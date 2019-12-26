@@ -16,18 +16,16 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int nodeId) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+  Map<String, dynamic> properties;
+
+  Comment(int nodeId, this.properties) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
 class TextNode extends Node {
   String data;
+  Map<String, dynamic> properties;
 
-  TextNode(int nodeId, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
-    assert(data != null);
-  }
-
-  TextNode.create(int nodeId, this.data)
-      : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, this.properties, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
   }
 }

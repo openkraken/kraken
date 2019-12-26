@@ -477,22 +477,20 @@ class RenderFlexLayout extends RenderBox
     bool isParentWithWidth = false;
     int childId = nodeId;
 
-    while (isParentWithWidth == false) {
-      bool foundParent = false;
-      ElementsIdTree.forEach((parentNodeId, childrenIds) {
-        if (childrenIds.indexOf(childId) != -1) {
-          foundParent = true;
-          childId = parentNodeId;
-          var nodeProps = ElementsPropsMap[parentNodeId];
-          if (nodeProps.containsKey('style')) {
-            var style = nodeProps['style'];
-            if (style.containsKey('width')) {
-              isParentWithWidth = true;
-              parentWidth = style['width'];
-            }
+    var childNode = nodeMap[childId];
+
+    while(isParentWithWidth == false) {
+      childNode = childNode.parentNode;
+      if (childNode.properties != null) {
+        var properties = childNode.properties;
+        if (properties.containsKey('style')) {
+          var style = properties['style'];
+          if (style.containsKey('width')) {
+            isParentWithWidth = true;
+            parentWidth = style['width'];
           }
         }
-      });
+      }
     }
 
     return Length(parentWidth).displayPortValue;

@@ -107,14 +107,6 @@ abstract class Element extends Node
     }
     elementStyle.putIfAbsent('display', () => display);
 
-    ElementsIdTree[nodeId] = [];
-    Map props = {};
-    if (ElementsPropsMap[nodeId] != null) {
-      props = ElementsPropsMap[nodeId];
-    }
-    props.putIfAbsent('style', () => elementStyle);
-    ElementsPropsMap[nodeId] = props;
-
     // Init default events.
     renderObject = renderBoxModel = RenderBoxModel(
       child: renderObject,
@@ -358,7 +350,6 @@ abstract class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
-    ElementsIdTree[nodeId].add(child.nodeId);
     super.appendChild(child);
     appendElement(child);
     return child;
