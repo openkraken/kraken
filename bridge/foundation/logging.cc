@@ -83,8 +83,8 @@ LogMessage::~LogMessage() {
 #elif defined(IS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
-  std::cerr << stream_.str();
-  std::cerr.flush();
+  std::cout << stream_.str();
+  std::cout.flush();
 #endif
 }
 

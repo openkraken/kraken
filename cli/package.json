@@ -8,6 +8,7 @@
   "scripts": {
     "build": "gulp -f gulpfile.js",
     "build:release": "KRAKEN_BUILD=Release gulp -f gulpfile.js",
+    "build:profile": "KRAKEN_BUILD=Profile gulp -f gulpfile.js",
     "postinstall": "tar -xzf ./vendors/build.tgz && echo 'Successfully extract Kraken.app'",
     "prepublish": "rm -rf vendors && mkdir vendors && tar -zcvf ./vendors/build.tgz ./build"
   },
