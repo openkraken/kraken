@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +26,7 @@ abstract class ElementsBindingObserver {
   ///
   /// Observers are expected to return true if they were able to
   /// handle the notification, for example by closing an active dialog
-  /// box, and false otherwise. 
+  /// box, and false otherwise.
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
@@ -122,7 +127,7 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// for example when the system locale changes. Generally, one
   /// element in the element tree registers itself as a binding
   /// observer, and converts the system state into inherited elements.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
