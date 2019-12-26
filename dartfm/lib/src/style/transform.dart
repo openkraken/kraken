@@ -27,16 +27,20 @@ mixin TransformStyleMixin {
       newMatrix4 = combineTransform(methods);
     }
     if (newMatrix4 != null) {
-      Transition transition = transitionMap["transform"];
-      Transition all = transitionMap["all"];
-      Matrix4 oldMatrix4 = matrix4.clone();
-      ProgressListener progressListener = (progress) {
-        transform.transform = (newMatrix4 - oldMatrix4) * progress + oldMatrix4;
-      };
-      if (transition != null) {
-        transition.addProgressListener(progressListener);
-      } else if (all != null) {
-        all.addProgressListener(progressListener);
+      if (transitionMap != null) {
+        Transition transition = transitionMap["transform"];
+        Transition all = transitionMap["all"];
+        Matrix4 oldMatrix4 = matrix4.clone();
+        ProgressListener progressListener = (progress) {
+          transform.transform = (newMatrix4 - oldMatrix4) * progress + oldMatrix4;
+        };
+        if (transition != null) {
+          transition.addProgressListener(progressListener);
+        } else if (all != null) {
+          all.addProgressListener(progressListener);
+        } else {
+          transform.transform = newMatrix4;
+        }
       } else {
         transform.transform = newMatrix4;
       }

@@ -8,16 +8,17 @@ const chalk = require('chalk');
 const fs = require('fs');
 const del = require('del');
 const os = require('os');
+const minimist = require('minimist');
 
 let enginePath = process.env.FLUTTER_ENGINE;
 let platform = os.platform() === 'darwin' ? 'macos' : os.platform();
 let buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
+const args = minimist(process.argv.slice(3));
+
 if (!enginePath) {
-  let args = process.argv.slice(4);
-  let index = args.indexOf('--local-engine-path');
-  if (index >= 0) {
-    enginePath = args[index + 1];
+  if (args['local-engine-path']) {
+    enginePath = args['local-engine-path'];
   } else {
     throw new Error('you need to set FLUTTER_ENGINE env value or pass --local-engine-path <path> to the argv');
   }
@@ -43,13 +44,10 @@ function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
 }
 
-// enum KrakenBuildMode {
-//   Debug,
-//   Release,
-// }
 function buildKraken(platform, mode, localEngine, localEngineSrc) {
   let runtimeMode = '--debug';
   if (mode === 'Release' && platform === 'macos') runtimeMode = '--release';
+  if (mode === 'Profile' && platform === 'macos') runtimeMode = '--profile';
 
   const args = ['build', platform, runtimeMode];
 
@@ -80,6 +78,15 @@ task('build-kraken-release', (done) => {
     done();
   } else {
     done(chalk.red('BUILD KRAKEN RELEASE WITH ERROR.'));
+  }
+});
+
+task('build-kraken-profile', (done) => {
+  const exitCode = buildKraken(platform, 'Profile', 'host_profile', paths.localEngineSrc);
+  if (exitCode === 0) {
+    done();
+  } else {
+    done(chalk.red('BUILD KRAKEN PROFILE WITH ERROR.'));
   }
 });
 
@@ -117,14 +124,41 @@ task('copy-kraken-release', (done) => {
   throw new Error('Kraken release is not supported in your platform.');
 });
 
+task('copy-kraken-profile', (done) => {
+  if (platform === 'macos') {
+    execSync(`mkdir -p ${paths.dist}/app`);
+    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Profile/Kraken.app')} ./build/app/`);
+    return done();
+  }
+
+  if (platform === 'linux') {
+    execSync(`mkdir -p ${paths.dist}/app`);
+    execSync(`mv ${path.join(paths.playground, 'build/linux/profile/')} ./build/app`);
+    return done();
+  }
+
+  throw new Error('Kraken profile is not supported in your platform.');
+});
+
 // Add a empty file to keep flutter_assets folder, or flutter crashed.
 task('patch-kraken-release', (done) => {
   writeFileSync(join(paths.dist, 'app/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
   done();
 });
 
+task('patch-kraken-profile', (done) => {
+  writeFileSync(join(paths.dist, 'app/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
+  done();
+});
+
 task('clean', () => {
-  return del('build');
+  return del('build').then(() => {
+    spawnSync('flutter', ['clean'], {
+      cwd: paths.playground,
+      env: process.env,
+      stdio: 'inherit'
+    });
+  })
 });
 
 task('generate-cmake-files', (done) => {
@@ -244,6 +278,8 @@ if (platform === 'linux') {
 } else {
   if (buildMode === 'Release') {
     _series = series('build-kraken-release', 'copy-kraken-release', 'patch-kraken-release');
+  } else if (buildMode === 'Profile') {
+    _series = series('build-kraken-profile', 'copy-kraken-profile', 'patch-kraken-profile');
   } else {
     _series = series('build-kraken-debug', 'copy-kraken-debug');
   }
