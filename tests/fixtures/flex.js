@@ -1,0 +1,82 @@
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":2,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"SPAN","id":4}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":5,"nodeType":3,"data":"flex direction column 1"}]]
+  )
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[4,"beforeend",5]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"SPAN","id":6}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":7,"nodeType":3,"data":"flex direction column 2"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[6,"beforeend",7]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[3,"beforeend",6]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":8,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"row","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"SPAN","id":9}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":10,"nodeType":3,"data":"flex direction row 1"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[9,"beforeend",10]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[8,"beforeend",9]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"SPAN","id":11}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":12,"nodeType":3,"data":"flex direction row 2"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[11,"beforeend",12]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[8,"beforeend",11]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",8]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"COMMENT","id":13,"props":{"data":"EMPTY"}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"afterend",13]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"COMMENT","id":14,"props":{"data":"EMPTY"}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[13,"afterend",14]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["removeNode",[13]])
+);

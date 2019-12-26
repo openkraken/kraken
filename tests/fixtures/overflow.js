@@ -1,0 +1,57 @@
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":2}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"style":{"overflowX":"scroll","width":"100px"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":4,"nodeType":3,"data":"overflow_X_auto_test"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":5,"props":{"style":{"overflowX":"visible","width":"100px"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":6,"nodeType":3,"data":"overflow_X_visible_test"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[5,"beforeend",6]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",5]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":7,"props":{"style":{"overflowX":"hidden","width":"100px"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createTextNode",[{"id":8,"nodeType":3,"data":"overflow_X_hidden_test"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[7,"beforeend",8]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",7]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"COMMENT","id":9,"props":{"data":"EMPTY"}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"afterend",9]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"COMMENT","id":10,"props":{"data":"EMPTY"}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[9,"afterend",10]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["removeNode",[9]])
+);
