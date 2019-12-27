@@ -31,6 +31,8 @@ abstract class ElementManagerActionDelegate {
   dynamic method(List payload);
 }
 
+Map<int, dynamic> nodeMap = {};
+
 class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   final int BODY_ID = -1;
   @override
@@ -48,7 +50,6 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 
   RenderBox _root;
   RenderBox get root => _root;
-  Map<int, Node> nodeMap = {};
 
   void createElement(List<dynamic> payload) {
     PayloadNode node = PayloadNode.fromJson(payload[0]);
@@ -61,7 +62,7 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 
     switch (node.type) {
       case 'COMMENT':
-        el = Comment(node.id);
+        el = Comment(node.id, node.props);
         break;
       default:
         el = createW3CElement(node);
@@ -73,7 +74,7 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 
   void createTextNode(List<dynamic> payload) {
     PayloadNode node = PayloadNode.fromJson(payload[0]);
-    TextNode textNode = TextNode.create(node.id, node.data);
+    TextNode textNode = TextNode(node.id, node.props, node.data);
     nodeMap[node.id] = textNode;
   }
 
@@ -85,6 +86,7 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     assert(target != null);
 
     target?.parentNode?.removeChild(target);
+    nodeMap.remove(targetId);
   }
 
   void setProperty(List<dynamic> payload) {

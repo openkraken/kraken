@@ -19,6 +19,7 @@ const String STYLE = 'style';
 
 typedef Statement = bool Function(Element element);
 
+
 Element createW3CElement(PayloadNode node) {
   switch (node.type) {
     case DIV:
@@ -313,6 +314,7 @@ abstract class Element extends Node
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: children,
+        nodeId: nodeId,
       );
     } else if (display == 'inline' || display == 'block') {
       Map<String, dynamic> elementStyle = {};

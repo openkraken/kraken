@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
@@ -96,6 +97,7 @@ class RenderFlexLayout extends RenderBox
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
+    this.nodeId,
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(mainAxisSize != null),
@@ -109,6 +111,8 @@ class RenderFlexLayout extends RenderBox
         _textBaseline = textBaseline {
     addAll(children);
   }
+
+  int nodeId;
 
   /// The direction to use as the main axis.
   Axis get direction => _direction;
@@ -466,6 +470,35 @@ class RenderFlexLayout extends RenderBox
     return null;
   }
 
+  // Loop element tree to find nearest parent width
+  // @TODO Support detecting node width in more complicated scene such as flex layout
+  double _getParentsWidth() {
+    if (constraints.maxWidth != double.infinity) {
+      return constraints.maxWidth;
+    }
+    var parentWidth;
+    bool isParentWithWidth = false;
+    int childId = nodeId;
+
+    var childNode = nodeMap[childId];
+
+    while(isParentWithWidth == false) {
+      childNode = childNode.parentNode;
+      if (childNode.properties != null) {
+        var properties = childNode.properties;
+        if (properties.containsKey('style')) {
+          var style = properties['style'];
+          if (style.containsKey('width')) {
+            isParentWithWidth = true;
+            parentWidth = style['width'];
+          }
+        }
+      }
+    }
+
+    return Length(parentWidth).displayPortValue;
+  }
+
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
@@ -697,16 +730,18 @@ class RenderFlexLayout extends RenderBox
     double actualSizeDelta;
     switch (_direction) {
       case Axis.horizontal:
+        double constraintWidth = _getParentsWidth();
         size = Size(
-          math.max(constraints.maxWidth, idealSize),
+          math.max(constraintWidth, idealSize),
           constraints.constrainHeight(crossSize)
         );
         actualSize = size.width;
         crossSize = size.height;
         break;
       case Axis.vertical:
+        double constraintWidth = _getParentsWidth();
         size = Size(
-          math.max(constraints.maxWidth, crossSize),
+          math.max(constraintWidth, crossSize),
           constraints.constrainHeight(idealSize)
         );
         actualSize = size.height;
