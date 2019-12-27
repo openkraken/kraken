@@ -8,6 +8,8 @@
 #include "bridge.h"
 #include "polyfill.h"
 #include <string>
+#include <atomic>
+std::atomic<bool> inited;
 
 static kraken::JSBridge *bridge = new kraken::JSBridge();
 
@@ -23,8 +25,10 @@ void evaluate_scripts(const char* code, const char* bundleFilename, int startLin
 
 KRAKEN_EXPORT
 void init_callback() {
+  if (inited) return;
+  inited = true;
+
   KrakenInitCallBack(invoke_kraken_callback);
   KrakenInitEvaluateScriptCallback(evaluate_scripts);
-
   initKrakenPolyFill(bridge->getContext());
 }

@@ -38,14 +38,17 @@ add_library(bindings STATIC
 
 target_include_directories(bindings PUBLIC ${JSA_DIR}/abstraction)
 target_include_directories(bindings PUBLIC ${JSA_DIR}/implementation/JSC)
-if (IS_ANDROID)
-  target_include_directories(bindings PUBLIC ../third_party/flutter-engine/android/flutter)
-endif ()
 target_include_directories(bindings PUBLIC ./foundation)
 
 target_link_libraries(bindings PUBLIC jsa_abstraction)
 target_link_libraries(bindings PUBLIC jsa_jsc_implementation)
 target_link_libraries(bindings PUBLIC foundation)
+
+if ($ENV{KRAKEN_BUILD} MATCHES Release)
+  target_include_directories(bindings PUBLIC $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
+else()
+  target_include_directories(bindings PUBLIC $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
+endif()
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml

@@ -19,6 +19,7 @@
 #include <memory>
 #include <iostream>
 #include <atomic>
+#include <cstdlib>
 
 namespace kraken {
 namespace {
@@ -53,7 +54,9 @@ alibaba::jsa::Value krakenJsToDart(alibaba::jsa::JSContext &context,
   auto &&message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
 
-  KRAKEN_LOG(VERBOSE) << "[KrakenJSToDart]: " << messageStr << std::endl;
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[KrakenJSToDart]: " << messageStr << std::endl;
+  }
 
   const char *result = KrakenInvokeDartFromCpp("krakenJsToDart", messageStr.c_str());
 
