@@ -37,7 +37,7 @@ void runApp({
       elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
       if (afterConnected != null) {
-      afterConnected();
+        afterConnected();
       }
       RendererBinding.instance.addPostFrameCallback((time) {
         CPPMessage(WINDOW_LOAD, '').send();
