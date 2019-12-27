@@ -86,7 +86,7 @@ void fetch(int callbackId, String url, String json) {
     data.write(
         Message.buildMessage('statusCode', response.statusCode.toString()));
     data.write(Message.buildMessage('body', response.content()));
-    CPPMessage(FETCH_MESSAGE, data.toString()).sendToCpp();
+    CPPMessage(FETCH_MESSAGE, data.toString()).send();
   }).catchError((e) {
     if (e is HTTPException) {
       data.write(
@@ -96,7 +96,7 @@ void fetch(int callbackId, String url, String json) {
       data.write(Message.buildMessage('error', e.toString()));
     }
 
-    CPPMessage(FETCH_MESSAGE, data.toString()).sendToCpp();
+    CPPMessage(FETCH_MESSAGE, data.toString()).send();
   });
 }
 
@@ -117,6 +117,6 @@ void initScreenMetricsChangedCallback() {
     buffer.write(Message.buildMessage(
         "availHeight", window.physicalSize.height.toString()));
 
-    CPPMessage(SCREEN_METRICS, buffer.toString()).sendToCpp();
+    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
   };
 }

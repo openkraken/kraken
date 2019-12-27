@@ -20,6 +20,8 @@ abstract class Message {
 
   Message(this._data);
 
+  send();
+
   static buildMessage(String key, String value) {
     return "$key=$value;";
   }
@@ -29,7 +31,7 @@ class JSMessage extends Message {
 
   JSMessage(String data) : super(data);
 
-  sendToJs() {
+  send() {
     return invokeKrakenCallback(DART + JS + _data);
   }
 }
@@ -40,7 +42,7 @@ class CPPMessage extends Message {
 
   CPPMessage(this._kind, String data) : super(data);
 
-  sendToCpp() {
+  send() {
     return invokeKrakenCallback(DART + CPP + _kind + _data);
   }
 }

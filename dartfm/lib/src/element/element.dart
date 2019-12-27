@@ -592,6 +592,6 @@ mixin ElementEventHandler on Node {
         nodeId,
         event,
       ]
-    ], toEncodable: (event) => event.toJson())).sendToJs();
+    ], toEncodable: (event) => event.toJson())).send();
   }
 }

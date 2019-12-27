@@ -38,7 +38,7 @@ void runApp({
       afterConnected();
     }
     RendererBinding.instance.addPostFrameCallback((time) {
-      CPPMessage(WINDOW_LOAD, "").sendToCpp();
+      CPPMessage(WINDOW_LOAD, "").send();
     });
   });
 

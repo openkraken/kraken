@@ -16,7 +16,7 @@ class KrakenTimer {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer(timeoutDurationMS, () {
-      CPPMessage(TIMEOUT_MESSAGE, "$callbackId").sendToCpp();
+      CPPMessage(TIMEOUT_MESSAGE, "$callbackId").send();
       timerMap.remove(id);
     });
     return id;
@@ -31,7 +31,7 @@ class KrakenTimer {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
-      CPPMessage(INTERVAL_MESSAGE, "$callbackId").sendToCpp();
+      CPPMessage(INTERVAL_MESSAGE, "$callbackId").send();
     });
     return id;
   }
