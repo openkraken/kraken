@@ -4,9 +4,12 @@
  */
 
 import 'dart:core';
+import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/kraken.dart' show remountApp;
 
 abstract class ElementManagerActionDelegate {
   RenderObject root;
@@ -40,11 +43,10 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 
   W3CElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
-    _root =
-        RenderDecoratedBox(
-          decoration: BoxDecoration(color: WebColor.white),
-          child: rootElement.renderObject
-        );
+    _root = RenderDecoratedBox(
+      decoration: BoxDecoration(color: WebColor.white),
+      child: rootElement.renderObject
+    );
     nodeMap[BODY_ID] = rootElement;
   }
 
@@ -200,13 +202,15 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 }
 
 class ElementManager {
-  ElementManagerActionDelegate _actionDelegate;
+  static ElementManagerActionDelegate _actionDelegate;
   static ElementManager _managerSingleton = ElementManager._();
   factory ElementManager() => _managerSingleton;
 
   ElementManager._() {
     _actionDelegate = W3CElementManagerActionDelegate();
   }
+
+  static bool showPerformanceOverlayOverride;
 
   RenderBox getRootRenderObject() {
     return _actionDelegate.root;
@@ -216,18 +220,44 @@ class ElementManager {
     return _actionDelegate.rootElement;
   }
 
+  bool showPerformanceOverlay = false;
+
   void connect({ bool showPerformanceOverlay = false }) {
-    RendererBinding.instance.renderView.child = getRootRenderObject();
+    this.showPerformanceOverlay = showPerformanceOverlay;
+
+    RenderBox result = getRootRenderObject();
+
+    // We need to add PerformanceOverlay of it's needed.
+    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+
     if (showPerformanceOverlay) {
       RenderPerformanceOverlay renderPerformanceOverlay = RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      _actionDelegate.rootElement.renderLayoutElement.add(renderPerformanceOverlay);
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
+        child: renderPerformanceOverlay,
+        additionalConstraints: BoxConstraints.tight(Size(
+          math.min(350.0, window.physicalSize.width),
+          math.min(150.0, window.physicalSize.height),
+        )),
+      );
+      result = RenderStack(
+        children: [
+          result,
+          renderConstrainedPerformanceOverlayBox
+        ],
+        textDirection: TextDirection.ltr,
+      );
     }
+
+    RendererBinding.instance.renderView.child = result;
   }
 
   void disconnect() {
     RendererBinding.instance.renderView.child = null;
+    nodeMap.clear();
     _managerSingleton = ElementManager._();
   }
+
+  void refresh() => remountApp();
 
   dynamic applyAction(String action, List<dynamic> payload) {
     var returnValue;

@@ -13,6 +13,7 @@ export 'bridge.dart';
 
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;
+ConnectedCallback _refresh;
 
 void runApp({
   bool enableDebug = false,
@@ -30,17 +31,21 @@ void runApp({
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
-    elementManager = ElementManager();
-    elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
+  _refresh = () {
+    RendererBinding.instance.scheduleFrameCallback((Duration time) {
+      elementManager = ElementManager();
+      elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
-    if (afterConnected != null) {
-      afterConnected();
-    }
-    RendererBinding.instance.addPostFrameCallback((time) {
-      CPPMessage(WINDOW_LOAD, "").send();
+      if (afterConnected != null) {
+        afterConnected();
+      }
+      RendererBinding.instance.addPostFrameCallback((time) {
+        CPPMessage(WINDOW_LOAD, '').send();
+      });
     });
-  });
+  };
+
+  _refresh();
 
   initScreenMetricsChangedCallback();
 }
@@ -49,5 +54,12 @@ void unmountApp() {
   if (elementManager != null) {
     elementManager.disconnect();
     elementManager = null;
+  }
+}
+
+void remountApp() {
+  unmountApp();
+  if (_refresh != null) {
+    _refresh();
   }
 }
