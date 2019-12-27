@@ -473,6 +473,9 @@ class RenderFlexLayout extends RenderBox
   // Loop element tree to find nearest parent width
   // @TODO Support detecting node width in more complicated scene such as flex layout
   double _getParentsWidth() {
+    if (constraints.maxWidth != double.infinity) {
+      return constraints.maxWidth;
+    }
     var parentWidth;
     bool isParentWithWidth = false;
     int childId = nodeId;
