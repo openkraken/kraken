@@ -13,6 +13,7 @@
 #include "bindings/timer.h"
 #include "bindings/fetch.h"
 #include "bindings/screen.h"
+#include "bindings/window.h"
 #include "message.h"
 #include <cassert>
 #include <string>
@@ -31,6 +32,7 @@ const char FETCH_MESSAGE = 's';
 const char TIMEOUT_MESSAGE = 't';
 const char INTERVAL_MESSAGE = 'i';
 const char ScreenMetrics = 'm';
+const char WINDOW_LOAD = 'l';
 
 ThreadSafeData<alibaba::jsa::Value *> dartJsCallBack;
 ThreadSafeData<int> timerCallbackId(1);
@@ -115,6 +117,9 @@ JSBridge::JSBridge() {
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context_.get());
+  window_ = std::make_shared<kraken::binding::JSWindow>();
+  window_->bind(context_.get());
+
 
   JSA_BINDING_FUNCTION(*context_, context_->global(), "__kraken_js_to_dart__", 0, krakenJsToDart);
   JSA_BINDING_FUNCTION(*context_, context_->global(), "__kraken_dart_to_js__", 0, krakenDartToJs);
@@ -231,6 +236,9 @@ void JSBridge::handleFlutterCallback(const char *args) {
                                           std::stoi(availHeight));
       break;
     }
+    case WINDOW_LOAD:
+      window_->invokeOnloadCallback(context_.get());
+      break;
     default:
       break;
     }

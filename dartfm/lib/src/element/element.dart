@@ -588,12 +588,12 @@ mixin ElementEventHandler on Node {
   }
 
   void _eventResponder(Event event) {
-    Message(json.encode([
+    JSMessage(json.encode([
       'event',
       [
         nodeId,
         event,
       ]
-    ], toEncodable: (event) => event.toJson())).sendToJs();
+    ], toEncodable: (event) => event.toJson())).send();
   }
 }

@@ -12,22 +12,37 @@ const JS = 'J';
 const FETCH_MESSAGE = 's';
 const TIMEOUT_MESSAGE = 't';
 const INTERVAL_MESSAGE = 'i';
-const ScreenMetrics = 'm';
+const SCREEN_METRICS = 'm';
+const WINDOW_LOAD = 'l';
 
-class Message {
+abstract class Message {
   final String _data;
 
-  Message(String data) : _data = data;
+  Message(this._data);
 
-  sendToCpp(String kind) {
-    return invokeKrakenCallback(DART + CPP + kind + _data);
-  }
+  send();
 
   static buildMessage(String key, String value) {
-    return "${key}=${value};";
+    return "$key=$value;";
   }
+}
 
-  sendToJs() {
+class JSMessage extends Message {
+
+  JSMessage(String data) : super(data);
+
+  send() {
     return invokeKrakenCallback(DART + JS + _data);
+  }
+}
+
+class CPPMessage extends Message {
+
+  final String _kind;
+
+  CPPMessage(this._kind, String data) : super(data);
+
+  send() {
+    return invokeKrakenCallback(DART + CPP + _kind + _data);
   }
 }

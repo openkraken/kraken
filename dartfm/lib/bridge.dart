@@ -5,3 +5,4 @@
 
 export 'src/bridge/bridge.dart';
 export 'src/bridge/platform.dart';
+export 'src/bridge/message.dart';

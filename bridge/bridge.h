@@ -12,6 +12,7 @@
 #include "bindings/kraken.h"
 #include "bindings/console.h"
 #include "bindings/websocket.h"
+#include "bindings/window.h"
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif //ENABLE_DEBUGGER
@@ -22,6 +23,7 @@ class JSBridge final {
 private:
   std::unique_ptr<alibaba::jsa::JSContext> context_;
   std::shared_ptr<kraken::binding::JSWebSocket> websocket_;
+  std::shared_ptr<kraken::binding::JSWindow> window_;
 
 public:
   JSBridge();

@@ -37,6 +37,9 @@ void runApp({
     if (afterConnected != null) {
       afterConnected();
     }
+    RendererBinding.instance.addPostFrameCallback((time) {
+      CPPMessage(WINDOW_LOAD, "").send();
+    });
   });
 
   initScreenMetricsChangedCallback();

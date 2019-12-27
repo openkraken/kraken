@@ -34,6 +34,8 @@ add_library(bindings STATIC
   bindings/timer.h
   bindings/websocket.cc
   bindings/websocket.h
+  bindings/window.cc
+  bindings/window.h
   )
 
 target_include_directories(bindings PUBLIC ${JSA_DIR}/abstraction)
