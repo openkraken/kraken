@@ -10,7 +10,6 @@
 #include "logging.h"
 
 #include <kraken_dart_export.h>
-#include "jsc_context.h"
 
 namespace kraken {
 namespace binding {

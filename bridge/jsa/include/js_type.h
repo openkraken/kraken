@@ -6,7 +6,7 @@
 #ifndef JSA_JSTYPE_H_
 #define JSA_JSTYPE_H_
 
-#include <js_context.h>
+#include "js_context.h"
 #include <cassert>
 #include <cstring>
 #include <vector>
@@ -141,7 +141,7 @@ public:
   /// copied.
   static String createFromAscii(JSContext &runtime, const char *str,
                                 size_t length) {
-    // 真正实现由runtime实现类提供                              
+    // 真正实现由runtime实现类提供
     return runtime.createStringFromAscii(str, length);
   }
 

@@ -4,8 +4,8 @@
 */
 
 #include "bridge.h"
-#include "jsc_context.h"
-#include <kraken_dart_export.h>
+#include "jsa.h"
+#include "kraken_dart_export.h"
 
 #include "logging.h"
 #include "thread_safe_data.h"

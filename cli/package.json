@@ -6,9 +6,9 @@
     "kraken": "bin/kraken.js"
   },
   "scripts": {
-    "build": "gulp -f gulpfile.js",
-    "build:release": "KRAKEN_BUILD=Release gulp -f gulpfile.js",
-    "build:profile": "KRAKEN_BUILD=Profile gulp -f gulpfile.js",
+    "build": "KRAKEN_JS_ENGINE=jsc gulp -f gulpfile.js",
+    "build:release": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Release gulp -f gulpfile.js",
+    "build:profile": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Profile gulp -f gulpfile.js",
     "postinstall": "tar -xzf ./vendors/build.tgz && echo 'Successfully extract Kraken.app'",
     "prepublish": "rm -rf vendors && mkdir vendors && tar -zcvf ./vendors/build.tgz ./build"
   },

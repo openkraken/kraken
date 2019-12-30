@@ -10,7 +10,7 @@
 #include "thread_safe_map.h"
 #include "thread_safe_data.h"
 #include <map>
-#include <kraken_dart_export.h>
+#include "kraken_dart_export.h"
 
 namespace kraken {
 namespace binding {

@@ -4,7 +4,7 @@
  */
 
 #include "kraken_bridge_export.h"
-#include <kraken_hook_init.h>
+#include "kraken_hook_init.h"
 #include "bridge.h"
 #include "polyfill.h"
 #include <string>

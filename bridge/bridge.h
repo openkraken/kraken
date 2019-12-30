@@ -6,11 +6,8 @@
 #ifndef KRAKEN_JS_BRIDGE_H_
 #define KRAKEN_JS_BRIDGE_H_
 
-#include <memory>
-#include <string>
-#include "jsa.h"
-#include "bindings/kraken.h"
 #include "bindings/console.h"
+#include "bindings/kraken.h"
 #include "bindings/websocket.h"
 #include "bindings/window.h"
 #ifdef ENABLE_DEBUGGER

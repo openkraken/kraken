@@ -28,7 +28,7 @@ set(FOUNDATION_INCLUDE_DIRECTORIES
     asio-1.12.1/include
 )
 
-add_library(foundation STATIC ${FOUNDATION_SOURCES} ${FOUNDATION_HEADERS})
+add_library(foundation STATIC ${FOUNDATION_SOURCES})
 
 if (${IS_ANDROID})
 
@@ -39,6 +39,6 @@ if (${IS_ANDROID})
 endif()
 
 target_include_directories(foundation
-    PUBLIC
+    PRIVATE
     ${FOUNDATION_INCLUDE_DIRECTORIES}
 )

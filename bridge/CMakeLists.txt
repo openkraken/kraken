@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.2.0)
+project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(JSA_DIR ../jsa)
-
-#load jsa
-add_subdirectory(${JSA_DIR} ${JSA_DIR})
-project(Bridge_Test)
+include(./jsa/jsa.cmake)
 
 # foundation
 add_subdirectory(foundation)
@@ -21,36 +18,101 @@ endif ()
 
 add_library(bindings STATIC
   bindings/kraken.cc
-  bindings/kraken.h
   bindings/console.cc
-  bindings/console.h
   bindings/fetch.cc
-  bindings/fetch.h
   bindings/screen.cc
-  bindings/screen.h
   bindings/thread_safe_map.h
-  bindings/thread_safe_data.h
   bindings/timer.cc
-  bindings/timer.h
   bindings/websocket.cc
   bindings/websocket.h
   bindings/window.cc
   bindings/window.h
   )
+add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
+add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
+add_library(kraken SHARED kraken_bridge_export.cc)
+add_library(flutter SHARED IMPORTED)
 
-target_include_directories(bindings PUBLIC ${JSA_DIR}/abstraction)
-target_include_directories(bindings PUBLIC ${JSA_DIR}/implementation/JSC)
-target_include_directories(bindings PUBLIC ./foundation)
+### Bindings
+target_include_directories(bindings PRIVATE
+  ./jsa/include
+  ./foundation
+  ${ADDITIONAL_INCLUDE_DIRS}
+  )
+target_link_libraries(bindings PRIVATE
+  jsa_abstraction
+  jsc_implementation
+  foundation)
 
-target_link_libraries(bindings PUBLIC jsa_abstraction)
-target_link_libraries(bindings PUBLIC jsa_jsc_implementation)
-target_link_libraries(bindings PUBLIC foundation)
+### Bridges
+target_link_libraries(bridge PRIVATE
+  jsc_implementation
+  jsa_abstraction
+  bindings
+  -pthread
+  flutter)
+target_include_directories(bridge PRIVATE
+  ./bindings
+  ./jsa/include
+  ${ADDITIONAL_INCLUDE_DIRS})
 
-if ($ENV{KRAKEN_BUILD} MATCHES Release)
-  target_include_directories(bindings PUBLIC $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
-else()
-  target_include_directories(bindings PUBLIC $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
-endif()
+message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
+
+### Js Code
+target_link_libraries(js_code PRIVATE bridge)
+target_include_directories(js_code PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ./jsa/include
+  ${ADDITIONAL_INCLUDE_DIRS}
+  )
+
+### Kraken
+target_link_libraries(kraken PRIVATE
+  bridge
+  js_code
+  )
+target_include_directories(kraken PRIVATE
+  ./foundation
+  ./polyfill/dist
+  ./jsa/include
+  ${ADDITIONAL_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
+
+## Linux X86_64
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  if ($ENV{KRAKEN_BUILD} MATCHES Release)
+    set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
+      $ENV{FLUTTER_ENGINE}/out/host_debug/libflutter_linux_glfw.so
+      )
+    target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
+    target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
+    target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
+  else ()
+    set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
+      $ENV{FLUTTER_ENGINE}/out/host_release/libflutter_linux_glfw.so
+      )
+    target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
+    target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
+    target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
+  endif ()
+## macOS
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  if ($ENV{KRAKEN_BUILD} MATCHES Release)
+    set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
+      $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/FlutterMacOS
+      )
+    target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
+    target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
+    target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
+  else ()
+    set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
+      $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/FlutterMacOS
+      )
+    target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
+    target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
+    target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
+  endif ()
+endif ()
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
@@ -71,4 +133,16 @@ add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
 
 if (${ENABLE_TEST})
   target_compile_definitions(bindings PRIVATE IS_TEST=true)
+endif ()
+
+if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+  set_target_properties(kraken
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    )
+else ()
+  set_target_properties(kraken
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../cli/build/lib"
+    )
 endif ()

@@ -162,26 +162,17 @@ task('clean', () => {
 });
 
 task('generate-cmake-files', (done) => {
-  let arch = os.arch();
-  let dir;
-
-  if (platform === 'linux') {
-    dir = platform + '_' + arch;
-  } else {
-    dir = platform;
-  }
-
   const args = [
     '-DCMAKE_BUILD_TYPE=Release',
     '-G',
     'CodeBlocks - Unix Makefiles',
     '-B',
-    resolve(paths.platform, dir + '/cmake-build-release'),
+    resolve(paths.bridge, 'cmake-build-release'),
     '-S',
-    resolve(paths.platform, dir)
+    paths.bridge
   ];
   const handle = spawnSync('cmake', args, {
-    cwd: resolve(paths.platform, dir),
+    cwd: paths.bridge,
     env: Object.assign(process.env, {
       LIBRARY_OUTPUT_DIR: paths.distLib,
       FLUTTER_ENGINE: paths.localEngineSrc
@@ -196,18 +187,9 @@ task('generate-cmake-files', (done) => {
 });
 
 task('build-kraken-lib', (done) => {
-  let arch = os.arch();
-  let dir;
-
-  if (platform === 'linux') {
-    dir = platform + '_' + arch;
-  } else {
-    dir = platform;
-  }
-
   const args = [
     '--build',
-    resolve(paths.platform, dir + '/cmake-build-release'),
+    resolve(paths.bridge, 'cmake-build-release'),
     '--target',
     'kraken',
     '--',
@@ -216,7 +198,7 @@ task('build-kraken-lib', (done) => {
   ];
   mkdirp.sync(paths.distLib);
   const handle = spawnSync('cmake', args, {
-    cwd: paths.platform,
+    cwd: paths.bridge,
     env: process.env,
     stdio: 'inherit',
   });
