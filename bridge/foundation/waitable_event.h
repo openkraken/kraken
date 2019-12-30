@@ -9,9 +9,9 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "macros.h"
 #include "thread_annotations.h"
 #include "time_delta.h"
+#include "macros.h"
 
 namespace foundation {
 

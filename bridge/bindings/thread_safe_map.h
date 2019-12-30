@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #ifndef THREAD_SAFE_MAP_H
 #define THREAD_SAFE_MAP_H
@@ -11,12 +11,13 @@
 #include <map>
 #include <mutex>
 
-template <typename Key, class T> class ThreadSafeMap {
+template<typename Key, class T>
+class ThreadSafeMap {
 public:
   ThreadSafeMap() {}
-  ThreadSafeMap &operator=(ThreadSafeMap &) = delete;
+  ThreadSafeMap& operator = (ThreadSafeMap&) = delete;
 
-  void set(Key key, T value) {
+  void set(Key key, T value){
     std::lock_guard<std::mutex> lk(mut);
     map[key] = value;
     condition.notify_one();
@@ -28,7 +29,7 @@ public:
     condition.notify_one();
   }
 
-  void get(Key key, T &value) {
+  void get(Key key, T& value){
     std::unique_lock<std::mutex> lk(mut);
     value = map[key];
     lk.unlock();
@@ -47,4 +48,5 @@ private:
   std::condition_variable condition;
 };
 
-#endif // THREAD_SAFE_MAP_H
+
+#endif //THREAD_SAFE_MAP_H

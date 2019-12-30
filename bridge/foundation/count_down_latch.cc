@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #include "count_down_latch.h"
 

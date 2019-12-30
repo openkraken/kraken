@@ -4,9 +4,9 @@
  */
 
 #include "console.h"
-#include <algorithm>
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
 #ifdef ENABLE_DEBUGGER
 #include "JavaScriptCore/JSGlobalObject.h"
@@ -19,25 +19,19 @@ namespace binding {
 namespace {
 using namespace alibaba::jsa;
 
-void logArgs(std::stringstream &stream, JSContext &context, const Value *args,
-             size_t count, int start);
+void logArgs(std::stringstream &stream, JSContext &context, const Value *args, size_t count, int start);
 
 void printLog(std::stringstream &stream, foundation::LogSeverity level);
 
-void logWithLevel(std::stringstream &stream, JSContext &context,
-                  const Value &value);
+void logWithLevel(std::stringstream &stream, JSContext &context, const Value &value);
 
-void logArray(std::stringstream &stream, JSContext &context,
-              const Array &value);
+void logArray(std::stringstream &stream, JSContext &context, const Array &value);
 
-void logObject(std::stringstream &stream, JSContext &context,
-               const Object &object);
+void logObject(std::stringstream &stream, JSContext &context, const Object &object);
 
-void logFunction(std::stringstream &stream, JSContext &context,
-                 const Function &func);
+void logFunction(std::stringstream &stream, JSContext &context, const Function &func);
 
-void logArgs(std::stringstream &stream, JSContext &context, const Value *args,
-             size_t count, int start) {
+void logArgs(std::stringstream &stream, JSContext &context, const Value *args, size_t count, int start) {
   for (size_t i = start; i < count; i++) {
     logWithLevel(stream, context, args[i]);
     if (i != count - 1) {
@@ -46,8 +40,7 @@ void logArgs(std::stringstream &stream, JSContext &context, const Value *args,
   }
 }
 
-void logWithLevel(std::stringstream &stream, JSContext &context,
-                  const Value &value) {
+void logWithLevel(std::stringstream &stream, JSContext &context, const Value &value) {
   if (value.isString()) {
     stream << "'" << value.getString(context).utf8(context) << "'";
   } else if (value.isBool()) {
@@ -124,38 +117,38 @@ void printLog(std::stringstream &stream, foundation::LogSeverity level) {
   JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
 #endif
   switch (level) {
-  case foundation::LOG_VERBOSE:
-    KRAKEN_LOG(VERBOSE) << "[JS_LOG] " << stream.str();
+    case foundation::LOG_VERBOSE:
+      KRAKEN_LOG(VERBOSE) << "[JS_LOG] " << stream.str();
 #ifdef ENABLE_DEBUGGER
-    _log_level = JSC::MessageLevel::Log;
+      _log_level = JSC::MessageLevel::Log;
 #endif
-    break;
-  case foundation::LOG_INFO:
-    KRAKEN_LOG(INFO) << "[JS_LOG] " << stream.str();
+      break;
+    case foundation::LOG_INFO:
+      KRAKEN_LOG(INFO) << "[JS_LOG] " << stream.str();
 #ifdef ENABLE_DEBUGGER
-    _log_level = JSC::MessageLevel::Info;
+      _log_level = JSC::MessageLevel::Info;
 #endif
-    break;
-  case foundation::LOG_DEBUG_:
-    KRAKEN_LOG(DEBUG_) << "[JS_LOG] " << stream.str();
+      break;
+    case foundation::LOG_DEBUG_:
+      KRAKEN_LOG(DEBUG_) << "[JS_LOG] " << stream.str();
 #ifdef ENABLE_DEBUGGER
-    _log_level = JSC::MessageLevel::Debug;
+      _log_level = JSC::MessageLevel::Debug;
 #endif
-    break;
-  case foundation::LOG_WARN:
-    KRAKEN_LOG(WARN) << "[JS_LOG] " << stream.str();
+      break;
+    case foundation::LOG_WARN:
+      KRAKEN_LOG(WARN) << "[JS_LOG] " << stream.str();
 #ifdef ENABLE_DEBUGGER
-    _log_level = JSC::MessageLevel::Warning;
+      _log_level = JSC::MessageLevel::Warning;
 #endif
-    break;
-  case foundation::LOG_ERROR:
-    KRAKEN_LOG(ERROR) << "[JS_LOG] " << stream.str();
+      break;
+    case foundation::LOG_ERROR:
+      KRAKEN_LOG(ERROR) << "[JS_LOG] " << stream.str();
 #ifdef ENABLE_DEBUGGER
-    _log_level = JSC::MessageLevel::Error;
+      _log_level = JSC::MessageLevel::Error;
 #endif
-    break;
-  default:
-    KRAKEN_LOG(VERBOSE) << "[JS_LOG] " << stream.str();
+      break;
+    default:
+      KRAKEN_LOG(VERBOSE) << "[JS_LOG] " << stream.str();
   }
 
 #ifdef ENABLE_DEBUGGER
@@ -175,9 +168,8 @@ Value log(JSContext &context, const Value &thisVal, const Value *args,
   logArgs(stream, context, args, count, 0);
 
 #ifdef IS_TEST
-  auto &&data = stream.str().data();
-  alibaba::jsa::String &&str =
-      alibaba::jsa::String::createFromAscii(context, data);
+  auto&& data = stream.str().data();
+  alibaba::jsa::String&& str = alibaba::jsa::String::createFromAscii(context, data);
   return Value(context, str);
 #endif
 
@@ -228,10 +220,11 @@ Value _assert(JSContext &context, const Value &thisVal, const Value *args,
 
   std::stringstream stream;
   if ((expression.isBool() && expression.getBool() == false) ||
-      expression.isUndefined() || expression.isNull() ||
+      expression.isUndefined() ||
+      expression.isNull() ||
       (expression.isNumber() && expression.asNumber() == 0) ||
-      (expression.isString() &&
-       expression.asString(context).utf8(context).empty())) {
+      (expression.isString() && expression.asString(context).utf8(context).empty())
+          ) {
     stream << "Assertion failed:";
 
     if (count > 1) {

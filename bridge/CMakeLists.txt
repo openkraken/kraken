@@ -95,7 +95,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL
     target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
     target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
   endif ()
-  ## macOS
+## macOS
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   if ($ENV{KRAKEN_BUILD} MATCHES Release)
     set_target_properties(flutter PROPERTIES IMPORTED_LOCATION

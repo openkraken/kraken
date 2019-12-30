@@ -7,7 +7,7 @@ set(ADDITIONAL_INCLUDE_DIRS)
 if (${ENABLE_TEST})
   include_directories(test)
   add_subdirectory(test)
-endif ()
+endif()
 
 add_library(jsa_abstraction STATIC
   ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_context.cc
@@ -58,5 +58,5 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include
     ${ADDITIONAL_INCLUDE_DIRS}
     )
-endif ()
+endif()
 

@@ -1,4 +1,4 @@
-import {Event, EventTarget} from 'event-target-shim';
+import {EventTarget, Event} from 'event-target-shim';
 
 type OnMessageFunc = (event: MessageEvent) => void;
 type OnOpenFunc = (event: Event) => void;
@@ -48,6 +48,7 @@ function notImpl(name: string) {
 }
 
 class WebSocket extends EventTarget {
+  private token: KrakenToken;
   public readyState: ReadyState;
   public CONNECTING = ReadyState.CONNECTING;
   public OPEN = ReadyState.OPEN;
@@ -62,28 +63,6 @@ class WebSocket extends EventTarget {
   public onclose: OnCloseFunc = notImpl('onclose');
   public onerror: OnErrorFunc = notImpl('onerror');
   public onmessage: OnMessageFunc = notImpl('onmessage');
-  private token: KrakenToken;
-
-  constructor(url: string, protocol: string | string[]) {
-    super();
-    // verify url schema
-    validateUrl(url);
-
-    this.url = url;
-    this.readyState = 0;
-
-    this.token = __kraken_websocket__.connect(url, this._onMessage, this._onOpen, this._onClose, this._onError);
-  }
-
-  // TODO add blob arrayBuffer ArrayBufferView format support
-  public send(message: string | ArrayBuffer | ArrayBufferView) {
-    __kraken_websocket__.send(this.token, message);
-  }
-
-  public close(code: number, reason: string) {
-    this.readyState = ReadyState.CLOSING;
-    __kraken_websocket__.close(this.token, code, reason);
-  }
 
   private _onMessage = (message: string) => {
     this.dispatchEvent({
@@ -139,6 +118,27 @@ class WebSocket extends EventTarget {
     });
     this.readyState = ReadyState.CLOSED;
   };
+
+  constructor(url: string, protocol: string | string[]) {
+    super();
+    // verify url schema
+    validateUrl(url);
+
+    this.url = url;
+    this.readyState = 0;
+
+    this.token = __kraken_websocket__.connect(url, this._onMessage, this._onOpen, this._onClose, this._onError);
+  }
+
+  // TODO add blob arrayBuffer ArrayBufferView format support
+  public send(message: string | ArrayBuffer | ArrayBufferView) {
+    __kraken_websocket__.send(this.token, message);
+  }
+
+  public close(code: number, reason: string) {
+    this.readyState = ReadyState.CLOSING;
+    __kraken_websocket__.close(this.token, code, reason);
+  }
 }
 
 //@ts-ignore

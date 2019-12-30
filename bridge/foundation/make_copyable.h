@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #ifndef KRAKEN_FOUNDATION_MAKE_COPYABLE_H_
 #define KRAKEN_FOUNDATION_MAKE_COPYABLE_H_
@@ -14,18 +14,20 @@
 namespace foundation {
 namespace internal {
 
-template <typename T> class CopyableLambda {
-public:
+template <typename T>
+class CopyableLambda {
+ public:
   explicit CopyableLambda(T func)
       : impl_(MakeRefCounted<Impl>(std::move(func))) {}
 
-  template <typename... ArgType> auto operator()(ArgType &&... args) const {
+  template <typename... ArgType>
+  auto operator()(ArgType&&... args) const {
     return impl_->func_(std::forward<ArgType>(args)...);
   }
 
-private:
+ private:
   class Impl : public RefCountedThreadSafe<Impl> {
-  public:
+   public:
     explicit Impl(T func) : func_(std::move(func)) {}
     T func_;
   };
@@ -33,7 +35,7 @@ private:
   RefPtr<Impl> impl_;
 };
 
-} // namespace internal
+}  // namespace internal
 
 // Provides a wrapper for a move-only lambda that is implictly convertable to an
 // std::function.
@@ -47,16 +49,16 @@ private:
 //
 // std::unique_ptr<Foo> foo = ...
 // std::function<int()> func =
-//     foundation::MakeCopyable([bar = std::move(foo)]() { return bar->count();
-//     });
+//     foundation::MakeCopyable([bar = std::move(foo)]() { return bar->count(); });
 //
 // Notice that the return type of MakeCopyable is rarely used directly. Instead,
 // callers typically erase the type by implicitly converting the return value
 // to an std::function.
-template <typename T> internal::CopyableLambda<T> MakeCopyable(T lambda) {
+template <typename T>
+internal::CopyableLambda<T> MakeCopyable(T lambda) {
   return internal::CopyableLambda<T>(std::move(lambda));
 }
 
-} // namespace foundation
+}  // namespace foundation
 
-#endif // KRAKEN_FOUNDATION_MAKE_COPYABLE_H_
+#endif  // KRAKEN_FOUNDATION_MAKE_COPYABLE_H_

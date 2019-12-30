@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #ifndef KRAKEN_FOUNDATION_LOGGING_H_
 #define KRAKEN_FOUNDATION_LOGGING_H_

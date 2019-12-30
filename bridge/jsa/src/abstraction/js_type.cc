@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
-#include <cassert>
 #include <js_error.h>
 #include <js_type.h>
+#include <cassert>
 
 namespace alibaba {
 namespace jsa {

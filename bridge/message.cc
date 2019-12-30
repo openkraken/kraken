@@ -8,13 +8,13 @@
 namespace kraken {
 namespace message {
 
-void Message::parseMessageBody(const std::string &body) {
+void Message::parseMessageBody(const std::string& body) {
   size_t start = 0;
   std::string key;
   size_t len = body.size();
   bool hasKey = false;
 
-  for (size_t i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i ++) {
     char w = body[i];
 
     if (w == '=' && !hasKey) {
@@ -25,7 +25,7 @@ void Message::parseMessageBody(const std::string &body) {
     }
 
     if (w == ';') {
-      std::string &&value = body.substr(start, i - start);
+      std::string&& value = body.substr(start, i - start);
       start = i + 1;
       hasKey = false;
 
@@ -39,11 +39,10 @@ void Message::readMessage(const std::string &key, std::string &value) {
   map_.get(key, value);
 }
 
-size_t Message::getBracketsValue(const std::string &source,
-                                 std::string &value) {
+size_t Message::getBracketsValue(const std::string &source, std::string &value) {
   size_t start = 0;
   size_t len = source.size();
-  for (size_t i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i ++) {
     char w = source[i];
 
     if (w == '[') {
@@ -56,10 +55,10 @@ size_t Message::getBracketsValue(const std::string &source,
       return i;
     }
   }
-
+  
   return -1;
 }
 
-} // namespace message
+}
 
-} // namespace kraken
+}

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #include "window.h"
 
@@ -11,12 +11,10 @@
 namespace kraken {
 namespace binding {
 
-alibaba::jsa::Value *callback(nullptr);
+alibaba::jsa::Value* callback(nullptr);
 
-alibaba::jsa::Value JSWindow::bindOnload(alibaba::jsa::JSContext &context,
-                                         const alibaba::jsa::Value &thisVal,
-                                         const alibaba::jsa::Value *args,
-                                         size_t count) {
+alibaba::jsa::Value JSWindow::bindOnload(alibaba::jsa::JSContext &context, const alibaba::jsa::Value &thisVal,
+                          const alibaba::jsa::Value *args, size_t count) {
   if (count != 1) {
     KRAKEN_LOG(WARN) << "__bind_load__ should only have one parameter";
     return alibaba::jsa::Value::undefined();
@@ -34,8 +32,8 @@ alibaba::jsa::Value JSWindow::bindOnload(alibaba::jsa::JSContext &context,
 }
 
 void JSWindow::invokeOnloadCallback(alibaba::jsa::JSContext *context) {
-  //  alibaba::jsa::Value* callback;
-  //  callbackData.get(callback);
+//  alibaba::jsa::Value* callback;
+//  callbackData.get(callback);
   if (callback == nullptr) {
     KRAKEN_LOG(WARN) << "__bind_load__: callback is nullptr";
     return;
@@ -50,14 +48,14 @@ void JSWindow::invokeOnloadCallback(alibaba::jsa::JSContext *context) {
   }
 }
 alibaba::jsa::Value JSWindow::get(alibaba::jsa::JSContext &context,
-                                  const alibaba::jsa::PropNameID &name) {
+  const alibaba::jsa::PropNameID &name) {
   auto _name = name.utf8(context);
   using namespace alibaba::jsa;
   if (_name == "bindOnload") {
     auto bindOnloadFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWindow::bindOnload, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+      context, std::bind(&JSWindow::bindOnload, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4));
     return alibaba::jsa::Value(context, bindOnloadFunc);
   }
   return alibaba::jsa::Value::undefined();
