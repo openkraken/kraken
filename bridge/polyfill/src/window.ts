@@ -10,16 +10,16 @@ declare var __kraken_window__: KrakenWindow;
 
 class Window extends EventTarget {
 
+  constructor() {
+    super();
+    __kraken_window__.bindOnload(this._onload);
+  }
+
   private _onload = () => {
     this.dispatchEvent({
       type: 'load',
     });
   };
-
-  constructor() {
-    super();
-    __kraken_window__.bindOnload(this._onload);
-  }
 }
 
 var window = new Window();

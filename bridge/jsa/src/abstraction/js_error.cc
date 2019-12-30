@@ -1,13 +1,15 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include <js_error.h>
 
 namespace alibaba {
 namespace jsa {
-JSError::JSError(JSContext &rt, Value &&value) { setValue(rt, std::move(value)); }
+JSError::JSError(JSContext &rt, Value &&value) {
+  setValue(rt, std::move(value));
+}
 
 JSError::JSError(JSContext &rt, std::string msg) : message_(std::move(msg)) {
   try {

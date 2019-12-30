@@ -1,14 +1,13 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
-
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKEN_JS_BINDINGS_WEBSOCKET_H_
 #define KRAKEN_JS_BINDINGS_WEBSOCKET_H_
 
-#include "websocket_client.h"
 #include "jsa.h"
+#include "websocket_client.h"
 
 #include <map>
 #include <memory>
@@ -17,7 +16,7 @@ namespace kraken {
 namespace binding {
 class CallbackImpl;
 class JSWebSocket : public alibaba::jsa::HostObject,
-      public std::enable_shared_from_this<JSWebSocket> {
+                    public std::enable_shared_from_this<JSWebSocket> {
 public:
   JSWebSocket();
   ~JSWebSocket() = default;
@@ -37,10 +36,8 @@ public:
   getPropertyNames(alibaba::jsa::JSContext &context) override;
 
 private:
-  std::shared_ptr<JSWebSocket> sharedSelf() {
-    return shared_from_this();
-  }
-  
+  std::shared_ptr<JSWebSocket> sharedSelf() { return shared_from_this(); }
+
   alibaba::jsa::Value connect(alibaba::jsa::JSContext &context,
                               const alibaba::jsa::Value &thisVal,
                               const alibaba::jsa::Value *args, size_t count);

@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "websocket.h"
 
@@ -13,7 +13,8 @@ namespace kraken {
 namespace binding {
 
 namespace {
-inline bool isFunction(alibaba::jsa::JSContext &context, const alibaba::jsa::Value &v) {
+inline bool isFunction(alibaba::jsa::JSContext &context,
+                       const alibaba::jsa::Value &v) {
   if (!v.isObject()) {
     return false;
   }
@@ -164,8 +165,9 @@ JSWebSocket::JSWebSocket() {
 }
 
 alibaba::jsa::Value JSWebSocket::connect(alibaba::jsa::JSContext &context,
-                            const alibaba::jsa::Value &thisVal,
-                            const alibaba::jsa::Value *args, size_t count) {
+                                         const alibaba::jsa::Value &thisVal,
+                                         const alibaba::jsa::Value *args,
+                                         size_t count) {
   if (count < 5) {
     KRAKEN_LOG(WARN) << "connect method takes 5 arguments. "
                         "[connetct(url,onMessage,onOpen,onClose,onError)]";
@@ -186,15 +188,16 @@ alibaba::jsa::Value JSWebSocket::connect(alibaba::jsa::JSContext &context,
   auto callback = std::make_shared<CallbackImpl>(
       context, std::move(onOpen), std::move(onMessage), std::move(onClose),
       std::move(onError));
-  auto token = _websocket->connect(url.getString(context).utf8(context), callback);
+  auto token =
+      _websocket->connect(url.getString(context).utf8(context), callback);
   _callback_map[token] = callback;
   return alibaba::jsa::Value(token);
 }
 
 alibaba::jsa::Value JSWebSocket::send(alibaba::jsa::JSContext &context,
-                                             const alibaba::jsa::Value &thisVal,
-                                             const alibaba::jsa::Value *args,
-                                             size_t count) {
+                                      const alibaba::jsa::Value &thisVal,
+                                      const alibaba::jsa::Value *args,
+                                      size_t count) {
   if (count < 2) {
     KRAKEN_LOG(WARN)
         << "websocket.send method takes 2 arguments. [send(token, message)]";
@@ -219,8 +222,9 @@ alibaba::jsa::Value JSWebSocket::send(alibaba::jsa::JSContext &context,
 }
 
 alibaba::jsa::Value JSWebSocket::close(alibaba::jsa::JSContext &context,
-                          const alibaba::jsa::Value &thisVal,
-                          const alibaba::jsa::Value *args, size_t count) {
+                                       const alibaba::jsa::Value &thisVal,
+                                       const alibaba::jsa::Value *args,
+                                       size_t count) {
   if (count < 3) {
     KRAKEN_LOG(WARN) << "websocket.close method takes 3 arguments. "
                         "[close(token, code, reason)]";
@@ -249,8 +253,8 @@ alibaba::jsa::Value JSWebSocket::close(alibaba::jsa::JSContext &context,
 }
 
 void JSWebSocket::set(alibaba::jsa::JSContext &,
-                             const alibaba::jsa::PropNameID &name,
-                             const alibaba::jsa::Value &value) {
+                      const alibaba::jsa::PropNameID &name,
+                      const alibaba::jsa::Value &value) {
   KRAKEN_LOG(ERROR) << "global.websocket not support set property";
 #ifndef NDEBUG
   std::abort();
@@ -258,26 +262,26 @@ void JSWebSocket::set(alibaba::jsa::JSContext &,
 }
 
 alibaba::jsa::Value JSWebSocket::get(alibaba::jsa::JSContext &context,
-                        const alibaba::jsa::PropNameID &name) {
+                                     const alibaba::jsa::PropNameID &name) {
   auto _name = name.utf8(context);
   using namespace alibaba::jsa;
   if (_name == "connect") {
     auto connectFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
         context, std::bind(&JSWebSocket::connect, this, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3,
-                      std::placeholders::_4));
+                           std::placeholders::_2, std::placeholders::_3,
+                           std::placeholders::_4));
     return alibaba::jsa::Value(context, connectFunc);
   } else if (_name == "send") {
     auto sendFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
         context, std::bind(&JSWebSocket::send, this, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3,
-                      std::placeholders::_4));
+                           std::placeholders::_2, std::placeholders::_3,
+                           std::placeholders::_4));
     return alibaba::jsa::Value(context, sendFunc);
   } else if (_name == "close") {
     auto closeFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
         context, std::bind(&JSWebSocket::close, this, std::placeholders::_1,
-                      std::placeholders::_2, std::placeholders::_3,
-                      std::placeholders::_4));
+                           std::placeholders::_2, std::placeholders::_3,
+                           std::placeholders::_4));
     return alibaba::jsa::Value(context, closeFunc);
   }
   return alibaba::jsa::Value::undefined();
@@ -286,16 +290,20 @@ alibaba::jsa::Value JSWebSocket::get(alibaba::jsa::JSContext &context,
 std::vector<alibaba::jsa::PropNameID>
 JSWebSocket::getPropertyNames(alibaba::jsa::JSContext &context) {
   std::vector<alibaba::jsa::PropNameID> propertyNames;
-  propertyNames.emplace_back(alibaba::jsa::PropNameID::forUtf8(context, "connect"));
-  propertyNames.emplace_back(alibaba::jsa::PropNameID::forUtf8(context, "send"));
-  propertyNames.emplace_back(alibaba::jsa::PropNameID::forUtf8(context, "close"));
+  propertyNames.emplace_back(
+      alibaba::jsa::PropNameID::forUtf8(context, "connect"));
+  propertyNames.emplace_back(
+      alibaba::jsa::PropNameID::forUtf8(context, "send"));
+  propertyNames.emplace_back(
+      alibaba::jsa::PropNameID::forUtf8(context, "close"));
   return propertyNames;
 }
 
 // 这里把websocket对象绑到global上
 void JSWebSocket::bind(alibaba::jsa::JSContext *context) {
   assert(context != nullptr);
-  JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_websocket__", sharedSelf());
+  JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_websocket__",
+                                 sharedSelf());
 }
 } // namespace binding
 } // namespace kraken
