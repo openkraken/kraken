@@ -6,7 +6,8 @@
 #ifndef KRAKEN_BRIDGE_EXPORT_H
 #define KRAKEN_BRIDGE_EXPORT_H
 
-#define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#define KRAKEN_EXPORT                                                          \
+  extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 KRAKEN_EXPORT
 void init_callback();

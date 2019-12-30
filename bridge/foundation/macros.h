@@ -1,7 +1,6 @@
 #ifndef KRAKEN_MACROS_H_
 #define KRAKEN_MACROS_H_
 
-
 //////////
 #if defined(ANDROID)
 #define IS_ANDROID 1
@@ -13,7 +12,7 @@
 #define IS_MACOSX 1
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
 #define IS_IOS 1
-#endif  // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#endif // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
 #elif defined(__linux__)
 #define IS_LINUX 1
 // include a system header to pull in features.h for glibc/uclibc macros.
@@ -38,27 +37,27 @@
 
 /////////////////
 
-#define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
+#define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName &) = delete
 
-#define KRAKEN_DISALLOW_ASSIGN(TypeName) \
-  TypeName& operator=(const TypeName&) = delete
+#define KRAKEN_DISALLOW_ASSIGN(TypeName)                                       \
+  TypeName &operator=(const TypeName &) = delete
 
-#define KRAKEN_DISALLOW_MOVE(TypeName) \
-  TypeName(TypeName&&) = delete;    \
-  TypeName& operator=(TypeName&&) = delete
+#define KRAKEN_DISALLOW_MOVE(TypeName)                                         \
+  TypeName(TypeName &&) = delete;                                              \
+  TypeName &operator=(TypeName &&) = delete
 
-#define KRAKEN_DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&) = delete;          \
-  TypeName& operator=(const TypeName&) = delete
+#define KRAKEN_DISALLOW_COPY_AND_ASSIGN(TypeName)                              \
+  TypeName(const TypeName &) = delete;                                         \
+  TypeName &operator=(const TypeName &) = delete
 
-#define KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName) \
-  TypeName(const TypeName&) = delete;               \
-  TypeName(TypeName&&) = delete;                    \
-  TypeName& operator=(const TypeName&) = delete;    \
-  TypeName& operator=(TypeName&&) = delete
+#define KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)                         \
+  TypeName(const TypeName &) = delete;                                         \
+  TypeName(TypeName &&) = delete;                                              \
+  TypeName &operator=(const TypeName &) = delete;                              \
+  TypeName &operator=(TypeName &&) = delete
 
-#define KRAKEN_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-  TypeName() = delete;                               \
+#define KRAKEN_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName)                        \
+  TypeName() = delete;                                                         \
   KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
 
-#endif  // KRAKEN_MACROS_H_
+#endif // KRAKEN_MACROS_H_

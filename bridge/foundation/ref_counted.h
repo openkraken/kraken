@@ -61,7 +61,7 @@ namespace foundation {
 // need. It's easy enough to add thread-unsafe versions if necessary.
 template <typename T>
 class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
- public:
+public:
   // Adds a reference to this object.
   // Inherited from the internal superclass:
   //   void AddRef() const;
@@ -70,7 +70,7 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   // last reference is released.
   void Release() const {
     if (internal::RefCountedThreadSafeBase::Release())
-      delete static_cast<const T*>(this);
+      delete static_cast<const T *>(this);
   }
 
   // Returns true if there is exactly one reference to this object. Use of this
@@ -96,7 +96,7 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   // Inherited from the internal superclass:
   //   void AssertHasOneRef();
 
- protected:
+protected:
   // Constructor. Note that the object is constructed with a reference count of
   // 1, and then must be adopted (see |AdoptRef()| in ref_ptr.h).
   RefCountedThreadSafe() {}
@@ -106,10 +106,9 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   // ref_ptr.h).
   ~RefCountedThreadSafe() {}
 
- private:
+private:
 #ifndef NDEBUG
-  template <typename U>
-  friend RefPtr<U> AdoptRef(U*);
+  template <typename U> friend RefPtr<U> AdoptRef(U *);
   // Marks the initial reference (assumed on construction) as adopted. This is
   // only required for Debug builds (when |NDEBUG| is not defined).
   // TODO(vtl): Should this really be private? This makes manual ref-counting
@@ -122,15 +121,15 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
 
 // If you subclass |RefCountedThreadSafe| and want to keep your destructor
 // private, use this. (See the example above |RefCountedThreadSafe|.)
-#define FML_FRIEND_REF_COUNTED_THREAD_SAFE(T) \
+#define FML_FRIEND_REF_COUNTED_THREAD_SAFE(T)                                  \
   friend class ::foundation::RefCountedThreadSafe<T>
 
 // If you want to keep your constructor(s) private and still want to use
 // |MakeRefCounted<T>()|, use this. (See the example above
 // |RefCountedThreadSafe|.)
-#define FML_FRIEND_MAKE_REF_COUNTED(T) \
+#define FML_FRIEND_MAKE_REF_COUNTED(T)                                         \
   friend class ::foundation::internal::MakeRefCountedHelper<T>
 
-}  // namespace foundation
+} // namespace foundation
 
-#endif  // KRAKEN_FOUNDATION_MEMORY_REF_COUNTED_H_
+#endif // KRAKEN_FOUNDATION_MEMORY_REF_COUNTED_H_
