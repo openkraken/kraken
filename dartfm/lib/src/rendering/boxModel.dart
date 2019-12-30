@@ -13,6 +13,7 @@ class RenderBoxModel extends RenderPointerListener {
     PointerCancelEventListener onPointerCancel,
     PointerSignalEventListener onPointerSignal,
     HitTestBehavior behavior,
+    this.nodeId,
     this.style,
   }) : super(
     child: child,
@@ -23,6 +24,7 @@ class RenderBoxModel extends RenderPointerListener {
     onPointerSignal: onPointerSignal,
     behavior: behavior,
   );
+  int nodeId;
   Map<String, dynamic> style;
 }
 
