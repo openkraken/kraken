@@ -1,8 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
-
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef JSA_MACROS_H_
 #define JSA_MACROS_H_
@@ -19,11 +18,11 @@
 #define JSC_UNLIKELY(EXPR) (EXPR)
 #endif
 
-#define JSC_ASSERT(x)          \
-  do {                         \
-    if (JSC_UNLIKELY(!!(x))) { \
-      abort();                 \
-    }                          \
+#define JSC_ASSERT(x)                                                          \
+  do {                                                                         \
+    if (JSC_UNLIKELY(!!(x))) {                                                 \
+      abort();                                                                 \
+    }                                                                          \
   } while (0)
 
 #if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
@@ -96,7 +95,8 @@
 // 创建一个JSBinding
 // 使用JSA_BINDING_GLOBAL_FUNCTION/JSA_BINDING_FUNCTION来注入
 #define JSA_CREATE_HOST_FUNCTION(rt, name, paramCount, func)                   \
-    alibaba::jsa::Function::createFromHostFunction(rt, alibaba::jsa::PropNameID::forUtf8(rt, name), paramCount, func);
+  alibaba::jsa::Function::createFromHostFunction(                              \
+      rt, alibaba::jsa::PropNameID::forUtf8(rt, name), paramCount, func);
 
 // 与JSA_CREATE_HOST_FUNCTION类似，创建一个JSBinding函数。
 #define JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(rt, func)                          \

@@ -13,3 +13,6 @@ trim_trailing_whitespace = true
 
 [*.gradle]
 indent_size = 4
+
+[*.{c,h,cpp,hpp}]
+ij_c_indent_class_members = 2

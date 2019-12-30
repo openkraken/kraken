@@ -23,7 +23,8 @@ TEST(message, get_age) {
 TEST(message, getRepeatToken) {
   kraken::message::Message message;
 
-  message.parseMessageBody("error=Socket error, time = 0.0, cost = 1.2;name=1234");
+  message.parseMessageBody(
+      "error=Socket error, time = 0.0, cost = 1.2;name=1234");
   std::string result;
   message.readMessage("error", result);
   EXPECT_EQ(result, "Socket error, time = 0.0, cost = 1.2");

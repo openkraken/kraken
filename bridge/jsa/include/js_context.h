@@ -1,15 +1,15 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef JSA_JSCONTEXT_H
 #define JSA_JSCONTEXT_H
 
+#include "macros.h"
 #include <functional>
 #include <memory>
 #include <vector>
-#include "macros.h"
 
 namespace alibaba {
 namespace jsa {
@@ -42,8 +42,7 @@ class JSError;
 /// can be any value - it will not necessarily be coerced to an object or
 /// or set to the global object.
 using HostFunctionType = std::function<Value(
-    JSContext &rt, const Value &thisVal,
-                                             const Value *args, size_t count)>;
+    JSContext &rt, const Value &thisVal, const Value *args, size_t count)>;
 
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
@@ -80,11 +79,11 @@ public:
 
 class ThreadScope {
 public:
-  using Task = void (*)(void*);
+  using Task = void (*)(void *);
   ThreadScope() = default;
   virtual ~ThreadScope() = default;
 
-  virtual void postToUIThread(Task task, void* data) = 0;
+  virtual void postToUIThread(Task task, void *data) = 0;
 };
 
 /// Represents a JS runtime.  Movable, but not copyable.  Note that
@@ -119,7 +118,7 @@ public:
   /// through the JSA API. For example, it will be much slower to use this to
   /// call a global function than using the JSA APIs to read the function
   /// property from the global object and then calling it explicitly.
-  virtual Value evaluateJavaScript(const char* code,
+  virtual Value evaluateJavaScript(const char *code,
                                    const std::string &sourceURL,
                                    int startLine) = 0;
 
@@ -152,8 +151,8 @@ public:
     thread_scope_ptr_ = std::move(threadScope);
   }
 
-  ThreadScope* threadScope() const{
-    if(thread_scope_ptr_ == nullptr) {
+  ThreadScope *threadScope() const {
+    if (thread_scope_ptr_ == nullptr) {
       return nullptr;
     }
     return thread_scope_ptr_.get();
@@ -268,7 +267,6 @@ protected:
 
 private:
   std::unique_ptr<ThreadScope> thread_scope_ptr_;
-
 };
 
 /// Not movable and not copyable RAII marker advising the underlying

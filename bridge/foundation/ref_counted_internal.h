@@ -17,18 +17,16 @@ namespace internal {
 
 // See ref_counted.h for comments on the public methods.
 class RefCountedThreadSafeBase {
- public:
-  void AddRef() const {
-    ref_count_.fetch_add(1u, std::memory_order_relaxed);
-  }
+public:
+  void AddRef() const { ref_count_.fetch_add(1u, std::memory_order_relaxed); }
 
   bool HasOneRef() const {
     return ref_count_.load(std::memory_order_acquire) == 1u;
   }
 
-  void AssertHasOneRef() const { }
+  void AssertHasOneRef() const {}
 
- protected:
+protected:
   RefCountedThreadSafeBase();
   ~RefCountedThreadSafeBase();
 
@@ -57,12 +55,10 @@ class RefCountedThreadSafeBase {
   }
 
 #ifndef NDEBUG
-  void Adopt() {
-    adoption_required_ = false;
-  }
+  void Adopt() { adoption_required_ = false; }
 #endif
 
- private:
+private:
   mutable std::atomic_uint_fast32_t ref_count_;
 
 #ifndef NDEBUG
@@ -77,16 +73,14 @@ inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
     : ref_count_(1u)
 #ifndef NDEBUG
       ,
-      adoption_required_(true),
-      destruction_started_(false)
+      adoption_required_(true), destruction_started_(false)
 #endif
 {
 }
 
-inline RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {
-}
+inline RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {}
 
-}  // namespace internal
-}  // namespace foundation
+} // namespace internal
+} // namespace foundation
 
-#endif  // KRAKEN_FOUNDATION_REF_COUNTED_INTERNAL_H_
+#endif // KRAKEN_FOUNDATION_REF_COUNTED_INTERNAL_H_

@@ -20,14 +20,14 @@ function normalizeValue(value: any) {
 
 function iteratorFor(items: Array<any>) {
   let iterator = {
-    next: function() {
+    next: function () {
       let value = items.shift();
       return {done: value === undefined, value: value};
     }
   };
 
   if ('Symbol' in self && 'iterator' in Symbol) {
-    iterator[Symbol.iterator] = function() {
+    iterator[Symbol.iterator] = function () {
       return iterator;
     };
   }
@@ -122,12 +122,30 @@ class FetchBody {
 }
 
 let methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
+
 function normalizeMethod(method: string) {
   let upcased = method.toUpperCase();
   return methods.indexOf(upcased) > -1 ? upcased : method;
 }
 
 class FetchRequest extends FetchBody {
+  readonly url: string;
+
+  // readonly cache: RequestCache; // not supported
+  // readonly credentials: RequestCredentials; // not supported;
+  // readonly destination: RequestDestination; // not supported
+  // readonly integrity: string; // not supported
+  // readonly isHistoryNavigation: boolean; // not supported
+  // readonly isReloadNavigation: boolean; // not supported
+  // readonly keepalive: boolean; // not supported
+  // readonly redirect: RequestRedirect; // not supported
+  // readonly referrer: string; // not supported
+  // readonly referrerPolicy: ReferrerPolicy;
+  // readonly signal: AbortSignal; // not supported
+  readonly method: string;
+  readonly headers: Headers;
+  readonly mode: RequestMode;
+
   constructor(input: FetchRequest | string, init?: RequestInit) {
     if (!init) {
       init = {};
@@ -164,50 +182,19 @@ class FetchRequest extends FetchBody {
     }
   }
 
-  // readonly cache: RequestCache; // not supported
-  // readonly credentials: RequestCredentials; // not supported;
-  // readonly destination: RequestDestination; // not supported
-  // readonly integrity: string; // not supported
-  // readonly isHistoryNavigation: boolean; // not supported
-  // readonly isReloadNavigation: boolean; // not supported
-  // readonly keepalive: boolean; // not supported
-  // readonly redirect: RequestRedirect; // not supported
-  // readonly referrer: string; // not supported
-  // readonly referrerPolicy: ReferrerPolicy;
-  // readonly signal: AbortSignal; // not supported
-
-  readonly url: string;
-  readonly method: string;
-  readonly headers: Headers;
-  readonly mode: RequestMode;
-
   clone(): FetchRequest {
     return Object.assign({}, this);
   }
 }
 
 let redirectStatuses = [301, 302, 303, 307, 308];
+
 class FetchResponse extends FetchBody {
-  static error(): FetchResponse {
-    let response = new FetchResponse(null, {status: 0, statusText: ''});
-    response.type = 'error';
-    return response;
-  };
-
-  static redirect(url: string, status?: number): FetchResponse {
-    if (!status || redirectStatuses.indexOf(status) === -1) {
-      throw new RangeError('Invalid status code')
-    }
-
-    let response = new FetchResponse(null, {status: status, headers: {location: url}});
-    response.redirected = true;
-    return response;
-  };
-
-  // TODO support readableStream
   // readonly body: ReadableStream<Uint8Array> | null;
   body: string | null;
   bodyUsed: boolean;
+
+  // TODO support readableStream
   headers: Headers;
   ok: boolean;
   redirected: boolean;
@@ -230,6 +217,22 @@ class FetchResponse extends FetchBody {
     this.headers = new FetchHeader(init.headers);
   }
 
+  static error(): FetchResponse {
+    let response = new FetchResponse(null, {status: 0, statusText: ''});
+    response.type = 'error';
+    return response;
+  };
+
+  static redirect(url: string, status?: number): FetchResponse {
+    if (!status || redirectStatuses.indexOf(status) === -1) {
+      throw new RangeError('Invalid status code')
+    }
+
+    let response = new FetchResponse(null, {status: status, headers: {location: url}});
+    response.redirected = true;
+    return response;
+  };
+
   clone(): FetchResponse {
     return Object.assign({}, this);
   }
@@ -240,7 +243,7 @@ function fetch(input: FetchRequest | string, init?: RequestInit) {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
 
-    __kraken__fetch__(url, JSON.stringify(init), function(err, response, body) {
+    __kraken__fetch__(url, JSON.stringify(init), function (err, response, body) {
       // network error did't have statusCode
       if (err && !response.statusCode) {
         reject(new Error(err));

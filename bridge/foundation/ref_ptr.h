@@ -62,9 +62,8 @@ namespace foundation {
 // constructor or move operator=, which would cause the copy
 // constructor/operator= to be deleted, but for clarity we include explicit
 // non-templated versions of everything.)
-template <typename T>
-class RefPtr final {
- public:
+template <typename T> class RefPtr final {
+public:
   RefPtr() : ptr_(nullptr) {}
   RefPtr(std::nullptr_t) : ptr_(nullptr) {}
 
@@ -72,29 +71,26 @@ class RefPtr final {
   // already been adopted). (Note that in |T::T()|, references to |this| cannot
   // be taken, since the object being constructed will not have been adopted
   // yet.)
-  template <typename U>
-  explicit RefPtr(U* p) : ptr_(p) {
+  template <typename U> explicit RefPtr(U *p) : ptr_(p) {
     if (ptr_)
       ptr_->AddRef();
   }
 
   // Copy constructor.
-  RefPtr(const RefPtr<T>& r) : ptr_(r.ptr_) {
+  RefPtr(const RefPtr<T> &r) : ptr_(r.ptr_) {
     if (ptr_)
       ptr_->AddRef();
   }
 
-  template <typename U>
-  RefPtr(const RefPtr<U>& r) : ptr_(r.ptr_) {
+  template <typename U> RefPtr(const RefPtr<U> &r) : ptr_(r.ptr_) {
     if (ptr_)
       ptr_->AddRef();
   }
 
   // Move constructor.
-  RefPtr(RefPtr<T>&& r) : ptr_(r.ptr_) { r.ptr_ = nullptr; }
+  RefPtr(RefPtr<T> &&r) : ptr_(r.ptr_) { r.ptr_ = nullptr; }
 
-  template <typename U>
-  RefPtr(RefPtr<U>&& r) : ptr_(r.ptr_) {
+  template <typename U> RefPtr(RefPtr<U> &&r) : ptr_(r.ptr_) {
     r.ptr_ = nullptr;
   }
 
@@ -104,34 +100,29 @@ class RefPtr final {
       ptr_->Release();
   }
 
-  T* get() const { return ptr_; }
+  T *get() const { return ptr_; }
 
-  T& operator*() const {
-    return *ptr_;
-  }
+  T &operator*() const { return *ptr_; }
 
-  T* operator->() const {
-    return ptr_;
-  }
+  T *operator->() const { return ptr_; }
 
   // Copy assignment.
-  RefPtr<T>& operator=(const RefPtr<T>& r) {
+  RefPtr<T> &operator=(const RefPtr<T> &r) {
     // Call |AddRef()| first so self-assignments work.
     if (r.ptr_)
       r.ptr_->AddRef();
-    T* old_ptr = ptr_;
+    T *old_ptr = ptr_;
     ptr_ = r.ptr_;
     if (old_ptr)
       old_ptr->Release();
     return *this;
   }
 
-  template <typename U>
-  RefPtr<T>& operator=(const RefPtr<U>& r) {
+  template <typename U> RefPtr<T> &operator=(const RefPtr<U> &r) {
     // Call |AddRef()| first so self-assignments work.
     if (r.ptr_)
       r.ptr_->AddRef();
-    T* old_ptr = ptr_;
+    T *old_ptr = ptr_;
     ptr_ = r.ptr_;
     if (old_ptr)
       old_ptr->Release();
@@ -141,19 +132,18 @@ class RefPtr final {
   // Move assignment.
   // Note: Like |std::shared_ptr|, we support self-move and move assignment is
   // equivalent to |RefPtr<T>(std::move(r)).swap(*this)|.
-  RefPtr<T>& operator=(RefPtr<T>&& r) {
+  RefPtr<T> &operator=(RefPtr<T> &&r) {
     RefPtr<T>(std::move(r)).swap(*this);
     return *this;
   }
 
-  template <typename U>
-  RefPtr<T>& operator=(RefPtr<U>&& r) {
+  template <typename U> RefPtr<T> &operator=(RefPtr<U> &&r) {
     RefPtr<T>(std::move(r)).swap(*this);
     return *this;
   }
 
-  void swap(RefPtr<T>& r) {
-    T* p = ptr_;
+  void swap(RefPtr<T> &r) {
+    T *p = ptr_;
     ptr_ = r.ptr_;
     r.ptr_ = p;
   }
@@ -165,31 +155,27 @@ class RefPtr final {
 
   explicit operator bool() const { return !!ptr_; }
 
-  template <typename U>
-  bool operator==(const RefPtr<U>& rhs) const {
+  template <typename U> bool operator==(const RefPtr<U> &rhs) const {
     return ptr_ == rhs.ptr_;
   }
 
-  template <typename U>
-  bool operator!=(const RefPtr<U>& rhs) const {
+  template <typename U> bool operator!=(const RefPtr<U> &rhs) const {
     return !operator==(rhs);
   }
 
-  template <typename U>
-  bool operator<(const RefPtr<U>& rhs) const {
+  template <typename U> bool operator<(const RefPtr<U> &rhs) const {
     return ptr_ < rhs.ptr_;
   }
 
- private:
-  template <typename U>
-  friend class RefPtr;
+private:
+  template <typename U> friend class RefPtr;
 
-  friend RefPtr<T> AdoptRef<T>(T*);
+  friend RefPtr<T> AdoptRef<T>(T *);
 
   enum AdoptTag { ADOPT };
-  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) {  }
+  RefPtr(T *ptr, AdoptTag) : ptr_(ptr) {}
 
-  T* ptr_;
+  T *ptr_;
 };
 
 // Adopts a newly-created |T|. Typically used in a static factory method, like:
@@ -198,8 +184,7 @@ class RefPtr final {
 //   RefPtr<Foo> Foo::Create() {
 //     return AdoptRef(new Foo());
 //   }
-template <typename T>
-inline RefPtr<T> AdoptRef(T* ptr) {
+template <typename T> inline RefPtr<T> AdoptRef(T *ptr) {
 #ifndef NDEBUG
   ptr->Adopt();
 #endif
@@ -213,10 +198,7 @@ inline RefPtr<T> AdoptRef(T* ptr) {
 //   auto foo_ref = Ref(foo);
 //
 // (|foo_ref| will be of type |RefPtr<Foo>|.)
-template <typename T>
-inline RefPtr<T> Ref(T* ptr) {
-  return RefPtr<T>(ptr);
-}
+template <typename T> inline RefPtr<T> Ref(T *ptr) { return RefPtr<T>(ptr); }
 
 // Creates an intrusively reference counted |T|, producing a |RefPtr<T>| (and
 // performing the required adoption). Use like:
@@ -225,24 +207,23 @@ inline RefPtr<T> Ref(T* ptr) {
 //
 // (|my_foo| will be of type |RefPtr<Foo>|.)
 template <typename T, typename... Args>
-RefPtr<T> MakeRefCounted(Args&&... args) {
+RefPtr<T> MakeRefCounted(Args &&... args) {
   return internal::MakeRefCountedHelper<T>::MakeRefCounted(
       std::forward<Args>(args)...);
 }
 
-}  // namespace foundation
+} // namespace foundation
 
 // Inject custom std::hash<> function object for |RefPtr<T>|.
 namespace std {
-template <typename T>
-struct hash<foundation::RefPtr<T>> {
+template <typename T> struct hash<foundation::RefPtr<T>> {
   using argument_type = foundation::RefPtr<T>;
   using result_type = std::size_t;
 
-  result_type operator()(const argument_type& ptr) const {
-    return std::hash<T*>()(ptr.get());
+  result_type operator()(const argument_type &ptr) const {
+    return std::hash<T *>()(ptr.get());
   }
 };
-}  // namespace std
+} // namespace std
 
-#endif  // KRAKEN_FOUNDATION_MEMORY_REF_PTR_H_
+#endif // KRAKEN_FOUNDATION_MEMORY_REF_PTR_H_
