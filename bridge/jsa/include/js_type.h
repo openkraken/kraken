@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #ifndef JSA_JSTYPE_H_
 #define JSA_JSTYPE_H_
@@ -9,8 +9,8 @@
 #include "js_context.h"
 #include <cassert>
 #include <cstring>
-#include <string>
 #include <vector>
+#include <string>
 
 namespace alibaba {
 namespace jsa {
@@ -49,8 +49,7 @@ public:
 
   /// Create a JS property name id from ascii values.  The data is
   /// copied.
-  static PropNameID forAscii(JSContext &runtime, const char *str,
-                             size_t length) {
+  static PropNameID forAscii(JSContext &runtime, const char *str, size_t length) {
     return runtime.createPropNameIDFromAscii(str, length);
   }
 
@@ -116,8 +115,7 @@ public:
   Symbol &operator=(Symbol &&other) = default;
 
   /// \return whether a and b refer to the same symbol.
-  static bool strictEquals(JSContext &runtime, const Symbol &a,
-                           const Symbol &b) {
+  static bool strictEquals(JSContext &runtime, const Symbol &a, const Symbol &b) {
     return runtime.strictEquals(a, b);
   }
 
@@ -174,8 +172,7 @@ public:
   }
 
   /// \return whether a and b contain the same characters.
-  static bool strictEquals(JSContext &runtime, const String &a,
-                           const String &b) {
+  static bool strictEquals(JSContext &runtime, const String &a, const String &b) {
     return runtime.strictEquals(a, b);
   }
 
@@ -206,8 +203,7 @@ public:
   }
 
   /// \return whether this and \c obj are the same JSObject or not.
-  static bool strictEquals(JSContext &runtime, const Object &a,
-                           const Object &b) {
+  static bool strictEquals(JSContext &runtime, const Object &a, const Object &b) {
     return runtime.strictEquals(a, b);
   }
 
@@ -273,15 +269,12 @@ public:
 
   /// \return true iff the Object is callable.  If so, then \c
   /// getFunction will succeed.
-  bool isFunction(JSContext &runtime) const {
-    return runtime.isFunction(*this);
-  }
+  bool isFunction(JSContext &runtime) const { return runtime.isFunction(*this); }
 
   /// \return true iff the Object was initialized with \c createFromHostObject
   /// and the HostObject passed is of type \c T. If returns \c true then
   /// \c getHostObject<T> will succeed.
-  template <typename T = HostObject>
-  bool isHostObject(JSContext &runtime) const;
+  template <typename T = HostObject> bool isHostObject(JSContext &runtime) const;
 
   /// \return an Array instance which refers to the same underlying
   /// object.  If \c isArray() would return false, this will assert.
@@ -400,8 +393,7 @@ class Array : public Object {
 public:
   Array(Array &&) = default;
   /// Creates a new Array instance, with \c length undefined elements.
-  Array(JSContext &runtime, size_t length)
-      : Array(runtime.createArray(length)) {}
+  Array(JSContext &runtime, size_t length) : Array(runtime.createArray(length)) {}
 
   Array &operator=(Array &&) = default;
 
@@ -501,8 +493,8 @@ public:
 
   /// Calls the function with \c count \c args and \c jsThis value passed
   /// as this value.
-  Value callWithThis(JSContext &Runtime, const Object &jsThis,
-                     const Value *args, size_t count) const;
+  Value callWithThis(JSContext &Runtime, const Object &jsThis, const Value *args,
+                     size_t count) const;
 
   /// Calls the function with a \c std::initializer_list of Value
   /// arguments. The \c this value of the JS function will be
@@ -817,6 +809,8 @@ void throwJSError(JSContext &, const char *msg);
 
 } // namespace detail
 
+
+
 inline Value Object::getProperty(JSContext &runtime, const char *name) const {
   return getProperty(runtime, String::createFromAscii(runtime, name));
 }
@@ -856,8 +850,7 @@ void Object::setProperty(JSContext &runtime, const String &name, T &&value) {
 }
 
 template <typename T>
-void Object::setProperty(JSContext &runtime, const PropNameID &name,
-                         T &&value) {
+void Object::setProperty(JSContext &runtime, const PropNameID &name, T &&value) {
   setPropertyValue(runtime, name,
                    detail::toValue(runtime, std::forward<T>(value)));
 }
@@ -903,8 +896,7 @@ inline Function Object::getFunction(JSContext &runtime) && {
   return Function(value);
 }
 
-template <typename T>
-inline bool Object::isHostObject(JSContext &runtime) const {
+template <typename T> inline bool Object::isHostObject(JSContext &runtime) const {
   return runtime.isHostObject(*this) &&
          std::dynamic_pointer_cast<T>(runtime.getHostObject(*this));
 }
@@ -1021,6 +1013,7 @@ PropNameID::names(PropNameID(&&propertyNames)[N]) {
   }
   return result;
 }
+
 
 inline Value Function::callAsConstructor(JSContext &runtime, const Value *args,
                                          size_t count) const {

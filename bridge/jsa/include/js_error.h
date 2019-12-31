@@ -1,15 +1,15 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 #ifndef JSA_JSEXCEPTION_H_
 #define JSA_JSEXCEPTION_H_
 
-#include <cassert>
-#include <exception>
 #include <js_context.h>
 #include <js_type.h>
+#include <cassert>
+#include <exception>
 #include <stdexcept>
 #include <string>
 

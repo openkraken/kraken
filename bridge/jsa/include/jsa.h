@@ -6,10 +6,10 @@
 #ifndef JSA_JSA_H_
 #define JSA_JSA_H_
 
-#include "instrumentation.h"
 #include "js_context.h"
 #include "js_error.h"
 #include "js_type.h"
+#include "instrumentation.h"
 #include "macros.h"
 
 //#ifdef KRAKEN_JSC_ENGINE
@@ -72,8 +72,7 @@
 // 创建一个JSBinding
 // 使用JSA_BINDING_GLOBAL_FUNCTION/JSA_BINDING_FUNCTION来注入
 #define JSA_CREATE_HOST_FUNCTION(rt, name, paramCount, func)                   \
-  alibaba::jsa::Function::createFromHostFunction(                              \
-      rt, alibaba::jsa::PropNameID::forUtf8(rt, name), paramCount, func);
+    alibaba::jsa::Function::createFromHostFunction(rt, alibaba::jsa::PropNameID::forUtf8(rt, name), paramCount, func);
 
 // 与JSA_CREATE_HOST_FUNCTION类似，创建一个JSBinding函数。
 #define JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(rt, func)                          \
