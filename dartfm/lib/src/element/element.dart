@@ -169,6 +169,12 @@ abstract class Element extends Node
       updateRenderDecoratedBox(newStyle, transitionMap);
 
       ///5.update constrained
+      updateConstraints(newStyle, transitionMap);
+
+      ///6.update margin
+      updateRenderMargin(newStyle, transitionMap);
+
+      ///7.update position
       String newPosition = newStyle['position'] ?? 'static';
       String oldPosition = _style['position'] ?? 'static';
       bool positionChanged = false;
@@ -176,14 +182,33 @@ abstract class Element extends Node
         positionChanged = true;
       }
 
-      updateConstraints(newStyle, transitionMap);
-
-      ///6.update margin
-      updateRenderMargin(newStyle, transitionMap);
-
-      ///7.update position
+      // position change
       if (positionChanged) {
         _updatePosition(newStyle);
+
+      } else if (newPosition != 'static') {
+        int newZIndex = newStyle['zIndex'];
+        int oldZIndex = _style['zIndex'];
+        // zIndex change
+        if (newZIndex != oldZIndex) {
+          _updateZIndex(newStyle);
+        }
+
+        // offset change
+        String newTop = newStyle['top'];
+        String newBottom = newStyle['bottom'];
+        String newLeft = newStyle['left'];
+        String newRight = newStyle['right'];
+        String oldTop = _style['top'];
+        String oldBottom = _style['bottom'];
+        String oldLeft = _style['left'];
+        String oldRight = _style['right'];
+        if ( newTop != oldTop ||
+          newBottom != oldBottom ||
+          newLeft != oldLeft ||
+          newRight != oldRight) {
+          _updateOffset(newStyle);
+        }
       }
 
       ///8.update opacity
@@ -219,9 +244,9 @@ abstract class Element extends Node
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
       (renderStack.parent as RenderTransform).child = child;
-      // remove non positioned element from parent element stack
-      Element parentStackElement = findParent(this, (element) => element.renderStack != null);
-      parentStackElement.renderStack.remove(renderBoxModel);
+      // remove positioned element from parent element stack
+      Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+      parentElementWithStack.renderStack.remove(renderBoxModel);
 
       // find pre non positioned element
       var preNonPositionedElement = null;
@@ -246,10 +271,10 @@ abstract class Element extends Node
             preNonPositionedObject = child;
           }
         };
-        parentStackElement.renderLayoutElement.visitChildren(visitor);
+        parentElementWithStack.renderLayoutElement.visitChildren(visitor);
       }
       // insert non positioned renderObject to parent element in the order of original element tree
-      parentStackElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
+      parentElementWithStack.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
 
     // from static to !static
     } else {
@@ -265,50 +290,99 @@ abstract class Element extends Node
         ],
       );
       transform.child = renderNewStack;
-      // remove positioned element from parent element
+      // remove non positioned element from parent element
       (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
       // attach positioned element to parent element stack
       Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-      StackParentData stackParentData = getAbsoluteParentDataFromStyle(style);
-      renderObject.parentData = stackParentData;
+      RenderStack parentStack = parentElementWithStack.renderStack;
 
-      // find pre positioned element
-      var currentElement = nodeMap[nodeId];
-      var parentElement = currentElement.parentNode;
-      // current element's zIndex
-      int curZIndex;
-      if (currentElement.properties != null && currentElement.properties.containsKey('style')) {
-        curZIndex = currentElement.properties['style']['zIndex'];
-      }
-      // find pre positioned renderObject
-      RenderBoxModel insertObject = null;
-      RenderObjectVisitor visitor = (child) {
-        if (child is RenderBoxModel) {
-          Element childElement = getElementById(parentElement, child.nodeId);
-          int zIndex = childElement.properties['style']['zIndex'];
-          // find positioned object zIndex is large than current object
-          if (zIndex != null && zIndex > curZIndex) {
-            insertObject = child;
-            return;
-          }
-        }
-      };
-      parentElementWithStack.renderStack.visitChildren(visitor);
-
-      if (insertObject != null) {
-        final ContainerParentDataMixin childParentData = insertObject.parentData;
-        insertObject = childParentData.previousSibling;
-      }
-
-      // insert positioned renderObject to parent stack element in the order of zIndex
-      parentElementWithStack.renderStack.insert(renderObject, after: insertObject);
+      // add current element back to parent stack by zIndex
+      _addElementByZIndex(parentStack, renderObject);
     }
+  }
+
+  void _addElementByZIndex(RenderStack parentStack, RenderObject renderObject) {
+    RenderObject insertObject = null;
+    Element currentElement = nodeMap[nodeId];
+    Element parentElement = currentElement.parentNode;
+
+    // current element's zIndex
+    int curZIndex = 0;
+    if (currentElement.properties != null && currentElement.properties.containsKey('style')) {
+      curZIndex = currentElement.properties['style']['zIndex'];
+    }
+
+    bool visitorEnd = false;
+    RenderObjectVisitor visitor = (child) {
+      if (!visitorEnd && child is RenderBoxModel) {
+        Element childElement = getElementById(parentElement, child.nodeId);
+        int zIndex = childElement.properties['style']['zIndex'];
+        if (zIndex == null) {
+          zIndex = 0;
+        }
+        // find positioned object zIndex is large than current object
+        if (zIndex > curZIndex) {
+          insertObject = child;
+          visitorEnd = true;
+        }
+      }
+    };
+    parentStack.visitChildren(visitor);
+
+    // not found large zIndex node, insert after last child
+    if (insertObject == null) {
+      insertObject = parentStack.lastChild;
+    } else { // insert before found node zIndex larger
+      final ContainerParentDataMixin childParentData = insertObject.parentData;
+      insertObject = childParentData.previousSibling;
+    }
+
+    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    renderObject.parentData = stackParentData;
+
+    // insert positioned renderObject to parent stack element in the order of zIndex
+    parentStack.insert(renderObject, after: insertObject);
+  }
+
+  void _updateZIndex(Style style) {
+    Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+    RenderStack parentStack = parentElementWithStack.renderStack;
+
+    // remove current element from parent stack
+    parentStack.remove(renderObject);
+
+    // add current element back to parent stack by zIndex
+    _addElementByZIndex(parentStack, renderObject);
+  }
+
+  void _updateOffset(Style style) {
+    Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+    RenderStack parentStack = parentElementWithStack.renderStack;
+
+    RenderObject preSibling;
+    List<RenderObject> stackChildren = [];
+    RenderObjectVisitor visitor = (child) {
+      stackChildren.add(child);
+    };
+    parentStack.visitChildren(visitor);
+    int curIdx = stackChildren.indexOf(renderObject);
+    if (curIdx != -1) {
+      preSibling = stackChildren[curIdx - 1];
+    }
+
+    // remove current element from parent stack
+    parentStack.remove(renderObject);
+
+    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    renderObject.parentData = stackParentData;
+
+    // insert positioned renderObject to parent stack element in the order of zIndex
+    parentStack.insert(renderObject, after: preSibling);
   }
 
   Element getElementById(Element parentElement, int nodeId) {
     Element result = null;
     List childNodes = parentElement.childNodes;
-
 
     for (int i = 0; i < childNodes.length; i++) {
       Element element = childNodes[i];
@@ -430,7 +504,7 @@ abstract class Element extends Node
         findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
           ZIndexParentData stackParentData =
-          getAbsoluteParentDataFromStyle(childStyle);
+          getPositionParentDataFromStyle(childStyle);
           RenderObject stackObject = childRenderObject;
 
           childRenderObject = RenderPadding(padding: EdgeInsets.zero);
@@ -449,7 +523,7 @@ abstract class Element extends Node
         }
       } else if (childPosition == 'fixed') {
         ZIndexParentData stackParentData =
-        getAbsoluteParentDataFromStyle(childStyle);
+        getPositionParentDataFromStyle(childStyle);
         RenderObject stackObject = childRenderObject;
 
         childRenderObject = RenderPadding(padding: EdgeInsets.zero);
@@ -532,7 +606,7 @@ abstract class Element extends Node
     return _el;
   }
 
-  static ZIndexParentData getAbsoluteParentDataFromStyle(Style style) {
+  static ZIndexParentData getPositionParentDataFromStyle(Style style) {
     ZIndexParentData parentData = ZIndexParentData();
 
     if (style.contains('top') || style.contains('left') || style.contains('bottom') || style.contains('right')) {
