@@ -271,10 +271,10 @@ abstract class Element extends Node
             preNonPositionedObject = child;
           }
         };
-        parentElementWithStack.renderLayoutElement.visitChildren(visitor);
+        parentElement.renderLayoutElement.visitChildren(visitor);
       }
       // insert non positioned renderObject to parent element in the order of original element tree
-      parentElementWithStack.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
+      parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
 
     // from static to !static
     } else {
