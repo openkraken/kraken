@@ -296,52 +296,20 @@ abstract class Element extends Node
       Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
       RenderStack parentStack = parentElementWithStack.renderStack;
 
-      // add current element back to parent stack by zIndex
-      _addElementByZIndex(parentStack, renderObject);
-    }
-  }
+      StackParentData stackParentData = getPositionParentDataFromStyle(style);
+      renderObject.parentData = stackParentData;
 
-  void _addElementByZIndex(RenderStack parentStack, RenderObject renderObject) {
-    RenderObject insertObject = null;
-    Element currentElement = nodeMap[nodeId];
-    Element parentElement = currentElement.parentNode;
+      Element currentElement = nodeMap[nodeId];
+      Element parentElement = currentElement.parentNode;
 
-    // current element's zIndex
-    int curZIndex = 0;
-    if (currentElement.properties != null && currentElement.properties.containsKey('style')) {
-      curZIndex = currentElement.properties['style']['zIndex'];
-    }
-
-    bool visitorEnd = false;
-    RenderObjectVisitor visitor = (child) {
-      if (!visitorEnd && child is RenderBoxModel) {
-        Element childElement = getElementById(parentElement, child.nodeId);
-        int zIndex = childElement.properties['style']['zIndex'];
-        if (zIndex == null) {
-          zIndex = 0;
-        }
-        // find positioned object zIndex is large than current object
-        if (zIndex > curZIndex) {
-          insertObject = child;
-          visitorEnd = true;
-        }
+      // current element's zIndex
+      int curZIndex = 0;
+      if (currentElement.properties != null && currentElement.properties.containsKey('style')) {
+        curZIndex = currentElement.properties['style']['zIndex'];
       }
-    };
-    parentStack.visitChildren(visitor);
-
-    // not found large zIndex node, insert after last child
-    if (insertObject == null) {
-      insertObject = parentStack.lastChild;
-    } else { // insert before found node zIndex larger
-      final ContainerParentDataMixin childParentData = insertObject.parentData;
-      insertObject = childParentData.previousSibling;
+      // add current element back to parent stack by zIndex
+      insertByZIndex(parentStack, renderObject, curZIndex);
     }
-
-    StackParentData stackParentData = getPositionParentDataFromStyle(style);
-    renderObject.parentData = stackParentData;
-
-    // insert positioned renderObject to parent stack element in the order of zIndex
-    parentStack.insert(renderObject, after: insertObject);
   }
 
   void _updateZIndex(Style style) {
@@ -351,8 +319,16 @@ abstract class Element extends Node
     // remove current element from parent stack
     parentStack.remove(renderObject);
 
+    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    renderObject.parentData = stackParentData;
+
+    // current element's zIndex
+    int curZIndex = 0;
+    if (style['zIndex'] != null) {
+      curZIndex = style['zIndex'];
+    }
     // add current element back to parent stack by zIndex
-    _addElementByZIndex(parentStack, renderObject);
+    insertByZIndex(parentStack, renderObject, curZIndex);
   }
 
   void _updateOffset(Style style) {
