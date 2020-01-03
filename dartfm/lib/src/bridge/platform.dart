@@ -20,7 +20,7 @@ final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
 final String nativeDynamicLibraryPath = Platform.isMacOS
   ? 'libkraken.dylib'
   : Platform.isWindows ? 'libkraken.dll' : 'libkraken.so';
-DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(join(kkLibraryPath ?? '', nativeDynamicLibraryPath));
+DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(join(kkLibraryPath ?? '\$ORIGIN', nativeDynamicLibraryPath));
 final initKrakenCallbackFunc = nativeDynamicLibrary.lookup<NativeFunction<InitKrakenCallbackFunc>>("init_callback");
 final _initKrakenCallback = initKrakenCallbackFunc.asFunction<InitKrakenCallback>();
 

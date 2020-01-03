@@ -28,6 +28,8 @@ const KRAKEN_ROOT = join(__dirname, '..');
 const paths = {
   dist: resolve(__dirname, 'build'),
   distLib: resolve(__dirname, 'build/lib'),
+  distInclude: resolve(__dirname, 'build/include'),
+  distApp: resolve(__dirname, 'build/app'),
   cli: resolveKraken('cli'),
   playground: resolveKraken('playground'),
   platform: resolveKraken('platform'),
@@ -186,6 +188,46 @@ task('generate-cmake-files', (done) => {
   done(null);
 });
 
+task('generate-cmake-embedded-files', (done) => {
+  const args = [
+    '-DCMAKE_BUILD_TYPE=Release',
+    '-G',
+    'CodeBlocks - Unix Makefiles',
+    '-B',
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    '-S',
+    resolve(paths.platform,'linux_' + os.arch())
+  ];
+  const handle = spawnSync('cmake', args, {
+    cwd: path.join(paths.platform, 'linux_' + os.arch()),
+    env: Object.assign(process.env),
+    stdio: 'inherit',
+  });
+  if (handle.status !== 0) {
+    console.error(handle.error);
+    return done(false);
+  }
+  done(null);
+});
+
+task('build-kraken-embedded-lib', (done) => {
+  const args = [
+    '--build',
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    '--target',
+    'kraken_embbeder',
+    '--',
+    '-j',
+    '4'
+  ];
+  const handle = spawnSync('cmake', args, {
+    cwd: resolve(paths.platform, 'linux_' + os.arch()),
+    env: process.env,
+    stdio: 'inherit',
+  });
+  done(handle.status === 0 ? null : handle.error);
+});
+
 task('build-kraken-lib', (done) => {
   const args = [
     '--build',
@@ -252,6 +294,58 @@ task('compile-polyfill', (done) => {
   done();
 });
 
+task('build-embedded-assets', (done) => {
+  if (!fs.existsSync(paths.distInclude)) {
+    fs.mkdirSync(paths.distInclude);
+  }
+  let copySource = [
+    {
+      src: paths.playground + '/linux/flutter/generated_plugin_registrant.h',
+      dest: paths.distInclude + '/generated_plugin_registrant.h'
+    },
+    {
+      src: paths.bridge + '/include/kraken_bridge_export.h',
+      dest: paths.distInclude + '/kraken_bridge_export.h'
+    },
+    {
+      src: paths.platform + '/linux_x64/kraken_embbeder.h',
+      dest: paths.distInclude + '/kraken_embbeder.h'
+    },
+    {
+      src: paths.playground + '/linux/flutter/ephemeral/flutter_export.h',
+      dest: paths.distInclude + '/flutter_export.h'
+    },
+    {
+      src: paths.playground + '/linux/flutter/ephemeral/flutter_glfw.h',
+      dest: paths.distInclude + '/flutter_glfw.h'
+    },
+    {
+      src: paths.playground + '/linux/flutter/ephemeral/flutter_messenger.h',
+      dest: paths.distInclude + '/flutter_messenger.h'
+    },
+    {
+      src: paths.playground + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
+      dest: paths.distInclude + '/flutter_plugin_registrar.h'
+    }
+  ];
+
+  for (let source of copySource) {
+    fs.copyFileSync(source.src, source.dest);
+  }
+
+  execSync(`cp -r ${paths.playground}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${paths.distInclude}`);
+  execSync(`ln -s ../app/lib/libflutter_linux_glfw.so ./`, {
+    cwd: paths.distLib
+  });
+  execSync('chrpath -r "\$ORIGIN" ./libkraken.so', {
+    cwd: paths.distLib
+  });
+  execSync('chrpath -r "\$ORIGIN ./libkraken_embbeder.so"', {
+    cwd: paths.distLib
+  });
+  done();
+});
+
 let _series;
 
 // linux only support debug from now on
@@ -267,10 +361,17 @@ if (platform === 'linux') {
   }
 }
 
+let embeddedSeries = series(
+  'generate-cmake-embedded-files',
+  'build-kraken-embedded-lib',
+  'build-embedded-assets'
+);
+
 exports.default = series(
   'clean',
   _series,
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
+  platform === 'linux' ? embeddedSeries : undefined,
 );
 

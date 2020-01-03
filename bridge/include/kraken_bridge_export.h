@@ -12,4 +12,8 @@
 KRAKEN_EXPORT
 void init_callback();
 
+KRAKEN_EXPORT
+void evaluate_scripts(const char *code, const char *bundleFilename,
+                      int startLine);
+
 #endif // KRAKEN_BRIDGE_EXPORT_H
