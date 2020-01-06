@@ -26,6 +26,8 @@ class Style {
   double right;
   double top;
   double bottom;
+  double width;
+  double height;
   String transform;
   String transformOrigin;
   String transition;
@@ -60,6 +62,8 @@ class Style {
     right = _styleMap.containsKey('right') ? Length(_styleMap['right']).displayPortValue : null;
     top = _styleMap.containsKey('top') ? Length(_styleMap['top']).displayPortValue : null;
     bottom = _styleMap.containsKey('bottom') ? Length(_styleMap['bottom']).displayPortValue : null;
+    width = _styleMap.containsKey('width') ? Length(_styleMap['width']).displayPortValue : null;
+    height = _styleMap.containsKey('height') ? Length(_styleMap['height']).displayPortValue : null;
     transform = _styleMap['transform'];
     transformOrigin = _styleMap['transformOrigin'];
     transition = _styleMap['transition'];
