@@ -372,6 +372,6 @@ exports.default = series(
   _series,
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
-  platform === 'linux' ? embeddedSeries : undefined,
+  platform === 'linux' ? embeddedSeries : [],
 );
 
