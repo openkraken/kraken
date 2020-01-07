@@ -9,7 +9,6 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 const minimist = require('minimist');
-const {createClient, upload} = require('./lib/alios');
 const packageJSON = require('./package.json');
 
 let enginePath = process.env.FLUTTER_ENGINE;
@@ -308,13 +307,17 @@ task('compile-polyfill', (done) => {
 });
 
 task('upload-dist', (done) => {
-  execSync('tar -zcf ./build.tar.gz ./build', {
+  const filename = `kraken-${os.platform()}-${packageJSON.version}.tar.gz`;
+  execSync(`tar -zcf ${paths.cli}/vendors/${filename} ./build`, {
     cwd: __dirname
   });
-  const client = createClient(process.env.OSS_AK, process.env.OSS_SK);
-  upload(client, `kraken-cli-vendors/kraken-${os.platform()}-${packageJSON.version}.tar.gz`, path.join(__dirname, 'build.tar.gz')).then(() => {
-    done()
-  }).catch(err => done(err.message));
+  const filepath = path.join(__dirname, 'vendors', filename);
+  execSync(`node oss.js --ak ${process.env.OSS_AK} --sk ${process.env.OSS_SK} -s ${filepath} -n ${filename}`, {
+    cwd: paths.tools,
+    env: process.env,
+    stdio: 'inherit'
+  });
+  done();
 });
 
 task('build-embedded-assets', (done) => {
