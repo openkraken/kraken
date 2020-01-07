@@ -38,18 +38,25 @@ class TextNode extends Node
   void setProperty(String key, value) {
     properties[key] = value;
 
-    Element parentNode = this.parentNode;
-    Style parentStyle = Style(parentNode.properties['style']);
+    Element parentElement = this.parentNode;
+    Style parentStyle = Style(parentElement.properties['style']);
 
-    RenderParagraph renderParagraph = RenderParagraph(
+    RenderParagraph newTextNode = RenderParagraph(
       createTextSpanWithStyle(value, parentStyle),
       textAlign: getTextAlignFromStyle(parentStyle),
       textDirection: TextDirection.ltr,
     );
 
-    parentNode.renderLayoutElement
-        ..removeAll()
-        ..add(renderParagraph);
+    int curIdx = parentElement.childNodes.indexOf(this);
+
+    List<RenderObject> children = [];
+    RenderObjectVisitor visitor = (child) {
+      children.add(child);
+    };
+    parentElement.renderLayoutElement
+        ..visitChildren(visitor)
+        ..remove(children[curIdx])
+        ..insert(newTextNode, after: children[curIdx - 1]);
   }
 }
 
