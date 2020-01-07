@@ -9,12 +9,20 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 const minimist = require('minimist');
+const packageJSON = require('./package.json');
 
 let enginePath = process.env.FLUTTER_ENGINE;
 let platform = os.platform() === 'darwin' ? 'macos' : os.platform();
 let buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
 const args = minimist(process.argv.slice(3));
+const uploadToOSS = args['upload-to-oss'];
+
+if (uploadToOSS) {
+  if (!process.env.OSS_AK || !process.env.OSS_SK) {
+    throw new Error('--ak and --sk is need to upload object into oss');
+  }
+}
 
 if (!enginePath) {
   if (args['local-engine-path']) {
@@ -294,6 +302,20 @@ task('compile-polyfill', (done) => {
   done();
 });
 
+task('upload-dist', (done) => {
+  const filename = `kraken-${os.platform()}-${packageJSON.version}.tar.gz`;
+  execSync(`tar -zcf ${paths.cli}/vendors/${filename} ./build`, {
+    cwd: __dirname
+  });
+  const filepath = path.join(__dirname, 'vendors', filename);
+  execSync(`node oss.js --ak ${process.env.OSS_AK} --sk ${process.env.OSS_SK} -s ${filepath} -n ${filename}`, {
+    cwd: paths.tools,
+    env: process.env,
+    stdio: 'inherit'
+  });
+  done();
+});
+
 task('build-embedded-assets', (done) => {
   if (!fs.existsSync(paths.distInclude)) {
     fs.mkdirSync(paths.distInclude);
@@ -373,5 +395,6 @@ exports.default = series(
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
   platform === 'linux' ? embeddedSeries : [],
+  uploadToOSS ? 'upload-dist' : []
 );
 
