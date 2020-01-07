@@ -9,12 +9,21 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 const minimist = require('minimist');
+const {createClient, upload} = require('./lib/alios');
+const packageJSON = require('./package.json');
 
 let enginePath = process.env.FLUTTER_ENGINE;
 let platform = os.platform() === 'darwin' ? 'macos' : os.platform();
 let buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
 const args = minimist(process.argv.slice(3));
+const uploadToOSS = args['upload-to-oss'];
+
+if (uploadToOSS) {
+  if (!process.env.OSS_AK || !process.env.OSS_SK) {
+    throw new Error('--ak and --sk is need to upload object into oss');
+  }
+}
 
 if (!enginePath) {
   if (args['local-engine-path']) {
@@ -155,6 +164,10 @@ task('patch-kraken-profile', (done) => {
 
 task('clean', () => {
   return del('build').then(() => {
+    if (fs.existsSync(path.join(__dirname, 'build.tar.gz'))) {
+      execSync('rm build.tar.gz');
+    }
+
     spawnSync('flutter', ['clean'], {
       cwd: paths.playground,
       env: process.env,
@@ -294,6 +307,16 @@ task('compile-polyfill', (done) => {
   done();
 });
 
+task('upload-dist', (done) => {
+  execSync('tar -zcf ./build.tar.gz ./build', {
+    cwd: __dirname
+  });
+  const client = createClient(process.env.OSS_AK, process.env.OSS_SK);
+  upload(client, `kraken-cli-vendors/kraken-${os.platform()}-${packageJSON.version}.tar.gz`, path.join(__dirname, 'build.tar.gz')).then(() => {
+    done()
+  }).catch(err => done(err.message));
+});
+
 task('build-embedded-assets', (done) => {
   if (!fs.existsSync(paths.distInclude)) {
     fs.mkdirSync(paths.distInclude);
@@ -373,5 +396,6 @@ exports.default = series(
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
   platform === 'linux' ? embeddedSeries : [],
+  uploadToOSS ? 'upload-dist' : []
 );
 

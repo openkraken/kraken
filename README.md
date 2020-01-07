@@ -17,3 +17,8 @@ https://yuque.antfin-inc.com/kraken/development/compile_kraken_linux
 ### Flutter Engine
 
 https://yuque.antfin-inc.com/kraken/development/compile_flutter_engine
+
+### 发布到AliOSS
+```bash
+OSS_AK=<your ak> OSS_SK=<your sk> npm run build:release -- --local-engine-path /path/to/flutter-engine/src
+```
