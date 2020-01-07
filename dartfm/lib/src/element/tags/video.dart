@@ -6,13 +6,61 @@
 import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/style.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
 const String DEFAULT_WIDTH = '300px';
 const String DEFAULT_HEIGHT = '150px';
 
-class VideoElement extends Element {
+class VideoParentData extends ContainerBoxParentData<RenderBox> {
+}
+
+class RenderVideoBox extends RenderBox
+  with
+    ContainerRenderObjectMixin<RenderBox, VideoParentData>,
+    RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
+
+  RenderVideoBox({
+    this.child,
+    this.additionalConstraints,
+  }) : assert(child != null) {
+    add(child);
+  }
+
+  RenderBox child;
+  BoxConstraints additionalConstraints;
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! VideoParentData) {
+      child.parentData = VideoParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    print('additionalConstraints============================= $constraints');
+    if (child != null) {
+      child.layout(additionalConstraints, parentUsesSize: true);
+      size = child.size;
+    } else {
+      performResize();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
+}
+
+class VideoElement extends Element
+  with DimensionMixin {
+
   VideoPlayerController controller;
   String _src;
 
@@ -66,7 +114,19 @@ class VideoElement extends Element {
     controller.initialize().then((int textureId) {
       controller.setMuted(props['muted'] ?? false);
       TextureBox box = TextureBox(textureId: textureId);
-      addChild(box);
+
+      // @TODO get video's original dimension if width or height not specified
+      BoxConstraints additionalConstraints = BoxConstraints(
+        minWidth: 0,
+        maxWidth: getDisplayPortedLength(props['style']['width']),
+        minHeight: 0,
+        maxHeight: getDisplayPortedLength(props['style']['height']),
+      );
+      RenderVideoBox videoBox = RenderVideoBox(
+        additionalConstraints: additionalConstraints,
+        child: box,
+      );
+      addChild(videoBox);
 
       if (props['autoPlay'] == true) {
         controller.play();
