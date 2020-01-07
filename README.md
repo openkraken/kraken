@@ -18,7 +18,12 @@ https://yuque.antfin-inc.com/kraken/development/compile_kraken_linux
 
 https://yuque.antfin-inc.com/kraken/development/compile_flutter_engine
 
-### 发布到AliOSS
+### Publish to AliOSS
 ```bash
 OSS_AK=<your ak> OSS_SK=<your sk> npm run build:release -- --local-engine-path /path/to/flutter-engine/src
+```
+or
+
+```
+ node tools/oss.js --ak <your ak> --sk <your sk> -s ./tools/kraken-darwin-0.2.0-preview.1.tar.gz -n kraken-darwin.tar.gz
 ```

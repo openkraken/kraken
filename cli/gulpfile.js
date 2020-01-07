@@ -163,10 +163,6 @@ task('patch-kraken-profile', (done) => {
 
 task('clean', () => {
   return del('build').then(() => {
-    if (fs.existsSync(path.join(__dirname, 'build.tar.gz'))) {
-      execSync('rm build.tar.gz');
-    }
-
     spawnSync('flutter', ['clean'], {
       cwd: paths.playground,
       env: process.env,
