@@ -7,6 +7,7 @@ import 'package:kraken/style.dart';
 
 const String COLOR = 'color';
 const String HEIGHT = 'height';
+const String LINE_HEIGHT = 'lineHeight';
 const String TEXT_DECORATION = 'textDecoration';
 const String TEXT_DECORATION_LINE = 'textDecorationLine';
 const String TEXT_DECORATION_COLOR = 'textDecorationColor';
@@ -256,9 +257,9 @@ mixin TextStyleMixin {
   }
 
   double getHeight(Style style) {
-    if (style.contains(HEIGHT)) {
-      Length height = Length(style[HEIGHT]);
-      return height.displayPortValue / getFontSize(style);
+    if (style.contains(LINE_HEIGHT)) {
+      Length height = Length(style[LINE_HEIGHT]);
+      return height.displayPortValue;
     } else {
       return null;
     }

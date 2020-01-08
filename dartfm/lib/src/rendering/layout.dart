@@ -39,7 +39,7 @@ class RenderFlowLayout extends RenderBox
     double spacing = 0.0,
     WrapAlignment runAlignment = WrapAlignment.start,
     double runSpacing = 0.0,
-    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.end,
+    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
     this.nodeId,
@@ -551,7 +551,7 @@ class RenderFlowLayout extends RenderBox
         preSiblingDisplayType = _getDisplayType(preChild);
       }
 
-      if (childCount > 0 && (displayType == 'block' || preSiblingDisplayType == 'block' || (runMainAxisExtent + spacing + childMainAxisExtent >= mainAxisLimit))) {
+      if (childCount > 0 && (_isBlockElement(child) || _isBlockElement(preChild) || (runMainAxisExtent + spacing + childMainAxisExtent >= mainAxisLimit))) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty)
@@ -598,7 +598,6 @@ class RenderFlowLayout extends RenderBox
     } else {
       constraintWidth = mainAxisExtent;
     }
-
     switch (direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(constraintWidth, crossAxisExtent));
@@ -716,6 +715,17 @@ class RenderFlowLayout extends RenderBox
       displayType = 'inline';
     }
     return displayType;
+  }
+
+  bool _isBlockElement(child) {
+    List blockTypes = [
+      'block',
+      'flex',
+    ];
+    if (blockTypes.indexOf(_getDisplayType(child)) != -1) {
+      return true;
+    }
+    return false;
   }
 
   @override

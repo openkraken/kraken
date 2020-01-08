@@ -72,12 +72,21 @@ abstract class Element extends Node
       }
     }
 
+    bool isInline = display == 'inline';
+    // @TODO inline element in flex layout should not remove dimension
+    if (isInline) {
+      style.remove('width');
+      style.remove('height');
+    }
+
     renderObject = renderLayoutElement = createRenderLayoutElement(null);
     renderObject = initRenderPadding(renderObject, style);
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style);
     }
-    renderObject = initOverflowBox(renderObject, style);
+    if (!isInline) {
+      renderObject = initOverflowBox(renderObject, style);
+    }
     renderObject = initRenderDecoratedBox(renderObject, style);
 
     renderObject = initRenderConstrainedBox(renderObject, style);
@@ -386,7 +395,7 @@ abstract class Element extends Node
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
 
-    } else if (display == 'inline' || display == 'block') {
+    } else if (display == 'inline' || display == 'inline-block' || display == 'block') {
       Map<String, dynamic> elementStyle = {};
       if (properties['style'] != null) {
         elementStyle = properties['style'];

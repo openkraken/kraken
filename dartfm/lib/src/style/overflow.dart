@@ -153,9 +153,15 @@ class OverflowCustomBox extends RenderSizedOverflowBox {
     assert(child != null);
     BoxConstraints childConstraints;
     if (axisDirection == AxisDirection.down) {
-      childConstraints = constraints.copyWith(maxHeight: double.infinity);
+      childConstraints = constraints.copyWith(
+        minHeight: 0,
+        maxHeight: double.infinity
+      );
     } else {
-      childConstraints = constraints.copyWith(maxWidth: double.infinity);
+      childConstraints = constraints.copyWith(
+        minWidth: 0,
+        maxWidth: double.infinity
+      );
     }
     child.layout(childConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);
