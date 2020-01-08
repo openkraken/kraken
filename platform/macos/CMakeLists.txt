@@ -11,14 +11,13 @@ if ($ENV{KRAKEN_BUILD} MATCHES Release)
   set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
     $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/FlutterMacOS
   )
+  target_include_directories(flutter INTERFACE $ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
 else()
   set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
     $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/FlutterMacOS
   )
+  target_include_directories(flutter INTERFACE $ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
 endif()
-include_directories($ENV{FLUTTER_ENGINE}/out/host_debug_unopt/FlutterMacOS.framework/Headers)
-include_directories($ENV{FLUTTER_ENGINE}/out/host_release/FlutterMacOS.framework/Headers)
-include_directories($ENV{FLUTTER_ENGINE}/out/host_debug/FlutterMacOS.framework/Headers)
 
 set(BRIDGE_DIR ../../bridge)
 

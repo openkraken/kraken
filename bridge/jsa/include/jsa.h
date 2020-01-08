@@ -6,12 +6,18 @@
 #ifndef JSA_JSA_H_
 #define JSA_JSA_H_
 
-#include <js_context.h>
-#include <js_error.h>
-#include <js_type.h>
-#include <instrumentation.h>
-#include <macros.h>
+#include "js_context.h"
+#include "js_error.h"
+#include "js_type.h"
+#include "instrumentation.h"
+#include "macros.h"
 
+//#ifdef KRAKEN_JSC_ENGINE
+#include "jsc/jsc_implementation.h"
+#define CREATE_JS_CONTEXT alibaba::jsc::createJSContext();
+//#endif
+
+//#define CREATE_JS_CONTEXT(code, url, line) \
 // set/get属性
 #define JSA_SET_PROPERTY(rt, obj, name, value)                                 \
   (obj).setProperty((rt), name, value)

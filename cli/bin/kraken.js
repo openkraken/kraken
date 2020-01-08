@@ -17,6 +17,7 @@ program
   .option('-u --url <url>', 'Bundle url. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-s, --source <source>', 'Source code. pass source directory from command line')
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'release')
+  .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .action((options) => {
     const { bundle, url, source } = options;
 
@@ -26,6 +27,10 @@ program
       const env = Object.assign({}, process.env);
       const shellPath = getShellPath(options.runtimeMode);
       env['KRAKEN_LIBRARY_PATH'] = resolve(__dirname, '../build/lib');
+
+      if (options.enableKrakenJsLog) {
+        env['ENABLE_KRAKEN_JS_LOG'] = 'true';
+      }
 
       if (bundle) {
         const absoluteBundlePath = resolve(process.cwd(), bundle);

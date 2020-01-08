@@ -30,7 +30,11 @@ Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
     return Future<String>.value(content);
   }
 
-  return await loadBundleFromAssets();
+  if (Platform.isAndroid || Platform.isIOS) {
+    return await loadBundleFromAssets();
+  }
+
+  return Future<String>.value('');
 }
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override

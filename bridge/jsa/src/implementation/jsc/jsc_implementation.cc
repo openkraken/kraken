@@ -3,7 +3,8 @@
 * Author: Kraken Team.
 */
 
-#include "jsc_context.h"
+#include "jsa.h"
+#include "jsc_implementation.h"
 #ifdef IS_LINUX
 #include <iostream>
 #endif

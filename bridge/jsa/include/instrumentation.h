@@ -9,7 +9,7 @@
 #include <iosfwd>
 #include <string>
 
-#include <js_type.h>
+#include "js_type.h"
 
 namespace alibaba {
 namespace jsa {

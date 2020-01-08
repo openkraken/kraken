@@ -1,58 +1,47 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.2.0)
+project(KrakenEmmbeder)
 
-project(Kraken LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_definitions(-DIS_LINUX=1)
-set(IS_LINUX_X86 1)
+add_compile_options(-fPIC)
 
 add_library(flutter SHARED IMPORTED)
+add_library(kraken SHARED IMPORTED)
+
 set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
-  $ENV{FLUTTER_ENGINE}/out/host_debug/libflutter_engine.so
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../cli/build/app/lib/libflutter_linux_glfw.so
+  BUILD_RPATH
+  ./libkraken_linux_glfw.so
   )
-include_directories($ENV{FLUTTER_ENGINE}/out/host_debug_unopt/)
-include_directories($ENV{FLUTTER_ENGINE}/out/host_release/)
-include_directories($ENV{FLUTTER_ENGINE}/out/host_debug/)
 
-add_subdirectory(./bridge)
+set_target_properties(kraken PROPERTIES IMPORTED_LOCATION
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../cli/build/lib/libkraken.so)
 
-## define bridge library
-add_library(bridge STATIC bridge/bridge.cc bridge/bridge.h bridge/message.cc bridge/message.h)
-target_link_libraries(bridge jsa_jsc_implementation)
-target_link_libraries(bridge jsa_abstraction)
-target_link_libraries(bridge bindings)
-target_link_libraries(bridge -pthread)
-target_link_libraries(bridge flutter)
-target_include_directories(bridge PUBLIC ./flutter/include)
-target_include_directories(bridge PUBLIC ./bridge/bindings)
+add_library(flutter_plugin STATIC
+  ../../playground/linux/flutter/generated_plugin_registrant.cc
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/engine_method_result.cc
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/flutter_window_controller.cc
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/plugin_registrar.cc
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/standard_codec.cc
+  )
+target_include_directories(flutter_plugin PUBLIC
+  ../../playground/linux/flutter
+  ../../playground/linux/flutter/ephemeral
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include
+  )
 
-add_library(js_code STATIC ../../polyfill/dist/polyfill.h ../../polyfill/dist/polyfill.cc)
-target_link_libraries(js_code bridge)
-target_include_directories(js_code PUBLIC ./bridge)
+add_library(kraken_embbeder SHARED kraken_embbeder.cc kraken_embbeder.h)
+target_link_libraries(kraken_embbeder kraken flutter flutter_plugin)
 
-add_library(kraken SHARED ../common/kraken_bridge_export.cc ../common/kraken_bridge_export.h)
+target_include_directories(kraken_embbeder PUBLIC
+  ../../bridge/include
+  ../../playground/linux/flutter
+  ../../playground/linux/flutter/ephemeral
+  ../../playground/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include
+  )
 
-if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-    )
-else()
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../lib"
-    )
-endif()
-
-target_include_directories(kraken PUBLIC ./bridge)
-target_include_directories(kraken PUBLIC ./bridge/jsa/abstraction)
-target_include_directories(kraken PUBLIC ./bridge/jsa/implementation/JSC)
-target_include_directories(kraken PUBLIC ./bridge/foundation)
-target_include_directories(kraken PUBLIC ../../polyfill/dist)
-
-target_link_libraries(kraken bridge)
-target_link_libraries(bridge flutter)
-target_link_libraries(kraken jsa_abstraction)
-target_link_libraries(kraken jsa_jsc_implementation)
-target_link_libraries(kraken foundation)
-target_link_libraries(kraken js_code)
+set_target_properties(kraken_embbeder
+  PROPERTIES
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../../cli/build/lib"
+  )

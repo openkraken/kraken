@@ -6,9 +6,8 @@
 #ifndef JSA_IMPLEMENTATION_JSC_CONTEXT_H_
 #define JSA_IMPLEMENTATION_JSC_CONTEXT_H_
 
-#include <jsa.h>
 #include <memory>
-#include <JavaScriptCore/JavaScript.h>
+#include "JavaScriptCore/JavaScript.h"
 #include <atomic>
 #include <cstdlib>
 #include <mutex>

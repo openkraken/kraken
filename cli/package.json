@@ -6,19 +6,17 @@
     "kraken": "bin/kraken.js"
   },
   "scripts": {
-    "build": "gulp -f gulpfile.js",
-    "build:release": "KRAKEN_BUILD=Release gulp -f gulpfile.js",
-    "build:profile": "KRAKEN_BUILD=Profile gulp -f gulpfile.js",
-    "postinstall": "tar -xzf ./vendors/build.tgz && echo 'Successfully extract Kraken.app'",
-    "prepublish": "rm -rf vendors && mkdir vendors && tar -zcvf ./vendors/build.tgz ./build"
+    "build": "KRAKEN_JS_ENGINE=jsc gulp -f gulpfile.js",
+    "build:release": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Release gulp -f gulpfile.js --upload-to-oss",
+    "build:profile": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Profile gulp -f gulpfile.js",
+    "postinstall": "node install.js"
   },
   "files": [
     "bin",
-    "vendors"
+    "install.js"
   ],
   "author": "Kraken Team",
   "dependencies": {
-    "chalk": "^2.4.2",
     "commander": "^4.0.1",
     "minimist": "^1.2.0",
     "prompt": "^1.0.0",
@@ -26,6 +24,8 @@
     "temp": "^0.9.1"
   },
   "devDependencies": {
+    "ali-oss": "^6.4.0",
+    "chalk": "^2.4.2",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "mkdirp": "^0.5.1"

@@ -19,18 +19,19 @@ namespace binding {
 #elif defined(__ANDROID__)
 #define PLATFORM "android" // Android (implies Linux, so it must come first)
 #elif defined(__linux__)
-#define PLATFORM "linux" // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#define PLATFORM                                                               \
+  "linux" // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
 #elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
 #include <TargetConditionals.h>
-  #if TARGET_IPHONE_SIMULATOR == 1
-  #define PLATFORM "ios" // Apple iOS Simulator
-  #elif TARGET_OS_IPHONE == 1
-  #define PLATFORM "ios" // Apple iOS
-  #elif TARGET_OS_MAC == 1
-  #define PLATFORM "macos" // Apple macOS
-  #endif
+#if TARGET_IPHONE_SIMULATOR == 1
+#define PLATFORM "ios" // Apple iOS Simulator
+#elif TARGET_OS_IPHONE == 1
+#define PLATFORM "ios" // Apple iOS
+#elif TARGET_OS_MAC == 1
+#define PLATFORM "macos" // Apple macOS
+#endif
 #else
-  #define PLATFORM "unknown"
+#define PLATFORM "unknown"
 #endif
 
 void bindKraken(alibaba::jsa::JSContext *runtime) {
