@@ -73,9 +73,6 @@ abstract class Element extends Node
     }
 
     renderObject = renderLayoutElement = createRenderLayoutElement(null);
-    if (renderLayoutElement is RenderFlexLayout) {
-      decorateRenderFlex(renderLayoutElement, style);
-    }
     renderObject = initRenderPadding(renderObject, style);
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style);
@@ -150,13 +147,6 @@ abstract class Element extends Node
           ..visitChildren(visitor)
           ..removeAll();
         renderLayoutElement = createRenderLayoutElement(children);
-        if (renderLayoutElement is RenderFlexLayout) {
-          decorateRenderFlex(renderLayoutElement, style);
-          RenderFlexLayout renderLayout = renderLayoutElement as RenderFlexLayout;
-          if (renderLayout.direction == Axis.vertical &&
-            renderLayout.crossAxisAlignment != CrossAxisAlignment.stretch) {
-          }
-        }
       }
 
       ///2.update overflow
@@ -386,13 +376,16 @@ abstract class Element extends Node
 
   ContainerRenderObjectMixin createRenderLayoutElement(List<RenderBox> children) {
     if (display == 'flex' || display == 'inline-flex') {
-      return RenderFlexLayout(
+      ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         textDirection: TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: children,
         nodeId: nodeId,
       );
+      decorateRenderFlex(flexLayout, style);
+      return flexLayout;
+
     } else if (display == 'inline' || display == 'block') {
       Map<String, dynamic> elementStyle = {};
       if (properties['style'] != null) {
@@ -400,9 +393,20 @@ abstract class Element extends Node
       }
       elementStyle.putIfAbsent('display', () => display);
 
+      WrapAlignment alignment = WrapAlignment.start;
+      switch(elementStyle['textAlign']) {
+        case 'right':
+          alignment = WrapAlignment.end;
+          break;
+        case 'center':
+          alignment = WrapAlignment.center;
+          break;
+      }
       return RenderFlowLayout(
+        alignment: alignment,
         children: children,
         style: elementStyle,
+        nodeId: nodeId,
       );
     } else {
       throw FlutterError('Not supported display type $display: $this');

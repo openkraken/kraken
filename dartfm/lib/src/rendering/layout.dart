@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 class _RunMetrics {
@@ -24,8 +25,12 @@ class WrapParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 /// Impl flow layout algorithm.
-class RenderFlowLayout extends RenderBox with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData>, RelativeStyleMixin {
+class RenderFlowLayout extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, WrapParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData>,
+        ElementStyleMixin,
+        RelativeStyleMixin {
   RenderFlowLayout({
     List<RenderBox> children,
     WrapAlignment alignment = WrapAlignment.start,
@@ -37,6 +42,7 @@ class RenderFlowLayout extends RenderBox with ContainerRenderObjectMixin<RenderB
     WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.end,
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
+    this.nodeId,
   }) : assert(direction != null),
         assert(alignment != null),
         assert(spacing != null),
@@ -55,6 +61,8 @@ class RenderFlowLayout extends RenderBox with ContainerRenderObjectMixin<RenderB
   }
 
   Map<String, dynamic> style;
+
+  int nodeId;
 
   /// The direction to use as the main axis.
   ///
@@ -579,9 +587,21 @@ class RenderFlowLayout extends RenderBox with ContainerRenderObjectMixin<RenderB
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
+    String displayType = _getDisplayType(this);
+    double constraintWidth;
+    if (displayType == 'block') {
+      if (constraints.maxWidth != double.infinity) {
+        constraintWidth = constraints.maxWidth;
+      } else {
+        constraintWidth = getParentsWidth(nodeId);
+      }
+    } else {
+      constraintWidth = mainAxisExtent;
+    }
+
     switch (direction) {
       case Axis.horizontal:
-        size = constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
+        size = constraints.constrain(Size(constraintWidth, crossAxisExtent));
         containerMainAxisExtent = size.width;
         containerCrossAxisExtent = size.height;
         break;
