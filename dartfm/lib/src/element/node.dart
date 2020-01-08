@@ -3,7 +3,10 @@
  * Author: Kraken Team.
  */
 import 'package:meta/meta.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/style.dart';
 
 const String DATA = 'data';
 const String COMMENT = 'Comment';
@@ -21,12 +24,39 @@ class Comment extends Node {
   Comment(int nodeId, this.properties) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
-class TextNode extends Node {
+class TextNode extends Node
+  with
+    TextStyleMixin {
   String data;
   Map<String, dynamic> properties;
 
   TextNode(int nodeId, this.properties, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
+  }
+
+  @mustCallSuper
+  void setProperty(String key, value) {
+    properties[key] = value;
+
+    Element parentElement = this.parentNode;
+    Style parentStyle = Style(parentElement.properties['style']);
+
+    RenderParagraph newTextNode = RenderParagraph(
+      createTextSpanWithStyle(value, parentStyle),
+      textAlign: getTextAlignFromStyle(parentStyle),
+      textDirection: TextDirection.ltr,
+    );
+
+    int curIdx = parentElement.childNodes.indexOf(this);
+
+    List<RenderObject> children = [];
+    RenderObjectVisitor visitor = (child) {
+      children.add(child);
+    };
+    parentElement.renderLayoutElement
+        ..visitChildren(visitor)
+        ..remove(children[curIdx])
+        ..insert(newTextNode, after: children[curIdx - 1]);
   }
 }
 
