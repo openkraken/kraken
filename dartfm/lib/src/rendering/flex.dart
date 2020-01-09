@@ -973,4 +973,9 @@ class RenderFlexItem
       size = Size.zero;
     }
   }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    return defaultHitTestChildren(result, position: position);
+  }
 }
