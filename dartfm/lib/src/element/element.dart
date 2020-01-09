@@ -72,24 +72,17 @@ abstract class Element extends Node
       }
     }
 
-    bool isInline = display == 'inline';
-    // @TODO inline element in flex layout should not remove dimension
-    if (isInline) {
-      style.remove('width');
-      style.remove('height');
-    }
-
     renderObject = renderLayoutElement = createRenderLayoutElement(null);
     renderObject = initRenderPadding(renderObject, style);
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style);
     }
-    if (!isInline) {
+    if (display != 'inline') {
       renderObject = initOverflowBox(renderObject, style);
     }
     renderObject = initRenderDecoratedBox(renderObject, style);
 
-    renderObject = initRenderConstrainedBox(renderObject, style);
+    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
     renderObject = initRenderMargin(renderObject, style);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
@@ -125,7 +118,7 @@ abstract class Element extends Node
     );
     _inited = true;
   }
-
+  RenderConstrainedBox renderConstrainedBox;
   final String tagName;
   Map<String, dynamic> properties;
   RenderObject renderObject; // Style decorated renderObject
@@ -486,6 +479,14 @@ abstract class Element extends Node
           child: childRenderBox,
           parent: renderLayoutElement,
         );
+      } else {
+          Style childStyle = Style(child.properties[STYLE]);
+          String childDisplay = childStyle.contains('display') ? childStyle['display'] : defaultDisplay;
+          // Remove inline element dimension in flow layout
+          if (childDisplay == 'inline') {
+            RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
+            renderConstrainedBox.additionalConstraints = BoxConstraints();
+          }
       }
 
       if (childPosition == 'absolute') {
