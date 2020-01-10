@@ -480,13 +480,13 @@ abstract class Element extends Node
           parent: renderLayoutElement,
         );
       } else {
-          Style childStyle = Style(child.properties[STYLE]);
-          String childDisplay = childStyle.contains('display') ? childStyle['display'] : defaultDisplay;
-          // Remove inline element dimension in flow layout
-          if (childDisplay == 'inline') {
-            RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
-            renderConstrainedBox.additionalConstraints = BoxConstraints();
-          }
+        Style childStyle = Style(child.properties[STYLE]);
+        String childDisplay = childStyle.contains('display') ? childStyle['display'] : defaultDisplay;
+        // Remove inline element dimension in flow layout
+        if (childDisplay == 'inline') {
+          RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
+          renderConstrainedBox.additionalConstraints = BoxConstraints();
+        }
       }
 
       if (childPosition == 'absolute') {

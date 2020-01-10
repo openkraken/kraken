@@ -23,10 +23,7 @@ class KrakenRenderConstrainedBox extends RenderConstrainedBox {
   void performLayout() {
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
-      size = Size(
-        math.max(child.size.width, constraints.maxWidth),
-        child.size.height
-      ); //  child.size;
+      size = child.size;
     } else {
       size = constraints.constrain(Size.zero);
     }
