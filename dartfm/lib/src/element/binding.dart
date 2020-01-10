@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'element_inspector.dart';
 import 'element_manager.dart';
 
 
@@ -132,6 +133,8 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return Future<void>.value();
         },
       );
+
+      ElementInspectorService.instance.initServiceExtensions(registerServiceExtension);
     }
   }
 

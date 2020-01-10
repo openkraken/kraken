@@ -357,13 +357,16 @@ task('build-embedded-assets', (done) => {
 
   execSync(`cp -r ${paths.playground}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${paths.distInclude}`);
   execSync(`ln -s ../app/lib/libflutter_linux_glfw.so ./`, {
-    cwd: paths.distLib
+    cwd: paths.distLib,
+    stdio: 'inherit'
   });
-  execSync('chrpath -r "\$ORIGIN" ./libkraken.so', {
-    cwd: paths.distLib
+  execSync('chrpath -r "\\$ORIGIN" ./libkraken.so', {
+    cwd: paths.distLib,
+    stdio: 'inherit'
   });
-  execSync('chrpath -r "\$ORIGIN ./libkraken_embbeder.so"', {
-    cwd: paths.distLib
+  execSync('chrpath -r "\\$ORIGIN ./libkraken_embbeder.so"', {
+    cwd: paths.distLib,
+    stdio: 'inherit'
   });
   done();
 });
