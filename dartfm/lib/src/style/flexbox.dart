@@ -12,6 +12,7 @@ class FlexMixin {
   static const String WRAP = 'flexWrap';
   static const String FLOW = 'flexFlow';
   static const String JUSTIFY_CONTENT = 'justifyContent';
+  static const String TEXT_ALIGN = 'textAlign';
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
@@ -51,13 +52,26 @@ class FlexMixin {
       renderObject.verticalDirection = verticalDirection;
       renderObject.direction = axis;
       renderObject.textDirection = textDirection;
-      renderObject.mainAxisAlignment = _getJustifyContent(style);
-      renderObject.crossAxisAlignment = _getAlignItems(style);
+      renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
+      renderObject.crossAxisAlignment = _getAlignItems(style, axis);
     }
   }
 
-  MainAxisAlignment _getJustifyContent(Style style) {
+  MainAxisAlignment _getJustifyContent(Style style, Axis axis) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
+
+    if (style.contains(TEXT_ALIGN) && axis == Axis.horizontal) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          mainAxisAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          mainAxisAlignment = MainAxisAlignment.center;
+          break;
+      }
+    }
+
     if (style.contains(JUSTIFY_CONTENT)) {
       String justifyContent = style[JUSTIFY_CONTENT];
       switch (justifyContent) {
@@ -78,8 +92,19 @@ class FlexMixin {
     return mainAxisAlignment;
   }
 
-  CrossAxisAlignment _getAlignItems(Style style) {
+  CrossAxisAlignment _getAlignItems(Style style, Axis axis) {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch;
+    if (style.contains(TEXT_ALIGN) && axis == Axis.vertical) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          crossAxisAlignment = CrossAxisAlignment.end;
+          break;
+        case 'center':
+          crossAxisAlignment = CrossAxisAlignment.center;
+          break;
+      }
+    }
     if (style.contains(ALIGN_ITEMS)) {
       String justifyContent = style[ALIGN_ITEMS];
       switch (justifyContent) {

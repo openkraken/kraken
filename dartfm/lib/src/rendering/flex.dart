@@ -83,7 +83,9 @@ class RenderFlexLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, FlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-        DebugOverflowIndicatorMixin, RelativeStyleMixin {
+        DebugOverflowIndicatorMixin,
+        ElementStyleMixin,
+        RelativeStyleMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -112,6 +114,7 @@ class RenderFlexLayout extends RenderBox
     addAll(children);
   }
 
+  // id of current element
   int nodeId;
 
   /// The direction to use as the main axis.
@@ -470,35 +473,6 @@ class RenderFlexLayout extends RenderBox
     return null;
   }
 
-  // Loop element tree to find nearest parent width
-  // @TODO Support detecting node width in more complicated scene such as flex layout
-  double _getParentsWidth() {
-    if (constraints.maxWidth != double.infinity) {
-      return constraints.maxWidth;
-    }
-    var parentWidth;
-    bool isParentWithWidth = false;
-    int childId = nodeId;
-
-    var childNode = nodeMap[childId];
-
-    while(isParentWithWidth == false) {
-      childNode = childNode.parentNode;
-      if (childNode.properties != null) {
-        var properties = childNode.properties;
-        if (properties.containsKey('style')) {
-          var style = properties['style'];
-          if (style.containsKey('width')) {
-            isParentWithWidth = true;
-            parentWidth = style['width'];
-          }
-        }
-      }
-    }
-
-    return Length(parentWidth).displayPortValue;
-  }
-
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
@@ -728,9 +702,14 @@ class RenderFlexLayout extends RenderBox
         : allocatedSize;
     double actualSize;
     double actualSizeDelta;
+    double constraintWidth;
+    if (constraints.maxWidth != double.infinity) {
+      constraintWidth = constraints.maxWidth;
+    } else {
+      constraintWidth = getParentWidth(nodeId);
+    }
     switch (_direction) {
       case Axis.horizontal:
-        double constraintWidth = _getParentsWidth();
         size = Size(
           math.max(constraintWidth, idealSize),
           constraints.constrainHeight(crossSize)
@@ -739,7 +718,6 @@ class RenderFlexLayout extends RenderBox
         crossSize = size.height;
         break;
       case Axis.vertical:
-        double constraintWidth = _getParentsWidth();
         size = Size(
           math.max(constraintWidth, crossSize),
           constraints.constrainHeight(idealSize)

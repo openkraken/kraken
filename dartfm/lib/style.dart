@@ -14,6 +14,7 @@ export 'src/style/style.dart';
 export 'src/style/text.dart';
 export 'src/style/transform.dart';
 export 'src/style/transition.dart';
+export 'src/style/element.dart';
 
 /// Types
 export 'src/style/types/angle.dart';
