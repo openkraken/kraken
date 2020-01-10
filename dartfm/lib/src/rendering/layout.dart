@@ -62,6 +62,7 @@ class RenderFlowLayout extends RenderBox
 
   Map<String, dynamic> style;
 
+  // id of current element
   int nodeId;
 
   /// The direction to use as the main axis.
@@ -593,7 +594,7 @@ class RenderFlowLayout extends RenderBox
       if (constraints.maxWidth != double.infinity) {
         constraintWidth = constraints.maxWidth;
       } else {
-        constraintWidth = getParentsWidth(nodeId);
+        constraintWidth = getParentWidth(nodeId);
       }
     } else {
       constraintWidth = mainAxisExtent;

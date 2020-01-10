@@ -5,7 +5,7 @@ import 'package:kraken/style.dart';
 mixin ElementStyleMixin on RenderBox {
   // Loop element tree to find nearest parent width
   // @TODO Support detecting node width in more complicated scene such as flex layout
-  double getParentsWidth(int childId) {
+  double getParentWidth(int childId) {
     var parentWidth;
     bool isParentWithWidth = false;
     var childNode = nodeMap[childId];
