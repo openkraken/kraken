@@ -185,18 +185,10 @@ abstract class Element extends Node
         }
 
         // offset change
-        String newTop = newStyle['top'];
-        String newBottom = newStyle['bottom'];
-        String newLeft = newStyle['left'];
-        String newRight = newStyle['right'];
-        String oldTop = _style['top'];
-        String oldBottom = _style['bottom'];
-        String oldLeft = _style['left'];
-        String oldRight = _style['right'];
-        if ( newTop != oldTop ||
-          newBottom != oldBottom ||
-          newLeft != oldLeft ||
-          newRight != oldRight) {
+        if (newStyle.top != _style.top || newStyle.bottom != _style.bottom ||
+            newStyle.left != _style.left || newStyle.right != _style.right ||
+            newStyle.width != _style.width ||
+            newStyle.height != _style.height) {
           _updateOffset(newStyle);
         }
       }
@@ -322,28 +314,163 @@ abstract class Element extends Node
   }
 
   void _updateOffset(Style style) {
-    Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-    RenderStack parentStack = parentElementWithStack.renderStack;
+    ZIndexParentData zIndexParentData;
+    AbstractNode renderParent = renderObject.parent;
+    if (renderParent is RenderPosition && renderObject.parentData is ZIndexParentData) {
+      zIndexParentData = renderObject.parentData;
+      Transition allTransition, topTransition, leftTransition, rightTransition,
+          bottomTransition, widthTransition, heightTransition;
+      double topDiff, leftDiff, rightDiff, bottomDiff, widthDiff, heightDiff;
+      double topBase, leftBase, rightBase, bottomBase, widthBase, heightBase;
+      ZIndexParentData progressParentData = zIndexParentData;
 
-    RenderObject preSibling;
-    List<RenderObject> stackChildren = [];
-    RenderObjectVisitor visitor = (child) {
-      stackChildren.add(child);
-    };
-    parentStack.visitChildren(visitor);
-    int curIdx = stackChildren.indexOf(renderObject);
-    if (curIdx != -1) {
-      preSibling = stackChildren[curIdx - 1];
+      if (transitionMap != null) {
+        allTransition = transitionMap["all"];
+        if (style.top != _style.top) {
+          topTransition = transitionMap["top"];
+          topDiff = style.top ?? 0 - _style.top ?? 0;
+          topBase = _style.top ?? 0;
+        }
+        if (style.left != _style.left) {
+          leftTransition = transitionMap["left"];
+          leftDiff = style.left ?? 0 - _style.left ?? 0;
+          leftBase = _style.left ?? 0;
+        }
+        if (style.right != _style.right) {
+          rightTransition = transitionMap["right"];
+          rightDiff = style.right ?? 0 - _style.left ?? 0;
+          rightBase = _style.right ?? 0;
+        }
+        if (style.bottom != _style.bottom) {
+          bottomTransition = transitionMap["bottom"];
+          bottomDiff = style.bottom ?? 0 - _style.bottom ?? 0;
+          bottomBase = _style.bottom ?? 0;
+        }
+        if (style.width != _style.width) {
+          widthTransition = transitionMap["width"];
+          widthDiff = style.width ?? 0 - _style.width ?? 0;
+          widthBase = _style.bottom ?? 0;
+        }
+        if (style.height != _style.height) {
+          heightTransition = transitionMap["height"];
+          heightDiff = style.height ?? 0 - _style.height ?? 0;
+          heightBase = _style.height ?? 0;
+        }
+      }
+      if (allTransition != null || topTransition != null ||
+          leftTransition != null || rightTransition != null ||
+          bottomTransition != null || widthTransition != null ||
+          heightTransition != null) {
+        bool hasTop = false,
+            hasLeft = false,
+            hasRight = false,
+            hasBottom = false,
+            hasWidth = false,
+            hasHeight = false;
+        if (topDiff != null) {
+          if (topTransition == null) {
+            hasTop = true;
+          } else {
+            topTransition.addProgressListener((percent) {
+              progressParentData.top = topBase + topDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (leftDiff != null) {
+          if (leftTransition == null) {
+            hasLeft = true;
+          } else {
+            leftTransition.addProgressListener((percent) {
+              progressParentData.left = leftBase + leftDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (rightDiff != null) {
+          if (rightTransition == null) {
+            hasRight = true;
+          } else {
+            rightTransition.addProgressListener((percent) {
+              progressParentData.right = rightBase + rightDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (bottomDiff != null) {
+          if (bottomTransition == null) {
+            hasBottom = true;
+          } else {
+            bottomTransition.addProgressListener((percent) {
+              progressParentData.bottom = bottomBase + bottomDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (widthDiff != null) {
+          if (widthTransition == null) {
+            hasWidth = true;
+          } else {
+            widthTransition.addProgressListener((percent) {
+              progressParentData.width = widthBase + widthDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (heightDiff != null) {
+          if (heightTransition == null) {
+            hasHeight = true;
+          } else {
+            heightTransition.addProgressListener((percent) {
+              progressParentData.height = heightBase + heightDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (allTransition != null &&
+            (hasTop || hasBottom || hasLeft || hasRight || hasWidth ||
+                hasHeight)) {
+          allTransition.addProgressListener((percent) {
+            if (hasTop) {
+              progressParentData.top = topBase + topDiff * percent;
+            }
+            if (hasLeft) {
+              progressParentData.left = leftBase + leftDiff * percent;
+            }
+            if (hasRight) {
+              progressParentData.right = rightBase + rightDiff * percent;
+            }
+            if (hasBottom) {
+              progressParentData.bottom = bottomBase + bottomDiff * percent;
+            }
+            if (hasWidth) {
+              progressParentData.width = widthBase + widthDiff * percent;
+            }
+            if (hasHeight) {
+              progressParentData.height = heightBase + heightDiff * percent;
+            }
+            renderObject.parentData = progressParentData;
+            renderParent.markNeedsLayout();
+          });
+        }
+      } else {
+        zIndexParentData.zIndex = style.zIndex;
+        zIndexParentData.top = style.top;
+        zIndexParentData.left = style.left;
+        zIndexParentData.right = style.right;
+        zIndexParentData.bottom = style.bottom;
+        zIndexParentData.width = style.width;
+        zIndexParentData.height = style.height;
+        renderObject.parentData = zIndexParentData;
+        renderParent.markNeedsLayout();
+      }
     }
-
-    // remove current element from parent stack
-    parentStack.remove(renderObject);
-
-    StackParentData stackParentData = getPositionParentDataFromStyle(style);
-    renderObject.parentData = stackParentData;
-
-    // insert positioned renderObject to parent stack element in the order of zIndex
-    parentStack.insert(renderObject, after: preSibling);
   }
 
   Element getElementById(Element parentElement, int nodeId) {
