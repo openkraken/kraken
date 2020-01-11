@@ -1,6 +1,6 @@
 {
   "name": "@ali/kraken-cli",
-  "version": "0.2.0-preview.1",
+  "version": "0.2.1",
   "description": "Kraken CLI tools.",
   "bin": {
     "kraken": "bin/kraken.js"
@@ -21,11 +21,11 @@
     "minimist": "^1.2.0",
     "prompt": "^1.0.0",
     "semver": "^6.3.0",
-    "temp": "^0.9.1"
+    "temp": "^0.9.1",
+    "chalk": "^2.4.2"
   },
   "devDependencies": {
     "ali-oss": "^6.4.0",
-    "chalk": "^2.4.2",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "mkdirp": "^0.5.1"
