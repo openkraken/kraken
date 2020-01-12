@@ -102,9 +102,9 @@ task('build-kraken-profile', (done) => {
 
 task('copy-kraken-debug', (done) => {
   if (platform === 'macos') {
-    execSync(`mkdir -p ${paths.dist}/app`);
+    execSync(`mkdir -p ${paths.dist}/app/debug`);
     // There is a problem that `cp -r` will drop symbolic, which will make app fails.
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Debug/Kraken.app')} ${paths.dist}/app/`);
+    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Debug/Kraken.app')} ${paths.dist}/app/debug`);
     return done();
   }
 
@@ -120,8 +120,8 @@ task('copy-kraken-debug', (done) => {
 
 task('copy-kraken-release', (done) => {
   if (platform === 'macos') {
-    execSync(`mkdir -p ${paths.dist}/app`);
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Release/Kraken.app')} ./build/app/`);
+    execSync(`mkdir -p ${paths.dist}/app/release`);
+    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Release/Kraken.app')} ./build/app/release/`);
     return done();
   }
 
@@ -136,8 +136,8 @@ task('copy-kraken-release', (done) => {
 
 task('copy-kraken-profile', (done) => {
   if (platform === 'macos') {
-    execSync(`mkdir -p ${paths.dist}/app`);
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Profile/Kraken.app')} ./build/app/`);
+    execSync(`mkdir -p ${paths.dist}/app/profile`);
+    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Profile/Kraken.app')} ./build/app/profile`);
     return done();
   }
 
@@ -152,12 +152,12 @@ task('copy-kraken-profile', (done) => {
 
 // Add a empty file to keep flutter_assets folder, or flutter crashed.
 task('patch-kraken-release', (done) => {
-  writeFileSync(join(paths.dist, 'app/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
+  writeFileSync(join(paths.dist, 'app/release/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
   done();
 });
 
 task('patch-kraken-profile', (done) => {
-  writeFileSync(join(paths.dist, 'app/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
+  writeFileSync(join(paths.dist, 'app/release/Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
   done();
 });
 
@@ -381,6 +381,8 @@ if (platform === 'linux') {
     _series = series('build-kraken-release', 'copy-kraken-release', 'patch-kraken-release');
   } else if (buildMode === 'Profile') {
     _series = series('build-kraken-profile', 'copy-kraken-profile', 'patch-kraken-profile');
+  } else if (buildMode === 'All') {
+    _series = series('build-kraken-release', 'copy-kraken-release', 'patch-kraken-release', 'build-kraken-debug', 'copy-kraken-debug');
   } else {
     _series = series('build-kraken-debug', 'copy-kraken-debug');
   }

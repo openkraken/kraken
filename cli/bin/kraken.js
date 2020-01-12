@@ -16,7 +16,7 @@ program
   .option('-b --bundle <bundle>', 'Bundle path. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-u --url <url>', 'Bundle url. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-s, --source <source>', 'Source code. pass source directory from command line')
-  .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'release')
+  .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .action((options) => {
     const { bundle, url, source } = options;
@@ -58,13 +58,16 @@ program.parse(process.argv);
 function getShellPath(runtimeMode) {
   const appPath = join(__dirname, '../build/app');
   const platform = os.platform();
-  if (runtimeMode === 'release' && platform === 'darwin') {
-    return join(appPath, 'Kraken.app/Contents/MacOS/Kraken');
+  if (platform === 'darwin') {
+    if (runtimeMode === 'release') {
+      return join(appPath, 'release/Kraken.app/Contents/MacOS/Kraken');
+    } else {
+      return join(appPath, 'debug/Kraken.app/Contents/MacOS/Kraken');
+    }
   } else if (platform === 'linux') {
     return join(appPath, 'kraken');
   } else {
-    console.log(chalk.red('[ERROR]: Debug binary too large, please manually build it.'));
-    console.log(chalk.red('[ERROR]: Or contact @zhuoling.lcl'));
+    console.log(chalk.red('[ERROR]: Something is failed. please contact @chenghuai.dtc'));
     process.exit(1);
   }
 }
