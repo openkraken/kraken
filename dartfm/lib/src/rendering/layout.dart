@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 class _RunMetrics {
@@ -543,14 +542,8 @@ class RenderFlowLayout extends RenderBox
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       final WrapParentData childParentData = child.parentData;
-      String displayType = _getDisplayType(child);
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-
-      String preSiblingDisplayType;
-      if (preChild != null) {
-        preSiblingDisplayType = _getDisplayType(preChild);
-      }
 
       if (childCount > 0 && (_isBlockElement(child) || _isBlockElement(preChild) || (runMainAxisExtent + spacing + childMainAxisExtent >= mainAxisLimit))) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);

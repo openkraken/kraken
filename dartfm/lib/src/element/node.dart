@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 const String DATA = 'data';

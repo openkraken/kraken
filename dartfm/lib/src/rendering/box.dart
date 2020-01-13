@@ -1,6 +1,5 @@
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
-import 'dart:math' as math;
 
 class KrakenRenderConstrainedBox extends RenderConstrainedBox {
 
