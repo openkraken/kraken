@@ -291,7 +291,7 @@ abstract class Element extends Node
       if (currentElement.style.contains('zIndex') &&
         currentElement.style['zIndex'] != null
       ) {
-        curZIndex = currentElement.properties['style']['zIndex'];
+        curZIndex = currentElement.style['zIndex'];
       }
       // add current element back to parent stack by zIndex
       insertByZIndex(parentStack, renderObject, curZIndex);
