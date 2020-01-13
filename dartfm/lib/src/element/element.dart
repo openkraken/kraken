@@ -77,10 +77,12 @@ abstract class Element extends Node
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style);
     }
-    renderObject = initOverflowBox(renderObject, style);
+    if (display != 'inline') {
+      renderObject = initOverflowBox(renderObject, style);
+    }
     renderObject = initRenderDecoratedBox(renderObject, style);
 
-    renderObject = initRenderConstrainedBox(renderObject, style);
+    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
     renderObject = initRenderMargin(renderObject, style);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
@@ -116,7 +118,7 @@ abstract class Element extends Node
     );
     _inited = true;
   }
-
+  RenderConstrainedBox renderConstrainedBox;
   final String tagName;
   Map<String, dynamic> properties;
   RenderObject renderObject; // Style decorated renderObject
@@ -513,7 +515,7 @@ abstract class Element extends Node
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
 
-    } else if (display == 'inline' || display == 'block') {
+    } else if (display == 'inline' || display == 'inline-block' || display == 'block') {
       Map<String, dynamic> elementStyle = {};
       if (properties['style'] != null) {
         elementStyle = properties['style'];
@@ -604,6 +606,14 @@ abstract class Element extends Node
           child: childRenderBox,
           parent: renderLayoutElement,
         );
+      } else {
+        Style childStyle = Style(child.properties[STYLE]);
+        String childDisplay = childStyle.contains('display') ? childStyle['display'] : defaultDisplay;
+        // Remove inline element dimension in flow layout
+        if (childDisplay == 'inline') {
+          RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
+          renderConstrainedBox.additionalConstraints = BoxConstraints();
+        }
       }
 
       if (childPosition == 'absolute') {

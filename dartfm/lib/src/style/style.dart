@@ -97,6 +97,10 @@ class Style {
     return Style(copiedStyleMap);
   }
 
+  void remove(String key) {
+    _styleMap.remove(key);
+  }
+
   @override
   String toString() {
     return _styleMap.toString();
