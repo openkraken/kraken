@@ -1,0 +1,9 @@
+__kraken_js_to_dart__(
+  JSON.stringify(["createElement",[{"type":"DIV","id":5,"props":{},"events":[]}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",5]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["setProperty",[5,"style",{"position":"relative","width":"100px","height":"100px","backgroundColor":"red"}]])
+);

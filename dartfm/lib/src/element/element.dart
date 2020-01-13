@@ -288,7 +288,9 @@ abstract class Element extends Node
 
       // current element's zIndex
       int curZIndex = 0;
-      if (currentElement.properties != null && currentElement.properties.containsKey('style')) {
+      if (currentElement.style.contains('zIndex') &&
+        currentElement.style['zIndex'] != null
+      ) {
         curZIndex = currentElement.properties['style']['zIndex'];
       }
       // add current element back to parent stack by zIndex
@@ -616,19 +618,23 @@ abstract class Element extends Node
         }
       }
 
+      RenderObject createStackObject() {
+        ZIndexParentData stackParentData = getPositionParentDataFromStyle(childStyle);
+        RenderObject stackObject = childRenderObject;
+
+        childRenderObject = RenderPadding(padding: EdgeInsets.zero);
+        if (!isFlex) {
+          stackParentData.hookRenderObject = childRenderObject;
+        }
+        stackObject.parentData = stackParentData;
+        return stackObject;
+      }
+
       if (childPosition == 'absolute') {
         Element parentStackedElement =
         findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
-          ZIndexParentData stackParentData =
-          getPositionParentDataFromStyle(childStyle);
-          RenderObject stackObject = childRenderObject;
-
-          childRenderObject = RenderPadding(padding: EdgeInsets.zero);
-          if (!isFlex) {
-            stackParentData.hookRenderObject = childRenderObject;
-          }
-          stackObject.parentData = stackParentData;
+          RenderObject stackObject = createStackObject();
           ///insert by z-index
           SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
             insertByZIndex(parentStackedElement.renderStack, stackObject, childStyle.zIndex);
@@ -639,15 +645,7 @@ abstract class Element extends Node
           }
         }
       } else if (childPosition == 'fixed') {
-        ZIndexParentData stackParentData =
-        getPositionParentDataFromStyle(childStyle);
-        RenderObject stackObject = childRenderObject;
-
-        childRenderObject = RenderPadding(padding: EdgeInsets.zero);
-        if (!isFlex) {
-          stackParentData.hookRenderObject = childRenderObject;
-        }
-        stackObject.parentData = stackParentData;
+        RenderObject stackObject = createStackObject();
         final RenderPosition renderPosition = ElementManager().getRootElement().renderStack;
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
           insertByZIndex(renderPosition, stackObject, childStyle.zIndex);

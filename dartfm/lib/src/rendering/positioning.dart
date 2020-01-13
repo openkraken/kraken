@@ -84,7 +84,9 @@ class RenderPosition extends RenderStack {
         }
         if (x != null) {
           childParentData.offset = Offset(x, y);
-        } else if (x == null && y == null && childParentData is ZIndexParentData) {
+        } else if (x == null && y == null && childParentData is ZIndexParentData &&
+          childParentData.hookRenderObject != null
+        ) {
           RenderBox renderBox = childParentData.hookRenderObject;
           ParentData parentData = renderBox.parentData;
           if (parentData is BoxParentData) {
