@@ -54,9 +54,12 @@ class TextNode extends Node
       children.add(child);
     };
     parentElement.renderLayoutElement
-        ..visitChildren(visitor)
+        ..visitChildren(visitor);
+    RenderObject insertNode = curIdx - 1 > -1 ? children[curIdx - 1] : null;
+
+    parentElement.renderLayoutElement
         ..remove(children[curIdx])
-        ..insert(newTextNode, after: children[curIdx - 1]);
+        ..insert(newTextNode, after: insertNode);
   }
 }
 

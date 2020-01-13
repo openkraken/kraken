@@ -291,7 +291,7 @@ abstract class Element extends Node
       if (currentElement.style.contains('zIndex') &&
         currentElement.style['zIndex'] != null
       ) {
-        curZIndex = currentElement.properties['style']['zIndex'];
+        curZIndex = currentElement.style['zIndex'];
       }
       // add current element back to parent stack by zIndex
       insertByZIndex(parentStack, renderObject, curZIndex);
@@ -742,6 +742,14 @@ abstract class Element extends Node
     properties[key] = value;
     if (key == STYLE) {
       style = _style.copyWith(value);
+    }
+    if (key == 'style') {
+      // update textNode style when container style changed
+      childNodes.forEach((node) {
+        if (node is TextNode) {
+          node.setProperty(key, node.data);
+        }
+      });
     }
   }
 

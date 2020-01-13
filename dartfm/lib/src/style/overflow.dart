@@ -27,7 +27,11 @@ mixin StyleOverflowMixin {
 
   void updateOverFlowBox(Style style) {
     if (style != null) {
-      if (style.overflowY != _style.overflowY) {
+      String oldOverflowY = null;
+      if (_style != null) {
+        oldOverflowY = _style.overflowY;
+      }
+      if (style.overflowY != oldOverflowY && _renderObjectY != null) {
         AbstractNode parent = _renderObjectY.parent;
         AbstractNode childParent = _renderObjectX.parent;
         AxisDirection axisDirection = AxisDirection.down;
@@ -68,7 +72,11 @@ mixin StyleOverflowMixin {
         }
       }
 
-      if (style.overflowX != _style.overflowX) {
+      String oldOverflowX = null;
+      if (_style != null) {
+        oldOverflowX = _style.overflowX;
+      }
+      if (style.overflowX != oldOverflowX && _renderObjectX != null) {
         AbstractNode parent = _renderObjectX.parent;
         AbstractNode childParent = _child.parent;
         AxisDirection axisDirection = AxisDirection.right;
