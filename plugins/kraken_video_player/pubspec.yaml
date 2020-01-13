@@ -1,0 +1,28 @@
+name: kraken_video_player
+description: Kraken Video Player
+version: 0.10.5
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  video_player_platform_interface: ^1.0.1
+  meta: "^1.0.5"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# The following section is specific to Flutter.
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.flutter.plugins.videoplayer
+        pluginClass: VideoPlayerPlugin
+      ios:
+        pluginClass: FLTVideoPlayerPlugin
+      macos:
+        pluginClass: FLTVideoPlayerPlugin

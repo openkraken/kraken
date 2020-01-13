@@ -1,0 +1,11 @@
+# Flutter-related
+**/Flutter/ephemeral/
+**/Pods/
+
+# Xcode-related
+**/xcuserdata/
+
+profile
+xcuserdata
+**/.generated/
+Flutter/
