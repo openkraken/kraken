@@ -156,7 +156,10 @@ void JSBridge::detatchDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::invokeKrakenCallback(const char *args) {
-  KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
+  }
   assert(context_ != nullptr);
 
   alibaba::jsa::Value *callback;
