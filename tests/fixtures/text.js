@@ -28,3 +28,9 @@ __kraken_js_to_dart__(
 __kraken_js_to_dart__(
   JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 1]])
 );
+__kraken_js_to_dart__(
+  JSON.stringify(["setProperty",[1,"style",{"fontSize":"80px"}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["setProperty",[1,"style",{"fontSize":"80px","textDecoration":"line-through"}]])
+);
