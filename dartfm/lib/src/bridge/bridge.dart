@@ -103,20 +103,26 @@ void fetch(int callbackId, String url, String json) {
 void initScreenMetricsChangedCallback() {
   var frameworkCallback = window.onMetricsChanged;
 
+  sendWindowSize() {
+    StringBuffer buffer = StringBuffer();
+    buffer.write(
+      Message.buildMessage("width", window.physicalSize.width.toString()));
+    buffer.write(
+      Message.buildMessage("height", window.physicalSize.height.toString()));
+    buffer.write(Message.buildMessage(
+      "availWidth", window.physicalSize.width.toString()));
+    buffer.write(Message.buildMessage(
+      "availHeight", window.physicalSize.height.toString()));
+
+    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
+  }
+
+  sendWindowSize();
+
   window.onMetricsChanged = () {
     // call framework callback first
     frameworkCallback();
 
-    StringBuffer buffer = StringBuffer();
-    buffer.write(
-        Message.buildMessage("width", window.physicalSize.width.toString()));
-    buffer.write(
-        Message.buildMessage("height", window.physicalSize.height.toString()));
-    buffer.write(Message.buildMessage(
-        "availWidth", window.physicalSize.width.toString()));
-    buffer.write(Message.buildMessage(
-        "availHeight", window.physicalSize.height.toString()));
-
-    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
+    sendWindowSize();
   };
 }
