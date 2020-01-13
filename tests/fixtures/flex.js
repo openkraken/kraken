@@ -2,7 +2,7 @@ __kraken_js_to_dart__(
   JSON.stringify(["createElement",[{"type":"DIV","id":2,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
 );
 __kraken_js_to_dart__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
+  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column", "alignItems": "center", "alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
 );
 __kraken_js_to_dart__(
   JSON.stringify(["createElement",[{"type":"SPAN","id":4}]])
@@ -27,10 +27,16 @@ __kraken_js_to_dart__(
   JSON.stringify(["insertAdjacentNode",[6,"beforeend",7]])
 );
 __kraken_js_to_dart__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",6]])
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
 );
 __kraken_js_to_dart__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
+  JSON.stringify(["createElement",[{"type":"DIV","id":22,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column", "alignItems": "flex-end", "alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[22,"beforeend",6]])
+);
+__kraken_js_to_dart__(
+  JSON.stringify(["insertAdjacentNode",[2,"beforeend",22]])
 );
 __kraken_js_to_dart__(
   JSON.stringify(["createElement",[{"type":"DIV","id":8,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"row","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])

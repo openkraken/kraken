@@ -28,4 +28,32 @@ mixin ElementStyleMixin on RenderBox {
 
     return Length(width).displayPortValue;
   }
+
+  // Whether current node is inline
+  bool isElementInline(String defaultDisplay, int nodeId) {
+    var node = nodeMap[nodeId];
+    var parentNode = node.parentNode;
+
+    String display = defaultDisplay;
+
+    // Display as inline-block if parent node is flex and with align-items not stretch
+    if (parentNode != null) {
+      Style style = parentNode.style;
+      if (style.contains('display') &&
+        style['display'] == 'flex' &&
+        style.contains('flexDirection') &&
+        style['flexDirection'] == 'column' &&
+        style.contains('alignItems') &&
+        style['alignItems'] != 'stretch'
+      ) {
+        display = 'inline-block';
+      }
+    }
+
+    if (display == 'flex' ||
+        display == 'block') {
+      return false;
+    }
+    return true;
+  }
 }

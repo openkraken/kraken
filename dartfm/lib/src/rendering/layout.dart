@@ -43,6 +43,7 @@ class RenderFlowLayout extends RenderBox
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
     this.nodeId,
+    this.display,
   }) : assert(direction != null),
         assert(alignment != null),
         assert(spacing != null),
@@ -64,6 +65,9 @@ class RenderFlowLayout extends RenderBox
 
   // id of current element
   int nodeId;
+
+  // display style
+  String display;
 
   /// The direction to use as the main axis.
   ///
@@ -588,9 +592,9 @@ class RenderFlowLayout extends RenderBox
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
-    String displayType = _getDisplayType(this);
     double constraintWidth;
-    if (displayType == 'block') {
+    bool isInline = isElementInline(display, nodeId);
+    if (!isInline) {
       if (constraints.maxWidth != double.infinity) {
         constraintWidth = constraints.maxWidth;
       } else {

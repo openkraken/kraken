@@ -513,6 +513,7 @@ abstract class Element extends Node
         mainAxisSize: MainAxisSize.min,
         children: children,
         nodeId: nodeId,
+        display: display,
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
@@ -538,6 +539,7 @@ abstract class Element extends Node
         children: children,
         style: elementStyle,
         nodeId: nodeId,
+        display: display,
       );
     } else {
       throw FlutterError('Not supported display type $display: $this');
