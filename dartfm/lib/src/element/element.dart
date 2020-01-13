@@ -288,9 +288,8 @@ abstract class Element extends Node
 
       // current element's zIndex
       int curZIndex = 0;
-      if (currentElement.properties != null &&
-        currentElement.properties.containsKey('style') &&
-        currentElement.properties['style']['zIndex'] != null
+      if (currentElement.style.contains('zIndex') &&
+        currentElement.style['zIndex'] != null
       ) {
         curZIndex = currentElement.properties['style']['zIndex'];
       }
