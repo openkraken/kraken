@@ -361,6 +361,8 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderRadiusTLTRBLBR[0] = borderRadiusTLTRBLBR[1] =
           borderRadiusTLTRBLBR[2] =
               borderRadiusTLTRBLBR[3] = Radius.circular(radius);
+    } else {
+      return null;
     }
     TLTRBLBR.forEach((String corner) {
       String key = 'borderRadius' + corner;
