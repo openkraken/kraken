@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`document createElement: createElement 1`] = `
+Array [
+  "[\\"createElement\\", [{
+    \\"type\\": \\"DIV\\",
+    \\"id\\": 1,
+    \\"props\\": {},
+    \\"events\\": []
+  }]]",
+  "[\\"createElement\\", [{
+    \\"type\\": \\"SPAN\\",
+    \\"id\\": 2,
+    \\"props\\": {},
+    \\"events\\": []
+  }]]",
+  "[\\"createTextNode\\", [{
+    \\"id\\": 3,
+    \\"nodeType\\": 3,
+    \\"data\\": \\"helloworld\\"
+  }]]",
+  "[\\"insertAdjacentNode\\", [2, \\"beforeend\\", 3]]",
+  "[\\"insertAdjacentNode\\", [1, \\"beforeend\\", 2]]",
+  "[\\"insertAdjacentNode\\", [-1, \\"beforeend\\", 1]]",
+]
+`;
+
+exports[`document insertBefore: insertBefore 1`] = `
+Array [
+  "[\\"createElement\\",[{\\"type\\":\\"DIV\\",\\"id\\":1,\\"props\\":{},\\"events\\":[]}]]",
+  "[\\"createElement\\",[{\\"type\\":\\"SPAN\\",\\"id\\":2,\\"props\\":{},\\"events\\":[]}]]",
+  "[\\"createTextNode\\",[{\\"id\\":3,\\"nodeType\\":3,\\"data\\":\\"helloworld\\"}]]",
+  "[\\"insertAdjacentNode\\",[2,\\"beforeend\\",3]]",
+  "[\\"insertAdjacentNode\\",[1,\\"beforeend\\",2]]",
+  "[\\"insertAdjacentNode\\",[-1,\\"beforeend\\",1]]",
+  "[\\"createTextNode\\",[{\\"id\\":4,\\"nodeType\\":3,\\"data\\":\\"inserted\\"}]]",
+  "[\\"createElement\\",[{\\"type\\":\\"SPAN\\",\\"id\\":5,\\"props\\":{},\\"events\\":[]}]]",
+  "[\\"insertAdjacentNode\\",[5,\\"beforeend\\",4]]",
+  "[\\"insertAdjacentNode\\",[2,\\"beforebegin\\",5]]",
+]
+`;
+
+exports[`document setStyle: setStyle 1`] = `
+Array [
+  "[\\"createElement\\",[{\\"type\\":\\"DIV\\",\\"id\\":1,\\"props\\":{},\\"events\\":[]}]]",
+  "[\\"setProperty\\",[1,\\"style\\",{\\"fontSize\\":\\"12px\\"}]]",
+]
+`;
