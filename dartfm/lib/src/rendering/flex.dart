@@ -114,6 +114,7 @@ class RenderFlexLayout extends RenderBox
     addAll(children);
   }
 
+  // id of current element
   int nodeId;
 
   /// The direction to use as the main axis.
@@ -705,7 +706,7 @@ class RenderFlexLayout extends RenderBox
     if (constraints.maxWidth != double.infinity) {
       constraintWidth = constraints.maxWidth;
     } else {
-      constraintWidth = getParentsWidth(nodeId);
+      constraintWidth = getParentWidth(nodeId);
     }
     switch (_direction) {
       case Axis.horizontal:

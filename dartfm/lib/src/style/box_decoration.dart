@@ -236,8 +236,10 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
           progressDecoration.borderBottomSide.borderBlue = (borderBottomBlueDiff * progress).toInt() + baseDecoration.borderBottomSide.borderBlue;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
         });
+      } else {
+        renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
+        renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
       }
-
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
       renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();

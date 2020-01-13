@@ -250,57 +250,35 @@ mixin DimensionMixin on Node {
 
   void updateRenderMargin(Style style, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
+    Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
-      Transition all = transitionMap["all"];
-      Transition margin = transitionMap["margin"];
-      Transition marginLeft = transitionMap["margin-left"];
-      Transition marginRight = transitionMap["margin-right"];
-      Transition marginBottom = transitionMap["margin-bottom"];
-      Transition marginTop = transitionMap["margin-top"];
+      all = transitionMap["all"];
+      margin = transitionMap["margin"];
+      marginLeft = transitionMap["margin-left"];
+      marginRight = transitionMap["margin-right"];
+      marginBottom = transitionMap["margin-bottom"];
+      marginTop = transitionMap["margin-top"];
+    }
+    if (all != null ||
+        margin != null ||
+        marginBottom != null ||
+        marginLeft != null ||
+        marginRight != null ||
+        marginTop != null) {
+      Padding newMargin = getMarginFromStyle(style);
 
-      if (all != null ||
-          margin != null ||
-          marginBottom != null ||
-          marginLeft != null ||
-          marginRight != null ||
-          marginTop != null) {
-        Padding newMargin = getMarginFromStyle(style);
+      double marginLeftInterval = newMargin.left - oldMargin.left;
+      double marginRightInterval = newMargin.right - oldMargin.right;
+      double marginTopInterval = newMargin.top - oldMargin.top;
+      double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
 
-        double marginLeftInterval = newMargin.left - oldMargin.left;
-        double marginRightInterval = newMargin.right - oldMargin.right;
-        double marginTopInterval = newMargin.top - oldMargin.top;
-        double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
+      Padding progressMargin = Padding(
+          oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+      Padding baseMargin = Padding(
+          oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
 
-        Padding progressMargin = Padding(
-            oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-        Padding baseMargin = Padding(
-            oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-
-        all?.addProgressListener((progress) {
-          if (margin == null) {
-            if (marginTop == null) {
-              progressMargin.top =
-                  progress * marginTopInterval + baseMargin.top;
-            }
-            if (marginBottom == null) {
-              progressMargin.bottom =
-                  progress * marginBottomInterval + baseMargin.bottom;
-            }
-            if (marginLeft == null) {
-              progressMargin.left =
-                  progress * marginLeftInterval + baseMargin.left;
-            }
-            if (marginRight == null) {
-              progressMargin.right =
-                  progress * marginRightInterval + baseMargin.right;
-            }
-            renderMargin.margin = EdgeInsets.fromLTRB(
-                progressMargin.left, progressMargin.top, progressMargin.right,
-                progressMargin.bottom);
-          }
-        });
-
-        margin?.addProgressListener((progress) {
+      all?.addProgressListener((progress) {
+        if (margin == null) {
           if (marginTop == null) {
             progressMargin.top =
                 progress * marginTopInterval + baseMargin.top;
@@ -320,39 +298,61 @@ mixin DimensionMixin on Node {
           renderMargin.margin = EdgeInsets.fromLTRB(
               progressMargin.left, progressMargin.top, progressMargin.right,
               progressMargin.bottom);
-        });
-        marginTop?.addProgressListener((progress) {
+        }
+      });
+
+      margin?.addProgressListener((progress) {
+        if (marginTop == null) {
           progressMargin.top =
               progress * marginTopInterval + baseMargin.top;
-          renderMargin.margin = EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom);
-        });
-        marginBottom?.addProgressListener((progress) {
+        }
+        if (marginBottom == null) {
           progressMargin.bottom =
               progress * marginBottomInterval + baseMargin.bottom;
-          renderMargin.margin = EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom);
-        });
-        marginLeft?.addProgressListener((progress) {
+        }
+        if (marginLeft == null) {
           progressMargin.left =
               progress * marginLeftInterval + baseMargin.left;
-          renderMargin.margin = EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom);
-        });
-        marginRight?.addProgressListener((progress) {
+        }
+        if (marginRight == null) {
           progressMargin.right =
               progress * marginRightInterval + baseMargin.right;
-          renderMargin.margin = EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom);
-        });
-        oldMargin = newMargin;
-      } else {
-        renderMargin.margin = getMarginInsetsFromStyle(style);
-      }
+        }
+        renderMargin.margin = EdgeInsets.fromLTRB(
+            progressMargin.left, progressMargin.top, progressMargin.right,
+            progressMargin.bottom);
+      });
+      marginTop?.addProgressListener((progress) {
+        progressMargin.top =
+            progress * marginTopInterval + baseMargin.top;
+        renderMargin.margin = EdgeInsets.fromLTRB(
+            progressMargin.left, progressMargin.top, progressMargin.right,
+            progressMargin.bottom);
+      });
+      marginBottom?.addProgressListener((progress) {
+        progressMargin.bottom =
+            progress * marginBottomInterval + baseMargin.bottom;
+        renderMargin.margin = EdgeInsets.fromLTRB(
+            progressMargin.left, progressMargin.top, progressMargin.right,
+            progressMargin.bottom);
+      });
+      marginLeft?.addProgressListener((progress) {
+        progressMargin.left =
+            progress * marginLeftInterval + baseMargin.left;
+        renderMargin.margin = EdgeInsets.fromLTRB(
+            progressMargin.left, progressMargin.top, progressMargin.right,
+            progressMargin.bottom);
+      });
+      marginRight?.addProgressListener((progress) {
+        progressMargin.right =
+            progress * marginRightInterval + baseMargin.right;
+        renderMargin.margin = EdgeInsets.fromLTRB(
+            progressMargin.left, progressMargin.top, progressMargin.right,
+            progressMargin.bottom);
+      });
+      oldMargin = newMargin;
+    } else {
+      renderMargin.margin = getMarginInsetsFromStyle(style);
     }
   }
 
@@ -427,59 +427,38 @@ mixin DimensionMixin on Node {
   void updateRenderPadding(Style style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
+    Transition all, padding, paddingLeft, paddingRight, paddingBottom,
+        paddingTop;
     if (transitionMap != null) {
-      Transition all = transitionMap["all"];
-      Transition padding = transitionMap["padding"];
-      Transition paddingLeft = transitionMap["padding-left"];
-      Transition paddingRight = transitionMap["padding-right"];
-      Transition paddingBottom = transitionMap["padding-bottom"];
-      Transition paddingTop = transitionMap["padding-top"];
+      all = transitionMap["all"];
+      padding = transitionMap["padding"];
+      paddingLeft = transitionMap["padding-left"];
+      paddingRight = transitionMap["padding-right"];
+      paddingBottom = transitionMap["padding-bottom"];
+      paddingTop = transitionMap["padding-top"];
+    }
+    if (all != null ||
+        padding != null ||
+        paddingBottom != null ||
+        paddingLeft != null ||
+        paddingRight != null ||
+        paddingTop != null) {
+      Padding newPadding = getPaddingFromStyle(style);
 
-      if (all != null ||
-          padding != null ||
-          paddingBottom != null ||
-          paddingLeft != null ||
-          paddingRight != null ||
-          paddingTop != null) {
-        Padding newPadding = getPaddingFromStyle(style);
+      double paddingLeftInterval = newPadding.left - oldPadding.left;
+      double paddingRightInterval = newPadding.right - oldPadding.right;
+      double paddingTopInterval = newPadding.top - oldPadding.top;
+      double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-        double paddingLeftInterval = newPadding.left - oldPadding.left;
-        double paddingRightInterval = newPadding.right - oldPadding.right;
-        double paddingTopInterval = newPadding.top - oldPadding.top;
-        double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
+      Padding progressPadding = Padding(
+          oldPadding.left, oldPadding.top, oldPadding.right,
+          oldPadding.bottom);
+      Padding basePadding = Padding(
+          oldPadding.left, oldPadding.top, oldPadding.right,
+          oldPadding.bottom);
 
-        Padding progressPadding = Padding(
-            oldPadding.left, oldPadding.top, oldPadding.right,
-            oldPadding.bottom);
-        Padding basePadding = Padding(
-            oldPadding.left, oldPadding.top, oldPadding.right,
-            oldPadding.bottom);
-
-        all?.addProgressListener((progress) {
-          if (padding == null) {
-            if (paddingTop == null) {
-              progressPadding.top =
-                  progress * paddingTopInterval + basePadding.top;
-            }
-            if (paddingBottom == null) {
-              progressPadding.bottom =
-                  progress * paddingBottomInterval + basePadding.bottom;
-            }
-            if (paddingLeft == null) {
-              progressPadding.left =
-                  progress * paddingLeftInterval + basePadding.left;
-            }
-            if (paddingRight == null) {
-              progressPadding.right =
-                  progress * paddingRightInterval + basePadding.right;
-            }
-
-            renderPadding.padding = EdgeInsets.fromLTRB(
-                progressPadding.left, progressPadding.top, progressPadding.right,
-                progressPadding.bottom);
-          }
-        });
-        padding?.addProgressListener((progress) {
+      all?.addProgressListener((progress) {
+        if (padding == null) {
           if (paddingTop == null) {
             progressPadding.top =
                 progress * paddingTopInterval + basePadding.top;
@@ -500,39 +479,61 @@ mixin DimensionMixin on Node {
           renderPadding.padding = EdgeInsets.fromLTRB(
               progressPadding.left, progressPadding.top, progressPadding.right,
               progressPadding.bottom);
-        });
-        paddingTop?.addProgressListener((progress) {
+        }
+      });
+      padding?.addProgressListener((progress) {
+        if (paddingTop == null) {
           progressPadding.top =
               progress * paddingTopInterval + basePadding.top;
-          renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right,
-              progressPadding.bottom);
-        });
-        paddingBottom?.addProgressListener((progress) {
+        }
+        if (paddingBottom == null) {
           progressPadding.bottom =
               progress * paddingBottomInterval + basePadding.bottom;
-          renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right,
-              progressPadding.bottom);
-        });
-        paddingLeft?.addProgressListener((progress) {
+        }
+        if (paddingLeft == null) {
           progressPadding.left =
               progress * paddingLeftInterval + basePadding.left;
-          renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right,
-              progressPadding.bottom);
-        });
-        paddingRight?.addProgressListener((progress) {
+        }
+        if (paddingRight == null) {
           progressPadding.right =
               progress * paddingRightInterval + basePadding.right;
-          renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right,
-              progressPadding.bottom);
-        });
-        oldPadding = newPadding;
-      } else {
-        renderPadding.padding = getPaddingInsetsFromStyle(style);
-      }
+        }
+
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right,
+            progressPadding.bottom);
+      });
+      paddingTop?.addProgressListener((progress) {
+        progressPadding.top =
+            progress * paddingTopInterval + basePadding.top;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right,
+            progressPadding.bottom);
+      });
+      paddingBottom?.addProgressListener((progress) {
+        progressPadding.bottom =
+            progress * paddingBottomInterval + basePadding.bottom;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right,
+            progressPadding.bottom);
+      });
+      paddingLeft?.addProgressListener((progress) {
+        progressPadding.left =
+            progress * paddingLeftInterval + basePadding.left;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right,
+            progressPadding.bottom);
+      });
+      paddingRight?.addProgressListener((progress) {
+        progressPadding.right =
+            progress * paddingRightInterval + basePadding.right;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right,
+            progressPadding.bottom);
+      });
+      oldPadding = newPadding;
+    } else {
+      renderPadding.padding = getPaddingInsetsFromStyle(style);
     }
   }
 }
