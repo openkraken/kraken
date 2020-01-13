@@ -593,6 +593,9 @@ class RenderFlowLayout extends RenderBox
     if (displayType == 'block') {
       if (constraints.maxWidth != double.infinity) {
         constraintWidth = constraints.maxWidth;
+      } else if (isFlexItem(nodeId)) {
+        // Display as inline-flex if element is flex item
+        constraintWidth = mainAxisExtent;
       } else {
         constraintWidth = getParentWidth(nodeId);
       }

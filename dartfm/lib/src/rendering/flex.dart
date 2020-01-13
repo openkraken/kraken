@@ -703,11 +703,18 @@ class RenderFlexLayout extends RenderBox
     double actualSize;
     double actualSizeDelta;
     double constraintWidth;
-    if (constraints.maxWidth != double.infinity) {
-      constraintWidth = constraints.maxWidth;
+
+    // Display as inline-flex if element is flex item
+    if (isFlexItem(nodeId)) {
+      constraintWidth = idealSize;
     } else {
-      constraintWidth = getParentWidth(nodeId);
+      if (constraints.maxWidth != double.infinity) {
+        constraintWidth = constraints.maxWidth;
+      } else {
+        constraintWidth = getParentWidth(nodeId);
+      }
     }
+
     switch (_direction) {
       case Axis.horizontal:
         size = Size(

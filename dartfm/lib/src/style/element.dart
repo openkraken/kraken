@@ -28,4 +28,23 @@ mixin ElementStyleMixin on RenderBox {
 
     return Length(width).displayPortValue;
   }
+
+  // Whether current node is flex item
+  bool isFlexItem(int nodeId) {
+    var node = nodeMap[nodeId];
+    var parentNode = node.parentNode;
+    bool isParentFlex = false;
+    if (parentNode != null) {
+      var properties = parentNode.properties;
+      if (properties.containsKey('style')) {
+        var style = properties['style'];
+        if (style.containsKey('display') &&
+          style['display'] == 'flex'
+        ) {
+          isParentFlex = true;
+        }
+      }
+    }
+    return isParentFlex;
+  }
 }
