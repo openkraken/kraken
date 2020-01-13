@@ -85,6 +85,10 @@ class Style {
     }
   }
 
+  void set(String key, dynamic value) {
+    _styleMap[key] = value;
+  }
+
   /// Reserved to use.
   Map<String, dynamic> getOriginalStyleMap() => _styleMap;
 
