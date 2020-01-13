@@ -19,11 +19,21 @@ program
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .action((options) => {
-    const { bundle, url, source } = options;
+    let { bundle, url, source } = options;
 
-    if (!bundle && !url && !source) {
+    if (!bundle && !url && !source && !options.args) {
       program.help();
     } else {
+      const firstArgs = options.args[0];      
+
+      if (firstArgs) {
+        if (/^http/.test(firstArgs)) {
+          url = firstArgs;
+        } else {
+          bundle = firstArgs;
+        }
+      }
+
       const env = Object.assign({}, process.env);
       const shellPath = getShellPath(options.runtimeMode);
       env['KRAKEN_LIBRARY_PATH'] = resolve(__dirname, '../build/lib');
