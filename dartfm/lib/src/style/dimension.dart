@@ -198,11 +198,11 @@ mixin DimensionMixin on Node {
     double bottom = 0.0;
 
     if (style != null) {
-      if (style['margin'] == 0) {
-        return Padding(0, 0, 0, 0);
+      var margin = style['margin'];
+      if (margin is int) {
+        margin = margin.toString();
       }
 
-      String margin = style['margin'];
       double marginLeft;
       double marginTop;
       double marginRight;
