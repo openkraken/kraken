@@ -319,10 +319,6 @@ mixin ElementInspectorService {
       name: 'disposeId',
       callback: disposeId,
     );
-    _registerServiceExtensionVarArgs(
-      name: 'setPubRootDirectories',
-      callback: setPubRootDirectories,
-    );
     _registerServiceExtensionWithArg(
       name: 'setSelectionById',
       callback: setSelectionById,
@@ -463,18 +459,6 @@ mixin ElementInspectorService {
     if (_groups[groupName]?.remove(referenceData) != true)
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
     _decrementReferenceCount(referenceData);
-  }
-
-  /// Set the list of directories that should be considered part of the local
-  /// project.
-  ///
-  /// The local project directories are used to distinguish widgets created by
-  /// the local project over widgets created from inside the framework.
-  @protected
-  void setPubRootDirectories(List<String> pubRootDirectories) {
-    _pubRootDirectories = pubRootDirectories
-        .map<String>((String directory) => Uri.parse(directory).path)
-        .toList();
   }
 
   /// Set the [WidgetInspector] selection to the object matching the specified
