@@ -17,6 +17,7 @@ div.style.backgroundColor = 'red';
   let container = document.createElement('div');
   setStyle(container, {
     display: 'flex',
+    justifyContent: 'center',
     backgroundColor: '#252423',
   });
 

@@ -151,6 +151,11 @@ abstract class Element extends Node
         renderBoxModel.style = newStyle;
       }
 
+      // update flex related properties
+      if (renderLayoutElement is RenderFlexLayout) {
+        decorateRenderFlex(renderLayoutElement, newStyle);
+      }
+
       ///2.update overflow
       updateOverFlowBox(newStyle);
 
@@ -744,9 +749,9 @@ abstract class Element extends Node
   void setProperty(String key, value) {
     if (key.indexOf(STYLE_PATH_PREFIX) >= 0) {
       String styleKey = key.substring(1).split('.')[1];
-      _style.set(styleKey, value);
-      properties['style'] = _style.getOriginalStyleMap();
-      style = _style;
+      Style newStyle = _style.copyWith({styleKey :value});
+      properties['style'] = newStyle.getOriginalStyleMap();
+      style = newStyle;
       updateTextNodeStyle(styleKey);
     } else {
       properties[key] = value;
