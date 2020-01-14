@@ -17,5 +17,5 @@ export function krakenRemoveNode(id: number) {
 }
 
 export function krakenSetProperty(id: number, key: string, value: string) {
-  return __kraken_js_to_dart__(`["setProperty",[${id},"${key}",${value}]]`);
+  return __kraken_js_to_dart__(`["setProperty",[${id},"${key}","${value}"]]`);
 }

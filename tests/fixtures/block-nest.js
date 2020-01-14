@@ -1,37 +1,13 @@
-__kraken_js_to_dart__(
-  JSON.stringify([
-    "createElement",
-    [
-      {
-        type: "DIV",
-        id: 1,
-        props: {
-          style: { width: "300px", height: "300px", backgroundColor: "red" }
-        }
-      }
-    ]
-  ])
-);
+var container = document.createElement('div');
+container.style.width = '300px';
+container.style.height = '300px';
+container.style.backgroundColor = 'red';
 
-__kraken_js_to_dart__(
-  JSON.stringify([
-    "createElement",
-    [
-      {
-        type: "DIV",
-        id: 2,
-        props: {
-          style: { width: "150px", height: "150px", backgroundColor: "green" }
-        }
-      }
-    ]
-  ])
-);
+var box = document.createElement('div');
+box.style.width = '150px';
+box.style.height = '150px';
+box.style.backgroundColor = 'green';
 
-__kraken_js_to_dart__(
-  JSON.stringify(["insertAdjacentNode", [1, "beforeend", 2]])
-);
 
-__kraken_js_to_dart__(
-  JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 1]])
-);
+container.appendChild(box);
+document.body.appendChild(container);
