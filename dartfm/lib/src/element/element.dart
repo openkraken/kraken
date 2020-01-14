@@ -101,10 +101,6 @@ abstract class Element extends Node
     }
 
     renderObject = initTransform(renderObject, style);
-    // if (!style.contains('display')) {
-    //   style.set('display', display);
-    // }
-    // Init default events.
     renderObject = renderBoxModel = RenderBoxModel(
       child: renderObject,
       onPointerDown: this._handlePointDown,
@@ -222,16 +218,6 @@ abstract class Element extends Node
   }
 
   final String defaultDisplay;
-  // String _display;
-  // String get display {
-  //   return _display;
-  // }
-  // set display (String value) {
-  //   if (_display == value) {
-  //     return;
-  //   }
-  //   _display = value;
-  // }
 
   void _updatePosition(Style style) {
     // from !static to static
