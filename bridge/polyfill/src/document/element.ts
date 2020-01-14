@@ -23,8 +23,9 @@ export class ElementImpl extends NodeImpl {
 
     this.style = new Proxy(this.style, {
       set(target: any, p: string | number | symbol, value: any, receiver: any): boolean {
-        this[toCamelCase(String(p))] = value;
-        krakenSetProperty(id, 'style', JSON.stringify(this));
+        let styleKey = toCamelCase(String(p));
+        this[styleKey] = value;
+        krakenSetProperty(id, '.style.' + styleKey, value);
         return true;
       }
     });

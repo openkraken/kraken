@@ -198,7 +198,11 @@ mixin DimensionMixin on Node {
     double bottom = 0.0;
 
     if (style != null) {
-      String margin = style['margin'];
+      var margin = style['margin'];
+      if (margin is! String) {
+        margin = margin.toString();
+      }
+
       double marginLeft;
       double marginTop;
       double marginRight;

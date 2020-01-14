@@ -16,6 +16,7 @@ import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
 
 const String STYLE = 'style';
+const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
 
@@ -295,7 +296,6 @@ abstract class Element extends Node
       renderObject.parentData = stackParentData;
 
       Element currentElement = nodeMap[nodeId];
-      Element parentElement = currentElement.parentNode;
 
       // current element's zIndex
       int curZIndex = 0;
@@ -745,19 +745,32 @@ abstract class Element extends Node
     return parentData;
   }
 
+  // update textNode style when container style changed
+  void updateTextNodeStyle(String key) {
+    childNodes.forEach((node) {
+      if (node is TextNode) {
+        node.setProperty(key, node.data);
+      }
+    });
+  }
+
   @mustCallSuper
   void setProperty(String key, value) {
-    properties[key] = value;
-    if (key == STYLE) {
-      style = _style.copyWith(value);
-    }
-    if (key == 'style') {
-      // update textNode style when container style changed
-      childNodes.forEach((node) {
-        if (node is TextNode) {
-          node.setProperty(key, node.data);
-        }
-      });
+    if (key.indexOf(STYLE_PATH_PREFIX) >= 0) {
+      String styleKey = key.substring(1).split('.')[1];
+      _style.set(styleKey, value);
+      properties['style'] = _style.getOriginalStyleMap();
+      style = _style;
+      updateTextNodeStyle(styleKey);
+    } else {
+      properties[key] = value;
+      if (key == STYLE) {
+        style = _style.copyWith(value);
+      }
+
+      if (key == 'style') {
+        updateTextNodeStyle(key);
+      }
     }
   }
 
