@@ -199,7 +199,7 @@ mixin DimensionMixin on Node {
 
     if (style != null) {
       var margin = style['margin'];
-      if (margin is int) {
+      if (margin is! String) {
         margin = margin.toString();
       }
 
