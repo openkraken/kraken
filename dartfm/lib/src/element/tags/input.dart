@@ -151,9 +151,12 @@ class InputElement extends Element
 
   void activeTextInput() {
     if (textInputConnection == null) {
+      final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
+      _lastKnownRemoteTextEditingValue = localValue;
+
       textInputConnection = TextInput.attach(this, textInputConfiguration);
       textInputConnection
-          .setEditingState(textSelectionDelegate.textEditingValue);
+          .setEditingState(localValue);
     }
     textInputConnection.show();
   }
@@ -210,31 +213,45 @@ class InputElement extends Element
     // todo: selection overlay.
   }
 
+  bool get _hasInputConnection => textInputConnection != null && textInputConnection.attached;
+  TextEditingValue _lastKnownRemoteTextEditingValue;
+
+  void _updateRemoteEditingValueIfNeeded() {
+    if (!_hasInputConnection)
+      return;
+    final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
+    if (localValue == _lastKnownRemoteTextEditingValue)
+      return;
+    _lastKnownRemoteTextEditingValue = localValue;
+    textInputConnection.setEditingState(localValue);
+  }
+
   void _formatAndSetValue(TextEditingValue value) {
-    textSpan = buildTextSpan(text: value.text);
+    final bool textChanged = textSelectionDelegate.textEditingValue?.text != value?.text;
     textSelectionDelegate.textEditingValue = value;
 
-    if (value.text.length == 0) {
-      renderEditable.text = placeholderTextSpan;
-    } else {
-      renderEditable.text = textSpan;
+    if (textChanged) {
+      _updateRemoteEditingValueIfNeeded();
+      textSpan = buildTextSpan(text: value.text);
+      if (value.text.length == 0) {
+        renderEditable.text = placeholderTextSpan;
+      } else {
+        renderEditable.text = textSpan;
+      }
     }
+
     renderEditable.selection = value.selection;
   }
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value != textSelectionDelegate.textEditingValue) {
+    if (value.text != textSelectionDelegate.textEditingValue.text) {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
-
-      if (value.text != textSelectionDelegate.textEditingValue.text) {
-        _triggerInputEvent(value.text);
-      }
-
-      _formatAndSetValue(value);
+      _triggerInputEvent(value.text);
     }
-
+    _lastKnownRemoteTextEditingValue = value;
+    _formatAndSetValue(value);
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -263,13 +280,12 @@ class InputElement extends Element
     if (key == 'value' && value is String) {
       String text = value ?? '';
 
-      TextEditingValue textEditingValue =
+      TextEditingValue newTextEditingValue =
           textSelectionDelegate.textEditingValue.copyWith(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       );
-
-      updateEditingValue(textEditingValue);
+      _formatAndSetValue(newTextEditingValue);
     }
   }
 
