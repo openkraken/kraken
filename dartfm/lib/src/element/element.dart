@@ -579,8 +579,11 @@ abstract class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    Node node = super.insertBefore(child, referenceNode);
     int referenceIndex = childNodes.indexOf(referenceNode);
+
+    // Node.insertBefore will change element tree structure,
+    // so get the referenceIndex before calling it.
+    Node node = super.insertBefore(child, referenceNode);
     if (referenceIndex != -1) {
       Node after;
       RenderObject afterRenderObject;
