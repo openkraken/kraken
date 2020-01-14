@@ -10,6 +10,10 @@ mixin ElementStyleMixin on RenderBox {
     bool isParentWithWidth = false;
     var childNode = nodeMap[childId];
 
+    double cropWidth = 0;
+    if (childNode is Element) {
+      cropWidth += childNode.cropWidth ?? 0;
+    }
     while(isParentWithWidth == false) {
       if (childNode.properties != null) {
         var properties = childNode.properties;
@@ -24,9 +28,14 @@ mixin ElementStyleMixin on RenderBox {
       if (childNode.parentNode != null) {
         childNode = childNode.parentNode;
       }
+      if (childNode is Element) {
+        cropWidth += childNode.cropWidth ?? 0;
+      }
     }
 
-    return Length(width).displayPortValue;
+    double widthD = Length(width).displayPortValue - cropWidth;
+
+    return widthD;
   }
 
   // Whether current node is inline
