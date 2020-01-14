@@ -100,7 +100,7 @@ class RenderFlexLayout extends RenderBox
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
     this.nodeId,
-    this.display,
+    this.style,
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(mainAxisSize != null),
@@ -115,11 +115,11 @@ class RenderFlexLayout extends RenderBox
     addAll(children);
   }
 
+  // Element style;
+  Style style;
+
   // id of current element
   int nodeId;
-
-  // display style
-  String display;
 
   /// The direction to use as the main axis.
   Axis get direction => _direction;
@@ -708,6 +708,7 @@ class RenderFlexLayout extends RenderBox
     double actualSizeDelta;
     double constraintWidth;
 
+    String display = style.get('display');
     bool isInline = isElementInline(display, nodeId);
     if (!isInline) {
       if (constraints.maxWidth != double.infinity) {

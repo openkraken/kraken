@@ -66,18 +66,19 @@ abstract class Element extends Node
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
     properties = properties ?? {};
     style = Style(properties[STYLE]);
+    style.set('display', style.contains('display') ? style['display'] : defaultDisplay);
     if (events != null) {
       for (String eventName in events) {
         addEvent(eventName);
       }
     }
 
-    renderObject = renderLayoutElement = createRenderLayoutElement(null);
+    renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
     renderObject = initRenderPadding(renderObject, style);
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style);
     }
-    if (display != 'inline') {
+    if (style.get('display') != 'inline') {
       renderObject = initOverflowBox(renderObject, style);
     }
     renderObject = initRenderDecoratedBox(renderObject, style);
@@ -99,13 +100,9 @@ abstract class Element extends Node
     }
 
     renderObject = initTransform(renderObject, style);
-
-    Map<String, dynamic> elementStyle = {};
-    if (properties['style'] != null) {
-      elementStyle = properties['style'];
-    }
-    elementStyle.putIfAbsent('display', () => display);
-
+    // if (!style.contains('display')) {
+    //   style.set('display', display);
+    // }
     // Init default events.
     renderObject = renderBoxModel = RenderBoxModel(
       child: renderObject,
@@ -114,7 +111,7 @@ abstract class Element extends Node
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
       nodeId: nodeId,
-      style: elementStyle,
+      style: style,
     );
     _inited = true;
   }
@@ -132,13 +129,14 @@ abstract class Element extends Node
   Style _style;
   Style get style => _style;
   set style(Style newStyle) {
+
+    newStyle.set('display', newStyle.contains('display') ? newStyle['display'] : defaultDisplay);
+
     // Update style;
     if (_inited) {
       ///1.update display
-      String oldDisplay =
-          style.contains('display') ? style['display'] : defaultDisplay;
-      String newDisplay =
-          newStyle.contains('display') ? newStyle['display'] : defaultDisplay;
+      String oldDisplay = style.get('display');
+      String newDisplay = newStyle.get('display');
       if (newDisplay != oldDisplay) {
         ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
         List<RenderBox> children = [];
@@ -148,7 +146,12 @@ abstract class Element extends Node
         oldRenderElement
           ..visitChildren(visitor)
           ..removeAll();
-        renderLayoutElement = createRenderLayoutElement(children);
+        RenderPadding parent = renderLayoutElement.parent;
+        parent.child = null;
+        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        parent.child = renderLayoutElement as RenderBox;
+        // update style reference
+        renderBoxModel.style = newStyle;
       }
 
       ///2.update overflow
@@ -209,6 +212,7 @@ abstract class Element extends Node
         }
       }
     }
+
     _style = newStyle;
   }
 
@@ -217,9 +221,16 @@ abstract class Element extends Node
   }
 
   final String defaultDisplay;
-  String get display {
-    return style.contains('display') ? style['display'] : defaultDisplay;
-  }
+  // String _display;
+  // String get display {
+  //   return _display;
+  // }
+  // set display (String value) {
+  //   if (_display == value) {
+  //     return;
+  //   }
+  //   _display = value;
+  // }
 
   void _updatePosition(Style style) {
     // from !static to static
@@ -505,28 +516,24 @@ abstract class Element extends Node
     renderLayoutElement.add(child);
   }
 
-  ContainerRenderObjectMixin createRenderLayoutElement(List<RenderBox> children) {
+  ContainerRenderObjectMixin createRenderLayoutElement(Style newStyle, List<RenderBox> children) {
+    String display = newStyle.get('display');
     if (display == 'flex' || display == 'inline-flex') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         textDirection: TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: children,
+        style: newStyle,
         nodeId: nodeId,
-        display: display,
       );
-      decorateRenderFlex(flexLayout, style);
+      decorateRenderFlex(flexLayout, newStyle);
       return flexLayout;
 
     } else if (display == 'inline' || display == 'inline-block' || display == 'block') {
-      Map<String, dynamic> elementStyle = {};
-      if (properties['style'] != null) {
-        elementStyle = properties['style'];
-      }
-      elementStyle.putIfAbsent('display', () => display);
 
       WrapAlignment alignment = WrapAlignment.start;
-      switch(elementStyle['textAlign']) {
+      switch(style['textAlign']) {
         case 'right':
           alignment = WrapAlignment.end;
           break;
@@ -537,9 +544,8 @@ abstract class Element extends Node
       return RenderFlowLayout(
         alignment: alignment,
         children: children,
-        style: elementStyle,
+        style: newStyle,
         nodeId: nodeId,
-        display: display,
       );
     } else {
       throw FlutterError('Not supported display type $display: $this');

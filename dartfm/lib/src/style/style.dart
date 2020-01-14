@@ -74,6 +74,11 @@ class Style {
   String get overflowX => _overflowX;
 
   dynamic get(String key) => _styleMap[key];
+
+  void set(String key, dynamic value) {
+    _styleMap[key] = value;
+  }
+
   dynamic operator [](String key) => this.get(key);
   bool contains(String key) {
     if (_styleMap.containsKey(key)) {
