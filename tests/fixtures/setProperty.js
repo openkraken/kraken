@@ -18,7 +18,9 @@ div.style.backgroundColor = 'red';
   setStyle(container, {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#252423',
+    height: '500px'
   });
 
   for (let i = 0; i < 5; i++) {
