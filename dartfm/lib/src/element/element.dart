@@ -284,7 +284,6 @@ abstract class Element extends Node
       renderObject.parentData = stackParentData;
 
       Element currentElement = nodeMap[nodeId];
-      Element parentElement = currentElement.parentNode;
 
       // current element's zIndex
       int curZIndex = 0;

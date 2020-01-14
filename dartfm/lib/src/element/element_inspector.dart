@@ -87,8 +87,6 @@ mixin ElementInspectorService {
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
-  List<String> _pubRootDirectories;
-
   _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
