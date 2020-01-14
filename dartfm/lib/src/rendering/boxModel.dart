@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:kraken/style.dart';
 
 class RenderBoxModel extends RenderPointerListener {
   RenderBoxModel({
@@ -25,6 +26,6 @@ class RenderBoxModel extends RenderPointerListener {
     behavior: behavior,
   );
   int nodeId;
-  Map<String, dynamic> style;
+  Style style;
 }
 
