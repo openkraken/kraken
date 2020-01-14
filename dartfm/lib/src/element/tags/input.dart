@@ -211,30 +211,29 @@ class InputElement extends Element
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    final bool textChanged =
-        textSelectionDelegate.textEditingValue?.text != value?.text;
-    if (textChanged) {
-      textSpan = buildTextSpan(text: value.text);
-      textInputConnection.setEditingState(value);
-      textSelectionDelegate.textEditingValue = value;
+    textSpan = buildTextSpan(text: value.text);
+    textSelectionDelegate.textEditingValue = value;
 
-      if (value.text.length == 0) {
-        renderEditable.text = placeholderTextSpan;
-      } else {
-        renderEditable.text = textSpan;
-      }
+    if (value.text.length == 0) {
+      renderEditable.text = placeholderTextSpan;
+    } else {
+      renderEditable.text = textSpan;
     }
     renderEditable.selection = value.selection;
   }
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value.text != textSelectionDelegate.textEditingValue?.text) {
+    if (value != textSelectionDelegate.textEditingValue) {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
-      _triggerInputEvent(value.text);
+
+      if (value.text != textSelectionDelegate.textEditingValue.text) {
+        _triggerInputEvent(value.text);
+      }
+
+      _formatAndSetValue(value);
     }
-    _formatAndSetValue(value);
 
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
