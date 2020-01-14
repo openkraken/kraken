@@ -183,8 +183,11 @@ mixin DimensionMixin on Node {
     return input.trim().split(spaceRegExp);
   }
 
-  RenderObject initRenderMargin(RenderObject renderObject, Style style) {
+  RenderObject initRenderMargin(RenderObject renderObject, Style style, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
+    if (element != null) {
+      element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+    }
     return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
@@ -252,7 +255,7 @@ mixin DimensionMixin on Node {
     return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(Style style, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(Style style, Element element, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -299,9 +302,9 @@ mixin DimensionMixin on Node {
             progressMargin.right =
                 progress * marginRightInterval + baseMargin.right;
           }
-          renderMargin.margin = EdgeInsets.fromLTRB(
+          _updateMargin(EdgeInsets.fromLTRB(
               progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom);
+              progressMargin.bottom), element);
         }
       });
 
@@ -322,9 +325,9 @@ mixin DimensionMixin on Node {
           progressMargin.right =
               progress * marginRightInterval + baseMargin.right;
         }
-        renderMargin.margin = EdgeInsets.fromLTRB(
+        _updateMargin(EdgeInsets.fromLTRB(
             progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom);
+            progressMargin.bottom), element);
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top =
@@ -336,28 +339,38 @@ mixin DimensionMixin on Node {
       marginBottom?.addProgressListener((progress) {
         progressMargin.bottom =
             progress * marginBottomInterval + baseMargin.bottom;
-        renderMargin.margin = EdgeInsets.fromLTRB(
+        _updateMargin(EdgeInsets.fromLTRB(
             progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom);
+            progressMargin.bottom), element);
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left =
             progress * marginLeftInterval + baseMargin.left;
-        renderMargin.margin = EdgeInsets.fromLTRB(
+        _updateMargin(EdgeInsets.fromLTRB(
             progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom);
+            progressMargin.bottom), element);
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right =
             progress * marginRightInterval + baseMargin.right;
-        renderMargin.margin = EdgeInsets.fromLTRB(
+        _updateMargin(EdgeInsets.fromLTRB(
             progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom);
+            progressMargin.bottom), element);
       });
       oldMargin = newMargin;
     } else {
-      renderMargin.margin = getMarginInsetsFromStyle(style);
+      _updateMargin(getMarginInsetsFromStyle(style), element);
     }
+  }
+
+  void _updateMargin(EdgeInsets margin, Element element) {
+    if (margin == null) {
+      return;
+    }
+    if (element != null) {
+      element.cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    }
+    renderMargin.margin = margin;
   }
 
   RenderObject initRenderPadding(RenderObject renderObject, Style style) {

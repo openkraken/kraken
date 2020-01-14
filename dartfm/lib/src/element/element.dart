@@ -85,7 +85,7 @@ abstract class Element extends Node
     renderObject = initRenderDecoratedBox(renderObject, style);
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-    renderObject = initRenderMargin(renderObject, style);
+    renderObject = initRenderMargin(renderObject, style, this);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
 
@@ -122,6 +122,8 @@ abstract class Element extends Node
   bool _inited = false; // True after constructor finished.
 
   bool shouldBlockStretch = true;
+
+  double cropWidth = 0;
 
   Style _style;
   Style get style => _style;
@@ -171,7 +173,7 @@ abstract class Element extends Node
       updateConstraints(newStyle, transitionMap);
 
       ///6.update margin
-      updateRenderMargin(newStyle, transitionMap);
+      updateRenderMargin(newStyle, this, transitionMap);
 
       ///7.update position
       String newPosition = newStyle['position'] ?? 'static';
@@ -221,7 +223,7 @@ abstract class Element extends Node
   }
 
   markShouldUpdateMargin() {
-    updateRenderMargin(style);
+    updateRenderMargin(style, this);
   }
 
   final String defaultDisplay;
