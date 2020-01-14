@@ -31,6 +31,10 @@ class RenderMargin extends RenderShiftedBox {
   void _markNeedResolution() {
     _resolvedMargin = null;
     markNeedsLayout();
+    // force child relayout
+    RenderBox childBox = child;
+    child = null;
+    child = childBox;
   }
 
   /// The amount to pad the child in each dimension.
