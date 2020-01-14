@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:ansicolor/ansicolor.dart';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:io';
 
 final Directory snapshots = Directory('./snapshots');
@@ -20,7 +21,10 @@ void main() {
     FlutterDriver driver;
 
     int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
-      assert(imageA.length == imageB.length);
+      if (imageA.length != imageB.length) {
+        return -1;
+      }
+
       int delta = 0;
       for (int i = 0; i < imageA.length; i+=1) {
         if (imageA[i] != imageB[i]) delta++;
@@ -37,7 +41,14 @@ void main() {
         if (diffCounts == 0) {
           print('$pass $fixture snaphost is equal!');
         } else {
-          print('$err $fixture snaphost is NOT equal with $diffCounts} pixels.');
+          final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
+          if (diffCounts == -1) {
+            print('$err $fixture snapshot is NOT equal with old ones');
+          } else {
+            print('$err $fixture snaphost is NOT equal with $diffCounts} pixels.');
+            print('please compare manually with ${snap.path} and ${newSnap.path}');
+          }
+          newSnap.writeAsBytes(screenPixels);
         }
       } else {
         await snap.writeAsBytes(screenPixels);
