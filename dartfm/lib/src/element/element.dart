@@ -156,6 +156,8 @@ abstract class Element extends Node
       // update flex related properties
       if (renderLayoutElement is RenderFlexLayout) {
         decorateRenderFlex(renderLayoutElement, newStyle);
+        // update style reference
+        (renderLayoutElement as RenderFlexLayout).style = newStyle;
       }
 
       ///2.update overflow
