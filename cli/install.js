@@ -6,7 +6,7 @@ const path = require('path');
 const tarName = `kraken-${os.platform()}-${packageJSON.version}.tar.gz`;
 const downloadUrl = `https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-cli-vendors/${tarName}`;
 
-execSync(`wget ${downloadUrl}`, {
+execSync(`curl -O ${downloadUrl}`, {
   cwd: __dirname,
   stdio: 'inherit'
 });
