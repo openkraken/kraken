@@ -63,9 +63,9 @@ class Style {
     top = _styleMap.containsKey('top') ? Length(_styleMap['top']).displayPortValue : null;
     bottom = _styleMap.containsKey('bottom') ? Length(_styleMap['bottom']).displayPortValue : null;
     width = _styleMap.containsKey('width') ? Length(_styleMap['width']).displayPortValue : null;
-    if (width.isNegative) width = 0.0;
+    if (width != null && width.isNegative) width = 0.0;
     height = _styleMap.containsKey('height') ? Length(_styleMap['height']).displayPortValue : null;
-    if (height.isNegative) height = 0.0;
+    if (height != null && height.isNegative) height = 0.0;
     transform = _styleMap['transform'];
     transformOrigin = _styleMap['transformOrigin'];
     transition = _styleMap['transition'];
