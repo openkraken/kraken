@@ -5,7 +5,7 @@
 #ifndef KRAKEN_MESSAGE_H
 #define KRAKEN_MESSAGE_H
 
-#include "bindings/thread_safe_map.h"
+#include "thread_safe_map.h"
 
 namespace kraken {
 namespace message {
