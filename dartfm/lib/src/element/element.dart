@@ -280,7 +280,13 @@ abstract class Element extends Node
           child
         ],
       );
-      transform.child = renderNewStack;
+      renderStack = transform.child = renderNewStack;
+
+      // new node no need to change position in tree
+      if (renderObject.parent == null) {
+        return;
+      }
+
       // remove non positioned element from parent element
       (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
       // attach positioned element to parent element stack
