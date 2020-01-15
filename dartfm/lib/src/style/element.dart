@@ -9,12 +9,8 @@ mixin ElementStyleMixin on RenderBox {
     var width;
     bool isParentWithWidth = false;
     var childNode = nodeMap[childId];
-
     double cropWidth = 0;
-    if (childNode is Element) {
-      cropWidth += childNode.cropWidth ?? 0;
-    }
-    while(isParentWithWidth == false) {
+    while(!isParentWithWidth) {
       if (childNode.properties != null) {
         var properties = childNode.properties;
         if (properties.containsKey('style')) {
@@ -22,14 +18,15 @@ mixin ElementStyleMixin on RenderBox {
           if (style.containsKey('width')) {
             isParentWithWidth = true;
             width = style['width'];
+            break;
           }
         }
       }
+      if (childNode is Element) {
+        cropWidth += ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
+      }
       if (childNode.parentNode != null) {
         childNode = childNode.parentNode;
-      }
-      if (childNode is Element) {
-        cropWidth += childNode.cropWidth ?? 0;
       }
     }
 

@@ -9,6 +9,8 @@ mixin StyleOverflowMixin {
   RenderObject _renderObjectX;
   RenderObject _child;
   RenderObject _renderObjectY;
+  KrakenScrollable _scrollableX;
+  KrakenScrollable _scrollableY;
 
   Style _style;
 
@@ -45,7 +47,8 @@ mixin StyleOverflowMixin {
               OverflowCustomBox overflowCustomBox = OverflowCustomBox(
                 child: _renderObjectX, textDirection: TextDirection.ltr,
                 axisDirection: axisDirection);
-              parent.child = overflowCustomBox;
+              parent.child = _renderObjectY = overflowCustomBox;
+              _scrollableY = null;
             }
             break;
           case Style.AUTO:
@@ -55,8 +58,9 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
                 childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = KrakenScrollable(axisDirection: axisDirection)
-                  .getScrollableRenderObject(_renderObjectX);
+              _scrollableY = KrakenScrollable(axisDirection: axisDirection);
+              parent.child = _renderObjectY =
+                  _scrollableY.getScrollableRenderObject(_renderObjectX);
             }
             break;
           case Style.HIDDEN:
@@ -65,11 +69,11 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = RenderSingleChildViewport(
-                axisDirection: axisDirection,
-                offset: ViewportOffset.zero(),
-                child: _renderObjectX,
-                shouldClip: true);
+              parent.child = _renderObjectY = RenderSingleChildViewport(
+                  axisDirection: axisDirection,
+                  offset: ViewportOffset.zero(),
+                  child: _renderObjectX);
+              _scrollableY = null;
             }
             break;
         }
@@ -90,9 +94,10 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = OverflowCustomBox(child: _child,
-                textDirection: TextDirection.ltr,
-                axisDirection: axisDirection);
+              parent.child = _renderObjectX = OverflowCustomBox(child: _child,
+                  textDirection: TextDirection.ltr,
+                  axisDirection: axisDirection);
+              _scrollableX = null;
             }
             break;
           case Style.AUTO:
@@ -102,8 +107,9 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = KrakenScrollable(axisDirection: axisDirection)
-                .getScrollableRenderObject(_child);
+              _scrollableX = KrakenScrollable(axisDirection: axisDirection);
+              parent.child = _renderObjectX =
+                  _scrollableX.getScrollableRenderObject(_child);
             }
             break;
           case Style.HIDDEN:
@@ -112,11 +118,12 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = RenderSingleChildViewport(
-                axisDirection: axisDirection,
-                offset: ViewportOffset.zero(),
-                child: _child,
-                shouldClip: true);
+              parent.child = _renderObjectX = RenderSingleChildViewport(
+                  axisDirection: axisDirection,
+                  offset: ViewportOffset.zero(),
+                  child: _child,
+                  shouldClip: true);
+              _scrollableX = null;
             }
             break;
         }
@@ -129,16 +136,31 @@ mixin StyleOverflowMixin {
       String overflow, RenderObject current, AxisDirection axisDirection) {
     switch (overflow) {
       case Style.VISIBLE:
+        if (axisDirection == AxisDirection.right) {
+          _scrollableX = null;
+        } else {
+          _scrollableY = null;
+        }
         current =
             OverflowCustomBox(child: current,
               textDirection: TextDirection.ltr, axisDirection: axisDirection);
          break;
       case Style.AUTO:
       case Style.SCROLL:
-        current = KrakenScrollable(axisDirection: axisDirection)
-            .getScrollableRenderObject(current);
+        KrakenScrollable scrollable = KrakenScrollable(axisDirection: axisDirection);
+        if (axisDirection == AxisDirection.right) {
+          _scrollableX = scrollable;
+        } else {
+          _scrollableY = scrollable;
+        }
+        current = scrollable.getScrollableRenderObject(current);
         break;
       case Style.HIDDEN:
+        if (axisDirection == AxisDirection.right) {
+          _scrollableX = null;
+        } else {
+          _scrollableY = null;
+        }
         current = RenderSingleChildViewport(axisDirection: axisDirection,
           offset: ViewportOffset.zero(),
           child: current,
@@ -146,6 +168,38 @@ mixin StyleOverflowMixin {
         break;
     }
     return current;
+  }
+
+  double getScrollTop() {
+    if (_scrollableY != null) {
+      return _scrollableY.position?.pixels ?? 0;
+    }
+    return 0;
+  }
+
+  double getScrollLeft() {
+    if (_scrollableX != null) {
+      return _scrollableX.position?.pixels ?? 0;
+    }
+    return 0;
+  }
+
+  double getScrollHeight() {
+    if (_scrollableY != null) {
+      return _scrollableY.renderBox?.size?.height ?? 0;
+    } else if (_renderObjectY is RenderBox) {
+      return (_renderObjectY as RenderBox).size?.height ?? 0;
+    }
+    return 0;
+  }
+
+  double getScrollWidth() {
+    if (_scrollableX != null) {
+      return _scrollableX.renderBox?.size?.width ?? 0;
+    } else if (_renderObjectX is RenderBox) {
+      return (_renderObjectX as RenderBox).size?.width ?? 0;
+    }
+    return 0;
   }
 }
 

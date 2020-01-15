@@ -19,6 +19,7 @@ class KrakenScrollable
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
+  RenderBox _renderBox;
 
   KrakenScrollable({
     axisDirection = AxisDirection.down,
@@ -30,17 +31,21 @@ class KrakenScrollable
         physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderObject getScrollableRenderObject(RenderObject child) {
+  RenderObject getScrollableRenderObject(RenderBox child) {
     RenderSingleChildViewport renderSingleChildViewport =
         RenderSingleChildViewport(
             axisDirection: _axisDirection, offset: position, child: child);
 
+    _renderBox = child;
     RenderPointerListener renderPointerListener = RenderPointerListener(
         onPointerDown: _handlePointerDown,
         child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
+
+
+  RenderBox get renderBox => _renderBox;
 
   /// The axis along which the scroll view scrolls.
   ///
