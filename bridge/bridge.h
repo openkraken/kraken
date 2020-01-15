@@ -40,6 +40,8 @@ public:
   void invokeKrakenCallback(const char *args);
   void invokeSetTimeoutCallback(const int callbackId);
   void invokeSetIntervalCallback(const int callbackId);
+
+  void invokeRequestAnimationFrameCallback(const int callbackId);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER

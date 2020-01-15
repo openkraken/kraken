@@ -17,6 +17,9 @@ void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
 void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,
                               const int callbackId);
 
+void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context, const int callbackId);
+
+
 } // namespace binding
 } // namespace kraken
 

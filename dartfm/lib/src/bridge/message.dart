@@ -12,6 +12,7 @@ const JS = 'J';
 const FETCH_MESSAGE = 's';
 const TIMEOUT_MESSAGE = 't';
 const INTERVAL_MESSAGE = 'i';
+const ANIMATION_FRAME_MESSAGE = 'a';
 const SCREEN_METRICS = 'm';
 const WINDOW_LOAD = 'l';
 

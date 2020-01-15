@@ -31,6 +31,7 @@ const char DART = 'D';
 const char FETCH_MESSAGE = 's';
 const char TIMEOUT_MESSAGE = 't';
 const char INTERVAL_MESSAGE = 'i';
+const char ANIMATION_FRAME_MESSAGE = 'a';
 const char ScreenMetrics = 'm';
 const char WINDOW_LOAD = 'l';
 
@@ -210,6 +211,12 @@ void JSBridge::handleFlutterCallback(const char *args) {
     case INTERVAL_MESSAGE:
       kraken::binding::invokeSetIntervalCallback(context_.get(),
                                                  std::stoi(str.substr(3)));
+      break;
+    case ANIMATION_FRAME_MESSAGE:
+      kraken::binding::invokeRequestAnimationFrameCallback(
+        context_.get(),
+        std::stoi(str.substr(3))
+      );
       break;
     case FETCH_MESSAGE: {
       // extract id from DCf[id][message]

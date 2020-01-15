@@ -26,6 +26,9 @@ FLUTTER_EXPORT
 int KrakenRegisterSetInterval(int callbackId, int timeout);
 
 FLUTTER_EXPORT
+int KrakenRegisterRequestAnimationFrame(int callbackId, int timeout);
+
+FLUTTER_EXPORT
 void KrakenInvokeClearTimeout(int timerId);
 
 FLUTTER_EXPORT
