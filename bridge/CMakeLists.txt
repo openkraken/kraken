@@ -17,16 +17,15 @@ if (${ENABLE_TEST})
 endif ()
 
 add_library(bindings STATIC
-  bindings/BOM/console.cc
-  bindings/BOM/fetch.cc
-  bindings/BOM/screen.cc
-  foundation/thread_safe_map.h
-  bindings/BOM/timer.cc
-  bindings/BOM/websocket.cc
-  bindings/BOM/websocket.h
-  bindings/BOM/window.cc
+  bindings/KOM/console.cc
+  bindings/KOM/fetch.cc
+  bindings/KOM/screen.cc
+  bindings/KOM/timer.cc
+  bindings/KOM/websocket.cc
+  bindings/KOM/websocket.h
+  bindings/KOM/window.cc
+  bindings/KOM/window.h
   bindings/kraken.cc
-  bindings/BOM/window.h
 )
 add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
 add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)

@@ -7,9 +7,9 @@
 #define KRAKEN_JS_BRIDGE_H_
 
 #include "bindings/kraken.h"
-#include "bindings/BOM/websocket.h"
-#include "bindings/BOM/window.h"
-#include "bindings/BOM/websocket.h"
+#include "bindings/KOM/websocket.h"
+#include "bindings/KOM/window.h"
+#include "bindings/KOM/websocket.h"
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
