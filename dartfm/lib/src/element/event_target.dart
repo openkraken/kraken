@@ -29,10 +29,6 @@ abstract class EventTarget {
 
   /// return whether event is cancelled.
   bool dispatchEvent(Event event) {
-    if (!eventHandlers.containsKey(event.type)) {
-      return true;
-    }
-
     bool cancelled = true;
     event.currentTarget = event.target = this;
     while (event.currentTarget != null) {
