@@ -60,7 +60,7 @@ abstract class Element extends Node
       @required int nodeId,
       @required this.tagName,
       this.properties,
-      this.didPosition,
+      this.needsReposition,
       List<String> events,
       @required this.defaultDisplay
     }) : assert(tagName != null),
@@ -73,6 +73,12 @@ abstract class Element extends Node
       for (String eventName in events) {
         addEvent(eventName);
       }
+    }
+
+    // mark element needs to reposition according to position property
+    if (style.contains('position') &&
+      (style.position == 'absolute' || style.position == 'fixed')) {
+      needsReposition = true;
     }
 
     renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
@@ -116,7 +122,7 @@ abstract class Element extends Node
   RenderConstrainedBox renderConstrainedBox;
   final String tagName;
   Map<String, dynamic> properties;
-  bool didPosition = false; // whether position is adjusted when position is absolute or fixed
+  bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
   RenderObject renderObject; // Style decorated renderObject
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutElement;
@@ -187,6 +193,7 @@ abstract class Element extends Node
 
       // position change
       if (positionChanged) {
+        needsReposition = true;
         _updatePosition(newStyle);
 
       } else if (newPosition != 'static') {
@@ -269,6 +276,7 @@ abstract class Element extends Node
       // insert non positioned renderObject to parent element in the order of original element tree
       parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
 
+      needsReposition = false;
     // from static to !static
     } else {
       // change non position element to position element, add stack node
@@ -284,35 +292,47 @@ abstract class Element extends Node
       );
       renderStack = transform.child = renderNewStack;
 
-      // new node not in the tree no need to append
-      if (renderObject.parent == null) {
-        return;
-      }
-
-      // find positioned element to attach
-      Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-      if (parentElementWithStack == null) {
-        return;
-      }
-
-      // remove non positioned element from parent element
-      (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
-      RenderStack parentStack = parentElementWithStack.renderStack;
-
-      StackParentData stackParentData = getPositionParentDataFromStyle(style);
-      renderObject.parentData = stackParentData;
-
-      Element currentElement = nodeMap[nodeId];
-
-      // current element's zIndex
-      int curZIndex = 0;
-      if (currentElement.style.contains('zIndex') &&
-        currentElement.style['zIndex'] != null
+      // append element to positioned parent
+      if (style.position == 'absolute' ||
+        style.position == 'fixed'
       ) {
-        curZIndex = currentElement.style['zIndex'];
+        // new node not in the tree, wait for append in appenedElement
+        if (renderObject.parent == null) {
+          return;
+        }
+
+        // find positioned element to attach
+        Element parentElementWithStack;
+        if (style.position == 'absolute') {
+          parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+        } else {
+          parentElementWithStack = ElementManager().getRootElement();
+        }
+
+        // not found positioned parent element, wait for append in appenedElement
+        if (parentElementWithStack == null) {
+          return;
+        }
+
+        // remove non positioned element from parent element
+        (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
+        RenderStack parentStack = parentElementWithStack.renderStack;
+
+        StackParentData stackParentData = getPositionParentDataFromStyle(style);
+        renderObject.parentData = stackParentData;
+
+        Element currentElement = nodeMap[nodeId];
+
+        // current element's zIndex
+        int curZIndex = 0;
+        if (currentElement.style.contains('zIndex') &&
+          currentElement.style['zIndex'] != null
+        ) {
+          curZIndex = currentElement.style['zIndex'];
+        }
+        // add current element back to parent stack by zIndex
+        insertByZIndex(parentStack, renderObject, this, curZIndex);
       }
-      // add current element back to parent stack by zIndex
-      insertByZIndex(parentStack, renderObject, this, curZIndex);
     }
   }
 
@@ -608,23 +628,20 @@ abstract class Element extends Node
     return node;
   }
 
-  // Loop element children to find positioned element which hasn't append to renderStack
-  List findNeedPositionChildren(dynamic el) {
+  // Loop element's children to find elements need to reposition
+  List findNeedsRepositionChildren(dynamic el) {
     if (el is! Element) {
       return null;
     }
     List resultEls = [];
-    if (el.didPosition != true &&
-      el.style.contains('position') &&
-      (el.style.position == 'absolute' || el.style.position == 'fixed')
-    ) {
+    if (el.needsReposition == true) {
       resultEls.add(el);
     }
 
     List childNodes = el.childNodes;
     if (childNodes.length != 0) {
       for (int i = 0; i < childNodes.length; i++) {
-        List childEls = this.findNeedPositionChildren(childNodes[i]);
+        List childEls = this.findNeedsRepositionChildren(childNodes[i]);
         if (childEls != null) {
           resultEls = [...resultEls, ...childEls];
         }
@@ -707,7 +724,7 @@ abstract class Element extends Node
 
       // append positioned children not appended to renderStack yet to element's renderStack
       if (renderStack != null) {
-        List targets = findNeedPositionChildren(child);
+        List targets = findNeedsRepositionChildren(child);
         for (int i = 0; i < targets.length; i++) {
           Element target = targets[i];
           // remove positioned element from parent
@@ -749,7 +766,7 @@ abstract class Element extends Node
   }
 
   void insertByZIndex(RenderStack renderStack, RenderObject renderObject, Element el, int zIndex) {
-    el.didPosition = true;
+    el.needsReposition = false;
     RenderBox child = renderStack.lastChild;
     while(child != null) {
       ParentData parentData = child.parentData;
