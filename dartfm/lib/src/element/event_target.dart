@@ -29,33 +29,31 @@ abstract class EventTarget {
 
   /// return whether event is cancelled.
   bool dispatchEvent(Event event) {
-    if (!eventHandlers.containsKey(event.type)) {
-      return true;
+    bool cancelled = true;
+    event.currentTarget = event.target = this;
+    while (event.currentTarget != null) {
+      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
+      cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
+      if (!event.bubbles || cancelled) break;
+      event.currentTarget = event.currentTarget?.parentNode;
     }
-
-    List<EventHandler> handlers = _getEventHandlers(event.type);
-    if (handlers != null) {
-      bool cancelled;
-      event.currentTarget = event.target = this;
-      _dispatchEventToTarget(event.currentTarget, handlers, event);
-      return cancelled;
-    } else {
-      return true;
-    }
+    return cancelled;
   }
 
   bool _dispatchEventToTarget(
       Node node, List<EventHandler> handlers, Event event) {
-    for (var handler in handlers) {
-      handler(event);
-      if (event.defaultPrevented || !event.canBubble()) {
-        return true;
+    if (handlers != null) {
+      for (var handler in handlers) {
+        handler(event);
+        if (event.defaultPrevented || !event.canBubble()) {
+          return true;
+        }
       }
     }
     return false;
   }
 
-  List<EventHandler> _getEventHandlers(String type) {
+  List<EventHandler> getEventHandlers(String type) {
     assert(type != null);
     return eventHandlers[type];
   }
