@@ -8,9 +8,8 @@ import 'package:meta/meta.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:kraken/src/element/context.dart';
-import 'package:kraken/src/bridge/message.dart';
+import 'package:kraken/scheduler.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
@@ -854,6 +853,9 @@ mixin ElementEventHandler on Node {
   num _touchStartTime = 0;
   num _touchEndTime = 0;
 
+  static const int MAX_STEP_MS = 10;
+  final Throttling _throttler = new Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+
   void _handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);
     _touchStartTime = event.timeStamp;
@@ -861,8 +863,10 @@ mixin ElementEventHandler on Node {
   }
 
   void _handlePointMove(PointerMoveEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchmove', pointEvent);
-    this.dispatchEvent(event);
+    _throttler.throttle(() {
+      TouchEvent event = _getTouchEvent('touchmove', pointEvent);
+      this.dispatchEvent(event);
+    });
   }
 
   void _handlePointUp(PointerUpEvent pointEvent) {
