@@ -1,5 +1,5 @@
 import {NodeImpl, NodeType} from './node';
-import {krakenAddEvent, krakenCreateElement, krakenSetProperty} from './kraken';
+import {krakenAddEvent, krakenCreateElement, krakenRemoveEvent, krakenSetProperty} from './kraken';
 
 declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
 type EventListener = () => void;
@@ -94,6 +94,13 @@ export class ElementImpl extends NodeImpl {
     krakenAddEvent(this.id, eventName);
     this.events[eventName] = eventListener;
     nodeMap[this.id] = this;
+  }
+
+  removeEventListener(eventName: string, eventListener: any) {
+    super.removeEventListener(eventName, eventListener);
+    delete nodeMap[this.id];
+    delete this.events[eventName];
+    krakenRemoveEvent(this.id, eventName);
   }
 
   get nodeName() {
