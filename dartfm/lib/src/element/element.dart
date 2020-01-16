@@ -92,14 +92,12 @@ abstract class Element extends Node
     renderObject = initRenderDecoratedBox(renderObject, style);
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-    renderObject = RenderEventListener(
+    renderObject = RenderPointerListener(
       child: renderObject,
       onPointerDown: this._handlePointDown,
       onPointerMove: this._handlePointMove,
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
-      nodeId: nodeId,
-      style: style,
     );
     renderObject = initRenderMargin(renderObject, style, this);
     renderObject = initRenderOpacity(renderObject, style);
