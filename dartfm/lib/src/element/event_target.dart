@@ -36,12 +36,7 @@ abstract class EventTarget {
     if (handlers != null) {
       bool cancelled;
       event.currentTarget = event.target = this;
-      while (event.currentTarget != null) {
-        cancelled =
-            _dispatchEventToTarget(event.currentTarget, handlers, event);
-        if (!event.bubbles || cancelled) break;
-        event.currentTarget = event.currentTarget?.parentNode;
-      }
+      _dispatchEventToTarget(event.currentTarget, handlers, event);
       return cancelled;
     } else {
       return true;
