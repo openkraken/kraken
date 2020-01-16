@@ -22,6 +22,7 @@ add_library(bindings STATIC
   bindings/fetch.cc
   bindings/screen.cc
   bindings/thread_safe_map.h
+  bindings/thread_safe_array.h
   bindings/timer.cc
   bindings/websocket.cc
   bindings/websocket.h

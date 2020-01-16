@@ -195,8 +195,8 @@ abstract class Element extends Node
         _updatePosition(newStyle);
 
       } else if (newPosition != 'static') {
-        int newZIndex = newStyle['zIndex'];
-        int oldZIndex = _style['zIndex'];
+        int newZIndex = newStyle.zIndex;
+        int oldZIndex = _style.zIndex;
         // zIndex change
         if (newZIndex != oldZIndex) {
           _updateZIndex(newStyle);
