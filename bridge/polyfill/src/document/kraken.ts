@@ -19,3 +19,11 @@ export function krakenRemoveNode(id: number) {
 export function krakenSetProperty(id: number, key: string, value: string) {
   return __kraken_js_to_dart__(`["setProperty",[${id},"${key}","${value}"]]`);
 }
+
+export function krakenAddEvent(id: number, eventName: string) {
+  return __kraken_js_to_dart__(`["addEvent", [${id}, "${eventName}"]]`);
+}
+
+export function krakenRemoveEvent(id: number, eventName: string) {
+  return __kraken_js_to_dart__(`["removeEvent", [${id}, "${eventName}"]]`);
+}
