@@ -24,7 +24,7 @@ mixin ColorMixin on Node {
   }
 
   void updateRenderOpacity(Style style,
-      {RenderBoxModel rootRenderObject}) {
+      {RenderObjectWithChildMixin rootRenderObject}) {
     if (style.contains('opacity')) {
       String opacityString = style['opacity'];
       double opacity =
