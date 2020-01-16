@@ -38,7 +38,7 @@ class TextNode extends Node
     properties[key] = value;
 
     Element parentElement = this.parentNode;
-    Style parentStyle = Style(parentElement.properties['style']);
+    Style parentStyle = parentElement.style;
 
     RenderParagraph newTextNode = RenderParagraph(
       createTextSpanWithStyle(value, parentStyle),

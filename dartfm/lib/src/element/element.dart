@@ -864,7 +864,25 @@ mixin ElementEventHandler on Node {
   }
 
   void _handlePointMove(PointerMoveEvent pointEvent) {
-    Event event = Event('touchmove', EventInit());
+    TouchEvent event = TouchEvent('touchmove');
+    Touch touch = Touch(
+      identifier: pointEvent.pointer,
+      target: this,
+      screenX: pointEvent.position.dx,
+      screenY: pointEvent.position.dy,
+      clientX: pointEvent.localPosition.dx,
+      clientY: pointEvent.localPosition.dy,
+      pageX: pointEvent.localPosition.dx,
+      pageY: pointEvent.localPosition.dy,
+      radiusX: pointEvent.radiusMajor,
+      radiusY: pointEvent.radiusMinor,
+      rotationAngle: pointEvent.orientation,
+      force: pointEvent.pressure,
+    );
+    event.changedTouches.items.add(touch);
+    event.targetTouches.items.add(touch);
+    event.touches.items.add(touch);
+
     event.detail = {};
     this.dispatchEvent(event);
   }
