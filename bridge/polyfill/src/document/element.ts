@@ -1,10 +1,60 @@
 import {NodeImpl, NodeType} from './node';
-import {krakenCreateElement, krakenSetProperty} from './kraken';
+import {krakenAddEvent, krakenCreateElement, krakenRemoveEvent, krakenSetProperty} from './kraken';
+
+declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
+type EventListener = () => void;
+
+let nodeMap: {
+  [nodeId: number]: ElementImpl;
+} = {};
+const TARGET_JS = 'J';
+
+__kraken_dart_to_js__((message) => {
+  if (message[1] === TARGET_JS) {
+    message = message.slice(2);
+  }
+  let parsedMessage = null;
+  try {
+    parsedMessage = JSON.parse(message);
+  } catch (err) {
+    console.error('Can not parse message from backend, the raw message:', message);
+    console.error(err);
+  }
+
+  if (parsedMessage !== null) {
+    try {
+      const action = parsedMessage[0];
+      const target = nodeMap[parsedMessage[1][0]];
+      const arg = parsedMessage[1][1];
+      if (action === 'event') {
+        handleEvent(target, arg);
+      } else {
+        console.error(`ERROR: Unknown action from backend ${action}, with arg: ${JSON.stringify(arg)}`);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+});
+
+function handleEvent(currentTarget: ElementImpl, event: any) {
+  const target = nodeMap[event.target];
+  event.targetId = event.target;
+  event.target = target;
+
+  event.currentTargetId = event.currentTarget;
+  event.currentTarget = currentTarget;
+
+  if (currentTarget) {
+    currentTarget.dispatchEvent(event);
+  }
+}
 
 export class ElementImpl extends NodeImpl {
   public readonly tagName: string;
-  private _props: any = {};
-  private events: string[] = [];
+  private events: {
+    [eventName: string]: EventListener;
+  } = {};
   public style: object = {};
 
   private toCamelCase(key: string) {
@@ -35,13 +85,22 @@ export class ElementImpl extends NodeImpl {
     });
 
     if (tagName != 'BODY') {
-      krakenCreateElement(this.tagName, id, this._props, this.events);
+      krakenCreateElement(this.tagName, id, {}, []);
     }
   }
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    this.events.push(eventName.toLowerCase());
+    krakenAddEvent(this.id, eventName);
+    this.events[eventName] = eventListener;
+    nodeMap[this.id] = this;
+  }
+
+  removeEventListener(eventName: string, eventListener: any) {
+    super.removeEventListener(eventName, eventListener);
+    delete nodeMap[this.id];
+    delete this.events[eventName];
+    krakenRemoveEvent(this.id, eventName);
   }
 
   get nodeName() {
