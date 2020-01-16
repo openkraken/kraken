@@ -3,27 +3,20 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/style.dart';
 
-class RenderBoxModel extends RenderPointerListener {
+class RenderBoxModel extends RenderTransform {
   RenderBoxModel({
     RenderBox child,
-    PointerDownEventListener onPointerDown,
-    PointerMoveEventListener onPointerMove,
-    PointerUpEventListener onPointerUp,
-    PointerCancelEventListener onPointerCancel,
-    PointerSignalEventListener onPointerSignal,
-    HitTestBehavior behavior,
+    Matrix4 transform,
+    Offset origin,
     this.nodeId,
     this.style,
   }) : super(
     child: child,
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onPointerCancel: onPointerCancel,
-    onPointerSignal: onPointerSignal,
-    behavior: behavior,
+    transform: transform,
+    origin: origin,
   );
   int nodeId;
   Style style;

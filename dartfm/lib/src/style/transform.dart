@@ -1,5 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin TransformStyleMixin {
@@ -7,14 +8,14 @@ mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
-  RenderObject initTransform(RenderObject current, Style style) {
+  RenderObject initTransform(RenderObject current, Style style, int nodeId) {
     if (style?.transform != null) {
       List<Method> methods = Method.parseMethod(style.transform);
       matrix4 = combineTransform(methods) ?? matrix4;
     }
     Offset offset = parseOrigin(style?.transformOrigin);
     transform =
-        RenderTransform(child: current, transform: matrix4, origin: offset);
+        RenderBoxModel(child: current, transform: matrix4, origin: offset, nodeId: nodeId, style: style);
     return transform;
   }
 

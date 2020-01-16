@@ -92,6 +92,15 @@ abstract class Element extends Node
     renderObject = initRenderDecoratedBox(renderObject, style);
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
+    renderObject = RenderEventListener(
+      child: renderObject,
+      onPointerDown: this._handlePointDown,
+      onPointerMove: this._handlePointMove,
+      onPointerUp: this._handlePointUp,
+      onPointerCancel: this._handlePointCancel,
+      nodeId: nodeId,
+      style: style,
+    );
     renderObject = initRenderMargin(renderObject, style, this);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
@@ -107,16 +116,7 @@ abstract class Element extends Node
       );
     }
 
-    renderObject = initTransform(renderObject, style);
-    renderObject = renderBoxModel = RenderBoxModel(
-      child: renderObject,
-      onPointerDown: this._handlePointDown,
-      onPointerMove: this._handlePointMove,
-      onPointerUp: this._handlePointUp,
-      onPointerCancel: this._handlePointCancel,
-      nodeId: nodeId,
-      style: style,
-    );
+    renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
     _inited = true;
   }
   RenderConstrainedBox renderConstrainedBox;

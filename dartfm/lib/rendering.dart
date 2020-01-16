@@ -5,6 +5,7 @@
 
 export 'src/rendering/box.dart';
 export 'src/rendering/boxModel.dart';
+export 'src/rendering/eventListener.dart';
 export 'src/rendering/canvas.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/layout.dart';
