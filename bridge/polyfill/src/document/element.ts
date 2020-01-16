@@ -27,6 +27,10 @@ export class ElementImpl extends NodeImpl {
         this[styleKey] = value;
         krakenSetProperty(id, '.style.' + styleKey, value);
         return true;
+      },
+      get(target: any, props: string | number | symbol, receiver) {
+        let styleKey = toCamelCase(String(props));
+        return this[styleKey];
       }
     });
 

@@ -11,20 +11,22 @@ const temp = require('temp');
 
 program
   .version(packageInfo.version)
-  .usage('[-b bundlePath] [-u bundleURL] [-s source]')
-  .description('Start a kraken app. Usage: ')
+  .usage('[filename|url]')
+  .description('Start a kraken app.')
   .option('-b --bundle <bundle>', 'Bundle path. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-u --url <url>', 'Bundle url. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-s, --source <source>', 'Source code. pass source directory from command line')
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
+  .option('--show-performance-monitor', 'show render performance monitor', false)
+  .option('-d, --debug-layout', 'debug element\'s paint layout', false)
   .action((options) => {
     let { bundle, url, source } = options;
 
     if (!bundle && !url && !source && !options.args) {
       program.help();
     } else {
-      const firstArgs = options.args[0];      
+      const firstArgs = options.args[0];
 
       if (firstArgs) {
         if (/^http/.test(firstArgs)) {
@@ -40,6 +42,14 @@ program
 
       if (options.enableKrakenJsLog) {
         env['ENABLE_KRAKEN_JS_LOG'] = 'true';
+      }
+
+      if (options.showPerformanceMonitor) {
+        env['KRAKEN_ENABLE_PERFORMANCE_OVERLAY'] = true;
+      }
+
+      if (options.debugLayout) {
+        env['KRAKEN_ENABLE_DEBUG'] = true;
       }
 
       if (bundle) {

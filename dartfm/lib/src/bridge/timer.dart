@@ -4,11 +4,13 @@
  */
 
 import 'dart:async';
+import 'package:kraken/element.dart';
 import 'message.dart';
 
 class KrakenTimer {
   int timerId = 1;
   Map<int, Timer> timerMap = {};
+  Map<int, bool> animationFrameCallbackValidateMap = {};
 
   KrakenTimer();
 
@@ -34,5 +36,23 @@ class KrakenTimer {
       CPPMessage(INTERVAL_MESSAGE, "$callbackId").send();
     });
     return id;
+  }
+
+  int requestAnimationFrame(int callbackId) {
+    int id = timerId++;
+    animationFrameCallbackValidateMap[callbackId] = true;
+    ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      if (animationFrameCallbackValidateMap[callbackId] == true) {
+        CPPMessage(ANIMATION_FRAME_MESSAGE, "$callbackId").send();
+        // $timeStamp
+      }
+    });
+    return id;
+  }
+
+  void cancelAnimationFrame(int timerId) {
+    if (animationFrameCallbackValidateMap.containsKey(timerId)) {
+      animationFrameCallbackValidateMap[timerId] = false;
+    }
   }
 }
