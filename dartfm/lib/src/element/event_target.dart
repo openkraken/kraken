@@ -20,10 +20,11 @@ abstract class EventTarget {
   }
 
   void removeEventListener(String eventName, EventHandler eventHandler) {
-    if (!eventHandlers.containsKey(eventHandler)) {
+    if (!eventHandlers.containsKey(eventName)) {
       return;
     }
-    eventHandlers.remove(eventHandler);
+    List<EventHandler> currentHandlers = eventHandlers[eventName];
+    currentHandlers.remove(eventHandler);
   }
 
   /// return whether event is cancelled.
