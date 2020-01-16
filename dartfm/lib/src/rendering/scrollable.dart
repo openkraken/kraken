@@ -204,6 +204,7 @@ class RenderSingleChildViewport extends RenderBox
     @required ViewportOffset offset,
     double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
+    this.shouldClip = false
   })  : assert(axisDirection != null),
         assert(offset != null),
         assert(cacheExtent != null),
@@ -213,6 +214,7 @@ class RenderSingleChildViewport extends RenderBox
     this.child = child;
   }
 
+  bool shouldClip;
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
@@ -384,7 +386,7 @@ class RenderSingleChildViewport extends RenderBox
         context.paintChild(child, offset + paintOffset);
       }
 
-      if (_shouldClipAtPaintOffset(paintOffset)) {
+      if (shouldClip && _shouldClipAtPaintOffset(paintOffset)) {
         context.pushClipRect(
             needsCompositing, offset, Offset.zero & size, paintContents);
       } else {

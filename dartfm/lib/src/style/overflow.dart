@@ -66,7 +66,10 @@ mixin StyleOverflowMixin {
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = RenderSingleChildViewport(
-                axisDirection: axisDirection, offset: ViewportOffset.zero(), child: _renderObjectX);
+                axisDirection: axisDirection,
+                offset: ViewportOffset.zero(),
+                child: _renderObjectX,
+                shouldClip: true);
             }
             break;
         }
@@ -87,8 +90,9 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = OverflowCustomBox(
-                child: _child, textDirection: TextDirection.ltr, axisDirection: axisDirection);
+              parent.child = OverflowCustomBox(child: _child,
+                textDirection: TextDirection.ltr,
+                axisDirection: axisDirection);
             }
             break;
           case Style.AUTO:
@@ -109,7 +113,10 @@ mixin StyleOverflowMixin {
               childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = RenderSingleChildViewport(
-                axisDirection: axisDirection, offset: ViewportOffset.zero(), child: _child);
+                axisDirection: axisDirection,
+                offset: ViewportOffset.zero(),
+                child: _child,
+                shouldClip: true);
             }
             break;
         }
@@ -132,8 +139,10 @@ mixin StyleOverflowMixin {
             .getScrollableRenderObject(current);
         break;
       case Style.HIDDEN:
-        current = RenderSingleChildViewport(
-          axisDirection: axisDirection, offset: ViewportOffset.zero(), child: current);
+        current = RenderSingleChildViewport(axisDirection: axisDirection,
+          offset: ViewportOffset.zero(),
+          child: current,
+          shouldClip: true);
         break;
     }
     return current;
