@@ -793,73 +793,18 @@ mixin ElementEventHandler on Node {
   num _touchEndTime = 0;
 
   void _handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = TouchEvent('touchstart');
-    Touch touch = Touch(
-      identifier: pointEvent.pointer,
-      target: this,
-      screenX: pointEvent.position.dx,
-      screenY: pointEvent.position.dy,
-      clientX: pointEvent.localPosition.dx,
-      clientY: pointEvent.localPosition.dy,
-      pageX: pointEvent.localPosition.dx,
-      pageY: pointEvent.localPosition.dy,
-      radiusX: pointEvent.radiusMajor,
-      radiusY: pointEvent.radiusMinor,
-      rotationAngle: pointEvent.orientation,
-      force: pointEvent.pressure,
-    );
-    event.changedTouches.items.add(touch);
-    event.targetTouches.items.add(touch);
-    event.touches.items.add(touch);
-    event.detail = {};
+    TouchEvent event = _getTouchEvent('touchstart', pointEvent);
     _touchStartTime = event.timeStamp;
     this.dispatchEvent(event);
   }
 
   void _handlePointMove(PointerMoveEvent pointEvent) {
-    TouchEvent event = TouchEvent('touchmove');
-    Touch touch = Touch(
-      identifier: pointEvent.pointer,
-      target: this,
-      screenX: pointEvent.position.dx,
-      screenY: pointEvent.position.dy,
-      clientX: pointEvent.localPosition.dx,
-      clientY: pointEvent.localPosition.dy,
-      pageX: pointEvent.localPosition.dx,
-      pageY: pointEvent.localPosition.dy,
-      radiusX: pointEvent.radiusMajor,
-      radiusY: pointEvent.radiusMinor,
-      rotationAngle: pointEvent.orientation,
-      force: pointEvent.pressure,
-    );
-    event.changedTouches.items.add(touch);
-    event.targetTouches.items.add(touch);
-    event.touches.items.add(touch);
-    event.detail = {};
-
+    TouchEvent event = _getTouchEvent('touchmove', pointEvent);
     this.dispatchEvent(event);
   }
 
   void _handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = TouchEvent('touchend');
-    Touch touch = Touch(
-      identifier: pointEvent.pointer,
-      target: this,
-      screenX: pointEvent.position.dx,
-      screenY: pointEvent.position.dy,
-      clientX: pointEvent.localPosition.dx,
-      clientY: pointEvent.localPosition.dy,
-      pageX: pointEvent.localPosition.dx,
-      pageY: pointEvent.localPosition.dy,
-      radiusX: pointEvent.radiusMajor,
-      radiusY: pointEvent.radiusMinor,
-      rotationAngle: pointEvent.orientation,
-      force: pointEvent.pressure,
-    );
-    event.changedTouches.items.add(touch);
-    event.targetTouches.items.add(touch);
-    event.touches.items.add(touch);
-    event.detail = {};
+    TouchEvent event = _getTouchEvent('touchend', pointEvent);
     _touchEndTime = event.timeStamp;
     this.dispatchEvent(event);
 
@@ -869,6 +814,29 @@ mixin ElementEventHandler on Node {
         _touchEndTime - _touchStartTime < 300) {
       handleClick(Event('click', EventInit()));
     }
+  }
+
+  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
+    TouchEvent event = TouchEvent(type);
+    Touch touch = Touch(
+      identifier: pointEvent.pointer,
+      target: this,
+      screenX: pointEvent.position.dx,
+      screenY: pointEvent.position.dy,
+      clientX: pointEvent.localPosition.dx,
+      clientY: pointEvent.localPosition.dy,
+      pageX: pointEvent.localPosition.dx,
+      pageY: pointEvent.localPosition.dy,
+      radiusX: pointEvent.radiusMajor,
+      radiusY: pointEvent.radiusMinor,
+      rotationAngle: pointEvent.orientation,
+      force: pointEvent.pressure,
+    );
+    event.changedTouches.items.add(touch);
+    event.targetTouches.items.add(touch);
+    event.touches.items.add(touch);
+    event.detail = {};
+    return event;
   }
 
   void handleClick(Event event) {
