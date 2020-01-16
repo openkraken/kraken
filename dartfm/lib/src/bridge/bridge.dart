@@ -59,6 +59,16 @@ void clearInterval(int timerId) {
 }
 
 @pragma('vm:entry-point')
+int requestAnimationFrame(int callbackId) {
+  return timer.requestAnimationFrame(callbackId);
+}
+
+@pragma('vm:entry-point')
+void cancelAnimationFrame(int timerId) {
+  timer.cancelAnimationFrame(timerId);
+}
+
+@pragma('vm:entry-point')
 double getScreenAvailHeight() {
   return window.physicalSize.height;
 }

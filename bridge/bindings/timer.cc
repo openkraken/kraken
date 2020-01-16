@@ -148,6 +148,37 @@ alibaba::jsa::Value clearTimeout(alibaba::jsa::JSContext &rt,
   return alibaba::jsa::Value::undefined();
 }
 
+alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
+                                const alibaba::jsa::Value &thisVal,
+                                const alibaba::jsa::Value *args,
+                                size_t count) {
+  if (count <= 0) {
+    KRAKEN_LOG(WARN) << "[requestAnimationFrame] function missing parameters";
+    return alibaba::jsa::Value::undefined();
+  }
+
+  alibaba::jsa::Value *callbackValue =
+      new alibaba::jsa::Value(args[0].getObject(rt));
+  alibaba::jsa::Object &&callbackFunction = callbackValue->getObject(rt);
+
+  if (!callbackFunction.isFunction(rt)) {
+    KRAKEN_LOG(WARN) << "[requestAnimationFrame] first param should be a function";
+    return alibaba::jsa::Value::undefined();
+  }
+
+  int callbackId;
+  timerCallbackId.get(callbackId);
+
+  timerCallbackMap.set(callbackId, callbackValue);
+
+  int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
+
+  timerIdToCallbackIdMap.set(timerId, callbackId);
+  timerCallbackId.set(callbackId + 1);
+
+  return alibaba::jsa::Value(timerId);
+}
+
 void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,
                               const int callbackId) {
   alibaba::jsa::Value *callbackValue;
@@ -190,12 +221,37 @@ void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
   }
 }
 
+void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context,
+        const int callbackId) {
+  alibaba::jsa::Value *callbackValue;
+  timerCallbackMap.get(callbackId, callbackValue);
+
+  if (callbackValue == nullptr) {
+    KRAKEN_LOG(VERBOSE) << "callback is not a function";
+    return;
+  }
+
+  alibaba::jsa::Object callback = callbackValue->getObject(*context);
+
+  if (callback.isFunction(*context)) {
+    callback.asFunction(*context).call(*context,
+                                       alibaba::jsa::Value::undefined(), 0);
+    delete callbackValue;
+    timerCallbackMap.erase(callbackId);
+  } else {
+    KRAKEN_LOG(VERBOSE) << "callback is not a function";
+  }
+}
+
 void bindTimer(alibaba::jsa::JSContext *context) {
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), requestAnimationFrame);
   JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0,
                        clearTimeout);
   JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,
+                       clearTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0,
                        clearTimeout);
 }
 
