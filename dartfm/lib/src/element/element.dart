@@ -793,9 +793,26 @@ mixin ElementEventHandler on Node {
   num _touchEndTime = 0;
 
   void _handlePointDown(PointerDownEvent pointEvent) {
-    Event event = Event('touchstart', EventInit());
-    _touchStartTime = event.timeStamp;
+    TouchEvent event = TouchEvent('touchstart');
+    Touch touch = Touch(
+      identifier: pointEvent.pointer,
+      target: this,
+      screenX: pointEvent.position.dx,
+      screenY: pointEvent.position.dy,
+      clientX: pointEvent.localPosition.dx,
+      clientY: pointEvent.localPosition.dy,
+      pageX: pointEvent.localPosition.dx,
+      pageY: pointEvent.localPosition.dy,
+      radiusX: pointEvent.radiusMajor,
+      radiusY: pointEvent.radiusMinor,
+      rotationAngle: pointEvent.orientation,
+      force: pointEvent.pressure,
+    );
+    event.changedTouches.items.add(touch);
+    event.targetTouches.items.add(touch);
+    event.touches.items.add(touch);
     event.detail = {};
+    _touchStartTime = event.timeStamp;
     this.dispatchEvent(event);
   }
 
@@ -818,15 +835,32 @@ mixin ElementEventHandler on Node {
     event.changedTouches.items.add(touch);
     event.targetTouches.items.add(touch);
     event.touches.items.add(touch);
-
     event.detail = {};
+
     this.dispatchEvent(event);
   }
 
   void _handlePointUp(PointerUpEvent pointEvent) {
-    Event event = Event('touchend', EventInit());
-    _touchEndTime = event.timeStamp;
+    TouchEvent event = TouchEvent('touchend');
+    Touch touch = Touch(
+      identifier: pointEvent.pointer,
+      target: this,
+      screenX: pointEvent.position.dx,
+      screenY: pointEvent.position.dy,
+      clientX: pointEvent.localPosition.dx,
+      clientY: pointEvent.localPosition.dy,
+      pageX: pointEvent.localPosition.dx,
+      pageY: pointEvent.localPosition.dy,
+      radiusX: pointEvent.radiusMajor,
+      radiusY: pointEvent.radiusMinor,
+      rotationAngle: pointEvent.orientation,
+      force: pointEvent.pressure,
+    );
+    event.changedTouches.items.add(touch);
+    event.targetTouches.items.add(touch);
+    event.touches.items.add(touch);
     event.detail = {};
+    _touchEndTime = event.timeStamp;
     this.dispatchEvent(event);
 
     // <300ms to trigger click

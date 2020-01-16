@@ -152,7 +152,8 @@ class Touch {
   Map toJson() {
     return {
       'identifier': identifier,
-//      'target': target, // target id?
+      // @NOTE: Can not get target in Touch
+      // 'target': target,
       'clientX': clientX,
       'clientY': clientY,
       'screenX': screenX,
