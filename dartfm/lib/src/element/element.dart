@@ -99,11 +99,6 @@ abstract class Element extends Node
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
     );
-    renderObject = initRenderDecoratedBox(renderObject, style, this);
-    renderObject = initRenderMargin(renderObject, style, this);
-    renderObject = initRenderOpacity(renderObject, style);
-    initTransition(style);
-
     if (style.position != 'static') {
       renderObject = renderStack = RenderPosition(
         textDirection: TextDirection.ltr,
@@ -114,6 +109,12 @@ abstract class Element extends Node
         ],
       );
     }
+
+    renderObject = initRenderDecoratedBox(renderObject, style, this);
+
+    renderObject = initRenderOpacity(renderObject, style);
+    renderObject = initRenderMargin(renderObject, style, this);
+    initTransition(style);
 
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
     _inited = true;
@@ -243,7 +244,7 @@ abstract class Element extends Node
       // change current positioned element to non positioned, remove stack node
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
-      (renderStack.parent as RenderTransform).child = child;
+      (renderStack.parent as RenderDecoratedBox).child = child;
       // remove positioned element from parent element stack
       Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
       parentElementWithStack.renderStack.remove(renderBoxModel);
@@ -278,13 +279,11 @@ abstract class Element extends Node
 
       needsReposition = false;
 
-      // @TODO reposition positioned children
-
     // from static to !static
     } else {
       // change non position element to position element, add stack node
-      RenderObject child = transform.child;
-      transform.child = null;
+      RenderObject child = renderDecoratedBox.child;
+      renderDecoratedBox.child = null;
       RenderStack renderNewStack = RenderPosition(
         textDirection: TextDirection.ltr,
         fit: StackFit.passthrough,
@@ -293,21 +292,22 @@ abstract class Element extends Node
           child
         ],
       );
-      renderStack = transform.child = renderNewStack;
+
+      renderStack = renderDecoratedBox.child = renderNewStack;
 
       // append element to positioned parent
       if (style.position == 'absolute' ||
         style.position == 'fixed'
       ) {
         _rePositionElement(this);
-
-        // loop positioned children to reposition
-        List targets = findPositionedChildren(this, false);
-        for (int i = 0; i < targets.length; i++) {
-          Element target = targets[i];
-          _rePositionElement(target);
-        }
       }
+    }
+
+    // loop positioned children to reposition
+    List targets = findPositionedChildren(this, false);
+    for (int i = 0; i < targets.length; i++) {
+      Element target = targets[i];
+      _rePositionElement(target);
     }
   }
 
@@ -682,7 +682,6 @@ abstract class Element extends Node
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
       Style childStyle = child.style;
-      ContextManager().styleMap[childRenderObject] = childStyle;
       String childPosition = childStyle['position'] ?? 'static';
       bool isFlex = renderLayoutElement is RenderFlexLayout;
 

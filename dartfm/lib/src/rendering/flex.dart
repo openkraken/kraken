@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
@@ -819,19 +820,21 @@ class RenderFlexLayout extends RenderBox
           break;
       }
       if (flipMainAxis) childMainPosition -= _getMainSize(child);
-      Offset relativeOffset;
-      switch (_direction) {
-        case Axis.horizontal:
-          relativeOffset =
-              Offset(childMainPosition, childCrossPosition);
-          break;
-        case Axis.vertical:
-          relativeOffset =
-              Offset(childCrossPosition, childMainPosition);
-          break;
+      if (child is RenderBoxModel) {
+        Offset relativeOffset;
+        switch (_direction) {
+          case Axis.horizontal:
+            relativeOffset =
+                Offset(childMainPosition, childCrossPosition);
+            break;
+          case Axis.vertical:
+            relativeOffset =
+                Offset(childCrossPosition, childMainPosition);
+            break;
+        }
+        ///apply position relative offset change
+        applyRelativeOffset(relativeOffset, child, (child as RenderBoxModel).nodeId);
       }
-      ///apply position relative offset change
-      applyRelativeOffset(relativeOffset, child);
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {

@@ -687,9 +687,11 @@ class RenderFlowLayout extends RenderBox
         final double childCrossAxisOffset = _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis)
           childMainPosition -= childMainAxisExtent;
-        Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child);
+        if (child is RenderBoxModel) {
+          Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
+          ///apply position relative offset change
+          applyRelativeOffset(relativeOffset, child, (child as RenderBoxModel).nodeId);
+        }
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else

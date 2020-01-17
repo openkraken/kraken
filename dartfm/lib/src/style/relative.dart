@@ -1,16 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/src/element/context.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 mixin RelativeStyleMixin on RenderBox {
-  void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox) {
+  void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, int nodeId) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
-      if (ContextManager().styleMap.containsKey(renderBox)) {
-        styleOffset = getRelativeOffset(ContextManager().styleMap[renderBox]);
-      }
+      Element el = nodeMap[nodeId];
+      Style style = el.style;
+      styleOffset = getRelativeOffset(style);
       boxParentData.offset = relativeOffset == null
           ? styleOffset
           : styleOffset == null
