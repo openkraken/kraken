@@ -3,12 +3,10 @@ import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 mixin RelativeStyleMixin on RenderBox {
-  void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, int nodeId) {
+  void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, Style style) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
-      Element el = nodeMap[nodeId];
-      Style style = el.style;
       styleOffset = getRelativeOffset(style);
       boxParentData.offset = relativeOffset == null
           ? styleOffset

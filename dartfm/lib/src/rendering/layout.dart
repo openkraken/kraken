@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 class _RunMetrics {
@@ -687,11 +688,16 @@ class RenderFlowLayout extends RenderBox
         final double childCrossAxisOffset = _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis)
           childMainPosition -= childMainAxisExtent;
-        if (child is RenderBoxModel) {
-          Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
-          ///apply position relative offset change
-          applyRelativeOffset(relativeOffset, child, (child as RenderBoxModel).nodeId);
+        Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
+        Style childStyle;
+        if (child is RenderParagraph) {
+          childStyle = nodeMap[nodeId].style;
+        } else {
+          int childNodeId = (child as RenderBoxModel).nodeId;
+          childStyle = nodeMap[childNodeId].style;
         }
+        ///apply position relative offset change
+        applyRelativeOffset(relativeOffset, child, childStyle);
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else
