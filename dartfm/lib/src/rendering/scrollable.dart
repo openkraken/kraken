@@ -19,6 +19,7 @@ class KrakenScrollable
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
+  RenderBox _renderBox;
 
   KrakenScrollable({
     axisDirection = AxisDirection.down,
@@ -30,17 +31,21 @@ class KrakenScrollable
         physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderObject getScrollableRenderObject(RenderObject child) {
+  RenderObject getScrollableRenderObject(RenderBox child) {
     RenderSingleChildViewport renderSingleChildViewport =
         RenderSingleChildViewport(
             axisDirection: _axisDirection, offset: position, child: child);
 
+    _renderBox = child;
     RenderPointerListener renderPointerListener = RenderPointerListener(
         onPointerDown: _handlePointerDown,
         child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
+
+
+  RenderBox get renderBox => _renderBox;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -204,6 +209,7 @@ class RenderSingleChildViewport extends RenderBox
     @required ViewportOffset offset,
     double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
+    this.shouldClip = false
   })  : assert(axisDirection != null),
         assert(offset != null),
         assert(cacheExtent != null),
@@ -213,6 +219,7 @@ class RenderSingleChildViewport extends RenderBox
     this.child = child;
   }
 
+  bool shouldClip;
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
@@ -384,7 +391,7 @@ class RenderSingleChildViewport extends RenderBox
         context.paintChild(child, offset + paintOffset);
       }
 
-      if (_shouldClipAtPaintOffset(paintOffset)) {
+      if (shouldClip && _shouldClipAtPaintOffset(paintOffset)) {
         context.pushClipRect(
             needsCompositing, offset, Offset.zero & size, paintContents);
       } else {

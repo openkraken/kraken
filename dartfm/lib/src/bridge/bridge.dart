@@ -125,6 +125,7 @@ void initScreenMetricsChangedCallback() {
       "availHeight", window.physicalSize.height.toString()));
 
     CPPMessage(SCREEN_METRICS, buffer.toString()).send();
+    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, window.devicePixelRatio.toString()).send();
   }
 
   sendWindowSize();

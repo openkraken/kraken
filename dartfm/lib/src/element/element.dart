@@ -4,13 +4,13 @@
  */
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:meta/meta.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:kraken/src/element/context.dart';
-import 'package:kraken/src/bridge/message.dart';
+import 'package:kraken/scheduler.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
@@ -89,9 +89,17 @@ abstract class Element extends Node
     if (style.get('display') != 'inline') {
       renderObject = initOverflowBox(renderObject, style);
     }
-    renderObject = initRenderDecoratedBox(renderObject, style);
+
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
+    renderObject = RenderPointerListener(
+      child: renderObject,
+      onPointerDown: this._handlePointDown,
+      onPointerMove: this._handlePointMove,
+      onPointerUp: this._handlePointUp,
+      onPointerCancel: this._handlePointCancel,
+    );
+    renderObject = initRenderDecoratedBox(renderObject, style, this);
     renderObject = initRenderMargin(renderObject, style, this);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
@@ -107,16 +115,7 @@ abstract class Element extends Node
       );
     }
 
-    renderObject = initTransform(renderObject, style);
-    renderObject = renderBoxModel = RenderBoxModel(
-      child: renderObject,
-      onPointerDown: this._handlePointDown,
-      onPointerMove: this._handlePointMove,
-      onPointerUp: this._handlePointUp,
-      onPointerCancel: this._handlePointCancel,
-      nodeId: nodeId,
-      style: style,
-    );
+    renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
     _inited = true;
   }
   RenderConstrainedBox renderConstrainedBox;
@@ -132,6 +131,7 @@ abstract class Element extends Node
   bool shouldBlockStretch = true;
 
   double cropWidth = 0;
+  double cropBorderWidth = 0;
 
   Style _style;
   Style get style => _style;
@@ -174,11 +174,11 @@ abstract class Element extends Node
       ///3.update padding
       updateRenderPadding(newStyle, transitionMap);
 
-      ///4.update decorated
-      updateRenderDecoratedBox(newStyle, transitionMap);
-
-      ///5.update constrained
+      ///4.update constrained
       updateConstraints(newStyle, transitionMap);
+
+      ///5.update decorated
+      updateRenderDecoratedBox(newStyle, this, transitionMap);
 
       ///6.update margin
       updateRenderMargin(newStyle, this, transitionMap);
@@ -197,8 +197,8 @@ abstract class Element extends Node
         _updatePosition(newStyle);
 
       } else if (newPosition != 'static') {
-        int newZIndex = newStyle['zIndex'];
-        int oldZIndex = _style['zIndex'];
+        int newZIndex = newStyle.zIndex;
+        int oldZIndex = _style.zIndex;
         // zIndex change
         if (newZIndex != oldZIndex) {
           _updateZIndex(newStyle);
@@ -755,7 +755,7 @@ abstract class Element extends Node
         for (int i = 0; i < targets.length; i++) {
           Element target = targets[i];
           // remove positioned element from parent
-          (target.parent.renderLayoutElement as ContainerRenderObjectMixin).remove(target.renderObject);
+          target.parent.renderLayoutElement.remove(target.renderObject);
 
           RenderObject stackObject = createStackObject(target);
           ///insert by z-index
@@ -829,13 +829,13 @@ abstract class Element extends Node
 
     if (style.contains('top') || style.contains('left') || style.contains('bottom') || style.contains('right')) {
       parentData
-        ..top = Length(style['top']).displayPortValue
-        ..left = Length(style['left']).displayPortValue
-        ..bottom = Length(style['bottom']).displayPortValue
-        ..right = Length(style['right']).displayPortValue;
+        ..top = Length.toDisplayPortValue(style['top'])
+        ..left = Length.toDisplayPortValue(style['left'])
+        ..bottom = Length.toDisplayPortValue(style['bottom'])
+        ..right = Length.toDisplayPortValue(style['right']);
     }
-    parentData.width = Length(style['width']).displayPortValue;
-    parentData.height = Length(style['height']).displayPortValue;
+    parentData.width = Length.toDisplayPortValue(style['width']);
+    parentData.height = Length.toDisplayPortValue(style['height']);
     parentData.zIndex = style.zIndex;
     return parentData;
   }
@@ -875,7 +875,51 @@ abstract class Element extends Node
   }
 
   dynamic method(String name, List<dynamic> args) {
-    debugPrint('unknown method call. name: $name, args: ${args}');
+    switch (name) {
+      case 'offsetTop':
+        return _getOffset(true);
+      case 'offsetLeft':
+        return _getOffset(false);
+      case 'offsetWidth':
+        return renderMargin?.size?.width ?? '0';
+      case 'offsetHeight':
+        return renderMargin?.size?.height ?? '0';
+      case 'clientWidth':
+        return renderPadding?.size?.width ?? '0';
+      case 'clientHeight':
+        return renderPadding?.size?.height ?? '0';
+      case 'clientLeft':
+        return renderPadding
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dx;
+      case 'clientTop':
+        return renderPadding
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dy;
+      case 'scrollTop':
+        return getScrollTop();
+      case 'scrollLeft':
+        return getScrollLeft();
+      case 'scrollHeight':
+        return getScrollHeight();
+      case 'scrollWidth':
+        return getScrollWidth();
+      default:
+        debugPrint('unknown method call. name: $name, args: ${args}');
+    }
+  }
+
+  String _getOffset(bool isTop) {
+    double offset = 0;
+    if (renderObject is RenderBox) {
+
+      Element element = findParent(
+          this, (element) => element.renderStack != null);
+      Offset relative = (renderObject as RenderBox).localToGlobal(
+          Offset.zero, ancestor: element.renderObject);
+      offset += isTop ? relative.dy : relative.dx;
+    }
+    return offset.toString();
   }
 }
 
@@ -883,23 +927,25 @@ mixin ElementEventHandler on Node {
   num _touchStartTime = 0;
   num _touchEndTime = 0;
 
+  static const int MAX_STEP_MS = 10;
+  final Throttling _throttler = new Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+
   void _handlePointDown(PointerDownEvent pointEvent) {
-    Event event = Event('touchstart', EventInit());
+    TouchEvent event = _getTouchEvent('touchstart', pointEvent);
     _touchStartTime = event.timeStamp;
-    event.detail = {};
     this.dispatchEvent(event);
   }
 
   void _handlePointMove(PointerMoveEvent pointEvent) {
-    Event event = Event('touchmove', EventInit());
-    event.detail = {};
-    this.dispatchEvent(event);
+    _throttler.throttle(() {
+      TouchEvent event = _getTouchEvent('touchmove', pointEvent);
+      this.dispatchEvent(event);
+    });
   }
 
   void _handlePointUp(PointerUpEvent pointEvent) {
-    Event event = Event('touchend', EventInit());
+    TouchEvent event = _getTouchEvent('touchend', pointEvent);
     _touchEndTime = event.timeStamp;
-    event.detail = {};
     this.dispatchEvent(event);
 
     // <300ms to trigger click
@@ -908,6 +954,29 @@ mixin ElementEventHandler on Node {
         _touchEndTime - _touchStartTime < 300) {
       handleClick(Event('click', EventInit()));
     }
+  }
+
+  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
+    TouchEvent event = TouchEvent(type);
+    Touch touch = Touch(
+      identifier: pointEvent.pointer,
+      target: this,
+      screenX: pointEvent.position.dx,
+      screenY: pointEvent.position.dy,
+      clientX: pointEvent.localPosition.dx,
+      clientY: pointEvent.localPosition.dy,
+      pageX: pointEvent.localPosition.dx,
+      pageY: pointEvent.localPosition.dy,
+      radiusX: pointEvent.radiusMajor,
+      radiusY: pointEvent.radiusMinor,
+      rotationAngle: pointEvent.orientation,
+      force: pointEvent.pressure,
+    );
+    event.changedTouches.items.add(touch);
+    event.targetTouches.items.add(touch);
+    event.touches.items.add(touch);
+    event.detail = {};
+    return event;
   }
 
   void handleClick(Event event) {

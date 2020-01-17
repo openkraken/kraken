@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin ColorMixin on Node {
@@ -23,7 +24,7 @@ mixin ColorMixin on Node {
   }
 
   void updateRenderOpacity(Style style,
-      {RenderPointerListener rootRenderObject}) {
+      {RenderObjectWithChildMixin rootRenderObject}) {
     if (style.contains('opacity')) {
       String opacityString = style['opacity'];
       double opacity =

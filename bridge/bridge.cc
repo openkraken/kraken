@@ -15,6 +15,7 @@
 #include "logging.h"
 #include "message.h"
 #include "thread_safe_data.h"
+#include "thread_safe_array.h"
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
@@ -32,11 +33,12 @@ const char FETCH_MESSAGE = 's';
 const char TIMEOUT_MESSAGE = 't';
 const char INTERVAL_MESSAGE = 'i';
 const char ANIMATION_FRAME_MESSAGE = 'a';
-const char ScreenMetrics = 'm';
+const char SCREEN_METRICS = 'm';
 const char WINDOW_LOAD = 'l';
+const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
 
-ThreadSafeData<alibaba::jsa::Value *> dartJsCallBack;
-ThreadSafeData<int> timerCallbackId(1);
+    ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
+    ThreadSafeData<int> timerCallbackId(1);
 
 /**
  * Message channel, send message from JS to Dart.
@@ -100,7 +102,7 @@ alibaba::jsa::Value krakenDartToJs(alibaba::jsa::JSContext &context,
     return alibaba::jsa::Value::undefined();
   }
 
-  dartJsCallBack.set(val);
+  dartJsCallbackList.push(val);
   KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS]: callback registered";
 
   return alibaba::jsa::Value::undefined();
@@ -163,24 +165,28 @@ void JSBridge::invokeKrakenCallback(const char *args) {
   }
   assert(context_ != nullptr);
 
-  alibaba::jsa::Value *callback;
-  dartJsCallBack.get(callback);
+  int length = dartJsCallbackList.length();
 
-  if (callback == nullptr) {
-    KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: you should initialize with "
-                        "__kraken_dart_to_js__ function";
-    return;
+  for (int i = 0; i < length; i ++) {
+    alibaba::jsa::Value *callback;
+    dartJsCallbackList.get(i, callback);
+
+    if (callback == nullptr) {
+      KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: you should initialize with "
+                          "__kraken_dart_to_js__ function";
+      return;
+    }
+
+    if (!callback->getObject(*context_).isFunction(*context_)) {
+      KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: callback is not a function";
+      return;
+    }
+
+    const alibaba::jsa::String str =
+        alibaba::jsa::String::createFromAscii(*context_, args);
+    callback->getObject(*context_).asFunction(*context_).callWithThis(
+        *context_, context_->global(), str, 1);
   }
-
-  if (!callback->getObject(*context_).isFunction(*context_)) {
-    KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: callback is not a function";
-    return;
-  }
-
-  const alibaba::jsa::String str =
-      alibaba::jsa::String::createFromAscii(*context_, args);
-  callback->getObject(*context_).asFunction(*context_).callWithThis(
-      *context_, context_->global(), str, 1);
 }
 
 void JSBridge::handleFlutterCallback(const char *args) {
@@ -241,7 +247,7 @@ void JSBridge::handleFlutterCallback(const char *args) {
                                            std::stoi(statusCode), body);
       break;
     }
-    case ScreenMetrics: {
+    case SCREEN_METRICS: {
       kraken::message::Message message;
       message.parseMessageBody(str.substr(3));
 
@@ -262,6 +268,9 @@ void JSBridge::handleFlutterCallback(const char *args) {
     }
     case WINDOW_LOAD:
       window_->invokeOnloadCallback(context_.get());
+      break;
+    case WINDOW_INIT_DEVICE_PIXEL_RATIO:
+      window_->initDevicePixelRatio(context_.get(), std::stoi(str.substr(3)));
       break;
     default:
       break;

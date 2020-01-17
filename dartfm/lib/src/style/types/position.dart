@@ -164,7 +164,6 @@ class Position {
       return (currentValue - 50) / 50;
     }
     double dividend = isHorizontal ? size.width : size.height;
-    Length length = Length(value);
-    return -length.displayPortValue / dividend;
+    return -Length.toDisplayPortValue(value) / dividend;
   }
 }

@@ -6,30 +6,38 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
+
+import '../../element.dart';
 
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
 mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   RenderDecoratedBox renderDecoratedBox;
-  RenderPadding renderBorderPadding;
+  RenderMargin renderBorderMargin;
   TransitionDecoration oldDecoration;
   Padding oldBorderPadding;
 
-  RenderObject initRenderDecoratedBox(RenderObject renderObject, Style style) {
+  RenderObject initRenderDecoratedBox(RenderObject renderObject, Style style, Element element) {
     oldDecoration = getTransitionDecoration(style);
-    renderBorderPadding = RenderPadding(
-        padding: oldDecoration.getBorderEdgeInsets(),
+    EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
+    if (element != null) {
+      element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    }
+    renderBorderMargin = RenderMargin(
+        margin: margin,
         child: renderObject
     );
     return renderDecoratedBox = RenderDecoratedBox(
       decoration: oldDecoration.toBoxDecoration(),
-      child: renderBorderPadding,
+      child: renderBorderMargin,
     );
   }
 
-  void updateRenderDecoratedBox(Style style, Map<String, Transition> transitionMap) {
+  void updateRenderDecoratedBox(Style style, Element element,
+      Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition allTransition = transitionMap['all'];
@@ -133,7 +141,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             }
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
         backgroundColorTransition?.addProgressListener((progress) {
           progressDecoration.alpha = (alphaDiff * progress).toInt() + baseDecoration.alpha;
@@ -157,28 +165,28 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             progressDecoration.borderBottomSide.borderWidth = borderBottomWidthDiff * progress + baseDecoration.borderBottomSide.borderWidth;
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
 
         borderLeftWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderLeftSide.borderWidth = borderLeftWidthDiff * progress + baseDecoration.borderLeftSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
         borderTopWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderTopSide.borderWidth = borderTopWidthDiff * progress + baseDecoration.borderTopSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
         borderRightWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderRightSide.borderWidth = borderRightWidthDiff * progress + baseDecoration.borderRightSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
         borderBottomWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderBottomSide.borderWidth = borderBottomWidthDiff * progress + baseDecoration.borderBottomSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
         });
 
         borderColorTransition?.addProgressListener((progress) {
@@ -238,13 +246,20 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         });
       } else {
         renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-        renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+        _updateMargin(newDecoration.getBorderEdgeInsets(), element);
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-      renderBorderPadding.padding = newDecoration.getBorderEdgeInsets();
+      _updateMargin(newDecoration.getBorderEdgeInsets(), element);
     }
     oldDecoration = newDecoration;
+  }
+
+  void _updateMargin(EdgeInsets margin, Element element) {
+    if (element != null) {
+      element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    }
+    renderBorderMargin.margin = margin;
   }
 
   /// Shorted border property:
@@ -319,13 +334,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = Length(shadowDefinitions[0]).displayPortValue;
-          double offsetY = Length(shadowDefinitions[1]).displayPortValue;
+          double offsetX = Length.toDisplayPortValue(shadowDefinitions[0]);
+          double offsetY = Length.toDisplayPortValue(shadowDefinitions[1]);
           double blurRadius = shadowDefinitions.length > 3
-              ? Length(shadowDefinitions[2]).displayPortValue
+              ? Length.toDisplayPortValue(shadowDefinitions[2])
               : 0.0;
           double spreadRadius = shadowDefinitions.length > 4
-              ? Length(shadowDefinitions[3]).displayPortValue
+              ? Length.toDisplayPortValue(shadowDefinitions[3])
               : 0.0;
 
           Color color = WebColor.generate(shadowDefinitions.last);
@@ -357,7 +372,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       Radius.zero,
     ];
     if (style.contains('borderRadius')) {
-      double radius = Length(style['borderRadius']).displayPortValue;
+      double radius = Length.toDisplayPortValue(style['borderRadius']);
       borderRadiusTLTRBLBR[0] = borderRadiusTLTRBLBR[1] =
           borderRadiusTLTRBLBR[2] =
               borderRadiusTLTRBLBR[3] = Radius.circular(radius);
@@ -367,7 +382,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     TLTRBLBR.forEach((String corner) {
       String key = 'borderRadius' + corner;
       if (style.contains(key)) {
-        double radius = Length(style[key]).displayPortValue;
+        double radius = Length.toDisplayPortValue(style[key]);
         int index = TLTRBLBR.indexOf(corner);
         borderRadiusTLTRBLBR[index] = Radius.circular(radius);
       }
@@ -421,7 +436,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         ? getBorderStyle(splittedBorder[1])
         : defaultBorderStyle;
     double width = splittedBorder.length > 0
-        ? Length(splittedBorder[0]).displayPortValue
+        ? Length.toDisplayPortValue(splittedBorder[0])
         : defaultBorderLineWidth;
 
     return TransitionBorderSide(
@@ -433,7 +448,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSide = getBorderSide(style['border' + side] ?? '');
     }
     if (style.contains('border' + side + 'Width')) {
-      borderSide.borderWidth = Length(style['border' + side + 'Width']).displayPortValue;
+      borderSide.borderWidth = Length.toDisplayPortValue(style['border' + side + 'Width']);
     }
     if (style.contains('border' + side + 'Style')) {
       borderSide.borderStyle = getBorderStyle(style['border' + side + 'Style']);

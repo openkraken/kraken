@@ -21,10 +21,10 @@ class CanvasElement extends Element {
         events: events,
       ) {
     if (style.contains('width')) {
-      _width = Length(style['width']).displayPortValue;
+      _width = Length.toDisplayPortValue(style['width']);
     }
     if (style.contains('height')) {
-      _height = Length(style['height']).displayPortValue;
+      _height = Length.toDisplayPortValue(style['height']);
     }
 
     size = Size(_width, _height);
@@ -67,36 +67,36 @@ class CanvasElement extends Element {
     String method = args[0];
     switch (method) {
       case 'fillRect':
-        double x = toDouble(args[1]);
-        double y = toDouble(args[2]);
-        double w = toDouble(args[3]);
-        double h = toDouble(args[4]);
+        double x = Length.toDouble(args[1]);
+        double y = Length.toDouble(args[2]);
+        double w = Length.toDouble(args[3]);
+        double h = Length.toDouble(args[4]);
         painter.context.fillRect(x, y, w, h);
         break;
 
       case 'clearRect':
-        double x = toDouble(args[1]);
-        double y = toDouble(args[2]);
-        double w = toDouble(args[3]);
-        double h = toDouble(args[4]);
+        double x = Length.toDouble(args[1]);
+        double y = Length.toDouble(args[2]);
+        double w = Length.toDouble(args[3]);
+        double h = Length.toDouble(args[4]);
         painter.context.clearRect(x, y, w, h);
         break;
 
       case 'strokeRect':
-        double x = toDouble(args[1]);
-        double y = toDouble(args[2]);
-        double w = toDouble(args[3]);
-        double h = toDouble(args[4]);
+        double x = Length.toDouble(args[1]);
+        double y = Length.toDouble(args[2]);
+        double w = Length.toDouble(args[3]);
+        double h = Length.toDouble(args[4]);
         painter.context.strokeRect(x, y, w, h);
         break;
 
       case 'fillText':
         String text = args[1];
-        double x = toDouble(args[2]);
-        double y = toDouble(args[3]);
+        double x = Length.toDouble(args[2]);
+        double y = Length.toDouble(args[3]);
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = toDouble(args[4]);
+          double maxWidth = Length.toDouble(args[4]);
           painter.context.fillText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.fillText(text, x, y);
@@ -105,11 +105,11 @@ class CanvasElement extends Element {
 
       case 'strokeText':
         String text = args[1];
-        double x = toDouble(args[2]);
-        double y = toDouble(args[3]);
+        double x = Length.toDouble(args[2]);
+        double y = Length.toDouble(args[3]);
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = toDouble(args[4]);
+          double maxWidth = Length.toDouble(args[4]);
           painter.context.strokeText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.strokeText(text, x, y);
