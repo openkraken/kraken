@@ -4,6 +4,7 @@
  */
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:meta/meta.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
@@ -88,7 +89,7 @@ abstract class Element extends Node
     if (style.get('display') != 'inline') {
       renderObject = initOverflowBox(renderObject, style);
     }
-    renderObject = initRenderDecoratedBox(renderObject, style);
+
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
     renderObject = RenderPointerListener(
@@ -98,6 +99,7 @@ abstract class Element extends Node
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
     );
+    renderObject = initRenderDecoratedBox(renderObject, style, this);
     renderObject = initRenderMargin(renderObject, style, this);
     renderObject = initRenderOpacity(renderObject, style);
     initTransition(style);
@@ -129,6 +131,7 @@ abstract class Element extends Node
   bool shouldBlockStretch = true;
 
   double cropWidth = 0;
+  double cropBorderWidth = 0;
 
   Style _style;
   Style get style => _style;
@@ -171,11 +174,11 @@ abstract class Element extends Node
       ///3.update padding
       updateRenderPadding(newStyle, transitionMap);
 
-      ///4.update decorated
-      updateRenderDecoratedBox(newStyle, transitionMap);
-
-      ///5.update constrained
+      ///4.update constrained
       updateConstraints(newStyle, transitionMap);
+
+      ///5.update decorated
+      updateRenderDecoratedBox(newStyle, this, transitionMap);
 
       ///6.update margin
       updateRenderMargin(newStyle, this, transitionMap);
@@ -845,7 +848,51 @@ abstract class Element extends Node
   }
 
   dynamic method(String name, List<dynamic> args) {
-    debugPrint('unknown method call. name: $name, args: ${args}');
+    switch (name) {
+      case 'offsetTop':
+        return _getOffset(true);
+      case 'offsetLeft':
+        return _getOffset(false);
+      case 'offsetWidth':
+        return renderMargin?.size?.width ?? '0';
+      case 'offsetHeight':
+        return renderMargin?.size?.height ?? '0';
+      case 'clientWidth':
+        return renderPadding?.size?.width ?? '0';
+      case 'clientHeight':
+        return renderPadding?.size?.height ?? '0';
+      case 'clientLeft':
+        return renderPadding
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dx;
+      case 'clientTop':
+        return renderPadding
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dy;
+      case 'scrollTop':
+        return getScrollTop();
+      case 'scrollLeft':
+        return getScrollLeft();
+      case 'scrollHeight':
+        return getScrollHeight();
+      case 'scrollWidth':
+        return getScrollWidth();
+      default:
+        debugPrint('unknown method call. name: $name, args: ${args}');
+    }
+  }
+
+  String _getOffset(bool isTop) {
+    double offset = 0;
+    if (renderObject is RenderBox) {
+
+      Element element = findParent(
+          this, (element) => element.renderStack != null);
+      Offset relative = (renderObject as RenderBox).localToGlobal(
+          Offset.zero, ancestor: element.renderObject);
+      offset += isTop ? relative.dy : relative.dx;
+    }
+    return offset.toString();
   }
 }
 

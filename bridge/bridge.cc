@@ -33,11 +33,12 @@ const char FETCH_MESSAGE = 's';
 const char TIMEOUT_MESSAGE = 't';
 const char INTERVAL_MESSAGE = 'i';
 const char ANIMATION_FRAME_MESSAGE = 'a';
-const char ScreenMetrics = 'm';
+const char SCREEN_METRICS = 'm';
 const char WINDOW_LOAD = 'l';
+const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
 
-ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
-ThreadSafeData<int> timerCallbackId(1);
+    ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
+    ThreadSafeData<int> timerCallbackId(1);
 
 /**
  * Message channel, send message from JS to Dart.
@@ -246,7 +247,7 @@ void JSBridge::handleFlutterCallback(const char *args) {
                                            std::stoi(statusCode), body);
       break;
     }
-    case ScreenMetrics: {
+    case SCREEN_METRICS: {
       kraken::message::Message message;
       message.parseMessageBody(str.substr(3));
 
@@ -267,6 +268,9 @@ void JSBridge::handleFlutterCallback(const char *args) {
     }
     case WINDOW_LOAD:
       window_->invokeOnloadCallback(context_.get());
+      break;
+    case WINDOW_INIT_DEVICE_PIXEL_RATIO:
+      window_->initDevicePixelRatio(context_.get(), std::stoi(str.substr(3)));
       break;
     default:
       break;

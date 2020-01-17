@@ -130,8 +130,7 @@ class RenderMargin extends RenderShiftedBox {
       ));
       return;
     }
-    final BoxConstraints innerConstraints = constraints.deflate(_resolvedMargin);
-    child.layout(innerConstraints, parentUsesSize: true);
+    child.layout(constraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = Offset(_resolvedMargin.left, _resolvedMargin.top);
     size = constraints.constrain(Size(
