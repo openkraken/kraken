@@ -25,8 +25,11 @@ class KrakenTimer {
   }
 
   void clearTimeout(int timerId) {
-    timerMap[timerId].cancel();
-    timerMap.remove(timerId);
+    // If timer already executed, which will be removed.
+    if (timerMap[timerId] != null) {
+      timerMap[timerId].cancel();
+      timerMap.remove(timerId);
+    }
   }
 
   int setInterval(int callbackId, int timeout) {
@@ -44,9 +47,10 @@ class KrakenTimer {
     ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
       if (animationFrameCallbackValidateMap[callbackId] == true) {
         CPPMessage(ANIMATION_FRAME_MESSAGE, "$callbackId").send();
-        // $timeStamp
       }
     });
+    // Call for paint to trigger painting frame manually.
+    ElementManager().getRootRenderObject().markNeedsPaint();
     return id;
   }
 
