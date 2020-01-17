@@ -33,7 +33,7 @@ mixin ElementStyleMixin on RenderBox {
       }
     }
 
-    double widthD = Length(width).displayPortValue - cropWidth;
+    double widthD = Length.toDisplayPortValue(width) - cropWidth;
 
     return widthD;
   }

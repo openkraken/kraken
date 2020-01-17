@@ -726,7 +726,7 @@ abstract class Element extends Node
         for (int i = 0; i < targets.length; i++) {
           Element target = targets[i];
           // remove positioned element from parent
-          (target.parent.renderLayoutElement as ContainerRenderObjectMixin).remove(target.renderObject);
+          target.parent.renderLayoutElement.remove(target.renderObject);
 
           RenderObject stackObject = createStackObject(target);
           ///insert by z-index
@@ -800,13 +800,13 @@ abstract class Element extends Node
 
     if (style.contains('top') || style.contains('left') || style.contains('bottom') || style.contains('right')) {
       parentData
-        ..top = Length(style['top']).displayPortValue
-        ..left = Length(style['left']).displayPortValue
-        ..bottom = Length(style['bottom']).displayPortValue
-        ..right = Length(style['right']).displayPortValue;
+        ..top = Length.toDisplayPortValue(style['top'])
+        ..left = Length.toDisplayPortValue(style['left'])
+        ..bottom = Length.toDisplayPortValue(style['bottom'])
+        ..right = Length.toDisplayPortValue(style['right']);
     }
-    parentData.width = Length(style['width']).displayPortValue;
-    parentData.height = Length(style['height']).displayPortValue;
+    parentData.width = Length.toDisplayPortValue(style['width']);
+    parentData.height = Length.toDisplayPortValue(style['height']);
     parentData.zIndex = style.zIndex;
     return parentData;
   }

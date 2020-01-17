@@ -56,8 +56,8 @@ mixin TransformStyleMixin {
       //FIXME need support percentage and value
       //FIXME just support two value
       if (originList.length == 2) {
-        offset = Offset(Length(originList[0]).displayPortValue,
-            Length(originList[1]).displayPortValue);
+        offset = Offset(Length.toDisplayPortValue(originList[0]),
+            Length.toDisplayPortValue(originList[1]));
       }
     }
     return offset;
@@ -132,10 +132,10 @@ mixin TransformStyleMixin {
           try {
             double y = 0;
             if (method.args.length == 2) {
-              y = Length(method.args[1].trim()).displayPortValue;
+              y = Length.toDisplayPortValue(method.args[1].trim());
             }
             matrix4 = Matrix4.identity()
-              ..translate(Length(method.args[0].trim()).displayPortValue, y);
+              ..translate(Length.toDisplayPortValue(method.args[0].trim()), y);
           } catch (exception) {}
         }
         break;
@@ -145,14 +145,14 @@ mixin TransformStyleMixin {
             double y = 0,
                 z = 0;
             if (method.args.length == 2) {
-              y = Length(method.args[1].trim()).displayPortValue;
+              y = Length.toDisplayPortValue(method.args[1].trim());
             }
             if (method.args.length == 3) {
-              y = Length(method.args[1].trim()).displayPortValue;
-              z = Length(method.args[2].trim()).displayPortValue;
+              y = Length.toDisplayPortValue(method.args[1].trim());
+              z = Length.toDisplayPortValue(method.args[2].trim());
             }
             matrix4 = Matrix4.identity()
-              ..translate(Length(method.args[0].trim()).displayPortValue, y, z);
+              ..translate(Length.toDisplayPortValue(method.args[0].trim()), y, z);
           } catch (exception) {}
         }
         break;
@@ -160,7 +160,7 @@ mixin TransformStyleMixin {
         if (method.args.length == 1) {
           try {
             matrix4 = Matrix4.identity()
-              ..translate(Length(method.args[0].trim()).displayPortValue);
+              ..translate(Length.toDisplayPortValue(method.args[0].trim()));
           } catch (exception) {}
         }
         break;
@@ -168,7 +168,7 @@ mixin TransformStyleMixin {
         if (method.args.length == 1) {
           try {
             matrix4 = Matrix4.identity()
-              ..translate(0.0, Length(method.args[0].trim()).displayPortValue);
+              ..translate(0.0, Length.toDisplayPortValue(method.args[0].trim()));
           } catch (exception) {
             print(exception);
           }
@@ -178,7 +178,7 @@ mixin TransformStyleMixin {
         if (method.args.length == 1) {
           try {
             matrix4 = Matrix4.identity()
-              ..translate(0.0, 0, Length(method.args[0].trim()).displayPortValue);
+              ..translate(0.0, 0, Length.toDisplayPortValue(method.args[0].trim()));
           } catch (exception) {}
         }
         break;

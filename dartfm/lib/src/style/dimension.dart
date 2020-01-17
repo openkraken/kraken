@@ -28,7 +28,7 @@ mixin DimensionMixin on Node {
     if (input is num) {
       input = input.toString();
     }
-    return Length(input as String).displayPortValue;
+    return Length.toDisplayPortValue(input as String);
   }
 
   void updateConstraints(Style style, Map<String, Transition> transitionMap) {

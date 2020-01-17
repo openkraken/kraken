@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
@@ -56,8 +55,7 @@ class RenderVideoBox extends RenderBox
   }
 }
 
-class VideoElement extends Element
-  with DimensionMixin {
+class VideoElement extends Element {
 
   VideoPlayerController controller;
   String _src;
