@@ -722,7 +722,7 @@ class RenderFlexLayout extends RenderBox
     double constraintHeight;
     double height;
     if (style.get('height') != null) {
-      height = Length(style.get('height')).displayPortValue;
+      height = Length.toDisplayPortValue(style.get('height'));
     }
 
     switch (_direction) {

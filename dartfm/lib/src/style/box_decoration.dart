@@ -319,13 +319,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = Length(shadowDefinitions[0]).displayPortValue;
-          double offsetY = Length(shadowDefinitions[1]).displayPortValue;
+          double offsetX = Length.toDisplayPortValue(shadowDefinitions[0]);
+          double offsetY = Length.toDisplayPortValue(shadowDefinitions[1]);
           double blurRadius = shadowDefinitions.length > 3
-              ? Length(shadowDefinitions[2]).displayPortValue
+              ? Length.toDisplayPortValue(shadowDefinitions[2])
               : 0.0;
           double spreadRadius = shadowDefinitions.length > 4
-              ? Length(shadowDefinitions[3]).displayPortValue
+              ? Length.toDisplayPortValue(shadowDefinitions[3])
               : 0.0;
 
           Color color = WebColor.generate(shadowDefinitions.last);
@@ -357,7 +357,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       Radius.zero,
     ];
     if (style.contains('borderRadius')) {
-      double radius = Length(style['borderRadius']).displayPortValue;
+      double radius = Length.toDisplayPortValue(style['borderRadius']);
       borderRadiusTLTRBLBR[0] = borderRadiusTLTRBLBR[1] =
           borderRadiusTLTRBLBR[2] =
               borderRadiusTLTRBLBR[3] = Radius.circular(radius);
@@ -367,7 +367,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     TLTRBLBR.forEach((String corner) {
       String key = 'borderRadius' + corner;
       if (style.contains(key)) {
-        double radius = Length(style[key]).displayPortValue;
+        double radius = Length.toDisplayPortValue(style[key]);
         int index = TLTRBLBR.indexOf(corner);
         borderRadiusTLTRBLBR[index] = Radius.circular(radius);
       }
@@ -421,7 +421,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         ? getBorderStyle(splittedBorder[1])
         : defaultBorderStyle;
     double width = splittedBorder.length > 0
-        ? Length(splittedBorder[0]).displayPortValue
+        ? Length.toDisplayPortValue(splittedBorder[0])
         : defaultBorderLineWidth;
 
     return TransitionBorderSide(
@@ -433,7 +433,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSide = getBorderSide(style['border' + side] ?? '');
     }
     if (style.contains('border' + side + 'Width')) {
-      borderSide.borderWidth = Length(style['border' + side + 'Width']).displayPortValue;
+      borderSide.borderWidth = Length.toDisplayPortValue(style['border' + side + 'Width']);
     }
     if (style.contains('border' + side + 'Style')) {
       borderSide.borderStyle = getBorderStyle(style['border' + side + 'Style']);

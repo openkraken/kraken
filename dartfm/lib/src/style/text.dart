@@ -225,8 +225,7 @@ mixin TextStyleMixin {
 
   double getFontSize(Style style) {
     if (style.contains(FONT_SIZE)) {
-      Length fontSize = Length(style[FONT_SIZE]);
-      return fontSize.displayPortValue;
+      return Length.toDisplayPortValue(style[FONT_SIZE]);
     } else {
       return DEFAULT_FONT_SIZE;
     }
@@ -237,8 +236,7 @@ mixin TextStyleMixin {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
 
-      Length letterSpacing = Length(_letterSpacing);
-      return letterSpacing.displayPortValue;
+      return Length.toDisplayPortValue(_letterSpacing);
     } else {
       return DEFAULT_LETTER_SPACING;
     }
@@ -249,8 +247,7 @@ mixin TextStyleMixin {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
 
-      Length wordSpacing = Length(_wordSpacing);
-      return wordSpacing.displayPortValue;
+      return Length.toDisplayPortValue(_wordSpacing);
     } else {
       return DEFAULT_WORD_SPACING;
     }
@@ -258,8 +255,7 @@ mixin TextStyleMixin {
 
   double getHeight(Style style) {
     if (style.contains(LINE_HEIGHT)) {
-      Length height = Length(style[LINE_HEIGHT]);
-      return height.displayPortValue;
+      return Length.toDisplayPortValue(style[LINE_HEIGHT]);
     } else {
       return null;
     }
@@ -290,10 +286,10 @@ mixin TextStyleMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = Length(shadowDefinitions[0]).displayPortValue;
-          double offsetY = Length(shadowDefinitions[1]).displayPortValue;
+          double offsetX = Length.toDisplayPortValue(shadowDefinitions[0]);
+          double offsetY = Length.toDisplayPortValue(shadowDefinitions[1]);
           double blurRadius = shadowDefinitions.length > 3
-              ? Length(shadowDefinitions[2]).displayPortValue
+              ? Length.toDisplayPortValue(shadowDefinitions[2])
               : 0.0;
           Color color = WebColor.generate(shadowDefinitions.last);
           if (color != null) {
