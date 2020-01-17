@@ -21,11 +21,12 @@ public:
   virtual alibaba::jsa::Value
   get(alibaba::jsa::JSContext &, const alibaba::jsa::PropNameID &name) override;
   void invokeOnloadCallback(alibaba::jsa::JSContext *context);
+  void initDevicePixelRatio(alibaba::jsa::JSContext *context, const int dp);
 
 private:
   std::shared_ptr<JSWindow> sharedSelf() { return shared_from_this(); }
 
-  alibaba::jsa::Value bindOnload(alibaba::jsa::JSContext &context,
+  alibaba::jsa::Value connect(alibaba::jsa::JSContext &context,
                                  const alibaba::jsa::Value &thisVal,
                                  const alibaba::jsa::Value *args, size_t count);
 };
