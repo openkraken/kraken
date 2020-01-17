@@ -25,8 +25,11 @@ class KrakenTimer {
   }
 
   void clearTimeout(int timerId) {
-    timerMap[timerId].cancel();
-    timerMap.remove(timerId);
+    // If timer already executed, which will be removed.
+    if (timerMap[timerId] != null) {
+      timerMap[timerId].cancel();
+      timerMap.remove(timerId);
+    }
   }
 
   int setInterval(int callbackId, int timeout) {
