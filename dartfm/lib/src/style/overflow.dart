@@ -72,7 +72,8 @@ mixin StyleOverflowMixin {
               parent.child = _renderObjectY = RenderSingleChildViewport(
                   axisDirection: axisDirection,
                   offset: ViewportOffset.zero(),
-                  child: _renderObjectX);
+                  child: _renderObjectX,
+                  shouldClip: true);
               _scrollableY = null;
             }
             break;
