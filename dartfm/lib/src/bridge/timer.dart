@@ -44,9 +44,10 @@ class KrakenTimer {
     ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
       if (animationFrameCallbackValidateMap[callbackId] == true) {
         CPPMessage(ANIMATION_FRAME_MESSAGE, "$callbackId").send();
-        // $timeStamp
       }
     });
+    // Call for paint to trigger painting frame manually.
+    ElementManager().getRootRenderObject().markNeedsPaint();
     return id;
   }
 
