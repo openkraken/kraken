@@ -105,4 +105,9 @@ class RenderPosition extends RenderStack {
       size = Size(width, height);
     }
   }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    paintStack(context, offset);
+  }
 }

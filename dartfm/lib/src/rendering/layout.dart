@@ -734,9 +734,6 @@ class RenderFlowLayout extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
-    if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
-    else
       defaultPaint(context, offset);
   }
 
