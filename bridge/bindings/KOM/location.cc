@@ -30,7 +30,7 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
   KRAKEN_LOG(VERBOSE) << "reload function called" << std::endl;
 
-  KrakenInvokeDartFromCpp("krakenJsToDart", R"(["globalAction",["refresh"]])");
+  KrakenInvokeDartFromCpp("reload", "");
 
   return Value::undefined();
 }

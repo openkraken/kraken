@@ -13,7 +13,6 @@ import 'fetch.dart' show Fetch;
 import 'timer.dart';
 import 'message.dart';
 
-const String GLOBAL_ACTION = 'globalAction';
 KrakenTimer timer = KrakenTimer();
 
 @pragma('vm:entry-point')
@@ -22,13 +21,7 @@ String krakenJsToDart(String args) {
   String action = list[0];
   List<dynamic> payload = list[1];
 
-  var result;
-
-  if (action == GLOBAL_ACTION) {
-    applyGlobalAction(payload);
-  } else {
-    result = ElementManager().applyAction(action, payload);
-  }
+  var result = ElementManager().applyAction(action, payload);
 
   if (result == null) {
     return '';
@@ -47,16 +40,10 @@ String krakenJsToDart(String args) {
   }
 }
 
-void applyGlobalAction(List<dynamic> payload) {
-  String action = payload[0].toString();
-
-  switch (action) {
-    case 'refresh':
-      refreshApp();
-      break;
-    default:
-      print('Unknown globalAction: $action');
-  }
+@pragma('vm:entry-point')
+void reload(String args) {
+  print('dart reload');
+  refreshApp();
 }
 
 @pragma('vm:entry-point')

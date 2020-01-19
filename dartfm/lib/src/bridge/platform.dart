@@ -36,12 +36,10 @@ void initKrakenCallback() {
 }
 
 void invokeKrakenCallback(String data) {
-  print('invoke kraken callback');
   KrakenCallback(data);
 }
 
 void restartJSVM() {
-  print('start to restart');
   _restartJSVm();
 }
 
