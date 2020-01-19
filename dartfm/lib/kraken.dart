@@ -41,15 +41,12 @@ void runApp({
   }
 
   if (afterConnected != null) _connectedCallback = afterConnected;
-  connect(showPerformanceOverlay);
-
   if (shouldInitializeBinding) {
     /// Bootstrap binding
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-
-
+  connect(showPerformanceOverlay);
   initScreenMetricsChangedCallback();
 }
 
