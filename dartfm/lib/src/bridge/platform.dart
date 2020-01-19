@@ -13,6 +13,8 @@ import 'dart:ui';
 
 typedef InitKrakenCallbackFunc = Void Function();
 typedef InitKrakenCallback = void Function();
+typedef RestartJSVMFunc = Void Function();
+typedef RestartJSVM = void Function();
 
 /// Search dynamic lib from env.KRAKEN_LIBRARY_PATH or /usr/lib
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
@@ -26,13 +28,21 @@ final initKrakenCallbackFunc = nativeDynamicLibrary
     .lookup<NativeFunction<InitKrakenCallbackFunc>>("init_callback");
 final _initKrakenCallback =
     initKrakenCallbackFunc.asFunction<InitKrakenCallback>();
+final restartJSVMFunc = nativeDynamicLibrary.lookup<NativeFunction<RestartJSVMFunc>>('restart_js');
+final _restartJSVm = restartJSVMFunc.asFunction<RestartJSVM>();
 
 void initKrakenCallback() {
   _initKrakenCallback();
 }
 
 void invokeKrakenCallback(String data) {
+  print('invoke kraken callback');
   KrakenCallback(data);
+}
+
+void restartJSVM() {
+  print('start to restart');
+  _restartJSVm();
 }
 
 void evaluateScripts(String content, String url, {int startLine = 0}) {

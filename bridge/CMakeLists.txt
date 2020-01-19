@@ -25,6 +25,8 @@ add_library(bindings STATIC
   bindings/KOM/websocket.h
   bindings/KOM/window.cc
   bindings/KOM/window.h
+  bindings/KOM/location.cc
+  bindings/KOM/location.h
   bindings/kraken.cc
 )
 add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)

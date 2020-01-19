@@ -190,6 +190,10 @@ void JSBridge::invokeKrakenCallback(const char *args) {
 }
 
 void JSBridge::handleFlutterCallback(const char *args) {
+  if (contextInvalid) {
+    return;
+  }
+
   std::string &&str = static_cast<std::string>(args);
   char from = str[0];
   char to = str[1];
@@ -300,6 +304,11 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
+}
+
+JSBridge::~JSBridge() {
+  contextInvalid = true;
+  context_.reset();
 }
 
 } // namespace kraken

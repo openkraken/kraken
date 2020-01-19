@@ -35,3 +35,9 @@ void init_callback() {
   KrakenInitEvaluateScriptCallback(evaluate_scripts);
   initKrakenPolyFill(bridge->getContext());
 }
+
+void restart_js() {
+  inited = false;
+  delete bridge;
+  bridge = new kraken::JSBridge();
+}
