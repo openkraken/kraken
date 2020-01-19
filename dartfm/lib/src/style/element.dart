@@ -6,21 +6,18 @@ mixin ElementStyleMixin on RenderBox {
   // Loop element tree to find nearest parent width include self node
   // @TODO Support detecting node width in more complicated scene such as flex layout
   double getParentWidth(int childId) {
-    var width;
+    String width;
     bool isParentWithWidth = false;
-    var childNode = nodeMap[childId];
+    Element childNode = nodeMap[childId];
+    Style parentStyle;
     double cropWidth = 0;
     while(!isParentWithWidth) {
-      if (childNode.properties != null) {
-        var properties = childNode.properties;
-        if (properties.containsKey('style')) {
-          var style = properties['style'];
-          if (style.containsKey('width')) {
-            isParentWithWidth = true;
-            width = style['width'];
-            break;
-          }
-        }
+      Style style = childNode.style;
+      if (style.contains('width')) {
+        isParentWithWidth = true;
+        width = style['width'];
+        parentStyle = style;
+        break;
       }
       if (childNode is Element) {
         cropWidth += ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
@@ -31,6 +28,9 @@ mixin ElementStyleMixin on RenderBox {
     }
 
     double widthD = Length.toDisplayPortValue(width) - cropWidth;
+
+    Padding padding = baseGetPaddingFromStyle(parentStyle);
+    widthD = widthD - padding.left - padding.right;
 
     return widthD;
   }
