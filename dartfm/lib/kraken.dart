@@ -15,6 +15,20 @@ typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
 
+void connect(bool showPerformanceOverlay) {
+  RendererBinding.instance.scheduleFrameCallback((Duration time) {
+    elementManager = ElementManager();
+    elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
+
+    if (_connectedCallback != null) {
+      _connectedCallback();
+    }
+    RendererBinding.instance.addPostFrameCallback((time) {
+      CPPMessage(WINDOW_LOAD, '').send();
+    });
+  });
+}
+
 void runApp({
   bool enableDebug = false,
   bool showPerformanceOverlay = false,
@@ -27,23 +41,14 @@ void runApp({
   }
 
   if (afterConnected != null) _connectedCallback = afterConnected;
+  connect(showPerformanceOverlay);
 
   if (shouldInitializeBinding) {
     /// Bootstrap binding
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
-    elementManager = ElementManager();
-    elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
-    if (afterConnected != null) {
-      afterConnected();
-    }
-    RendererBinding.instance.addPostFrameCallback((time) {
-      CPPMessage(WINDOW_LOAD, '').send();
-    });
-  });
 
   initScreenMetricsChangedCallback();
 }
@@ -55,18 +60,10 @@ void unmountApp() {
   }
 }
 
-void refreshApp({ List args }) {
+void refreshApp() {
+  bool prevShowPerformanceOverlay = elementManager.showPerformanceOverlay;
+
   unmountApp();
   // resetJSContext()
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
-    elementManager = ElementManager();
-    elementManager.connect();
-
-    if (_connectedCallback != null) {
-      _connectedCallback();
-    }
-    RendererBinding.instance.addPostFrameCallback((time) {
-      CPPMessage(WINDOW_LOAD, '').send();
-    });
-  });
+  connect(prevShowPerformanceOverlay);
 }

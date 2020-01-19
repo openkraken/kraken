@@ -51,7 +51,7 @@ void applyGlobalAction(List<dynamic> payload) {
 
   switch (action) {
     case 'refresh':
-      refreshApp(args: payload);
+      refreshApp();
       break;
     default:
       print('Unknown globalAction: $action');
