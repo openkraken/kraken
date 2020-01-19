@@ -7,11 +7,13 @@ import 'dart:convert';
 import 'dart:ui' show window;
 
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 import 'fetch.dart' show Fetch;
 import 'timer.dart';
 import 'message.dart';
 
+const String GLOBAL_ACTION = 'globalAction';
 KrakenTimer timer = KrakenTimer();
 
 @pragma('vm:entry-point')
@@ -19,7 +21,14 @@ String krakenJsToDart(String args) {
   dynamic list = jsonDecode(args);
   String action = list[0];
   List<dynamic> payload = list[1];
-  dynamic result = ElementManager().applyAction(action, payload);
+
+  var result;
+
+  if (action == GLOBAL_ACTION) {
+    applyGlobalAction(payload);
+  } else {
+    result = ElementManager().applyAction(action, payload);
+  }
 
   if (result == null) {
     return '';
@@ -34,6 +43,18 @@ String krakenJsToDart(String args) {
       return jsonEncode(result);
     default:
       return result.toString();
+  }
+}
+
+void applyGlobalAction(List<dynamic> payload) {
+  String action = payload[0].toString();
+
+  switch (action) {
+    case 'refresh':
+      refreshApp(args: payload);
+      break;
+    default:
+      print('Unknown globalAction: $action');
   }
 }
 

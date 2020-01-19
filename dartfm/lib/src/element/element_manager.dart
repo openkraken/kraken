@@ -257,8 +257,6 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  void refresh() => remountApp();
-
   dynamic applyAction(String action, List<dynamic> payload) {
     var returnValue;
     switch (action) {
