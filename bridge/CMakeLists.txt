@@ -17,18 +17,16 @@ if (${ENABLE_TEST})
 endif ()
 
 add_library(bindings STATIC
+  bindings/KOM/console.cc
+  bindings/KOM/fetch.cc
+  bindings/KOM/screen.cc
+  bindings/KOM/timer.cc
+  bindings/KOM/websocket.cc
+  bindings/KOM/websocket.h
+  bindings/KOM/window.cc
+  bindings/KOM/window.h
   bindings/kraken.cc
-  bindings/console.cc
-  bindings/fetch.cc
-  bindings/screen.cc
-  bindings/thread_safe_map.h
-  bindings/thread_safe_array.h
-  bindings/timer.cc
-  bindings/websocket.cc
-  bindings/websocket.h
-  bindings/window.cc
-  bindings/window.h
-  )
+)
 add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
 add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
 add_library(kraken SHARED kraken_bridge_export.cc)
@@ -53,7 +51,6 @@ target_link_libraries(bridge PRIVATE
   -pthread
   flutter)
 target_include_directories(bridge PRIVATE
-  ./bindings
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS})
 
