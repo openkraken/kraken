@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
@@ -719,15 +721,22 @@ class RenderFlexLayout extends RenderBox
       constraintWidth = idealSize;
     }
 
-    double constraintHeight;
-    double height;
+    double constraintHeight = _direction == Axis.horizontal ? crossSize : idealSize;
     if (style.get('height') != null) {
-      height = Length.toDisplayPortValue(style.get('height'));
+      double height = Length.toDisplayPortValue(style.get('height'));
+      if (height != null) {
+        constraintHeight = height;
+      }
+    } else {
+      double parentHeight = getStretchParentHeight(nodeId);
+      if (parentHeight != null) {
+        constraintHeight = parentHeight;
+      }
     }
+
 
     switch (_direction) {
       case Axis.horizontal:
-        constraintHeight = height != null ? height : crossSize;
         size = Size(
           math.max(constraintWidth, idealSize),
           constraints.constrainHeight(constraintHeight)
@@ -736,7 +745,6 @@ class RenderFlexLayout extends RenderBox
         crossSize = size.height;
         break;
       case Axis.vertical:
-        constraintHeight = height != null ? height : idealSize;
         size = Size(
           math.max(constraintWidth, crossSize),
           constraints.constrainHeight(constraintHeight)
@@ -830,8 +838,15 @@ class RenderFlexLayout extends RenderBox
               Offset(childCrossPosition, childMainPosition);
           break;
       }
+      Style childStyle;
+      if (child is RenderParagraph) {
+        childStyle = nodeMap[nodeId].style;
+      } else {
+        int childNodeId = (child as RenderBoxModel).nodeId;
+        childStyle = nodeMap[childNodeId].style;
+      }
       ///apply position relative offset change
-      applyRelativeOffset(relativeOffset, child);
+      applyRelativeOffset(relativeOffset, child, childStyle);
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {

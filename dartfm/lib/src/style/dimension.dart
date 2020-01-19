@@ -8,6 +8,76 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
+RegExp spaceRegExp = RegExp(r" ");
+
+double baseGetDisplayPortedLength(input) {
+  if (input == null) return null;
+  if (input is num) {
+    input = input.toString();
+  }
+  return Length.toDisplayPortValue(input as String);
+}
+
+List<String> baseGetShorttedProperties(String input) {
+  assert(input != null);
+  return input.trim().split(spaceRegExp);
+}
+
+Padding baseGetPaddingFromStyle(Style style) {
+  double left = 0.0;
+  double top = 0.0;
+  double right = 0.0;
+  double bottom = 0.0;
+
+  if (style != null) {
+    String padding = style['padding'];
+    double paddingLeft;
+    double paddingTop;
+    double paddingRight;
+    double paddingBottom;
+    if (padding != null) {
+      List<String> splitedpadding = baseGetShorttedProperties(padding);
+      if (splitedpadding.length == 1) {
+        paddingLeft = paddingRight = paddingTop =
+            paddingBottom = baseGetDisplayPortedLength(splitedpadding[0]);
+      } else if (splitedpadding.length == 2) {
+        paddingTop =
+            paddingBottom = baseGetDisplayPortedLength(splitedpadding[0]);
+        paddingLeft =
+            paddingRight = baseGetDisplayPortedLength(splitedpadding[1]);
+      } else if (splitedpadding.length == 3) {
+        paddingTop = baseGetDisplayPortedLength(splitedpadding[0]);
+        paddingRight =
+            paddingLeft = baseGetDisplayPortedLength(splitedpadding[1]);
+        paddingBottom = baseGetDisplayPortedLength(splitedpadding[2]);
+      } else if (splitedpadding.length == 4) {
+        paddingTop = baseGetDisplayPortedLength(splitedpadding[0]);
+        paddingRight = baseGetDisplayPortedLength(splitedpadding[1]);
+        paddingBottom = baseGetDisplayPortedLength(splitedpadding[2]);
+        paddingLeft = baseGetDisplayPortedLength(splitedpadding[3]);
+      }
+    }
+
+    if (style.contains('paddingLeft'))
+      paddingLeft = baseGetDisplayPortedLength(style['paddingLeft']);
+
+    if (style.contains('paddingTop'))
+      paddingTop = baseGetDisplayPortedLength(style['paddingTop']);
+
+    if (style.contains('paddingRight'))
+      paddingRight = baseGetDisplayPortedLength(style['paddingRight']);
+
+    if (style.contains('paddingBottom'))
+      paddingBottom = baseGetDisplayPortedLength(style['paddingBottom']);
+
+    left = paddingLeft ?? left;
+    top = paddingTop ?? top;
+    right = paddingRight ?? right;
+    bottom = paddingBottom ?? bottom;
+  }
+
+  return Padding(left, top, right, bottom);
+}
 /// DimensionMixin impls RenderConstrainedBox to support
 /// - width
 /// - height
@@ -24,11 +94,7 @@ mixin DimensionMixin on Node {
   SizeConstraints oldConstraints;
 
   double getDisplayPortedLength(input) {
-    if (input == null) return null;
-    if (input is num) {
-      input = input.toString();
-    }
-    return Length.toDisplayPortValue(input as String);
+    return baseGetDisplayPortedLength(input);
   }
 
   void updateConstraints(Style style, Map<String, Transition> transitionMap) {
@@ -176,11 +242,9 @@ mixin DimensionMixin on Node {
     }
   }
 
-  static RegExp spaceRegExp = RegExp(r" ");
 
   List<String> getShorttedProperties(String input) {
-    assert(input != null);
-    return input.trim().split(spaceRegExp);
+    return baseGetShorttedProperties(input);
   }
 
   RenderObject initRenderMargin(RenderObject renderObject, Style style, Element element) {
@@ -380,59 +444,7 @@ mixin DimensionMixin on Node {
   }
 
   Padding getPaddingFromStyle(Style style) {
-    double left = 0.0;
-    double top = 0.0;
-    double right = 0.0;
-    double bottom = 0.0;
-
-    if (style != null) {
-      String padding = style['padding'];
-      double paddingLeft;
-      double paddingTop;
-      double paddingRight;
-      double paddingBottom;
-      if (padding != null) {
-        List<String> splitedpadding = getShorttedProperties(padding);
-        if (splitedpadding.length == 1) {
-          paddingLeft = paddingRight = paddingTop =
-              paddingBottom = getDisplayPortedLength(splitedpadding[0]);
-        } else if (splitedpadding.length == 2) {
-          paddingTop =
-              paddingBottom = getDisplayPortedLength(splitedpadding[0]);
-          paddingLeft =
-              paddingRight = getDisplayPortedLength(splitedpadding[1]);
-        } else if (splitedpadding.length == 3) {
-          paddingTop = getDisplayPortedLength(splitedpadding[0]);
-          paddingRight =
-              paddingLeft = getDisplayPortedLength(splitedpadding[1]);
-          paddingBottom = getDisplayPortedLength(splitedpadding[2]);
-        } else if (splitedpadding.length == 4) {
-          paddingTop = getDisplayPortedLength(splitedpadding[0]);
-          paddingRight = getDisplayPortedLength(splitedpadding[1]);
-          paddingBottom = getDisplayPortedLength(splitedpadding[2]);
-          paddingLeft = getDisplayPortedLength(splitedpadding[3]);
-        }
-      }
-
-      if (style.contains('paddingLeft'))
-        paddingLeft = getDisplayPortedLength(style['paddingLeft']);
-
-      if (style.contains('paddingTop'))
-        paddingTop = getDisplayPortedLength(style['paddingTop']);
-
-      if (style.contains('paddingRight'))
-        paddingRight = getDisplayPortedLength(style['paddingRight']);
-
-      if (style.contains('paddingBottom'))
-        paddingBottom = getDisplayPortedLength(style['paddingBottom']);
-
-      left = paddingLeft ?? left;
-      top = paddingTop ?? top;
-      right = paddingRight ?? right;
-      bottom = paddingBottom ?? bottom;
-    }
-
-    return Padding(left, top, right, bottom);
+    return baseGetPaddingFromStyle(style);
   }
 
   EdgeInsets getPaddingInsetsFromStyle(Style style) {
