@@ -58,8 +58,7 @@ void unmountApp() {
 }
 
 void refreshApp() {
-  bool prevShowPerformanceOverlay = elementManager.showPerformanceOverlay;
-
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   unmountApp();
   // resetJSContext()
   connect(prevShowPerformanceOverlay);

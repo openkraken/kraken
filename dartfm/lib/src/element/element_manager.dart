@@ -222,8 +222,10 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  void connect({ bool showPerformanceOverlay = false }) {
-    this.showPerformanceOverlay = showPerformanceOverlay;
+  void connect({ bool showPerformanceOverlay }) {
+    if (showPerformanceOverlay != null) {
+      this.showPerformanceOverlay = showPerformanceOverlay;
+    }
 
     RenderBox result = getRootRenderObject();
 
