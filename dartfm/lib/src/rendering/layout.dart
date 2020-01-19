@@ -596,9 +596,15 @@ class RenderFlowLayout extends RenderBox
       constraintWidth = mainAxisExtent;
     }
 
+    double constraintHeight = crossAxisExtent;
+    double parentHeight = getStretchParentHeight(nodeId);
+    if (parentHeight != null) {
+      constraintHeight = parentHeight;
+    }
+
     switch (direction) {
       case Axis.horizontal:
-        size = constraints.constrain(Size(constraintWidth, crossAxisExtent));
+        size = constraints.constrain(Size(constraintWidth, constraintHeight));
         containerMainAxisExtent = size.width;
         containerCrossAxisExtent = size.height;
         break;

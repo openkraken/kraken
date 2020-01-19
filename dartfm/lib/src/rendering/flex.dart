@@ -721,15 +721,22 @@ class RenderFlexLayout extends RenderBox
       constraintWidth = idealSize;
     }
 
-    double constraintHeight;
-    double height;
+    double constraintHeight = _direction == Axis.horizontal ? crossSize : idealSize;
     if (style.get('height') != null) {
-      height = Length.toDisplayPortValue(style.get('height'));
+      double height = Length.toDisplayPortValue(style.get('height'));
+      if (height != null) {
+        constraintHeight = height;
+      }
+    } else {
+      double parentHeight = getStretchParentHeight(nodeId);
+      if (parentHeight != null) {
+        constraintHeight = parentHeight;
+      }
     }
+
 
     switch (_direction) {
       case Axis.horizontal:
-        constraintHeight = height != null ? height : crossSize;
         size = Size(
           math.max(constraintWidth, idealSize),
           constraints.constrainHeight(constraintHeight)
@@ -738,7 +745,6 @@ class RenderFlexLayout extends RenderBox
         crossSize = size.height;
         break;
       case Axis.vertical:
-        constraintHeight = height != null ? height : idealSize;
         size = Size(
           math.max(constraintWidth, crossSize),
           constraints.constrainHeight(constraintHeight)
