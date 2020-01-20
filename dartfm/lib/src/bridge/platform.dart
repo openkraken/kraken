@@ -18,11 +18,14 @@ typedef InitKrakenCallback = void Function();
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
 final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
 final String nativeDynamicLibraryPath = Platform.isMacOS
-  ? 'libkraken.dylib'
-  : Platform.isWindows ? 'libkraken.dll' : 'libkraken.so';
-DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(join(kkLibraryPath ?? '\$ORIGIN', nativeDynamicLibraryPath));
-final initKrakenCallbackFunc = nativeDynamicLibrary.lookup<NativeFunction<InitKrakenCallbackFunc>>("init_callback");
-final _initKrakenCallback = initKrakenCallbackFunc.asFunction<InitKrakenCallback>();
+    ? 'libkraken.dylib'
+    : Platform.isWindows ? 'libkraken.dll' : 'libkraken.so';
+DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(
+    join(kkLibraryPath ?? '\$ORIGIN', nativeDynamicLibraryPath));
+final initKrakenCallbackFunc = nativeDynamicLibrary
+    .lookup<NativeFunction<InitKrakenCallbackFunc>>("init_callback");
+final _initKrakenCallback =
+    initKrakenCallbackFunc.asFunction<InitKrakenCallback>();
 
 void initKrakenCallback() {
   _initKrakenCallback();
@@ -32,7 +35,7 @@ void invokeKrakenCallback(String data) {
   KrakenCallback(data);
 }
 
-void evaluateScripts(String content, String url, { int startLine = 0 }) {
+void evaluateScripts(String content, String url, {int startLine = 0}) {
   assert(content != null);
   assert(url != null);
   KrakenEvaluateCallback(content, url, startLine);

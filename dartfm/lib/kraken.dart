@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'element.dart';
 import 'bridge.dart';
 export 'bridge.dart';
-import 'src/scheduler/fps.dart';
 
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;

@@ -1,9 +1,9 @@
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 mixin RelativeStyleMixin on RenderBox {
-  void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, Style style) {
+  void applyRelativeOffset(
+      Offset relativeOffset, RenderBox renderBox, Style style) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;

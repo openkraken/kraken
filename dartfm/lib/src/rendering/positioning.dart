@@ -8,18 +8,18 @@ class ZIndexParentData extends StackParentData {
 }
 
 class RenderPosition extends RenderStack {
-
   RenderPosition({
     List<RenderBox> children,
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection = TextDirection.ltr,
     StackFit fit = StackFit.passthrough,
     Overflow overflow = Overflow.visible,
-  }) : super(children: children,
-      alignment: alignment,
-      textDirection: textDirection,
-      fit: fit,
-      overflow: overflow);
+  }) : super(
+            children: children,
+            alignment: alignment,
+            textDirection: textDirection,
+            fit: fit,
+            overflow: overflow);
 
   @override
   void performLayout() {
@@ -62,7 +62,8 @@ class RenderPosition extends RenderStack {
               childConstraints.tighten(height: childParentData.height);
         else if (childParentData.top != null && childParentData.bottom != null)
           childConstraints = childConstraints.tighten(
-              height: size.height - childParentData.bottom - childParentData.top);
+              height:
+                  size.height - childParentData.bottom - childParentData.top);
 
         child.layout(childConstraints, parentUsesSize: true);
 
@@ -72,7 +73,6 @@ class RenderPosition extends RenderStack {
         } else if (childParentData.right != null) {
           x = size.width - childParentData.right - child.size.width;
         }
-
 
         double y;
         if (childParentData.top != null) {
@@ -84,9 +84,10 @@ class RenderPosition extends RenderStack {
         }
         if (x != null) {
           childParentData.offset = Offset(x, y);
-        } else if (x == null && y == null && childParentData is ZIndexParentData &&
-          childParentData.hookRenderObject != null
-        ) {
+        } else if (x == null &&
+            y == null &&
+            childParentData is ZIndexParentData &&
+            childParentData.hookRenderObject != null) {
           RenderBox renderBox = childParentData.hookRenderObject;
           ParentData parentData = renderBox.parentData;
           if (parentData is BoxParentData) {

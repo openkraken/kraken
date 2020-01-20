@@ -11,7 +11,7 @@ mixin ElementStyleMixin on RenderBox {
     Element childNode = nodeMap[childId];
     Style parentStyle;
     double cropWidth = 0;
-    while(!isParentWithWidth) {
+    while (!isParentWithWidth) {
       Style style = childNode.style;
       if (style.contains('width')) {
         isParentWithWidth = true;
@@ -20,7 +20,8 @@ mixin ElementStyleMixin on RenderBox {
         break;
       }
       if (childNode is Element) {
-        cropWidth += ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
+        cropWidth +=
+            ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
       }
       if (childNode.parentNode != null) {
         childNode = childNode.parentNode;
@@ -44,12 +45,12 @@ mixin ElementStyleMixin on RenderBox {
       Style parentStyle = parentNode.style;
 
       if (parentStyle.contains('display') &&
-        parentStyle['display'] == 'flex' &&
-        parentStyle['flexDirection'] == 'row' &&
-        parentStyle.contains('height') &&
-        (!parentStyle.contains('alignItems') ||
-        (parentStyle.contains('alignItems') && parentStyle['alignItems'] == 'stretch'))
-      ) {
+          parentStyle['display'] == 'flex' &&
+          parentStyle['flexDirection'] == 'row' &&
+          parentStyle.contains('height') &&
+          (!parentStyle.contains('alignItems') ||
+              (parentStyle.contains('alignItems') &&
+                  parentStyle['alignItems'] == 'stretch'))) {
         parentHeight = Length.toDisplayPortValue(parentStyle['height']);
       }
     }
@@ -67,22 +68,20 @@ mixin ElementStyleMixin on RenderBox {
     if (parentNode != null) {
       Style style = parentNode.style;
 
-      if (style.contains('display') &&
-        style['display'] == 'flex') {
+      if (style.contains('display') && style['display'] == 'flex') {
         display = 'inline-block';
 
         if (style.contains('flexDirection') &&
-          style['flexDirection'] == 'column' &&
-          (!style.contains('alignItems') ||
-          (style.contains('alignItems') && style['alignItems'] == 'stretch'))
-        ) {
+            style['flexDirection'] == 'column' &&
+            (!style.contains('alignItems') ||
+                (style.contains('alignItems') &&
+                    style['alignItems'] == 'stretch'))) {
           display = 'block';
         }
       }
     }
 
-    if (display == 'flex' ||
-        display == 'block') {
+    if (display == 'flex' || display == 'block') {
       return false;
     }
     return true;

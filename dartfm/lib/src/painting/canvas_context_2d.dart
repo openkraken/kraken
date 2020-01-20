@@ -16,12 +16,12 @@ class CanvasRenderingContext2DSettings {
 }
 
 class CanvasRenderingContext2D extends _CanvasRenderingContext2D
-    with CanvasFillStrokeStyles2D,
+    with
+        CanvasFillStrokeStyles2D,
         CanvasPathDrawingStyles2D,
         CanvasRect2D,
         CanvasTextDrawingStyles2D,
-        CanvasText2D
-{
+        CanvasText2D {
   @override
   String type = 'CanvasRenderingContext2D';
 
@@ -93,7 +93,8 @@ class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   Color fillStyle = WebColor.black;
 
   @override
-  CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1) {
+  CanvasGradient createLinearGradient(
+      double x0, double y0, double x1, double y1) {
     // TODO: implement createLinearGradient
     throw UnimplementedError();
   }
@@ -105,22 +106,25 @@ class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   }
 
   @override
-  CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1) {
+  CanvasGradient createRadialGradient(
+      double x0, double y0, double r0, double x1, double y1, double r1) {
     // TODO: implement createRadialGradient
     throw UnimplementedError();
   }
 }
 
 mixin CanvasRect2D
-on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D
-implements CanvasRect {
+    on
+        _CanvasRenderingContext2D,
+        CanvasFillStrokeStyles2D,
+        CanvasPathDrawingStyles2D
+    implements CanvasRect {
   @override
   void clearRect(double x, double y, double w, double h) {
     Rect rect = Rect.fromLTWH(x, y, w, h);
 
     action((Canvas canvas, Size size) {
-      Paint paint = Paint()
-        ..blendMode = BlendMode.src;
+      Paint paint = Paint()..blendMode = BlendMode.src;
       canvas.drawRect(rect, paint);
     });
   }
@@ -150,10 +154,11 @@ implements CanvasRect {
 }
 
 mixin CanvasText2D
-on _CanvasRenderingContext2D,
-    CanvasTextDrawingStyles2D,
-    CanvasFillStrokeStyles2D
-implements CanvasText {
+    on
+        _CanvasRenderingContext2D,
+        CanvasTextDrawingStyles2D,
+        CanvasFillStrokeStyles2D
+    implements CanvasText {
   TextStyle _getTextStyle(Color color) {
     return TextStyle(
       color: color,
@@ -167,7 +172,6 @@ implements CanvasText {
     TextSpan span = TextSpan(text: text, style: textStyle);
     TextAlign _textAlign;
     switch (textAlign) {
-
       case CanvasTextAlign.start:
         _textAlign = TextAlign.start;
         break;
@@ -187,7 +191,6 @@ implements CanvasText {
 
     TextDirection _textDirection;
     switch (direction) {
-
       case CanvasDirection.ltr:
         _textDirection = TextDirection.ltr;
         break;
@@ -208,7 +211,7 @@ implements CanvasText {
     return textPainter;
   }
 
-  void fillText(String text, double x, double y, { double maxWidth }) {
+  void fillText(String text, double x, double y, {double maxWidth}) {
     TextPainter textPainter = _getTextPainter(text, fillStyle);
     action((Canvas canvas, Size size) {
       if (maxWidth != null) {
@@ -220,7 +223,7 @@ implements CanvasText {
     });
   }
 
-  void strokeText(String text, double x, double y, { double maxWidth }) {
+  void strokeText(String text, double x, double y, {double maxWidth}) {
     TextPainter textPainter = _getTextPainter(text, strokeStyle);
     action((Canvas canvas, Size size) {
       if (maxWidth != null) {

@@ -32,7 +32,8 @@ abstract class EventTarget {
     bool cancelled = true;
     event.currentTarget = event.target = this;
     while (event.currentTarget != null) {
-      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
+      List<EventHandler> handlers =
+          event.currentTarget.getEventHandlers(event.type);
       cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
       if (!event.bubbles || cancelled) break;
       event.currentTarget = event.currentTarget?.parentNode;

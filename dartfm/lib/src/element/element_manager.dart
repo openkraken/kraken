@@ -45,9 +45,8 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   W3CElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
     _root = RenderDecoratedBox(
-      decoration: BoxDecoration(color: WebColor.white),
-      child: rootElement.renderObject
-    );
+        decoration: BoxDecoration(color: WebColor.white),
+        child: rootElement.renderObject);
     nodeMap[BODY_ID] = rootElement;
   }
 
@@ -223,17 +222,20 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  void connect({ bool showPerformanceOverlay = false }) {
+  void connect({bool showPerformanceOverlay = false}) {
     this.showPerformanceOverlay = showPerformanceOverlay;
 
     RenderBox result = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null)
+      showPerformanceOverlay = showPerformanceOverlayOverride;
 
     if (showPerformanceOverlay) {
-      RenderPerformanceOverlay renderPerformanceOverlay = RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
+      RenderPerformanceOverlay renderPerformanceOverlay =
+          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox =
+          RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
           math.min(350.0, window.physicalSize.width),
@@ -241,7 +243,7 @@ class ElementManager {
         )),
       );
       RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
-      
+
       result = RenderStack(
         children: [
           result,

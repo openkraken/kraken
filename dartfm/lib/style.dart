@@ -25,5 +25,3 @@ export 'src/style/types/numeric.dart';
 export 'src/style/types/position.dart';
 export 'src/style/types/textual.dart';
 export 'src/style/types/time.dart';
-
-
