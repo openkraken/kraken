@@ -1,9 +1,5 @@
-import {EventTarget, Event} from 'event-target-shim';
+import { EventTarget } from 'event-target-shim';
 
-type OnMessageFunc = (event: MessageEvent) => void;
-type OnOpenFunc = (event: Event) => void;
-type OnCloseFunc = (event: Event) => void;
-type OnErrorFunc = (event: Event) => void;
 type KrakenToken = number;
 
 // this interface is a description of the C++ Websocket API (bridge/bindings/websocket.cc)
@@ -39,12 +35,6 @@ enum ReadyState {
 enum BinaryType {
   blob = 'blob',
   arraybuffer = 'arraybuffer'
-}
-
-function notImpl(name: string) {
-  return () => {
-    throw new Error(`${name} is not implemented`);
-  }
 }
 
 class WebSocket extends EventTarget {
