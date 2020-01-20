@@ -57,8 +57,6 @@ LogMessage::LogMessage(LogSeverity severity, const char *file, int line,
 }
 
 LogMessage::~LogMessage() {
-  stream_ << std::endl;
-
 #if defined(IS_ANDROID)
   android_LogPriority priority = ANDROID_LOG_VERBOSE;
 
