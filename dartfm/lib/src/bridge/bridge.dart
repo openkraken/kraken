@@ -42,13 +42,11 @@ String krakenJsToDart(String args) {
 }
 
 @pragma('vm:entry-point')
-void reloadApp(String args) {
+void reloadApp(String args) async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   unmountApp();
-  Timer(Duration(milliseconds: 16), () {
-    reloadJSContext();
-    connect(prevShowPerformanceOverlay);
-  });
+  await reloadJSContext();
+  connect(prevShowPerformanceOverlay);
 }
 
 @pragma('vm:entry-point')

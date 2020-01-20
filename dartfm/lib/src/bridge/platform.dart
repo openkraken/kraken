@@ -39,8 +39,10 @@ void invokeKrakenCallback(String data) {
   KrakenCallback(data);
 }
 
-void reloadJSContext() {
-  _reloadJSContext();
+Future<void> reloadJSContext() async {
+  return Future.microtask(() {
+    _reloadJSContext();
+  });
 }
 
 void evaluateScripts(String content, String url, {int startLine = 0}) {
