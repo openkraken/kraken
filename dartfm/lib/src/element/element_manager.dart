@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/scheduler/fps.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/kraken.dart' show remountApp;
 
 abstract class ElementManagerActionDelegate {
   RenderObject root;
