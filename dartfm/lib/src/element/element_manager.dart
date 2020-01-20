@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/scheduler/fps.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/kraken.dart' show remountApp;
 
 abstract class ElementManagerActionDelegate {
   RenderObject root;
@@ -222,8 +221,10 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  void connect({bool showPerformanceOverlay = false}) {
-    this.showPerformanceOverlay = showPerformanceOverlay;
+  void connect({ bool showPerformanceOverlay }) {
+    if (showPerformanceOverlay != null) {
+      this.showPerformanceOverlay = showPerformanceOverlay;
+    }
 
     RenderBox result = getRootRenderObject();
 
@@ -262,8 +263,6 @@ class ElementManager {
     nodeMap.clear();
     _managerSingleton = ElementManager._();
   }
-
-  void refresh() => remountApp();
 
   dynamic applyAction(String action, List<dynamic> payload) {
     var returnValue;

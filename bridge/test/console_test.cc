@@ -3,9 +3,8 @@
  * Author: Kraken Team.
  */
 
-#include "console.h"
+#include "KOM/console.h"
 #include "jsa.h"
-#include "jsc_context.h"
 #include "gtest/gtest.h"
 
 namespace kraken {

@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'package:kraken/kraken.dart';
 import 'element_inspector.dart';
 import 'element_manager.dart';
 
@@ -135,7 +136,7 @@ mixin ElementsBinding
         setter: (bool value) {
           if (ElementManager.showPerformanceOverlayOverride != value) {
             ElementManager.showPerformanceOverlayOverride = value;
-            ElementManager().refresh();
+            reloadApp("");
           }
           return Future<void>.value();
         },

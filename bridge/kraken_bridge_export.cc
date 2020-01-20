@@ -11,7 +11,7 @@
 #include <string>
 std::atomic<bool> inited;
 
-static kraken::JSBridge *bridge = new kraken::JSBridge();
+static std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
 
 // injected into engine
 void invoke_kraken_callback(const char *args) {
@@ -33,5 +33,11 @@ void init_callback() {
 
   KrakenInitCallBack(invoke_kraken_callback);
   KrakenInitEvaluateScriptCallback(evaluate_scripts);
+  initKrakenPolyFill(bridge->getContext());
+}
+
+void reload_js_context() {
+  inited = false;
+  bridge.reset(new kraken::JSBridge());
   initKrakenPolyFill(bridge->getContext());
 }

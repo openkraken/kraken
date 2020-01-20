@@ -29,11 +29,20 @@ const getPolyFillSource = (source) => `/*
  */
 
 #include "polyfill.h"
+#include "logging.h"
 
 static const char* jsCode = R"(${source})";
 
 void initKrakenPolyFill(alibaba::jsa::JSContext *context) {
-  context->evaluateJavaScript(jsCode, "internal://", 0);
+  try {
+    context->evaluateJavaScript(jsCode, "internal://", 0);
+  } catch (alibaba::jsa::JSError &error) {
+    auto &&stack = error.getStack();
+    auto &&message = error.getMessage();
+
+    // TODO throw error in js context
+    KRAKEN_LOG(VERBOSE) << message << "\\n" << stack;
+  }
 }
 `;
 

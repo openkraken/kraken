@@ -4,11 +4,6 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_CXX_STANDARD 14)
 set(ADDITIONAL_INCLUDE_DIRS)
 
-if (${ENABLE_TEST})
-  include_directories(test)
-  add_subdirectory(test)
-endif()
-
 add_library(jsa_abstraction STATIC
   ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_context.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_error.cc

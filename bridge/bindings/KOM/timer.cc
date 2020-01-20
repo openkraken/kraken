@@ -255,5 +255,11 @@ void bindTimer(alibaba::jsa::JSContext *context) {
                        clearTimeout);
 }
 
+void destroy() {
+  timerCallbackMap.reset();
+  timerIdToCallbackIdMap.reset();
+  timerCallbackId.set(1);
+}
+
 } // namespace binding
 } // namespace kraken

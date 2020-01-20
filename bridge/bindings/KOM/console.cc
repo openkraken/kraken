@@ -173,14 +173,6 @@ Value log(JSContext &context, const Value &thisVal, const Value *args,
           size_t count) {
   std::stringstream stream;
   logArgs(stream, context, args, count, 0);
-
-#ifdef IS_TEST
-  auto &&data = stream.str().data();
-  alibaba::jsa::String &&str =
-      alibaba::jsa::String::createFromAscii(context, data);
-  return Value(context, str);
-#endif
-
   printLog(stream, foundation::LOG_VERBOSE);
   return Value::undefined();
 }

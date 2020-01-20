@@ -1,32 +1,29 @@
-project(Bridge_TEST)
+set(TEST_LINK_LIBRARY
+        bindings
+        jsa_abstraction
+        jsc_implementation
+        gtest
+        gtest_main
+        js_code
+        flutter
+        )
 
-include(googletest)
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-
-add_compile_definitions(IS_TEST=true)
+set(TEST_INCLUDE_DIR
+        ../bindings
+        ../jsa/include
+        ../polyfill/dist/
+        ./googletest/googletest/include
+        )
 
 # console test
-add_executable(console_test console_test.cc)
-target_link_libraries(console_test bindings)
-target_link_libraries(console_test jsa_abstraction)
-target_link_libraries(console_test jsa_jsc_implementation)
-target_link_libraries(console_test gtest gtest_main)
-target_include_directories(console_test PUBLIC ../bindings)
-target_include_directories(console_test PUBLIC ../../jsa/abstraction)
-target_include_directories(console_test PUBLIC ../../jsa/implementation/JSC)
-
-
-# websocket test
-add_executable(websocket_test websocket_test.cc)
-target_link_libraries(websocket_test bindings)
-target_link_libraries(websocket_test foundation)
-target_link_libraries(websocket_test jsa_abstraction)
-target_link_libraries(websocket_test jsa_jsc_implementation)
-target_link_libraries(websocket_test gtest gtest_main)
-target_include_directories(websocket_test PUBLIC ../bindings)
-target_include_directories(websocket_test PUBLIC ../../jsa/abstraction)
-target_include_directories(websocket_test PUBLIC ../../jsa/implementation/JSC)
+add_executable(console_test console_test.cc reload_test.cc)
+target_link_libraries(console_test ${TEST_LINK_LIBRARY})
+target_include_directories(console_test PUBLIC ${TEST_INCLUDE_DIR})
 
 add_executable(message_test ../message.cc ../message.h message_test.cc)
 target_include_directories(message_test PUBLIC ../)
 target_link_libraries(message_test gtest gtest_main)
+
+add_executable(reload_test ./reload_test.cc)
+target_link_libraries(reload_test ${TEST_LINK_LIBRARY})
+target_include_directories(reload_test PUBLIC ${TEST_INCLUDE_DIR})

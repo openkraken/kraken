@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:ui' show window;
 
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 import 'fetch.dart' show Fetch;
 import 'timer.dart';
@@ -19,7 +20,8 @@ String krakenJsToDart(String args) {
   dynamic list = jsonDecode(args);
   String action = list[0];
   List<dynamic> payload = list[1];
-  dynamic result = ElementManager().applyAction(action, payload);
+
+  var result = ElementManager().applyAction(action, payload);
 
   if (result == null) {
     return '';
@@ -36,6 +38,14 @@ String krakenJsToDart(String args) {
     default:
       return result.toString();
   }
+}
+
+@pragma('vm:entry-point')
+void reloadApp(String args) async {
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  unmountApp();
+  await reloadJSContext();
+  connect(prevShowPerformanceOverlay);
 }
 
 @pragma('vm:entry-point')

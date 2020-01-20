@@ -13,6 +13,8 @@ import 'dart:ui';
 
 typedef InitKrakenCallbackFunc = Void Function();
 typedef InitKrakenCallback = void Function();
+typedef ReloadJSContextFn = Void Function();
+typedef ReloadJSContext = void Function();
 
 /// Search dynamic lib from env.KRAKEN_LIBRARY_PATH or /usr/lib
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
@@ -26,6 +28,8 @@ final initKrakenCallbackFunc = nativeDynamicLibrary
     .lookup<NativeFunction<InitKrakenCallbackFunc>>("init_callback");
 final _initKrakenCallback =
     initKrakenCallbackFunc.asFunction<InitKrakenCallback>();
+final ReloadJSContextFunc = nativeDynamicLibrary.lookup<NativeFunction<ReloadJSContextFn>>('reload_js_context');
+final _reloadJSContext = ReloadJSContextFunc.asFunction<ReloadJSContext>();
 
 void initKrakenCallback() {
   _initKrakenCallback();
@@ -33,6 +37,12 @@ void initKrakenCallback() {
 
 void invokeKrakenCallback(String data) {
   KrakenCallback(data);
+}
+
+Future<void> reloadJSContext() async {
+  return Future.microtask(() {
+    _reloadJSContext();
+  });
 }
 
 void evaluateScripts(String content, String url, {int startLine = 0}) {

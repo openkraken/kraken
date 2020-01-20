@@ -16,4 +16,7 @@ KRAKEN_EXPORT
 void evaluate_scripts(const char *code, const char *bundleFilename,
                       int startLine);
 
+KRAKEN_EXPORT
+void reload_js_context();
+
 #endif // KRAKEN_BRIDGE_EXPORT_H

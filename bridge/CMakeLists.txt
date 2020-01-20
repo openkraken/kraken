@@ -10,12 +10,6 @@ include(./jsa/jsa.cmake)
 add_subdirectory(foundation)
 include_directories(foundation)
 
-# test
-if (${ENABLE_TEST})
-  add_subdirectory(test)
-  include_directories(test)
-endif ()
-
 add_library(bindings STATIC
   bindings/KOM/console.cc
   bindings/KOM/fetch.cc
@@ -25,6 +19,8 @@ add_library(bindings STATIC
   bindings/KOM/websocket.h
   bindings/KOM/window.cc
   bindings/KOM/window.h
+  bindings/KOM/location.cc
+  bindings/KOM/location.h
   bindings/kraken.cc
 )
 add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
@@ -130,7 +126,10 @@ string(REPLACE \n "" GIT_HEAD ${GIT_HEAD}) # Remove last \n
 add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
 
 if (${ENABLE_TEST})
-  target_compile_definitions(bindings PRIVATE IS_TEST=true)
+  add_compile_definitions(IS_TEST=true)
+  add_subdirectory(./test/googletest)
+  add_subdirectory(test)
+  include_directories(test)
 endif ()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

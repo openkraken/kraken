@@ -5,30 +5,39 @@
 #ifndef KRAKEN_JS_BINDINGS_WINDOW_H_
 #define KRAKEN_JS_BINDINGS_WINDOW_H_
 #include "jsa.h"
+#include "location.h"
 
 #include <memory>
 
 namespace kraken {
 namespace binding {
-class JSWindow : public alibaba::jsa::HostObject,
+using namespace alibaba::jsa;
+
+class JSWindow : public HostObject,
                  public std::enable_shared_from_this<JSWindow> {
 public:
-  JSWindow(){};
-  ~JSWindow() = default;
+  JSWindow(){
+    location_ = std::make_shared<kraken::binding::JSLocation>();
+  };
 
-  virtual void bind(alibaba::jsa::JSContext *context);
-  // alibaba::jsa::HostObject
-  virtual alibaba::jsa::Value
-  get(alibaba::jsa::JSContext &, const alibaba::jsa::PropNameID &name) override;
-  void invokeOnloadCallback(alibaba::jsa::JSContext *context);
-  void initDevicePixelRatio(alibaba::jsa::JSContext *context, const int dp);
+  ~JSWindow() {
+    _onloadCallback = nullptr;
+    location_ = nullptr;
+  };
+
+  void bind(JSContext *context);
+  void unbind(JSContext *context);
+  Value get(JSContext &, const PropNameID &name) override;
+  void set(JSContext &, const PropNameID &name, const Value &value) override;
+
+  void invokeOnloadCallback(JSContext *context);
+  void initDevicePixelRatio(JSContext *context, int dp);
 
 private:
   std::shared_ptr<JSWindow> sharedSelf() { return shared_from_this(); }
-
-  alibaba::jsa::Value connect(alibaba::jsa::JSContext &context,
-                                 const alibaba::jsa::Value &thisVal,
-                                 const alibaba::jsa::Value *args, size_t count);
+  Value _onloadCallback;
+  int _devicePixelRatio = 1;
+  std::shared_ptr<kraken::binding::JSLocation> location_;
 };
 } // namespace binding
 } // namespace kraken

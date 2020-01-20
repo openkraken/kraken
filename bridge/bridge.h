@@ -10,6 +10,7 @@
 #include "bindings/KOM/websocket.h"
 #include "bindings/KOM/window.h"
 #include "bindings/KOM/websocket.h"
+#include <atomic>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
@@ -24,8 +25,9 @@ private:
 
 public:
   JSBridge();
-  ~JSBridge() = default;
+  ~JSBridge();
 
+  std::atomic<bool> contextInvalid;
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detatchDevtools();
@@ -36,12 +38,12 @@ public:
 
   alibaba::jsa::JSContext *getContext() const { return context_.get(); }
 
+#ifndef ENABLE_TEST
+  alibaba::jsa::Value getGlobalValue(std::string code);
+#endif
+
   void handleFlutterCallback(const char *args);
   void invokeKrakenCallback(const char *args);
-  void invokeSetTimeoutCallback(const int callbackId);
-  void invokeSetIntervalCallback(const int callbackId);
-
-  void invokeRequestAnimationFrameCallback(const int callbackId);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER
