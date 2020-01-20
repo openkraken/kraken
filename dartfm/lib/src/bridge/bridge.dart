@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'dart:ui' show window;
+import 'dart:async';
 
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
@@ -41,9 +42,13 @@ String krakenJsToDart(String args) {
 }
 
 @pragma('vm:entry-point')
-void reload(String args) {
-  print('dart reload');
-  refreshApp();
+void reloadApp(String args) {
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  unmountApp();
+  Timer(Duration(milliseconds: 16), () {
+    reloadJSContext();
+    connect(prevShowPerformanceOverlay);
+  });
 }
 
 @pragma('vm:entry-point')
