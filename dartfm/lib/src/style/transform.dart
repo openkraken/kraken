@@ -4,7 +4,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin TransformStyleMixin {
-
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
@@ -14,8 +13,12 @@ mixin TransformStyleMixin {
       matrix4 = combineTransform(methods) ?? matrix4;
     }
     Offset offset = parseOrigin(style?.transformOrigin);
-    transform =
-        RenderBoxModel(child: current, transform: matrix4, origin: offset, nodeId: nodeId, style: style);
+    transform = RenderBoxModel(
+        child: current,
+        transform: matrix4,
+        origin: offset,
+        nodeId: nodeId,
+        style: style);
     return transform;
   }
 
@@ -33,7 +36,8 @@ mixin TransformStyleMixin {
         Transition all = transitionMap["all"];
         Matrix4 oldMatrix4 = matrix4.clone();
         ProgressListener progressListener = (progress) {
-          transform.transform = (newMatrix4 - oldMatrix4) * progress + oldMatrix4;
+          transform.transform =
+              (newMatrix4 - oldMatrix4) * progress + oldMatrix4;
         };
         if (transition != null) {
           transition.addProgressListener(progressListener);
@@ -142,8 +146,7 @@ mixin TransformStyleMixin {
       case 'translate3d':
         if (method.args.length >= 1 && method.args.length <= 3) {
           try {
-            double y = 0,
-                z = 0;
+            double y = 0, z = 0;
             if (method.args.length == 2) {
               y = Length.toDisplayPortValue(method.args[1].trim());
             }
@@ -152,7 +155,8 @@ mixin TransformStyleMixin {
               z = Length.toDisplayPortValue(method.args[2].trim());
             }
             matrix4 = Matrix4.identity()
-              ..translate(Length.toDisplayPortValue(method.args[0].trim()), y, z);
+              ..translate(
+                  Length.toDisplayPortValue(method.args[0].trim()), y, z);
           } catch (exception) {}
         }
         break;
@@ -168,7 +172,8 @@ mixin TransformStyleMixin {
         if (method.args.length == 1) {
           try {
             matrix4 = Matrix4.identity()
-              ..translate(0.0, Length.toDisplayPortValue(method.args[0].trim()));
+              ..translate(
+                  0.0, Length.toDisplayPortValue(method.args[0].trim()));
           } catch (exception) {
             print(exception);
           }
@@ -178,7 +183,8 @@ mixin TransformStyleMixin {
         if (method.args.length == 1) {
           try {
             matrix4 = Matrix4.identity()
-              ..translate(0.0, 0, Length.toDisplayPortValue(method.args[0].trim()));
+              ..translate(
+                  0.0, 0, Length.toDisplayPortValue(method.args[0].trim()));
           } catch (exception) {}
         }
         break;
@@ -235,7 +241,8 @@ mixin TransformStyleMixin {
         if (method.args.length == 3) {
           try {
             matrix4 = Matrix4.identity()
-              ..scale(double.parse(method.args[0].trim()),
+              ..scale(
+                  double.parse(method.args[0].trim()),
                   double.parse(method.args[1].trim()),
                   double.parse(method.args[2].trim()));
           } catch (exception) {}

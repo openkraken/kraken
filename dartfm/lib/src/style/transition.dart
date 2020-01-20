@@ -15,7 +15,6 @@ mixin TransitionStyleMixin {
 typedef ProgressListener = void Function(double progress);
 
 class Transition with CustomTickerProviderStateMixin {
-
   Duration delay = Duration(milliseconds: 0);
   CurvedAnimation curvedAnimation;
   AnimationController controller;
@@ -23,7 +22,7 @@ class Transition with CustomTickerProviderStateMixin {
 
   void apply() {
     if (progressListeners != null && progressListeners.length > 0) {
-      Future.delayed(delay, (){
+      Future.delayed(delay, () {
         controller?.forward();
       });
       curvedAnimation.addListener(listener);
@@ -42,7 +41,7 @@ class Transition with CustomTickerProviderStateMixin {
 
   void listener() {
     if (progressListeners != null) {
-      for(ProgressListener progressListener in progressListeners) {
+      for (ProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
     }
@@ -75,7 +74,7 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   static void parseTransition(String string, Map<String, Transition> map) {
-    if (string!= null && string.isNotEmpty) {
+    if (string != null && string.isNotEmpty) {
       List<String> strs = string.trim().split(" ");
       if (strs.length > 1) {
         String property = strs[0];
@@ -102,8 +101,11 @@ class Transition with CustomTickerProviderStateMixin {
         Curve curve = parseFunction(function);
         if (curve != null) {
           Transition transition = Transition();
-          AnimationController controller = AnimationController(duration: Duration(milliseconds: duration.valueOf()), vsync: transition);
-          transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
+          AnimationController controller = AnimationController(
+              duration: Duration(milliseconds: duration.valueOf()),
+              vsync: transition);
+          transition.curvedAnimation =
+              CurvedAnimation(curve: curve, parent: controller);
           transition.controller = controller;
           transition.delay = Duration(milliseconds: delay.valueOf());
           map[property] = transition;
@@ -113,7 +115,7 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   static Curve parseFunction(String function) {
-    switch(function) {
+    switch (function) {
       case "linear":
         return Curves.linear;
       case "ease":
@@ -164,10 +166,8 @@ class Transition with CustomTickerProviderStateMixin {
 }
 
 class StepCurve extends Curve {
-
   final int step;
   final bool isStart;
-
 
   StepCurve(this.step, this.isStart);
 
@@ -181,6 +181,6 @@ class StepCurve extends Curve {
     int cur = (t * step).floor();
     cur = cur + addition;
 
-    return cur/step;
+    return cur / step;
   }
 }

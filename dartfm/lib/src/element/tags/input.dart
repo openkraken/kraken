@@ -55,8 +55,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   bool get selectAllEnabled => true;
 }
 
-class InputElement extends Element
-    implements TextInputClient, TickerProvider {
+class InputElement extends Element implements TextInputClient, TickerProvider {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier =
@@ -151,12 +150,12 @@ class InputElement extends Element
 
   void activeTextInput() {
     if (textInputConnection == null) {
-      final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
+      final TextEditingValue localValue =
+          textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
       textInputConnection = TextInput.attach(this, textInputConfiguration);
-      textInputConnection
-          .setEditingState(localValue);
+      textInputConnection.setEditingState(localValue);
     }
     textInputConnection.show();
   }
@@ -213,21 +212,21 @@ class InputElement extends Element
     // todo: selection overlay.
   }
 
-  bool get _hasInputConnection => textInputConnection != null && textInputConnection.attached;
+  bool get _hasInputConnection =>
+      textInputConnection != null && textInputConnection.attached;
   TextEditingValue _lastKnownRemoteTextEditingValue;
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (!_hasInputConnection)
-      return;
+    if (!_hasInputConnection) return;
     final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
-    if (localValue == _lastKnownRemoteTextEditingValue)
-      return;
+    if (localValue == _lastKnownRemoteTextEditingValue) return;
     _lastKnownRemoteTextEditingValue = localValue;
     textInputConnection.setEditingState(localValue);
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    final bool textChanged = textSelectionDelegate.textEditingValue?.text != value?.text;
+    final bool textChanged =
+        textSelectionDelegate.textEditingValue?.text != value?.text;
     textSelectionDelegate.textEditingValue = value;
 
     if (textChanged) {

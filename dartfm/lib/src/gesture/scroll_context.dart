@@ -15,7 +15,6 @@ import 'package:flutter/rendering.dart';
 ///  * [ScrollPosition], which uses this interface to communicate with the
 ///    scrollable widget.
 abstract class ScrollContext {
-
   /// A [TickerProvider] to use when animating the scroll position.
   TickerProvider get vsync;
 
