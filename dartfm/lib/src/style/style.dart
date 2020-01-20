@@ -31,7 +31,7 @@ class Style {
   String transform;
   String transformOrigin;
   String transition;
-  double linearAngle;
+  double _linearAngle;
 
   Style(Map<String, dynamic> styleMap) {
     this._styleMap = styleMap ?? {};
@@ -92,6 +92,12 @@ class Style {
 
   void set(String key, dynamic value) {
     _styleMap[key] = value;
+  }
+
+  double get linearAngle => _linearAngle;
+
+  set linearAngle(double value) {
+    _linearAngle = value;
   }
 
   dynamic operator [](String key) => this.get(key);
