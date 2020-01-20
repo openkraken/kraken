@@ -97,7 +97,6 @@ mixin BackgroundImageMixin {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
           Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
-          GradientTransform transform;
           if (method.args[0].startsWith('to ')) {
             List<String> toString = method.args[0].trim().split(' ');
             if (toString.length >= 2) {
@@ -163,7 +162,7 @@ mixin BackgroundImageMixin {
             start = 1;
           } else if (Angle.isAngle(method.args[0])) {
             Angle angle = Angle(method.args[0]);
-            style.linearAngle = angle.angleValue + math.pi;
+            style.linearAngle = angle.angleValue;
             start = 1;
           }
           applyColorAndStops(start, method.args, colors, stops);
