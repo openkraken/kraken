@@ -12,6 +12,7 @@ import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin {
 
+  double linearAngle;
   RenderObject initBackgroundImage(RenderObject renderObject, Style style, int nodeId) {
     DecorationImage decorationImage;
     Gradient gradient;
@@ -162,7 +163,7 @@ mixin BackgroundImageMixin {
             start = 1;
           } else if (Angle.isAngle(method.args[0])) {
             Angle angle = Angle(method.args[0]);
-            style.linearAngle = angle.angleValue;
+            linearAngle = angle.angleValue;
             start = 1;
           }
           applyColorAndStops(start, method.args, colors, stops);

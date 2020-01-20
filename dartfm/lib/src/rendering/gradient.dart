@@ -35,7 +35,7 @@ class RenderGradient extends RenderDecoratedBox {
       if (gradient is LinearGradient) {
         dynamic el = nodeMap[_nodeId];
         if (el is Element) {
-          double angle = el.style.linearAngle;
+          double angle = el.linearAngle;
           if (angle != null) {
             double sin = math.sin(angle);
             double cos = math.cos(angle);
