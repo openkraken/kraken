@@ -50,7 +50,11 @@ class RenderGradient extends RenderDecoratedBox {
                 colors: gradient.colors,
                 stops: gradient.stops,
                 tileMode: gradient.tileMode);
-            decoration = BoxDecoration(gradient: linearGradient);
+            decoration = BoxDecoration(gradient: linearGradient,
+                border: box.border,
+                borderRadius: box.borderRadius,
+                color: box.color,
+                boxShadow: box.boxShadow);
           }
         }
       }
