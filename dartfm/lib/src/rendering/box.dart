@@ -2,14 +2,13 @@ import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 class KrakenRenderConstrainedBox extends RenderConstrainedBox {
-
   KrakenRenderConstrainedBox({
     RenderBox child,
     @required BoxConstraints additionalConstraints,
   }) : super(child: child, additionalConstraints: additionalConstraints);
 
   @override
-  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+  void layout(Constraints constraints, {bool parentUsesSize = false}) {
     Constraints additional = additionalConstraints;
     Constraints result = constraints;
     if (constraints is BoxConstraints && additional is BoxConstraints) {

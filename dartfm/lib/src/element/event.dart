@@ -81,8 +81,8 @@ class InputEvent extends Event {
 
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
-  TouchEvent(String type) : super(type,
-      EventInit(bubbles: true, cancelable: true, composed: true ));
+  TouchEvent(String type)
+      : super(type, EventInit(bubbles: true, cancelable: true, composed: true));
 
   TouchList touches = TouchList();
   TouchList targetTouches = TouchList();

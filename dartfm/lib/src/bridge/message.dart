@@ -30,7 +30,6 @@ abstract class Message {
 }
 
 class JSMessage extends Message {
-
   JSMessage(String data) : super(data);
 
   send() {
@@ -39,7 +38,6 @@ class JSMessage extends Message {
 }
 
 class CPPMessage extends Message {
-
   final String _kind;
 
   CPPMessage(this._kind, String data) : super(data);

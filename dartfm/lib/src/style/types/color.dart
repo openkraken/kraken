@@ -40,7 +40,7 @@ class WebColor {
     return ret;
   }
 
-  static  String convertToHex(Color color) {
+  static String convertToHex(Color color) {
     String red = color.red.toRadixString(16).padLeft(2);
     String green = color.green.toRadixString(16).padLeft(2);
     String blue = color.blue.toRadixString(16).padLeft(2);

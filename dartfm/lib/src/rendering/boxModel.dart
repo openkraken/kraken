@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'package:kraken/style.dart';
 
 class RenderBoxModel extends RenderTransform {
@@ -14,11 +13,10 @@ class RenderBoxModel extends RenderTransform {
     this.nodeId,
     this.style,
   }) : super(
-    child: child,
-    transform: transform,
-    origin: origin,
-  );
+          child: child,
+          transform: transform,
+          origin: origin,
+        );
   int nodeId;
   Style style;
 }
-

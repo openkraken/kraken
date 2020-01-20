@@ -14,8 +14,7 @@ class Throttling {
   bool get isReady => isReady;
   Future<void> get _waiter => Future.delayed(this._duration);
   // ignore: close_sinks
-  final StreamController<bool> _stateSC =
-  new StreamController<bool>.broadcast();
+  final StreamController<bool> _stateSC = StreamController<bool>.broadcast();
 
   Throttling({Duration duration = const Duration(seconds: 1)})
       : assert(duration is Duration && !duration.isNegative),

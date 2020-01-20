@@ -721,7 +721,8 @@ class RenderFlexLayout extends RenderBox
       constraintWidth = idealSize;
     }
 
-    double constraintHeight = _direction == Axis.horizontal ? crossSize : idealSize;
+    double constraintHeight =
+        _direction == Axis.horizontal ? crossSize : idealSize;
     if (style.get('height') != null) {
       double height = Length.toDisplayPortValue(style.get('height'));
       if (height != null) {
@@ -734,21 +735,16 @@ class RenderFlexLayout extends RenderBox
       }
     }
 
-
     switch (_direction) {
       case Axis.horizontal:
-        size = Size(
-          math.max(constraintWidth, idealSize),
-          constraints.constrainHeight(constraintHeight)
-        );
+        size = Size(math.max(constraintWidth, idealSize),
+            constraints.constrainHeight(constraintHeight));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case Axis.vertical:
-        size = Size(
-          math.max(constraintWidth, crossSize),
-          constraints.constrainHeight(constraintHeight)
-        );
+        size = Size(math.max(constraintWidth, crossSize),
+            constraints.constrainHeight(constraintHeight));
         actualSize = size.height;
         crossSize = size.width;
         break;
@@ -830,12 +826,10 @@ class RenderFlexLayout extends RenderBox
       Offset relativeOffset;
       switch (_direction) {
         case Axis.horizontal:
-          relativeOffset =
-              Offset(childMainPosition, childCrossPosition);
+          relativeOffset = Offset(childMainPosition, childCrossPosition);
           break;
         case Axis.vertical:
-          relativeOffset =
-              Offset(childCrossPosition, childMainPosition);
+          relativeOffset = Offset(childCrossPosition, childMainPosition);
           break;
       }
       Style childStyle;
@@ -845,6 +839,7 @@ class RenderFlexLayout extends RenderBox
         int childNodeId = (child as RenderBoxModel).nodeId;
         childStyle = nodeMap[childNodeId].style;
       }
+
       ///apply position relative offset change
       applyRelativeOffset(relativeOffset, child, childStyle);
       if (flipMainAxis) {
@@ -896,13 +891,13 @@ class RenderFlexLayout extends RenderBox
   }
 }
 
-
-class RenderFlexItem
-  extends RenderBox
-  with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-    DebugOverflowIndicatorMixin, RelativeStyleMixin {
-  RenderFlexItem({ RenderFlexLayout parent, RenderBox child }) {
+class RenderFlexItem extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+        DebugOverflowIndicatorMixin,
+        RelativeStyleMixin {
+  RenderFlexItem({RenderFlexLayout parent, RenderBox child}) {
     this.parentFlexBox = parent;
     add(child);
   }
@@ -935,7 +930,7 @@ class RenderFlexItem
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 }

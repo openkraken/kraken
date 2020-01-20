@@ -12,14 +12,12 @@ const String VIDEO = 'VIDEO';
 const String DEFAULT_WIDTH = '300px';
 const String DEFAULT_HEIGHT = '150px';
 
-class VideoParentData extends ContainerBoxParentData<RenderBox> {
-}
+class VideoParentData extends ContainerBoxParentData<RenderBox> {}
 
 class RenderVideoBox extends RenderBox
-  with
-    ContainerRenderObjectMixin<RenderBox, VideoParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
-
+    with
+        ContainerRenderObjectMixin<RenderBox, VideoParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
   RenderVideoBox({
     this.child,
     this.additionalConstraints,
@@ -56,7 +54,6 @@ class RenderVideoBox extends RenderBox
 }
 
 class VideoElement extends Element {
-
   VideoPlayerController controller;
   String _src;
 
@@ -82,7 +79,7 @@ class VideoElement extends Element {
           properties: props,
           events: events,
         ) {
-    RegExp exp = new RegExp(r"^(http|https)://");
+    RegExp exp = RegExp(r"^(http|https)://");
 
     if (props['src'] == null) {
       TextureBox box = TextureBox(textureId: 0);
@@ -91,7 +88,7 @@ class VideoElement extends Element {
     }
 
     if (!exp.hasMatch(props['src'])) {
-      throw new Exception('video url\'s prefix should be http:// or https://');
+      throw Exception('video url\'s prefix should be http:// or https://');
     }
 
     controller = VideoPlayerController.network(props['src']);
@@ -131,7 +128,8 @@ class VideoElement extends Element {
   }
 
   Future<Map<String, dynamic>> getVideoDetail() async {
-    final Completer<Map<String, dynamic>> detailCompleter = Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> detailCompleter =
+        Completer<Map<String, dynamic>>();
     RendererBinding.instance.addPostFrameCallback((Duration timeout) {
       var value = controller.value;
       var duration = value.duration;
@@ -172,10 +170,7 @@ class VideoElement extends Element {
 
   onError(int code, String error) {
     Event event = Event('error', EventInit());
-    event.detail = {
-      'code': code,
-      'message': error
-    };
+    event.detail = {'code': code, 'message': error};
     dispatchEvent(event);
   }
 
@@ -215,7 +210,7 @@ class VideoElement extends Element {
       return;
     }
 
-    switch(name) {
+    switch (name) {
       case 'play':
         controller.play();
         break;

@@ -33,22 +33,28 @@ abstract class Length {
 
     if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
-      displayPortValue =
-          currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
+      displayPortValue = currentValue /
+          750.0 *
+          window.physicalSize.width /
+          window.devicePixelRatio;
     } else if (unitedValue.endsWith(PX)) {
       double currentValue = double.parse(unitedValue.split(PX)[0]);
       displayPortValue = currentValue;
     } else if (unitedValue.endsWith(VW)) {
       double currentValue = double.parse(unitedValue.split(VW)[0]);
-      displayPortValue =
-          currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
+      displayPortValue = currentValue /
+          100.0 *
+          window.physicalSize.width /
+          window.devicePixelRatio;
     } else if (unitedValue.endsWith(VH)) {
       double currentValue = double.parse(unitedValue.split(VH)[0]);
-      displayPortValue =
-          currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
+      displayPortValue = currentValue /
+          100.0 *
+          window.physicalSize.height /
+          window.devicePixelRatio;
     }
     // Failed silently
-    
+
     return displayPortValue;
   }
 }

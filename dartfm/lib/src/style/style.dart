@@ -58,13 +58,25 @@ class Style {
     dynamic zIndexValue = _styleMap['zIndex'];
     zIndex = zIndexValue is num ? zIndexValue.toInt() : 0;
     position = _styleMap['position'] ?? 'static';
-    left = _styleMap.containsKey('left') ? Length.toDisplayPortValue(_styleMap['left']) : null;
-    right = _styleMap.containsKey('right') ? Length.toDisplayPortValue(_styleMap['right']) : null;
-    top = _styleMap.containsKey('top') ? Length.toDisplayPortValue(_styleMap['top']) : null;
-    bottom = _styleMap.containsKey('bottom') ? Length.toDisplayPortValue(_styleMap['bottom']) : null;
-    width = _styleMap.containsKey('width') ? Length.toDisplayPortValue(_styleMap['width']) : null;
+    left = _styleMap.containsKey('left')
+        ? Length.toDisplayPortValue(_styleMap['left'])
+        : null;
+    right = _styleMap.containsKey('right')
+        ? Length.toDisplayPortValue(_styleMap['right'])
+        : null;
+    top = _styleMap.containsKey('top')
+        ? Length.toDisplayPortValue(_styleMap['top'])
+        : null;
+    bottom = _styleMap.containsKey('bottom')
+        ? Length.toDisplayPortValue(_styleMap['bottom'])
+        : null;
+    width = _styleMap.containsKey('width')
+        ? Length.toDisplayPortValue(_styleMap['width'])
+        : null;
     if (width != null && width.isNegative) width = 0.0;
-    height = _styleMap.containsKey('height') ? Length.toDisplayPortValue(_styleMap['height']) : null;
+    height = _styleMap.containsKey('height')
+        ? Length.toDisplayPortValue(_styleMap['height'])
+        : null;
     if (height != null && height.isNegative) height = 0.0;
     transform = _styleMap['transform'];
     transformOrigin = _styleMap['transformOrigin'];

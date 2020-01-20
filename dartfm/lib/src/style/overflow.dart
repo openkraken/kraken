@@ -18,11 +18,11 @@ mixin StyleOverflowMixin {
     if (style != null) {
       _style = style;
       _child = current;
-      _renderObjectX =
-          _getRenderObjectByOverflow(style.overflowX, current, AxisDirection.right);
+      _renderObjectX = _getRenderObjectByOverflow(
+          style.overflowX, current, AxisDirection.right);
 
-      _renderObjectY =
-          _getRenderObjectByOverflow(style.overflowY, _renderObjectX, AxisDirection.down);
+      _renderObjectY = _getRenderObjectByOverflow(
+          style.overflowY, _renderObjectX, AxisDirection.down);
     }
     return _renderObjectY;
   }
@@ -45,8 +45,9 @@ mixin StyleOverflowMixin {
                 childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               OverflowCustomBox overflowCustomBox = OverflowCustomBox(
-                child: _renderObjectX, textDirection: TextDirection.ltr,
-                axisDirection: axisDirection);
+                  child: _renderObjectX,
+                  textDirection: TextDirection.ltr,
+                  axisDirection: axisDirection);
               parent.child = _renderObjectY = overflowCustomBox;
               _scrollableY = null;
             }
@@ -67,7 +68,7 @@ mixin StyleOverflowMixin {
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin &&
-              childParent is RenderObjectWithChildMixin) {
+                childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = _renderObjectY = RenderSingleChildViewport(
                   axisDirection: axisDirection,
@@ -93,9 +94,10 @@ mixin StyleOverflowMixin {
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin &&
-              childParent is RenderObjectWithChildMixin) {
+                childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              parent.child = _renderObjectX = OverflowCustomBox(child: _child,
+              parent.child = _renderObjectX = OverflowCustomBox(
+                  child: _child,
                   textDirection: TextDirection.ltr,
                   axisDirection: axisDirection);
               _scrollableX = null;
@@ -106,7 +108,7 @@ mixin StyleOverflowMixin {
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin &&
-              childParent is RenderObjectWithChildMixin) {
+                childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               _scrollableX = KrakenScrollable(axisDirection: axisDirection);
               parent.child = _renderObjectX =
@@ -117,7 +119,7 @@ mixin StyleOverflowMixin {
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin &&
-              childParent is RenderObjectWithChildMixin) {
+                childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = _renderObjectX = RenderSingleChildViewport(
                   axisDirection: axisDirection,
@@ -142,13 +144,15 @@ mixin StyleOverflowMixin {
         } else {
           _scrollableY = null;
         }
-        current =
-            OverflowCustomBox(child: current,
-              textDirection: TextDirection.ltr, axisDirection: axisDirection);
-         break;
+        current = OverflowCustomBox(
+            child: current,
+            textDirection: TextDirection.ltr,
+            axisDirection: axisDirection);
+        break;
       case Style.AUTO:
       case Style.SCROLL:
-        KrakenScrollable scrollable = KrakenScrollable(axisDirection: axisDirection);
+        KrakenScrollable scrollable =
+            KrakenScrollable(axisDirection: axisDirection);
         if (axisDirection == AxisDirection.right) {
           _scrollableX = scrollable;
         } else {
@@ -162,10 +166,11 @@ mixin StyleOverflowMixin {
         } else {
           _scrollableY = null;
         }
-        current = RenderSingleChildViewport(axisDirection: axisDirection,
-          offset: ViewportOffset.zero(),
-          child: current,
-          shouldClip: true);
+        current = RenderSingleChildViewport(
+            axisDirection: axisDirection,
+            offset: ViewportOffset.zero(),
+            child: current,
+            shouldClip: true);
         break;
     }
     return current;
@@ -206,13 +211,13 @@ mixin StyleOverflowMixin {
 
 class OverflowCustomBox extends RenderSizedOverflowBox {
   AxisDirection axisDirection;
-  OverflowCustomBox({
-    RenderBox child,
-    Size requestedSize = Size.zero,
-    AlignmentGeometry alignment = Alignment.topLeft,
-    TextDirection textDirection,
-    AxisDirection axisDirection
-  })  : assert(requestedSize != null),
+  OverflowCustomBox(
+      {RenderBox child,
+      Size requestedSize = Size.zero,
+      AlignmentGeometry alignment = Alignment.topLeft,
+      TextDirection textDirection,
+      AxisDirection axisDirection})
+      : assert(requestedSize != null),
         axisDirection = axisDirection,
         super(
             child: child,
@@ -225,15 +230,11 @@ class OverflowCustomBox extends RenderSizedOverflowBox {
     assert(child != null);
     BoxConstraints childConstraints;
     if (axisDirection == AxisDirection.down) {
-      childConstraints = constraints.copyWith(
-        minHeight: 0,
-        maxHeight: double.infinity
-      );
+      childConstraints =
+          constraints.copyWith(minHeight: 0, maxHeight: double.infinity);
     } else {
-      childConstraints = constraints.copyWith(
-        minWidth: 0,
-        maxWidth: double.infinity
-      );
+      childConstraints =
+          constraints.copyWith(minWidth: 0, maxWidth: double.infinity);
     }
     child.layout(childConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);
