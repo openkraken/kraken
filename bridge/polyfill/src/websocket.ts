@@ -1,9 +1,5 @@
-import {EventTarget, Event} from 'event-target-shim';
+import { EventTarget } from 'event-target-shim';
 
-type OnMessageFunc = (event: MessageEvent) => void;
-type OnOpenFunc = (event: Event) => void;
-type OnCloseFunc = (event: Event) => void;
-type OnErrorFunc = (event: Event) => void;
 type KrakenToken = number;
 
 // this interface is a description of the C++ Websocket API (bridge/bindings/websocket.cc)
@@ -41,12 +37,6 @@ enum BinaryType {
   arraybuffer = 'arraybuffer'
 }
 
-function notImpl(name: string) {
-  return () => {
-    throw new Error(`${name} is not implemented`);
-  }
-}
-
 class WebSocket extends EventTarget {
   private token: KrakenToken;
   public readyState: ReadyState;
@@ -59,10 +49,6 @@ class WebSocket extends EventTarget {
   public extensions: string = ''; // TODO add extensions support
   public protocol: string = ''; // TODO add protocol support
   public binaryType: BinaryType = BinaryType.blob;
-  public onopen: OnOpenFunc = notImpl('onopen');
-  public onclose: OnCloseFunc = notImpl('onclose');
-  public onerror: OnErrorFunc = notImpl('onerror');
-  public onmessage: OnMessageFunc = notImpl('onmessage');
 
   private _onMessage = (message: string) => {
     this.dispatchEvent({
@@ -118,6 +104,60 @@ class WebSocket extends EventTarget {
     });
     this.readyState = ReadyState.CLOSED;
   };
+
+  public _onopen: any = null;
+  public _onmessage: any = null
+  public _onclose: any = null
+  public _onerror: any = null
+
+  public set onopen(messageHandler: any) {
+    if (this._onopen) {
+      this.removeEventListener('open', this._onopen);
+    }
+    this._onopen = messageHandler;
+    this.addEventListener('open', messageHandler);
+  }
+
+  public get onopen() {
+    return this._onopen;
+  }
+
+  public set onclose(messageHandler: any) {
+    if (this._onclose) {
+      this.removeEventListener('close', this._onclose);
+    }
+    this._onclose = messageHandler;
+    this.addEventListener('close', messageHandler);
+  }
+
+  public get onclose() {
+    return this._onclose;
+  }
+
+
+  public set onmessage(messageHandler: any) {
+    if (this._onmessage) {
+      this.removeEventListener('message', this._onmessage);
+    }
+    this._onmessage = messageHandler;
+    this.addEventListener('message', messageHandler);
+  }
+
+  public get onmessage() {
+    return this._onmessage;
+  }
+
+  public set onerror(messageHandler: any) {
+    if (this._onerror) {
+      this.removeEventListener('error', this._onerror);
+    }
+    this._onerror = messageHandler;
+    this.addEventListener('error', messageHandler);
+  }
+
+  public get onerror() {
+    return this._onerror;
+  }
 
   constructor(url: string, protocol: string | string[]) {
     super();

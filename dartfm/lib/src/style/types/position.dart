@@ -20,7 +20,7 @@ class Position {
       alignment = Alignment(getValue(items[0], true), 0.0);
     } else if (items.length == 2) {
       alignment =
-        Alignment(getValue(items[0], true), getValue(items[1], false));
+          Alignment(getValue(items[0], true), getValue(items[1], false));
     } else if (items.length == 3) {
       String first = items[0];
       String second = items[1];

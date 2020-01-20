@@ -4,7 +4,6 @@
  */
 
 export 'src/element/binding.dart';
-export 'src/element/context.dart';
 export 'src/element/element.dart';
 export 'src/element/element_manager.dart';
 export 'src/element/node.dart';

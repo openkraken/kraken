@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/src/scheduler/fps.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/kraken.dart' show remountApp;
 
@@ -44,9 +45,8 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   W3CElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
     _root = RenderDecoratedBox(
-      decoration: BoxDecoration(color: WebColor.white),
-      child: rootElement.renderObject
-    );
+        decoration: BoxDecoration(color: WebColor.white),
+        child: rootElement.renderObject);
     nodeMap[BODY_ID] = rootElement;
   }
 
@@ -230,21 +230,27 @@ class ElementManager {
     RenderBox result = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null)
+      showPerformanceOverlay = showPerformanceOverlayOverride;
 
     if (showPerformanceOverlay) {
-      RenderPerformanceOverlay renderPerformanceOverlay = RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
+      RenderPerformanceOverlay renderPerformanceOverlay =
+          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox =
+          RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
           math.min(350.0, window.physicalSize.width),
           math.min(150.0, window.physicalSize.height),
         )),
       );
+      RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
+
       result = RenderStack(
         children: [
           result,
-          renderConstrainedPerformanceOverlayBox
+          renderConstrainedPerformanceOverlayBox,
+          renderFpsOverlayBox,
         ],
         textDirection: TextDirection.ltr,
       );

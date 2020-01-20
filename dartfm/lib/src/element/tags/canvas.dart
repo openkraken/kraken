@@ -13,13 +13,13 @@ final RegExp SpaceRegExp = RegExp(' ');
 
 class CanvasElement extends Element {
   CanvasElement(int nodeId, Map<String, dynamic> props, List<String> events)
-    : super(
-        nodeId: nodeId,
-        defaultDisplay: 'block',
-        tagName: CANVAS,
-        properties: props,
-        events: events,
-      ) {
+      : super(
+          nodeId: nodeId,
+          defaultDisplay: 'block',
+          tagName: CANVAS,
+          properties: props,
+          events: events,
+        ) {
     if (style.contains('width')) {
       _width = Length.toDisplayPortValue(style['width']);
     }
@@ -48,7 +48,8 @@ class CanvasElement extends Element {
   Size size;
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext getContext(String contextId, { dynamic options = null }) {
+  CanvasRenderingContext getContext(String contextId,
+      {dynamic options = null}) {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
@@ -156,4 +157,3 @@ class CanvasElement extends Element {
     }
   }
 }
-
