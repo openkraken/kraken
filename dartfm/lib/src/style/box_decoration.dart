@@ -7,10 +7,9 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/rendering/gradient.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/element.dart';
 
-import '../../element.dart';
 
 /// RenderDecoratedBox impls styles of
 /// - background

@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/src/rendering/gradient.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin {
@@ -166,7 +166,6 @@ mixin BackgroundImageMixin {
             start = 1;
           }
           applyColorAndStops(start, method.args, colors, stops);
-
           if (colors.length >= 2) {
             gradient = LinearGradient(
               begin: begin,
