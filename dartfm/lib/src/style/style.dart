@@ -31,6 +31,7 @@ class Style {
   String transform;
   String transformOrigin;
   String transition;
+  double linearAngle;
 
   Style(Map<String, dynamic> styleMap) {
     this._styleMap = styleMap ?? {};
