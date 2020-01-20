@@ -5,7 +5,6 @@
 
 import 'dart:convert';
 import 'dart:ui' show window;
-import 'dart:async';
 
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
