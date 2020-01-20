@@ -148,3 +148,53 @@ void initScreenMetricsChangedCallback() {
     sendWindowSize();
   };
 }
+
+@pragma('vm:entry-point')
+void KrakenCreateElement(String type, int id, String props, String events) {
+  PayloadNode node = PayloadNode.fromParams(type, id, props, events);
+  ElementManager.actionDelegate.createElement(node);
+}
+
+@pragma('vm:entry-point')
+void KrakenCreateTextNode(String type, int id, String props, String events) {
+  PayloadNode node = PayloadNode.fromParams(type, id, props, events);
+  ElementManager.actionDelegate.createTextNode(node);
+}
+
+@pragma('vm:entry-point')
+void KrakenSetStyle(int targetId, String key, String value) {
+  ElementManager.actionDelegate.setStyle(targetId, key, value);
+}
+
+/// an pipeline designed for dimension size
+/// it's to slow to pass (String '43.123231232193923828px')
+/// instead of we use (double 43.123231232193923828, String 'px')
+@pragma('vm:entry-point')
+void KrakenSetStyleWithDimensionSize(int targetId, String key, double value, String unit) {
+  ElementManager.actionDelegate.setStyle(targetId, key, value.toString() + unit);
+}
+
+@pragma('vm:entry-point')
+void KrakenRemoveNode(int targetId) {
+  ElementManager.actionDelegate.removeNode(targetId);
+}
+
+@pragma('vm:entry-point')
+void KrakenInsertAdjacentNode(int targetId, String position, int nodeId) {
+  ElementManager.actionDelegate.insertAdjacentNode(targetId, position, nodeId);
+}
+
+@pragma('vm:entry-point')
+void KrakenSetProperty(int targetId, String key, String value) {
+  ElementManager.actionDelegate.setProperty(targetId, key, value);
+}
+
+@pragma('vm:entry-point')
+void KrakenRemoveProperty(int targetId, String key) {
+  ElementManager.actionDelegate.removeProperty(targetId, key);
+}
+
+@pragma('vm:entry-point')
+void KrakenMethod(int targetId, String method, String args) {
+  ElementManager.actionDelegate.method(targetId, method, jsonEncode(args));
+}

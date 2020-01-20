@@ -52,6 +52,13 @@ alibaba::jsa::Value setTimeout(alibaba::jsa::JSContext &rt,
 
   timerCallbackMap.set(callbackId, callbackValue);
 
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[setTimeout]: "
+                        << "([\"setTimeout\",[" << callbackId << "]])"
+                        << std::endl;
+  }
+
   int timerId = KrakenRegisterSetTimeout(callbackId, time);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
@@ -94,6 +101,13 @@ alibaba::jsa::Value setInterval(alibaba::jsa::JSContext &rt,
   timerCallbackId.get(callbackId);
 
   timerCallbackMap.set(callbackId, callbackValue);
+
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[setInterval]: "
+                        << "([\"setTimeout\",[" << callbackId << "]])"
+                        << std::endl;
+  }
 
   int timerId = KrakenRegisterSetInterval(callbackId, time);
 
@@ -149,9 +163,9 @@ alibaba::jsa::Value clearTimeout(alibaba::jsa::JSContext &rt,
 }
 
 alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
-                                const alibaba::jsa::Value &thisVal,
-                                const alibaba::jsa::Value *args,
-                                size_t count) {
+                                          const alibaba::jsa::Value &thisVal,
+                                          const alibaba::jsa::Value *args,
+                                          size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[requestAnimationFrame] function missing parameters";
     return alibaba::jsa::Value::undefined();
@@ -162,7 +176,8 @@ alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
   alibaba::jsa::Object &&callbackFunction = callbackValue->getObject(rt);
 
   if (!callbackFunction.isFunction(rt)) {
-    KRAKEN_LOG(WARN) << "[requestAnimationFrame] first param should be a function";
+    KRAKEN_LOG(WARN)
+        << "[requestAnimationFrame] first param should be a function";
     return alibaba::jsa::Value::undefined();
   }
 
@@ -170,6 +185,13 @@ alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
   timerCallbackId.get(callbackId);
 
   timerCallbackMap.set(callbackId, callbackValue);
+
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[requestAnimationFrame]: "
+                        << "([\"requestAnimationFrame\",[" << callbackId << "]])"
+                        << std::endl;
+  }
 
   int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
 
@@ -222,7 +244,7 @@ void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
 }
 
 void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context,
-        const int callbackId) {
+                                         const int callbackId) {
   alibaba::jsa::Value *callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -246,7 +268,8 @@ void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context,
 void bindTimer(alibaba::jsa::JSContext *context) {
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), requestAnimationFrame);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),
+                                  requestAnimationFrame);
   JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0,
                        clearTimeout);
   JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,

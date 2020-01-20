@@ -149,7 +149,7 @@ class ImgElement extends Element {
   }
 
   @override
-  void setProperty(String key, value) {
+  void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     if (key == 'src') {
       image = NetworkImage(_getFormattedSourceURL(value));

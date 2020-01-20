@@ -12,6 +12,7 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
+#include "bindings/DOM/element.h"
 #include "logging.h"
 #include "message.h"
 #include "thread_safe_array.h"
@@ -148,6 +149,7 @@ JSBridge::JSBridge() {
   kraken::binding::bindTimer(context_.get());
   kraken::binding::bindFetch(context_.get());
   kraken::binding::bindScreen(context_.get());
+  kraken::binding::bindElement(context_.get());
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context_.get());

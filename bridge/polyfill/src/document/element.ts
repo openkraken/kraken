@@ -1,5 +1,11 @@
 import {NodeImpl, NodeType} from './node';
-import {krakenAddEvent, krakenCreateElement, krakenRemoveEvent, krakenSetProperty} from './kraken';
+import {
+  krakenAddEvent,
+  krakenCreateElement,
+  krakenRemoveEvent,
+  krakenSetProperty,
+  krakenSetStyle,
+} from './kraken';
 
 declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
 type EventListener = () => void;
@@ -75,7 +81,7 @@ export class ElementImpl extends NodeImpl {
       set(target: any, p: string | number | symbol, value: any, receiver: any): boolean {
         let styleKey = toCamelCase(String(p));
         this[styleKey] = value;
-        krakenSetProperty(id, '.style.' + styleKey, value);
+        krakenSetStyle(id, styleKey, value);
         return true;
       },
       get(target: any, props: string | number | symbol, receiver) {

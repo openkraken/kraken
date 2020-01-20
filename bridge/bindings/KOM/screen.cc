@@ -21,8 +21,6 @@ namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
-Screen screen;
-
 void bindScreen(JSContext *context) {
   // flutter screen is not initialized when this constructor called.
   // so we do nothing(nothing can do) at this constructor and waiting for

@@ -22,6 +22,7 @@ add_library(bindings STATIC
   bindings/KOM/location.cc
   bindings/KOM/location.h
   bindings/kraken.cc
+  bindings/DOM/element.cc
 )
 add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
 add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
