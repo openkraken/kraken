@@ -8,8 +8,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/element.dart';
 
-import '../../element.dart';
 
 /// RenderDecoratedBox impls styles of
 /// - background
@@ -27,8 +27,12 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     if (element != null) {
       element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
     }
-    renderBorderMargin = RenderMargin(margin: margin, child: renderObject);
-    return renderDecoratedBox = RenderDecoratedBox(
+    renderBorderMargin = RenderMargin(
+        margin: margin,
+        child: renderObject
+    );
+    return renderDecoratedBox = RenderGradient(
+      nodeId: element.nodeId,
       decoration: oldDecoration.toBoxDecoration(),
       child: renderBorderMargin,
     );
@@ -437,7 +441,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             decorationImage = getBackgroundImage(url, style);
           }
         } else {
-          gradient = getBackgroundGradient(method);
+          gradient = getBackgroundGradient(method, style);
         }
       }
     }

@@ -7,10 +7,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin {
-  RenderObject initBackgroundImage(RenderObject renderObject, Style style) {
+
+  double linearAngle;
+  RenderObject initBackgroundImage(RenderObject renderObject, Style style, int nodeId) {
     DecorationImage decorationImage;
     Gradient gradient;
     if (style.contains("backgroundImage")) {
@@ -23,12 +26,13 @@ mixin BackgroundImageMixin {
             decorationImage = getBackgroundImage(url, style);
           }
         } else {
-          gradient = getBackgroundGradient(method);
+          gradient = getBackgroundGradient(method, style);
         }
       }
     }
 
-    return RenderDecoratedBox(
+    return RenderGradient(
+        nodeId: nodeId,
         decoration: BoxDecoration(image: decorationImage, gradient: gradient),
         child: renderObject);
   }
@@ -84,7 +88,7 @@ mixin BackgroundImageMixin {
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method) {
+  Gradient getBackgroundGradient(Method method, Style style) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -94,7 +98,6 @@ mixin BackgroundImageMixin {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
           Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
-          GradientTransform transform;
           if (method.args[0].startsWith('to ')) {
             List<String> toString = method.args[0].trim().split(' ');
             if (toString.length >= 2) {
@@ -160,22 +163,19 @@ mixin BackgroundImageMixin {
             start = 1;
           } else if (Angle.isAngle(method.args[0])) {
             Angle angle = Angle(method.args[0]);
-            transform = GradientRotation(angle.angleValue + math.pi);
+            linearAngle = angle.angleValue;
             start = 1;
           }
           applyColorAndStops(start, method.args, colors, stops);
-
           if (colors.length >= 2) {
             gradient = LinearGradient(
               begin: begin,
               end: end,
-              transform: transform,
               colors: colors,
               stops: stops,
               tileMode: method.name == 'linear-gradient'
                   ? TileMode.clamp
-                  : TileMode.repeated,
-            );
+                  : TileMode.repeated);
           }
           break;
         //TODO just support circle radial
