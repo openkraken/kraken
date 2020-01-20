@@ -18,9 +18,10 @@ class JSLocation : public HostObject,
                    public std::enable_shared_from_this<JSLocation> {
 public:
   JSLocation(){};
-  ~JSLocation() = default;
+  ~JSLocation(){};
 
   void bind(JSContext *context, Object& window);
+  void unbind(JSContext *context, Object &window);
 
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;

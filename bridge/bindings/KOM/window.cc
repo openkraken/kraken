@@ -59,7 +59,15 @@ void JSWindow::bind(alibaba::jsa::JSContext *context) {
       alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
   location_->bind(context, window);
   JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", window);
-//  JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_window__", window);
 }
+
+void JSWindow::unbind(JSContext *context) {
+  Value &&window = JSA_GLOBAL_GET_PROPERTY(*context, "__kraken_window__");
+  Object &&object = window.getObject(*context);
+  location_->unbind(context, object);
+  _onloadCallback = Value::undefined();
+  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", Value::undefined());
+}
+
 } // namespace binding
 } // namespace kraken

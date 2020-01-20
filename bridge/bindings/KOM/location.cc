@@ -30,7 +30,7 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
   KRAKEN_LOG(VERBOSE) << "reload function called" << std::endl;
 
-  KrakenInvokeDartFromCpp("reload", "");
+  KrakenInvokeDartFromCpp("reloadApp", "");
 
   return Value::undefined();
 }
@@ -39,6 +39,13 @@ void JSLocation::bind(JSContext *context, Object &window) {
   JSA_SET_PROPERTY(
       *context, window, "location",
       alibaba::jsa::Object::createFromHostObject(*context, sharedSelf()));
+}
+
+void JSLocation::unbind(JSContext *context, Object &window) {
+  JSA_SET_PROPERTY(
+      *context, window, "location",
+      Value::undefined()
+  );
 }
 
 } // namespace binding

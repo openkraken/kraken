@@ -41,6 +41,12 @@ public:
     return hasValue;
   }
 
+  void reset() {
+    std::unique_lock<std::mutex> lk(mut);
+    this->map = std::map<Key, T>();
+    lk.unlock();
+  }
+
 private:
   std::mutex mut;
   std::map<Key, T> map;

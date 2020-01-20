@@ -19,9 +19,14 @@ public:
   JSWindow(){
     location_ = std::make_shared<kraken::binding::JSLocation>();
   };
-  ~JSWindow() = default;
+
+  ~JSWindow() {
+    _onloadCallback = nullptr;
+    location_ = nullptr;
+  };
 
   void bind(JSContext *context);
+  void unbind(JSContext *context);
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 

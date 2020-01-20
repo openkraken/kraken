@@ -14,8 +14,8 @@
 #include "bindings/KOM/window.h"
 #include "logging.h"
 #include "message.h"
-#include "thread_safe_data.h"
 #include "thread_safe_array.h"
+#include "thread_safe_data.h"
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
@@ -37,8 +37,18 @@ const char SCREEN_METRICS = 'm';
 const char WINDOW_LOAD = 'l';
 const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
 
-    ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
-    ThreadSafeData<int> timerCallbackId(1);
+ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
+ThreadSafeData<int> timerCallbackId(1);
+
+void clearDartJsCallbackList() {
+  // clear all dartToJSCallback js reference
+  for (int i = 0; i < dartJsCallbackList.length(); i ++) {
+    alibaba::jsa::Value* pv;
+    dartJsCallbackList.get(i, pv);
+    delete pv;
+  }
+  dartJsCallbackList.clear();
+}
 
 /**
  * Message channel, send message from JS to Dart.
@@ -108,6 +118,21 @@ alibaba::jsa::Value krakenDartToJs(alibaba::jsa::JSContext &context,
   return alibaba::jsa::Value::undefined();
 }
 
+#ifdef IS_TEST
+alibaba::jsa::Value getValue(alibaba::jsa::JSContext &context,
+                             const alibaba::jsa::Value &thisVal,
+                             const alibaba::jsa::Value *args,
+                             size_t count) {
+  if (count != 1) {
+    KRAKEN_LOG(VERBOSE) << "[TEST] getValue() accept 1 params";
+    return alibaba::jsa::Value::undefined();
+  }
+
+  const alibaba::jsa::Value &name = args[0];
+  return JSA_GLOBAL_GET_PROPERTY(context, name.getString(context).utf8(context).c_str());
+}
+#endif
+
 } // namespace
 
 /**
@@ -115,6 +140,7 @@ alibaba::jsa::Value krakenDartToJs(alibaba::jsa::JSContext &context,
  */
 JSBridge::JSBridge() {
   context_ = alibaba::jsc::createJSContext();
+  contextInvalid = false;
 
   // Inject JSC global objects
   kraken::binding::bindKraken(context_.get());
@@ -159,15 +185,11 @@ void JSBridge::detatchDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::invokeKrakenCallback(const char *args) {
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
-  }
   assert(context_ != nullptr);
 
   int length = dartJsCallbackList.length();
 
-  for (int i = 0; i < length; i ++) {
+  for (int i = 0; i < length; i++) {
     alibaba::jsa::Value *callback;
     dartJsCallbackList.get(i, callback);
 
@@ -190,6 +212,10 @@ void JSBridge::invokeKrakenCallback(const char *args) {
 }
 
 void JSBridge::handleFlutterCallback(const char *args) {
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+    KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
+  }
   if (contextInvalid) {
     return;
   }
@@ -224,9 +250,7 @@ void JSBridge::handleFlutterCallback(const char *args) {
       break;
     case ANIMATION_FRAME_MESSAGE:
       kraken::binding::invokeRequestAnimationFrameCallback(
-        context_.get(),
-        std::stoi(str.substr(3))
-      );
+          context_.get(), std::stoi(str.substr(3)));
       break;
     case FETCH_MESSAGE: {
       // extract id from DCf[id][message]
@@ -307,8 +331,14 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 }
 
 JSBridge::~JSBridge() {
+  window_->unbind(context_.get());
   contextInvalid = true;
+  clearDartJsCallbackList();
   context_.reset();
+}
+
+alibaba::jsa::Value JSBridge::getGlobalValue(std::string code) {
+  return context_->evaluateJavaScript(code.c_str(), "test://", 0);
 }
 
 } // namespace kraken

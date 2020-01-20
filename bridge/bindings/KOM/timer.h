@@ -12,6 +12,7 @@ namespace kraken {
 namespace binding {
 
 void bindTimer(alibaba::jsa::JSContext *context);
+void destroy();
 void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
                                const int callbackId);
 void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,

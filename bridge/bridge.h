@@ -22,12 +22,12 @@ private:
   std::unique_ptr<alibaba::jsa::JSContext> context_;
   std::shared_ptr<kraken::binding::JSWebSocket> websocket_;
   std::shared_ptr<kraken::binding::JSWindow> window_;
-  std::atomic<bool> contextInvalid;
 
 public:
   JSBridge();
   ~JSBridge();
 
+  std::atomic<bool> contextInvalid;
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detatchDevtools();
@@ -37,6 +37,10 @@ public:
                       int startLine);
 
   alibaba::jsa::JSContext *getContext() const { return context_.get(); }
+
+#ifndef ENABLE_TEST
+  alibaba::jsa::Value getGlobalValue(std::string code);
+#endif
 
   void handleFlutterCallback(const char *args);
   void invokeKrakenCallback(const char *args);
