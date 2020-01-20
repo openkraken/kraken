@@ -700,8 +700,8 @@ class RenderFlowLayout extends RenderBox
         Style childStyle;
         if (child is RenderParagraph) {
           childStyle = nodeMap[nodeId].style;
-        } else {
-          int childNodeId = (child as RenderBoxModel).nodeId;
+        } else if (child is RenderBoxModel) {
+          int childNodeId = child.nodeId;
           childStyle = nodeMap[childNodeId].style;
         }
 
