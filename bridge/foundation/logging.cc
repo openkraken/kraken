@@ -49,7 +49,7 @@ LogMessage::LogMessage(LogSeverity severity, const char *file, int line,
   if (severity >= LOG_INFO)
     stream_ << GetNameForLogSeverity(severity);
   else
-    stream_ << FRED("VERBOSE");
+    stream_ << "VERBOSE";
   stream_ << "] ";
 
   if (condition)

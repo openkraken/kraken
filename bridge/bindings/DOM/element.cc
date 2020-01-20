@@ -66,9 +66,9 @@ Value createElement(JSContext &context, const Value &thisVal, const Value *args,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[createElement]: "
-                        << R"(["createElement",[{"type":")" << c_type
+                        << R"([{"type":")" << c_type
                         << R"(","id":)" << id.getNumber() << R"(,"props":)"
-                        << c_props << R"(,"events":)" << c_events << "}]]"
+                        << c_props << R"(,"events":)" << c_events << "}]"
                         << std::endl;
   }
 
@@ -125,9 +125,9 @@ Value createTextNode(JSContext &context, const Value &thisVal,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[createTextNode]: "
-                        << R"(["createTextNode",[{"type":")" << c_type
+                        << R"([{"type":")" << c_type
                         << R"(","id":)" << id.getNumber() << R"(,"props":)"
-                        << c_props << R"(,"events":)" << c_events << "}]]"
+                        << c_props << R"(,"events":)" << c_events << "}]"
                         << std::endl;
   }
 
@@ -174,10 +174,10 @@ Value setStyle(JSContext &context, const Value &thisVal, const Value *args,
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[setProperty]: "
-                        << "([\"setProperty\",[" << (int)targetId.getNumber()
-                        << ",\".style." << c_key << "\",\"" << c_value
-                        << "\"]])" << std::endl;
+    KRAKEN_LOG(VERBOSE) << "[setStyle]: "
+                        << "[" << (int)targetId.getNumber()
+                        << "," << c_key << "\",\"" << c_value
+                        << "\"]" << std::endl;
   }
 
 #ifdef IS_TEST
@@ -208,8 +208,8 @@ Value removeNode(JSContext &context, const Value &thisVal, const Value *args,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[removeNode]: "
-                        << "([\"removeNode\",[" << (int)targetId.getNumber()
-                        << "]])" << std::endl;
+                        << "[" << (int)targetId.getNumber()
+                        << "]" << std::endl;
   }
 
 #ifdef IS_TEST
@@ -254,9 +254,9 @@ Value insertAdjacentNode(JSContext &context, const Value &thisVal,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[insertAdjacentNode]: "
-                        << "([\"insertAdjacentNode\",["
+                        << "["
                         << (int)targetId.getNumber() << ",\"" << c_position
-                        << "\"," << (int)nodeId.getNumber() << "]])"
+                        << "\"," << (int)nodeId.getNumber() << "]"
                         << std::endl;
   }
 
@@ -303,8 +303,8 @@ Value setProperty(JSContext &context, const Value &thisVal, const Value *args,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[setProperty]: "
-                        << "([\"setProperty\",[" << (int)targetId.getNumber()
-                        << ",\"" << c_key << "\",\"" << c_value << "\"]])"
+                        << "[" << (int)targetId.getNumber()
+                        << ",\"" << c_key << "\",\"" << c_value << "\"]"
                         << std::endl;
   }
 
@@ -359,9 +359,9 @@ Value setStyleWithDimensionSize(JSContext &context, const Value &thisValue,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[setStyleWithDimensionSize]: "
-                        << "([\"setStyleWithDimensionSize\",["
+                        << "["
                         << (int)targetId.getNumber() << ",\"" << c_key << "\","
-                        << value.getNumber() << ",\"" << c_unit << "\"]])"
+                        << value.getNumber() << ",\"" << c_unit << "\"]"
                         << std::endl;
   }
 
@@ -401,8 +401,8 @@ Value removeProperty(JSContext &context, const Value &thisVal,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[removeProperty]: "
-                        << "([\"removeProperty\",[" << (int)targetId.getNumber()
-                        << ",\"" << c_key << "\"]])" << std::endl;
+                        << "[" << (int)targetId.getNumber()
+                        << ",\"" << c_key << "\"]" << std::endl;
   }
 #ifdef IS_TEST
 #else
@@ -447,8 +447,8 @@ Value method(JSContext &context, const Value &thisVal, const Value *args,
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[method]: "
-                        << "([\"method\",[" << (int)targetId.getNumber()
-                        << ",\"" << c_method << "\"," << c_args << "]])"
+                        << "[" << (int)targetId.getNumber()
+                        << ",\"" << c_method << "\"," << c_args << "]"
                         << std::endl;
   }
 

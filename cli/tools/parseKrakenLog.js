@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const program = require('commander');
 const readline = require('readline');
@@ -14,26 +16,31 @@ program
 
     rl.on('line', input => {
       if (!input) return;
-      let msg = input.match(/.+\["(\w+)\",(\[[\w\W]+\])\]/);
+      let msg = input.match(/bridge\:\s\[(\w+)\]\s\[(\w+)\]:\s(.+)/);
       if (msg) {
-        let method = msg[1];
-        let data = JSON.parse(msg[2]);
+        let mode = msg[1];
+        let method = msg[2];
+        let data = msg[3];
 
         switch (method) {
           case 'setProperty': {
-            codes.push(`KrakenSetProperty(${data[0]}, "${data[1]}", "${data[2]}");`);
+            codes.push('setProperty ' + data);
+            break;
+          }
+          case 'setStyle': {
+            codes.push('setStyle ' + data);
             break;
           }
           case 'createElement': {
-            codes.push(`KrakenCreateElement("${data[0].type}", ${data[0].id}, "{}", "[]");`);
+            codes.push('createElement ' + data);
             break;
           }
           case 'insertAdjacentNode': {
-            codes.push(`KrakenInsertAdjacentNode(${data[0]},"${data[1]}",${data[2]});`);
+            codes.push('insertAdjacentNode ' + data);
             break;
           }
           case 'requestAnimationFrame': {
-            codes.push(`requestAnimationFrame(${data[0]});`);
+            codes.push('requestAnimationFrame ' + data);
             break;
           }
         }
