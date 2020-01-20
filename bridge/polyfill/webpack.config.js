@@ -1,6 +1,6 @@
 module.exports = () => {
   const config = {
-    mode: 'production',
+    mode: process.env['KRAKEN_WEBPACK_BUILD'] || 'none',
     entry: './src/index.ts',
     devServer: {
       hot: false,
