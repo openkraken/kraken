@@ -1,7 +1,7 @@
 stage:
   test:
     env:
-      image: 'alpha/flutter-engine:latest'
+      image: 'aone-base-global/alios7-nodejs-ci:1.0.0'
     plugin:
       -
         param:
@@ -11,8 +11,15 @@ stage:
           isDelGit: 'false'
         name: checkout
         pos: front
+      -
+        param:
+          version: node-8
+          source: '${source_root}'
+        name: node_envs
+        pos: front
     exec:
+      - 'export PATH=$PWD/node_modules/.bin:$HOME/.cli:$PATH'
       - 'echo $PATH'
-      - 'cd dartfm && dartanalyzer --options analysis_options.yaml .'
+      - 'tnpm run ci'
 pipeline:
   - 'test'
