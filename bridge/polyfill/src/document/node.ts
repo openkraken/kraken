@@ -1,5 +1,5 @@
-import {EventTarget} from 'event-target-shim';
-import {krakenInsertAdjacentNode, krakenRemoveNode} from "./kraken";
+import { EventTarget } from 'event-target-shim';
+import { insertAdjacentNode, removeNode } from "./kraken";
 
 type NodeList = Array<NodeImpl>;
 
@@ -11,8 +11,6 @@ export enum NodeType {
   DOCUMENT_TYPE_NODE = 10,
   DOCUMENT_FRAGMENT_NODE = 11
 }
-
-
 
 export class NodeImpl extends EventTarget {
   public readonly childNodes: NodeList = [];
@@ -52,7 +50,7 @@ export class NodeImpl extends EventTarget {
     this.childNodes.push(node);
     node.parentChildIndex = this.childNodes.length - 1;
     node.parentNode = this;
-    krakenInsertAdjacentNode(this.id, 'beforeend', node.id);
+    insertAdjacentNode(this.id, 'beforeend', node.id);
   }
 
   public insertBefore(newNode: NodeImpl, referenceNode: NodeImpl) {
@@ -61,11 +59,11 @@ export class NodeImpl extends EventTarget {
     const nextIndex = parentNode.childNodes.indexOf(referenceNode);
     parentNode.childNodes.splice(nextIndex - 1, 0, newNode);
     newNode.parentNode = parentNode;
-    krakenInsertAdjacentNode(referenceNode.id, 'beforebegin', newNode.id);
+    insertAdjacentNode(referenceNode.id, 'beforebegin', newNode.id);
   }
 
   public remove() {
-    krakenRemoveNode(this.id);
+    removeNode(this.id);
   }
 
   // public replaceChild(newNode: NodeImpl, oldNode: NodeImpl) {
@@ -77,7 +75,7 @@ export class NodeImpl extends EventTarget {
   //   newNode.parentNode = parentNode;
   //   parentNode.childNodes.splice(childIndex, 1, newNode);
   //
-  //   krakenInsertAdjacentNode(oldNode.id, 'afterend', newNode.id);
-  //   krakenRemoveNode(oldNode.id);
+  //   insertAdjacentNode(oldNode.id, 'afterend', newNode.id);
+  //   removeNode(oldNode.id);
   // }
 }

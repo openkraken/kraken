@@ -876,7 +876,7 @@ abstract class Element extends Node
   }
 
   @mustCallSuper
-  void setProperty(String key, value) {
+  void setProperty(String key, dynamic value) {
     if (key.indexOf(STYLE_PATH_PREFIX) >= 0) {
       String styleKey = key.substring(1).split('.')[1];
       Style newStyle = _style.copyWith({styleKey: value});
@@ -886,10 +886,15 @@ abstract class Element extends Node
     } else {
       properties[key] = value;
       if (key == STYLE) {
+        if (value is String) {
+          // if value is raw style string, should convert it into map
+          value = jsonEncode(value);
+        }
+
         style = _style.copyWith(value);
       }
 
-      if (key == 'style') {
+      if (key == STYLE) {
         updateTextNodeStyle(key);
       }
     }

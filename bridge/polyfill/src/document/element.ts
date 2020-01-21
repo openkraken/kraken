@@ -1,5 +1,12 @@
-import {NodeImpl, NodeType} from './node';
-import {krakenAddEvent, krakenCreateElement, krakenRemoveEvent, krakenSetProperty} from './kraken';
+import { NodeImpl, NodeType } from './node';
+import {
+  addEvent,
+  createElement,
+  removeEvent,
+  setProperty,
+  setStyle,
+  frameTick,
+} from './kraken';
 
 declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
 type EventListener = () => void;
@@ -8,11 +15,21 @@ let nodeMap: {
   [nodeId: number]: ElementImpl;
 } = {};
 const TARGET_JS = 'J';
+const FRAME_BEGIN = '$';
 
 __kraken_dart_to_js__((message) => {
+  if (message[2] === FRAME_BEGIN) {
+    frameTick();
+    return;
+  }
+
   if (message[1] === TARGET_JS) {
     message = message.slice(2);
+  } else {
+    // Target is not js, ignore that.
+    return;
   }
+
   let parsedMessage = null;
   try {
     parsedMessage = JSON.parse(message);
@@ -75,7 +92,7 @@ export class ElementImpl extends NodeImpl {
       set(target: any, p: string | number | symbol, value: any, receiver: any): boolean {
         let styleKey = toCamelCase(String(p));
         this[styleKey] = value;
-        krakenSetProperty(id, '.style.' + styleKey, value);
+        setStyle(id, styleKey, value);
         return true;
       },
       get(target: any, props: string | number | symbol, receiver) {
@@ -85,13 +102,13 @@ export class ElementImpl extends NodeImpl {
     });
 
     if (tagName != 'BODY') {
-      krakenCreateElement(this.tagName, id, {}, []);
+      createElement(this.tagName, id, {}, []);
     }
   }
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    krakenAddEvent(this.id, eventName);
+    addEvent(this.id, eventName);
     this.events[eventName] = eventListener;
     nodeMap[this.id] = this;
   }
@@ -100,7 +117,7 @@ export class ElementImpl extends NodeImpl {
     super.removeEventListener(eventName, eventListener);
     delete nodeMap[this.id];
     delete this.events[eventName];
-    krakenRemoveEvent(this.id, eventName);
+    removeEvent(this.id, eventName);
   }
 
   get nodeName() {
@@ -108,6 +125,6 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
-    krakenSetProperty(this.id, name, value);
+    setProperty(this.id, name, value);
   }
 }

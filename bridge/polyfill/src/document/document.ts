@@ -1,6 +1,6 @@
-import {NodeImpl, NodeType} from './node';
-import {ElementImpl} from "./element";
-import {TextImpl} from "./text";
+import { NodeImpl, NodeType } from './node';
+import { ElementImpl } from "./element";
+import { TextImpl } from "./text";
 
 let id = 1;
 

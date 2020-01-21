@@ -15,13 +15,14 @@ program
   .description('Start a kraken app.')
   .option('-b --bundle <bundle>', 'Bundle path. One of bundle or url is needed, if both determined, bundlePath will be used.')
   .option('-u --url <url>', 'Bundle url. One of bundle or url is needed, if both determined, bundlePath will be used.')
+  .option('-i --instruct <instruct>', 'instruct file path.')
   .option('-s, --source <source>', 'Source code. pass source directory from command line')
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .option('--show-performance-monitor', 'show render performance monitor', false)
   .option('-d, --debug-layout', 'debug element\'s paint layout', false)
   .action((options) => {
-    let { bundle, url, source } = options;
+    let { bundle, url, source, instruct } = options;
 
     if (!bundle && !url && !source && !options.args) {
       program.help();
@@ -52,6 +53,11 @@ program
         env['KRAKEN_ENABLE_DEBUG'] = true;
       }
 
+      if (instruct) {
+        const absoluteInstructPath = resolve(process.cwd(), instruct);
+        env['KRAKEN_INSTRUCT_PATH'] = absoluteInstructPath;
+      }
+
       if (bundle) {
         const absoluteBundlePath = resolve(process.cwd(), bundle);
         env['KRAKEN_BUNDLE_PATH'] = absoluteBundlePath;
@@ -61,7 +67,7 @@ program
         let t = temp.track();
         let tempdir = t.openSync('source');
         let tempPath = tempdir.path;
-        fs.writeFileSync(tempPath, source, {encoding: 'utf-8'});
+        fs.writeFileSync(tempPath, source, { encoding: 'utf-8' });
         env['KRAKEN_BUNDLE_PATH'] = tempPath;
       }
 

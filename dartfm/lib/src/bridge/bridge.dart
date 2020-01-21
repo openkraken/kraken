@@ -13,14 +13,54 @@ import 'fetch.dart' show Fetch;
 import 'timer.dart';
 import 'message.dart';
 
+const String BATCH_UPDATE = 'batchUpdate';
 KrakenTimer timer = KrakenTimer();
+
+ElementAction getAction(String action) {
+  switch (action) {
+    case 'createElement':
+      return ElementAction.createElement;
+    case 'createTextNode':
+      return ElementAction.createTextNode;
+    case 'insertAdjacentNode':
+      return ElementAction.insertAdjacentNode;
+    case 'removeNode':
+      return ElementAction.removeNode;
+    case 'setStyle':
+      return ElementAction.setStyle;
+    case 'setProperty':
+      return ElementAction.setProperty;
+    case 'removeProperty':
+      return ElementAction.removeProperty;
+    case 'addEvent':
+      return ElementAction.addEvent;
+    case 'removeEvent':
+      return ElementAction.removeEvent;
+    case 'method':
+      return ElementAction.method;
+    default:
+      return null;
+  }
+}
 
 @pragma('vm:entry-point')
 String krakenJsToDart(String args) {
-  dynamic list = jsonDecode(args);
-  String action = list[0];
-  List<dynamic> payload = list[1];
+  dynamic directives = jsonDecode(args);
+  if (directives[0] == BATCH_UPDATE) {
+    List<dynamic> children = directives[1];
+    List<String> result = [];
+    for (dynamic child in children) {
+      result.add(handleJSToDart(child as List));
+    }
+    return result.join(',');
+  } else {
+    return handleJSToDart(directives);
+  }
+}
 
+String handleJSToDart(List directive) {
+  ElementAction action = getAction(directive[0]);
+  List payload = directive[1];
   var result = ElementManager().applyAction(action, payload);
 
   if (result == null) {
@@ -43,8 +83,10 @@ String krakenJsToDart(String args) {
 @pragma('vm:entry-point')
 void reloadApp(String args) async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  appLoading = true;
   unmountApp();
   await reloadJSContext();
+  appLoading = false;
   connect(prevShowPerformanceOverlay);
 }
 
@@ -64,10 +106,7 @@ void clearTimeout(int timerId) {
 }
 
 @pragma('vm:entry-point')
-void clearInterval(int timerId) {
-  // Use same logical to clear innterval.
-  return timer.clearTimeout(timerId);
-}
+void clearInterval = clearTimeout;
 
 @pragma('vm:entry-point')
 int requestAnimationFrame(int callbackId) {
@@ -147,4 +186,52 @@ void initScreenMetricsChangedCallback() {
 
     sendWindowSize();
   };
+}
+
+@pragma('vm:entry-point')
+void createElement(String type, int id, String props, String events) {
+  ElementManager().applyAction(
+    ElementAction.createElement,
+    null,
+    node: PayloadNode.fromParams(type, id, props, events),
+  );
+}
+
+@pragma('vm:entry-point')
+void createTextNode(String type, int id, String props, String events) {
+  ElementManager().applyAction(
+    ElementAction.createTextNode,
+    null,
+    node: PayloadNode.fromParams(type, id, props, events),
+  );
+}
+
+@pragma('vm:entry-point')
+void setStyle(int targetId, String key, String value) {
+  ElementManager().applyAction(ElementAction.setStyle, [targetId, key, value]);
+}
+
+@pragma('vm:entry-point')
+void removeNode(int targetId) {
+  ElementManager().applyAction(ElementAction.removeNode, [targetId]);
+}
+
+@pragma('vm:entry-point')
+void insertAdjacentNode(int targetId, String position, int nodeId) {
+  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, position, nodeId]);
+}
+
+@pragma('vm:entry-point')
+void setProperty(int targetId, String key, String value) {
+  ElementManager().applyAction(ElementAction.setProperty, [targetId, key, value]);
+}
+
+@pragma('vm:entry-point')
+void removeProperty(int targetId, String key) {
+  ElementManager().applyAction(ElementAction.removeProperty, [targetId, key]);
+}
+
+@pragma('vm:entry-point')
+void method(int targetId, String method, String args) {
+  ElementManager().applyAction(ElementAction.method, [targetId, method, jsonEncode(args)]);
 }

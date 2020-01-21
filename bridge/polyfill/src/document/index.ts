@@ -1,4 +1,4 @@
-import {DocumentImpl} from './document';
+import { DocumentImpl } from './document';
 
 const _document = new DocumentImpl();
 

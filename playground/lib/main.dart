@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
+import 'package:kraken_playground/command.dart';
 import 'package:requests/requests.dart';
 import 'package:kraken/kraken.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
+const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
@@ -18,6 +20,10 @@ String getBundleURLFromEnv() {
 
 String getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
+}
+
+String getCommandPathFromEnv() {
+  return Platform.environment[COMMAND_PATH];
 }
 
 Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
@@ -58,10 +64,15 @@ Future<String> loadBundleFromAssets() async {
   return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
 }
 
+void afterConnectedForCommand() async {
+  CommandRun(getCommandPathFromEnv()).run();
+}
+
 void afterConnected() async {
   String bundleUrl = getBundleURLFromEnv();
   String bundlePath = getBundlePathFromEnv();
-  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath);
+  String content = await getBundleContent(
+      bundleUrl: bundleUrl, bundlePath: bundlePath);
 
   evaluateScripts(
     content,
@@ -72,9 +83,10 @@ void afterConnected() async {
 void main() {
   initKrakenCallback();
   _setTargetPlatformForDesktop();
-  runApp(
-    enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-    afterConnected: afterConnected
-  );
+  runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+      showPerformanceOverlay: Platform
+          .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      afterConnected: Platform.environment[COMMAND_PATH] != null
+          ? afterConnectedForCommand
+          : afterConnected);
 }

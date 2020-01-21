@@ -11,7 +11,7 @@ set(FOUNDATION_SOURCES
   count_down_latch.cc
   time_point.cc
   waitable_event.cc
-  )
+  colors.h)
 
 set(FOUNDATION_HEADERS
   logging.h

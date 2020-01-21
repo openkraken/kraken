@@ -273,7 +273,7 @@ task('compile-polyfill', (done) => {
     runPolyFillNpmInstall();
   }
 
-  let result = spawnSync('npm', ['run', 'build'], {
+  let result = spawnSync('npm', ['run', buildMode === 'Release' ? 'build:release' : 'build'], {
     cwd: paths.polyfill,
     env: process.env,
     stdio: 'inherit'

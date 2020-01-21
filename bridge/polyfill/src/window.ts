@@ -1,4 +1,4 @@
-import {EventTarget} from 'event-target-shim';
+import { EventTarget } from 'event-target-shim';
 
 interface KrakenWindow {
   onload: () => void;

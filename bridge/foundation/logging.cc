@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "logging.h"
+#include "colors.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -18,11 +19,11 @@ namespace foundation {
 namespace {
 
 const char *const kLogSeverityNames[LOG_NUM_SEVERITIES] = {
-    "VERBOSE", "INFO", "WARN", "DEBUG", "ERROR"};
+    "VERBOSE", BOLD("INFO"), FYEL("WARN"), BOLD("DEBUG"), FRED("ERROR")};
 const char *GetNameForLogSeverity(LogSeverity severity) {
   if (severity >= LOG_INFO && severity < LOG_NUM_SEVERITIES)
     return kLogSeverityNames[severity];
-  return "UNKNOWN";
+  return FCYN("UNKNOWN");
 }
 
 const char *StripDots(const char *path) {
@@ -44,21 +45,18 @@ const char *StripPath(const char *path) {
 LogMessage::LogMessage(LogSeverity severity, const char *file, int line,
                        const char *condition)
     : severity_(severity), file_(file), line_(line) {
-  stream_ << "[";
+  stream_ << "bridge: [";
   if (severity >= LOG_INFO)
     stream_ << GetNameForLogSeverity(severity);
   else
-    stream_ << "VERBOSE" << -severity;
-  stream_ << ":" << (severity > LOG_INFO ? StripDots(file_) : StripPath(file_))
-          << "(" << line_ << ")] ";
+    stream_ << "VERBOSE";
+  stream_ << "] ";
 
   if (condition)
     stream_ << "Check failed: " << condition << ". ";
 }
 
 LogMessage::~LogMessage() {
-  stream_ << std::endl;
-
 #if defined(IS_ANDROID)
   android_LogPriority priority = ANDROID_LOG_VERBOSE;
 
@@ -84,6 +82,7 @@ LogMessage::~LogMessage() {
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
   std::cout << stream_.str();
+  std::cout << std::endl;
   std::cout.flush();
 #endif
 }

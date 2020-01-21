@@ -26,6 +26,9 @@ TEST(reload, first) {
   Value &&another = bridge->getGlobalValue("typeof a");
   EXPECT_EQ(another.isString(), true);
   EXPECT_EQ(another.getString(*context).utf8(*context), "undefined");
+  Value anotherCopy = Value(*context, another.getString(*context));
+  EXPECT_EQ(anotherCopy.isString(), true);
+  EXPECT_EQ(anotherCopy.getString(*context).utf8(*context), "undefined");
 }
 
 }

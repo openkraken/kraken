@@ -6,7 +6,7 @@
 #include "screen.h"
 #include "jsa.h"
 #include "logging.h"
-#include "thread_safe_data.h"
+#include <atomic>
 #include <kraken_dart_export.h>
 
 struct Screen {
@@ -20,8 +20,6 @@ struct Screen {
 namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
-
-Screen screen;
 
 void bindScreen(JSContext *context) {
   // flutter screen is not initialized when this constructor called.
