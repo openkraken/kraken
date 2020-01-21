@@ -174,7 +174,7 @@ Value setStyle(JSContext &context, const Value &thisVal, const Value *args,
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[setStyle]: "
                         << "[" << (int)targetId.getNumber()
-                        << "," << c_key << "\",\"" << c_value
+                        << "," << "\"" << c_key << "\",\"" << c_value
                         << "\"]" << std::endl;
   }
 
