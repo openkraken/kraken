@@ -7,11 +7,9 @@
 #include "bridge.h"
 #include "kraken_hook_init.h"
 #include "polyfill.h"
-#include <atomic>
 #include <string>
-std::atomic<bool> inited;
 
-static std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
 
 // injected into engine
 void invoke_kraken_callback(const char *args) {
@@ -27,17 +25,12 @@ void evaluate_scripts(const char *code, const char *bundleFilename,
 
 KRAKEN_EXPORT
 void init_callback() {
-  if (inited)
-    return;
-  inited = true;
-
   KrakenInitCallBack(invoke_kraken_callback);
   KrakenInitEvaluateScriptCallback(evaluate_scripts);
   initKrakenPolyFill(bridge->getContext());
 }
 
 void reload_js_context() {
-  inited = false;
   bridge.reset(new kraken::JSBridge());
   initKrakenPolyFill(bridge->getContext());
 }

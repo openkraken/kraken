@@ -12,6 +12,7 @@ namespace kraken {
 namespace binding {
 
 void bindFetch(alibaba::jsa::JSContext *context);
+void unbindFetch();
 void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
                          const std::string &error, int statusCode,
                          const std::string &body);
