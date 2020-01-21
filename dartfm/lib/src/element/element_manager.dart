@@ -12,6 +12,18 @@ import 'package:kraken/element.dart';
 import 'package:kraken/src/scheduler/fps.dart';
 import 'package:kraken/style.dart';
 
+enum ElementAction {
+  createElement,
+  createTextNode,
+  insertAdjacentNode,
+  removeNode,
+  setProperty,
+  removeProperty,
+  addEvent,
+  removeEvent,
+  method
+}
+
 abstract class ElementManagerActionDelegate {
   RenderObject root;
   Element rootElement;
@@ -192,22 +204,22 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 }
 
 class ElementManager {
-  static ElementManagerActionDelegate actionDelegate;
+  static ElementManagerActionDelegate _actionDelegate;
   static ElementManager _managerSingleton = ElementManager._();
   factory ElementManager() => _managerSingleton;
 
   ElementManager._() {
-    actionDelegate = W3CElementManagerActionDelegate();
+    _actionDelegate = W3CElementManagerActionDelegate();
   }
 
   static bool showPerformanceOverlayOverride;
 
   RenderBox getRootRenderObject() {
-    return actionDelegate.root;
+    return _actionDelegate.root;
   }
 
   Element getRootElement() {
-    return actionDelegate.rootElement;
+    return _actionDelegate.rootElement;
   }
 
   bool showPerformanceOverlay = false;
@@ -255,35 +267,40 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  dynamic applyAction(String action, List<dynamic> payload) {
+  dynamic applyAction(ElementAction action, List payload, {
+    PayloadNode node
+  }) {
     var returnValue;
+
     switch (action) {
-      case 'createElement':
-        actionDelegate.createElement(PayloadNode.fromJson(payload[0]));
+      case ElementAction.createElement:
+        if (node == null) node = PayloadNode.fromJson(payload[0]);
+        _actionDelegate.createElement(node);
         break;
-      case 'createTextNode':
-        actionDelegate.createTextNode(PayloadNode.fromJson(payload[0]));
+      case ElementAction.createTextNode:
+        if (node == null) node = PayloadNode.fromJson(payload[0]);
+        _actionDelegate.createTextNode(node);
         break;
-      case 'insertAdjacentNode':
-        actionDelegate.insertAdjacentNode(payload[0], payload[1], payload[2]);
+      case ElementAction.insertAdjacentNode:
+        _actionDelegate.insertAdjacentNode(payload[0], payload[1], payload[2]);
         break;
-      case 'removeNode':
-        actionDelegate.removeNode(payload[0]);
+      case ElementAction.removeNode:
+        _actionDelegate.removeNode(payload[0]);
         break;
-      case 'setProperty':
-        actionDelegate.setProperty(payload[0], payload[1], payload[2]);
+      case ElementAction.setProperty:
+        _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
         break;
-      case 'removeProperty':
-        actionDelegate.removeProperty(payload[0], payload[1]);
+      case ElementAction.removeProperty:
+        _actionDelegate.removeProperty(payload[0], payload[1]);
         break;
-      case 'addEvent':
-        actionDelegate.addEvent(payload[0], payload[1]);
+      case ElementAction.addEvent:
+        _actionDelegate.addEvent(payload[0], payload[1]);
         break;
-      case 'removeEvent':
-        actionDelegate.removeEvent(payload[0], payload[1]);
+      case ElementAction.removeEvent:
+        _actionDelegate.removeEvent(payload[0], payload[1]);
         break;
-      case 'method':
-        returnValue = actionDelegate.method(payload[0], payload[1], payload[2]);
+      case ElementAction.method:
+        returnValue = _actionDelegate.method(payload[0], payload[1], payload[2]);
         break;
     }
 

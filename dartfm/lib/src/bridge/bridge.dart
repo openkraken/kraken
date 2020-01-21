@@ -15,10 +15,35 @@ import 'message.dart';
 
 KrakenTimer timer = KrakenTimer();
 
+ElementAction getAction(String action) {
+  switch (action) {
+    case 'createElement':
+      return ElementAction.createElement;
+    case 'createTextNode':
+      return ElementAction.createTextNode;
+    case 'insertAdjacentNode':
+      return ElementAction.insertAdjacentNode;
+    case 'removeNode':
+      return ElementAction.removeNode;
+    case 'setProperty':
+      return ElementAction.setProperty;
+    case 'removeProperty':
+      return ElementAction.removeProperty;
+    case 'addEvent':
+      return ElementAction.addEvent;
+    case 'removeEvent':
+      return ElementAction.removeEvent;
+    case 'method':
+      return ElementAction.method;
+    default:
+      return null;
+  }
+}
+
 @pragma('vm:entry-point')
 String krakenJsToDart(String args) {
   dynamic list = jsonDecode(args);
-  String action = list[0];
+  ElementAction action = getAction(list[0]);
   List<dynamic> payload = list[1];
 
   var result = ElementManager().applyAction(action, payload);
@@ -64,10 +89,7 @@ void clearTimeout(int timerId) {
 }
 
 @pragma('vm:entry-point')
-void clearInterval(int timerId) {
-  // Use same logical to clear innterval.
-  return timer.clearTimeout(timerId);
-}
+void clearInterval = clearTimeout;
 
 @pragma('vm:entry-point')
 int requestAnimationFrame(int callbackId) {
@@ -150,51 +172,49 @@ void initScreenMetricsChangedCallback() {
 }
 
 @pragma('vm:entry-point')
-void KrakenCreateElement(String type, int id, String props, String events) {
-  PayloadNode node = PayloadNode.fromParams(type, id, props, events);
-  ElementManager.actionDelegate.createElement(node);
+void createElement(String type, int id, String props, String events) {
+  ElementManager().applyAction(
+    ElementAction.createElement,
+    null,
+    node: PayloadNode.fromParams(type, id, props, events),
+  );
 }
 
 @pragma('vm:entry-point')
-void KrakenCreateTextNode(String type, int id, String props, String events) {
-  PayloadNode node = PayloadNode.fromParams(type, id, props, events);
-  ElementManager.actionDelegate.createTextNode(node);
+void createTextNode(String type, int id, String props, String events) {
+  ElementManager().applyAction(
+    ElementAction.createTextNode,
+    null,
+    node: PayloadNode.fromParams(type, id, props, events),
+  );
 }
 
 @pragma('vm:entry-point')
-void KrakenSetStyle(int targetId, String key, String value) {
-  ElementManager.actionDelegate.setStyle(targetId, key, value);
-}
-
-/// an pipeline designed for dimension size
-/// it's to slow to pass (String '43.123231232193923828px')
-/// instead of we use (double 43.123231232193923828, String 'px')
-@pragma('vm:entry-point')
-void KrakenSetStyleWithDimensionSize(int targetId, String key, double value, String unit) {
-  ElementManager.actionDelegate.setStyle(targetId, key, value.toString() + unit);
+void setStyle(int targetId, String key, String value) {
+  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, key, value]);
 }
 
 @pragma('vm:entry-point')
-void KrakenRemoveNode(int targetId) {
-  ElementManager.actionDelegate.removeNode(targetId);
+void removeNode(int targetId) {
+  ElementManager().applyAction(ElementAction.removeNode, [targetId]);
 }
 
 @pragma('vm:entry-point')
-void KrakenInsertAdjacentNode(int targetId, String position, int nodeId) {
-  ElementManager.actionDelegate.insertAdjacentNode(targetId, position, nodeId);
+void insertAdjacentNode(int targetId, String position, int nodeId) {
+  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, position, nodeId]);
 }
 
 @pragma('vm:entry-point')
-void KrakenSetProperty(int targetId, String key, String value) {
-  ElementManager.actionDelegate.setProperty(targetId, key, value);
+void setProperty(int targetId, String key, String value) {
+  ElementManager().applyAction(ElementAction.setProperty, [targetId, key, value]);
 }
 
 @pragma('vm:entry-point')
-void KrakenRemoveProperty(int targetId, String key) {
-  ElementManager.actionDelegate.removeProperty(targetId, key);
+void removeProperty(int targetId, String key) {
+  ElementManager().applyAction(ElementAction.removeProperty, [targetId, key]);
 }
 
 @pragma('vm:entry-point')
-void KrakenMethod(int targetId, String method, String args) {
-  ElementManager.actionDelegate.method(targetId, method, jsonEncode(args));
+void method(int targetId, String method, String args) {
+  ElementManager().applyAction(ElementAction.removeProperty, [targetId, method, jsonEncode(args)]);
 }
