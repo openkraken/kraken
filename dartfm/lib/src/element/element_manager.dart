@@ -268,9 +268,7 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  dynamic applyAction(ElementAction action, List payload, {
-    PayloadNode node
-  }) {
+  dynamic applyAction(ElementAction action, List payload, { PayloadNode node }) {
     var returnValue;
 
     switch (action) {

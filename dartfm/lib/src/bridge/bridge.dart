@@ -42,20 +42,23 @@ ElementAction getAction(String action) {
 }
 
 @pragma('vm:entry-point')
-String krakenJsToDart(String args, { dynamic list }) {
-  if (list == null) list = jsonDecode(args);
-  if (list[0] == BATCH_UPDATE) {
-    List<dynamic> children = list[1];
+String krakenJsToDart(String args) {
+  dynamic directives = jsonDecode(args);
+  if (directives[0] == BATCH_UPDATE) {
+    List<dynamic> children = directives[1];
     List<String> result = [];
     for (dynamic child in children) {
-      result.add(krakenJsToDart('', list: child));
+      result.add(handleJSToDart(child as List));
     }
     return result.join(',');
+  } else {
+    return handleJSToDart(directives);
   }
+}
 
-  ElementAction action = getAction(list[0]);
-  List<dynamic> payload = list[1];
-
+String handleJSToDart(List directive) {
+  ElementAction action = getAction(directive[0]);
+  List payload = directive[1];
   var result = ElementManager().applyAction(action, payload);
 
   if (result == null) {
@@ -226,5 +229,5 @@ void removeProperty(int targetId, String key) {
 
 @pragma('vm:entry-point')
 void method(int targetId, String method, String args) {
-  ElementManager().applyAction(ElementAction.removeProperty, [targetId, method, jsonEncode(args)]);
+  ElementManager().applyAction(ElementAction.method, [targetId, method, jsonEncode(args)]);
 }

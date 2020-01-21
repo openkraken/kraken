@@ -75,14 +75,14 @@ class Command {
   void run() {
     switch (method) {
       case 'setStyle':
-        KrakenSetStyle(params[0], params[1], params[2]);
+        setStyle(params[0], params[1], params[2]);
         break;
       case 'createElement':
         Map map = params[0];
-        KrakenCreateElement(map['type'], map['id'], map['props'].toString(), map['events'].toString());
+        createElement(map['type'], map['id'], map['props'].toString(), map['events'].toString());
         break;
       case 'insertAdjacentNode':
-        KrakenInsertAdjacentNode(params[0], params[1], params[2]);
+        insertAdjacentNode(params[0], params[1], params[2]);
         break;
     }
   }

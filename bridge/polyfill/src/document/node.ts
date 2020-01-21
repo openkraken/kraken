@@ -12,8 +12,6 @@ export enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 }
 
-
-
 export class NodeImpl extends EventTarget {
   public readonly childNodes: NodeList = [];
 
