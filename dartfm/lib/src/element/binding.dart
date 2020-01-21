@@ -395,7 +395,7 @@ class ElementsFlutterBinding extends BindingBase
         ElementsBinding {
   static void onFrameBegin(Duration timeStamp) {
     JSMessage(FRAME_BEGIN).send();
-    ElementsBinding.instance.scheduleFrameCallback(onFrameBegin, rescheduling: true);
+    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
   }
 
   /// Returns an instance of the [ElementsBinding], creating and
@@ -404,7 +404,7 @@ class ElementsFlutterBinding extends BindingBase
   /// it will at least implement [ElementsBinding].
   static ElementsBinding ensureInitialized() {
     if (ElementsBinding.instance == null) ElementsFlutterBinding();
-    ElementsBinding.instance.scheduleFrameCallback(onFrameBegin);
+    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
     return ElementsBinding.instance;
   }
 }

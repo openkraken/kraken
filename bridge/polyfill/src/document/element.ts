@@ -18,15 +18,15 @@ const TARGET_JS = 'J';
 const FRAME_BEGIN = '$';
 
 __kraken_dart_to_js__((message) => {
+  if (message[2] === FRAME_BEGIN) {
+    frameTick();
+    return;
+  }
+
   if (message[1] === TARGET_JS) {
     message = message.slice(2);
   } else {
     // Target is not js, ignore that.
-    return;
-  }
-
-  if (message[0] === FRAME_BEGIN) {
-    frameTick();
     return;
   }
 
