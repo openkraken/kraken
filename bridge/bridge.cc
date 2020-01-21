@@ -102,7 +102,6 @@ Value krakenDartToJs(JSContext &context,
   }
 
   dartJsCallbackList.push(val);
-  KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS]: callback registered";
 
   return Value::undefined();
 }
