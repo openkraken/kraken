@@ -13,6 +13,7 @@ import 'fetch.dart' show Fetch;
 import 'timer.dart';
 import 'message.dart';
 
+const String BATCH_UPDATE = 'batchUpdate';
 KrakenTimer timer = KrakenTimer();
 
 ElementAction getAction(String action) {
@@ -41,8 +42,17 @@ ElementAction getAction(String action) {
 }
 
 @pragma('vm:entry-point')
-String krakenJsToDart(String args) {
-  dynamic list = jsonDecode(args);
+String krakenJsToDart(String args, { dynamic list }) {
+  if (list == null) list = jsonDecode(args);
+  if (list[0] == BATCH_UPDATE) {
+    List<dynamic> children = list[1];
+    List<String> result = [];
+    for (dynamic child in children) {
+      result.add(krakenJsToDart('', list: child));
+    }
+    return result.join(',');
+  }
+
   ElementAction action = getAction(list[0]);
   List<dynamic> payload = list[1];
 
@@ -191,7 +201,7 @@ void createTextNode(String type, int id, String props, String events) {
 
 @pragma('vm:entry-point')
 void setStyle(int targetId, String key, String value) {
-  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, key, value]);
+  ElementManager().applyAction(ElementAction.setStyle, [targetId, key, value]);
 }
 
 @pragma('vm:entry-point')

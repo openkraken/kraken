@@ -9,7 +9,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/src/scheduler/fps.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
 
 enum ElementAction {
@@ -17,6 +17,7 @@ enum ElementAction {
   createTextNode,
   insertAdjacentNode,
   removeNode,
+  setStyle,
   setProperty,
   removeProperty,
   addEvent,
@@ -286,6 +287,9 @@ class ElementManager {
         break;
       case ElementAction.removeNode:
         _actionDelegate.removeNode(payload[0]);
+        break;
+      case ElementAction.setStyle:
+        _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
         break;
       case ElementAction.setProperty:
         _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
