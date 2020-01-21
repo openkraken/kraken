@@ -83,8 +83,10 @@ String handleJSToDart(List directive) {
 @pragma('vm:entry-point')
 void reloadApp(String args) async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  appLoading = true;
   unmountApp();
   await reloadJSContext();
+  appLoading = false;
   connect(prevShowPerformanceOverlay);
 }
 

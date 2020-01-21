@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 // We inject KrakenCallback() and KrakenEvaluateCallback() function into dart:ui
 // from out customized flutter engine, so don't remove this line
 import 'dart:ui';
+import 'package:kraken/kraken.dart';
 
 typedef InitKrakenCallbackFunc = Void Function();
 typedef InitKrakenCallback = void Function();
@@ -36,6 +37,7 @@ void initKrakenCallback() {
 }
 
 void invokeKrakenCallback(String data) {
+  if (appLoading) return;
   KrakenCallback(data);
 }
 
@@ -46,6 +48,8 @@ Future<void> reloadJSContext() async {
 }
 
 void evaluateScripts(String content, String url, {int startLine = 0}) {
+  if (appLoading) return;
+
   assert(content != null);
   assert(url != null);
   KrakenEvaluateCallback(content, url, startLine);

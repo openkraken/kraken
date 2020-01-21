@@ -234,7 +234,7 @@ void invokeRequestAnimationFrameCallback(JSContext *context,
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
+    KRAKEN_LOG(VERBOSE) << "callback is not a function" << callbackId;
     return;
   }
 

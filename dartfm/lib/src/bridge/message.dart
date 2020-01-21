@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:kraken/kraken.dart';
 import 'platform.dart';
 
 const DART = 'D';

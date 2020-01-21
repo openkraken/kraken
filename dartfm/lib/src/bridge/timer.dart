@@ -59,4 +59,10 @@ class KrakenTimer {
       animationFrameCallbackValidateMap[timerId] = false;
     }
   }
+
+  void reloadTimer() {
+    timerId = 1;
+    timerMap = {};
+    animationFrameCallbackValidateMap = {};
+  }
 }

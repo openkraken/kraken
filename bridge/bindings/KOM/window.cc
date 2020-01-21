@@ -18,8 +18,6 @@ void JSWindow::invokeOnloadCallback(alibaba::jsa::JSContext *context) {
     return;
   }
 
-  KRAKEN_LOG(VERBOSE ) << "invoke onload" << std::endl;
-
   auto funcObject = _onloadCallback.getObject(*context);
 
   if (funcObject.isFunction(*context)) {

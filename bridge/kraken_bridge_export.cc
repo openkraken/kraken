@@ -8,17 +8,23 @@
 #include "kraken_hook_init.h"
 #include "polyfill.h"
 #include <string>
+#include <iostream>
+#include <atomic>
 
+// this is not thread safe
+std::atomic<bool> inited {false};
 std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
 
 // injected into engine
 void invoke_kraken_callback(const char *args) {
+  if (!inited) return;
   bridge->handleFlutterCallback(args);
 }
 
 // injected into engine
 void evaluate_scripts(const char *code, const char *bundleFilename,
                       int startLine) {
+  if (!inited) return;
   bridge->evaluateScript(std::string(code), std::string(bundleFilename),
                          startLine);
 }
@@ -28,9 +34,12 @@ void init_callback() {
   KrakenInitCallBack(invoke_kraken_callback);
   KrakenInitEvaluateScriptCallback(evaluate_scripts);
   initKrakenPolyFill(bridge->getContext());
+  inited = true;
 }
 
 void reload_js_context() {
-  bridge.reset(new kraken::JSBridge());
+  inited = false;
+  bridge = std::make_unique<kraken::JSBridge>();
   initKrakenPolyFill(bridge->getContext());
+  inited = true;
 }

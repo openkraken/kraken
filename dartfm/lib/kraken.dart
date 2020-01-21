@@ -14,6 +14,7 @@ export 'bridge.dart';
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
+bool appLoading = false;
 
 void connect(bool showPerformanceOverlay) {
   RendererBinding.instance.scheduleFrameCallback((Duration time) {
@@ -52,6 +53,7 @@ void runApp({
 
 void unmountApp() {
   if (elementManager != null) {
+    timer.reloadTimer();
     elementManager.disconnect();
     elementManager = null;
   }
