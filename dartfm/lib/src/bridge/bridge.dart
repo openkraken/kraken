@@ -26,6 +26,8 @@ ElementAction getAction(String action) {
       return ElementAction.insertAdjacentNode;
     case 'removeNode':
       return ElementAction.removeNode;
+    case 'setStyle':
+      return ElementAction.setStyle;
     case 'setProperty':
       return ElementAction.setProperty;
     case 'removeProperty':
