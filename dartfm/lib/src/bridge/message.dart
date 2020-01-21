@@ -9,6 +9,7 @@ const DART = 'D';
 const CPP = 'C';
 const JS = 'J';
 
+const FRAME_BEGIN = '\$';
 const FETCH_MESSAGE = 's';
 const TIMEOUT_MESSAGE = 't';
 const INTERVAL_MESSAGE = 'i';

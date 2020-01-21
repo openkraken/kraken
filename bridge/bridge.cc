@@ -28,8 +28,10 @@ namespace kraken {
 namespace {
 
 const char CPP = 'C';
+const char JS = 'J';
 const char DART = 'D';
 
+const char FRAME_BEGIN = '$';
 const char FETCH_MESSAGE = 's';
 const char TIMEOUT_MESSAGE = 't';
 const char INTERVAL_MESSAGE = 'i';
@@ -214,10 +216,6 @@ void JSBridge::invokeKrakenCallback(const char *args) {
 }
 
 void JSBridge::handleFlutterCallback(const char *args) {
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
-  }
   if (contextInvalid) {
     return;
   }
@@ -233,13 +231,19 @@ void JSBridge::handleFlutterCallback(const char *args) {
   }
 
   try {
+    char kind = str[2];
+    if (
+      kind != FRAME_BEGIN &&
+      std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0
+    ) {
+      KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
+    }
     // do not handle message which did'n response to cpp layer
-    if (to != CPP) {
+    if (to == JS) {
       this->invokeKrakenCallback(args);
       return;
     }
-
-    char kind = str[2];
 
     switch (kind) {
     case TIMEOUT_MESSAGE:

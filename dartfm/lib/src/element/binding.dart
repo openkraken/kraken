@@ -393,12 +393,18 @@ class ElementsFlutterBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         ElementsBinding {
+  static void onFrameBegin(Duration timeStamp) {
+    JSMessage(FRAME_BEGIN).send();
+    ElementsBinding.instance.scheduleFrameCallback(onFrameBegin, rescheduling: true);
+  }
+
   /// Returns an instance of the [ElementsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a
   /// [ElementsFlutterBinding]. If one was previously initialized, then
   /// it will at least implement [ElementsBinding].
   static ElementsBinding ensureInitialized() {
     if (ElementsBinding.instance == null) ElementsFlutterBinding();
+    ElementsBinding.instance.scheduleFrameCallback(onFrameBegin);
     return ElementsBinding.instance;
   }
 }

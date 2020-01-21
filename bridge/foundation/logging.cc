@@ -82,6 +82,7 @@ LogMessage::~LogMessage() {
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
   std::cout << stream_.str();
+  std::cout << std::endl;
   std::cout.flush();
 #endif
 }
