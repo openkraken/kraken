@@ -77,14 +77,14 @@ target_include_directories(kraken PRIVATE
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
   if ($ENV{KRAKEN_BUILD} MATCHES Release)
     set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
-      $ENV{FLUTTER_ENGINE}/out/host_debug/libflutter_linux_glfw.so
+      $ENV{FLUTTER_ENGINE}/out/host_release/libflutter_linux_glfw.so
       )
     target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
     target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
     target_include_directories(kraken PRIVATE $ENV{FLUTTER_ENGINE}/out/host_release/)
   else ()
     set_target_properties(flutter PROPERTIES IMPORTED_LOCATION
-      $ENV{FLUTTER_ENGINE}/out/host_release/libflutter_linux_glfw.so
+      $ENV{FLUTTER_ENGINE}/out/host_debug/libflutter_linux_glfw.so
       )
     target_include_directories(bindings PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
     target_include_directories(bridge PRIVATE $ENV{FLUTTER_ENGINE}/out/host_debug/)
