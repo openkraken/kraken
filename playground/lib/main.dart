@@ -9,7 +9,7 @@ import 'package:flutter/services.dart' show rootBundle;
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String COMMAND_PATH = 'KRAKEN_COMMAND_PATH';
+const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
@@ -84,7 +84,8 @@ void main() {
   initKrakenCallback();
   _setTargetPlatformForDesktop();
   runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-      showPerformanceOverlay: true,
+      showPerformanceOverlay: Platform
+          .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       afterConnected: Platform.environment[COMMAND_PATH] != null
           ? afterConnectedForCommand
           : afterConnected);
