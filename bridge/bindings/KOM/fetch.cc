@@ -7,8 +7,8 @@
 #include "jsa.h"
 #include "kraken_dart_export.h"
 #include "logging.h"
-#include "thread_safe_data.h"
 #include "thread_safe_map.h"
+#include <atomic>
 #include <map>
 
 namespace kraken {
@@ -16,8 +16,8 @@ namespace binding {
 
 using namespace alibaba::jsa;
 
-ThreadSafeMap<int, Value *> fetchMap;
-ThreadSafeData<int> fetchId(0);
+ThreadSafeMap<int, std::shared_ptr<Value>> fetchMap;
+std::atomic<int> fetchId = {0};
 
 Value fetch(JSContext &context, const Value &thisVal, const Value *args,
             size_t count) {
@@ -45,9 +45,8 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  Value *funcValue = new Value(func.getObject(context));
-  int id;
-  fetchId.get(id);
+  std::shared_ptr<Value> funcValue = std::make_shared<Value> (Value(func.getObject(context)));
+  int id = fetchId.load();
 
   // store callback function
   fetchMap.set(id, funcValue);
@@ -57,7 +56,7 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
                     data.getString(context).utf8(context).c_str());
 
   fetchMap.set(id, funcValue);
-  fetchId.set(id + 1);
+  fetchId = id + 1;
 
   return Value::undefined();
 }
@@ -65,7 +64,7 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
 void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
                          const std::string &error, int statusCode,
                          const std::string &body) {
-  Value *funcValue;
+  std::shared_ptr<Value> funcValue;
   fetchMap.get(callbackId, funcValue);
 
   if (funcValue == nullptr) {
@@ -97,6 +96,10 @@ void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
 void bindFetch(alibaba::jsa::JSContext *context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken__fetch__", 0,
                        fetch);
+}
+
+void unbindFetch() {
+  fetchMap.reset();
 }
 
 } // namespace binding

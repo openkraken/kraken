@@ -6,7 +6,7 @@
 #include "screen.h"
 #include "jsa.h"
 #include "logging.h"
-#include "thread_safe_data.h"
+#include <atomic>
 #include <kraken_dart_export.h>
 
 struct Screen {

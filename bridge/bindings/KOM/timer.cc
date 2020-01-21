@@ -6,33 +6,34 @@
 #include "timer.h"
 #include "jsa.h"
 #include "logging.h"
-#include "thread_safe_data.h"
 #include "thread_safe_map.h"
+#include <atomic>
 
 #include <kraken_dart_export.h>
 
 namespace kraken {
 namespace binding {
 
-ThreadSafeMap<int, alibaba::jsa::Value *> timerCallbackMap;
-ThreadSafeMap<int, int> timerIdToCallbackIdMap;
-ThreadSafeData<int> timerCallbackId(1);
+using namespace alibaba::jsa;
 
-alibaba::jsa::Value setTimeout(alibaba::jsa::JSContext &rt,
-                               const alibaba::jsa::Value &thisVal,
-                               const alibaba::jsa::Value *args, size_t count) {
+ThreadSafeMap<int, std::shared_ptr<Value>> timerCallbackMap;
+ThreadSafeMap<int, int> timerIdToCallbackIdMap;
+std::atomic<int> timerCallbackId = {1};
+
+Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
+                 size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[setTimeout] function missing parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  alibaba::jsa::Value *callbackValue =
-      new alibaba::jsa::Value(args[0].getObject(rt));
-  alibaba::jsa::Object &&callbackFunction = callbackValue->getObject(rt);
+  std::shared_ptr<Value> callbackValue =
+      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(rt)) {
+  if (!callbackFunction.isFunction(context)) {
     KRAKEN_LOG(WARN) << "[setTimeout] first params should be a function";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   auto &&timeout = args[1];
@@ -44,11 +45,10 @@ alibaba::jsa::Value setTimeout(alibaba::jsa::JSContext &rt,
     time = timeout.getNumber();
   } else {
     KRAKEN_LOG(WARN) << "[setTimeout] timeout should be a number";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  int callbackId;
-  timerCallbackId.get(callbackId);
+  int callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -63,26 +63,25 @@ alibaba::jsa::Value setTimeout(alibaba::jsa::JSContext &rt,
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
 
-  timerCallbackId.set(callbackId + 1);
+  timerCallbackId = callbackId + 1;
 
-  return alibaba::jsa::Value(timerId);
+  return Value(timerId);
 }
 
-alibaba::jsa::Value setInterval(alibaba::jsa::JSContext &rt,
-                                const alibaba::jsa::Value &thisVal,
-                                const alibaba::jsa::Value *args, size_t count) {
+Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
+                  size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[setInterval] function missing parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  alibaba::jsa::Value *callbackValue =
-      new alibaba::jsa::Value(args[0].getObject(rt));
-  alibaba::jsa::Object &&callbackFunction = callbackValue->getObject(rt);
+  std::shared_ptr<Value> callbackValue =
+      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(rt)) {
+  if (!callbackFunction.isFunction(context)) {
     KRAKEN_LOG(WARN) << "[setInterval] first params should be a function";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   auto &&timeout = args[1];
@@ -94,11 +93,10 @@ alibaba::jsa::Value setInterval(alibaba::jsa::JSContext &rt,
     time = timeout.getNumber();
   } else {
     KRAKEN_LOG(WARN) << "[setInterval] timeout should be a number";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  int callbackId;
-  timerCallbackId.get(callbackId);
+  int callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -112,25 +110,23 @@ alibaba::jsa::Value setInterval(alibaba::jsa::JSContext &rt,
   int timerId = KrakenRegisterSetInterval(callbackId, time);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId.set(callbackId + 1);
+  timerCallbackId = callbackId + 1;
 
-  return alibaba::jsa::Value(timerId);
+  return Value(timerId);
 }
 
-alibaba::jsa::Value clearTimeout(alibaba::jsa::JSContext &rt,
-                                 const alibaba::jsa::Value &thisVal,
-                                 const alibaba::jsa::Value *args,
-                                 size_t count) {
+Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
+                   size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[clearTimeout] function missing parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  const alibaba::jsa::Value &timerId = args[0];
+  const Value &timerId = args[0];
   if (!timerId.isNumber()) {
     KRAKEN_LOG(WARN)
         << "[clearTimeout] clearTimeout accept number as parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   int timer = static_cast<int>(timerId.asNumber());
@@ -140,49 +136,43 @@ alibaba::jsa::Value clearTimeout(alibaba::jsa::JSContext &rt,
   if (callbackId == 0) {
     KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of timerId: "
                      << timer;
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   KrakenInvokeClearTimeout(timer);
 
-  alibaba::jsa::Value *callbackValue;
-
+  std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr ||
       !callbackValue->getObject(rt).isFunction(rt)) {
     KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of callbackId: "
                      << callbackId;
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
-
-  delete callbackValue;
 
   timerCallbackMap.erase(callbackId);
-  return alibaba::jsa::Value::undefined();
+  return Value::undefined();
 }
 
-alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
-                                          const alibaba::jsa::Value &thisVal,
-                                          const alibaba::jsa::Value *args,
-                                          size_t count) {
+Value requestAnimationFrame(JSContext &context, const Value &thisVal,
+                            const Value *args, size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[requestAnimationFrame] function missing parameters";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  alibaba::jsa::Value *callbackValue =
-      new alibaba::jsa::Value(args[0].getObject(rt));
-  alibaba::jsa::Object &&callbackFunction = callbackValue->getObject(rt);
+  std::shared_ptr<Value> callbackValue =
+      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(rt)) {
+  if (!callbackFunction.isFunction(context)) {
     KRAKEN_LOG(WARN)
         << "[requestAnimationFrame] first param should be a function";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  int callbackId;
-  timerCallbackId.get(callbackId);
+  int callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -196,14 +186,13 @@ alibaba::jsa::Value requestAnimationFrame(alibaba::jsa::JSContext &rt,
   int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId.set(callbackId + 1);
+  timerCallbackId = callbackId + 1;
 
-  return alibaba::jsa::Value(timerId);
+  return Value(timerId);
 }
 
-void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,
-                              const int callbackId) {
-  alibaba::jsa::Value *callbackValue;
+void invokeSetTimeoutCallback(JSContext *context, const int callbackId) {
+  std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr) {
@@ -211,21 +200,18 @@ void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,
     return;
   }
 
-  alibaba::jsa::Object callback = callbackValue->getObject(*context);
+  Object callback = callbackValue->getObject(*context);
 
   if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context,
-                                       alibaba::jsa::Value::undefined(), 0);
-    delete callbackValue;
+    callback.asFunction(*context).call(*context, Value::undefined(), 0);
     timerCallbackMap.erase(callbackId);
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
 }
 
-void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
-                               const int callbackId) {
-  alibaba::jsa::Value *callbackValue;
+void invokeSetIntervalCallback(JSContext *context, const int callbackId) {
+  std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr) {
@@ -233,19 +219,18 @@ void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
     return;
   }
 
-  alibaba::jsa::Object callback = callbackValue->getObject(*context);
+  Object callback = callbackValue->getObject(*context);
 
   if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context,
-                                       alibaba::jsa::Value::undefined(), 0);
+    callback.asFunction(*context).call(*context, Value::undefined(), 0);
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
 }
 
-void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context,
+void invokeRequestAnimationFrameCallback(JSContext *context,
                                          const int callbackId) {
-  alibaba::jsa::Value *callbackValue;
+  std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr) {
@@ -253,19 +238,17 @@ void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context,
     return;
   }
 
-  alibaba::jsa::Object callback = callbackValue->getObject(*context);
+  Object callback = callbackValue->getObject(*context);
 
   if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context,
-                                       alibaba::jsa::Value::undefined(), 0);
-    delete callbackValue;
+    callback.asFunction(*context).call(*context, Value::undefined(), 0);
     timerCallbackMap.erase(callbackId);
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
 }
 
-void bindTimer(alibaba::jsa::JSContext *context) {
+void bindTimer(JSContext *context) {
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),
@@ -278,10 +261,10 @@ void bindTimer(alibaba::jsa::JSContext *context) {
                        clearTimeout);
 }
 
-void destroy() {
+void unbindTimer() {
   timerCallbackMap.reset();
   timerIdToCallbackIdMap.reset();
-  timerCallbackId.set(1);
+  timerCallbackId = 1;
 }
 
 } // namespace binding

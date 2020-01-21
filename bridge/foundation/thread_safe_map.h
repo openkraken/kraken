@@ -43,7 +43,7 @@ public:
 
   void reset() {
     std::unique_lock<std::mutex> lk(mut);
-    this->map = std::map<Key, T>();
+    map.clear();
     lk.unlock();
   }
 

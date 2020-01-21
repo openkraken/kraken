@@ -83,9 +83,8 @@ abstract class Element extends Node
 
     renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
     renderObject = initRenderPadding(renderObject, style);
-    if (style.backgroundAttachment == 'local' &&
-        style.backgroundImage != null) {
-      renderObject = initBackgroundImage(renderObject, style);
+    if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
+      renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
     if (style.get('display') != 'inline') {
       renderObject = initOverflowBox(renderObject, style);
