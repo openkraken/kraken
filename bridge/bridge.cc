@@ -12,6 +12,7 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
+#include "bindings/KOM/location.h"
 #include "bindings/DOM/element.h"
 #include "logging.h"
 #include "message.h"
@@ -310,6 +311,7 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
   assert(context_ != nullptr);
   try {
+    binding::updateLocation(url);
     context_->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
   } catch (JSError error) {
     auto &&stack = error.getStack();

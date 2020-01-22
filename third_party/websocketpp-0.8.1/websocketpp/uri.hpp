@@ -317,6 +317,12 @@ public:
     void set_port(uint16_t port);
     void set_port(const std::string& port);
     void set_resource(const std::string& resource);*/
+    std::string m_scheme;
+    std::string m_host;
+    std::string m_resource;
+    uint16_t    m_port;
+    bool        m_secure;
+    bool        m_valid;
 private:
     uint16_t get_port_from_string(std::string const & port, lib::error_code &
         ec) const
@@ -339,13 +345,6 @@ private:
 
         return static_cast<uint16_t>(t_port);
     }
-
-    std::string m_scheme;
-    std::string m_host;
-    std::string m_resource;
-    uint16_t    m_port;
-    bool        m_secure;
-    bool        m_valid;
 };
 
 /// Pointer to a URI

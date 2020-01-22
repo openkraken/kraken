@@ -12,6 +12,8 @@ namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
+void updateLocation(std::string url);
+
 class JSWindow;
 
 class JSLocation : public HostObject,
