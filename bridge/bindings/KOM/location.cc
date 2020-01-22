@@ -11,14 +11,51 @@
 namespace kraken {
 namespace binding {
 
+std::string origin = "";
+std::string protocol = "";
+std::string host = "";
+std::string hostname = "";
+std::string port = "";
+std::string pathname = "";
+std::string search = "";
+std::string hash = "";
+
+void updateLocation(std::string url = "") {
+
+//  origin = _origin;
+//  protocol = _protocol;
+//  host = _host;
+//  hostname = _hostname;
+//  port = _port;
+//  pathname = _pathname;
+//  search = _search;
+//  hash = _hash;
+}
+
 Value JSLocation::get(JSContext &context, const PropNameID &name) {
-  auto _name = name.utf8(context);
-  if (_name == "reload") {
+  auto propertyName = name.utf8(context);
+  if (propertyName == "reload") {
     auto reloadFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
         context, std::bind(&JSLocation::reload, this, std::placeholders::_1,
                            std::placeholders::_2, std::placeholders::_3,
                            std::placeholders::_4));
     return Value(context, reloadFunc);
+  } else if (propertyName == "origin") {
+    return alibaba::jsa::String::createFromUtf8(context, origin);
+  } else if (propertyName == "protocol") {
+    return alibaba::jsa::String::createFromUtf8(context, protocol);
+  } else if (propertyName == "host") {
+    return alibaba::jsa::String::createFromUtf8(context, host);
+  } else if (propertyName == "hostname") {
+    return alibaba::jsa::String::createFromUtf8(context, hostname);
+  } else if (propertyName == "port") {
+    return alibaba::jsa::String::createFromUtf8(context, port);
+  } else if (propertyName == "pathname") {
+    return alibaba::jsa::String::createFromUtf8(context, pathname);
+  } else if (propertyName == "search") {
+    return alibaba::jsa::String::createFromUtf8(context, search);
+  } else if (propertyName == "hash") {
+    return alibaba::jsa::String::createFromUtf8(context, hash);
   }
 
   return Value::undefined();
@@ -28,15 +65,16 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
+  KRAKEN_LOG(VERBOSE) << "reload function called" << std::endl;
+
   KrakenInvokeDartFromCpp("reloadApp", "");
 
   return Value::undefined();
 }
 
 void JSLocation::bind(JSContext *context, Object &window) {
-  JSA_SET_PROPERTY(
-      *context, window, "location",
-      alibaba::jsa::Object::createFromHostObject(*context, sharedSelf()));
+  Object &&locationObject = alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
+  JSA_SET_PROPERTY(*context, window, "location", locationObject);
 }
 
 void JSLocation::unbind(JSContext *context, Object &window) {
