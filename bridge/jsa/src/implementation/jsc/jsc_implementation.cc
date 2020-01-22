@@ -97,7 +97,7 @@ std::string to_string(void* value) {
 
 JSCContext::JSCContext()
     : JSCContext(JSGlobalContextCreateInGroup(nullptr, nullptr)) {
-//  JSGlobalContextRelease(ctx_);
+  JSGlobalContextRelease(ctx_);
 
 #ifdef ANDROID_PLATFORM
   JSC::HeapTimer::startTimerThread();
