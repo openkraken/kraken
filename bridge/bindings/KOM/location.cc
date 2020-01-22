@@ -32,15 +32,6 @@ void updateLocation(std::string url = "") {
     search = uri.get_query();
     pathname = uri.get_resource();
   }
-
-//  origin = _origin;
-//  protocol = _protocol;
-//  host = _host;
-//  hostname = _hostname;
-//  port = _port;
-//  pathname = _pathname;
-//  search = _search;
-//  hash = _hash;
 }
 
 Value JSLocation::get(JSContext &context, const PropNameID &name) {
@@ -76,10 +67,7 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
-  KRAKEN_LOG(VERBOSE) << "reload function called" << std::endl;
-
   KrakenInvokeDartFromCpp("reloadApp", "");
-
   return Value::undefined();
 }
 
