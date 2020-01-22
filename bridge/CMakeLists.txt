@@ -33,6 +33,7 @@ add_library(flutter SHARED IMPORTED)
 target_include_directories(bindings PRIVATE
   ./jsa/include
   ./foundation
+  ./foundation/websockettpp-0.8.1
   ${ADDITIONAL_INCLUDE_DIRS}
   )
 target_link_libraries(bindings PRIVATE
