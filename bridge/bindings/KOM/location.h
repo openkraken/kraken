@@ -12,6 +12,8 @@ namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
+void updateLocation(std::string url);
+
 class JSWindow;
 
 class JSLocation : public HostObject,
@@ -25,16 +27,6 @@ public:
 
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;
-  void updateLocation(
-    std::string _origin,
-    std::string _protocol,
-    std::string _host,
-    std::string _hostname,
-    std::string _port,
-    std::string _pathname,
-    std::string _search,
-    std::string _hash
-  );
 
 private:
   std::shared_ptr<JSLocation> sharedSelf() { return shared_from_this(); }

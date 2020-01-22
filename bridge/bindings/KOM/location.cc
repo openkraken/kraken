@@ -6,6 +6,7 @@
 #include "location.h"
 #include "logging.h"
 #include "window.h"
+#include "websocketpp/uri.hpp"
 #include <kraken_dart_export.h>
 
 namespace kraken {
@@ -21,6 +22,16 @@ std::string search = "";
 std::string hash = "";
 
 void updateLocation(std::string url = "") {
+  websocketpp::uri uri(url);
+  if (uri.get_valid()) {
+    origin = uri.get_host();
+    protocol = uri.get_scheme() + "://";
+    hostname = uri.get_host();
+    port = uri.get_port_str();
+    host = hostname + ":" + port;
+    search = uri.get_query();
+    pathname = uri.get_resource();
+  }
 
 //  origin = _origin;
 //  protocol = _protocol;

@@ -1,23 +1,15 @@
 import { EventTarget } from 'event-target-shim';
+import { KrakenLocation, Location } from './location';
 
-interface KrakenWindow {
+export interface KrakenWindow {
   onload: () => void;
   devicePixelRatio: number;
   location: KrakenLocation;
 }
 
-interface KrakenLocation {
-  reload: () => void;
-}
-
 declare var __kraken_window__: KrakenWindow;
 
-class Location {
-  constructor() {}
-  reload() {
-    __kraken_window__.location.reload();
-  }
-}
+export const originLocation = __kraken_window__.location;
 
 class Window extends EventTarget {
   public location: Location;
@@ -50,5 +42,12 @@ Object.defineProperty(global, 'window', {
   enumerable: true,
   writable: false,
   value: window,
+  configurable: false
+});
+
+Object.defineProperty(global, 'location', {
+  enumerable: true,
+  writable: false,
+  value: window.location,
   configurable: false
 });
