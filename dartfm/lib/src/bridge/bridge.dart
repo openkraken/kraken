@@ -97,20 +97,16 @@ int setTimeout(int callbackId, int timeout) {
   return timer.setTimeout(callbackId, timeout);
 }
 
-@pragma('vm:entry-point')
 int setInterval(int callbackId, int timeout) {
   return timer.setInterval(callbackId, timeout);
 }
 
-@pragma('vm:entry-point')
 void clearTimeout(int timerId) {
   return timer.clearTimeout(timerId);
 }
 
-@pragma('vm:entry-point')
 void clearInterval = clearTimeout;
 
-@pragma('vm:entry-point')
 int requestAnimationFrame(int callbackId) {
   return timer.requestAnimationFrame(callbackId);
 }

@@ -4,10 +4,10 @@
  */
 
 #include "location.h"
-#include "logging.h"
-#include "window.h"
-#include "websocketpp/uri.hpp"
 #include "dart_callbacks.h"
+#include "logging.h"
+#include "websocketpp/uri.hpp"
+#include "window.h"
 
 namespace kraken {
 namespace binding {

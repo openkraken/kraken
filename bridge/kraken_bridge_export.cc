@@ -51,3 +51,15 @@ void registerReloadApp(void (*callback)()) {
 void registerSetTimeout(int32_t (*callback)(int32_t, int32_t)) {
   kraken::registerSetTimeout(callback);
 }
+
+void registerSetInterval(int32_t (*callback)(int32_t, int32_t)) {
+  kraken::registerSetInterval(callback);
+}
+
+void registerClearTimeout(void (*callback)(int32_t)) {
+  kraken::registerClearTimeout(callback);
+}
+
+void registerRequestAnimationFrame(int32_t (*callback)(int32_t)) {
+  kraken::registerRequestAnimationFrame(callback);
+}

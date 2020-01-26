@@ -30,6 +30,15 @@ KRAKEN_EXPORT
 void registerReloadApp(void (*callback)());
 
 KRAKEN_EXPORT
-void registerSetTimeout(int32_t (*callback)(int, int));
+void registerSetTimeout(int32_t (*callback)(int32_t, int32_t));
+
+KRAKEN_EXPORT
+void registerSetInterval(int32_t (*callback)(int32_t, int32_t));
+
+KRAKEN_EXPORT
+void registerClearTimeout(void (*callback)(int32_t));
+
+KRAKEN_EXPORT
+void registerRequestAnimationFrame(int32_t (*callback)(int32_t));
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

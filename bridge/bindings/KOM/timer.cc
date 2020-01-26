@@ -4,10 +4,10 @@
  */
 
 #include "timer.h"
+#include "dart_callbacks.h"
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
-#include "dart_callbacks.h"
 #include <atomic>
 
 namespace kraken {
@@ -108,13 +108,17 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-//  int32_t timerId = KrakenRegisterSetInterval(callbackId, time);
+  if (getDartFunc()->setInterval == nullptr) {
+    KRAKEN_LOG(ERROR) << "[setInterval] dart callback not register";
+    return Value::undefined();
+  }
 
-//  timerIdToCallbackIdMap.set(timerId, callbackId);
-//  timerCallbackId = callbackId + 1;
-//
-//  return Value(timerId);
-return Value::undefined();
+  int32_t timerId = getDartFunc()->setInterval(callbackId, time);
+
+  timerIdToCallbackIdMap.set(timerId, callbackId);
+  timerCallbackId = callbackId + 1;
+
+  return Value(timerId);
 }
 
 Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
@@ -141,7 +145,12 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-//  KrakenInvokeClearTimeout(timer);
+  if (getDartFunc()->clearTimeout == nullptr) {
+    KRAKEN_LOG(ERROR) << "[clearTimeout]: dart callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->clearTimeout(timer);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
@@ -185,8 +194,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                         << std::endl;
   }
 
-//  int32_t timerId = KrakenRegisterRequestAnimationFrame(callbackId);
-int32_t timerId = 0;
+  if (getDartFunc()->requestAnimationFrame == nullptr) {
+    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
+    return Value::undefined();
+  }
+
+  int32_t timerId = getDartFunc()->requestAnimationFrame(callbackId);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
