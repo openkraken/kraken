@@ -19,4 +19,8 @@ void registerReloadApp(ReloadApp callback) {
   funcPointer.reloadApp = callback;
 }
 
+void registerSetTimeout(SetTimeout callback) {
+  funcPointer.setTimeout = callback;
+}
+
 }

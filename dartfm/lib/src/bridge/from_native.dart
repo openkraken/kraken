@@ -15,6 +15,12 @@ typedef Native_RegisterReloadJSApp = Void Function(
 typedef Dart_RegisterReloadJSApp = void Function(
     Pointer<NativeFunction<Native_ReloadJSApp>>);
 
+typedef Native_SetTimeout = Int32 Function(Int32, Int32);
+typedef Native_RegisterSetTimeout = Void Function(
+    Pointer<NativeFunction<Native_SetTimeout>>);
+typedef Dart_RegisterSetTimeout = void Function(
+    Pointer<NativeFunction<Native_SetTimeout>>);
+
 final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInvokeDartFromJS>>(
         'registerInvokeDartFromJS')
@@ -22,6 +28,10 @@ final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
 
 final Dart_RegisterReloadJSApp _registerReloadJSApp = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterReloadJSApp>>('registerReloadApp')
+    .asFunction();
+
+final Dart_RegisterSetTimeout _registerSetTimeout = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout')
     .asFunction();
 
 Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
@@ -32,6 +42,11 @@ Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
 
 void __reloadJSApp() {
   reloadApp();
+}
+
+int __setTimeout(int callbackId, int timeout) {
+  print('trigger setTimeout');
+  return setTimeout(callbackId, timeout);
 }
 
 void registerInvokeDartFromJS() {
@@ -46,7 +61,14 @@ void registerReloadJSApp() {
   _registerReloadJSApp(pointer);
 }
 
+void registerSetTimeout() {
+  Pointer<NativeFunction<Native_SetTimeout>> pointer =
+      Pointer.fromFunction(__setTimeout, 0);
+  _registerSetTimeout(pointer);
+}
+
 void registerDartFunctionIntoCpp() {
   registerInvokeDartFromJS();
   registerReloadJSApp();
+  registerSetTimeout();
 }

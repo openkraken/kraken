@@ -35,10 +35,19 @@ void evaluateScripts(const char *code, const char *bundleFilename,
                          startLine);
 }
 
+void invokeKrakenCallback(const char *data) {
+  if (!inited) return;
+  bridge->handleFlutterCallback(data);
+}
+
 void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
   kraken::registerInvokeDartFromJS(callbacks);
 }
 
 void registerReloadApp(void (*callback)()) {
   kraken::registerReloadApp(callback);
+}
+
+void registerSetTimeout(int32_t (*callback)(int32_t, int32_t)) {
+  kraken::registerSetTimeout(callback);
 }

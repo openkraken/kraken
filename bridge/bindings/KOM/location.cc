@@ -67,8 +67,11 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
+  if (getDartFunc()->reloadApp == nullptr) {
+    KRAKEN_LOG(ERROR) << "[location.reload()] dart callback not register";
+    return Value::undefined();
+  }
   getDartFunc()->reloadApp();
-//  KrakenInvokeDartFromCpp("reloadApp", "");
   return Value::undefined();
 }
 

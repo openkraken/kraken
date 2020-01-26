@@ -7,18 +7,17 @@
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
+#include "dart_callbacks.h"
 #include <atomic>
-
-//#include <kraken_dart_export.h>
 
 namespace kraken {
 namespace binding {
 
 using namespace alibaba::jsa;
 
-ThreadSafeMap<int, std::shared_ptr<Value>> timerCallbackMap;
-ThreadSafeMap<int, int> timerIdToCallbackIdMap;
-std::atomic<int> timerCallbackId = {1};
+ThreadSafeMap<int32_t, std::shared_ptr<Value>> timerCallbackMap;
+ThreadSafeMap<int32_t, int32_t> timerIdToCallbackIdMap;
+std::atomic<int32_t> timerCallbackId = {1};
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                  size_t count) {
@@ -37,7 +36,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   auto &&timeout = args[1];
-  int time;
+  int32_t time;
 
   if (timeout.isUndefined() || count < 2) {
     time = 0;
@@ -48,7 +47,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -59,14 +58,15 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-//  int timerId = KrakenRegisterSetTimeout(callbackId, time);
-//
-//  timerIdToCallbackIdMap.set(timerId, callbackId);
-//
-//  timerCallbackId = callbackId + 1;
+  if (getDartFunc()->setTimeout == nullptr) {
+    KRAKEN_LOG(ERROR) << "[setTimeout] dart callback not register";
+    return Value::undefined();
+  }
 
-//  return Value(timerId);
-return Value::undefined();
+  int32_t timerId = getDartFunc()->setTimeout(callbackId, time);
+  timerIdToCallbackIdMap.set(timerId, callbackId);
+  timerCallbackId = callbackId + 1;
+  return Value(timerId);
 }
 
 Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
@@ -86,7 +86,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   auto &&timeout = args[1];
-  int time;
+  int32_t time;
 
   if (timeout.isUndefined()) {
     time = 0;
@@ -97,7 +97,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -108,7 +108,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-//  int timerId = KrakenRegisterSetInterval(callbackId, time);
+//  int32_t timerId = KrakenRegisterSetInterval(callbackId, time);
 
 //  timerIdToCallbackIdMap.set(timerId, callbackId);
 //  timerCallbackId = callbackId + 1;
@@ -131,8 +131,8 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int timer = static_cast<int>(timerId.asNumber());
-  int callbackId = 0;
+  int32_t timer = static_cast<int32_t>(timerId.asNumber());
+  int32_t callbackId = 0;
   timerIdToCallbackIdMap.get(timer, callbackId);
 
   if (callbackId == 0) {
@@ -174,7 +174,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -185,8 +185,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                         << std::endl;
   }
 
-//  int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
-int timerId = 0;
+//  int32_t timerId = KrakenRegisterRequestAnimationFrame(callbackId);
+int32_t timerId = 0;
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
@@ -194,7 +194,7 @@ int timerId = 0;
   return Value(timerId);
 }
 
-void invokeSetTimeoutCallback(JSContext *context, const int callbackId) {
+void invokeSetTimeoutCallback(JSContext *context, const int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -213,7 +213,7 @@ void invokeSetTimeoutCallback(JSContext *context, const int callbackId) {
   }
 }
 
-void invokeSetIntervalCallback(JSContext *context, const int callbackId) {
+void invokeSetIntervalCallback(JSContext *context, const int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -232,7 +232,7 @@ void invokeSetIntervalCallback(JSContext *context, const int callbackId) {
 }
 
 void invokeRequestAnimationFrameCallback(JSContext *context,
-                                         const int callbackId) {
+                                         const int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 

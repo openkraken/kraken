@@ -14,6 +14,9 @@ typedef Dart_InitJSEngine = void Function();
 typedef Native_ReloadJSContext = Void Function();
 typedef Dart_ReloadJSContext = void Function();
 
+typedef Native_InvokeKrakenCallback = Void Function(Pointer<Utf8>);
+typedef Dart_InvokeKrakenCallback = void Function(Pointer<Utf8>);
+
 final Dart_EvaluateScripts _evaluateScripts = nativeDynamicLibrary
     .lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts')
     .asFunction();
@@ -26,6 +29,10 @@ final Dart_ReloadJSContext _reloadJSContext = nativeDynamicLibrary
     .lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext')
     .asFunction();
 
+final Dart_InvokeKrakenCallback _invokeKrakenCallback = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_InvokeKrakenCallback>>('invokeKrakenCallback')
+    .asFunction();
+
 void evaluateScripts(String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
@@ -34,6 +41,11 @@ void evaluateScripts(String code, String url, int line) {
 
 void initJSEngine() {
   _initJsEngine();
+}
+
+void invokeKrakenCallback(String data) {
+  Pointer<Utf8> buf = Utf8.toUtf8(data);
+  _invokeKrakenCallback(buf);
 }
 
 Future<void> reloadJSContext() async {

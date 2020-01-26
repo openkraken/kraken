@@ -11,19 +11,23 @@
 
 typedef const char *(*InvokeDartFromJS)(const char *);
 typedef void(*ReloadApp)();
+typedef int32_t(*SetTimeout)(int32_t, int32_t);
 
 namespace kraken {
 
 struct DartFuncPointer {
   DartFuncPointer() :
     invokeDartFromJS(nullptr),
-    reloadApp(nullptr){}
+    reloadApp(nullptr),
+    setTimeout(nullptr){}
   InvokeDartFromJS invokeDartFromJS;
   ReloadApp reloadApp;
+  SetTimeout setTimeout;
 };
 
 void registerInvokeDartFromJS(InvokeDartFromJS callback);
 void registerReloadApp(ReloadApp callback);
+void registerSetTimeout(SetTimeout callback);
 
 DartFuncPointer* getDartFunc();
 

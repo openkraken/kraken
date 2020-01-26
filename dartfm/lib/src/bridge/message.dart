@@ -3,8 +3,7 @@
  * Author: Kraken Team.
  */
 
-//import 'package:kraken/kraken.dart';
-//import 'platform.dart';
+import 'package:kraken/bridge.dart';
 
 const DART = 'D';
 const CPP = 'C';
@@ -35,7 +34,7 @@ class JSMessage extends Message {
   JSMessage(String data) : super(data);
 
   send() {
-//    return invokeKrakenCallback(DART + JS + _data);
+    return invokeKrakenCallback(DART + JS + _data);
   }
 }
 
@@ -45,6 +44,6 @@ class CPPMessage extends Message {
   CPPMessage(this._kind, String data) : super(data);
 
   send() {
-//    return invokeKrakenCallback(DART + CPP + _kind + _data);
+    return invokeKrakenCallback(DART + CPP + _kind + _data);
   }
 }

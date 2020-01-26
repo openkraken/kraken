@@ -93,7 +93,6 @@ void reloadApp() async {
   connect(prevShowPerformanceOverlay);
 }
 
-@pragma('vm:entry-point')
 int setTimeout(int callbackId, int timeout) {
   return timer.setTimeout(callbackId, timeout);
 }
@@ -176,12 +175,12 @@ void initScreenMetricsChangedCallback() {
     buffer.write(Message.buildMessage('availWidth', width.toString()));
     buffer.write(Message.buildMessage('availHeight', height.toString()));
 
-//    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
-//    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, devicePixelRatio.toString())
-//        .send();
+    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
+    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, devicePixelRatio.toString())
+        .send();
   }
 
-//  sendWindowSize();
+  sendWindowSize();
 
   window.onMetricsChanged = () {
     // call framework callback first
