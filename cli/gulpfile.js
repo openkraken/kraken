@@ -24,14 +24,6 @@ if (uploadToOSS) {
   }
 }
 
-if (!enginePath) {
-  if (args['local-engine-path']) {
-    enginePath = args['local-engine-path'];
-  } else {
-    throw new Error('you need to set FLUTTER_ENGINE env value or pass --local-engine-path <path> to the argv');
-  }
-}
-
 const KRAKEN_ROOT = join(__dirname, '..');
 const paths = {
   dist: resolve(__dirname, 'build'),
@@ -47,22 +39,19 @@ const paths = {
   devtools: resolveKraken('devtools'),
   tools: resolveKraken('cli/tools'),
   jsa: resolveKraken('jsa'),
-  localEngineSrc: resolve(__dirname, enginePath),
 };
 
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
 }
 
-function buildKraken(platform, mode, localEngine, localEngineSrc) {
+function buildKraken(platform, mode) {
   let runtimeMode = '--debug';
   if (mode === 'Release' && platform === 'macos') runtimeMode = '--release';
   if (mode === 'Profile' && platform === 'macos') runtimeMode = '--profile';
 
   const args = ['build', platform, runtimeMode];
 
-  if (localEngine) args.push(`--local-engine=${localEngine}`);
-  if (localEngineSrc) args.push(`--local-engine-src-path=${localEngineSrc}`)
   console.log(`${chalk.green('[BUILD]')} flutter ${args.join(' ')}`);
   const handle = spawnSync('flutter', args, {
     cwd: paths.playground,
@@ -74,7 +63,7 @@ function buildKraken(platform, mode, localEngine, localEngineSrc) {
 }
 
 task('build-kraken-debug', (done) => {
-  const exitCode = buildKraken(platform, 'Debug', 'host_debug', paths.localEngineSrc);
+  const exitCode = buildKraken(platform, 'Debug', 'host_debug');
   if (exitCode === 0) {
     done();
   } else {
@@ -83,7 +72,7 @@ task('build-kraken-debug', (done) => {
 });
 
 task('build-kraken-release', (done) => {
-  const exitCode = buildKraken(platform, 'Release', 'host_release', paths.localEngineSrc);
+  const exitCode = buildKraken(platform, 'Release', 'host_release');
   if (exitCode === 0) {
     done();
   } else {
@@ -92,7 +81,7 @@ task('build-kraken-release', (done) => {
 });
 
 task('build-kraken-profile', (done) => {
-  const exitCode = buildKraken(platform, 'Profile', 'host_profile', paths.localEngineSrc);
+  const exitCode = buildKraken(platform, 'Profile', 'host_profile');
   if (exitCode === 0) {
     done();
   } else {
@@ -184,8 +173,7 @@ task('generate-cmake-files', (done) => {
   const handle = spawnSync('cmake', args, {
     cwd: paths.bridge,
     env: Object.assign(process.env, {
-      LIBRARY_OUTPUT_DIR: paths.distLib,
-      FLUTTER_ENGINE: paths.localEngineSrc
+      LIBRARY_OUTPUT_DIR: paths.distLib
     }),
     stdio: 'inherit',
   });

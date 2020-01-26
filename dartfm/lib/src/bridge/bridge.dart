@@ -43,7 +43,6 @@ ElementAction getAction(String action) {
   }
 }
 
-@pragma('vm:entry-point')
 String krakenJsToDart(String args) {
   dynamic directives = jsonDecode(args);
   if (directives[0] == BATCH_UPDATE) {
@@ -85,14 +84,13 @@ void initBridge() {
   registerDartFunctionIntoCpp();
 }
 
-@pragma('vm:entry-point')
-void reloadApp(String args) async {
-//  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-//  appLoading = true;
-//  unmountApp();
-//  await reloadJSContext();
-//  appLoading = false;
-//  connect(prevShowPerformanceOverlay);
+void reloadApp() async {
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  appLoading = true;
+  unmountApp();
+  await reloadJSContext();
+  appLoading = false;
+  connect(prevShowPerformanceOverlay);
 }
 
 @pragma('vm:entry-point')

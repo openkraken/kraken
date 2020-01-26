@@ -24,6 +24,7 @@ void reloadJsContext() {
 
 void initJsEngine() {
   bridge = std::make_unique<kraken::JSBridge>();
+  initKrakenPolyFill(bridge->getContext());
   inited = true;
 }
 
@@ -36,4 +37,8 @@ void evaluateScripts(const char *code, const char *bundleFilename,
 
 void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
   kraken::registerInvokeDartFromJS(callbacks);
+}
+
+void registerReloadApp(void (*callback)()) {
+  kraken::registerReloadApp(callback);
 }

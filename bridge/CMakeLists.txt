@@ -24,27 +24,30 @@ add_library(bindings STATIC
   bindings/kraken.cc
   bindings/DOM/element.cc
 )
-add_library(bridge STATIC bridge.cc bridge.h message.cc message.h dart_callbacks.cc dart_callbacks.h)
+add_library(bridge STATIC bridge.cc bridge.h message.cc message.h)
+add_library(dart_callback STATIC dart_callbacks.cc dart_callbacks.h)
 add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
 add_library(kraken SHARED kraken_bridge_export.cc)
-#add_library(flutter SHARED IMPORTED)
 
 ### Bindings
 target_include_directories(bindings PRIVATE
   ./jsa/include
   ./foundation
+  ./
   ./foundation/websockettpp-0.8.1
   ${ADDITIONAL_INCLUDE_DIRS}
   )
 target_link_libraries(bindings PRIVATE
   jsa_abstraction
   jsc_implementation
+  dart_callback
   foundation)
 
 ### Bridges
 target_link_libraries(bridge PRIVATE
   jsc_implementation
   jsa_abstraction
+  dart_callback
   bindings
   -pthread)
 target_include_directories(bridge PRIVATE

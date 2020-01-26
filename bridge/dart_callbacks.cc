@@ -15,4 +15,8 @@ void registerInvokeDartFromJS(InvokeDartFromJS callback) {
   funcPointer.invokeDartFromJS = callback;
 }
 
+void registerReloadApp(ReloadApp callback) {
+  funcPointer.reloadApp = callback;
+}
+
 }

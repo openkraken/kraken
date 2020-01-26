@@ -22,4 +22,7 @@ void reloadJsContext();
 KRAKEN_EXPORT
 void registerInvokeDartFromJS(const char* (*callbacks)(const char*));
 
+KRAKEN_EXPORT
+void registerReloadApp(void (*callback)());
+
 #endif // KRAKEN_BRIDGE_EXPORT_H

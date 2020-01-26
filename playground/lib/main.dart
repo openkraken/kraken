@@ -73,7 +73,6 @@ void afterConnected() async {
   String bundlePath = getBundlePathFromEnv();
   String content = await getBundleContent(
       bundleUrl: bundleUrl, bundlePath: bundlePath);
-print('START TO EVALUATE SCRIPTS');
   evaluateScripts(
     content,
     bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH,
