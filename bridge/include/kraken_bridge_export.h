@@ -10,13 +10,16 @@
   extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 KRAKEN_EXPORT
-void init_callback();
+void initJsEngine();
 
 KRAKEN_EXPORT
-void evaluate_scripts(const char *code, const char *bundleFilename,
+void evaluateScripts(const char *code, const char *bundleFilename,
                       int startLine);
 
 KRAKEN_EXPORT
-void reload_js_context();
+void reloadJsContext();
+
+KRAKEN_EXPORT
+void registerInvokeDartFromJS(const char* (*callbacks)(const char*));
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

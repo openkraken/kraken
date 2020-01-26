@@ -4,42 +4,36 @@
  */
 
 #include "kraken_bridge_export.h"
+#include "dart_callbacks.h"
 #include "bridge.h"
-#include "kraken_hook_init.h"
 #include "polyfill.h"
-#include <string>
-#include <iostream>
 #include <atomic>
+#include <string>
 
+kraken::DartFuncPointer funcPointer;
 // this is not thread safe
-std::atomic<bool> inited {false};
-std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+std::atomic<bool> inited{false};
+std::unique_ptr<kraken::JSBridge> bridge;
 
-// injected into engine
-void invoke_kraken_callback(const char *args) {
-  if (!inited) return;
-  bridge->handleFlutterCallback(args);
+void reloadJsContext() {
+  inited = false;
+  bridge = std::make_unique<kraken::JSBridge>();
+  initKrakenPolyFill(bridge->getContext());
+  inited = true;
 }
 
-// injected into engine
-void evaluate_scripts(const char *code, const char *bundleFilename,
+void initJsEngine() {
+  bridge = std::make_unique<kraken::JSBridge>();
+  inited = true;
+}
+
+void evaluateScripts(const char *code, const char *bundleFilename,
                       int startLine) {
   if (!inited) return;
   bridge->evaluateScript(std::string(code), std::string(bundleFilename),
                          startLine);
 }
 
-KRAKEN_EXPORT
-void init_callback() {
-  KrakenInitCallBack(invoke_kraken_callback);
-  KrakenInitEvaluateScriptCallback(evaluate_scripts);
-  initKrakenPolyFill(bridge->getContext());
-  inited = true;
-}
-
-void reload_js_context() {
-  inited = false;
-  bridge = std::make_unique<kraken::JSBridge>();
-  initKrakenPolyFill(bridge->getContext());
-  inited = true;
+void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
+  kraken::registerInvokeDartFromJS(callbacks);
 }

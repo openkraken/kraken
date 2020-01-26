@@ -5,7 +5,7 @@
 
 #include "fetch.h"
 #include "jsa.h"
-#include "kraken_dart_export.h"
+//#include "kraken_dart_export.h"
 #include "logging.h"
 #include "thread_safe_map.h"
 #include <atomic>
@@ -52,8 +52,8 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
   fetchMap.set(id, funcValue);
 
   // call request
-  KrakenInvokeFetch(id, url.getString(context).utf8(context).c_str(),
-                    data.getString(context).utf8(context).c_str());
+//  KrakenInvokeFetch(id, url.getString(context).utf8(context).c_str(),
+//                    data.getString(context).utf8(context).c_str());
 
   fetchMap.set(id, funcValue);
   fetchId = id + 1;

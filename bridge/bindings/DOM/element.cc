@@ -5,7 +5,7 @@
 
 #include "element.h"
 #include "jsa.h"
-#include "kraken_dart_export.h"
+//#include "kraken_dart_export.h"
 #include "logging.h"
 #include <cstdlib>
 
@@ -73,8 +73,8 @@ Value createElement(JSContext &context, const Value &thisVal, const Value *args,
 #ifdef IS_TEST
   // TODO unit tests
 #else
-  KrakenCreateElement(c_type.c_str(), (int)id.getNumber(), c_props.c_str(),
-                      c_events.c_str());
+//  KrakenCreateElement(c_type.c_str(), (int)id.getNumber(), c_props.c_str(),
+//                      c_events.c_str());
 #endif
   return Value::undefined();
 }
@@ -131,8 +131,8 @@ Value createTextNode(JSContext &context, const Value &thisVal,
 
 #ifdef IS_TEST
 #else
-  KrakenCreateTextNode(c_type.c_str(), (int)id.getNumber(), c_props.c_str(),
-                       c_events.c_str());
+//  KrakenCreateTextNode(c_type.c_str(), (int)id.getNumber(), c_props.c_str(),
+//                       c_events.c_str());
 #endif
 
   return Value::undefined();
@@ -180,9 +180,9 @@ Value setStyle(JSContext &context, const Value &thisVal, const Value *args,
 
 #ifdef IS_TEST
 #else
-  KrakenSetStyle((int)targetId.getNumber(),
-                 key.getString(context).utf8(context).c_str(),
-                 value.getString(context).utf8(context).c_str());
+//  KrakenSetStyle((int)targetId.getNumber(),
+//                 key.getString(context).utf8(context).c_str(),
+//                 value.getString(context).utf8(context).c_str());
 #endif
 
   return Value::undefined();
@@ -212,7 +212,7 @@ Value removeNode(JSContext &context, const Value &thisVal, const Value *args,
 
 #ifdef IS_TEST
 #else
-  KrakenRemoveNode((int)targetId.getNumber());
+//  KrakenRemoveNode((int)targetId.getNumber());
 #endif
   return Value::undefined();
 }
@@ -260,8 +260,8 @@ Value insertAdjacentNode(JSContext &context, const Value &thisVal,
 
 #ifdef IS_TEST
 #else
-  KrakenInsertAdjacentNode((int)targetId.getNumber(), c_position.c_str(),
-                           (int)nodeId.getNumber());
+//  KrakenInsertAdjacentNode((int)targetId.getNumber(), c_position.c_str(),
+//                           (int)nodeId.getNumber());
 #endif
   return Value::undefined();
 }
@@ -308,7 +308,7 @@ Value setProperty(JSContext &context, const Value &thisVal, const Value *args,
 
 #ifdef IS_TEST
 #else
-  KrakenSetProperty((int)targetId.asNumber(), c_key.c_str(), c_value.c_str());
+//  KrakenSetProperty((int)targetId.asNumber(), c_key.c_str(), c_value.c_str());
 #endif
 
   return Value::undefined();
@@ -347,7 +347,7 @@ Value removeProperty(JSContext &context, const Value &thisVal,
   }
 #ifdef IS_TEST
 #else
-  KrakenRemoveProperty((int)targetId.getNumber(), c_key.c_str());
+//  KrakenRemoveProperty((int)targetId.getNumber(), c_key.c_str());
 #endif
 
   return Value::undefined();
@@ -395,9 +395,9 @@ Value method(JSContext &context, const Value &thisVal, const Value *args,
 
 #ifdef IS_TEST
 #else
-  KrakenMethod((int)targetId.getNumber(),
-               c_method.c_str(),
-               c_args.c_str());
+//  KrakenMethod((int)targetId.getNumber(),
+//               c_method.c_str(),
+//               c_args.c_str());
 #endif
   return Value::undefined();
 }

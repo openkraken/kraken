@@ -80,14 +80,19 @@ String handleJSToDart(List directive) {
   }
 }
 
+void initBridge() {
+  initJSEngine();
+  registerDartFunctionIntoCpp();
+}
+
 @pragma('vm:entry-point')
 void reloadApp(String args) async {
-  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-  appLoading = true;
-  unmountApp();
-  await reloadJSContext();
-  appLoading = false;
-  connect(prevShowPerformanceOverlay);
+//  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+//  appLoading = true;
+//  unmountApp();
+//  await reloadJSContext();
+//  appLoading = false;
+//  connect(prevShowPerformanceOverlay);
 }
 
 @pragma('vm:entry-point')
@@ -173,12 +178,12 @@ void initScreenMetricsChangedCallback() {
     buffer.write(Message.buildMessage('availWidth', width.toString()));
     buffer.write(Message.buildMessage('availHeight', height.toString()));
 
-    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
-    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, devicePixelRatio.toString())
-        .send();
+//    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
+//    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, devicePixelRatio.toString())
+//        .send();
   }
 
-  sendWindowSize();
+//  sendWindowSize();
 
   window.onMetricsChanged = () {
     // call framework callback first

@@ -7,7 +7,7 @@
 #include "jsa.h"
 #include "logging.h"
 #include <atomic>
-#include <kraken_dart_export.h>
+//#include <kraken_dart_export.h>
 
 struct Screen {
   int availHeight;

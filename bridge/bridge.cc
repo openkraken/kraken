@@ -4,16 +4,15 @@
  */
 
 #include "bridge.h"
-#include "jsa.h"
-#include "kraken_dart_export.h"
-
+#include "bindings/DOM/element.h"
 #include "bindings/KOM/console.h"
 #include "bindings/KOM/fetch.h"
+#include "bindings/KOM/location.h"
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
-#include "bindings/KOM/location.h"
-#include "bindings/DOM/element.h"
+#include "dart_callbacks.h"
+#include "jsa.h"
 #include "logging.h"
 #include "message.h"
 #include "thread_safe_array.h"
@@ -52,10 +51,8 @@ ThreadSafeArray<std::shared_ptr<Value>> dartJsCallbackList;
  * @param count
  * @return JSValue
  */
-Value krakenJsToDart(JSContext &context,
-                                   const Value &thisVal,
-                                   const Value *args,
-                                   size_t count) {
+Value krakenJsToDart(JSContext &context, const Value &thisVal,
+                     const Value *args, size_t count) {
   if (count < 1) {
     KRAKEN_LOG(WARN) << "[KrakenJSToDart ERROR]: function missing parameter";
     return Value::undefined();
@@ -69,13 +66,15 @@ Value krakenJsToDart(JSContext &context,
     KRAKEN_LOG(VERBOSE) << "[KrakenJSToDart]: " << messageStr << std::endl;
   }
 
-  const char *result =
-      KrakenInvokeDartFromCpp("krakenJsToDart", messageStr.c_str());
+  if (getDartFunc()->invokeDartFromJS == nullptr) {
+    KRAKEN_LOG(ERROR) << "[KrakenJSToDart ERROR]: dart callbacks not register";
+    return Value::undefined();
+  }
 
+  const char *result = getDartFunc()->invokeDartFromJS(messageStr.c_str());
   if (result == nullptr) {
     return Value::null();
   }
-
   return String::createFromUtf8(context, std::string(result));
 }
 
@@ -87,16 +86,15 @@ Value krakenJsToDart(JSContext &context,
  * @param count
  * @return
  */
-Value krakenDartToJs(JSContext &context,
-                                   const Value &thisVal,
-                                   const Value *args,
-                                   size_t count) {
+Value krakenDartToJs(JSContext &context, const Value &thisVal,
+                     const Value *args, size_t count) {
   if (count < 1) {
     KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: function missing parameter";
     return Value::undefined();
   }
 
-  std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  std::shared_ptr<Value> val =
+      std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
   if (!func.isFunction(context)) {
@@ -197,8 +195,7 @@ void JSBridge::invokeKrakenCallback(const char *args) {
       return;
     }
 
-    const String str =
-        String::createFromAscii(*context_, args);
+    const String str = String::createFromAscii(*context_, args);
     callback->getObject(*context_).asFunction(*context_).callWithThis(
         *context_, context_->global(), str, 1);
   }
@@ -221,11 +218,8 @@ void JSBridge::handleFlutterCallback(const char *args) {
 
   try {
     char kind = str[2];
-    if (
-      kind != FRAME_BEGIN &&
-      std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0
-    ) {
+    if (kind != FRAME_BEGIN && std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+        strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
       KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
     }
     // do not handle message which did'n response to cpp layer

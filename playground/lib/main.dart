@@ -73,20 +73,21 @@ void afterConnected() async {
   String bundlePath = getBundlePathFromEnv();
   String content = await getBundleContent(
       bundleUrl: bundleUrl, bundlePath: bundlePath);
-
+print('START TO EVALUATE SCRIPTS');
   evaluateScripts(
     content,
     bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH,
+    0
   );
 }
 
 void main() {
-  initKrakenCallback();
-  _setTargetPlatformForDesktop();
-  runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-      showPerformanceOverlay: Platform
-          .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      afterConnected: Platform.environment[COMMAND_PATH] != null
-          ? afterConnectedForCommand
-          : afterConnected);
+  initBridge();
+ _setTargetPlatformForDesktop();
+ runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+     showPerformanceOverlay: Platform
+         .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+     afterConnected: Platform.environment[COMMAND_PATH] != null
+         ? afterConnectedForCommand
+         : afterConnected);
 }

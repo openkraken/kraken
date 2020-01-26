@@ -9,7 +9,7 @@
 #include "thread_safe_map.h"
 #include <atomic>
 
-#include <kraken_dart_export.h>
+//#include <kraken_dart_export.h>
 
 namespace kraken {
 namespace binding {
@@ -59,13 +59,14 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterSetTimeout(callbackId, time);
+//  int timerId = KrakenRegisterSetTimeout(callbackId, time);
+//
+//  timerIdToCallbackIdMap.set(timerId, callbackId);
+//
+//  timerCallbackId = callbackId + 1;
 
-  timerIdToCallbackIdMap.set(timerId, callbackId);
-
-  timerCallbackId = callbackId + 1;
-
-  return Value(timerId);
+//  return Value(timerId);
+return Value::undefined();
 }
 
 Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
@@ -107,12 +108,13 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterSetInterval(callbackId, time);
+//  int timerId = KrakenRegisterSetInterval(callbackId, time);
 
-  timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId = callbackId + 1;
-
-  return Value(timerId);
+//  timerIdToCallbackIdMap.set(timerId, callbackId);
+//  timerCallbackId = callbackId + 1;
+//
+//  return Value(timerId);
+return Value::undefined();
 }
 
 Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
@@ -139,7 +141,7 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  KrakenInvokeClearTimeout(timer);
+//  KrakenInvokeClearTimeout(timer);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
@@ -183,7 +185,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
+//  int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
+int timerId = 0;
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;

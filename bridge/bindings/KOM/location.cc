@@ -7,7 +7,7 @@
 #include "logging.h"
 #include "window.h"
 #include "websocketpp/uri.hpp"
-#include <kraken_dart_export.h>
+//#include <kraken_dart_export.h>
 
 namespace kraken {
 namespace binding {
@@ -67,7 +67,7 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
-  KrakenInvokeDartFromCpp("reloadApp", "");
+//  KrakenInvokeDartFromCpp("reloadApp", "");
   return Value::undefined();
 }
 
