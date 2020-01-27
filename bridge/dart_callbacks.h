@@ -15,6 +15,7 @@ typedef int32_t (*SetTimeout)(int32_t, int32_t);
 typedef int32_t (*SetInterval)(int32_t, int32_t);
 typedef void (*ClearTimeout)(int32_t);
 typedef int32_t (*RequestAnimationFrame)(int32_t);
+typedef void (*CancelAnimationFrame)(int32_t);
 
 namespace kraken {
 
@@ -26,6 +27,7 @@ struct DartFuncPointer {
   SetInterval setInterval{nullptr};
   ClearTimeout clearTimeout{nullptr};
   RequestAnimationFrame requestAnimationFrame{nullptr};
+  CancelAnimationFrame cancelAnimationFrame{nullptr};
 };
 
 void registerInvokeDartFromJS(InvokeDartFromJS callback);
@@ -34,6 +36,7 @@ void registerSetTimeout(SetTimeout callback);
 void registerSetInterval(SetInterval callback);
 void registerClearTimeout(ClearTimeout callback);
 void registerRequestAnimationFrame(RequestAnimationFrame callback);
+void registerCancelAnimationFrame(CancelAnimationFrame callback);
 
 std::shared_ptr<DartFuncPointer> getDartFunc();
 

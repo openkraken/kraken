@@ -39,4 +39,8 @@ void registerRequestAnimationFrame(RequestAnimationFrame callback) {
   funcPointer->requestAnimationFrame = callback;
 }
 
+void registerCancelAnimationFrame(CancelAnimationFrame callback) {
+  funcPointer->cancelAnimationFrame = callback;
+}
+
 } // namespace kraken

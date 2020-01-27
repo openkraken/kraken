@@ -41,4 +41,7 @@ void registerClearTimeout(void (*callback)(int32_t));
 KRAKEN_EXPORT
 void registerRequestAnimationFrame(int32_t (*callback)(int32_t));
 
+KRAKEN_EXPORT
+void registerCancelAnimationFrame(void (*callback)(int32_t));
+
 #endif // KRAKEN_BRIDGE_EXPORT_H

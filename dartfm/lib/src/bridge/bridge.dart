@@ -111,7 +111,6 @@ int requestAnimationFrame(int callbackId) {
   return timer.requestAnimationFrame(callbackId);
 }
 
-@pragma('vm:entry-point')
 void cancelAnimationFrame(int timerId) {
   timer.cancelAnimationFrame(timerId);
 }

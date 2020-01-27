@@ -166,6 +166,51 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
   return Value::undefined();
 }
 
+Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args,
+                          size_t count) {
+  if (count <= 0) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] function missing parameter";
+    return Value::undefined();
+  }
+
+  const Value &timerId = args[0];
+  if (!timerId.isNumber()) {
+    KRAKEN_LOG(WARN)
+    << "[clearAnimationFrame] cancelAnimationFrame accept number as parameter";
+    return Value::undefined();
+  }
+
+  auto timer = static_cast<int32_t>(timerId.asNumber());
+  int32_t callbackId = 0;
+  timerIdToCallbackIdMap.get(timer, callbackId);
+
+  if (callbackId == 0) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of timerId: "
+                     << timer;
+    return Value::undefined();
+  }
+
+  if (getDartFunc()->cancelAnimationFrame == nullptr) {
+    KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->cancelAnimationFrame(timer);
+
+  std::shared_ptr<Value> callbackValue;
+  timerCallbackMap.get(callbackId, callbackValue);
+
+  if (callbackValue == nullptr ||
+      !callbackValue->getObject(context).isFunction(context)) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of callbackId: "
+                     << callbackId;
+    return Value::undefined();
+  }
+
+  timerCallbackMap.erase(callbackId);
+  return Value::undefined();
+}
+
 Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                             const Value *args, size_t count) {
   if (count <= 0) {
@@ -274,7 +319,7 @@ void bindTimer(JSContext *context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,
                        clearTimeout);
   JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0,
-                       clearTimeout);
+                       cancelAnimationFrame);
 }
 
 void unbindTimer() {

@@ -63,3 +63,7 @@ void registerClearTimeout(void (*callback)(int32_t)) {
 void registerRequestAnimationFrame(int32_t (*callback)(int32_t)) {
   kraken::registerRequestAnimationFrame(callback);
 }
+
+void registerCancelAnimationFrame(void (*callback)(int32_t)) {
+  kraken::registerCancelAnimationFrame(callback);
+}

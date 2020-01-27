@@ -39,6 +39,12 @@ typedef Native_RegisterRequestAnimationFrame = Void Function(
 typedef Dart_RegisterRequestAnimationFrame = void Function(
     Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
+typedef Native_CancelAnimationFrame = Void Function(Int32);
+typedef Native_RegisterCancelAnimationFrame = Void Function(
+    Pointer<NativeFunction<Native_CancelAnimationFrame>>);
+typedef Dart_RegisterCancelAnimationFrame = void Function(
+    Pointer<NativeFunction<Native_CancelAnimationFrame>>);
+
 final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInvokeDartFromJS>>(
         'registerInvokeDartFromJS')
@@ -62,6 +68,12 @@ final Dart_RegisterClearTimeout _registerClearTimeout = nativeDynamicLibrary
 
 final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
+    .asFunction();
+
+final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame =
+nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>(
+    'registerCancelAnimationFrame')
     .asFunction();
 
 Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
@@ -88,6 +100,10 @@ void __clearTimeout(int timerId) {
 
 int __requestAnimationFrame(int callbackId) {
   return requestAnimationFrame(callbackId);
+}
+
+void __cancelAnimationFrame(int timerId) {
+  cancelAnimationFrame(timerId);
 }
 
 void registerInvokeDartFromJS() {
@@ -126,6 +142,11 @@ void registerRequestAnimationFrame() {
   _registerRequestAnimationFrame(pointer);
 }
 
+void registerCancelAnimationFrame() {
+  Pointer<NativeFunction<Native_CancelAnimationFrame>> pointer = Pointer.fromFunction(__cancelAnimationFrame);
+  _registerCancelAnimationFrame(pointer);
+}
+
 void registerDartFunctionIntoCpp() {
   registerInvokeDartFromJS();
   registerReloadJSApp();
@@ -133,4 +154,5 @@ void registerDartFunctionIntoCpp() {
   registerSetInterval();
   registerClearTimeout();
   registerRequestAnimationFrame();
+  registerCancelAnimationFrame();
 }
