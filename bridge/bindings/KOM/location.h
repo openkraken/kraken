@@ -27,6 +27,7 @@ public:
 
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;
+  std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
   std::shared_ptr<JSLocation> sharedSelf() { return shared_from_this(); }

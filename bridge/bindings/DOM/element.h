@@ -12,7 +12,7 @@ namespace binding {
 
 using namespace alibaba::jsa;
 
-void bindElement(alibaba::jsa::JSContext *context);
+void bindElement(std::unique_ptr<JSContext> &context);
 
 }
 }

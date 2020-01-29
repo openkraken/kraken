@@ -30,6 +30,8 @@ public:
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 
+  std::vector<PropNameID> getPropertyNames(JSContext &context) override;
+
   void invokeOnloadCallback(JSContext *context);
   void initDevicePixelRatio(JSContext *context, int dp);
 

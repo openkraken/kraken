@@ -87,5 +87,19 @@ void JSLocation::unbind(std::unique_ptr<JSContext> &context, Object &window) {
   );
 }
 
+std::vector<PropNameID> JSLocation::getPropertyNames(JSContext &context) {
+  std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forAscii(context, "origin"));
+  names.emplace_back(PropNameID::forAscii(context, "protocol"));
+  names.emplace_back(PropNameID::forAscii(context, "host"));
+  names.emplace_back(PropNameID::forAscii(context, "hostname"));
+  names.emplace_back(PropNameID::forAscii(context, "port"));
+  names.emplace_back(PropNameID::forAscii(context, "pathname"));
+  names.emplace_back(PropNameID::forAscii(context, "search"));
+  names.emplace_back(PropNameID::forAscii(context, "hash"));
+  names.emplace_back(PropNameID::forAscii(context, "reload"));
+  return names;
+}
+
 } // namespace binding
 } // namespace kraken

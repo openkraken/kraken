@@ -402,7 +402,7 @@ Value method(JSContext &context, const Value &thisVal, const Value *args,
   return Value::undefined();
 }
 
-void bindElement(alibaba::jsa::JSContext *context) {
+void bindElement(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), CREATE_ELEMENT_JS_API, 4,
                        createElement);
   JSA_BINDING_FUNCTION(*context, context->global(), CREATE_TEXT_NODE_JS_API, 4,

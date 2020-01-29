@@ -67,5 +67,12 @@ void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
   JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", Value::undefined());
 }
 
+std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {
+  std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forUtf8(context, "devicePixelRatio"));
+  names.emplace_back(PropNameID::forUtf8(context, "location"));
+  return names;
+}
+
 } // namespace binding
 } // namespace kraken
