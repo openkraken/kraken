@@ -402,8 +402,4 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // TODO: implement connectionClosed
     print('TODO: impl connection closed.');
   }
-
-  @override
-  // TODO: implement currentTextEditingValue
-  TextEditingValue get currentTextEditingValue => throw UnimplementedError();
 }

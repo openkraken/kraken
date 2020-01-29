@@ -5,7 +5,6 @@
 
 import 'dart:async';
 import 'package:kraken/element.dart';
-import 'message.dart';
 import 'to_native.dart';
 
 class KrakenTimer {

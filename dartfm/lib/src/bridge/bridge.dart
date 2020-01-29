@@ -12,7 +12,6 @@ import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 import 'fetch.dart' show Fetch;
 import 'timer.dart';
-import 'message.dart';
 
 const String BATCH_UPDATE = 'batchUpdate';
 KrakenTimer timer = KrakenTimer();
