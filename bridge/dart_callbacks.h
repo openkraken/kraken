@@ -7,15 +7,8 @@
 #define KRAKEN_DART_CALLBACKS_H_
 
 #include "thread_safe_map.h"
+#include "kraken_bridge_export.h"
 #include <memory>
-
-typedef const char *(*InvokeDartFromJS)(const char *);
-typedef void (*ReloadApp)();
-typedef int32_t (*SetTimeout)(int32_t, int32_t);
-typedef int32_t (*SetInterval)(int32_t, int32_t);
-typedef void (*ClearTimeout)(int32_t);
-typedef int32_t (*RequestAnimationFrame)(int32_t);
-typedef void (*CancelAnimationFrame)(int32_t);
 
 namespace kraken {
 
@@ -28,6 +21,7 @@ struct DartFuncPointer {
   ClearTimeout clearTimeout{nullptr};
   RequestAnimationFrame requestAnimationFrame{nullptr};
   CancelAnimationFrame cancelAnimationFrame{nullptr};
+  GetScreen getScreen{nullptr};
 };
 
 void registerInvokeDartFromJS(InvokeDartFromJS callback);
@@ -37,6 +31,7 @@ void registerSetInterval(SetInterval callback);
 void registerClearTimeout(ClearTimeout callback);
 void registerRequestAnimationFrame(RequestAnimationFrame callback);
 void registerCancelAnimationFrame(CancelAnimationFrame callback);
+void registerGetScreen(GetScreen callback);
 
 std::shared_ptr<DartFuncPointer> getDartFunc();
 

@@ -1,4 +1,5 @@
 import 'package:kraken/kraken.dart';
+import 'package:kraken/src/bridge/native_structs.dart';
 
 import 'platform.dart';
 import 'dart:ffi';
@@ -17,6 +18,11 @@ typedef Dart_ReloadJSContext = void Function();
 typedef Native_InvokeKrakenCallback = Void Function(Pointer<Utf8>);
 typedef Dart_InvokeKrakenCallback = void Function(Pointer<Utf8>);
 
+typedef Native_CreateScreen = Pointer<ScreenSize> Function(
+    Double width, Double height);
+typedef Dart_CreateScreen = Pointer<ScreenSize> Function(
+    double width, double height);
+
 final Dart_EvaluateScripts _evaluateScripts = nativeDynamicLibrary
     .lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts')
     .asFunction();
@@ -31,6 +37,10 @@ final Dart_ReloadJSContext _reloadJSContext = nativeDynamicLibrary
 
 final Dart_InvokeKrakenCallback _invokeKrakenCallback = nativeDynamicLibrary
     .lookup<NativeFunction<Native_InvokeKrakenCallback>>('invokeKrakenCallback')
+    .asFunction();
+
+final Dart_CreateScreen _createScreen = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_CreateScreen>>('createScreen')
     .asFunction();
 
 void evaluateScripts(String code, String url, int line) {
@@ -52,4 +62,8 @@ Future<void> reloadJSContext() async {
   return Future.microtask(() {
     _reloadJSContext();
   });
+}
+
+Pointer<ScreenSize> createScreen(double width, double height) {
+  return _createScreen(width, height);
 }

@@ -14,6 +14,7 @@ kraken::DartFuncPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
+Screen screen;
 
 void reloadJsContext() {
   inited = false;
@@ -44,26 +45,36 @@ void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
   kraken::registerInvokeDartFromJS(callbacks);
 }
 
-void registerReloadApp(void (*callback)()) {
-  kraken::registerReloadApp(callback);
+void registerReloadApp(ReloadApp reloadApp) {
+  kraken::registerReloadApp(reloadApp);
 }
 
-void registerSetTimeout(int32_t (*callback)(int32_t, int32_t)) {
-  kraken::registerSetTimeout(callback);
+void registerSetTimeout(SetTimeout setTimeout) {
+  kraken::registerSetTimeout(setTimeout);
 }
 
-void registerSetInterval(int32_t (*callback)(int32_t, int32_t)) {
-  kraken::registerSetInterval(callback);
+void registerSetInterval(SetInterval setInterval) {
+  kraken::registerSetInterval(setInterval);
 }
 
-void registerClearTimeout(void (*callback)(int32_t)) {
-  kraken::registerClearTimeout(callback);
+void registerClearTimeout(ClearTimeout clearTimeout) {
+  kraken::registerClearTimeout(clearTimeout);
 }
 
-void registerRequestAnimationFrame(int32_t (*callback)(int32_t)) {
-  kraken::registerRequestAnimationFrame(callback);
+void registerRequestAnimationFrame(RequestAnimationFrame requestAnimationFrame) {
+  kraken::registerRequestAnimationFrame(requestAnimationFrame);
 }
 
-void registerCancelAnimationFrame(void (*callback)(int32_t)) {
-  kraken::registerCancelAnimationFrame(callback);
+void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame) {
+  kraken::registerCancelAnimationFrame(cancelAnimationFrame);
+}
+
+void registerGetScreen(GetScreen getScreen) {
+  kraken::registerGetScreen(getScreen);
+}
+
+Screen *createScreen(double width, double height) {
+  screen.width = width;
+  screen.height = height;
+  return &screen;
 }

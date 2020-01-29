@@ -1,7 +1,10 @@
+import 'package:flutter/painting.dart';
+
 import 'platform.dart';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'bridge.dart';
+import 'native_structs.dart';
 
 typedef Native_InvokeDartFromJS = Pointer<Utf8> Function(Pointer<Utf8>);
 typedef Native_RegisterInvokeDartFromJS = Void Function(
@@ -45,6 +48,12 @@ typedef Native_RegisterCancelAnimationFrame = Void Function(
 typedef Dart_RegisterCancelAnimationFrame = void Function(
     Pointer<NativeFunction<Native_CancelAnimationFrame>>);
 
+typedef Native_GetScreen = Pointer<ScreenSize> Function();
+typedef Native_RegisterGetScreen = Void Function(
+    Pointer<NativeFunction<Native_GetScreen>>);
+typedef Dart_RegisterGetScreen = void Function(
+    Pointer<NativeFunction<Native_GetScreen>>);
+
 final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInvokeDartFromJS>>(
         'registerInvokeDartFromJS')
@@ -66,14 +75,20 @@ final Dart_RegisterClearTimeout _registerClearTimeout = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout')
     .asFunction();
 
-final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
-    .asFunction();
+final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame =
+    nativeDynamicLibrary
+        .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>(
+            'registerRequestAnimationFrame')
+        .asFunction();
 
 final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame =
-nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>(
-    'registerCancelAnimationFrame')
+    nativeDynamicLibrary
+        .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>(
+            'registerCancelAnimationFrame')
+        .asFunction();
+
+final Dart_RegisterGetScreen _registerGetScreen = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterGetScreen>>('registerGetScreen')
     .asFunction();
 
 Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
@@ -104,6 +119,11 @@ int __requestAnimationFrame(int callbackId) {
 
 void __cancelAnimationFrame(int timerId) {
   cancelAnimationFrame(timerId);
+}
+
+Pointer<ScreenSize> __getScreen() {
+  Size size = getScreen();
+  return ScreenSize.fromSize(size);
 }
 
 void registerInvokeDartFromJS() {
@@ -143,8 +163,14 @@ void registerRequestAnimationFrame() {
 }
 
 void registerCancelAnimationFrame() {
-  Pointer<NativeFunction<Native_CancelAnimationFrame>> pointer = Pointer.fromFunction(__cancelAnimationFrame);
+  Pointer<NativeFunction<Native_CancelAnimationFrame>> pointer =
+      Pointer.fromFunction(__cancelAnimationFrame);
   _registerCancelAnimationFrame(pointer);
+}
+
+void registerGetScreen() {
+  Pointer<NativeFunction<Native_GetScreen>> pointer = Pointer.fromFunction(__getScreen);
+  _registerGetScreen(pointer);
 }
 
 void registerDartFunctionIntoCpp() {
@@ -155,4 +181,5 @@ void registerDartFunctionIntoCpp() {
   registerClearTimeout();
   registerRequestAnimationFrame();
   registerCancelAnimationFrame();
+  registerGetScreen();
 }

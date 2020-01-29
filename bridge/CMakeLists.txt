@@ -54,6 +54,10 @@ target_include_directories(bridge PRIVATE
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS})
 
+target_include_directories(dart_callback PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include
+)
+
 message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
 
 ### Js Code

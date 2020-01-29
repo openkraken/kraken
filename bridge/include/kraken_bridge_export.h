@@ -10,6 +10,20 @@
 #define KRAKEN_EXPORT                                                          \
   extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
+struct Screen {
+  double width;
+  double height;
+};
+
+typedef const char *(*InvokeDartFromJS)(const char *);
+typedef void (*ReloadApp)();
+typedef int32_t (*SetTimeout)(int32_t, int32_t);
+typedef int32_t (*SetInterval)(int32_t, int32_t);
+typedef void (*ClearTimeout)(int32_t);
+typedef int32_t (*RequestAnimationFrame)(int32_t);
+typedef void (*CancelAnimationFrame)(int32_t);
+typedef Screen *(*GetScreen)();
+
 KRAKEN_EXPORT
 void initJsEngine();
 KRAKEN_EXPORT

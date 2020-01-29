@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:ui' show window;
 
+import 'package:flutter/painting.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
@@ -115,24 +116,8 @@ void cancelAnimationFrame(int timerId) {
   timer.cancelAnimationFrame(timerId);
 }
 
-@pragma('vm:entry-point')
-double getScreenAvailHeight() {
-  return window.physicalSize.height;
-}
-
-@pragma('vm:entry-point')
-double getScreenAvailWidth() {
-  return window.physicalSize.width;
-}
-
-@pragma('vm:entry-point')
-double getScreenHeight() {
-  return window.physicalSize.height;
-}
-
-@pragma('vm:entry-point')
-double getScreenWidth() {
-  return window.physicalSize.width;
+Size getScreen() {
+  return window.physicalSize;
 }
 
 @pragma('vm:entry-point')

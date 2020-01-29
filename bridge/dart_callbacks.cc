@@ -4,6 +4,7 @@
  */
 
 #include "dart_callbacks.h"
+#include "kraken_bridge_export.h"
 #include <memory>
 
 namespace kraken {
@@ -41,6 +42,10 @@ void registerRequestAnimationFrame(RequestAnimationFrame callback) {
 
 void registerCancelAnimationFrame(CancelAnimationFrame callback) {
   funcPointer->cancelAnimationFrame = callback;
+}
+
+void registerGetScreen(GetScreen callback) {
+  funcPointer->getScreen = callback;
 }
 
 } // namespace kraken

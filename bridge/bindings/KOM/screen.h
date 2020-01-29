@@ -7,14 +7,26 @@
 #define KRAKEN_SCREEN_H
 
 #include "jsa.h"
+#include <memory>
 
 namespace kraken {
 namespace binding {
 
-void bindScreen(alibaba::jsa::JSContext *context);
+using namespace alibaba::jsa;
 
-void invokeUpdateScreen(alibaba::jsa::JSContext *context, int width, int height,
-                        int availWidth, int availHeight);
+class JSScreen : public HostObject,
+                 public std::enable_shared_from_this<JSScreen> {
+public:
+  void bind(std::unique_ptr<JSContext> &context);
+  void unbind(std::unique_ptr<JSContext> &context);
+
+  virtual Value get(JSContext &context, const PropNameID &name) override;
+  virtual void set(JSContext &context, const PropNameID &name, const Value &value) override;
+  std::vector<PropNameID> getPropertyNames(JSContext &context) override;
+
+private:
+  std::shared_ptr<JSScreen> sharedSelf() { return shared_from_this(); }
+};
 
 } // namespace binding
 } // namespace kraken
