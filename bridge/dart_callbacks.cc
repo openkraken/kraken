@@ -48,4 +48,12 @@ void registerGetScreen(GetScreen callback) {
   funcPointer->getScreen = callback;
 }
 
+void registerInvokeFetch(InvokeFetch invokeFetch) {
+  funcPointer->invokeFetch = invokeFetch;
+}
+
+void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
+  funcPointer->devicePixelRatio = devicePixelRatio;
+}
+
 } // namespace kraken

@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'package:kraken/element.dart';
 import 'message.dart';
+import 'to_native.dart';
 
 class KrakenTimer {
   int timerId = 1;
@@ -18,7 +19,7 @@ class KrakenTimer {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer(timeoutDurationMS, () {
-      CPPMessage(TIMEOUT_MESSAGE, "$callbackId").send();
+      invokeSetTimeout(callbackId);
       timerMap.remove(id);
     });
     return id;
@@ -36,7 +37,7 @@ class KrakenTimer {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
-      CPPMessage(INTERVAL_MESSAGE, "$callbackId").send();
+      invokeSetIntervalCallback(callbackId);
     });
     return id;
   }
@@ -46,7 +47,7 @@ class KrakenTimer {
     animationFrameCallbackValidateMap[callbackId] = true;
     ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
       if (animationFrameCallbackValidateMap[callbackId] == true) {
-        CPPMessage(ANIMATION_FRAME_MESSAGE, "$callbackId").send();
+        invokeRequestAnimationFrame(callbackId);
       }
     });
     // Call for paint to trigger painting frame manually.

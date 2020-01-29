@@ -4,8 +4,8 @@
  */
 
 #include "fetch.h"
+#include "dart_callbacks.h"
 #include "jsa.h"
-//#include "kraken_dart_export.h"
 #include "logging.h"
 #include "thread_safe_map.h"
 #include <atomic>
@@ -45,15 +45,20 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  std::shared_ptr<Value> funcValue = std::make_shared<Value> (Value(func.getObject(context)));
+  std::shared_ptr<Value> funcValue =
+      std::make_shared<Value>(Value(func.getObject(context)));
   int id = fetchId.load();
 
   // store callback function
   fetchMap.set(id, funcValue);
 
-  // call request
-//  KrakenInvokeFetch(id, url.getString(context).utf8(context).c_str(),
-//                    data.getString(context).utf8(context).c_str());
+  if (getDartFunc()->invokeFetch == nullptr) {
+    KRAKEN_LOG(ERROR) << "dart fetch callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->invokeFetch(id, url.getString(context).utf8(context).c_str(),
+                             data.getString(context).utf8(context).c_str());
 
   fetchMap.set(id, funcValue);
   fetchId = id + 1;
@@ -85,9 +90,8 @@ void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
     Object &&response = Object(*context);
     response.setProperty(*context, "statusCode", Value(statusCode));
 
-    funcObj.asFunction(*context).call(
-        *context, jsError, response,
-        String::createFromUtf8(*context, body));
+    funcObj.asFunction(*context).call(*context, jsError, response,
+                                      String::createFromUtf8(*context, body));
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
@@ -98,9 +102,7 @@ void bindFetch(std::unique_ptr<JSContext> &context) {
                        fetch);
 }
 
-void unbindFetch() {
-  fetchMap.reset();
-}
+void unbindFetch() { fetchMap.reset(); }
 
 } // namespace binding
 } // namespace kraken

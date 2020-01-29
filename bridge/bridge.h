@@ -46,6 +46,12 @@ public:
 
   void handleFlutterCallback(const char *args);
   void invokeKrakenCallback(const char *args);
+  void invokeSetTimeoutCallback(int32_t callbackId);
+  void invokeSetIntervalCallback(int32_t callbackId);
+  void invokeRequestAnimationFrameCallback(int32_t callbackId);
+  void invokeOnloadCallback();
+  void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
+                           const char* body);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER

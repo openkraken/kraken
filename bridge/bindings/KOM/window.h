@@ -32,8 +32,7 @@ public:
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
-  void invokeOnloadCallback(JSContext *context);
-  void initDevicePixelRatio(JSContext *context, int dp);
+  void invokeOnloadCallback(std::unique_ptr<JSContext> &context);
 
 private:
   std::shared_ptr<JSWindow> sharedSelf() { return shared_from_this(); }

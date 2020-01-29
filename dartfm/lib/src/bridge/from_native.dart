@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/painting.dart';
 
 import 'platform.dart';
@@ -54,6 +56,18 @@ typedef Native_RegisterGetScreen = Void Function(
 typedef Dart_RegisterGetScreen = void Function(
     Pointer<NativeFunction<Native_GetScreen>>);
 
+typedef Native_InvokeFetch = Void Function(Int32, Pointer<Utf8>, Pointer<Utf8>);
+typedef Native_RegisterInvokeFetch = Void Function(
+    Pointer<NativeFunction<Native_InvokeFetch>>);
+typedef Dart_RegisterInvokeFetch = void Function(
+    Pointer<NativeFunction<Native_InvokeFetch>>);
+
+typedef Native_DevicePixelRatio = Double Function();
+typedef Native_RegisterDevicePixelRatio = Void Function(
+    Pointer<NativeFunction<Native_DevicePixelRatio>>);
+typedef Dart_RegisterDevicePixelRatio = void Function(
+    Pointer<NativeFunction<Native_DevicePixelRatio>>);
+
 final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInvokeDartFromJS>>(
         'registerInvokeDartFromJS')
@@ -91,6 +105,16 @@ final Dart_RegisterGetScreen _registerGetScreen = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterGetScreen>>('registerGetScreen')
     .asFunction();
 
+final Dart_RegisterInvokeFetch _registerInvokeFetch = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterInvokeFetch>>('registerInvokeFetch')
+    .asFunction();
+
+final Dart_RegisterDevicePixelRatio _registerDevicePixelRatio =
+    nativeDynamicLibrary
+        .lookup<NativeFunction<Native_RegisterDevicePixelRatio>>(
+            'registerDevicePixelRatio')
+        .asFunction();
+
 Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
   String args = Utf8.fromUtf8(data);
   String result = krakenJsToDart(args);
@@ -119,6 +143,14 @@ int __requestAnimationFrame(int callbackId) {
 
 void __cancelAnimationFrame(int timerId) {
   cancelAnimationFrame(timerId);
+}
+
+void __invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
+  fetch(callbackId, Utf8.fromUtf8(url), Utf8.fromUtf8(json));
+}
+
+double __devicePixelRatio() {
+  return window.devicePixelRatio;
 }
 
 Pointer<ScreenSize> __getScreen() {
@@ -169,8 +201,21 @@ void registerCancelAnimationFrame() {
 }
 
 void registerGetScreen() {
-  Pointer<NativeFunction<Native_GetScreen>> pointer = Pointer.fromFunction(__getScreen);
+  Pointer<NativeFunction<Native_GetScreen>> pointer =
+      Pointer.fromFunction(__getScreen);
   _registerGetScreen(pointer);
+}
+
+void registerInvokeFetch() {
+  Pointer<NativeFunction<Native_InvokeFetch>> pointer =
+      Pointer.fromFunction(__invokeFetch);
+  _registerInvokeFetch(pointer);
+}
+
+void registerDevicePixelRatio() {
+  Pointer<NativeFunction<Native_DevicePixelRatio>> pointer =
+      Pointer.fromFunction(__devicePixelRatio, 0.0);
+  _registerDevicePixelRatio(pointer);
 }
 
 void registerDartFunctionIntoCpp() {
@@ -182,4 +227,6 @@ void registerDartFunctionIntoCpp() {
   registerRequestAnimationFrame();
   registerCancelAnimationFrame();
   registerGetScreen();
+  registerInvokeFetch();
+  registerDevicePixelRatio();
 }

@@ -227,51 +227,6 @@ void JSBridge::handleFlutterCallback(const char *args) {
       this->invokeKrakenCallback(args);
       return;
     }
-
-    switch (kind) {
-    case TIMEOUT_MESSAGE:
-      kraken::binding::invokeSetTimeoutCallback(context,
-                                                std::stoi(str.substr(3)));
-      break;
-    case INTERVAL_MESSAGE:
-      kraken::binding::invokeSetIntervalCallback(context,
-                                                 std::stoi(str.substr(3)));
-      break;
-    case ANIMATION_FRAME_MESSAGE:
-      kraken::binding::invokeRequestAnimationFrameCallback(
-          context.get(), std::stoi(str.substr(3)));
-      break;
-    case FETCH_MESSAGE: {
-      // extract id from DCf[id][message]
-      // D == Dart
-      // C == Cpp
-      // F == FetchMessage
-      std::string callbackId;
-      size_t lastStart = message::Message::getBracketsValue(str, callbackId);
-      kraken::message::Message message;
-      message.parseMessageBody(str.substr(lastStart + 1));
-
-      std::string error;
-      std::string statusCode;
-      std::string body;
-
-      message.readMessage("error", error);
-      message.readMessage("statusCode", statusCode);
-      message.readMessage("body", body);
-
-      kraken::binding::invokeFetchCallback(context, std::stoi(callbackId),
-                                           error, std::stoi(statusCode), body);
-      break;
-    }
-    case WINDOW_LOAD:
-      window_->invokeOnloadCallback(context.get());
-      break;
-    case WINDOW_INIT_DEVICE_PIXEL_RATIO:
-      window_->initDevicePixelRatio(context.get(), std::stoi(str.substr(3)));
-      break;
-    default:
-      break;
-    }
   } catch (JSError &error) {
     auto &&stack = error.getStack();
     auto &&message = error.getMessage();
@@ -313,6 +268,28 @@ JSBridge::~JSBridge() {
 
 Value JSBridge::getGlobalValue(std::string code) {
   return context->evaluateJavaScript(code.c_str(), "test://", 0);
+}
+
+void JSBridge::invokeSetTimeoutCallback(int32_t callbackId) {
+  kraken::binding::invokeSetTimeoutCallback(context, callbackId);
+}
+
+void JSBridge::invokeSetIntervalCallback(int32_t callbackId) {
+  kraken::binding::invokeSetIntervalCallback(context, callbackId);
+}
+
+void JSBridge::invokeRequestAnimationFrameCallback(int32_t callbackId) {
+  kraken::binding::invokeRequestAnimationFrameCallback(context, callbackId);
+}
+
+void JSBridge::invokeOnloadCallback() {
+  window_->invokeOnloadCallback(context);
+}
+
+void JSBridge::invokeFetchCallback(int32_t callbackId, const char *error,
+                                   int32_t statusCode, const char *body) {
+  kraken::binding::invokeFetchCallback(context, callbackId, std::string(error),
+                                       statusCode, std::string(body));
 }
 
 } // namespace kraken

@@ -4,16 +4,16 @@
  */
 
 #include "window.h"
-//#include "kraken_dart_export.h"
 #include "logging.h"
 #include <cassert>
+#include "dart_callbacks.h"
 
 namespace kraken {
 namespace binding {
 
 using namespace alibaba::jsa;
 
-void JSWindow::invokeOnloadCallback(JSContext *context) {
+void JSWindow::invokeOnloadCallback(std::unique_ptr<JSContext> &context) {
   if (_onloadCallback.isUndefined()) {
     return;
   }
@@ -27,15 +27,17 @@ void JSWindow::invokeOnloadCallback(JSContext *context) {
   }
 }
 
-void JSWindow::initDevicePixelRatio(JSContext *context, int dp) {
-  _devicePixelRatio = dp;
-}
-
 Value JSWindow::get(JSContext &context,
                                   const PropNameID &name) {
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
-    return Value(_devicePixelRatio);
+    if (getDartFunc()->devicePixelRatio == nullptr) {
+      KRAKEN_LOG(ERROR) << "devicePixelRatio dart callback not register";
+      return Value::undefined();
+    }
+
+    double devicePixelRatio = getDartFunc()->devicePixelRatio();
+    return Value(devicePixelRatio);
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }

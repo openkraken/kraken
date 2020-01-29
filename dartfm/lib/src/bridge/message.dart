@@ -37,13 +37,3 @@ class JSMessage extends Message {
     return invokeKrakenCallback(DART + JS + _data);
   }
 }
-
-class CPPMessage extends Message {
-  final String _kind;
-
-  CPPMessage(this._kind, String data) : super(data);
-
-  send() {
-    return invokeKrakenCallback(DART + CPP + _kind + _data);
-  }
-}

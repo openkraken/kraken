@@ -16,11 +16,11 @@ using namespace alibaba::jsa;
 void bindTimer(std::unique_ptr<JSContext> &context);
 void unbindTimer();
 void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
-                               const int callbackId);
+                               int32_t callbackId);
 void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
-                              const int callbackId);
+                              int32_t callbackId);
 
-void invokeRequestAnimationFrameCallback(JSContext *context, const int callbackId);
+void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context, const int callbackId);
 
 
 } // namespace binding

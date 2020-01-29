@@ -253,7 +253,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
 }
 
 void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
-                              const int callbackId) {
+                              int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -273,7 +273,7 @@ void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
 }
 
 void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
-                               const int callbackId) {
+                               int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -291,8 +291,8 @@ void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
   }
 }
 
-void invokeRequestAnimationFrameCallback(JSContext *context,
-                                         const int32_t callbackId) {
+void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context,
+                                         int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 

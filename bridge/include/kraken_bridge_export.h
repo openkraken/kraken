@@ -23,6 +23,8 @@ typedef void (*ClearTimeout)(int32_t);
 typedef int32_t (*RequestAnimationFrame)(int32_t);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
+typedef double (*DevicePixelRatio)();
+typedef void (*InvokeFetch)(int32_t, const char*, const char*);
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -33,6 +35,20 @@ KRAKEN_EXPORT
 void reloadJsContext();
 KRAKEN_EXPORT
 void invokeKrakenCallback(const char *data);
+KRAKEN_EXPORT
+Screen *createScreen(double width, double height);
+KRAKEN_EXPORT
+void invokeSetTimeoutCallback(int32_t callbackId);
+KRAKEN_EXPORT
+void invokeSetIntervalCallback(int32_t callbackId);
+KRAKEN_EXPORT
+void invokeRequestAnimationFrameCallback(int32_t callbackId);
+KRAKEN_EXPORT
+void invokeOnloadCallback();
+KRAKEN_EXPORT
+void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
+                         const char* body);
+
 KRAKEN_EXPORT
 void registerInvokeDartFromJS(InvokeDartFromJS invokeDartFromJs);
 KRAKEN_EXPORT
@@ -50,6 +66,8 @@ void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame);
 KRAKEN_EXPORT
 void registerGetScreen(GetScreen getScreen);
 KRAKEN_EXPORT
-Screen *createScreen(double width, double height);
+void registerInvokeFetch(InvokeFetch invokeFetch);
+KRAKEN_EXPORT
+void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
