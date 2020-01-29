@@ -17,7 +17,9 @@ class ScreenSize extends Struct {
         ..height = height;
 
   static Pointer<ScreenSize> fromSize(Size size) {
-    Pointer<ScreenSize> screen = createScreen(size.width, size.height);
+    Pointer<ScreenSize> screen = createScreen(
+        size.width / window.devicePixelRatio,
+        size.height / window.devicePixelRatio);
     return screen;
   }
 }
