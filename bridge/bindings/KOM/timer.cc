@@ -252,7 +252,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
   return Value(timerId);
 }
 
-void invokeSetTimeoutCallback(JSContext *context, const int32_t callbackId) {
+void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
+                              const int callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -271,7 +272,8 @@ void invokeSetTimeoutCallback(JSContext *context, const int32_t callbackId) {
   }
 }
 
-void invokeSetIntervalCallback(JSContext *context, const int32_t callbackId) {
+void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
+                               const int callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -309,7 +311,7 @@ void invokeRequestAnimationFrameCallback(JSContext *context,
   }
 }
 
-void bindTimer(JSContext *context) {
+void bindTimer(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),

@@ -14,41 +14,38 @@
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
+
 class CallbackImpl;
-class JSWebSocket : public alibaba::jsa::HostObject,
+class JSWebSocket : public HostObject,
                     public std::enable_shared_from_this<JSWebSocket> {
 public:
   JSWebSocket();
   ~JSWebSocket() = default;
 
   // JSBinding
-  virtual void bind(alibaba::jsa::JSContext *context);
+  virtual void bind(std::unique_ptr<JSContext> &context);
+  virtual void unbind(std::unique_ptr<JSContext> &context);
 
-  // alibaba::jsa::HostObject
-  virtual alibaba::jsa::Value
-  get(alibaba::jsa::JSContext &, const alibaba::jsa::PropNameID &name) override;
+  // HostObject
+  virtual Value get(JSContext &, const PropNameID &name) override;
 
-  virtual void set(alibaba::jsa::JSContext &,
-                   const alibaba::jsa::PropNameID &name,
-                   const alibaba::jsa::Value &value) override;
+  virtual void set(JSContext &, const PropNameID &name,
+                   const Value &value) override;
 
-  virtual std::vector<alibaba::jsa::PropNameID>
-  getPropertyNames(alibaba::jsa::JSContext &context) override;
+  std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
   std::shared_ptr<JSWebSocket> sharedSelf() { return shared_from_this(); }
 
-  alibaba::jsa::Value connect(alibaba::jsa::JSContext &context,
-                              const alibaba::jsa::Value &thisVal,
-                              const alibaba::jsa::Value *args, size_t count);
+  Value connect(JSContext &context, const Value &thisVal, const Value *args,
+                size_t count);
 
-  alibaba::jsa::Value send(alibaba::jsa::JSContext &context,
-                           const alibaba::jsa::Value &thisVal,
-                           const alibaba::jsa::Value *args, size_t count);
+  Value send(JSContext &context, const Value &thisVal, const Value *args,
+             size_t count);
 
-  alibaba::jsa::Value close(alibaba::jsa::JSContext &context,
-                            const alibaba::jsa::Value &thisVal,
-                            const alibaba::jsa::Value *args, size_t count);
+  Value close(JSContext &context, const Value &thisVal, const Value *args,
+              size_t count);
 
 private:
   std::unique_ptr<kraken::foundation::WebSocketClient> _websocket;

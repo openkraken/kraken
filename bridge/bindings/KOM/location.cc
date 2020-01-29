@@ -75,12 +75,12 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal,
   return Value::undefined();
 }
 
-void JSLocation::bind(JSContext *context, Object &window) {
+void JSLocation::bind(std::unique_ptr<JSContext> &context, Object &window) {
   Object &&locationObject = alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
   JSA_SET_PROPERTY(*context, window, "location", locationObject);
 }
 
-void JSLocation::unbind(JSContext *context, Object &window) {
+void JSLocation::unbind(std::unique_ptr<JSContext> &context, Object &window) {
   JSA_SET_PROPERTY(
       *context, window, "location",
       Value::undefined()

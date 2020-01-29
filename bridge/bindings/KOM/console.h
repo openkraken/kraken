@@ -8,11 +8,13 @@
 
 #include "jsa.h"
 #include "logging.h"
+#include <memory>
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
 
-void bindConsole(alibaba::jsa::JSContext *context);
+void bindConsole(std::unique_ptr<JSContext> &context);
 
 } // namespace binding
 } // namespace kraken

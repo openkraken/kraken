@@ -3,11 +3,13 @@
  * Author: Kraken Team.
  */
 #include "jsa.h"
+#include <memory>
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
 
-void bindKraken(alibaba::jsa::JSContext *context);
+void bindKraken(std::unique_ptr<JSContext> &context);
 
 } // namespace binding
 } // namespace kraken

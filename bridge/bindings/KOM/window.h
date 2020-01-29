@@ -25,8 +25,8 @@ public:
     location_ = nullptr;
   };
 
-  void bind(JSContext *context);
-  void unbind(JSContext *context);
+  void bind(std::unique_ptr<JSContext> &context);
+  void unbind(std::unique_ptr<JSContext> &context);
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 

@@ -13,7 +13,7 @@ namespace binding {
 
 using namespace alibaba::jsa;
 
-void JSWindow::invokeOnloadCallback(alibaba::jsa::JSContext *context) {
+void JSWindow::invokeOnloadCallback(JSContext *context) {
   if (_onloadCallback.isUndefined()) {
     return;
   }
@@ -27,20 +27,20 @@ void JSWindow::invokeOnloadCallback(alibaba::jsa::JSContext *context) {
   }
 }
 
-void JSWindow::initDevicePixelRatio(alibaba::jsa::JSContext *context, int dp) {
+void JSWindow::initDevicePixelRatio(JSContext *context, int dp) {
   _devicePixelRatio = dp;
 }
 
-alibaba::jsa::Value JSWindow::get(alibaba::jsa::JSContext &context,
-                                  const alibaba::jsa::PropNameID &name) {
+Value JSWindow::get(JSContext &context,
+                                  const PropNameID &name) {
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
     return Value(_devicePixelRatio);
   } else if (_name == "location") {
-    return Value(context, alibaba::jsa::Object::createFromHostObject(context, location_->shared_from_this()));
+    return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }
 
-  return alibaba::jsa::Value::undefined();
+  return Value::undefined();
 }
 
 void JSWindow::set(JSContext &context, const PropNameID &name, const Value &value) {
@@ -50,16 +50,16 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
   }
 }
 
-void JSWindow::bind(alibaba::jsa::JSContext *context) {
+void JSWindow::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
 
   Object&& window =
-      alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
+      Object::createFromHostObject(*context, sharedSelf());
   location_->bind(context, window);
   JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", window);
 }
 
-void JSWindow::unbind(JSContext *context) {
+void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
   Value &&window = JSA_GLOBAL_GET_PROPERTY(*context, "__kraken_window__");
   Object &&object = window.getObject(*context);
   location_->unbind(context, object);

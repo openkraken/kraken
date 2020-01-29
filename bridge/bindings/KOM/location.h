@@ -22,8 +22,8 @@ public:
   JSLocation(){};
   ~JSLocation(){};
 
-  void bind(JSContext *context, Object& window);
-  void unbind(JSContext *context, Object &window);
+  void bind(std::unique_ptr<JSContext> &context, Object& window);
+  void unbind(std::unique_ptr<JSContext> &context, Object &window);
 
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;

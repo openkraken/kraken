@@ -61,7 +61,7 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
   return Value::undefined();
 }
 
-void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
+void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
                          const std::string &error, int statusCode,
                          const std::string &body) {
   std::shared_ptr<Value> funcValue;
@@ -72,28 +72,28 @@ void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
     return;
   }
 
-  alibaba::jsa::Object funcObj = funcValue->asObject(*context);
+  Object funcObj = funcValue->asObject(*context);
 
   if (funcObj.isFunction(*context)) {
     Value jsError;
     if (!error.empty()) {
-      jsError = alibaba::jsa::String::createFromUtf8(*context, error);
+      jsError = String::createFromUtf8(*context, error);
     } else {
       jsError = Value::undefined();
     }
 
-    alibaba::jsa::Object &&response = alibaba::jsa::Object(*context);
+    Object &&response = Object(*context);
     response.setProperty(*context, "statusCode", Value(statusCode));
 
     funcObj.asFunction(*context).call(
         *context, jsError, response,
-        alibaba::jsa::String::createFromUtf8(*context, body));
+        String::createFromUtf8(*context, body));
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
 }
 
-void bindFetch(alibaba::jsa::JSContext *context) {
+void bindFetch(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken__fetch__", 0,
                        fetch);
 }

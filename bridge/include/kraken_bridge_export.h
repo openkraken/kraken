@@ -12,36 +12,30 @@
 
 KRAKEN_EXPORT
 void initJsEngine();
-
 KRAKEN_EXPORT
 void evaluateScripts(const char *code, const char *bundleFilename,
-                      int startLine);
-
+                     int startLine);
 KRAKEN_EXPORT
 void reloadJsContext();
-
 KRAKEN_EXPORT
-void invokeKrakenCallback(const char* data);
-
+void invokeKrakenCallback(const char *data);
 KRAKEN_EXPORT
-void registerInvokeDartFromJS(const char* (*callbacks)(const char*));
-
+void registerInvokeDartFromJS(InvokeDartFromJS invokeDartFromJs);
 KRAKEN_EXPORT
-void registerReloadApp(void (*callback)());
-
+void registerReloadApp(ReloadApp reloadApp);
 KRAKEN_EXPORT
-void registerSetTimeout(int32_t (*callback)(int32_t, int32_t));
-
+void registerSetTimeout(SetTimeout setTimeout);
 KRAKEN_EXPORT
-void registerSetInterval(int32_t (*callback)(int32_t, int32_t));
-
+void registerSetInterval(SetInterval setInterval);
 KRAKEN_EXPORT
-void registerClearTimeout(void (*callback)(int32_t));
-
+void registerClearTimeout(ClearTimeout clearTimeout);
 KRAKEN_EXPORT
-void registerRequestAnimationFrame(int32_t (*callback)(int32_t));
-
+void registerRequestAnimationFrame(RequestAnimationFrame requestAnimationFrame);
 KRAKEN_EXPORT
-void registerCancelAnimationFrame(void (*callback)(int32_t));
+void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame);
+KRAKEN_EXPORT
+void registerGetScreen(GetScreen getScreen);
+KRAKEN_EXPORT
+Screen *createScreen(double width, double height);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
