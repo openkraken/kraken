@@ -4,7 +4,6 @@
  */
 
 #include "bridge.h"
-#include "bindings/DOM/element.h"
 #include "bindings/KOM/console.h"
 #include "bindings/KOM/fetch.h"
 #include "bindings/KOM/location.h"
@@ -14,32 +13,22 @@
 #include "dart_callbacks.h"
 #include "jsa.h"
 #include "logging.h"
-#include "message.h"
 #include "thread_safe_array.h"
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include <string>
 
 namespace kraken {
 namespace {
 
 using namespace alibaba::jsa;
 
-const char CPP = 'C';
 const char JS = 'J';
 const char DART = 'D';
 
 const char FRAME_BEGIN = '$';
-const char FETCH_MESSAGE = 's';
-const char TIMEOUT_MESSAGE = 't';
-const char INTERVAL_MESSAGE = 'i';
-const char ANIMATION_FRAME_MESSAGE = 'a';
-const char SCREEN_METRICS = 'm';
-const char WINDOW_LOAD = 'l';
-const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
 
 ThreadSafeArray<std::shared_ptr<Value>> dartJsCallbackList;
 
@@ -136,7 +125,6 @@ JSBridge::JSBridge() {
   kraken::binding::bindConsole(context);
   kraken::binding::bindTimer(context);
   kraken::binding::bindFetch(context);
-  kraken::binding::bindElement(context);
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context);

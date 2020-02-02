@@ -115,106 +115,106 @@ final Dart_RegisterDevicePixelRatio _registerDevicePixelRatio =
             'registerDevicePixelRatio')
         .asFunction();
 
-Pointer<Utf8> __invokeDartFromJS(Pointer<Utf8> data) {
+Pointer<Utf8> _invokeDartFromJS(Pointer<Utf8> data) {
   String args = Utf8.fromUtf8(data);
   String result = krakenJsToDart(args);
   return Utf8.toUtf8(result);
 }
 
-void __reloadJSApp() {
+void _reloadJSApp() {
   reloadApp();
 }
 
-int __setTimeout(int callbackId, int timeout) {
+int _setTimeout(int callbackId, int timeout) {
   return setTimeout(callbackId, timeout);
 }
 
-int __setInterval(int callbackId, int timeout) {
+int _setInterval(int callbackId, int timeout) {
   return setInterval(callbackId, timeout);
 }
 
-void __clearTimeout(int timerId) {
+void _clearTimeout(int timerId) {
   clearTimeout(timerId);
 }
 
-int __requestAnimationFrame(int callbackId) {
+int _requestAnimationFrame(int callbackId) {
   return requestAnimationFrame(callbackId);
 }
 
-void __cancelAnimationFrame(int timerId) {
+void _cancelAnimationFrame(int timerId) {
   cancelAnimationFrame(timerId);
 }
 
-void __invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
+void _invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
   fetch(callbackId, Utf8.fromUtf8(url), Utf8.fromUtf8(json));
 }
 
-double __devicePixelRatio() {
+double _devicePixelRatio() {
   return window.devicePixelRatio;
 }
 
-Pointer<ScreenSize> __getScreen() {
+Pointer<ScreenSize> _getScreen() {
   Size size = getScreen();
   return ScreenSize.fromSize(size);
 }
 
 void registerInvokeDartFromJS() {
   Pointer<NativeFunction<Native_InvokeDartFromJS>> pointer =
-      Pointer.fromFunction(__invokeDartFromJS);
+      Pointer.fromFunction(_invokeDartFromJS);
   _registerDartFn(pointer);
 }
 
 void registerReloadJSApp() {
   Pointer<NativeFunction<Native_ReloadJSApp>> pointer =
-      Pointer.fromFunction(__reloadJSApp);
+      Pointer.fromFunction(_reloadJSApp);
   _registerReloadJSApp(pointer);
 }
 
 void registerSetTimeout() {
   Pointer<NativeFunction<Native_SetTimeout>> pointer =
-      Pointer.fromFunction(__setTimeout, 0);
+      Pointer.fromFunction(_setTimeout, 0);
   _registerSetTimeout(pointer);
 }
 
 void registerSetInterval() {
   Pointer<NativeFunction<Native_SetInterval>> pointer =
-      Pointer.fromFunction(__setInterval, 0);
+      Pointer.fromFunction(_setInterval, 0);
   _registerSetInterval(pointer);
 }
 
 void registerClearTimeout() {
   Pointer<NativeFunction<Native_ClearTimeout>> pointer =
-      Pointer.fromFunction(__clearTimeout);
+      Pointer.fromFunction(_clearTimeout);
   _registerClearTimeout(pointer);
 }
 
 void registerRequestAnimationFrame() {
   Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer =
-      Pointer.fromFunction(__requestAnimationFrame, 0);
+      Pointer.fromFunction(_requestAnimationFrame, 0);
   _registerRequestAnimationFrame(pointer);
 }
 
 void registerCancelAnimationFrame() {
   Pointer<NativeFunction<Native_CancelAnimationFrame>> pointer =
-      Pointer.fromFunction(__cancelAnimationFrame);
+      Pointer.fromFunction(_cancelAnimationFrame);
   _registerCancelAnimationFrame(pointer);
 }
 
 void registerGetScreen() {
   Pointer<NativeFunction<Native_GetScreen>> pointer =
-      Pointer.fromFunction(__getScreen);
+      Pointer.fromFunction(_getScreen);
   _registerGetScreen(pointer);
 }
 
 void registerInvokeFetch() {
   Pointer<NativeFunction<Native_InvokeFetch>> pointer =
-      Pointer.fromFunction(__invokeFetch);
+      Pointer.fromFunction(_invokeFetch);
   _registerInvokeFetch(pointer);
 }
 
 void registerDevicePixelRatio() {
   Pointer<NativeFunction<Native_DevicePixelRatio>> pointer =
-      Pointer.fromFunction(__devicePixelRatio, 0.0);
+      Pointer.fromFunction(_devicePixelRatio, 0.0);
   _registerDevicePixelRatio(pointer);
 }
 

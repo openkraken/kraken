@@ -281,7 +281,6 @@ std::vector<PropNameID> JSWebSocket::getPropertyNames(JSContext &context) {
   return propertyNames;
 }
 
-// 这里把websocket对象绑到global上
 void JSWebSocket::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
   JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_websocket__",
