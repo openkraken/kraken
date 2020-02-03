@@ -7,13 +7,15 @@
 #define KRAKEN_FETCH_H
 
 #include "jsa.h"
+#include <memory>
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
 
-void bindFetch(alibaba::jsa::JSContext *context);
+void bindFetch(std::unique_ptr<JSContext> &context);
 void unbindFetch();
-void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
+void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
                          const std::string &error, int statusCode,
                          const std::string &body);
 } // namespace binding

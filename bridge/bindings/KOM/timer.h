@@ -7,18 +7,20 @@
 #define BRIDGE_TIMER_H
 
 #include "jsa.h"
+#include <memory>
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
 
-void bindTimer(alibaba::jsa::JSContext *context);
+void bindTimer(std::unique_ptr<JSContext> &context);
 void unbindTimer();
-void invokeSetIntervalCallback(alibaba::jsa::JSContext *context,
-                               const int callbackId);
-void invokeSetTimeoutCallback(alibaba::jsa::JSContext *context,
-                              const int callbackId);
+void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
+                               int32_t callbackId);
+void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
+                              int32_t callbackId);
 
-void invokeRequestAnimationFrameCallback(alibaba::jsa::JSContext *context, const int callbackId);
+void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context, const int callbackId);
 
 
 } // namespace binding

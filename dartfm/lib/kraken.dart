@@ -25,7 +25,7 @@ void connect(bool showPerformanceOverlay) {
       _connectedCallback();
     }
     RendererBinding.instance.addPostFrameCallback((time) {
-      CPPMessage(WINDOW_LOAD, '').send();
+      invokeOnloadCallback();
     });
   });
 }
@@ -48,7 +48,6 @@ void runApp({
   }
 
   connect(showPerformanceOverlay);
-  initScreenMetricsChangedCallback();
 }
 
 void unmountApp() {

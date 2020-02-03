@@ -6,45 +6,52 @@
 #include "screen.h"
 #include "jsa.h"
 #include "logging.h"
-#include <atomic>
-#include <kraken_dart_export.h>
-
-struct Screen {
-  int availHeight;
-  int availWidth;
-  int colorDepth;
-  int height;
-  int width;
-};
+#include "dart_callbacks.h"
 
 namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
-void bindScreen(JSContext *context) {
-  // flutter screen is not initialized when this constructor called.
-  // so we do nothing(nothing can do) at this constructor and waiting for
-  // flutter to invoke a callback to initialize the screen javascript object.
-  Object screen = JSA_CREATE_OBJECT(*context);
-  screen.setProperty(*context, "width", Value(0));
-  screen.setProperty(*context, "height", Value(0));
-  screen.setProperty(*context, "availWidth", Value(0));
-  screen.setProperty(*context, "availHeight", Value(0));
-  context->global().setProperty(*context, "screen", screen);
+void JSScreen::bind(std::unique_ptr<JSContext> &context) {
+  auto screen = Object::createFromHostObject(*context, sharedSelf());
+  JSA_SET_PROPERTY(*context, context->global(), "screen", screen);
+
 }
 
-void invokeUpdateScreen(alibaba::jsa::JSContext *context, int width, int height,
-                        int availWidth, int availHeight) {
-  //  Object &screen = JSA_GLOBAL_GET_PROPERTY(*context, "screen");
-  Value &&screen = context->global().getProperty(*context, "screen");
-  Object &&screenObject = screen.asObject(*context);
+void JSScreen::unbind(std::unique_ptr<JSContext> &context) {
+  JSA_SET_PROPERTY(*context, context->global(), "screen", Value::undefined());
+}
 
-  screenObject.setProperty(*context, "width", Value(width));
-  screenObject.setProperty(*context, "height", Value(height));
-  screenObject.setProperty(*context, "availWidth", Value(availWidth));
-  screenObject.setProperty(*context, "availHeight", Value(availHeight));
+Value JSScreen::get(JSContext &context, const PropNameID &name) {
+  auto propertyName = name.utf8(context);
 
-  // TODO trigger window resize event here
+  if (getDartFunc()->getScreen == nullptr) {
+    KRAKEN_LOG(ERROR) << "getScreen dart API not register";
+    return Value::undefined();
+  }
+
+  Screen *screen = getDartFunc()->getScreen();
+
+  if (propertyName == "width" || propertyName == "availWidth") {
+    return Value(screen->width);
+  } else if (propertyName == "height" || propertyName == "availHeight") {
+    return Value(screen->height);
+  }
+
+  return Value::undefined();
+}
+
+void JSScreen::set(JSContext &, const PropNameID &name, const Value &value) {
+  // do nothing
+}
+
+std::vector<PropNameID> JSScreen::getPropertyNames(JSContext &context) {
+  std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forAscii(context, "width"));
+  names.emplace_back(PropNameID::forAscii(context, "height"));
+  names.emplace_back(PropNameID::forAscii(context, "availWidth"));
+  names.emplace_back(PropNameID::forAscii(context, "availHeight"));
+  return names;
 }
 
 } // namespace binding

@@ -4,21 +4,20 @@
  */
 
 #include "timer.h"
+#include "dart_callbacks.h"
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
 #include <atomic>
-
-#include <kraken_dart_export.h>
 
 namespace kraken {
 namespace binding {
 
 using namespace alibaba::jsa;
 
-ThreadSafeMap<int, std::shared_ptr<Value>> timerCallbackMap;
-ThreadSafeMap<int, int> timerIdToCallbackIdMap;
-std::atomic<int> timerCallbackId = {1};
+ThreadSafeMap<int32_t, std::shared_ptr<Value>> timerCallbackMap;
+ThreadSafeMap<int32_t, int32_t> timerIdToCallbackIdMap;
+std::atomic<int32_t> timerCallbackId = {1};
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                  size_t count) {
@@ -37,7 +36,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   auto &&timeout = args[1];
-  int time;
+  int32_t time;
 
   if (timeout.isUndefined() || count < 2) {
     time = 0;
@@ -48,7 +47,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -59,12 +58,14 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterSetTimeout(callbackId, time);
+  if (getDartFunc()->setTimeout == nullptr) {
+    KRAKEN_LOG(ERROR) << "[setTimeout] dart callback not register";
+    return Value::undefined();
+  }
 
+  int32_t timerId = getDartFunc()->setTimeout(callbackId, time);
   timerIdToCallbackIdMap.set(timerId, callbackId);
-
   timerCallbackId = callbackId + 1;
-
   return Value(timerId);
 }
 
@@ -85,7 +86,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   auto &&timeout = args[1];
-  int time;
+  int32_t time;
 
   if (timeout.isUndefined()) {
     time = 0;
@@ -96,7 +97,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -107,7 +108,12 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterSetInterval(callbackId, time);
+  if (getDartFunc()->setInterval == nullptr) {
+    KRAKEN_LOG(ERROR) << "[setInterval] dart callback not register";
+    return Value::undefined();
+  }
+
+  int32_t timerId = getDartFunc()->setInterval(callbackId, time);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
@@ -129,8 +135,8 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int timer = static_cast<int>(timerId.asNumber());
-  int callbackId = 0;
+  int32_t timer = static_cast<int32_t>(timerId.asNumber());
+  int32_t callbackId = 0;
   timerIdToCallbackIdMap.get(timer, callbackId);
 
   if (callbackId == 0) {
@@ -139,7 +145,12 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  KrakenInvokeClearTimeout(timer);
+  if (getDartFunc()->clearTimeout == nullptr) {
+    KRAKEN_LOG(ERROR) << "[clearTimeout]: dart callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->clearTimeout(timer);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
@@ -147,6 +158,51 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
   if (callbackValue == nullptr ||
       !callbackValue->getObject(rt).isFunction(rt)) {
     KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of callbackId: "
+                     << callbackId;
+    return Value::undefined();
+  }
+
+  timerCallbackMap.erase(callbackId);
+  return Value::undefined();
+}
+
+Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args,
+                          size_t count) {
+  if (count <= 0) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] function missing parameter";
+    return Value::undefined();
+  }
+
+  const Value &timerId = args[0];
+  if (!timerId.isNumber()) {
+    KRAKEN_LOG(WARN)
+    << "[clearAnimationFrame] cancelAnimationFrame accept number as parameter";
+    return Value::undefined();
+  }
+
+  auto timer = static_cast<int32_t>(timerId.asNumber());
+  int32_t callbackId = 0;
+  timerIdToCallbackIdMap.get(timer, callbackId);
+
+  if (callbackId == 0) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of timerId: "
+                     << timer;
+    return Value::undefined();
+  }
+
+  if (getDartFunc()->cancelAnimationFrame == nullptr) {
+    KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->cancelAnimationFrame(timer);
+
+  std::shared_ptr<Value> callbackValue;
+  timerCallbackMap.get(callbackId, callbackValue);
+
+  if (callbackValue == nullptr ||
+      !callbackValue->getObject(context).isFunction(context)) {
+    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of callbackId: "
                      << callbackId;
     return Value::undefined();
   }
@@ -172,7 +228,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  int callbackId = timerCallbackId.load();
+  int32_t callbackId = timerCallbackId.load();
 
   timerCallbackMap.set(callbackId, callbackValue);
 
@@ -183,7 +239,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                         << std::endl;
   }
 
-  int timerId = KrakenRegisterRequestAnimationFrame(callbackId);
+  if (getDartFunc()->requestAnimationFrame == nullptr) {
+    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
+    return Value::undefined();
+  }
+
+  int32_t timerId = getDartFunc()->requestAnimationFrame(callbackId);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
@@ -191,7 +252,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
   return Value(timerId);
 }
 
-void invokeSetTimeoutCallback(JSContext *context, const int callbackId) {
+void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
+                              int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -210,7 +272,8 @@ void invokeSetTimeoutCallback(JSContext *context, const int callbackId) {
   }
 }
 
-void invokeSetIntervalCallback(JSContext *context, const int callbackId) {
+void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
+                               int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -228,8 +291,8 @@ void invokeSetIntervalCallback(JSContext *context, const int callbackId) {
   }
 }
 
-void invokeRequestAnimationFrameCallback(JSContext *context,
-                                         const int callbackId) {
+void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context,
+                                         int32_t callbackId) {
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
@@ -248,7 +311,7 @@ void invokeRequestAnimationFrameCallback(JSContext *context,
   }
 }
 
-void bindTimer(JSContext *context) {
+void bindTimer(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
   JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),
@@ -258,7 +321,7 @@ void bindTimer(JSContext *context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,
                        clearTimeout);
   JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0,
-                       clearTimeout);
+                       cancelAnimationFrame);
 }
 
 void unbindTimer() {

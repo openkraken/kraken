@@ -6,12 +6,12 @@
 import 'dart:convert';
 import 'dart:ui' show window;
 
+import 'package:flutter/painting.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 import 'fetch.dart' show Fetch;
 import 'timer.dart';
-import 'message.dart';
 
 const String BATCH_UPDATE = 'batchUpdate';
 KrakenTimer timer = KrakenTimer();
@@ -43,7 +43,6 @@ ElementAction getAction(String action) {
   }
 }
 
-@pragma('vm:entry-point')
 String krakenJsToDart(String args) {
   dynamic directives = jsonDecode(args);
   if (directives[0] == BATCH_UPDATE) {
@@ -80,8 +79,12 @@ String handleJSToDart(List directive) {
   }
 }
 
-@pragma('vm:entry-point')
-void reloadApp(String args) async {
+void initBridge() {
+  initJSEngine();
+  registerDartFunctionIntoCpp();
+}
+
+void reloadApp() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   appLoading = true;
   unmountApp();
@@ -90,102 +93,43 @@ void reloadApp(String args) async {
   connect(prevShowPerformanceOverlay);
 }
 
-@pragma('vm:entry-point')
 int setTimeout(int callbackId, int timeout) {
   return timer.setTimeout(callbackId, timeout);
 }
 
-@pragma('vm:entry-point')
 int setInterval(int callbackId, int timeout) {
   return timer.setInterval(callbackId, timeout);
 }
 
-@pragma('vm:entry-point')
 void clearTimeout(int timerId) {
   return timer.clearTimeout(timerId);
 }
 
-@pragma('vm:entry-point')
 void clearInterval = clearTimeout;
 
-@pragma('vm:entry-point')
 int requestAnimationFrame(int callbackId) {
   return timer.requestAnimationFrame(callbackId);
 }
 
-@pragma('vm:entry-point')
 void cancelAnimationFrame(int timerId) {
   timer.cancelAnimationFrame(timerId);
 }
 
-@pragma('vm:entry-point')
-double getScreenAvailHeight() {
-  return window.physicalSize.height;
+Size getScreen() {
+  return window.physicalSize;
 }
 
-@pragma('vm:entry-point')
-double getScreenAvailWidth() {
-  return window.physicalSize.width;
-}
-
-@pragma('vm:entry-point')
-double getScreenHeight() {
-  return window.physicalSize.height;
-}
-
-@pragma('vm:entry-point')
-double getScreenWidth() {
-  return window.physicalSize.width;
-}
-
-@pragma('vm:entry-point')
 void fetch(int callbackId, String url, String json) {
-  StringBuffer data = StringBuffer('[$callbackId]');
   Fetch.fetch(url, json).then((Response response) {
     response.raiseForStatus();
-    data.write(
-        Message.buildMessage('statusCode', response.statusCode.toString()));
-    data.write(Message.buildMessage('body', response.content()));
-    CPPMessage(FETCH_MESSAGE, data.toString()).send();
+    invokeFetchCallback(callbackId, '', response.statusCode, response.content());
   }).catchError((e) {
     if (e is HTTPException) {
-      data.write(
-          Message.buildMessage('statusCode', e.response.statusCode.toString()));
-      data.write(Message.buildMessage('error', e.message));
+      invokeFetchCallback(callbackId, e.message, e.response.statusCode, "");
     } else {
-      data.write(Message.buildMessage('error', e.toString()));
+      invokeFetchCallback(callbackId, e.toString(), e.response.statusCode, "");
     }
-
-    CPPMessage(FETCH_MESSAGE, data.toString()).send();
   });
-}
-
-void initScreenMetricsChangedCallback() {
-  var frameworkCallback = window.onMetricsChanged;
-
-  sendWindowSize() {
-    double devicePixelRatio = window.devicePixelRatio;
-    double width = window.physicalSize.width / devicePixelRatio;
-    double height = window.physicalSize.height / devicePixelRatio;
-    StringBuffer buffer = StringBuffer();
-    buffer.write(Message.buildMessage('width', width.toString()));
-    buffer.write(Message.buildMessage('height', height.toString()));
-    buffer.write(Message.buildMessage('availWidth', width.toString()));
-    buffer.write(Message.buildMessage('availHeight', height.toString()));
-
-    CPPMessage(SCREEN_METRICS, buffer.toString()).send();
-    CPPMessage(WINDOW_INIT_DEVICE_PIXEL_RATIO, devicePixelRatio.toString())
-        .send();
-  }
-
-  sendWindowSize();
-
-  window.onMetricsChanged = () {
-    // call framework callback first
-    frameworkCallback();
-
-    sendWindowSize();
-  };
 }
 
 @pragma('vm:entry-point')

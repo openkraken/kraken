@@ -136,7 +136,7 @@ mixin ElementsBinding
         setter: (bool value) {
           if (ElementManager.showPerformanceOverlayOverride != value) {
             ElementManager.showPerformanceOverlayOverride = value;
-            reloadApp("");
+            reloadApp();
           }
           return Future<void>.value();
         },

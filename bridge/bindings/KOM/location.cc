@@ -4,10 +4,10 @@
  */
 
 #include "location.h"
+#include "dart_callbacks.h"
 #include "logging.h"
-#include "window.h"
 #include "websocketpp/uri.hpp"
-#include <kraken_dart_export.h>
+#include "window.h"
 
 namespace kraken {
 namespace binding {
@@ -67,20 +67,38 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
-  KrakenInvokeDartFromCpp("reloadApp", "");
+  if (getDartFunc()->reloadApp == nullptr) {
+    KRAKEN_LOG(ERROR) << "[location.reload()] dart callback not register";
+    return Value::undefined();
+  }
+  getDartFunc()->reloadApp();
   return Value::undefined();
 }
 
-void JSLocation::bind(JSContext *context, Object &window) {
+void JSLocation::bind(std::unique_ptr<JSContext> &context, Object &window) {
   Object &&locationObject = alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
   JSA_SET_PROPERTY(*context, window, "location", locationObject);
 }
 
-void JSLocation::unbind(JSContext *context, Object &window) {
+void JSLocation::unbind(std::unique_ptr<JSContext> &context, Object &window) {
   JSA_SET_PROPERTY(
       *context, window, "location",
       Value::undefined()
   );
+}
+
+std::vector<PropNameID> JSLocation::getPropertyNames(JSContext &context) {
+  std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forAscii(context, "origin"));
+  names.emplace_back(PropNameID::forAscii(context, "protocol"));
+  names.emplace_back(PropNameID::forAscii(context, "host"));
+  names.emplace_back(PropNameID::forAscii(context, "hostname"));
+  names.emplace_back(PropNameID::forAscii(context, "port"));
+  names.emplace_back(PropNameID::forAscii(context, "pathname"));
+  names.emplace_back(PropNameID::forAscii(context, "search"));
+  names.emplace_back(PropNameID::forAscii(context, "hash"));
+  names.emplace_back(PropNameID::forAscii(context, "reload"));
+  return names;
 }
 
 } // namespace binding

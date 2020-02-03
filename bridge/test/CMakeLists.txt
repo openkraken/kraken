@@ -20,10 +20,6 @@ add_executable(console_test console_test.cc reload_test.cc)
 target_link_libraries(console_test ${TEST_LINK_LIBRARY})
 target_include_directories(console_test PUBLIC ${TEST_INCLUDE_DIR})
 
-add_executable(message_test ../message.cc ../message.h message_test.cc)
-target_include_directories(message_test PUBLIC ../)
-target_link_libraries(message_test gtest gtest_main)
-
 add_executable(reload_test ./reload_test.cc)
 target_link_libraries(reload_test ${TEST_LINK_LIBRARY})
 target_include_directories(reload_test PUBLIC ${TEST_INCLUDE_DIR})
