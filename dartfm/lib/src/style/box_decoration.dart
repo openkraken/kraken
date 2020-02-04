@@ -407,6 +407,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
+      if (element.linearAngle != null) {
+        renderDecoratedBox.markNeedsLayout();
+      }
       _updateMargin(newDecoration.getBorderEdgeInsets(), element);
     }
     oldDecoration = newDecoration;
