@@ -841,7 +841,7 @@ class RenderFlexLayout extends RenderBox
       Style childStyle;
       if (child is RenderTextNode) {
         childStyle = nodeMap[nodeId].style;
-      } else {
+      } else if (child is RenderBoxModel) {
         int childNodeId = (child as RenderBoxModel).nodeId;
         childStyle = nodeMap[childNodeId].style;
       }

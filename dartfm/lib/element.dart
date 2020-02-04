@@ -15,7 +15,6 @@ export 'src/element/tags/body.dart';
 export 'src/element/tags/canvas.dart';
 export 'src/element/tags/div.dart';
 export 'src/element/tags/img.dart';
-export 'src/element/tags/text.dart';
 export 'src/element/tags/input.dart';
 export 'src/element/tags/li.dart';
 export 'src/element/tags/p.dart';

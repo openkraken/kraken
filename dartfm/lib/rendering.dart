@@ -13,4 +13,5 @@ export 'src/rendering/positioning.dart';
 export 'src/rendering/scrollable.dart';
 export 'src/rendering/positioning.dart';
 export 'src/rendering/video.dart';
+export 'src/rendering/text.dart';
 export 'src/rendering/ticker_provider.dart';
