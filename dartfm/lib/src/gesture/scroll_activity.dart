@@ -80,10 +80,10 @@ abstract class ScrollActivity {
   ///
   /// For example, [BallisticScrollActivity]'s implementation calls
   /// [ScrollActivityDelegate.goBallistic].
-  void resetActivity() { }
+  void resetActivity() {}
 
   /// Called when the scroll view that is performing this activity changes its metrics.
-  void applyNewDimensions() { }
+  void applyNewDimensions() {}
 
   /// Whether the scroll view should ignore pointer events while performing this
   /// activity.
@@ -156,7 +156,8 @@ abstract class ScrollHoldController {
 /// scrolling, and does not prevent the user from interacting with the contents
 /// of the [Scrollable] (unlike when a drag has begun or there is a scroll
 /// animation underway).
-class HoldScrollActivity extends ScrollActivity implements ScrollHoldController {
+class HoldScrollActivity extends ScrollActivity
+    implements ScrollHoldController {
   /// Creates a scroll activity that does nothing.
   HoldScrollActivity({
     @required ScrollActivityDelegate delegate,
@@ -182,8 +183,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 
   @override
   void dispose() {
-    if (onHoldCanceled != null)
-      onHoldCanceled();
+    if (onHoldCanceled != null) onHoldCanceled();
     super.dispose();
   }
 }
@@ -205,17 +205,18 @@ class ScrollDragController implements Drag {
     this.onDragCanceled,
     this.carriedVelocity,
     this.motionStartDistanceThreshold,
-  }) : assert(delegate != null),
-       assert(details != null),
-       assert(
-         motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
-         'motionStartDistanceThreshold must be a positive number or null'
-       ),
-       _delegate = delegate,
-       _lastDetails = details,
-       _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
-       _lastNonStationaryTimestamp = details.sourceTimeStamp,
-       _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
+  })  : assert(delegate != null),
+        assert(details != null),
+        assert(
+            motionStartDistanceThreshold == null ||
+                motionStartDistanceThreshold > 0.0,
+            'motionStartDistanceThreshold must be a positive number or null'),
+        _delegate = delegate,
+        _lastDetails = details,
+        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
+        _lastNonStationaryTimestamp = details.sourceTimeStamp,
+        _offsetSinceLastStop =
+            motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -234,6 +235,7 @@ class ScrollDragController implements Drag {
 
   Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
+
   /// Null if already in motion or has no [motionStartDistanceThreshold].
   double _offsetSinceLastStop;
 
@@ -269,8 +271,10 @@ class ScrollDragController implements Drag {
   void _maybeLoseMomentum(double offset, Duration timestamp) {
     if (_retainMomentum &&
         offset == 0.0 &&
-        (timestamp == null || // If drag event has no timestamp, we lose momentum.
-         timestamp - _lastNonStationaryTimestamp > momentumRetainStationaryDurationThreshold)) {
+        (timestamp ==
+                null || // If drag event has no timestamp, we lose momentum.
+            timestamp - _lastNonStationaryTimestamp >
+                momentumRetainStationaryDurationThreshold)) {
       // If pointer is stationary for too long, we lose momentum.
       _retainMomentum = false;
     }
@@ -291,7 +295,8 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       if (motionStartDistanceThreshold != null &&
           _offsetSinceLastStop == null &&
-          timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
+          timestamp - _lastNonStationaryTimestamp >
+              motionStoppedDurationThreshold) {
         // Enforce a new threshold.
         _offsetSinceLastStop = 0.0;
       }
@@ -314,11 +319,12 @@ class ScrollDragController implements Drag {
           } else {
             // This is a normal speed threshold break.
             return math.min(
-              // Ease into the motion when the threshold is initially broken
-              // to avoid a visible jump.
-              motionStartDistanceThreshold / 3.0,
-              offset.abs(),
-            ) * offset.sign;
+                  // Ease into the motion when the threshold is initially broken
+                  // to avoid a visible jump.
+                  motionStartDistanceThreshold / 3.0,
+                  offset.abs(),
+                ) *
+                offset.sign;
           }
         } else {
           return 0.0;
@@ -374,8 +380,7 @@ class ScrollDragController implements Drag {
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
-    if (onDragCanceled != null)
-      onDragCanceled();
+    if (onDragCanceled != null) onDragCanceled();
   }
 
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
@@ -400,8 +405,8 @@ class DragScrollActivity extends ScrollActivity {
   DragScrollActivity(
     ScrollActivityDelegate delegate,
     ScrollDragController controller,
-  ) : _controller = controller,
-      super(delegate);
+  )   : _controller = controller,
+        super(delegate);
 
   ScrollDragController _controller;
 
@@ -456,7 +461,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+          .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override
@@ -475,8 +480,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _tick() {
-    if (!applyMoveTo(_controller.value))
-      delegate.goIdle();
+    if (!applyMoveTo(_controller.value)) delegate.goIdle();
   }
 
   /// Move the position to the given location.
@@ -534,12 +538,12 @@ class DrivenScrollActivity extends ScrollActivity {
     @required Duration duration,
     @required Curve curve,
     @required TickerProvider vsync,
-  }) : assert(from != null),
-       assert(to != null),
-       assert(duration != null),
-       assert(duration > Duration.zero),
-       assert(curve != null),
-       super(delegate) {
+  })  : assert(from != null),
+        assert(to != null),
+        assert(duration != null),
+        assert(duration > Duration.zero),
+        assert(curve != null),
+        super(delegate) {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,
@@ -548,7 +552,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+          .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   Completer<void> _completer;
@@ -565,8 +569,7 @@ class DrivenScrollActivity extends ScrollActivity {
   double get velocity => _controller.velocity;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0)
-      delegate.goIdle();
+    if (delegate.setPixels(_controller.value) != 0.0) delegate.goIdle();
   }
 
   void _end() {

@@ -8,11 +8,8 @@ import 'package:kraken/element.dart';
 const String DIV = 'DIV';
 
 class DivElement extends Element {
-  DivElement(
-    int nodeId,
-    Map<String, dynamic> props,
-    List<String> events
-  ) : super(
+  DivElement(int nodeId, Map<String, dynamic> props, List<String> events)
+      : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
           tagName: DIV,

@@ -3,35 +3,51 @@
  * Author: Kraken Team.
  */
 
+import 'dart:convert';
 import 'dart:core';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/kraken.dart' show remountApp;
+
+enum ElementAction {
+  createElement,
+  createTextNode,
+  insertAdjacentNode,
+  removeNode,
+  setStyle,
+  setProperty,
+  removeProperty,
+  addEvent,
+  removeEvent,
+  method
+}
 
 abstract class ElementManagerActionDelegate {
   RenderObject root;
   Element rootElement;
 
-  void createElement(List payload);
+  void createElement(PayloadNode node);
 
-  void createTextNode(List payload);
+  void createTextNode(PayloadNode node);
 
-  void removeNode(List payload);
+  void removeNode(int targetId);
 
-  void setProperty(List payload);
+  void setProperty(int targetId, String key, dynamic value);
 
-  void removeProperty(List payload);
+  void removeProperty(int targetId, String key);
 
-  void insertAdjacentNode(List payload);
+  void setStyle(int targetId, String key, String value);
 
-  void addEvent(List payload);
+  void insertAdjacentNode(int targetId, String position, int nodeId);
 
-  void removeEvent(List payload);
+  void addEvent(int targetId, String eventName);
 
-  dynamic method(List payload);
+  void removeEvent(int targetId, String eventName);
+
+  dynamic method(int targetId, String method, dynamic args);
 }
 
 Map<int, dynamic> nodeMap = {};
@@ -44,17 +60,15 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   W3CElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
     _root = RenderDecoratedBox(
-      decoration: BoxDecoration(color: WebColor.white),
-      child: rootElement.renderObject
-    );
+        decoration: BoxDecoration(color: WebColor.white),
+        child: rootElement.renderObject);
     nodeMap[BODY_ID] = rootElement;
   }
 
   RenderBox _root;
   RenderBox get root => _root;
 
-  void createElement(List<dynamic> payload) {
-    PayloadNode node = PayloadNode.fromJson(payload[0]);
+  void createElement(PayloadNode node) {
     assert(node != null);
     if (nodeMap.containsKey(node.id)) {
       throw Exception('ERROR: can not create element with same id: $node.id');
@@ -74,14 +88,12 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     nodeMap[node.id] = el;
   }
 
-  void createTextNode(List<dynamic> payload) {
-    PayloadNode node = PayloadNode.fromJson(payload[0]);
+  void createTextNode(PayloadNode node) {
     TextNode textNode = TextNode(node.id, node.props, node.data);
     nodeMap[node.id] = textNode;
   }
 
-  void removeNode(List<dynamic> payload) {
-    int targetId = payload[0];
+  void removeNode(int targetId) {
     assert(nodeMap.containsKey(targetId));
 
     Node target = nodeMap[targetId];
@@ -91,23 +103,24 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     nodeMap.remove(targetId);
   }
 
-  void setProperty(List<dynamic> payload) {
-    int targetId = payload[0];
-    String key = payload[1];
+  void setProperty(int targetId, String key, dynamic value) {
     assert(nodeMap.containsKey(targetId));
-
-    dynamic value = payload[2];
     Node target = nodeMap[targetId];
     assert(target != null);
 
     target.setProperty(key, value);
   }
 
-  void removeProperty(List<dynamic> payload) {
-    int targetId = payload[0];
+  void setStyle(int targetId, String key, String value) {
     assert(nodeMap.containsKey(targetId));
-    String key = payload[1];
+    Element target = nodeMap[targetId];
+    assert(target != null);
 
+    target.setProperty(STYLE_PATH_PREFIX + '.' + key, value);
+  }
+
+  void removeProperty(int targetId, String key) {
+    assert(nodeMap.containsKey(targetId));
     Node target = nodeMap[targetId];
     assert(target != null);
 
@@ -121,10 +134,7 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   ///   <!-- beforeend -->
   /// </p>
   /// <!-- afterend -->
-  void insertAdjacentNode(List<dynamic> payload) {
-    int targetId = payload[0];
-    String position = payload[1];
-    int nodeId = payload[2];
+  void insertAdjacentNode(int targetId, String position, int nodeId) {
     assert(nodeMap.containsKey(targetId));
     assert(nodeMap.containsKey(nodeId));
 
@@ -157,10 +167,8 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     RendererBinding.instance.renderView.performLayout();
   }
 
-  void addEvent(List<dynamic> payload) {
-    int targetId = payload[0];
+  void addEvent(int targetId, String eventName) {
     assert(nodeMap.containsKey(targetId));
-    String eventName = payload[1];
 
     Element target = nodeMap[targetId];
     assert(target != null);
@@ -168,10 +176,8 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     target.addEvent(eventName);
   }
 
-  void removeEvent(List<dynamic> payload) {
-    int targetId = payload[0];
+  void removeEvent(int targetId, String eventName) {
     assert(nodeMap.containsKey(targetId));
-    String eventName = payload[1];
 
     Element target = nodeMap[targetId];
     assert(target != null);
@@ -188,15 +194,12 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
   }
 
   @override
-  dynamic method(List<dynamic> payload) {
-    int targetId = payload[0];
+  dynamic method(int targetId, String method, dynamic args) {
     assert(nodeMap.containsKey(targetId));
-    String methodName = payload[1];
-    List<dynamic> args = payload[2];
 
     Element target = nodeMap[targetId];
     assert(target != null);
-    dynamic res = target.method(methodName, args);
+    dynamic res = target.method(method, args);
     return res;
   }
 }
@@ -222,27 +225,35 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  void connect({ bool showPerformanceOverlay = false }) {
-    this.showPerformanceOverlay = showPerformanceOverlay;
+  void connect({ bool showPerformanceOverlay }) {
+    if (showPerformanceOverlay != null) {
+      this.showPerformanceOverlay = showPerformanceOverlay;
+    }
 
     RenderBox result = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null)
+      showPerformanceOverlay = showPerformanceOverlayOverride;
 
     if (showPerformanceOverlay) {
-      RenderPerformanceOverlay renderPerformanceOverlay = RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
+      RenderPerformanceOverlay renderPerformanceOverlay =
+          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox =
+          RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
           math.min(350.0, window.physicalSize.width),
           math.min(150.0, window.physicalSize.height),
         )),
       );
+      RenderFpsOverlay renderFpsOverlayBox = RenderFpsOverlay();
+
       result = RenderStack(
         children: [
           result,
-          renderConstrainedPerformanceOverlayBox
+          renderConstrainedPerformanceOverlayBox,
+          renderFpsOverlayBox,
         ],
         textDirection: TextDirection.ltr,
       );
@@ -257,37 +268,41 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  void refresh() => remountApp();
-
-  dynamic applyAction(String action, List<dynamic> payload) {
+  dynamic applyAction(ElementAction action, List payload, { PayloadNode node }) {
     var returnValue;
+
     switch (action) {
-      case 'createElement':
-        _actionDelegate.createElement(payload);
+      case ElementAction.createElement:
+        if (node == null) node = PayloadNode.fromJson(payload[0]);
+        _actionDelegate.createElement(node);
         break;
-      case 'createTextNode':
-        _actionDelegate.createTextNode(payload);
+      case ElementAction.createTextNode:
+        if (node == null) node = PayloadNode.fromJson(payload[0]);
+        _actionDelegate.createTextNode(node);
         break;
-      case 'insertAdjacentNode':
-        _actionDelegate.insertAdjacentNode(payload);
+      case ElementAction.insertAdjacentNode:
+        _actionDelegate.insertAdjacentNode(payload[0], payload[1], payload[2]);
         break;
-      case 'removeNode':
-        _actionDelegate.removeNode(payload);
+      case ElementAction.removeNode:
+        _actionDelegate.removeNode(payload[0]);
         break;
-      case 'setProperty':
-        _actionDelegate.setProperty(payload);
+      case ElementAction.setStyle:
+        _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
         break;
-      case 'removeProperty':
-        _actionDelegate.removeProperty(payload);
+      case ElementAction.setProperty:
+        _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
         break;
-      case 'addEvent':
-        _actionDelegate.addEvent(payload);
+      case ElementAction.removeProperty:
+        _actionDelegate.removeProperty(payload[0], payload[1]);
         break;
-      case 'removeEvent':
-        _actionDelegate.removeEvent(payload);
+      case ElementAction.addEvent:
+        _actionDelegate.addEvent(payload[0], payload[1]);
         break;
-      case 'method':
-        returnValue = _actionDelegate.method(payload);
+      case ElementAction.removeEvent:
+        _actionDelegate.removeEvent(payload[0], payload[1]);
+        break;
+      case ElementAction.method:
+        returnValue = _actionDelegate.method(payload[0], payload[1], payload[2]);
         break;
     }
 
@@ -317,6 +332,22 @@ class PayloadNode {
       }
     }
     data = json['data'];
+  }
+
+  PayloadNode.fromParams(String type, int id, String propsJson, String eventsJson) {
+    this.type = type;
+    this.id = id;
+
+    if (propsJson != null && propsJson.isNotEmpty) {
+      props = jsonDecode(propsJson);
+    }
+
+    if (eventsJson != null && eventsJson.isNotEmpty) {
+      var events = jsonDecode(eventsJson);
+      for (var eventName in events) {
+        if (eventName is String) this.events.add(eventName);
+      }
+    }
   }
 
   String toString() {

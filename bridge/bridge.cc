@@ -4,41 +4,33 @@
  */
 
 #include "bridge.h"
+#include "bindings/KOM/console.h"
+#include "bindings/KOM/fetch.h"
+#include "bindings/KOM/location.h"
+#include "bindings/KOM/screen.h"
+#include "bindings/KOM/timer.h"
+#include "bindings/KOM/window.h"
+#include "dart_callbacks.h"
 #include "jsa.h"
-#include "kraken_dart_export.h"
-
-#include "bindings/console.h"
-#include "bindings/fetch.h"
-#include "bindings/screen.h"
-#include "bindings/timer.h"
-#include "bindings/window.h"
 #include "logging.h"
-#include "message.h"
-#include "thread_safe_data.h"
 #include "thread_safe_array.h"
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include <string>
 
 namespace kraken {
 namespace {
 
-const char CPP = 'C';
+using namespace alibaba::jsa;
+
+const char JS = 'J';
 const char DART = 'D';
 
-const char FETCH_MESSAGE = 's';
-const char TIMEOUT_MESSAGE = 't';
-const char INTERVAL_MESSAGE = 'i';
-const char ANIMATION_FRAME_MESSAGE = 'a';
-const char SCREEN_METRICS = 'm';
-const char WINDOW_LOAD = 'l';
-const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
+const char FRAME_BEGIN = '$';
 
-    ThreadSafeArray<alibaba::jsa::Value *> dartJsCallbackList;
-    ThreadSafeData<int> timerCallbackId(1);
+ThreadSafeArray<std::shared_ptr<Value>> dartJsCallbackList;
 
 /**
  * Message channel, send message from JS to Dart.
@@ -48,13 +40,11 @@ const char WINDOW_INIT_DEVICE_PIXEL_RATIO = 'r';
  * @param count
  * @return JSValue
  */
-alibaba::jsa::Value krakenJsToDart(alibaba::jsa::JSContext &context,
-                                   const alibaba::jsa::Value &thisVal,
-                                   const alibaba::jsa::Value *args,
-                                   size_t count) {
+Value krakenJsToDart(JSContext &context, const Value &thisVal,
+                     const Value *args, size_t count) {
   if (count < 1) {
     KRAKEN_LOG(WARN) << "[KrakenJSToDart ERROR]: function missing parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   auto &&message = args[0];
@@ -65,14 +55,16 @@ alibaba::jsa::Value krakenJsToDart(alibaba::jsa::JSContext &context,
     KRAKEN_LOG(VERBOSE) << "[KrakenJSToDart]: " << messageStr << std::endl;
   }
 
-  const char *result =
-      KrakenInvokeDartFromCpp("krakenJsToDart", messageStr.c_str());
-
-  if (result == nullptr) {
-    return alibaba::jsa::Value::null();
+  if (getDartFunc()->invokeDartFromJS == nullptr) {
+    KRAKEN_LOG(ERROR) << "[KrakenJSToDart ERROR]: dart callbacks not register";
+    return Value::undefined();
   }
 
-  return alibaba::jsa::String::createFromUtf8(context, std::string(result));
+  const char *result = getDartFunc()->invokeDartFromJS(messageStr.c_str());
+  if (result == nullptr) {
+    return Value::null();
+  }
+  return String::createFromUtf8(context, std::string(result));
 }
 
 /**
@@ -83,30 +75,41 @@ alibaba::jsa::Value krakenJsToDart(alibaba::jsa::JSContext &context,
  * @param count
  * @return
  */
-alibaba::jsa::Value krakenDartToJs(alibaba::jsa::JSContext &context,
-                                   const alibaba::jsa::Value &thisVal,
-                                   const alibaba::jsa::Value *args,
-                                   size_t count) {
+Value krakenDartToJs(JSContext &context, const Value &thisVal,
+                     const Value *args, size_t count) {
   if (count < 1) {
     KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: function missing parameter";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
-  alibaba::jsa::Value *val =
-      new alibaba::jsa::Value(args[0].getObject(context));
-  alibaba::jsa::Object &&func = val->getObject(context);
+  std::shared_ptr<Value> val =
+      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object &&func = val->getObject(context);
 
   if (!func.isFunction(context)) {
     KRAKEN_LOG(WARN)
         << "[KrakenDartToJS ERROR]: parameter should be a function";
-    return alibaba::jsa::Value::undefined();
+    return Value::undefined();
   }
 
   dartJsCallbackList.push(val);
-  KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS]: callback registered";
 
-  return alibaba::jsa::Value::undefined();
+  return Value::undefined();
 }
+
+#ifdef IS_TEST
+Value getValue(JSContext &context, const Value &thisVal, const Value *args,
+               size_t count) {
+  if (count != 1) {
+    KRAKEN_LOG(VERBOSE) << "[TEST] getValue() accept 1 params";
+    return Value::undefined();
+  }
+
+  const Value &name = args[0];
+  return JSA_GLOBAL_GET_PROPERTY(context,
+                                 name.getString(context).utf8(context).c_str());
+}
+#endif
 
 } // namespace
 
@@ -114,24 +117,26 @@ alibaba::jsa::Value krakenDartToJs(alibaba::jsa::JSContext &context,
  * JSRuntime
  */
 JSBridge::JSBridge() {
-  context_ = alibaba::jsc::createJSContext();
+  context = alibaba::jsc::createJSContext();
+  contextInvalid = false;
 
   // Inject JSC global objects
-  kraken::binding::bindKraken(context_.get());
-  kraken::binding::bindConsole(context_.get());
-  kraken::binding::bindTimer(context_.get());
-  kraken::binding::bindFetch(context_.get());
-  kraken::binding::bindScreen(context_.get());
+  kraken::binding::bindKraken(context);
+  kraken::binding::bindConsole(context);
+  kraken::binding::bindTimer(context);
+  kraken::binding::bindFetch(context);
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
-  websocket_->bind(context_.get());
+  websocket_->bind(context);
   window_ = std::make_shared<kraken::binding::JSWindow>();
-  window_->bind(context_.get());
+  window_->bind(context);
+  screen_ = std::make_shared<kraken::binding::JSScreen>();
+  screen_->bind(context);
 
-  JSA_BINDING_FUNCTION(*context_, context_->global(), "__kraken_js_to_dart__",
-                       0, krakenJsToDart);
-  JSA_BINDING_FUNCTION(*context_, context_->global(), "__kraken_dart_to_js__",
-                       0, krakenDartToJs);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_js_to_dart__", 0,
+                       krakenJsToDart);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_dart_to_js__", 0,
+                       krakenDartToJs);
 }
 
 #ifdef ENABLE_DEBUGGER
@@ -159,16 +164,12 @@ void JSBridge::detatchDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::invokeKrakenCallback(const char *args) {
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
-  }
-  assert(context_ != nullptr);
+  assert(context != nullptr);
 
   int length = dartJsCallbackList.length();
 
-  for (int i = 0; i < length; i ++) {
-    alibaba::jsa::Value *callback;
+  for (int i = 0; i < length; i++) {
+    std::shared_ptr<Value> callback;
     dartJsCallbackList.get(i, callback);
 
     if (callback == nullptr) {
@@ -177,19 +178,22 @@ void JSBridge::invokeKrakenCallback(const char *args) {
       return;
     }
 
-    if (!callback->getObject(*context_).isFunction(*context_)) {
+    if (!callback->getObject(*context).isFunction(*context)) {
       KRAKEN_LOG(WARN) << "[KrakenDartToJS ERROR]: callback is not a function";
       return;
     }
 
-    const alibaba::jsa::String str =
-        alibaba::jsa::String::createFromAscii(*context_, args);
-    callback->getObject(*context_).asFunction(*context_).callWithThis(
-        *context_, context_->global(), str, 1);
+    const String str = String::createFromAscii(*context, args);
+    callback->getObject(*context).asFunction(*context).callWithThis(
+        *context, context->global(), str, 1);
   }
 }
 
 void JSBridge::handleFlutterCallback(const char *args) {
+  if (contextInvalid) {
+    return;
+  }
+
   std::string &&str = static_cast<std::string>(args);
   char from = str[0];
   char to = str[1];
@@ -201,81 +205,17 @@ void JSBridge::handleFlutterCallback(const char *args) {
   }
 
   try {
+    char kind = str[2];
+    if (kind != FRAME_BEGIN && std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
+        strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+      KRAKEN_LOG(VERBOSE) << "[KrakenDartToJS] called, message: " << args;
+    }
     // do not handle message which did'n response to cpp layer
-    if (to != CPP) {
+    if (to == JS) {
       this->invokeKrakenCallback(args);
       return;
     }
-
-    char kind = str[2];
-
-    switch (kind) {
-    case TIMEOUT_MESSAGE:
-      kraken::binding::invokeSetTimeoutCallback(context_.get(),
-                                                std::stoi(str.substr(3)));
-      break;
-    case INTERVAL_MESSAGE:
-      kraken::binding::invokeSetIntervalCallback(context_.get(),
-                                                 std::stoi(str.substr(3)));
-      break;
-    case ANIMATION_FRAME_MESSAGE:
-      kraken::binding::invokeRequestAnimationFrameCallback(
-        context_.get(),
-        std::stoi(str.substr(3))
-      );
-      break;
-    case FETCH_MESSAGE: {
-      // extract id from DCf[id][message]
-      // D == Dart
-      // C == Cpp
-      // F == FetchMessage
-      std::string callbackId;
-      size_t lastStart = message::Message::getBracketsValue(str, callbackId);
-      kraken::message::Message message;
-      message.parseMessageBody(str.substr(lastStart + 1));
-
-      std::string error;
-      std::string statusCode;
-      std::string body;
-
-      message.readMessage("error", error);
-      message.readMessage("statusCode", statusCode);
-      message.readMessage("body", body);
-
-      kraken::binding::invokeFetchCallback(context_.get(),
-                                           std::stoi(callbackId), error,
-                                           std::stoi(statusCode), body);
-      break;
-    }
-    case SCREEN_METRICS: {
-      kraken::message::Message message;
-      message.parseMessageBody(str.substr(3));
-
-      std::string width;
-      std::string height;
-      std::string availWidth;
-      std::string availHeight;
-
-      message.readMessage("width", width);
-      message.readMessage("height", height);
-      message.readMessage("availWidth", availWidth);
-      message.readMessage("availHeight", availHeight);
-
-      kraken::binding::invokeUpdateScreen(
-          context_.get(), std::stoi(width), std::stoi(height),
-          std::stoi(availWidth), std::stoi(availHeight));
-      break;
-    }
-    case WINDOW_LOAD:
-      window_->invokeOnloadCallback(context_.get());
-      break;
-    case WINDOW_INIT_DEVICE_PIXEL_RATIO:
-      window_->initDevicePixelRatio(context_.get(), std::stoi(str.substr(3)));
-      break;
-    default:
-      break;
-    }
-  } catch (alibaba::jsa::JSError &error) {
+  } catch (JSError &error) {
     auto &&stack = error.getStack();
     auto &&message = error.getMessage();
 
@@ -286,10 +226,11 @@ void JSBridge::handleFlutterCallback(const char *args) {
 
 void JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
-  assert(context_ != nullptr);
+  assert(context != nullptr);
   try {
-    context_->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
-  } catch (alibaba::jsa::JSError error) {
+    binding::updateLocation(url);
+    context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
+  } catch (JSError error) {
     auto &&stack = error.getStack();
     auto &&message = error.getMessage();
 
@@ -300,6 +241,43 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
+}
+
+JSBridge::~JSBridge() {
+  window_->unbind(context);
+  screen_->unbind(context);
+  websocket_->unbind(context);
+  binding::unbindTimer();
+  binding::unbindFetch();
+  contextInvalid = true;
+  dartJsCallbackList.clear();
+  context.reset();
+}
+
+Value JSBridge::getGlobalValue(std::string code) {
+  return context->evaluateJavaScript(code.c_str(), "test://", 0);
+}
+
+void JSBridge::invokeSetTimeoutCallback(int32_t callbackId) {
+  kraken::binding::invokeSetTimeoutCallback(context, callbackId);
+}
+
+void JSBridge::invokeSetIntervalCallback(int32_t callbackId) {
+  kraken::binding::invokeSetIntervalCallback(context, callbackId);
+}
+
+void JSBridge::invokeRequestAnimationFrameCallback(int32_t callbackId) {
+  kraken::binding::invokeRequestAnimationFrameCallback(context, callbackId);
+}
+
+void JSBridge::invokeOnloadCallback() {
+  window_->invokeOnloadCallback(context);
+}
+
+void JSBridge::invokeFetchCallback(int32_t callbackId, const char *error,
+                                   int32_t statusCode, const char *body) {
+  kraken::binding::invokeFetchCallback(context, callbackId, std::string(error),
+                                       statusCode, std::string(body));
 }
 
 } // namespace kraken

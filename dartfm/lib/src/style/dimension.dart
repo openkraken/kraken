@@ -78,6 +78,7 @@ Padding baseGetPaddingFromStyle(Style style) {
 
   return Padding(left, top, right, bottom);
 }
+
 /// DimensionMixin impls RenderConstrainedBox to support
 /// - width
 /// - height
@@ -99,8 +100,12 @@ mixin DimensionMixin {
 
   void updateConstraints(Style style, Map<String, Transition> transitionMap) {
     if (renderConstrainedBox != null && style != null) {
-      Transition allTransition, widthTransition, heightTransition,
-          minWidthTransition, maxWidthTransition, minHeightTransition,
+      Transition allTransition,
+          widthTransition,
+          heightTransition,
+          minWidthTransition,
+          maxWidthTransition,
+          minHeightTransition,
           maxHeightTransition;
       if (transitionMap != null) {
         allTransition = transitionMap['all'];
@@ -114,32 +119,41 @@ mixin DimensionMixin {
 
       SizeConstraints newConstraints = _getConstraints(style);
 
-      if (allTransition != null || widthTransition != null ||
-          heightTransition != null || minWidthTransition != null ||
-          maxWidthTransition != null || minHeightTransition != null ||
+      if (allTransition != null ||
+          widthTransition != null ||
+          heightTransition != null ||
+          minWidthTransition != null ||
+          maxWidthTransition != null ||
+          minHeightTransition != null ||
           maxHeightTransition != null) {
-        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ??
-            0.0);
-        double diffHeight = (newConstraints.height ??
-            0.0) - (oldConstraints.height ?? 0.0);
-        double diffMinWidth = (newConstraints.minWidth ??
-            0.0) - (oldConstraints.minWidth ?? 0.0);
-        double diffMaxWidth = (newConstraints.maxWidth ??
-            0.0) - (oldConstraints.maxWidth ?? 0.0);
-        double diffMinHeight = (newConstraints.minHeight ??
-            0.0) - (oldConstraints.minHeight ?? 0.0);
-        double diffMaxHeight = (newConstraints.maxHeight ??
-            0.0) - (oldConstraints.maxHeight ?? 0.0);
+        double diffWidth =
+            (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
+        double diffHeight =
+            (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
+        double diffMinWidth =
+            (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
+        double diffMaxWidth =
+            (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
+        double diffMinHeight = (newConstraints.minHeight ?? 0.0) -
+            (oldConstraints.minHeight ?? 0.0);
+        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) -
+            (oldConstraints.maxHeight ?? 0.0);
 
         SizeConstraints progressConstraints = SizeConstraints(
-            oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth,
-            oldConstraints.minHeight, oldConstraints.maxHeight);
+            oldConstraints.width,
+            oldConstraints.height,
+            oldConstraints.minWidth,
+            oldConstraints.maxWidth,
+            oldConstraints.minHeight,
+            oldConstraints.maxHeight);
 
         SizeConstraints baseConstraints = SizeConstraints(
-            oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth,
-            oldConstraints.minHeight, oldConstraints.maxHeight);
+            oldConstraints.width,
+            oldConstraints.height,
+            oldConstraints.minWidth,
+            oldConstraints.maxWidth,
+            oldConstraints.minHeight,
+            oldConstraints.maxHeight);
 
         allTransition?.addProgressListener((progress) {
           if (widthTransition == null) {
@@ -155,16 +169,16 @@ mixin DimensionMixin {
                 diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
           }
           if (maxWidthTransition == null) {
-            progressConstraints.maxWidth =
-                diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+            progressConstraints.maxWidth = diffMaxWidth * progress +
+                (baseConstraints.maxWidth ?? double.infinity);
           }
           if (minHeightTransition == null) {
             progressConstraints.minHeight =
                 diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
           }
           if (maxHeightTransition == null) {
-            progressConstraints.maxHeight =
-                diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
+            progressConstraints.maxHeight = diffMaxHeight * progress +
+                (baseConstraints.maxHeight ?? double.infinity);
           }
           renderConstrainedBox.additionalConstraints =
               progressConstraints.toBoxConstraints();
@@ -194,14 +208,14 @@ mixin DimensionMixin {
               progressConstraints.toBoxConstraints();
         });
         maxHeightTransition?.addProgressListener((progress) {
-          progressConstraints.maxHeight =
-              diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
+          progressConstraints.maxHeight = diffWidth * progress +
+              (baseConstraints.maxHeight ?? double.infinity);
           renderConstrainedBox.additionalConstraints =
               progressConstraints.toBoxConstraints();
         });
         maxWidthTransition?.addProgressListener((progress) {
-          progressConstraints.maxWidth =
-              diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+          progressConstraints.maxWidth = diffWidth * progress +
+              (baseConstraints.maxWidth ?? double.infinity);
           renderConstrainedBox.additionalConstraints =
               progressConstraints.toBoxConstraints();
         });
@@ -242,12 +256,12 @@ mixin DimensionMixin {
     }
   }
 
-
   List<String> getShorttedProperties(String input) {
     return baseGetShorttedProperties(input);
   }
 
-  RenderObject initRenderMargin(RenderObject renderObject, Style style, Element element) {
+  RenderObject initRenderMargin(
+      RenderObject renderObject, Style style, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     if (element != null) {
       element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
@@ -316,10 +330,12 @@ mixin DimensionMixin {
 
   EdgeInsets getMarginInsetsFromStyle(Style style) {
     oldMargin = getMarginFromStyle(style);
-    return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+    return EdgeInsets.fromLTRB(
+        oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(Style style, Element element, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(Style style, Element element,
+      [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -351,8 +367,7 @@ mixin DimensionMixin {
       all?.addProgressListener((progress) {
         if (margin == null) {
           if (marginTop == null) {
-            progressMargin.top =
-                progress * marginTopInterval + baseMargin.top;
+            progressMargin.top = progress * marginTopInterval + baseMargin.top;
           }
           if (marginBottom == null) {
             progressMargin.bottom =
@@ -366,60 +381,60 @@ mixin DimensionMixin {
             progressMargin.right =
                 progress * marginRightInterval + baseMargin.right;
           }
-          _updateMargin(EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right,
-              progressMargin.bottom), element);
+          _updateMargin(
+              EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
+                  progressMargin.right, progressMargin.bottom),
+              element);
         }
       });
 
       margin?.addProgressListener((progress) {
         if (marginTop == null) {
-          progressMargin.top =
-              progress * marginTopInterval + baseMargin.top;
+          progressMargin.top = progress * marginTopInterval + baseMargin.top;
         }
         if (marginBottom == null) {
           progressMargin.bottom =
               progress * marginBottomInterval + baseMargin.bottom;
         }
         if (marginLeft == null) {
-          progressMargin.left =
-              progress * marginLeftInterval + baseMargin.left;
+          progressMargin.left = progress * marginLeftInterval + baseMargin.left;
         }
         if (marginRight == null) {
           progressMargin.right =
               progress * marginRightInterval + baseMargin.right;
         }
-        _updateMargin(EdgeInsets.fromLTRB(
-            progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom), element);
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
+                progressMargin.right, progressMargin.bottom),
+            element);
       });
       marginTop?.addProgressListener((progress) {
-        progressMargin.top =
-            progress * marginTopInterval + baseMargin.top;
-        renderMargin.margin = EdgeInsets.fromLTRB(
-            progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom);
+        progressMargin.top = progress * marginTopInterval + baseMargin.top;
+        renderMargin.margin = EdgeInsets.fromLTRB(progressMargin.left,
+            progressMargin.top, progressMargin.right, progressMargin.bottom);
       });
       marginBottom?.addProgressListener((progress) {
         progressMargin.bottom =
             progress * marginBottomInterval + baseMargin.bottom;
-        _updateMargin(EdgeInsets.fromLTRB(
-            progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom), element);
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
+                progressMargin.right, progressMargin.bottom),
+            element);
       });
       marginLeft?.addProgressListener((progress) {
-        progressMargin.left =
-            progress * marginLeftInterval + baseMargin.left;
-        _updateMargin(EdgeInsets.fromLTRB(
-            progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom), element);
+        progressMargin.left = progress * marginLeftInterval + baseMargin.left;
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
+                progressMargin.right, progressMargin.bottom),
+            element);
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right =
             progress * marginRightInterval + baseMargin.right;
-        _updateMargin(EdgeInsets.fromLTRB(
-            progressMargin.left, progressMargin.top, progressMargin.right,
-            progressMargin.bottom), element);
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
+                progressMargin.right, progressMargin.bottom),
+            element);
       });
       oldMargin = newMargin;
     } else {
@@ -456,7 +471,11 @@ mixin DimensionMixin {
   void updateRenderPadding(Style style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
-    Transition all, padding, paddingLeft, paddingRight, paddingBottom,
+    Transition all,
+        padding,
+        paddingLeft,
+        paddingRight,
+        paddingBottom,
         paddingTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
@@ -480,11 +499,9 @@ mixin DimensionMixin {
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
       Padding progressPadding = Padding(
-          oldPadding.left, oldPadding.top, oldPadding.right,
-          oldPadding.bottom);
+          oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
       Padding basePadding = Padding(
-          oldPadding.left, oldPadding.top, oldPadding.right,
-          oldPadding.bottom);
+          oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
 
       all?.addProgressListener((progress) {
         if (padding == null) {
@@ -506,14 +523,15 @@ mixin DimensionMixin {
           }
 
           renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right,
+              progressPadding.left,
+              progressPadding.top,
+              progressPadding.right,
               progressPadding.bottom);
         }
       });
       padding?.addProgressListener((progress) {
         if (paddingTop == null) {
-          progressPadding.top =
-              progress * paddingTopInterval + basePadding.top;
+          progressPadding.top = progress * paddingTopInterval + basePadding.top;
         }
         if (paddingBottom == null) {
           progressPadding.bottom =
@@ -528,37 +546,31 @@ mixin DimensionMixin {
               progress * paddingRightInterval + basePadding.right;
         }
 
-        renderPadding.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right,
-            progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
+            progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingTop?.addProgressListener((progress) {
-        progressPadding.top =
-            progress * paddingTopInterval + basePadding.top;
-        renderPadding.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right,
-            progressPadding.bottom);
+        progressPadding.top = progress * paddingTopInterval + basePadding.top;
+        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
+            progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingBottom?.addProgressListener((progress) {
         progressPadding.bottom =
             progress * paddingBottomInterval + basePadding.bottom;
-        renderPadding.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right,
-            progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
+            progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingLeft?.addProgressListener((progress) {
         progressPadding.left =
             progress * paddingLeftInterval + basePadding.left;
-        renderPadding.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right,
-            progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
+            progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingRight?.addProgressListener((progress) {
         progressPadding.right =
             progress * paddingRightInterval + basePadding.right;
-        renderPadding.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right,
-            progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
+            progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
     } else {

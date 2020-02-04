@@ -4,34 +4,106 @@
  */
 
 #include "kraken_bridge_export.h"
+#include "dart_callbacks.h"
 #include "bridge.h"
-#include "kraken_hook_init.h"
 #include "polyfill.h"
 #include <atomic>
 #include <string>
-std::atomic<bool> inited;
 
-static kraken::JSBridge *bridge = new kraken::JSBridge();
+kraken::DartFuncPointer funcPointer;
+// this is not thread safe
+std::atomic<bool> inited{false};
+std::unique_ptr<kraken::JSBridge> bridge;
+Screen screen;
 
-// injected into engine
-void invoke_kraken_callback(const char *args) {
-  bridge->handleFlutterCallback(args);
+void reloadJsContext() {
+  inited = false;
+  bridge = std::make_unique<kraken::JSBridge>();
+  initKrakenPolyFill(bridge->getContext());
+  inited = true;
 }
 
-// injected into engine
-void evaluate_scripts(const char *code, const char *bundleFilename,
+void initJsEngine() {
+  bridge = std::make_unique<kraken::JSBridge>();
+  initKrakenPolyFill(bridge->getContext());
+  inited = true;
+}
+
+void evaluateScripts(const char *code, const char *bundleFilename,
                       int startLine) {
+  if (!inited) return;
   bridge->evaluateScript(std::string(code), std::string(bundleFilename),
                          startLine);
 }
 
-KRAKEN_EXPORT
-void init_callback() {
-  if (inited)
-    return;
-  inited = true;
+void invokeKrakenCallback(const char *data) {
+  if (!inited) return;
+  bridge->handleFlutterCallback(data);
+}
 
-  KrakenInitCallBack(invoke_kraken_callback);
-  KrakenInitEvaluateScriptCallback(evaluate_scripts);
-  initKrakenPolyFill(bridge->getContext());
+void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
+  kraken::registerInvokeDartFromJS(callbacks);
+}
+
+void registerReloadApp(ReloadApp reloadApp) {
+  kraken::registerReloadApp(reloadApp);
+}
+
+void registerSetTimeout(SetTimeout setTimeout) {
+  kraken::registerSetTimeout(setTimeout);
+}
+
+void registerSetInterval(SetInterval setInterval) {
+  kraken::registerSetInterval(setInterval);
+}
+
+void registerClearTimeout(ClearTimeout clearTimeout) {
+  kraken::registerClearTimeout(clearTimeout);
+}
+
+void registerRequestAnimationFrame(RequestAnimationFrame requestAnimationFrame) {
+  kraken::registerRequestAnimationFrame(requestAnimationFrame);
+}
+
+void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame) {
+  kraken::registerCancelAnimationFrame(cancelAnimationFrame);
+}
+
+void registerGetScreen(GetScreen getScreen) {
+  kraken::registerGetScreen(getScreen);
+}
+
+void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
+  kraken::registerDevicePixelRatio(devicePixelRatio);
+}
+
+Screen *createScreen(double width, double height) {
+  screen.width = width;
+  screen.height = height;
+  return &screen;
+}
+
+void registerInvokeFetch(InvokeFetch invokeFetch) {
+  kraken::registerInvokeFetch(invokeFetch);
+}
+
+void invokeSetTimeoutCallback(int32_t callbackId) {
+  bridge->invokeSetTimeoutCallback(callbackId);
+}
+
+void invokeSetIntervalCallback(int32_t callbackId) {
+  bridge->invokeSetIntervalCallback(callbackId);
+}
+
+void invokeRequestAnimationFrameCallback(int32_t callbackId) {
+  bridge->invokeRequestAnimationFrameCallback(callbackId);
+}
+
+void invokeOnloadCallback() {
+  bridge->invokeOnloadCallback();
+}
+
+void invokeFetchCallback(int32_t callbackId, const char *error,
+                         int32_t statusCode, const char *body) {
+  bridge->invokeFetchCallback(callbackId, error, statusCode, body);
 }

@@ -4,11 +4,11 @@
  */
 
 #include "fetch.h"
+#include "dart_callbacks.h"
 #include "jsa.h"
-#include "kraken_dart_export.h"
 #include "logging.h"
-#include "thread_safe_data.h"
 #include "thread_safe_map.h"
+#include <atomic>
 #include <map>
 
 namespace kraken {
@@ -16,8 +16,8 @@ namespace binding {
 
 using namespace alibaba::jsa;
 
-ThreadSafeMap<int, Value *> fetchMap;
-ThreadSafeData<int> fetchId(0);
+ThreadSafeMap<int, std::shared_ptr<Value>> fetchMap;
+std::atomic<int> fetchId = {0};
 
 Value fetch(JSContext &context, const Value &thisVal, const Value *args,
             size_t count) {
@@ -45,27 +45,31 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  Value *funcValue = new Value(func.getObject(context));
-  int id;
-  fetchId.get(id);
+  std::shared_ptr<Value> funcValue =
+      std::make_shared<Value>(Value(func.getObject(context)));
+  int id = fetchId.load();
 
   // store callback function
   fetchMap.set(id, funcValue);
 
-  // call request
-  KrakenInvokeFetch(id, url.getString(context).utf8(context).c_str(),
-                    data.getString(context).utf8(context).c_str());
+  if (getDartFunc()->invokeFetch == nullptr) {
+    KRAKEN_LOG(ERROR) << "dart fetch callback not register";
+    return Value::undefined();
+  }
+
+  getDartFunc()->invokeFetch(id, url.getString(context).utf8(context).c_str(),
+                             data.getString(context).utf8(context).c_str());
 
   fetchMap.set(id, funcValue);
-  fetchId.set(id + 1);
+  fetchId = id + 1;
 
   return Value::undefined();
 }
 
-void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
+void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
                          const std::string &error, int statusCode,
                          const std::string &body) {
-  Value *funcValue;
+  std::shared_ptr<Value> funcValue;
   fetchMap.get(callbackId, funcValue);
 
   if (funcValue == nullptr) {
@@ -73,31 +77,32 @@ void invokeFetchCallback(alibaba::jsa::JSContext *context, int callbackId,
     return;
   }
 
-  alibaba::jsa::Object funcObj = funcValue->asObject(*context);
+  Object funcObj = funcValue->asObject(*context);
 
   if (funcObj.isFunction(*context)) {
     Value jsError;
     if (!error.empty()) {
-      jsError = alibaba::jsa::String::createFromUtf8(*context, error);
+      jsError = String::createFromUtf8(*context, error);
     } else {
       jsError = Value::undefined();
     }
 
-    alibaba::jsa::Object &&response = alibaba::jsa::Object(*context);
+    Object &&response = Object(*context);
     response.setProperty(*context, "statusCode", Value(statusCode));
 
-    funcObj.asFunction(*context).call(
-        *context, jsError, response,
-        alibaba::jsa::String::createFromUtf8(*context, body));
+    funcObj.asFunction(*context).call(*context, jsError, response,
+                                      String::createFromUtf8(*context, body));
   } else {
     KRAKEN_LOG(VERBOSE) << "callback is not a function";
   }
 }
 
-void bindFetch(alibaba::jsa::JSContext *context) {
+void bindFetch(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken__fetch__", 0,
                        fetch);
 }
+
+void unbindFetch() { fetchMap.reset(); }
 
 } // namespace binding
 } // namespace kraken

@@ -1,31 +1,36 @@
-import {EventTarget} from 'event-target-shim';
+import { EventTarget } from 'event-target-shim';
+import { KrakenLocation, Location } from './location';
 
-interface KrakenWindow {
-  connect: (
-    onload: () => void,
-    initDevicePixelRatio: (dp: number) => void
-  ) => void;
+export interface KrakenWindow {
+  onload: () => void;
+  devicePixelRatio: number;
+  location: KrakenLocation;
 }
 
 declare var __kraken_window__: KrakenWindow;
 
-class Window extends EventTarget {
+export const originLocation = __kraken_window__.location;
 
-  public devicePixelRatio:number;
+class Window extends EventTarget {
+  public location: Location;
   private _onload = () => {
     this.dispatchEvent({
       type: 'load',
     });
   };
 
-  private _initDevicePixelRatio = (dp: number) => {
-    this.devicePixelRatio = dp;
-  }
-
   constructor() {
     super();
-    this.devicePixelRatio = 1;
-    __kraken_window__.connect(this._onload, this._initDevicePixelRatio);
+    this.location = new Location();
+    __kraken_window__.onload = this._onload;
+  }
+
+  set onload(fn: any) {
+    __kraken_window__.onload = fn;
+  }
+
+  get devicePixelRatio() {
+    return __kraken_window__.devicePixelRatio;
   }
 }
 
@@ -37,5 +42,12 @@ Object.defineProperty(global, 'window', {
   enumerable: true,
   writable: false,
   value: window,
+  configurable: false
+});
+
+Object.defineProperty(global, 'location', {
+  enumerable: true,
+  writable: false,
+  value: window.location,
   configurable: false
 });

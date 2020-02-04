@@ -5,42 +5,43 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-export 'package:flutter/gestures.dart' show
-  DragDownDetails,
-  DragStartDetails,
-  DragUpdateDetails,
-  DragEndDetails,
-  GestureTapDownCallback,
-  GestureTapUpCallback,
-  GestureTapCallback,
-  GestureTapCancelCallback,
-  GestureLongPressCallback,
-  GestureLongPressStartCallback,
-  GestureLongPressMoveUpdateCallback,
-  GestureLongPressUpCallback,
-  GestureLongPressEndCallback,
-  GestureDragDownCallback,
-  GestureDragStartCallback,
-  GestureDragUpdateCallback,
-  GestureDragEndCallback,
-  GestureDragCancelCallback,
-  GestureScaleStartCallback,
-  GestureScaleUpdateCallback,
-  GestureScaleEndCallback,
-  GestureForcePressStartCallback,
-  GestureForcePressPeakCallback,
-  GestureForcePressEndCallback,
-  GestureForcePressUpdateCallback,
-  LongPressStartDetails,
-  LongPressMoveUpdateDetails,
-  LongPressEndDetails,
-  ScaleStartDetails,
-  ScaleUpdateDetails,
-  ScaleEndDetails,
-  TapDownDetails,
-  TapUpDetails,
-  ForcePressDetails,
-  Velocity;
+export 'package:flutter/gestures.dart'
+    show
+        DragDownDetails,
+        DragStartDetails,
+        DragUpdateDetails,
+        DragEndDetails,
+        GestureTapDownCallback,
+        GestureTapUpCallback,
+        GestureTapCallback,
+        GestureTapCancelCallback,
+        GestureLongPressCallback,
+        GestureLongPressStartCallback,
+        GestureLongPressMoveUpdateCallback,
+        GestureLongPressUpCallback,
+        GestureLongPressEndCallback,
+        GestureDragDownCallback,
+        GestureDragStartCallback,
+        GestureDragUpdateCallback,
+        GestureDragEndCallback,
+        GestureDragCancelCallback,
+        GestureScaleStartCallback,
+        GestureScaleUpdateCallback,
+        GestureScaleEndCallback,
+        GestureForcePressStartCallback,
+        GestureForcePressPeakCallback,
+        GestureForcePressEndCallback,
+        GestureForcePressUpdateCallback,
+        LongPressStartDetails,
+        LongPressMoveUpdateDetails,
+        LongPressEndDetails,
+        ScaleStartDetails,
+        ScaleUpdateDetails,
+        ScaleEndDetails,
+        TapDownDetails,
+        TapUpDetails,
+        ForcePressDetails,
+        Velocity;
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
@@ -70,21 +71,25 @@ abstract class GestureRecognizerFactory<T extends GestureRecognizer> {
 }
 
 /// Signature for closures that implement [GestureRecognizerFactory.constructor].
-typedef GestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T Function();
+typedef GestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T
+    Function();
 
 /// Signature for closures that implement [GestureRecognizerFactory.initializer].
-typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void Function(T instance);
+typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void
+    Function(T instance);
 
 /// Factory for creating gesture recognizers that delegates to callbacks.
 ///
 /// Used by [RawGestureDetector.gestures].
-class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends GestureRecognizerFactory<T> {
+class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer>
+    extends GestureRecognizerFactory<T> {
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
-    : assert(_constructor != null),
-      assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(
+      this._constructor, this._initializer)
+      : assert(_constructor != null),
+        assert(_initializer != null);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -96,4 +101,3 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   @override
   void initializer(T instance) => _initializer(instance);
 }
-

@@ -10,6 +10,7 @@
 namespace kraken {
 namespace binding {
 
+using namespace alibaba::jsa;
 #if defined(_WIN32)
 #define PLATFORM "windows" // Windows
 #elif defined(_WIN64)
@@ -34,18 +35,17 @@ namespace binding {
 #define PLATFORM "unknown"
 #endif
 
-void bindKraken(alibaba::jsa::JSContext *runtime) {
-  assert(runtime != nullptr);
-  auto kraken = JSA_CREATE_OBJECT(*runtime);
+void bindKraken(std::unique_ptr<JSContext> &context) {
+  auto kraken = JSA_CREATE_OBJECT(*context);
 
   // Other properties are injected by dart.
-  JSA_SET_PROPERTY(*runtime, kraken, "appName", "Kraken App");
-  JSA_SET_PROPERTY(*runtime, kraken, "appVersion", VERSION_APP);
-  JSA_SET_PROPERTY(*runtime, kraken, "platform", PLATFORM);
-  JSA_SET_PROPERTY(*runtime, kraken, "product", PRODUCT);
-  JSA_SET_PROPERTY(*runtime, kraken, "productSub", PRODUCT_SUB);
+  JSA_SET_PROPERTY(*context, kraken, "appName", "Kraken App");
+  JSA_SET_PROPERTY(*context, kraken, "appVersion", VERSION_APP);
+  JSA_SET_PROPERTY(*context, kraken, "platform", PLATFORM);
+  JSA_SET_PROPERTY(*context, kraken, "product", PRODUCT);
+  JSA_SET_PROPERTY(*context, kraken, "productSub", PRODUCT_SUB);
 
-  JSA_GLOBAL_SET_PROPERTY(*runtime, "__kraken__", kraken);
+  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken__", kraken);
 }
 
 } // namespace binding

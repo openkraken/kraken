@@ -16,9 +16,7 @@ enum CanvasFillRule {
   evenodd,
 }
 
-enum ImageSmoothingQuality {
-  low, medium, high
-}
+enum ImageSmoothingQuality { low, medium, high }
 
 enum CanvasLineCap { butt, round, square }
 
@@ -26,12 +24,21 @@ enum CanvasLineJoin { round, bevel, miter }
 
 enum CanvasTextAlign { start, end, left, right, center }
 
-enum CanvasTextBaseline { top, hanging, middle, alphabetic, ideographic, bottom }
+enum CanvasTextBaseline {
+  top,
+  hanging,
+  middle,
+  alphabetic,
+  ideographic,
+  bottom
+}
 
 enum CanvasDirection { ltr, rtl, inherit }
 
 class ImageData {
-  ImageData(double sw, double sh, {
+  ImageData(
+    double sw,
+    double sh, {
     Uint8List data,
   });
 
@@ -43,19 +50,19 @@ class ImageData {
 @immutable
 class TextMetrics {
   TextMetrics(
-      this.width,
-      this.actualBoundingBoxLeft,
-      this.actualBoundingBoxRight,
-      this.fontBoundingBoxAscent,
-      this.fontBoundingBoxDescent,
-      this.actualBoundingBoxAscent,
-      this.actualBoundingBoxDescent,
-      this.emHeightAscent,
-      this.emHeightDescent,
-      this.hangingBaseline,
-      this.alphabeticBaseline,
-      this.ideographicBaseline,
-      );
+    this.width,
+    this.actualBoundingBoxLeft,
+    this.actualBoundingBoxRight,
+    this.fontBoundingBoxAscent,
+    this.fontBoundingBoxDescent,
+    this.actualBoundingBoxAscent,
+    this.actualBoundingBoxDescent,
+    this.emHeightAscent,
+    this.emHeightDescent,
+    this.hangingBaseline,
+    this.alphabeticBaseline,
+    this.ideographicBaseline,
+  );
 
   // x-direction
   final double width;
@@ -135,8 +142,10 @@ abstract class CanvasFillStrokeStyles {
   // colors and styles (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
   Color strokeStyle; // (default black)
   Color fillStyle; // (default black)
-  CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1);
-  CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
+  CanvasGradient createLinearGradient(
+      double x0, double y0, double x1, double y1);
+  CanvasGradient createRadialGradient(
+      double x0, double y0, double r0, double x1, double y1, double r1);
   CanvasPattern createPattern(CanvasImageSource image, String repetition);
 }
 
@@ -155,62 +164,66 @@ abstract class CanvasFilters {
 
 abstract class CanvasRect {
   // rects
-  void clearRect( double x,  double y,  double w,  double h);
-  void fillRect( double x,  double y,  double w,  double h);
-  void strokeRect( double x,  double y,  double w,  double h);
+  void clearRect(double x, double y, double w, double h);
+  void fillRect(double x, double y, double w, double h);
+  void strokeRect(double x, double y, double w, double h);
 }
 
 abstract class CanvasDrawPath {
   // path API (see also CanvasPath)
   void beginPath();
-  void fill( CanvasFillRule fillRule, { Path2D path });
-  void stroke({ Path2D path });
-  void clip(CanvasFillRule fillRule, { Path2D path });
-  bool isPointInPath( double x,  double y,  CanvasFillRule fillRule, { Path2D path });
-  bool isPointInStroke( double x,  double y, { Path2D path });
+  void fill(CanvasFillRule fillRule, {Path2D path});
+  void stroke({Path2D path});
+  void clip(CanvasFillRule fillRule, {Path2D path});
+  bool isPointInPath(double x, double y, CanvasFillRule fillRule,
+      {Path2D path});
+  bool isPointInStroke(double x, double y, {Path2D path});
 }
 
 abstract class Path2D {
   Path2D(dynamic path);
 
-  void addPath(Path2D path, { String transform });
+  void addPath(Path2D path, {String transform});
 }
 
 abstract class CanvasUserInterface {
-  void drawFocusIfNeeded({ Path2D path });
-  void scrollPathIntoView({ Path2D path });
+  void drawFocusIfNeeded({Path2D path});
+  void scrollPathIntoView({Path2D path});
 }
 
 abstract class CanvasText {
   // text (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
 
-  void fillText(String text, double x, double y, { double maxWidth });
+  void fillText(String text, double x, double y, {double maxWidth});
 
-  void strokeText(String text, double x, double y, { double maxWidth });
+  void strokeText(String text, double x, double y, {double maxWidth});
 
   TextMetrics measureText(String text);
 }
 
 abstract class CanvasDrawImage {
   // drawing images
-  void drawImage(CanvasImageSource image, double dx, double dy, {
-    double dw, double dh,
-    double sx, double sy, double sw, double sh,
+  void drawImage(
+    CanvasImageSource image,
+    double dx,
+    double dy, {
+    double dw,
+    double dh,
+    double sx,
+    double sy,
+    double sw,
+    double sh,
   });
 }
 
 abstract class CanvasImageData {
   // pixel manipulation
-  ImageData createImageData({
-    double sw, double sh,
-    ImageData imagedata
-  });
+  ImageData createImageData({double sw, double sh, ImageData imagedata});
 
   ImageData getImageData(double sx, double sy, double sw, double sh);
 
-  void putImageData(ImageData imagedata, double dx, double dy, {
-    double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight
-  });
+  void putImageData(ImageData imagedata, double dx, double dy,
+      {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
 }
 
 abstract class CanvasPathDrawingStyles {
@@ -245,19 +258,20 @@ abstract class CanvasPath {
 
   void quadraticCurveTo(double cpx, double cpy, double x, double y);
 
-  void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y,
-      double x, double y);
+  void bezierCurveTo(
+      double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
 
   void arcTo(double x1, double y1, double x2, double y2, double radius);
 
   void rect(double x, double y, double w, double h);
 
-  void arc(double x, double y, double radius, double startAngle,
-      double endAngle, { bool anticlockwise = false });
+  void arc(
+      double x, double y, double radius, double startAngle, double endAngle,
+      {bool anticlockwise = false});
 
   void ellipse(double x, double y, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle,
-      { bool anticlockwise = false });
+      {bool anticlockwise = false});
 }
 
 abstract class CanvasGradient {

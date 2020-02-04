@@ -173,14 +173,6 @@ Value log(JSContext &context, const Value &thisVal, const Value *args,
           size_t count) {
   std::stringstream stream;
   logArgs(stream, context, args, count, 0);
-
-#ifdef IS_TEST
-  auto &&data = stream.str().data();
-  alibaba::jsa::String &&str =
-      alibaba::jsa::String::createFromAscii(context, data);
-  return Value(context, str);
-#endif
-
   printLog(stream, foundation::LOG_VERBOSE);
   return Value::undefined();
 }
@@ -249,16 +241,15 @@ Value _assert(JSContext &context, const Value &thisVal, const Value *args,
 
 ////////////////
 
-void bindConsole(JSContext *runtime) {
-  assert(runtime != nullptr);
-  auto console = JSA_CREATE_OBJECT(*runtime);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*runtime, console, log);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*runtime, console, info);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*runtime, console, warn);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*runtime, console, debug);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*runtime, console, error);
-  JSA_BINDING_FUNCTION(*runtime, console, "assert", 0, _assert);
-  JSA_GLOBAL_SET_PROPERTY(*runtime, "console", console);
+void bindConsole(std::unique_ptr<JSContext> &context) {
+  auto console = JSA_CREATE_OBJECT(*context);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, log);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, info);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, warn);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, debug);
+  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, error);
+  JSA_BINDING_FUNCTION(*context, console, "assert", 0, _assert);
+  JSA_GLOBAL_SET_PROPERTY(*context, "console", console);
 }
 
 } // namespace binding

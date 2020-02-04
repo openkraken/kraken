@@ -38,12 +38,10 @@ class KrakenScrollable
 
     _renderBox = child;
     RenderPointerListener renderPointerListener = RenderPointerListener(
-        onPointerDown: _handlePointerDown,
-        child: renderSingleChildViewport);
+        onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
-
 
   RenderBox get renderBox => _renderBox;
 
@@ -204,13 +202,13 @@ class KrakenScrollable
 class RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
-  RenderSingleChildViewport({
-    AxisDirection axisDirection = AxisDirection.down,
-    @required ViewportOffset offset,
-    double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
-    RenderBox child,
-    this.shouldClip = false
-  })  : assert(axisDirection != null),
+  RenderSingleChildViewport(
+      {AxisDirection axisDirection = AxisDirection.down,
+      @required ViewportOffset offset,
+      double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
+      RenderBox child,
+      this.shouldClip = false})
+      : assert(axisDirection != null),
         assert(offset != null),
         assert(cacheExtent != null),
         _axisDirection = axisDirection,

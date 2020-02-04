@@ -7,11 +7,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin {
 
-  RenderObject initBackgroundImage(RenderObject renderObject, Style style) {
+  double linearAngle;
+  RenderObject initBackgroundImage(RenderObject renderObject, Style style, int nodeId) {
     DecorationImage decorationImage;
     Gradient gradient;
     if (style.contains("backgroundImage")) {
@@ -24,15 +26,15 @@ mixin BackgroundImageMixin {
             decorationImage = getBackgroundImage(url, style);
           }
         } else {
-          gradient = getBackgroundGradient(method);
+          gradient = getBackgroundGradient(method, style);
         }
       }
     }
 
-    return RenderDecoratedBox(
+    return RenderGradient(
+        nodeId: nodeId,
         decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-        child: renderObject
-    );
+        child: renderObject);
   }
 
   DecorationImage getBackgroundImage(String url, Style style) {
@@ -52,8 +54,8 @@ mixin BackgroundImageMixin {
             break;
         }
       }
-      Position position = Position(
-          style['backgroundPosition'], window.physicalSize);
+      Position position =
+          Position(style['backgroundPosition'], window.physicalSize);
       BoxFit boxFit = BoxFit.none;
       if (style.contains('backgroundSize')) {
         switch (style['backgroundSize']) {
@@ -81,13 +83,12 @@ mixin BackgroundImageMixin {
           image: NetworkImage(url),
           repeat: imageRepeat,
           alignment: position.alignment,
-          fit: boxFit
-      );
+          fit: boxFit);
     }
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method) {
+  Gradient getBackgroundGradient(Method method, Style style) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];
@@ -96,9 +97,7 @@ mixin BackgroundImageMixin {
       switch (method.name) {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
-          Alignment begin = Alignment.topCenter,
-              end = Alignment.bottomCenter;
-          GradientTransform transform;
+          Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
           if (method.args[0].startsWith('to ')) {
             List<String> toString = method.args[0].trim().split(' ');
             if (toString.length >= 2) {
@@ -164,24 +163,22 @@ mixin BackgroundImageMixin {
             start = 1;
           } else if (Angle.isAngle(method.args[0])) {
             Angle angle = Angle(method.args[0]);
-            transform = GradientRotation(angle.angleValue + math.pi);
+            linearAngle = angle.angleValue;
             start = 1;
           }
           applyColorAndStops(start, method.args, colors, stops);
-
           if (colors.length >= 2) {
             gradient = LinearGradient(
               begin: begin,
               end: end,
-              transform: transform,
               colors: colors,
               stops: stops,
               tileMode: method.name == 'linear-gradient'
                   ? TileMode.clamp
-                  : TileMode.repeated,);
+                  : TileMode.repeated);
           }
           break;
-      //TODO just support circle radial
+        //TODO just support circle radial
         case 'radial-gradient':
         case 'repeating-radial-gradient':
           double atX = 0.5;
@@ -217,7 +214,8 @@ mixin BackgroundImageMixin {
               stops: stops,
               tileMode: method.name == 'radial-gradient'
                   ? TileMode.clamp
-                  : TileMode.repeated,);
+                  : TileMode.repeated,
+            );
           }
           break;
         case 'conic-gradient':
@@ -246,7 +244,8 @@ mixin BackgroundImageMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = SweepGradient(center: FractionalOffset(atX, atY),
+            gradient = SweepGradient(
+                center: FractionalOffset(atX, atY),
                 colors: colors,
                 stops: stops,
                 transform: GradientRotation(-math.pi / 2 + from));
@@ -258,8 +257,8 @@ mixin BackgroundImageMixin {
     return gradient;
   }
 
-  void applyColorAndStops(int start, List<String> args, List<Color> colors,
-      List<double> stops) {
+  void applyColorAndStops(
+      int start, List<String> args, List<Color> colors, List<double> stops) {
     double grow = 1.0 / (args.length - 1);
     for (int i = start; i < args.length; i++) {
       ColorGradient colorGradient = parseColorAndStop(args[i], i * grow);

@@ -11,9 +11,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'package:kraken/kraken.dart';
 import 'element_inspector.dart';
 import 'element_manager.dart';
-
 
 /// This class can be extended directly, to get default behaviors for all of the
 /// handlers, or can used with the `implements` keyword, in which case all the
@@ -54,7 +54,7 @@ abstract class ElementsBindingObserver {
   /// In general, this is unnecessary as the layout system takes care of
   /// automatically recomputing the application geometry when the application
   /// size changes.
-  void didChangeMetrics() { }
+  void didChangeMetrics() {}
 
   /// Called when the platform's text scale factor changes.
   ///
@@ -63,19 +63,19 @@ abstract class ElementsBindingObserver {
   /// application.
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
-  void didChangeTextScaleFactor() { }
+  void didChangeTextScaleFactor() {}
 
   /// Called when the platform brightness changes.
   ///
   /// This method exposes notifications from [Window.onPlatformBrightnessChanged].
-  void didChangePlatformBrightness() { }
+  void didChangePlatformBrightness() {}
 
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
   ///
   /// This method exposes notifications from [Window.onLocaleChanged].
-  void didChangeLocales(List<Locale> locale) { }
+  void didChangeLocales(List<Locale> locale) {}
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -84,23 +84,30 @@ abstract class ElementsBindingObserver {
   /// documentation for the [ElementsBindingObserver] class.
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   /// Called when the system is running low on memory.
   ///
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
-  void didHaveMemoryPressure() { }
+  void didHaveMemoryPressure() {}
 
   /// Called when the system changes the set of currently active accessibility
   /// features.
   ///
   /// This method exposes notifications from [Window.onAccessibilityFeaturesChanged].
-  void didChangeAccessibilityFeatures() { }
+  void didChangeAccessibilityFeatures() {}
 }
 
 /// The glue between the elements layer and the Flutter engine.
-mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
+mixin ElementsBinding
+    on
+        BindingBase,
+        ServicesBinding,
+        SchedulerBinding,
+        GestureBinding,
+        RendererBinding,
+        SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -124,17 +131,19 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     if (!kReleaseMode) {
       registerBoolServiceExtension(
         name: 'showPerformanceOverlay',
-        getter: () => Future<bool>.value(ElementManager.showPerformanceOverlayOverride ?? false),
+        getter: () => Future<bool>.value(
+            ElementManager.showPerformanceOverlayOverride ?? false),
         setter: (bool value) {
           if (ElementManager.showPerformanceOverlayOverride != value) {
             ElementManager.showPerformanceOverlayOverride = value;
-            ElementManager().refresh();
+            reloadApp();
           }
           return Future<void>.value();
         },
       );
 
-      ElementInspectorService.instance.initServiceExtensions(registerServiceExtension);
+      ElementInspectorService.instance
+          .initServiceExtensions(registerServiceExtension);
     }
   }
 
@@ -150,7 +159,8 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
   ///  * [ElementsBindingObserver], which has an example of using this method.
-  void addObserver(ElementsBindingObserver observer) => _observers.add(observer);
+  void addObserver(ElementsBindingObserver observer) =>
+      _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
@@ -160,7 +170,8 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [ElementsBindingObserver], which has an example of using this method.
-  bool removeObserver(ElementsBindingObserver observer) => _observers.remove(observer);
+  bool removeObserver(ElementsBindingObserver observer) =>
+      _observers.remove(observer);
 
   @override
   void handleMetricsChanged() {
@@ -239,9 +250,9 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (ElementsBindingObserver observer in List<ElementsBindingObserver>.from(_observers)) {
-      if (await observer.didPopRoute())
-        return;
+    for (ElementsBindingObserver observer
+        in List<ElementsBindingObserver>.from(_observers)) {
+      if (await observer.didPopRoute()) return;
     }
     SystemNavigator.pop();
   }
@@ -259,9 +270,9 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (ElementsBindingObserver observer in List<ElementsBindingObserver>.from(_observers)) {
-      if (await observer.didPushRoute(route))
-        return;
+    for (ElementsBindingObserver observer
+        in List<ElementsBindingObserver>.from(_observers)) {
+      if (await observer.didPushRoute(route)) return;
     }
   }
 
@@ -370,19 +381,30 @@ mixin ElementsBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 }
 
-
 /// A concrete binding for applications based on the elements framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
-class ElementsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, ElementsBinding {
+class ElementsFlutterBinding extends BindingBase
+    with
+        GestureBinding,
+        ServicesBinding,
+        SchedulerBinding,
+        PaintingBinding,
+        SemanticsBinding,
+        RendererBinding,
+        ElementsBinding {
+  static void onFrameBegin(Duration timeStamp) {
+    JSMessage(FRAME_BEGIN).send();
+    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
+  }
 
   /// Returns an instance of the [ElementsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a
   /// [ElementsFlutterBinding]. If one was previously initialized, then
   /// it will at least implement [ElementsBinding].
   static ElementsBinding ensureInitialized() {
-    if (ElementsBinding.instance == null)
-      ElementsFlutterBinding();
+    if (ElementsBinding.instance == null) ElementsFlutterBinding();
+    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
     return ElementsBinding.instance;
   }
 }

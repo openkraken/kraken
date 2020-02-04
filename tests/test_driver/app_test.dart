@@ -42,13 +42,13 @@ void main() {
           print('$pass $fixture snaphost is equal!');
         } else {
           final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
-          if (diffCounts == -1) {
-            print('$err $fixture snapshot is NOT equal with old ones');
-          } else {
-            print('$err $fixture snaphost is NOT equal with $diffCounts} pixels.');
-            print('please compare manually with ${snap.path} and ${newSnap.path}');
-          }
           newSnap.writeAsBytes(screenPixels);
+          if (diffCounts == -1) {
+            throw Exception('$err $fixture snapshot is NOT equal with old ones');
+          } else {
+            throw Exception('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
+                'please compare manually with ${snap.path} and ${newSnap.path}');
+          }
         }
       } else {
         await snap.writeAsBytes(screenPixels);

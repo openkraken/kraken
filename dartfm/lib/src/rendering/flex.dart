@@ -721,7 +721,8 @@ class RenderFlexLayout extends RenderBox
       constraintWidth = idealSize;
     }
 
-    double constraintHeight = _direction == Axis.horizontal ? crossSize : idealSize;
+    double constraintHeight =
+        _direction == Axis.horizontal ? crossSize : idealSize;
     if (style.get('height') != null) {
       double height = Length.toDisplayPortValue(style.get('height'));
       if (height != null) {
@@ -734,21 +735,16 @@ class RenderFlexLayout extends RenderBox
       }
     }
 
-
     switch (_direction) {
       case Axis.horizontal:
-        size = Size(
-          math.max(constraintWidth, idealSize),
-          constraints.constrainHeight(constraintHeight)
-        );
+        size = Size(math.max(constraintWidth, idealSize),
+            constraints.constrainHeight(constraintHeight));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case Axis.vertical:
-        size = Size(
-          math.max(constraintWidth, crossSize),
-          constraints.constrainHeight(constraintHeight)
-        );
+        size = Size(math.max(constraintWidth, crossSize),
+            constraints.constrainHeight(constraintHeight));
         actualSize = size.height;
         crossSize = size.width;
         break;
@@ -830,12 +826,10 @@ class RenderFlexLayout extends RenderBox
       Offset relativeOffset;
       switch (_direction) {
         case Axis.horizontal:
-          relativeOffset =
-              Offset(childMainPosition, childCrossPosition);
+          relativeOffset = Offset(childMainPosition, childCrossPosition);
           break;
         case Axis.vertical:
-          relativeOffset =
-              Offset(childCrossPosition, childMainPosition);
+          relativeOffset = Offset(childCrossPosition, childMainPosition);
           break;
       }
       Style childStyle;
@@ -845,6 +839,7 @@ class RenderFlexLayout extends RenderBox
         int childNodeId = (child as RenderBoxModel).nodeId;
         childStyle = nodeMap[childNodeId].style;
       }
+
       ///apply position relative offset change
       applyRelativeOffset(relativeOffset, child, childStyle);
       if (flipMainAxis) {
@@ -863,59 +858,7 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (!_hasOverflow) {
-      defaultPaint(context, offset);
-      return;
-    }
-
-    // There's no point in drawing the children if we're empty.
-    if (size.isEmpty) return;
-
-    // We have overflow. Clip it.
-    context.pushClipRect(
-        needsCompositing, offset, Offset.zero & size, defaultPaint);
-
-    assert(() {
-      // Only set this if it's null to save work. It gets reset to null if the
-      // _direction changes.
-      final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
-        ErrorDescription(
-            'The overflowing $runtimeType has an orientation of $_direction.'),
-        ErrorDescription(
-            'The edge of the $runtimeType that is overflowing has been marked '
-            'in the rendering with a yellow and black striped pattern. This is '
-            'usually caused by the contents being too big for the $runtimeType.'),
-        ErrorHint(
-            'Consider applying a flex factor (e.g. using an Expanded widget) to '
-            'force the children of the $runtimeType to fit within the available '
-            'space instead of being sized to their natural size.'),
-        ErrorHint(
-            'This is considered an error condition because it indicates that there '
-            'is content that cannot be seen. If the content is legitimately bigger '
-            'than the available space, consider clipping it with a ClipRect widget '
-            'before putting it in the flex, or using a scrollable container rather '
-            'than a Flex, like a ListView.')
-      ];
-
-      // Simulate a child rect that overflows by the right amount. This child
-      // rect is never used for drawing, just for determining the overflow
-      // location and amount.
-      Rect overflowChildRect;
-      switch (_direction) {
-        case Axis.horizontal:
-          overflowChildRect =
-              Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
-          break;
-        case Axis.vertical:
-          overflowChildRect =
-              Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
-          break;
-      }
-      paintOverflowIndicator(
-          context, offset, Offset.zero & size, overflowChildRect,
-          overflowHints: debugOverflowHints);
-      return true;
-    }());
+    defaultPaint(context, offset);
   }
 
   @override
@@ -948,13 +891,13 @@ class RenderFlexLayout extends RenderBox
   }
 }
 
-
-class RenderFlexItem
-  extends RenderBox
-  with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-    DebugOverflowIndicatorMixin, RelativeStyleMixin {
-  RenderFlexItem({ RenderFlexLayout parent, RenderBox child }) {
+class RenderFlexItem extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+        DebugOverflowIndicatorMixin,
+        RelativeStyleMixin {
+  RenderFlexItem({RenderFlexLayout parent, RenderBox child}) {
     this.parentFlexBox = parent;
     add(child);
   }
@@ -987,7 +930,7 @@ class RenderFlexItem
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 }

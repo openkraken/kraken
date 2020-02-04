@@ -21,16 +21,16 @@ enum NodeType {
 class Comment extends Node {
   Map<String, dynamic> properties;
 
-  Comment(int nodeId, this.properties) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+  Comment(int nodeId, this.properties)
+      : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
-class TextNode extends Node
-  with
-    TextStyleMixin {
+class TextNode extends Node with TextStyleMixin {
   String data;
   Map<String, dynamic> properties;
 
-  TextNode(int nodeId, this.properties, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, this.properties, this.data)
+      : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
   }
 
@@ -53,13 +53,12 @@ class TextNode extends Node
     RenderObjectVisitor visitor = (child) {
       children.add(child);
     };
-    parentElement.renderLayoutElement
-        ..visitChildren(visitor);
+    parentElement.renderLayoutElement..visitChildren(visitor);
     RenderObject insertNode = curIdx - 1 > -1 ? children[curIdx - 1] : null;
 
     parentElement.renderLayoutElement
-        ..remove(children[curIdx])
-        ..insert(newTextNode, after: insertNode);
+      ..remove(children[curIdx])
+      ..insert(newTextNode, after: insertNode);
   }
 }
 
