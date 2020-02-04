@@ -151,13 +151,12 @@ task('patch-kraken-profile', (done) => {
 });
 
 task('clean', () => {
-  return del('build').then(() => {
-    spawnSync('flutter', ['clean'], {
-      cwd: paths.playground,
-      env: process.env,
-      stdio: 'inherit'
-    });
-  })
+  execSync('git clean -xfd', {
+    cwd: paths.playground,
+    env: process.env,
+    stdio: 'inherit'
+  });
+  return del('build');
 });
 
 task('generate-cmake-files', (done) => {
@@ -290,6 +289,21 @@ task('compile-polyfill', (done) => {
   done();
 });
 
+task('pubGet', (done) => {
+  execSync('flutter pub get', {
+    cwd: paths.playground,
+    env: process.env,
+    stdio: 'inherit'
+  });
+  execSync('flutter pub get', {
+    cwd: paths.dartfm,
+    env: process.env,
+    stdio: 'inherit'
+  });
+
+  done();
+});
+
 task('upload-dist', (done) => {
   const filename = `kraken-${os.platform()}-${packageJSON.version}.tar.gz`;
   execSync(`tar -zcf ${paths.cli}/vendors/${filename} ./build`, {
@@ -384,6 +398,7 @@ let embeddedSeries = series(
 
 exports.default = series(
   'clean',
+  'pubGet',
   _series,
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
