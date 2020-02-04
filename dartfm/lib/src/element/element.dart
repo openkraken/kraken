@@ -782,12 +782,12 @@ abstract class Element extends Node
         renderObject.markNeedsLayout();
       }
     } else if (child is TextNode) {
-      RenderParagraph renderParagraph = RenderParagraph(
-        createTextSpanWithStyle(child.data, style),
-        textAlign: getTextAlignFromStyle(style),
-        textDirection: TextDirection.ltr,
+      RenderTextNode newTextNode = RenderTextNode(
+        nodeId: nodeId,
+        text: child.data,
+        style: style,
       );
-      addChild(renderParagraph);
+      addChild(newTextNode);
     }
   }
 

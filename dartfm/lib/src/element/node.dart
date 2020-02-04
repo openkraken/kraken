@@ -40,10 +40,10 @@ class TextNode extends Node
     Element parentElement = this.parentNode;
     Style parentStyle = parentElement.style;
 
-    RenderParagraph newTextNode = RenderParagraph(
-      createTextSpanWithStyle(value, parentStyle),
-      textAlign: getTextAlignFromStyle(parentStyle),
-      textDirection: TextDirection.ltr,
+    RenderTextNode newTextNode = RenderTextNode(
+      nodeId: nodeId,
+      text: value,
+      style: parentStyle,
     );
 
     int curIdx = parentElement.childNodes.indexOf(this);
