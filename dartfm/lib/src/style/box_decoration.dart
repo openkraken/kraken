@@ -407,6 +407,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
+      //update can not trigger performlayout
+      //when linearAngle not null(other situation doesn't need),
+      //gradient need trigger performlayout to recaculate the alignment
       if (element.linearAngle != null) {
         renderDecoratedBox.markNeedsLayout();
       }
