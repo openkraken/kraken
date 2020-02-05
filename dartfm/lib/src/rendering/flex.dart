@@ -833,7 +833,7 @@ class RenderFlexLayout extends RenderBox
           break;
       }
       Style childStyle;
-      if (child is RenderParagraph) {
+      if (child is RenderTextNode) {
         childStyle = nodeMap[nodeId].style;
       } else if (child is RenderBoxModel) {
         int childNodeId = child.nodeId;

@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 const String DATA = 'data';
@@ -40,10 +41,10 @@ class TextNode extends Node with TextStyleMixin {
     Element parentElement = this.parentNode;
     Style parentStyle = parentElement.style;
 
-    RenderParagraph newTextNode = RenderParagraph(
-      createTextSpanWithStyle(value, parentStyle),
-      textAlign: getTextAlignFromStyle(parentStyle),
-      textDirection: TextDirection.ltr,
+    RenderTextNode newTextNode = RenderTextNode(
+      nodeId: nodeId,
+      text: value,
+      style: parentStyle,
     );
 
     int curIdx = parentElement.childNodes.indexOf(this);

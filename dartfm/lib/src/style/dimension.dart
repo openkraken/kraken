@@ -86,7 +86,7 @@ Padding baseGetPaddingFromStyle(Style style) {
 /// - max-height
 /// - min-width
 /// - min-height
-mixin DimensionMixin on Node {
+mixin DimensionMixin {
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   RenderPadding renderPadding;
