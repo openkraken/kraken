@@ -701,7 +701,7 @@ class RenderFlowLayout extends RenderBox
         if (child is RenderTextNode) {
           childStyle = nodeMap[nodeId].style;
         } else if (child is RenderBoxModel) {
-          int childNodeId = (child as RenderBoxModel).nodeId;
+          int childNodeId = child.nodeId;
           childStyle = nodeMap[childNodeId].style;
         }
 

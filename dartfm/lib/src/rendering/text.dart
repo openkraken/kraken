@@ -3,9 +3,7 @@
  * Author: Kraken Team.
  */
 
-import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {
