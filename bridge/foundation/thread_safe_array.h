@@ -42,9 +42,7 @@ public:
   }
 
   void clear() {
-    std::unique_lock<std::mutex> lk(mut);
     list.clear();
-    lk.unlock();
   }
 
 private:

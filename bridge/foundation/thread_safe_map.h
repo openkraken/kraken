@@ -42,9 +42,7 @@ public:
   }
 
   void reset() {
-    std::unique_lock<std::mutex> lk(mut);
     map.clear();
-    lk.unlock();
   }
 
 private:
