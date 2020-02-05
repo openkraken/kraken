@@ -7,7 +7,7 @@ import 'package:kraken/kraken.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  initKrakenCallback();
+  initBridge();
   if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
   // This line enables the extension.
@@ -23,7 +23,7 @@ void main() {
         shouldInitializeBinding: false,
         enableDebug: true,
         afterConnected: () {
-          evaluateScripts(payload, 'TEST_CASE');
+          evaluateScripts(payload, 'TEST_CASE', 0);
           RendererBinding.instance.addPostFrameCallback((Duration timeout) {
             completer.complete('done');
           });
