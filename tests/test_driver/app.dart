@@ -1,10 +1,16 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
 import 'package:flutter_driver/driver_extension.dart';
+
+void onFrameBegin(Duration timeStamp) {
+  JSMessage(FRAME_BEGIN).send();
+  WidgetsBinding.instance.addPostFrameCallback(onFrameBegin);
+}
 
 void main() {
   initBridge();
@@ -31,7 +37,9 @@ void main() {
       );
     }
 
-
     return completer.future;
   });
+
+  // To start onFrameBegin tick.
+  WidgetsBinding.instance.addPostFrameCallback(onFrameBegin);
 }
