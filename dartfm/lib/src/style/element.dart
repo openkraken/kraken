@@ -8,30 +8,31 @@ mixin ElementStyleMixin on RenderBox {
   double getParentWidth(int childId) {
     String width;
     bool isParentWithWidth = false;
-    Element childNode = nodeMap[childId];
-    Style parentStyle;
+    var childNode = nodeMap[childId];
     double cropWidth = 0;
     while (!isParentWithWidth) {
-      Style style = childNode.style;
-      if (style.contains('width')) {
-        isParentWithWidth = true;
-        width = style['width'];
-        parentStyle = style;
-        break;
-      }
       if (childNode is Element) {
+        Style style = childNode.style;
+        if (style.contains('width')) {
+          isParentWithWidth = true;
+          width = style['width'];
+          break;
+        }
+        // minus margin and border
         cropWidth +=
             ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
+
+        // minus padding
+        Padding padding = baseGetPaddingFromStyle(childNode.style);
+        cropWidth += padding.left + padding.right;
       }
+
       if (childNode.parentNode != null) {
         childNode = childNode.parentNode;
       }
     }
 
     double widthD = Length.toDisplayPortValue(width) - cropWidth;
-
-    Padding padding = baseGetPaddingFromStyle(parentStyle);
-    widthD = widthD - padding.left - padding.right;
 
     return widthD;
   }
