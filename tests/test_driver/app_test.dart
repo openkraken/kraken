@@ -5,7 +5,6 @@ import 'package:path/path.dart' as path;
 import 'package:ansicolor/ansicolor.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:io';
 
 final Directory snapshots = Directory('./snapshots');
