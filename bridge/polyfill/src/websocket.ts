@@ -1,21 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-
-type KrakenToken = number;
-
-// this interface is a description of the C++ Websocket API (bridge/bindings/websocket.cc)
-interface KrakenWebSocket {
-  connect: (
-    url: string,
-    onMessage: (message: string) => void,
-    onOpen: () => void,
-    onClose: (code: number, reason: string) => void,
-    onError: (error: string) => void
-  ) => KrakenToken;
-  send: (token: KrakenToken, message: string | ArrayBuffer | ArrayBufferView) => void;
-  close: (token: KrakenToken, code: number, reason: string) => void;
-}
-
-declare var __kraken_websocket__: KrakenWebSocket;
+import { KrakenWebSocketToken, krakenWebSocket} from './kraken';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -38,7 +22,7 @@ enum BinaryType {
 }
 
 class WebSocket extends EventTarget {
-  private token: KrakenToken;
+  private token: KrakenWebSocketToken;
   public readyState: ReadyState;
   public CONNECTING = ReadyState.CONNECTING;
   public OPEN = ReadyState.OPEN;
@@ -167,22 +151,20 @@ class WebSocket extends EventTarget {
     this.url = url;
     this.readyState = 0;
 
-    this.token = __kraken_websocket__.connect(url, this._onMessage, this._onOpen, this._onClose, this._onError);
+    this.token = krakenWebSocket.connect(url, this._onMessage, this._onOpen, this._onClose, this._onError);
   }
 
   // TODO add blob arrayBuffer ArrayBufferView format support
   public send(message: string | ArrayBuffer | ArrayBufferView) {
-    __kraken_websocket__.send(this.token, message);
+    krakenWebSocket.send(this.token, message);
   }
 
   public close(code: number, reason: string) {
     this.readyState = ReadyState.CLOSING;
-    __kraken_websocket__.close(this.token, code, reason);
+    krakenWebSocket.close(this.token, code, reason);
   }
 }
 
-//@ts-ignore
-// prevent user override buildin WebSocket class
 Object.defineProperty(global, 'WebSocket', {
   enumerable: true,
   writable: false,

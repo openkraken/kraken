@@ -156,9 +156,9 @@ void JSBridge::attachDevtools() {
   devtools_front_door_->setup();
 }
 
-void JSBridge::detatchDevtools() {
+void JSBridge::detachDevtools() {
   assert(devtools_front_door_ != nullptr);
-  KRAKEN_LOG(VERBOSE) << "kraken will detatch Devtools...";
+  KRAKEN_LOG(VERBOSE) << "kraken will detach Devtools...";
   devtools_front_door_->terminate();
 }
 #endif // ENABLE_DEBUGGER
@@ -270,14 +270,18 @@ void JSBridge::invokeRequestAnimationFrameCallback(int32_t callbackId) {
   kraken::binding::invokeRequestAnimationFrameCallback(context, callbackId);
 }
 
-void JSBridge::invokeOnloadCallback() {
-  window_->invokeOnloadCallback(context);
-}
-
 void JSBridge::invokeFetchCallback(int32_t callbackId, const char *error,
                                    int32_t statusCode, const char *body) {
   kraken::binding::invokeFetchCallback(context, callbackId, std::string(error),
                                        statusCode, std::string(body));
+}
+
+void JSBridge::invokeOnloadCallback() {
+  window_->invokeOnloadCallback(context);
+}
+
+void JSBridge::invokeOnPlatformBrightnessChangedCallback() {
+  window_->invokeOnPlatformBrightnessChangedCallback(context);
 }
 
 } // namespace kraken

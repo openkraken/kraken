@@ -23,8 +23,10 @@ typedef void (*ClearTimeout)(int32_t);
 typedef int32_t (*RequestAnimationFrame)(int32_t);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
-typedef double (*DevicePixelRatio)();
 typedef void (*InvokeFetch)(int32_t, const char*, const char*);
+typedef double (*DevicePixelRatio)();
+typedef const char *(*PlatformBrightness)();
+typedef void (*OnPlatformBrightnessChanged)();
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -44,10 +46,12 @@ void invokeSetIntervalCallback(int32_t callbackId);
 KRAKEN_EXPORT
 void invokeRequestAnimationFrameCallback(int32_t callbackId);
 KRAKEN_EXPORT
-void invokeOnloadCallback();
-KRAKEN_EXPORT
 void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
                          const char* body);
+KRAKEN_EXPORT
+void invokeOnloadCallback();
+KRAKEN_EXPORT
+void invokeOnPlatformBrightnessChangedCallback();
 
 KRAKEN_EXPORT
 void registerInvokeDartFromJS(InvokeDartFromJS invokeDartFromJs);
@@ -69,5 +73,10 @@ KRAKEN_EXPORT
 void registerInvokeFetch(InvokeFetch invokeFetch);
 KRAKEN_EXPORT
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
+KRAKEN_EXPORT
+void registerPlatformBrightness(PlatformBrightness platformBrightness);
+KRAKEN_EXPORT
+void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
+
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from "./kraken";
+import { insertAdjacentNode, removeNode } from "./bridge";
 
 type NodeList = Array<NodeImpl>;
 

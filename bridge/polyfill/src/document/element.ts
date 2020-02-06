@@ -1,4 +1,5 @@
 import { NodeImpl, NodeType } from './node';
+import { krakenDartToJS } from '../kraken';
 import {
   addEvent,
   createElement,
@@ -6,9 +7,8 @@ import {
   setProperty,
   setStyle,
   frameTick,
-} from './kraken';
+} from './bridge';
 
-declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
 type EventListener = () => void;
 
 let nodeMap: {
@@ -17,7 +17,7 @@ let nodeMap: {
 const TARGET_JS = 'J';
 const FRAME_BEGIN = '$';
 
-__kraken_dart_to_js__((message) => {
+krakenDartToJS((message) => {
   if (message[2] === FRAME_BEGIN) {
     frameTick();
     return;

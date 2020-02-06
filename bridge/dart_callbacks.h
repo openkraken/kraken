@@ -24,6 +24,8 @@ struct DartFuncPointer {
   GetScreen getScreen{nullptr};
   InvokeFetch invokeFetch{nullptr};
   DevicePixelRatio devicePixelRatio{nullptr};
+  PlatformBrightness platformBrightness{nullptr};
+  OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
 };
 
 void registerInvokeDartFromJS(InvokeDartFromJS callback);
@@ -36,6 +38,8 @@ void registerCancelAnimationFrame(CancelAnimationFrame callback);
 void registerGetScreen(GetScreen callback);
 void registerInvokeFetch(InvokeFetch invokeFetch);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
+void registerPlatformBrightness(PlatformBrightness platformBrightness);
+void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 
 std::shared_ptr<DartFuncPointer> getDartFunc();
 

@@ -1,4 +1,6 @@
 import './websocket';
 import './fetch';
-import './window';
 import './document';
+import './matchMedia';
+import './location';
+import './window';
