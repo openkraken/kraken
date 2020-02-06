@@ -23,7 +23,7 @@ mixin ElementStyleMixin on RenderBox {
             ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
 
         // minus padding
-        Padding padding = baseGetPaddingFromStyle((childNode as Element).style);
+        Padding padding = baseGetPaddingFromStyle(childNode.style);
         cropWidth += padding.left + padding.right;
       }
 
