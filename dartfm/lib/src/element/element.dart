@@ -805,7 +805,7 @@ abstract class Element extends Node
       }
     } else if (child is TextNode) {
       RenderTextNode newTextNode = RenderTextNode(
-        nodeId: nodeId,
+        nodeId: child.nodeId,
         text: child.data,
         style: style,
       );

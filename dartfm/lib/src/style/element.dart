@@ -8,16 +8,16 @@ mixin ElementStyleMixin on RenderBox {
   double getParentWidth(int childId) {
     String width;
     bool isParentWithWidth = false;
-    Element childNode = nodeMap[childId];
+    var childNode = nodeMap[childId];
     double cropWidth = 0;
     while (!isParentWithWidth) {
-      Style style = childNode.style;
-      if (style.contains('width')) {
-        isParentWithWidth = true;
-        width = style['width'];
-        break;
-      }
       if (childNode is Element) {
+        Style style = childNode.style;
+        if (style.contains('width')) {
+          isParentWithWidth = true;
+          width = style['width'];
+          break;
+        }
         // minus margin and border
         cropWidth +=
             ((childNode.cropWidth ?? 0) + (childNode.cropBorderWidth ?? 0));
