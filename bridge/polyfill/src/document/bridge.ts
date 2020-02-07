@@ -14,8 +14,7 @@ export function enableBatchUpdate() {
 const tickMessageQueue:string[] = [];
 
 export function frameTick() {
-  if (frameTimeoutTimer !== undefined)
-  clearTimeout(frameTimeoutTimer);
+  if (frameTimeoutTimer !== undefined) clearTimeout(frameTimeoutTimer);
   frameTimeoutTimer = setTimeout(frameTick, FRAME_TICK_TIMEOUT);
   if (tickMessageQueue.length > 0) {
     krakenJSToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
