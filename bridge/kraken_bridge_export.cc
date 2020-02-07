@@ -77,6 +77,14 @@ void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
   kraken::registerDevicePixelRatio(devicePixelRatio);
 }
 
+void registerPlatformBrightness(PlatformBrightness platformBrightness) {
+  kraken::registerPlatformBrightness(platformBrightness);
+}
+
+void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
+  kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
+}
+
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
@@ -99,11 +107,15 @@ void invokeRequestAnimationFrameCallback(int32_t callbackId) {
   bridge->invokeRequestAnimationFrameCallback(callbackId);
 }
 
+void invokeFetchCallback(int32_t callbackId, const char *error,
+                         int32_t statusCode, const char *body) {
+  bridge->invokeFetchCallback(callbackId, error, statusCode, body);
+}
+
 void invokeOnloadCallback() {
   bridge->invokeOnloadCallback();
 }
 
-void invokeFetchCallback(int32_t callbackId, const char *error,
-                         int32_t statusCode, const char *body) {
-  bridge->invokeFetchCallback(callbackId, error, statusCode, body);
+void invokeOnPlatformBrightnessChangedCallback() {
+  bridge->invokeOnPlatformBrightnessChangedCallback();
 }

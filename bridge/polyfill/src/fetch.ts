@@ -1,5 +1,4 @@
-type KrakenFetch = (url: string, data: string, callback: (err: any, response: any, data: any) => void) => void;
-declare var __kraken__fetch__: KrakenFetch;
+import { krakenFetch } from './kraken';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
@@ -16,23 +15,6 @@ function normalizeValue(value: any) {
     value = String(value);
   }
   return value;
-}
-
-function iteratorFor(items: Array<any>) {
-  let iterator = {
-    next: function() {
-      let value = items.shift();
-      return {done: value === undefined, value: value};
-    }
-  };
-
-  if ('Symbol' in self && 'iterator' in Symbol) {
-    iterator[Symbol.iterator] = function() {
-      return iterator;
-    };
-  }
-
-  return iterator
 }
 
 class FetchHeader implements Headers {
@@ -235,12 +217,12 @@ class FetchResponse extends FetchBody {
   }
 }
 
-function fetch(input: FetchRequest | string, init?: RequestInit) {
+export function fetch(input: FetchRequest | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
 
-    __kraken__fetch__(url, JSON.stringify(init), function(err, response, body) {
+    krakenFetch(url, JSON.stringify(init), function(err, response, body) {
       // network error did't have statusCode
       if (err && !response.statusCode) {
         reject(new Error(err));

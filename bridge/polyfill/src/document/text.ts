@@ -1,5 +1,5 @@
 import { NodeImpl, NodeType } from './node';
-import { createTextNode } from "./kraken";
+import { createTextNode } from "./bridge";
 
 export class TextImpl extends NodeImpl {
   public textContent: string = '';

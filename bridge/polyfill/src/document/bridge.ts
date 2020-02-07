@@ -1,8 +1,7 @@
-declare var __kraken_js_to_dart__: (dart: string) => void;
+import { krakenJSToDart } from '../kraken';
 
 // Timeout for batch updater, default to 60 fps.
 const FRAME_TICK_TIMEOUT = 1000 / 60;
-const sendToDart = __kraken_js_to_dart__;
 
 // Auto negotiation whether to enable batch update.
 let isEnableBatchUpdate:boolean = false;
@@ -19,7 +18,7 @@ export function frameTick() {
   clearTimeout(frameTimeoutTimer);
   frameTimeoutTimer = setTimeout(frameTick, FRAME_TICK_TIMEOUT);
   if (tickMessageQueue.length > 0) {
-    sendToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
+    krakenJSToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
     tickMessageQueue.length = 0;
   }
 }
@@ -29,7 +28,7 @@ export function createElement(type: string, id: number, props: any, events: any)
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -38,7 +37,7 @@ export function createTextNode(id: number, nodeType: number, data: string) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -47,7 +46,7 @@ export function insertAdjacentNode(parentNodeId: number, position: string, nodeI
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -56,7 +55,7 @@ export function removeNode(id: number) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -65,7 +64,7 @@ export function setProperty(id: number, key: string, value: any) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -74,7 +73,7 @@ export function setStyle(id: number, key: string, value: string) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -83,7 +82,7 @@ export function addEvent(id: number, eventName: string) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
 
@@ -92,6 +91,6 @@ export function removeEvent(id: number, eventName: string) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
-    sendToDart(message);
+    krakenJSToDart(message);
   }
 }
