@@ -25,10 +25,14 @@ class ImgElement extends Element {
             properties: props,
             events: events) {
     String url = _getFormattedSourceURL(properties['src']);
+    if (url.isNotEmpty) {
+      image = NetworkImage(url);
+      _constructImageChild();
+    }
+  }
 
-    image = NetworkImage(url);
+  void _constructImageChild() {
     imageBox = getRenderDecoratedBox(style, image);
-    imageBox.configuration;
     imageConstrainedBox = getRenderConstraintedBox(imageBox);
 
     if (!determinBothWidthAndHeight) {
@@ -37,7 +41,9 @@ class ImgElement extends Element {
       imageStream.addListener(imageListener);
     }
 
-    addChild(imageConstrainedBox);
+    if (childNodes.isEmpty) {
+      addChild(imageConstrainedBox);
+    }
   }
 
   bool get determinBothWidthAndHeight {
@@ -152,14 +158,10 @@ class ImgElement extends Element {
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
     if (key == 'src') {
-      image = NetworkImage(_getFormattedSourceURL(value));
-      imageBox = getRenderDecoratedBox(style, image);
-      imageConstrainedBox.child = imageBox;
-
-      if (!determinBothWidthAndHeight) {
-        imageStream = image.resolve(imageBox.configuration);
-        imageListener = ImageStreamListener(resizeAfterImageLoaded);
-        imageStream.addListener(imageListener);
+      String url = _getFormattedSourceURL(value);
+      if (url.isNotEmpty) {
+        image = NetworkImage(url);
+        _constructImageChild();
       }
     }
   }
