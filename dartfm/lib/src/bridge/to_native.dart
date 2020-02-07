@@ -43,6 +43,9 @@ typedef Dart_InvokeOnLoadCallback = void Function();
 typedef Native_InvokeOnPlatformBrightnessChangedCallback = Void Function();
 typedef Dart_InvokeOnPlatformBrightnessChangedCallback = void Function();
 
+typedef Native_FlushUITask = Void Function();
+typedef Dart_FlushUITask = void Function();
+
 final Dart_EvaluateScripts _evaluateScripts = nativeDynamicLibrary
     .lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts')
     .asFunction();
@@ -93,6 +96,9 @@ final Dart_InvokeOnPlatformBrightnessChangedCallback _invokeOnPlatformBrightness
     .lookup<NativeFunction<Native_InvokeOnPlatformBrightnessChangedCallback>>('invokeOnPlatformBrightnessChangedCallback')
     .asFunction();
 
+final Dart_FlushUITask _flushUITask = nativeDynamicLibrary
+.lookup<NativeFunction<Native_FlushUITask>>('flushUITask').asFunction();
+
 void evaluateScripts(String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
@@ -140,4 +146,8 @@ void invokeOnloadCallback() {
 
 void invokeOnPlatformBrightnessChangedCallback() {
   _invokeOnPlatformBrightnessChangedCallback();
+}
+
+void flushUITask() {
+  _flushUITask();
 }
