@@ -46,7 +46,8 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments "-DFLUTTER_ENGINE=${project.property('local-engine-out')}"
+                arguments "-DKRAKEN_JS_ENGINE=jsc"
+                abiFilters 'armeabi-v7a'
             }
         }
     }

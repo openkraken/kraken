@@ -57,6 +57,8 @@ final class VideoPlayer {
 
   private boolean isInitialized = false;
 
+  private float lastMutedVolume = 0f;
+
   VideoPlayer(
       Context context,
       EventChannel eventChannel,
