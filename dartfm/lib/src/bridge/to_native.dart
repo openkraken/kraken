@@ -32,13 +32,16 @@ typedef Dart_InvokeSetIntervalCallback = void Function(int);
 typedef Native_InvokeRequestAnimationFrame = Void Function(Int32);
 typedef Dart_InvokeRequestAnimationFrame = void Function(int);
 
-typedef Native_InvokeOnloadCallback = Void Function();
-typedef Dart_InvokeOnLoadCallback = void Function();
-
-typedef Native_invokeFetchCallback = Void Function(
+typedef Native_InvokeFetchCallback = Void Function(
     Int32, Pointer<Utf8>, Int32, Pointer<Utf8>);
 typedef Dart_InvokeFetchCallback = void Function(
     int, Pointer<Utf8>, int, Pointer<Utf8>);
+
+typedef Native_InvokeOnloadCallback = Void Function();
+typedef Dart_InvokeOnLoadCallback = void Function();
+
+typedef Native_InvokeOnPlatformBrightnessChangedCallback = Void Function();
+typedef Dart_InvokeOnPlatformBrightnessChangedCallback = void Function();
 
 final Dart_EvaluateScripts _evaluateScripts = nativeDynamicLibrary
     .lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts')
@@ -78,12 +81,16 @@ final Dart_InvokeRequestAnimationFrame _invokeRequestAnimationFrame =
             'invokeRequestAnimationFrameCallback')
         .asFunction();
 
+final Dart_InvokeFetchCallback _invokeFetchCallback = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_InvokeFetchCallback>>('invokeFetchCallback')
+    .asFunction();
+
 final Dart_InvokeOnLoadCallback _invokeOnloadCallback = nativeDynamicLibrary
     .lookup<NativeFunction<Native_InvokeOnloadCallback>>('invokeOnloadCallback')
     .asFunction();
 
-final Dart_InvokeFetchCallback _invokeFetchCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_invokeFetchCallback>>('invokeFetchCallback')
+final Dart_InvokeOnPlatformBrightnessChangedCallback _invokeOnPlatformBrightnessChangedCallback = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_InvokeOnPlatformBrightnessChangedCallback>>('invokeOnPlatformBrightnessChangedCallback')
     .asFunction();
 
 void evaluateScripts(String code, String url, int line) {
@@ -123,10 +130,14 @@ void invokeRequestAnimationFrame(int callbackId) {
   _invokeRequestAnimationFrame(callbackId);
 }
 
+void invokeFetchCallback(int callbackId, String error, int statusCode, String body) {
+  _invokeFetchCallback(callbackId, Utf8.toUtf8(error), statusCode, Utf8.toUtf8(body));
+}
+
 void invokeOnloadCallback() {
   _invokeOnloadCallback();
 }
 
-void invokeFetchCallback(int callbackId, String error, int statusCode, String body) {
-  _invokeFetchCallback(callbackId, Utf8.toUtf8(error), statusCode, Utf8.toUtf8(body));
+void invokeOnPlatformBrightnessChangedCallback() {
+  _invokeOnPlatformBrightnessChangedCallback();
 }

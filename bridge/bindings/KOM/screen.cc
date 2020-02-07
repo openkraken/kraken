@@ -15,7 +15,6 @@ using namespace alibaba::jsa;
 void JSScreen::bind(std::unique_ptr<JSContext> &context) {
   auto screen = Object::createFromHostObject(*context, sharedSelf());
   JSA_SET_PROPERTY(*context, context->global(), "screen", screen);
-
 }
 
 void JSScreen::unbind(std::unique_ptr<JSContext> &context) {

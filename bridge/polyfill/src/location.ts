@@ -1,44 +1,39 @@
-import { originLocation } from './window';
+import { krakenWindow } from './kraken';
+const krakenLocation = krakenWindow.location;
 
-export interface KrakenLocation {
-  reload: () => void;
-  origin: string;
-  protocol: string;
-  host: string;
-  hostname: string;
-  port: string;
-  pathname: string;
-  search: string;
-  hash: string;
-}
-
-
-export class Location {
+export const location = {
   get reload() {
-    return originLocation.reload;
-  }
+    return krakenLocation.reload;
+  },
   get origin () {
-    return originLocation.origin;
-  }
+    return krakenLocation.origin;
+  },
   get protocol () {
-    return originLocation.protocol;
-  }
+    return krakenLocation.protocol;
+  },
   get host () {
-    return originLocation.host;
-  }
+    return krakenLocation.host;
+  },
   get hostname () {
-    return originLocation.hostname;
-  }
+    return krakenLocation.hostname;
+  },
   get port () {
-    return originLocation.port;
-  }
+    return krakenLocation.port;
+  },
   get pathname () {
-    return originLocation.pathname;
-  }
+    return krakenLocation.pathname;
+  },
   get search () {
-    return originLocation.search;
-  }
+    return krakenLocation.search;
+  },
   get hash () {
-    return originLocation.hash;
+    return krakenLocation.hash;
   }
 }
+
+Object.defineProperty(global, 'location', {
+  enumerable: true,
+  writable: false,
+  value: location,
+  configurable: false
+});

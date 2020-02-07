@@ -11,6 +11,7 @@
 
 namespace kraken {
 namespace binding {
+using namespace alibaba::jsa;
 
 std::string origin = "";
 std::string protocol = "";
@@ -43,21 +44,21 @@ Value JSLocation::get(JSContext &context, const PropNameID &name) {
                            std::placeholders::_4));
     return Value(context, reloadFunc);
   } else if (propertyName == "origin") {
-    return alibaba::jsa::String::createFromUtf8(context, origin);
+    return String::createFromUtf8(context, origin);
   } else if (propertyName == "protocol") {
-    return alibaba::jsa::String::createFromUtf8(context, protocol);
+    return String::createFromUtf8(context, protocol);
   } else if (propertyName == "host") {
-    return alibaba::jsa::String::createFromUtf8(context, host);
+    return String::createFromUtf8(context, host);
   } else if (propertyName == "hostname") {
-    return alibaba::jsa::String::createFromUtf8(context, hostname);
+    return String::createFromUtf8(context, hostname);
   } else if (propertyName == "port") {
-    return alibaba::jsa::String::createFromUtf8(context, port);
+    return String::createFromUtf8(context, port);
   } else if (propertyName == "pathname") {
-    return alibaba::jsa::String::createFromUtf8(context, pathname);
+    return String::createFromUtf8(context, pathname);
   } else if (propertyName == "search") {
-    return alibaba::jsa::String::createFromUtf8(context, search);
+    return String::createFromUtf8(context, search);
   } else if (propertyName == "hash") {
-    return alibaba::jsa::String::createFromUtf8(context, hash);
+    return String::createFromUtf8(context, hash);
   }
 
   return Value::undefined();
@@ -76,7 +77,7 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal,
 }
 
 void JSLocation::bind(std::unique_ptr<JSContext> &context, Object &window) {
-  Object &&locationObject = alibaba::jsa::Object::createFromHostObject(*context, sharedSelf());
+  Object &&locationObject = Object::createFromHostObject(*context, sharedSelf());
   JSA_SET_PROPERTY(*context, window, "location", locationObject);
 }
 

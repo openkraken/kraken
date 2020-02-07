@@ -1,10 +1,10 @@
-declare var __kraken_js_to_dart__: (dart: string) => void;
+import { krakenJSToDart } from '../kraken';
 
 const tickMessageQueue:string[] = [];
 
 export function frameTick() {
   if (tickMessageQueue.length > 0) {
-    __kraken_js_to_dart__('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
+    krakenJSToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
     tickMessageQueue.length = 0;
   }
 }

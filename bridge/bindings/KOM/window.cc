@@ -14,16 +14,30 @@ namespace binding {
 using namespace alibaba::jsa;
 
 void JSWindow::invokeOnloadCallback(std::unique_ptr<JSContext> &context) {
-  if (_onloadCallback.isUndefined()) {
+  if (_onLoadCallback.isUndefined()) {
     return;
   }
 
-  auto funcObject = _onloadCallback.getObject(*context);
+  auto funcObject = _onLoadCallback.getObject(*context);
 
   if (funcObject.isFunction(*context)) {
     funcObject.asFunction(*context).call(*context);
   } else {
-    KRAKEN_LOG(VERBOSE) << "__bind_load__ callback is not a function";
+    KRAKEN_LOG(VERBOSE) << "onLoad callback is not a function";
+  }
+}
+
+void JSWindow::invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSContext> &context) {
+  if (_onPlatformBrightnessChanged.isUndefined()) {
+    return;
+  }
+
+  auto funcObject = _onPlatformBrightnessChanged.getObject(*context);
+
+  if (funcObject.isFunction(*context)) {
+    funcObject.asFunction(*context).call(*context);
+  } else {
+    KRAKEN_LOG(VERBOSE) << "onPlatformBrightnessChanged callback is not a function";
   }
 }
 
@@ -38,6 +52,13 @@ Value JSWindow::get(JSContext &context,
 
     double devicePixelRatio = getDartFunc()->devicePixelRatio();
     return Value(devicePixelRatio);
+  } else if (_name == "colorScheme") {
+    if (getDartFunc()->platformBrightness == nullptr) {
+      KRAKEN_LOG(ERROR) << "platformBrightness dart callback not register";
+      return Value::undefined();
+    }
+    
+    return String::createFromUtf8(context, getDartFunc()->platformBrightness());
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }
@@ -47,8 +68,15 @@ Value JSWindow::get(JSContext &context,
 
 void JSWindow::set(JSContext &context, const PropNameID &name, const Value &value) {
   auto _name = name.utf8(context);
-  if (_name == "onload") {
-    _onloadCallback = Value(context, value);
+  if (_name == "onLoad") {
+    _onLoadCallback = Value(context, value);
+  } else if (_name == "onColorSchemeChange") {
+    if (getDartFunc()->onPlatformBrightnessChanged == nullptr) {
+      KRAKEN_LOG(ERROR) << "onPlatformBrightnessChanged dart callback not register";
+      return;
+    }
+    _onPlatformBrightnessChanged = Value(context, value);
+    getDartFunc()->onPlatformBrightnessChanged();
   }
 }
 
@@ -65,7 +93,8 @@ void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
   Value &&window = JSA_GLOBAL_GET_PROPERTY(*context, "__kraken_window__");
   Object &&object = window.getObject(*context);
   location_->unbind(context, object);
-  _onloadCallback = Value::undefined();
+  _onLoadCallback = Value::undefined();
+  _onPlatformBrightnessChanged = Value::undefined();
   JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", Value::undefined());
 }
 

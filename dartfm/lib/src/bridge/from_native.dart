@@ -8,17 +8,18 @@ import 'package:ffi/ffi.dart';
 import 'bridge.dart';
 import 'native_structs.dart';
 
+// Functions signature for ffi
 typedef Native_InvokeDartFromJS = Pointer<Utf8> Function(Pointer<Utf8>);
 typedef Native_RegisterInvokeDartFromJS = Void Function(
     Pointer<NativeFunction<Native_InvokeDartFromJS>>);
 typedef Dart_RegisterInvokeDartFromJS = void Function(
     Pointer<NativeFunction<Native_InvokeDartFromJS>>);
 
-typedef Native_ReloadJSApp = Void Function();
-typedef Native_RegisterReloadJSApp = Void Function(
-    Pointer<NativeFunction<Native_ReloadJSApp>>);
-typedef Dart_RegisterReloadJSApp = void Function(
-    Pointer<NativeFunction<Native_ReloadJSApp>>);
+typedef Native_ReloadApp = Void Function();
+typedef Native_RegisterReloadApp = Void Function(
+    Pointer<NativeFunction<Native_ReloadApp>>);
+typedef Dart_RegisterReloadApp = void Function(
+    Pointer<NativeFunction<Native_ReloadApp>>);
 
 typedef Native_SetTimeout = Int32 Function(Int32, Int32);
 typedef Native_RegisterSetTimeout = Void Function(
@@ -68,13 +69,26 @@ typedef Native_RegisterDevicePixelRatio = Void Function(
 typedef Dart_RegisterDevicePixelRatio = void Function(
     Pointer<NativeFunction<Native_DevicePixelRatio>>);
 
+typedef Native_PlatformBrightness = Pointer<Utf8> Function();
+typedef Native_RegisterPlatformBrightness = Void Function(
+    Pointer<NativeFunction<Native_PlatformBrightness>>);
+typedef Dart_RegisterPlatformBrightness = void Function(
+    Pointer<NativeFunction<Native_PlatformBrightness>>);
+
+typedef Native_OnPlatformBrightnessChanged = Void Function();
+typedef Native_RegisterOnPlatformBrightnessChanged = Void Function(
+    Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>>);
+typedef Dart_RegisterOnPlatformBrightnessChanged = void Function(
+    Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>>);
+
+
 final Dart_RegisterInvokeDartFromJS _registerDartFn = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterInvokeDartFromJS>>(
         'registerInvokeDartFromJS')
     .asFunction();
 
-final Dart_RegisterReloadJSApp _registerReloadJSApp = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterReloadJSApp>>('registerReloadApp')
+final Dart_RegisterReloadApp _registerReloadApp = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp')
     .asFunction();
 
 final Dart_RegisterSetTimeout _registerSetTimeout = nativeDynamicLibrary
@@ -115,13 +129,25 @@ final Dart_RegisterDevicePixelRatio _registerDevicePixelRatio =
             'registerDevicePixelRatio')
         .asFunction();
 
+final Dart_RegisterPlatformBrightness _registerPlatformBrightness =
+    nativeDynamicLibrary
+        .lookup<NativeFunction<Native_RegisterPlatformBrightness>>(
+            'registerPlatformBrightness')
+        .asFunction();
+
+final Dart_RegisterOnPlatformBrightnessChanged _registerOnPlatformBrightnessChanged =
+    nativeDynamicLibrary
+        .lookup<NativeFunction<Native_RegisterOnPlatformBrightnessChanged>>(
+            'registerOnPlatformBrightnessChanged')
+        .asFunction();
+
 Pointer<Utf8> _invokeDartFromJS(Pointer<Utf8> data) {
   String args = Utf8.fromUtf8(data);
   String result = krakenJsToDart(args);
   return Utf8.toUtf8(result);
 }
 
-void _reloadJSApp() {
+void _reloadApp() {
   reloadApp();
 }
 
@@ -149,13 +175,24 @@ void _invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
   fetch(callbackId, Utf8.fromUtf8(url), Utf8.fromUtf8(json));
 }
 
+Pointer<ScreenSize> _getScreen() {
+  Size size = window.physicalSize;;
+  return ScreenSize.fromSize(size);
+}
+
 double _devicePixelRatio() {
   return window.devicePixelRatio;
 }
 
-Pointer<ScreenSize> _getScreen() {
-  Size size = getScreen();
-  return ScreenSize.fromSize(size);
+final Pointer<Utf8> _dark = Utf8.toUtf8('dark');
+final Pointer<Utf8> _light = Utf8.toUtf8('light');
+
+Pointer<Utf8> _platformBrightness() {
+  return window.platformBrightness == Brightness.dark ? _dark : _light;
+}
+
+void _onPlatformBrightnessChanged() {
+  onPlatformBrightnessChanged();
 }
 
 void registerInvokeDartFromJS() {
@@ -164,10 +201,10 @@ void registerInvokeDartFromJS() {
   _registerDartFn(pointer);
 }
 
-void registerReloadJSApp() {
-  Pointer<NativeFunction<Native_ReloadJSApp>> pointer =
-      Pointer.fromFunction(_reloadJSApp);
-  _registerReloadJSApp(pointer);
+void registerReloadApp() {
+  Pointer<NativeFunction<Native_ReloadApp>> pointer =
+      Pointer.fromFunction(_reloadApp);
+  _registerReloadApp(pointer);
 }
 
 void registerSetTimeout() {
@@ -218,9 +255,21 @@ void registerDevicePixelRatio() {
   _registerDevicePixelRatio(pointer);
 }
 
+void registerPlatformBrightness() {
+  Pointer<NativeFunction<Native_PlatformBrightness>> pointer =
+      Pointer.fromFunction(_platformBrightness);
+  _registerPlatformBrightness(pointer);
+}
+
+void registerOnPlatformBrightnessChanged() {
+  Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>> pointer =
+      Pointer.fromFunction(_onPlatformBrightnessChanged);
+  _registerOnPlatformBrightnessChanged(pointer);
+}
+
 void registerDartFunctionIntoCpp() {
   registerInvokeDartFromJS();
-  registerReloadJSApp();
+  registerReloadApp();
   registerSetTimeout();
   registerSetInterval();
   registerClearTimeout();
@@ -229,4 +278,6 @@ void registerDartFunctionIntoCpp() {
   registerGetScreen();
   registerInvokeFetch();
   registerDevicePixelRatio();
+  registerPlatformBrightness();
+  registerOnPlatformBrightnessChanged();
 }

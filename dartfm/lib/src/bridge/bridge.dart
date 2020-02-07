@@ -5,8 +5,6 @@
 
 import 'dart:convert';
 import 'dart:ui' show window;
-
-import 'package:flutter/painting.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
@@ -115,8 +113,9 @@ void cancelAnimationFrame(int timerId) {
   timer.cancelAnimationFrame(timerId);
 }
 
-Size getScreen() {
-  return window.physicalSize;
+void onPlatformBrightnessChanged() {
+  // TODO: should avoid overwrite old event handler
+  window.onPlatformBrightnessChanged = invokeOnPlatformBrightnessChangedCallback;
 }
 
 void fetch(int callbackId, String url, String json) {

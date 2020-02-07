@@ -56,4 +56,12 @@ void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {
   funcPointer->devicePixelRatio = devicePixelRatio;
 }
 
+void registerPlatformBrightness(PlatformBrightness platformBrightness) {
+  funcPointer->platformBrightness = platformBrightness;
+}
+
+void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged) {
+  funcPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
+}
+
 } // namespace kraken
