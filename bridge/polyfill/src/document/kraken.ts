@@ -1,42 +1,97 @@
 declare var __kraken_js_to_dart__: (dart: string) => void;
 
+// Timeout for batch updater, default to 60 fps.
+const FRAME_TICK_TIMEOUT = 1000 / 60;
+const sendToDart = __kraken_js_to_dart__;
+
+// Auto negotiation whether to enable batch update.
+let isEnableBatchUpdate:boolean = false;
+let frameTimeoutTimer:any;
+
+export function enableBatchUpdate() {
+  isEnableBatchUpdate = true;
+}
+
 const tickMessageQueue:string[] = [];
 
 export function frameTick() {
+  if (frameTimeoutTimer !== undefined)
+  clearTimeout(frameTimeoutTimer);
+  frameTimeoutTimer = setTimeout(frameTick, FRAME_TICK_TIMEOUT);
   if (tickMessageQueue.length > 0) {
-    __kraken_js_to_dart__('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
+    sendToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
     tickMessageQueue.length = 0;
   }
 }
 
 export function createElement(type: string, id: number, props: any, events: any) {
-  tickMessageQueue.push(`["createElement", [{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
+  const message = `["createElement", [{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function createTextNode(id: number, nodeType: number, data: string) {
-  tickMessageQueue.push(`["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`);
+  const message = `["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function insertAdjacentNode(parentNodeId: number, position: string, nodeId: number) {
-  tickMessageQueue.push(`["insertAdjacentNode",[${parentNodeId},"${position}",${nodeId}]]`);
+  const message = `["insertAdjacentNode",[${parentNodeId},"${position}",${nodeId}]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function removeNode(id: number) {
-  tickMessageQueue.push(`["removeNode",[${id}]]`);
+  const message = `["removeNode",[${id}]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function setProperty(id: number, key: string, value: any) {
-  tickMessageQueue.push(`["setProperty",[${id},"${key}","${value}"]]`);
+  const message = `["setProperty",[${id},"${key}","${value}"]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function setStyle(id: number, key: string, value: string) {
-  tickMessageQueue.push(`["setStyle",[${id},"${key}","${value}"]]`);
+  const message = `["setStyle",[${id},"${key}","${value}"]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function addEvent(id: number, eventName: string) {
-  tickMessageQueue.push(`["addEvent",[${id},"${eventName}"]]`);
+  const message = `["addEvent",[${id},"${eventName}"]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }
 
 export function removeEvent(id: number, eventName: string) {
-  tickMessageQueue.push(`["removeEvent",[${id},"${eventName}"]]`);
+  const message = `["removeEvent",[${id},"${eventName}"]]`;
+  if (isEnableBatchUpdate) {
+    tickMessageQueue.push(message);
+  } else {
+    sendToDart(message);
+  }
 }

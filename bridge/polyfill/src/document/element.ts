@@ -6,6 +6,7 @@ import {
   setProperty,
   setStyle,
   frameTick,
+  enableBatchUpdate
 } from './kraken';
 
 declare var __kraken_dart_to_js__: (fn: (message: string) => void) => void;
@@ -19,6 +20,7 @@ const FRAME_BEGIN = '$';
 
 __kraken_dart_to_js__((message) => {
   if (message[2] === FRAME_BEGIN) {
+    enableBatchUpdate();
     frameTick();
     return;
   }
