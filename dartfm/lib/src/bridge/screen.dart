@@ -1,7 +1,8 @@
 import 'dart:ffi';
-import 'package:flutter/painting.dart';
 import 'dart:ui';
+
 import 'package:ffi/ffi.dart';
+import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 
 class ScreenSize extends Struct {
