@@ -7,8 +7,10 @@ library kraken;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'element.dart';
+
 import 'bridge.dart';
+import 'element.dart';
+
 export 'bridge.dart';
 
 typedef ConnectedCallback = void Function();
@@ -56,4 +58,14 @@ void unmountApp() {
     elementManager.disconnect();
     elementManager = null;
   }
+}
+
+void reloadApp() async {
+  bool prevShowPerformanceOverlay =
+      elementManager?.showPerformanceOverlay ?? false;
+  appLoading = true;
+  unmountApp();
+  await reloadJSContext();
+  appLoading = false;
+  connect(prevShowPerformanceOverlay);
 }

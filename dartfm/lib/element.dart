@@ -6,10 +6,9 @@
 export 'src/element/binding.dart';
 export 'src/element/element.dart';
 export 'src/element/element_manager.dart';
-export 'src/element/node.dart';
 export 'src/element/event.dart';
 export 'src/element/event_target.dart';
-
+export 'src/element/node.dart';
 export 'src/element/tags/a.dart';
 export 'src/element/tags/body.dart';
 export 'src/element/tags/canvas.dart';
