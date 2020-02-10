@@ -500,7 +500,26 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
     if (child == null) {
-      size = constraints.smallest;
+      double constraintWidth = 0;
+      String display = style.get('display');
+      bool isInline = isElementInline(display, nodeId);
+      if (!isInline) {
+        if (constraints.maxWidth != double.infinity) {
+          constraintWidth = constraints.maxWidth;
+        } else {
+          constraintWidth = getParentWidth(nodeId);
+        }
+      }
+
+      double constraintHeight = 0;
+      double parentHeight = getStretchParentHeight(nodeId);
+      if (parentHeight != null) {
+        constraintHeight = parentHeight;
+      }
+
+      // calculate size according to element size
+      size = constraints.constrain(Size(constraintWidth, constraintHeight));
+
       return;
     }
 
@@ -511,7 +530,12 @@ class RenderFlowLayout extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-        mainAxisLimit = constraints.maxWidth;
+        if (constraints.maxWidth != double.infinity) {
+          mainAxisLimit = constraints.maxWidth;
+        } else {
+          // calculate max width limit according to element width
+          mainAxisLimit = getParentWidth(nodeId);
+        }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
