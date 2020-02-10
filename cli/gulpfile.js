@@ -1,9 +1,9 @@
-const {src, dest, series, parallel, task} = require('gulp');
+const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const path = require('path');
-const {writeFileSync} = require('fs');
-const {spawnSync, execSync} = require('child_process');
-const {join, resolve} = require('path');
+const { writeFileSync } = require('fs');
+const { spawnSync, execSync } = require('child_process');
+const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
 const del = require('del');
@@ -191,7 +191,7 @@ task('generate-cmake-embedded-files', (done) => {
     '-B',
     resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
     '-S',
-    resolve(paths.platform,'linux_' + os.arch())
+    resolve(paths.platform, 'linux_' + os.arch())
   ];
   const handle = spawnSync('cmake', args, {
     cwd: path.join(paths.platform, 'linux_' + os.arch()),
@@ -289,7 +289,7 @@ task('compile-polyfill', (done) => {
   done();
 });
 
-task('pubGet', (done) => {
+task('pub-get', (done) => {
   execSync('flutter pub get', {
     cwd: paths.playground,
     env: process.env,
@@ -398,7 +398,7 @@ let embeddedSeries = series(
 
 exports.default = series(
   'clean',
-  'pubGet',
+  'pub-get',
   _series,
   'compile-polyfill',
   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),

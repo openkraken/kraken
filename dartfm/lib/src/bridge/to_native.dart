@@ -1,9 +1,18 @@
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/src/bridge/native_structs.dart';
 
 import 'platform.dart';
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
+import 'screen.dart';
+
+// Steps for using dart:ffi to call a C function from Dart:
+// 1. Import dart:ffi.
+// 2. Create a typedef with the FFI type signature of the C function.
+// 3. Create a typedef for the variable that you’ll use when calling the C function.
+// 4. Open the dynamic library that contains the C function.
+// 5. Get a reference to the C function, and put it into a variable.
+// 6. Call the C function.
 
 typedef Native_EvaluateScripts = Void Function(
     Pointer<Utf8>, Pointer<Utf8>, Int32);
@@ -89,9 +98,13 @@ final Dart_InvokeOnLoadCallback _invokeOnloadCallback = nativeDynamicLibrary
     .lookup<NativeFunction<Native_InvokeOnloadCallback>>('invokeOnloadCallback')
     .asFunction();
 
-final Dart_InvokeOnPlatformBrightnessChangedCallback _invokeOnPlatformBrightnessChangedCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeOnPlatformBrightnessChangedCallback>>('invokeOnPlatformBrightnessChangedCallback')
-    .asFunction();
+final Dart_InvokeOnPlatformBrightnessChangedCallback
+    _invokeOnPlatformBrightnessChangedCallback = nativeDynamicLibrary
+        .lookup<
+                NativeFunction<
+                    Native_InvokeOnPlatformBrightnessChangedCallback>>(
+            'invokeOnPlatformBrightnessChangedCallback')
+        .asFunction();
 
 void evaluateScripts(String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
@@ -130,8 +143,10 @@ void invokeRequestAnimationFrame(int callbackId) {
   _invokeRequestAnimationFrame(callbackId);
 }
 
-void invokeFetchCallback(int callbackId, String error, int statusCode, String body) {
-  _invokeFetchCallback(callbackId, Utf8.toUtf8(error), statusCode, Utf8.toUtf8(body));
+void invokeFetchCallback(
+    int callbackId, String error, int statusCode, String body) {
+  _invokeFetchCallback(
+      callbackId, Utf8.toUtf8(error), statusCode, Utf8.toUtf8(body));
 }
 
 void invokeOnloadCallback() {

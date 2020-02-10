@@ -7,6 +7,7 @@ import {
   setProperty,
   setStyle,
   frameTick,
+  enableBatchUpdate
 } from './bridge';
 
 type EventListener = () => void;
@@ -19,6 +20,7 @@ const FRAME_BEGIN = '$';
 
 krakenDartToJS((message) => {
   if (message[2] === FRAME_BEGIN) {
+    enableBatchUpdate();
     frameTick();
     return;
   }
