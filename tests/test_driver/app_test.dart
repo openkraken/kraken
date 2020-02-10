@@ -11,6 +11,10 @@ final Directory snapshots = Directory('./snapshots');
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST ERROR]');
 
+String addJavaScriptClosure(String input) {
+  return '(function(){\n$input\n})();';
+}
+
 void main() {
   if (!snapshots.existsSync()) {
     snapshots.createSync();
@@ -76,7 +80,7 @@ void main() {
         basename = basename.substring(0, basename.length - 3);
 
         test('screenshot-$basename}', () async {
-          String payload = File(fixture.path).readAsStringSync();
+          String payload = addJavaScriptClosure(File(fixture.path).readAsStringSync());
           await driver.requestData(jsonEncode({
             'type': 'startup',
             'payload': payload,
