@@ -22,74 +22,42 @@ export function frameTick() {
   }
 }
 
-export function createElement(type: string, id: number, props: any, events: any) {
-  const message = `["createElement", [{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`;
+function sendMessage(message: string) {
   if (isEnableBatchUpdate) {
     tickMessageQueue.push(message);
   } else {
     krakenJSToDart(message);
   }
+}
+
+export function createElement(type: string, id: number, props: any, events: any) {
+  sendMessage(`["createElement", [{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
 }
 
 export function createTextNode(id: number, nodeType: number, data: string) {
-  const message = `["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`);
 }
 
 export function insertAdjacentNode(parentNodeId: number, position: string, nodeId: number) {
-  const message = `["insertAdjacentNode",[${parentNodeId},"${position}",${nodeId}]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["insertAdjacentNode",[${parentNodeId},"${position}",${nodeId}]]`);
 }
 
 export function removeNode(id: number) {
-  const message = `["removeNode",[${id}]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["removeNode",[${id}]]`);
 }
 
 export function setProperty(id: number, key: string, value: any) {
-  const message = `["setProperty",[${id},"${key}","${value}"]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["setProperty",[${id},"${key}","${value}"]]`);
 }
 
 export function setStyle(id: number, key: string, value: string) {
-  const message = `["setStyle",[${id},"${key}","${value}"]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["setStyle",[${id},"${key}","${value}"]]`);
 }
 
 export function addEvent(id: number, eventName: string) {
-  const message = `["addEvent",[${id},"${eventName}"]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["addEvent",[${id},"${eventName}"]]`);
 }
 
 export function removeEvent(id: number, eventName: string) {
-  const message = `["removeEvent",[${id},"${eventName}"]]`;
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
-  } else {
-    krakenJSToDart(message);
-  }
+  sendMessage(`["removeEvent",[${id},"${eventName}"]]`);
 }
