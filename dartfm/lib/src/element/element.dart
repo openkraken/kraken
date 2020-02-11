@@ -590,7 +590,9 @@ abstract class Element extends Node
       );
       decorateRenderFlex(flexLayout, newStyle);
       return flexLayout;
-    } else if (display == 'inline' ||
+    } else if (
+        display == 'none' ||
+        display == 'inline' ||
         display == 'inline-block' ||
         display == 'block') {
       WrapAlignment alignment = WrapAlignment.start;
