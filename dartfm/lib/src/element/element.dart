@@ -38,6 +38,11 @@ Element createW3CElement(PayloadNode node) {
         VideoElement.setDefaultPropsStyle(node.props);
         return VideoElement(node.id, node.props, node.events);
       }
+    case CAMERA:
+      {
+        CameraElement.setDefaultPropsStyle(node.props);
+        return CameraElement(node.id, node.props, node.events);
+      }
     default:
       throw FlutterError('ERROR: unexpected element type, ' + node.type);
   }

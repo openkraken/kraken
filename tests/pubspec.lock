@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  camera:
+    dependency: transitive
+    description:
+      path: "../plugins/camera"
+      relative: true
+    source: path
+    version: "0.5.7+3"
   charcode:
     dependency: transitive
     description:
@@ -64,6 +71,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.14.11"
+  connectivity:
+    dependency: transitive
+    description:
+      name: connectivity
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.6+2"
+  connectivity_macos:
+    dependency: transitive
+    description:
+      name: connectivity_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.2+1"
   convert:
     dependency: transitive
     description:
@@ -92,6 +113,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  device_info:
+    dependency: transitive
+    description:
+      name: device_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.1+4"
   ffi:
     dependency: transitive
     description:
@@ -551,4 +579,4 @@ packages:
     version: "2.2.0"
 sdks:
   dart: ">=2.6.0 <3.0.0"
-  flutter: ">=1.12.13+hotfix.4 <2.0.0"
+  flutter: ">=1.12.13+hotfix.5 <2.0.0"

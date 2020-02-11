@@ -12,6 +12,7 @@ export 'src/element/node.dart';
 export 'src/element/tags/a.dart';
 export 'src/element/tags/body.dart';
 export 'src/element/tags/canvas.dart';
+export 'src/element/tags/camera.dart';
 export 'src/element/tags/div.dart';
 export 'src/element/tags/img.dart';
 export 'src/element/tags/input.dart';

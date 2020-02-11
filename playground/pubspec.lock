@@ -29,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  camera:
+    dependency: transitive
+    description:
+      path: "../plugins/camera"
+      relative: true
+    source: path
+    version: "0.5.7+3"
   charcode:
     dependency: transitive
     description:
