@@ -32,7 +32,6 @@ class RenderBoxModel extends RenderTransform {
 
   @override
   void performLayout() {
-
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       size = child.size;
