@@ -259,6 +259,9 @@ class CameraController extends ValueNotifier<CameraValue> {
   StreamSubscription<dynamic> _imageStreamSubscription;
   Completer<void> _creatingCompleter;
 
+  // Expose textureId for Kraken
+  int getTextureId() => _textureId;
+
   /// Initializes the camera on the device.
   ///
   /// Throws a [CameraException] if the initialization fails.

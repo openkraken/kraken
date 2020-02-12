@@ -1,0 +1,6 @@
+module camera {
+  umbrella header "camera-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -62,3 +62,4 @@ bundle.js
 libkraken.dylib
 Podfile.lock
 .cxx
+.dart_tool

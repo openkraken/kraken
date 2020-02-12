@@ -1,0 +1,1 @@
+../../../../.symlinks/plugins/camera/ios/Classes/CameraPlugin.h

@@ -1,0 +1,26 @@
+{
+  "name": "video_player_web",
+  "version": "0.0.1",
+  "summary": "No-op implementation of video_player_web web plugin to avoid build issues on iOS",
+  "description": "temp fake video_player_web plugin",
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/video_player/video_player_web",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Flutter Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "8.0"
+  }
+}

@@ -69,6 +69,28 @@
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "KRAKEN_ENABLE_PERFORMANCE_OVERLAY"
+            value = "true"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "KRAKEN_ENABLE_DEBUG"
+            value = "true"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "KRAKEN_BUNDLE_PATH"
+            value = "/Users/zhuoling/workspace/kraken_workspace/kraken/tests/temp/camera.js"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "KRAKEN_LIBRARY_PATH"
+            value = "/Users/zhuoling/workspace/kraken_workspace"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

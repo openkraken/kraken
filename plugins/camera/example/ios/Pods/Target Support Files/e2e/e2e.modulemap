@@ -1,0 +1,6 @@
+module e2e {
+  umbrella header "e2e-umbrella.h"
+
+  export *
+  module * { export * }
+}

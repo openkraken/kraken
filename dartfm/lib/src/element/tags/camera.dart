@@ -11,6 +11,15 @@ import 'package:camera/camera.dart';
 
 const String CAMERA = 'CAMERA';
 
+bool camerasDetected = false;
+List<CameraDescription> cameras = [];
+
+Future<void> detectCameras() async {
+  // Obtain a list of the available cameras on the device.
+  cameras = await availableCameras();
+  camerasDetected = true;
+}
+
 class CameraParentData extends ContainerBoxParentData<RenderBox> {}
 
 class RenderCameraBox extends RenderBox
@@ -29,9 +38,15 @@ class RenderCameraBox extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! VideoParentData) {
-      child.parentData = VideoParentData();
+    if (child.parentData is! CameraParentData) {
+      child.parentData = CameraParentData();
     }
+  }
+
+  @override
+  void performResize() {
+    size = constraints.smallest;
+    assert(size.isFinite);
   }
 
   @override
@@ -54,7 +69,8 @@ class RenderCameraBox extends RenderBox
 
 class CameraElement extends Element {
   CameraController controller;
-  String _src;
+  RenderCameraBox renderCameraBox;
+  bool enableAudio = false;
 
   static String DEFAULT_WIDTH = '300px';
   static String DEFAULT_HEIGHT = '150px';
@@ -81,58 +97,65 @@ class CameraElement extends Element {
           properties: props,
           events: events,
         ) {
-    RegExp exp = RegExp(r"^(http|https)://");
-    test();
-    if (props['src'] == null) {
-      TextureBox box = TextureBox(textureId: 0);
-      addChild(box);
-      return;
-    }
-
-    if (!exp.hasMatch(props['src'])) {
-      throw Exception('video url\'s prefix should be http:// or https://');
-    }
-
-//    controller = VideoPlayerController.network(props['src']);
-    _src = props['src'];
-
-//    controller.setLooping(props['loop'] ?? false);
-
-//    controller.onCanPlay = onCanPlay;
-//    controller.onCanPlayThrough = onCanPlayThrough;
-//    controller.onPlay = onPlay;
-//    controller.onPause = onPause;
-//    controller.onSeeked = onSeeked;
-//    controller.onSeeking = onSeeking;
-//    controller.onEnded = onEnded;
-//    controller.onError = onError;
-//    controller.initialize().then((int textureId) {
-//      controller.setMuted(props['muted'] ?? false);
-//      TextureBox box = TextureBox(textureId: textureId);
-//
-//      // @TODO get video's original dimension if width or height not specified as web
-//      BoxConstraints additionalConstraints = BoxConstraints(
-//        minWidth: 0,
-//        maxWidth: getDisplayPortedLength(props['style']['width']),
-//        minHeight: 0,
-//        maxHeight: getDisplayPortedLength(props['style']['height']),
-//      );
-//      RenderCameraBox renderCameraBox = RenderCameraBox(
-//        additionalConstraints: additionalConstraints,
-//        child: box,
-//      );
-//      addChild(renderCameraBox);
-//
-//      if (props['autoPlay'] == true) {
-//        controller.play();
-//      }
-//    });
+    initCameraController()
+      .then((_) async {
+        print("startImageStream");
+        await controller.startImageStream((CameraImage image) {
+          print('CameraImage $image');
+        });
+//        print('startVideoRecording');
+//        controller.startVideoRecording("/Users/zhuoling/workspace/kraken_workspace/test_camera.mp4");
+//        Timer(Duration(seconds: 10), () {
+//          print('stopVideoRecording');
+//          controller.stopVideoRecording();
+//        });
+      });
   }
 
-  Future<void> test() async {
-    // Obtain a list of the available cameras on the device.
-    final cameras = await availableCameras();
-    print('cameras $cameras');
+  Future<void> initCameraController() async {
+    if (!camerasDetected) await detectCameras();
+    if (cameras.isEmpty) {
+      throw FlutterError('No avaiable camera in your device.');
+    }
+
+    CameraDescription cameraDescription = cameras.first;
+
+    if (controller != null) await controller.dispose();
+
+    controller = CameraController(
+      cameraDescription,
+      ResolutionPreset.low,
+      enableAudio: enableAudio,
+    );
+
+    // If the controller is updated then update the UI.
+    controller.addListener(() {
+      renderCameraBox?.markNeedsPaint();
+      if (controller.value.hasError) {
+        print('Camera error ${controller.value.errorDescription}');
+      }
+    });
+
+    try {
+      await controller.initialize();
+    } on CameraException catch (e) {
+      print(e);
+    }
+
+    if (renderCameraBox != null) renderLayoutElement.remove(renderCameraBox);
+    renderCameraBox = RenderCameraBox(
+      child: TextureBox(textureId: controller.getTextureId()),
+      additionalConstraints: BoxConstraints(
+        minWidth: 0,
+        maxWidth: style.width,
+        minHeight: 0,
+        maxHeight: style.height,
+      ),
+    );
+    print('textureId: ${controller.getTextureId()}');
+    addChild(renderCameraBox);
+
+    renderCameraBox.markNeedsPaint();
   }
 
   @override

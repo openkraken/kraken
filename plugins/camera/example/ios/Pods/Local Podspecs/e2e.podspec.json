@@ -1,0 +1,30 @@
+{
+  "name": "e2e",
+  "version": "0.0.1",
+  "summary": "Adapter for e2e tests.",
+  "description": "Runs tests that use the flutter_test API as integration tests.",
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/e2e",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Flutter Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "VALID_ARCHS[sdk=iphonesimulator*]": "x86_64"
+  }
+}

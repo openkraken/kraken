@@ -26,6 +26,8 @@ flutter:
         pluginClass: CameraPlugin
       ios:
         pluginClass: CameraPlugin
+      macos:
+        pluginClass: CameraPlugin
 
 environment:
   sdk: ">=2.0.0-dev.28.0 <3.0.0"
