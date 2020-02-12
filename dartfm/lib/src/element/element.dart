@@ -103,6 +103,7 @@ abstract class Element extends Node
       onPointerMove: this._handlePointMove,
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
+      behavior: HitTestBehavior.translucent,
     );
     if (style.position != 'static') {
       renderObject = renderStack = RenderPosition(
@@ -595,7 +596,9 @@ abstract class Element extends Node
       );
       decorateRenderFlex(flexLayout, newStyle);
       return flexLayout;
-    } else if (display == 'inline' ||
+    } else if (
+        display == 'none' ||
+        display == 'inline' ||
         display == 'inline-block' ||
         display == 'block') {
       WrapAlignment alignment = WrapAlignment.start;

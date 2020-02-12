@@ -11,12 +11,39 @@ class RenderBoxModel extends RenderTransform {
     Matrix4 transform,
     Offset origin,
     this.nodeId,
-    this.style,
-  }) : super(
+    Style style,
+  }) :
+    _style = style,
+    super(
           child: child,
           transform: transform,
           origin: origin,
         );
   int nodeId;
-  Style style;
+
+  Style _style;
+  Style get style => _style;
+  set style(Style value) {
+    if (_style == value) {
+      return;
+    }
+    _style = value;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = child.size;
+    } else {
+      performResize();
+    }
+
+    if (style != null) {
+      String display = style.get('display');
+      if (display == 'none') {
+        size = constraints.constrain(Size(0, 0));
+      }
+    }
+  }
 }

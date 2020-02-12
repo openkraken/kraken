@@ -5,6 +5,7 @@
 
 library kraken;
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -29,6 +30,17 @@ void connect(bool showPerformanceOverlay) {
     RendererBinding.instance.addPostFrameCallback((time) {
       invokeOnloadCallback();
     });
+    startFlushUILoop();
+  });
+}
+
+void startFlushUILoop() {
+  flushUITask();
+
+  // flush ui task every 16ms
+  Duration duration = Duration(milliseconds: 16);
+  Timer(duration, () {
+    startFlushUILoop();
   });
 }
 

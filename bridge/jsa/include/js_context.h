@@ -78,15 +78,6 @@ public:
   virtual std::vector<PropNameID> getPropertyNames(JSContext &rt);
 };
 
-class ThreadScope {
-public:
-  using Task = void (*)(void*);
-  ThreadScope() = default;
-  virtual ~ThreadScope() = default;
-
-  virtual void postToUIThread(Task task, void* data) = 0;
-};
-
 /// Represents a JS runtime.  Movable, but not copyable.  Note that
 /// this object may not be thread-aware, but cannot be used safely from
 /// multiple threads at once.  The application is responsible for
@@ -147,17 +138,6 @@ public:
   /// \return JS Engine's actual global object,
   /// in most of the time, you should use global() method instead of this.
   virtual void *globalImpl() = 0;
-
-  void bindThreadScope(std::unique_ptr<ThreadScope> threadScope) {
-    thread_scope_ptr_ = std::move(threadScope);
-  }
-
-  ThreadScope* threadScope() const{
-    if(thread_scope_ptr_ == nullptr) {
-      return nullptr;
-    }
-    return thread_scope_ptr_.get();
-  }
 
 protected:
   friend class Pointer;
@@ -265,10 +245,6 @@ protected:
   static const PointerValue *getPointerValue(const Value &value);
 
   template <typename Plain, typename Base> friend class RuntimeDecorator;
-
-private:
-  std::unique_ptr<ThreadScope> thread_scope_ptr_;
-
 };
 
 /// Not movable and not copyable RAII marker advising the underlying

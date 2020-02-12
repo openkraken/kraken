@@ -53,6 +53,7 @@ public:
                            const char* body);
   void invokeOnloadCallback();
   void invokeOnPlatformBrightnessChangedCallback();
+  void flushUITask();
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER

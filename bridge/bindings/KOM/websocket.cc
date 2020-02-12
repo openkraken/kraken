@@ -4,6 +4,7 @@
  */
 
 #include "websocket.h"
+#include "foundation/flushUITask.h"
 
 #include "logging.h"
 #include "websocket_client.h"
@@ -66,40 +67,28 @@ void CallbackImpl::onOpen() {
   if (!context_._on_open.isFunction(context_._context)) {
     return;
   }
-  auto scope = context_._context.threadScope();
-  if (scope) {
-    scope->postToUIThread(
-        [](void *data) {
-          auto c = reinterpret_cast<context *>(data);
-          c->_on_open.asFunction(c->_context).call(c->_context, nullptr, 0);
-        },
-        reinterpret_cast<void *>(&context_));
-  } else {
-    context_._on_open.asFunction(context_._context)
-        .call(context_._context, nullptr, 0);
-  }
+  kraken::foundation::registerUITask(
+      [](void *data) {
+        auto c = reinterpret_cast<context *>(data);
+        c->_on_open.asFunction(c->_context).call(c->_context, nullptr, 0);
+      },
+      reinterpret_cast<void *>(&context_));
 }
 
 void CallbackImpl::onMessage(const std::string &message) {
   if (!context_._on_message.isFunction(context_._context)) {
     return;
   }
-  auto scope = context_._context.threadScope();
-  if (scope) {
-    context_.message = message;
-    scope->postToUIThread(
-        [](void *data) {
-          auto c = reinterpret_cast<context *>(data);
-          c->_on_message.asFunction(c->_context)
-              .call(c->_context,
-                    {String::createFromUtf8(c->_context, c->message)});
-        },
-        reinterpret_cast<void *>(&context_));
-  } else {
-    context_._on_message.asFunction(context_._context)
-        .call(context_._context,
-              {String::createFromUtf8(context_._context, message)});
-  }
+
+  context_.message = message;
+  kraken::foundation::registerUITask(
+      [](void *data) {
+        auto c = reinterpret_cast<context *>(data);
+        c->_on_message.asFunction(c->_context)
+            .call(c->_context,
+                  {String::createFromUtf8(c->_context, c->message)});
+      },
+      reinterpret_cast<void *>(&context_));
 }
 
 void CallbackImpl::onClose(int code, const std::string &reason) {
@@ -107,51 +96,36 @@ void CallbackImpl::onClose(int code, const std::string &reason) {
     return;
   }
 
-  auto scope = context_._context.threadScope();
-  if (scope) {
-    context_.code = code;
-    context_.reason = reason;
-    scope->postToUIThread(
-        [](void *data) {
-          auto c = reinterpret_cast<context *>(data);
-          auto obj = JSA_CREATE_OBJECT(c->_context);
-          JSA_SET_PROPERTY(c->_context, obj, "code", c->code);
-          JSA_SET_PROPERTY(c->_context, obj, "message",
-                           String::createFromUtf8(c->_context, c->reason));
-          c->_on_close.asFunction(c->_context)
-              .call(c->_context, {Value(c->_context, obj)});
-        },
-        reinterpret_cast<void *>(&context_));
-  } else {
-    auto obj = JSA_CREATE_OBJECT(context_._context);
-    JSA_SET_PROPERTY(context_._context, obj, "code", code);
-    JSA_SET_PROPERTY(context_._context, obj, "message",
-                     String::createFromUtf8(context_._context, reason));
-    context_._on_close.asFunction(context_._context)
-        .call(context_._context, {Value(context_._context, obj)});
-  }
+  context_.code = code;
+  context_.reason = reason;
+
+  kraken::foundation::registerUITask(
+      [](void *data) {
+        auto c = reinterpret_cast<context *>(data);
+        auto obj = JSA_CREATE_OBJECT(c->_context);
+        JSA_SET_PROPERTY(c->_context, obj, "code", c->code);
+        JSA_SET_PROPERTY(c->_context, obj, "message",
+                         String::createFromUtf8(c->_context, c->reason));
+        c->_on_close.asFunction(c->_context)
+            .call(c->_context, {Value(c->_context, obj)});
+      },
+      reinterpret_cast<void *>(&context_));
 }
 
 void CallbackImpl::onError(const std::string &error) {
   if (!context_._on_err.isFunction(context_._context)) {
     return;
   }
-  auto scope = context_._context.threadScope();
-  if (scope) {
-    context_.error = error;
-    scope->postToUIThread(
-        [](void *data) {
-          auto c = reinterpret_cast<context *>(data);
-          c->_on_err.asFunction(c->_context)
-              .call(c->_context,
-                    {String::createFromUtf8(c->_context, c->error)});
-        },
-        reinterpret_cast<void *>(&context_));
-  } else {
-    context_._on_err.asFunction(context_._context)
-        .call(context_._context,
-              {String::createFromUtf8(context_._context, error)});
-  }
+
+  context_.error = error;
+
+  kraken::foundation::registerUITask(
+      [](void *data) {
+        auto c = reinterpret_cast<context *>(data);
+        c->_on_err.asFunction(c->_context)
+            .call(c->_context, {String::createFromUtf8(c->_context, c->error)});
+      },
+      reinterpret_cast<void *>(&context_));
 }
 
 //////////////////////////
