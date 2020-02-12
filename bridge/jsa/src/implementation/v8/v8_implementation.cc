@@ -221,8 +221,8 @@ V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
 }
 #else
 V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
-                                        v8::Local<v8::String> &str) {
-  str_.Reset(isolate, str);
+                                        v8::Local<v8::String> string): isolate_(isolate) {
+  str_.Reset(isolate, string);
 }
 #endif
 
@@ -310,7 +310,11 @@ std::string V8Context::utf8(const jsa::PropNameID &) {}
 
 bool V8Context::compare(const jsa::PropNameID &, const jsa::PropNameID &) {}
 
-std::string V8Context::symbolToString(const jsa::Symbol &) {}
+std::string V8Context::symbolToString(const jsa::Symbol &sym) {
+  return jsa::Value(*this, sym)
+      .toString(*this)
+      .utf8(*this);
+}
 
 jsa::String V8Context::createStringFromAscii(const char *str, size_t length) {
   v8::HandleScope handleScope(_isolate);
@@ -440,7 +444,11 @@ jsa::Object V8Context::createObject(v8::Local<v8::Object> object) const {}
 
 jsa::JSContext::PointerValue *
 V8Context::makeSymbolValue(v8::Local<v8::Symbol> sym) const {
+#ifndef NDEBUG
   return new V8SymbolValue(_isolate, ctxInvalid_, sym, symbolCounter_);
+#else
+  return new V8SymbolValue(_isolate, ctxInvalid_, sym);
+#endif
 }
 
 jsa::JSContext::PointerValue *

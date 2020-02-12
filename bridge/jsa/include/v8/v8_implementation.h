@@ -73,7 +73,8 @@ protected:
     V8StringValue(v8::Isolate *isolate, v8::Local<v8::String> str,
                   std::atomic<intptr_t> &counter);
 #else
-    V8StringValue(JSStringRef str);
+    V8StringValue(v8::Isolate *isolate,
+                  v8::Local<v8::String> string);
 #endif
     void invalidate() override;
 
