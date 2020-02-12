@@ -119,3 +119,7 @@ void invokeOnloadCallback() {
 void invokeOnPlatformBrightnessChangedCallback() {
   bridge->invokeOnPlatformBrightnessChangedCallback();
 }
+
+void flushUITask() {
+  bridge->flushUITask();
+}
