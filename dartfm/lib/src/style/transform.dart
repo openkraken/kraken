@@ -51,6 +51,7 @@ mixin TransformStyleMixin {
       }
       matrix4 = newMatrix4;
     }
+    (transform as RenderBoxModel).style = style;
   }
 
   Offset parseOrigin(String origin) {
