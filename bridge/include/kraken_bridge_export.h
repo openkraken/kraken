@@ -52,6 +52,8 @@ KRAKEN_EXPORT
 void invokeOnloadCallback();
 KRAKEN_EXPORT
 void invokeOnPlatformBrightnessChangedCallback();
+KRAKEN_EXPORT
+void flushUITask();
 
 KRAKEN_EXPORT
 void registerInvokeDartFromJS(InvokeDartFromJS invokeDartFromJs);
