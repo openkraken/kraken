@@ -184,7 +184,6 @@ v8::Local<v8::Value> V8Context::valueRef(const jsa::Value &value) {
     return v8::Number::New(_isolate, value.getNumber());
   } else if (value.isSymbol()) {
     return symbolRef(value.getSymbol(*this));
-    //    return symbolRef(value.getSymbol(*this));
   } else if (value.isString()) {
     return v8::String::NewFromUtf8(_isolate,
                                    value.getString(*this).utf8(*this).c_str())
@@ -244,7 +243,8 @@ V8Context::V8SymbolValue::V8SymbolValue(
     std::atomic<intptr_t>& counter
 #endif
 )
-    : ctxInvalid_(ctxInvalid)
+    : ctxInvalid_(ctxInvalid),
+      isolate_(isolate)
 #ifndef NDEBUG
     ,
       counter_(counter)

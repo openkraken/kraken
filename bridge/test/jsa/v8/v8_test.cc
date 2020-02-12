@@ -126,3 +126,14 @@ TEST(V8StringValue, createString) {
   auto result = string.getString(*context).utf8(*context);
   EXPECT_EQ(result, "helloworld");
 }
+
+TEST(V8SymbolValue, evaluateString) {
+  initV8Engine("");
+  auto context = new V8Context();
+  jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
+  EXPECT_EQ(result.isSymbol(), true);
+  v8::Local<v8::Value> ref = context->valueRef(result);
+  EXPECT_EQ(ref->IsSymbol(), true);
+  // TODO verify symbol toString
+  //  auto str = result.getSymbol(*context).toString(*context);
+}
