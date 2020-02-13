@@ -12,6 +12,8 @@ import 'package:kraken/gesture.dart';
 import 'package:meta/meta.dart';
 import 'ticker_provider.dart';
 
+typedef ScrollListener = void Function(double scrollTop);
+
 class KrakenScrollable
     with CustomTickerProviderStateMixin
     implements ScrollContext {
@@ -20,10 +22,12 @@ class KrakenScrollable
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
   RenderBox _renderBox;
+  ScrollListener scrollListener;
 
   KrakenScrollable({
     axisDirection = AxisDirection.down,
     dragStartBehavior = DragStartBehavior.start,
+    this.scrollListener,
   }) {
     _axisDirection = axisDirection;
     dragStartBehavior = dragStartBehavior;
@@ -34,7 +38,11 @@ class KrakenScrollable
   RenderObject getScrollableRenderObject(RenderBox child) {
     RenderSingleChildViewport renderSingleChildViewport =
         RenderSingleChildViewport(
-            axisDirection: _axisDirection, offset: position, child: child);
+            axisDirection: _axisDirection,
+            offset: position,
+            child: child,
+            scrollListener: scrollListener,
+        );
 
     _renderBox = child;
     RenderPointerListener renderPointerListener = RenderPointerListener(
@@ -207,6 +215,7 @@ class RenderSingleChildViewport extends RenderBox
       @required ViewportOffset offset,
       double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
       RenderBox child,
+      this.scrollListener,
       this.shouldClip = false})
       : assert(axisDirection != null),
         assert(offset != null),
@@ -217,6 +226,7 @@ class RenderSingleChildViewport extends RenderBox
     this.child = child;
   }
 
+  ScrollListener scrollListener;
   bool shouldClip;
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
@@ -251,6 +261,7 @@ class RenderSingleChildViewport extends RenderBox
   }
 
   void _hasScrolled() {
+    scrollListener(offset.pixels);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
