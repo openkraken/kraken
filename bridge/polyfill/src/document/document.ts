@@ -1,6 +1,6 @@
 import { NodeImpl, NodeType } from './node';
-import { ElementImpl } from "./element";
-import { TextImpl } from "./text";
+import { ElementImpl } from './element';
+import { TextImpl } from './text';
 
 let id = 1;
 
@@ -17,5 +17,14 @@ export class DocumentImpl extends NodeImpl {
 
   createTextNode(text: string) {
     return new TextImpl(text, id++);
+  }
+
+  /**
+   * createComment() creates a new comment node, and returns it.
+   * @param data {string} A string containing the data to be added to the Comment.
+   */
+  createComment(data: string) {
+    // Use an empty TextNode to impl comment.
+    return new TextImpl('', id++);
   }
 }

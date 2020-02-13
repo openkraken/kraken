@@ -53,29 +53,39 @@ export class NodeImpl extends EventTarget {
     insertAdjacentNode(this.id, 'beforeend', node.id);
   }
 
-  public insertBefore(newNode: NodeImpl, referenceNode: NodeImpl) {
+  public insertBefore(newChild: NodeImpl, referenceNode: NodeImpl) {
     if (!referenceNode.parentNode) return;
     const parentNode = referenceNode.parentNode;
     const nextIndex = parentNode.childNodes.indexOf(referenceNode);
-    parentNode.childNodes.splice(nextIndex - 1, 0, newNode);
-    newNode.parentNode = parentNode;
-    insertAdjacentNode(referenceNode.id, 'beforebegin', newNode.id);
+    parentNode.childNodes.splice(nextIndex - 1, 0, newChild);
+    newChild.parentNode = parentNode;
+    insertAdjacentNode(referenceNode.id, 'beforebegin', newChild.id);
   }
 
   public remove() {
     removeNode(this.id);
   }
 
-  // public replaceChild(newNode: NodeImpl, oldNode: NodeImpl) {
-  //   if (!oldNode.parentNode) return;
-  //   const parentNode = oldNode.parentNode;
-  //   oldNode.parentNode = null;
-  //   const childIndex = oldNode.parentChildIndex;
-  //
-  //   newNode.parentNode = parentNode;
-  //   parentNode.childNodes.splice(childIndex, 1, newNode);
-  //
-  //   insertAdjacentNode(oldNode.id, 'afterend', newNode.id);
-  //   removeNode(oldNode.id);
-  // }
+  /**
+   * The Node.replaceChild() method replaces a child node within the given (parent) node.
+   * @param newChild {NodeImpl} The new node to replace oldChild. If it already exists in the DOM, it is first removed.
+   * @param oldChild {NodeImpl} The child to be replaced.
+   * @return The returned value is the replaced node. This is the same node as oldChild.
+   */
+  public replaceChild(newChild: NodeImpl, oldChild: NodeImpl) {
+    const argLength = arguments.length;
+    if (argLength < 2) throw new Error(`Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required, but only ${argLength} present.`);
+    if (!oldChild.parentNode) throw new Error(`Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.`);
+
+    const parentNode = oldChild.parentNode;
+    oldChild.parentNode = null;
+    const childIndex = oldChild.parentChildIndex;
+
+    newChild.parentNode = parentNode;
+    parentNode.childNodes.splice(childIndex, 1, newChild);
+
+    insertAdjacentNode(oldChild.id, 'afterend', newChild.id);
+    removeNode(oldChild.id);
+    return oldChild;
+  }
 }

@@ -51,13 +51,6 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
 
   timerCallbackMap.set(callbackId, callbackValue);
 
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[setTimeout]: "
-                        << "([\"setTimeout\",[" << callbackId << "]])"
-                        << std::endl;
-  }
-
   if (getDartMethod()->setTimeout == nullptr) {
     KRAKEN_LOG(ERROR) << "[setTimeout] dart callback not register";
     return Value::undefined();

@@ -164,3 +164,14 @@ Future<void> reloadJSContext() async {
     _reloadJSContext();
   });
 }
+
+// Register flushUITask
+typedef Native_FlushUITask = Void Function();
+typedef Dart_FlushUITask = void Function();
+
+final Dart_FlushUITask _flushUITask = nativeDynamicLibrary
+.lookup<NativeFunction<Native_FlushUITask>>('flushUITask').asFunction();
+
+void flushUITask() {
+  _flushUITask();
+}

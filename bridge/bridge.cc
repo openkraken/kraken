@@ -10,7 +10,9 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
+
 #include "dart_methods.h"
+#include "foundation/flushUITask.h"
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_array.h"
@@ -324,7 +326,6 @@ JSBridge::~JSBridge() {
   binding::unbindFetch();
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
-  context.reset();
 }
 
 Value JSBridge::getGlobalValue(std::string code) {
@@ -369,6 +370,10 @@ void JSBridge::invokeOnloadCallback() {
 
 void JSBridge::invokeOnPlatformBrightnessChangedCallback() {
   window_->invokeOnPlatformBrightnessChangedCallback(context);
+}
+
+void JSBridge::flushUITask() {
+  kraken::foundation::flushUITask();
 }
 
 } // namespace kraken

@@ -56,6 +56,7 @@ public:
   void invokeModuleCallback(int32_t callbackId, const char* json);
   void invokeOnloadCallback();
   void invokeOnPlatformBrightnessChangedCallback();
+  void flushUITask();
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER
