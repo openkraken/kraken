@@ -176,7 +176,7 @@ private:
   // Factory methods for creating String/Object
   jsa::Symbol createSymbol(v8::Local<v8::Symbol> symbol) const;
   jsa::String createString(v8::Local<v8::String> string) const;
-  jsa::PropNameID createPropNameID(v8::Local<v8::String> &string);
+  jsa::PropNameID createPropNameID(v8::Local<v8::String> string);
   jsa::Object createObject(v8::Local<v8::Object> object) const;
 
   // Used by factory methods and clone methods

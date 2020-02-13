@@ -13,21 +13,21 @@
 using namespace alibaba::jsa_v8;
 using namespace alibaba;
 
-TEST(createValue, undefined) {
+TEST(V8Context, undefined) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   jsa::Value result = context->evaluateJavaScript("undefined;", "", 0);
   EXPECT_EQ(result.isUndefined(), true);
 }
 
-TEST(createValue, null) {
+TEST(V8Context, null) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   jsa::Value result = context->evaluateJavaScript("null", "", 0);
   EXPECT_EQ(result.isNull(), true);
 }
 
-TEST(createValue, number) {
+TEST(V8Context, number) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("123456", "", 0).isNumber(), true);
@@ -45,7 +45,7 @@ TEST(createValue, number) {
   EXPECT_EQ(context->evaluateJavaScript("NaN", "", 0).isNumber(), true);
 }
 
-TEST(createValue, boolean) {
+TEST(V8Context, boolean) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
@@ -56,7 +56,7 @@ TEST(createValue, boolean) {
 TEST(valueRef, undefined) {
   jsa::Value value;
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   v8::Local<v8::Value> ref = context->valueRef(value);
   EXPECT_EQ(ref->IsUndefined(), true);
   EXPECT_EQ(ref->IsNullOrUndefined(), true);
@@ -65,7 +65,7 @@ TEST(valueRef, undefined) {
 TEST(valueRef, null) {
   jsa::Value value{nullptr};
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   v8::Local<v8::Value> ref = context->valueRef(value);
   EXPECT_EQ(ref->IsNull(), true);
   EXPECT_EQ(ref->IsNullOrUndefined(), true);
@@ -75,7 +75,7 @@ TEST(valueRef, number) {
   jsa::Value intValue{2};
   jsa::Value doubleValue(2.2);
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   v8::Local<v8::Value> intRef = context->valueRef(intValue);
   v8::Local<v8::Value> doubleRef = context->valueRef(doubleValue);
   EXPECT_EQ(intRef->IsNumber(), true);
@@ -85,14 +85,14 @@ TEST(valueRef, number) {
 TEST(valueRef, boolean) {
   jsa::Value boolValue{true};
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   v8::Local<v8::Value> boolRef = context->valueRef(boolValue);
   EXPECT_EQ(boolRef->IsBoolean(), true);
 }
 
 TEST(V8StringValue, newString) {
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   const std::string str = "helloworld";
 
   jsa::String string = jsa::String::createFromUtf8(*context, str);
@@ -102,7 +102,7 @@ TEST(V8StringValue, newString) {
 
 TEST(V8StringValue, evaluateString) {
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   jsa::Value result = context->evaluateJavaScript("'12345'", "", 0);
   EXPECT_EQ(result.isString(), true);
   std::string resultStr = result.getString(*context).utf8(*context);
@@ -111,7 +111,7 @@ TEST(V8StringValue, evaluateString) {
 
 TEST(V8StringValue, evaluateStringObject) {
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   auto result = context->evaluateJavaScript("new String(12345)", "", 0);
   EXPECT_EQ(result.isString(), true);
   auto resultStr = result.getString(*context).utf8(*context);
@@ -120,7 +120,7 @@ TEST(V8StringValue, evaluateStringObject) {
 
 TEST(V8StringValue, createString) {
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   jsa::Value string = jsa::String::createFromAscii(*context, "helloworld");
   EXPECT_EQ(string.isString(), true);
   auto result = string.getString(*context).utf8(*context);
@@ -129,7 +129,7 @@ TEST(V8StringValue, createString) {
 
 TEST(V8SymbolValue, evaluateString) {
   initV8Engine("");
-  auto context = new V8Context();
+  auto context = std::make_unique<V8Context>();
   jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
   EXPECT_EQ(result.isSymbol(), true);
   v8::Local<v8::Value> ref = context->valueRef(result);

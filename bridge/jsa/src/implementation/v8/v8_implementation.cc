@@ -157,12 +157,14 @@ jsa::Value V8Context::createValue(v8::Local<v8::Value> value,
     bool result = value.As<v8::Boolean>()->BooleanValue(_isolate);
     return jsa::Value(result);
   } else if (value->IsString()) {
-    v8::Local<v8::String> str = v8::Local<v8::String>::New(_isolate, v8::Local<v8::String>::Cast(value));
+    v8::Local<v8::String> str = v8::Local<v8::String>::New(
+        _isolate, v8::Local<v8::String>::Cast(value));
     return jsa::Value(createString(str));
   } else if (value->IsStringObject()) {
     v8::Local<v8::StringObject> str = v8::Local<v8::StringObject>::Cast(value);
     v8::String::Utf8Value utf8Value(_isolate, str);
-    return jsa::Value(this->createStringFromAscii(*utf8Value, strlen(*utf8Value)));
+    return jsa::Value(
+        this->createStringFromAscii(*utf8Value, strlen(*utf8Value)));
   } else if (value->IsSymbol() || value->IsSymbolObject()) {
     v8::Local<v8::Symbol> sym = v8::Local<v8::Symbol>::Cast(value);
     return jsa::Value(createSymbol(sym));
@@ -221,7 +223,8 @@ V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
 }
 #else
 V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
-                                        v8::Local<v8::String> string): isolate_(isolate) {
+                                        v8::Local<v8::String> string)
+    : isolate_(isolate) {
   str_.Reset(isolate, string);
 }
 #endif
@@ -234,19 +237,17 @@ void V8Context::V8StringValue::invalidate() {
   delete this;
 }
 
-V8Context::V8SymbolValue::V8SymbolValue(
-    v8::Isolate *isolate,
-    const std::atomic<bool>& ctxInvalid,
-    v8::Local<v8::Symbol> sym
+V8Context::V8SymbolValue::V8SymbolValue(v8::Isolate *isolate,
+                                        const std::atomic<bool> &ctxInvalid,
+                                        v8::Local<v8::Symbol> sym
 #ifndef NDEBUG
-    ,
-    std::atomic<intptr_t>& counter
+                                        ,
+                                        std::atomic<intptr_t> &counter
 #endif
-)
-    : ctxInvalid_(ctxInvalid),
-      isolate_(isolate)
+                                        )
+    : ctxInvalid_(ctxInvalid), isolate_(isolate)
 #ifndef NDEBUG
-    ,
+      ,
       counter_(counter)
 #endif
 {
@@ -266,7 +267,6 @@ void V8Context::V8SymbolValue::invalidate() {
   }
   delete this;
 }
-
 
 jsa::JSContext::PointerValue *
 V8Context::cloneString(const jsa::JSContext::PointerValue *pv) {
@@ -295,25 +295,55 @@ V8Context::cloneObject(const jsa::JSContext::PointerValue *pv) {
 
 jsa::JSContext::PointerValue *
 V8Context::clonePropNameID(const jsa::JSContext::PointerValue *pv) {
-  return nullptr;
+  if (!pv) {
+    return nullptr;
+  }
+  const auto *string = static_cast<const V8StringValue *>(pv);
+  return makeStringValue(string->str_.Get(_isolate));
 }
 
 jsa::PropNameID V8Context::createPropNameIDFromAscii(const char *str,
-                                                     size_t length) {}
+                                                     size_t length) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::String> value =
+      v8::String::NewFromUtf8(_isolate, str).ToLocalChecked();
+  return createPropNameID(value);
+}
 
 jsa::PropNameID V8Context::createPropNameIDFromUtf8(const uint8_t *utf8,
-                                                    size_t length) {}
+                                                    size_t length) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::String> value =
+      v8::String::NewFromOneByte(_isolate, utf8).ToLocalChecked();
+  return createPropNameID(value);
+}
 
-jsa::PropNameID V8Context::createPropNameIDFromString(const jsa::String &str) {}
+jsa::PropNameID V8Context::createPropNameIDFromString(const jsa::String &str) {
+  v8::HandleScope handleScope(_isolate);
+  std::string source = str.utf8(*this);
+  v8::Local<v8::String> value =
+      v8::String::NewFromUtf8(_isolate, source.c_str()).ToLocalChecked();
+  return createPropNameID(value);
+}
 
-std::string V8Context::utf8(const jsa::PropNameID &) {}
+std::string V8Context::utf8(const jsa::PropNameID &propNameId) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::String> value = stringRef(propNameId);
+  v8::String::Utf8Value utf8Value(_isolate, value);
+  return std::string(*utf8Value);
+}
 
-bool V8Context::compare(const jsa::PropNameID &, const jsa::PropNameID &) {}
+bool V8Context::compare(const jsa::PropNameID &left,
+                        const jsa::PropNameID &right) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::String> leftString = stringRef(left);
+  v8::Local<v8::String> rightString = stringRef(right);
+  return leftString->Equals(_isolate->GetCurrentContext(), rightString)
+      .ToChecked();
+}
 
 std::string V8Context::symbolToString(const jsa::Symbol &sym) {
-  return jsa::Value(*this, sym)
-      .toString(*this)
-      .utf8(*this);
+  return jsa::Value(*this, sym).toString(*this).utf8(*this);
 }
 
 jsa::String V8Context::createStringFromAscii(const char *str, size_t length) {
@@ -438,7 +468,9 @@ jsa::String V8Context::createString(v8::Local<v8::String> value) const {
   return make<jsa::String>(makeStringValue(value));
 }
 
-jsa::PropNameID V8Context::createPropNameID(v8::Local<v8::String> &string) {}
+jsa::PropNameID V8Context::createPropNameID(v8::Local<v8::String> string) {
+  return make<jsa::PropNameID>(makeStringValue(string));
+}
 
 jsa::Object V8Context::createObject(v8::Local<v8::Object> object) const {}
 
