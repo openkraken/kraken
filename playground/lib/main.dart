@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
+
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:kraken/kraken.dart';
 import 'package:kraken_playground/command.dart';
 import 'package:requests/requests.dart';
-import 'package:kraken/kraken.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -26,8 +27,7 @@ String getCommandPathFromEnv() {
   return Platform.environment[COMMAND_PATH];
 }
 
-Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
-
+Future<String> getBundleContent({String bundleUrl, String bundlePath}) async {
   if (bundleUrl != null) {
     return Requests.get(bundleUrl).then((Response response) => response.content());
   }
@@ -37,11 +37,7 @@ Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
     return Future<String>.value(content);
   }
 
-  if (Platform.isAndroid || Platform.isIOS) {
-    return await loadBundleFromAssets();
-  }
-
-  return Future<String>.value('');
+  return await loadBundleFromAssets();
 }
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
@@ -61,7 +57,10 @@ void _setTargetPlatformForDesktop() {
 }
 
 Future<String> loadBundleFromAssets() async {
-  return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
+  // TODO：avoid crash when no assets bundle file
+  try {
+    return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
+  } catch (e) {}
 }
 
 void afterConnectedForCommand() async {
@@ -71,22 +70,15 @@ void afterConnectedForCommand() async {
 void afterConnected() async {
   String bundleUrl = getBundleURLFromEnv();
   String bundlePath = getBundlePathFromEnv();
-  String content = await getBundleContent(
-      bundleUrl: bundleUrl, bundlePath: bundlePath);
-  evaluateScripts(
-    content,
-    bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH,
-    0
-  );
+  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath);
+  evaluateScripts(content, bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
 void main() {
   initBridge();
- _setTargetPlatformForDesktop();
- runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-     showPerformanceOverlay: Platform
-         .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-     afterConnected: Platform.environment[COMMAND_PATH] != null
-         ? afterConnectedForCommand
-         : afterConnected);
+  _setTargetPlatformForDesktop();
+  runApp(
+      enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected);
 }

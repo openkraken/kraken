@@ -10,8 +10,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
+import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
+
 import 'element_inspector.dart';
 import 'element_manager.dart';
 
@@ -381,6 +382,8 @@ mixin ElementsBinding
   }
 }
 
+const FRAME_BEGIN = '\$';
+
 /// A concrete binding for applications based on the elements framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
@@ -394,7 +397,7 @@ class ElementsFlutterBinding extends BindingBase
         RendererBinding,
         ElementsBinding {
   static void onFrameBegin(Duration timeStamp) {
-    JSMessage(FRAME_BEGIN).send();
+    emitUIEvent(FRAME_BEGIN);
     ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
   }
 

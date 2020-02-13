@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 
 import 'bridge.dart';
 import 'element.dart';
+import 'module.dart';
 
 export 'bridge.dart';
 

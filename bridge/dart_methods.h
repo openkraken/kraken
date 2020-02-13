@@ -3,18 +3,19 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKEN_DART_CALLBACKS_H_
-#define KRAKEN_DART_CALLBACKS_H_
+#ifndef KRAKEN_DART_METHODS_H_
+#define KRAKEN_DART_METHODS_H_
 
 #include "thread_safe_map.h"
-#include "kraken_bridge_export.h"
+#include "bridge_export.h"
 #include <memory>
 
 namespace kraken {
 
-struct DartFuncPointer {
-  DartFuncPointer() = default;
-  InvokeDartFromJS invokeDartFromJS{nullptr};
+struct DartMethodPointer {
+  DartMethodPointer() = default;
+  InvokeUIManager invokeUIManager{nullptr};
+  InvokeModuleManager invokeModuleManager{nullptr};
   ReloadApp reloadApp{nullptr};
   SetTimeout setTimeout{nullptr};
   SetInterval setInterval{nullptr};
@@ -28,7 +29,8 @@ struct DartFuncPointer {
   OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
 };
 
-void registerInvokeDartFromJS(InvokeDartFromJS callback);
+void registerInvokeUIManager(InvokeUIManager callback);
+void registerInvokeModuleManager(InvokeModuleManager callback);
 void registerReloadApp(ReloadApp callback);
 void registerSetTimeout(SetTimeout callback);
 void registerSetInterval(SetInterval callback);
@@ -41,7 +43,7 @@ void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 
-std::shared_ptr<DartFuncPointer> getDartFunc();
+std::shared_ptr<DartMethodPointer> getDartMethod();
 
 } // namespace kraken
 

@@ -32,16 +32,10 @@ class Fetch {
         future = Requests.get(url, headers: map['headers']);
         break;
       case 'POST':
-        future = Requests.post(url,
-            headers: headers,
-            body: map['body'],
-            bodyEncoding: RequestBodyEncoding.JSON);
+        future = Requests.post(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
         break;
       case 'PUT':
-        future = Requests.put(url,
-            headers: headers,
-            body: map['body'],
-            bodyEncoding: RequestBodyEncoding.JSON);
+        future = Requests.put(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
         break;
       case 'PATCH':
         future = Requests.patch(url, headers: headers);

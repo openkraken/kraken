@@ -4,7 +4,7 @@
  */
 
 #include "timer.h"
-#include "dart_callbacks.h"
+#include "dart_methods.h"
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
@@ -58,12 +58,12 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  if (getDartFunc()->setTimeout == nullptr) {
+  if (getDartMethod()->setTimeout == nullptr) {
     KRAKEN_LOG(ERROR) << "[setTimeout] dart callback not register";
     return Value::undefined();
   }
 
-  int32_t timerId = getDartFunc()->setTimeout(callbackId, time);
+  int32_t timerId = getDartMethod()->setTimeout(callbackId, time);
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
   return Value(timerId);
@@ -108,12 +108,12 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                         << std::endl;
   }
 
-  if (getDartFunc()->setInterval == nullptr) {
+  if (getDartMethod()->setInterval == nullptr) {
     KRAKEN_LOG(ERROR) << "[setInterval] dart callback not register";
     return Value::undefined();
   }
 
-  int32_t timerId = getDartFunc()->setInterval(callbackId, time);
+  int32_t timerId = getDartMethod()->setInterval(callbackId, time);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;
@@ -145,12 +145,12 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  if (getDartFunc()->clearTimeout == nullptr) {
+  if (getDartMethod()->clearTimeout == nullptr) {
     KRAKEN_LOG(ERROR) << "[clearTimeout]: dart callback not register";
     return Value::undefined();
   }
 
-  getDartFunc()->clearTimeout(timer);
+  getDartMethod()->clearTimeout(timer);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
@@ -190,12 +190,12 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value
     return Value::undefined();
   }
 
-  if (getDartFunc()->cancelAnimationFrame == nullptr) {
+  if (getDartMethod()->cancelAnimationFrame == nullptr) {
     KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
     return Value::undefined();
   }
 
-  getDartFunc()->cancelAnimationFrame(timer);
+  getDartMethod()->cancelAnimationFrame(timer);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
@@ -239,12 +239,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                         << std::endl;
   }
 
-  if (getDartFunc()->requestAnimationFrame == nullptr) {
+  if (getDartMethod()->requestAnimationFrame == nullptr) {
     KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
     return Value::undefined();
   }
 
-  int32_t timerId = getDartFunc()->requestAnimationFrame(callbackId);
+  int32_t timerId = getDartMethod()->requestAnimationFrame(callbackId);
 
   timerIdToCallbackIdMap.set(timerId, callbackId);
   timerCallbackId = callbackId + 1;

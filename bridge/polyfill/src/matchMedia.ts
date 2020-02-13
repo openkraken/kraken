@@ -82,7 +82,7 @@ function parseQuery(query: string): Query {
   return parsed;
 }
 
-export function matchMedia(mediaQuery: string): MediaQueryList {
+function matchMedia(mediaQuery: string): MediaQueryList {
   
   let query = parseQuery(mediaQuery);
   // Not serialize the origin mediaquery

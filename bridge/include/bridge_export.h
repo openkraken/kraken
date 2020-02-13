@@ -15,7 +15,8 @@ struct Screen {
   double height;
 };
 
-typedef const char *(*InvokeDartFromJS)(const char *);
+typedef const char *(*InvokeUIManager)(const char*);
+typedef const char *(*InvokeModuleManager)(const char*, int32_t);
 typedef void (*ReloadApp)();
 typedef int32_t (*SetTimeout)(int32_t, int32_t);
 typedef int32_t (*SetInterval)(int32_t, int32_t);
@@ -36,7 +37,7 @@ void evaluateScripts(const char *code, const char *bundleFilename,
 KRAKEN_EXPORT
 void reloadJsContext();
 KRAKEN_EXPORT
-void invokeKrakenCallback(const char *data);
+void invokeEventListener(int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 KRAKEN_EXPORT
@@ -49,12 +50,16 @@ KRAKEN_EXPORT
 void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
                          const char* body);
 KRAKEN_EXPORT
+void invokeModuleCallback(int32_t callbackId, const char* json);
+KRAKEN_EXPORT
 void invokeOnloadCallback();
 KRAKEN_EXPORT
 void invokeOnPlatformBrightnessChangedCallback();
 
 KRAKEN_EXPORT
-void registerInvokeDartFromJS(InvokeDartFromJS invokeDartFromJs);
+void registerInvokeUIManager(InvokeUIManager invokeUIManager);
+KRAKEN_EXPORT
+void registerInvokeModuleManager(InvokeModuleManager invokeUIManager);
 KRAKEN_EXPORT
 void registerReloadApp(ReloadApp reloadApp);
 KRAKEN_EXPORT

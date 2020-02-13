@@ -1,5 +1,5 @@
 import { NodeImpl, NodeType } from './node';
-import { createTextNode } from "./bridge";
+import { createTextNode } from "./UIManager";
 
 export class TextImpl extends NodeImpl {
   public textContent: string = '';

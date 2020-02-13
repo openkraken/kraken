@@ -4,7 +4,7 @@
  */
 
 #include "fetch.h"
-#include "dart_callbacks.h"
+#include "dart_methods.h"
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
@@ -22,7 +22,7 @@ std::atomic<int> fetchId = {0};
 Value fetch(JSContext &context, const Value &thisVal, const Value *args,
             size_t count) {
   if (count != 3) {
-    KRAKEN_LOG(WARN) << "__kraken_fetch__ should only have one parameter";
+    KRAKEN_LOG(WARN) << "__kraken_fetch__ should have three parameter";
     return Value::undefined();
   }
 
@@ -31,37 +31,36 @@ Value fetch(JSContext &context, const Value &thisVal, const Value *args,
   const Value &func = args[2];
   if (!func.getObject(context).isFunction(context)) {
     KRAKEN_LOG(WARN)
-        << "__kraken_fetch__: first parameter should be an function";
+        << "__kraken_fetch__: callback should be an function";
     return Value::undefined();
   }
 
   if (!url.isString()) {
-    KRAKEN_LOG(WARN) << "__kraken_fetch__: second parameter should be a string";
+    KRAKEN_LOG(WARN) << "__kraken_fetch__: url should be a string";
     return Value::undefined();
   }
 
   if (!data.isString()) {
-    KRAKEN_LOG(WARN) << "__kraken_fetch__: third parameter  should be a string";
+    KRAKEN_LOG(WARN) << "__kraken_fetch__: data should be a string";
+    return Value::undefined();
+  }
+
+  if (getDartMethod()->invokeFetch == nullptr) {
+    KRAKEN_LOG(ERROR) << "dart invokeFetch not register";
     return Value::undefined();
   }
 
   std::shared_ptr<Value> funcValue =
       std::make_shared<Value>(Value(func.getObject(context)));
-  int id = fetchId.load();
+  int callbackId = fetchId.load();
 
   // store callback function
-  fetchMap.set(id, funcValue);
+  fetchMap.set(callbackId, funcValue);
 
-  if (getDartFunc()->invokeFetch == nullptr) {
-    KRAKEN_LOG(ERROR) << "dart fetch callback not register";
-    return Value::undefined();
-  }
+  fetchId = callbackId + 1;
 
-  getDartFunc()->invokeFetch(id, url.getString(context).utf8(context).c_str(),
+  getDartMethod()->invokeFetch(callbackId, url.getString(context).utf8(context).c_str(),
                              data.getString(context).utf8(context).c_str());
-
-  fetchMap.set(id, funcValue);
-  fetchId = id + 1;
 
   return Value::undefined();
 }
@@ -71,9 +70,10 @@ void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
                          const std::string &body) {
   std::shared_ptr<Value> funcValue;
   fetchMap.get(callbackId, funcValue);
+  fetchMap.erase(callbackId);
 
   if (funcValue == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
+    KRAKEN_LOG(VERBOSE) << "callback is null";
     return;
   }
 
@@ -98,7 +98,7 @@ void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
 }
 
 void bindFetch(std::unique_ptr<JSContext> &context) {
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken__fetch__", 0,
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_fetch__", 0,
                        fetch);
 }
 

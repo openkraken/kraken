@@ -1,37 +1,35 @@
-import { krakenJSToDart } from '../kraken';
+import { krakenUIManager } from '../kraken';
 
 // Timeout for batch updater, default to 60 fps.
 const FRAME_TICK_TIMEOUT = 1000 / 60;
-
 // Auto negotiation whether to enable batch update.
-let isEnableBatchUpdate:boolean = false;
-let frameTimeoutTimer:any;
+let batchUpdateEnabled:boolean = false;
+let updateFrameTimer:any;
+const updateMessageQueue:string[] = [];
 
 export function enableBatchUpdate() {
-  isEnableBatchUpdate = true;
+  batchUpdateEnabled = true;
 }
 
-const tickMessageQueue:string[] = [];
-
-export function frameTick() {
-  if (frameTimeoutTimer !== undefined) clearTimeout(frameTimeoutTimer);
-  frameTimeoutTimer = setTimeout(frameTick, FRAME_TICK_TIMEOUT);
-  if (tickMessageQueue.length > 0) {
-    krakenJSToDart('["batchUpdate",[' + tickMessageQueue.join(',') + ']]');
-    tickMessageQueue.length = 0;
+export function requestUpdateFrame() {
+  if (updateFrameTimer !== undefined) clearTimeout(updateFrameTimer);
+  updateFrameTimer = setTimeout(requestUpdateFrame, FRAME_TICK_TIMEOUT);
+  if (updateMessageQueue.length > 0) {
+    krakenUIManager('["batchUpdate",[' + updateMessageQueue.join(',') + ']]');
+    updateMessageQueue.length = 0;
   }
 }
 
 function sendMessage(message: string) {
-  if (isEnableBatchUpdate) {
-    tickMessageQueue.push(message);
+  if (batchUpdateEnabled) {
+    updateMessageQueue.push(message);
   } else {
-    krakenJSToDart(message);
+    krakenUIManager(message);
   }
 }
 
 export function createElement(type: string, id: number, props: any, events: any) {
-  sendMessage(`["createElement", [{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
+  sendMessage(`["createElement",[{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
 }
 
 export function createTextNode(id: number, nodeType: number, data: string) {

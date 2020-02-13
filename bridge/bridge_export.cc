@@ -3,14 +3,14 @@
  * Author: Kraken Team.
  */
 
-#include "kraken_bridge_export.h"
-#include "dart_callbacks.h"
+#include "bridge_export.h"
+#include "dart_methods.h"
 #include "bridge.h"
 #include "polyfill.h"
 #include <atomic>
 #include <string>
 
-kraken::DartFuncPointer funcPointer;
+kraken::DartMethodPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
@@ -36,13 +36,17 @@ void evaluateScripts(const char *code, const char *bundleFilename,
                          startLine);
 }
 
-void invokeKrakenCallback(const char *data) {
+void invokeEventListener(int32_t type,const char *data) {
   if (!inited) return;
-  bridge->handleFlutterCallback(data);
+  bridge->invokeEventListener(type, data);
 }
 
-void registerInvokeDartFromJS(InvokeDartFromJS callbacks) {
-  kraken::registerInvokeDartFromJS(callbacks);
+void registerInvokeUIManager(InvokeUIManager callbacks) {
+  kraken::registerInvokeUIManager(callbacks);
+}
+
+void registerInvokeModuleManager(InvokeModuleManager callbacks) {
+  kraken::registerInvokeModuleManager(callbacks);
 }
 
 void registerReloadApp(ReloadApp reloadApp) {
@@ -110,6 +114,10 @@ void invokeRequestAnimationFrameCallback(int32_t callbackId) {
 void invokeFetchCallback(int32_t callbackId, const char *error,
                          int32_t statusCode, const char *body) {
   bridge->invokeFetchCallback(callbackId, error, statusCode, body);
+}
+
+void invokeModuleCallback(int32_t callbackId, const char *json) {
+  bridge->invokeModuleCallback(callbackId, json);
 }
 
 void invokeOnloadCallback() {

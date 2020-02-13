@@ -1,4 +1,4 @@
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify([
     "createElement",
     [
@@ -13,7 +13,7 @@ __kraken_js_to_dart__(
   ])
 );
 
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify([
     "createElement",
     [
@@ -29,7 +29,7 @@ __kraken_js_to_dart__(
 );
 
 setTimeout(() => {
-  var _ctx = __kraken_js_to_dart__(
+  var _ctx = __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -42,7 +42,7 @@ setTimeout(() => {
   var context = JSON.parse(_ctx);
 
 //    context.fillStyle = WebColor.green;
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -53,7 +53,7 @@ setTimeout(() => {
     ])
   );
   //  context.fillRect(10, 10, 50, 50);
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -64,7 +64,7 @@ setTimeout(() => {
     ])
   );
   // context.clearRect(15, 15, 30, 30);
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -75,7 +75,7 @@ setTimeout(() => {
     ])
   );
 //    context.strokeStyle = WebColor.red;
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -86,7 +86,7 @@ setTimeout(() => {
     ])
   );
 //    context.strokeRect(40, 40, 100, 100);
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -97,7 +97,7 @@ setTimeout(() => {
     ])
   );
 //    context.fillStyle = WebColor.blue;
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -108,7 +108,7 @@ setTimeout(() => {
     ])
   );
 //    context.fillText('Hello World', 5.0, 5.0);
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -119,7 +119,7 @@ setTimeout(() => {
     ])
   );
 //    context.strokeText('Hello World', 5.0, 25.0);
-  __kraken_js_to_dart__(
+  __kraken_ui_manager__(
     JSON.stringify([
       'method',
       [
@@ -133,11 +133,11 @@ setTimeout(() => {
 }, 500);
 
 
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify(["insertAdjacentNode", [1, "beforeend", 2]])
 );
 
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 1]])
 );
 

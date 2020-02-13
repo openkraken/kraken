@@ -6,7 +6,7 @@
 #include "window.h"
 #include "logging.h"
 #include <cassert>
-#include "dart_callbacks.h"
+#include "dart_methods.h"
 
 namespace kraken {
 namespace binding {
@@ -45,20 +45,20 @@ Value JSWindow::get(JSContext &context,
                                   const PropNameID &name) {
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
-    if (getDartFunc()->devicePixelRatio == nullptr) {
+    if (getDartMethod()->devicePixelRatio == nullptr) {
       KRAKEN_LOG(ERROR) << "devicePixelRatio dart callback not register";
       return Value::undefined();
     }
 
-    double devicePixelRatio = getDartFunc()->devicePixelRatio();
+    double devicePixelRatio = getDartMethod()->devicePixelRatio();
     return Value(devicePixelRatio);
   } else if (_name == "colorScheme") {
-    if (getDartFunc()->platformBrightness == nullptr) {
+    if (getDartMethod()->platformBrightness == nullptr) {
       KRAKEN_LOG(ERROR) << "platformBrightness dart callback not register";
       return Value::undefined();
     }
     
-    return String::createFromUtf8(context, getDartFunc()->platformBrightness());
+    return String::createFromUtf8(context, getDartMethod()->platformBrightness());
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }
@@ -71,12 +71,12 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
   if (_name == "onLoad") {
     _onLoadCallback = Value(context, value);
   } else if (_name == "onColorSchemeChange") {
-    if (getDartFunc()->onPlatformBrightnessChanged == nullptr) {
+    if (getDartMethod()->onPlatformBrightnessChanged == nullptr) {
       KRAKEN_LOG(ERROR) << "onPlatformBrightnessChanged dart callback not register";
       return;
     }
     _onPlatformBrightnessChanged = Value(context, value);
-    getDartFunc()->onPlatformBrightnessChanged();
+    getDartMethod()->onPlatformBrightnessChanged();
   }
 }
 
@@ -100,8 +100,11 @@ void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
 
 std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {
   std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forUtf8(context, "colorScheme"));
   names.emplace_back(PropNameID::forUtf8(context, "devicePixelRatio"));
   names.emplace_back(PropNameID::forUtf8(context, "location"));
+  names.emplace_back(PropNameID::forUtf8(context, "onColorSchemeChange"));
+  names.emplace_back(PropNameID::forUtf8(context, "onLoad"));
   return names;
 }
 
