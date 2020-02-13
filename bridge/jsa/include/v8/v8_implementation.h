@@ -37,8 +37,7 @@ public:
   V8Instrumentation &instrumentation() override;
 
   // JSValueRef->JSValue (needs make.*Value so it must be member function)
-  jsa::Value createValue(v8::Local<v8::Value> value,
-                         v8::Local<v8::Context> context);
+  jsa::Value createValue(v8::Local<v8::Value> value);
 
   // Value->JSValueRef (similar to above)
   v8::Local<v8::Value> valueRef(const jsa::Value &value);
@@ -46,15 +45,13 @@ public:
 protected:
   // Symbol
   class V8SymbolValue final : public PointerValue {
-    V8SymbolValue(
-        v8::Isolate *isolate,
-        const std::atomic<bool> &ctxInvalid,
-        v8::Local<v8::Symbol> sym
+    V8SymbolValue(v8::Isolate *isolate, const std::atomic<bool> &ctxInvalid,
+                  v8::Local<v8::Symbol> sym
 #ifndef NDEBUG
-        ,
-        std::atomic<intptr_t>& counter
+                  ,
+                  std::atomic<intptr_t> &counter
 #endif
-        );
+    );
     void invalidate() override;
 
     v8::Isolate *isolate_;
@@ -73,13 +70,12 @@ protected:
     V8StringValue(v8::Isolate *isolate, v8::Local<v8::String> str,
                   std::atomic<intptr_t> &counter);
 #else
-    V8StringValue(v8::Isolate *isolate,
-                  v8::Local<v8::String> string);
+    V8StringValue(v8::Isolate *isolate, v8::Local<v8::String> string);
 #endif
     void invalidate() override;
 
     v8::Persistent<v8::String> str_;
-    v8::Isolate* isolate_;
+    v8::Isolate *isolate_;
 #ifndef NDEBUG
     std::atomic<intptr_t> &counter_;
 #endif
@@ -88,20 +84,21 @@ protected:
   };
 
   // Object
-  class JSCObjectValue final : public PointerValue {
-    JSCObjectValue(JSGlobalContextRef ctx, const std::atomic<bool> &ctxInvalid,
-                   JSObjectRef obj
+  class V8ObjectValue final : public PointerValue {
+    V8ObjectValue(v8::Isolate *isolate,
+                  const std::atomic<bool> &ctxInvalid,
+                  v8::Local<v8::Object> obj
 #ifndef NDEBUG
-                   ,
-                   std::atomic<intptr_t> &counter
+                  ,
+                  std::atomic<intptr_t> &counter
 #endif
     );
 
     void invalidate() override;
 
-    JSGlobalContextRef ctx_;
+    v8::Isolate *isolate_;
+    v8::Persistent<v8::Object> obj_;
     const std::atomic<bool> &ctxInvalid_;
-    JSObjectRef obj_;
 #ifndef NDEBUG
     std::atomic<intptr_t> &counter_;
 #endif
@@ -168,10 +165,10 @@ protected:
 
 private:
   // Basically convenience casts
-  static v8::Local<v8::Symbol> symbolRef(const jsa::Symbol &str);
-  static v8::Local<v8::String> stringRef(const jsa::String &str);
-  static v8::Local<v8::String> stringRef(const jsa::PropNameID &sym);
-  static v8::Local<v8::Object> objectRef(const jsa::Object &obj);
+  v8::Local<v8::Symbol> symbolRef(const jsa::Symbol &str) const;
+  v8::Local<v8::String> stringRef(const jsa::String &str) const;
+  v8::Local<v8::String> stringRef(const jsa::PropNameID &sym) const;
+  v8::Local<v8::Object> objectRef(const jsa::Object &obj) const;
 
   // Factory methods for creating String/Object
   jsa::Symbol createSymbol(v8::Local<v8::Symbol> symbol) const;
@@ -185,7 +182,7 @@ private:
   jsa::JSContext::PointerValue *
   makeStringValue(v8::Local<v8::String> value) const;
   jsa::JSContext::PointerValue *
-  makeObjectValue(v8::Local<v8::Object> &obj) const;
+  makeObjectValue(v8::Local<v8::Object> obj) const;
 
   v8::Isolate *_isolate;
   std::atomic<bool> ctxInvalid_;

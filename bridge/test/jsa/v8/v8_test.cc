@@ -53,7 +53,7 @@ TEST(V8Context, boolean) {
             true);
 }
 
-TEST(valueRef, undefined) {
+TEST(V8Context, valueRef_undefined) {
   jsa::Value value;
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -62,7 +62,7 @@ TEST(valueRef, undefined) {
   EXPECT_EQ(ref->IsNullOrUndefined(), true);
 }
 
-TEST(valueRef, null) {
+TEST(V8Context, valueRef_null) {
   jsa::Value value{nullptr};
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -71,7 +71,7 @@ TEST(valueRef, null) {
   EXPECT_EQ(ref->IsNullOrUndefined(), true);
 }
 
-TEST(valueRef, number) {
+TEST(V8Context, valueRef_number) {
   jsa::Value intValue{2};
   jsa::Value doubleValue(2.2);
   initV8Engine("");
@@ -82,7 +82,7 @@ TEST(valueRef, number) {
   EXPECT_EQ(doubleRef->IsNumber(), true);
 }
 
-TEST(valueRef, boolean) {
+TEST(V8Context, valueRef_boolean) {
   jsa::Value boolValue{true};
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -90,7 +90,7 @@ TEST(valueRef, boolean) {
   EXPECT_EQ(boolRef->IsBoolean(), true);
 }
 
-TEST(V8StringValue, newString) {
+TEST(V8Context, V8StringValue_newString) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   const std::string str = "helloworld";
@@ -100,7 +100,7 @@ TEST(V8StringValue, newString) {
   EXPECT_EQ(result, str);
 }
 
-TEST(V8StringValue, evaluateString) {
+TEST(V8Context, V8StringValue_evaluateString) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   jsa::Value result = context->evaluateJavaScript("'12345'", "", 0);
@@ -109,7 +109,7 @@ TEST(V8StringValue, evaluateString) {
   EXPECT_EQ(resultStr, "12345");
 }
 
-TEST(V8StringValue, evaluateStringObject) {
+TEST(V8Context, V8StringValue_evaluateStringObject) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   auto result = context->evaluateJavaScript("new String(12345)", "", 0);
@@ -118,7 +118,7 @@ TEST(V8StringValue, evaluateStringObject) {
   EXPECT_EQ(resultStr, "12345");
 }
 
-TEST(V8StringValue, createString) {
+TEST(V8Context, V8StringValue_createString) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   jsa::Value string = jsa::String::createFromAscii(*context, "helloworld");
@@ -127,7 +127,7 @@ TEST(V8StringValue, createString) {
   EXPECT_EQ(result, "helloworld");
 }
 
-TEST(V8SymbolValue, evaluateString) {
+TEST(V8Context, V8SymbolValue_evaluateString) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
@@ -136,4 +136,14 @@ TEST(V8SymbolValue, evaluateString) {
   EXPECT_EQ(ref->IsSymbol(), true);
   // TODO verify symbol toString
   //  auto str = result.getSymbol(*context).toString(*context);
+}
+
+TEST(V8Context, V8ObjectValue_createValue) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
+  EXPECT_EQ(result.isObject(), true);
+  jsa::Object obj = result.getObject(*context);
+  jsa::Value name = obj.getProperty(*context, "name");
+  EXPECT_EQ(name.isNumber(), true);
 }
