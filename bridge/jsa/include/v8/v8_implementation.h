@@ -37,7 +37,7 @@ public:
   V8Instrumentation &instrumentation() override;
 
   // JSValueRef->JSValue (needs make.*Value so it must be member function)
-  jsa::Value createValue(v8::Local<v8::Value> value);
+  jsa::Value createValue(v8::Local<v8::Value>& value);
 
   // Value->JSValueRef (similar to above)
   v8::Local<v8::Value> valueRef(const jsa::Value &value);
@@ -87,7 +87,7 @@ protected:
   class V8ObjectValue final : public PointerValue {
     V8ObjectValue(v8::Isolate *isolate,
                   const std::atomic<bool> &ctxInvalid,
-                  v8::Local<v8::Object> obj
+                  v8::Local<v8::Object> &obj
 #ifndef NDEBUG
                   ,
                   std::atomic<intptr_t> &counter
@@ -174,7 +174,7 @@ private:
   jsa::Symbol createSymbol(v8::Local<v8::Symbol> symbol) const;
   jsa::String createString(v8::Local<v8::String> string) const;
   jsa::PropNameID createPropNameID(v8::Local<v8::String> string);
-  jsa::Object createObject(v8::Local<v8::Object> object) const;
+  jsa::Object createObject(v8::Local<v8::Object> &object) const;
 
   // Used by factory methods and clone methods
   jsa::JSContext::PointerValue *
@@ -182,9 +182,10 @@ private:
   jsa::JSContext::PointerValue *
   makeStringValue(v8::Local<v8::String> value) const;
   jsa::JSContext::PointerValue *
-  makeObjectValue(v8::Local<v8::Object> obj) const;
+  makeObjectValue(v8::Local<v8::Object> &obj) const;
 
   v8::Isolate *_isolate;
+  v8::Persistent<v8::Context> _context;
   std::atomic<bool> ctxInvalid_;
   std::unique_ptr<V8Instrumentation> inst;
 
