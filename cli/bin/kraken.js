@@ -22,7 +22,7 @@ program
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .option('--show-performance-monitor', 'show render performance monitor', false)
-  .option('--jsEngine <jsEngine>', 'the JavaScript Engine that executes the code. ' + SUPPORTED_JS_ENGINE.join(' | '), 'jsc')
+  .option('--js-engine <jsengine>', 'the JavaScript Engine that executes the code. ' + SUPPORTED_JS_ENGINE.join(' | '), 'jsc')
   .option('-d, --debug-layout', 'debug element\'s paint layout', false)
   .action((options) => {
     let { bundle, url, source, instruct } = options;
