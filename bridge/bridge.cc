@@ -323,10 +323,10 @@ JSBridge::~JSBridge() {
   window_->unbind(context);
   screen_->unbind(context);
   websocket_->unbind(context);
-  binding::unbindTimer();
-  binding::unbindFetch();
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
+  binding::unbindFetch();
+  binding::unbindTimer();
 }
 
 Value JSBridge::getGlobalValue(std::string code) {

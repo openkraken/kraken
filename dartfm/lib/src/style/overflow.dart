@@ -14,20 +14,20 @@ mixin StyleOverflowMixin {
 
   Style _style;
 
-  RenderObject initOverflowBox(RenderObject current, Style style) {
+  RenderObject initOverflowBox(RenderObject current, Style style, void scrollListener(double scrollTop)) {
     if (style != null) {
       _style = style;
       _child = current;
       _renderObjectX = _getRenderObjectByOverflow(
-          style.overflowX, current, AxisDirection.right);
+          style.overflowX, current, AxisDirection.right, scrollListener);
 
       _renderObjectY = _getRenderObjectByOverflow(
-          style.overflowY, _renderObjectX, AxisDirection.down);
+          style.overflowY, _renderObjectX, AxisDirection.down, scrollListener);
     }
     return _renderObjectY;
   }
 
-  void updateOverFlowBox(Style style) {
+  void updateOverFlowBox(Style style, void scrollListener(double scrollTop)) {
     if (style != null) {
       String oldOverflowY = null;
       if (_style != null) {
@@ -59,7 +59,7 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
                 childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              _scrollableY = KrakenScrollable(axisDirection: axisDirection);
+              _scrollableY = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
               parent.child = _renderObjectY =
                   _scrollableY.getScrollableRenderObject(_renderObjectX);
             }
@@ -110,7 +110,7 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin &&
                 childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              _scrollableX = KrakenScrollable(axisDirection: axisDirection);
+              _scrollableX = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
               parent.child = _renderObjectX =
                   _scrollableX.getScrollableRenderObject(_child);
             }
@@ -136,7 +136,7 @@ mixin StyleOverflowMixin {
   }
 
   RenderObject _getRenderObjectByOverflow(
-      String overflow, RenderObject current, AxisDirection axisDirection) {
+      String overflow, RenderObject current, AxisDirection axisDirection, void scrollListener(double scrollTop)) {
     switch (overflow) {
       case Style.VISIBLE:
         if (axisDirection == AxisDirection.right) {
@@ -152,7 +152,7 @@ mixin StyleOverflowMixin {
       case Style.AUTO:
       case Style.SCROLL:
         KrakenScrollable scrollable =
-            KrakenScrollable(axisDirection: axisDirection);
+            KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
         if (axisDirection == AxisDirection.right) {
           _scrollableX = scrollable;
         } else {

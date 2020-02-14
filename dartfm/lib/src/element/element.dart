@@ -86,7 +86,7 @@ abstract class Element extends Node
       renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
     if (style.get('display') != 'inline') {
-      renderObject = initOverflowBox(renderObject, style);
+      renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
 
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
@@ -117,8 +117,10 @@ abstract class Element extends Node
 
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
     _inited = true;
+
   }
   RenderConstrainedBox renderConstrainedBox;
+  RenderObject stickyPlaceholder;
   final String tagName;
   Map<String, dynamic> properties;
   bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
@@ -132,6 +134,9 @@ abstract class Element extends Node
 
   double cropWidth = 0;
   double cropBorderWidth = 0;
+
+  double offsetTop = null;
+  bool stickyFixed = false;
 
   Style _style;
   Style get style => _style;
@@ -168,7 +173,7 @@ abstract class Element extends Node
       }
 
       ///2.update overflow
-      updateOverFlowBox(newStyle);
+      updateOverFlowBox(newStyle, _scrollListener);
 
       ///3.update padding
       updateRenderPadding(newStyle, transitionMap);
@@ -193,7 +198,7 @@ abstract class Element extends Node
       // position change
       if (positionChanged) {
         needsReposition = true;
-        _updatePosition(newStyle);
+        updatePosition(newStyle);
       } else if (newPosition != 'static') {
         int newZIndex = newStyle.zIndex;
         int oldZIndex = _style.zIndex;
@@ -237,65 +242,146 @@ abstract class Element extends Node
 
   final String defaultDisplay;
 
-  void _updatePosition(Style style) {
-    // from !static to static
-    if (style.position == 'static') {
-      // change current positioned element to non positioned, remove stack node
+  void _scrollListener(double scrollTop) {
+    if (this != ElementManager().getRootElement()) {
+      return;
+    }
+
+    List stickyEls = findStickyChildren(this);
+
+    for (int i = 0; i < stickyEls.length; i++) {
+      Element el = stickyEls[i];
+      Style elStyle = el.style;
+      double top = baseGetDisplayPortedLength(elStyle.get('top'));
+      double offsetTop = double.parse(el.getOffset(true));
+      if (el.offsetTop == null) {
+        el.offsetTop = offsetTop;
+      }
+
+      if (el.offsetTop - scrollTop <= top) {
+        // change to fixed behavior
+        if (!el.stickyFixed) {
+          el.stickyFixed = true;
+          el.updatePosition(elStyle.copyWith({'position': 'fixed'}));
+        }
+      } else {
+        // change to relative behavior
+        if (el.stickyFixed) {
+          el.stickyFixed = false;
+          el.updatePosition(elStyle.copyWith({'position': 'sticky'}));
+        }
+      }
+    }
+  }
+
+  List findStickyChildren(dynamic el) {
+    if (el is! Element) {
+      return null;
+    }
+    List resultEls = [];
+
+    List childNodes = el.childNodes;
+    if (childNodes.length != 0) {
+      for (int i = 0; i < childNodes.length; i++) {
+        dynamic childEl = childNodes[i];
+        if (childEl is Element) {
+          Style childStyle = childEl.style;
+          if (childStyle.position == 'sticky' &&
+            childStyle.top != null
+          ) {
+            resultEls.add(childEl);
+          }
+
+          List childEls = findStickyChildren(childEl);
+          if (childEls != null) {
+            resultEls = [...resultEls, ...childEls];
+          }
+        }
+      }
+    }
+
+    return resultEls;
+  }
+
+  void updatePosition(Style newStyle) {
+    // remove stack node when change to non positioned
+    if (newStyle.position == 'static') {
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
       (renderStack.parent as RenderDecoratedBox).child = child;
-      // remove positioned element from parent element stack
-      Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-      parentElementWithStack.renderStack.remove(renderBoxModel);
-
-      // find pre non positioned element
-      var preNonPositionedElement = null;
-      var currentElement = nodeMap[nodeId];
-      var parentElement = currentElement.parentNode;
-      int curIdx = parentElement.childNodes.indexOf(currentElement);
-      for (int i = curIdx - 1; i > -1; i--) {
-        var element = parentElement.childNodes[i];
-        var style = element.properties['style'];
-        if (style == null ||
-            !style.containsKey('position') ||
-            (style.containsKey('position') && style['position'] == 'static')) {
-          preNonPositionedElement = element;
-          break;
-        }
-      }
-      // find pre non positioned renderObject
-      RenderBoxModel preNonPositionedObject = null;
-      if (preNonPositionedElement != null) {
-        RenderObjectVisitor visitor = (child) {
-          if (child is RenderBoxModel && preNonPositionedElement.nodeId == child.nodeId) {
-            preNonPositionedObject = child;
-          }
-        };
-        parentElement.renderLayoutElement.visitChildren(visitor);
-      }
-      // insert non positioned renderObject to parent element in the order of original element tree
-      parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
-
-      needsReposition = false;
-
-      // from static to !static
+      renderStack = null;
     } else {
-      // change non position element to position element, add stack node
-      RenderObject child = renderDecoratedBox.child;
-      renderDecoratedBox.child = null;
-      RenderStack renderNewStack = RenderPosition(
-        textDirection: TextDirection.ltr,
-        fit: StackFit.passthrough,
-        overflow: Overflow.visible,
-        children: [child],
-      );
+      // add stack node when change to positioned
+      if (renderStack == null) {
+        RenderObject child = renderDecoratedBox.child;
+        renderDecoratedBox.child = null;
+        RenderStack renderNewStack = RenderPosition(
+          textDirection: TextDirection.ltr,
+          fit: StackFit.passthrough,
+          overflow: Overflow.visible,
+          children: [child],
+        );
 
-      renderStack = renderDecoratedBox.child = renderNewStack;
-
-      // append element to positioned parent
-      if (style.position == 'absolute' || style.position == 'fixed') {
-        _rePositionElement(this);
+        renderStack = renderDecoratedBox.child = renderNewStack;
       }
+    }
+
+    // move element back to document flow
+    if (newStyle.position == 'static' ||
+      newStyle.position == 'relative' ||
+      (newStyle.position == 'sticky' && !stickyFixed)
+    ) {
+      // move element back to document flow
+      if (style.position == 'absolute' ||
+        style.position == 'fixed' ||
+        style.position == 'sticky'
+      ) {
+        // remove positioned element from parent element stack
+        Element parentElementWithStack =
+            findParent(this, (element) => element.renderStack != null);
+        parentElementWithStack.renderStack.remove(renderBoxModel);
+
+        // remove sticky placeholder
+        if (style.position == 'sticky') {
+          removeStickyPlaceholder();
+        }
+        // find pre non positioned element
+        var preNonPositionedElement = null;
+        var currentElement = nodeMap[nodeId];
+        var parentElement = currentElement.parentNode;
+        int curIdx = parentElement.childNodes.indexOf(currentElement);
+        for (int i = curIdx - 1; i > -1; i--) {
+          var element = parentElement.childNodes[i];
+          var style = element.properties['style'];
+          if (style == null ||
+              !style.containsKey('position') ||
+              (style.containsKey('position') && style['position'] == 'static')) {
+            preNonPositionedElement = element;
+            break;
+          }
+        }
+        // find pre non positioned renderObject
+        RenderBoxModel preNonPositionedObject = null;
+        if (preNonPositionedElement != null) {
+          RenderObjectVisitor visitor = (child) {
+            if (child is RenderBoxModel &&
+                preNonPositionedElement.nodeId == child.nodeId) {
+              preNonPositionedObject = child;
+            }
+          };
+          parentElement.renderLayoutElement.visitChildren(visitor);
+        }
+        // insert non positioned renderObject to parent element in the order of original element tree
+        parentElement.renderLayoutElement
+            .insert(renderBoxModel, after: preNonPositionedObject);
+
+        needsReposition = false;
+      }
+
+    // move element out of document flow
+    } else {
+      // append element to positioned parent
+      _rePositionElement(this);
     }
 
     // loop positioned children to reposition
@@ -304,6 +390,21 @@ abstract class Element extends Node
       Element target = targets[i];
       _rePositionElement(target);
     }
+  }
+
+  void removeStickyPlaceholder() {
+    (stickyPlaceholder.parent as ContainerRenderObjectMixin).remove(stickyPlaceholder);
+  }
+
+  void insertStickyPlaceholder() {
+    Style pStyle = Style({
+      'width': renderMargin.size.width.toString() + 'px',
+      'height': renderMargin.size.height.toString() + 'px',
+      'backgroundColor': '#fff',
+    });
+    stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
+    stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, this);
+    (renderObject.parent as ContainerRenderObjectMixin).insert(stickyPlaceholder, after: renderObject);
   }
 
   // reposition element with position absolute/fixed
@@ -327,6 +428,11 @@ abstract class Element extends Node
     // not found positioned parent element, wait for append in appenedElement
     if (parentElementWithStack == null) {
       return;
+    }
+
+    // add placeholder for sticky element before moved
+    if (style.position == 'sticky') {
+      insertStickyPlaceholder();
     }
 
     // remove non positioned element from parent element
@@ -645,22 +751,27 @@ abstract class Element extends Node
     }
     List resultEls = [];
 
-    if (el.style.contains('position') && (el.style.position == 'absolute' || el.style.position == 'fixed')) {
-      if (needsReposition) {
-        if (el.needsReposition == true) {
-          resultEls.add(el);
-        }
-      } else {
-        resultEls.add(el);
-      }
-    }
-
     List childNodes = el.childNodes;
     if (childNodes.length != 0) {
       for (int i = 0; i < childNodes.length; i++) {
-        List childEls = this.findPositionedChildren(childNodes[i], needsReposition);
-        if (childEls != null) {
-          resultEls = [...resultEls, ...childEls];
+        dynamic childEl = childNodes[i];
+        if (childEl is Element) {
+          if (childEl.style.contains('position') &&
+              (childEl.style.position == 'absolute' || childEl.style.position == 'fixed')) {
+            if (needsReposition) {
+              if (childEl.needsReposition == true) {
+                resultEls.add(childEl);
+              }
+            } else {
+              resultEls.add(childEl);
+            }
+          }
+
+          List childEls =
+              this.findPositionedChildren(childEl, needsReposition);
+          if (childEls != null) {
+            resultEls = [...resultEls, ...childEls];
+          }
         }
       }
     }
@@ -866,9 +977,9 @@ abstract class Element extends Node
   dynamic method(String name, List<dynamic> args) {
     switch (name) {
       case 'offsetTop':
-        return _getOffset(true);
+        return getOffset(true);
       case 'offsetLeft':
-        return _getOffset(false);
+        return getOffset(false);
       case 'offsetWidth':
         return renderMargin?.size?.width ?? '0';
       case 'offsetHeight':
@@ -894,11 +1005,16 @@ abstract class Element extends Node
     }
   }
 
-  String _getOffset(bool isTop) {
+  String getOffset(bool isTop) {
     double offset = 0;
     if (renderObject is RenderBox) {
-      Element element = findParent(this, (element) => element.renderStack != null);
-      Offset relative = (renderObject as RenderBox).localToGlobal(Offset.zero, ancestor: element.renderObject);
+      Element element =
+          findParent(this, (element) => element.renderStack != null);
+      if (element == null) {
+        element = ElementManager().getRootElement();
+      }
+      Offset relative = (renderObject as RenderBox)
+          .localToGlobal(Offset.zero, ancestor: element.renderObject);
       offset += isTop ? relative.dy : relative.dx;
     }
     return offset.toString();

@@ -143,7 +143,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   return Value(timerId);
 }
 
-Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
+Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args,
                    size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[clearTimeout] function missing parameter";
