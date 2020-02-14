@@ -262,7 +262,6 @@ abstract class Element extends Node
         el.offsetTop = offsetTop;
       }
 
-      String position = elStyle.get('position');
       if (el.offsetTop - scrollTop <= top) {
         // change to fixed behavior
         if (!el.stickyFixed) {
