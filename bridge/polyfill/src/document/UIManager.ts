@@ -1,10 +1,8 @@
 import { krakenUIManager } from '../kraken';
 
-// Timeout for batch updater, default to 60 fps.
-const FRAME_TICK_TIMEOUT = 16;
 // Auto negotiation whether to enable batch update.
 let batchUpdateEnabled:boolean = false;
-let updateFrameTimer:any = null;
+// let updateFrameTimer:any = null;
 const updateMessageQueue:string[] = [];
 
 export function enableBatchUpdate() {
@@ -12,8 +10,6 @@ export function enableBatchUpdate() {
 }
 
 export function requestUpdateFrame() {
-  if (updateFrameTimer !== null) clearTimeout(updateFrameTimer);
-  updateFrameTimer = setTimeout(requestUpdateFrame, FRAME_TICK_TIMEOUT);
   if (updateMessageQueue.length > 0) {
     krakenUIManager('["batchUpdate",[' + updateMessageQueue.join(',') + ']]');
     updateMessageQueue.length = 0;

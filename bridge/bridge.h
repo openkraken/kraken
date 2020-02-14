@@ -28,8 +28,6 @@ private:
 public:
   JSBridge();
   ~JSBridge();
-
-  std::atomic<bool> contextInvalid;
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();
@@ -48,9 +46,6 @@ public:
   void handleUIListener(const char *args);
   void handleModuleListener(const char *args);
 
-  void invokeSetTimeoutCallback(int32_t callbackId);
-  void invokeSetIntervalCallback(int32_t callbackId);
-  void invokeRequestAnimationFrameCallback(int32_t callbackId);
   void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
                            const char* body);
   void invokeModuleCallback(int32_t callbackId, const char* json);

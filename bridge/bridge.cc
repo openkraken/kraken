@@ -81,7 +81,7 @@ Value krakenModuleManager(JSContext &context, const Value &thisVal,
     const Value &func = args[1];
     if (func.getObject(context).isFunction(context)) {
       callbackId = methodCallbackId.load();
-       std::shared_ptr<Value> funcValue = 
+       std::shared_ptr<Value> funcValue =
         std::make_shared<Value>(Value(func.getObject(context)));
       methodCallbackMap.set(callbackId, funcValue);
       methodCallbackId = callbackId + 1;
@@ -279,7 +279,7 @@ const int UI_EVENT = 0;
 const int MODULE_EVENT = 1;
 
 void JSBridge::invokeEventListener(int32_t type, const char *args) {
-  assert(context != nullptr);
+  if (!context->isValid()) return;
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
       strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -301,7 +301,7 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
 
 void JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
-  assert(context != nullptr);
+  if (!context->isValid()) return;
   try {
     binding::updateLocation(url);
     context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
@@ -319,6 +319,7 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 }
 
 JSBridge::~JSBridge() {
+  if (!context->isValid()) return;
   window_->unbind(context);
   screen_->unbind(context);
   websocket_->unbind(context);
@@ -332,25 +333,16 @@ Value JSBridge::getGlobalValue(std::string code) {
   return context->evaluateJavaScript(code.c_str(), "test://", 0);
 }
 
-void JSBridge::invokeSetTimeoutCallback(int32_t callbackId) {
-  kraken::binding::invokeSetTimeoutCallback(context, callbackId);
-}
-
-void JSBridge::invokeSetIntervalCallback(int32_t callbackId) {
-  kraken::binding::invokeSetIntervalCallback(context, callbackId);
-}
-
-void JSBridge::invokeRequestAnimationFrameCallback(int32_t callbackId) {
-  kraken::binding::invokeRequestAnimationFrameCallback(context, callbackId);
-}
 
 void JSBridge::invokeFetchCallback(int32_t callbackId, const char *error,
                                    int32_t statusCode, const char *body) {
+  if (!context->isValid()) return;
   kraken::binding::invokeFetchCallback(context, callbackId, std::string(error),
                                        statusCode, std::string(body));
 }
 
 void JSBridge::invokeModuleCallback(int32_t callbackId, const char *json) {
+  if (!context->isValid()) return;
   std::shared_ptr<Value> funcValue;
   methodCallbackMap.get(callbackId, funcValue);
 
@@ -364,14 +356,17 @@ void JSBridge::invokeModuleCallback(int32_t callbackId, const char *json) {
 }
 
 void JSBridge::invokeOnloadCallback() {
+  if (!context->isValid()) return;
   window_->invokeOnloadCallback(context);
 }
 
 void JSBridge::invokeOnPlatformBrightnessChangedCallback() {
+  if (!context->isValid()) return;
   window_->invokeOnPlatformBrightnessChangedCallback(context);
 }
 
 void JSBridge::flushUITask() {
+  if (!context->isValid()) return;
   kraken::foundation::flushUITask();
 }
 
