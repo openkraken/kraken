@@ -235,7 +235,7 @@ void JSBridge::handleUIListener(const char *args) {
     std::shared_ptr<Value> callback;
     krakenUIListenerList.get(i, callback);
 
-    if (callback == nullptr) {
+    if (callback.get() == nullptr) {
       KRAKEN_LOG(WARN) << "[krakenUIListener ERROR]: you should initialize UI listener";
       return;
     }
@@ -259,8 +259,8 @@ void JSBridge::handleModuleListener(const char *args) {
     std::shared_ptr<Value> callback;
     krakenModuleListenerList.get(i, callback);
 
-    if (callback == nullptr) {
-      KRAKEN_LOG(WARN) << "[krakenModuleListener ERROR]: you should initialize module listener";
+    if (callback.get() == nullptr) {
+      KRAKEN_LOG(WARN) << "[krakenModuleListener ERROR]: you should initialize Module listener";
       return;
     }
 
@@ -353,9 +353,8 @@ void JSBridge::invokeFetchCallback(int32_t callbackId, const char *error,
 void JSBridge::invokeModuleCallback(int32_t callbackId, const char *json) {
   std::shared_ptr<Value> funcValue;
   methodCallbackMap.get(callbackId, funcValue);
-  methodCallbackMap.erase(callbackId);
 
-  if (funcValue == nullptr) {
+  if (funcValue.get() == nullptr) {
     KRAKEN_LOG(VERBOSE) << "Module method callback is null";
     return;
   }

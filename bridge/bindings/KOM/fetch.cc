@@ -72,7 +72,7 @@ void invokeFetchCallback(std::unique_ptr<JSContext> &context, int callbackId,
   fetchMap.get(callbackId, funcValue);
   fetchMap.erase(callbackId);
 
-  if (funcValue == nullptr) {
+  if (funcValue.get() == nullptr) {
     KRAKEN_LOG(VERBOSE) << "callback is null";
     return;
   }

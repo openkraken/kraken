@@ -305,16 +305,12 @@ void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context,
 }
 
 void bindTimer(std::unique_ptr<JSContext> &context) {
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),
-                                  requestAnimationFrame);
-  JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0,
-                       clearTimeout);
-  JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,
-                       clearTimeout);
-  JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0,
-                       cancelAnimationFrame);
+  JSA_BINDING_FUNCTION(*context, context->global(), "setTimeout", 0, setTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "setInterval", 0, setInterval);
+  JSA_BINDING_FUNCTION(*context, context->global(), "requestAnimationFrame", 0, requestAnimationFrame);
+  JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0, clearTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0, clearTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0, cancelAnimationFrame);
 }
 
 void unbindTimer() {
