@@ -177,6 +177,10 @@ bool JSCContext::isInspectable() {
   return false;
 }
 
+bool JSCContext::isValid() {
+  return !ctxInvalid_.load();
+}
+
 namespace {
 
 bool smellsLikeES6Symbol(JSGlobalContextRef ctx, JSValueRef ref) {
