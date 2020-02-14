@@ -98,6 +98,7 @@ abstract class Element extends Node
       onPointerMove: this._handlePointMove,
       onPointerUp: this._handlePointUp,
       onPointerCancel: this._handlePointCancel,
+      behavior: HitTestBehavior.translucent,
     );
     if (style.position != 'static') {
       renderObject = renderStack = RenderPosition(
