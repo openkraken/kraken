@@ -1,20 +1,7 @@
 import { krakenUIListener } from '../kraken';
-import { enableBatchUpdate, requestUpdateFrame } from './UIManager';
 import { handleEvent } from './element';
 
-const FRAME_BEGIN = '$';
-let batchUpdateInitialized = false;
 krakenUIListener((message) => {
-  // frame begin message maybe not once
-  if (message[0] === FRAME_BEGIN) {
-    if (!batchUpdateInitialized) {
-      batchUpdateInitialized = true;
-      enableBatchUpdate();
-      requestUpdateFrame();
-    }
-    return;
-  }
-
   let parsedMessage = null;
   try {
     parsedMessage = JSON.parse(message);

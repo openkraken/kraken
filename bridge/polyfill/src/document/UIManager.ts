@@ -1,15 +1,10 @@
 import { krakenUIManager } from '../kraken';
 
-// Auto negotiation whether to enable batch update.
-let batchUpdateEnabled:boolean = false;
-// let updateFrameTimer:any = null;
 const updateMessageQueue:string[] = [];
+let updateRequested: boolean = false;
 
-export function enableBatchUpdate() {
-  batchUpdateEnabled = true;
-}
-
-export function requestUpdateFrame() {
+function requestUpdateFrame() {
+  updateRequested = false;
   if (updateMessageQueue.length > 0) {
     krakenUIManager('["batchUpdate",[' + updateMessageQueue.join(',') + ']]');
     updateMessageQueue.length = 0;
@@ -17,10 +12,10 @@ export function requestUpdateFrame() {
 }
 
 function sendMessage(message: string) {
-  if (batchUpdateEnabled) {
-    updateMessageQueue.push(message);
-  } else {
-    krakenUIManager(message);
+  updateMessageQueue.push(message);
+  if (!updateRequested) {
+    updateRequested = true;
+    requestAnimationFrame(requestUpdateFrame);
   }
 }
 

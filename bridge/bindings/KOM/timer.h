@@ -14,7 +14,6 @@ namespace binding {
 using namespace alibaba::jsa;
 
 void bindTimer(std::unique_ptr<JSContext> &context);
-void unbindTimer();
 
 } // namespace binding
 } // namespace kraken

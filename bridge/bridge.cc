@@ -326,7 +326,6 @@ JSBridge::~JSBridge() {
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
   binding::unbindFetch();
-  binding::unbindTimer();
 }
 
 Value JSBridge::getGlobalValue(std::string code) {

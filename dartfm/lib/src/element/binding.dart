@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
 
 import 'element_inspector.dart';
@@ -102,13 +101,7 @@ abstract class ElementsBindingObserver {
 
 /// The glue between the elements layer and the Flutter engine.
 mixin ElementsBinding
-    on
-        BindingBase,
-        ServicesBinding,
-        SchedulerBinding,
-        GestureBinding,
-        RendererBinding,
-        SemanticsBinding {
+    on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -132,8 +125,7 @@ mixin ElementsBinding
     if (!kReleaseMode) {
       registerBoolServiceExtension(
         name: 'showPerformanceOverlay',
-        getter: () => Future<bool>.value(
-            ElementManager.showPerformanceOverlayOverride ?? false),
+        getter: () => Future<bool>.value(ElementManager.showPerformanceOverlayOverride ?? false),
         setter: (bool value) {
           if (ElementManager.showPerformanceOverlayOverride != value) {
             ElementManager.showPerformanceOverlayOverride = value;
@@ -143,8 +135,7 @@ mixin ElementsBinding
         },
       );
 
-      ElementInspectorService.instance
-          .initServiceExtensions(registerServiceExtension);
+      ElementInspectorService.instance.initServiceExtensions(registerServiceExtension);
     }
   }
 
@@ -160,8 +151,7 @@ mixin ElementsBinding
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
   ///  * [ElementsBindingObserver], which has an example of using this method.
-  void addObserver(ElementsBindingObserver observer) =>
-      _observers.add(observer);
+  void addObserver(ElementsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
@@ -171,35 +161,30 @@ mixin ElementsBinding
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [ElementsBindingObserver], which has an example of using this method.
-  bool removeObserver(ElementsBindingObserver observer) =>
-      _observers.remove(observer);
+  bool removeObserver(ElementsBindingObserver observer) => _observers.remove(observer);
 
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeMetrics();
+    for (ElementsBindingObserver observer in _observers) observer.didChangeMetrics();
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeTextScaleFactor();
+    for (ElementsBindingObserver observer in _observers) observer.didChangeTextScaleFactor();
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangePlatformBrightness();
+    for (ElementsBindingObserver observer in _observers) observer.didChangePlatformBrightness();
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeAccessibilityFeatures();
+    for (ElementsBindingObserver observer in _observers) observer.didChangeAccessibilityFeatures();
   }
 
   /// Called when the system locale changes.
@@ -222,8 +207,7 @@ mixin ElementsBinding
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale> locales) {
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeLocales(locales);
+    for (ElementsBindingObserver observer in _observers) observer.didChangeLocales(locales);
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]
@@ -235,8 +219,7 @@ mixin ElementsBinding
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeAccessibilityFeatures();
+    for (ElementsBindingObserver observer in _observers) observer.didChangeAccessibilityFeatures();
   }
 
   /// Called when the system pops the current route.
@@ -251,8 +234,7 @@ mixin ElementsBinding
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (ElementsBindingObserver observer
-        in List<ElementsBindingObserver>.from(_observers)) {
+    for (ElementsBindingObserver observer in List<ElementsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute()) return;
     }
     SystemNavigator.pop();
@@ -271,8 +253,7 @@ mixin ElementsBinding
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (ElementsBindingObserver observer
-        in List<ElementsBindingObserver>.from(_observers)) {
+    for (ElementsBindingObserver observer in List<ElementsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route)) return;
     }
   }
@@ -290,8 +271,7 @@ mixin ElementsBinding
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (ElementsBindingObserver observer in _observers)
-      observer.didChangeAppLifecycleState(state);
+    for (ElementsBindingObserver observer in _observers) observer.didChangeAppLifecycleState(state);
   }
 
   /// Called when the operating system notifies the application of a memory
@@ -303,8 +283,7 @@ mixin ElementsBinding
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
-    for (ElementsBindingObserver observer in _observers)
-      observer.didHaveMemoryPressure();
+    for (ElementsBindingObserver observer in _observers) observer.didHaveMemoryPressure();
   }
 
   @override
@@ -382,8 +361,6 @@ mixin ElementsBinding
   }
 }
 
-const FRAME_BEGIN = '\$';
-
 /// A concrete binding for applications based on the elements framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
@@ -396,18 +373,12 @@ class ElementsFlutterBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         ElementsBinding {
-  static void onFrameBegin(Duration timeStamp) {
-    emitUIEvent(FRAME_BEGIN);
-    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
-  }
-
   /// Returns an instance of the [ElementsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a
   /// [ElementsFlutterBinding]. If one was previously initialized, then
   /// it will at least implement [ElementsBinding].
   static ElementsBinding ensureInitialized() {
     if (ElementsBinding.instance == null) ElementsFlutterBinding();
-    ElementsBinding.instance.addPostFrameCallback(onFrameBegin);
     return ElementsBinding.instance;
   }
 }
