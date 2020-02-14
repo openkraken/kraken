@@ -99,16 +99,7 @@ class CameraElement extends Element {
         ) {
     initCameraController()
       .then((_) async {
-        print("startImageStream");
-        await controller.startImageStream((CameraImage image) {
-          print('CameraImage $image');
-        });
-//        print('startVideoRecording');
-//        controller.startVideoRecording("/Users/zhuoling/workspace/kraken_workspace/test_camera.mp4");
-//        Timer(Duration(seconds: 10), () {
-//          print('stopVideoRecording');
-//          controller.stopVideoRecording();
-//        });
+        print('initCameraController initizeld.');
       });
   }
 
