@@ -1,5 +1,5 @@
 stage:
-  test:
+  CIChecker:
     env:
       image: 'aone-base-global/alios7-nodejs-ci:1.0.0'
     plugin:
@@ -21,8 +21,8 @@ stage:
       - 'export PATH=$PWD/node_modules/.bin:$HOME/.cli:$PATH'
       - 'echo $PATH'
       - 'wget https://storage.googleapis.com/flutter_infra/releases/dev/linux/flutter_linux_v1.15.3-dev.tar.xz -q'
-      - 'tar xvf ./flutter_linux_v1.15.3-dev.tar.xz'
+      - 'tar xf ./flutter_linux_v1.15.3-dev.tar.xz'
       - 'export PATH="$PATH:`pwd`/flutter/bin"'
       - 'npm run ci'
 pipeline:
-  - 'test'
+  - 'CIChecker'
