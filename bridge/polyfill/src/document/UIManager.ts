@@ -1,7 +1,7 @@
 import { krakenUIManager } from '../kraken';
 
 // Timeout for batch updater, default to 60 fps.
-const FRAME_TICK_TIMEOUT = 1000 / 60;
+const FRAME_TICK_TIMEOUT = 16;
 // Auto negotiation whether to enable batch update.
 let batchUpdateEnabled:boolean = false;
 let updateFrameTimer:any = null;

@@ -114,7 +114,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   return Value(timerId);
 }
 
-Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
+Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args,
                    size_t count) {
   if (count <= 0) {
     KRAKEN_LOG(WARN) << "[clearTimeout] function missing parameter";
@@ -128,13 +128,13 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  int32_t timer = static_cast<int32_t>(timerId.asNumber());
+  int32_t id = static_cast<int32_t>(timerId.asNumber());
   int32_t callbackId = 0;
-  timerIdToCallbackIdMap.get(timer, callbackId);
+  timerIdToCallbackIdMap.get(id, callbackId);
 
   if (callbackId == 0) {
     KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of timerId: "
-                     << timer;
+                     << id;
     return Value::undefined();
   }
 
@@ -143,13 +143,13 @@ Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
     return Value::undefined();
   }
 
-  getDartMethod()->clearTimeout(timer);
+  getDartMethod()->clearTimeout(id);
 
   std::shared_ptr<Value> callbackValue;
   timerCallbackMap.get(callbackId, callbackValue);
 
   if (callbackValue == nullptr ||
-      !callbackValue->getObject(rt).isFunction(rt)) {
+      !callbackValue->getObject(context).isFunction(context)) {
     KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of callbackId: "
                      << callbackId;
     return Value::undefined();
