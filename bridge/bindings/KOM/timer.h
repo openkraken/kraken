@@ -15,13 +15,6 @@ using namespace alibaba::jsa;
 
 void bindTimer(std::unique_ptr<JSContext> &context);
 void unbindTimer();
-void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
-                               int32_t callbackId);
-void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
-                              int32_t callbackId);
-
-void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context, const int callbackId);
-
 
 } // namespace binding
 } // namespace kraken

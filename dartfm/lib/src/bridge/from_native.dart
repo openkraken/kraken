@@ -161,16 +161,21 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
+typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
+typedef DartAsyncCallback = void Function(Pointer<Void> context);
 // Register setTimeout
-typedef Native_SetTimeout = Int32 Function(Int32, Int32);
+typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
-int _setTimeout(int callbackId, int timeout) {
-  return timer.setTimeout(callbackId, timeout);
+int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
+  return timer.setTimeout(timeout, () {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+  });
 }
 
 void registerSetTimeout() {
@@ -179,15 +184,18 @@ void registerSetTimeout() {
 }
 
 // Register setInterval
-typedef Native_SetInterval = Int32 Function(Int32, Int32);
+typedef Native_SetInterval = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetInterval = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetInterval _registerSetInterval =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
-int _setInterval(int callbackId, int timeout) {
-  return timer.setInterval(callbackId, timeout);
+int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
+  return timer.setInterval(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
+    func(context);
+  });
 }
 
 void registerSetInterval() {
@@ -213,7 +221,7 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Int32);
+typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -221,8 +229,11 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(int callbackId) {
-  return timer.requestAnimationFrame(callbackId);
+int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
+  return timer.requestAnimationFrame(() {
+    DartAsyncCallback func = callback.asFunction();
+    func(context);
+  });
 }
 
 void registerRequestAnimationFrame() {
