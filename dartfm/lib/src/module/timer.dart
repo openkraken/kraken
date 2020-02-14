@@ -5,7 +5,6 @@
 
 import 'dart:async';
 
-import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 
 class KrakenTimer {
@@ -15,11 +14,11 @@ class KrakenTimer {
 
   KrakenTimer();
 
-  int setTimeout(int callbackId, int timeout) {
+  int setTimeout(int timeout, Function callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer(timeoutDurationMS, () {
-      invokeSetTimeoutCallback(callbackId);
+      callback();
       timerMap.remove(id);
     });
     return id;
@@ -33,21 +32,21 @@ class KrakenTimer {
     }
   }
 
-  int setInterval(int callbackId, int timeout) {
+  int setInterval(int timeout, Function callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = timerId++;
     timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
-      invokeSetIntervalCallback(callbackId);
+      callback();
     });
     return id;
   }
 
-  int requestAnimationFrame(int callbackId) {
+  int requestAnimationFrame(Function callback) {
     int id = timerId++;
-    animationFrameCallbackValidateMap[callbackId] = true;
+    animationFrameCallbackValidateMap[id] = true;
     ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      if (animationFrameCallbackValidateMap[callbackId] == true) {
-        invokeRequestAnimationFrameCallback(callbackId);
+      if (animationFrameCallbackValidateMap[id] == true) {
+        callback();
       }
     });
     // Call for paint to trigger painting frame manually.

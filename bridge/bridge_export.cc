@@ -99,18 +99,6 @@ void registerInvokeFetch(InvokeFetch invokeFetch) {
   kraken::registerInvokeFetch(invokeFetch);
 }
 
-void invokeSetTimeoutCallback(int32_t callbackId) {
-  bridge->invokeSetTimeoutCallback(callbackId);
-}
-
-void invokeSetIntervalCallback(int32_t callbackId) {
-  bridge->invokeSetIntervalCallback(callbackId);
-}
-
-void invokeRequestAnimationFrameCallback(int32_t callbackId) {
-  bridge->invokeRequestAnimationFrameCallback(callbackId);
-}
-
 void invokeFetchCallback(int32_t callbackId, const char *error,
                          int32_t statusCode, const char *body) {
   bridge->invokeFetchCallback(callbackId, error, statusCode, body);

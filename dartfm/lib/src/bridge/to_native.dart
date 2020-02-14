@@ -46,42 +46,6 @@ void invokeModuleCallback(int callbackId, String json) {
   _invokeModuleCallback(callbackId, Utf8.toUtf8(json));
 }
 
-// Register invokeSetTimeout
-typedef Native_InvokeSetTimeoutCallback = Void Function(Int32);
-typedef Dart_InvokeSetTimeoutCallback = void Function(int);
-
-final Dart_InvokeSetTimeoutCallback _invokeSetTimeoutCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeSetTimeoutCallback>>('invokeSetTimeoutCallback')
-    .asFunction();
-
-void invokeSetTimeoutCallback(int callbackId) {
-  _invokeSetTimeoutCallback(callbackId);
-}
-
-// Register invokeSetIntervalCallback
-typedef Native_InvokeSetIntervalCallback = Void Function(Int32);
-typedef Dart_InvokeSetIntervalCallback = void Function(int);
-
-final Dart_InvokeSetIntervalCallback _invokeSetIntervalCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeSetIntervalCallback>>('invokeSetIntervalCallback')
-    .asFunction();
-
-void invokeSetIntervalCallback(int callbackId) {
-  _invokeSetIntervalCallback(callbackId);
-}
-
-// Register invokeRequestAnimationFrameCallback
-typedef Native_InvokeRequestAnimationFrameCallback = Void Function(Int32);
-typedef Dart_InvokeRequestAnimationFrameCallback = void Function(int);
-
-final Dart_InvokeRequestAnimationFrameCallback _invokeRequestAnimationFrameCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeRequestAnimationFrameCallback>>('invokeRequestAnimationFrameCallback')
-    .asFunction();
-
-void invokeRequestAnimationFrameCallback(int callbackId) {
-  _invokeRequestAnimationFrameCallback(callbackId);
-}
-
 // Register invokeFetchCallback
 typedef Native_InvokeFetchCallback = Void Function(Int32, Pointer<Utf8>, Int32, Pointer<Utf8>);
 typedef Dart_InvokeFetchCallback = void Function(int, Pointer<Utf8>, int, Pointer<Utf8>);

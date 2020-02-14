@@ -14,14 +14,14 @@ struct Screen {
   double width;
   double height;
 };
-
+using AsyncCallback = void (*)(void*);
 typedef const char *(*InvokeUIManager)(const char*);
 typedef const char *(*InvokeModuleManager)(const char*, int32_t);
 typedef void (*ReloadApp)();
-typedef int32_t (*SetTimeout)(int32_t, int32_t);
-typedef int32_t (*SetInterval)(int32_t, int32_t);
+typedef int32_t (*SetTimeout)(AsyncCallback callback, void* context, int32_t);
+typedef int32_t (*SetInterval)(AsyncCallback callback, void* context, int32_t);
 typedef void (*ClearTimeout)(int32_t);
-typedef int32_t (*RequestAnimationFrame)(int32_t);
+typedef int32_t (*RequestAnimationFrame)(AsyncCallback callback, void* context);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
 typedef void (*InvokeFetch)(int32_t, const char*, const char*);
@@ -40,12 +40,6 @@ KRAKEN_EXPORT
 void invokeEventListener(int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
-KRAKEN_EXPORT
-void invokeSetTimeoutCallback(int32_t callbackId);
-KRAKEN_EXPORT
-void invokeSetIntervalCallback(int32_t callbackId);
-KRAKEN_EXPORT
-void invokeRequestAnimationFrameCallback(int32_t callbackId);
 KRAKEN_EXPORT
 void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
                          const char* body);
