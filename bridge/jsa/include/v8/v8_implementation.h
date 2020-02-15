@@ -186,6 +186,7 @@ private:
 
   v8::Isolate *_isolate;
   v8::Persistent<v8::Context> _context;
+  v8::Persistent<v8::Object> _global;
   std::atomic<bool> ctxInvalid_;
   std::unique_ptr<V8Instrumentation> inst;
 

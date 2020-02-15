@@ -729,6 +729,8 @@ public:
   // \return a String like JS .toString() would do.
   String toString(JSContext &runtime) const;
 
+  std::string toJSON(JSContext &context) const;
+
 private:
   friend class JSContext;
 
