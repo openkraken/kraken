@@ -136,6 +136,10 @@ V8Context::V8Context()
 
   _context.Reset(_isolate, context);
   v8::Local<v8::Object> global = context->Global();
+  v8::Local<v8::Value> globalValue = v8::Local<v8::Value>::Cast(global);
+  v8::Local<v8::String> globalKey =
+      v8::String::NewFromUtf8(_isolate, "global").ToLocalChecked();
+  global->Set(context, globalKey, globalValue).ToChecked();
   _global.Reset(_isolate, global);
 }
 

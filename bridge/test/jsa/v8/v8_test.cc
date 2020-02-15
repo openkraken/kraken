@@ -5,9 +5,7 @@
 
 #include "jsa.h"
 #include "v8/v8_implementation.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include <iostream>
 #include <memory>
 
 using namespace alibaba::jsa_v8;
@@ -145,4 +143,34 @@ TEST(V8Context, V8ObjectValue_setProperty) {
                               .getObject(*context)
                               .getProperty(*context, "test");
   EXPECT_EQ(helloworld.getString(*context).utf8(*context), "helloworld");
+}
+
+TEST(V8Context, V8ObjectValue_hasProperty) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value value = context->evaluateJavaScript("({name: '12345'})", "", 0);
+  EXPECT_EQ(value.isObject(), true);
+  EXPECT_EQ(value.getObject(*context).hasProperty(*context, "name"), true);
+  EXPECT_EQ(value.getObject(*context).hasProperty(*context, jsa::String::createFromUtf8(*context, "name")), true);
+  EXPECT_EQ(value.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), true);
+}
+
+TEST(V8Context, global) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  auto global = context->global();
+  global.setProperty(*context, "helloworld", "12345");
+  jsa::Value result = context->evaluateJavaScript("global.helloworld", "", 0);
+  EXPECT_EQ(result.isString(), true);
+  EXPECT_EQ(result.getString(*context).utf8(*context), "12345");
+}
+
+TEST(V8Context, global_with_none_global_var) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  auto global = context->global();
+  global.setProperty(*context, "helloworld", "12345");
+  jsa::Value result = context->evaluateJavaScript("helloworld", "", 0);
+  EXPECT_EQ(result.isString(), true);
+  EXPECT_EQ(result.getString(*context).utf8(*context), "12345");
 }
