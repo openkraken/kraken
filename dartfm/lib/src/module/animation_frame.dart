@@ -8,6 +8,7 @@ int requestAnimationFrame(Function callback) {
   _animationFrameCallbackValidateMap[id] = true;
   ElementsBinding.instance.scheduleFrameCallback((Duration timeStamp) {
     if (_animationFrameCallbackValidateMap[id] == true) {
+      _animationFrameCallbackValidateMap.remove(id);
       callback();
     }
   });
