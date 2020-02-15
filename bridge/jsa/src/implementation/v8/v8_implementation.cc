@@ -446,13 +446,17 @@ jsa::Object V8Context::createObject() {
   return createObject(newObject);
 }
 
-jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {}
-
-std::shared_ptr<jsa::HostObject> V8Context::getHostObject(const jsa::Object &) {
-
+jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
+  // TODO createObject
 }
 
-jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &) {}
+std::shared_ptr<jsa::HostObject> V8Context::getHostObject(const jsa::Object &) {
+  // TODO getHostObject
+}
+
+jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &) {
+  // TODO getHostFunction
+}
 
 jsa::Value V8Context::getProperty(const jsa::Object &obj,
                                   const jsa::String &name) {
@@ -555,9 +559,13 @@ bool V8Context::isFunction(const jsa::Object &obj) const {
   return object->IsFunction();
 }
 
-bool V8Context::isHostObject(const jsa::Object &) const {}
+bool V8Context::isHostObject(const jsa::Object &) const {
+  // TODO isHostObject
+}
 
-bool V8Context::isHostFunction(const jsa::Function &) const {}
+bool V8Context::isHostFunction(const jsa::Function &) const {
+  // TODO isHostFunction
+}
 
 jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
   v8::HandleScope handleScope(_isolate);
@@ -570,9 +578,13 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
   auto result = createArray(names->Length());
 }
 
-jsa::WeakObject V8Context::createWeakObject(const jsa::Object &) {}
+jsa::WeakObject V8Context::createWeakObject(const jsa::Object &) {
+  // TODO createWeakObject
+}
 
-jsa::Value V8Context::lockWeakObject(const jsa::WeakObject &) {}
+jsa::Value V8Context::lockWeakObject(const jsa::WeakObject &) {
+  // TODO LockWeakObject
+}
 
 jsa::Array V8Context::createArray(size_t length) {
   v8::HandleScope handleScope(_isolate);
@@ -581,11 +593,34 @@ jsa::Array V8Context::createArray(size_t length) {
   return createObject(object).getArray(*this);
 }
 
-size_t V8Context::size(const jsa::Array &) { return 0; }
-size_t V8Context::size(const jsa::ArrayBuffer &) { return 0; }
-uint8_t *V8Context::data(const jsa::ArrayBuffer &) { return nullptr; }
-jsa::Value V8Context::getValueAtIndex(const jsa::Array &, size_t i) {
-  return jsa::Value();
+size_t V8Context::size(const jsa::Array &arr) {
+  assert(isArray(arr));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arr);
+  return v8::Local<v8::Array>::Cast(obj)->Length();
+}
+size_t V8Context::size(const jsa::ArrayBuffer &arrayBuffer) {
+  assert(isArrayBuffer(arrayBuffer));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBuffer);
+  return v8::Local<v8::ArrayBuffer>::Cast(obj)->ByteLength();
+}
+void *V8Context::data(const jsa::ArrayBuffer &arrayBuffer) {
+  assert(isArrayBuffer(arrayBuffer));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBuffer);
+  v8::Local<v8::ArrayBuffer> buffer = v8::Local<v8::ArrayBuffer>::Cast(obj);
+  return buffer->GetContents().Data();
+}
+jsa::Value V8Context::getValueAtIndex(const jsa::Array &arr, size_t i) {
+  assert(isArray(arr));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Object> obj = objectRef(arr);
+  v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(obj);
+  v8::Local<v8::Value> result = array->Get(context, i).ToLocalChecked();
+  return createValue(result);
 }
 
 void V8Context::setValueAtIndexImpl(jsa::Array &, size_t i,

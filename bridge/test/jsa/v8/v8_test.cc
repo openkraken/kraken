@@ -151,8 +151,12 @@ TEST(V8Context, V8ObjectValue_hasProperty) {
   jsa::Value value = context->evaluateJavaScript("({name: '12345'})", "", 0);
   EXPECT_EQ(value.isObject(), true);
   EXPECT_EQ(value.getObject(*context).hasProperty(*context, "name"), true);
-  EXPECT_EQ(value.getObject(*context).hasProperty(*context, jsa::String::createFromUtf8(*context, "name")), true);
-  EXPECT_EQ(value.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), true);
+  EXPECT_EQ(value.getObject(*context).hasProperty(
+                *context, jsa::String::createFromUtf8(*context, "name")),
+            true);
+  EXPECT_EQ(value.getObject(*context).hasProperty(
+                *context, jsa::PropNameID::forAscii(*context, "name")),
+            true);
 }
 
 TEST(V8Context, global) {
@@ -197,4 +201,52 @@ TEST(V8Context, stringStrictEquals) {
   jsa::Value left = jsa::String::createFromAscii(*context, "helloworld");
   jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
+}
+
+TEST(V8Context, array) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result = context->evaluateJavaScript("[1,2,3,4]", "", 0);
+  EXPECT_EQ(result.getObject(*context).isArray(*context), true);
+  jsa::Array array = result.getObject(*context).getArray(*context);
+  jsa::Value first = array.getValueAtIndex(*context, 0);
+  EXPECT_EQ(first.isNumber(), true);
+  EXPECT_EQ(first.getNumber(), 1);
+
+  size_t length = array.length(*context);
+  EXPECT_EQ(length, 4);
+}
+
+TEST(V8Context, arrayBuffer_uint8) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value value =
+      context->evaluateJavaScript("new Int8Array([1,2,3,4,5]).buffer", "", 0);
+  jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
+  EXPECT_EQ(buffer.isArrayBuffer(*context), true);
+  uint8_t *data = static_cast<uint8_t *>(buffer.data(*context));
+  EXPECT_EQ(data[0], 1);
+  EXPECT_EQ(data[1], 2);
+  EXPECT_EQ(data[2], 3);
+  EXPECT_EQ(data[3], 4);
+  EXPECT_EQ(data[4], 5);
+  size_t size = buffer.size(*context);
+  EXPECT_EQ(size, 5);
+}
+
+TEST(V8Context, arrayBuffer_uint16) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value value = context->evaluateJavaScript(
+      "new Int16Array([1000, 2000, 3000, 4000, 5000]).buffer", "", 0);
+  jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
+  EXPECT_EQ(buffer.isArrayBuffer(*context), true);
+  uint16_t *data = static_cast<uint16_t *>(buffer.data(*context));
+  size_t size = buffer.size(*context);
+  EXPECT_EQ(size, 10);
+  EXPECT_EQ(data[0], 1000);
+  EXPECT_EQ(data[1], 2000);
+  EXPECT_EQ(data[2], 3000);
+  EXPECT_EQ(data[3], 4000);
+  EXPECT_EQ(data[4], 5000);
 }
