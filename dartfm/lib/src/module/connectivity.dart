@@ -15,7 +15,7 @@ String _parseConnectivityResult(ConnectivityResult state) {
   }
 }
 
-void checkConnectivity(callbackId) {
+void getConnectivity(callbackId) {
   Connectivity().checkConnectivity().then((ConnectivityResult connectivityResult) {
     String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
     bool hasCallback = callbackId > 0;

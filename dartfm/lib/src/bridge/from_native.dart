@@ -115,8 +115,8 @@ String invokeModuleManager(String json, int callbackId) {
   String method = args[0];
 
   var result;
-  if (method == 'checkConnectivity') {
-    checkConnectivity(callbackId);
+  if (method == 'getConnectivity') {
+    getConnectivity(callbackId);
   }
 
   if (result == null) {

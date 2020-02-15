@@ -2,9 +2,9 @@ import { krakenModuleManager } from './kraken';
 
 const navigator = {
   connection: {
-    checkConnectivity() {
+    getConnectivity() {
       return new Promise((resolve) => {
-        krakenModuleManager('["checkConnectivity"]', (json) => {
+        krakenModuleManager('["getConnectivity"]', (json) => {
           resolve(JSON.parse(json));
         });
       });
