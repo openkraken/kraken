@@ -267,3 +267,11 @@ TEST(V8Context, arrayBuffer_uint16) {
   EXPECT_EQ(data[3], 4000);
   EXPECT_EQ(data[4], 5000);
 }
+
+TEST(V8Context, instanceof) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value constructor = context->evaluateJavaScript("Object", "", 0);
+  jsa::Object obj = jsa::Object(*context);
+  obj.instanceOf(*context, constructor.getObject(*context).getFunction(*context));
+}

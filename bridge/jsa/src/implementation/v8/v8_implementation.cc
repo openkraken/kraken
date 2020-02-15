@@ -637,13 +637,18 @@ void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i,
 jsa::Function
 V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
                                           unsigned int paramCount,
-                                          jsa::HostFunctionType func) {}
+                                          jsa::HostFunctionType func) {
+// TODO CreateFunctionFromHostFunction
+}
 jsa::Value V8Context::call(const jsa::Function &function,
                            const jsa::Value &jsThis, const jsa::Value *args,
-                           size_t count) {}
+                           size_t count) {
+  // TODO call
+}
 
 jsa::Value V8Context::callAsConstructor(const jsa::Function &,
                                         const jsa::Value *args, size_t count) {
+  // TODO callAsConstructor
   return jsa::Value();
 }
 bool V8Context::strictEquals(const jsa::Symbol &a, const jsa::Symbol &b) const {
@@ -666,7 +671,12 @@ bool V8Context::strictEquals(const jsa::Object &a, const jsa::Object &b) const {
 }
 
 bool V8Context::instanceOf(const jsa::Object &o, const jsa::Function &f) {
-  return false;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Object> obj = objectRef(o);
+  v8::Local<v8::Object> func = objectRef(f);
+  return obj->InstanceOf(context, func).ToChecked();
 }
 
 v8::Local<v8::Symbol> V8Context::symbolRef(const jsa::Symbol &sym) const {
