@@ -1,14 +1,15 @@
 import 'package:kraken/element.dart';
 
-int _frameId = 1;
-Map<int, bool> _animationFrameCallbackValidateMap = {};
+int _id = 1;
+const EXISTED = true;
+const Map<int, bool> _animationFrameCallbackMap = {};
 
 int requestAnimationFrame(Function callback) {
-  int id = _frameId++;
-  _animationFrameCallbackValidateMap[id] = true;
+  int id = _id++;
+  _animationFrameCallbackMap[id] = EXISTED;
   ElementsBinding.instance.scheduleFrameCallback((Duration timeStamp) {
-    if (_animationFrameCallbackValidateMap[id] == true) {
-      _animationFrameCallbackValidateMap.remove(id);
+    if (_animationFrameCallbackMap.containsKey(id)) {
+      _animationFrameCallbackMap.remove(id);
       callback();
     }
   });
@@ -16,8 +17,8 @@ int requestAnimationFrame(Function callback) {
   return id;
 }
 
-void cancelAnimationFrame(int frameId) {
-  if (_animationFrameCallbackValidateMap.containsKey(frameId)) {
-    _animationFrameCallbackValidateMap[frameId] = false;
+void cancelAnimationFrame(int id) {
+  if (_animationFrameCallbackMap.containsKey(id)) {
+    _animationFrameCallbackMap.remove(id);
   }
 }
