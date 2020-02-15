@@ -137,8 +137,8 @@ abstract class Element extends Node
 
   double cropWidth = 0;
   double cropBorderWidth = 0;
+  double offsetTop = null; // offset to the top of viewport
 
-  double offsetTop = null;
   bool stickyFixed = false;
 
   Style _style;
@@ -256,13 +256,25 @@ abstract class Element extends Node
     for (int i = 0; i < stickyEls.length; i++) {
       Element el = stickyEls[i];
       Style elStyle = el.style;
-      double top = baseGetDisplayPortedLength(elStyle.get('top'));
-      double offsetTop = double.parse(el.getOffset(true));
+      bool isFixed;
+
       if (el.offsetTop == null) {
+        double offsetTop = double.parse(el.getOffset(true));
+        // save element original offset to viewport
         el.offsetTop = offsetTop;
       }
 
-      if (el.offsetTop - scrollTop <= top) {
+      if (elStyle.get('top') != null) {
+        double top = baseGetDisplayPortedLength(elStyle.get('top'));
+        isFixed = el.offsetTop - scrollTop <= top;
+      } else if (elStyle.get('bottom') != null) {
+        double bottom = baseGetDisplayPortedLength(elStyle.get('bottom'));
+        double viewPortHeight = renderMargin?.size?.height;
+        double elViewPortTop = el.offsetTop - scrollTop;
+        isFixed = viewPortHeight - elViewPortTop <= bottom;
+      }
+
+      if (isFixed) {
         // change to fixed behavior
         if (!el.stickyFixed) {
           el.stickyFixed = true;
@@ -291,7 +303,7 @@ abstract class Element extends Node
         if (childEl is Element) {
           Style childStyle = childEl.style;
           if (childStyle.position == 'sticky' &&
-            childStyle.top != null
+            (childStyle.top != null || childStyle.bottom != null)
           ) {
             resultEls.add(childEl);
           }
@@ -959,14 +971,20 @@ abstract class Element extends Node
   static ZIndexParentData getPositionParentDataFromStyle(Style style) {
     ZIndexParentData parentData = ZIndexParentData();
 
-    if (style.contains('top') ||
-        style.contains('left') ||
-        style.contains('bottom') ||
-        style.contains('right')) {
+    if (style.contains('top')) {
       parentData
-        ..top = Length.toDisplayPortValue(style['top'])
-        ..left = Length.toDisplayPortValue(style['left'])
-        ..bottom = Length.toDisplayPortValue(style['bottom'])
+        ..top = Length.toDisplayPortValue(style['top']);
+    }
+    if (style.contains('left')) {
+      parentData
+        ..left = Length.toDisplayPortValue(style['left']);
+    }
+    if (style.contains('bottom')) {
+      parentData
+        ..bottom = Length.toDisplayPortValue(style['bottom']);
+    }
+    if (style.contains('right')) {
+      parentData
         ..right = Length.toDisplayPortValue(style['right']);
     }
     parentData.width = Length.toDisplayPortValue(style['width']);
