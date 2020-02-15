@@ -16,6 +16,7 @@ using namespace alibaba;
 namespace {
 std::atomic<bool> v8_inited{false};
 std::unique_ptr<v8::Platform> platform;
+v8::Isolate *isolate {nullptr};
 
 v8::Local<v8::String> getEmptyString(v8::Isolate *isolate) {
   static v8::Local<v8::String> empty =
@@ -79,6 +80,10 @@ void initV8Engine(const char *current_directory) {
   platform = v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
   v8::V8::Initialize();
+  v8::Isolate::CreateParams createParams;
+  createParams.array_buffer_allocator =
+      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+  isolate = v8::Isolate::New(createParams);
 }
 
 jsa::Value V8Context::evaluateJavaScript(const char *code,
@@ -122,10 +127,8 @@ V8Context::V8Context()
       objectCounter_(0), stringCounter_(0)
 #endif
 {
-  v8::Isolate::CreateParams createParams;
-  createParams.array_buffer_allocator =
-      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-  _isolate = v8::Isolate::New(createParams);
+  assert(isolate != nullptr);
+  _isolate = isolate;
   inst = std::make_unique<V8Instrumentation>(_isolate);
 
   v8::Isolate::Scope isolate_scope(_isolate);
@@ -147,7 +150,6 @@ V8Context::~V8Context() {
   ctxInvalid_ = true;
   _context.Reset();
   _global.Reset();
-  _isolate->Dispose();
 
 #ifndef NDEBUG
   assert(objectCounter_ == 0 &&
