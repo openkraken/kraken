@@ -203,7 +203,7 @@ TEST(V8Context, stringStrictEquals) {
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
 
-TEST(V8Context, array) {
+TEST(V8Context, array_get) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
   jsa::Value result = context->evaluateJavaScript("[1,2,3,4]", "", 0);
@@ -215,6 +215,23 @@ TEST(V8Context, array) {
 
   size_t length = array.length(*context);
   EXPECT_EQ(length, 4);
+}
+
+TEST(V8Context, array_set) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result = context->evaluateJavaScript("a = [1,2,3,4]", "", 0);
+  jsa::Array array = result.getObject(*context).getArray(*context);
+  size_t length = array.length(*context);
+  EXPECT_EQ(length, 4);
+  array.setValueAtIndex(*context, 3, jsa::Value(10));
+  jsa::Object global = context->global();
+  EXPECT_EQ(global.getProperty(*context, "a")
+                .getObject(*context)
+                .getArray(*context)
+                .getValueAtIndex(*context, 3)
+                .getNumber(),
+            10);
 }
 
 TEST(V8Context, arrayBuffer_uint8) {

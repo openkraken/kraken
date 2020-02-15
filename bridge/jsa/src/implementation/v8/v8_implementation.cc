@@ -623,8 +623,17 @@ jsa::Value V8Context::getValueAtIndex(const jsa::Array &arr, size_t i) {
   return createValue(result);
 }
 
-void V8Context::setValueAtIndexImpl(jsa::Array &, size_t i,
-                                    const jsa::Value &value) {}
+void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i,
+                                    const jsa::Value &value) {
+  assert(isArray(arr));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Object> obj = objectRef(arr);
+  v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(obj);
+  bool success = array->Set(context, i, valueRef(value)).ToChecked();
+  assert(success);
+}
 jsa::Function
 V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
                                           unsigned int paramCount,
