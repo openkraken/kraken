@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'package:kraken/bridge.dart';
 
-_parseConnectivityResult(ConnectivityResult state) {
+String _parseConnectivityResult(ConnectivityResult state) {
   switch (state) {
     case ConnectivityResult.wifi:
       return 'wifi';
@@ -17,7 +17,7 @@ _parseConnectivityResult(ConnectivityResult state) {
 
 void checkConnectivity(callbackId) {
   Connectivity().checkConnectivity().then((ConnectivityResult connectivityResult) {
-    var isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
+    String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
     bool hasCallback = callbackId > 0;
     String type = _parseConnectivityResult(connectivityResult);
     if (hasCallback) {

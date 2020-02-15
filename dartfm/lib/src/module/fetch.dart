@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:requests/requests.dart';
 
-_parseHeaders(Map<String, dynamic> map) {
+Map<String, String> _parseHeaders(Map<String, dynamic> map) {
   Map<String, String> headerMap = {};
 
   if (map == null) {
