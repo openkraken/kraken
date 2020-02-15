@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:requests/requests.dart';
 
-parseHeaders(Map<String, dynamic> map) {
+_parseHeaders(Map<String, dynamic> map) {
   Map<String, String> headerMap = {};
 
   if (map == null) {
@@ -21,33 +21,31 @@ parseHeaders(Map<String, dynamic> map) {
   return headerMap;
 }
 
-class Fetch {
-  static Future<Response> fetch(String url, String json) async {
-    Map<String, dynamic> map = jsonDecode(json);
-    String method = map['method'];
-    Map<String, String> headers = parseHeaders(map['headers']);
-    Future<Response> future;
-    switch (method) {
-      case 'GET':
-        future = Requests.get(url, headers: map['headers']);
-        break;
-      case 'POST':
-        future = Requests.post(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
-        break;
-      case 'PUT':
-        future = Requests.put(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
-        break;
-      case 'PATCH':
-        future = Requests.patch(url, headers: headers);
-        break;
-      case 'DELETE':
-        future = Requests.delete(url, headers: headers);
-        break;
-      case 'HEAD':
-        future = Requests.head(url, headers: headers);
-        break;
-    }
-
-    return future;
+Future<Response> fetch(String url, String json) async {
+  Map<String, dynamic> map = jsonDecode(json);
+  String method = map['method'];
+  Map<String, String> headers = _parseHeaders(map['headers']);
+  Future<Response> future;
+  switch (method) {
+    case 'GET':
+      future = Requests.get(url, headers: map['headers']);
+      break;
+    case 'POST':
+      future = Requests.post(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
+      break;
+    case 'PUT':
+      future = Requests.put(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);
+      break;
+    case 'PATCH':
+      future = Requests.patch(url, headers: headers);
+      break;
+    case 'DELETE':
+      future = Requests.delete(url, headers: headers);
+      break;
+    case 'HEAD':
+      future = Requests.head(url, headers: headers);
+      break;
   }
+
+  return future;
 }

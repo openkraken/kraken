@@ -172,9 +172,9 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
 int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
-  return timer.setTimeout(timeout, () {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+  return setTimeout(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
+    func(context);
   });
 }
 
@@ -192,7 +192,7 @@ final Dart_RegisterSetInterval _registerSetInterval =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
 int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
-  return timer.setInterval(timeout, () {
+  return setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     func(context);
   });
@@ -212,7 +212,7 @@ final Dart_RegisterClearTimeout _registerClearTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout').asFunction();
 
 void _clearTimeout(int timerId) {
-  return timer.clearTimeout(timerId);
+  return clearTimeout(timerId);
 }
 
 void registerClearTimeout() {
@@ -230,7 +230,7 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .asFunction();
 
 int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
-  return timer.requestAnimationFrame(() {
+  return requestAnimationFrame(() {
     DartAsyncCallback func = callback.asFunction();
     func(context);
   });
@@ -251,7 +251,7 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .asFunction();
 
 void _cancelAnimationFrame(int timerId) {
-  timer.cancelAnimationFrame(timerId);
+  cancelAnimationFrame(timerId);
 }
 
 void registerCancelAnimationFrame() {
@@ -267,8 +267,8 @@ typedef Dart_RegisterInvokeFetch = void Function(Pointer<NativeFunction<Native_I
 final Dart_RegisterInvokeFetch _registerInvokeFetch =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeFetch>>('registerInvokeFetch').asFunction();
 
-void fetch(int callbackId, String url, String json) {
-  Fetch.fetch(url, json).then((Response response) {
+void _invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
+  fetch(Utf8.fromUtf8(url), Utf8.fromUtf8(json)).then((Response response) {
     response.raiseForStatus();
     invokeFetchCallback(callbackId, '', response.statusCode, response.content());
   }).catchError((e) {
@@ -278,10 +278,6 @@ void fetch(int callbackId, String url, String json) {
       invokeFetchCallback(callbackId, e.toString(), e.response.statusCode, "");
     }
   });
-}
-
-void _invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
-  fetch(callbackId, Utf8.fromUtf8(url), Utf8.fromUtf8(json));
 }
 
 void registerInvokeFetch() {

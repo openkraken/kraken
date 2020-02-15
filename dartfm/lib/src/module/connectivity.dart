@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'package:kraken/bridge.dart';
 
-String _parseConnectivityResult(ConnectivityResult state) {
+_parseConnectivityResult(ConnectivityResult state) {
   switch (state) {
     case ConnectivityResult.wifi:
       return 'wifi';

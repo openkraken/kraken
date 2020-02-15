@@ -6,12 +6,12 @@
 library kraken;
 
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'bridge.dart';
 import 'element.dart';
-import 'module.dart';
 
 export 'bridge.dart';
 
@@ -67,15 +67,13 @@ void runApp({
 
 void unmountApp() {
   if (elementManager != null) {
-    timer.reloadTimer();
     elementManager.disconnect();
     elementManager = null;
   }
 }
 
 void reloadApp() async {
-  bool prevShowPerformanceOverlay =
-      elementManager?.showPerformanceOverlay ?? false;
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   appLoading = true;
   unmountApp();
   await reloadJSContext();

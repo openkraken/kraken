@@ -5,66 +5,32 @@
 
 import 'dart:async';
 
-import 'package:kraken/element.dart';
+int _timerId = 1;
+Map<int, Timer> _timerMap = {};
 
-class KrakenTimer {
-  int timerId = 1;
-  Map<int, Timer> timerMap = {};
-  Map<int, bool> animationFrameCallbackValidateMap = {};
+int setTimeout(int timeout, Function callback) {
+  Duration timeoutDurationMS = Duration(milliseconds: timeout);
+  int id = _timerId++;
+  _timerMap[id] = Timer(timeoutDurationMS, () {
+    callback();
+    _timerMap.remove(id);
+  });
+  return id;
+}
 
-  KrakenTimer();
-
-  int setTimeout(int timeout, Function callback) {
-    Duration timeoutDurationMS = Duration(milliseconds: timeout);
-    int id = timerId++;
-    timerMap[id] = Timer(timeoutDurationMS, () {
-      callback();
-      timerMap.remove(id);
-    });
-    return id;
-  }
-
-  void clearTimeout(int timerId) {
-    // If timer already executed, which will be removed.
-    if (timerMap[timerId] != null) {
-      timerMap[timerId].cancel();
-      timerMap.remove(timerId);
-    }
-  }
-
-  int setInterval(int timeout, Function callback) {
-    Duration timeoutDurationMS = Duration(milliseconds: timeout);
-    int id = timerId++;
-    timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
-      callback();
-    });
-    return id;
-  }
-
-  int requestAnimationFrame(Function callback) {
-    int id = timerId++;
-    animationFrameCallbackValidateMap[id] = true;
-    ElementsBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      if (animationFrameCallbackValidateMap[id] == true) {
-        callback();
-      }
-    });
-    // Call for paint to trigger painting frame manually.
-    ElementManager().getRootRenderObject().markNeedsPaint();
-    return id;
-  }
-
-  void cancelAnimationFrame(int timerId) {
-    if (animationFrameCallbackValidateMap.containsKey(timerId)) {
-      animationFrameCallbackValidateMap[timerId] = false;
-    }
-  }
-
-  void reloadTimer() {
-    timerId = 1;
-    timerMap = {};
-    animationFrameCallbackValidateMap = {};
+void clearTimeout(int timerId) {
+  // If timer already executed, which will be removed.
+  if (_timerMap[timerId] != null) {
+    _timerMap[timerId].cancel();
+    _timerMap.remove(timerId);
   }
 }
 
-KrakenTimer timer = KrakenTimer();
+int setInterval(int timeout, Function callback) {
+  Duration timeoutDurationMS = Duration(milliseconds: timeout);
+  int id = _timerId++;
+  _timerMap[id] = Timer.periodic(timeoutDurationMS, (Timer timer) {
+    callback();
+  });
+  return id;
+}
