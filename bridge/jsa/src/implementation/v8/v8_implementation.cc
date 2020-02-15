@@ -242,7 +242,8 @@ bool V8Context::isInspectable() { return false; }
 
 void *V8Context::globalImpl() {}
 
-void V8Context::setDescription(const std::string &desc) {}
+void V8Context::setDescription(const std::string &desc) {
+}
 
 #ifndef NDEBUG
 V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
@@ -602,14 +603,24 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &,
   return jsa::Value();
 }
 bool V8Context::strictEquals(const jsa::Symbol &a, const jsa::Symbol &b) const {
-  return false;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Symbol> leftSymbol = symbolRef(a);
+  v8::Local<v8::Symbol> rightSymbol = symbolRef(b);
+  return leftSymbol->StrictEquals(rightSymbol);
 }
 bool V8Context::strictEquals(const jsa::String &a, const jsa::String &b) const {
-  return false;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::String> left = stringRef(a);
+  v8::Local<v8::String> right = stringRef(b);
+  return left->StrictEquals(right);
 }
 bool V8Context::strictEquals(const jsa::Object &a, const jsa::Object &b) const {
-  return false;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> left = objectRef(a);
+  v8::Local<v8::Object> right = objectRef(b);
+  return left->StrictEquals(right);
 }
+
 bool V8Context::instanceOf(const jsa::Object &o, const jsa::Function &f) {
   return false;
 }

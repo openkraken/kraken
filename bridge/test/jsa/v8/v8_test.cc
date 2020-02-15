@@ -174,3 +174,27 @@ TEST(V8Context, global_with_none_global_var) {
   EXPECT_EQ(result.isString(), true);
   EXPECT_EQ(result.getString(*context).utf8(*context), "12345");
 }
+
+TEST(V8Context, propIdStrictEquals) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::PropNameID &&left = jsa::PropNameID::forAscii(*context, "1234");
+  jsa::PropNameID &&right = jsa::PropNameID::forAscii(*context, "1234");
+  EXPECT_EQ(left.compare(*context, left, right), true);
+}
+
+TEST(V8Context, symbolStrictEquals) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value left = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
+  jsa::Value right = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
+  EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
+}
+
+TEST(V8Context, stringStrictEquals) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value left = jsa::String::createFromAscii(*context, "helloworld");
+  jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
+  EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
+}
