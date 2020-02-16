@@ -6,6 +6,7 @@ import 'package:kraken_playground/command.dart';
 import 'package:requests/requests.dart';
 import 'package:kraken/kraken.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:kraken_playground/bundle.dart';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -13,9 +14,14 @@ const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
+const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
 String getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
+}
+
+String getZipBundleURLFromEnv() {
+  return Platform.environment[ZIP_BUNDLE_URL];
 }
 
 String getBundlePathFromEnv() {
@@ -37,8 +43,11 @@ Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
     return Future<String>.value(content);
   }
 
-  if (Platform.isAndroid || Platform.isIOS) {
-    return await loadBundleFromAssets();
+  //目前jsbundle只支持Android和ios
+  String zipBundleUrl = getZipBundleURLFromEnv();
+  if (zipBundleUrl != null && zipBundleUrl.isNotEmpty &&
+      (Platform.isAndroid || Platform.isIOS)) {
+    return await BundleManager().downloadAndParse(zipBundleUrl);
   }
 
   return Future<String>.value('');
@@ -58,10 +67,6 @@ void _setTargetPlatformForDesktop() {
   if (targetPlatform != null) {
     debugDefaultTargetPlatformOverride = targetPlatform;
   }
-}
-
-Future<String> loadBundleFromAssets() async {
-  return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
 }
 
 void afterConnectedForCommand() async {
