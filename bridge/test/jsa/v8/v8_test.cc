@@ -159,6 +159,17 @@ TEST(V8Context, V8ObjectValue_hasProperty) {
             true);
 }
 
+TEST(V8Context, getPropertyNames) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value value = context->evaluateJavaScript("({name: '12345', age: 20})", "", 0);
+  jsa::Array names = value.getObject(*context).getPropertyNames(*context);
+  size_t length = names.size(*context);
+  EXPECT_EQ(length, 2);
+  EXPECT_EQ(names.getValueAtIndex(*context, 0).getString(*context).utf8(*context), "name");
+  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context), "age");
+}
+
 TEST(V8Context, global) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -274,4 +285,53 @@ TEST(V8Context, instanceof) {
   jsa::Value constructor = context->evaluateJavaScript("Object", "", 0);
   jsa::Object obj = jsa::Object(*context);
   obj.instanceOf(*context, constructor.getObject(*context).getFunction(*context));
+}
+
+TEST(V8Context, callFunction) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value value = context->evaluateJavaScript("function A() {return 11;}; A;", "", 0);
+  jsa::Function func = value.getObject(*context).getFunction(*context);
+  EXPECT_EQ(func.isFunction(*context), true);
+  jsa::Value result = func.call(*context);
+  EXPECT_EQ(result.isNumber(), true);
+  EXPECT_EQ(result.getNumber(), 11);
+
+  jsa::Object global = context->global();
+  jsa::Function a = global.getPropertyAsFunction(*context, "A");
+  jsa::Value aResult = a.call(*context);
+  EXPECT_EQ(aResult.getNumber(), 11);
+}
+
+TEST(V8Context, callFunctionWithArgs) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  context->evaluateJavaScript(R"(
+function fibonacci(num) {
+  if (num <= 1) return 1;
+
+  return fibonacci(num - 1) + fibonacci(num - 2);
+}
+)", "", 0);
+  jsa::Object global = context->global();
+  jsa::Function fibonacci = global.getPropertyAsFunction(*context, "fibonacci");
+  jsa::Value result = fibonacci.call(*context, {
+    jsa::Value(10)
+  });
+  EXPECT_EQ(result.isNumber(), true);
+  EXPECT_EQ(result.getNumber(), 89);
+}
+
+TEST(V8Context, callFunctionWithThis) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result = context->evaluateJavaScript(R"(
+function callThis() {
+  this.name = 20;
+}; callThis;
+)", "", 0);
+  result.getObject(*context).getFunction(*context).call(*context);
+  jsa::Object global = context->global();
+  jsa::Value name = global.getProperty(*context, "name");
+  EXPECT_EQ(name.getNumber(), 20);
 }

@@ -16,7 +16,7 @@ using namespace alibaba;
 namespace {
 std::atomic<bool> v8_inited{false};
 std::unique_ptr<v8::Platform> platform;
-v8::Isolate *isolate {nullptr};
+v8::Isolate *isolate_{nullptr};
 
 v8::Local<v8::String> getEmptyString(v8::Isolate *isolate) {
   static v8::Local<v8::String> empty =
@@ -68,6 +68,33 @@ void reportException(v8::Isolate *isolate, v8::TryCatch &tryCatch) {
   }
 };
 
+// jsa::Values* -> v8::Local<v8::Value>*
+class ArgsConverter {
+public:
+  ArgsConverter(V8Context &context, const jsa::Value *args, size_t count) {
+    v8::Local<v8::Value> *destination;
+    if (count > maxStackArgs) {
+      outOfLine_ = std::make_unique<v8::Local<v8::Value>[]>(count);
+      destination = outOfLine_.get();
+    } else {
+      destination = inline_;
+    }
+
+    for (size_t i = 0; i < count; ++i) {
+      destination[i] = context.valueRef(args[i]);
+    }
+  }
+
+  operator v8::Local<v8::Value> *() {
+    return outOfLine_ ? outOfLine_.get() : inline_;
+  }
+
+private:
+  constexpr static unsigned maxStackArgs = 8;
+  v8::Local<v8::Value> inline_[maxStackArgs];
+  std::unique_ptr<v8::Local<v8::Value>[]> outOfLine_;
+};
+
 } // namespace
 
 void initV8Engine(const char *current_directory) {
@@ -83,7 +110,7 @@ void initV8Engine(const char *current_directory) {
   v8::Isolate::CreateParams createParams;
   createParams.array_buffer_allocator =
       v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-  isolate = v8::Isolate::New(createParams);
+  isolate_ = v8::Isolate::New(createParams);
 }
 
 jsa::Value V8Context::evaluateJavaScript(const char *code,
@@ -127,8 +154,8 @@ V8Context::V8Context()
       objectCounter_(0), stringCounter_(0)
 #endif
 {
-  assert(isolate != nullptr);
-  _isolate = isolate;
+  assert(isolate_ != nullptr);
+  _isolate = isolate_;
   inst = std::make_unique<V8Instrumentation>(_isolate);
 
   v8::Isolate::Scope isolate_scope(_isolate);
@@ -242,8 +269,7 @@ bool V8Context::isInspectable() { return false; }
 
 void *V8Context::globalImpl() {}
 
-void V8Context::setDescription(const std::string &desc) {
-}
+void V8Context::setDescription(const std::string &desc) {}
 
 #ifndef NDEBUG
 V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
@@ -575,7 +601,15 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
       v8::Local<v8::Object>::New(_isolate, objectRef(obj));
   v8::Local<v8::Array> names =
       object->GetPropertyNames(context).ToLocalChecked();
-  auto result = createArray(names->Length());
+  jsa::Array result = createArray(names->Length());
+
+  for (size_t i = 0; i < names->Length(); i ++) {
+    v8::HandleScope innerScope(_isolate);
+    v8::Local<v8::Value> item = names->Get(context, i).ToLocalChecked();
+    result.setValueAtIndex(*this, i, createValue(item));
+  }
+
+  return result;
 }
 
 jsa::WeakObject V8Context::createWeakObject(const jsa::Object &) {
@@ -638,12 +672,21 @@ jsa::Function
 V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
                                           unsigned int paramCount,
                                           jsa::HostFunctionType func) {
-// TODO CreateFunctionFromHostFunction
+  // TODO CreateFunctionFromHostFunction
 }
 jsa::Value V8Context::call(const jsa::Function &function,
                            const jsa::Value &jsThis, const jsa::Value *args,
                            size_t count) {
-  // TODO call
+  assert(isFunction(function));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Local<v8::Function> func =
+      v8::Local<v8::Function>::Cast(objectRef(function));
+  v8::Local<v8::Value> thisVal = valueRef(jsThis);
+  v8::Local<v8::Value> result =
+      func->Call(context, thisVal, count, ArgsConverter(*this, args, count))
+          .ToLocalChecked();
+  return createValue(result);
 }
 
 jsa::Value V8Context::callAsConstructor(const jsa::Function &,
