@@ -603,7 +603,7 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
       object->GetPropertyNames(context).ToLocalChecked();
   jsa::Array result = createArray(names->Length());
 
-  for (size_t i = 0; i < names->Length(); i ++) {
+  for (size_t i = 0; i < names->Length(); i++) {
     v8::HandleScope innerScope(_isolate);
     v8::Local<v8::Value> item = names->Get(context, i).ToLocalChecked();
     result.setValueAtIndex(*this, i, createValue(item));
@@ -689,10 +689,18 @@ jsa::Value V8Context::call(const jsa::Function &function,
   return createValue(result);
 }
 
-jsa::Value V8Context::callAsConstructor(const jsa::Function &,
+jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
                                         const jsa::Value *args, size_t count) {
-  // TODO callAsConstructor
-  return jsa::Value();
+  assert(isFunction(function));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Local<v8::Function> func =
+      v8::Local<v8::Function>::Cast(objectRef(function));
+
+  v8::Local<v8::Value> result =
+      func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
+          .ToLocalChecked();
+  return createValue(result);
 }
 bool V8Context::strictEquals(const jsa::Symbol &a, const jsa::Symbol &b) const {
   v8::HandleScope handleScope(_isolate);
