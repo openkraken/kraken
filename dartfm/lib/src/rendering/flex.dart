@@ -453,8 +453,30 @@ class RenderFlexLayout extends RenderBox
     return childParentData.flex ?? 0;
   }
 
+  double _getBaseConstraints(child) {
+    double minConstraints;
+    Element childNode = nodeMap[child.nodeId];
+    String flexBasis = childNode.style.get('flexBasis') ?? 'auto';
+
+    if (_direction == Axis.horizontal) {
+      String width = childNode.style.get('width');
+      if (flexBasis == 'auto') {
+        if (width != null) {
+          minConstraints = Length.toDisplayPortValue(width);
+        } else {
+          minConstraints = 0;
+        }
+      } else {
+        minConstraints = Length.toDisplayPortValue(flexBasis);
+      }
+    } else {
+    }
+    return minConstraints;
+  }
+
   FlexFit _getFit(RenderBox child) {
-    return FlexFit.tight;
+    final FlexParentData childParentData = child.parentData;
+    return childParentData.fit ?? FlexFit.tight;
   }
 
   double _getCrossSize(RenderBox child) {
@@ -637,21 +659,19 @@ class RenderFlexLayout extends RenderBox
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex
+          double maxChildExtent = canFlex
               ? (child == lastFlexChild
                   ? (freeSpace - allocatedFlexSpace)
                   : spacePerFlex * flex)
               : double.infinity;
           double minChildExtent;
-          switch (_getFit(child)) {
-            case FlexFit.tight:
-              assert(maxChildExtent < double.infinity);
-              minChildExtent = maxChildExtent;
-              break;
-            case FlexFit.loose:
-              minChildExtent = 0.0;
-              break;
+          double baseConstraints = _getBaseConstraints(child);
+          if (baseConstraints != 0) {
+            maxChildExtent = baseConstraints;
           }
+          Element childNode = nodeMap[(child as RenderBoxModel).nodeId];
+          String flexGrow = childNode.style.get('flexGrow');
+          minChildExtent = flexGrow != null ? maxChildExtent : 0;
           assert(minChildExtent != null);
           BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
