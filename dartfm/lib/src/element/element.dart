@@ -412,7 +412,6 @@ abstract class Element extends Node
     Style pStyle = Style({
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
-      'backgroundColor': '#fff',
     });
     stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
     stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, this);
