@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 
+import 'bundle.dart';
 import 'command.dart';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
