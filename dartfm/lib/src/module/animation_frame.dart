@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:ui' show VoidCallback;
 import 'package:kraken/element.dart';
 
 int _id = 1;
