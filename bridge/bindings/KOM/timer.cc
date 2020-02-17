@@ -180,14 +180,14 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  const Value &timerId = args[0];
-  if (!timerId.isNumber()) {
+  const Value &requestId = args[0];
+  if (!requestId.isNumber()) {
     KRAKEN_LOG(WARN) << "[clearAnimationFrame] cancelAnimationFrame accept "
                         "number as parameter";
     return Value::undefined();
   }
 
-  auto id = static_cast<int32_t>(timerId.asNumber());
+  auto id = static_cast<int32_t>(requestId.asNumber());
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
     KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
@@ -224,9 +224,15 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  int32_t timerId = getDartMethod()->requestAnimationFrame(
+  int32_t requestId = getDartMethod()->requestAnimationFrame(
       handleTransientCallback, static_cast<void *>(callbackContext));
-  return Value(timerId);
+  
+  // `-1` represents some error occurred.
+  if (requestId == -1) {
+    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] requestAnimationFrame error";
+  }
+  
+  return Value(requestId);
 }
 
 void bindTimer(std::unique_ptr<JSContext> &context) {

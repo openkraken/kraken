@@ -1,12 +1,12 @@
+import 'dart:ui' show VoidCallback;
 import 'package:kraken/element.dart';
 
 int _id = 1;
-const EXISTED = true;
-const Map<int, bool> _animationFrameCallbackMap = {};
+Map<int, bool> _animationFrameCallbackMap = {};
 
-int requestAnimationFrame(Function callback) {
+int requestAnimationFrame(VoidCallback callback) {
   int id = _id++;
-  _animationFrameCallbackMap[id] = EXISTED;
+  _animationFrameCallbackMap[id] = true;
   ElementsBinding.instance.scheduleFrameCallback((Duration timeStamp) {
     if (_animationFrameCallbackMap.containsKey(id)) {
       _animationFrameCallbackMap.remove(id);
