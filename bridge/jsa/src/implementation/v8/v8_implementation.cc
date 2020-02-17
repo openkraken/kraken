@@ -95,6 +95,18 @@ private:
   std::unique_ptr<v8::Local<v8::Value>[]> outOfLine_;
 };
 
+v8::Global<v8::ObjectTemplate> hostFunctionTemplate;
+class HostFunctionProxy {
+public:
+  HostFunctionProxy(jsa::HostFunctionType hostFunction)
+      : hostFunction_(hostFunction) {}
+
+  jsa::HostFunctionType &getHostFunction() { return hostFunction_; }
+
+protected:
+  jsa::HostFunctionType hostFunction_;
+};
+
 } // namespace
 
 void initV8Engine(const char *current_directory) {
@@ -672,20 +684,115 @@ jsa::Function
 V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
                                           unsigned int paramCount,
                                           jsa::HostFunctionType func) {
-  // TODO CreateFunctionFromHostFunction
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+
+  struct HostFunctionMetaData : public HostFunctionProxy {
+    HostFunctionMetaData(V8Context *ctx, v8::Isolate *isolate,
+                         v8::Local<v8::Context> v8Context,
+                         jsa::HostFunctionType f, unsigned int paramCount,
+                         v8::Local<v8::String> n)
+        : HostFunctionProxy(std::move(f)), argsCount(paramCount), ctx(ctx),
+          isolate(isolate) {
+      this->name.Reset(isolate, n);
+      this->v8Context.Reset(isolate, v8Context);
+    }
+
+    v8::Local<v8::Value> call(const v8::FunctionCallbackInfo<v8::Value> &info) {
+      v8::EscapableHandleScope escapeScope(isolate);
+      const unsigned maxStackArgCount = 8;
+      jsa::Value stackArgs[maxStackArgCount];
+      std::unique_ptr<jsa::Value[]> heapArgs;
+      jsa::Value *args;
+      int argumentCount = info.Length();
+
+      if (argumentCount > maxStackArgCount) {
+        heapArgs = std::make_unique<jsa::Value[]>(argumentCount);
+        for (size_t i = 0; i < argumentCount; i++) {
+          v8::HandleScope scope(isolate);
+          v8::Local<v8::Value> v = info[i];
+          heapArgs[i] = ctx->createValue(v);
+        }
+        args = heapArgs.get();
+      } else {
+        for (size_t i = 0; i < argumentCount; i++) {
+          v8::HandleScope scope(isolate);
+          v8::Local<v8::Value> v = info[i];
+          stackArgs[i] = ctx->createValue(v);
+        }
+        args = stackArgs;
+      }
+
+      v8::Local<v8::Object> thisArgs = info.This();
+      jsa::Value thisVal(ctx->createObject(thisArgs));
+      v8::Local<v8::Value> res;
+      try {
+        res = ctx->valueRef(hostFunction_(*ctx, thisVal, args, argumentCount));
+      } catch (const jsa::JSError &error) {
+        v8::Local<v8::Value> msg = ctx->valueRef(error.value());
+        isolate->ThrowException(msg);
+      } catch (const std::exception &exception) {
+        const char *what = exception.what();
+        v8::Local<v8::String> msg =
+            v8::String::NewFromUtf8(isolate, what).ToLocalChecked();
+        isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
+      } catch (...) {
+        std::string exceptionString("Exception in HostFunction: <unknown>");
+        v8::Local<v8::String> msg =
+            v8::String::NewFromUtf8(isolate, exceptionString.c_str())
+                .ToLocalChecked();
+        isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
+      }
+      return escapeScope.Escape(res);
+    }
+
+    unsigned int argsCount;
+    v8::Isolate *isolate;
+    V8Context *ctx;
+    v8::Persistent<v8::String> name;
+    v8::Persistent<v8::Context> v8Context;
+  };
+
+  auto proxy = new HostFunctionMetaData(this, _isolate, context, func,
+                                        paramCount, stringRef(name));
+  v8::Local<v8::External> hostCallback = v8::External::New(_isolate, proxy);
+
+  auto callback = [](const v8::FunctionCallbackInfo<v8::Value> &info) {
+    v8::Local<v8::External> field = v8::Local<v8::External>::Cast(info.Data());
+    auto p = static_cast<HostFunctionMetaData *>(field->Value());
+    v8::Local<v8::Value> ret = p->call(info);
+    info.GetReturnValue().Set(ret);
+  };
+
+  v8::Local<v8::Function> function =
+      v8::Function::New(context, callback, hostCallback, (int)paramCount)
+          .ToLocalChecked();
+  v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
+  return createObject(funcObject).getFunction(*this);
 }
+
 jsa::Value V8Context::call(const jsa::Function &function,
                            const jsa::Value &jsThis, const jsa::Value *args,
                            size_t count) {
   assert(isFunction(function));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
   v8::Local<v8::Function> func =
       v8::Local<v8::Function>::Cast(objectRef(function));
   v8::Local<v8::Value> thisVal = valueRef(jsThis);
-  v8::Local<v8::Value> result =
+  v8::Local<v8::Value> result;
+  v8::TryCatch tryCatch(_isolate);
+  bool success =
       func->Call(context, thisVal, count, ArgsConverter(*this, args, count))
-          .ToLocalChecked();
+          .ToLocal(&result);
+
+  if (!success) {
+    reportException(_isolate, tryCatch);
+    return jsa::Value::undefined();
+  }
+
   return createValue(result);
 }
 
@@ -694,12 +801,19 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
   assert(isFunction(function));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
   v8::Local<v8::Function> func =
       v8::Local<v8::Function>::Cast(objectRef(function));
+  v8::TryCatch tryCatch(_isolate);
+  v8::Local<v8::Value> result;
 
-  v8::Local<v8::Value> result =
-      func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
-          .ToLocalChecked();
+  bool success = func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
+          .ToLocal(&result);
+  if (!success) {
+    reportException(_isolate, tryCatch);
+    return jsa::Value::undefined();
+  }
+
   return createValue(result);
 }
 bool V8Context::strictEquals(const jsa::Symbol &a, const jsa::Symbol &b) const {

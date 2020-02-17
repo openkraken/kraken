@@ -70,6 +70,12 @@ TEST(V8Context, V8StringValue_evaluateString) {
   EXPECT_EQ(resultStr, "12345");
 }
 
+TEST(V8Context, V8StringCopyRefer) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::String a = jsa::String::createFromAscii(*context, "1234");
+}
+
 TEST(V8Context, V8StringValue_evaluateStringObject) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -328,6 +334,16 @@ function fibonacci(num) {
   EXPECT_EQ(result.getNumber(), 89);
 }
 
+TEST(V8Context, callFunctionWithException) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result = context->evaluateJavaScript(
+      R"(function throwAnError() { throw new Error('1234');}; throwAnError; )",
+      "", 0);
+  jsa::Function throwError = result.getObject(*context).getFunction(*context);
+  throwError.call(*context);
+}
+
 TEST(V8Context, callFunctionWithThis) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>();
@@ -358,4 +374,75 @@ TEST(V8Context, callAsConstructor) {
   EXPECT_EQ(name, "helloworld");
   jsa::Object global = context->global();
   EXPECT_EQ(global.hasProperty(*context, "prop"), false);
+}
+
+TEST(V8Context, hostFunction) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value { return jsa::Value(12345); };
+  jsa::Object object = jsa::Object(*context);
+  JSA_BINDING_FUNCTION(*context, object, "helloworld", 0, callback);
+
+  jsa::Function helloworld =
+      object.getPropertyAsFunction(*context, "helloworld");
+  jsa::Value result = helloworld.call(*context);
+  EXPECT_EQ(result.getNumber(), 12345);
+}
+
+TEST(V8Context, hostFunctionWithParams) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args, size_t count) -> jsa::Value {
+    jsa::Object object = jsa::Object(context);
+    const jsa::Value &number = args[0];
+    object.setProperty(context, "abc", number.getNumber());
+    return object;
+  };
+  jsa::Object object = jsa::Object(*context);
+  JSA_BINDING_FUNCTION(*context, object, "getObj", 1, callback);
+  jsa::Function getObj = object.getPropertyAsFunction(*context, "getObj");
+  jsa::Value result = getObj.call(*context, {jsa::Value(10)});
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).getProperty(*context, "abc").getNumber(),
+            10);
+}
+
+TEST(V8Context, hostFunctionWithThis) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args, size_t count) -> jsa::Value {
+    EXPECT_EQ(thisVal.isObject(), true);
+    EXPECT_EQ(thisVal.getObject(context)
+                  .getProperty(context, "abc")
+                  .getString(context)
+                  .utf8(context),
+              "helloworld");
+    return jsa::Value::undefined();
+  };
+  jsa::Object object = jsa::Object(*context);
+  JSA_BINDING_FUNCTION(*context, object, "abc", 0, callback);
+  jsa::Function getObj = object.getPropertyAsFunction(*context, "abc");
+  jsa::Object thisObject = jsa::Object(*context);
+  thisObject.setProperty(*context, "abc", "helloworld");
+  getObj.callWithThis(*context, thisObject);
+}
+
+TEST(V8Context, hostFunctionThrowError) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value { throw jsa::JSError(context, "ops !!"); };
+  jsa::Object object = jsa::Object(*context);
+  JSA_BINDING_FUNCTION(*context, object, "causeError", 0, callback);
+  context->global().setProperty(*context, "object", object);
+  context->evaluateJavaScript("object.causeError()", "", 0);
 }

@@ -42,7 +42,7 @@ class JSError;
 /// can be any value - it will not necessarily be coerced to an object or
 /// or set to the global object.
 using HostFunctionType = std::function<Value(
-    JSContext &rt, const Value &thisVal,
+    JSContext &context, const Value &thisVal,
                                              const Value *args, size_t count)>;
 
 /// An object which implements this interface can be registered as an
