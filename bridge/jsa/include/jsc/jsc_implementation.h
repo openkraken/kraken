@@ -60,6 +60,8 @@ public:
   // Value->JSValueRef (similar to above)
   JSValueRef valueRef(const jsa::Value& value);
 
+  bool isValid() override;
+
 protected:
   friend class detail::ArgsConverter;
 

@@ -139,6 +139,8 @@ public:
   /// in most of the time, you should use global() method instead of this.
   virtual void *globalImpl() = 0;
 
+  /// verify is JS Engine is ready to use
+  virtual bool isValid() = 0;
 protected:
   friend class Pointer;
   friend class PropNameID;

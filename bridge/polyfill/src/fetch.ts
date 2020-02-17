@@ -217,13 +217,13 @@ class FetchResponse extends FetchBody {
   }
 }
 
-export function fetch(input: FetchRequest | string, init?: RequestInit) {
+function fetch(input: FetchRequest | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
 
     krakenFetch(url, JSON.stringify(init), function(err, response, body) {
-      // network error did't have statusCode
+      // network error didn't have statusCode
       if (err && !response.statusCode) {
         reject(new Error(err));
         return;

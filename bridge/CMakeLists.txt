@@ -24,9 +24,9 @@ add_library(bindings STATIC
   bindings/kraken.cc
 )
 add_library(bridge STATIC bridge.cc bridge.h)
-add_library(dart_callback STATIC dart_callbacks.cc dart_callbacks.h)
+add_library(dart_methods STATIC dart_methods.cc dart_methods.h)
 add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
-add_library(kraken SHARED kraken_bridge_export.cc)
+add_library(kraken SHARED bridge_export.cc)
 
 ### Bindings
 target_include_directories(bindings PRIVATE
@@ -39,8 +39,8 @@ target_include_directories(bindings PRIVATE
 target_link_libraries(bindings PRIVATE
   jsa_abstraction
   jsc_implementation
+  dart_methods
   v8_implementation
-  dart_callback
   foundation)
 
 ### Bridges
@@ -48,14 +48,14 @@ target_link_libraries(bridge PRIVATE
   jsc_implementation
   v8_implementation
   jsa_abstraction
-  dart_callback
+  dart_methods
   bindings
   -pthread)
 target_include_directories(bridge PRIVATE
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS})
 
-target_include_directories(dart_callback PRIVATE
+target_include_directories(dart_methods PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include
 )
 

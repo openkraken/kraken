@@ -1,5 +1,6 @@
-import { DocumentImpl } from './document';
 
+import './UIListener';
+import { DocumentImpl } from './document';
 const _document = new DocumentImpl();
 
 Object.defineProperty(global, 'document', {

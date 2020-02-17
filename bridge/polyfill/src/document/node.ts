@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from "./bridge";
+import { insertAdjacentNode, removeNode } from "./UIManager";
 
 type NodeList = Array<NodeImpl>;
 
