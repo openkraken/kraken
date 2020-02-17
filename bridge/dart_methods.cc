@@ -20,8 +20,8 @@ void registerInvokeUIManager(InvokeUIManager callback) {
   methodPointer->invokeUIManager = callback;
 }
 
-void registerInvokeModuleManager(InvokeModuleManager callback) {
-  methodPointer->invokeModuleManager = callback;
+void registerInvokeModule(InvokeModule callback) {
+  methodPointer->invokeModule = callback;
 }
 
 void registerReloadApp(ReloadApp callback) {
@@ -50,10 +50,6 @@ void registerCancelAnimationFrame(CancelAnimationFrame callback) {
 
 void registerGetScreen(GetScreen callback) {
   methodPointer->getScreen = callback;
-}
-
-void registerInvokeFetch(InvokeFetch invokeFetch) {
-  methodPointer->invokeFetch = invokeFetch;
 }
 
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio) {

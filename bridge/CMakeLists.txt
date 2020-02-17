@@ -12,7 +12,6 @@ include_directories(foundation)
 
 add_library(bindings STATIC
   bindings/KOM/console.cc
-  bindings/KOM/fetch.cc
   bindings/KOM/screen.cc
   bindings/KOM/timer.cc
   bindings/KOM/websocket.cc

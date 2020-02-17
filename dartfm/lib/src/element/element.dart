@@ -1095,12 +1095,7 @@ mixin ElementEventHandler on Node {
   }
 
   void _eventResponder(Event event) {
-    emitUIEvent(json.encode([
-      'event',
-      [
-        nodeId,
-        event,
-      ]
-    ], toEncodable: (event) => event.toJson()));
+    String json = jsonEncode([nodeId, event]);
+    emitUIEvent(json);
   }
 }
