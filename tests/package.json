@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npm run build:rax && npm run test:flutter",
     "build:rax": "webpack -c webpack.config.js",
-    "test:flutter": "flutter drive --target=test_driver/app.dart"
+    "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart"
   },
   "author": "Kraken Team",
   "license": "MIT"

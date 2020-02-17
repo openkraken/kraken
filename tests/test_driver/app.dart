@@ -5,10 +5,11 @@ import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
+import 'package:kraken/element.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void onFrameBegin(Duration timeStamp) {
-  JSMessage(FRAME_BEGIN).send();
+  emitUIEvent(FRAME_BEGIN);
   WidgetsBinding.instance.addPostFrameCallback(onFrameBegin);
 }
 
