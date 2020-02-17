@@ -239,6 +239,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
 
   int32_t timerId = getDartMethod()->requestAnimationFrame(
       callback, static_cast<void *>(callbackContext));
+
+  // `-1` represents some error occured.
+  if (timerId == -1) {
+    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] requestAnimationFrame error";
+  }
+  
   return Value(timerId);
 }
 

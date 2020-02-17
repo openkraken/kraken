@@ -9,7 +9,6 @@ import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/kraken.dart';
 import 'package:path/path.dart';
 
 /// Search dynamic lib from env.KRAKEN_LIBRARY_PATH or /usr/lib

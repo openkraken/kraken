@@ -236,8 +236,10 @@ int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallback>> callback
   });
 }
 
+const int RAF_ERROR_CODE = -1;
+// `-1` represents some error occured in requestAnimationFrame execution.
 void registerRequestAnimationFrame() {
-  Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer = Pointer.fromFunction(_requestAnimationFrame, 0);
+  Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer = Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
   _registerRequestAnimationFrame(pointer);
 }
 
