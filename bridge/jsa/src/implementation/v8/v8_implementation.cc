@@ -754,6 +754,7 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
     v8::Persistent<v8::Context> v8Context;
   };
 
+  // TODO fix memory leaks
   auto proxy = new HostFunctionMetaData(this, _isolate, context, func,
                                         paramCount, stringRef(name));
   v8::Local<v8::External> hostCallback = v8::External::New(_isolate, proxy);
