@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
+
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:kraken_playground/command.dart';
-import 'package:requests/requests.dart';
-import 'package:kraken/kraken.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:kraken_playground/bundle.dart';
+import 'package:kraken/kraken.dart';
+import 'package:requests/requests.dart';
+
+import 'command.dart';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -32,8 +33,7 @@ String getCommandPathFromEnv() {
   return Platform.environment[COMMAND_PATH];
 }
 
-Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
-
+Future<String> getBundleContent({String bundleUrl, String bundlePath}) async {
   if (bundleUrl != null) {
     return Requests.get(bundleUrl).then((Response response) => response.content());
   }
@@ -43,7 +43,7 @@ Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
     return Future<String>.value(content);
   }
 
-  //目前jsbundle只支持Android和ios
+  // JSBundle only supports Android and iOS.
   String zipBundleUrl = getZipBundleURLFromEnv();
   if (zipBundleUrl != null && zipBundleUrl.isNotEmpty &&
       (Platform.isAndroid || Platform.isIOS)) {
@@ -76,22 +76,15 @@ void afterConnectedForCommand() async {
 void afterConnected() async {
   String bundleUrl = getBundleURLFromEnv();
   String bundlePath = getBundlePathFromEnv();
-  String content = await getBundleContent(
-      bundleUrl: bundleUrl, bundlePath: bundlePath);
-  evaluateScripts(
-    content,
-    bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH,
-    0
-  );
+  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath);
+  evaluateScripts(content, bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
 void main() {
   initBridge();
- _setTargetPlatformForDesktop();
- runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-     showPerformanceOverlay: Platform
-         .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-     afterConnected: Platform.environment[COMMAND_PATH] != null
-         ? afterConnectedForCommand
-         : afterConnected);
+  _setTargetPlatformForDesktop();
+  runApp(
+      enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected);
 }

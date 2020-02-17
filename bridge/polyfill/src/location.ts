@@ -1,7 +1,7 @@
 import { krakenWindow } from './kraken';
 const krakenLocation = krakenWindow.location;
 
-export const location = {
+const location = {
   get reload() {
     return krakenLocation.reload;
   },

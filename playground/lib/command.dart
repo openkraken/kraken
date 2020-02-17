@@ -1,10 +1,25 @@
-import 'dart:io';
 import 'dart:convert';
-import 'package:kraken/bridge.dart';
+import 'dart:io';
+
 import 'package:kraken/element.dart';
 
-class CommandRun {
+void createElement(String type, int id, String props, String events) {
+  ElementManager().applyAction(
+    ElementAction.createElement,
+    null,
+    node: PayloadNode.fromParams(type, id, props, events),
+  );
+}
 
+void setStyle(int targetId, String key, String value) {
+  ElementManager().applyAction(ElementAction.setStyle, [targetId, key, value]);
+}
+
+void insertAdjacentNode(int targetId, String position, int nodeId) {
+  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, position, nodeId]);
+}
+
+class CommandRun {
   String _path;
 
   List<Command> preCommands = [];
