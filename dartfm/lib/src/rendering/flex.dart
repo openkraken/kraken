@@ -454,8 +454,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   FlexFit _getFit(RenderBox child) {
-    final FlexParentData childParentData = child.parentData;
-    return childParentData.fit ?? FlexFit.tight;
+    return FlexFit.tight;
   }
 
   double _getCrossSize(RenderBox child) {
@@ -485,9 +484,30 @@ class RenderFlexLayout extends RenderBox
     int totalFlex = 0;
     int totalChildren = 0;
     assert(constraints != null);
+
+    double maxWidth = 0;
+    if (constraints.maxWidth != double.infinity) {
+      maxWidth = constraints.maxWidth;
+    } else {
+      maxWidth = getParentWidth(nodeId);
+    }
+
+    double maxHeight = 0;
+    if (style.get('height') != null) {
+      double height = Length.toDisplayPortValue(style.get('height'));
+      if (height != null) {
+        maxHeight = height;
+      }
+    } else {
+      double parentHeight = getStretchParentHeight(nodeId);
+      if (parentHeight != null) {
+        maxHeight = parentHeight;
+      }
+    }
+
     final double maxMainSize = _direction == Axis.horizontal
-        ? constraints.maxWidth
-        : constraints.maxHeight;
+        ? maxWidth
+        : maxHeight;
     final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
