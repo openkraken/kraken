@@ -4,9 +4,9 @@
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
     "test": "echo \"no test specified\" && exit 1",
-    "lint:dartfm": "cd dartfm && flutter analyze",
-    "format:dartfm": "cd dartfm && flutter format",
-    "ci": "npm run lint:dartfm"
+    "lint": "cd kraken && flutter analyze",
+    "format": "cd kraken && flutter format",
+    "ci": "npm run lint"
   },
   "repository": {
     "type": "git",
