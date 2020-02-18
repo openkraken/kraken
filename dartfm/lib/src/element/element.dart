@@ -911,10 +911,12 @@ abstract class Element extends Node
         RenderFlexLayout renderLayout = renderLayoutElement as RenderFlexLayout;
         if (renderLayout.direction == Axis.vertical &&
             renderLayout.crossAxisAlignment != CrossAxisAlignment.stretch) {}
-        assert(childParentData is FlexParentData);
-        final FlexParentData parentData = childParentData;
-        FlexParentData flexParentData = FlexItem.getParentData(childStyle);
-        parentData.flex = flexParentData.flex;
+        assert(childParentData is KrakenFlexParentData);
+        final KrakenFlexParentData parentData = childParentData;
+        KrakenFlexParentData flexParentData = FlexItem.getParentData(childStyle);
+        parentData.flexGrow = flexParentData.flexGrow;
+        parentData.flexShrink = flexParentData.flexShrink;
+        parentData.flexBasis = flexParentData.flexBasis;
         parentData.fit = flexParentData.fit;
         String alignItems = style[FlexItem.ALIGN_ITEMS];
         if (alignItems != null && style[FlexItem.ALIGN_ITEMS] != 'stretch') {

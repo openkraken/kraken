@@ -46,6 +46,7 @@ class RenderTextNode extends RenderBox
   void performLayout() {
     RenderBox child = firstChild;
 
+    // @TODO when in flex-grow or flex-shrink width needs to be recalulated
     double constraintWidth = getParentWidth(nodeId);
     if (child != null) {
       BoxConstraints additionalConstraints = BoxConstraints(

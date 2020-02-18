@@ -82,8 +82,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlexLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
         DebugOverflowIndicatorMixin,
         ElementStyleMixin,
         RelativeStyleMixin {
@@ -313,8 +313,8 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData)
-      child.parentData = FlexParentData();
+    if (child.parentData is! KrakenFlexParentData)
+      child.parentData = KrakenFlexParentData();
   }
 
   double _getIntrinsicSize({
@@ -328,24 +328,24 @@ class RenderFlexLayout extends RenderBox
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
-      double totalFlex = 0.0;
+      double totalFlexGrow = 0.0;
       double inflexibleSpace = 0.0;
       double maxFlexFractionSoFar = 0.0;
       RenderBox child = firstChild;
       while (child != null) {
-        final int flex = _getFlex(child);
-        totalFlex += flex;
+        final int flex = _getFlexGrow(child);
+        totalFlexGrow += flex;
         if (flex > 0) {
           final double flexFraction =
-              childSize(child, extent) / _getFlex(child);
+              childSize(child, extent) / _getFlexGrow(child);
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final FlexParentData childParentData = child.parentData;
+        final KrakenFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
-      return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
+      return maxFlexFractionSoFar * totalFlexGrow + inflexibleSpace;
     } else {
       // INTRINSIC CROSS SIZE
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
@@ -354,13 +354,13 @@ class RenderFlexLayout extends RenderBox
 
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
       final double availableMainSpace = extent;
-      int totalFlex = 0;
+      int totalFlexGrow = 0;
       double inflexibleSpace = 0.0;
       double maxCrossSize = 0.0;
       RenderBox child = firstChild;
       while (child != null) {
-        final int flex = _getFlex(child);
-        totalFlex += flex;
+        final int flex = _getFlexGrow(child);
+        totalFlexGrow += flex;
         double mainSize;
         double crossSize;
         if (flex == 0) {
@@ -377,23 +377,23 @@ class RenderFlexLayout extends RenderBox
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        final FlexParentData childParentData = child.parentData;
+        final KrakenFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
       // Determine the spacePerFlex by allocating the remaining available space.
       // When you're overconstrained spacePerFlex can be negative.
       final double spacePerFlex =
-          math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
+          math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlexGrow);
 
       // Size remaining (flexible) items, find the maximum cross size.
       child = firstChild;
       while (child != null) {
-        final int flex = _getFlex(child);
+        final int flex = _getFlexGrow(child);
         if (flex > 0)
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        final FlexParentData childParentData = child.parentData;
+        final KrakenFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
@@ -448,18 +448,39 @@ class RenderFlexLayout extends RenderBox
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
-  int _getFlex(RenderBox child) {
-    final FlexParentData childParentData = child.parentData;
-    return childParentData.flex ?? 0;
+  int _getFlexGrow(RenderBox child) {
+    final KrakenFlexParentData childParentData = child.parentData;
+    return childParentData.flexGrow ?? 0;
   }
 
-  double _getBaseConstraints(child) {
+  int _getFlexShrink(RenderBox child) {
+    final KrakenFlexParentData childParentData = child.parentData;
+    return childParentData.flexShrink ?? 1;
+  }
+
+  String _getFlexBasis(RenderBox child) {
+    final KrakenFlexParentData childParentData = child.parentData;
+    return childParentData.flexBasis ?? 'auto';
+  }
+
+  double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
+    double totalExtent = 0;
+    childSizeMap.forEach((nodeId, item) {
+      totalExtent += item['flexShrink'] * item['size'];
+    });
+    dynamic current = childSizeMap[(child as RenderBoxModel).nodeId];
+    double currentExtent = current['flexShrink'] * current['size'];
+
+    double minusConstraints = (currentExtent / totalExtent) * freeSpace;
+    return minusConstraints;
+  }
+
+  double _getBaseConstraints(RenderBoxModel child) {
     double minConstraints;
-    Element childNode = nodeMap[child.nodeId];
-    String flexBasis = childNode.style.get('flexBasis') ?? 'auto';
+    String flexBasis = _getFlexBasis(child);
 
     if (_direction == Axis.horizontal) {
-      String width = childNode.style.get('width');
+      String width = child.style.get('width');
       if (flexBasis == 'auto') {
         if (width != null) {
           minConstraints = Length.toDisplayPortValue(width);
@@ -470,12 +491,22 @@ class RenderFlexLayout extends RenderBox
         minConstraints = Length.toDisplayPortValue(flexBasis);
       }
     } else {
+      String height = child.style.get('height');
+      if (flexBasis == 'auto') {
+        if (height != null) {
+          minConstraints = Length.toDisplayPortValue(height);
+        } else {
+          minConstraints = 0;
+        }
+      } else {
+        minConstraints = Length.toDisplayPortValue(flexBasis);
+      }
     }
     return minConstraints;
   }
 
   FlexFit _getFit(RenderBox child) {
-    final FlexParentData childParentData = child.parentData;
+    final KrakenFlexParentData childParentData = child.parentData;
     return childParentData.fit ?? FlexFit.tight;
   }
 
@@ -503,7 +534,8 @@ class RenderFlexLayout extends RenderBox
   void performLayout() {
     assert(_debugHasNecessaryDirections);
     // Determine used flex factor, size inflexible items, calculate free space.
-    int totalFlex = 0;
+    int totalFlexGrow = 0;
+    bool hasFlexShrink = false;
     int totalChildren = 0;
     assert(constraints != null);
 
@@ -536,12 +568,16 @@ class RenderFlexLayout extends RenderBox
     double allocatedSize =
         0.0; // Sum of the sizes of the non-flexible children.
     RenderBox child = firstChild;
-    RenderBox lastFlexChild;
+    Map<int, dynamic> childSizeMap = {};
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
+      final KrakenFlexParentData childParentData = child.parentData;
       totalChildren++;
-      final int flex = _getFlex(child);
-      if (flex > 0) {
+      final int flexGrow = _getFlexGrow(child);
+      final int flexShrink = _getFlexShrink(child);
+      if (flexShrink != 0) {
+        hasFlexShrink = true;
+      }
+      if (flexGrow > 0) {
         assert(() {
           final String identity =
               _direction == Axis.horizontal ? 'row' : 'column';
@@ -609,111 +645,121 @@ class RenderFlexLayout extends RenderBox
                 'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
                 '  https://github.com/flutter/flutter/issues/new?template=BUG.md')));
         }());
-        totalFlex += childParentData.flex;
-        lastFlexChild = child;
-      } else {
-        BoxConstraints innerConstraints;
-        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints = BoxConstraints(
-                  minHeight: constraints.minHeight,
-                  maxHeight: constraints.maxHeight);
-              break;
-            case Axis.vertical:
-              innerConstraints = BoxConstraints(
-                  minWidth: constraints.minWidth,
-                  maxWidth: constraints.maxWidth);
-              break;
-          }
-        } else {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints =
-                  BoxConstraints(maxHeight: constraints.maxHeight);
-              break;
-            case Axis.vertical:
-              innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-              break;
-          }
-        }
-        child.layout(innerConstraints, parentUsesSize: true);
-        allocatedSize += _getMainSize(child);
-        crossSize = math.max(crossSize, _getCrossSize(child));
+        totalFlexGrow += childParentData.flexGrow;
       }
+
+      BoxConstraints innerConstraints;
+      if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+        switch (_direction) {
+          case Axis.horizontal:
+            innerConstraints = BoxConstraints(
+                minHeight: constraints.minHeight,
+                maxHeight: constraints.maxHeight);
+            break;
+          case Axis.vertical:
+            innerConstraints = BoxConstraints(
+                minWidth: constraints.minWidth,
+                maxWidth: constraints.maxWidth);
+            break;
+        }
+      } else {
+        switch (_direction) {
+          case Axis.horizontal:
+            innerConstraints =
+                BoxConstraints(maxHeight: constraints.maxHeight);
+            break;
+          case Axis.vertical:
+            innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+            break;
+        }
+      }
+      child.layout(innerConstraints, parentUsesSize: true);
+      allocatedSize += _getMainSize(child);
+      crossSize = math.max(crossSize, _getCrossSize(child));
+      childSizeMap[(child as RenderBoxModel).nodeId] = {
+        'size': _getMainSize(child),
+        'flexShrink': _getFlexShrink(child),
+      };
+
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
 
     // Distribute free space to flexible children, and determine baseline.
     final double freeSpace =
-        math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
-    double allocatedFlexSpace = 0.0;
+        (canFlex ? maxMainSize : 0.0) - allocatedSize;
     double maxBaselineDistance = 0.0;
-    if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
+    if ((freeSpace >= 0 &&  totalFlexGrow > 0) ||
+        (freeSpace < 0 && hasFlexShrink) ||
+        crossAxisAlignment == CrossAxisAlignment.baseline) {
       final double spacePerFlex =
-          canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
+          canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
       child = firstChild;
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
       while (child != null) {
-        final int flex = _getFlex(child);
-        if (flex > 0) {
-          double maxChildExtent = canFlex
-              ? (child == lastFlexChild
-                  ? (freeSpace - allocatedFlexSpace)
-                  : spacePerFlex * flex)
-              : double.infinity;
-          double minChildExtent;
+        final int flexGrow = _getFlexGrow(child);
+        final double mainSize = _getMainSize(child);
+        double maxChildExtent;
+        double minChildExtent;
+
+        if (freeSpace >= 0) {
+          maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
+            : double.infinity;
+
           double baseConstraints = _getBaseConstraints(child);
           if (baseConstraints != 0) {
             maxChildExtent = baseConstraints;
           }
+          minChildExtent = maxChildExtent;
+        } else {
+          double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
           Element childNode = nodeMap[(child as RenderBoxModel).nodeId];
-          String flexGrow = childNode.style.get('flexGrow');
-          minChildExtent = flexGrow != null ? maxChildExtent : 0;
-          assert(minChildExtent != null);
-          BoxConstraints innerConstraints;
-          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-            switch (_direction) {
-              case Axis.horizontal:
-                innerConstraints = BoxConstraints(
-                    minWidth: minChildExtent,
-                    maxWidth: maxChildExtent,
-                    minHeight: constraints.minHeight,
-                    maxHeight: constraints.maxHeight);
-                break;
-              case Axis.vertical:
-                innerConstraints = BoxConstraints(
-                    minWidth: constraints.minWidth,
-                    maxWidth: constraints.maxWidth,
-                    minHeight: minChildExtent,
-                    maxHeight: maxChildExtent);
-                break;
-            }
-          } else {
-            switch (_direction) {
-              case Axis.horizontal:
-                innerConstraints = BoxConstraints(
-                    minWidth: minChildExtent,
-                    maxWidth: maxChildExtent,
-                    maxHeight: constraints.maxHeight);
-                break;
-              case Axis.vertical:
-                innerConstraints = BoxConstraints(
-                    maxWidth: constraints.maxWidth,
-                    minHeight: minChildExtent,
-                    maxHeight: maxChildExtent);
-                break;
-            }
-          }
-          child.layout(innerConstraints, parentUsesSize: true);
-          final double childSize = _getMainSize(child);
-          assert(childSize <= maxChildExtent);
-          allocatedSize += childSize;
-          allocatedFlexSpace += maxChildExtent;
-          crossSize = math.max(crossSize, _getCrossSize(child));
+          dynamic current = childSizeMap[(child as RenderBoxModel).nodeId];
+          minChildExtent = maxChildExtent = current['size'] + shrinkValue;
         }
+
+        assert(minChildExtent != null);
+        BoxConstraints innerConstraints;
+        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+          switch (_direction) {
+            case Axis.horizontal:
+              innerConstraints = BoxConstraints(
+                  minWidth: minChildExtent,
+                  maxWidth: maxChildExtent,
+                  minHeight: constraints.minHeight,
+                  maxHeight: constraints.maxHeight);
+              break;
+            case Axis.vertical:
+              innerConstraints = BoxConstraints(
+                  minWidth: constraints.minWidth,
+                  maxWidth: constraints.maxWidth,
+                  minHeight: minChildExtent,
+                  maxHeight: maxChildExtent);
+              break;
+          }
+        } else {
+          switch (_direction) {
+            case Axis.horizontal:
+              innerConstraints = BoxConstraints(
+                  minWidth: minChildExtent,
+                  maxWidth: maxChildExtent,
+                  maxHeight: constraints.maxHeight);
+              break;
+            case Axis.vertical:
+              innerConstraints = BoxConstraints(
+                  maxWidth: constraints.maxWidth,
+                  minHeight: minChildExtent,
+                  maxHeight: maxChildExtent);
+              break;
+          }
+        }
+        child.layout(innerConstraints, parentUsesSize: true);
+        final double childSize = _getMainSize(child);
+        assert(childSize <= maxChildExtent);
+        allocatedSize += childSize;
+        crossSize = math.max(crossSize, _getCrossSize(child));
+
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(() {
             if (textBaseline == null)
@@ -736,7 +782,7 @@ class RenderFlexLayout extends RenderBox
             crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
           }
         }
-        final FlexParentData childParentData = child.parentData;
+        final KrakenFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
     }
@@ -834,7 +880,7 @@ class RenderFlexLayout extends RenderBox
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
+      final KrakenFlexParentData childParentData = child.parentData;
       double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -933,8 +979,8 @@ class RenderFlexLayout extends RenderBox
 
 class RenderFlexItem extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
         DebugOverflowIndicatorMixin,
         RelativeStyleMixin {
   RenderFlexItem({RenderFlexLayout parent, RenderBox child}) {
@@ -946,8 +992,8 @@ class RenderFlexItem extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData) {
-      FlexParentData flexParentData = FlexParentData();
+    if (child.parentData is! KrakenFlexParentData) {
+      KrakenFlexParentData flexParentData = KrakenFlexParentData();
       flexParentData.fit = FlexFit.tight;
       child.parentData = flexParentData;
     }
