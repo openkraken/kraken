@@ -198,8 +198,9 @@ int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<V
   });
 }
 
+const int SET_TIMEOUT_ERROR = -1;
 void registerSetTimeout() {
-  Pointer<NativeFunction<Native_SetTimeout>> pointer = Pointer.fromFunction(_setTimeout, 0);
+  Pointer<NativeFunction<Native_SetTimeout>> pointer = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
   _registerSetTimeout(pointer);
 }
 
@@ -218,8 +219,9 @@ int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<
   });
 }
 
+const int SET_INTERVAL_ERROR = -1;
 void registerSetInterval() {
-  Pointer<NativeFunction<Native_SetInterval>> pointer = Pointer.fromFunction(_setInterval, 0);
+  Pointer<NativeFunction<Native_SetInterval>> pointer = Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
   _registerSetInterval(pointer);
 }
 
