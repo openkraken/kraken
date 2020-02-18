@@ -37,12 +37,13 @@ public:
   V8Instrumentation &instrumentation() override;
 
   // JSValueRef->JSValue (needs make.*Value so it must be member function)
-  jsa::Value createValue(v8::Local<v8::Value>& value);
+  jsa::Value createValue(v8::Local<v8::Value> &value);
 
   // Value->JSValueRef (similar to above)
   v8::Local<v8::Value> valueRef(const jsa::Value &value);
 
   bool isValid() override;
+
 protected:
   // Symbol
   class V8SymbolValue final : public PointerValue {
@@ -85,10 +86,9 @@ protected:
   };
 
   // Object
-  class V8ObjectValue final : public PointerValue {
-    V8ObjectValue(v8::Isolate *isolate,
-                  const std::atomic<bool> &ctxInvalid,
-                  v8::Local<v8::Object> &obj
+  template <typename T> class V8ObjectValue final : public PointerValue {
+    V8ObjectValue(v8::Isolate *isolate, const std::atomic<bool> &ctxInvalid,
+                  v8::Local<v8::Object> &obj, T *privateData
 #ifndef NDEBUG
                   ,
                   std::atomic<intptr_t> &counter
@@ -97,9 +97,14 @@ protected:
 
     void invalidate() override;
 
+    // recycle privateData's memory when javascript Object is finalized (prepared
+    // for garbage collection).
+    static void finalize(const v8::WeakCallbackInfo<T> &data);
+
     v8::Isolate *isolate_;
     v8::Persistent<v8::Object> obj_;
     const std::atomic<bool> &ctxInvalid_;
+    T *privateData_;
 #ifndef NDEBUG
     std::atomic<intptr_t> &counter_;
 #endif
@@ -176,14 +181,17 @@ private:
   jsa::String createString(v8::Local<v8::String> string) const;
   jsa::PropNameID createPropNameID(v8::Local<v8::String> string);
   jsa::Object createObject(v8::Local<v8::Object> &object) const;
+  template <typename T>
+  jsa::Object createObject(v8::Local<v8::Object> &object, T *privateData) const;
 
   // Used by factory methods and clone methods
   jsa::JSContext::PointerValue *
   makeSymbolValue(v8::Local<v8::Symbol> sym) const;
   jsa::JSContext::PointerValue *
   makeStringValue(v8::Local<v8::String> value) const;
-  jsa::JSContext::PointerValue *
-  makeObjectValue(v8::Local<v8::Object> &obj) const;
+  template <typename T>
+  jsa::JSContext::PointerValue *makeObjectValue(v8::Local<v8::Object> &obj,
+                                                T *privateData) const;
 
   v8::Isolate *_isolate;
   v8::Persistent<v8::Context> _context;

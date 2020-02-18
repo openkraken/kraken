@@ -198,9 +198,7 @@ V8Context::~V8Context() {
 #endif
 }
 
-bool V8Context::isValid() {
-  return ctxInvalid_.load();
-}
+bool V8Context::isValid() { return ctxInvalid_.load(); }
 
 jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
   v8::HandleScope handleScope(_isolate);
@@ -344,15 +342,17 @@ void V8Context::V8SymbolValue::invalidate() {
   delete this;
 }
 
-V8Context::V8ObjectValue::V8ObjectValue(v8::Isolate *isolate,
-                                        const std::atomic<bool> &ctxInvalid,
-                                        v8::Local<v8::Object> &obj
+template <typename T>
+V8Context::V8ObjectValue<T>::V8ObjectValue(v8::Isolate *isolate,
+                                           const std::atomic<bool> &ctxInvalid,
+                                           v8::Local<v8::Object> &obj,
+                                           T *privateData
 #ifndef NDEBUG
-                                        ,
-                                        std::atomic<intptr_t> &counter
+                                           ,
+                                           std::atomic<intptr_t> &counter
 #endif
-                                        )
-    : ctxInvalid_(ctxInvalid), isolate_(isolate)
+                                           )
+    : ctxInvalid_(ctxInvalid), isolate_(isolate), privateData_(privateData)
 #ifndef NDEBUG
       ,
       counter_(counter)
@@ -364,12 +364,26 @@ V8Context::V8ObjectValue::V8ObjectValue(v8::Isolate *isolate,
   obj_.Reset(isolate, obj);
 }
 
-void V8Context::V8ObjectValue::invalidate() {
+template <typename T> void V8Context::V8ObjectValue<T>::invalidate() {
 #ifndef NDEBUG
   counter_ -= 1;
 #endif
+  // when privateData is not null, we should recycle privateData's memory before
+  // gc collect object's memory.
+  // https://stackoverflow.com/questions/173366/how-do-you-free-a-wrapped-c-object-when-associated-javascript-object-is-garbag
+  if (privateData_ != nullptr) {
+    obj_.SetWeak(privateData_, finalize, v8::WeakCallbackType::kFinalizer);
+  }
   obj_.Reset();
+
   delete this;
+}
+
+template <typename T>
+void V8Context::V8ObjectValue<T>::finalize(
+    const v8::WeakCallbackInfo<T> &data) {
+  T *parameter = data.GetParameter();
+  delete parameter;
 }
 
 jsa::JSContext::PointerValue *
@@ -398,9 +412,9 @@ V8Context::cloneObject(const jsa::JSContext::PointerValue *pv) {
     return nullptr;
   }
   v8::HandleScope handleScope(_isolate);
-  const auto *pointer = static_cast<const V8ObjectValue *>(pv);
+  const auto *pointer = static_cast<const V8ObjectValue<void *> *>(pv);
   v8::Local<v8::Object> obj = pointer->obj_.Get(_isolate);
-  return makeObjectValue(obj);
+  return makeObjectValue(obj, pointer->privateData_);
 }
 
 jsa::JSContext::PointerValue *
@@ -506,7 +520,8 @@ jsa::Value V8Context::getProperty(const jsa::Object &obj,
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  auto pointer = static_cast<const V8ObjectValue *>(getPointerValue(obj));
+  auto pointer =
+      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   v8::Local<v8::Object> object = pointer->obj_.Get(pointer->isolate_);
   std::string cKey = name.utf8(*this);
   v8::Local<v8::String> key =
@@ -774,7 +789,7 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
       v8::Function::New(context, callback, hostCallback, (int)paramCount)
           .ToLocalChecked();
   v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
-  return createObject(funcObject).getFunction(*this);
+  return createObject(funcObject, proxy).getFunction(*this);
 }
 
 jsa::Value V8Context::call(const jsa::Function &function,
@@ -812,7 +827,8 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
   v8::TryCatch tryCatch(_isolate);
   v8::Local<v8::Value> result;
 
-  bool success = func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
+  bool success =
+      func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
           .ToLocal(&result);
   if (!success) {
     reportException(_isolate, tryCatch);
@@ -871,7 +887,8 @@ V8Context::stringRef(const jsa::PropNameID &propNameId) const {
 
 v8::Local<v8::Object> V8Context::objectRef(const jsa::Object &obj) const {
   v8::EscapableHandleScope handleScope(_isolate);
-  auto pointer = static_cast<const V8ObjectValue *>(getPointerValue(obj));
+  auto pointer =
+      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   return handleScope.Escape(pointer->obj_.Get(pointer->isolate_));
 }
 
@@ -888,7 +905,13 @@ jsa::PropNameID V8Context::createPropNameID(v8::Local<v8::String> string) {
 }
 
 jsa::Object V8Context::createObject(v8::Local<v8::Object> &object) const {
-  return make<jsa::Object>(makeObjectValue(object));
+  return make<jsa::Object>(makeObjectValue<void *>(object, nullptr));
+}
+
+template <typename T>
+jsa::Object V8Context::createObject(v8::Local<v8::Object> &object,
+                                    T *privateData) const {
+  return make<jsa::Object>(makeObjectValue(object, privateData));
 }
 
 jsa::JSContext::PointerValue *
@@ -913,13 +936,14 @@ V8Context::makeStringValue(v8::Local<v8::String> ref) const {
 #endif
 }
 
+template <typename T>
 jsa::JSContext::PointerValue *
-V8Context::makeObjectValue(v8::Local<v8::Object> &obj) const {
-  v8::HandleScope handleScope(_isolate);
+V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
 #ifndef NDEBUG
-  return new V8ObjectValue(_isolate, ctxInvalid_, obj, objectCounter_);
+  return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData,
+                              objectCounter_);
 #else
-  return new V8ObjectValue(_isolate, ctxInvalid_, obj);
+  return new V8ObjectValue(_isolate, ctxInvalid_, obj, privateData);
 #endif
 }
 
