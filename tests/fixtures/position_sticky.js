@@ -7,7 +7,7 @@ function setStyle(dom, object) {
 }
 
 const sticky1 = document.createElement('div');
-sticky1.appendChild(document.createTextNode('sticky 1'));
+sticky1.appendChild(document.createTextNode('sticky top 1'));
 setStyle(sticky1, {
   backgroundColor: '#f40',
   color: '#FFF',
@@ -24,7 +24,7 @@ setStyle(block1, {
 });
 
 const sticky2 = document.createElement('div');
-sticky2.appendChild(document.createTextNode('sticky 2'));
+sticky2.appendChild(document.createTextNode('sticky top 2'));
 setStyle(sticky2, {
   backgroundColor: 'blue',
   color: '#FFF',
@@ -41,7 +41,7 @@ setStyle(block2, {
 });
 
 const sticky3 = document.createElement('div');
-sticky3.appendChild(document.createTextNode('sticky 3'));
+sticky3.appendChild(document.createTextNode('sticky top 3'));
 setStyle(sticky3, {
   backgroundColor: 'green',
   color: '#FFF',
@@ -52,8 +52,25 @@ setStyle(sticky3, {
 });
 
 const block3 = document.createElement('div');
-block3.appendChild(document.createTextNode('bottom block'));
+block3.appendChild(document.createTextNode('block3'));
 setStyle(block3, {
+  backgroundColor: '#999', height: '200px'
+});
+
+const sticky4 = document.createElement('div');
+sticky4.appendChild(document.createTextNode('sticky bottom'));
+setStyle(sticky4, {
+  backgroundColor: 'purple',
+  color: '#FFF',
+  position: 'sticky',
+  bottom: '50px',
+  width: '414px',
+  height: '50px',
+});
+
+const block4 = document.createElement('div');
+block4.appendChild(document.createTextNode('bottom block'));
+setStyle(block4, {
   backgroundColor: '#999', height: '800px'
 });
 
@@ -63,4 +80,5 @@ document.body.appendChild(sticky2);
 document.body.appendChild(block2);
 document.body.appendChild(sticky3);
 document.body.appendChild(block3);
-
+document.body.appendChild(sticky4);
+document.body.appendChild(block4);

@@ -45,10 +45,6 @@ public:
   void invokeEventListener(int32_t type, const char *args);
   void handleUIListener(const char *args);
   void handleModuleListener(const char *args);
-
-  void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
-                           const char* body);
-  void invokeModuleCallback(int32_t callbackId, const char* json);
   void invokeOnloadCallback();
   void invokeOnPlatformBrightnessChangedCallback();
   void flushUITask();

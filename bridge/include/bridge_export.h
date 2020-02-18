@@ -15,13 +15,14 @@ struct Screen {
   double height;
 };
 using AsyncCallback = void (*)(void*);
+using AsyncModuleCallback = void (*)(char *, void *);
 typedef const char *(*InvokeUIManager)(const char*);
-typedef const char *(*InvokeModuleManager)(const char*, int32_t);
+typedef const char *(*InvokeModule)(const char*, AsyncModuleCallback callback, void* context);
 typedef void (*ReloadApp)();
 typedef int32_t (*SetTimeout)(AsyncCallback callback, void* context, int32_t);
 typedef int32_t (*SetInterval)(AsyncCallback callback, void* context, int32_t);
-typedef void (*ClearTimeout)(int32_t);
 typedef int32_t (*RequestAnimationFrame)(AsyncCallback callback, void* context);
+typedef void (*ClearTimeout)(int32_t);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
 typedef void (*InvokeFetch)(int32_t, const char*, const char*);
@@ -41,11 +42,6 @@ void invokeEventListener(int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 KRAKEN_EXPORT
-void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
-                         const char* body);
-KRAKEN_EXPORT
-void invokeModuleCallback(int32_t callbackId, const char* json);
-KRAKEN_EXPORT
 void invokeOnloadCallback();
 KRAKEN_EXPORT
 void invokeOnPlatformBrightnessChangedCallback();
@@ -55,7 +51,7 @@ void flushUITask();
 KRAKEN_EXPORT
 void registerInvokeUIManager(InvokeUIManager invokeUIManager);
 KRAKEN_EXPORT
-void registerInvokeModuleManager(InvokeModuleManager invokeUIManager);
+void registerInvokeModule(InvokeModule invokeUIManager);
 KRAKEN_EXPORT
 void registerReloadApp(ReloadApp reloadApp);
 KRAKEN_EXPORT
@@ -70,8 +66,6 @@ KRAKEN_EXPORT
 void registerCancelAnimationFrame(CancelAnimationFrame cancelAnimationFrame);
 KRAKEN_EXPORT
 void registerGetScreen(GetScreen getScreen);
-KRAKEN_EXPORT
-void registerInvokeFetch(InvokeFetch invokeFetch);
 KRAKEN_EXPORT
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 KRAKEN_EXPORT

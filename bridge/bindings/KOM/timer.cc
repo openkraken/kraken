@@ -23,6 +23,31 @@ struct CallbackContext {
   std::shared_ptr<Value> _callback;
 };
 
+void destoryCallbackContext(void *data) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  delete obj;
+}
+
+void handlePersistentCallback(void *data) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  JSContext &_context = obj->_context;
+  if (!_context.isValid())
+    return;
+
+  if (obj->_callback == nullptr) {
+    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    return;
+  }
+
+  Object callback = obj->_callback->getObject(_context);
+  callback.asFunction(_context).call(_context, Value::undefined(), 0);
+}
+
+void handleTransientCallback(void *data) {
+  handlePersistentCallback(data);
+  destoryCallbackContext(data);
+}
+
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                  size_t count) {
   if (count < 1) {
@@ -58,25 +83,8 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
 
   auto *callbackContext = new CallbackContext(context, callbackValue);
 
-  auto callback = [](void *data) {
-    auto *obj = static_cast<CallbackContext *>(data);
-    if (!obj->_context.isValid())
-      return;
-
-    if (obj->_callback == nullptr) {
-      KRAKEN_LOG(VERBOSE) << "Callback is null";
-      return;
-    }
-
-    Object callback = obj->_callback->getObject(obj->_context);
-    callback.asFunction(obj->_context)
-        .call(obj->_context, Value::undefined(), 0);
-
-    delete obj;
-  };
-
   int32_t timerId = getDartMethod()->setTimeout(
-      callback, static_cast<void *>(callbackContext), timeout);
+      handleTransientCallback, static_cast<void *>(callbackContext), timeout);
   return Value(timerId);
 }
 
@@ -135,7 +143,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   };
 
   int32_t timerId = getDartMethod()->setInterval(
-      callback, static_cast<void *>(callbackContext), delay);
+      handlePersistentCallback, static_cast<void *>(callbackContext), delay);
 
   return Value(timerId);
 }
@@ -172,14 +180,14 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  const Value &timerId = args[0];
-  if (!timerId.isNumber()) {
+  const Value &requestId = args[0];
+  if (!requestId.isNumber()) {
     KRAKEN_LOG(WARN) << "[clearAnimationFrame] cancelAnimationFrame accept "
                         "number as parameter";
     return Value::undefined();
   }
 
-  auto id = static_cast<int32_t>(timerId.asNumber());
+  auto id = static_cast<int32_t>(requestId.asNumber());
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
     KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
@@ -210,36 +218,21 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
 
   // the context pointer which will be pass by pointer address to dart code.
   auto *callbackContext = new CallbackContext(context, callbackValue);
-  // the callback pointer send and invoked by dart code.
-  auto callback = [](void *data) {
-    auto *obj = static_cast<CallbackContext *>(data);
-    if (!obj->_context.isValid())
-      return;
-    if (obj->_callback == nullptr) {
-      KRAKEN_LOG(VERBOSE) << "callback is not a function";
-      return;
-    }
-
-    Object callback = obj->_callback->getObject(obj->_context);
-    if (callback.isFunction(obj->_context)) {
-      callback.asFunction(obj->_context)
-          .call(obj->_context, Value::undefined(), 0);
-    } else {
-      KRAKEN_LOG(VERBOSE) << "callback is not a function";
-    }
-
-    // delete callbackContext pointer.
-    delete obj;
-  };
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
     KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
     return Value::undefined();
   }
 
-  int32_t timerId = getDartMethod()->requestAnimationFrame(
-      callback, static_cast<void *>(callbackContext));
-  return Value(timerId);
+  int32_t requestId = getDartMethod()->requestAnimationFrame(
+      handleTransientCallback, static_cast<void *>(callbackContext));
+  
+  // `-1` represents some error occurred.
+  if (requestId == -1) {
+    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] requestAnimationFrame error";
+  }
+  
+  return Value(requestId);
 }
 
 void bindTimer(std::unique_ptr<JSContext> &context) {

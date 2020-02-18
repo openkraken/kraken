@@ -82,7 +82,15 @@ class RenderPosition extends RenderStack {
         } else if (x != null) {
           y = 0;
         }
-        if (x != null) {
+        if (x != null ||
+          y != null
+        ) {
+          if (x == null) {
+            x = 0;
+          }
+          if (y == null) {
+            y = 0;
+          }
           childParentData.offset = Offset(x, y);
         } else if (x == null &&
             y == null &&

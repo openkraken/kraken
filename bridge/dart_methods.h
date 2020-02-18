@@ -15,7 +15,7 @@ namespace kraken {
 struct DartMethodPointer {
   DartMethodPointer() = default;
   InvokeUIManager invokeUIManager{nullptr};
-  InvokeModuleManager invokeModuleManager{nullptr};
+  InvokeModule invokeModule{nullptr};
   ReloadApp reloadApp{nullptr};
   SetTimeout setTimeout{nullptr};
   SetInterval setInterval{nullptr};
@@ -30,7 +30,7 @@ struct DartMethodPointer {
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
-void registerInvokeModuleManager(InvokeModuleManager callback);
+void registerInvokeModule(InvokeModule callback);
 void registerReloadApp(ReloadApp callback);
 void registerSetTimeout(SetTimeout callback);
 void registerSetInterval(SetInterval callback);
@@ -38,7 +38,6 @@ void registerClearTimeout(ClearTimeout callback);
 void registerRequestAnimationFrame(RequestAnimationFrame callback);
 void registerCancelAnimationFrame(CancelAnimationFrame callback);
 void registerGetScreen(GetScreen callback);
-void registerInvokeFetch(InvokeFetch invokeFetch);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);

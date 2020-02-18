@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'dart:convert';
-
 import 'package:requests/requests.dart';
 
 Map<String, String> _parseHeaders(Map<String, dynamic> map) {
@@ -21,8 +19,7 @@ Map<String, String> _parseHeaders(Map<String, dynamic> map) {
   return headerMap;
 }
 
-Future<Response> fetch(String url, String json) async {
-  Map<String, dynamic> map = jsonDecode(json);
+Future<Response> fetch(String url, Map<String, dynamic> map) async {
   String method = map['method'];
   Map<String, String> headers = _parseHeaders(map['headers']);
   Future<Response> future;
