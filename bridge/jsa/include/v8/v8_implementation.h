@@ -42,6 +42,7 @@ public:
   // Value->JSValueRef (similar to above)
   v8::Local<v8::Value> valueRef(const jsa::Value &value);
 
+  bool isValid() override;
 protected:
   // Symbol
   class V8SymbolValue final : public PointerValue {
