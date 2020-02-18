@@ -101,22 +101,41 @@ void registerInvokeUIManager() {
   _registerInvokeUIManager(pointer);
 }
 
-// Register InvokeModuleManager
-typedef Native_InvokeModuleManager = Pointer<Utf8> Function(Pointer<Utf8>, Int32);
-typedef Native_RegisterInvokeModuleManager = Void Function(Pointer<NativeFunction<Native_InvokeModuleManager>>);
-typedef Dart_RegisterInvokeModuleManager = void Function(Pointer<NativeFunction<Native_InvokeModuleManager>>);
+// Register InvokeModule
+typedef NativeAsyncModuleCallback = Void Function(Pointer<Utf8>, Pointer<Void>);
+typedef DartAsyncModuleCallback = void Function(Pointer<Utf8>, Pointer<Void>);
 
-final Dart_RegisterInvokeModuleManager _registerInvokeModuleManager = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterInvokeModuleManager>>('registerInvokeModuleManager')
-    .asFunction();
+typedef Native_InvokeModule = Pointer<Utf8> Function(
+    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>, Pointer<Void>);
+typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
+typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
-String invokeModuleManager(String json, int callbackId) {
+final Dart_RegisterInvokeModule _registerInvokeModule =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
+
+String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void> context) {
   dynamic args = jsonDecode(json);
   String method = args[0];
-
   var result;
   if (method == 'getConnectivity') {
-    getConnectivity(callbackId);
+    getConnectivity((String json) {
+      callback(Utf8.toUtf8(json), context);
+    });
+  } else if(method == 'onConnectivityChanged') {
+    onConnectivityChanged();
+  } else if (method == 'fetch') {
+    List fetchArgs = args[1];
+    String url = fetchArgs[0];
+    Map<String, dynamic> options = fetchArgs[1];
+    fetch(url, options).then((Response response) {
+      response.raiseForStatus();
+      String json = jsonEncode(['', response.statusCode, response.content()]);
+      callback(Utf8.toUtf8(json), context);
+    }).catchError((e) {
+      String errorMesssage = e is HTTPException ? e.message : e.toString();
+      String json = jsonEncode([errorMesssage, e.response.statusCode, '']);
+      callback(Utf8.toUtf8(json), context);
+    });
   }
 
   if (result == null) {
@@ -134,14 +153,15 @@ String invokeModuleManager(String json, int callbackId) {
   }
 }
 
-Pointer<Utf8> _invokeModuleManager(Pointer<Utf8> json, int callbackId) {
-  String result = invokeModuleManager(Utf8.fromUtf8(json), callbackId);
+Pointer<Utf8> _invokeModule(
+    Pointer<Utf8> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback, Pointer<Void> context) {
+  String result = invokeModule(Utf8.fromUtf8(json), callback.asFunction(), context);
   return Utf8.toUtf8(result);
 }
 
-void registerInvokeModuleManager() {
-  Pointer<NativeFunction<Native_InvokeModuleManager>> pointer = Pointer.fromFunction(_invokeModuleManager);
-  _registerInvokeModuleManager(pointer);
+void registerInvokeModule() {
+  Pointer<NativeFunction<Native_InvokeModule>> pointer = Pointer.fromFunction(_invokeModule);
+  _registerInvokeModule(pointer);
 }
 
 // Register reloadApp
@@ -261,32 +281,6 @@ void registerCancelAnimationFrame() {
   _registerCancelAnimationFrame(pointer);
 }
 
-// Register fetch
-typedef Native_InvokeFetch = Void Function(Int32, Pointer<Utf8>, Pointer<Utf8>);
-typedef Native_RegisterInvokeFetch = Void Function(Pointer<NativeFunction<Native_InvokeFetch>>);
-typedef Dart_RegisterInvokeFetch = void Function(Pointer<NativeFunction<Native_InvokeFetch>>);
-
-final Dart_RegisterInvokeFetch _registerInvokeFetch =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeFetch>>('registerInvokeFetch').asFunction();
-
-void _invokeFetch(int callbackId, Pointer<Utf8> url, Pointer<Utf8> json) {
-  fetch(Utf8.fromUtf8(url), Utf8.fromUtf8(json)).then((Response response) {
-    response.raiseForStatus();
-    invokeFetchCallback(callbackId, '', response.statusCode, response.content());
-  }).catchError((e) {
-    if (e is HTTPException) {
-      invokeFetchCallback(callbackId, e.message, e.response.statusCode, "");
-    } else {
-      invokeFetchCallback(callbackId, e.toString(), e.response.statusCode, "");
-    }
-  });
-}
-
-void registerInvokeFetch() {
-  Pointer<NativeFunction<Native_InvokeFetch>> pointer = Pointer.fromFunction(_invokeFetch);
-  _registerInvokeFetch(pointer);
-}
-
 // Register devicePixelRatio
 typedef Native_DevicePixelRatio = Double Function();
 typedef Native_RegisterDevicePixelRatio = Void Function(Pointer<NativeFunction<Native_DevicePixelRatio>>);
@@ -370,7 +364,7 @@ void registerGetScreen() {
 
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
-  registerInvokeModuleManager();
+  registerInvokeModule();
   registerReloadApp();
   registerSetTimeout();
   registerSetInterval();
@@ -378,7 +372,6 @@ void registerDartMethodsToCpp() {
   registerRequestAnimationFrame();
   registerCancelAnimationFrame();
   registerGetScreen();
-  registerInvokeFetch();
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerOnPlatformBrightnessChanged();

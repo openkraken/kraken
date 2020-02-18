@@ -34,7 +34,7 @@ String getCommandPathFromEnv() {
   return Platform.environment[COMMAND_PATH];
 }
 
-Future<String> getBundleContent({String bundleUrl, String bundlePath}) async {
+Future<String> getBundleContent({String bundleUrl, String bundlePath, String zipBundleUrl}) async {
   if (bundleUrl != null) {
     return Requests.get(bundleUrl).then((Response response) => response.content());
   }
@@ -44,11 +44,14 @@ Future<String> getBundleContent({String bundleUrl, String bundlePath}) async {
     return Future<String>.value(content);
   }
 
-  // JSBundle only supports Android and iOS.
-  String zipBundleUrl = getZipBundleURLFromEnv();
-  if (zipBundleUrl != null && zipBundleUrl.isNotEmpty &&
-      (Platform.isAndroid || Platform.isIOS)) {
+  if (zipBundleUrl != null) {
     return await BundleManager().downloadAndParse(zipBundleUrl);
+  }
+
+  try {
+    return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
+  } catch (e) {
+    print('ERROR: no bundle found');
   }
 
   return Future<String>.value('');
@@ -77,8 +80,9 @@ void afterConnectedForCommand() async {
 void afterConnected() async {
   String bundleUrl = getBundleURLFromEnv();
   String bundlePath = getBundlePathFromEnv();
-  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath);
-  evaluateScripts(content, bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH, 0);
+  String zipBundleUrl = getZipBundleURLFromEnv();
+  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath, zipBundleUrl: zipBundleUrl);
+  evaluateScripts(content, bundleUrl ?? bundlePath ?? zipBundleUrl ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
 void main() {

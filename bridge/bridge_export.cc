@@ -45,8 +45,8 @@ void registerInvokeUIManager(InvokeUIManager callbacks) {
   kraken::registerInvokeUIManager(callbacks);
 }
 
-void registerInvokeModuleManager(InvokeModuleManager callbacks) {
-  kraken::registerInvokeModuleManager(callbacks);
+void registerInvokeModule(InvokeModule callbacks) {
+  kraken::registerInvokeModule(callbacks);
 }
 
 void registerReloadApp(ReloadApp reloadApp) {
@@ -93,19 +93,6 @@ Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
   return &screen;
-}
-
-void registerInvokeFetch(InvokeFetch invokeFetch) {
-  kraken::registerInvokeFetch(invokeFetch);
-}
-
-void invokeFetchCallback(int32_t callbackId, const char *error,
-                         int32_t statusCode, const char *body) {
-  bridge->invokeFetchCallback(callbackId, error, statusCode, body);
-}
-
-void invokeModuleCallback(int32_t callbackId, const char *json) {
-  bridge->invokeModuleCallback(callbackId, json);
 }
 
 void invokeOnloadCallback() {

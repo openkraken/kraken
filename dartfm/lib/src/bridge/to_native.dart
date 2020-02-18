@@ -35,28 +35,6 @@ void emitModuleEvent(String data) {
   invokeEventListener(MODULE_EVENT, data);
 }
 
-// Register invokeModuleCallback
-typedef Native_InvokeModuleCallback = Void Function(Int32, Pointer<Utf8>);
-typedef Dart_InvokeModuleCallback = void Function(int, Pointer<Utf8>);
-
-final Dart_InvokeModuleCallback _invokeModuleCallback =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeModuleCallback>>('invokeModuleCallback').asFunction();
-
-void invokeModuleCallback(int callbackId, String json) {
-  _invokeModuleCallback(callbackId, Utf8.toUtf8(json));
-}
-
-// Register invokeFetchCallback
-typedef Native_InvokeFetchCallback = Void Function(Int32, Pointer<Utf8>, Int32, Pointer<Utf8>);
-typedef Dart_InvokeFetchCallback = void Function(int, Pointer<Utf8>, int, Pointer<Utf8>);
-
-final Dart_InvokeFetchCallback _invokeFetchCallback =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeFetchCallback>>('invokeFetchCallback').asFunction();
-
-void invokeFetchCallback(int callbackId, String error, int statusCode, String body) {
-  _invokeFetchCallback(callbackId, Utf8.toUtf8(error), statusCode, Utf8.toUtf8(body));
-}
-
 // Register invokeOnloadCallback
 typedef Native_InvokeOnloadCallback = Void Function();
 typedef Dart_InvokeOnLoadCallback = void Function();
