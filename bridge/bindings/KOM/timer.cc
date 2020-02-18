@@ -85,6 +85,12 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
 
   int32_t timerId = getDartMethod()->setTimeout(
       handleTransientCallback, static_cast<void *>(callbackContext), timeout);
+
+  // `-1` represents ffi error occurred.
+  if (timerId == -1) {
+    KRAKEN_LOG(ERROR) << "[setTimeout] dart method call failed";
+  }
+
   return Value(timerId);
 }
 
@@ -144,6 +150,10 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
 
   int32_t timerId = getDartMethod()->setInterval(
       handlePersistentCallback, static_cast<void *>(callbackContext), delay);
+
+  if (timerId == -1) {
+    KRAKEN_LOG(ERROR) << "[setInterval] dart method call failed";
+  }
 
   return Value(timerId);
 }
@@ -226,12 +236,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
 
   int32_t requestId = getDartMethod()->requestAnimationFrame(
       handleTransientCallback, static_cast<void *>(callbackContext));
-  
+
   // `-1` represents some error occurred.
   if (requestId == -1) {
     KRAKEN_LOG(ERROR) << "[requestAnimationFrame] requestAnimationFrame error";
   }
-  
+
   return Value(requestId);
 }
 
