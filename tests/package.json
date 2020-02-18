@@ -1,10 +1,9 @@
 {
-  "name": "kraken-test",
-  "version": "1.0.0",
+  "name": "@kraken/test",
+  "version": "0.0.0",
   "description": "Kraken test repo.",
   "scripts": {
     "test": "npm run build:rax && npm run test:flutter",
-    "build:rax": "webpack -c webpack.config.js",
     "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart"
   },
   "author": "Kraken Team",

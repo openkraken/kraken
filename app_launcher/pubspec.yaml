@@ -1,5 +1,5 @@
-name: kraken_playground
-description: Playground App for Kraken.
+name: kraken_app_launcher
+description: Shell for kraken.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -21,7 +21,7 @@ dependencies:
     sdk: flutter
 
   kraken:
-    path: ../dartfm
+    path: ../kraken
 
   path_provider: ^0.5.0+1
   dio: ^2.0.2
