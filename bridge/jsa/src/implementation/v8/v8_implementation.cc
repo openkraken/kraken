@@ -510,8 +510,11 @@ std::shared_ptr<jsa::HostObject> V8Context::getHostObject(const jsa::Object &) {
   // TODO getHostObject
 }
 
-jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &) {
-  // TODO getHostFunction
+jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
+  auto pointer = static_cast<const V8ObjectValue<void*> *>(getPointerValue(func));
+  void* privateData = pointer->privateData_;
+  HostFunctionProxy* proxy = static_cast<HostFunctionProxy*>(privateData);
+  return proxy->getHostFunction();
 }
 
 jsa::Value V8Context::getProperty(const jsa::Object &obj,
@@ -620,8 +623,9 @@ bool V8Context::isHostObject(const jsa::Object &) const {
   // TODO isHostObject
 }
 
-bool V8Context::isHostFunction(const jsa::Function &) const {
-  // TODO isHostFunction
+bool V8Context::isHostFunction(const jsa::Function &func) const {
+  auto pointer = static_cast<const V8ObjectValue<void*> *>(getPointerValue(func));
+  return pointer->privateData_ != nullptr;
 }
 
 jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
@@ -788,6 +792,10 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
   v8::Local<v8::Function> function =
       v8::Function::New(context, callback, hostCallback, (int)paramCount)
           .ToLocalChecked();
+
+  v8::Local<v8::Private> privateKey = v8::Private::New(
+      _isolate, v8::String::NewFromUtf8(_isolate, "proxy").ToLocalChecked());
+  function->SetPrivate(context, privateKey, hostCallback);
   v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
   return createObject(funcObject, proxy).getFunction(*this);
 }

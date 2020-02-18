@@ -446,3 +446,32 @@ TEST(V8Context, hostFunctionThrowError) {
   context->global().setProperty(*context, "object", object);
   context->evaluateJavaScript("object.causeError()", "", 0);
 }
+
+TEST(V8Context, isHostFunction) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args, size_t count) -> jsa::Value { return jsa::Value::undefined(); };
+  jsa::Object object = jsa::Object(*context);
+  jsa::Function func = jsa::Function::createFromHostFunction(
+      *context, jsa::PropNameID::forUtf8(*context, "helloworld"), 0, callback);
+  EXPECT_EQ(func.isHostFunction(*context), true);
+}
+
+TEST(V8Context, getHostFunction) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args, size_t count) -> jsa::Value { return jsa::Value(1); };
+  jsa::Object object = jsa::Object(*context);
+  jsa::Function func = jsa::Function::createFromHostFunction(
+      *context, jsa::PropNameID::forUtf8(*context, "helloworld"), 0, callback);
+  jsa::HostFunctionType other = func.getHostFunction(*context);
+  const jsa::Value thisVal = jsa::Value::undefined();
+  const jsa::Value* args[0] = {};
+  jsa::Value result = other(*context, thisVal,
+                            reinterpret_cast<const jsa::Value *>(args), 0);
+  EXPECT_EQ(result.getNumber(), 1);
+}
