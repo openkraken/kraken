@@ -138,6 +138,26 @@ abstract class Element extends Node
 
   bool stickyFixed = false;
 
+  bool isFlexStyleChanged(Style newStyle) {
+    String display = newStyle.get('display');
+    List flexStyles = [
+      'flexDirection',
+      'flexWrap',
+      'alignItems',
+      'justifyContent',
+      'alignContent',
+    ];
+    bool hasChanged = false;
+    if (display == 'flex' || display == 'inline-flex') {
+      flexStyles.forEach((key) {
+        if (style.get(key) != newStyle.get(key)) {
+          hasChanged = true;
+        }
+      });
+    }
+    return hasChanged;
+  }
+
   Style _style;
   Style get style => _style;
   set style(Style newStyle) {
@@ -148,7 +168,8 @@ abstract class Element extends Node
       ///1.update display
       String oldDisplay = style.get('display');
       String newDisplay = newStyle.get('display');
-      if (newDisplay != oldDisplay) {
+      bool hasFlexChange = isFlexStyleChanged(newStyle);
+      if (newDisplay != oldDisplay || hasFlexChange) {
         ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
         List<RenderBox> children = [];
         RenderObjectVisitor visitor = (child) {
@@ -172,7 +193,12 @@ abstract class Element extends Node
       if (isFlex) {
         decorateRenderFlex(renderLayoutElement, newStyle);
         // update style reference
-        (renderLayoutElement as RenderFlexLayout).style = newStyle;
+
+        if (renderLayoutElement is RenderFlowLayout) {
+          (renderLayoutElement as RenderFlowLayout).style = newStyle;
+        } else {
+          (renderLayoutElement as RenderFlexLayout).style = newStyle;
+        }
       }
 
       ///2.update overflow
@@ -706,8 +732,27 @@ abstract class Element extends Node
           alignment = MainAxisAlignment.center;
           break;
       }
+      MainAxisAlignment runAlignment = MainAxisAlignment.start;
+      switch (newStyle['alignContent']) {
+        case 'end':
+          runAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          runAlignment = MainAxisAlignment.center;
+          break;
+        case 'space-around':
+          runAlignment = MainAxisAlignment.spaceAround;
+          break;
+        case 'space-between':
+          runAlignment = MainAxisAlignment.spaceBetween;
+          break;
+        case 'space-evenly':
+          runAlignment = MainAxisAlignment.spaceEvenly;
+          break;
+      }
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
         mainAxisAlignment: alignment,
+        runAlignment: runAlignment,
         children: children,
         style: newStyle,
         nodeId: nodeId,

@@ -17,6 +17,9 @@ class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
   /// Flex basis
   String flexBasis;
 
+  /// Row index of child when wrapping
+  int runIndex = 0;
+
   /// How a flexible child is inscribed into the available space.
   ///
   /// If [flex] is non-zero, the [fit] determines whether the child fills the
@@ -173,13 +176,13 @@ class FlexItem {
 
     if (style != null) {
       dynamic grow = style[GROW];
-      if (grow != null && grow is num) {
+      if (grow != null) {
         parentData.fit = FlexFit.tight;
-        parentData.flexGrow = grow.toInt();
+        parentData.flexGrow = int.parse(grow);
       }
       dynamic shrink = style[SHRINK];
-      if (shrink != null && shrink is num) {
-        parentData.flexShrink = shrink.toInt();
+      if (shrink != null) {
+        parentData.flexShrink = int.parse(shrink);
       }
       dynamic basis = style[BASIS];
       if (basis != null) {

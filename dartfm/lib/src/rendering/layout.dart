@@ -19,16 +19,11 @@ class _RunMetrics {
   final int childCount;
 }
 
-/// Parent data for use with [RenderWrap].
-class WrapParentData extends ContainerBoxParentData<RenderBox> {
-  int _runIndex = 0;
-}
-
 /// Impl flow layout algorithm.
 class RenderFlowLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, WrapParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData>,
+        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
         ElementStyleMixin,
         RelativeStyleMixin {
   RenderFlowLayout({
@@ -313,8 +308,8 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! WrapParentData) {
-      child.parentData = WrapParentData();
+    if (child.parentData is! KrakenFlexParentData) {
+      child.parentData = KrakenFlexParentData();
     }
   }
 
@@ -561,7 +556,7 @@ class RenderFlowLayout extends RenderBox
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
-      final WrapParentData childParentData = child.parentData;
+      final KrakenFlexParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
       if (childCount > 0 &&
@@ -582,7 +577,7 @@ class RenderFlowLayout extends RenderBox
       if (childCount > 0) runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-      childParentData._runIndex = runMetrics.length;
+      childParentData.runIndex = runMetrics.length;
       preChild = child;
       child = childParentData.nextSibling;
     }
@@ -616,21 +611,29 @@ class RenderFlowLayout extends RenderBox
     }
 
     double constraintHeight = crossAxisExtent;
+    // stretch height to container height if alignItems is stretch
     double parentHeight = getStretchParentHeight(nodeId);
     if (parentHeight != null) {
       constraintHeight = parentHeight;
     }
 
+    // get container height
+    double containerHeight = crossAxisExtent;
+    double containerParentHeight = style.height;
+    if (containerParentHeight != null) {
+      containerHeight = containerParentHeight;
+    }
+
     switch (direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(constraintWidth, constraintHeight));
-        containerMainAxisExtent = size.width;
-        containerCrossAxisExtent = size.height;
+        containerMainAxisExtent = constraintWidth;
+        containerCrossAxisExtent = containerHeight;
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-        containerMainAxisExtent = size.height;
-        containerCrossAxisExtent = size.width;
+        containerMainAxisExtent = containerHeight;
+        containerCrossAxisExtent = constraintWidth;
         break;
     }
 
@@ -710,9 +713,9 @@ class RenderFlowLayout extends RenderBox
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final WrapParentData childParentData = child.parentData;
+        final KrakenFlexParentData childParentData = child.parentData;
 
-        if (childParentData._runIndex != i) break;
+        if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
         final double childCrossAxisOffset = _getChildCrossAxisOffset(
@@ -730,6 +733,9 @@ class RenderFlowLayout extends RenderBox
 
         ///apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
+
+        childParentData.offset = relativeOffset;
+
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else
