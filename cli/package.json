@@ -6,10 +6,10 @@
     "kraken": "bin/kraken.js"
   },
   "scripts": {
-    "build": "KRAKEN_JS_ENGINE=jsc gulp -f gulpfile.js",
-    "build:release": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Release gulp -f gulpfile.js",
-    "build:profile": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=Profile gulp -f gulpfile.js",
-    "build:all": "KRAKEN_JS_ENGINE=jsc KRAKEN_BUILD=All gulp -f gulpfile.js --upload-to-oss",
+    "build": "gulp -f gulpfile.js",
+    "build:release": "KRAKEN_BUILD=Release gulp -f gulpfile.js",
+    "build:profile": "KRAKEN_BUILD=Profile gulp -f gulpfile.js",
+    "build:all": "KRAKEN_BUILD=All gulp -f gulpfile.js --upload-to-oss",
     "postinstall": "node install.js"
   },
   "files": [
