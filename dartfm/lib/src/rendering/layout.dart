@@ -734,8 +734,6 @@ class RenderFlowLayout extends RenderBox
         ///apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
 
-        childParentData.offset = relativeOffset;
-
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else

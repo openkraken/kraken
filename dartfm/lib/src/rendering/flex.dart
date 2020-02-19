@@ -468,7 +468,14 @@ class RenderFlexLayout extends RenderBox
     childSizeMap.forEach((nodeId, item) {
       totalExtent += item['flexShrink'] * item['size'];
     });
-    dynamic current = childSizeMap[(child as RenderBoxModel).nodeId];
+
+    int childNodeId;
+    if (child is RenderTextNode) {
+      childNodeId = (child as RenderTextNode).nodeId;
+    } else if (child is RenderBoxModel) {
+      childNodeId = (child as RenderBoxModel).nodeId;
+    }
+    dynamic current = childSizeMap[childNodeId];
     double currentExtent = current['flexShrink'] * current['size'];
 
     double minusConstraints = (currentExtent / totalExtent) * freeSpace;
@@ -556,6 +563,8 @@ class RenderFlexLayout extends RenderBox
       double parentHeight = getStretchParentHeight(nodeId);
       if (parentHeight != null) {
         maxHeight = parentHeight;
+      } else if (style.height != null) {
+        maxHeight = style.height;
       }
     }
 
@@ -676,7 +685,15 @@ class RenderFlexLayout extends RenderBox
       child.layout(innerConstraints, parentUsesSize: true);
       allocatedSize += _getMainSize(child);
       crossSize = math.max(crossSize, _getCrossSize(child));
-      childSizeMap[(child as RenderBoxModel).nodeId] = {
+
+      int childNodeId;
+      if (child is RenderTextNode) {
+        childNodeId = (child as RenderTextNode).nodeId;
+      } else if (child is RenderBoxModel) {
+        childNodeId = (child as RenderBoxModel).nodeId;
+      }
+
+      childSizeMap[childNodeId] = {
         'size': _getMainSize(child),
         'flexShrink': _getFlexShrink(child),
       };
@@ -686,7 +703,7 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeSpace =
+    final double freeSpace = maxMainSize == 0 ? 0 :
         (canFlex ? maxMainSize : 0.0) - allocatedSize;
     double maxBaselineDistance = 0.0;
     if ((freeSpace >= 0 &&  totalFlexGrow > 0) ||
@@ -714,8 +731,14 @@ class RenderFlexLayout extends RenderBox
           minChildExtent = maxChildExtent;
         } else {
           double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
-          Element childNode = nodeMap[(child as RenderBoxModel).nodeId];
-          dynamic current = childSizeMap[(child as RenderBoxModel).nodeId];
+          int childNodeId;
+          if (child is RenderTextNode) {
+            childNodeId = (child as RenderTextNode).nodeId;
+          } else if (child is RenderBoxModel) {
+            childNodeId = (child as RenderBoxModel).nodeId;
+          }
+          dynamic childNode = nodeMap[childNodeId];
+          dynamic current = childSizeMap[childNodeId];
           minChildExtent = maxChildExtent = current['size'] + shrinkValue;
         }
 

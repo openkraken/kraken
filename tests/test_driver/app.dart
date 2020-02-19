@@ -9,7 +9,6 @@ import 'package:kraken/element.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void onFrameBegin(Duration timeStamp) {
-  emitUIEvent(FRAME_BEGIN);
   WidgetsBinding.instance.addPostFrameCallback(onFrameBegin);
 }
 
