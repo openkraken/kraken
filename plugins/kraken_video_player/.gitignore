@@ -8,3 +8,9 @@ build/
 
 .flutter-plugins-dependencies
 .flutter-plugins
+
+ios/Flutter
+GeneratedPluginRegistrant.h
+GeneratedPluginRegistrant.m
+GeneratedPluginRegistrant.java
+

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
+    "build": "node scripts/build.js",
     "test": "cd test && npm run test",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",

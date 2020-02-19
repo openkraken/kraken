@@ -14,7 +14,7 @@ import 'package:path/path.dart';
 /// Search dynamic lib from env.KRAKEN_LIBRARY_PATH or /usr/lib
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
 final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
-final String nativeDynamicLibraryPath = Platform.isMacOS
+final String nativeDynamicLibraryPath = Platform.isMacOS || Platform.isIOS
     ? 'libkraken.dylib'
     : Platform.isWindows ? 'libkraken.dll' : 'libkraken.so';
 DynamicLibrary nativeDynamicLibrary = Platform.isAndroid
