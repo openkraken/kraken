@@ -761,21 +761,6 @@ abstract class Element extends Node
     }
   }
 
-  // MainAxisAlignment getMainAxisAlignment(Style style) {
-  //   String textAlign = style['textAlign'];
-  //   switch (textAlign) {
-  //     case 'center':
-  //       return MainAxisAlignment.center;
-  //     case 'end':
-  //     case 'right':
-  //       return MainAxisAlignment.end;
-  //     case 'start':
-  //     case 'left':
-  //     default:
-  //       return MainAxisAlignment.start;
-  //   }
-  // }
-
   @override
   @mustCallSuper
   Node appendChild(Node child) {
