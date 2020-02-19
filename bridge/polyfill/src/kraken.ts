@@ -45,7 +45,7 @@ export const krakenUIManager = __kraken_ui_manager__;
 declare const __kraken_ui_listener__: (fn: (message: string) => void) => void;
 export const krakenUIListener = __kraken_ui_listener__;
 
-declare const __kraken_invoke_module__: (message: string, fn?: (message: string) => void) => void;
+declare const __kraken_invoke_module__: (message: string, fn?: (message: string) => void) => string;
 export const krakenInvokeModule = __kraken_invoke_module__;
 
 declare const __kraken_module_listener__: (fn: (message: string) => void) => void;
