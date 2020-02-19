@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
+
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:kraken_playground/command.dart';
-import 'package:requests/requests.dart';
-import 'package:kraken/kraken.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:kraken/kraken.dart';
+import 'package:requests/requests.dart';
+
+import 'bundle.dart';
+import 'command.dart';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -13,9 +16,14 @@ const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
+const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
 String getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
+}
+
+String getZipBundleURLFromEnv() {
+  return Platform.environment[ZIP_BUNDLE_URL];
 }
 
 String getBundlePathFromEnv() {
@@ -26,8 +34,7 @@ String getCommandPathFromEnv() {
   return Platform.environment[COMMAND_PATH];
 }
 
-Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
-
+Future<String> getBundleContent({String bundleUrl, String bundlePath, String zipBundleUrl}) async {
   if (bundleUrl != null) {
     return Requests.get(bundleUrl).then((Response response) => response.content());
   }
@@ -37,8 +44,14 @@ Future<String> getBundleContent({ String bundleUrl, String bundlePath }) async {
     return Future<String>.value(content);
   }
 
-  if (Platform.isAndroid || Platform.isIOS) {
-    return await loadBundleFromAssets();
+  if (zipBundleUrl != null) {
+    return await BundleManager().downloadAndParse(zipBundleUrl);
+  }
+
+  try {
+    return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
+  } catch (e) {
+    print('ERROR: no bundle found');
   }
 
   return Future<String>.value('');
@@ -60,10 +73,6 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-Future<String> loadBundleFromAssets() async {
-  return await rootBundle.loadString(DEFAULT_BUNDLE_PATH);
-}
-
 void afterConnectedForCommand() async {
   CommandRun(getCommandPathFromEnv()).run();
 }
@@ -71,22 +80,16 @@ void afterConnectedForCommand() async {
 void afterConnected() async {
   String bundleUrl = getBundleURLFromEnv();
   String bundlePath = getBundlePathFromEnv();
-  String content = await getBundleContent(
-      bundleUrl: bundleUrl, bundlePath: bundlePath);
-  evaluateScripts(
-    content,
-    bundleUrl ?? bundlePath ?? DEFAULT_BUNDLE_PATH,
-    0
-  );
+  String zipBundleUrl = getZipBundleURLFromEnv();
+  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath, zipBundleUrl: zipBundleUrl);
+  evaluateScripts(content, bundleUrl ?? bundlePath ?? zipBundleUrl ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
 void main() {
   initBridge();
- _setTargetPlatformForDesktop();
- runApp(enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-     showPerformanceOverlay: Platform
-         .environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-     afterConnected: Platform.environment[COMMAND_PATH] != null
-         ? afterConnectedForCommand
-         : afterConnected);
+  _setTargetPlatformForDesktop();
+  runApp(
+      enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected);
 }

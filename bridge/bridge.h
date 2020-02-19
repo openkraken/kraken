@@ -28,8 +28,6 @@ private:
 public:
   JSBridge();
   ~JSBridge();
-
-  std::atomic<bool> contextInvalid;
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();
@@ -44,13 +42,9 @@ public:
   alibaba::jsa::Value getGlobalValue(std::string code);
 #endif
 
-  void handleFlutterCallback(const char *args);
-  void invokeKrakenCallback(const char *args);
-  void invokeSetTimeoutCallback(int32_t callbackId);
-  void invokeSetIntervalCallback(int32_t callbackId);
-  void invokeRequestAnimationFrameCallback(int32_t callbackId);
-  void invokeFetchCallback(int32_t callbackId, const char* error, int32_t statusCode,
-                           const char* body);
+  void invokeEventListener(int32_t type, const char *args);
+  void handleUIListener(const char *args);
+  void handleModuleListener(const char *args);
   void invokeOnloadCallback();
   void invokeOnPlatformBrightnessChangedCallback();
   void flushUITask();

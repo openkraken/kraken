@@ -4,7 +4,7 @@
  */
 
 #include "location.h"
-#include "dart_callbacks.h"
+#include "dart_methods.h"
 #include "logging.h"
 #include "websocketpp/uri.hpp"
 #include "window.h"
@@ -68,11 +68,11 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
-  if (getDartFunc()->reloadApp == nullptr) {
+  if (getDartMethod()->reloadApp == nullptr) {
     KRAKEN_LOG(ERROR) << "[location.reload()] dart callback not register";
     return Value::undefined();
   }
-  getDartFunc()->reloadApp();
+  getDartMethod()->reloadApp();
   return Value::undefined();
 }
 

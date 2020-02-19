@@ -1,62 +1,20 @@
 import { NodeImpl, NodeType } from './node';
-import { krakenDartToJS } from '../kraken';
 import {
   addEvent,
   createElement,
   removeEvent,
   setProperty,
-  setStyle,
-  frameTick,
-  enableBatchUpdate
-} from './bridge';
+  setStyle
+} from './UIManager';
 
 type EventListener = () => void;
 
 let nodeMap: {
   [nodeId: number]: ElementImpl;
 } = {};
-const TARGET_JS = 'J';
-const FRAME_BEGIN = '$';
 
-krakenDartToJS((message) => {
-  if (message[2] === FRAME_BEGIN) {
-    enableBatchUpdate();
-    frameTick();
-    return;
-  }
-
-  if (message[1] === TARGET_JS) {
-    message = message.slice(2);
-  } else {
-    // Target is not js, ignore that.
-    return;
-  }
-
-  let parsedMessage = null;
-  try {
-    parsedMessage = JSON.parse(message);
-  } catch (err) {
-    console.error('Can not parse message from backend, the raw message:', message);
-    console.error(err);
-  }
-
-  if (parsedMessage !== null) {
-    try {
-      const action = parsedMessage[0];
-      const target = nodeMap[parsedMessage[1][0]];
-      const arg = parsedMessage[1][1];
-      if (action === 'event') {
-        handleEvent(target, arg);
-      } else {
-        console.error(`ERROR: Unknown action from backend ${action}, with arg: ${JSON.stringify(arg)}`);
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
-  }
-});
-
-function handleEvent(currentTarget: ElementImpl, event: any) {
+export function handleEvent(nodeId: number, event: any) {
+  const currentTarget = nodeMap[nodeId];
   const target = nodeMap[event.target];
   event.targetId = event.target;
   event.target = target;

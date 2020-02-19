@@ -21,10 +21,6 @@ export interface KrakenWindow {
 declare const __kraken_window__: KrakenWindow;
 export const krakenWindow = __kraken_window__;
 
-type KrakenFetch = (url: string, data: string, callback: (err: any, response: any, data: any) => void) => void;
-declare const __kraken__fetch__: KrakenFetch;
-export const krakenFetch = __kraken__fetch__;
-
 export type KrakenWebSocketToken = number;
 
 // this interface is a description of the C++ Websocket API (bridge/bindings/websocket.cc)
@@ -43,8 +39,14 @@ export interface KrakenWebSocket {
 declare const __kraken_websocket__: KrakenWebSocket;
 export const krakenWebSocket = __kraken_websocket__;
 
-declare const __kraken_js_to_dart__: (dart: string) => void;
-export const krakenJSToDart = __kraken_js_to_dart__;
+declare const __kraken_ui_manager__: (message: string) => void;
+export const krakenUIManager = __kraken_ui_manager__;
 
-declare const __kraken_dart_to_js__: (fn: (message: string) => void) => void;
-export const krakenDartToJS = __kraken_dart_to_js__;
+declare const __kraken_ui_listener__: (fn: (message: string) => void) => void;
+export const krakenUIListener = __kraken_ui_listener__;
+
+declare const __kraken_invoke_module__: (message: string, fn?: (message: string) => void) => void;
+export const krakenInvokeModule = __kraken_invoke_module__;
+
+declare const __kraken_module_listener__: (fn: (message: string) => void) => void;
+export const krakenModuleListener = __kraken_module_listener__;

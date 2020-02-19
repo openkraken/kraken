@@ -1,4 +1,4 @@
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify([
     "createElement",
     [
@@ -12,6 +12,6 @@ __kraken_js_to_dart__(
     ]
   ])
 );
-__kraken_js_to_dart__(
+__kraken_ui_manager__(
   JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 1]])
 );
