@@ -22,6 +22,17 @@ const navigator = {
       // TODO: should remove old listener when onchange reset with a null listener
       krakenInvokeModule('["onConnectivityChanged"]');
     }
+  },
+  get hardwareConcurrency() {
+    const logicalProcessors = krakenInvokeModule('["getHardwareConcurrency"]');
+    return parseInt(logicalProcessors);
+  },
+  getDeviceInfo() {
+    return new Promise((resolve) => {
+      krakenInvokeModule('["getDeviceInfo"]', (json) => {
+        resolve(JSON.parse(json));
+      });
+    });
   }
 }
 
