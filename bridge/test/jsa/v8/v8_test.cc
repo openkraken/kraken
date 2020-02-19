@@ -558,3 +558,26 @@ TEST(V8Context, hostObject_set) {
   EXPECT_EQ(result.getNumber(), 12345);
   u->unbind();
 }
+
+TEST(V8Context, hostObject_getPropertyNames) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  class User : public jsa::HostObject, std::enable_shared_from_this<User> {
+    std::vector<jsa::PropNameID> getPropertyNames(jsa::JSContext &context) {
+      std::vector<jsa::PropNameID> propertyNames;
+      propertyNames.emplace_back(jsa::PropNameID::forUtf8(context, "connect"));
+      propertyNames.emplace_back(jsa::PropNameID::forUtf8(context, "send"));
+      propertyNames.emplace_back(jsa::PropNameID::forUtf8(context, "close"));
+      return propertyNames;
+    }
+  };
+  std::shared_ptr<User> u = std::make_shared<User>();
+  jsa::Object user = jsa::Object::createFromHostObject(*context, u);
+  jsa::Array names = user.getPropertyNames(*context);
+  EXPECT_EQ(names.size(*context), 3);
+  EXPECT_EQ(
+      names.getValueAtIndex(*context, 0).getString(*context).utf8(*context),
+      "connect");
+  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
+      "send");
+}
