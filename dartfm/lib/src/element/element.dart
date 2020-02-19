@@ -186,19 +186,13 @@ abstract class Element extends Node
         renderBoxModel.style = newStyle;
       }
 
-      String display = newStyle.get('display');
-      bool isFlex = display == 'flex' || display == 'inline-flex';
-
       // update flex related properties
-      if (isFlex) {
-        decorateRenderFlex(renderLayoutElement, newStyle);
-        // update style reference
-
-        if (renderLayoutElement is RenderFlowLayout) {
-          (renderLayoutElement as RenderFlowLayout).style = newStyle;
-        } else {
-          (renderLayoutElement as RenderFlexLayout).style = newStyle;
-        }
+      decorateRenderFlex(renderLayoutElement, newStyle);
+      // update style reference
+      if (renderLayoutElement is RenderFlowLayout) {
+        (renderLayoutElement as RenderFlowLayout).style = newStyle;
+      } else {
+        (renderLayoutElement as RenderFlexLayout).style = newStyle;
       }
 
       ///2.update overflow
@@ -724,7 +718,7 @@ abstract class Element extends Node
       isFlexWrap
     ) {
       MainAxisAlignment alignment = MainAxisAlignment.start;
-      switch (style['textAlign']) {
+      switch (newStyle['textAlign']) {
         case 'right':
           alignment = MainAxisAlignment.end;
           break;
