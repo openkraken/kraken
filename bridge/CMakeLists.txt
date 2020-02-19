@@ -60,8 +60,6 @@ target_include_directories(dart_methods PRIVATE
   PUBLIC ./include
 )
 
-message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
-
 ### Js Code
 target_link_libraries(js_code PRIVATE bridge)
 target_include_directories(js_code PUBLIC
@@ -105,6 +103,12 @@ include(./test/test.cmake)
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
 endif ()
+
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
+endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken

@@ -1127,7 +1127,7 @@ V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
   return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData,
                               objectCounter_);
 #else
-  return new V8ObjectValue(_isolate, ctxInvalid_, obj, privateData);
+  return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData);
 #endif
 }
 

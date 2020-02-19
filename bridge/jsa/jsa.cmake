@@ -65,7 +65,6 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     ## TODO implementation linux v8
   else ()
-    message(123422)
     list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/v8-7.9.317.31/include)
     add_library(v8 SHARED IMPORTED)
     set_target_properties(v8 PROPERTIES IMPORTED_LOCATION

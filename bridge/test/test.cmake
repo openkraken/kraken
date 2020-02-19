@@ -2,8 +2,7 @@ add_subdirectory(./third_party/googletest)
 
 set(TEST_LINK_LIBRARY
         jsa_abstraction
-        jsc_implementation
-        v8_implementation
+        jsa_implementation
         gtest
         gtest_main
         gmock
