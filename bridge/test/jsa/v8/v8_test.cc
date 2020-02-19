@@ -452,7 +452,8 @@ TEST(V8Context, isHostFunction) {
   auto context = std::make_unique<V8Context>();
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
-         const jsa::Value *args, size_t count) -> jsa::Value { return jsa::Value::undefined(); };
+         const jsa::Value *args,
+         size_t count) -> jsa::Value { return jsa::Value::undefined(); };
   jsa::Object object = jsa::Object(*context);
   jsa::Function func = jsa::Function::createFromHostFunction(
       *context, jsa::PropNameID::forUtf8(*context, "helloworld"), 0, callback);
@@ -464,14 +465,96 @@ TEST(V8Context, getHostFunction) {
   auto context = std::make_unique<V8Context>();
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
-         const jsa::Value *args, size_t count) -> jsa::Value { return jsa::Value(1); };
+         const jsa::Value *args,
+         size_t count) -> jsa::Value { return jsa::Value(1); };
   jsa::Object object = jsa::Object(*context);
   jsa::Function func = jsa::Function::createFromHostFunction(
       *context, jsa::PropNameID::forUtf8(*context, "helloworld"), 0, callback);
   jsa::HostFunctionType other = func.getHostFunction(*context);
   const jsa::Value thisVal = jsa::Value::undefined();
-  const jsa::Value* args[0] = {};
-  jsa::Value result = other(*context, thisVal,
-                            reinterpret_cast<const jsa::Value *>(args), 0);
+  const jsa::Value *args[0] = {};
+  jsa::Value result =
+      other(*context, thisVal, reinterpret_cast<const jsa::Value *>(args), 0);
   EXPECT_EQ(result.getNumber(), 1);
+}
+
+TEST(V8Context, hostObject_get) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  class User : public jsa::HostObject, std::enable_shared_from_this<User> {
+    jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
+      auto _prop = prop.utf8(context);
+      if (_prop == "helloworld") {
+        return jsa::Value(12345);
+      } else if (_prop == "getName") {
+        auto func = jsa::Function::createFromHostFunction(
+            context, jsa::PropNameID::forAscii(context, "getName"), 1, getName);
+        return jsa::Value(context, func);
+      }
+      return jsa::Value::undefined();
+    }
+
+    static jsa::Value getName(jsa::JSContext &context,
+                              const jsa::Value &thisVal, const jsa::Value *args,
+                              size_t count) {
+      const jsa::Value &name = args[0];
+      if (name.getString(context).utf8(context) == "andycall") {
+        return jsa::String::createFromAscii(context, "chenghuai.dtc");
+      } else if (name.getString(context).utf8(context) == "wssgcg1213") {
+        return jsa::String::createFromAscii(context, "zhuoling.lcl");
+      }
+      return jsa::Value::undefined();
+    };
+  };
+  jsa::Object user =
+      jsa::Object::createFromHostObject(*context, std::make_shared<User>());
+  jsa::Value result = user.getProperty(*context, "helloworld");
+  EXPECT_EQ(result.getNumber(), 12345);
+  jsa::Value undefined = user.getProperty(*context, "unknown");
+  EXPECT_EQ(undefined.isUndefined(), true);
+
+  jsa::Function getName = user.getPropertyAsFunction(*context, "getName");
+  jsa::Value name = getName.call(*context, "andycall");
+  EXPECT_EQ(name.getString(*context).utf8(*context), "chenghuai.dtc");
+}
+
+TEST(V8Context, hostObject_set) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  class User : public jsa::HostObject, std::enable_shared_from_this<User> {
+    jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
+      auto _prop = prop.utf8(context);
+      if (_prop == "getCallback") {
+        return jsa::Value(context, *_callback);
+      }
+      return jsa::Value::undefined();
+    }
+
+    void set(jsa::JSContext &context, const jsa::PropNameID &prop,
+             const jsa::Value &value) {
+      auto _prop = prop.utf8(context);
+      if (_prop == "setCallback") {
+        const jsa::Function &f = value.getObject(context).getFunction(context);
+        _callback = std::make_shared<jsa::Value>(jsa::Value(context, f));
+      }
+    }
+
+  public:
+    void unbind() { _callback.reset(); }
+
+    std::shared_ptr<jsa::Value> _callback;
+  };
+  jsa::HostFunctionType callback =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value { return jsa::Value(12345); };
+  std::shared_ptr<User> u = std::make_shared<User>();
+  jsa::Object user = jsa::Object::createFromHostObject(*context, u);
+  JSA_BINDING_FUNCTION(*context, user, "setCallback", 1, callback);
+  jsa::Function f = user.getProperty(*context, "getCallback")
+                        .getObject(*context)
+                        .getFunction(*context);
+  jsa::Value result = f.call(*context);
+  EXPECT_EQ(result.getNumber(), 12345);
+  u->unbind();
 }
