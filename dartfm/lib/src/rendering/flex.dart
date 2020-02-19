@@ -983,12 +983,9 @@ class RenderFlexItem extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
         DebugOverflowIndicatorMixin,
         RelativeStyleMixin {
-  RenderFlexItem({RenderFlexLayout parent, RenderBox child}) {
-    this.parentFlexBox = parent;
+  RenderFlexItem({RenderBox child}) {
     add(child);
   }
-
-  RenderFlexLayout parentFlexBox;
 
   @override
   void setupParentData(RenderBox child) {

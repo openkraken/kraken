@@ -39,7 +39,7 @@ class FlexMixin {
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
-  void decorateRenderFlex(RenderFlexLayout renderObject, Style style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, Style style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -72,11 +72,20 @@ class FlexMixin {
           verticalDirection = VerticalDirection.down;
           break;
       }
-      renderObject.verticalDirection = verticalDirection;
-      renderObject.direction = axis;
-      renderObject.textDirection = textDirection;
-      renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
-      renderObject.crossAxisAlignment = _getAlignItems(style, axis);
+
+      if (renderObject is RenderFlowLayout) {
+        (renderObject as RenderFlowLayout).verticalDirection = verticalDirection;
+        (renderObject as RenderFlowLayout).direction = axis;
+        (renderObject as RenderFlowLayout).textDirection = textDirection;
+        (renderObject as RenderFlowLayout).mainAxisAlignment = _getJustifyContent(style, axis);
+        (renderObject as RenderFlowLayout).crossAxisAlignment = _getAlignItems(style, axis);
+      } else {
+        (renderObject as RenderFlexLayout).verticalDirection = verticalDirection;
+        (renderObject as RenderFlexLayout).direction = axis;
+        (renderObject as RenderFlexLayout).textDirection = textDirection;
+        (renderObject as RenderFlexLayout).mainAxisAlignment = _getJustifyContent(style, axis);
+        (renderObject as RenderFlexLayout).crossAxisAlignment = _getAlignItems(style, axis);
+      }
     }
   }
 

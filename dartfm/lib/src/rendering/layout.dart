@@ -33,24 +33,24 @@ class RenderFlowLayout extends RenderBox
         RelativeStyleMixin {
   RenderFlowLayout({
     List<RenderBox> children,
-    WrapAlignment alignment = WrapAlignment.start,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     TextDirection textDirection = TextDirection.ltr,
     Axis direction = Axis.horizontal,
     double spacing = 0.0,
-    WrapAlignment runAlignment = WrapAlignment.start,
+    MainAxisAlignment runAlignment = MainAxisAlignment.start,
     double runSpacing = 0.0,
-    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
     this.nodeId,
   })  : assert(direction != null),
-        assert(alignment != null),
+        assert(mainAxisAlignment != null),
         assert(spacing != null),
         assert(runAlignment != null),
         assert(runSpacing != null),
         assert(crossAxisAlignment != null),
         _direction = direction,
-        _alignment = alignment,
+        _mainAxisAlignment = mainAxisAlignment,
         _spacing = spacing,
         _runAlignment = runAlignment,
         _runSpacing = runSpacing,
@@ -83,10 +83,10 @@ class RenderFlowLayout extends RenderBox
 
   /// How the children within a run should be placed in the main axis.
   ///
-  /// For example, if [alignment] is [WrapAlignment.center], the children in
+  /// For example, if [mainAxisAlignment] is [MainAxisAlignment.center], the children in
   /// each run are grouped together in the center of their run in the main axis.
   ///
-  /// Defaults to [WrapAlignment.start].
+  /// Defaults to [MainAxisAlignment.start].
   ///
   /// See also:
   ///
@@ -94,12 +94,12 @@ class RenderFlowLayout extends RenderBox
   ///    other in the cross axis.
   ///  * [crossAxisAlignment], which controls how the children within each run
   ///    are placed relative to each other in the cross axis.
-  WrapAlignment get alignment => _alignment;
-  WrapAlignment _alignment;
-  set alignment(WrapAlignment value) {
+  MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
+  MainAxisAlignment _mainAxisAlignment;
+  set mainAxisAlignment(MainAxisAlignment value) {
     assert(value != null);
-    if (_alignment == value) return;
-    _alignment = value;
+    if (_mainAxisAlignment == value) return;
+    _mainAxisAlignment = value;
     markNeedsLayout();
   }
 
@@ -111,7 +111,7 @@ class RenderFlowLayout extends RenderBox
   /// If there is additional free space in a run (e.g., because the wrap has a
   /// minimum size that is not filled or because some runs are longer than
   /// others), the additional free space will be allocated according to the
-  /// [alignment].
+  /// [mainAxisAlignment].
   ///
   /// Defaults to 0.0.
   double get spacing => _spacing;
@@ -125,21 +125,21 @@ class RenderFlowLayout extends RenderBox
 
   /// How the runs themselves should be placed in the cross axis.
   ///
-  /// For example, if [runAlignment] is [WrapAlignment.center], the runs are
+  /// For example, if [runAlignment] is [MainAxisAlignment.center], the runs are
   /// grouped together in the center of the overall [RenderWrap] in the cross
   /// axis.
   ///
-  /// Defaults to [WrapAlignment.start].
+  /// Defaults to [MainAxisAlignment.start].
   ///
   /// See also:
   ///
-  ///  * [alignment], which controls how the children within each run are placed
+  ///  * [mainAxisAlignment], which controls how the children within each run are placed
   ///    relative to each other in the main axis.
   ///  * [crossAxisAlignment], which controls how the children within each run
   ///    are placed relative to each other in the cross axis.
-  WrapAlignment get runAlignment => _runAlignment;
-  WrapAlignment _runAlignment;
-  set runAlignment(WrapAlignment value) {
+  MainAxisAlignment get runAlignment => _runAlignment;
+  MainAxisAlignment _runAlignment;
+  set runAlignment(MainAxisAlignment value) {
     assert(value != null);
     if (_runAlignment == value) return;
     _runAlignment = value;
@@ -168,21 +168,21 @@ class RenderFlowLayout extends RenderBox
   /// How the children within a run should be aligned relative to each other in
   /// the cross axis.
   ///
-  /// For example, if this is set to [WrapCrossAlignment.end], and the
+  /// For example, if this is set to [CrossAxisAlignment.end], and the
   /// [direction] is [Axis.horizontal], then the children within each
   /// run will have their bottom edges aligned to the bottom edge of the run.
   ///
-  /// Defaults to [WrapCrossAlignment.start].
+  /// Defaults to [CrossAxisAlignment.start].
   ///
   /// See also:
   ///
-  ///  * [alignment], which controls how the children within each run are placed
+  ///  * [mainAxisAlignment], which controls how the children within each run are placed
   ///    relative to each other in the main axis.
   ///  * [runAlignment], which controls how the runs are placed relative to each
   ///    other in the cross axis.
-  WrapCrossAlignment get crossAxisAlignment => _crossAxisAlignment;
-  WrapCrossAlignment _crossAxisAlignment;
-  set crossAxisAlignment(WrapCrossAlignment value) {
+  CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
+  CrossAxisAlignment _crossAxisAlignment;
+  set crossAxisAlignment(CrossAxisAlignment value) {
     assert(value != null);
     if (_crossAxisAlignment == value) return;
     _crossAxisAlignment = value;
@@ -194,23 +194,23 @@ class RenderFlowLayout extends RenderBox
   ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// children are positioned (left-to-right or right-to-left), and the meaning
-  /// of the [alignment] property's [WrapAlignment.start] and
-  /// [WrapAlignment.end] values.
+  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// [MainAxisAlignment.end] values.
   ///
   /// If the [direction] is [Axis.horizontal], and either the
-  /// [alignment] is either [WrapAlignment.start] or [WrapAlignment.end], or
+  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or
   /// there's more than one child, then the [textDirection] must not be null.
   ///
   /// If the [direction] is [Axis.vertical], this controls the order in
   /// which runs are positioned, the meaning of the [runAlignment] property's
-  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
-  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
-  /// [WrapCrossAlignment.end] values.
+  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
   ///
   /// If the [direction] is [Axis.vertical], and either the
-  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
-  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
-  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [runAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], the
+  /// [crossAxisAlignment] is either [CrossAxisAlignment.start] or
+  /// [CrossAxisAlignment.end], or there's more than one child, then the
   /// [textDirection] must not be null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
@@ -225,23 +225,23 @@ class RenderFlowLayout extends RenderBox
   /// `start` and `end` in the vertical direction.
   ///
   /// If the [direction] is [Axis.vertical], this controls which order children
-  /// are painted in (down or up), the meaning of the [alignment] property's
-  /// [WrapAlignment.start] and [WrapAlignment.end] values.
+  /// are painted in (down or up), the meaning of the [mainAxisAlignment] property's
+  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
   ///
-  /// If the [direction] is [Axis.vertical], and either the [alignment]
-  /// is either [WrapAlignment.start] or [WrapAlignment.end], or there's
+  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
+  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
   /// more than one child, then the [verticalDirection] must not be null.
   ///
   /// If the [direction] is [Axis.horizontal], this controls the order in which
   /// runs are positioned, the meaning of the [runAlignment] property's
-  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
-  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
-  /// [WrapCrossAlignment.end] values.
+  /// [MainAxisAlignment.start] and [MainAxisAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
   ///
   /// If the [direction] is [Axis.horizontal], and either the
-  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
-  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
-  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [runAlignment] is either [MainAxisAlignment.start] or [MainAxisAlignment.end], the
+  /// [crossAxisAlignment] is either [CrossAxisAlignment.start] or
+  /// [CrossAxisAlignment.end], or there's more than one child, then the
   /// [verticalDirection] must not be null.
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
@@ -254,7 +254,7 @@ class RenderFlowLayout extends RenderBox
 
   bool get _debugHasNecessaryDirections {
     assert(direction != null);
-    assert(alignment != null);
+    assert(mainAxisAlignment != null);
     assert(runAlignment != null);
     assert(crossAxisAlignment != null);
     if (firstChild != null && lastChild != firstChild) {
@@ -270,41 +270,41 @@ class RenderFlowLayout extends RenderBox
           break;
       }
     }
-    if (alignment == WrapAlignment.start || alignment == WrapAlignment.end) {
+    if (mainAxisAlignment == MainAxisAlignment.start || mainAxisAlignment == MainAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null,
-              'Horizontal $runtimeType with alignment $alignment has a null textDirection, so the alignment cannot be resolved.');
+              'Horizontal $runtimeType with mainAxisAlignment $mainAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(verticalDirection != null,
-              'Vertical $runtimeType with alignment $alignment has a null verticalDirection, so the alignment cannot be resolved.');
+              'Vertical $runtimeType with mainAxisAlignment $mainAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
-    if (runAlignment == WrapAlignment.start ||
-        runAlignment == WrapAlignment.end) {
+    if (runAlignment == MainAxisAlignment.start ||
+        runAlignment == MainAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the alignment cannot be resolved.');
+              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the alignment cannot be resolved.');
+              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
-    if (crossAxisAlignment == WrapCrossAlignment.start ||
-        crossAxisAlignment == WrapCrossAlignment.end) {
+    if (crossAxisAlignment == CrossAxisAlignment.start ||
+        crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
+              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
@@ -484,11 +484,11 @@ class RenderFlowLayout extends RenderBox
       double childCrossAxisExtent) {
     final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
     switch (crossAxisAlignment) {
-      case WrapCrossAlignment.start:
+      case CrossAxisAlignment.start:
         return flipCrossAxis ? freeSpace : 0.0;
-      case WrapCrossAlignment.end:
+      case CrossAxisAlignment.end:
         return flipCrossAxis ? 0.0 : freeSpace;
-      case WrapCrossAlignment.center:
+      case CrossAxisAlignment.center:
         return freeSpace / 2.0;
     }
     return 0.0;
@@ -560,11 +560,12 @@ class RenderFlowLayout extends RenderBox
     RenderBox preChild = null;
 
     while (child != null) {
+      print('childConstraints-------------------- $childConstraints');
       child.layout(childConstraints, parentUsesSize: true);
       final WrapParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-
+print('child size============== ${child.size}');
       if (childCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
@@ -641,23 +642,23 @@ class RenderFlowLayout extends RenderBox
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
     switch (runAlignment) {
-      case WrapAlignment.start:
+      case MainAxisAlignment.start:
         break;
-      case WrapAlignment.end:
+      case MainAxisAlignment.end:
         runLeadingSpace = crossAxisFreeSpace;
         break;
-      case WrapAlignment.center:
+      case MainAxisAlignment.center:
         runLeadingSpace = crossAxisFreeSpace / 2.0;
         break;
-      case WrapAlignment.spaceBetween:
+      case MainAxisAlignment.spaceBetween:
         runBetweenSpace =
             runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
         break;
-      case WrapAlignment.spaceAround:
+      case MainAxisAlignment.spaceAround:
         runBetweenSpace = crossAxisFreeSpace / runCount;
         runLeadingSpace = runBetweenSpace / 2.0;
         break;
-      case WrapAlignment.spaceEvenly:
+      case MainAxisAlignment.spaceEvenly:
         runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
         runLeadingSpace = runBetweenSpace;
         break;
@@ -680,24 +681,24 @@ class RenderFlowLayout extends RenderBox
       double childLeadingSpace = 0.0;
       double childBetweenSpace = 0.0;
 
-      switch (alignment) {
-        case WrapAlignment.start:
+      switch (mainAxisAlignment) {
+        case MainAxisAlignment.start:
           break;
-        case WrapAlignment.end:
+        case MainAxisAlignment.end:
           childLeadingSpace = mainAxisFreeSpace;
           break;
-        case WrapAlignment.center:
+        case MainAxisAlignment.center:
           childLeadingSpace = mainAxisFreeSpace / 2.0;
           break;
-        case WrapAlignment.spaceBetween:
+        case MainAxisAlignment.spaceBetween:
           childBetweenSpace =
               childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
           break;
-        case WrapAlignment.spaceAround:
+        case MainAxisAlignment.spaceAround:
           childBetweenSpace = mainAxisFreeSpace / childCount;
           childLeadingSpace = childBetweenSpace / 2.0;
           break;
-        case WrapAlignment.spaceEvenly:
+        case MainAxisAlignment.spaceEvenly:
           childBetweenSpace = mainAxisFreeSpace / (childCount + 1);
           childLeadingSpace = childBetweenSpace;
           break;
@@ -749,6 +750,12 @@ class RenderFlowLayout extends RenderBox
     String displayType;
     if (child is RenderFlowLayout || child is RenderBoxModel) {
       displayType = child.style['display'];
+
+      String display = style['display'];
+      String flexWrap = style.get('flexWrap');
+      if ((display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap') {
+        displayType = 'inline';
+      }
     } else {
       displayType = 'inline';
     }
@@ -782,9 +789,9 @@ class RenderFlowLayout extends RenderBox
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<WrapAlignment>('alignment', alignment));
+    properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
     properties.add(DoubleProperty('spacing', spacing));
-    properties.add(EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    properties.add(EnumProperty<MainAxisAlignment>('runAlignment', runAlignment));
     properties.add(DoubleProperty('runSpacing', runSpacing));
     properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
