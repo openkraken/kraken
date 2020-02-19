@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
-    "test": "echo \"no test specified\" && exit 1",
+    "test": "cd test && npm run test",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
     "ci": "npm run lint"
@@ -16,8 +16,5 @@
     "kraken",
     "rax"
   ],
-  "author": "KrakenTeam",
-  "devDependencies": {
-    "@ali/ci": "^4.23.0"
-  }
+  "author": "KrakenTeam"
 }

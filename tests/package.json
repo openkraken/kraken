@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Kraken test repo.",
   "scripts": {
-    "test": "npm run build:rax && npm run test:flutter",
+    "test": "npm run test:flutter",
     "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart"
   },
   "author": "Kraken Team",
