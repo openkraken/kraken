@@ -560,12 +560,10 @@ class RenderFlowLayout extends RenderBox
     RenderBox preChild = null;
 
     while (child != null) {
-      print('childConstraints-------------------- $childConstraints');
       child.layout(childConstraints, parentUsesSize: true);
       final WrapParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-print('child size============== ${child.size}');
       if (childCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
