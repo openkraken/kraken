@@ -208,7 +208,7 @@ V8Context::~V8Context() {
 #endif
 }
 
-bool V8Context::isValid() { return ctxInvalid_.load(); }
+bool V8Context::isValid() { return !ctxInvalid_.load(); }
 
 jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
   v8::HandleScope handleScope(_isolate);
@@ -291,7 +291,9 @@ std::string V8Context::description() { return std::string(""); }
 
 bool V8Context::isInspectable() { return false; }
 
-void *V8Context::globalImpl() {}
+void *V8Context::globalImpl() {
+  return nullptr;
+}
 
 void V8Context::setDescription(const std::string &desc) {}
 
@@ -822,10 +824,12 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
 
 jsa::WeakObject V8Context::createWeakObject(const jsa::Object &) {
   // TODO createWeakObject
+  throw std::logic_error("Not implemented");
 }
 
 jsa::Value V8Context::lockWeakObject(const jsa::WeakObject &) {
   // TODO LockWeakObject
+  throw std::logic_error("Not implemented");
 }
 
 jsa::Array V8Context::createArray(size_t length) {

@@ -34,28 +34,30 @@ target_include_directories(bindings PRIVATE
   ./
   ./foundation/websockettpp-0.8.1
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   )
 target_link_libraries(bindings PRIVATE
   jsa_abstraction
-  jsc_implementation
+  jsa_implementation
   dart_methods
-  v8_implementation
   foundation)
 
 ### Bridges
 target_link_libraries(bridge PRIVATE
-  jsc_implementation
-  v8_implementation
+  jsa_implementation
   jsa_abstraction
   dart_methods
   bindings
   -pthread)
 target_include_directories(bridge PRIVATE
   ./jsa/include
+  ${JSA_INCLUDE_DIRS}
   ${ADDITIONAL_INCLUDE_DIRS})
 
 target_include_directories(dart_methods PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${JSA_INCLUDE_DIRS}
+  PUBLIC ./include
 )
 
 message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
@@ -66,6 +68,7 @@ target_include_directories(js_code PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   )
 
 ### Kraken
@@ -78,6 +81,7 @@ target_include_directories(kraken PRIVATE
   ./polyfill/dist
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 execute_process(
