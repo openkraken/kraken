@@ -176,9 +176,9 @@ void registerReloadApp() {
 }
 
 typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
-typedef NativeAsyncCallbackWithString = Void Function(Pointer<Void> context, Pointer<Utf8> data);
+typedef NativeAsyncCallbackWithDouble = Void Function(Pointer<Void> context, Double data);
 typedef DartAsyncCallback = void Function(Pointer<Void> context);
-typedef DartAsyncCallbackWithString = void Function(Pointer<Void> context, Pointer<Utf8> data);
+typedef DartAsyncCallbackWithDouble = void Function(Pointer<Void> context, double data);
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
@@ -239,7 +239,7 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallbackWithString>>, Pointer<Void>);
+typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallbackWithDouble>>, Pointer<Void>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -247,11 +247,10 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallbackWithString>> callback, Pointer<Void> context) {
-  return requestAnimationFrame((Duration timeStamp) {
-    String highResTimeStamp = timeStamp.toString();
-    DartAsyncCallbackWithString func = callback.asFunction();
-    func(context, Utf8.toUtf8(highResTimeStamp));
+int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallbackWithDouble>> callback, Pointer<Void> context) {
+  return requestAnimationFrame((double highResTimeStamp) {
+    DartAsyncCallbackWithDouble func = callback.asFunction();
+    func(context, highResTimeStamp);
   });
 }
 

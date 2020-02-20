@@ -43,8 +43,28 @@ void handlePersistentCallback(void *data) {
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
+void handlePersistentCallbackWithDouble(void *data, double result) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  JSContext &_context = obj->_context;
+  if (!_context.isValid())
+    return;
+
+  if (obj->_callback == nullptr) {
+    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    return;
+  }
+
+  Object callback = obj->_callback->getObject(_context);
+  callback.asFunction(_context).call(_context, Value(result), 0);
+}
+
 void handleTransientCallback(void *data) {
   handlePersistentCallback(data);
+  destoryCallbackContext(data);
+}
+
+void handleTransientCallbackWithDouble(void *data, double result) {
+  handlePersistentCallbackWithDouble(data, result);
   destoryCallbackContext(data);
 }
 
@@ -235,7 +255,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
   }
 
   int32_t requestId = getDartMethod()->requestAnimationFrame(
-      handleTransientCallback, static_cast<void *>(callbackContext));
+      handleTransientCallbackWithDouble, static_cast<void *>(callbackContext));
 
   // `-1` represents some error occurred.
   if (requestId == -1) {
