@@ -53,6 +53,21 @@ export class NodeImpl extends EventTarget {
     insertAdjacentNode(this.id, 'beforeend', node.id);
   }
 
+  public removeChild(node: NodeImpl) {
+    if (node.id < 0) {
+      throw new Error(`${node.nodeName} can not be remove from ${this.nodeName}`);
+    }
+
+    this.childNodes.some((child, idx) => {
+      if (child.id === node.id) {
+        this.childNodes.splice(idx, 1);
+        removeNode(node.id);
+        return true;
+      }
+      return false;
+    });
+  }
+
   public insertBefore(newChild: NodeImpl, referenceNode: NodeImpl) {
     if (!referenceNode.parentNode) return;
     const parentNode = referenceNode.parentNode;
