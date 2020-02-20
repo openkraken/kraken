@@ -7,6 +7,32 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'style.dart';
 
+class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
+  /// Flex grow
+  int flexGrow;
+
+  /// Flex shrink
+  int flexShrink;
+
+  /// Flex basis
+  String flexBasis;
+
+  /// Row index of child when wrapping
+  int runIndex = 0;
+
+  /// How a flexible child is inscribed into the available space.
+  ///
+  /// If [flex] is non-zero, the [fit] determines whether the child fills the
+  /// space the parent makes available during layout. If the fit is
+  /// [FlexFit.tight], the child is required to fill the available space. If the
+  /// fit is [FlexFit.loose], the child can be at most as large as the available
+  /// space (but is allowed to be smaller).
+  FlexFit fit;
+
+  @override
+  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; fit=$fit';
+}
+
 class FlexMixin {
   static const String DIRECTION = 'flexDirection';
   static const String WRAP = 'flexWrap';
@@ -16,7 +42,7 @@ class FlexMixin {
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
-  void decorateRenderFlex(RenderFlexLayout renderObject, Style style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, Style style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -49,11 +75,20 @@ class FlexMixin {
           verticalDirection = VerticalDirection.down;
           break;
       }
-      renderObject.verticalDirection = verticalDirection;
-      renderObject.direction = axis;
-      renderObject.textDirection = textDirection;
-      renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
-      renderObject.crossAxisAlignment = _getAlignItems(style, axis);
+
+      if (renderObject is RenderFlowLayout) {
+        renderObject.verticalDirection = verticalDirection;
+        renderObject.direction = axis;
+        renderObject.textDirection = textDirection;
+        renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
+        renderObject.crossAxisAlignment = _getAlignItems(style, axis);
+      } else if (renderObject is RenderFlexLayout) {
+        renderObject.verticalDirection = verticalDirection;
+        renderObject.direction = axis;
+        renderObject.textDirection = textDirection;
+        renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
+        renderObject.crossAxisAlignment = _getAlignItems(style, axis);
+      }
     }
   }
 
@@ -128,18 +163,30 @@ class FlexMixin {
 
 class FlexItem {
   static const String GROW = 'flexGrow';
+  static const String SHRINK = 'flexShrink';
+  static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
 
-  static FlexParentData getParentData(Style style) {
-    FlexParentData parentData = FlexParentData();
-    parentData.flex = 1;
+  static KrakenFlexParentData getParentData(Style style) {
+    KrakenFlexParentData parentData = KrakenFlexParentData();
+    parentData.flexGrow = 0;
+    parentData.flexShrink = 1;
+    parentData.flexBasis = 'auto';
     parentData.fit = FlexFit.loose;
 
     if (style != null) {
       dynamic grow = style[GROW];
-      if (grow != null && grow is num) {
-        parentData.fit = FlexFit.loose;
-        parentData.flex = grow.toInt();
+      if (grow != null) {
+        parentData.fit = FlexFit.tight;
+        parentData.flexGrow = int.parse(grow);
+      }
+      dynamic shrink = style[SHRINK];
+      if (shrink != null) {
+        parentData.flexShrink = int.parse(shrink);
+      }
+      dynamic basis = style[BASIS];
+      if (basis != null) {
+        parentData.flexBasis = basis;
       }
     }
     return parentData;

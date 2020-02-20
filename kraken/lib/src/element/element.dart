@@ -138,6 +138,26 @@ abstract class Element extends Node
 
   bool stickyFixed = false;
 
+  bool isFlexStyleChanged(Style newStyle) {
+    String display = newStyle.get('display');
+    List flexStyles = [
+      'flexDirection',
+      'flexWrap',
+      'alignItems',
+      'justifyContent',
+      'alignContent',
+    ];
+    bool hasChanged = false;
+    if (display == 'flex' || display == 'inline-flex') {
+      flexStyles.forEach((key) {
+        if (style.get(key) != newStyle.get(key)) {
+          hasChanged = true;
+        }
+      });
+    }
+    return hasChanged;
+  }
+
   Style _style;
   Style get style => _style;
   set style(Style newStyle) {
@@ -148,7 +168,8 @@ abstract class Element extends Node
       ///1.update display
       String oldDisplay = style.get('display');
       String newDisplay = newStyle.get('display');
-      if (newDisplay != oldDisplay) {
+      bool hasFlexChange = isFlexStyleChanged(newStyle);
+      if (newDisplay != oldDisplay || hasFlexChange) {
         ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
         List<RenderBox> children = [];
         RenderObjectVisitor visitor = (child) {
@@ -166,9 +187,11 @@ abstract class Element extends Node
       }
 
       // update flex related properties
-      if (renderLayoutElement is RenderFlexLayout) {
-        decorateRenderFlex(renderLayoutElement, newStyle);
-        // update style reference
+      decorateRenderFlex(renderLayoutElement, newStyle);
+      // update style reference
+      if (renderLayoutElement is RenderFlowLayout) {
+        (renderLayoutElement as RenderFlowLayout).style = newStyle;
+      } else {
         (renderLayoutElement as RenderFlexLayout).style = newStyle;
       }
 
@@ -674,7 +697,9 @@ abstract class Element extends Node
 
   ContainerRenderObjectMixin createRenderLayoutElement(Style newStyle, List<RenderBox> children) {
     String display = newStyle.get('display');
-    if (display == 'flex' || display == 'inline-flex') {
+    String flexWrap = newStyle.get('flexWrap');
+    bool isFlexWrap = (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
+    if ((display == 'flex' || display == 'inline-flex') && flexWrap != 'wrap') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         textDirection: TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -685,39 +710,54 @@ abstract class Element extends Node
       );
       decorateRenderFlex(flexLayout, newStyle);
       return flexLayout;
-    } else if (display == 'none' || display == 'inline' || display == 'inline-block' || display == 'block') {
-      WrapAlignment alignment = WrapAlignment.start;
-      switch (style['textAlign']) {
+    } else if (
+      display == 'none' ||
+      display == 'inline' ||
+      display == 'inline-block' ||
+      display == 'block' ||
+      isFlexWrap
+    ) {
+      MainAxisAlignment alignment = MainAxisAlignment.start;
+      switch (newStyle['textAlign']) {
         case 'right':
-          alignment = WrapAlignment.end;
+          alignment = MainAxisAlignment.end;
           break;
         case 'center':
-          alignment = WrapAlignment.center;
+          alignment = MainAxisAlignment.center;
           break;
       }
-      return RenderFlowLayout(
-        alignment: alignment,
+      MainAxisAlignment runAlignment = MainAxisAlignment.start;
+      switch (newStyle['alignContent']) {
+        case 'end':
+          runAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          runAlignment = MainAxisAlignment.center;
+          break;
+        case 'space-around':
+          runAlignment = MainAxisAlignment.spaceAround;
+          break;
+        case 'space-between':
+          runAlignment = MainAxisAlignment.spaceBetween;
+          break;
+        case 'space-evenly':
+          runAlignment = MainAxisAlignment.spaceEvenly;
+          break;
+      }
+      ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
+        mainAxisAlignment: alignment,
+        runAlignment: runAlignment,
         children: children,
         style: newStyle,
         nodeId: nodeId,
       );
+
+      if (isFlexWrap) {
+        decorateRenderFlex(flowLayout, newStyle);
+      }
+      return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');
-    }
-  }
-
-  WrapAlignment getWrapAlignment(Style style) {
-    String textAlign = style['textAlign'];
-    switch (textAlign) {
-      case 'center':
-        return WrapAlignment.center;
-      case 'end':
-      case 'right':
-        return WrapAlignment.end;
-      case 'start':
-      case 'left':
-      default:
-        return WrapAlignment.start;
     }
   }
 
@@ -795,7 +835,10 @@ abstract class Element extends Node
       RenderObject childRenderObject = child.renderObject;
       Style childStyle = child.style;
       String childPosition = childStyle['position'] ?? 'static';
-      bool isFlex = renderLayoutElement is RenderFlexLayout;
+      // bool isFlex = renderLayoutElement is RenderFlexLayout;
+
+      String display = style.get('display');
+      bool isFlex = display == 'flex' || display == 'inline-flex';
 
       if (isFlex) {
         // Add FlexItem wrap for flex child node.
@@ -804,7 +847,6 @@ abstract class Element extends Node
         parent.child = null;
         parent.child = RenderFlexItem(
           child: childRenderBox,
-          parent: renderLayoutElement,
         );
       } else {
         Style childStyle = Style(child.properties[STYLE]);
@@ -873,12 +915,12 @@ abstract class Element extends Node
 
       ParentData childParentData = childRenderObject.parentData;
       if (isFlex) {
-        RenderFlexLayout renderLayout = renderLayoutElement as RenderFlexLayout;
-        if (renderLayout.direction == Axis.vertical && renderLayout.crossAxisAlignment != CrossAxisAlignment.stretch) {}
-        assert(childParentData is FlexParentData);
-        final FlexParentData parentData = childParentData;
-        FlexParentData flexParentData = FlexItem.getParentData(childStyle);
-        parentData.flex = flexParentData.flex;
+        assert(childParentData is KrakenFlexParentData);
+        final KrakenFlexParentData parentData = childParentData;
+        KrakenFlexParentData flexParentData = FlexItem.getParentData(childStyle);
+        parentData.flexGrow = flexParentData.flexGrow;
+        parentData.flexShrink = flexParentData.flexShrink;
+        parentData.flexBasis = flexParentData.flexBasis;
         parentData.fit = flexParentData.fit;
         String alignItems = style[FlexItem.ALIGN_ITEMS];
         if (alignItems != null && style[FlexItem.ALIGN_ITEMS] != 'stretch') {
