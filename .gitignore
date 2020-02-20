@@ -57,8 +57,7 @@ node_modules
 cmake-build-debug
 cmake-build-release
 
-lib/bundle.js
-bundle.js
 libkraken.dylib
 Podfile.lock
 .cxx
+!scripts/build

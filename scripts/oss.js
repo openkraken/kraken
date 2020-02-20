@@ -1,14 +1,14 @@
 const OSS = require('ali-oss');
 const fs = require('fs');
 const chalk = require('chalk');
-const execSync = require('child_process').execSync;
+const { execSync } = require('child_process');
 const packageJSON = require('../package.json');
 const os = require('os');
 const path = require('path');
 const program = require('commander');
 
 program
-  .version('0.1.0')
+  .version(packageJSON.version)
   .usage('[-s kraken-darwin.tar.gz]')
   .requiredOption('--ak <string>', 'your aliyun bucket AK')
   .requiredOption('--sk <string>', 'your aliyun bucket SK')
@@ -26,13 +26,12 @@ function createClient(ak, sk) {
 
 function upload(client, filename, filepath) {
   const readStream = fs.createReadStream(filepath);
-  return client.put(filename, readStream).then(ret => {
-    let res = ret.res;
-    if (res.status !== 200) {
+  return client.put(filename, readStream).then((ret) => {
+    if (ret.res.status !== 200) {
       return Promise.reject(chalk.red(`file: ${filename} upload failed !`));
+    } else {
+      return Promise.resolve();
     }
-
-    return Promise.resolve();
   });
 }
 
@@ -43,7 +42,7 @@ if (!path.isAbsolute(source)) {
 
 const client = createClient(program.ak, program.sk);
 upload(client, `kraken-cli-vendors/${program.name}`, source).then(() => {
-  console.log('upload success');
+  console.log(chalk.green('Uploaded successfully.'));
 }).catch((err) => {
   throw err;
 });

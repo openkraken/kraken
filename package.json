@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
-    "build": "node scripts/build.js",
+    "start": "cd app_launcher && flutter run",
+    "build:macos": "node scripts/build/macos",
+    "build:android": "node scripts/build/android",
+    "build:linux": "node scripts/build/linux",
     "test": "cd test && npm run test",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
@@ -17,5 +20,13 @@
     "kraken",
     "rax"
   ],
+  "devDependencies": {
+    "ali-oss": "^6.4.0",
+    "chalk": "^3.0.0",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1"
+  },
   "author": "KrakenTeam"
 }

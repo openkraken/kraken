@@ -9,7 +9,6 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 const minimist = require('minimist');
-const packageJSON = require('./package.json');
 
 let enginePath = process.env.FLUTTER_ENGINE;
 let platform = os.platform() === 'darwin' ? 'macos' : os.platform();
@@ -31,9 +30,9 @@ const paths = {
   distInclude: resolve(__dirname, 'build/include'),
   distApp: resolve(__dirname, 'build/app'),
   cli: resolveKraken('cli'),
-  playground: resolveKraken('playground'),
+  app_launcher: resolveKraken('app_launcher'),
   platform: resolveKraken('platform'),
-  dartfm: resolveKraken('dartfm'),
+  kraken: resolveKraken('kraken'),
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
   devtools: resolveKraken('devtools'),
@@ -54,7 +53,7 @@ function buildKraken(platform, mode) {
 
   console.log(`${chalk.green('[BUILD]')} flutter ${args.join(' ')}`);
   const handle = spawnSync('flutter', args, {
-    cwd: paths.playground,
+    cwd: paths.app_launcher,
     env: process.env,
     stdio: 'inherit',
   });
@@ -93,30 +92,30 @@ task('copy-kraken-debug', (done) => {
   if (platform === 'macos') {
     execSync(`mkdir -p ${paths.dist}/app/debug`);
     // There is a problem that `cp -r` will drop symbolic, which will make app fails.
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Debug/Kraken.app')} ${paths.dist}/app/debug`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Debug/Kraken.app')} ${paths.dist}/app/debug`);
     return done();
   }
 
   if (platform === 'linux') {
     execSync(`mkdir -p ${paths.dist}/app`);
-    execSync(`cp -r ${path.join(paths.playground, 'build/linux/debug/*')} ./build/app`);
+    execSync(`cp -r ${path.join(paths.app_launcher, 'build/linux/debug/*')} ./build/app`);
     return done();
   }
 
   throw new Error('Kraken debug is not supported in your platform.');
-  // execSync(`cp -r ${path.join(paths.playground, 'build/linux/Build/Products/Debug')} ./build/app/`);
+  // execSync(`cp -r ${path.join(paths.app_launcher, 'build/linux/Build/Products/Debug')} ./build/app/`);
 });
 
 task('copy-kraken-release', (done) => {
   if (platform === 'macos') {
     execSync(`mkdir -p ${paths.dist}/app/release`);
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Release/Kraken.app')} ./build/app/release/`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Release/Kraken.app')} ./build/app/release/`);
     return done();
   }
 
   if (platform === 'linux') {
     execSync(`mkdir -p ${paths.dist}/app`);
-    execSync(`mv ${path.join(paths.playground, 'build/linux/release/')} ./build/app`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/linux/release/')} ./build/app`);
     return done();
   }
 
@@ -126,13 +125,13 @@ task('copy-kraken-release', (done) => {
 task('copy-kraken-profile', (done) => {
   if (platform === 'macos') {
     execSync(`mkdir -p ${paths.dist}/app/profile`);
-    execSync(`mv ${path.join(paths.playground, 'build/macos/Build/Products/Profile/Kraken.app')} ./build/app/profile`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Profile/Kraken.app')} ./build/app/profile`);
     return done();
   }
 
   if (platform === 'linux') {
     execSync(`mkdir -p ${paths.dist}/app`);
-    execSync(`mv ${path.join(paths.playground, 'build/linux/profile/')} ./build/app`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/linux/profile/')} ./build/app`);
     return done();
   }
 
@@ -152,7 +151,7 @@ task('patch-kraken-profile', (done) => {
 
 task('clean', () => {
   execSync('git clean -xfd', {
-    cwd: paths.playground,
+    cwd: paths.app_launcher,
     env: process.env,
     stdio: 'inherit'
   });
@@ -271,7 +270,7 @@ task('compile-polyfill', (done) => {
   }
 
   result = spawnSync('node', [
-    'js2c.js',
+    'js_to_c.js',
     '-s',
     path.join(paths.polyfill, 'dist/main.js'),
     '-o',
@@ -291,12 +290,12 @@ task('compile-polyfill', (done) => {
 
 task('pub-get', (done) => {
   execSync('flutter pub get', {
-    cwd: paths.playground,
+    cwd: paths.app_launcher,
     env: process.env,
     stdio: 'inherit'
   });
   execSync('flutter pub get', {
-    cwd: paths.dartfm,
+    cwd: paths.kraken,
     env: process.env,
     stdio: 'inherit'
   });
@@ -305,7 +304,7 @@ task('pub-get', (done) => {
 });
 
 task('upload-dist', (done) => {
-  const filename = `kraken-${os.platform()}-${packageJSON.version}.tar.gz`;
+  const filename = `kraken-${os.platform()}-${require('../cli/package.json').version}.tar.gz`;
   execSync(`tar -zcf ${paths.cli}/vendors/${filename} ./build`, {
     cwd: __dirname
   });
@@ -324,7 +323,7 @@ task('build-embedded-assets', (done) => {
   }
   let copySource = [
     {
-      src: paths.playground + '/linux/flutter/generated_plugin_registrant.h',
+      src: paths.app_launcher + '/linux/flutter/generated_plugin_registrant.h',
       dest: paths.distInclude + '/generated_plugin_registrant.h'
     },
     {
@@ -336,19 +335,19 @@ task('build-embedded-assets', (done) => {
       dest: paths.distInclude + '/kraken_embbeder.h'
     },
     {
-      src: paths.playground + '/linux/flutter/ephemeral/flutter_export.h',
+      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_export.h',
       dest: paths.distInclude + '/flutter_export.h'
     },
     {
-      src: paths.playground + '/linux/flutter/ephemeral/flutter_glfw.h',
+      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_glfw.h',
       dest: paths.distInclude + '/flutter_glfw.h'
     },
     {
-      src: paths.playground + '/linux/flutter/ephemeral/flutter_messenger.h',
+      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_messenger.h',
       dest: paths.distInclude + '/flutter_messenger.h'
     },
     {
-      src: paths.playground + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
+      src: paths.app_launcher + '/linux/flutter/ephemeral/flutter_plugin_registrar.h',
       dest: paths.distInclude + '/flutter_plugin_registrar.h'
     }
   ];
@@ -357,7 +356,7 @@ task('build-embedded-assets', (done) => {
     fs.copyFileSync(source.src, source.dest);
   }
 
-  execSync(`cp -r ${paths.playground}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${paths.distInclude}`);
+  execSync(`cp -r ${paths.app_launcher}/linux/flutter/ephemeral/cpp_client_wrapper_glfw/include/flutter ${paths.distInclude}`);
   execSync(`ln -s ../app/lib/libflutter_linux_glfw.so ./`, {
     cwd: paths.distLib,
     stdio: 'inherit'
@@ -373,36 +372,14 @@ task('build-embedded-assets', (done) => {
   done();
 });
 
-let _series;
 
-// linux only support debug from now on
-if (platform === 'linux') {
-  _series = series('build-kraken-debug', 'copy-kraken-debug'); // Debug too large to publish to npm.
-} else {
-  if (buildMode === 'Release') {
-    _series = series('build-kraken-release', 'copy-kraken-release', 'patch-kraken-release');
-  } else if (buildMode === 'Profile') {
-    _series = series('build-kraken-profile', 'copy-kraken-profile', 'patch-kraken-profile');
-  } else if (buildMode === 'All') {
-    _series = series('build-kraken-release', 'copy-kraken-release', 'patch-kraken-release', 'build-kraken-debug', 'copy-kraken-debug');
-  } else {
-    _series = series('build-kraken-debug', 'copy-kraken-debug');
-  }
-}
-
-let embeddedSeries = series(
-  'generate-cmake-embedded-files',
-  'build-kraken-embedded-lib',
-  'build-embedded-assets'
-);
-
-exports.default = series(
-  'clean',
-  'pub-get',
-  _series,
-  'compile-polyfill',
-  parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
-  platform === 'linux' ? embeddedSeries : [],
-  uploadToOSS ? 'upload-dist' : []
-);
+// exports.default = series(
+//   'clean',
+//   'pub-get',
+//   _series,
+//   'compile-polyfill',
+//   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
+//   platform === 'linux' ? embeddedSeries : [],
+//   uploadToOSS ? 'upload-dist' : []
+// );
 

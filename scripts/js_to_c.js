@@ -5,7 +5,7 @@ const fs = require('fs');
 
 if (argv.help) {
   process.stdout.write(`Convert Javascript Code into Cpp source code
-Usage: node js2c.js -s /path/to/source.js -o /path/to/dist.c\n`);
+Usage: node js_to_c.js -s /path/to/source.js -o /path/to/dist.c\n`);
   process.exit(0);
 }
 
@@ -69,7 +69,7 @@ function getAbsolutePath(p) {
 let sourcePath = getAbsolutePath(source);
 let outputPath = getAbsolutePath(output);
 
-let jsCode = fs.readFileSync(sourcePath, {encoding: 'utf-8'});
+let jsCode = fs.readFileSync(sourcePath, { encoding: 'utf-8' });
 
 let headerSource = getPolyFillHeader();
 let ccSource = convertJSToCpp(jsCode);

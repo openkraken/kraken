@@ -4,17 +4,17 @@ const program = require('commander');
 const chalk = require('chalk');
 const { spawnSync } = require('child_process');
 const { join, resolve } = require('path');
-const packageInfo = require('../package.json');
+const packageJSON = require('../package.json');
 const os = require('os');
 const fs = require('fs');
 const temp = require('temp');
 
 program
-  .version(packageInfo.version)
-  .usage('[filename|url]')
+  .version(packageJSON.version)
+  .usage('[filename|URL]')
   .description('Start a kraken app.')
-  .option('-b --bundle <bundle>', 'Bundle path. One of bundle or url is needed, if both determined, bundlePath will be used.')
-  .option('-u --url <url>', 'Bundle url. One of bundle or url is needed, if both determined, bundlePath will be used.')
+  .option('-b --bundle <filename>', 'Bundle path. One of bundle or url is needed, if both determined, bundle path will be used.')
+  .option('-u --url <URL>', 'Bundle URL. One of bundle or URL is needed, if both determined, bundle path will be used.')
   .option('-i --instruct <instruct>', 'instruct file path.')
   .option('-s, --source <source>', 'Source code. pass source directory from command line')
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
@@ -93,7 +93,7 @@ function getShellPath(runtimeMode) {
   } else if (platform === 'linux') {
     return join(appPath, 'kraken');
   } else {
-    console.log(chalk.red('[ERROR]: Something is failed. please contact @chenghuai.dtc'));
+    console.log(chalk.red('[ERROR]: If anything goes wrong, please contact Kraken Team.'));
     process.exit(1);
   }
 }
