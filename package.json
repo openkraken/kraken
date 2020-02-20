@@ -5,7 +5,7 @@
   "scripts": {
     "install": "cd cli && tnpm link -g && ln -s ../targets build",
     "start": "cd app_launcher && flutter run",
-    "build:macos": "node scripts/build_macos",
+    "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
     "test": "cd test && npm run test",

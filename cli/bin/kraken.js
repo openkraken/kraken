@@ -90,8 +90,8 @@ program
 program.parse(process.argv);
 
 function getShellPath(runtimeMode) {
-  const appPath = join(__dirname, '../build/app');
   const platform = os.platform();
+  const appPath = join(__dirname, '../build', platform);
   if (platform === 'darwin') {
     if (runtimeMode === 'release') {
       return join(appPath, 'release/Kraken.app/Contents/MacOS/Kraken');

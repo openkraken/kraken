@@ -14,13 +14,12 @@ const V8_VERSION = '7.9.317.31';
 
 const KRAKEN_ROOT = join(__dirname, '..');
 const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
-const platform = os.platform() === 'darwin' ? 'macos' : os.platform();
+const platform = os.platform();
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 const targetDist = join(TARGET_PATH, platform, buildMode.toLowerCase());
 const paths = {
   cli: resolveKraken('cli'),
   app_launcher: resolveKraken('app_launcher'),
-  platform: resolveKraken('platform'),
   kraken: resolveKraken('kraken'),
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
@@ -36,9 +35,13 @@ function resolveKraken(submodule) {
 
 function buildKraken(platform, mode) {
   let runtimeMode = '--debug';
-  if (mode === 'Release' && platform === 'macos') runtimeMode = '--release';
+  if (mode === 'Release' && platform === 'darwin') runtimeMode = '--release';
 
-  const args = ['build', platform, runtimeMode];
+  const args = [
+    'build',
+    platform === 'darwin' ? 'macos' : platform,
+    runtimeMode,
+  ];
 
   console.log(`${chalk.green('[BUILD]')} flutter ${args.join(' ')}`);
   const handle = spawnSync('flutter', args, {
@@ -71,7 +74,7 @@ task('build-kraken-release', (done) => {
 task('copy-kraken-debug', (done) => {
   const targetDist = join(TARGET_PATH, platform, 'debug');
   execSync(`mkdir -p ${targetDist}`);
-  if (platform === 'macos') {
+  if (platform === 'darwin') {
     // There is a problem that `cp -r` will drop symbolic, which will make app fails.
     execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Debug/Kraken.app')} ${targetDist}`);
     return done();
@@ -90,7 +93,7 @@ task('copy-kraken-release', (done) => {
   const targetDist = join(TARGET_PATH, platform, 'release');
   execSync(`mkdir -p ${targetDist}`);
 
-  if (platform === 'macos') {
+  if (platform === 'darwin') {
     execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Release/Kraken.app')} ${targetDist}`);
     // Add a empty file to keep flutter_assets folder, or flutter crashed.
     writeFileSync(join(targetDist, 'Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
@@ -209,7 +212,7 @@ task('build-kraken-embedded-lib', (done) => {
 });
 
 task('copy-build-libs', done => {
-  execSync(`cp -r ${paths.thirdParty}/v8-${V8_VERSION}/lib/${platform}/ ${libOutputPath}`, {
+  execSync(`cp -r ${paths.thirdParty}/v8-${V8_VERSION}/lib/${platform === 'darwin' ? 'macos' : platform}/ ${libOutputPath}`, {
     env: process.env,
     stdio: 'inherit'
   });
