@@ -15,7 +15,8 @@ const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
 series(
   'compile-polyfill',
   libKrakenSeries,
-  'copy-build-libs'
+  'copy-build-libs',
+  'install-v8-name-prefix'
 )((err) => {
   if (err) {
     console.log(err);
