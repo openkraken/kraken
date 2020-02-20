@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
+    "link:local": "cd cli && npm link -g",
     "start": "cd app_launcher && flutter run",
     "build:macos": "node scripts/build_macos",
     "build:android": "node scripts/build_android",

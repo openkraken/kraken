@@ -111,7 +111,12 @@ task('clean', () => {
     env: process.env,
     stdio: 'inherit'
   });
-  return del('build');
+
+  if (buildMode === 'All') {
+    return del(join(TARGET_PATH, platform));
+  } else {
+    return del(join(TARGET_PATH, platform, buildMode.toLowerCase()));
+  }
 });
 
 const libOutputPath = join(TARGET_PATH, platform, buildMode.toLowerCase(), 'lib');
