@@ -43,8 +43,9 @@ export class NodeImpl extends EventTarget {
   }
 
   public appendChild(node: NodeImpl) {
+    // @TODO add logic to tell whether child to append contains the parent
     if (node.id < 0) {
-      throw new Error(`${node.nodeName} can not be append to ${this.nodeName}`);
+      throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
 
     this.childNodes.push(node);
@@ -59,13 +60,12 @@ export class NodeImpl extends EventTarget {
    * @return The returned value is the rmoved node.
    */
   public removeChild(node: NodeImpl) {
-    if (node.id < 0) {
-      throw new Error(`${node.nodeName} can not be remove from ${this.nodeName}`);
-    }
     const idx = this.childNodes.indexOf(node);
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
       removeNode(node.id);
+    } else {
+      throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
     return node;
   }
