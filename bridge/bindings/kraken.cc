@@ -39,7 +39,7 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
   auto kraken = JSA_CREATE_OBJECT(*context);
 
   // Other properties are injected by dart.
-  JSA_SET_PROPERTY(*context, kraken, "appName", "Kraken App");
+  JSA_SET_PROPERTY(*context, kraken, "appName", "Kraken");
   JSA_SET_PROPERTY(*context, kraken, "appVersion", VERSION_APP);
   JSA_SET_PROPERTY(*context, kraken, "platform", PLATFORM);
   JSA_SET_PROPERTY(*context, kraken, "product", PRODUCT);

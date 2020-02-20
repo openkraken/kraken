@@ -9,6 +9,8 @@ const os = require('os');
 const fs = require('fs');
 const temp = require('temp');
 
+const SUPPORTED_JS_ENGINE = ['jsc', 'v8'];
+
 program
   .version(packageInfo.version)
   .usage('[filename|url]')
@@ -20,6 +22,7 @@ program
   .option('-m --runtime-mode <runtimeMode>', 'Runtime mode, debug | release.', 'debug')
   .option('--enable-kraken-js-log', 'print kraken js to dart log', false)
   .option('--show-performance-monitor', 'show render performance monitor', false)
+  .option('--js-engine <jsengine>', 'the JavaScript Engine that executes the code. ' + SUPPORTED_JS_ENGINE.join(' | '), 'jsc')
   .option('-d, --debug-layout', 'debug element\'s paint layout', false)
   .action((options) => {
     let { bundle, url, source, instruct } = options;
@@ -51,6 +54,11 @@ program
 
       if (options.debugLayout) {
         env['KRAKEN_ENABLE_DEBUG'] = true;
+      }
+
+      if (options.jsEngine) {
+        if (!SUPPORTED_JS_ENGINE.includes(options.jsEngine)) throw new Error(`unknown js engine: ${options.jsEngine}, supported: ${SUPPORTED_JS_ENGINE.join(',')}`)
+        env['KRAKEN_JS_ENGINE'] = options.jsEngine;
       }
 
       if (instruct) {

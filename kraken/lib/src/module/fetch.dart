@@ -19,7 +19,7 @@ Map<String, String> _parseHeaders(Map<String, dynamic> map) {
   return headerMap;
 }
 
-Future<Response> fetch(String url, Map<String, dynamic> map) async {
+Future<Response> fetch(String url, Map<String, dynamic> map) {
   String method = map['method'];
   Map<String, String> headers = _parseHeaders(map['headers']);
   Future<Response> future;

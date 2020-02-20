@@ -1,7 +1,7 @@
 name: kraken
 description: Kraken Dart Framework
 version: 0.2.0
-author: Kranken Team
+author: Kraken Team
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
