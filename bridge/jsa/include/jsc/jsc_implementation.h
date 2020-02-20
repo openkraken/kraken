@@ -192,7 +192,7 @@ protected:
   jsa::Array createArray(size_t length) override;
   size_t size(const jsa::Array&) override;
   size_t size(const jsa::ArrayBuffer&) override;
-  uint8_t* data(const jsa::ArrayBuffer&) override;
+  void* data(const jsa::ArrayBuffer&) override;
   jsa::Value getValueAtIndex(const jsa::Array&, size_t i) override;
   void setValueAtIndexImpl(jsa::Array&, size_t i, const jsa::Value& value)
   override;

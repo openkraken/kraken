@@ -7,3 +7,4 @@ export 'src/module/connectivity.dart';
 export 'src/module/fetch.dart';
 export 'src/module/timer.dart';
 export 'src/module/animation_frame.dart';
+export 'src/module/device_info.dart';

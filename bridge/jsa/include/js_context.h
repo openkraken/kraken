@@ -42,7 +42,7 @@ class JSError;
 /// can be any value - it will not necessarily be coerced to an object or
 /// or set to the global object.
 using HostFunctionType = std::function<Value(
-    JSContext &rt, const Value &thisVal,
+    JSContext &context, const Value &thisVal,
                                              const Value *args, size_t count)>;
 
 /// An object which implements this interface can be registered as an
@@ -217,7 +217,7 @@ protected:
   virtual Array createArray(size_t length) = 0;
   virtual size_t size(const Array &) = 0;
   virtual size_t size(const ArrayBuffer &) = 0;
-  virtual uint8_t *data(const ArrayBuffer &) = 0;
+  virtual void *data(const ArrayBuffer &) = 0;
   virtual Value getValueAtIndex(const Array &, size_t i) = 0;
   virtual void setValueAtIndexImpl(Array &, size_t i, const Value &value) = 0;
 

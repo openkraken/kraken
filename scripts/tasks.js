@@ -14,6 +14,9 @@ let enginePath = process.env.FLUTTER_ENGINE;
 let platform = os.platform() === 'darwin' ? 'macos' : os.platform();
 let buildMode = process.env.KRAKEN_BUILD || 'Debug';
 
+const SUPPORTED_JS_ENGINES = ['jsc', 'v8'];
+const V8_VERSION = '7.9.317.31';
+
 const args = minimist(process.argv.slice(3));
 const uploadToOSS = args['upload-to-oss'];
 
@@ -35,6 +38,7 @@ const paths = {
   kraken: resolveKraken('kraken'),
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
+  thirdParty: resolveKraken('third_party'),
   devtools: resolveKraken('devtools'),
   tools: resolveKraken('cli/tools'),
   jsa: resolveKraken('jsa'),
@@ -158,29 +162,53 @@ task('clean', () => {
   return del('build');
 });
 
-task('generate-cmake-files', (done) => {
-  const args = [
-    '-DCMAKE_BUILD_TYPE=Release',
-    '-G',
-    'CodeBlocks - Unix Makefiles',
-    '-B',
-    resolve(paths.bridge, 'cmake-build-release'),
-    '-S',
-    paths.bridge
-  ];
-  const handle = spawnSync('cmake', args, {
-    cwd: paths.bridge,
-    env: Object.assign(process.env, {
-      LIBRARY_OUTPUT_DIR: paths.distLib
-    }),
-    stdio: 'inherit',
+for (let jsEngine of SUPPORTED_JS_ENGINES) {
+  task('generate-cmake-files-' + jsEngine, (done) => {
+    const args = [
+      '-DCMAKE_BUILD_TYPE=Release',
+      '-G',
+      'CodeBlocks - Unix Makefiles',
+      '-B',
+      resolve(paths.bridge, 'cmake-build-release'),
+      '-S',
+      paths.bridge
+    ];
+    const handle = spawnSync('cmake', args, {
+      cwd: paths.bridge,
+      env: Object.assign(process.env, {
+        LIBRARY_OUTPUT_DIR: paths.distLib,
+        KRAKEN_JS_ENGINE: jsEngine
+      }),
+      stdio: 'inherit',
+    });
+    if (handle.status !== 0) {
+      console.error(handle.error);
+      return done(false);
+    }
+    done(null);
   });
-  if (handle.status !== 0) {
-    console.error(handle.error);
-    return done(false);
-  }
-  done(null);
-});
+
+  task('build-kraken-lib-' + jsEngine, (done) => {
+    const args = [
+      '--build',
+      resolve(paths.bridge, 'cmake-build-release'),
+      '--target',
+      'kraken',
+      '--',
+      '-j',
+      '4'
+    ];
+    mkdirp.sync(paths.distLib);
+    const handle = spawnSync('cmake', args, {
+      cwd: paths.bridge,
+      env: Object.assign(process.env, {
+        KRAKEN_JS_ENGINE: jsEngine
+      }),
+      stdio: 'inherit',
+    });
+    done(handle.status === 0 ? null : handle.error);
+  });
+}
 
 task('generate-cmake-embedded-files', (done) => {
   const args = [
@@ -222,23 +250,24 @@ task('build-kraken-embedded-lib', (done) => {
   done(handle.status === 0 ? null : handle.error);
 });
 
-task('build-kraken-lib', (done) => {
-  const args = [
-    '--build',
-    resolve(paths.bridge, 'cmake-build-release'),
-    '--target',
-    'kraken',
-    '--',
-    '-j',
-    '4'
-  ];
-  mkdirp.sync(paths.distLib);
-  const handle = spawnSync('cmake', args, {
-    cwd: paths.bridge,
+task('copy-build-libs', done => {
+  execSync(`cp -r ${paths.thirdParty}/v8-${V8_VERSION}/lib/${platform}/ ${paths.distLib}`, {
     env: process.env,
-    stdio: 'inherit',
+    stdio: 'inherit'
   });
-  done(handle.status === 0 ? null : handle.error);
+  execSync(`./tools/install_name_prefix_tool.sh ./build/lib /usr/local/opt/v8/libexec @executable_path/../Frameworks`, {
+    env: process.env,
+    cwd: paths.cli,
+    stdio: 'inherit'
+  });
+
+  execSync(`mv ./build/lib/*.dylib ./build/app/${buildMode.toLowerCase()}/Kraken.app/Contents/Frameworks`, {
+    env: process.env,
+    cwd: paths.cli,
+    stdio: 'inherit'
+  });
+
+  done();
 });
 
 task('generate-shells', () => {
@@ -371,15 +400,3 @@ task('build-embedded-assets', (done) => {
   });
   done();
 });
-
-
-// exports.default = series(
-//   'clean',
-//   'pub-get',
-//   _series,
-//   'compile-polyfill',
-//   parallel('generate-cmake-files', 'build-kraken-lib', 'generate-shells'),
-//   platform === 'linux' ? embeddedSeries : [],
-//   uploadToOSS ? 'upload-dist' : []
-// );
-

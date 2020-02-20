@@ -109,7 +109,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
   CallbackContext *callbackContext = nullptr;
 
   if (count == 2) {
-    std::shared_ptr<Value> callbackValue = 
+    std::shared_ptr<Value> callbackValue =
       std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
     callbackContext = new CallbackContext(context, callbackValue);
@@ -195,7 +195,12 @@ Value getValue(JSContext &context, const Value &thisVal, const Value *args,
  * JSRuntime
  */
 JSBridge::JSBridge() {
+#ifdef KRAKEN_JSC_ENGINE
   context = alibaba::jsc::createJSContext();
+#elif KRAKEN_V8_ENGINE
+  alibaba::jsa_v8::initV8Engine("");
+  context = alibaba::jsa_v8::createJSContext();
+#endif
 
   // Inject JSC global objects
   kraken::binding::bindKraken(context);

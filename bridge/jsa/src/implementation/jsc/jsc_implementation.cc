@@ -668,8 +668,8 @@ bool JSCContext::isArrayBuffer(const jsa::Object& obj) const {
   return typedArrayType == kJSTypedArrayTypeArrayBuffer;
 }
 
-uint8_t*JSCContext::data(const jsa::ArrayBuffer& obj) {
-  return static_cast<uint8_t*>(JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), nullptr));
+void* JSCContext::data(const jsa::ArrayBuffer& obj) {
+  return JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), nullptr);
 }
 
 size_t JSCContext::size(const jsa::ArrayBuffer& obj) {

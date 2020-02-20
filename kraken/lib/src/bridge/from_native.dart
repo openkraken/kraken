@@ -116,12 +116,12 @@ final Dart_RegisterInvokeModule _registerInvokeModule =
 String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void> context) {
   dynamic args = jsonDecode(json);
   String method = args[0];
-  var result;
+  String result = '';
   if (method == 'getConnectivity') {
     getConnectivity((String json) {
       callback(Utf8.toUtf8(json), context);
     });
-  } else if(method == 'onConnectivityChanged') {
+  } else if (method == 'onConnectivityChanged') {
     onConnectivityChanged();
   } else if (method == 'fetch') {
     List fetchArgs = args[1];
@@ -136,21 +136,15 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       String json = jsonEncode([errorMesssage, e.response.statusCode, '']);
       callback(Utf8.toUtf8(json), context);
     });
+  } else if (method == 'getDeviceInfo') {
+    getDeviceInfo().then((String json) {
+      callback(Utf8.toUtf8(json), context);
+    });
+  } else if (method == 'getHardwareConcurrency') {
+    result = getHardwareConcurrency().toString();
   }
 
-  if (result == null) {
-    return '';
-  }
-
-  switch (result.runtimeType) {
-    case String:
-      return result;
-    case Map:
-    case List:
-      return jsonEncode(result);
-    default:
-      return result.toString();
-  }
+  return result;
 }
 
 Pointer<Utf8> _invokeModule(
@@ -261,7 +255,8 @@ int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallback>> callback
 const int RAF_ERROR_CODE = -1;
 // `-1` represents some error occured in requestAnimationFrame execution.
 void registerRequestAnimationFrame() {
-  Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer = Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
+  Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer =
+      Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
   _registerRequestAnimationFrame(pointer);
 }
 

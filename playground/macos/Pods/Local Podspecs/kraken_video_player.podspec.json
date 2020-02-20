@@ -1,0 +1,28 @@
+{
+  "name": "kraken_video_player",
+  "version": "0.0.1",
+  "summary": "Kraken Video Player",
+  "description": "Kraken Video Player",
+  "homepage": "http://example.com",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "chenghuai.dtc": "chenghuai.dtc@alibaba-inc.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "FlutterMacOS": [
+
+    ]
+  },
+  "platforms": {
+    "osx": "10.11"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES"
+  }
+}
