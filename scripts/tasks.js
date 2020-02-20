@@ -260,7 +260,7 @@ task('compile-polyfill', (done) => {
     '-o',
     path.join(paths.polyfill, 'dist')
   ], {
-    cwd: paths.tools,
+    cwd: __dirname,
     env: process.env,
     stdio: 'inherit'
   });
