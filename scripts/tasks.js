@@ -223,14 +223,6 @@ task('copy-build-libs', done => {
     stdio: 'inherit'
   });
 
-  execSync(`mv ${libOutputPath}/* ${targetDist}/Kraken.app/Contents/Frameworks`, {
-    env: process.env,
-    cwd: targetDist,
-    stdio: 'inherit'
-  });
-
-  execSync(`rmdir ${libOutputPath}`);
-
   done();
 });
 

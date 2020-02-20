@@ -46,10 +46,10 @@ const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
 series(
   'clean',
   'pub-get',
-  buildLibKrakenTasks,
   'compile-polyfill',
   libKrakenSeries,
   'copy-build-libs',
+  buildLibKrakenTasks,
   uploadToOSS ? 'upload-dist' : []
 )((err) => {
   if (err) {
