@@ -485,6 +485,10 @@ class RenderFlowLayout extends RenderBox
         return flipCrossAxis ? 0.0 : freeSpace;
       case CrossAxisAlignment.center:
         return freeSpace / 2.0;
+      case CrossAxisAlignment.baseline:
+        return 0.0;
+      case CrossAxisAlignment.stretch:
+        return 0.0;
     }
     return 0.0;
   }
