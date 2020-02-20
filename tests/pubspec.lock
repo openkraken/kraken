@@ -232,7 +232,7 @@ packages:
   kraken:
     dependency: "direct main"
     description:
-      path: "../dartfm"
+      path: "../kraken"
       relative: true
     source: path
     version: "0.2.0"

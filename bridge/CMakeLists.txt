@@ -34,29 +34,31 @@ target_include_directories(bindings PRIVATE
   ./
   ./foundation/websockettpp-0.8.1
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   )
 target_link_libraries(bindings PRIVATE
   jsa_abstraction
-  jsc_implementation
+  jsa_implementation
   dart_methods
   foundation)
 
 ### Bridges
 target_link_libraries(bridge PRIVATE
-  jsc_implementation
+  jsa_implementation
   jsa_abstraction
   dart_methods
   bindings
   -pthread)
 target_include_directories(bridge PRIVATE
   ./jsa/include
+  ${JSA_INCLUDE_DIRS}
   ${ADDITIONAL_INCLUDE_DIRS})
 
 target_include_directories(dart_methods PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${JSA_INCLUDE_DIRS}
+  PUBLIC ./include
 )
-
-message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
 
 ### Js Code
 target_link_libraries(js_code PRIVATE bridge)
@@ -64,6 +66,7 @@ target_include_directories(js_code PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   )
 
 ### Kraken
@@ -76,11 +79,12 @@ target_include_directories(kraken PRIVATE
   ./polyfill/dist
   ./jsa/include
   ${ADDITIONAL_INCLUDE_DIRS}
+  ${JSA_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../dartfm
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
   OUTPUT_VARIABLE APP_VER
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
@@ -95,12 +99,16 @@ execute_process(
 string(REPLACE \n "" GIT_HEAD ${GIT_HEAD}) # Remove last \n
 add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
 
+include(./test/test.cmake)
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
-  add_subdirectory(./test/googletest)
-  add_subdirectory(test)
-  include_directories(test)
 endif ()
+
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
+endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken

@@ -447,10 +447,9 @@ public:
   /// \return the size of the ArrayBuffer, according to its byteLength property.
   /// (C++ naming convention)
   size_t size(JSContext &runtime) const { return runtime.size(*this); }
-
   size_t length(JSContext &runtime) const { return runtime.size(*this); }
 
-  uint8_t *data(JSContext &runtime) { return runtime.data(*this); }
+  void *data(JSContext &runtime) { return runtime.data(*this); }
 
 private:
   friend class Object;
@@ -728,6 +727,8 @@ public:
 
   // \return a String like JS .toString() would do.
   String toString(JSContext &runtime) const;
+
+  std::string toJSON(JSContext &context) const;
 
 private:
   friend class JSContext;

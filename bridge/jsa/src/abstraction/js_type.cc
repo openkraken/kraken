@@ -1,11 +1,11 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
+#include <cassert>
 #include <js_error.h>
 #include <js_type.h>
-#include <cassert>
 
 namespace alibaba {
 namespace jsa {
@@ -247,6 +247,13 @@ String Value::asString(JSContext &rt) && {
 String Value::toString(JSContext &runtime) const {
   Function toString = runtime.global().getPropertyAsFunction(runtime, "String");
   return toString.call(runtime, *this).getString(runtime);
+}
+
+std::string Value::toJSON(JSContext &context) const {
+  Function stringify = context.global()
+                           .getPropertyAsObject(context, "JSON")
+                           .getPropertyAsFunction(context, "stringify");
+  return stringify.call(context, *this).getString(context).utf8(context);
 }
 
 Array Array::createWithElements(JSContext &rt,

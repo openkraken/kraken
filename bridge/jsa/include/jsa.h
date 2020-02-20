@@ -12,8 +12,12 @@
 #include "instrumentation.h"
 #include "macros.h"
 
-//#ifdef KRAKEN_JSC_ENGINE
+#ifdef KRAKEN_JSC_ENGINE
 #include "jsc/jsc_implementation.h"
+#elif KRAKEN_V8_ENGINE
+#include "v8/v8_implementation.h"
+#endif
+//#include "v8/v8_implementation.h"
 #define CREATE_JS_CONTEXT alibaba::jsc::createJSContext();
 //#endif
 
