@@ -17,21 +17,21 @@ if (uploadToOSS) {
   }
 }
 
-let buildLibKrakenTasks;
+let buildAppTasks;
 if (buildMode === 'Release') {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-release',
     'copy-kraken-release'
   );
 } else if (buildMode === 'All') {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-release',
     'copy-kraken-release',
     'build-kraken-debug',
     'copy-kraken-debug'
   );
 } else {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-debug',
     'copy-kraken-debug'
   );
@@ -49,7 +49,8 @@ series(
   'compile-polyfill',
   libKrakenSeries,
   'copy-build-libs',
-  buildLibKrakenTasks,
+  'install-v8-name-prefix',
+  buildAppTasks,
   uploadToOSS ? 'upload-dist' : []
 )((err) => {
   if (err) {
