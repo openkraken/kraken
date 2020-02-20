@@ -217,12 +217,6 @@ task('copy-build-libs', done => {
     stdio: 'inherit'
   });
 
-  execSync(`./install_name_prefix_tool.sh ${libOutputPath} /usr/local/opt/v8/libexec @executable_path/../Frameworks`, {
-    env: process.env,
-    cwd: __dirname,
-    stdio: 'inherit'
-  });
-
   done();
 });
 
