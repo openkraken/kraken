@@ -44,7 +44,7 @@ export class NodeImpl extends EventTarget {
 
   public appendChild(node: NodeImpl) {
     // @TODO add logic to tell whether child to append contains the parent
-    if (node.id < 0) {
+    if (node.id < 0 || node === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
 
