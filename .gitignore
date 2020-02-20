@@ -61,3 +61,4 @@ libkraken.dylib
 Podfile.lock
 .cxx
 !scripts/build
+targets

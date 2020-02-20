@@ -4,9 +4,9 @@
   "description": "Flutter & web standards based rendering engine for IoT.",
   "scripts": {
     "start": "cd app_launcher && flutter run",
-    "build:macos": "node scripts/build/macos",
-    "build:android": "node scripts/build/android",
-    "build:linux": "node scripts/build/linux",
+    "build:macos": "node scripts/build_macos",
+    "build:android": "node scripts/build_android",
+    "build:linux": "node scripts/build_linux",
     "test": "cd test && npm run test",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",

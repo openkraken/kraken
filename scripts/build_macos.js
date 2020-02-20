@@ -6,6 +6,8 @@ const chalk = require('chalk');
 const minimist = require('minimist');
 const { series, parallel } = require('gulp');
 
+const SUPPORTED_JS_ENGINES = ['jsc', 'v8'];
+const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 const args = minimist(process.argv.slice(3));
 const uploadToOSS = args['upload-to-oss'];
 
@@ -19,20 +21,12 @@ let buildLibKrakenTasks;
 if (buildMode === 'Release') {
   buildLibKrakenTasks = series(
     'build-kraken-release',
-    'copy-kraken-release',
-    'patch-kraken-release'
-  );
-} else if (buildMode === 'Profile') {
-  buildLibKrakenTasks = series(
-    'build-kraken-profile',
-    'copy-kraken-profile',
-    'patch-kraken-profile'
+    'copy-kraken-release'
   );
 } else if (buildMode === 'All') {
   buildLibKrakenTasks = series(
     'build-kraken-release',
     'copy-kraken-release',
-    'patch-kraken-release',
     'build-kraken-debug',
     'copy-kraken-debug'
   );
@@ -43,17 +37,19 @@ if (buildMode === 'Release') {
   );
 }
 
+const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
+  'generate-cmake-files-' + jsEngine,
+  'build-kraken-lib-' + jsEngine
+]);
+
 // Run tasks
 series(
   'clean',
   'pub-get',
   buildLibKrakenTasks,
   'compile-polyfill',
-  parallel(
-    'generate-cmake-files',
-    'build-kraken-lib',
-    'generate-shells'
-  ),
+  libKrakenSeries,
+  'copy-build-libs',
   uploadToOSS ? 'upload-dist' : []
 )((err) => {
   if (err) {

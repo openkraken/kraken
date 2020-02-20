@@ -15,8 +15,7 @@ series(
   'compile-polyfill',
   parallel(
     'generate-cmake-files',
-    'build-kraken-lib',
-    'generate-shells'
+    'build-kraken-lib'
   ),
   series(
     'generate-cmake-embedded-files',
