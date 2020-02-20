@@ -176,7 +176,9 @@ void registerReloadApp() {
 }
 
 typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
+typedef NativeAsyncCallbackWithString = Void Function(Pointer<Void> context, Pointer<Utf8> data);
 typedef DartAsyncCallback = void Function(Pointer<Void> context);
+typedef DartAsyncCallbackWithString = void Function(Pointer<Void> context, Pointer<Utf8> data);
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
@@ -237,7 +239,7 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
+typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallbackWithString>>, Pointer<Void>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -245,15 +247,16 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
-  return requestAnimationFrame(() {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallbackWithString>> callback, Pointer<Void> context) {
+  return requestAnimationFrame((Duration timeStamp) {
+    String highResTimeStamp = timeStamp.toString();
+    DartAsyncCallbackWithString func = callback.asFunction();
+    func(context, Utf8.toUtf8(highResTimeStamp));
   });
 }
 
 const int RAF_ERROR_CODE = -1;
-// `-1` represents some error occured in requestAnimationFrame execution.
+// `-1` represents some error occurred in requestAnimationFrame execution.
 void registerRequestAnimationFrame() {
   Pointer<NativeFunction<Native_RequestAnimationFrame>> pointer =
       Pointer.fromFunction(_requestAnimationFrame, RAF_ERROR_CODE);
