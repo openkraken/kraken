@@ -1,6 +1,0 @@
-framework module kraken_video_player {
-  umbrella header "kraken_video_player-umbrella.h"
-
-  export *
-  module * { export * }
-}
