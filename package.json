@@ -1,12 +1,17 @@
 {
   "name": "kraken",
   "version": "0.0.0",
-  "description": "Flutter & web standards based rendering engine for IoT.",
+  "description": "Flutter & Web standard based rendering engine for IoT.",
   "scripts": {
-    "test": "echo \"no test specified\" && exit 1",
-    "lint:dartfm": "cd dartfm && flutter analyze",
-    "format:dartfm": "cd dartfm && flutter format",
-    "ci": "npm run lint:dartfm"
+    "install": "cd cli && tnpm i --ignore-scripts && tnpm link -g && rm -rf build && ln -s ../targets build",
+    "start": "cd app_launcher && flutter run",
+    "build:macos": "node scripts/build_darwin",
+    "build:android": "node scripts/build_android",
+    "build:linux": "node scripts/build_linux",
+    "test": "cd test && npm run test",
+    "lint": "cd kraken && flutter analyze",
+    "format": "cd kraken && flutter format",
+    "ci": "npm run lint"
   },
   "repository": {
     "type": "git",
@@ -16,8 +21,13 @@
     "kraken",
     "rax"
   ],
-  "author": "KrakenTeam",
   "devDependencies": {
-    "@ali/ci": "^4.23.0"
-  }
+    "ali-oss": "^6.4.0",
+    "chalk": "^3.0.0",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1"
+  },
+  "author": "KrakenTeam"
 }

@@ -84,7 +84,7 @@ target_include_directories(kraken PRIVATE
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../dartfm
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
   OUTPUT_VARIABLE APP_VER
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
