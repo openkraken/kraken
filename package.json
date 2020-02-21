@@ -8,7 +8,7 @@
     "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
-    "test": "cd test && npm run test",
+    "test": "cd tests && npm test",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
     "ci": "npm run lint"

@@ -17,21 +17,21 @@ if (uploadToOSS) {
   }
 }
 
-let buildLibKrakenTasks;
+let buildAppTasks;
 if (buildMode === 'Release') {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-release',
     'copy-kraken-release'
   );
 } else if (buildMode === 'All') {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-release',
     'copy-kraken-release',
     'build-kraken-debug',
     'copy-kraken-debug'
   );
 } else {
-  buildLibKrakenTasks = series(
+  buildAppTasks = series(
     'build-kraken-debug',
     'copy-kraken-debug'
   );
@@ -46,10 +46,10 @@ const libKrakenSeries = SUPPORTED_JS_ENGINES.map(jsEngine => [
 series(
   'clean',
   'pub-get',
-  buildLibKrakenTasks,
   'compile-polyfill',
   libKrakenSeries,
   'copy-build-libs',
+  buildAppTasks,
   uploadToOSS ? 'upload-dist' : []
 )((err) => {
   if (err) {
