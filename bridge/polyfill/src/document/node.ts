@@ -43,14 +43,31 @@ export class NodeImpl extends EventTarget {
   }
 
   public appendChild(node: NodeImpl) {
-    if (node.id < 0) {
-      throw new Error(`${node.nodeName} can not be append to ${this.nodeName}`);
+    // @TODO add logic to tell whether child to append contains the parent
+    if (node.id < 0 || node === this) {
+      throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
 
     this.childNodes.push(node);
     node.parentChildIndex = this.childNodes.length - 1;
     node.parentNode = this;
     insertAdjacentNode(this.id, 'beforeend', node.id);
+  }
+
+  /**
+   * The Node.removeChild() method rmoves a child node within the given (parent) node.
+   * @param node {NodeImpl} The child node to remove.
+   * @return The returned value is the rmoved node.
+   */
+  public removeChild(node: NodeImpl) {
+    const idx = this.childNodes.indexOf(node);
+    if (idx !== -1) {
+      this.childNodes.splice(idx, 1);
+      removeNode(node.id);
+    } else {
+      throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
+    }
+    return node;
   }
 
   public insertBefore(newChild: NodeImpl, referenceNode: NodeImpl) {
