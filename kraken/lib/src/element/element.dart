@@ -771,6 +771,14 @@ abstract class Element extends Node
 
   @override
   @mustCallSuper
+  Node removeChild(Node child) {
+    removeElement(child);
+    super.removeChild(child);
+    return child;
+  }
+
+  @override
+  @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
     int referenceIndex = childNodes.indexOf(referenceNode);
 
@@ -828,6 +836,18 @@ abstract class Element extends Node
     }
 
     return resultEls;
+  }
+
+  void removeElement(Node child) {
+    Element parent = child.parentNode;
+    int childIdx = parent.childNodes.indexOf(child);
+    List<RenderObject> children = [];
+    RenderObjectVisitor visitor = (child) {
+      children.add(child);
+    };
+    parent.renderLayoutElement
+      ..visitChildren(visitor)
+      ..remove(children[childIdx]);
   }
 
   void appendElement(Node child, {RenderObject afterRenderObject, bool isAppend = true}) {
