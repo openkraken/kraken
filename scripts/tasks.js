@@ -211,15 +211,9 @@ task('build-kraken-embedded-lib', (done) => {
   done(handle.status === 0 ? null : handle.error);
 });
 
-task('copy-build-libs', done => {
+task('copy-build-libs', (done) => {
   execSync(`cp -r ${paths.thirdParty}/v8-${V8_VERSION}/lib/${platform === 'darwin' ? 'macos' : platform}/ ${libOutputPath}`, {
     env: process.env,
-    stdio: 'inherit'
-  });
-
-  execSync(`./install_name_prefix_tool.sh ${libOutputPath} /usr/local/opt/v8/libexec @executable_path/../Frameworks`, {
-    env: process.env,
-    cwd: __dirname,
     stdio: 'inherit'
   });
 
