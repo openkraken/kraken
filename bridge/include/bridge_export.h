@@ -15,14 +15,14 @@ struct Screen {
   double height;
 };
 using AsyncCallback = void (*)(void*);
-using AsyncCallbackWithDouble = void (*)(void*, double);
+using AsyncRAFCallback = void (*)(void*, double);
 using AsyncModuleCallback = void (*)(char *, void *);
 typedef const char *(*InvokeUIManager)(const char*);
 typedef const char *(*InvokeModule)(const char*, AsyncModuleCallback callback, void* context);
 typedef void (*ReloadApp)();
 typedef int32_t (*SetTimeout)(AsyncCallback callback, void* context, int32_t);
 typedef int32_t (*SetInterval)(AsyncCallback callback, void* context, int32_t);
-typedef int32_t (*RequestAnimationFrame)(AsyncCallbackWithDouble callback, void* context);
+typedef int32_t (*RequestAnimationFrame)(AsyncRAFCallback callback, void* context);
 typedef void (*ClearTimeout)(int32_t);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
