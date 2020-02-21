@@ -176,9 +176,9 @@ void registerReloadApp() {
 }
 
 typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
-typedef NativeAsyncCallbackWithDouble = Void Function(Pointer<Void> context, Double data);
+typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data);
 typedef DartAsyncCallback = void Function(Pointer<Void> context);
-typedef DartAsyncCallbackWithDouble = void Function(Pointer<Void> context, double data);
+typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data);
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
@@ -239,7 +239,7 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeAsyncCallbackWithDouble>>, Pointer<Void>);
+typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeRAFAsyncCallback>>, Pointer<Void>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -247,9 +247,9 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(Pointer<NativeFunction<NativeAsyncCallbackWithDouble>> callback, Pointer<Void> context) {
+int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
   return requestAnimationFrame((double highResTimeStamp) {
-    DartAsyncCallbackWithDouble func = callback.asFunction();
+    DartRAFAsyncCallback func = callback.asFunction();
     func(context, highResTimeStamp);
   });
 }
