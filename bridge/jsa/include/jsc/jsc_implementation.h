@@ -29,8 +29,6 @@ class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
   JSCContext();
-  // Retains ctx
-  JSCContext(JSGlobalContextRef ctx);
   ~JSCContext();
 
 
@@ -250,8 +248,8 @@ private:
 };// JSCContext
 
 
-// 工厂函数。创建JSC运行时。
 std::unique_ptr<jsa::JSContext> createJSContext();
+
 } // namespace jsc
 } // namespace alibaba
 

@@ -218,10 +218,10 @@ jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
     return jsa::Value::undefined();
   } else if (value->IsNull()) {
     return jsa::Value(nullptr);
-  } else if (value->IsNumber() || value->IsNumberObject()) {
+  } else if (value->IsNumber()) {
     int32_t result = value.As<v8::Number>()->Int32Value(context).FromJust();
     return jsa::Value(result);
-  } else if (value->IsBoolean() || value->IsBooleanObject()) {
+  } else if (value->IsBoolean()) {
     bool result = value.As<v8::Boolean>()->BooleanValue(_isolate);
     return jsa::Value(result);
   } else if (value->IsString()) {
