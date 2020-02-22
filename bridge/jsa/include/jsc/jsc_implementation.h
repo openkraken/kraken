@@ -188,7 +188,7 @@ protected:
   jsa::Value lockWeakObject(const jsa::WeakObject&) override;
 
   jsa::Array createArray(size_t length) override;
-  jsa::ArrayBuffer createArrayBuffer(uint8_t* data, size_t length) override;
+  jsa::ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) override;
   size_t size(const jsa::Array&) override;
   size_t size(const jsa::ArrayBuffer&) override;
   void* data(const jsa::ArrayBuffer&) override;

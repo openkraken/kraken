@@ -723,14 +723,18 @@ jsa::Array JSCContext::createArray(size_t length) {
   return createObject(obj).getArray(*this);
 }
 
-jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length) {
+struct DeallocatorContext {
+  DeallocatorContext(jsa::ArrayBufferDeallocator<uint8_t > f): deallocator(f) {}
+  jsa::ArrayBufferDeallocator<uint8_t> deallocator;
+};
+jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
   JSValueRef exc = nullptr;
-  auto deallocator = [](void *bytes, void *deallocatorContext) {
-    auto *data = static_cast<uint8_t *>(bytes);
-    delete data;
-  };
   JSObjectRef arrayBuffer = JSObjectMakeArrayBufferWithBytesNoCopy(
-      ctx_, data, length, deallocator, nullptr, &exc);
+      ctx_, data, length, [](void *bytes, void *deallocatorContext) {
+        auto data = static_cast<uint8_t *>(bytes);
+        auto context = static_cast<DeallocatorContext*>(deallocatorContext);
+        context->deallocator(data);
+      }, new DeallocatorContext(deallocator), &exc);
   checkException(arrayBuffer, exc);
   return createObject(arrayBuffer).getArrayBuffer(*this);
 }

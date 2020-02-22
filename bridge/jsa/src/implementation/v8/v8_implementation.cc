@@ -291,9 +291,7 @@ std::string V8Context::description() { return std::string(""); }
 
 bool V8Context::isInspectable() { return false; }
 
-void *V8Context::globalImpl() {
-  return nullptr;
-}
+void *V8Context::globalImpl() { return nullptr; }
 
 void V8Context::setDescription(const std::string &desc) {}
 
@@ -614,9 +612,7 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
       info.GetReturnValue().Set(v8::Undefined(p->isolate));
     }
     static void namedQuery(v8::Local<v8::Name> property,
-                           const v8::PropertyCallbackInfo<v8::Integer> &info) {
-
-    }
+                           const v8::PropertyCallbackInfo<v8::Integer> &info) {}
     static void
     namedDeleter(v8::Local<v8::Name> property,
                  const v8::PropertyCallbackInfo<v8::Boolean> &info) {}
@@ -667,8 +663,10 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
   return createObject(object, metaData);
 }
 
-std::shared_ptr<jsa::HostObject> V8Context::getHostObject(const jsa::Object &obj) {
-  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
+std::shared_ptr<jsa::HostObject>
+V8Context::getHostObject(const jsa::Object &obj) {
+  auto pointer =
+      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   void *privateData = pointer->privateData_;
   return static_cast<HostObjectProxyBase *>(privateData)->hostObject;
 }
@@ -837,6 +835,36 @@ jsa::Array V8Context::createArray(size_t length) {
   v8::Local<v8::Array> arr = v8::Array::New(_isolate, length);
   v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(arr);
   return createObject(object).getArray(*this);
+}
+
+//
+template <typename T> struct ArrayBufferDealloactorProxy {
+  ArrayBufferDealloactorProxy() = delete;
+  ArrayBufferDealloactorProxy(jsa::ArrayBufferDeallocator<T> deallocator,
+                              T *data)
+      : _deallocator(deallocator), _data(data) {}
+  ~ArrayBufferDealloactorProxy() {
+    _deallocator(_data);
+  }
+
+  jsa::ArrayBufferDeallocator<T> _deallocator;
+  T *_data;
+};
+
+jsa::ArrayBuffer
+V8Context::createArrayBuffer(uint8_t *data, size_t length,
+                             jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::ArrayBuffer> buffer =
+      v8::ArrayBuffer::New(_isolate, data, length);
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(buffer);
+  auto proxy = new ArrayBufferDealloactorProxy<uint8_t>(deallocator, data);
+
+  // when v8 arrayBuffer is gc collected, it will recycle ArrayBufferDealloactorProxy's memory
+  return createObject<ArrayBufferDealloactorProxy<uint8_t>>(object, proxy)
+      .getArrayBuffer(*this);
 }
 
 size_t V8Context::size(const jsa::Array &arr) {

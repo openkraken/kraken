@@ -550,10 +550,15 @@ TEST(JSCContext, hostObject_getPropertyNames) {
 TEST(JSCContext, createArrayBuffer) {
   auto context = std::make_unique<JSCContext>();
   const size_t len = 20;
-  uint8_t data[len] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  uint8_t *data = new uint8_t[len];
+  for (int i = 0; i < 20; i ++) {
+    data[i] = i + 1;
+  }
 
   jsa::ArrayBuffer arrayBuffer =
-      jsa::ArrayBuffer::createWithUnit8(*context, data, len);
+      jsa::ArrayBuffer::createWithUnit8(*context, data, len, [](uint8_t* bytes) {
+        delete bytes;
+      });
   uint8_t *other = arrayBuffer.data<uint8_t>(*context);
   EXPECT_EQ(*other, *data);
 

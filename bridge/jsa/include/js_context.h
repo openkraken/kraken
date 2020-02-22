@@ -30,6 +30,9 @@ class Scope;
 class JSAException;
 class JSError;
 
+template<typename T>
+using ArrayBufferDeallocator = void (*)(T* bytes);
+
 /// A function which has this type can be registered as a function
 /// callable from JavaScript using Function::createFromHostFunction().
 /// When the function is called, args will point to the arguments, and
@@ -215,7 +218,7 @@ protected:
   virtual Value lockWeakObject(const WeakObject &) = 0;
 
   virtual Array createArray(size_t length) = 0;
-  virtual ArrayBuffer createArrayBuffer(uint8_t* data, size_t length) = 0;
+  virtual ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, ArrayBufferDeallocator<uint8_t>deallocator) = 0;
   virtual size_t size(const Array &) = 0;
   virtual size_t size(const ArrayBuffer &) = 0;
   virtual void *data(const ArrayBuffer &) = 0;
