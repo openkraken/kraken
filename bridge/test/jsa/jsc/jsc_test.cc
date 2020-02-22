@@ -45,8 +45,9 @@ TEST(JSCContext, number) {
 TEST(JSCContext, boolean) {
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
-  EXPECT_EQ(context->evaluateJavaScript("new Boolean('1234')", "", 0).isObject(),
-            true);
+  EXPECT_EQ(
+      context->evaluateJavaScript("new Boolean('1234')", "", 0).isObject(),
+      true);
 }
 
 TEST(JSCContext, V8StringValue_newString) {
@@ -88,9 +89,9 @@ TEST(JSCContext, V8StringValue_createString) {
 }
 
 TEST(JSCContext, V8SymbolValue_evaluateString) {
-//  auto context = std::make_unique<JSCContext>();
-//  jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
-//  EXPECT_EQ(result.isSymbol(), true);
+  //  auto context = std::make_unique<JSCContext>();
+  //  jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
+  //  EXPECT_EQ(result.isSymbol(), true);
   // TODO verify symbol toString
   //  auto str = result.getSymbol(*context).toString(*context);
 }
@@ -194,10 +195,10 @@ TEST(JSCContext, propIdStrictEquals) {
 }
 
 TEST(JSCContext, symbolStrictEquals) {
-//  auto context = std::make_unique<JSCContext>();
-//  jsa::Value left = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
-//  jsa::Value right = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
-//  EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
+  //  auto context = std::make_unique<JSCContext>();
+  //  jsa::Value left = context->evaluateJavaScript("Symbol.for('1234')", "",
+  //  0); jsa::Value right = context->evaluateJavaScript("Symbol.for('1234')",
+  //  "", 0); EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
 
 TEST(JSCContext, stringStrictEquals) {
@@ -242,7 +243,7 @@ TEST(JSCContext, arrayBuffer_uint8) {
       context->evaluateJavaScript("new Int8Array([1,2,3,4,5]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
   EXPECT_EQ(buffer.isArrayBuffer(*context), true);
-  uint8_t *data = static_cast<uint8_t *>(buffer.data(*context));
+  uint8_t *data = buffer.data<uint8_t>(*context);
   EXPECT_EQ(data[0], 1);
   EXPECT_EQ(data[1], 2);
   EXPECT_EQ(data[2], 3);
@@ -258,7 +259,7 @@ TEST(JSCContext, arrayBuffer_uint16) {
       "new Int16Array([1000, 2000, 3000, 4000, 5000]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
   EXPECT_EQ(buffer.isArrayBuffer(*context), true);
-  uint16_t *data = static_cast<uint16_t *>(buffer.data(*context));
+  uint16_t *data = buffer.data<uint16_t>(*context);
   size_t size = buffer.size(*context);
   EXPECT_EQ(size, 10);
   EXPECT_EQ(data[0], 1000);
@@ -544,6 +545,29 @@ TEST(JSCContext, hostObject_getPropertyNames) {
   EXPECT_EQ(
       names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
       "send");
+}
+
+TEST(JSCContext, createArrayBuffer) {
+  auto context = std::make_unique<JSCContext>();
+  const size_t len = 20;
+  uint8_t data[len] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+  jsa::ArrayBuffer arrayBuffer =
+      jsa::ArrayBuffer::createWithUnit8(*context, data, len);
+  uint8_t *other = arrayBuffer.data<uint8_t>(*context);
+  EXPECT_EQ(*other, *data);
+
+  context->global().setProperty(*context, "buffer", arrayBuffer);
+
+  jsa::Value toStringValue = context->evaluateJavaScript("buffer.toString()", "", 0);
+  EXPECT_EQ(toStringValue.isString(), true);
+  EXPECT_EQ(toStringValue.getString(*context).utf8(*context), "[object ArrayBuffer]");
+
+  jsa::Value rawArray = context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
+  EXPECT_EQ(rawArray.getObject(*context).isArray(*context), true);
+  jsa::Array dataArray = rawArray.getObject(*context).getArray(*context);
+  EXPECT_EQ(dataArray.getValueAtIndex(*context, 0).getNumber(), 1);
+  EXPECT_EQ(dataArray.getValueAtIndex(*context, 9).getNumber(), 10);
 }
 
 #endif

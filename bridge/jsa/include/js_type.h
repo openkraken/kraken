@@ -449,7 +449,12 @@ public:
   size_t size(JSContext &runtime) const { return runtime.size(*this); }
   size_t length(JSContext &runtime) const { return runtime.size(*this); }
 
-  void *data(JSContext &runtime) { return runtime.data(*this); }
+  static ArrayBuffer createWithUnit8(JSContext &context, uint8_t* data, size_t length) {
+    return context.createArrayBuffer(data, length);
+  }
+
+  template<typename T = uint8_t>
+  T *data(JSContext &runtime) { return static_cast<T*>(runtime.data(*this)); }
 
 private:
   friend class Object;

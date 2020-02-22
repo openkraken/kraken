@@ -215,6 +215,7 @@ protected:
   virtual Value lockWeakObject(const WeakObject &) = 0;
 
   virtual Array createArray(size_t length) = 0;
+  virtual ArrayBuffer createArrayBuffer(uint8_t* data, size_t length) = 0;
   virtual size_t size(const Array &) = 0;
   virtual size_t size(const ArrayBuffer &) = 0;
   virtual void *data(const ArrayBuffer &) = 0;

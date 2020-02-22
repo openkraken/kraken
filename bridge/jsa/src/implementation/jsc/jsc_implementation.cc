@@ -723,6 +723,18 @@ jsa::Array JSCContext::createArray(size_t length) {
   return createObject(obj).getArray(*this);
 }
 
+jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length) {
+  JSValueRef exc = nullptr;
+  auto deallocator = [](void *bytes, void *deallocatorContext) {
+    auto *data = static_cast<uint8_t *>(bytes);
+    delete data;
+  };
+  JSObjectRef arrayBuffer = JSObjectMakeArrayBufferWithBytesNoCopy(
+      ctx_, data, length, deallocator, nullptr, &exc);
+  checkException(arrayBuffer, exc);
+  return createObject(arrayBuffer).getArrayBuffer(*this);
+}
+
 size_t JSCContext::size(const jsa::Array& arr) {
   return static_cast<size_t>(
       getProperty(arr, createPropNameID(getLengthString())).getNumber());
