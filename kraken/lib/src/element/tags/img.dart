@@ -24,11 +24,19 @@ class ImgElement extends Element {
             tagName: IMAGE,
             properties: props,
             events: events) {
+    addImgBox();
+  }
+
+  void addImgBox() {
     String url = _getFormattedSourceURL(properties['src']);
     if (url.isNotEmpty) {
       image = NetworkImage(url);
       _constructImageChild();
     }
+  }
+
+  void removeImgBox() {
+    renderLayoutElement.removeAll();
   }
 
   void _constructImageChild() {
@@ -157,12 +165,7 @@ class ImgElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (key == 'src') {
-      String url = _getFormattedSourceURL(value);
-      if (url.isNotEmpty) {
-        image = NetworkImage(url);
-        _constructImageChild();
-      }
-    }
+    removeImgBox();
+    addImgBox();
   }
 }
