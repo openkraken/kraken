@@ -26,6 +26,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
     if (element != null) {
       element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
+      element.cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     }
     // Flutter Border width is inside the element
     // but w3c border is outside the element
@@ -424,6 +425,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   void _updateMargin(EdgeInsets margin, Element element) {
     if (element != null) {
       element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
+      element.cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     }
     renderBorderMargin.margin = margin;
   }
