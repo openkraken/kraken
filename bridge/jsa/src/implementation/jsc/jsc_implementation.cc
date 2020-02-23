@@ -95,24 +95,20 @@ std::string to_string(void* value) {
 }
 } // namespace
 
-JSCContext::JSCContext()
-    : JSCContext(JSGlobalContextCreateInGroup(nullptr, nullptr)) {
-  JSGlobalContextRelease(ctx_);
-
-#ifdef ANDROID_PLATFORM
-  JSC::HeapTimer::startTimerThread();
-#endif// ANDROID_PLATFORM
-}
-
-JSCContext::JSCContext(JSGlobalContextRef ctx)
-    : ctx_(JSGlobalContextRetain(ctx)),
-      ctxInvalid_(false)
+JSCContext::JSCContext(): ctxInvalid_(false)
 #ifndef NDEBUG
-      ,
-      objectCounter_(0),
-      stringCounter_(0)
+    ,
+    objectCounter_(0),
+    stringCounter_(0)
 #endif
 {
+  ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
+  ctx_ = JSGlobalContextRetain(ctx_);
+
+  JSObjectRef global = JSContextGetGlobalObject(ctx_);
+  JSStringRef globalName = JSStringCreateWithUTF8CString("global");
+  JSObjectSetProperty(ctx_, global, globalName, global, kJSPropertyAttributeNone,
+                      nullptr);
 }
 
 JSCContext::~JSCContext() {
@@ -727,6 +723,22 @@ jsa::Array JSCContext::createArray(size_t length) {
   return createObject(obj).getArray(*this);
 }
 
+struct DeallocatorContext {
+  DeallocatorContext(jsa::ArrayBufferDeallocator<uint8_t > f): deallocator(f) {}
+  jsa::ArrayBufferDeallocator<uint8_t> deallocator;
+};
+jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
+  JSValueRef exc = nullptr;
+  JSObjectRef arrayBuffer = JSObjectMakeArrayBufferWithBytesNoCopy(
+      ctx_, data, length, [](void *bytes, void *deallocatorContext) {
+        auto data = static_cast<uint8_t *>(bytes);
+        auto context = static_cast<DeallocatorContext*>(deallocatorContext);
+        context->deallocator(data);
+      }, new DeallocatorContext(deallocator), &exc);
+  checkException(arrayBuffer, exc);
+  return createObject(arrayBuffer).getArrayBuffer(*this);
+}
+
 size_t JSCContext::size(const jsa::Array& arr) {
   return static_cast<size_t>(
       getProperty(arr, createPropNameID(getLengthString())).getNumber());
@@ -1145,42 +1157,21 @@ JSObjectRef JSCContext::objectRef(const jsa::Object& obj) {
 void JSCContext::checkException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
 void JSCContext::checkException(JSValueRef res, JSValueRef exc) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
 void JSCContext::checkException(JSValueRef exc, const char* msg) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
@@ -1190,14 +1181,7 @@ void JSCContext::checkException(
     const char* msg) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
