@@ -1,7 +1,5 @@
 import { ElementImpl } from '../element';
-import {
-  method,
-} from '../UIManager';
+import { method } from '../UIManager';
 
 export class VideoImpl extends ElementImpl {
   constructor(tagName: string, id: number) {
