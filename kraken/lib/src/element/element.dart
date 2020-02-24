@@ -111,6 +111,7 @@ abstract class Element extends Node
 
     renderObject = initRenderDecoratedBox(renderObject, style, this);
 
+    // init opacity and visiblity
     renderObject = initRenderOpacity(renderObject, style);
     renderObject = initRenderMargin(renderObject, style, this);
     initTransition(style);
@@ -241,10 +242,12 @@ abstract class Element extends Node
         }
       }
 
-      ///8.update opacity
+      ///8.update opacity and visiblity
       updateRenderOpacity(
+        style,
         newStyle,
-        rootRenderObject: renderBoxModel,
+        rootRenderObject: renderMargin,
+        childRenderObject: renderDecoratedBox,
       );
 
       updateTransform(newStyle, transitionMap);
