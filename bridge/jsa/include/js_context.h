@@ -78,7 +78,7 @@ public:
   // When JS wants a list of property names for the HostObject, it will
   // call this method. If it throws an exception, the call will thow a
   // JS \c Error object. The default implementation returns empty vector.
-  virtual std::vector<PropNameID> getPropertyNames(JSContext &rt);
+  virtual std::vector<PropNameID> getPropertyNames(JSContext &context);
 };
 
 /// Represents a JS runtime.  Movable, but not copyable.  Note that
@@ -273,7 +273,7 @@ protected:
 /// locking, provided that the lock (if any) is managed with RAII helpers.
 class Scope {
 public:
-  explicit Scope(JSContext &rt) : rt_(rt), prv_(rt.pushScope()) {}
+  explicit Scope(JSContext &context) : rt_(context), prv_(context.pushScope()) {}
   ~Scope() { rt_.popScope(prv_); };
 
   Scope(const Scope &) = delete;
@@ -283,8 +283,8 @@ public:
   Scope &operator=(Scope &&) = delete;
 
   template <typename F>
-  static auto callInNewScope(JSContext &rt, F f) -> decltype(f()) {
-    Scope s(rt);
+  static auto callInNewScope(JSContext &context, F f) -> decltype(f()) {
+    Scope s(context);
     return f();
   }
 

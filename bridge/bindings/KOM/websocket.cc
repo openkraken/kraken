@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+#include "jsa.h"
 #include "websocket.h"
 #include "foundation/flushUITask.h"
 
@@ -226,22 +227,22 @@ Value JSWebSocket::get(JSContext &context, const PropNameID &name) {
   auto _name = name.utf8(context);
   using namespace alibaba::jsa;
   if (_name == "connect") {
-    auto connectFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::connect, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto connectFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "connect", 4, std::bind(&JSWebSocket::connect, this, std::placeholders::_1,
+                                      std::placeholders::_2, std::placeholders::_3,
+                                      std::placeholders::_4));
     return Value(context, connectFunc);
   } else if (_name == "send") {
-    auto sendFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::send, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto sendFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "send", 4, std::bind(&JSWebSocket::send, this, std::placeholders::_1,
+                                      std::placeholders::_2, std::placeholders::_3,
+                                      std::placeholders::_4));
     return Value(context, sendFunc);
   } else if (_name == "close") {
-    auto closeFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::close, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto closeFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "close", 4, std::bind(&JSWebSocket::close, this, std::placeholders::_1,
+                                       std::placeholders::_2, std::placeholders::_3,
+                                       std::placeholders::_4));
     return Value(context, closeFunc);
   }
   return Value::undefined();
@@ -257,12 +258,12 @@ std::vector<PropNameID> JSWebSocket::getPropertyNames(JSContext &context) {
 
 void JSWebSocket::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
-  JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_websocket__",
-                                 sharedSelf());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_websocket__",
+                                 Object::createFromHostObject(*context, sharedSelf()));
 }
 
 void JSWebSocket::unbind(std::unique_ptr<JSContext> &context) {
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_websocket__", Value::undefined());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_websocket__", Value::undefined());
 }
 } // namespace binding
 } // namespace kraken

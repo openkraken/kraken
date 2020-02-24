@@ -38,10 +38,10 @@ void updateLocation(std::string url = "") {
 Value JSLocation::get(JSContext &context, const PropNameID &name) {
   auto propertyName = name.utf8(context);
   if (propertyName == "reload") {
-    auto reloadFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSLocation::reload, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto reloadFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "reload", 4, std::bind(&JSLocation::reload, this, std::placeholders::_1,
+                                        std::placeholders::_2, std::placeholders::_3,
+                                        std::placeholders::_4));
     return Value(context, reloadFunc);
   } else if (propertyName == "origin") {
     return String::createFromUtf8(context, origin);
