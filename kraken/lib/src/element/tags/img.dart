@@ -165,7 +165,12 @@ class ImgElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    removeImgBox();
-    addImgBox();
+    if (key == 'src' ||
+      key == '.style.width' ||
+      key == '.style.height'
+    ) {
+      removeImgBox();
+      addImgBox();
+    }
   }
 }
