@@ -52,5 +52,5 @@ export function removeEvent(id: number, eventName: string) {
 }
 
 export function method(id: number, eventName: string, params: any[]) {
-  sendMessage(`["method",[${id},"${eventName}", "${JSON.stringify(params)}"]]`);
+  return krakenUIManager(`["method",[${id},"${eventName}", "${JSON.stringify(params)}"]]`);
 }
