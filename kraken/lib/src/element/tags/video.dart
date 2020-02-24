@@ -240,7 +240,10 @@ class VideoElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (key == 'src') {
+    if (key == 'src' ||
+      key == '.style.width' ||
+      key == '.style.height'
+    ) {
       removeVideoBox();
       addVideoBox();
     }
