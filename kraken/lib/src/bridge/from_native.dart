@@ -361,6 +361,39 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
+typedef Native_StartFlushUILoop = Void Function();
+typedef Native_RegisterStartFlushUILoop = Void Function(Pointer<NativeFunction<Native_StartFlushUILoop>>);
+typedef Dart_RegisterStartFlushUILoop = void Function(Pointer<NativeFunction<Native_StartFlushUILoop>>);
+
+final Dart_RegisterStartFlushUILoop _registerStartFlushUILoop =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStartFlushUILoop>>('registerStartFlushUILoop').asFunction();
+
+void _startFlushUILoop() {
+  startFlushUILoop();
+}
+
+void registerStartFlushUILoop() {
+  Pointer<NativeFunction<Native_StartFlushUILoop>> pointer = Pointer.fromFunction(_startFlushUILoop);
+  _registerStartFlushUILoop(pointer);
+}
+
+
+typedef Native_StopFlushUILoop = Void Function();
+typedef Native_RegisterStopFlushUILoop = Void Function(Pointer<NativeFunction<Native_StopFlushUILoop>>);
+typedef Dart_RegisterStopFlushUILoop = void Function(Pointer<NativeFunction<Native_StopFlushUILoop>>);
+
+final Dart_RegisterStartFlushUILoop _registerStopFlushUILoop =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStopFlushUILoop>>('registerStopFlushUILoop').asFunction();
+
+void _stopFlushUILoop() {
+  stopFlushUILoop();
+}
+
+void registerStopFlushUILoop() {
+  Pointer<NativeFunction<Native_StartFlushUILoop>> pointer = Pointer.fromFunction(_stopFlushUILoop);
+  _registerStopFlushUILoop(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -374,4 +407,6 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerOnPlatformBrightnessChanged();
+  registerStartFlushUILoop();
+  registerStopFlushUILoop();
 }

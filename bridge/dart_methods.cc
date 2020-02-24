@@ -64,4 +64,12 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   methodPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
 }
 
+void registerStartFlushUILoop(StartFlushUILoop startFlushUiLoop) {
+  methodPointer->startFlushUILoop = startFlushUiLoop;
+}
+
+void registerStopFlushUILoop(StopFlushUILoop stopFlushUiLoop) {
+  methodPointer->stopFlushUILoop = stopFlushUiLoop;
+}
+
 } // namespace kraken
