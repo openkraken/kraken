@@ -1,6 +1,7 @@
 import { NodeImpl, NodeType } from './node';
 import { ElementImpl } from './element';
 import { TextImpl } from './text';
+import { VideoImpl } from './tags/video';
 
 let id = 1;
 
@@ -12,7 +13,16 @@ export class DocumentImpl extends NodeImpl {
   }
 
   createElement(tagName: string) {
-    return new ElementImpl(tagName, id++);
+    let element;
+    switch(tagName) {
+      case 'video':
+        element = new VideoImpl(tagName, id++);
+        break;
+      default:
+        element = new ElementImpl(tagName, id++);
+        break;
+    }
+    return element;
   }
 
   createTextNode(text: string) {
