@@ -57,7 +57,7 @@ Value JSWindow::get(JSContext &context,
       KRAKEN_LOG(ERROR) << "platformBrightness dart callback not register";
       return Value::undefined();
     }
-    
+
     return String::createFromUtf8(context, getDartMethod()->platformBrightness());
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
@@ -86,16 +86,16 @@ void JSWindow::bind(std::unique_ptr<JSContext> &context) {
   Object&& window =
       Object::createFromHostObject(*context, sharedSelf());
   location_->bind(context, window);
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", window);
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_window__", window);
 }
 
 void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
-  Value &&window = JSA_GLOBAL_GET_PROPERTY(*context, "__kraken_window__");
+  Value &&window = JSA_GET_PROPERTY(*context, context->global(), "__kraken_window__");
   Object &&object = window.getObject(*context);
   location_->unbind(context, object);
   _onLoadCallback = Value::undefined();
   _onPlatformBrightnessChanged = Value::undefined();
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", Value::undefined());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_window__", Value::undefined());
 }
 
 std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {

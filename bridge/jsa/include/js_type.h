@@ -208,8 +208,8 @@ public:
   }
 
   /// \return the result of `this instanceOf ctor` in JS.
-  bool instanceOf(JSContext &rt, const Function &ctor) {
-    return rt.instanceOf(*this, ctor);
+  bool instanceOf(JSContext &context, const Function &ctor) {
+    return context.instanceOf(*this, ctor);
   }
 
   /// \return the property of the object with the given ascii name.
@@ -613,7 +613,7 @@ public:
   /// Creates a JS value from another Value lvalue.
   Value(JSContext &runtime, const Value &value);
 
-  /// Value(rt, "foo") will treat foo as a bool.  This makes doing
+  /// Value(context, "foo") will treat foo as a bool.  This makes doing
   /// that a compile error.
   template <typename T = void> Value(JSContext &, const char *) {
     static_assert(!std::is_same<T, void>::value,
