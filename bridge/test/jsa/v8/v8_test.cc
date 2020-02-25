@@ -388,6 +388,11 @@ TEST(V8Context, hostFunction) {
       object.getPropertyAsFunction(*context, "helloworld");
   jsa::Value result = helloworld.call(*context);
   EXPECT_EQ(result.getNumber(), 12345);
+  EXPECT_EQ(helloworld.getProperty(*context, "name")
+                .getString(*context)
+                .utf8(*context),
+            "helloworld");
+  EXPECT_EQ(helloworld.getProperty(*context, "length").getNumber(), 0);
 }
 
 TEST(V8Context, hostFunctionWithParams) {
@@ -576,7 +581,8 @@ TEST(V8Context, hostObject_getPropertyNames) {
   EXPECT_EQ(
       names.getValueAtIndex(*context, 0).getString(*context).utf8(*context),
       "connect");
-  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
+  EXPECT_EQ(
+      names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
       "send");
 }
 
@@ -585,12 +591,12 @@ TEST(V8Context, createArrayBuffer) {
   auto context = std::make_unique<V8Context>();
   const size_t len = 20;
   uint8_t *data = new uint8_t[len];
-  for (int i = 0; i < 20; i ++) {
+  for (int i = 0; i < 20; i++) {
     data[i] = i + 1;
   }
 
-  jsa::ArrayBuffer arrayBuffer =
-      jsa::ArrayBuffer::createWithUnit8(*context, data, len, [](uint8_t* bytes) {
+  jsa::ArrayBuffer arrayBuffer = jsa::ArrayBuffer::createWithUnit8(
+      *context, data, len, [](uint8_t *bytes) {
         abort();
         delete bytes;
       });
@@ -599,17 +605,19 @@ TEST(V8Context, createArrayBuffer) {
 
   context->global().setProperty(*context, "buffer", arrayBuffer);
 
-  jsa::Value toStringValue = context->evaluateJavaScript("buffer.toString()", "", 0);
+  jsa::Value toStringValue =
+      context->evaluateJavaScript("buffer.toString()", "", 0);
   EXPECT_EQ(toStringValue.isString(), true);
-  EXPECT_EQ(toStringValue.getString(*context).utf8(*context), "[object ArrayBuffer]");
+  EXPECT_EQ(toStringValue.getString(*context).utf8(*context),
+            "[object ArrayBuffer]");
 
-  jsa::Value rawArray = context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
+  jsa::Value rawArray =
+      context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
   EXPECT_EQ(rawArray.getObject(*context).isArray(*context), true);
   jsa::Array dataArray = rawArray.getObject(*context).getArray(*context);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 0).getNumber(), 1);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 9).getNumber(), 10);
 }
-
 
 TEST(V8Context, isArrayBufferView) {
   initV8Engine("");
