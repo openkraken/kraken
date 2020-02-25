@@ -8,6 +8,5 @@ box.style.width = '150px';
 box.style.height = '150px';
 box.style.backgroundColor = 'green';
 
-
 container.appendChild(box);
 document.body.appendChild(container);

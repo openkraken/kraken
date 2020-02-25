@@ -33,7 +33,7 @@ class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; fit=$fit';
 }
 
-class FlexMixin {
+mixin FlexMixin {
   static const String DIRECTION = 'flexDirection';
   static const String WRAP = 'flexWrap';
   static const String FLOW = 'flexFlow';

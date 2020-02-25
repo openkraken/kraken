@@ -266,8 +266,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentText = textSelectionDelegate.textEditingValue?.text;
     if (_lastChangedTextString != currentText) {
-      Event changeEvent = Event('change',
-          EventInit(bubbles: false, cancelable: false, composed: false));
+      Event changeEvent = Event('change');
       dispatchEvent(changeEvent);
       _lastChangedTextString = currentText;
     }
