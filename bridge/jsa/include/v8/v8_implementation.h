@@ -143,6 +143,7 @@ protected:
                         const jsa::Value &value) override;
   bool isArray(const jsa::Object &) const override;
   bool isArrayBuffer(const jsa::Object &) const override;
+  bool isArrayBufferView(const jsa::Object &) const override;
   bool isFunction(const jsa::Object &) const override;
   bool isHostObject(const jsa::Object &) const override;
   bool isHostFunction(const jsa::Function &) const override;
@@ -153,7 +154,10 @@ protected:
   jsa::ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) override;
   size_t size(const jsa::Array &) override;
   size_t size(const jsa::ArrayBuffer &) override;
+  size_t size(const jsa::ArrayBufferView&) override;
   void *data(const jsa::ArrayBuffer &) override;
+  void *data(const jsa::ArrayBufferView &) override;
+  jsa::ArrayBufferViewType arrayBufferViewType(const jsa::ArrayBufferView &) override;
   jsa::Value getValueAtIndex(const jsa::Array &, size_t i) override;
   void setValueAtIndexImpl(jsa::Array &, size_t i,
                            const jsa::Value &value) override;

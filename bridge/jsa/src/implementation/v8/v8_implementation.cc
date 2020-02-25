@@ -779,6 +779,12 @@ bool V8Context::isArrayBuffer(const jsa::Object &obj) const {
   return object->IsArrayBuffer();
 }
 
+bool V8Context::isArrayBufferView(const jsa::Object &obj) const {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  return object->IsArrayBufferView();
+}
+
 bool V8Context::isFunction(const jsa::Object &obj) const {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> object =
@@ -879,6 +885,13 @@ size_t V8Context::size(const jsa::ArrayBuffer &arrayBuffer) {
   v8::Local<v8::Object> obj = objectRef(arrayBuffer);
   return v8::Local<v8::ArrayBuffer>::Cast(obj)->ByteLength();
 }
+size_t V8Context::size(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  return v8::Local<v8::ArrayBufferView>::Cast(obj)->ByteLength();
+}
+
 void *V8Context::data(const jsa::ArrayBuffer &arrayBuffer) {
   assert(isArrayBuffer(arrayBuffer));
   v8::HandleScope handleScope(_isolate);
@@ -886,6 +899,42 @@ void *V8Context::data(const jsa::ArrayBuffer &arrayBuffer) {
   v8::Local<v8::ArrayBuffer> buffer = v8::Local<v8::ArrayBuffer>::Cast(obj);
   return buffer->GetContents().Data();
 }
+
+void *V8Context::data(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  v8::Local<v8::ArrayBufferView> bufferView = v8::Local<v8::ArrayBufferView>::Cast(obj);
+  return bufferView->Buffer()->GetContents().Data();
+}
+
+jsa::ArrayBufferViewType V8Context::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  v8::Local<v8::ArrayBufferView> bufferView = v8::Local<v8::ArrayBufferView>::Cast(obj);
+  if (bufferView->IsInt8Array()) {
+    return jsa::ArrayBufferViewType::Int8Array;
+  } else if (bufferView->IsInt16Array()) {
+    return jsa::ArrayBufferViewType::Int16Array;
+  } else if (bufferView->IsInt32Array()) {
+    return jsa::ArrayBufferViewType::Int32Array;
+  } else if (bufferView->IsUint8Array()) {
+    return jsa::ArrayBufferViewType::Uint8Array;
+  } else if (bufferView->IsUint8ClampedArray()) {
+    return jsa::ArrayBufferViewType::Uint8ClampedArray;
+  } else if (bufferView->IsUint16Array()) {
+    return jsa::ArrayBufferViewType::Uint16Array;
+  } else if (bufferView->IsUint32Array()) {
+    return jsa::ArrayBufferViewType::Uint32Array;
+  } else if (bufferView->IsFloat32Array()) {
+    return jsa::ArrayBufferViewType::Float32Array;
+  } else if (bufferView->IsFloat64Array()) {
+    return jsa::ArrayBufferViewType::Float64Array;
+  }
+  return jsa::ArrayBufferViewType::none;
+}
+
 jsa::Value V8Context::getValueAtIndex(const jsa::Array &arr, size_t i) {
   assert(isArray(arr));
   v8::HandleScope handleScope(_isolate);

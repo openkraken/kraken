@@ -31,8 +31,6 @@ TEST(V8Context, number) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("123456", "", 0).isNumber(), true);
-  EXPECT_EQ(context->evaluateJavaScript("new Number('1234')", "", 0).isNumber(),
-            true);
   EXPECT_EQ(context->evaluateJavaScript("2.455", "", 0).isNumber(), true);
   EXPECT_EQ(context->evaluateJavaScript("parseInt('42')", "", 0).isNumber(),
             true);
@@ -49,8 +47,6 @@ TEST(V8Context, boolean) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
-  EXPECT_EQ(context->evaluateJavaScript("new Boolean('1234')", "", 0).isBool(),
-            true);
 }
 
 TEST(V8Context, V8StringValue_newString) {
@@ -612,6 +608,35 @@ TEST(V8Context, createArrayBuffer) {
   jsa::Array dataArray = rawArray.getObject(*context).getArray(*context);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 0).getNumber(), 1);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 9).getNumber(), 10);
+}
+
+
+TEST(V8Context, isArrayBufferView) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  EXPECT_EQ(result.getObject(*context).isArrayBufferView(*context), true);
+  jsa::ArrayBufferViewType type =
+      result.getObject(*context).getArrayBufferView(*context).getType(*context);
+  EXPECT_EQ(type, jsa::ArrayBufferViewType::Uint8Array);
+}
+
+TEST(V8Context, ArrayBufferView_data) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  jsa::ArrayBufferView bufferView =
+      result.getObject(*context).getArrayBufferView(*context);
+  uint8_t *data = bufferView.data<uint8_t>(*context);
+  size_t length = bufferView.size(*context);
+  EXPECT_EQ(length, 5);
+  EXPECT_EQ(data[0], 1);
+  EXPECT_EQ(data[1], 2);
+  EXPECT_EQ(data[2], 3);
+  EXPECT_EQ(data[3], 4);
+  EXPECT_EQ(data[4], 5);
 }
 
 #endif
