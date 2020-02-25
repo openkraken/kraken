@@ -12,7 +12,7 @@ namespace jsa {
 namespace {
 
 // This is used for generating short exception strings.
-std::string kindToString(const Value &v, JSContext *rt = nullptr) {
+std::string kindToString(const Value &v, JSContext *context = nullptr) {
   if (v.isUndefined()) {
     return "undefined";
   } else if (v.isNull()) {
@@ -27,7 +27,7 @@ std::string kindToString(const Value &v, JSContext *rt = nullptr) {
     return "a symbol";
   } else {
     assert(v.isObject() && "Expecting object.");
-    return rt != nullptr && v.getObject(*rt).isFunction(*rt) ? "a function"
+    return context != nullptr && v.getObject(*context).isFunction(*context) ? "a function"
                                                              : "an object";
   }
 }
@@ -36,7 +36,7 @@ std::string kindToString(const Value &v, JSContext *rt = nullptr) {
 
 namespace detail {
 
-void throwJSError(JSContext &rt, const char *msg) { throw JSError(rt, msg); }
+void throwJSError(JSContext &context, const char *msg) { throw JSError(context, msg); }
 } // namespace detail
 
 Pointer &Pointer::operator=(Pointer &&other) {
@@ -189,18 +189,18 @@ double Value::asNumber() const {
   return getNumber();
 }
 
-Object Value::asObject(JSContext &rt) const & {
+Object Value::asObject(JSContext &context) const & {
   if (!isObject()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected an Object");
   }
 
-  return getObject(rt);
+  return getObject(context);
 }
 
-Object Value::asObject(JSContext &rt) && {
+Object Value::asObject(JSContext &context) && {
   if (!isObject()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected an Object");
   }
   auto ptr = data_.pointer.ptr_;
@@ -208,40 +208,40 @@ Object Value::asObject(JSContext &rt) && {
   return static_cast<Object>(ptr);
 }
 
-Symbol Value::asSymbol(JSContext &rt) const & {
+Symbol Value::asSymbol(JSContext &context) const & {
   if (!isSymbol()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected a Symbol");
   }
 
-  return getSymbol(rt);
+  return getSymbol(context);
 }
 
-Symbol Value::asSymbol(JSContext &rt) && {
+Symbol Value::asSymbol(JSContext &context) && {
   if (!isSymbol()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected a Symbol");
   }
 
-  return std::move(*this).getSymbol(rt);
+  return std::move(*this).getSymbol(context);
 }
 
-String Value::asString(JSContext &rt) const & {
+String Value::asString(JSContext &context) const & {
   if (!isString()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected a String");
   }
 
-  return getString(rt);
+  return getString(context);
 }
 
-String Value::asString(JSContext &rt) && {
+String Value::asString(JSContext &context) && {
   if (!isString()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
+    throw JSError(context, "Value is " + kindToString(*this, &context) +
                           ", expected a String");
   }
 
-  return std::move(*this).getString(rt);
+  return std::move(*this).getString(context);
 }
 
 String Value::toString(JSContext &runtime) const {
@@ -256,12 +256,12 @@ std::string Value::toJSON(JSContext &context) const {
   return stringify.call(context, *this).getString(context).utf8(context);
 }
 
-Array Array::createWithElements(JSContext &rt,
+Array Array::createWithElements(JSContext &context,
                                 std::initializer_list<Value> elements) {
-  Array result(rt, elements.size());
+  Array result(context, elements.size());
   size_t index = 0;
   for (const auto &element : elements) {
-    result.setValueAtIndex(rt, index++, element);
+    result.setValueAtIndex(context, index++, element);
   }
   return result;
 }

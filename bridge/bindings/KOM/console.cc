@@ -243,13 +243,13 @@ Value _assert(JSContext &context, const Value &thisVal, const Value *args,
 
 void bindConsole(std::unique_ptr<JSContext> &context) {
   auto console = JSA_CREATE_OBJECT(*context);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, log);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, info);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, warn);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, debug);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, console, error);
-  JSA_BINDING_FUNCTION(*context, console, "assert", 0, _assert);
-  JSA_GLOBAL_SET_PROPERTY(*context, "console", console);
+  JSA_BINDING_FUNCTION(*context, context->global(), "log", 1, log);
+  JSA_BINDING_FUNCTION(*context, context->global(), "info", 1, info);
+  JSA_BINDING_FUNCTION(*context, context->global(), "warn", 1, warn);
+  JSA_BINDING_FUNCTION(*context, context->global(), "debug", 1, debug);
+  JSA_BINDING_FUNCTION(*context, context->global(), "error", 1, error);
+  JSA_BINDING_FUNCTION(*context, context->global(), "assert", 0, _assert);
+  context->global().setProperty(*context, "console", console);
 }
 
 } // namespace binding

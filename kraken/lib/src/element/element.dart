@@ -844,15 +844,26 @@ abstract class Element extends Node
   }
 
   void removeElement(Node child) {
-    Element parent = child.parentNode;
-    int childIdx = parent.childNodes.indexOf(child);
     List<RenderObject> children = [];
     RenderObjectVisitor visitor = (child) {
       children.add(child);
     };
-    parent.renderLayoutElement
-      ..visitChildren(visitor)
-      ..remove(children[childIdx]);
+    renderLayoutElement
+      ..visitChildren(visitor);
+
+    int childIdx;
+    children.forEach((childNode) {
+      int childId;
+      if (childNode is RenderTextNode) {
+        childId = childNode.nodeId;
+      } else if (childNode is RenderBoxModel) {
+        childId = childNode.nodeId;
+      }
+      if (childId == child.nodeId) {
+        childIdx = children.indexOf(childNode);
+      }
+    });
+    renderLayoutElement.remove(children[childIdx]);
   }
 
   void appendElement(Node child, {RenderObject afterRenderObject, bool isAppend = true}) {

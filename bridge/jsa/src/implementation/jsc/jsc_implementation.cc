@@ -95,24 +95,20 @@ std::string to_string(void* value) {
 }
 } // namespace
 
-JSCContext::JSCContext()
-    : JSCContext(JSGlobalContextCreateInGroup(nullptr, nullptr)) {
-  JSGlobalContextRelease(ctx_);
-
-#ifdef ANDROID_PLATFORM
-  JSC::HeapTimer::startTimerThread();
-#endif// ANDROID_PLATFORM
-}
-
-JSCContext::JSCContext(JSGlobalContextRef ctx)
-    : ctx_(JSGlobalContextRetain(ctx)),
-      ctxInvalid_(false)
+JSCContext::JSCContext(): ctxInvalid_(false)
 #ifndef NDEBUG
-      ,
-      objectCounter_(0),
-      stringCounter_(0)
+    ,
+    objectCounter_(0),
+    stringCounter_(0)
 #endif
 {
+  ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
+  ctx_ = JSGlobalContextRetain(ctx_);
+
+  JSObjectRef global = JSContextGetGlobalObject(ctx_);
+  JSStringRef globalName = JSStringCreateWithUTF8CString("global");
+  JSObjectSetProperty(ctx_, global, globalName, global, kJSPropertyAttributeNone,
+                      nullptr);
 }
 
 JSCContext::~JSCContext() {
@@ -417,9 +413,9 @@ jsa::Object JSCContext::createObject() {
 // HostObject details
 namespace detail {
 struct HostObjectProxyBase {
-  HostObjectProxyBase(JSCContext & rt,
+  HostObjectProxyBase(JSCContext & context,
       const std::shared_ptr<jsa::HostObject>& sho)
-      : runtime(rt), hostObject(sho) {}
+      : runtime(context), hostObject(sho) {}
 
   JSCContext & runtime;
   std::shared_ptr<jsa::HostObject> hostObject;
@@ -442,38 +438,38 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSStringRef propName,
         JSValueRef* exception) {
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      jsa::PropNameID sym = rt.createPropNameID(propName);
+      auto& context = proxy->runtime;
+      jsa::PropNameID sym = context.createPropNameID(propName);
       jsa::Value ret;
       try {
-        ret = proxy->hostObject->get(rt, sym);
+        ret = proxy->hostObject->get(context, sym);
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         return JSValueMakeUndefined(ctx);
       } catch (const std::exception& ex) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::get(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): ") + ex.what());
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return JSValueMakeUndefined(ctx);
       } catch (...) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::get(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): <unknown>"));
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return JSValueMakeUndefined(ctx);
       }
-      return rt.valueRef(ret);
+      return context.valueRef(ret);
     }
 
     #define JSC_UNUSED(x) (void) (x);
@@ -486,34 +482,34 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSValueRef* exception) {
       JSC_UNUSED(ctx);
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      jsa::PropNameID sym = rt.createPropNameID(propName);
+      auto& context = proxy->runtime;
+      jsa::PropNameID sym = context.createPropNameID(propName);
       try {
-        proxy->hostObject->set(rt, sym, rt.createValue(value));
+        proxy->hostObject->set(context, sym, context.createValue(value));
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         return false;
       } catch (const std::exception& ex) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::set(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): ") + ex.what());
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return false;
       } catch (...) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                       std::string("Exception in HostObject::set(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): <unknown>"));
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return false;
       }
       return true;
@@ -528,8 +524,8 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSPropertyNameAccumulatorRef propertyNames) noexcept {
       JSC_UNUSED(ctx);
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      auto names = proxy->hostObject->getPropertyNames(rt);
+      auto& context = proxy->runtime;
+      auto names = proxy->hostObject->getPropertyNames(context);
       for (auto& name : names) {
         JSPropertyNameAccumulatorAddName(propertyNames, stringRef(name));
       }
@@ -727,6 +723,22 @@ jsa::Array JSCContext::createArray(size_t length) {
   return createObject(obj).getArray(*this);
 }
 
+struct DeallocatorContext {
+  DeallocatorContext(jsa::ArrayBufferDeallocator<uint8_t > f): deallocator(f) {}
+  jsa::ArrayBufferDeallocator<uint8_t> deallocator;
+};
+jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
+  JSValueRef exc = nullptr;
+  JSObjectRef arrayBuffer = JSObjectMakeArrayBufferWithBytesNoCopy(
+      ctx_, data, length, [](void *bytes, void *deallocatorContext) {
+        auto data = static_cast<uint8_t *>(bytes);
+        auto context = static_cast<DeallocatorContext*>(deallocatorContext);
+        context->deallocator(data);
+      }, new DeallocatorContext(deallocator), &exc);
+  checkException(arrayBuffer, exc);
+  return createObject(arrayBuffer).getArrayBuffer(*this);
+}
+
 size_t JSCContext::size(const jsa::Array& arr) {
   return static_cast<size_t>(
       getProperty(arr, createPropNameID(getLengthString())).getNumber());
@@ -827,10 +839,10 @@ JSCContext::createFunctionFromHostFunction(
       JSObjectSetPrototype(ctx, object, funcProto);
     }
 
-    static JSValueRef makeError(JSCContext & rt, const std::string& desc) {
+    static JSValueRef makeError(JSCContext & context, const std::string& desc) {
       jsa::Value value =
-          rt.global().getPropertyAsFunction(rt, "Error").call(rt, desc);
-      return rt.valueRef(value);
+          context.global().getPropertyAsFunction(context, "Error").call(context, desc);
+      return context.valueRef(value);
     }
 
     // JSC会调用此方法执行先前注入的JS Function
@@ -843,7 +855,7 @@ JSCContext::createFunctionFromHostFunction(
         JSValueRef* exception) {
       HostFunctionMetadata* metadata =
           static_cast<HostFunctionMetadata*>(JSObjectGetPrivate(function));
-      JSCContext & rt = *(metadata->runtime);
+      JSCContext & context = *(metadata->runtime);
       const unsigned maxStackArgCount = 8;
       jsa::Value stackArgs[maxStackArgCount];
       std::unique_ptr<jsa::Value[]> heapArgs;
@@ -851,32 +863,32 @@ JSCContext::createFunctionFromHostFunction(
       if (argumentCount > maxStackArgCount) {
         heapArgs = std::make_unique<jsa::Value[]>(argumentCount);
         for (size_t i = 0; i < argumentCount; i++) {
-          heapArgs[i] = rt.createValue(arguments[i]);
+          heapArgs[i] = context.createValue(arguments[i]);
         }
         args = heapArgs.get();
       } else {
         for (size_t i = 0; i < argumentCount; i++) {
-          stackArgs[i] = rt.createValue(arguments[i]);
+          stackArgs[i] = context.createValue(arguments[i]);
         }
         args = stackArgs;
       }
       JSValueRef res;
-      jsa::Value thisVal(rt.createObject(thisObject));
+      jsa::Value thisVal(context.createObject(thisObject));
       try {
         // 执行lambda
-        res = rt.valueRef(
-            metadata->hostFunction_(rt, thisVal, args, argumentCount));
+        res = context.valueRef(
+            metadata->hostFunction_(context, thisVal, args, argumentCount));
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         res = JSValueMakeUndefined(ctx);
       } catch (const std::exception& ex) {
         std::string exceptionString("Exception in HostFunction: ");
         exceptionString += ex.what();
-        *exception = makeError(rt, exceptionString);
+        *exception = makeError(context, exceptionString);
         res = JSValueMakeUndefined(ctx);
       } catch (...) {
         std::string exceptionString("Exception in HostFunction: <unknown>");
-        *exception = makeError(rt, exceptionString);
+        *exception = makeError(context, exceptionString);
         res = JSValueMakeUndefined(ctx);
       }
       return res;
@@ -889,12 +901,12 @@ JSCContext::createFunctionFromHostFunction(
       delete metadata;
     }
 
-    HostFunctionMetadata(JSCContext * rt,
+    HostFunctionMetadata(JSCContext * context,
         jsa::HostFunctionType hf,
         unsigned ac,
         JSStringRef n)
         : HostFunctionProxy(hf),
-          runtime(rt),
+          runtime(context),
           argCount(ac),
           name(JSStringRetain(n)) {}
 
@@ -927,7 +939,7 @@ namespace detail {
 // jsa::Values* -> JSValueRef*
 class ArgsConverter {
  public:
-  ArgsConverter(JSCContext & rt, const jsa::Value* args, size_t count) {
+  ArgsConverter(JSCContext & context, const jsa::Value* args, size_t count) {
     JSValueRef* destination = inline_;
     if (count > maxStackArgs) {
       outOfLine_ = std::make_unique<JSValueRef[]>(count);
@@ -935,7 +947,7 @@ class ArgsConverter {
     }
 
     for (size_t i = 0; i < count; ++i) {
-      destination[i] = rt.valueRef(args[i]);
+      destination[i] = context.valueRef(args[i]);
     }
   }
 
@@ -1145,42 +1157,21 @@ JSObjectRef JSCContext::objectRef(const jsa::Object& obj) {
 void JSCContext::checkException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
 void JSCContext::checkException(JSValueRef res, JSValueRef exc) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
 void JSCContext::checkException(JSValueRef exc, const char* msg) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 
@@ -1190,14 +1181,7 @@ void JSCContext::checkException(
     const char* msg) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-#ifdef IS_LINUX
-    std::cout << error.getMessage()
-              << ":"
-              << error.getStack()
-              << std::endl;
-#else
-    throw error;
-#endif
+    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
   }
 }
 

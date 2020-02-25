@@ -45,21 +45,21 @@ public:
 
   /// Creates a JSError referring to new \c Error instance capturing current
   /// JavaScript stack. The error message property is set to given \c message.
-  JSError(JSContext &rt, std::string message);
+  JSError(JSContext &context, std::string message);
 
   /// Creates a JSError referring to new \c Error instance capturing current
   /// JavaScript stack. The error message property is set to given \c message.
-  JSError(JSContext &rt, const char *message)
-      : JSError(rt, std::string(message)){};
+  JSError(JSContext &context, const char *message)
+      : JSError(context, std::string(message)){};
 
   /// Creates a JSError referring to a JavaScript Object having message and
   /// stack properties set to provided values.
-  JSError(JSContext &rt, std::string message, std::string stack);
+  JSError(JSContext &context, std::string message, std::string stack);
 
   /// Creates a JSError referring to provided value and what string
   /// set to provided message.  This argument order is a bit weird,
   /// but necessary to avoid ambiguity with the above.
-  JSError(std::string what, JSContext &rt, Value &&value);
+  JSError(std::string what, JSContext &context, Value &&value);
 
   const std::string &getStack() const { return stack_; }
 
@@ -74,7 +74,7 @@ private:
   // This initializes the value_ member and does some other
   // validation, so it must be called by every branch through the
   // constructors.
-  void setValue(JSContext &rt, Value &&value);
+  void setValue(JSContext &context, Value &&value);
 
   // This needs to be on the heap, because throw requires the object
   // be copyable, and Value is not.

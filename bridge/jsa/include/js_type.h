@@ -208,8 +208,8 @@ public:
   }
 
   /// \return the result of `this instanceOf ctor` in JS.
-  bool instanceOf(JSContext &rt, const Function &ctor) {
-    return rt.instanceOf(*this, ctor);
+  bool instanceOf(JSContext &context, const Function &ctor) {
+    return context.instanceOf(*this, ctor);
   }
 
   /// \return the property of the object with the given ascii name.
@@ -449,7 +449,13 @@ public:
   size_t size(JSContext &runtime) const { return runtime.size(*this); }
   size_t length(JSContext &runtime) const { return runtime.size(*this); }
 
-  void *data(JSContext &runtime) { return runtime.data(*this); }
+  /// create an arrayBuffer with int8 array,
+  static ArrayBuffer createWithUnit8(JSContext &context, uint8_t* data, size_t length, ArrayBufferDeallocator<uint8_t> deallocator) {
+    return context.createArrayBuffer(data, length, deallocator);
+  }
+
+  template<typename T>
+  T *data(JSContext &runtime) { return static_cast<T*>(runtime.data(*this)); }
 
 private:
   friend class Object;
@@ -607,7 +613,7 @@ public:
   /// Creates a JS value from another Value lvalue.
   Value(JSContext &runtime, const Value &value);
 
-  /// Value(rt, "foo") will treat foo as a bool.  This makes doing
+  /// Value(context, "foo") will treat foo as a bool.  This makes doing
   /// that a compile error.
   template <typename T = void> Value(JSContext &, const char *) {
     static_assert(!std::is_same<T, void>::value,

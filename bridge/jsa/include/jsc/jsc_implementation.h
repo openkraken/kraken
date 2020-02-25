@@ -29,8 +29,6 @@ class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
   JSCContext();
-  // Retains ctx
-  JSCContext(JSGlobalContextRef ctx);
   ~JSCContext();
 
 
@@ -190,6 +188,7 @@ protected:
   jsa::Value lockWeakObject(const jsa::WeakObject&) override;
 
   jsa::Array createArray(size_t length) override;
+  jsa::ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, jsa::ArrayBufferDeallocator<uint8_t> deallocator) override;
   size_t size(const jsa::Array&) override;
   size_t size(const jsa::ArrayBuffer&) override;
   void* data(const jsa::ArrayBuffer&) override;
@@ -250,8 +249,8 @@ private:
 };// JSCContext
 
 
-// 工厂函数。创建JSC运行时。
 std::unique_ptr<jsa::JSContext> createJSContext();
+
 } // namespace jsc
 } // namespace alibaba
 
