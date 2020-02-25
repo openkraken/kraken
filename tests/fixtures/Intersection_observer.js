@@ -6,6 +6,7 @@ div.style.backgroundColor = 'red';
 div.addEventListener('disappear', () => {
   console.log('disappear');
   div.style.backgroundColor = 'green';
+  div.style.bottom = '0';
 });
 
 document.body.appendChild(div);
