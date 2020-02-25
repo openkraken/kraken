@@ -64,12 +64,12 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   methodPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
 }
 
-void registerStartFlushUILoop(StartFlushUILoop startFlushUiLoop) {
-  methodPointer->startFlushUILoop = startFlushUiLoop;
+void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushCallbacksInUiThread) {
+  methodPointer->startFlushCallbacksInUIThread = startFlushCallbacksInUiThread;
 }
 
-void registerStopFlushUILoop(StopFlushUILoop stopFlushUiLoop) {
-  methodPointer->stopFlushUILoop = stopFlushUiLoop;
+void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
+  methodPointer->stopFlushCallbacksInUIThread = stopFlushCallbacksInUiThread;
 }
 
 } // namespace kraken

@@ -8,6 +8,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/src/module/flushCallbacksInUIThread.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -361,37 +362,37 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
-typedef Native_StartFlushUILoop = Void Function();
-typedef Native_RegisterStartFlushUILoop = Void Function(Pointer<NativeFunction<Native_StartFlushUILoop>>);
-typedef Dart_RegisterStartFlushUILoop = void Function(Pointer<NativeFunction<Native_StartFlushUILoop>>);
+typedef Native_StartFlushCallbacksInUIThread = Void Function();
+typedef Native_RegisterFlushCallbacksInUIThread = Void Function(Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
+typedef Dart_RegisterFlushCallbacksInUIThread = void Function(Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
 
-final Dart_RegisterStartFlushUILoop _registerStartFlushUILoop =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStartFlushUILoop>>('registerStartFlushUILoop').asFunction();
+final Dart_RegisterFlushCallbacksInUIThread _registerStartFlushCallbacksInUIThread =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>('registerStartFlushCallbacksInUIThread').asFunction();
 
-void _startFlushUILoop() {
-  startFlushUILoop();
+void _startFlushCallbacksInUIThread() {
+  startFlushCallbacksInUIThread();
 }
 
-void registerStartFlushUILoop() {
-  Pointer<NativeFunction<Native_StartFlushUILoop>> pointer = Pointer.fromFunction(_startFlushUILoop);
-  _registerStartFlushUILoop(pointer);
+void registerStartFlushCallbacksInUIThread() {
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer = Pointer.fromFunction(_startFlushCallbacksInUIThread);
+  _registerStartFlushCallbacksInUIThread(pointer);
 }
 
 
-typedef Native_StopFlushUILoop = Void Function();
-typedef Native_RegisterStopFlushUILoop = Void Function(Pointer<NativeFunction<Native_StopFlushUILoop>>);
-typedef Dart_RegisterStopFlushUILoop = void Function(Pointer<NativeFunction<Native_StopFlushUILoop>>);
+typedef Native_StopFlushCallbacksInUIThread = Void Function();
+typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
+typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
 
-final Dart_RegisterStartFlushUILoop _registerStopFlushUILoop =
-nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStopFlushUILoop>>('registerStopFlushUILoop').asFunction();
+final Dart_RegisterFlushCallbacksInUIThread _registerStopFlushCallbacksInUIThread =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>('registerStopFlushCallbacksInUIThread').asFunction();
 
-void _stopFlushUILoop() {
-  stopFlushUILoop();
+void _stopFlushCallbacksInUIThread() {
+  stopFlushCallbacksInUIThread();
 }
 
-void registerStopFlushUILoop() {
-  Pointer<NativeFunction<Native_StartFlushUILoop>> pointer = Pointer.fromFunction(_stopFlushUILoop);
-  _registerStopFlushUILoop(pointer);
+void registerStopFlushCallbacksInUIThread() {
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer = Pointer.fromFunction(_stopFlushCallbacksInUIThread);
+  _registerStopFlushCallbacksInUIThread(pointer);
 }
 
 void registerDartMethodsToCpp() {
@@ -407,6 +408,6 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerOnPlatformBrightnessChanged();
-  registerStartFlushUILoop();
-  registerStopFlushUILoop();
+  registerStartFlushCallbacksInUIThread();
+  registerStopFlushCallbacksInUIThread();
 }

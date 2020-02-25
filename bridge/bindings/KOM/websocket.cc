@@ -153,7 +153,7 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
-  getDartMethod()->startFlushUILoop();
+  getDartMethod()->startFlushCallbacksInUIThread();
 
   auto callback = std::make_shared<CallbackImpl>(
       context, std::move(onOpen), std::move(onMessage), std::move(onClose),
@@ -215,7 +215,7 @@ Value JSWebSocket::close(JSContext &context, const Value &thisVal,
   _websocket->close(static_cast<int>(token.getNumber()),
                     static_cast<int>(code.getNumber()),
                     reason.getString(context).utf8(context));
-  getDartMethod()->stopFlushUILoop();
+  getDartMethod()->stopFlushCallbacksInUIThread();
   return Value::undefined();
 }
 

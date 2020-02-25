@@ -30,8 +30,8 @@ typedef void (*InvokeFetch)(int32_t, const char*, const char*);
 typedef double (*DevicePixelRatio)();
 typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
-typedef void (*StartFlushUILoop)();
-typedef void (*StopFlushUILoop)();
+typedef void (*StartFlushCallbacksInUIThread)();
+typedef void (*StopFlushCallbacksInUIThread)();
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -76,8 +76,10 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
-void registerStartFlushUILoop(StartFlushUILoop startFlushUiLoop);
+void registerStartFlushCallbacksInUIThread(
+    StartFlushCallbacksInUIThread startFlushCallbacksInUiThread);
 KRAKEN_EXPORT
-void registerStopFlushUILoop(StopFlushUILoop stopFlushUiLoop);
+void registerStopFlushCallbacksInUIThread(
+    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

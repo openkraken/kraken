@@ -107,10 +107,12 @@ void flushUITask() {
   bridge->flushUITask();
 }
 
-void registerStartFlushUILoop(StartFlushUILoop startFlushUiLoop) {
-  kraken::registerStartFlushUILoop(startFlushUiLoop);
+void registerStartFlushCallbacksInUIThread(
+    StartFlushCallbacksInUIThread startFlushCallbacksInUiThread) {
+  kraken::registerStartFlushUILoop(startFlushCallbacksInUiThread);
 }
 
-void registerStopFlushUILoop(StopFlushUILoop stopFlushUiLoop) {
-  kraken::registerStopFlushUILoop(stopFlushUiLoop);
+void registerStopFlushCallbacksInUIThread(
+    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
+  kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
 }

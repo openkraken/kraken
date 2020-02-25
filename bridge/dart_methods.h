@@ -26,8 +26,8 @@ struct DartMethodPointer {
   DevicePixelRatio devicePixelRatio{nullptr};
   PlatformBrightness platformBrightness{nullptr};
   OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
-  StartFlushUILoop startFlushUILoop{nullptr};
-  StopFlushUILoop stopFlushUILoop{nullptr};
+  StartFlushCallbacksInUIThread startFlushCallbacksInUIThread{nullptr};
+  StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -42,8 +42,8 @@ void registerGetScreen(GetScreen callback);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
-void registerStartFlushUILoop(StartFlushUILoop startFlushUiLoop);
-void registerStopFlushUILoop(StopFlushUILoop stopFlushUiLoop);
+void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
+void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
