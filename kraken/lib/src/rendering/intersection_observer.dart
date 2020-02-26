@@ -97,19 +97,13 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Last known layer offset supplied to [addToScene].  Never null.
   Offset _layerOffset;
 
-  /// The offset supplied to [RenderVisibilityDetector.paint] method.  Never
-  /// null.
+  /// The offset supplied to [RenderVisibilityDetector.paint] method.
   final Offset paintOffset;
 
   /// See [VisibilityDetector.onIntersectionChange].
   ///
   /// Do not invoke this directly; call [_fireCallback] instead.
-  ///
-  /// Never null.
   final IntersectionChangeCallback onIntersectionChange;
-
-  /// Keeps track of the last known bounds of a element, in global coordinates.
-  Rect _lastBounds;
 
   /// Keeps track of the last known visibility state of a element.
   ///
@@ -223,7 +217,6 @@ class IntersectionObserverLayer extends ContainerLayer {
     } else {
       // Track only visible items so that the maps don't grow unbounded.
       _lastVisibility = null;
-      _lastBounds = null;
     }
     // Notify visibility changed event
     onIntersectionChange(info);
@@ -236,8 +229,7 @@ class IntersectionObserverLayer extends ContainerLayer {
       return;
     }
 
-    final elementBounds = _computeElementBounds();
-    _lastBounds = elementBounds;
+    Rect elementBounds = _computeElementBounds();
 
     final info = IntersectionObserverEntry.fromRects(elementBounds: elementBounds, clipRect: _computeClipRect());
     _fireCallback(info);

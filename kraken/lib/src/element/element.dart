@@ -422,8 +422,10 @@ abstract class Element extends Node
         needsReposition = false;
       }
 
-      // move element out of document flow
+      
     } else {
+      // move element out of document flow
+
       // append element to positioned parent
       _rePositionElement(this);
     }
