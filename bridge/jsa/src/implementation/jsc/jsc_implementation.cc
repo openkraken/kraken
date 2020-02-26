@@ -664,12 +664,62 @@ bool JSCContext::isArrayBuffer(const jsa::Object& obj) const {
   return typedArrayType == kJSTypedArrayTypeArrayBuffer;
 }
 
+bool JSCContext::isArrayBufferView(const jsa::Object &obj) const {
+  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(obj), nullptr);
+  return typedArrayType == kJSTypedArrayTypeInt8Array ||
+    typedArrayType == kJSTypedArrayTypeInt16Array ||
+    typedArrayType == kJSTypedArrayTypeInt32Array ||
+    typedArrayType == kJSTypedArrayTypeUint8Array ||
+    typedArrayType == kJSTypedArrayTypeUint8ClampedArray ||
+    typedArrayType == kJSTypedArrayTypeUint16Array ||
+    typedArrayType == kJSTypedArrayTypeUint32Array ||
+    typedArrayType == kJSTypedArrayTypeFloat32Array ||
+    typedArrayType == kJSTypedArrayTypeFloat64Array;
+}
+
 void* JSCContext::data(const jsa::ArrayBuffer& obj) {
   return JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), nullptr);
 }
 
+void *JSCContext::data(const jsa::ArrayBufferView &obj) {
+  return JSObjectGetTypedArrayBytesPtr(ctx_, objectRef(obj), nullptr);
+}
+
 size_t JSCContext::size(const jsa::ArrayBuffer& obj) {
   return JSObjectGetArrayBufferByteLength(ctx_, objectRef(obj), nullptr);
+}
+
+size_t JSCContext::size(const jsa::ArrayBufferView& obj) {
+  return JSObjectGetTypedArrayByteLength(ctx_, objectRef(obj), nullptr);
+}
+
+jsa::ArrayBufferViewType
+JSCContext::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
+  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(arrayBufferView), nullptr);
+
+  switch(typedArrayType) {
+    case kJSTypedArrayTypeInt8Array:
+      return jsa::ArrayBufferViewType::Int8Array;
+    case kJSTypedArrayTypeInt16Array:
+      return jsa::ArrayBufferViewType::Int16Array;
+    case kJSTypedArrayTypeInt32Array:
+      return jsa::ArrayBufferViewType::Int32Array;
+    case kJSTypedArrayTypeUint8Array:
+      return jsa::ArrayBufferViewType::Uint8Array;
+    case kJSTypedArrayTypeUint8ClampedArray:
+      return jsa::ArrayBufferViewType::Uint8ClampedArray;
+    case kJSTypedArrayTypeUint16Array:
+      return jsa::ArrayBufferViewType::Uint16Array;
+    case kJSTypedArrayTypeUint32Array:
+      return jsa::ArrayBufferViewType::Uint32Array;
+    case kJSTypedArrayTypeFloat32Array:
+      return jsa::ArrayBufferViewType::Float32Array;
+    case kJSTypedArrayTypeFloat64Array:
+      return jsa::ArrayBufferViewType::Float64Array;
+    default:
+      break;
+  }
+  return jsa::ArrayBufferViewType::none;
 }
 
 bool JSCContext::isFunction(const jsa::Object& obj) const {

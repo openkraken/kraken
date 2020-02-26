@@ -14,7 +14,9 @@
 
 #ifdef KRAKEN_JSC_ENGINE
 #include "jsc/jsc_implementation.h"
-#elif KRAKEN_V8_ENGINE
+#endif
+
+#ifdef KRAKEN_V8_ENGINE
 #include "v8/v8_implementation.h"
 #endif
 
