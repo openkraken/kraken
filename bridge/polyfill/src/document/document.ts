@@ -38,3 +38,5 @@ export class DocumentImpl extends NodeImpl {
     return new TextImpl('', id++);
   }
 }
+
+export const document = new DocumentImpl();

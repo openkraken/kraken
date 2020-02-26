@@ -1,10 +1,9 @@
 
 import './UIListener';
-import { DocumentImpl } from './document';
-const _document = new DocumentImpl();
+import { document } from './document';
 
 Object.defineProperty(global, 'document', {
-  value: _document,
+  value: document,
   enumerable: true,
   writable: false,
   configurable: false
