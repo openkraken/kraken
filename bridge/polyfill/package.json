@@ -5,8 +5,9 @@
   "description": "js polyfill for kraken export JS API",
   "main": "dist/index.js",
   "scripts": {
-    "build": "webpack -c webpack.config.js",
-    "build:release": "KRAKEN_WEBPACK_BUILD=production webpack -c webpack.config.js",
+    "build": "webpack -c webpack.config.js && npm run jsToC",
+    "build:release": "KRAKEN_WEBPACK_BUILD=production webpack -c webpack.config.js && npm run jsToC",
+    "jsToC": "node scripts/js_to_c.js -s ../dist/main.js -o ../dist",
     "start": "webpack-dev-server -c webpack.config.js --host=0.0.0.0"
   },
   "author": "",

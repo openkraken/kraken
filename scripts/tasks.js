@@ -239,22 +239,6 @@ task('compile-polyfill', (done) => {
     return done(result.status);
   }
 
-  result = spawnSync('node', [
-    'js_to_c.js',
-    '-s',
-    path.join(paths.polyfill, 'dist/main.js'),
-    '-o',
-    path.join(paths.polyfill, 'dist')
-  ], {
-    cwd: __dirname,
-    env: process.env,
-    stdio: 'inherit'
-  });
-
-  if (result.status !== 0) {
-    return done(result.status);
-  }
-
   done();
 });
 
