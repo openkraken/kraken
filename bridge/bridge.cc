@@ -9,6 +9,8 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
+#include "bindings/KOM/blob.h"
+#include "polyfill.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
@@ -206,6 +208,7 @@ JSBridge::JSBridge() {
   kraken::binding::bindKraken(context);
   kraken::binding::bindConsole(context);
   kraken::binding::bindTimer(context);
+  kraken::binding::bindBlob(context);
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context);
@@ -222,6 +225,8 @@ JSBridge::JSBridge() {
                        invokeModule);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_module_listener__", 0,
                        krakenModuleListener);
+
+  initKrakenPolyFill(context.get());
 }
 
 #ifdef ENABLE_DEBUGGER
