@@ -1,5 +1,3 @@
-#Editor Config is So awesom
-
 # Apply the following rules to these file types
 [*.{cpp,cc,c,h,hpp}]
 end_of_line = lf                #Unix type line endings

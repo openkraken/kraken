@@ -71,14 +71,25 @@ class VideoElement extends Element {
     }
   }
 
-  VideoElement(int nodeId, Map<String, dynamic> props, List<String> events)
-      : super(
-          nodeId: nodeId,
-          defaultDisplay: 'block',
-          tagName: VIDEO,
-          properties: props,
-          events: events,
-        ) {
+  VideoElement(
+    this.nodeId,
+    this.props,
+    this.events
+  ) : super(
+    nodeId: nodeId,
+    defaultDisplay: 'block',
+    tagName: VIDEO,
+    properties: props,
+    events: events,
+  ) {
+    addVideoBox();
+  }
+
+  int nodeId;
+  Map<String, dynamic> props;
+  List<String> events;
+
+  void addVideoBox() {
     RegExp exp = RegExp(r"^(http|https)://");
 
     if (props['src'] == null) {
@@ -125,6 +136,10 @@ class VideoElement extends Element {
         controller.play();
       }
     });
+  }
+
+  void removeVideoBox() {
+    renderLayoutElement.removeAll();
   }
 
   Future<Map<String, dynamic>> getVideoDetail() async {
@@ -219,6 +234,18 @@ class VideoElement extends Element {
         break;
       case 'muted':
         controller.setMuted(args[0]);
+    }
+  }
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'src' ||
+      key == '.style.width' ||
+      key == '.style.height'
+    ) {
+      removeVideoBox();
+      addVideoBox();
     }
   }
 }
