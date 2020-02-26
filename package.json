@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Web standard based rendering engine.",
   "scripts": {
-    "install": "cd cli && npm i --ignore-scripts && tnpm link -g && rm -rf build && ln -s ../targets build",
+    "install": "cd cli && npm link --ignore-scripts && rm -rf build && ln -s ../targets build",
     "start": "cd app_launcher && flutter run",
     "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
