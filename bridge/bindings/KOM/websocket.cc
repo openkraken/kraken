@@ -6,6 +6,7 @@
 #include "jsa.h"
 #include "websocket.h"
 #include "foundation/flushUITask.h"
+#include "dart_methods.h"
 
 #include "logging.h"
 #include "websocket_client.h"
@@ -153,6 +154,8 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
     return Value::undefined();
   }
 
+  getDartMethod()->startFlushCallbacksInUIThread();
+
   auto callback = std::make_shared<CallbackImpl>(
       context, std::move(onOpen), std::move(onMessage), std::move(onClose),
       std::move(onError));
@@ -213,6 +216,7 @@ Value JSWebSocket::close(JSContext &context, const Value &thisVal,
   _websocket->close(static_cast<int>(token.getNumber()),
                     static_cast<int>(code.getNumber()),
                     reason.getString(context).utf8(context));
+  getDartMethod()->stopFlushCallbacksInUIThread();
   return Value::undefined();
 }
 

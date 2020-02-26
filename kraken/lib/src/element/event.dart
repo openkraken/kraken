@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 import 'package:kraken/element.dart';
@@ -9,7 +9,6 @@ class Event {
   String type;
   bool bubbles;
   bool cancelable;
-  bool composed;
   Node currentTarget;
   Node target;
   num timeStamp;
@@ -18,14 +17,15 @@ class Event {
 
   bool _immediateBubble = true;
 
-  Event(this.type, EventInit init) {
+  Event(this.type, [EventInit init]) {
     assert(type != null);
-    assert(init != null);
+
+    if (init == null) {
+      init = EventInit();
+    }
 
     bubbles = init.bubbles;
     cancelable = init.cancelable;
-    composed = init.composed;
-
     timeStamp = DateTime.now().millisecondsSinceEpoch;
   }
 
@@ -49,7 +49,6 @@ class Event {
       'type': type,
       'bubbles': bubbles,
       'cancelable': cancelable,
-      'composed': composed,
       'timeStamp': timeStamp,
       'defaultPrevented': defaultPrevented,
       'target': target?.nodeId,
@@ -62,10 +61,16 @@ class Event {
 class EventInit {
   bool bubbles;
   bool cancelable;
-  bool composed;
 
-  EventInit(
-      {this.bubbles = false, this.cancelable = false, this.composed = false});
+  static final Map<String, EventInit> _cache =
+      <String, EventInit>{};
+
+  factory EventInit({bubbles = false, cancelable = false}) {
+    String key = bubbles.toString() + cancelable.toString();
+    return _cache.putIfAbsent(key, () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
+  }
+
+  EventInit._internal({this.bubbles, this.cancelable});
 }
 
 class InputEvent extends Event {
@@ -75,14 +80,32 @@ class InputEvent extends Event {
   InputEvent(
     this.detail, {
     this.inputType = 'insertText',
-  }) : super('input',
-            EventInit(bubbles: false, cancelable: true, composed: true));
+  }) : super('input', EventInit(cancelable: true));
+}
+
+class AppearEvent extends Event {
+  AppearEvent() : super('appear');
+}
+
+class DisappearEvent extends Event {
+  DisappearEvent() : super('disappear');
+}
+
+class IntersectionChangeEvent extends Event {
+  IntersectionChangeEvent(this.intersectionRatio): super('intersectionchange');
+  double intersectionRatio;
+  
+  Map toJson() {
+    Map eventMap = super.toJson();
+    eventMap['intersectionRatio'] = intersectionRatio;
+    return eventMap;
+  }
 }
 
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
   TouchEvent(String type)
-      : super(type, EventInit(bubbles: true, cancelable: true, composed: true));
+      : super(type, EventInit(bubbles: true, cancelable: true));
 
   TouchList touches = TouchList();
   TouchList targetTouches = TouchList();

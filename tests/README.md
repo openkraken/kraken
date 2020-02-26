@@ -11,4 +11,4 @@
 
 ## Usage
 
-- 执行测试：npm run test:flutter
+- npm run test

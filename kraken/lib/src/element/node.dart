@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
+import 'package:meta/meta.dart';
 
 const String DATA = 'data';
 const String COMMENT = 'Comment';
@@ -21,16 +21,14 @@ enum NodeType {
 class Comment extends Node {
   Map<String, dynamic> properties;
 
-  Comment(int nodeId, this.properties)
-      : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+  Comment(int nodeId, this.properties) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
 class TextNode extends Node with TextStyleMixin {
   String data;
   Map<String, dynamic> properties;
 
-  TextNode(int nodeId, this.properties, this.data)
-      : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, this.properties, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
   }
 
