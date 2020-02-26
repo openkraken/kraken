@@ -199,7 +199,9 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
 
     Element target = nodeMap[targetId];
     assert(target != null);
-    dynamic res = target.method(method, args);
+    assert(target.method != null);
+    List<dynamic> arguments = jsonDecode(args);
+    dynamic res = target.method(method, arguments);
     return res;
   }
 }

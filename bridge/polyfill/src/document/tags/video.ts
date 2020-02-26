@@ -28,7 +28,7 @@ export class VideoImpl extends ElementImpl {
   };
 
   fastSeek = (duration: number) => {
-    method(this.id, 'fastSeek', [String(duration)]);
+    method(this.id, 'fastSeek', [duration]);
   };
 
   // not w3c standard, but maybe useful.

@@ -2,6 +2,7 @@ import { NodeImpl, NodeType } from './node';
 import { ElementImpl } from './element';
 import { TextImpl } from './text';
 import { VideoImpl } from './tags/video';
+import { AudioImpl } from './tags/audio';
 
 let id = 1;
 
@@ -17,6 +18,9 @@ export class DocumentImpl extends NodeImpl {
     switch(tagName) {
       case 'video':
         element = new VideoImpl(tagName, id++);
+        break;
+      case 'audio':
+        element = new AudioImpl(tagName, id++);
         break;
       default:
         element = new ElementImpl(tagName, id++);
