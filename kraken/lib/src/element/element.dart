@@ -125,6 +125,7 @@ abstract class Element extends Node
     }
     // border
     renderObject = initRenderDecoratedBox(renderObject, style, this);
+
     // Pointer event listener
     renderObject = RenderPointerListener(
       child: renderObject,
@@ -240,10 +241,12 @@ abstract class Element extends Node
         }
       }
 
-      ///8.update opacity
+      ///8.update opacity and visiblity
       updateRenderOpacity(
+        style,
         newStyle,
-        rootRenderObject: renderBoxModel,
+        rootRenderObject: renderMargin,
+        childRenderObject: renderDecoratedBox,
       );
 
       ///9.update transform
@@ -422,7 +425,7 @@ abstract class Element extends Node
         needsReposition = false;
       }
 
-      
+
     } else {
       // move element out of document flow
 
