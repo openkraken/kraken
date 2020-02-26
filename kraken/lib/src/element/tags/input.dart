@@ -381,5 +381,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     print('TODO: impl connection closed.');
   }
 
+  // Abstract class method added after flutter@1.15
+  @override
   TextEditingValue get currentTextEditingValue => textSelectionDelegate.textEditingValue;
 }
