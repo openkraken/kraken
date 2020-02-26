@@ -1,11 +1,8 @@
 {
-  "name": "@kraken/test",
-  "version": "0.0.0",
-  "description": "Kraken test repo.",
+  "private": true,
   "scripts": {
+    "install": "flutter pub get",
     "test": "npm run test:flutter",
-    "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart"
-  },
-  "author": "Kraken Team",
-  "license": "MIT"
+    "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart --verbose"
+  }
 }
