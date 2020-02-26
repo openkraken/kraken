@@ -108,8 +108,8 @@ void flushUITask() {
 }
 
 void registerStartFlushCallbacksInUIThread(
-    StartFlushCallbacksInUIThread startFlushCallbacksInUiThread) {
-  kraken::registerStartFlushUILoop(startFlushCallbacksInUiThread);
+    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
+  kraken::registerStartFlushUILoop(startFlushCallbacksInUIThread);
 }
 
 void registerStopFlushCallbacksInUIThread(

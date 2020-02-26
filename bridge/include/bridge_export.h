@@ -77,7 +77,7 @@ KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
 void registerStartFlushCallbacksInUIThread(
-    StartFlushCallbacksInUIThread startFlushCallbacksInUiThread);
+    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread);
 KRAKEN_EXPORT
 void registerStopFlushCallbacksInUIThread(
     StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);

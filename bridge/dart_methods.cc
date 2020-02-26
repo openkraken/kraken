@@ -64,8 +64,8 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   methodPointer->onPlatformBrightnessChanged = onPlatformBrightnessChanged;
 }
 
-void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushCallbacksInUiThread) {
-  methodPointer->startFlushCallbacksInUIThread = startFlushCallbacksInUiThread;
+void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
+  methodPointer->startFlushCallbacksInUIThread = startFlushCallbacksInUIThread;
 }
 
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
