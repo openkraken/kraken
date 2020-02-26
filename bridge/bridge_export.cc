@@ -106,3 +106,13 @@ void invokeOnPlatformBrightnessChangedCallback() {
 void flushUITask() {
   bridge->flushUITask();
 }
+
+void registerStartFlushCallbacksInUIThread(
+    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
+  kraken::registerStartFlushUILoop(startFlushCallbacksInUIThread);
+}
+
+void registerStopFlushCallbacksInUIThread(
+    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
+  kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
+}

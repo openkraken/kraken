@@ -1,56 +1,18 @@
-__kraken_ui_manager__(
-    JSON.stringify([
-      "createElement",
-      [
-        {
-          type: "DIV",
-          id: 1,
-          props: {
-            style: { margin: "20rpx 30rpx 30rpx 30rpx",
-             backgroundColor: "blue" }
-          }
-        }
-      ]
-    ])
-  );
-  
-  __kraken_ui_manager__(
-    JSON.stringify([
-      "createElement",
-      [
-        {
-          type: "DIV",
-          id: 2,
-          props: {
-            style: { width: "10px", height: "10px"}
-          }
-        }
-      ]
-    ])
-  );
-  
-  __kraken_ui_manager__(
-    JSON.stringify([
-      "createElement",
-      [
-        {
-          type: "DIV",
-          id: 3,
-          props: {
-            style: { width: "200px", height: "200px",
-             backgroundImage: "radial-gradient(50%, red 0%, yellow 20%, blue 80%)" }
-          }
-        }
-      ]
-    ])
-  );
-  
-  __kraken_ui_manager__(
-    JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 1]])
-  );
-  __kraken_ui_manager__(
-    JSON.stringify(["insertAdjacentNode", [1, "beforeend", 2]])
-  );
-  __kraken_ui_manager__(
-    JSON.stringify(["insertAdjacentNode", [-1, "beforeend", 3]])
-  );
+const div = document.createElement('div');
+div.style.margin = '20rpx 30rpx 30rpx 30rpx';
+div.style.backgroundColor = 'blue';
+
+document.body.appendChild(div);
+
+const div2 = document.createElement('div');
+div2.style.width = '10px';
+div2.style.height = '10px';
+
+div.appendChild(div2);
+
+const div3 = document.createElement('div');
+div3.style.width = '200px';
+div3.style.height = '200px';
+div3.style.backgroundImage = 'radial-gradient(50%, red 0%, yellow 20%, blue 80%)';
+
+document.body.appendChild(div3);
