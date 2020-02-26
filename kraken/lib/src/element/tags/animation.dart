@@ -10,7 +10,7 @@ class AnimationElement extends Element {
   static final String ANIMATION_TYPE_FLARE = "flare";
 
   String type = ANIMATION_TYPE_FLARE;
-  String fit = 'contain';
+  String objectFit = 'contain';
   RenderObject animationRenderObject;
 
   AnimationElement(
@@ -25,8 +25,8 @@ class AnimationElement extends Element {
       type = properties['type'];
     }
 
-    if (properties.containsKey('fit')) {
-      fit = properties['fit'];
+    if (style.contains('objectFit')) {
+      objectFit = style['objectFit'];
     }
 
     if (type == ANIMATION_TYPE_FLARE) {
@@ -41,7 +41,7 @@ class AnimationElement extends Element {
       Map<String, dynamic> properties) {
     assert(properties.containsKey('src'));
     BoxFit boxFit;
-    switch(fit) {
+    switch(objectFit) {
       case 'fill':
         boxFit = BoxFit.fill;
         break;
