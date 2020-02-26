@@ -39,6 +39,8 @@ Element createW3CElement(PayloadNode node) {
         VideoElement.setDefaultPropsStyle(node.props);
         return VideoElement(node.id, node.props, node.events);
       }
+    case AUDIO:
+      return AudioElement(node.id, node.props, node.events);
     default:
       throw FlutterError('ERROR: unexpected element type, ' + node.type);
   }
