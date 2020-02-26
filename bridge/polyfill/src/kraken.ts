@@ -18,8 +18,18 @@ export interface KrakenWindow {
   location: KrakenLocation;
 }
 
+export interface KrakenBlob {
+  size: number;
+  type: string;
+  slice(start?: number, end?: number, contentType?: string): KrakenBlob;
+  text(): string;
+  arrayBuffer(): ArrayBuffer;
+}
+
 declare const __kraken_window__: KrakenWindow;
+declare const __kraken_blob__: (blobParts?: BlobPart[], options?: BlobPropertyBag) => KrakenBlob;
 export const krakenWindow = __kraken_window__;
+export const krakenBlob = __kraken_blob__;
 
 export type KrakenWebSocketToken = number;
 

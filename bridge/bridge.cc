@@ -325,12 +325,12 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
   }
 }
 
-void JSBridge::evaluateScript(const std::string &script, const std::string &url,
+alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
-  if (!context->isValid()) return;
+  if (!context->isValid()) return Value::undefined();
   try {
     binding::updateLocation(url);
-    context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
+    return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
   } catch (JSError error) {
     auto &&stack = error.getStack();
     auto &&message = error.getMessage();
@@ -342,6 +342,8 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
+
+  return Value::undefined();
 }
 
 JSBridge::~JSBridge() {
