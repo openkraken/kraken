@@ -779,6 +779,13 @@ bool V8Context::isArrayBuffer(const jsa::Object &obj) const {
   return object->IsArrayBuffer();
 }
 
+bool V8Context::isArrayBufferView(const jsa::Object &obj) const {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> object =
+      v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  return object->IsArrayBufferView();
+}
+
 bool V8Context::isFunction(const jsa::Object &obj) const {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> object =
@@ -843,9 +850,7 @@ template <typename T> struct ArrayBufferDealloactorProxy {
   ArrayBufferDealloactorProxy(jsa::ArrayBufferDeallocator<T> deallocator,
                               T *data)
       : _deallocator(deallocator), _data(data) {}
-  ~ArrayBufferDealloactorProxy() {
-    _deallocator(_data);
-  }
+  ~ArrayBufferDealloactorProxy() { _deallocator(_data); }
 
   jsa::ArrayBufferDeallocator<T> _deallocator;
   T *_data;
@@ -862,7 +867,8 @@ V8Context::createArrayBuffer(uint8_t *data, size_t length,
   v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(buffer);
   auto proxy = new ArrayBufferDealloactorProxy<uint8_t>(deallocator, data);
 
-  // when v8 arrayBuffer is gc collected, it will recycle ArrayBufferDealloactorProxy's memory
+  // when v8 arrayBuffer is gc collected, it will recycle
+  // ArrayBufferDealloactorProxy's memory
   return createObject<ArrayBufferDealloactorProxy<uint8_t>>(object, proxy)
       .getArrayBuffer(*this);
 }
@@ -879,6 +885,13 @@ size_t V8Context::size(const jsa::ArrayBuffer &arrayBuffer) {
   v8::Local<v8::Object> obj = objectRef(arrayBuffer);
   return v8::Local<v8::ArrayBuffer>::Cast(obj)->ByteLength();
 }
+size_t V8Context::size(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  return v8::Local<v8::ArrayBufferView>::Cast(obj)->ByteLength();
+}
+
 void *V8Context::data(const jsa::ArrayBuffer &arrayBuffer) {
   assert(isArrayBuffer(arrayBuffer));
   v8::HandleScope handleScope(_isolate);
@@ -886,6 +899,45 @@ void *V8Context::data(const jsa::ArrayBuffer &arrayBuffer) {
   v8::Local<v8::ArrayBuffer> buffer = v8::Local<v8::ArrayBuffer>::Cast(obj);
   return buffer->GetContents().Data();
 }
+
+void *V8Context::data(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  v8::Local<v8::ArrayBufferView> bufferView =
+      v8::Local<v8::ArrayBufferView>::Cast(obj);
+  return bufferView->Buffer()->GetContents().Data();
+}
+
+jsa::ArrayBufferViewType
+V8Context::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
+  assert(isArrayBufferView(arrayBufferView));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> obj = objectRef(arrayBufferView);
+  v8::Local<v8::ArrayBufferView> bufferView =
+      v8::Local<v8::ArrayBufferView>::Cast(obj);
+  if (bufferView->IsInt8Array()) {
+    return jsa::ArrayBufferViewType::Int8Array;
+  } else if (bufferView->IsInt16Array()) {
+    return jsa::ArrayBufferViewType::Int16Array;
+  } else if (bufferView->IsInt32Array()) {
+    return jsa::ArrayBufferViewType::Int32Array;
+  } else if (bufferView->IsUint8Array()) {
+    return jsa::ArrayBufferViewType::Uint8Array;
+  } else if (bufferView->IsUint8ClampedArray()) {
+    return jsa::ArrayBufferViewType::Uint8ClampedArray;
+  } else if (bufferView->IsUint16Array()) {
+    return jsa::ArrayBufferViewType::Uint16Array;
+  } else if (bufferView->IsUint32Array()) {
+    return jsa::ArrayBufferViewType::Uint32Array;
+  } else if (bufferView->IsFloat32Array()) {
+    return jsa::ArrayBufferViewType::Float32Array;
+  } else if (bufferView->IsFloat64Array()) {
+    return jsa::ArrayBufferViewType::Float64Array;
+  }
+  return jsa::ArrayBufferViewType::none;
+}
+
 jsa::Value V8Context::getValueAtIndex(const jsa::Array &arr, size_t i) {
   assert(isArray(arr));
   v8::HandleScope handleScope(_isolate);
@@ -919,11 +971,9 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
   struct HostFunctionMetaData : public HostFunctionProxy {
     HostFunctionMetaData(V8Context *ctx, v8::Isolate *isolate,
                          v8::Local<v8::Context> v8Context,
-                         jsa::HostFunctionType f, unsigned int paramCount,
-                         v8::Local<v8::String> n)
-        : HostFunctionProxy(std::move(f)), argsCount(paramCount), ctx(ctx),
+                         jsa::HostFunctionType f)
+        : HostFunctionProxy(std::move(f)), ctx(ctx),
           isolate(isolate) {
-      this->name.Reset(isolate, n);
       this->v8Context.Reset(isolate, v8Context);
     }
 
@@ -975,15 +1025,12 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
       return escapeScope.Escape(res);
     }
 
-    unsigned int argsCount;
     v8::Isolate *isolate;
     V8Context *ctx;
-    v8::Persistent<v8::String> name;
     v8::Persistent<v8::Context> v8Context;
   };
 
-  auto proxy = new HostFunctionMetaData(this, _isolate, context, func,
-                                        paramCount, stringRef(name));
+  auto proxy = new HostFunctionMetaData(this, _isolate, context, func);
   v8::Local<v8::External> hostCallback = v8::External::New(_isolate, proxy);
 
   auto callback = [](const v8::FunctionCallbackInfo<v8::Value> &info) {
@@ -996,6 +1043,9 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
   v8::Local<v8::Function> function =
       v8::Function::New(context, callback, hostCallback, (int)paramCount)
           .ToLocalChecked();
+
+  function->SetName(v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
+                        .ToLocalChecked());
 
   v8::Local<v8::Private> privateKey = v8::Private::New(
       _isolate, v8::String::NewFromUtf8(_isolate, "proxy").ToLocalChecked());

@@ -34,30 +34,18 @@ export class ElementImpl extends NodeImpl {
   } = {};
   public style: object = {};
 
-  private toCamelCase(key: string) {
-    let  strArray = key.split(/_|-/);
-    let humpStr = strArray[0];
-    for (let i = 1, l = strArray.length; i < l; i+=1) {
-      humpStr += strArray[i].slice(0, 1).toUpperCase() + strArray[i].slice(1);
-    }
-    return humpStr;
-  }
-
   constructor(tagName: string, id: number) {
     super(NodeType.ELEMENT_NODE, id);
     this.tagName = tagName.toUpperCase();
-    const toCamelCase = this.toCamelCase;
 
     this.style = new Proxy(this.style, {
-      set(target: any, p: string | number | symbol, value: any, receiver: any): boolean {
-        let styleKey = toCamelCase(String(p));
-        this[styleKey] = value;
-        setStyle(id, styleKey, value);
-        return true;
+      set(target: any, key: string, value: any, receiver: any): boolean {
+        this[key] = value;
+        setStyle(id, key, value);
+        return value;
       },
-      get(target: any, props: string | number | symbol, receiver) {
-        let styleKey = toCamelCase(String(props));
-        return this[styleKey];
+      get(target: any, key: string, receiver) {
+        return this[key];
       }
     });
 

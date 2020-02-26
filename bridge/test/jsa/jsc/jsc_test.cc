@@ -551,28 +551,55 @@ TEST(JSCContext, createArrayBuffer) {
   auto context = std::make_unique<JSCContext>();
   const size_t len = 20;
   uint8_t *data = new uint8_t[len];
-  for (int i = 0; i < 20; i ++) {
+  for (int i = 0; i < 20; i++) {
     data[i] = i + 1;
   }
 
-  jsa::ArrayBuffer arrayBuffer =
-      jsa::ArrayBuffer::createWithUnit8(*context, data, len, [](uint8_t* bytes) {
-        delete bytes;
-      });
+  jsa::ArrayBuffer arrayBuffer = jsa::ArrayBuffer::createWithUnit8(
+      *context, data, len, [](uint8_t *bytes) { delete bytes; });
   uint8_t *other = arrayBuffer.data<uint8_t>(*context);
   EXPECT_EQ(*other, *data);
 
   context->global().setProperty(*context, "buffer", arrayBuffer);
 
-  jsa::Value toStringValue = context->evaluateJavaScript("buffer.toString()", "", 0);
+  jsa::Value toStringValue =
+      context->evaluateJavaScript("buffer.toString()", "", 0);
   EXPECT_EQ(toStringValue.isString(), true);
-  EXPECT_EQ(toStringValue.getString(*context).utf8(*context), "[object ArrayBuffer]");
+  EXPECT_EQ(toStringValue.getString(*context).utf8(*context),
+            "[object ArrayBuffer]");
 
-  jsa::Value rawArray = context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
+  jsa::Value rawArray =
+      context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
   EXPECT_EQ(rawArray.getObject(*context).isArray(*context), true);
   jsa::Array dataArray = rawArray.getObject(*context).getArray(*context);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 0).getNumber(), 1);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 9).getNumber(), 10);
+}
+
+TEST(JSCContext, isArrayBufferView) {
+  auto context = std::make_unique<JSCContext>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  EXPECT_EQ(result.getObject(*context).isArrayBufferView(*context), true);
+  jsa::ArrayBufferViewType type =
+      result.getObject(*context).getArrayBufferView(*context).getType(*context);
+  EXPECT_EQ(type, jsa::ArrayBufferViewType::Uint8Array);
+}
+
+TEST(JSCContext, ArrayBufferView_data) {
+  auto context = std::make_unique<JSCContext>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  jsa::ArrayBufferView bufferView =
+      result.getObject(*context).getArrayBufferView(*context);
+  uint8_t *data = bufferView.data<uint8_t>(*context);
+  size_t length = bufferView.size(*context);
+  EXPECT_EQ(length, 5);
+  EXPECT_EQ(data[0], 1);
+  EXPECT_EQ(data[1], 2);
+  EXPECT_EQ(data[2], 3);
+  EXPECT_EQ(data[3], 4);
+  EXPECT_EQ(data[4], 5);
 }
 
 #endif

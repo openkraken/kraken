@@ -14,9 +14,9 @@ add_library(jsa_abstraction STATIC
 target_include_directories(jsa_abstraction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
 
 ### JSC implementations
-if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
-  add_library(jsa_implementation ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/jsc/jsc_implementation.cc)
+  list(APPEND JSA_IMPLEMENTATION ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/jsc/jsc_implementation.cc)
   list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include/jsc)
 
   if (${IS_ANDROID})
@@ -47,17 +47,15 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   else ()
     list(APPEND JSA_LINK_LIBS "-framework JavaScriptCore")
   endif ()
-  target_link_libraries(jsa_implementation PRIVATE ${JSA_LINK_LIBS})
-  target_include_directories(jsa_implementation PRIVATE
-          ${JSA_INCLUDE_DIRS}
-          )
-elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+
+endif()
+
+if($ENV{KRAKEN_JS_ENGINE} MATCHES "v8" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
   ### V8 Implementations
   add_compile_options(-DKRAKEN_V8_ENGINE=1)
-  add_library(jsa_implementation
+  list(APPEND JSA_IMPLEMENTATION
           ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/v8/v8_implementation.cc
-          ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/v8/v8_instrumentation.cc
-          )
+          ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/v8/v8_instrumentation.cc)
   list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include/v8)
 
   if (${IS_ANDROID})
@@ -90,9 +88,10 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
     # 链接jsc
     list(APPEND JSA_LINK_LIBS v8 v8_base v8_platform v8_icui18n v8_icuuc)
   endif ()
-  target_link_libraries(jsa_implementation PRIVATE ${JSA_LINK_LIBS})
-  target_include_directories(jsa_implementation PRIVATE
-          ${JSA_INCLUDE_DIRS}
-          )
 endif()
 
+add_library(jsa_implementation ${JSA_IMPLEMENTATION})
+target_link_libraries(jsa_implementation PRIVATE ${JSA_LINK_LIBS})
+target_include_directories(jsa_implementation PRIVATE
+        ${JSA_INCLUDE_DIRS}
+        )
