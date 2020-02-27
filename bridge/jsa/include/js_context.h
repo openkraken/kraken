@@ -49,6 +49,11 @@ using HostFunctionType =
 
 using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
 
+/// A function which has this type can be registered as a class callable from
+/// Javascript using Function::createFromClassFunction().
+using HostClassType = std::function<Object(
+    JSContext &context, const Value &thisVal, const Value *args, size_t count)>;
+
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
 class HostObject {
