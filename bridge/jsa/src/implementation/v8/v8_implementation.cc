@@ -681,10 +681,6 @@ jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
 
 jsa::Value V8Context::getProperty(const jsa::Object &obj,
                                   const jsa::String &name) {
-  if (!isHostObject(obj)) {
-    assert(hasProperty(obj, name));
-  }
-
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
@@ -701,9 +697,6 @@ jsa::Value V8Context::getProperty(const jsa::Object &obj,
 
 jsa::Value V8Context::getProperty(const jsa::Object &obj,
                                   const jsa::PropNameID &name) {
-  if (!isHostObject(obj)) {
-    assert(hasProperty(obj, name));
-  }
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);

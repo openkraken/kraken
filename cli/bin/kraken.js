@@ -42,7 +42,10 @@ program
 
       const env = Object.assign({}, process.env);
       const shellPath = getShellPath(options.runtimeMode);
-      env['KRAKEN_LIBRARY_PATH'] = resolve(__dirname, '../build/lib');
+      // only linux platform need this
+      if (os.platform() === 'linux') {
+        env['KRAKEN_LIBRARY_PATH'] = resolve(__dirname, '../build/lib');
+      }
 
       if (options.enableKrakenJsLog) {
         env['ENABLE_KRAKEN_JS_LOG'] = 'true';

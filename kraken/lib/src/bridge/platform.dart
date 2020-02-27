@@ -20,7 +20,6 @@ final String libName = 'libkraken_$kkJsEngine';
 final String nativeDynamicLibraryName = Platform.isMacOS || Platform.isIOS
     ? '$libName.dylib'
     : Platform.isWindows ? '$libName.dll' : '$libName.so';
-DynamicLibrary nativeDynamicLibrary = (Platform.isAndroid || Platform.isMacOS)
-    ? DynamicLibrary.open(nativeDynamicLibraryName)
-    : DynamicLibrary.open(
-        join(kkLibraryPath ?? '\$ORIGIN', nativeDynamicLibraryName));
+DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(join(
+    kkLibraryPath ?? (Platform.isLinux ? '\$ORIGIN' : ''),
+    nativeDynamicLibraryName));
