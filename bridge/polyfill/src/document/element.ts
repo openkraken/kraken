@@ -47,63 +47,48 @@ export class ElementImpl extends NodeImpl {
       },
       get(target: any, key: string, receiver) {
         return this[key];
-      }
+      },
     });
 
     // define properties
     Object.defineProperty(this, 'offsetTop', {
       configurable: false,
       enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
       get() {
-        return method(this.id, 'offsetTop', []);
-      }
+        return Number(method(this.id, 'offsetTop', []));
+      },
     });
 
     Object.defineProperty(this, 'offsetLeft', {
       configurable: false,
       enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
       get() {
-        return method(this.id, 'offsetLeft', []);
-      }
+        return Number(method(this.id, 'offsetLeft', []));
+      },
     });
 
     Object.defineProperty(this, 'offsetWidth', {
       configurable: false,
       enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
       get() {
-        return method(this.id, 'offsetWidth', []);
-      }
+        return Number(method(this.id, 'offsetWidth', []));
+      },
     });
 
     Object.defineProperty(this, 'offsetHeight', {
       configurable: false,
       enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
       get() {
-        return method(this.id, 'offsetHeight', []);
-      }
+        return Number(method(this.id, 'offsetHeight', []));
+      },
     });
 
     Object.defineProperty(this, 'clientWidth', {
       configurable: false,
       enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
       get() {
-        return method(this.id, 'clientWidth', []);
-      }
+        return Number(method(this.id, 'clientWidth', []));
+      },
     });
 
     Object.defineProperty(this, 'clientHeight', {
