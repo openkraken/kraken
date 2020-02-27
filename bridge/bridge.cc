@@ -9,6 +9,8 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
+#include "bindings/KOM/blob.h"
+#include "polyfill.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
@@ -206,6 +208,7 @@ JSBridge::JSBridge() {
   kraken::binding::bindKraken(context);
   kraken::binding::bindConsole(context);
   kraken::binding::bindTimer(context);
+  kraken::binding::bindBlob(context);
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context);
@@ -222,6 +225,8 @@ JSBridge::JSBridge() {
                        invokeModule);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_module_listener__", 0,
                        krakenModuleListener);
+
+  initKrakenPolyFill(context.get());
 }
 
 #ifdef ENABLE_DEBUGGER
@@ -320,12 +325,12 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
   }
 }
 
-void JSBridge::evaluateScript(const std::string &script, const std::string &url,
+alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
-  if (!context->isValid()) return;
+  if (!context->isValid()) return Value::undefined();
   try {
     binding::updateLocation(url);
-    context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
+    return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
   } catch (JSError error) {
     auto &&stack = error.getStack();
     auto &&message = error.getMessage();
@@ -337,6 +342,8 @@ void JSBridge::evaluateScript(const std::string &script, const std::string &url,
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
+
+  return Value::undefined();
 }
 
 JSBridge::~JSBridge() {

@@ -7,7 +7,8 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:io';
 
-final Directory snapshots = Directory('./snapshots');
+final Directory snapshots = Directory('./integration/snapshots');
+final Directory fixturesDir = Directory('./integration/fixtures');
 String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST ERROR]');
 
@@ -71,7 +72,6 @@ void main() {
       }
     });
 
-    Directory fixturesDir = Directory('./fixtures');
     List<FileSystemEntity> fixtures = fixturesDir.listSync();
 
     for (FileSystemEntity fixture in fixtures) {

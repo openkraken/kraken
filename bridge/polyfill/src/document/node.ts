@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from "./UIManager";
+import { insertAdjacentNode, removeNode } from './UIManager';
 
 type NodeList = Array<NodeImpl>;
 
@@ -13,33 +13,35 @@ export enum NodeType {
 }
 
 export class NodeImpl extends EventTarget {
-  public readonly childNodes: NodeList = [];
-
-  public get firstChild() {
-    return this.childNodes[0];
-  }
-  public get lastChild() {
-    return this.childNodes[this.childNodes.length - 1];
-  }
-  public get nextSibling() {
-    if (!this.parentNode) {
-      return null;
-    }
-    return this.parentNode.childNodes[this.parentChildIndex + 1];
-  }
-  public get nodeName(): string {
-    throw new Error('node nodeName property need to be override')
-  }
-
   public readonly nodeType: NodeType;
   public parentNode: NodeImpl | null;
   public id: number;
-  private parentChildIndex: number;
+  public readonly childNodes: NodeList = [];
 
   constructor(type: NodeType, id: number) {
     super();
     this.nodeType = type;
     this.id = id;
+  }
+
+  public get firstChild() {
+    return this.childNodes[0];
+  }
+
+  public get lastChild() {
+    return this.childNodes[this.childNodes.length - 1];
+  }
+
+  public get nextSibling() {
+    if (!this.parentNode) {
+      return null;
+    }
+    const parentChildNodes = this.parentNode.childNodes;
+    return parentChildNodes[parentChildNodes.indexOf(this) + 1];
+  }
+
+  public get nodeName(): string {
+    throw new Error('node nodeName property need to be override')
   }
 
   public appendChild(node: NodeImpl) {
@@ -49,7 +51,6 @@ export class NodeImpl extends EventTarget {
     }
 
     this.childNodes.push(node);
-    node.parentChildIndex = this.childNodes.length - 1;
     node.parentNode = this;
     insertAdjacentNode(this.id, 'beforeend', node.id);
   }
@@ -80,6 +81,9 @@ export class NodeImpl extends EventTarget {
   }
 
   public remove() {
+    if (!this.parentNode) {
+      return;
+    }
     removeNode(this.id);
   }
 
@@ -96,7 +100,7 @@ export class NodeImpl extends EventTarget {
 
     const parentNode = oldChild.parentNode;
     oldChild.parentNode = null;
-    const childIndex = oldChild.parentChildIndex;
+    const childIndex = parentNode.childNodes.indexOf(oldChild);
 
     newChild.parentNode = parentNode;
     parentNode.childNodes.splice(childIndex, 1, newChild);
