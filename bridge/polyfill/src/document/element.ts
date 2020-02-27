@@ -99,7 +99,12 @@ export class ElementImpl extends NodeImpl {
   }
 
   getBoundingClientRect = () => {
-    return method(this.id, 'getBoundingClientRect', []);
+    const rectInformation = method(this.id, 'getBoundingClientRect', []);
+    if (typeof rectInformation === 'string') {
+      return JSON.parse(rectInformation);
+    } else {
+      return null;
+    }
   }
 
   get nodeName() {
