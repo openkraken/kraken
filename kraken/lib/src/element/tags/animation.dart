@@ -48,13 +48,13 @@ class AnimationElement extends Element {
       case 'cover':
         boxFit = BoxFit.cover;
         break;
-      case 'fitHeight':
+      case 'fit-height':
         boxFit = BoxFit.fitHeight;
         break;
-      case 'fitWidth':
+      case 'fit-width':
         boxFit = BoxFit.fitWidth;
         break;
-      case 'scaleDown':
+      case 'scale-down':
         boxFit = BoxFit.scaleDown;
         break;
       case 'contain':
