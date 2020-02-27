@@ -18,8 +18,18 @@ export interface KrakenWindow {
   location: KrakenLocation;
 }
 
+export interface KrakenBlob {
+  size: number;
+  type: string;
+  slice(start?: number, end?: number, contentType?: string): KrakenBlob;
+  text(): string;
+  arrayBuffer(): ArrayBuffer;
+}
+
 declare const __kraken_window__: KrakenWindow;
+declare const __kraken_blob__: (blobParts?: BlobPart[], options?: BlobPropertyBag) => KrakenBlob;
 export const krakenWindow = __kraken_window__;
+export const krakenBlob = __kraken_blob__;
 
 export type KrakenWebSocketToken = number;
 
@@ -39,7 +49,7 @@ export interface KrakenWebSocket {
 declare const __kraken_websocket__: KrakenWebSocket;
 export const krakenWebSocket = __kraken_websocket__;
 
-declare const __kraken_ui_manager__: (message: string) => void;
+declare const __kraken_ui_manager__: (message: string) => void|string;
 export const krakenUIManager = __kraken_ui_manager__;
 
 declare const __kraken_ui_listener__: (fn: (message: string) => void) => void;
