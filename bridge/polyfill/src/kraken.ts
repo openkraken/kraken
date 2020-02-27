@@ -49,7 +49,7 @@ export interface KrakenWebSocket {
 declare const __kraken_websocket__: KrakenWebSocket;
 export const krakenWebSocket = __kraken_websocket__;
 
-declare const __kraken_ui_manager__: (message: string) => void;
+declare const __kraken_ui_manager__: (message: string) => void|string;
 export const krakenUIManager = __kraken_ui_manager__;
 
 declare const __kraken_ui_listener__: (fn: (message: string) => void) => void;

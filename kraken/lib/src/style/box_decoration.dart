@@ -27,6 +27,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     if (element != null) {
       element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
     }
+    // Flutter Border width is inside the element
+    // but w3c border is outside the element
+    // so use margin to fix it
     renderBorderMargin = RenderMargin(
         margin: margin,
         child: renderObject

@@ -301,7 +301,7 @@ abstract class Element extends Node
       bool isFixed;
 
       if (el.offsetTop == null) {
-        double offsetTop = double.parse(el.getOffset(true));
+        double offsetTop = double.parse(el.getOffsetY());
         // save element original offset to viewport
         el.offsetTop = offsetTop;
       }
@@ -1078,9 +1078,9 @@ abstract class Element extends Node
   dynamic method(String name, List<dynamic> args) {
     switch (name) {
       case 'offsetTop':
-        return getOffset(true);
+        return getOffsetY();
       case 'offsetLeft':
-        return getOffset(false);
+        return getOffsetX();
       case 'offsetWidth':
         return renderMargin?.size?.width ?? '0';
       case 'offsetHeight':
@@ -1101,22 +1101,52 @@ abstract class Element extends Node
         return getScrollHeight();
       case 'scrollWidth':
         return getScrollWidth();
+      case 'getBoundingClientRect':
+        return getBoundingClientRect();
       default:
         debugPrint('unknown method call. name: $name, args: ${args}');
     }
   }
 
-  String getOffset(bool isTop) {
+  Map getBoundingClientRect() {
+    Offset offset = getOffset(renderBorderMargin);
+    Size size = renderBorderMargin.size;
+    Map rect = {};
+    rect['x'] = offset.dx;
+    rect['y'] = offset.dy;
+    rect['width'] = size.width;
+    rect['height'] = size.height;
+    rect['top'] = offset.dy;
+    rect['left'] = offset.dx;
+    rect['right'] = offset.dx + size.width;
+    rect['bottom'] = offset.dy + size.height;
+    return rect;
+  }
+
+  String getOffsetX() {
     double offset = 0;
     if (renderObject is RenderBox) {
-      Element element = findParent(this, (element) => element.renderStack != null);
-      if (element == null) {
-        element = ElementManager().getRootElement();
-      }
-      Offset relative = (renderObject as RenderBox).localToGlobal(Offset.zero, ancestor: element.renderObject);
-      offset += isTop ? relative.dy : relative.dx;
+      Offset relative = getOffset(renderObject as RenderBox);
+      offset +=  relative.dx;
     }
     return offset.toString();
+  }
+
+  String getOffsetY() {
+    double offset = 0;
+    if (renderObject is RenderBox) {
+      Offset relative = getOffset(renderObject as RenderBox);
+      offset +=  relative.dy;
+    }
+    return offset.toString();
+  }
+
+  Offset getOffset(RenderBox renderBox) {
+    Element element = findParent(this, (element) => element.renderStack != null);
+    if (element == null) {
+      element = ElementManager().getRootElement();
+    }
+    return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
 
   void addEvent(String eventName) {

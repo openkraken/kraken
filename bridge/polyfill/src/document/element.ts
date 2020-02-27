@@ -4,7 +4,8 @@ import {
   createElement,
   removeEvent,
   setProperty,
-  setStyle
+  setStyle,
+  method
 } from './UIManager';
 
 type EventListener = () => void;
@@ -27,6 +28,23 @@ export function handleEvent(nodeId: number, event: any) {
   }
 }
 
+const RECT_PROPERTIES = [
+  'offsetTop',
+  'offsetLeft',
+  'offsetWidth',
+  'offsetHeight',
+
+  'clientWidth',
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
+
+  'scrollTop',
+  'scrollLeft',
+  'scrollHeight',
+  'scrollWidth',
+];
+
 export class ElementImpl extends NodeImpl {
   public readonly tagName: string;
   private events: {
@@ -46,8 +64,20 @@ export class ElementImpl extends NodeImpl {
       },
       get(target: any, key: string, receiver) {
         return this[key];
-      }
+      },
     });
+
+    // Define rect properties
+    for (let i = 0; i < RECT_PROPERTIES.length; i++) {
+      const prop = RECT_PROPERTIES[i];
+      Object.defineProperty(this, prop, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          return Number(method(this.id, prop, []));
+        },
+      });
+    }
 
     if (tagName != 'BODY') {
       createElement(this.tagName, id, {}, []);
@@ -66,6 +96,15 @@ export class ElementImpl extends NodeImpl {
     delete nodeMap[this.id];
     delete this.events[eventName];
     removeEvent(this.id, eventName);
+  }
+
+  getBoundingClientRect = () => {
+    const rectInformation = method(this.id, 'getBoundingClientRect', []);
+    if (typeof rectInformation === 'string') {
+      return JSON.parse(rectInformation);
+    } else {
+      return null;
+    }
   }
 
   get nodeName() {
