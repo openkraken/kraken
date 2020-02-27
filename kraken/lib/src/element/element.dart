@@ -163,7 +163,9 @@ abstract class Element extends Node
       }
 
       // update flex related properties
-      decorateRenderFlex(renderLayoutElement, newStyle);
+      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
+        decorateRenderFlex(renderLayoutElement, newStyle);
+      }
       // update style reference
       if (renderLayoutElement is RenderFlowLayout) {
         (renderLayoutElement as RenderFlowLayout).style = newStyle;
