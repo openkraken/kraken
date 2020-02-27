@@ -9,7 +9,6 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
-const String COMMENT = 'Comment';
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,
@@ -19,16 +18,17 @@ enum NodeType {
 }
 
 class Comment extends Node {
+  String data;
   Map<String, dynamic> properties;
 
-  Comment(int nodeId, this.properties) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+  Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
 class TextNode extends Node with TextStyleMixin {
   String data;
   Map<String, dynamic> properties;
 
-  TextNode(int nodeId, this.properties, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
   }
 

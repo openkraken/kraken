@@ -85,7 +85,7 @@ if($ENV{KRAKEN_JS_ENGINE} MATCHES "v8" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
             "${CMAKE_CURRENT_SOURCE_DIR}/third_party/v8-7.9.317.31/lib/macos/libicuuc.dylib"
             )
 
-    # 链接jsc
+    # linking jsc
     list(APPEND JSA_LINK_LIBS v8 v8_base v8_platform v8_icui18n v8_icuuc)
   endif ()
 endif()
