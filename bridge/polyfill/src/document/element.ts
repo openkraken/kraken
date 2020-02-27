@@ -78,6 +78,6 @@ export class ElementImpl extends NodeImpl {
   }
 
   public click() {
-    method(this.nodeId, 'click', []);
+    method(this.nodeId, 'click');
   }
 }

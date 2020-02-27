@@ -21,8 +21,6 @@ export enum NodeType {
 export class NodeImpl extends EventTarget {
   public readonly nodeType: NodeType;
   public readonly childNodes: NodeList = [];
-  // Only element and text type node should render in UI
-  public readonly childUINodes: NodeList = [];
   public readonly nodeId: number;
   public nodeValue: string | null;
   public textContent: string | null;
@@ -32,6 +30,16 @@ export class NodeImpl extends EventTarget {
     super();
     this.nodeId = id || nodeId++;
     this.nodeType = type;
+  }
+
+  public get isConnected() {
+    let _isConnected = this.nodeId === NodeId.BODY;
+    let parentNode = this.parentNode;
+    while (parentNode) {
+      _isConnected = parentNode.nodeId === NodeId.BODY
+      parentNode = parentNode.parentNode;
+    }
+    return _isConnected;
   }
 
   public get firstChild() {
