@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:audioplayers/audioplayers.dart';
 
