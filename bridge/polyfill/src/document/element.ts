@@ -8,7 +8,22 @@ import {
   method
 } from './UIManager';
 
-type EventListener = () => void;
+const RECT_PROPERTIES = [
+  'offsetTop',
+  'offsetLeft',
+  'offsetWidth',
+  'offsetHeight',
+
+  'clientWidth',
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
+
+  'scrollTop',
+  'scrollLeft',
+  'scrollHeight',
+  'scrollWidth',
+];
 
 let nodeMap: {
   [nodeId: number]: ElementImpl;
@@ -28,27 +43,10 @@ export function handleEvent(nodeId: number, event: any) {
   }
 }
 
-const RECT_PROPERTIES = [
-  'offsetTop',
-  'offsetLeft',
-  'offsetWidth',
-  'offsetHeight',
-
-  'clientWidth',
-  'clientHeight',
-  'clientLeft',
-  'clientTop',
-
-  'scrollTop',
-  'scrollLeft',
-  'scrollHeight',
-  'scrollWidth',
-];
-
 export class ElementImpl extends NodeImpl {
   public readonly tagName: string;
   private events: {
-    [eventName: string]: EventListener;
+    [eventName: string]: any;
   } = {};
   public style: object = {};
 
@@ -72,9 +70,9 @@ export class ElementImpl extends NodeImpl {
       const prop = RECT_PROPERTIES[i];
       Object.defineProperty(this, prop, {
         configurable: false,
-        enumerable: false,
+        enumerable: true,
         get() {
-          return Number(method(this.id, prop, []));
+          return Number(method(nodeId, prop));
         },
       });
     }
@@ -99,7 +97,7 @@ export class ElementImpl extends NodeImpl {
   }
 
   getBoundingClientRect = () => {
-    const rectInformation = method(this.id, 'getBoundingClientRect', []);
+    const rectInformation = method(this.nodeId, 'getBoundingClientRect');
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {
