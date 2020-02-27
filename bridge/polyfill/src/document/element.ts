@@ -28,6 +28,23 @@ export function handleEvent(nodeId: number, event: any) {
   }
 }
 
+const RECT_PROPERTIES = [
+  'offsetTop',
+  'offsetLeft',
+  'offsetWidth',
+  'offsetHeight',
+
+  'clientWidth',
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
+
+  'scrollTop',
+  'scrollLeft',
+  'scrollHeight',
+  'scrollWidth',
+];
+
 export class ElementImpl extends NodeImpl {
   public readonly tagName: string;
   private events: {
@@ -50,123 +67,17 @@ export class ElementImpl extends NodeImpl {
       },
     });
 
-    // define properties
-    Object.defineProperty(this, 'offsetTop', {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return Number(method(this.id, 'offsetTop', []));
-      },
-    });
-
-    Object.defineProperty(this, 'offsetLeft', {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return Number(method(this.id, 'offsetLeft', []));
-      },
-    });
-
-    Object.defineProperty(this, 'offsetWidth', {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return Number(method(this.id, 'offsetWidth', []));
-      },
-    });
-
-    Object.defineProperty(this, 'offsetHeight', {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return Number(method(this.id, 'offsetHeight', []));
-      },
-    });
-
-    Object.defineProperty(this, 'clientWidth', {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return Number(method(this.id, 'clientWidth', []));
-      },
-    });
-
-    Object.defineProperty(this, 'clientHeight', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'clientHeight', []);
-      }
-    });
-
-    Object.defineProperty(this, 'clientLeft', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'clientLeft', []);
-      }
-    });
-
-    Object.defineProperty(this, 'clientTop', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'clientTop', []);
-      }
-    });
-
-    Object.defineProperty(this, 'scrollTop', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'scrollTop', []);
-      }
-    });
-
-    Object.defineProperty(this, 'scrollLeft', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'scrollLeft', []);
-      }
-    });
-
-    Object.defineProperty(this, 'scrollHeight', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'scrollHeight', []);
-      }
-    });
-
-    Object.defineProperty(this, 'scrollWidth', {
-      configurable: false,
-      enumerable: false,
-      set(v) {
-        console.warn('this property is only readable');
-      },
-      get() {
-        return method(this.id, 'scrollWidth', []);
-      }
-    });
+    // Define rect properties
+    for (let i = 0; i < RECT_PROPERTIES.length; i++) {
+      const prop = RECT_PROPERTIES[i];
+      Object.defineProperty(this, prop, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          return Number(method(this.id, prop, []));
+        },
+      });
+    }
 
     if (tagName != 'BODY') {
       createElement(this.tagName, id, {}, []);
