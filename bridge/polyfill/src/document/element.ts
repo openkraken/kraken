@@ -4,7 +4,8 @@ import {
   createElement,
   removeEvent,
   setProperty,
-  setStyle
+  setStyle,
+  method
 } from './UIManager';
 
 type EventListener = () => void;
@@ -34,14 +35,14 @@ export class ElementImpl extends NodeImpl {
   } = {};
   public style: object = {};
 
-  constructor(tagName: string, id: number) {
+  constructor(tagName: string, id?: number) {
     super(NodeType.ELEMENT_NODE, id);
     this.tagName = tagName.toUpperCase();
-
+    const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
         this[key] = value;
-        setStyle(id, key, value);
+        setStyle(nodeId, key, value);
         return value;
       },
       get(target: any, key: string, receiver) {
@@ -50,22 +51,22 @@ export class ElementImpl extends NodeImpl {
     });
 
     if (tagName != 'BODY') {
-      createElement(this.tagName, id, {}, []);
+      createElement(this.tagName, nodeId, {}, []);
     }
   }
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    addEvent(this.id, eventName);
+    addEvent(this.nodeId, eventName);
     this.events[eventName] = eventListener;
-    nodeMap[this.id] = this;
+    nodeMap[this.nodeId] = this;
   }
 
   removeEventListener(eventName: string, eventListener: any) {
     super.removeEventListener(eventName, eventListener);
-    delete nodeMap[this.id];
+    delete nodeMap[this.nodeId];
     delete this.events[eventName];
-    removeEvent(this.id, eventName);
+    removeEvent(this.nodeId, eventName);
   }
 
   get nodeName() {
@@ -73,6 +74,10 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
-    setProperty(this.id, name, value);
+    setProperty(this.nodeId, name, value);
+  }
+
+  public click() {
+    method(this.nodeId, 'click', []);
   }
 }

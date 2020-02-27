@@ -31,37 +31,16 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
 
 const String BATCH_UPDATE = 'batchUpdate';
 
-ElementAction getAction(String action) {
-  switch (action) {
-    case 'createElement':
-      return ElementAction.createElement;
-    case 'createTextNode':
-      return ElementAction.createTextNode;
-    case 'insertAdjacentNode':
-      return ElementAction.insertAdjacentNode;
-    case 'removeNode':
-      return ElementAction.removeNode;
-    case 'setStyle':
-      return ElementAction.setStyle;
-    case 'setProperty':
-      return ElementAction.setProperty;
-    case 'removeProperty':
-      return ElementAction.removeProperty;
-    case 'addEvent':
-      return ElementAction.addEvent;
-    case 'removeEvent':
-      return ElementAction.removeEvent;
-    case 'method':
-      return ElementAction.method;
-    default:
-      return null;
-  }
-}
-
-String handleDirective(List directive) {
-  ElementAction action = getAction(directive[0]);
+String handleAction(List directive) {
+  String action = directive[0];
   List payload = directive[1];
-  var result = ElementManager().applyAction(action, payload);
+
+  var result;
+  try {
+    result = ElementManager.applyAction(action, payload);
+  } catch (e) {
+    print(e);
+  }
 
   if (result == null) {
     return '';
@@ -84,11 +63,11 @@ String invokeUIManager(String json) {
     List<dynamic> directiveList = directive[1];
     List<String> result = [];
     for (dynamic item in directiveList) {
-      result.add(handleDirective(item as List));
+      result.add(handleAction(item as List));
     }
     return result.join(',');
   } else {
-    return handleDirective(directive);
+    return handleAction(directive);
   }
 }
 
@@ -363,35 +342,42 @@ void registerGetScreen() {
 }
 
 typedef Native_StartFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterFlushCallbacksInUIThread = Void Function(Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
-typedef Dart_RegisterFlushCallbacksInUIThread = void Function(Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
+typedef Native_RegisterFlushCallbacksInUIThread = Void Function(
+    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
+typedef Dart_RegisterFlushCallbacksInUIThread = void Function(
+    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
 
-final Dart_RegisterFlushCallbacksInUIThread _registerStartFlushCallbacksInUIThread =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>('registerStartFlushCallbacksInUIThread').asFunction();
+final Dart_RegisterFlushCallbacksInUIThread _registerStartFlushCallbacksInUIThread = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>('registerStartFlushCallbacksInUIThread')
+    .asFunction();
 
 void _startFlushCallbacksInUIThread() {
   startFlushCallbacksInUIThread();
 }
 
 void registerStartFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer = Pointer.fromFunction(_startFlushCallbacksInUIThread);
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
+      Pointer.fromFunction(_startFlushCallbacksInUIThread);
   _registerStartFlushCallbacksInUIThread(pointer);
 }
 
-
 typedef Native_StopFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
-typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
+typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(
+    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
+typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(
+    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
 
-final Dart_RegisterFlushCallbacksInUIThread _registerStopFlushCallbacksInUIThread =
-nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>('registerStopFlushCallbacksInUIThread').asFunction();
+final Dart_RegisterFlushCallbacksInUIThread _registerStopFlushCallbacksInUIThread = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>('registerStopFlushCallbacksInUIThread')
+    .asFunction();
 
 void _stopFlushCallbacksInUIThread() {
   stopFlushCallbacksInUIThread();
 }
 
 void registerStopFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer = Pointer.fromFunction(_stopFlushCallbacksInUIThread);
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
+      Pointer.fromFunction(_stopFlushCallbacksInUIThread);
   _registerStopFlushCallbacksInUIThread(pointer);
 }
 

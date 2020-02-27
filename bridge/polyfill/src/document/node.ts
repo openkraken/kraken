@@ -1,7 +1,13 @@
 import { EventTarget } from 'event-target-shim';
 import { insertAdjacentNode, removeNode } from './UIManager';
 
-type NodeList = Array<NodeImpl>;
+export type NodeList = Array<NodeImpl>;
+
+let nodeId = 1;
+
+export enum NodeId {
+  BODY = -1,
+}
 
 export enum NodeType {
   ELEMENT_NODE = 1,
@@ -14,14 +20,18 @@ export enum NodeType {
 
 export class NodeImpl extends EventTarget {
   public readonly nodeType: NodeType;
-  public parentNode: NodeImpl | null;
-  public id: number;
   public readonly childNodes: NodeList = [];
+  // Only element and text type node should render in UI
+  public readonly childUINodes: NodeList = [];
+  public readonly nodeId: number;
+  public nodeValue: string | null;
+  public textContent: string | null;
+  public parentNode: NodeImpl | null;
 
-  constructor(type: NodeType, id: number) {
+  constructor(type: NodeType, id?: number) {
     super();
+    this.nodeId = id || nodeId++;
     this.nodeType = type;
-    this.id = id;
   }
 
   public get firstChild() {
@@ -32,6 +42,14 @@ export class NodeImpl extends EventTarget {
     return this.childNodes[this.childNodes.length - 1];
   }
 
+  public get previousSibling() {
+    if (!this.parentNode) {
+      return null;
+    }
+    const parentChildNodes = this.parentNode.childNodes;
+    return parentChildNodes[parentChildNodes.indexOf(this) - 1];
+  }
+
   public get nextSibling() {
     if (!this.parentNode) {
       return null;
@@ -40,19 +58,15 @@ export class NodeImpl extends EventTarget {
     return parentChildNodes[parentChildNodes.indexOf(this) + 1];
   }
 
-  public get nodeName(): string {
-    throw new Error('node nodeName property need to be override')
-  }
-
   public appendChild(node: NodeImpl) {
     // @TODO add logic to tell whether child to append contains the parent
-    if (node.id < 0 || node === this) {
+    if (node.nodeId === NodeId.BODY || node === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
-
+    
     this.childNodes.push(node);
     node.parentNode = this;
-    insertAdjacentNode(this.id, 'beforeend', node.id);
+    insertAdjacentNode(this.nodeId, 'beforeend', node.nodeId);
   }
 
   /**
@@ -64,7 +78,7 @@ export class NodeImpl extends EventTarget {
     const idx = this.childNodes.indexOf(node);
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
-      removeNode(node.id);
+      removeNode(node.nodeId);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
@@ -74,17 +88,11 @@ export class NodeImpl extends EventTarget {
   public insertBefore(newChild: NodeImpl, referenceNode: NodeImpl) {
     if (!referenceNode.parentNode) return;
     const parentNode = referenceNode.parentNode;
-    const nextIndex = parentNode.childNodes.indexOf(referenceNode);
-    parentNode.childNodes.splice(nextIndex - 1, 0, newChild);
+    const parentChildNodes = parentNode.childNodes;
+    const nextIndex = parentChildNodes.indexOf(referenceNode);
+    parentChildNodes.splice(nextIndex - 1, 0, newChild);
     newChild.parentNode = parentNode;
-    insertAdjacentNode(referenceNode.id, 'beforebegin', newChild.id);
-  }
-
-  public remove() {
-    if (!this.parentNode) {
-      return;
-    }
-    removeNode(this.id);
+    insertAdjacentNode(referenceNode.nodeId, 'beforebegin', newChild.nodeId);
   }
 
   /**
@@ -105,8 +113,8 @@ export class NodeImpl extends EventTarget {
     newChild.parentNode = parentNode;
     parentNode.childNodes.splice(childIndex, 1, newChild);
 
-    insertAdjacentNode(oldChild.id, 'afterend', newChild.id);
-    removeNode(oldChild.id);
+    insertAdjacentNode(oldChild.nodeId, 'afterend', newChild.nodeId);
+    removeNode(oldChild.nodeId);
     return oldChild;
   }
 }

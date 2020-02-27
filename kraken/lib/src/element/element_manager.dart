@@ -3,94 +3,81 @@
  * Author: Kraken Team.
  */
 
-import 'dart:convert';
 import 'dart:core';
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
 
-enum ElementAction {
-  createElement,
-  createTextNode,
-  insertAdjacentNode,
-  removeNode,
-  setStyle,
-  setProperty,
-  removeProperty,
-  addEvent,
-  removeEvent,
-  method
-}
-
-abstract class ElementManagerActionDelegate {
-  RenderObject root;
-  Element rootElement;
-
-  void createElement(PayloadNode node);
-
-  void createTextNode(PayloadNode node);
-
-  void removeNode(int targetId);
-
-  void setProperty(int targetId, String key, dynamic value);
-
-  void removeProperty(int targetId, String key);
-
-  void setStyle(int targetId, String key, String value);
-
-  void insertAdjacentNode(int targetId, String position, int nodeId);
-
-  void addEvent(int targetId, String eventName);
-
-  void removeEvent(int targetId, String eventName);
-
-  dynamic method(int targetId, String method, dynamic args);
+Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
+  switch (type) {
+    case DIV:
+      return DivElement(id, props, events);
+    case SPAN:
+      return SpanElement(id, props, events);
+    case IMAGE:
+      return ImgElement(id, props, events);
+    case PARAGRAPH:
+      return ParagraphElement(id, props, events);
+    case INPUT:
+      return InputElement(id, props, events);
+    case CANVAS:
+      return CanvasElement(id, props, events);
+    case VIDEO:
+      {
+        VideoElement.setDefaultPropsStyle(props);
+        return VideoElement(id, props, events);
+      }
+    default:
+      throw Exception('ERROR: unexpected element type "$type"');
+  }
 }
 
 Map<int, dynamic> nodeMap = {};
 
-class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
+class ElementManagerActionDelegate {
   final int BODY_ID = -1;
-  @override
   Element rootElement;
 
-  W3CElementManagerActionDelegate() {
+  ElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
-    _root = RenderDecoratedBox(
-        decoration: BoxDecoration(color: WebColor.white),
-        child: rootElement.renderObject);
+    _root = RenderDecoratedBox(decoration: BoxDecoration(color: WebColor.white), child: rootElement.renderObject);
     nodeMap[BODY_ID] = rootElement;
   }
 
   RenderBox _root;
   RenderBox get root => _root;
-
-  void createElement(PayloadNode node) {
-    assert(node != null);
-    if (nodeMap.containsKey(node.id)) {
-      throw Exception('ERROR: can not create element with same id: $node.id');
-    }
-
-    Node el;
-
-    switch (node.type) {
-      case 'COMMENT':
-        el = Comment(node.id, node.props);
-        break;
-      default:
-        el = createW3CElement(node);
-        break;
-    }
-
-    nodeMap[node.id] = el;
+  set root(RenderObject root) {
+    assert(() {
+      throw FlutterError('Can not set root to ElementManagerActionDelegate.');
+    }());
   }
 
-  void createTextNode(PayloadNode node) {
-    TextNode textNode = TextNode(node.id, node.props, node.data);
-    nodeMap[node.id] = textNode;
+  void createElement(int id, String type, Map<String, dynamic> props, List<dynamic> events) {
+    if (nodeMap.containsKey(id)) {
+      throw Exception('ERROR: can not create element with same id "$id"');
+    }
+
+    List<String> eventList = [];
+    if (events != null) {
+      for (var eventName in events) {
+        if (eventName is String) eventList.add(eventName);
+      }
+    }
+
+    nodeMap[id] = _createElement(id, type, props, eventList);
+  }
+
+  void createTextNode(int id, String data) {
+    TextNode textNode = TextNode(id, data);
+    nodeMap[id] = textNode;
+  }
+
+  void createComment(int id, String data) {
+    nodeMap[id] = Comment(id, data);
   }
 
   void removeNode(int targetId) {
@@ -157,8 +144,7 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
         } else {
           target.parentNode.insertBefore(
             newNode,
-            target.parentNode
-                .childNodes[target.parentNode.childNodes.indexOf(target) + 1],
+            target.parentNode.childNodes[target.parentNode.childNodes.indexOf(target) + 1],
           );
         }
 
@@ -185,15 +171,6 @@ class W3CElementManagerActionDelegate implements ElementManagerActionDelegate {
     target.removeEvent(eventName);
   }
 
-  @override
-  set root(RenderObject _root) {
-    assert(() {
-      throw FlutterError(
-          'Can not set root to W3CElementManagerActionDelegate.');
-    }());
-  }
-
-  @override
   dynamic method(int targetId, String method, dynamic args) {
     assert(nodeMap.containsKey(targetId));
 
@@ -210,7 +187,7 @@ class ElementManager {
   factory ElementManager() => _managerSingleton;
 
   ElementManager._() {
-    _actionDelegate = W3CElementManagerActionDelegate();
+    _actionDelegate = ElementManagerActionDelegate();
   }
 
   static bool showPerformanceOverlayOverride;
@@ -225,7 +202,7 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  void connect({ bool showPerformanceOverlay }) {
+  void connect({bool showPerformanceOverlay}) {
     if (showPerformanceOverlay != null) {
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
@@ -233,14 +210,12 @@ class ElementManager {
     RenderBox result = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null)
-      showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
 
     if (showPerformanceOverlay) {
       RenderPerformanceOverlay renderPerformanceOverlay =
           RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox =
-          RenderConstrainedBox(
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
           math.min(350.0, window.physicalSize.width),
@@ -268,89 +243,45 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  dynamic applyAction(ElementAction action, List payload, { PayloadNode node }) {
+  static dynamic applyAction(String action, List payload) {
     var returnValue;
 
     switch (action) {
-      case ElementAction.createElement:
-        if (node == null) node = PayloadNode.fromJson(payload[0]);
-        _actionDelegate.createElement(node);
+      case 'createElement':
+        _actionDelegate.createElement(payload[0], payload[1], payload[2], payload[3]);
         break;
-      case ElementAction.createTextNode:
-        if (node == null) node = PayloadNode.fromJson(payload[0]);
-        _actionDelegate.createTextNode(node);
+      case 'createTextNode':
+        _actionDelegate.createTextNode(payload[0], payload[1]);
         break;
-      case ElementAction.insertAdjacentNode:
+      case 'createComment':
+        _actionDelegate.createComment(payload[0], payload[1]);
+        break;
+      case 'insertAdjacentNode':
         _actionDelegate.insertAdjacentNode(payload[0], payload[1], payload[2]);
         break;
-      case ElementAction.removeNode:
+      case 'removeNode':
         _actionDelegate.removeNode(payload[0]);
         break;
-      case ElementAction.setStyle:
+      case 'setStyle':
         _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
         break;
-      case ElementAction.setProperty:
+      case 'setProperty':
         _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
         break;
-      case ElementAction.removeProperty:
+      case 'removeProperty':
         _actionDelegate.removeProperty(payload[0], payload[1]);
         break;
-      case ElementAction.addEvent:
+      case 'addEvent':
         _actionDelegate.addEvent(payload[0], payload[1]);
         break;
-      case ElementAction.removeEvent:
+      case 'removeEvent':
         _actionDelegate.removeEvent(payload[0], payload[1]);
         break;
-      case ElementAction.method:
+      case 'method':
         returnValue = _actionDelegate.method(payload[0], payload[1], payload[2]);
         break;
     }
 
     return returnValue;
-  }
-}
-
-class PayloadNode {
-  int id;
-  String type;
-  Map<String, dynamic> props = {};
-  List<String> events = [];
-  String data;
-
-  PayloadNode.fromJson(Map<String, dynamic> json) {
-    List<dynamic> events = json['events'];
-    id = json['id'];
-    type = json['type'];
-
-    if (json['props'] != null) {
-      props = json['props'];
-    }
-
-    if (events != null) {
-      for (var eventName in events) {
-        if (eventName is String) this.events.add(eventName);
-      }
-    }
-    data = json['data'];
-  }
-
-  PayloadNode.fromParams(String type, int id, String propsJson, String eventsJson) {
-    this.type = type;
-    this.id = id;
-
-    if (propsJson != null && propsJson.isNotEmpty) {
-      props = jsonDecode(propsJson);
-    }
-
-    if (eventsJson != null && eventsJson.isNotEmpty) {
-      var events = jsonDecode(eventsJson);
-      for (var eventName in events) {
-        if (eventName is String) this.events.add(eventName);
-      }
-    }
-  }
-
-  String toString() {
-    return 'PayloadNode(id: $id, type: $type, props: $props, events: $events, data: $data)';
   }
 }

@@ -21,30 +21,6 @@ const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
 
-Element createW3CElement(PayloadNode node) {
-  switch (node.type) {
-    case DIV:
-      return DivElement(node.id, node.props, node.events);
-    case SPAN:
-      return SpanElement(node.id, node.props, node.events);
-    case IMAGE:
-      return ImgElement(node.id, node.props, node.events);
-    case PARAGRAPH:
-      return ParagraphElement(node.id, node.props, node.events);
-    case INPUT:
-      return InputElement(node.id, node.props, node.events);
-    case CANVAS:
-      return CanvasElement(node.id, node.props, node.events);
-    case VIDEO:
-      {
-        VideoElement.setDefaultPropsStyle(node.props);
-        return VideoElement(node.id, node.props, node.events);
-      }
-    default:
-      throw FlutterError('ERROR: unexpected element type, ' + node.type);
-  }
-}
-
 abstract class Element extends Node
     with
         EventHandlerMixin,
@@ -424,8 +400,6 @@ abstract class Element extends Node
 
         needsReposition = false;
       }
-
-
     } else {
       // move element out of document flow
 
@@ -853,8 +827,7 @@ abstract class Element extends Node
     RenderObjectVisitor visitor = (child) {
       children.add(child);
     };
-    renderLayoutElement
-      ..visitChildren(visitor);
+    renderLayoutElement..visitChildren(visitor);
 
     int childIdx;
     children.forEach((childNode) {
