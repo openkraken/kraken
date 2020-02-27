@@ -24,13 +24,13 @@ public:
   ~JSWebSocket() = default;
 
   // JSBinding
-  virtual void bind(std::unique_ptr<JSContext> &context);
-  virtual void unbind(std::unique_ptr<JSContext> &context);
+  void bind(std::unique_ptr<JSContext> &context);
+  void unbind(std::unique_ptr<JSContext> &context);
 
   // HostObject
-  virtual Value get(JSContext &, const PropNameID &name) override;
+  Value get(JSContext &, const PropNameID &name) override;
 
-  virtual void set(JSContext &, const PropNameID &name,
+  void set(JSContext &, const PropNameID &name,
                    const Value &value) override;
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;

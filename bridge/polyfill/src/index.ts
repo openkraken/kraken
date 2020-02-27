@@ -5,3 +5,4 @@ import './matchMedia';
 import './location';
 import './navigator';
 import './window';
+import './blob';

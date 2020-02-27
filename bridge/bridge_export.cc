@@ -6,7 +6,6 @@
 #include "bridge_export.h"
 #include "dart_methods.h"
 #include "bridge.h"
-#include "polyfill.h"
 #include <atomic>
 #include <string>
 
@@ -19,13 +18,11 @@ Screen screen;
 void reloadJsContext() {
   inited = false;
   bridge = std::make_unique<kraken::JSBridge>();
-  initKrakenPolyFill(bridge->getContext());
   inited = true;
 }
 
 void initJsEngine() {
   bridge = std::make_unique<kraken::JSBridge>();
-  initKrakenPolyFill(bridge->getContext());
   inited = true;
 }
 
