@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
@@ -1078,6 +1079,8 @@ abstract class Element extends Node
         return getScrollWidth();
       case 'getBoundingClientRect':
         return getBoundingClientRect();
+      case 'click':
+        return click();
       default:
         debugPrint('unknown method call. name: $name, args: ${args}');
     }
@@ -1102,7 +1105,7 @@ abstract class Element extends Node
     double offset = 0;
     if (renderObject is RenderBox) {
       Offset relative = getOffset(renderObject as RenderBox);
-      offset +=  relative.dx;
+      offset += relative.dx;
     }
     return offset.toString();
   }
@@ -1111,7 +1114,7 @@ abstract class Element extends Node
     double offset = 0;
     if (renderObject is RenderBox) {
       Offset relative = getOffset(renderObject as RenderBox);
-      offset +=  relative.dy;
+      offset += relative.dy;
     }
     return offset.toString();
   }
@@ -1147,6 +1150,20 @@ abstract class Element extends Node
   void _eventResponder(Event event) {
     String json = jsonEncode([nodeId, event]);
     emitUIEvent(json);
+  }
+
+  void click() {
+    final RenderBox box = renderObject as RenderBox;
+    // Click at the center of the element
+    Offset position = box.localToGlobal(box.size.center(Offset.zero));
+    PointerEvent downEvent = PointerDownEvent(position: position);
+
+    final HitTestResult hitTestResult = HitTestResult();
+    GestureBinding.instance.hitTest(hitTestResult, position);
+    GestureBinding.instance.dispatchEvent(downEvent, hitTestResult);
+
+    PointerEvent upEvent = PointerUpEvent(position: position);
+    GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
   }
 }
 

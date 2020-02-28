@@ -44,6 +44,10 @@ void registerRequestAnimationFrame(RequestAnimationFrame callback) {
   methodPointer->requestAnimationFrame = callback;
 }
 
+void registerRequestBatchUpdate(RequestBatchUpdate callback) {
+  methodPointer->requestBatchUpdate = callback;
+}
+
 void registerCancelAnimationFrame(CancelAnimationFrame callback) {
   methodPointer->cancelAnimationFrame = callback;
 }

@@ -1,4 +1,4 @@
-import { krakenUIManager } from '../kraken';
+import { krakenUIManager, krakenRequestBatchUpdate } from '../kraken';
 
 const updateMessageQueue:string[] = [];
 let updateRequested: boolean = false;
@@ -15,7 +15,7 @@ function sendMessage(message: string) {
   updateMessageQueue.push(message);
   if (!updateRequested) {
     updateRequested = true;
-    requestAnimationFrame(requestUpdateFrame);
+    krakenRequestBatchUpdate(requestUpdateFrame);
   }
 }
 
@@ -56,5 +56,5 @@ export function removeEvent(id: number, eventName: string) {
 }
 
 export function method(id: number, methodName: string, params?: any[]) {
-  return krakenUIManager(`["method",[${id},"${methodName}",${JSON.stringify(params)}]]`);
+  return krakenUIManager(`["method",[${id},"${methodName}",${params ? JSON.stringify(params): '[]'}]]`);
 }

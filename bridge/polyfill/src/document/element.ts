@@ -45,8 +45,8 @@ export class ElementImpl extends NodeImpl {
   } = {};
   public style: object = {};
 
-  constructor(tagName: string, id?: number) {
-    super(NodeType.ELEMENT_NODE, id);
+  constructor(tagName: string, _nodeId?: number) {
+    super(NodeType.ELEMENT_NODE, _nodeId);
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
@@ -77,13 +77,9 @@ export class ElementImpl extends NodeImpl {
     }
   }
 
-  _hasEvent(eventName: string) {
-    return this.events.hasOwnProperty(eventName);
-  }
-
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    if (!this._hasEvent(eventName)) {
+    if (!this.events.hasOwnProperty(eventName)) {
       addEvent(this.nodeId, eventName);
       this.events[eventName] = eventListener;
     }
