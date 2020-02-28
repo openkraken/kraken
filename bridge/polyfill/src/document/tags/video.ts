@@ -1,7 +1,7 @@
-import { ElementImpl } from '../element';
+import { Element } from '../element';
 import { method } from '../UIManager';
 
-export class VideoImpl extends ElementImpl {
+export class Video extends Element {
   constructor(tagName: string) {
     super(tagName);
   }

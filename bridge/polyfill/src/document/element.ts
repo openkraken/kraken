@@ -1,4 +1,4 @@
-import { NodeImpl, NodeType, nodeMap } from './node';
+import { Node, NodeType, getNodeById } from './node';
 import {
   addEvent,
   createElement,
@@ -24,9 +24,8 @@ const RECT_PROPERTIES = [
   'scrollWidth',
 ];
 
-export function handleEvent(nodeId: number, event: any) {
-  const currentTarget = nodeMap[nodeId];
-  const target = nodeMap[event.target];
+export function handleEvent(currentTarget: Node, event: any) {
+  const target = getNodeById(event.target);
   event.targetId = event.target;
   event.target = target;
 
@@ -38,7 +37,7 @@ export function handleEvent(nodeId: number, event: any) {
   }
 }
 
-export class ElementImpl extends NodeImpl {
+export class Element extends Node {
   public readonly tagName: string;
   private events: {
     [eventName: string]: any;

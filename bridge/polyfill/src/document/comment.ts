@@ -1,7 +1,7 @@
-import { NodeImpl, NodeType } from './node';
+import { Node, NodeType } from './node';
 import { createComment } from './UIManager';
 
-export class CommentImpl extends NodeImpl {
+export class Comment extends Node {
   public nodeName: string = '#comment';
   public data: string = '';
 
