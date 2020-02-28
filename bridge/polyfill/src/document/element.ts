@@ -1,8 +1,7 @@
-import { NodeImpl, NodeType } from './node';
+import { NodeImpl, NodeType, nodeMap } from './node';
 import {
   addEvent,
   createElement,
-  removeEvent,
   setProperty,
   setStyle,
   method
@@ -24,10 +23,6 @@ const RECT_PROPERTIES = [
   'scrollHeight',
   'scrollWidth',
 ];
-
-let nodeMap: {
-  [nodeId: number]: ElementImpl;
-} = {};
 
 export function handleEvent(nodeId: number, event: any) {
   const currentTarget = nodeMap[nodeId];
@@ -82,18 +77,21 @@ export class ElementImpl extends NodeImpl {
     }
   }
 
-  addEventListener(eventName: string, eventListener: any) {
-    super.addEventListener(eventName, eventListener);
-    addEvent(this.nodeId, eventName);
-    this.events[eventName] = eventListener;
-    nodeMap[this.nodeId] = this;
+  _hasEvent(eventName: string) {
+    return this.events.hasOwnProperty(eventName);
   }
 
+  addEventListener(eventName: string, eventListener: any) {
+    super.addEventListener(eventName, eventListener);
+    if (!this._hasEvent(eventName)) {
+      addEvent(this.nodeId, eventName);
+      this.events[eventName] = eventListener;
+    }
+  }
+
+  // Do not really emit remove event, due to performance consideration.
   removeEventListener(eventName: string, eventListener: any) {
     super.removeEventListener(eventName, eventListener);
-    delete nodeMap[this.nodeId];
-    delete this.events[eventName];
-    removeEvent(this.nodeId, eventName);
   }
 
   getBoundingClientRect = () => {

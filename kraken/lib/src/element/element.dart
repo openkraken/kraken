@@ -111,14 +111,17 @@ abstract class Element extends Node
       onPointerCancel: this.handlePointCancel,
       behavior: HitTestBehavior.translucent,
     );
+
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
     // opacity
     renderObject = initRenderOpacity(renderObject, style);
+
     // margin
     renderObject = initRenderMargin(renderObject, style, this);
     // transition
     initTransition(style);
+
     // transform
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
 
