@@ -1016,7 +1016,7 @@ abstract class Element extends Node
   void updateTextNodeStyle(String key) {
     childNodes.forEach((node) {
       if (node is TextNode) {
-        node.setProperty(key, node.data);
+        node.setProperty('style', style);
       }
     });
   }

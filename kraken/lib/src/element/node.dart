@@ -8,6 +8,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
+const String STYLE = 'style';
 const String DATA = 'data';
 enum NodeType {
   ELEMENT_NODE,
@@ -25,12 +26,16 @@ class Comment extends Node {
 }
 
 class TextNode extends Node with TextStyleMixin {
-  String data;
-  Map<String, dynamic> properties;
-
-  TextNode(int nodeId, this.data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, String data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
+    this.data = data;
   }
+
+  String get data => properties['data'];
+  String set data(value) {
+    properties['data'] = value;
+  }
+  Map<String, dynamic> properties = {};
 
   @mustCallSuper
   void setProperty(String key, value) {
@@ -39,10 +44,14 @@ class TextNode extends Node with TextStyleMixin {
     Element parentElement = this.parentNode;
     Style parentStyle = parentElement.style;
 
+    Style textNodeStyle = parentStyle;
+    if (key == STYLE && value is Style)
+      textNodeStyle = textNodeStyle.copyWith(value.getOriginalStyleMap());
+
     RenderTextNode newTextNode = RenderTextNode(
       nodeId: nodeId,
-      text: value,
-      style: parentStyle,
+      text: data,
+      style: textNodeStyle,
     );
 
     int curIdx = parentElement.childNodes.indexOf(this);
