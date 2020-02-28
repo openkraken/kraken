@@ -148,7 +148,11 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp() {
-  reloadApp();
+  try {
+    reloadApp();
+  } catch(err, stack) {
+    print('$err\n$stack');
+  }
 }
 
 void registerReloadApp() {
