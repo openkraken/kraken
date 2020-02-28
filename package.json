@@ -9,9 +9,10 @@
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
     "test": "cd tests && npm test",
+    "test:unit": "cd tests && npm run unit",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
-    "ci": "npm run lint"
+    "ci": "npm run lint && npm run test:unit"
   },
   "repository": {
     "type": "git",
