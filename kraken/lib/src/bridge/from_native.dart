@@ -38,8 +38,9 @@ String handleAction(List directive) {
   var result;
   try {
     result = ElementManager.applyAction(action, payload);
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    print(error);
+    print(stackTrace);
   }
 
   if (result == null) {
@@ -147,7 +148,11 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp() {
-  reloadApp();
+  try {
+    reloadApp();
+  } catch(err, stack) {
+    print('$err\n$stack');
+  }
 }
 
 void registerReloadApp() {

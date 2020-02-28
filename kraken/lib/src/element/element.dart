@@ -16,7 +16,6 @@ import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
 
-const String STYLE = 'style';
 const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
@@ -111,14 +110,17 @@ abstract class Element extends Node
       onPointerCancel: this.handlePointCancel,
       behavior: HitTestBehavior.translucent,
     );
+
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
     // opacity
     renderObject = initRenderOpacity(renderObject, style);
+
     // margin
     renderObject = initRenderMargin(renderObject, style, this);
     // transition
     initTransition(style);
+
     // transform
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
 
@@ -1013,7 +1015,7 @@ abstract class Element extends Node
   void updateTextNodeStyle(String key) {
     childNodes.forEach((node) {
       if (node is TextNode) {
-        node.setProperty(key, node.data);
+        node.setProperty('style', style);
       }
     });
   }

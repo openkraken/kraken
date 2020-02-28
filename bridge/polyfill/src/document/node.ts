@@ -5,6 +5,11 @@ export type NodeList = Array<NodeImpl>;
 
 let nodeId = 1;
 
+// TODO: Remove reference at proper time.
+export const nodeMap: {
+  [nodeId: number]: NodeImpl;
+} = {};
+
 export enum NodeId {
   BODY = -1,
 }
@@ -29,7 +34,12 @@ export class NodeImpl extends EventTarget {
   constructor(type: NodeType, id?: number) {
     super();
     this.nodeId = id || nodeId++;
+    nodeMap[this.nodeId] = this;
     this.nodeType = type;
+  }
+
+  public destroy() {
+    delete nodeMap[this.nodeId];
   }
 
   public get isConnected() {
@@ -71,7 +81,7 @@ export class NodeImpl extends EventTarget {
     if (node.nodeId === NodeId.BODY || node === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
-    
+
     this.childNodes.push(node);
     node.parentNode = this;
     insertAdjacentNode(this.nodeId, 'beforeend', node.nodeId);
