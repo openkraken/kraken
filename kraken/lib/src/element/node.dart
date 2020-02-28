@@ -8,7 +8,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
-const String STYLE = 'style';
 const String DATA = 'data';
 enum NodeType {
   ELEMENT_NODE,
@@ -32,7 +31,7 @@ class TextNode extends Node with TextStyleMixin {
   }
 
   String get data => properties['data'];
-  String set data(value) {
+  set data(value) {
     properties['data'] = value;
   }
   Map<String, dynamic> properties = {};

@@ -16,7 +16,6 @@ import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
 
-const String STYLE = 'style';
 const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
