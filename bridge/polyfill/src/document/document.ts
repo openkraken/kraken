@@ -1,36 +1,33 @@
-import { NodeImpl, NodeType } from './node';
+import { NodeType, NodeId } from './node';
 import { ElementImpl } from './element';
+import { CommentImpl } from './comment';
 import { TextImpl } from './text';
 import { VideoImpl } from './tags/video';
 import { AudioImpl } from './tags/audio';
 
-let id = 1;
-
-export class DocumentImpl extends NodeImpl {
-  public body: ElementImpl = new ElementImpl('BODY', -1);
-
-  constructor() {
-    super(NodeType.DOCUMENT_NODE, -2);
-  }
+export class DocumentImpl {
+  public body: ElementImpl = new ElementImpl('BODY', NodeId.BODY);
+  public nodeName: string = '#document';
+  public nodeType = NodeType.DOCUMENT_NODE;
 
   createElement(tagName: string) {
     let element;
     switch(tagName) {
       case 'video':
-        element = new VideoImpl(tagName, id++);
+        element = new VideoImpl(tagName);
         break;
       case 'audio':
-        element = new AudioImpl(tagName, id++);
+        element = new AudioImpl(tagName);
         break;
       default:
-        element = new ElementImpl(tagName, id++);
+        element = new ElementImpl(tagName);
         break;
     }
     return element;
   }
 
   createTextNode(text: string) {
-    return new TextImpl(text, id++);
+    return new TextImpl(text);
   }
 
   /**
@@ -38,8 +35,7 @@ export class DocumentImpl extends NodeImpl {
    * @param data {string} A string containing the data to be added to the Comment.
    */
   createComment(data: string) {
-    // Use an empty TextNode to impl comment.
-    return new TextImpl('', id++);
+    return new CommentImpl(data);
   }
 }
 

@@ -2,19 +2,19 @@ import { ElementImpl } from '../element';
 import { method } from '../UIManager';
 
 export class AudioImpl extends ElementImpl {
-  constructor(tagName: string, id: number) {
-    super(tagName, id);
+  constructor(tagName: string) {
+    super(tagName);
   }
 
   play = () => {
-    method(this.id, 'play', []);
+    method(this.nodeId, 'play', []);
   };
 
   pause = () => {
-    method(this.id, 'pause', []);
+    method(this.nodeId, 'pause', []);
   };
 
   fastSeek = (duration: number) => {
-    method(this.id, 'fastSeek', [duration]);
+    method(this.nodeId, 'fastSeek', [duration]);
   };
 }

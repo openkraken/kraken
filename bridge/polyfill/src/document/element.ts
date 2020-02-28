@@ -8,7 +8,22 @@ import {
   method
 } from './UIManager';
 
-type EventListener = () => void;
+const RECT_PROPERTIES = [
+  'offsetTop',
+  'offsetLeft',
+  'offsetWidth',
+  'offsetHeight',
+
+  'clientWidth',
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
+
+  'scrollTop',
+  'scrollLeft',
+  'scrollHeight',
+  'scrollWidth',
+];
 
 let nodeMap: {
   [nodeId: number]: ElementImpl;
@@ -28,38 +43,21 @@ export function handleEvent(nodeId: number, event: any) {
   }
 }
 
-const RECT_PROPERTIES = [
-  'offsetTop',
-  'offsetLeft',
-  'offsetWidth',
-  'offsetHeight',
-
-  'clientWidth',
-  'clientHeight',
-  'clientLeft',
-  'clientTop',
-
-  'scrollTop',
-  'scrollLeft',
-  'scrollHeight',
-  'scrollWidth',
-];
-
 export class ElementImpl extends NodeImpl {
   public readonly tagName: string;
   private events: {
-    [eventName: string]: EventListener;
+    [eventName: string]: any;
   } = {};
   public style: object = {};
 
-  constructor(tagName: string, id: number) {
+  constructor(tagName: string, id?: number) {
     super(NodeType.ELEMENT_NODE, id);
     this.tagName = tagName.toUpperCase();
-
+    const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
         this[key] = value;
-        setStyle(id, key, value);
+        setStyle(nodeId, key, value);
         return value;
       },
       get(target: any, key: string, receiver) {
@@ -72,34 +70,34 @@ export class ElementImpl extends NodeImpl {
       const prop = RECT_PROPERTIES[i];
       Object.defineProperty(this, prop, {
         configurable: false,
-        enumerable: false,
+        enumerable: true,
         get() {
-          return Number(method(this.id, prop, []));
+          return Number(method(nodeId, prop));
         },
       });
     }
 
     if (tagName != 'BODY') {
-      createElement(this.tagName, id, {}, []);
+      createElement(this.tagName, nodeId, {}, []);
     }
   }
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    addEvent(this.id, eventName);
+    addEvent(this.nodeId, eventName);
     this.events[eventName] = eventListener;
-    nodeMap[this.id] = this;
+    nodeMap[this.nodeId] = this;
   }
 
   removeEventListener(eventName: string, eventListener: any) {
     super.removeEventListener(eventName, eventListener);
-    delete nodeMap[this.id];
+    delete nodeMap[this.nodeId];
     delete this.events[eventName];
-    removeEvent(this.id, eventName);
+    removeEvent(this.nodeId, eventName);
   }
 
   getBoundingClientRect = () => {
-    const rectInformation = method(this.id, 'getBoundingClientRect', []);
+    const rectInformation = method(this.nodeId, 'getBoundingClientRect');
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {
@@ -112,6 +110,10 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
-    setProperty(this.id, name, value);
+    setProperty(this.nodeId, name, value);
+  }
+
+  public click() {
+    method(this.nodeId, 'click');
   }
 }

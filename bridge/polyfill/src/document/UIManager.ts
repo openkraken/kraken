@@ -20,11 +20,15 @@ function sendMessage(message: string) {
 }
 
 export function createElement(type: string, id: number, props: any, events: any) {
-  sendMessage(`["createElement",[{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
+  sendMessage(`["createElement",[${id},"${type}",${JSON.stringify(props)},${JSON.stringify(events)}]]`);
 }
 
-export function createTextNode(id: number, nodeType: number, data: string) {
-  sendMessage(`["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`);
+export function createTextNode(id: number, data: string) {
+  sendMessage(`["createTextNode",[${id},"${data}"]]`);
+}
+
+export function createComment(id: number, data: string) {
+  sendMessage(`["createComment",[${id},"${data}"]]`);
 }
 
 export function insertAdjacentNode(parentNodeId: number, position: string, nodeId: number) {
@@ -51,6 +55,6 @@ export function removeEvent(id: number, eventName: string) {
   sendMessage(`["removeEvent",[${id},"${eventName}"]]`);
 }
 
-export function method(id: number, eventName: string, params: any[]) {
-  return krakenUIManager(`["method",[${id},"${eventName}", "${JSON.stringify(params)}"]]`);
+export function method(id: number, methodName: string, params?: any[]) {
+  return krakenUIManager(`["method",[${id},"${methodName}",${JSON.stringify(params)}]]`);
 }
