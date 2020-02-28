@@ -58,7 +58,7 @@ export class ElementImpl extends NodeImpl {
       set(target: any, key: string, value: any, receiver: any): boolean {
         this[key] = value;
         setStyle(nodeId, key, value);
-        return value;
+        return true;
       },
       get(target: any, key: string, receiver) {
         return this[key];
