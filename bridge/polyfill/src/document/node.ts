@@ -83,7 +83,7 @@ export class Node extends EventTarget {
     insertAdjacentNode(this.nodeId, 'beforeend', child.nodeId);
 
     if (this.isConnected) {
-      nodeMap[child.nodeId] = child;
+      traverseNode(child, addToNodeMap);
     }
   }
 
@@ -97,9 +97,8 @@ export class Node extends EventTarget {
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
 
-      const childId = child.nodeId;
-      removeNode(childId);
-      delete nodeMap[childId];
+      removeNode(child.nodeId);
+      traverseNode(child, removeFromNodeMap);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
@@ -116,7 +115,7 @@ export class Node extends EventTarget {
     insertAdjacentNode(referenceNode.nodeId, 'beforebegin', newChild.nodeId);
 
     if (this.isConnected) {
-      nodeMap[newChild.nodeId] = newChild;
+      traverseNode(newChild, addToNodeMap);
     }
   }
 
@@ -142,10 +141,27 @@ export class Node extends EventTarget {
     removeNode(oldChild.nodeId);
 
     if (this.isConnected) {
-      nodeMap[newChild.nodeId] = newChild;
-      delete nodeMap[oldChild.nodeId];
+      traverseNode(newChild, addToNodeMap);
+      traverseNode(oldChild, removeFromNodeMap);
     }
 
     return oldChild;
   }
+}
+
+function traverseNode(node: Node, handle: Function) {
+  handle(node);
+  if (node.childNodes.length > 0) {
+    for (let i = 0, l = node.childNodes.length; i < l; i++) {
+      traverseNode(node.childNodes[i], handle);
+    }
+  }
+}
+
+function addToNodeMap(node: Node) {
+  nodeMap[node.nodeId] = node;
+}
+
+function removeFromNodeMap(node: Node) {
+  delete nodeMap[node.nodeId];
 }
