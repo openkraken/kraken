@@ -45,7 +45,9 @@ abstract class Element extends Node
   bool _inited = false; // True after constructor finished.
   bool shouldBlockStretch = true;
   double cropWidth = 0;
+  double cropHeight = 0;
   double cropBorderWidth = 0;
+  double cropBorderHeight = 0;
   double offsetTop = null; // offset to the top of viewport
   bool stickyFixed = false;
 

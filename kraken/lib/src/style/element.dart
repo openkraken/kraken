@@ -37,6 +37,40 @@ mixin ElementStyleMixin on RenderBox {
     return widthD;
   }
 
+  // Loop element tree to find nearest parent width include self node
+  // @TODO Support detecting node width in more complicated scene such as flex layout
+  double getParentHeight(int childId) {
+    String height;
+    bool isParentWithHeight = false;
+    var childNode = nodeMap[childId];
+    double cropHeight = 0;
+    while (!isParentWithHeight) {
+      if (childNode is Element) {
+        Style style = childNode.style;
+        if (style.contains('height')) {
+          isParentWithHeight = true;
+          height = style['height'];
+          break;
+        }
+        // minus margin and border
+        cropHeight +=
+        ((childNode.cropHeight ?? 0) + (childNode.cropBorderHeight ?? 0));
+
+        // minus padding
+        Padding padding = baseGetPaddingFromStyle(childNode.style);
+        cropHeight += padding.top + padding.bottom;
+      }
+
+      if (childNode.parentNode != null) {
+        childNode = childNode.parentNode;
+      }
+    }
+
+    double heightD = Length.toDisplayPortValue(height) - cropHeight;
+
+    return heightD;
+  }
+
   // get parent node height if parent is flex and stretch children height
   double getStretchParentHeight(int nodeId) {
     double parentHeight;
