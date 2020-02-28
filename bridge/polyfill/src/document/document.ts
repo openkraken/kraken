@@ -1,15 +1,21 @@
-import { NodeType, NodeId } from './node';
+import { Node, NodeType, NodeId } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
 import { Text } from './text';
 import { Video } from './tags/video';
 
-export class Document {
+export class Document extends Node {
   public body: Element = new Element('BODY', NodeId.BODY);
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
 
-  createElement(tagName: string) {
+  constructor() {
+    // Use the same nodeId with body, only used in event targets,
+    // document events are triggered and received by body element.
+    super(NodeType.DOCUMENT_NODE, NodeId.BODY);
+  }
+
+  createElement(tagName: string) : Element {
     let element;
     switch(tagName) {
       case 'video':
