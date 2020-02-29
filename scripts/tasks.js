@@ -125,7 +125,22 @@ task('clean', () => {
 const libOutputPath = join(TARGET_PATH, platform, buildMode.toLowerCase(), 'lib');
 for (let jsEngine of SUPPORTED_JS_ENGINES) {
   task('generate-cmake-files-' + jsEngine, (done) => {
-    const args = [
+    function generateCmake(args) {
+      const handle = spawnSync('cmake', args, {
+        cwd: paths.bridge,
+        env: Object.assign(process.env, {
+          LIBRARY_OUTPUT_DIR: libOutputPath,
+          KRAKEN_JS_ENGINE: jsEngine
+        }),
+        stdio: 'inherit',
+      });
+      if (handle.status !== 0) {
+        console.error(handle.error);
+        return done(false);
+      }
+    }
+
+    const makeFileArgs = [
       '-DCMAKE_BUILD_TYPE=Release',
       '-G',
       'CodeBlocks - Unix Makefiles',
@@ -134,18 +149,22 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '-S',
       paths.bridge
     ];
-    const handle = spawnSync('cmake', args, {
-      cwd: paths.bridge,
-      env: Object.assign(process.env, {
-        LIBRARY_OUTPUT_DIR: libOutputPath,
-        KRAKEN_JS_ENGINE: jsEngine
-      }),
-      stdio: 'inherit',
-    });
-    if (handle.status !== 0) {
-      console.error(handle.error);
-      return done(false);
+
+    // generate xcode project for debugging on macOS.
+    if (platform === 'darwin') {
+      const xcodeArgs = [
+        '-DCMAKE_BUILD_TYPE=Release',
+          '-G',
+          'Xcode',
+          '-B',
+          resolve(paths.bridge, 'cmake-build-macos'),
+          '-S',
+          paths.bridge
+      ];
+      generateCmake(xcodeArgs);
     }
+
+    generateCmake(makeFileArgs);
     done(null);
   });
 
