@@ -88,14 +88,15 @@ export class NodeImpl extends EventTarget {
   }
 
   /**
-   * The Node.removeChild() method rmoves a child node within the given (parent) node.
+   * The Node.removeChild() method removes a child node within the given (parent) node.
    * @param node {NodeImpl} The child node to remove.
-   * @return The returned value is the rmoved node.
+   * @return The returned value is the removed node.
    */
   public removeChild(node: NodeImpl) {
     const idx = this.childNodes.indexOf(node);
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
+      node.parentNode = null;
       removeNode(node.nodeId);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
