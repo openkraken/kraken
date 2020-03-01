@@ -1,3 +1,4 @@
+import './console';
 import './websocket';
 import './fetch';
 import './document';
