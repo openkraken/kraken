@@ -256,7 +256,7 @@ const console = {
     }
   },
   assert(expression: boolean, ...args: Array<any>) {
-    if (!expression) console.error('Assertion failed: ', ...args);
+    if (!expression) console.error('Assertion failed:', ...args);
   },
   time(label = 'default') {
     label = String(label);
