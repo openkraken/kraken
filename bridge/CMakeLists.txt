@@ -12,76 +12,55 @@ include(./jsa/jsa.cmake)
 add_subdirectory(foundation)
 include_directories(foundation)
 
-add_library(bindings STATIC
-  bindings/KOM/console.cc
-  bindings/KOM/screen.cc
-  bindings/KOM/timer.cc
-  bindings/KOM/websocket.cc
-  bindings/KOM/websocket.h
-  bindings/KOM/window.cc
-  bindings/KOM/window.h
-  bindings/KOM/location.cc
-  bindings/KOM/location.h
-  bindings/kraken.cc
+list(APPEND BRIDGE_SOURCE
+    bindings/KOM/console.cc
+    bindings/KOM/screen.cc
+    bindings/KOM/timer.cc
+    bindings/KOM/websocket.cc
+    bindings/KOM/websocket.h
+    bindings/KOM/window.cc
+    bindings/KOM/window.h
+    bindings/KOM/location.cc
+    bindings/KOM/location.h
+    bindings/kraken.cc
+    bindings/KOM/blob.cc
+    bindings/KOM/blob.h
+    dart_methods.cc
+    dart_methods.h
+    bridge.cc
+    bridge.h
+    polyfill/dist/polyfill.cc
 )
-add_library(bridge STATIC bridge.cc bridge.h)
-add_library(dart_methods STATIC dart_methods.cc dart_methods.h)
-add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
+
+list(APPEND BRIDGE_INCLUDE
+    ./jsa/include
+    ./foundation
+    ./
+    ./include
+    ./polyfill/dist
+    ./foundation/websockettpp-0.8.1
+    ${ADDITIONAL_INCLUDE_DIRS}
+    ${JSA_INCLUDE_DIRS}
+)
+
+list(APPEND BRIDGE_LINK_LIBS
+        jsa_abstraction
+        jsa_implementation
+        foundation
+        -pthread
+)
+
+add_library(bridge STATIC ${BRIDGE_SOURCE})
 add_library(kraken SHARED bridge_export.cc)
 
-### Bindings
-target_include_directories(bindings PRIVATE
-  ./jsa/include
-  ./foundation
-  ./
-  ./foundation/websockettpp-0.8.1
-  ${ADDITIONAL_INCLUDE_DIRS}
-  ${JSA_INCLUDE_DIRS}
-  )
-target_link_libraries(bindings PRIVATE
-  jsa_abstraction
-  jsa_implementation
-  dart_methods
-  foundation)
-
-### Bridges
-target_link_libraries(bridge PRIVATE
-  jsa_implementation
-  jsa_abstraction
-  dart_methods
-  bindings
-  -pthread)
-target_include_directories(bridge PRIVATE
-  ./jsa/include
-  ${JSA_INCLUDE_DIRS}
-  ${ADDITIONAL_INCLUDE_DIRS})
-
-target_include_directories(dart_methods PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${JSA_INCLUDE_DIRS}
-  PUBLIC ./include
-)
-
-### Js Code
-target_link_libraries(js_code PRIVATE bridge)
-target_include_directories(js_code PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ./jsa/include
-  ${ADDITIONAL_INCLUDE_DIRS}
-  ${JSA_INCLUDE_DIRS}
-  )
+### bridge
+target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
+target_include_directories(bridge PRIVATE ${BRIDGE_INCLUDE})
 
 ### Kraken
-target_link_libraries(kraken PRIVATE
-  bridge
-  js_code
-  )
+target_link_libraries(kraken PRIVATE bridge)
 target_include_directories(kraken PRIVATE
-  ./foundation
-  ./polyfill/dist
-  ./jsa/include
-  ${ADDITIONAL_INCLUDE_DIRS}
-  ${JSA_INCLUDE_DIRS}
+  ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 execute_process(

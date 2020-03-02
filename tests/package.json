@@ -1,11 +1,13 @@
 {
-  "name": "@kraken/test",
-  "version": "0.0.0",
-  "description": "Kraken test repo.",
+  "private": true,
   "scripts": {
-    "test": "npm run test:flutter",
-    "test:flutter": "flutter clean && flutter drive --target=test_driver/app.dart"
+    "install": "flutter pub get",
+    "test": "flutter clean && npm run unit && npm run integration",
+    "unit": "node ./scripts/bootstrap_unit_test",
+    "integration": "flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
   },
-  "author": "Kraken Team",
-  "license": "MIT"
+  "devDependencies": {
+    "chalk": "^3.0.0",
+    "glob": "^7.1.6"
+  }
 }

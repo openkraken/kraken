@@ -15,12 +15,11 @@ import 'package:path/path.dart';
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
 const String KRAKEN_JS_ENGINE = 'KRAKEN_JS_ENGINE';
 final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
-final String kkJsEngine = Platform.isIOS ? 'jsc' : Platform.environment[KRAKEN_JS_ENGINE] ?? 'v8';
+final String kkJsEngine = Platform.environment[KRAKEN_JS_ENGINE] ?? ((Platform.isIOS || Platform.isMacOS) ? 'jsc' : 'v8');
 final String libName = 'libkraken_$kkJsEngine';
 final String nativeDynamicLibraryName = Platform.isMacOS || Platform.isIOS
     ? '$libName.dylib'
     : Platform.isWindows ? '$libName.dll' : '$libName.so';
-DynamicLibrary nativeDynamicLibrary = (Platform.isAndroid || Platform.isMacOS)
-    ? DynamicLibrary.open(nativeDynamicLibraryName)
-    : DynamicLibrary.open(
-        join(kkLibraryPath ?? '\$ORIGIN', nativeDynamicLibraryName));
+DynamicLibrary nativeDynamicLibrary = DynamicLibrary.open(join(
+    kkLibraryPath ?? (Platform.isLinux ? '\$ORIGIN' : ''),
+    nativeDynamicLibraryName));

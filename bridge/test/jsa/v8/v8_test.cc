@@ -31,8 +31,6 @@ TEST(V8Context, number) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("123456", "", 0).isNumber(), true);
-  EXPECT_EQ(context->evaluateJavaScript("new Number('1234')", "", 0).isNumber(),
-            true);
   EXPECT_EQ(context->evaluateJavaScript("2.455", "", 0).isNumber(), true);
   EXPECT_EQ(context->evaluateJavaScript("parseInt('42')", "", 0).isNumber(),
             true);
@@ -49,8 +47,6 @@ TEST(V8Context, boolean) {
   initV8Engine("");
   std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
-  EXPECT_EQ(context->evaluateJavaScript("new Boolean('1234')", "", 0).isBool(),
-            true);
 }
 
 TEST(V8Context, V8StringValue_newString) {
@@ -392,6 +388,11 @@ TEST(V8Context, hostFunction) {
       object.getPropertyAsFunction(*context, "helloworld");
   jsa::Value result = helloworld.call(*context);
   EXPECT_EQ(result.getNumber(), 12345);
+  EXPECT_EQ(helloworld.getProperty(*context, "name")
+                .getString(*context)
+                .utf8(*context),
+            "helloworld");
+  EXPECT_EQ(helloworld.getProperty(*context, "length").getNumber(), 0);
 }
 
 TEST(V8Context, hostFunctionWithParams) {
@@ -580,7 +581,8 @@ TEST(V8Context, hostObject_getPropertyNames) {
   EXPECT_EQ(
       names.getValueAtIndex(*context, 0).getString(*context).utf8(*context),
       "connect");
-  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
+  EXPECT_EQ(
+      names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
       "send");
 }
 
@@ -589,12 +591,12 @@ TEST(V8Context, createArrayBuffer) {
   auto context = std::make_unique<V8Context>();
   const size_t len = 20;
   uint8_t *data = new uint8_t[len];
-  for (int i = 0; i < 20; i ++) {
+  for (int i = 0; i < 20; i++) {
     data[i] = i + 1;
   }
 
-  jsa::ArrayBuffer arrayBuffer =
-      jsa::ArrayBuffer::createWithUnit8(*context, data, len, [](uint8_t* bytes) {
+  jsa::ArrayBuffer arrayBuffer = jsa::ArrayBuffer::createWithUnit8(
+      *context, data, len, [](uint8_t *bytes) {
         abort();
         delete bytes;
       });
@@ -603,15 +605,46 @@ TEST(V8Context, createArrayBuffer) {
 
   context->global().setProperty(*context, "buffer", arrayBuffer);
 
-  jsa::Value toStringValue = context->evaluateJavaScript("buffer.toString()", "", 0);
+  jsa::Value toStringValue =
+      context->evaluateJavaScript("buffer.toString()", "", 0);
   EXPECT_EQ(toStringValue.isString(), true);
-  EXPECT_EQ(toStringValue.getString(*context).utf8(*context), "[object ArrayBuffer]");
+  EXPECT_EQ(toStringValue.getString(*context).utf8(*context),
+            "[object ArrayBuffer]");
 
-  jsa::Value rawArray = context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
+  jsa::Value rawArray =
+      context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);
   EXPECT_EQ(rawArray.getObject(*context).isArray(*context), true);
   jsa::Array dataArray = rawArray.getObject(*context).getArray(*context);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 0).getNumber(), 1);
   EXPECT_EQ(dataArray.getValueAtIndex(*context, 9).getNumber(), 10);
+}
+
+TEST(V8Context, isArrayBufferView) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  EXPECT_EQ(result.getObject(*context).isArrayBufferView(*context), true);
+  jsa::ArrayBufferViewType type =
+      result.getObject(*context).getArrayBufferView(*context).getType(*context);
+  EXPECT_EQ(type, jsa::ArrayBufferViewType::Uint8Array);
+}
+
+TEST(V8Context, ArrayBufferView_data) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  jsa::Value result =
+      context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
+  jsa::ArrayBufferView bufferView =
+      result.getObject(*context).getArrayBufferView(*context);
+  uint8_t *data = bufferView.data<uint8_t>(*context);
+  size_t length = bufferView.size(*context);
+  EXPECT_EQ(length, 5);
+  EXPECT_EQ(data[0], 1);
+  EXPECT_EQ(data[1], 2);
+  EXPECT_EQ(data[2], 3);
+  EXPECT_EQ(data[3], 4);
+  EXPECT_EQ(data[4], 5);
 }
 
 #endif

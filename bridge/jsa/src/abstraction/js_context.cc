@@ -15,11 +15,11 @@ namespace jsa {
 ////////////////////HostObject Definition////////////////////
 Value HostObject::get(JSContext &, const PropNameID &) { return Value(); }
 
-void HostObject::set(JSContext &rt, const PropNameID &name, const Value &) {
+void HostObject::set(JSContext &context, const PropNameID &name, const Value &) {
   std::string msg("TypeError: Cannot assign to property '");
-  msg += name.utf8(rt);
+  msg += name.utf8(context);
   msg += "' on HostObject with default setter";
-  throw JSError(rt, msg);
+  throw JSError(context, msg);
 }
 
 HostObject::~HostObject() {}

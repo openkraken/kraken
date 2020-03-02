@@ -3,8 +3,10 @@
  * Author: Kraken Team.
  */
 
+#include "jsa.h"
 #include "websocket.h"
 #include "foundation/flushUITask.h"
+#include "dart_methods.h"
 
 #include "logging.h"
 #include "websocket_client.h"
@@ -136,8 +138,8 @@ JSWebSocket::JSWebSocket() {
 Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
                            const Value *args, size_t count) {
   if (count < 5) {
-    KRAKEN_LOG(WARN) << "connect method takes 5 arguments. "
-                        "[connetct(url,onMessage,onOpen,onClose,onError)]";
+    KRAKEN_LOG(WARN) << "WebSocket.connect method takes 5 arguments. "
+                        "[connect(url, onMessage, onOpen, onClose, onError)]";
     return Value::undefined();
   }
   auto &&url = args[0];
@@ -151,6 +153,8 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
     KRAKEN_LOG(ERROR) << "websocket url must be string";
     return Value::undefined();
   }
+
+  getDartMethod()->startFlushCallbacksInUIThread();
 
   auto callback = std::make_shared<CallbackImpl>(
       context, std::move(onOpen), std::move(onMessage), std::move(onClose),
@@ -212,6 +216,7 @@ Value JSWebSocket::close(JSContext &context, const Value &thisVal,
   _websocket->close(static_cast<int>(token.getNumber()),
                     static_cast<int>(code.getNumber()),
                     reason.getString(context).utf8(context));
+  getDartMethod()->stopFlushCallbacksInUIThread();
   return Value::undefined();
 }
 
@@ -226,22 +231,22 @@ Value JSWebSocket::get(JSContext &context, const PropNameID &name) {
   auto _name = name.utf8(context);
   using namespace alibaba::jsa;
   if (_name == "connect") {
-    auto connectFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::connect, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto connectFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "connect", 4, std::bind(&JSWebSocket::connect, this, std::placeholders::_1,
+                                      std::placeholders::_2, std::placeholders::_3,
+                                      std::placeholders::_4));
     return Value(context, connectFunc);
   } else if (_name == "send") {
-    auto sendFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::send, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto sendFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "send", 4, std::bind(&JSWebSocket::send, this, std::placeholders::_1,
+                                      std::placeholders::_2, std::placeholders::_3,
+                                      std::placeholders::_4));
     return Value(context, sendFunc);
   } else if (_name == "close") {
-    auto closeFunc = JSA_CREATE_HOST_FUNCTION_SIMPLIFIED(
-        context, std::bind(&JSWebSocket::close, this, std::placeholders::_1,
-                           std::placeholders::_2, std::placeholders::_3,
-                           std::placeholders::_4));
+    auto closeFunc = JSA_CREATE_HOST_FUNCTION(
+        context, "close", 4, std::bind(&JSWebSocket::close, this, std::placeholders::_1,
+                                       std::placeholders::_2, std::placeholders::_3,
+                                       std::placeholders::_4));
     return Value(context, closeFunc);
   }
   return Value::undefined();
@@ -257,12 +262,12 @@ std::vector<PropNameID> JSWebSocket::getPropertyNames(JSContext &context) {
 
 void JSWebSocket::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
-  JSA_BINDING_GLOBAL_HOST_OBJECT(*context, "__kraken_websocket__",
-                                 sharedSelf());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_websocket__",
+                                 Object::createFromHostObject(*context, sharedSelf()));
 }
 
 void JSWebSocket::unbind(std::unique_ptr<JSContext> &context) {
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_websocket__", Value::undefined());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_websocket__", Value::undefined());
 }
 } // namespace binding
 } // namespace kraken

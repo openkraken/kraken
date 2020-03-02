@@ -33,7 +33,7 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-  void evaluateScript(const std::string &script, const std::string &url,
+  alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url,
                       int startLine);
 
   alibaba::jsa::JSContext *getContext() const { return context.get(); }

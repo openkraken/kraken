@@ -23,6 +23,7 @@ class Object;
 class WeakObject;
 class Array;
 class ArrayBuffer;
+class ArrayBufferView;
 class Function;
 class Value;
 class Instrumentation;
@@ -78,8 +79,21 @@ public:
   // When JS wants a list of property names for the HostObject, it will
   // call this method. If it throws an exception, the call will thow a
   // JS \c Error object. The default implementation returns empty vector.
-  virtual std::vector<PropNameID> getPropertyNames(JSContext &rt);
+  virtual std::vector<PropNameID> getPropertyNames(JSContext &context);
 };
+
+typedef enum {
+  Int8Array,
+  Int16Array,
+  Int32Array,
+  Uint8Array,
+  Uint8ClampedArray,
+  Uint16Array,
+  Uint32Array,
+  Float32Array,
+  Float64Array,
+  none
+} ArrayBufferViewType;
 
 /// Represents a JS runtime.  Movable, but not copyable.  Note that
 /// this object may not be thread-aware, but cannot be used safely from
@@ -153,6 +167,7 @@ protected:
   friend class WeakObject;
   friend class Array;
   friend class ArrayBuffer;
+  friend class ArrayBufferView;
   friend class Function;
   friend class Value;
   friend class Scope;
@@ -209,6 +224,7 @@ protected:
 
   virtual bool isArray(const Object &) const = 0;
   virtual bool isArrayBuffer(const Object &) const = 0;
+  virtual bool isArrayBufferView(const Object &) const = 0;
   virtual bool isFunction(const Object &) const = 0;
   virtual bool isHostObject(const jsa::Object &) const = 0;
   virtual bool isHostFunction(const jsa::Function &) const = 0;
@@ -221,7 +237,11 @@ protected:
   virtual ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, ArrayBufferDeallocator<uint8_t>deallocator) = 0;
   virtual size_t size(const Array &) = 0;
   virtual size_t size(const ArrayBuffer &) = 0;
+  virtual size_t size(const ArrayBufferView &) = 0;
   virtual void *data(const ArrayBuffer &) = 0;
+  virtual void *data(const ArrayBufferView &) = 0;
+  virtual ArrayBufferViewType arrayBufferViewType(const ArrayBufferView &) = 0;
+
   virtual Value getValueAtIndex(const Array &, size_t i) = 0;
   virtual void setValueAtIndexImpl(Array &, size_t i, const Value &value) = 0;
 
@@ -273,7 +293,7 @@ protected:
 /// locking, provided that the lock (if any) is managed with RAII helpers.
 class Scope {
 public:
-  explicit Scope(JSContext &rt) : rt_(rt), prv_(rt.pushScope()) {}
+  explicit Scope(JSContext &context) : rt_(context), prv_(context.pushScope()) {}
   ~Scope() { rt_.popScope(prv_); };
 
   Scope(const Scope &) = delete;
@@ -283,8 +303,8 @@ public:
   Scope &operator=(Scope &&) = delete;
 
   template <typename F>
-  static auto callInNewScope(JSContext &rt, F f) -> decltype(f()) {
-    Scope s(rt);
+  static auto callInNewScope(JSContext &context, F f) -> decltype(f()) {
+    Scope s(context);
     return f();
   }
 

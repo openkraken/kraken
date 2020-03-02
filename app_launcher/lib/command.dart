@@ -3,20 +3,19 @@ import 'dart:io';
 
 import 'package:kraken/element.dart';
 
-void createElement(String type, int id, String props, String events) {
-  ElementManager().applyAction(
-    ElementAction.createElement,
-    null,
-    node: PayloadNode.fromParams(type, id, props, events),
+void createElement(type, id, props, events) {
+  ElementManager.applyAction(
+    'createElement',
+    [type, id, props, events],
   );
 }
 
 void setStyle(int targetId, String key, String value) {
-  ElementManager().applyAction(ElementAction.setStyle, [targetId, key, value]);
+  ElementManager.applyAction('setStyle', [targetId, key, value]);
 }
 
 void insertAdjacentNode(int targetId, String position, int nodeId) {
-  ElementManager().applyAction(ElementAction.insertAdjacentNode, [targetId, position, nodeId]);
+  ElementManager.applyAction('insertAdjacentNode', [targetId, position, nodeId]);
 }
 
 class CommandRun {
@@ -93,8 +92,7 @@ class Command {
         setStyle(params[0], params[1], params[2]);
         break;
       case 'createElement':
-        Map map = params[0];
-        createElement(map['type'], map['id'], map['props'].toString(), map['events'].toString());
+        createElement(params[0], params[1], params[2], params[3]);
         break;
       case 'insertAdjacentNode':
         insertAdjacentNode(params[0], params[1], params[2]);

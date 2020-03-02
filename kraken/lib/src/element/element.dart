@@ -1,52 +1,29 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
-const String STYLE = 'style';
+import 'event_handler.dart';
+
 const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
 
-Element createW3CElement(PayloadNode node) {
-  switch (node.type) {
-    case DIV:
-      return DivElement(node.id, node.props, node.events);
-    case SPAN:
-      return SpanElement(node.id, node.props, node.events);
-    case IMAGE:
-      return ImgElement(node.id, node.props, node.events);
-    case PARAGRAPH:
-      return ParagraphElement(node.id, node.props, node.events);
-    case INPUT:
-      return InputElement(node.id, node.props, node.events);
-    case CANVAS:
-      return CanvasElement(node.id, node.props, node.events);
-    case VIDEO:
-      {
-        VideoElement.setDefaultPropsStyle(node.props);
-        return VideoElement(node.id, node.props, node.events);
-      }
-    default:
-      throw FlutterError('ERROR: unexpected element type, ' + node.type);
-  }
-}
-
 abstract class Element extends Node
     with
-        ElementEventHandler,
+        EventHandlerMixin,
         TextStyleMixin,
         BackgroundImageMixin,
         RenderDecoratedBoxMixin,
@@ -56,6 +33,28 @@ abstract class Element extends Node
         ColorMixin,
         TransformStyleMixin,
         TransitionStyleMixin {
+  RenderConstrainedBox renderConstrainedBox;
+  RenderObject stickyPlaceholder;
+  RenderObject renderObject; // Style decorated renderObject
+  RenderStack renderStack;
+  ContainerRenderObjectMixin renderLayoutElement;
+  RenderBoxModel renderBoxModel;
+  Map<String, dynamic> properties;
+  RenderIntersectionObserver renderIntersectionObserver;
+
+  bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
+  bool _inited = false; // True after constructor finished.
+  bool shouldBlockStretch = true;
+  double cropWidth = 0;
+  double cropHeight = 0;
+  double cropBorderWidth = 0;
+  double cropBorderHeight = 0;
+  double offsetTop = null; // offset to the top of viewport
+  bool stickyFixed = false;
+
+  final String tagName;
+  final String defaultDisplay;
+
   Element(
       {@required int nodeId,
       @required this.tagName,
@@ -67,13 +66,11 @@ abstract class Element extends Node
         assert(defaultDisplay != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
     properties = properties ?? {};
+
+    /// Element style render
+
     style = Style(properties[STYLE]);
     style.set('display', style.contains('display') ? style['display'] : defaultDisplay);
-    if (events != null) {
-      for (String eventName in events) {
-        addEvent(eventName);
-      }
-    }
 
     // mark element needs to reposition according to position property
     if (style.contains('position') && (style.position == 'absolute' || style.position == 'fixed')) {
@@ -81,23 +78,19 @@ abstract class Element extends Node
     }
 
     renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
+    // padding
     renderObject = initRenderPadding(renderObject, style);
+    // background image
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
+    // display
     if (style.get('display') != 'inline') {
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
-
+    // constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-    renderObject = RenderPointerListener(
-      child: renderObject,
-      onPointerDown: this._handlePointDown,
-      onPointerMove: this._handlePointMove,
-      onPointerUp: this._handlePointUp,
-      onPointerCancel: this._handlePointCancel,
-      behavior: HitTestBehavior.translucent,
-    );
+    // position
     if (style.position != 'static') {
       renderObject = renderStack = RenderPosition(
         textDirection: TextDirection.ltr,
@@ -108,55 +101,43 @@ abstract class Element extends Node
         ],
       );
     }
-
+    // border
     renderObject = initRenderDecoratedBox(renderObject, style, this);
 
+    // Pointer event listener
+    renderObject = RenderPointerListener(
+      child: renderObject,
+      onPointerDown: this.handlePointDown,
+      onPointerMove: this.handlePointMove,
+      onPointerUp: this.handlePointUp,
+      onPointerCancel: this.handlePointCancel,
+      behavior: HitTestBehavior.translucent,
+    );
+
+    // Intersection observer
+    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
+    // opacity
     renderObject = initRenderOpacity(renderObject, style);
+
+    // margin
     renderObject = initRenderMargin(renderObject, style, this);
+    // transition
     initTransition(style);
 
+    // transform
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
-    _inited = true;
 
-  }
-  RenderConstrainedBox renderConstrainedBox;
-  RenderObject stickyPlaceholder;
-  final String tagName;
-  Map<String, dynamic> properties;
-  bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
-  RenderObject renderObject; // Style decorated renderObject
-  RenderStack renderStack;
-  ContainerRenderObjectMixin renderLayoutElement;
-  RenderBoxModel renderBoxModel;
-  bool _inited = false; // True after constructor finished.
-
-  bool shouldBlockStretch = true;
-
-  double cropWidth = 0;
-  double cropBorderWidth = 0;
-  double offsetTop = null; // offset to the top of viewport
-
-  bool stickyFixed = false;
-
-  bool isFlexStyleChanged(Style newStyle) {
-    String display = newStyle.get('display');
-    List flexStyles = [
-      'flexDirection',
-      'flexWrap',
-      'alignItems',
-      'justifyContent',
-      'alignContent',
-    ];
-    bool hasChanged = false;
-    if (display == 'flex' || display == 'inline-flex') {
-      flexStyles.forEach((key) {
-        if (style.get(key) != newStyle.get(key)) {
-          hasChanged = true;
-        }
-      });
+    /// Element event listener
+    if (events != null) {
+      for (String eventName in events) {
+        addEvent(eventName);
+      }
     }
-    return hasChanged;
+
+    _inited = true;
   }
+
+  Element get parent => this.parentNode;
 
   Style _style;
   Style get style => _style;
@@ -187,7 +168,9 @@ abstract class Element extends Node
       }
 
       // update flex related properties
-      decorateRenderFlex(renderLayoutElement, newStyle);
+      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
+        decorateRenderFlex(renderLayoutElement, newStyle);
+      }
       // update style reference
       if (renderLayoutElement is RenderFlowLayout) {
         (renderLayoutElement as RenderFlowLayout).style = newStyle;
@@ -241,12 +224,15 @@ abstract class Element extends Node
         }
       }
 
-      ///8.update opacity
+      ///8.update opacity and visiblity
       updateRenderOpacity(
+        style,
         newStyle,
-        rootRenderObject: renderBoxModel,
+        rootRenderObject: renderMargin,
+        childRenderObject: renderDecoratedBox,
       );
 
+      ///9.update transform
       updateTransform(newStyle, transitionMap);
 
       if (transitionMap != null) {
@@ -263,7 +249,25 @@ abstract class Element extends Node
     updateRenderMargin(style, this);
   }
 
-  final String defaultDisplay;
+  bool isFlexStyleChanged(Style newStyle) {
+    String display = newStyle.get('display');
+    List flexStyles = [
+      'flexDirection',
+      'flexWrap',
+      'alignItems',
+      'justifyContent',
+      'alignContent',
+    ];
+    bool hasChanged = false;
+    if (display == 'flex' || display == 'inline-flex') {
+      flexStyles.forEach((key) {
+        if (style.get(key) != newStyle.get(key)) {
+          hasChanged = true;
+        }
+      });
+    }
+    return hasChanged;
+  }
 
   void _scrollListener(double scrollTop) {
     if (this != ElementManager().getRootElement()) {
@@ -278,7 +282,7 @@ abstract class Element extends Node
       bool isFixed;
 
       if (el.offsetTop == null) {
-        double offsetTop = double.parse(el.getOffset(true));
+        double offsetTop = el.getOffsetY();
         // save element original offset to viewport
         el.offsetTop = offsetTop;
       }
@@ -321,9 +325,7 @@ abstract class Element extends Node
         dynamic childEl = childNodes[i];
         if (childEl is Element) {
           Style childStyle = childEl.style;
-          if (childStyle.position == 'sticky' &&
-            (childStyle.top != null || childStyle.bottom != null)
-          ) {
+          if (childStyle.position == 'sticky' && (childStyle.top != null || childStyle.bottom != null)) {
             resultEls.add(childEl);
           }
 
@@ -363,17 +365,12 @@ abstract class Element extends Node
 
     // move element back to document flow
     if (newStyle.position == 'static' ||
-      newStyle.position == 'relative' ||
-      (newStyle.position == 'sticky' && !stickyFixed)
-    ) {
+        newStyle.position == 'relative' ||
+        (newStyle.position == 'sticky' && !stickyFixed)) {
       // move element back to document flow
-      if (style.position == 'absolute' ||
-        style.position == 'fixed' ||
-        style.position == 'sticky'
-      ) {
+      if (style.position == 'absolute' || style.position == 'fixed' || style.position == 'sticky') {
         // remove positioned element from parent element stack
-        Element parentElementWithStack =
-            findParent(this, (element) => element.renderStack != null);
+        Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
         parentElementWithStack.renderStack.remove(renderBoxModel);
 
         // remove sticky placeholder
@@ -399,22 +396,20 @@ abstract class Element extends Node
         RenderBoxModel preNonPositionedObject = null;
         if (preNonPositionedElement != null) {
           RenderObjectVisitor visitor = (child) {
-            if (child is RenderBoxModel &&
-                preNonPositionedElement.nodeId == child.nodeId) {
+            if (child is RenderBoxModel && preNonPositionedElement.nodeId == child.nodeId) {
               preNonPositionedObject = child;
             }
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
         // insert non positioned renderObject to parent element in the order of original element tree
-        parentElement.renderLayoutElement
-            .insert(renderBoxModel, after: preNonPositionedObject);
+        parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
 
         needsReposition = false;
       }
-
-    // move element out of document flow
     } else {
+      // move element out of document flow
+
       // append element to positioned parent
       _rePositionElement(this);
     }
@@ -681,7 +676,6 @@ abstract class Element extends Node
     return result;
   }
 
-  Element get parent => this.parentNode;
   List<Element> get children {
     List<Element> _children = [];
     for (var child in this.childNodes) {
@@ -710,13 +704,11 @@ abstract class Element extends Node
       );
       decorateRenderFlex(flexLayout, newStyle);
       return flexLayout;
-    } else if (
-      display == 'none' ||
-      display == 'inline' ||
-      display == 'inline-block' ||
-      display == 'block' ||
-      isFlexWrap
-    ) {
+    } else if (display == 'none' ||
+        display == 'inline' ||
+        display == 'inline-block' ||
+        display == 'block' ||
+        isFlexWrap) {
       MainAxisAlignment alignment = MainAxisAlignment.start;
       switch (newStyle['textAlign']) {
         case 'right':
@@ -826,8 +818,7 @@ abstract class Element extends Node
             }
           }
 
-          List childEls =
-              this.findPositionedChildren(childEl, needsReposition);
+          List childEls = this.findPositionedChildren(childEl, needsReposition);
           if (childEls != null) {
             resultEls = [...resultEls, ...childEls];
           }
@@ -839,15 +830,25 @@ abstract class Element extends Node
   }
 
   void removeElement(Node child) {
-    Element parent = child.parentNode;
-    int childIdx = parent.childNodes.indexOf(child);
     List<RenderObject> children = [];
     RenderObjectVisitor visitor = (child) {
       children.add(child);
     };
-    parent.renderLayoutElement
-      ..visitChildren(visitor)
-      ..remove(children[childIdx]);
+    renderLayoutElement..visitChildren(visitor);
+
+    int childIdx;
+    children.forEach((childNode) {
+      int childId;
+      if (childNode is RenderTextNode) {
+        childId = childNode.nodeId;
+      } else if (childNode is RenderBoxModel) {
+        childId = childNode.nodeId;
+      }
+      if (childId == child.nodeId) {
+        childIdx = children.indexOf(childNode);
+      }
+    });
+    renderLayoutElement.remove(children[childIdx]);
   }
 
   void appendElement(Node child, {RenderObject afterRenderObject, bool isAppend = true}) {
@@ -996,20 +997,16 @@ abstract class Element extends Node
     ZIndexParentData parentData = ZIndexParentData();
 
     if (style.contains('top')) {
-      parentData
-        ..top = Length.toDisplayPortValue(style['top']);
+      parentData..top = Length.toDisplayPortValue(style['top']);
     }
     if (style.contains('left')) {
-      parentData
-        ..left = Length.toDisplayPortValue(style['left']);
+      parentData..left = Length.toDisplayPortValue(style['left']);
     }
     if (style.contains('bottom')) {
-      parentData
-        ..bottom = Length.toDisplayPortValue(style['bottom']);
+      parentData..bottom = Length.toDisplayPortValue(style['bottom']);
     }
     if (style.contains('right')) {
-      parentData
-        ..right = Length.toDisplayPortValue(style['right']);
+      parentData..right = Length.toDisplayPortValue(style['right']);
     }
     parentData.width = Length.toDisplayPortValue(style['width']);
     parentData.height = Length.toDisplayPortValue(style['height']);
@@ -1021,7 +1018,7 @@ abstract class Element extends Node
   void updateTextNodeStyle(String key) {
     childNodes.forEach((node) {
       if (node is TextNode) {
-        node.setProperty(key, node.data);
+        node.setProperty('style', style);
       }
     });
   }
@@ -1059,21 +1056,21 @@ abstract class Element extends Node
   dynamic method(String name, List<dynamic> args) {
     switch (name) {
       case 'offsetTop':
-        return getOffset(true);
+        return getOffsetY();
       case 'offsetLeft':
-        return getOffset(false);
+        return getOffsetX();
       case 'offsetWidth':
-        return renderMargin?.size?.width ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
-        return renderMargin?.size?.height ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.height : 0;
       case 'clientWidth':
-        return renderPadding?.size?.width ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.width : 0;
       case 'clientHeight':
-        return renderPadding?.size?.height ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.height : 0;
       case 'clientLeft':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
       case 'clientTop':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
@@ -1082,102 +1079,104 @@ abstract class Element extends Node
         return getScrollHeight();
       case 'scrollWidth':
         return getScrollWidth();
+      case 'getBoundingClientRect':
+        return getBoundingClientRect();
+      case 'click':
+        return click();
       default:
         debugPrint('unknown method call. name: $name, args: ${args}');
     }
   }
 
-  String getOffset(bool isTop) {
+  Map getBoundingClientRect() {
+    Map rect = {};
+    if (renderBorderMargin.hasSize) {
+      Offset offset = getOffset(renderBorderMargin);
+      Size size = renderBorderMargin.size;
+      rect['x'] = offset.dx;
+      rect['y'] = offset.dy;
+      rect['width'] = size.width;
+      rect['height'] = size.height;
+      rect['top'] = offset.dy;
+      rect['left'] = offset.dx;
+      rect['right'] = offset.dx + size.width;
+      rect['bottom'] = offset.dy + size.height;
+    }
+    return rect;
+  }
+
+  double getOffsetX() {
     double offset = 0;
-    if (renderObject is RenderBox) {
-      Element element =
-          findParent(this, (element) => element.renderStack != null);
-      if (element == null) {
-        element = ElementManager().getRootElement();
-      }
-      Offset relative = (renderObject as RenderBox)
-          .localToGlobal(Offset.zero, ancestor: element.renderObject);
-      offset += isTop ? relative.dy : relative.dx;
+    if (renderObject is RenderBox && renderObject.attached) {
+      Offset relative = getOffset(renderObject as RenderBox);
+      offset += relative.dx;
     }
-    return offset.toString();
-  }
-}
-
-mixin ElementEventHandler on Node {
-  num _touchStartTime = 0;
-  num _touchEndTime = 0;
-
-  static const int MAX_STEP_MS = 10;
-  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
-
-  void _handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchstart', pointEvent);
-    _touchStartTime = event.timeStamp;
-    this.dispatchEvent(event);
+    return offset;
   }
 
-  void _handlePointMove(PointerMoveEvent pointEvent) {
-    _throttler.throttle(() {
-      TouchEvent event = _getTouchEvent('touchmove', pointEvent);
-      this.dispatchEvent(event);
-    });
-  }
-
-  void _handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchend', pointEvent);
-    _touchEndTime = event.timeStamp;
-    this.dispatchEvent(event);
-
-    // <300ms to trigger click
-    if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-      handleClick(Event('click', EventInit()));
+  double getOffsetY() {
+    double offset = 0;
+    if (renderObject is RenderBox && renderObject.attached) {
+      Offset relative = getOffset(renderObject as RenderBox);
+      offset += relative.dy;
     }
+    return offset;
   }
 
-  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
-    TouchEvent event = TouchEvent(type);
-    Touch touch = Touch(
-      identifier: pointEvent.pointer,
-      target: this,
-      screenX: pointEvent.position.dx,
-      screenY: pointEvent.position.dy,
-      clientX: pointEvent.localPosition.dx,
-      clientY: pointEvent.localPosition.dy,
-      pageX: pointEvent.localPosition.dx,
-      pageY: pointEvent.localPosition.dy,
-      radiusX: pointEvent.radiusMajor,
-      radiusY: pointEvent.radiusMinor,
-      rotationAngle: pointEvent.orientation,
-      force: pointEvent.pressure,
-    );
-    event.changedTouches.items.add(touch);
-    event.targetTouches.items.add(touch);
-    event.touches.items.add(touch);
-    event.detail = {};
-    return event;
-  }
-
-  void handleClick(Event event) {
-    this.dispatchEvent(event);
-  }
-
-  void _handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event('touchcancel', EventInit());
-    event.detail = {};
-    this.dispatchEvent(event);
+  Offset getOffset(RenderBox renderBox) {
+    Element element = findParent(this, (element) => element.renderStack != null);
+    if (element == null) {
+      element = ElementManager().getRootElement();
+    }
+    return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
 
   void addEvent(String eventName) {
     if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.addEventListener(eventName, this._eventResponder);
+
+    if (_isIntersectionObserverEvent(eventName)) {
+      renderIntersectionObserver.onIntersectionChange = handleIntersectionChange;
+    }
   }
 
   void removeEvent(String eventName) {
+    if (!this.eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.removeEventListener(eventName, this._eventResponder);
+
+    if (_isIntersectionObserverEvent(eventName)) {
+      if (!_hasIntersectionObserverEvent(this.eventHandlers)) {
+        renderIntersectionObserver.onIntersectionChange = null;
+      }
+    }
   }
 
   void _eventResponder(Event event) {
     String json = jsonEncode([nodeId, event]);
     emitUIEvent(json);
   }
+
+  void click() {
+    final RenderBox box = renderObject as RenderBox;
+    // Click at the center of the element
+    Offset position = box.localToGlobal(box.size.center(Offset.zero));
+    PointerEvent downEvent = PointerDownEvent(position: position);
+
+    final HitTestResult hitTestResult = HitTestResult();
+    GestureBinding.instance.hitTest(hitTestResult, position);
+    GestureBinding.instance.dispatchEvent(downEvent, hitTestResult);
+
+    PointerEvent upEvent = PointerUpEvent(position: position);
+    GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
+  }
+}
+
+bool _isIntersectionObserverEvent(String eventName) {
+  return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
+}
+
+bool _hasIntersectionObserverEvent(eventHandlers) {
+  return eventHandlers.containsKey('appear') ||
+      eventHandlers.containsKey('disappear') ||
+      eventHandlers.containsKey('intersectionchange');
 }

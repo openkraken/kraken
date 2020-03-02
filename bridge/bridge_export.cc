@@ -6,7 +6,6 @@
 #include "bridge_export.h"
 #include "dart_methods.h"
 #include "bridge.h"
-#include "polyfill.h"
 #include <atomic>
 #include <string>
 
@@ -19,13 +18,11 @@ Screen screen;
 void reloadJsContext() {
   inited = false;
   bridge = std::make_unique<kraken::JSBridge>();
-  initKrakenPolyFill(bridge->getContext());
   inited = true;
 }
 
 void initJsEngine() {
   bridge = std::make_unique<kraken::JSBridge>();
-  initKrakenPolyFill(bridge->getContext());
   inited = true;
 }
 
@@ -47,6 +44,10 @@ void registerInvokeUIManager(InvokeUIManager callbacks) {
 
 void registerInvokeModule(InvokeModule callbacks) {
   kraken::registerInvokeModule(callbacks);
+}
+
+void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate) {
+  kraken::registerRequestBatchUpdate(requestBatchUpdate);
 }
 
 void registerReloadApp(ReloadApp reloadApp) {
@@ -105,4 +106,14 @@ void invokeOnPlatformBrightnessChangedCallback() {
 
 void flushUITask() {
   bridge->flushUITask();
+}
+
+void registerStartFlushCallbacksInUIThread(
+    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
+  kraken::registerStartFlushUILoop(startFlushCallbacksInUIThread);
+}
+
+void registerStopFlushCallbacksInUIThread(
+    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
+  kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
 }

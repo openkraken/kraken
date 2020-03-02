@@ -4,6 +4,7 @@
  */
 
 import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
@@ -71,7 +72,7 @@ class VideoElement extends Element {
     }
   }
 
-  VideoElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  VideoElement(this.nodeId, this.props, this.events)
       : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
@@ -79,6 +80,14 @@ class VideoElement extends Element {
           properties: props,
           events: events,
         ) {
+    addVideoBox();
+  }
+
+  int nodeId;
+  Map<String, dynamic> props;
+  List<String> events;
+
+  void addVideoBox() {
     RegExp exp = RegExp(r"^(http|https)://");
 
     if (props['src'] == null) {
@@ -127,9 +136,12 @@ class VideoElement extends Element {
     });
   }
 
+  void removeVideoBox() {
+    renderLayoutElement.removeAll();
+  }
+
   Future<Map<String, dynamic>> getVideoDetail() async {
-    final Completer<Map<String, dynamic>> detailCompleter =
-        Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> detailCompleter = Completer<Map<String, dynamic>>();
     RendererBinding.instance.addPostFrameCallback((Duration timeout) {
       var value = controller.value;
       var duration = value.duration;
@@ -217,8 +229,15 @@ class VideoElement extends Element {
       case 'pause':
         controller.pause();
         break;
-      case 'muted':
-        controller.setMuted(args[0]);
+    }
+  }
+
+  @override
+  void setProperty(String key, dynamic value) {
+    super.setProperty(key, value);
+    if (key == 'src' || key == '.style.width' || key == '.style.height') {
+      removeVideoBox();
+      addVideoBox();
     }
   }
 }

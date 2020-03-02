@@ -1,25 +1,38 @@
-import { NodeImpl, NodeType } from './node';
-import { createTextNode, setProperty } from "./UIManager";
+import { Node, NodeType } from './node';
+import { createTextNode, setProperty } from './UIManager';
 
-export class TextImpl extends NodeImpl {
-  private _textContent: string = '';
+export class Text extends Node {
+  public nodeName: string = '#text';
+  public _data: string = '';
 
-  constructor(data: string, id: number) {
-    super(NodeType.TEXT_NODE, id);
-    this._textContent = data;
-    createTextNode(id, NodeType.TEXT_NODE, data);
+  constructor(data: string) {
+    super(NodeType.TEXT_NODE);
+    this._data = data;
+    createTextNode(this.nodeId, data);
   }
 
-  public get nodeName() {
-    return '#text';
+  public set data(data: string) {
+    this._data = String(data);
+    setProperty(this.nodeId, 'data', data);
   }
 
-  public get textContent() {
-    return this._textContent;
+  public get data() {
+    return this._data;
+  }
+
+  public set nodeValue(data: string) {
+    this.data = data;
+  }
+
+  public get nodeValue() {
+    return this._data;
   }
 
   public set textContent(data: string) {
-    this._textContent = data;
-    setProperty(this.id, 'data', data);
+    this.data = data;
+  }
+
+  public get textContent() {
+    return this._data;
   }
 }

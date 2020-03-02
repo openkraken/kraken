@@ -7,58 +7,58 @@
 
 namespace alibaba {
 namespace jsa {
-JSError::JSError(JSContext &rt, Value &&value) { setValue(rt, std::move(value)); }
+JSError::JSError(JSContext &context, Value &&value) { setValue(context, std::move(value)); }
 
-JSError::JSError(JSContext &rt, std::string msg) : message_(std::move(msg)) {
+JSError::JSError(JSContext &context, std::string msg) : message_(std::move(msg)) {
   try {
-    setValue(rt,
-             rt.global().getPropertyAsFunction(rt, "Error").call(rt, message_));
+    setValue(context,
+             context.global().getPropertyAsFunction(context, "Error").call(context, message_));
   } catch (...) {
-    setValue(rt, Value());
+    setValue(context, Value());
   }
 }
 
-JSError::JSError(JSContext &rt, std::string msg, std::string stack)
+JSError::JSError(JSContext &context, std::string msg, std::string stack)
     : message_(std::move(msg)), stack_(std::move(stack)) {
   try {
-    Object e(rt);
-    e.setProperty(rt, "message", String::createFromUtf8(rt, message_));
-    e.setProperty(rt, "stack", String::createFromUtf8(rt, stack_));
-    setValue(rt, std::move(e));
+    Object e(context);
+    e.setProperty(context, "message", String::createFromUtf8(context, message_));
+    e.setProperty(context, "stack", String::createFromUtf8(context, stack_));
+    setValue(context, std::move(e));
   } catch (...) {
-    setValue(rt, Value());
+    setValue(context, Value());
   }
 }
 
-JSError::JSError(std::string what, JSContext &rt, Value &&value)
+JSError::JSError(std::string what, JSContext &context, Value &&value)
     : JSAException(std::move(what)) {
-  setValue(rt, std::move(value));
+  setValue(context, std::move(value));
 }
 
-void JSError::setValue(JSContext &rt, Value &&value) {
+void JSError::setValue(JSContext &context, Value &&value) {
   value_ = std::make_shared<jsa::Value>(std::move(value));
 
   try {
     if ((message_.empty() || stack_.empty()) && value_->isObject()) {
-      auto obj = value_->getObject(rt);
+      auto obj = value_->getObject(context);
 
       if (message_.empty()) {
-        jsa::Value message = obj.getProperty(rt, "message");
+        jsa::Value message = obj.getProperty(context, "message");
         if (!message.isUndefined()) {
-          message_ = message.toString(rt).utf8(rt);
+          message_ = message.toString(context).utf8(context);
         }
       }
 
       if (stack_.empty()) {
-        jsa::Value stack = obj.getProperty(rt, "stack");
+        jsa::Value stack = obj.getProperty(context, "stack");
         if (!stack.isUndefined()) {
-          stack_ = stack.toString(rt).utf8(rt);
+          stack_ = stack.toString(context).utf8(context);
         }
       }
     }
 
     if (message_.empty()) {
-      message_ = value_->toString(rt).utf8(rt);
+      message_ = value_->toString(context).utf8(context);
     }
 
     if (stack_.empty()) {

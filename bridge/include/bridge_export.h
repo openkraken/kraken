@@ -19,6 +19,7 @@ using AsyncRAFCallback = void (*)(void*, double);
 using AsyncModuleCallback = void (*)(char *, void *);
 typedef const char *(*InvokeUIManager)(const char*);
 typedef const char *(*InvokeModule)(const char*, AsyncModuleCallback callback, void* context);
+typedef void (*RequestBatchUpdate)(AsyncCallback callback, void* context);
 typedef void (*ReloadApp)();
 typedef int32_t (*SetTimeout)(AsyncCallback callback, void* context, int32_t);
 typedef int32_t (*SetInterval)(AsyncCallback callback, void* context, int32_t);
@@ -30,6 +31,8 @@ typedef void (*InvokeFetch)(int32_t, const char*, const char*);
 typedef double (*DevicePixelRatio)();
 typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
+typedef void (*StartFlushCallbacksInUIThread)();
+typedef void (*StopFlushCallbacksInUIThread)();
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -54,6 +57,8 @@ void registerInvokeUIManager(InvokeUIManager invokeUIManager);
 KRAKEN_EXPORT
 void registerInvokeModule(InvokeModule invokeUIManager);
 KRAKEN_EXPORT
+void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate);
+KRAKEN_EXPORT
 void registerReloadApp(ReloadApp reloadApp);
 KRAKEN_EXPORT
 void registerSetTimeout(SetTimeout setTimeout);
@@ -73,6 +78,11 @@ KRAKEN_EXPORT
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
-
+KRAKEN_EXPORT
+void registerStartFlushCallbacksInUIThread(
+    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread);
+KRAKEN_EXPORT
+void registerStopFlushCallbacksInUIThread(
+    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

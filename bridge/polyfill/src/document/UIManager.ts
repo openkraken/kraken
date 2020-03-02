@@ -1,4 +1,4 @@
-import { krakenUIManager } from '../kraken';
+import { krakenUIManager, krakenRequestBatchUpdate } from '../kraken';
 
 const updateMessageQueue:string[] = [];
 let updateRequested: boolean = false;
@@ -15,16 +15,20 @@ function sendMessage(message: string) {
   updateMessageQueue.push(message);
   if (!updateRequested) {
     updateRequested = true;
-    requestAnimationFrame(requestUpdateFrame);
+    krakenRequestBatchUpdate(requestUpdateFrame);
   }
 }
 
 export function createElement(type: string, id: number, props: any, events: any) {
-  sendMessage(`["createElement",[{"id":${id},"type":"${type}","props":${JSON.stringify(props)},"events":${JSON.stringify(events)}}]]`);
+  sendMessage(`["createElement",[${id},"${type}",${JSON.stringify(props)},${JSON.stringify(events)}]]`);
 }
 
-export function createTextNode(id: number, nodeType: number, data: string) {
-  sendMessage(`["createTextNode",[{"id":${id},"nodeType":${nodeType},"data":"${data}"}]]`);
+export function createTextNode(id: number, data: string) {
+  sendMessage(`["createTextNode",[${id},"${data}"]]`);
+}
+
+export function createComment(id: number, data: string) {
+  sendMessage(`["createComment",[${id},"${data}"]]`);
 }
 
 export function insertAdjacentNode(parentNodeId: number, position: string, nodeId: number) {
@@ -39,6 +43,10 @@ export function setProperty(id: number, key: string, value: any) {
   sendMessage(`["setProperty",[${id},"${key}","${value}"]]`);
 }
 
+export function removeProperty(id: number, key: string) {
+  sendMessage(`["removeProperty",[${id},"${key}"]]`);
+}
+
 export function setStyle(id: number, key: string, value: string) {
   sendMessage(`["setStyle",[${id},"${key}","${value}"]]`);
 }
@@ -49,4 +57,10 @@ export function addEvent(id: number, eventName: string) {
 
 export function removeEvent(id: number, eventName: string) {
   sendMessage(`["removeEvent",[${id},"${eventName}"]]`);
+}
+
+export function method(id: number, methodName: string, params?: any[]) {
+  // Must flush batch update before get
+  requestUpdateFrame();
+  return krakenUIManager(`["method",[${id},"${methodName}",${params ? JSON.stringify(params): '[]'}]]`);
 }

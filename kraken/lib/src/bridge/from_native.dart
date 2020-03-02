@@ -30,37 +30,17 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
 
 const String BATCH_UPDATE = 'batchUpdate';
 
-ElementAction getAction(String action) {
-  switch (action) {
-    case 'createElement':
-      return ElementAction.createElement;
-    case 'createTextNode':
-      return ElementAction.createTextNode;
-    case 'insertAdjacentNode':
-      return ElementAction.insertAdjacentNode;
-    case 'removeNode':
-      return ElementAction.removeNode;
-    case 'setStyle':
-      return ElementAction.setStyle;
-    case 'setProperty':
-      return ElementAction.setProperty;
-    case 'removeProperty':
-      return ElementAction.removeProperty;
-    case 'addEvent':
-      return ElementAction.addEvent;
-    case 'removeEvent':
-      return ElementAction.removeEvent;
-    case 'method':
-      return ElementAction.method;
-    default:
-      return null;
-  }
-}
-
-String handleDirective(List directive) {
-  ElementAction action = getAction(directive[0]);
+String handleAction(List directive) {
+  String action = directive[0];
   List payload = directive[1];
-  var result = ElementManager().applyAction(action, payload);
+
+  var result;
+  try {
+    result = ElementManager.applyAction(action, payload);
+  } catch (error, stackTrace) {
+    print(error);
+    print(stackTrace);
+  }
 
   if (result == null) {
     return '';
@@ -83,11 +63,11 @@ String invokeUIManager(String json) {
     List<dynamic> directiveList = directive[1];
     List<String> result = [];
     for (dynamic item in directiveList) {
-      result.add(handleDirective(item as List));
+      result.add(handleAction(item as List));
     }
     return result.join(',');
   } else {
-    return handleDirective(directive);
+    return handleAction(directive);
   }
 }
 
@@ -167,7 +147,11 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp() {
-  reloadApp();
+  try {
+    reloadApp();
+  } catch (err, stack) {
+    print('$err\n$stack');
+  }
 }
 
 void registerReloadApp() {
@@ -179,6 +163,28 @@ typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
 typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data);
 typedef DartAsyncCallback = void Function(Pointer<Void> context);
 typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data);
+
+// Register requestBatchUpdate
+typedef Native_RequestBatchUpdate = Void Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
+typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
+typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
+
+final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
+    .asFunction();
+
+void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
+  return requestBatchUpdate((Duration timeStamp) {
+    DartAsyncCallback func = callback.asFunction();
+    func(context);
+  });
+}
+
+void registerRequestBatchUpdate() {
+  Pointer<NativeFunction<Native_RequestBatchUpdate>> pointer = Pointer.fromFunction(_requestBatchUpdate);
+  _registerRequestBatchUpdate(pointer);
+}
+
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
@@ -361,9 +367,50 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
+typedef Native_StartFlushCallbacksInUIThread = Void Function();
+typedef Native_RegisterFlushCallbacksInUIThread = Void Function(
+    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
+typedef Dart_RegisterFlushCallbacksInUIThread = void Function(
+    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
+
+final Dart_RegisterFlushCallbacksInUIThread _registerStartFlushCallbacksInUIThread = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>('registerStartFlushCallbacksInUIThread')
+    .asFunction();
+
+void _startFlushCallbacksInUIThread() {
+  startFlushCallbacksInUIThread();
+}
+
+void registerStartFlushCallbacksInUIThread() {
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
+      Pointer.fromFunction(_startFlushCallbacksInUIThread);
+  _registerStartFlushCallbacksInUIThread(pointer);
+}
+
+typedef Native_StopFlushCallbacksInUIThread = Void Function();
+typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(
+    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
+typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(
+    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
+
+final Dart_RegisterFlushCallbacksInUIThread _registerStopFlushCallbacksInUIThread = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>('registerStopFlushCallbacksInUIThread')
+    .asFunction();
+
+void _stopFlushCallbacksInUIThread() {
+  stopFlushCallbacksInUIThread();
+}
+
+void registerStopFlushCallbacksInUIThread() {
+  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
+      Pointer.fromFunction(_stopFlushCallbacksInUIThread);
+  _registerStopFlushCallbacksInUIThread(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
+  registerRequestBatchUpdate();
   registerReloadApp();
   registerSetTimeout();
   registerSetInterval();
@@ -374,4 +421,6 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerOnPlatformBrightnessChanged();
+  registerStartFlushCallbacksInUIThread();
+  registerStopFlushCallbacksInUIThread();
 }

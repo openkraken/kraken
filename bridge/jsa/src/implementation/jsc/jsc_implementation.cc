@@ -103,7 +103,6 @@ JSCContext::JSCContext(): ctxInvalid_(false)
 #endif
 {
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
-  ctx_ = JSGlobalContextRetain(ctx_);
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef globalName = JSStringCreateWithUTF8CString("global");
@@ -413,9 +412,9 @@ jsa::Object JSCContext::createObject() {
 // HostObject details
 namespace detail {
 struct HostObjectProxyBase {
-  HostObjectProxyBase(JSCContext & rt,
+  HostObjectProxyBase(JSCContext & context,
       const std::shared_ptr<jsa::HostObject>& sho)
-      : runtime(rt), hostObject(sho) {}
+      : runtime(context), hostObject(sho) {}
 
   JSCContext & runtime;
   std::shared_ptr<jsa::HostObject> hostObject;
@@ -438,38 +437,38 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSStringRef propName,
         JSValueRef* exception) {
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      jsa::PropNameID sym = rt.createPropNameID(propName);
+      auto& context = proxy->runtime;
+      jsa::PropNameID sym = context.createPropNameID(propName);
       jsa::Value ret;
       try {
-        ret = proxy->hostObject->get(rt, sym);
+        ret = proxy->hostObject->get(context, sym);
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         return JSValueMakeUndefined(ctx);
       } catch (const std::exception& ex) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::get(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): ") + ex.what());
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return JSValueMakeUndefined(ctx);
       } catch (...) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::get(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): <unknown>"));
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return JSValueMakeUndefined(ctx);
       }
-      return rt.valueRef(ret);
+      return context.valueRef(ret);
     }
 
     #define JSC_UNUSED(x) (void) (x);
@@ -482,34 +481,34 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSValueRef* exception) {
       JSC_UNUSED(ctx);
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      jsa::PropNameID sym = rt.createPropNameID(propName);
+      auto& context = proxy->runtime;
+      jsa::PropNameID sym = context.createPropNameID(propName);
       try {
-        proxy->hostObject->set(rt, sym, rt.createValue(value));
+        proxy->hostObject->set(context, sym, context.createValue(value));
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         return false;
       } catch (const std::exception& ex) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                     std::string("Exception in HostObject::set(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): ") + ex.what());
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return false;
       } catch (...) {
         auto excValue =
-            rt.global()
-                .getPropertyAsFunction(rt, "Error")
+            context.global()
+                .getPropertyAsFunction(context, "Error")
                 .call(
-                    rt,
+                    context,
                       std::string("Exception in HostObject::set(propName:")
                       + JSStringToSTLString(propName)
                       + std::string("): <unknown>"));
-        *exception = rt.valueRef(excValue);
+        *exception = context.valueRef(excValue);
         return false;
       }
       return true;
@@ -524,8 +523,8 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
         JSPropertyNameAccumulatorRef propertyNames) noexcept {
       JSC_UNUSED(ctx);
       auto proxy = static_cast<HostObjectProxy*>(JSObjectGetPrivate(object));
-      auto& rt = proxy->runtime;
-      auto names = proxy->hostObject->getPropertyNames(rt);
+      auto& context = proxy->runtime;
+      auto names = proxy->hostObject->getPropertyNames(context);
       for (auto& name : names) {
         JSPropertyNameAccumulatorAddName(propertyNames, stringRef(name));
       }
@@ -664,12 +663,62 @@ bool JSCContext::isArrayBuffer(const jsa::Object& obj) const {
   return typedArrayType == kJSTypedArrayTypeArrayBuffer;
 }
 
+bool JSCContext::isArrayBufferView(const jsa::Object &obj) const {
+  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(obj), nullptr);
+  return typedArrayType == kJSTypedArrayTypeInt8Array ||
+    typedArrayType == kJSTypedArrayTypeInt16Array ||
+    typedArrayType == kJSTypedArrayTypeInt32Array ||
+    typedArrayType == kJSTypedArrayTypeUint8Array ||
+    typedArrayType == kJSTypedArrayTypeUint8ClampedArray ||
+    typedArrayType == kJSTypedArrayTypeUint16Array ||
+    typedArrayType == kJSTypedArrayTypeUint32Array ||
+    typedArrayType == kJSTypedArrayTypeFloat32Array ||
+    typedArrayType == kJSTypedArrayTypeFloat64Array;
+}
+
 void* JSCContext::data(const jsa::ArrayBuffer& obj) {
   return JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), nullptr);
 }
 
+void *JSCContext::data(const jsa::ArrayBufferView &obj) {
+  return JSObjectGetTypedArrayBytesPtr(ctx_, objectRef(obj), nullptr);
+}
+
 size_t JSCContext::size(const jsa::ArrayBuffer& obj) {
   return JSObjectGetArrayBufferByteLength(ctx_, objectRef(obj), nullptr);
+}
+
+size_t JSCContext::size(const jsa::ArrayBufferView& obj) {
+  return JSObjectGetTypedArrayByteLength(ctx_, objectRef(obj), nullptr);
+}
+
+jsa::ArrayBufferViewType
+JSCContext::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
+  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(arrayBufferView), nullptr);
+
+  switch(typedArrayType) {
+    case kJSTypedArrayTypeInt8Array:
+      return jsa::ArrayBufferViewType::Int8Array;
+    case kJSTypedArrayTypeInt16Array:
+      return jsa::ArrayBufferViewType::Int16Array;
+    case kJSTypedArrayTypeInt32Array:
+      return jsa::ArrayBufferViewType::Int32Array;
+    case kJSTypedArrayTypeUint8Array:
+      return jsa::ArrayBufferViewType::Uint8Array;
+    case kJSTypedArrayTypeUint8ClampedArray:
+      return jsa::ArrayBufferViewType::Uint8ClampedArray;
+    case kJSTypedArrayTypeUint16Array:
+      return jsa::ArrayBufferViewType::Uint16Array;
+    case kJSTypedArrayTypeUint32Array:
+      return jsa::ArrayBufferViewType::Uint32Array;
+    case kJSTypedArrayTypeFloat32Array:
+      return jsa::ArrayBufferViewType::Float32Array;
+    case kJSTypedArrayTypeFloat64Array:
+      return jsa::ArrayBufferViewType::Float64Array;
+    default:
+      break;
+  }
+  return jsa::ArrayBufferViewType::none;
 }
 
 bool JSCContext::isFunction(const jsa::Object& obj) const {
@@ -839,10 +888,10 @@ JSCContext::createFunctionFromHostFunction(
       JSObjectSetPrototype(ctx, object, funcProto);
     }
 
-    static JSValueRef makeError(JSCContext & rt, const std::string& desc) {
+    static JSValueRef makeError(JSCContext & context, const std::string& desc) {
       jsa::Value value =
-          rt.global().getPropertyAsFunction(rt, "Error").call(rt, desc);
-      return rt.valueRef(value);
+          context.global().getPropertyAsFunction(context, "Error").call(context, desc);
+      return context.valueRef(value);
     }
 
     // JSC会调用此方法执行先前注入的JS Function
@@ -855,7 +904,7 @@ JSCContext::createFunctionFromHostFunction(
         JSValueRef* exception) {
       HostFunctionMetadata* metadata =
           static_cast<HostFunctionMetadata*>(JSObjectGetPrivate(function));
-      JSCContext & rt = *(metadata->runtime);
+      JSCContext & context = *(metadata->runtime);
       const unsigned maxStackArgCount = 8;
       jsa::Value stackArgs[maxStackArgCount];
       std::unique_ptr<jsa::Value[]> heapArgs;
@@ -863,32 +912,32 @@ JSCContext::createFunctionFromHostFunction(
       if (argumentCount > maxStackArgCount) {
         heapArgs = std::make_unique<jsa::Value[]>(argumentCount);
         for (size_t i = 0; i < argumentCount; i++) {
-          heapArgs[i] = rt.createValue(arguments[i]);
+          heapArgs[i] = context.createValue(arguments[i]);
         }
         args = heapArgs.get();
       } else {
         for (size_t i = 0; i < argumentCount; i++) {
-          stackArgs[i] = rt.createValue(arguments[i]);
+          stackArgs[i] = context.createValue(arguments[i]);
         }
         args = stackArgs;
       }
       JSValueRef res;
-      jsa::Value thisVal(rt.createObject(thisObject));
+      jsa::Value thisVal(context.createObject(thisObject));
       try {
         // 执行lambda
-        res = rt.valueRef(
-            metadata->hostFunction_(rt, thisVal, args, argumentCount));
+        res = context.valueRef(
+            metadata->hostFunction_(context, thisVal, args, argumentCount));
       } catch (const jsa::JSError& error) {
-        *exception = rt.valueRef(error.value());
+        *exception = context.valueRef(error.value());
         res = JSValueMakeUndefined(ctx);
       } catch (const std::exception& ex) {
         std::string exceptionString("Exception in HostFunction: ");
         exceptionString += ex.what();
-        *exception = makeError(rt, exceptionString);
+        *exception = makeError(context, exceptionString);
         res = JSValueMakeUndefined(ctx);
       } catch (...) {
         std::string exceptionString("Exception in HostFunction: <unknown>");
-        *exception = makeError(rt, exceptionString);
+        *exception = makeError(context, exceptionString);
         res = JSValueMakeUndefined(ctx);
       }
       return res;
@@ -901,12 +950,12 @@ JSCContext::createFunctionFromHostFunction(
       delete metadata;
     }
 
-    HostFunctionMetadata(JSCContext * rt,
+    HostFunctionMetadata(JSCContext * context,
         jsa::HostFunctionType hf,
         unsigned ac,
         JSStringRef n)
         : HostFunctionProxy(hf),
-          runtime(rt),
+          runtime(context),
           argCount(ac),
           name(JSStringRetain(n)) {}
 
@@ -939,7 +988,7 @@ namespace detail {
 // jsa::Values* -> JSValueRef*
 class ArgsConverter {
  public:
-  ArgsConverter(JSCContext & rt, const jsa::Value* args, size_t count) {
+  ArgsConverter(JSCContext & context, const jsa::Value* args, size_t count) {
     JSValueRef* destination = inline_;
     if (count > maxStackArgs) {
       outOfLine_ = std::make_unique<JSValueRef[]>(count);
@@ -947,7 +996,7 @@ class ArgsConverter {
     }
 
     for (size_t i = 0; i < count; ++i) {
-      destination[i] = rt.valueRef(args[i]);
+      destination[i] = context.valueRef(args[i]);
     }
   }
 
