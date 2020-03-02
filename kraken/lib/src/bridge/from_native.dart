@@ -8,7 +8,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/src/module/flushCallbacksInUIThread.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -38,8 +37,9 @@ String handleAction(List directive) {
   var result;
   try {
     result = ElementManager.applyAction(action, payload);
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    print(error);
+    print(stackTrace);
   }
 
   if (result == null) {
@@ -147,7 +147,11 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp() {
-  reloadApp();
+  try {
+    reloadApp();
+  } catch (err, stack) {
+    print('$err\n$stack');
+  }
 }
 
 void registerReloadApp() {
@@ -159,6 +163,28 @@ typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
 typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data);
 typedef DartAsyncCallback = void Function(Pointer<Void> context);
 typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data);
+
+// Register requestBatchUpdate
+typedef Native_RequestBatchUpdate = Void Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
+typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
+typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
+
+final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
+    .asFunction();
+
+void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
+  return requestBatchUpdate((Duration timeStamp) {
+    DartAsyncCallback func = callback.asFunction();
+    func(context);
+  });
+}
+
+void registerRequestBatchUpdate() {
+  Pointer<NativeFunction<Native_RequestBatchUpdate>> pointer = Pointer.fromFunction(_requestBatchUpdate);
+  _registerRequestBatchUpdate(pointer);
+}
+
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
@@ -384,6 +410,7 @@ void registerStopFlushCallbacksInUIThread() {
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
+  registerRequestBatchUpdate();
   registerReloadApp();
   registerSetTimeout();
   registerSetInterval();

@@ -1,9 +1,9 @@
-import { NodeImpl, NodeType } from './node';
+import { Node, NodeType } from './node';
 import {
   addEvent,
   createElement,
-  removeEvent,
   setProperty,
+  removeProperty,
   setStyle,
   method
 } from './UIManager';
@@ -25,40 +25,24 @@ const RECT_PROPERTIES = [
   'scrollWidth',
 ];
 
-let nodeMap: {
-  [nodeId: number]: ElementImpl;
-} = {};
-
-export function handleEvent(nodeId: number, event: any) {
-  const currentTarget = nodeMap[nodeId];
-  const target = nodeMap[event.target];
-  event.targetId = event.target;
-  event.target = target;
-
-  event.currentTargetId = event.currentTarget;
-  event.currentTarget = currentTarget;
-
-  if (currentTarget) {
-    currentTarget.dispatchEvent(event);
-  }
-}
-
-export class ElementImpl extends NodeImpl {
+export class Element extends Node {
   public readonly tagName: string;
   private events: {
     [eventName: string]: any;
   } = {};
   public style: object = {};
+  // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
+  public attributes: Array<any> = [];
 
-  constructor(tagName: string, id?: number) {
-    super(NodeType.ELEMENT_NODE, id);
+  constructor(tagName: string, _nodeId?: number) {
+    super(NodeType.ELEMENT_NODE, _nodeId);
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
         this[key] = value;
         setStyle(nodeId, key, value);
-        return value;
+        return true;
       },
       get(target: any, key: string, receiver) {
         return this[key];
@@ -84,16 +68,15 @@ export class ElementImpl extends NodeImpl {
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    addEvent(this.nodeId, eventName);
-    this.events[eventName] = eventListener;
-    nodeMap[this.nodeId] = this;
+    if (!this.events.hasOwnProperty(eventName)) {
+      addEvent(this.nodeId, eventName);
+      this.events[eventName] = eventListener;
+    }
   }
 
+  // Do not really emit remove event, due to performance consideration.
   removeEventListener(eventName: string, eventListener: any) {
     super.removeEventListener(eventName, eventListener);
-    delete nodeMap[this.nodeId];
-    delete this.events[eventName];
-    removeEvent(this.nodeId, eventName);
   }
 
   getBoundingClientRect = () => {
@@ -110,7 +93,42 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
+    name = String(name);
+    value = String(value);
+    if (this.attributes[name]) {
+      this.attributes[name].value = value;
+    } else {
+      const attr = {name, value};
+      this.attributes[name] = attr;
+      this.attributes.push(attr);
+    }
+
     setProperty(this.nodeId, name, value);
+  }
+
+  public getAttribute(name: string) {
+    name = String(name);
+    if (this.attributes[name]) {
+      return this.attributes[name].value;
+    }
+  }
+
+  public hasAttribute(name: string) {
+    name = String(name);
+    return Boolean(this.attributes[name]);
+  }
+
+  public removeAttribute(name: string) {
+    if (this.attributes[name]) {
+      const attr = this.attributes[name];
+      const idx = this.attributes.indexOf(attr);
+      if (idx !== -1) {
+        this.attributes.splice(idx, 1);
+      }
+
+      removeProperty(this.nodeId, name);
+      delete this.attributes[name];
+    }
   }
 
   public click() {

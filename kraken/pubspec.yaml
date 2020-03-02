@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   meta: ^1.1.6
+  flare_flutter: ^2.0.1
   ffi: ^0.1.3
   connectivity: ^0.4.6
   connectivity_macos: ^0.0.1

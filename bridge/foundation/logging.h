@@ -30,8 +30,7 @@ public:
 
 class LogMessage {
 public:
-  LogMessage(LogSeverity severity, const char *file, int line,
-             const char *condition);
+  LogMessage(LogSeverity severity, const char *file, int line);
   ~LogMessage();
 
   std::ostream &stream() { return stream_; }
@@ -48,8 +47,7 @@ private:
 } // namespace foundation
 
 #define KRAKEN_LOG_STREAM(severity)                                            \
-  ::foundation::LogMessage(::foundation::LOG_##severity, __FILE__, __LINE__,   \
-                           nullptr)                                            \
+  ::foundation::LogMessage(::foundation::LOG_##severity, __FILE__, __LINE__)   \
       .stream()
 
 #define KRAKEN_LAZY_STREAM(stream, condition)                                  \
@@ -59,7 +57,7 @@ private:
   true || (ignored)                                                            \
       ? (void)0                                                                \
       : ::foundation::LogMessageVoidify() &                                    \
-            ::foundation::LogMessage(::foundation::LOG_FATAL, 0, 0, nullptr)   \
+            ::foundation::LogMessage(::foundation::LOG_FATAL, 0, 0)            \
                 .stream()
 
 #define KRAKEN_LOG(severity)                                                   \

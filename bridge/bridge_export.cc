@@ -46,6 +46,10 @@ void registerInvokeModule(InvokeModule callbacks) {
   kraken::registerInvokeModule(callbacks);
 }
 
+void registerRequestBatchUpdate(RequestBatchUpdate requestBatchUpdate) {
+  kraken::registerRequestBatchUpdate(requestBatchUpdate);
+}
+
 void registerReloadApp(ReloadApp reloadApp) {
   kraken::registerReloadApp(reloadApp);
 }

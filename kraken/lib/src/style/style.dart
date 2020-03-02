@@ -5,7 +5,7 @@
 
 import 'package:kraken/style.dart';
 
-final String STYLE = 'style';
+const String STYLE = 'style';
 
 class Style {
   static const String VISIBLE = 'visible';

@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
@@ -16,7 +17,6 @@ import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
 
-const String STYLE = 'style';
 const String STYLE_PATH_PREFIX = '.style';
 
 typedef Statement = bool Function(Element element);
@@ -46,7 +46,9 @@ abstract class Element extends Node
   bool _inited = false; // True after constructor finished.
   bool shouldBlockStretch = true;
   double cropWidth = 0;
+  double cropHeight = 0;
   double cropBorderWidth = 0;
+  double cropBorderHeight = 0;
   double offsetTop = null; // offset to the top of viewport
   bool stickyFixed = false;
 
@@ -111,14 +113,17 @@ abstract class Element extends Node
       onPointerCancel: this.handlePointCancel,
       behavior: HitTestBehavior.translucent,
     );
+
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
     // opacity
     renderObject = initRenderOpacity(renderObject, style);
+
     // margin
     renderObject = initRenderMargin(renderObject, style, this);
     // transition
     initTransition(style);
+
     // transform
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
 
@@ -277,7 +282,7 @@ abstract class Element extends Node
       bool isFixed;
 
       if (el.offsetTop == null) {
-        double offsetTop = double.parse(el.getOffsetY());
+        double offsetTop = el.getOffsetY();
         // save element original offset to viewport
         el.offsetTop = offsetTop;
       }
@@ -1019,7 +1024,7 @@ abstract class Element extends Node
   void updateTextNodeStyle(String key) {
     childNodes.forEach((node) {
       if (node is TextNode) {
-        node.setProperty(key, node.data);
+        node.setProperty('style', style);
       }
     });
   }
@@ -1061,17 +1066,17 @@ abstract class Element extends Node
       case 'offsetLeft':
         return getOffsetX();
       case 'offsetWidth':
-        return renderMargin?.size?.width ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
-        return renderMargin?.size?.height ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.height : 0;
       case 'clientWidth':
-        return renderPadding?.size?.width ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.width : 0;
       case 'clientHeight':
-        return renderPadding?.size?.height ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.height : 0;
       case 'clientLeft':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
       case 'clientTop':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
@@ -1082,42 +1087,46 @@ abstract class Element extends Node
         return getScrollWidth();
       case 'getBoundingClientRect':
         return getBoundingClientRect();
+      case 'click':
+        return click();
       default:
         debugPrint('unknown method call. name: $name, args: ${args}');
     }
   }
 
   Map getBoundingClientRect() {
-    Offset offset = getOffset(renderBorderMargin);
-    Size size = renderBorderMargin.size;
     Map rect = {};
-    rect['x'] = offset.dx;
-    rect['y'] = offset.dy;
-    rect['width'] = size.width;
-    rect['height'] = size.height;
-    rect['top'] = offset.dy;
-    rect['left'] = offset.dx;
-    rect['right'] = offset.dx + size.width;
-    rect['bottom'] = offset.dy + size.height;
+    if (renderBorderMargin.hasSize) {
+      Offset offset = getOffset(renderBorderMargin);
+      Size size = renderBorderMargin.size;
+      rect['x'] = offset.dx;
+      rect['y'] = offset.dy;
+      rect['width'] = size.width;
+      rect['height'] = size.height;
+      rect['top'] = offset.dy;
+      rect['left'] = offset.dx;
+      rect['right'] = offset.dx + size.width;
+      rect['bottom'] = offset.dy + size.height;
+    }
     return rect;
   }
 
-  String getOffsetX() {
+  double getOffsetX() {
     double offset = 0;
-    if (renderObject is RenderBox) {
+    if (renderObject is RenderBox && renderObject.attached) {
       Offset relative = getOffset(renderObject as RenderBox);
-      offset +=  relative.dx;
+      offset += relative.dx;
     }
-    return offset.toString();
+    return offset;
   }
 
-  String getOffsetY() {
+  double getOffsetY() {
     double offset = 0;
-    if (renderObject is RenderBox) {
+    if (renderObject is RenderBox && renderObject.attached) {
       Offset relative = getOffset(renderObject as RenderBox);
-      offset +=  relative.dy;
+      offset += relative.dy;
     }
-    return offset.toString();
+    return offset;
   }
 
   Offset getOffset(RenderBox renderBox) {
@@ -1151,6 +1160,20 @@ abstract class Element extends Node
   void _eventResponder(Event event) {
     String json = jsonEncode([nodeId, event]);
     emitUIEvent(json);
+  }
+
+  void click() {
+    final RenderBox box = renderObject as RenderBox;
+    // Click at the center of the element
+    Offset position = box.localToGlobal(box.size.center(Offset.zero));
+    PointerEvent downEvent = PointerDownEvent(position: position);
+
+    final HitTestResult hitTestResult = HitTestResult();
+    GestureBinding.instance.hitTest(hitTestResult, position);
+    GestureBinding.instance.dispatchEvent(downEvent, hitTestResult);
+
+    PointerEvent upEvent = PointerUpEvent(position: position);
+    GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
   }
 }
 

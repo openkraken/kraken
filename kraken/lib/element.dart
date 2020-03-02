@@ -21,3 +21,4 @@ export 'src/element/tags/span.dart';
 export 'src/element/tags/ul.dart';
 export 'src/element/tags/video.dart';
 export 'src/element/tags/audio.dart';
+export 'src/element/tags/animation.dart';

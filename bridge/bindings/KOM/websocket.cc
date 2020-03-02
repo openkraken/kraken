@@ -138,8 +138,8 @@ JSWebSocket::JSWebSocket() {
 Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
                            const Value *args, size_t count) {
   if (count < 5) {
-    KRAKEN_LOG(WARN) << "connect method takes 5 arguments. "
-                        "[connetct(url,onMessage,onOpen,onClose,onError)]";
+    KRAKEN_LOG(WARN) << "WebSocket.connect method takes 5 arguments. "
+                        "[connect(url, onMessage, onOpen, onClose, onError)]";
     return Value::undefined();
   }
   auto &&url = args[0];
