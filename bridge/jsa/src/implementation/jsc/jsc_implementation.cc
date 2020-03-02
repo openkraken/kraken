@@ -103,7 +103,6 @@ JSCContext::JSCContext(): ctxInvalid_(false)
 #endif
 {
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
-  ctx_ = JSGlobalContextRetain(ctx_);
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef globalName = JSStringCreateWithUTF8CString("global");

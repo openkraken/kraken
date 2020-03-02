@@ -1,7 +1,7 @@
-import { NodeImpl, NodeType } from './node';
+import { Node, NodeType } from './node';
 import { createTextNode, setProperty } from './UIManager';
 
-export class TextImpl extends NodeImpl {
+export class Text extends Node {
   public nodeName: string = '#text';
   public _data: string = '';
 
