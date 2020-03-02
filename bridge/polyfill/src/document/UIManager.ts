@@ -3,7 +3,7 @@ import { krakenUIManager, krakenRequestBatchUpdate } from '../kraken';
 const updateMessageQueue:string[] = [];
 let updateRequested: boolean = false;
 
-function requestUpdateFrame() {
+export function requestUpdateFrame() {
   updateRequested = false;
   if (updateMessageQueue.length > 0) {
     krakenUIManager('["batchUpdate",[' + updateMessageQueue.join(',') + ']]');

@@ -4,6 +4,9 @@
  */
 
 import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -36,6 +39,7 @@ abstract class Element extends Node
   RenderConstrainedBox renderConstrainedBox;
   RenderObject stickyPlaceholder;
   RenderObject renderObject; // Style decorated renderObject
+  RenderRepaintBoundary renderRepaintBoundary;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutElement;
   RenderBoxModel renderBoxModel;
@@ -119,13 +123,16 @@ abstract class Element extends Node
     // opacity
     renderObject = initRenderOpacity(renderObject, style);
 
-    // margin
-    renderObject = initRenderMargin(renderObject, style, this);
     // transition
     initTransition(style);
 
     // transform
     renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
+
+    renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
+
+    // margin
+    renderObject = initRenderMargin(renderObject, style, this);
 
     /// Element event listener
     if (events != null) {
@@ -1168,6 +1175,22 @@ abstract class Element extends Node
 
     PointerEvent upEvent = PointerUpEvent(position: position);
     GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
+  }
+
+  Future<Uint8List> toBlob({double devicePixelRatio}) {
+    if (devicePixelRatio == null) {
+      devicePixelRatio = window.devicePixelRatio;
+    }
+
+    Completer<Uint8List> completer = new Completer();
+
+    ElementsBinding.instance.addPostFrameCallback((duration) async {
+      Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
+      ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+      completer.complete(byteData.buffer.asUint8List());
+    });
+
+    return completer.future;
   }
 }
 

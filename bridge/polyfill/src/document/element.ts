@@ -5,8 +5,10 @@ import {
   setProperty,
   removeProperty,
   setStyle,
-  method
+  method,
+  requestUpdateFrame
 } from './UIManager';
+import {krakenToBlob} from '../kraken';
 
 const RECT_PROPERTIES = [
   'offsetTop',
@@ -147,5 +149,18 @@ export class ElementImpl extends NodeImpl {
 
   public click() {
     method(this.nodeId, 'click');
+  }
+
+  async toBlob() {
+    requestUpdateFrame();
+    return new Promise((resolve, reject) => {
+      krakenToBlob(this.nodeId, (err, blob) => {
+        if (err) {
+          return reject(new Error(err));
+        }
+
+        resolve(blob);
+      });
+    });
   }
 }
