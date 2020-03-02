@@ -141,11 +141,11 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
     }
 
     const makeFileArgs = [
-      '-DCMAKE_BUILD_TYPE=Release',
+      '-DCMAKE_BUILD_TYPE=' + buildMode,
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
-      resolve(paths.bridge, 'cmake-build-release'),
+      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '-S',
       paths.bridge
     ];
@@ -153,7 +153,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
     // generate xcode project for debugging on macOS.
     if (platform === 'darwin') {
       const xcodeArgs = [
-        '-DCMAKE_BUILD_TYPE=Release',
+        '-DCMAKE_BUILD_TYPE=' + buildMode,
           '-G',
           'Xcode',
           '-B',
@@ -171,7 +171,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
   task('build-kraken-lib-' + jsEngine, (done) => {
     const args = [
       '--build',
-      resolve(paths.bridge, 'cmake-build-release'),
+      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
       '--',
@@ -192,11 +192,11 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
 
 task('generate-cmake-embedded-files', (done) => {
   const args = [
-    '-DCMAKE_BUILD_TYPE=Release',
+    '-DCMAKE_BUILD_TYPE=' + buildMode,
     '-G',
     'CodeBlocks - Unix Makefiles',
     '-B',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '-S',
     resolve(paths.platform, 'linux_' + os.arch())
   ];
@@ -215,7 +215,7 @@ task('generate-cmake-embedded-files', (done) => {
 task('build-kraken-embedded-lib', (done) => {
   const args = [
     '--build',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '--target',
     'kraken_embbeder',
     '--',
