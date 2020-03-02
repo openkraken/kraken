@@ -1,29 +1,35 @@
-import { NodeType, NodeId } from './node';
-import { ElementImpl } from './element';
-import { CommentImpl } from './comment';
-import { TextImpl } from './text';
-import { VideoImpl } from './tags/video';
+import { Node, NodeType, NodeId, traverseNode } from './node';
+import { Element } from './element';
+import { Comment } from './comment';
+import { Text } from './text';
+import { Video } from './tags/video';
 
-export class DocumentImpl {
-  public body: ElementImpl = new ElementImpl('BODY', NodeId.BODY);
+export class Document extends Node {
+  public body: Element = new Element('BODY', NodeId.BODY);
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
 
-  createElement(tagName: string) {
+  constructor() {
+    // Use the same nodeId with body, only used in event targets,
+    // document events are triggered and received by body element.
+    super(NodeType.DOCUMENT_NODE, NodeId.BODY);
+  }
+
+  createElement(tagName: string) : Element {
     let element;
     switch(tagName) {
       case 'video':
-        element = new VideoImpl(tagName);
+        element = new Video(tagName);
         break;
       default:
-        element = new ElementImpl(tagName);
+        element = new Element(tagName);
         break;
     }
     return element;
   }
 
   createTextNode(text: string) {
-    return new TextImpl(text);
+    return new Text(text);
   }
 
   /**
@@ -31,8 +37,19 @@ export class DocumentImpl {
    * @param data {string} A string containing the data to be added to the Comment.
    */
   createComment(data: string) {
-    return new CommentImpl(data);
+    return new Comment(data);
   }
 }
 
-export const document = new DocumentImpl();
+export const document = new Document();
+
+export function getNodeByNodeId(nodeId: number) : Node|null {
+  let _node = null;
+  traverseNode(document.body, (node: Node) : any => {
+    if (node.nodeId === nodeId) {
+      _node = node;
+      return true; // Return true to stop travsering
+    }
+  });
+  return _node;
+}
