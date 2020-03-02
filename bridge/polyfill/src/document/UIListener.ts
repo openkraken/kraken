@@ -1,9 +1,22 @@
 import { krakenUIListener } from '../kraken';
-import { handleEvent } from './element';
+import { getNodeByNodeId } from './document';
 
 krakenUIListener((message) => {
-  let parsed = JSON.parse(message);
+  const parsed = JSON.parse(message);
   const nodeId = parsed[0];
-  const eventObj = parsed[1];
-  handleEvent(nodeId, eventObj);
+  const event = parsed[1];
+  const currentTarget = getNodeByNodeId(nodeId);
+
+  if (currentTarget !== null) {
+    const target = getNodeByNodeId(event.target);
+    event.targetId = event.target;
+    event.target = target;
+
+    event.currentTargetId = event.currentTarget;
+    event.currentTarget = currentTarget;
+
+    if (currentTarget.dispatchEvent) {
+      currentTarget.dispatchEvent(event);
+    }
+  }
 });
