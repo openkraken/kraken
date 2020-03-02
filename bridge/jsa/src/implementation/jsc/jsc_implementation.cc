@@ -6,8 +6,8 @@
 #include "jsa.h"
 #include "jsc_implementation.h"
 #ifdef IS_LINUX
-#include <iostream>
 #endif
+#include <iostream>
 
 namespace alibaba {
 namespace jsc {
@@ -103,7 +103,6 @@ JSCContext::JSCContext(): ctxInvalid_(false)
 #endif
 {
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
-  ctx_ = JSGlobalContextRetain(ctx_);
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef globalName = JSStringCreateWithUTF8CString("global");
@@ -119,6 +118,7 @@ JSCContext::~JSCContext() {
   // atomic<bool> to avoid unsafe unprotects happening after shutdown
   // has started.
   ctxInvalid_ = true;
+  std::cout << "destroy context" << std::endl;
   JSGlobalContextRelease(ctx_);
 #ifndef NDEBUG
   assert(
