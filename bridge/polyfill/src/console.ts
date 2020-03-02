@@ -58,7 +58,7 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
       case 'function':
         break;
       case 'string':
-        primitive = `'${obj}`;
+        primitive = `'${obj}'`;
       default:
         primitive = obj.toString();
     }
