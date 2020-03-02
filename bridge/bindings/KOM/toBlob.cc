@@ -48,14 +48,10 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args,
         String::createFromAscii(context, error)
       });
     } else {
+      std::vector<uint8_t> vec(bytes, bytes + length);
       ctx->_callback->getObject(context).getFunction(context).call(context, {
           Value::null(),
-          // TODO jsa does not support the `new` operator yet, so we can build Blob object at this point.
-          // return buffer instead until the `new` operator is supported.
-          ArrayBuffer::createWithUnit8(ctx->_context, bytes, length, [](uint8_t *bytes) {
-            // after copy data into vector, we need to clean up original bytes
-            delete[] bytes;
-          })
+          Object::createFromHostObject(context, std::make_shared<JSBlob>(vec))
       });
     }
     

@@ -9,6 +9,7 @@ import {
   requestUpdateFrame
 } from './UIManager';
 import {krakenToBlob} from '../kraken';
+import {BlobClass} from "../blob";
 
 const RECT_PROPERTIES = [
   'offsetTop',
@@ -154,12 +155,12 @@ export class ElementImpl extends NodeImpl {
   async toBlob() {
     requestUpdateFrame();
     return new Promise((resolve, reject) => {
-      krakenToBlob(this.nodeId, (err, blob) => {
+      krakenToBlob(this.nodeId, (err, arrayBuffer) => {
         if (err) {
           return reject(new Error(err));
         }
 
-        resolve(blob);
+        resolve(new BlobClass([arrayBuffer]));
       });
     });
   }
