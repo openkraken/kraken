@@ -40,3 +40,4 @@ lib/generated_plugin_registrant.dart
 pubspec.lock
 assets/*
 !assets/.gitkeep
+android/targets
