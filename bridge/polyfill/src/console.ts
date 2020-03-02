@@ -7,6 +7,9 @@ const DIMENSIONS = 3;
 const INDENT = '  ';
 const times = {};
 const counts = {};
+const INDEX = '(index)';
+const VALUE = '(value)';
+const EMPTY = ' ';
 let groupIndent = '';
 
 function printer(message: string, level?: string) {
@@ -31,7 +34,7 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
   var type = typeof obj;
   switch (type) {
     case 'string':
-      return `"${obj}"`;
+      return `'${obj}'`;
     case 'function':
       break;
     case 'object':
@@ -55,7 +58,7 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
       case 'function':
         break;
       case 'string':
-        primitive = `"${obj}"`;
+        primitive = `'${obj}`;
       default:
         primitive = obj.toString();
     }
@@ -95,13 +98,6 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
 function inspect(obj: any, within?: boolean): string {
   var result = '';
 
-  if (Object(obj) !== obj) {
-    if (within && typeof obj == 'string') {
-      return '"' + obj + '"';
-    }
-    return obj;
-  }
-
   if (obj && obj.nodeType == 1) {
     // Is element?
     result = '<' + obj.tagName.toLowerCase();
@@ -119,7 +115,7 @@ function inspect(obj: any, within?: boolean): string {
   var kind = Object.prototype.toString.call(obj).slice(8, -1);
   switch (kind) {
     case 'String':
-      return `"${obj}"`;
+      return within ? `'${obj}'` : obj;
     case 'Function':
       return 'ƒ ()';
     case 'Number':
@@ -128,15 +124,8 @@ function inspect(obj: any, within?: boolean): string {
     case 'RegExp':
       return obj.toString();
     case 'Array':
-    case 'HTMLCollection':
-    case 'NodeList':
-      // Is array-like object?
-      result = kind == 'Array' ? '[' : kind + ' [';
-      var itemList = [];
-      for (var j = 0, jj = obj.length; j < jj; j++) {
-        itemList[j] = inspect(obj[j], true);
-      }
-      return result + itemList.join(', ') + ']';
+      var itemList = obj.map((item: any) => inspect(item, true));
+      return '[' + itemList.join(', ') + ']';
     default:
       if (typeof obj === 'object') {
         var prefix;
@@ -178,8 +167,9 @@ function inspect(obj: any, within?: boolean): string {
   }
 }
 
-function logger(firstArg: any, allArgs: IArguments) {
+function logger(allArgs: any) {
   var args = Array.prototype.slice.call(allArgs, 0);
+  var firstArg = args[0];
   var result = [];
   if (typeof firstArg === 'string' && INTERPOLATE.test(firstArg)) {
     args.shift();
@@ -195,22 +185,22 @@ function logger(firstArg: any, allArgs: IArguments) {
 
 const console = {
   log(...args: any) {
-    printer(logger(arguments[0], arguments));
+    printer(logger(arguments));
   },
   info(...args: any) {
-    printer(logger(arguments[0], arguments), 'info');
+    printer(logger(arguments), 'info');
   },
   warn(...args: any) {
-    printer(logger(arguments[0], arguments), 'warn');
+    printer(logger(arguments), 'warn');
   },
   debug(...args: any) {
-    printer(logger(arguments[0], arguments), 'debug');
+    printer(logger(arguments), 'debug');
   },
   error(...args: any) {
-    printer(logger(arguments[0], arguments), 'error');
+    printer(logger(arguments), 'error');
   },
   dirxml(...args: any) {
-    printer(logger(arguments[0], arguments));
+    printer(logger(arguments));
   },
   dir(...args: any) {
     var result = [];
@@ -219,22 +209,110 @@ const console = {
     }
     printer(result.join(SEPARATOR));
   },
-  table(data: any, columns: Array<string>) {
-    console.dir(data);
+  table(data: Array<any>, filterColumns: Array<string>) {
+    if (data === null || typeof data !== 'object') {
+      return console.log(data);
+    }
+
+    const rows: any[] = [];
+    const columns: string[] = [];
+    const index: any[] = [];
+    let hasValueColumn = false;
+
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        let row = data[key];
+        index.push(key);
+        rows.push(row);
+        if (typeof row === 'object' && data !== null) {
+          Object.keys(row).forEach(columnName => {
+            if (columns.indexOf(columnName) === -1) {
+              if (Array.isArray(filterColumns) && filterColumns.length !== 0) {
+                if (filterColumns.indexOf(columnName) !== -1) {
+                  columns.push(columnName);
+                }
+              } else {
+                columns.push(columnName);
+              }
+            }
+          });
+        } else {
+          hasValueColumn = true;
+        }
+      }
+    }
+
+    // Unshift (index) or push (value) in columns
+    columns.unshift(INDEX);
+    if (hasValueColumn) columns.push(VALUE);
+
+    var stringRows: any[] = [];
+    var columnWidths: number[] = [];
+
+    // Convert each cell to a string. Also
+    // figure out max cell width for each column
+    columns.forEach((columnName, columnIndex) => {
+      columnWidths[columnIndex] = columnName.length;
+      rows.forEach((row, rowIndex) => {
+        let cellString: string;
+
+        if (columnName === INDEX) cellString = index[rowIndex];
+        else if (row[columnName] !== undefined) cellString = logger([row[columnName]]);
+        else if (columnName === VALUE && (row === null || typeof row !== 'object')) cellString = logger([row]);
+        else cellString = EMPTY; // empty
+
+        stringRows[rowIndex] = stringRows[rowIndex] || [];
+        stringRows[rowIndex][columnIndex] = cellString;
+        // Update to the max length value in column
+        columnWidths[columnIndex] = Math.max(columnWidths[columnIndex], cellString.length);
+      });
+    });
+
+    // Join all elements in the row into a single string with | separators
+    // (appends extra spaces to each cell to make separators  | aligned)
+    function joinRow(row: any[], space = ' ', sep = '│') {
+      var cells = row.map(function (cell, i) {
+        var extraSpaces = ' '.repeat(columnWidths[i] - cell.length);
+        return cell + extraSpaces;
+      });
+      return cells.join(space + sep + space);
+    }
+
+    var separators = columnWidths.map(function (columnWidth) {
+      return '─'.repeat(columnWidth);
+    });
+
+    var sep = joinRow(separators, '─', '─');
+    var header = joinRow(columns);
+    var separatorRow = joinRow(separators, '─');
+    var table = [sep, header, separatorRow];
+
+    for (var i = 0; i < rows.length; i++) {
+      table.push(joinRow(stringRows[i]));
+    }
+
+    table.push(sep);
+
+    console.log(table.join('\n'));
   },
   trace(...args: any) {
-    var traceStack: Array<string> = ['Trace: '];
-    var argsInfo = logger(arguments[0], arguments);
+    var traceStack = 'Trace:';
+    var argsInfo = logger(arguments);
     if (argsInfo) {
-      traceStack.push(argsInfo);
+      traceStack += (' ' + argsInfo);
     }
 
     var stack = new Error().stack;
     if (stack) {
-      traceStack.concat(stack.split('\n').slice(1));
+      // Compilable with V8 that has Error prefix
+      stack = stack.replace(/^Error\n/g, '');
+      // Slice the top trace is the current function,
+      // and compilable with JSC that without space indent
+      stack = stack.split('\n').slice(1).map(line => INDENT + line.trim()).join('\n');
+      traceStack += ('\n' + stack);
     }
 
-    printer(traceStack.join('\n'));
+    printer(traceStack);
   },
   // Defined by: https://console.spec.whatwg.org/#count
   count(label = 'default') {
