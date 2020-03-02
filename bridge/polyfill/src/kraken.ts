@@ -60,3 +60,9 @@ export const krakenInvokeModule = __kraken_invoke_module__;
 
 declare const __kraken_module_listener__: (fn: (message: string) => void) => void;
 export const krakenModuleListener = __kraken_module_listener__;
+
+declare const __kraken_request_batch_update__: (fn: () => void) => void;
+export const krakenRequestBatchUpdate = __kraken_request_batch_update__;
+
+declare const __kraken_print__: (log: string, level?: string) => void;
+export const krakenPrint = __kraken_print__;

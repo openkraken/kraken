@@ -26,6 +26,8 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
       return InputElement(id, props, events);
     case CANVAS:
       return CanvasElement(id, props, events);
+    case ANIMATION:
+      return AnimationElement(id, props, events);
     case VIDEO:
       {
         VideoElement.setDefaultPropsStyle(props);

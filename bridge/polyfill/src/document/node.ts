@@ -84,7 +84,7 @@ export class Node extends EventTarget {
     const idx = this.childNodes.indexOf(child);
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
-
+      child.parentNode = null;
       removeNode(child.nodeId);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
