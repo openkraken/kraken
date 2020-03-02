@@ -1,6 +1,6 @@
 import {KrakenBlob, krakenBlob} from './kraken';
 
-export class BlobClass {
+export class Blob {
   public size: number;
   public type: string;
   private blob: KrakenBlob;
@@ -33,6 +33,6 @@ export class BlobClass {
 Object.defineProperty(global, 'Blob', {
   configurable: false,
   enumerable: true,
-  value: BlobClass,
+  value: Blob,
   writable: false
 });

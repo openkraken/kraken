@@ -9,7 +9,7 @@ import {
   requestUpdateFrame
 } from './UIManager';
 import {krakenToBlob} from '../kraken';
-import {BlobClass} from "../blob";
+import {Blob} from "../blob";
 
 const RECT_PROPERTIES = [
   'offsetTop',
@@ -139,14 +139,15 @@ export class Element extends Node {
   }
 
   async toBlob() {
+    // need to flush all pending frame messages
     requestUpdateFrame();
     return new Promise((resolve, reject) => {
-      krakenToBlob(this.nodeId, (err, arrayBuffer) => {
+      krakenToBlob(this.nodeId, (err, blob) => {
         if (err) {
           return reject(new Error(err));
         }
 
-        resolve(new BlobClass([arrayBuffer]));
+        resolve(new Blob([blob]));
       });
     });
   }

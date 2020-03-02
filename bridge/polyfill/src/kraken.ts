@@ -28,7 +28,7 @@ export interface KrakenBlob {
 
 declare const __kraken_window__: KrakenWindow;
 declare const __kraken_blob__: (blobParts?: BlobPart[], options?: BlobPropertyBag) => KrakenBlob;
-declare const __kraken_to_blob__: (id: number, callback: (err: string, arrayBuffer: ArrayBuffer) => void) => KrakenBlob;
+declare const __kraken_to_blob__: (id: number, callback: (err: string, blob: Blob) => void) => KrakenBlob;
 export const krakenWindow = __kraken_window__;
 export const krakenBlob = __kraken_blob__;
 export const krakenToBlob = __kraken_to_blob__;

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
+* Copyright (C) 2020-present Alibaba Inc. All rights reserved.
 * Author: Kraken Team.
 */
 
@@ -39,13 +39,13 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args,
 
   auto ctx = new CallbackContext(context, func);
 
-  getDartMethod()->toBlob([](void* ptr, const char* error, uint8_t* bytes, int32_t length) {
-    auto ctx = static_cast<CallbackContext*>(ptr);
+  getDartMethod()->toBlob([](void *ptr, const char *error, uint8_t *bytes, int32_t length) {
+    auto ctx = static_cast<CallbackContext *>(ptr);
     JSContext &context = ctx->_context;
 
     if (error != nullptr) {
       ctx->_callback->getObject(context).getFunction(context).call(context, {
-        String::createFromAscii(context, error)
+          String::createFromAscii(context, error)
       });
     } else {
       std::vector<uint8_t> vec(bytes, bytes + length);
@@ -54,9 +54,9 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args,
           Object::createFromHostObject(context, std::make_shared<JSBlob>(vec))
       });
     }
-    
+
     delete ctx;
-  }, static_cast<void*>(ctx), id.getNumber());
+  }, static_cast<void *>(ctx), id.getNumber());
   return Value::undefined();
 }
 
