@@ -3,6 +3,7 @@ import {
   addEvent,
   createElement,
   setProperty,
+  removeProperty,
   setStyle,
   method
 } from './UIManager';
@@ -44,6 +45,8 @@ export class ElementImpl extends NodeImpl {
     [eventName: string]: any;
   } = {};
   public style: object = {};
+  // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
+  public attributes: Array<any> = [];
 
   constructor(tagName: string, _nodeId?: number) {
     super(NodeType.ELEMENT_NODE, _nodeId);
@@ -104,7 +107,42 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
+    name = String(name);
+    value = String(value);
+    if (this.attributes[name]) {
+      this.attributes[name].value = value;
+    } else {
+      const attr = {name, value};
+      this.attributes[name] = attr;
+      this.attributes.push(attr);
+    }
+
     setProperty(this.nodeId, name, value);
+  }
+
+  public getAttribute(name: string) {
+    name = String(name);
+    if (this.attributes[name]) {
+      return this.attributes[name].value;
+    }
+  }
+
+  public hasAttribute(name: string) {
+    name = String(name);
+    return Boolean(this.attributes[name]);
+  }
+
+  public removeAttribute(name: string) {
+    if (this.attributes[name]) {
+      const attr = this.attributes[name];
+      const idx = this.attributes.indexOf(attr);
+      if (idx !== -1) {
+        this.attributes.splice(idx, 1);
+      }
+
+      removeProperty(this.nodeId, name);
+      delete this.attributes[name];
+    }
   }
 
   public click() {

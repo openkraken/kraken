@@ -43,6 +43,10 @@ export function setProperty(id: number, key: string, value: any) {
   sendMessage(`["setProperty",[${id},"${key}","${value}"]]`);
 }
 
+export function removeProperty(id: number, key: string) {
+  sendMessage(`["removeProperty",[${id},"${key}"]]`);
+}
+
 export function setStyle(id: number, key: string, value: string) {
   sendMessage(`["setStyle",[${id},"${key}","${value}"]]`);
 }
@@ -56,5 +60,7 @@ export function removeEvent(id: number, eventName: string) {
 }
 
 export function method(id: number, methodName: string, params?: any[]) {
+  // Must flush batch update before get
+  requestUpdateFrame();
   return krakenUIManager(`["method",[${id},"${methodName}",${params ? JSON.stringify(params): '[]'}]]`);
 }

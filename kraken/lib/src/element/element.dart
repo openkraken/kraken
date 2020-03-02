@@ -282,7 +282,7 @@ abstract class Element extends Node
       bool isFixed;
 
       if (el.offsetTop == null) {
-        double offsetTop = double.parse(el.getOffsetY());
+        double offsetTop = el.getOffsetY();
         // save element original offset to viewport
         el.offsetTop = offsetTop;
       }
@@ -1060,17 +1060,17 @@ abstract class Element extends Node
       case 'offsetLeft':
         return getOffsetX();
       case 'offsetWidth':
-        return renderMargin?.size?.width ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
-        return renderMargin?.size?.height ?? '0';
+        return renderMargin.hasSize ? renderMargin.size.height : 0;
       case 'clientWidth':
-        return renderPadding?.size?.width ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.width : 0;
       case 'clientHeight':
-        return renderPadding?.size?.height ?? '0';
+        return renderPadding.hasSize ? renderPadding.size.height : 0;
       case 'clientLeft':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
       case 'clientTop':
-        return renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
@@ -1089,36 +1089,38 @@ abstract class Element extends Node
   }
 
   Map getBoundingClientRect() {
-    Offset offset = getOffset(renderBorderMargin);
-    Size size = renderBorderMargin.size;
     Map rect = {};
-    rect['x'] = offset.dx;
-    rect['y'] = offset.dy;
-    rect['width'] = size.width;
-    rect['height'] = size.height;
-    rect['top'] = offset.dy;
-    rect['left'] = offset.dx;
-    rect['right'] = offset.dx + size.width;
-    rect['bottom'] = offset.dy + size.height;
+    if (renderBorderMargin.hasSize) {
+      Offset offset = getOffset(renderBorderMargin);
+      Size size = renderBorderMargin.size;
+      rect['x'] = offset.dx;
+      rect['y'] = offset.dy;
+      rect['width'] = size.width;
+      rect['height'] = size.height;
+      rect['top'] = offset.dy;
+      rect['left'] = offset.dx;
+      rect['right'] = offset.dx + size.width;
+      rect['bottom'] = offset.dy + size.height;
+    }
     return rect;
   }
 
-  String getOffsetX() {
+  double getOffsetX() {
     double offset = 0;
-    if (renderObject is RenderBox) {
+    if (renderObject is RenderBox && renderObject.attached) {
       Offset relative = getOffset(renderObject as RenderBox);
       offset += relative.dx;
     }
-    return offset.toString();
+    return offset;
   }
 
-  String getOffsetY() {
+  double getOffsetY() {
     double offset = 0;
-    if (renderObject is RenderBox) {
+    if (renderObject is RenderBox && renderObject.attached) {
       Offset relative = getOffset(renderObject as RenderBox);
       offset += relative.dy;
     }
-    return offset.toString();
+    return offset;
   }
 
   Offset getOffset(RenderBox renderBox) {
