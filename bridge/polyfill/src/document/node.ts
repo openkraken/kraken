@@ -2,9 +2,6 @@ import { EventTarget } from 'event-target-shim';
 import { insertAdjacentNode, removeNode } from './UIManager';
 
 export type NodeList = Array<Node>;
-export type NodeMap = {
-  [nodeId: number]: Node,
-};
 export enum NodeId {
   BODY = -1,
 }
@@ -18,11 +15,6 @@ export enum NodeType {
 }
 
 let nodesCount = 1;
-// Node in nodeMap is that in render tree.
-const nodeMap : NodeMap = {};
-export function getNodeById(nodeId: number) {
-  return nodeMap[nodeId] ?? null;
-}
 
 export class Node extends EventTarget {
   public readonly nodeType: NodeType;
@@ -81,10 +73,6 @@ export class Node extends EventTarget {
     this.childNodes.push(child);
     child.parentNode = this;
     insertAdjacentNode(this.nodeId, 'beforeend', child.nodeId);
-
-    if (this.isConnected) {
-      traverseNode(child, addToNodeMap);
-    }
   }
 
   /**
@@ -98,7 +86,6 @@ export class Node extends EventTarget {
       this.childNodes.splice(idx, 1);
 
       removeNode(child.nodeId);
-      traverseNode(child, removeFromNodeMap);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
@@ -113,10 +100,6 @@ export class Node extends EventTarget {
     parentChildNodes.splice(nextIndex - 1, 0, newChild);
     newChild.parentNode = parentNode;
     insertAdjacentNode(referenceNode.nodeId, 'beforebegin', newChild.nodeId);
-
-    if (this.isConnected) {
-      traverseNode(newChild, addToNodeMap);
-    }
   }
 
   /**
@@ -140,28 +123,17 @@ export class Node extends EventTarget {
     insertAdjacentNode(oldChild.nodeId, 'afterend', newChild.nodeId);
     removeNode(oldChild.nodeId);
 
-    if (this.isConnected) {
-      traverseNode(newChild, addToNodeMap);
-      traverseNode(oldChild, removeFromNodeMap);
-    }
-
     return oldChild;
   }
 }
 
-function traverseNode(node: Node, handle: Function) {
-  handle(node);
+export function traverseNode(node: Node, handle: Function) {
+  const shouldExit = handle(node);
+  if (shouldExit) return;
+
   if (node.childNodes.length > 0) {
     for (let i = 0, l = node.childNodes.length; i < l; i++) {
       traverseNode(node.childNodes[i], handle);
     }
   }
-}
-
-function addToNodeMap(node: Node) {
-  nodeMap[node.nodeId] = node;
-}
-
-function removeFromNodeMap(node: Node) {
-  delete nodeMap[node.nodeId];
 }

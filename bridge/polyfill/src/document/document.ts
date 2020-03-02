@@ -1,4 +1,4 @@
-import { Node, NodeType, NodeId } from './node';
+import { Node, NodeType, NodeId, traverseNode } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
 import { Text } from './text';
@@ -42,3 +42,14 @@ export class Document extends Node {
 }
 
 export const document = new Document();
+
+export function getNodeByNodeId(nodeId: number) : Node|null {
+  let _node = null;
+  traverseNode(document.body, (node: Node) : any => {
+    if (node.nodeId === nodeId) {
+      _node = node;
+      return true; // Return true to stop travsering
+    }
+  });
+  return _node;
+}

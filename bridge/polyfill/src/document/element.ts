@@ -1,4 +1,4 @@
-import { Node, NodeType, getNodeById } from './node';
+import { Node, NodeType } from './node';
 import {
   addEvent,
   createElement,
@@ -23,19 +23,6 @@ const RECT_PROPERTIES = [
   'scrollHeight',
   'scrollWidth',
 ];
-
-export function handleEvent(currentTarget: Node, event: any) {
-  const target = getNodeById(event.target);
-  event.targetId = event.target;
-  event.target = target;
-
-  event.currentTargetId = event.currentTarget;
-  event.currentTarget = currentTarget;
-
-  if (currentTarget) {
-    currentTarget.dispatchEvent(event);
-  }
-}
 
 export class Element extends Node {
   public readonly tagName: string;
