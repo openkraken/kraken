@@ -668,8 +668,11 @@ std::shared_ptr<jsa::HostObject>
 V8Context::getHostObject(const jsa::Object &obj) {
   auto pointer =
       static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
-  void *privateData = pointer->privateData_;
-  return static_cast<HostObjectProxyBase *>(privateData)->hostObject;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> object = pointer->obj_.Get(_isolate);
+  v8::Local<v8::External> external = v8::Local<v8::External>::Cast(object->GetInternalField(0));
+  HostObjectProxyBase* proxyBase = static_cast<HostObjectProxyBase *>(external->Value());
+  return proxyBase->hostObject;
 }
 
 jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
