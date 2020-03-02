@@ -42,18 +42,14 @@ const char *StripPath(const char *path) {
 
 } // namespace
 
-LogMessage::LogMessage(LogSeverity severity, const char *file, int line,
-                       const char *condition)
+LogMessage::LogMessage(LogSeverity severity, const char *file, int line)
     : severity_(severity), file_(file), line_(line) {
-  stream_ << "bridge: [";
-  if (severity >= LOG_INFO)
+  
+  if (severity >= LOG_WARN) {
+    stream_ << "[";
     stream_ << GetNameForLogSeverity(severity);
-  else
-    stream_ << "VERBOSE";
-  stream_ << "] ";
-
-  if (condition)
-    stream_ << "Check failed: " << condition << ". ";
+    stream_ << "] ";
+  }
 }
 
 LogMessage::~LogMessage() {

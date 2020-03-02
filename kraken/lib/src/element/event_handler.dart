@@ -42,6 +42,9 @@ mixin EventHandlerMixin on Node {
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
+    // Use original event, prevent to be relative coordinate
+    if (pointEvent.original != null) pointEvent = pointEvent.original;
+
     Touch touch = Touch(
       identifier: pointEvent.pointer,
       target: this,

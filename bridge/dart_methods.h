@@ -16,6 +16,7 @@ struct DartMethodPointer {
   DartMethodPointer() = default;
   InvokeUIManager invokeUIManager{nullptr};
   InvokeModule invokeModule{nullptr};
+  RequestBatchUpdate requestBatchUpdate{nullptr};
   ReloadApp reloadApp{nullptr};
   SetTimeout setTimeout{nullptr};
   SetInterval setInterval{nullptr};
@@ -32,6 +33,7 @@ struct DartMethodPointer {
 
 void registerInvokeUIManager(InvokeUIManager callback);
 void registerInvokeModule(InvokeModule callback);
+void registerRequestBatchUpdate(RequestBatchUpdate callback);
 void registerReloadApp(ReloadApp callback);
 void registerSetTimeout(SetTimeout callback);
 void registerSetInterval(SetInterval callback);

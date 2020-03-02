@@ -32,8 +32,8 @@ container2.addEventListener('click', () => {
   console.log('inner clicked');
 });
 
-setTimeout(function() {
+requestAnimationFrame(function() {
   setStyle(container2, {
     opacity: 0.5,
   });
-}, 2000);
+});
