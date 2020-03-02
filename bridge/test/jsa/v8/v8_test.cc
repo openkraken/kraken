@@ -6,6 +6,7 @@
 #ifdef KRAKEN_V8_ENGINE
 
 #include "jsa.h"
+#include "bindings/KOM/blob.h"
 #include "v8/v8_implementation.h"
 #include "gtest/gtest.h"
 #include <memory>
@@ -519,6 +520,25 @@ TEST(V8Context, hostObject_get) {
   jsa::Function getName = user.getPropertyAsFunction(*context, "getName");
   jsa::Value name = getName.call(*context, "andycall");
   EXPECT_EQ(name.getString(*context).utf8(*context), "chenghuai.dtc");
+}
+
+
+TEST(V8Context, hostObjectAsArgs) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>();
+  std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
+  jsa::HostFunctionType getBlob =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value {
+    auto &&object = args[0].getObject(context);
+    EXPECT_EQ(object.isHostObject(context), true);
+    return jsa::Value::undefined();
+  };
+  jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
+  func.call(*context, {
+    jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
+  });
 }
 
 TEST(V8Context, hostObject_set) {
