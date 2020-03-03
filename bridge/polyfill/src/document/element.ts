@@ -5,7 +5,8 @@ import {
   setProperty,
   removeProperty,
   setStyle,
-  method
+  method,
+  toBlob
 } from './UIManager';
 
 const RECT_PROPERTIES = [
@@ -133,5 +134,9 @@ export class Element extends Node {
 
   public click() {
     method(this.nodeId, 'click');
+  }
+
+  async toBlob() {
+    return toBlob(this.nodeId);
   }
 }

@@ -374,7 +374,8 @@ V8Context::V8ObjectValue<T>::V8ObjectValue(v8::Isolate *isolate,
   obj_.Reset(isolate, obj);
 }
 
-template <typename T> void V8Context::V8ObjectValue<T>::invalidate() {
+template<typename T>
+void V8Context::V8ObjectValue<T>::invalidate() {
 #ifndef NDEBUG
   counter_ -= 1;
 #endif
@@ -389,7 +390,7 @@ template <typename T> void V8Context::V8ObjectValue<T>::invalidate() {
   delete this;
 }
 
-template <typename T>
+template<typename T>
 void V8Context::V8ObjectValue<T>::finalize(
     const v8::WeakCallbackInfo<T> &data) {
   T *parameter = data.GetParameter();
@@ -667,15 +668,23 @@ std::shared_ptr<jsa::HostObject>
 V8Context::getHostObject(const jsa::Object &obj) {
   auto pointer =
       static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
-  void *privateData = pointer->privateData_;
-  return static_cast<HostObjectProxyBase *>(privateData)->hostObject;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> object = pointer->obj_.Get(_isolate);
+  v8::Local<v8::External> external = v8::Local<v8::External>::Cast(object->GetInternalField(0));
+  HostObjectProxyBase* proxyBase = static_cast<HostObjectProxyBase *>(external->Value());
+  return proxyBase->hostObject;
 }
 
 jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
   auto pointer =
       static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
-  void *privateData = pointer->privateData_;
-  HostFunctionProxy *proxy = static_cast<HostFunctionProxy *>(privateData);
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Function> function = v8::Local<v8::Function>::Cast(pointer->obj_.Get(_isolate));
+  v8::Local<v8::External> hostFunction = v8::Local<v8::External>::Cast(
+      function->Get(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToLocalChecked());
+  HostFunctionProxy *proxy = static_cast<HostFunctionProxy *>(hostFunction->Value());
   return proxy->getHostFunction();
 }
 
@@ -789,13 +798,24 @@ bool V8Context::isFunction(const jsa::Object &obj) const {
 bool V8Context::isHostObject(const jsa::Object &obj) const {
   auto pointer =
       static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
-  return pointer->privateData_ != nullptr;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Object> object = pointer->obj_.Get(_isolate);
+  if (object->InternalFieldCount() == 0) {
+    return false;
+  }
+  // hostObject set an external value in internalField, we use it to detect an object is an hostObject.
+  v8::Local<v8::Value> field = object->GetInternalField(0);
+  return field->IsExternal();
 }
 
 bool V8Context::isHostFunction(const jsa::Function &func) const {
   auto pointer =
       static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
-  return pointer->privateData_ != nullptr;
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Function> function = v8::Local<v8::Function>::Cast(pointer->obj_.Get(_isolate));
+  return function->Has(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToChecked();
 }
 
 jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
@@ -838,11 +858,14 @@ jsa::Array V8Context::createArray(size_t length) {
 }
 
 //
-template <typename T> struct ArrayBufferDealloactorProxy {
+template<typename T>
+struct ArrayBufferDealloactorProxy {
   ArrayBufferDealloactorProxy() = delete;
+
   ArrayBufferDealloactorProxy(jsa::ArrayBufferDeallocator<T> deallocator,
                               T *data)
       : _deallocator(deallocator), _data(data) {}
+
   ~ArrayBufferDealloactorProxy() { _deallocator(_data); }
 
   jsa::ArrayBufferDeallocator<T> _deallocator;
@@ -872,12 +895,14 @@ size_t V8Context::size(const jsa::Array &arr) {
   v8::Local<v8::Object> obj = objectRef(arr);
   return v8::Local<v8::Array>::Cast(obj)->Length();
 }
+
 size_t V8Context::size(const jsa::ArrayBuffer &arrayBuffer) {
   assert(isArrayBuffer(arrayBuffer));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> obj = objectRef(arrayBuffer);
   return v8::Local<v8::ArrayBuffer>::Cast(obj)->ByteLength();
 }
+
 size_t V8Context::size(const jsa::ArrayBufferView &arrayBufferView) {
   assert(isArrayBufferView(arrayBufferView));
   v8::HandleScope handleScope(_isolate);
@@ -953,6 +978,7 @@ void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i,
   bool success = array->Set(context, i, valueRef(value)).ToChecked();
   assert(success);
 }
+
 jsa::Function
 V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
                                           unsigned int paramCount,
@@ -1034,15 +1060,12 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
   };
 
   v8::Local<v8::Function> function =
-      v8::Function::New(context, callback, hostCallback, (int)paramCount)
+      v8::Function::New(context, callback, hostCallback, (int) paramCount)
           .ToLocalChecked();
 
   function->SetName(v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
                         .ToLocalChecked());
-
-  v8::Local<v8::Private> privateKey = v8::Private::New(
-      _isolate, v8::String::NewFromUtf8(_isolate, "proxy").ToLocalChecked());
-  function->SetPrivate(context, privateKey, hostCallback);
+  function->Set(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked(), hostCallback).ToChecked();
   v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
   return createObject(funcObject, proxy).getFunction(*this);
 }
@@ -1092,18 +1115,21 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
 
   return createValue(result);
 }
+
 bool V8Context::strictEquals(const jsa::Symbol &a, const jsa::Symbol &b) const {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Symbol> leftSymbol = symbolRef(a);
   v8::Local<v8::Symbol> rightSymbol = symbolRef(b);
   return leftSymbol->StrictEquals(rightSymbol);
 }
+
 bool V8Context::strictEquals(const jsa::String &a, const jsa::String &b) const {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::String> left = stringRef(a);
   v8::Local<v8::String> right = stringRef(b);
   return left->StrictEquals(right);
 }
+
 bool V8Context::strictEquals(const jsa::Object &a, const jsa::Object &b) const {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> left = objectRef(a);
@@ -1163,7 +1189,7 @@ jsa::Object V8Context::createObject(v8::Local<v8::Object> &object) const {
   return make<jsa::Object>(makeObjectValue<void *>(object, nullptr));
 }
 
-template <typename T>
+template<typename T>
 jsa::Object V8Context::createObject(v8::Local<v8::Object> &object,
                                     T *privateData) const {
   return make<jsa::Object>(makeObjectValue(object, privateData));
@@ -1191,7 +1217,7 @@ V8Context::makeStringValue(v8::Local<v8::String> ref) const {
 #endif
 }
 
-template <typename T>
+template<typename T>
 jsa::JSContext::PointerValue *
 V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
 #ifndef NDEBUG
