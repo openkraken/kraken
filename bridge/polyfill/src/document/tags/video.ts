@@ -13,4 +13,8 @@ export class Video extends Element {
   pause() {
     method(this.nodeId, 'pause');
   }
+
+  fastSeek = (duration: number) => {
+    method(this.nodeId, 'fastSeek', [duration]);
+  };
 }

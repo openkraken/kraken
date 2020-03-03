@@ -6,6 +6,7 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
+import 'dart:convert';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -33,6 +34,8 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
         VideoElement.setDefaultPropsStyle(props);
         return VideoElement(id, props, events);
       }
+    case AUDIO:
+      return AudioElement(id, props, events);
     default:
       throw Exception('ERROR: unexpected element type "$type"');
   }
@@ -178,7 +181,9 @@ class ElementManagerActionDelegate {
 
     Element target = nodeMap[targetId];
     assert(target != null);
-    dynamic res = target.method(method, args);
+    assert(target.method != null);
+    List<dynamic> arguments = jsonDecode(args);
+    dynamic res = target.method(method, arguments);
     return res;
   }
 }

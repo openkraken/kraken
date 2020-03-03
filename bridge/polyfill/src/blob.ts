@@ -1,11 +1,11 @@
 import {KrakenBlob, krakenBlob} from './kraken';
 
-class BlobClass {
+export class Blob {
   public size: number;
   public type: string;
   private blob: KrakenBlob;
   constructor(blobParts?: BlobPart[], options?: BlobPropertyBag) {
-    let blob = krakenBlob(blobParts, options)
+    let blob = krakenBlob(blobParts, options);
     this.blob = blob;
     this.size = blob.size;
     this.type = blob.type;
@@ -33,6 +33,6 @@ class BlobClass {
 Object.defineProperty(global, 'Blob', {
   configurable: false,
   enumerable: true,
-  value: BlobClass,
+  value: Blob,
   writable: false
 });

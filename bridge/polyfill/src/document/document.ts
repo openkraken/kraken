@@ -3,6 +3,7 @@ import { Element } from './element';
 import { Comment } from './comment';
 import { Text } from './text';
 import { Video } from './tags/video';
+import { Audio } from './tags/audio';
 
 export class Document extends Node {
   public body: Element = new Element('BODY', NodeId.BODY);
@@ -20,6 +21,9 @@ export class Document extends Node {
     switch(tagName) {
       case 'video':
         element = new Video(tagName);
+        break;
+      case 'audio':
+        element = new Audio(tagName);
         break;
       default:
         element = new Element(tagName);

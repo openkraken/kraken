@@ -19,6 +19,8 @@ dependencies:
   device_info: ^0.4.1 # Only support iOS and Android.
   kraken_video_player:
     path: ../plugins/kraken_video_player
+  audioplayers:
+    path: ../plugins/audioplayers
 
 dev_dependencies:
   flutter_test:

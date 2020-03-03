@@ -21,13 +21,24 @@ class RenderVideoBox extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
   RenderVideoBox({
     this.child,
-    this.additionalConstraints,
+    BoxConstraints additionalConstraints,
   }) : assert(child != null) {
+    _additionalConstraints = additionalConstraints;
     add(child);
   }
 
   RenderBox child;
-  BoxConstraints additionalConstraints;
+
+  // Additional constraints to apply to [child] during layout
+  BoxConstraints get additionalConstraints => _additionalConstraints;
+  BoxConstraints _additionalConstraints;
+  set additionalConstraints(BoxConstraints value) {
+    assert(value != null);
+    if (_additionalConstraints == value)
+      return;
+    _additionalConstraints = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -39,7 +50,7 @@ class RenderVideoBox extends RenderBox
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(additionalConstraints, parentUsesSize: true);
+      child.layout(_additionalConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -86,6 +97,7 @@ class VideoElement extends Element {
   int nodeId;
   Map<String, dynamic> props;
   List<String> events;
+  RenderVideoBox renderVideoBox;
 
   void addVideoBox() {
     RegExp exp = RegExp(r"^(http|https)://");
@@ -124,11 +136,11 @@ class VideoElement extends Element {
         minHeight: 0,
         maxHeight: getDisplayPortedLength(props['style']['height']),
       );
-      RenderVideoBox videoBox = RenderVideoBox(
+      renderVideoBox = RenderVideoBox(
         additionalConstraints: additionalConstraints,
         child: box,
       );
-      addChild(videoBox);
+      addChild(renderVideoBox);
 
       if (props['autoPlay'] == true) {
         controller.play();
@@ -235,9 +247,22 @@ class VideoElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (key == 'src' || key == '.style.width' || key == '.style.height') {
+    if (key == 'src') {
       removeVideoBox();
       addVideoBox();
+    }
+
+    // Update video constraints when video has initialized
+    if (key == '.style.width' || key == '.style.height') {
+      if (renderVideoBox != null) {
+        BoxConstraints additionalConstraints = BoxConstraints(
+          minWidth: 0,
+          maxWidth: getDisplayPortedLength(props['style']['width']),
+          minHeight: 0,
+          maxHeight: getDisplayPortedLength(props['style']['height']),
+        );
+        renderVideoBox.additionalConstraints = additionalConstraints;
+      }
     }
   }
 }

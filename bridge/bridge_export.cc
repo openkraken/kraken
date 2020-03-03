@@ -117,3 +117,7 @@ void registerStopFlushCallbacksInUIThread(
     StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
   kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
 }
+
+void registerToBlob(ToBlob toBlob) {
+  kraken::registerToBlob(toBlob);
+}
