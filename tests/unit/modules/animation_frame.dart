@@ -1,5 +1,5 @@
+import 'package:kraken/module.dart';
 import 'package:kraken/src/element/binding.dart';
-import 'package:kraken/src/module/schedule_frame.dart';
 import 'package:test/test.dart';
 
 void main() {
