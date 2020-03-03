@@ -151,6 +151,26 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     AsyncStorage.clear().then((bool value) {
       callback(Utf8.toUtf8(value.toString()), context);
     });
+  } else if (method == 'getCurrentPosition') {
+    List locationArgs = args[1];
+    Map<String, dynamic> options;
+    if (locationArgs.length > 0) {
+      options = locationArgs[0];
+    }
+    getCurrentPosition(options, (json) {
+      callback(Utf8.toUtf8(json), context);
+    });
+  } else if (method == 'watchPosition') {
+    List locationArgs = args[1];
+    Map<String, dynamic> options;
+    if (locationArgs.length > 0) {
+      options = locationArgs[0];
+    }
+    result = watchPosition(options).toString();
+  } else if (method == 'clearWatch') {
+    List locationArgs = args[1];
+    int id = locationArgs[0];
+    clearWatch(id);
   }
 
   return result;
