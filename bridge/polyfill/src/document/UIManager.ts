@@ -1,4 +1,5 @@
-import { krakenUIManager, krakenRequestBatchUpdate } from '../kraken';
+import {krakenUIManager, krakenRequestBatchUpdate, krakenToBlob} from '../kraken';
+import {Blob} from "../blob";
 
 const updateMessageQueue:string[] = [];
 let updateRequested: boolean = false;
@@ -63,4 +64,18 @@ export function method(id: number, methodName: string, params?: any[]) {
   // Must flush batch update before get
   requestUpdateFrame();
   return krakenUIManager(`["method",[${id},"${methodName}",${params ? JSON.stringify(params): '[]'}]]`);
+}
+
+export function toBlob(id: number) {
+  // need to flush all pending frame messages
+  requestUpdateFrame();
+  return new Promise((resolve, reject) => {
+    krakenToBlob(id, (err, blob) => {
+      if (err) {
+        return reject(new Error(err));
+      }
+
+      resolve(new Blob([blob]));
+    });
+  });
 }
