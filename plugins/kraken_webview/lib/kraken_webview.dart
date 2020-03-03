@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
+import 'package:kraken/style.dart';
 
 import 'platform_interface.dart';
 import 'src/webview_android.dart';
@@ -130,15 +132,15 @@ class JavascriptChannel {
 }
 
 /// A web view widget for showing html content.
-class WebView extends StatefulWidget {
+class WebViewElement extends Element {
   /// Creates a new web view.
   ///
   /// The web view can be controlled using a `WebViewController` that is passed to the
   /// `onWebViewCreated` callback once the web view is created.
   ///
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
-  const WebView({
-    Key key,
+  WebViewElement(int nodeId, Map<String, dynamic> props, List<String> events, {
+    String tagName = 'WEBVIEW',
     this.onWebViewCreated,
     this.initialUrl,
     this.javascriptMode = JavascriptMode.disabled,
@@ -152,9 +154,49 @@ class WebView extends StatefulWidget {
     this.userAgent,
     this.initialMediaPlaybackPolicy =
         AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
-  })  : assert(javascriptMode != null),
-        assert(initialMediaPlaybackPolicy != null),
-        super(key: key);
+  })  : assert(initialUrl != null),
+        assert(javascriptMode != null),
+        assert(initialMediaPlaybackPolicy != null), super(
+          nodeId: nodeId,
+          defaultDisplay: 'block',
+          tagName: tagName,
+          properties: props,
+          events: events,
+      ) {
+    _assertJavascriptChannelNamesAreUnique();
+    _platformCallbacksHandler = _PlatformCallbacksHandler(this);
+    RenderBox platformView = platform.buildRenderBox(
+      creationParams: _creationParamsFromElement(this),
+       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
+      onWebViewPlatformCreated: _onWebViewPlatformCreated,
+      gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
+    );
+    addChild(RenderConstrainedBox(
+      additionalConstraints: BoxConstraints.tight(Size(width, height)),
+      child: platformView
+    ));
+  }
+
+  _PlatformCallbacksHandler _platformCallbacksHandler;
+
+  String initialUrl;
+
+  double _width = Length.toDisplayPortValue(DEFAULT_WIDTH);
+  double get width => _width;
+  set width(double newValue) {
+    _width = newValue;
+    // todo: repaint
+  }
+
+  double _height = Length.toDisplayPortValue(DEFAULT_HEIGHT);
+  double get height => _height;
+  set height(double newValue) {
+    _height = newValue;
+    // todo: repaint
+  }
+
+  static String DEFAULT_WIDTH = '300px';
+  static String DEFAULT_HEIGHT = '150px';
 
   static WebViewPlatform _platform;
 
@@ -203,11 +245,11 @@ class WebView extends StatefulWidget {
   /// were not claimed by any other gesture recognizer.
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
-  /// The initial URL to load.
-  final String initialUrl;
-
   /// Whether Javascript execution is enabled.
   final JavascriptMode javascriptMode;
+
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+  <Factory<OneSequenceGestureRecognizer>>{};
 
   /// The set of [JavascriptChannel]s available to JavaScript code running in the web view.
   ///
@@ -319,80 +361,97 @@ class WebView extends StatefulWidget {
   /// The default policy is [AutoMediaPlaybackPolicy.require_user_action_for_all_media_types].
   final AutoMediaPlaybackPolicy initialMediaPlaybackPolicy;
 
-  @override
-  State<StatefulWidget> createState() => _WebViewState();
-}
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
 
-class _WebViewState extends State<WebView> {
-  final Completer<WebViewController> _controller =
-      Completer<WebViewController>();
-
-  _PlatformCallbacksHandler _platformCallbacksHandler;
-
-  @override
-  Widget build(BuildContext context) {
-    return WebView.platform.build(
-      context: context,
-      onWebViewPlatformCreated: _onWebViewPlatformCreated,
-      webViewPlatformCallbacksHandler: _platformCallbacksHandler,
-      gestureRecognizers: widget.gestureRecognizers,
-      creationParams: _creationParamsfromWidget(widget),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _assertJavascriptChannelNamesAreUnique();
-    _platformCallbacksHandler = _PlatformCallbacksHandler(widget);
-  }
-
-  @override
-  void didUpdateWidget(WebView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _assertJavascriptChannelNamesAreUnique();
-    _controller.future.then((WebViewController controller) {
-      _platformCallbacksHandler._widget = widget;
-      controller._updateWidget(widget);
-    });
+  void _assertJavascriptChannelNamesAreUnique() {
+    if (javascriptChannels == null || javascriptChannels.isEmpty) {
+      return;
+    }
+    assert(_extractChannelNames(javascriptChannels).length == javascriptChannels.length);
   }
 
   void _onWebViewPlatformCreated(WebViewPlatformController webViewPlatform) {
     final WebViewController controller =
-        WebViewController._(widget, webViewPlatform, _platformCallbacksHandler);
+        WebViewController._(this, webViewPlatform, _platformCallbacksHandler);
     _controller.complete(controller);
-    if (widget.onWebViewCreated != null) {
-      widget.onWebViewCreated(controller);
+    if (onWebViewCreated != null) {
+      onWebViewCreated(controller);
     }
-  }
-
-  void _assertJavascriptChannelNamesAreUnique() {
-    if (widget.javascriptChannels == null ||
-        widget.javascriptChannels.isEmpty) {
-      return;
-    }
-    assert(_extractChannelNames(widget.javascriptChannels).length ==
-        widget.javascriptChannels.length);
   }
 }
 
-CreationParams _creationParamsfromWidget(WebView widget) {
+//class _WebViewState extends State<WebView> {
+//  final Completer<WebViewController> _controller =
+//      Completer<WebViewController>();
+//
+//  _PlatformCallbacksHandler _platformCallbacksHandler;
+//
+//
+//
+////  @override
+////  Widget build(BuildContext context) {
+////    return WebView.platform.build(
+////      context: context,
+////      onWebViewPlatformCreated: _onWebViewPlatformCreated,
+////      webViewPlatformCallbacksHandler: _platformCallbacksHandler,
+////      gestureRecognizers: widget.gestureRecognizers,
+////      creationParams: _creationParamsfromWidget(widget),
+////    );
+////  }
+//
+//  @override
+//  void initState() {
+//    super.initState();
+//    _assertJavascriptChannelNamesAreUnique();
+//    _platformCallbacksHandler = _PlatformCallbacksHandler(widget);
+//  }
+//
+//  @override
+//  void didUpdateWidget(WebView oldWidget) {
+//    super.didUpdateWidget(oldWidget);
+//    _assertJavascriptChannelNamesAreUnique();
+//    _controller.future.then((WebViewController controller) {
+//      _platformCallbacksHandler._widget = widget;
+//      controller._updateWidget(widget);
+//    });
+//  }
+//
+//  void _onWebViewPlatformCreated(WebViewPlatformController webViewPlatform) {
+//    final WebViewController controller =
+//        WebViewController._(widget, webViewPlatform, _platformCallbacksHandler);
+//    _controller.complete(controller);
+//    if (widget.onWebViewCreated != null) {
+//      widget.onWebViewCreated(controller);
+//    }
+//  }
+//
+//  void _assertJavascriptChannelNamesAreUnique() {
+//    if (widget.javascriptChannels == null ||
+//        widget.javascriptChannels.isEmpty) {
+//      return;
+//    }
+//    assert(_extractChannelNames(widget.javascriptChannels).length ==
+//        widget.javascriptChannels.length);
+//  }
+//}
+
+CreationParams _creationParamsFromElement(WebViewElement element) {
   return CreationParams(
-    initialUrl: widget.initialUrl,
-    webSettings: _webSettingsFromWidget(widget),
-    javascriptChannelNames: _extractChannelNames(widget.javascriptChannels),
-    userAgent: widget.userAgent,
-    autoMediaPlaybackPolicy: widget.initialMediaPlaybackPolicy,
+    initialUrl: element.initialUrl,
+    webSettings: _webSettingsFromElement(element),
+    javascriptChannelNames: _extractChannelNames(element.javascriptChannels),
+    userAgent: element.userAgent,
+    autoMediaPlaybackPolicy: element.initialMediaPlaybackPolicy,
   );
 }
 
-WebSettings _webSettingsFromWidget(WebView widget) {
+WebSettings _webSettingsFromElement(WebViewElement element) {
   return WebSettings(
-    javascriptMode: widget.javascriptMode,
-    hasNavigationDelegate: widget.navigationDelegate != null,
-    debuggingEnabled: widget.debuggingEnabled,
-    gestureNavigationEnabled: widget.gestureNavigationEnabled,
-    userAgent: WebSetting<String>.of(widget.userAgent),
+    javascriptMode: element.javascriptMode,
+    hasNavigationDelegate: element.navigationDelegate != null,
+    debuggingEnabled: element.debuggingEnabled,
+    gestureNavigationEnabled: element.gestureNavigationEnabled,
+    userAgent: WebSetting<String>.of(element.userAgent),
   );
 }
 
@@ -443,11 +502,11 @@ Set<String> _extractChannelNames(Set<JavascriptChannel> channels) {
 }
 
 class _PlatformCallbacksHandler implements WebViewPlatformCallbacksHandler {
-  _PlatformCallbacksHandler(this._widget) {
-    _updateJavascriptChannelsFromSet(_widget.javascriptChannels);
+  _PlatformCallbacksHandler(this._element) {
+    _updateJavascriptChannelsFromSet(_element.javascriptChannels);
   }
 
-  WebView _widget;
+  WebViewElement _element;
 
   // Maps a channel name to a channel.
   final Map<String, JavascriptChannel> _javascriptChannels =
@@ -462,23 +521,23 @@ class _PlatformCallbacksHandler implements WebViewPlatformCallbacksHandler {
   FutureOr<bool> onNavigationRequest({String url, bool isForMainFrame}) async {
     final NavigationRequest request =
         NavigationRequest._(url: url, isForMainFrame: isForMainFrame);
-    final bool allowNavigation = _widget.navigationDelegate == null ||
-        await _widget.navigationDelegate(request) ==
+    final bool allowNavigation = _element.navigationDelegate == null ||
+        await _element.navigationDelegate(request) ==
             NavigationDecision.navigate;
     return allowNavigation;
   }
 
   @override
   void onPageStarted(String url) {
-    if (_widget.onPageStarted != null) {
-      _widget.onPageStarted(url);
+    if (_element.onPageStarted != null) {
+      _element.onPageStarted(url);
     }
   }
 
   @override
   void onPageFinished(String url) {
-    if (_widget.onPageFinished != null) {
-      _widget.onPageFinished(url);
+    if (_element.onPageFinished != null) {
+      _element.onPageFinished(url);
     }
   }
 
@@ -499,11 +558,11 @@ class _PlatformCallbacksHandler implements WebViewPlatformCallbacksHandler {
 /// callback for a [WebView] widget.
 class WebViewController {
   WebViewController._(
-    this._widget,
+    this._element,
     this._webViewPlatformController,
     this._platformCallbacksHandler,
   ) : assert(_webViewPlatformController != null) {
-    _settings = _webSettingsFromWidget(_widget);
+    _settings = _webSettingsFromElement(_element);
   }
 
   final WebViewPlatformController _webViewPlatformController;
@@ -512,7 +571,7 @@ class WebViewController {
 
   WebSettings _settings;
 
-  WebView _widget;
+  WebViewElement _element;
 
   /// Loads the specified URL.
   ///
@@ -533,7 +592,7 @@ class WebViewController {
 
   /// Accessor to the current URL that the WebView is displaying.
   ///
-  /// If [WebView.initialUrl] was never specified, returns `null`.
+  /// If [WebViewElement.initialUrl] was never specified, returns `null`.
   /// Note that this operation is asynchronous, and it is possible that the
   /// current URL changes again by the time this function returns (in other
   /// words, by the time this future completes, the WebView may be displaying a
@@ -592,10 +651,10 @@ class WebViewController {
     return reload();
   }
 
-  Future<void> _updateWidget(WebView widget) async {
-    _widget = widget;
-    await _updateSettings(_webSettingsFromWidget(widget));
-    await _updateJavascriptChannels(widget.javascriptChannels);
+  Future<void> _updateElement(WebViewElement element) async {
+    _element = element;
+    await _updateSettings(_webSettingsFromElement(element));
+    await _updateJavascriptChannels(element.javascriptChannels);
   }
 
   Future<void> _updateSettings(WebSettings newSettings) {
@@ -677,7 +736,7 @@ class CookieManager {
   /// This is a no op on iOS version smaller than 9.
   ///
   /// Returns true if cookies were present before clearing, else false.
-  Future<bool> clearCookies() => WebView.platform.clearCookies();
+  Future<bool> clearCookies() => WebViewElement.platform.clearCookies();
 }
 
 // Throws an ArgumentError if `url` is not a valid URL string.

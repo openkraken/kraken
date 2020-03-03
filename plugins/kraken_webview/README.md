@@ -1,10 +1,11 @@
-# WebView for Flutter (Developers Preview)
+# WebView for Kraken (Developers Preview)
 
-[![pub package](https://img.shields.io/pub/v/webview_flutter.svg)](https://pub.dartlang.org/packages/webview_flutter)
+[![pub package](https://img.shields.io/pub/v/kraken_webview.svg)](https://pub.dartlang.org/packages/kraken_webview)
 
-A Flutter plugin that provides a WebView widget.
+A Flutter plugin that provides a WebView Element for kraken.
 
 On iOS the WebView widget is backed by a [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview);
+
 On Android the WebView widget is backed by a [WebView](https://developer.android.com/reference/android/webkit/WebView).
 
 ## Developers Preview Status
@@ -30,7 +31,7 @@ Opt-in to the embedded views preview by adding a boolean property to the app's `
 with the key `io.flutter.embedded_views_preview` and the value `YES`.
 
 ## Usage
-Add `webview_flutter` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+Add `kraken_webview` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
 
 You can now include a WebView widget in your widget tree.
 See the WebView widget's Dartdoc for more details on how to use the widget.

@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
-import 'webview_flutter.dart';
+import 'kraken_webview.dart';
 
 /// Interface for callbacks made by [WebViewPlatformController].
 ///
@@ -211,9 +211,6 @@ class WebSetting<T> {
     final WebSetting<T> typedOther = other;
     return typedOther.isPresent == isPresent && typedOther._value == _value;
   }
-
-  @override
-  int get hashCode => hashValues(_value, isPresent);
 }
 
 /// Settings for configuring a WebViewPlatform.
@@ -332,7 +329,7 @@ typedef WebViewPlatformCreatedCallback = void Function(
 abstract class WebViewPlatform {
   /// Builds a new WebView.
   ///
-  /// Returns a Widget tree that embeds the created webview.
+  /// Returns a RenderObject tree that embeds the created webview.
   ///
   /// `creationParams` are the initial parameters used to setup the webview.
   ///
@@ -351,8 +348,7 @@ abstract class WebViewPlatform {
   /// were not claimed by any other gesture recognizer.
   ///
   /// `webViewPlatformHandler` must not be null.
-  Widget build({
-    BuildContext context,
+  RenderBox buildRenderBox({
     // TODO(amirh): convert this to be the actual parameters.
     // I'm starting without it as the PR is starting to become pretty big.
     // I'll followup with the conversion PR.
