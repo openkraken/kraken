@@ -1,18 +1,18 @@
 import { Element } from '../element';
 import { method } from '../UIManager';
 
-export class Video extends Element {
+export class Audio extends Element {
   constructor(tagName: string) {
     super(tagName);
   }
 
-  play() {
-    method(this.nodeId, 'play');
-  }
+  play = () => {
+    method(this.nodeId, 'play', []);
+  };
 
-  pause() {
-    method(this.nodeId, 'pause');
-  }
+  pause = () => {
+    method(this.nodeId, 'pause', []);
+  };
 
   fastSeek = (duration: number) => {
     method(this.nodeId, 'fastSeek', [duration]);

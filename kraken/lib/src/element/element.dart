@@ -861,6 +861,12 @@ abstract class Element extends Node
       String display = style.get('display');
       bool isFlex = display == 'flex' || display == 'inline-flex';
 
+      // Set audio element size to zero
+      if (child is AudioElement) {
+        RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
+        renderConstrainedBox.additionalConstraints = BoxConstraints();
+      }
+
       if (isFlex) {
         // Add FlexItem wrap for flex child node.
         RenderPadding parent = child.renderLayoutElement.parent;
