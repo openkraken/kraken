@@ -13,12 +13,6 @@ mixin TransformStyleMixin {
       matrix4 = combineTransform(methods) ?? matrix4;
     }
     Offset offset = parseOrigin(style?.transformOrigin);
-    // transform = RenderBoxModel(
-    //     child: current,
-    //     transform: matrix4,
-    //     origin: offset,
-    //     nodeId: nodeId,
-    //     style: style);
     transform = RenderTransform(
         child: current,
         transform: matrix4,
@@ -55,7 +49,6 @@ mixin TransformStyleMixin {
       }
       matrix4 = newMatrix4;
     }
-    // (transform as RenderBoxModel).style = style;
   }
 
   Offset parseOrigin(String origin) {

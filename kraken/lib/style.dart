@@ -8,6 +8,7 @@ export 'src/style/box_decoration.dart';
 export 'src/style/color.dart';
 export 'src/style/dimension.dart';
 export 'src/style/flexbox.dart';
+export 'src/style/flow.dart';
 export 'src/style/overflow.dart';
 export 'src/style/relative.dart';
 export 'src/style/style.dart';

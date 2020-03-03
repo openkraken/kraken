@@ -267,12 +267,9 @@ mixin DimensionMixin {
       element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
       element.cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     }
-    print('edgeInsets==================== $style $edgeInsets');
-    return renderMargin = RenderBoxModel(
+    return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
-      style: style,
-      nodeId: nodeId,
     );
   }
 

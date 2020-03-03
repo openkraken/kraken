@@ -6,18 +6,22 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-class RenderBoxModel extends RenderMargin {
+class BoxModelParentData extends ContainerBoxParentData<RenderBox> {}
+
+class RenderBoxModel extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, BoxModelParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, BoxModelParentData> {
   RenderBoxModel({
-    EdgeInsets margin,
-    RenderBox child,
-    this.nodeId,
+    this.child,
     Style style,
-  }) :
-    _style = style,
-    super(
-          child: child,
-          margin: margin,
-        );
+    this.nodeId,
+  }) : assert(child != null) {
+    _style = style;
+    add(child);
+  }
+
+  RenderBox child;
   int nodeId;
 
   Style _style;
@@ -27,6 +31,13 @@ class RenderBoxModel extends RenderMargin {
       return;
     }
     _style = value;
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! BoxModelParentData) {
+      child.parentData = BoxModelParentData();
+    }
   }
 
   @override
@@ -43,6 +54,13 @@ class RenderBoxModel extends RenderMargin {
       if (display == 'none') {
         size = constraints.constrain(Size(0, 0));
       }
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      context.paintChild(child, offset);
     }
   }
 }
