@@ -91,7 +91,7 @@ class VideoElement extends Element {
           properties: props,
           events: events,
         ) {
-    addVideoBox();
+    // nothing to do with createElement
   }
 
   int nodeId;
@@ -99,7 +99,33 @@ class VideoElement extends Element {
   List<String> events;
   RenderVideoBox renderVideoBox;
 
-  void addVideoBox() {
+  Future<int> createVideoPlayer(String src) {
+    Completer<int> completer = new Completer();
+
+    controller = VideoPlayerController.network(src);
+    _src = src;
+
+    controller.setLooping(props['loop'] ?? false);
+    controller.onCanPlay = onCanPlay;
+    controller.onCanPlayThrough = onCanPlayThrough;
+    controller.onPlay = onPlay;
+    controller.onPause = onPause;
+    controller.onSeeked = onSeeked;
+    controller.onSeeking = onSeeking;
+    controller.onEnded = onEnded;
+    controller.onError = onError;
+    controller.initialize().then((int textureId) {
+      if (props['muted'] == true) {
+        controller.setMuted(props['muted']);
+      }
+
+      completer.complete(textureId);
+    });
+
+    return completer.future;
+  }
+
+  void addVideoBox(int textureId) {
     RegExp exp = RegExp(r"^(http|https)://");
 
     if (props['src'] == null) {
@@ -112,40 +138,24 @@ class VideoElement extends Element {
       throw Exception('video url\'s prefix should be http:// or https://');
     }
 
-    controller = VideoPlayerController.network(props['src']);
-    _src = props['src'];
+    TextureBox box = TextureBox(textureId: textureId);
 
-    controller.setLooping(props['loop'] ?? false);
+    // @TODO get video's original dimension if width or height not specified as web
+    BoxConstraints additionalConstraints = BoxConstraints(
+      minWidth: 0,
+      maxWidth: getDisplayPortedLength(props['style']['width']),
+      minHeight: 0,
+      maxHeight: getDisplayPortedLength(props['style']['height']),
+    );
+    renderVideoBox = RenderVideoBox(
+      additionalConstraints: additionalConstraints,
+      child: box,
+    );
+    addChild(renderVideoBox);
 
-    controller.onCanPlay = onCanPlay;
-    controller.onCanPlayThrough = onCanPlayThrough;
-    controller.onPlay = onPlay;
-    controller.onPause = onPause;
-    controller.onSeeked = onSeeked;
-    controller.onSeeking = onSeeking;
-    controller.onEnded = onEnded;
-    controller.onError = onError;
-    controller.initialize().then((int textureId) {
-      controller.setMuted(props['muted'] ?? false);
-      TextureBox box = TextureBox(textureId: textureId);
-
-      // @TODO get video's original dimension if width or height not specified as web
-      BoxConstraints additionalConstraints = BoxConstraints(
-        minWidth: 0,
-        maxWidth: getDisplayPortedLength(props['style']['width']),
-        minHeight: 0,
-        maxHeight: getDisplayPortedLength(props['style']['height']),
-      );
-      renderVideoBox = RenderVideoBox(
-        additionalConstraints: additionalConstraints,
-        child: box,
-      );
-      addChild(renderVideoBox);
-
-      if (props['autoPlay'] == true) {
-        controller.play();
-      }
-    });
+    if (props['autoplay'] == 'true') {
+      controller.play();
+    }
   }
 
   void removeVideoBox() {
@@ -245,24 +255,11 @@ class VideoElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
+  void setProperty(String key, dynamic value) async {
     super.setProperty(key, value);
-    if (key == 'src') {
-      removeVideoBox();
-      addVideoBox();
-    }
-
-    // Update video constraints when video has initialized
-    if (key == '.style.width' || key == '.style.height') {
-      if (renderVideoBox != null) {
-        BoxConstraints additionalConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: getDisplayPortedLength(props['style']['width']),
-          minHeight: 0,
-          maxHeight: getDisplayPortedLength(props['style']['height']),
-        );
-        renderVideoBox.additionalConstraints = additionalConstraints;
-      }
+    if (key == 'src' && _src == null) {
+      int textureId = await createVideoPlayer(props['src']);
+      addVideoBox(textureId);
     }
   }
 }
