@@ -3,21 +3,20 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-class RenderBoxModel extends RenderTransform {
+class RenderBoxModel extends RenderMargin {
   RenderBoxModel({
+    EdgeInsets margin,
     RenderBox child,
-    Matrix4 transform,
-    Offset origin,
     this.nodeId,
     Style style,
   }) :
     _style = style,
     super(
           child: child,
-          transform: transform,
-          origin: origin,
+          margin: margin,
         );
   int nodeId;
 

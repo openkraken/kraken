@@ -261,15 +261,18 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, Style style, Element element) {
+      RenderObject renderObject, Style style, int nodeId, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     if (element != null) {
       element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
       element.cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     }
-    return renderMargin = RenderMargin(
+    print('edgeInsets==================== $style $edgeInsets');
+    return renderMargin = RenderBoxModel(
       margin: edgeInsets,
       child: renderObject,
+      style: style,
+      nodeId: nodeId,
     );
   }
 

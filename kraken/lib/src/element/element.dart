@@ -127,12 +127,12 @@ abstract class Element extends Node
     initTransition(style);
 
     // transform
-    renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
+    renderObject = initTransform(renderObject, style);
 
     renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // margin
-    renderObject = initRenderMargin(renderObject, style, this);
+    renderObject = renderBoxModel = initRenderMargin(renderObject, style, nodeId, this);
 
     /// Element event listener
     if (events != null) {
@@ -771,7 +771,9 @@ abstract class Element extends Node
   @override
   @mustCallSuper
   Node removeChild(Node child) {
-    removeElement(child);
+    if (child is Element || child is TextNode) {
+      removeElement(child);
+    }
     super.removeChild(child);
     return child;
   }

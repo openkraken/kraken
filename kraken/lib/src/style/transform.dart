@@ -7,18 +7,22 @@ mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
-  RenderObject initTransform(RenderObject current, Style style, int nodeId) {
+  RenderObject initTransform(RenderObject current, Style style) {
     if (style?.transform != null) {
       List<Method> methods = Method.parseMethod(style.transform);
       matrix4 = combineTransform(methods) ?? matrix4;
     }
     Offset offset = parseOrigin(style?.transformOrigin);
-    transform = RenderBoxModel(
+    // transform = RenderBoxModel(
+    //     child: current,
+    //     transform: matrix4,
+    //     origin: offset,
+    //     nodeId: nodeId,
+    //     style: style);
+    transform = RenderTransform(
         child: current,
         transform: matrix4,
-        origin: offset,
-        nodeId: nodeId,
-        style: style);
+        origin: offset);
     return transform;
   }
 
@@ -51,7 +55,7 @@ mixin TransformStyleMixin {
       }
       matrix4 = newMatrix4;
     }
-    (transform as RenderBoxModel).style = style;
+    // (transform as RenderBoxModel).style = style;
   }
 
   Offset parseOrigin(String origin) {
