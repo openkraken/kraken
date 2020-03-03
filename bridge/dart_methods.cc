@@ -76,4 +76,8 @@ void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlush
   methodPointer->stopFlushCallbacksInUIThread = stopFlushCallbacksInUiThread;
 }
 
+void registerToBlob(ToBlob toBlob) {
+  methodPointer->toBlob = toBlob;
+}
+
 } // namespace kraken

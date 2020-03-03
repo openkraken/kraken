@@ -7,6 +7,7 @@
 
 #include "jsa.h"
 #include "jsc/jsc_implementation.h"
+#include "bindings/KOM/blob.h"
 #include "gtest/gtest.h"
 #include <memory>
 
@@ -600,6 +601,44 @@ TEST(JSCContext, ArrayBufferView_data) {
   EXPECT_EQ(data[2], 3);
   EXPECT_EQ(data[3], 4);
   EXPECT_EQ(data[4], 5);
+}
+
+TEST(JSCContext, HostObjectAsArgs) {
+  auto context = std::make_unique<JSCContext>();
+  std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
+  jsa::HostFunctionType getBlob =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value {
+        auto &&object = args[0].getObject(context);
+        EXPECT_EQ(object.isHostObject(context), true);
+        return jsa::Value::undefined();
+      };
+  jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
+  func.call(*context, {
+      jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
+  });
+}
+
+TEST(JSCContext, getHostObject) {
+  auto context = std::make_unique<JSCContext>();
+  std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
+  jsa::HostFunctionType getBlob =
+      [](jsa::JSContext &context, const jsa::Value &thisVal,
+         const jsa::Value *args,
+         size_t count) -> jsa::Value {
+        auto &&object = args[0].getObject(context);
+        EXPECT_EQ(object.isHostObject(context), true);
+        std::shared_ptr<kraken::binding::JSBlob> blob = object.getHostObject<kraken::binding::JSBlob>(context);
+        jsa::Value size = blob->get(context, jsa::PropNameID::forAscii(context, "size"));
+        EXPECT_EQ(size.getNumber(), 5);
+
+        return jsa::Value::undefined();
+      };
+  jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
+  func.call(*context, {
+      jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
+  });
 }
 
 #endif

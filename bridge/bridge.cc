@@ -10,6 +10,7 @@
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/window.h"
 #include "bindings/KOM/blob.h"
+#include "bindings/KOM/toBlob.h"
 #include "polyfill.h"
 
 #include "dart_methods.h"
@@ -257,6 +258,7 @@ JSBridge::JSBridge() {
   kraken::binding::bindConsole(context);
   kraken::binding::bindTimer(context);
   kraken::binding::bindBlob(context);
+  kraken::binding::bindToBlob(context);
 
   websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
   websocket_->bind(context);

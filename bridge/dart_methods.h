@@ -29,6 +29,7 @@ struct DartMethodPointer {
   OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
   StartFlushCallbacksInUIThread startFlushCallbacksInUIThread{nullptr};
   StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
+  ToBlob toBlob{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -46,6 +47,7 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
+void registerToBlob(ToBlob toBlob);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

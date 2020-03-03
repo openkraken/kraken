@@ -125,34 +125,53 @@ task('clean', () => {
 const libOutputPath = join(TARGET_PATH, platform, buildMode.toLowerCase(), 'lib');
 for (let jsEngine of SUPPORTED_JS_ENGINES) {
   task('generate-cmake-files-' + jsEngine, (done) => {
-    const args = [
-      '-DCMAKE_BUILD_TYPE=Release',
+    function generateCmake(args) {
+      const handle = spawnSync('cmake', args, {
+        cwd: paths.bridge,
+        env: Object.assign(process.env, {
+          LIBRARY_OUTPUT_DIR: libOutputPath,
+          KRAKEN_JS_ENGINE: jsEngine
+        }),
+        stdio: 'inherit',
+      });
+      if (handle.status !== 0) {
+        console.error(handle.error);
+        return done(false);
+      }
+    }
+
+    const makeFileArgs = [
+      '-DCMAKE_BUILD_TYPE=' + buildMode,
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
-      resolve(paths.bridge, 'cmake-build-release'),
+      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '-S',
       paths.bridge
     ];
-    const handle = spawnSync('cmake', args, {
-      cwd: paths.bridge,
-      env: Object.assign(process.env, {
-        LIBRARY_OUTPUT_DIR: libOutputPath,
-        KRAKEN_JS_ENGINE: jsEngine
-      }),
-      stdio: 'inherit',
-    });
-    if (handle.status !== 0) {
-      console.error(handle.error);
-      return done(false);
+
+    // generate xcode project for debugging on macOS.
+    if (platform === 'darwin') {
+      const xcodeArgs = [
+        '-DCMAKE_BUILD_TYPE=' + buildMode,
+          '-G',
+          'Xcode',
+          '-B',
+          resolve(paths.bridge, 'cmake-build-macos'),
+          '-S',
+          paths.bridge
+      ];
+      generateCmake(xcodeArgs);
     }
+
+    generateCmake(makeFileArgs);
     done(null);
   });
 
   task('build-kraken-lib-' + jsEngine, (done) => {
     const args = [
       '--build',
-      resolve(paths.bridge, 'cmake-build-release'),
+      resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
       '--',
@@ -173,11 +192,11 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
 
 task('generate-cmake-embedded-files', (done) => {
   const args = [
-    '-DCMAKE_BUILD_TYPE=Release',
+    '-DCMAKE_BUILD_TYPE=' + buildMode,
     '-G',
     'CodeBlocks - Unix Makefiles',
     '-B',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '-S',
     resolve(paths.platform, 'linux_' + os.arch())
   ];
@@ -196,7 +215,7 @@ task('generate-cmake-embedded-files', (done) => {
 task('build-kraken-embedded-lib', (done) => {
   const args = [
     '--build',
-    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-release'),
+    resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '--target',
     'kraken_embbeder',
     '--',

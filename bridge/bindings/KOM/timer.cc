@@ -8,20 +8,14 @@
 #include "jsa.h"
 #include "logging.h"
 #include "thread_safe_map.h"
+#include "foundation/callback_context.h"
 #include <atomic>
 
 namespace kraken {
 namespace binding {
 
 using namespace alibaba::jsa;
-
-struct CallbackContext {
-  CallbackContext(JSContext &context, std::shared_ptr<Value> callback)
-      : _context(context), _callback(std::move(callback)){};
-
-  JSContext &_context;
-  std::shared_ptr<Value> _callback;
-};
+using namespace kraken::foundation;
 
 void destoryCallbackContext(void *data) {
   auto *obj = static_cast<CallbackContext *>(data);

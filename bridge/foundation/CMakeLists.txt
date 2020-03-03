@@ -14,7 +14,8 @@ set(FOUNDATION_SOURCES
   colors.h
   thread_safe_stack.h
   flushUITask.h
-  flushUITask.cc)
+  flushUITask.cc
+  callback_context.h)
 
 set(FOUNDATION_HEADERS
   logging.h
@@ -43,5 +44,6 @@ endif ()
 
 target_include_directories(foundation
   PRIVATE
+  ${JSA_INCLUDE_DIRS}
   ${FOUNDATION_INCLUDE_DIRECTORIES}
   )

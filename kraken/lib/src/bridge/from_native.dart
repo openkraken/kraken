@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
@@ -407,6 +408,54 @@ void registerStopFlushCallbacksInUIThread() {
   _registerStopFlushCallbacksInUIThread(pointer);
 }
 
+typedef NativeAsyncBlobCallback = Void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
+typedef DartAsyncBlobCallback = void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, int);
+typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32);
+typedef Native_RegisterToBlob = Void Function(
+    Pointer<NativeFunction<Native_ToBlob>>);
+typedef Dart_RegisterToBlob = void Function(
+    Pointer<NativeFunction<Native_ToBlob>>);
+
+final Dart_RegisterToBlob _registerToBlob = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob')
+    .asFunction();
+
+void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id) {
+  DartAsyncBlobCallback func = callback.asFunction();
+  try {
+    if (!nodeMap.containsKey(id)) {
+      Pointer<Utf8> msg = Utf8.toUtf8("toBlob: unknown node id: $id");
+      func(context, msg, nullptr, -1);
+      return;
+    }
+
+    dynamic node = nodeMap[id];
+    if (node is Element) {
+      node.toBlob().then((Uint8List bytes) {
+        Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
+        Uint8List byteList = bytePtr.asTypedList(bytes.length);
+        byteList.setAll(0, bytes);
+        func(context, nullptr, bytePtr, bytes.length);
+      }).catchError((e, stack) {
+        Pointer<Utf8> msg = Utf8.toUtf8("toBlob: failed to export image data from element id: $id. error: $e}.\n stack: $stack");
+        func(context, msg, nullptr, -1);
+      });
+    } else {
+      Pointer<Utf8> msg = Utf8.toUtf8("toBlob: node is not an element, id: $id");
+      func(context, msg, nullptr, -1);
+      return;
+    }
+  } catch (e, stack) {
+    Pointer<Utf8> msg = Utf8.toUtf8("toBlob: unexpected error: $e\n stack: $stack");
+    func(context, msg, nullptr, -1);
+  }
+}
+
+void registerToBlob() {
+  Pointer<NativeFunction<Native_ToBlob>> pointer = Pointer.fromFunction(_toBlob);
+  _registerToBlob(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -423,4 +472,5 @@ void registerDartMethodsToCpp() {
   registerOnPlatformBrightnessChanged();
   registerStartFlushCallbacksInUIThread();
   registerStopFlushCallbacksInUIThread();
+  registerToBlob();
 }
