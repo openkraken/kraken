@@ -25,6 +25,8 @@ list(APPEND BRIDGE_SOURCE
     bindings/kraken.cc
     bindings/KOM/blob.cc
     bindings/KOM/blob.h
+    bindings/KOM/toBlob.cc
+    bindings/KOM/toBlob.h
     dart_methods.cc
     dart_methods.h
     bridge.cc

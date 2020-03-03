@@ -21,6 +21,8 @@ dependencies:
     path: ../plugins/kraken_video_player
   kraken_webview:
     path: ../plugins/kraken_webview
+  audioplayers:
+    path: ../plugins/audioplayers
 
 dev_dependencies:
   flutter_test:

@@ -17,6 +17,7 @@ struct Screen {
 using AsyncCallback = void (*)(void*);
 using AsyncRAFCallback = void (*)(void*, double);
 using AsyncModuleCallback = void (*)(char *, void *);
+using AsyncBlobCallback = void (*)(void*, const char*, uint8_t*, int32_t);
 typedef const char *(*InvokeUIManager)(const char*);
 typedef const char *(*InvokeModule)(const char*, AsyncModuleCallback callback, void* context);
 typedef void (*RequestBatchUpdate)(AsyncCallback callback, void* context);
@@ -33,6 +34,7 @@ typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
 typedef void (*StartFlushCallbacksInUIThread)();
 typedef void (*StopFlushCallbacksInUIThread)();
+typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void* context, int32_t);
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -84,5 +86,7 @@ void registerStartFlushCallbacksInUIThread(
 KRAKEN_EXPORT
 void registerStopFlushCallbacksInUIThread(
     StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
+KRAKEN_EXPORT
+void registerToBlob(ToBlob toBlob);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
