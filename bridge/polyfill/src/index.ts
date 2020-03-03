@@ -7,3 +7,4 @@ import './location';
 import './navigator';
 import './window';
 import './blob';
+import './asyncStorage';
