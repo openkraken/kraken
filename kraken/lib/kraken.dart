@@ -52,9 +52,9 @@ void runApp({
   connect(showPerformanceOverlay);
 }
 
-void unmountApp() {
+void unmountApp() async {
   if (elementManager != null) {
-    elementManager.disconnect();
+    await elementManager.disconnect();
     elementManager = null;
   }
 }
@@ -62,7 +62,7 @@ void unmountApp() {
 void reloadApp() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   appLoading = true;
-  unmountApp();
+  await unmountApp();
   await reloadJSContext();
   appLoading = false;
   connect(prevShowPerformanceOverlay);

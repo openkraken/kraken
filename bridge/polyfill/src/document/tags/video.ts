@@ -17,4 +17,20 @@ export class Video extends Element {
   fastSeek = (duration: number) => {
     method(this.nodeId, 'fastSeek', [duration]);
   };
+
+  set src(value: string) {
+    this.setAttribute('src', value);
+  }
+
+  set autoplay(value: any) {
+    this.setAttribute('autoplay', value);
+  }
+
+  set loop(value: any) {
+    this.setAttribute('loop', value);
+  }
+
+  set poster(value: any) {
+    this.setAttribute('poster', value);
+  }
 }

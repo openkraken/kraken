@@ -65,6 +65,16 @@ class RenderVideoBox extends RenderBox
   }
 }
 
+List<VideoPlayerController> videoControllers = [];
+
+// dispose all video player when Dart VM is going to shutdown
+Future<void> shutDownVideoPlayer() async {
+  for (int i = 0; i < videoControllers.length; i ++) {
+    await videoControllers[i].dispose();
+  }
+  videoControllers.clear();
+}
+
 class VideoElement extends Element {
   VideoPlayerController controller;
   String _src;
@@ -121,6 +131,8 @@ class VideoElement extends Element {
 
       completer.complete(textureId);
     });
+
+    videoControllers.add(controller);
 
     return completer.future;
   }
@@ -257,7 +269,13 @@ class VideoElement extends Element {
   @override
   void setProperty(String key, dynamic value) async {
     super.setProperty(key, value);
-    if (key == 'src' && _src == null) {
+    if (key == 'src') {
+      if (_src != null) {
+        await controller.dispose();
+        videoControllers.remove(controller);
+        removeVideoBox();
+      }
+
       int textureId = await createVideoPlayer(props['src']);
       addVideoBox(textureId);
     }
