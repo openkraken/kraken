@@ -14,7 +14,7 @@ import 'webview_method_channel.dart';
 
 /// Builds an Android webview.
 ///
-/// This is used as the default implementation for [WebView.platform] on Android. It uses
+/// This is used as the default implementation for [WebViewElement.platform] on Android. It uses
 /// an [AndroidView] to embed the webview in the widget hierarchy, and uses a method channel to
 /// communicate with the platform code.
 class AndroidWebView implements WebViewPlatform {

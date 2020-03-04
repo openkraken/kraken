@@ -21,7 +21,7 @@
     },
     {
       "name": "audioplayers",
-      "rootUri": "../../../plugins/audioplayers",
+      "rootUri": "../../audioplayers",
       "packageUri": "lib/",
       "languageVersion": "2.0"
     },
@@ -392,7 +392,7 @@
       "languageVersion": "2.2"
     }
   ],
-  "generated": "2020-03-04T04:23:00.316674Z",
+  "generated": "2020-03-04T04:53:57.955458Z",
   "generator": "pub",
   "generatorVersion": "2.8.0-dev.8.0.flutter-514a8d4c84"
 }

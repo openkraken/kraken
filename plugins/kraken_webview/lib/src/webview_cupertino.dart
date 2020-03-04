@@ -14,7 +14,7 @@ import 'webview_method_channel.dart';
 
 /// Builds an iOS webview.
 ///
-/// This is used as the default implementation for [WebView.platform] on iOS. It uses
+/// This is used as the default implementation for [WebViewElement.platform] on iOS. It uses
 /// a [UiKitView] to embed the webview in the widget hierarchy, and uses a method channel to
 /// communicate with the platform code.
 class CupertinoWebView implements WebViewPlatform {

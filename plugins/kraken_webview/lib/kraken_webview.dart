@@ -13,6 +13,7 @@ import 'package:kraken/style.dart';
 import 'platform_interface.dart';
 import 'src/webview_android.dart';
 import 'src/webview_cupertino.dart';
+import 'src/webview_fallback.dart';
 
 /// Optional callback invoked when a web view is first created. [controller] is
 /// the [WebViewController] for the created web view.
@@ -180,6 +181,8 @@ class WebViewElement extends Element {
 
   @override
   void setProperty(String key, value) {
+    super.setProperty(key, value);
+
     if (key == 'src') {
       initialUrl = value;
       renderLayoutElement.removeAll();
@@ -262,8 +265,8 @@ class WebViewElement extends Element {
           _platform = CupertinoWebView();
           break;
         default:
-          throw UnsupportedError(
-              "Trying to use the default webview implementation for $defaultTargetPlatform but there isn't a default one");
+          _platform = FallbackWebView();
+          break;
       }
     }
     return _platform;
