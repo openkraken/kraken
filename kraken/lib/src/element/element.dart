@@ -43,7 +43,7 @@ abstract class Element extends Node
   RenderRepaintBoundary renderRepaintBoundary;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutElement;
-  RenderBoxModel renderBoxModel;
+  RenderElementBoundary renderElementBoundary;
   Map<String, dynamic> properties;
   RenderIntersectionObserver renderIntersectionObserver;
 
@@ -135,7 +135,7 @@ abstract class Element extends Node
     // margin
     renderObject = initRenderMargin(renderObject, style, nodeId, this);
 
-    renderObject = renderBoxModel = RenderBoxModel(child: renderObject, style: style, nodeId: nodeId);
+    renderObject = renderElementBoundary = RenderElementBoundary(child: renderObject, style: style, nodeId: nodeId);
 
     /// Element event listener
     if (events != null) {
@@ -174,7 +174,7 @@ abstract class Element extends Node
         renderLayoutElement = createRenderLayoutElement(newStyle, children);
         parent.child = renderLayoutElement as RenderBox;
         // update style reference
-        renderBoxModel.style = newStyle;
+        renderElementBoundary.style = newStyle;
       }
 
       if (newDisplay == 'flex' || newDisplay == 'inline-flex') { // update flex layout properties
@@ -383,7 +383,7 @@ abstract class Element extends Node
       if (style.position == 'absolute' || style.position == 'fixed' || style.position == 'sticky') {
         // remove positioned element from parent element stack
         Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-        parentElementWithStack.renderStack.remove(renderBoxModel);
+        parentElementWithStack.renderStack.remove(renderElementBoundary);
 
         // remove sticky placeholder
         if (style.position == 'sticky') {
@@ -405,17 +405,17 @@ abstract class Element extends Node
           }
         }
         // find pre non positioned renderObject
-        RenderBoxModel preNonPositionedObject = null;
+        RenderElementBoundary preNonPositionedObject = null;
         if (preNonPositionedElement != null) {
           RenderObjectVisitor visitor = (child) {
-            if (child is RenderBoxModel && preNonPositionedElement.nodeId == child.nodeId) {
+            if (child is RenderElementBoundary && preNonPositionedElement.nodeId == child.nodeId) {
               preNonPositionedObject = child;
             }
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
         // insert non positioned renderObject to parent element in the order of original element tree
-        parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
+        parentElement.renderLayoutElement.insert(renderElementBoundary, after: preNonPositionedObject);
 
         needsReposition = false;
       }
@@ -847,7 +847,7 @@ abstract class Element extends Node
       int childId;
       if (childNode is RenderTextNode) {
         childId = childNode.nodeId;
-      } else if (childNode is RenderBoxModel) {
+      } else if (childNode is RenderElementBoundary) {
         childId = childNode.nodeId;
       }
       if (childId == child.nodeId) {

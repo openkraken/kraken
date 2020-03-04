@@ -8,11 +8,11 @@ import 'package:kraken/style.dart';
 
 class BoxModelParentData extends ContainerBoxParentData<RenderBox> {}
 
-class RenderBoxModel extends RenderBox
+class RenderElementBoundary extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, BoxModelParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, BoxModelParentData> {
-  RenderBoxModel({
+  RenderElementBoundary({
     this.child,
     Style style,
     this.nodeId,

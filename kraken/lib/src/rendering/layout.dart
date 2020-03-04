@@ -730,7 +730,7 @@ class RenderFlowLayout extends RenderBox
         Style childStyle;
         if (child is RenderTextNode) {
           childStyle = nodeMap[nodeId].style;
-        } else if (child is RenderBoxModel) {
+        } else if (child is RenderElementBoundary) {
           int childNodeId = child.nodeId;
           childStyle = nodeMap[childNodeId].style;
         }
@@ -754,7 +754,7 @@ class RenderFlowLayout extends RenderBox
 
   String _getDisplayType(child) {
     String displayType;
-    if (child is RenderFlowLayout || child is RenderBoxModel) {
+    if (child is RenderFlowLayout || child is RenderElementBoundary) {
       displayType = child.style['display'];
 
       String display = style['display'];
