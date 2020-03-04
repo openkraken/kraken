@@ -761,13 +761,17 @@ abstract class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
-    appendElement(child);
+    // Only append node types which is visible in RenderObject tree
+    if (child is Element || child is TextNode) {
+      appendElement(child);
+    }
     return child;
   }
 
   @override
   @mustCallSuper
   Node removeChild(Node child) {
+    // Not remove node type which is not present in RenderObject tree such as Comment
     if (child is Element || child is TextNode) {
       removeElement(child);
     }
