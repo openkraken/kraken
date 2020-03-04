@@ -39,14 +39,17 @@ export class Element extends Node {
     super(NodeType.ELEMENT_NODE, _nodeId);
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
+    const self = this;
     this.style = new Proxy(this.style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
-        this[key] = value;
-        setStyle(nodeId, key, value);
+        const cKey = self.camelizeKey(key);
+        this[cKey] = value;
+        setStyle(nodeId, cKey, value);
         return true;
       },
       get(target: any, key: string, receiver) {
-        return this[key];
+        const cKey = self.camelizeKey(key);
+        return this[cKey];
       },
     });
 
@@ -138,5 +141,16 @@ export class Element extends Node {
 
   async toBlob() {
     return toBlob(this.nodeId);
+  }
+
+  camelizeKey = (key: string) => {
+    const partials = key.split('-');
+    if (partials.length === 2 && partials[0] !== '' && partials[1] !== '') {
+      const firstPart = partials[0];
+      const secondPart = partials[1];
+      const upperSecondPart = secondPart[0].toUpperCase() + secondPart.slice(1);
+      return firstPart + upperSecondPart;
+    }
+    return key;
   }
 }
