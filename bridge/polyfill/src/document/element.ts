@@ -26,6 +26,34 @@ const RECT_PROPERTIES = [
   'scrollWidth',
 ];
 
+interface ICamelize {
+  (str: string): string;
+}
+
+/**
+ * Create a cached version of a pure function.
+ */
+function cached(fn: ICamelize) {
+  const cache = Object.create(null);
+  return function cachedFn(str : string) {
+    const hit = cache[str];
+    return hit || (cache[str] = fn(str));
+  };
+};
+
+/**
+ * Camelize a hyphen-delimited string.
+ */
+const camelize: ICamelize = (str: string) => {
+  const camelizeRE = /-(\w)/g;
+  return str.replace(camelizeRE, function(_ : string, c : string) {
+    return c ? c.toUpperCase() : '';
+  });
+}
+
+// Cached camelize utility
+const cachedCamelize = cached(camelize);
+
 export class Element extends Node {
   public readonly tagName: string;
   private events: {
@@ -41,12 +69,14 @@ export class Element extends Node {
     const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
-        this[key] = value;
-        setStyle(nodeId, key, value);
+        const cKey = cachedCamelize(key);
+        this[cKey] = value;
+        setStyle(nodeId, cKey, value);
         return true;
       },
       get(target: any, key: string, receiver) {
-        return this[key];
+        const cKey = cachedCamelize(key);
+        return this[cKey];
       },
     });
 
