@@ -1,5 +1,6 @@
 import { krakenInvokeModule, krakenModuleListener } from './kraken';
 
+let map: {};
 const navigator = {
   connection: {
     getConnectivity() {
@@ -35,7 +36,6 @@ const navigator = {
     });
   },
   geolocation: {
-    map: {},
     getCurrentPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
       krakenInvokeModule(`["getCurrentPosition", [${JSON.stringify(options)}]]`, (json) => {
         let result = JSON.parse(json);
@@ -48,18 +48,18 @@ const navigator = {
     },
     watchPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
       const watchId = krakenInvokeModule(`["watchPosition", [${JSON.stringify(options)}]]`);
-      this.map[watchId] = {success: success, error: error};
+      map[watchId] = {success: success, error: error};
       // TODO: should only register one global module listener avoid repeat JSON parse
       krakenModuleListener(json => {
         let parsed = JSON.parse(json);
         const type = parsed[0];
         if (type === 'watchPosition') {
           const result = parsed[1];
-          if (this.map[watchId]) {
+          if (map[watchId]) {
             if (result['coords'] != null) {
-              this.map[watchId]['success'](result);
+              map[watchId]['success'](result);
             } else if(error != null) {
-              this.map[watchId]['error'](result);
+              map[watchId]['error'](result);
             }
           }
         }
@@ -67,8 +67,8 @@ const navigator = {
       return parseInt(watchId);
     },
     clearWatch(id: number) {
-      delete this.map[id];
-      if (Object.keys(this.map).length === 0) {
+      delete map[id];
+      if (Object.keys(map).length === 0) {
         krakenInvokeModule(`["clearWatch"]`);
       }
     }
