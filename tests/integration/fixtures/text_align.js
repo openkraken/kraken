@@ -1,30 +1,16 @@
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":2}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"style":{"textAlign":"center","backgroundColor":"#f40"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":4,"nodeType":3,"data":"flow layout text-align center"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":5,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative","textAlign":"center","backgroundColor":"green"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":6,"nodeType":3,"data":"flex layout text-align center"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[5,"beforeend",6]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",5]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
-);
+var container = document.createElement('div');
+
+var div1 = document.createElement('div');
+Object.assign(div1.style, {
+  textAlign: "center",
+  backgroundColor: "#f40",
+});
+div1.appendChild(document.createTextNode('flow layout text-align center'))
+container.appendChild(div1);
+
+var div2 = document.createElement('div');
+Object.assign(div2.style, { "boxSizing": "border-box", "display": "flex", "flexDirection": "column", "alignContent": "flex-start", "flexShrink": 0, "position": "relative", "textAlign": "center", "backgroundColor": "green" });
+div2.appendChild(document.createTextNode('flex layout text-align center'));
+container.appendChild(div2);
+
+document.body.appendChild(container);
