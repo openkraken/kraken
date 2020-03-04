@@ -113,8 +113,8 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       String json = jsonEncode(['', response.statusCode, response.content()]);
       callback(Utf8.toUtf8(json), context);
     }).catchError((e) {
-      String errorMesssage = e is HTTPException ? e.message : e.toString();
-      String json = jsonEncode([errorMesssage, e.response.statusCode, '']);
+      String errorMessage = e is HTTPException ? e.message : e.toString();
+      String json = jsonEncode([errorMessage, e.response.statusCode, '']);
       callback(Utf8.toUtf8(json), context);
     });
   } else if (method == 'getDeviceInfo') {
@@ -123,6 +123,34 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     });
   } else if (method == 'getHardwareConcurrency') {
     result = getHardwareConcurrency().toString();
+  } else if (method == 'AsyncStorage.getItem') {
+    List getItemArgs = args[1];
+    String key = getItemArgs[0];
+    AsyncStorage.getItem(key).then((String value) {
+      callback(Utf8.toUtf8(value), context);
+    });
+  } else if (method == 'AsyncStorage.setItem') {
+    List setItemArgs = args[1];
+    String key = setItemArgs[0];
+    String value = setItemArgs[1];
+    AsyncStorage.setItem(key, value).then((bool o) {
+      callback(Utf8.toUtf8(value), context);
+    });
+  } else if (method == 'AsyncStorage.removeItem') {
+    List removeItemArgs = args[1];
+    String key = removeItemArgs[0];
+    AsyncStorage.removeItem(key).then((bool value) {
+      callback(Utf8.toUtf8(value.toString()), context);
+    });
+  } else if (method == 'AsyncStorage.getAllKeys') {
+    AsyncStorage.getAllKeys().then((Set<String> set) {
+      List<String> list = List.from(set);
+      callback(Utf8.toUtf8(jsonEncode(list)), context);
+    });
+  } else if (method == 'AsyncStorage.clear') {
+    AsyncStorage.clear().then((bool value) {
+      callback(Utf8.toUtf8(value.toString()), context);
+    });
   }
 
   return result;

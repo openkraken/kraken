@@ -1,6 +1,6 @@
-import 'package:test/test.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/src/element/binding.dart';
-import 'package:kraken/src/module/animation_frame.dart';
+import 'package:test/test.dart';
 
 void main() {
   setUp(() {

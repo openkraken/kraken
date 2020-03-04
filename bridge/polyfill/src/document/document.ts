@@ -52,7 +52,7 @@ export function getNodeByNodeId(nodeId: number) : Node|null {
   traverseNode(document.body, (node: Node) : any => {
     if (node.nodeId === nodeId) {
       _node = node;
-      return true; // Return true to stop travsering
+      return true; // Return true to stop traversing
     }
   });
   return _node;
