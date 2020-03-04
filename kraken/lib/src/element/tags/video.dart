@@ -77,25 +77,25 @@ Future<void> shutDownVideoPlayer() async {
 
 class VideoElement extends Element {
   VideoPlayerController controller;
+
   String _src;
+  String get src => _src;
   set src(String value) {
-    if (value == _src) return;
+    if (_src != value) {
+      bool needDispose = _src != null;
+      _src = value;
 
-    if (_src != null) {
-      controller.dispose().then((_) {
-        videoControllers.remove(controller);
-        removeVideoBox();
+      if (needDispose) {
+        controller.dispose().then((_) {
+          videoControllers.remove(controller);
+          _removeVideoBox();
 
-        createVideoPlayer(value).then((textureId) {
-          addVideoBox(textureId);
+          _createVideoBox();
         });
-      });
-    } else {
-      createVideoPlayer(value).then((textureId) {
-        addVideoBox(textureId);
-      });
+      } else {
+        _createVideoBox();
+      }
     }
-    _src = value;
   }
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
@@ -172,9 +172,9 @@ class VideoElement extends Element {
     // @TODO get video's original dimension if width or height not specified as web
     BoxConstraints additionalConstraints = BoxConstraints(
       minWidth: 0,
-      maxWidth: getDisplayPortedLength(props['style']['width']),
+      maxWidth: getDisplayPortedLength(style['width']),
       minHeight: 0,
-      maxHeight: getDisplayPortedLength(props['style']['height']),
+      maxHeight: getDisplayPortedLength(style['height']),
     );
     renderVideoBox = RenderVideoBox(
       additionalConstraints: additionalConstraints,
@@ -182,12 +182,18 @@ class VideoElement extends Element {
     );
     addChild(renderVideoBox);
 
-    if (props['autoplay'] == 'true') {
+    if (props['autoplay'].toString() == 'true') {
       controller.play();
     }
   }
 
-  void removeVideoBox() {
+  void _createVideoBox() {
+    createVideoPlayer(_src).then((textureId) {
+      addVideoBox(textureId);
+    });
+  }
+
+  void _removeVideoBox() {
     renderLayoutElement.removeAll();
   }
 
@@ -284,8 +290,10 @@ class VideoElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) async {
+  void setProperty(String key, value) {
     super.setProperty(key, value);
-    src = props['src'];
+    if (key == 'src') {
+      src = value.toString();
+    }
   }
 }
