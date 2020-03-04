@@ -56,8 +56,8 @@ class VideoElement extends Element {
   VideoPlayerController controller;
   String _src;
 
-  static String DEFAULT_WIDTH = '300px';
-  static String DEFAULT_HEIGHT = '150px';
+  static const String DEFAULT_WIDTH = '300px';
+  static const String DEFAULT_HEIGHT = '150px';
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {
