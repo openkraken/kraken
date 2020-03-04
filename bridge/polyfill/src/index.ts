@@ -8,3 +8,4 @@ import './navigator';
 import './window';
 import './blob';
 import './asyncStorage';
+import './moduleListener'

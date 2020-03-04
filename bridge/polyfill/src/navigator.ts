@@ -1,6 +1,8 @@
-import { krakenInvokeModule, krakenModuleListener } from './kraken';
+import { krakenInvokeModule } from './kraken';
 
-let map: {};
+export const positionWatcherMap = new Map<string, any>();
+export let onConnectivityChangeListener: (data: Object) => any;
+
 const navigator = {
   connection: {
     getConnectivity() {
@@ -11,15 +13,7 @@ const navigator = {
       });
     },
     set onchange(listener: (data: Object) => any) {
-      // TODO: should only register one global module listener avoid repeat JSON parse
-      krakenModuleListener(message => {
-        let parsed = JSON.parse(message);
-        const type = parsed[0];
-        if (type === 'onConnectivityChanged') {
-          const event = parsed[1];  
-          listener(event);
-        }
-      });
+      onConnectivityChangeListener = listener;
       // TODO: should remove old listener when onchange reset with a null listener
       krakenInvokeModule('["onConnectivityChanged"]');
     }
@@ -41,34 +35,19 @@ const navigator = {
         let result = JSON.parse(json);
         if (result['coords'] != null) {
           success(result);
-        } else if(error != null) {
+        } else if (error != null) {
           error(result);
         }
       });
     },
     watchPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
       const watchId = krakenInvokeModule(`["watchPosition", [${JSON.stringify(options)}]]`);
-      map[watchId] = {success: success, error: error};
-      // TODO: should only register one global module listener avoid repeat JSON parse
-      krakenModuleListener(json => {
-        let parsed = JSON.parse(json);
-        const type = parsed[0];
-        if (type === 'watchPosition') {
-          const result = parsed[1];
-          if (map[watchId]) {
-            if (result['coords'] != null) {
-              map[watchId]['success'](result);
-            } else if(error != null) {
-              map[watchId]['error'](result);
-            }
-          }
-        }
-      });
+      positionWatcherMap.set(watchId, { success: success, error: error });
       return parseInt(watchId);
     },
     clearWatch(id: number) {
-      delete map[id];
-      if (Object.keys(map).length === 0) {
+      positionWatcherMap.delete(id.toString());
+      if (positionWatcherMap.size === 0) {
         krakenInvokeModule(`["clearWatch"]`);
       }
     }
