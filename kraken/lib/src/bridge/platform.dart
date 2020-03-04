@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 // ignore_for_file: unused_import, undefined_function
@@ -15,7 +15,7 @@ import 'package:path/path.dart';
 const String KRAKEN_LIBRARY_PATH = 'KRAKEN_LIBRARY_PATH';
 const String KRAKEN_JS_ENGINE = 'KRAKEN_JS_ENGINE';
 final String kkLibraryPath = Platform.environment[KRAKEN_LIBRARY_PATH];
-final String kkJsEngine = Platform.environment[KRAKEN_JS_ENGINE] ?? ((Platform.isIOS || Platform.isMacOS) ? 'jsc' : 'v8');
+final String kkJsEngine = Platform.environment[KRAKEN_JS_ENGINE] ?? ((Platform.isIOS || Platform.isMacOS || Platform.isAndroid) ? 'jsc' : 'v8');
 final String libName = 'libkraken_$kkJsEngine';
 final String nativeDynamicLibraryName = Platform.isMacOS || Platform.isIOS
     ? '$libName.dylib'

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 import 'package:requests/requests.dart';
 
@@ -57,19 +57,14 @@ Future<String> getBundleContent({String bundleUrl, String bundlePath, String zip
   return Future<String>.value('');
 }
 
-// See http://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-/// If the current platform is desktop, override the default platform to
-/// a supported platform (iOS for macOS, Android for Linux and Windows).
+// See http://github.com/flutter/flutter/wiki/Desktop-shells
+/// If the current platform is a desktop platform that isn't yet supported by
+/// TargetPlatform, override the default platform to one that is.
 /// Otherwise, do nothing.
+/// No need to handle macOS, as it has now been added to TargetPlatform.
 void _setTargetPlatformForDesktop() {
-  TargetPlatform targetPlatform;
-  if (Platform.isMacOS) {
-    targetPlatform = TargetPlatform.iOS;
-  } else if (Platform.isLinux || Platform.isWindows) {
-    targetPlatform = TargetPlatform.android;
-  }
-  if (targetPlatform != null) {
-    debugDefaultTargetPlatformOverride = targetPlatform;
+  if (Platform.isLinux || Platform.isWindows) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
 }
 

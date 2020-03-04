@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -10,8 +10,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
 
 class VideoParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -97,6 +95,9 @@ class VideoElement extends Element {
       }
     }
   }
+
+  static const String DEFAULT_WIDTH = '300px';
+  static const String DEFAULT_HEIGHT = '150px';
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {

@@ -1,0 +1,30 @@
+name: kraken_webview
+description: A Flutter plugin that provides a WebView Element for Kraken on Android and iOS.
+version: 0.1.0
+
+environment:
+  sdk: ">=2.2.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5 <2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  kraken:
+    path: ../../kraken
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.flutter.plugins.webviewflutter
+        pluginClass: WebViewFlutterPlugin
+      ios:
+        pluginClass: FLTWebViewFlutterPlugin
+#      macos:
+#        pluginClass: FLTWebViewFlutterPlugin

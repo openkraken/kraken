@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -22,3 +22,4 @@ export 'src/element/tags/ul.dart';
 export 'src/element/tags/video.dart';
 export 'src/element/tags/audio.dart';
 export 'src/element/tags/animation.dart';
+export 'src/element/tags/iframe.dart';
