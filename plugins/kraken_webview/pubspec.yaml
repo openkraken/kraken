@@ -26,5 +26,5 @@ flutter:
         pluginClass: WebViewFlutterPlugin
       ios:
         pluginClass: FLTWebViewFlutterPlugin
-      macos:
-        pluginClass: FLTWebViewFlutterPlugin
+#      macos:
+#        pluginClass: FLTWebViewFlutterPlugin

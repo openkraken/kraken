@@ -2,8 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:kraken/style.dart';
-import 'package:kraken_webview/kraken_webview.dart';
+import 'package:kraken_webview/kraken_webview.dart' show WebViewElement;
 
 const String IFRAME = 'IFRAME';
 
@@ -35,33 +34,5 @@ const String IFRAME = 'IFRAME';
 // };
 class IFrameElement extends WebViewElement {
   IFrameElement(int nodeId, Map<String, dynamic> props, List<String> events)
-      : super(
-    nodeId, props, events,
-    tagName: IFRAME,
-    initialUrl: props['src'] ?? 'https://m.taobao.com',
-    javascriptMode: JavascriptMode.unrestricted, // Allow execute js.
-  );
-
-  String _src;
-  String get src => _src;
-  set src(newVal) {
-    _src = newVal;
-    // TODO: refresh
-  }
-
-  @override
-  method(String name, List<dynamic> args) {
-  }
-
-  @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
-    if (key == 'src') {
-      src = value;
-    } else if (key == '.style.width') {
-      width = Length.toDisplayPortValue(value);
-    } else if (key == '.style.height') {
-      height = Length.toDisplayPortValue(value);
-    }
-  }
+      : super(nodeId, props, events, tagName: IFRAME);
 }

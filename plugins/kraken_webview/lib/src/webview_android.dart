@@ -22,7 +22,7 @@ class AndroidWebView implements WebViewPlatform {
   int _id;
 
   @override
-  RenderBox buildRenderBox({
+  RenderAndroidView buildRenderBox({
     CreationParams creationParams,
     @required WebViewPlatformCallbacksHandler webViewPlatformCallbacksHandler,
     WebViewPlatformCreatedCallback onWebViewPlatformCreated,

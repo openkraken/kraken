@@ -20,6 +20,12 @@
       "languageVersion": "2.0"
     },
     {
+      "name": "audioplayers",
+      "rootUri": "../../../plugins/audioplayers",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/boolean_selector-1.0.5",
       "packageUri": "lib/",
@@ -194,6 +200,24 @@
       "languageVersion": "2.0"
     },
     {
+      "name": "path_provider",
+      "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
+      "name": "path_provider_macos",
+      "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-0.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/path_provider_platform_interface-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
       "name": "pedantic",
       "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/pedantic-1.8.0+1",
       "packageUri": "lib/",
@@ -210,6 +234,12 @@
       "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/platform-2.2.1",
       "packageUri": "lib/",
       "languageVersion": "1.24"
+    },
+    {
+      "name": "plugin_platform_interface",
+      "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/plugin_platform_interface-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
     },
     {
       "name": "process",
@@ -314,6 +344,12 @@
       "languageVersion": "2.0"
     },
     {
+      "name": "uuid",
+      "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/uuid-2.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
       "name": "vector_math",
       "rootUri": "file:///Users/zhuoling/.pub-cache/hosted/pub.dartlang.org/vector_math-2.0.8",
       "packageUri": "lib/",
@@ -356,7 +392,7 @@
       "languageVersion": "2.2"
     }
   ],
-  "generated": "2020-03-03T14:34:31.761587Z",
+  "generated": "2020-03-04T04:23:00.316674Z",
   "generator": "pub",
   "generatorVersion": "2.8.0-dev.8.0.flutter-514a8d4c84"
 }

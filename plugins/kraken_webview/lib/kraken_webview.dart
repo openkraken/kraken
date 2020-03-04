@@ -133,6 +133,7 @@ class JavascriptChannel {
 
 /// A web view widget for showing html content.
 class WebViewElement extends Element {
+  static String WEBVIEW = 'WEBVIEW';
   /// Creates a new web view.
   ///
   /// The web view can be controlled using a `WebViewController` that is passed to the
@@ -143,7 +144,7 @@ class WebViewElement extends Element {
     String tagName = 'WEBVIEW',
     this.onWebViewCreated,
     this.initialUrl,
-    this.javascriptMode = JavascriptMode.disabled,
+    this.javascriptMode = JavascriptMode.unrestricted,
     this.javascriptChannels,
     this.navigationDelegate,
     this.gestureRecognizers,
@@ -151,52 +152,89 @@ class WebViewElement extends Element {
     this.onPageFinished,
     this.debuggingEnabled = false,
     this.gestureNavigationEnabled = false,
-    this.userAgent,
+    this.userAgent = DEFAULT_USER_AGENT,
     this.initialMediaPlaybackPolicy =
         AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
-  })  : assert(initialUrl != null),
-        assert(javascriptMode != null),
+  })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null), super(
           nodeId: nodeId,
           defaultDisplay: 'block',
-          tagName: tagName,
+          tagName: tagName ?? WEBVIEW,
           properties: props,
           events: events,
       ) {
+    if (props.containsKey('src')) {
+      initialUrl = props['src'];
+      _buildPlatformRenderBox();
+      addChild(sizedBox);
+    }
+  }
+
+  /// The url that WebView loaded at first time.
+  String initialUrl;
+  /// The constrained to platformed render box, applying width and height.
+  RenderConstrainedBox sizedBox;
+  /// The webview render box itself.
+  RenderBox platformRenderBox;
+  _PlatformCallbacksHandler _platformCallbacksHandler;
+
+  @override
+  void setProperty(String key, value) {
+    if (key == 'src') {
+      initialUrl = value;
+      renderLayoutElement.removeAll();
+      _buildPlatformRenderBox();
+      addChild(sizedBox);
+    } else if (key.endsWith('width')) {
+      width = Length.toDisplayPortValue(value);
+    } else if (key.endsWith('height')) {
+      height = Length.toDisplayPortValue(value);
+    }
+  }
+
+  /// Create a new platformed render box.
+  void _buildPlatformRenderBox() {
     _assertJavascriptChannelNamesAreUnique();
     _platformCallbacksHandler = _PlatformCallbacksHandler(this);
-    RenderBox platformView = platform.buildRenderBox(
+    platformRenderBox = platform.buildRenderBox(
       creationParams: _creationParamsFromElement(this),
-       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
+      webViewPlatformCallbacksHandler: _platformCallbacksHandler,
       onWebViewPlatformCreated: _onWebViewPlatformCreated,
       gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
     );
-    addChild(RenderConstrainedBox(
+    sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(Size(width, height)),
-      child: platformView
-    ));
+      child: platformRenderBox
+    );
   }
 
-  _PlatformCallbacksHandler _platformCallbacksHandler;
-
-  String initialUrl;
-
+  /// Element attribute width
   double _width = Length.toDisplayPortValue(DEFAULT_WIDTH);
   double get width => _width;
   set width(double newValue) {
-    _width = newValue;
-    // todo: repaint
+    if (newValue != null) {
+      _width = newValue;
+      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+    }
   }
 
+  /// Element attribute height
   double _height = Length.toDisplayPortValue(DEFAULT_HEIGHT);
   double get height => _height;
   set height(double newValue) {
-    _height = newValue;
-    // todo: repaint
+    if (newValue != null) {
+      _height = newValue;
+      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+    }
   }
 
-  static String DEFAULT_WIDTH = '300px';
-  static String DEFAULT_HEIGHT = '150px';
+  /// Default width is 300 in pixel, height is 150 in pixel,
+  /// defined by HTML Standard.
+  static const String DEFAULT_WIDTH = '300px';
+  static const String DEFAULT_HEIGHT = '150px';
+
+  /// Default userAgent for kraken.
+  static const String DEFAULT_USER_AGENT = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome Mobile Safari/537.36 AliApp(Kraken/0.3.0)';
 
   static WebViewPlatform _platform;
 
@@ -379,61 +417,6 @@ class WebViewElement extends Element {
     }
   }
 }
-
-//class _WebViewState extends State<WebView> {
-//  final Completer<WebViewController> _controller =
-//      Completer<WebViewController>();
-//
-//  _PlatformCallbacksHandler _platformCallbacksHandler;
-//
-//
-//
-////  @override
-////  Widget build(BuildContext context) {
-////    return WebView.platform.build(
-////      context: context,
-////      onWebViewPlatformCreated: _onWebViewPlatformCreated,
-////      webViewPlatformCallbacksHandler: _platformCallbacksHandler,
-////      gestureRecognizers: widget.gestureRecognizers,
-////      creationParams: _creationParamsfromWidget(widget),
-////    );
-////  }
-//
-//  @override
-//  void initState() {
-//    super.initState();
-//    _assertJavascriptChannelNamesAreUnique();
-//    _platformCallbacksHandler = _PlatformCallbacksHandler(widget);
-//  }
-//
-//  @override
-//  void didUpdateWidget(WebView oldWidget) {
-//    super.didUpdateWidget(oldWidget);
-//    _assertJavascriptChannelNamesAreUnique();
-//    _controller.future.then((WebViewController controller) {
-//      _platformCallbacksHandler._widget = widget;
-//      controller._updateWidget(widget);
-//    });
-//  }
-//
-//  void _onWebViewPlatformCreated(WebViewPlatformController webViewPlatform) {
-//    final WebViewController controller =
-//        WebViewController._(widget, webViewPlatform, _platformCallbacksHandler);
-//    _controller.complete(controller);
-//    if (widget.onWebViewCreated != null) {
-//      widget.onWebViewCreated(controller);
-//    }
-//  }
-//
-//  void _assertJavascriptChannelNamesAreUnique() {
-//    if (widget.javascriptChannels == null ||
-//        widget.javascriptChannels.isEmpty) {
-//      return;
-//    }
-//    assert(_extractChannelNames(widget.javascriptChannels).length ==
-//        widget.javascriptChannels.length);
-//  }
-//}
 
 CreationParams _creationParamsFromElement(WebViewElement element) {
   return CreationParams(
