@@ -244,9 +244,10 @@ class ElementManager {
     RendererBinding.instance.renderView.child = result;
   }
 
-  void disconnect() {
+  void disconnect() async {
     RendererBinding.instance.renderView.child = null;
     nodeMap.clear();
+    await shutDownVideoPlayer();
     _managerSingleton = ElementManager._();
   }
 

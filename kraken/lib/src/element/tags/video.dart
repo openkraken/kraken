@@ -21,13 +21,24 @@ class RenderVideoBox extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
   RenderVideoBox({
     this.child,
-    this.additionalConstraints,
+    BoxConstraints additionalConstraints,
   }) : assert(child != null) {
+    _additionalConstraints = additionalConstraints;
     add(child);
   }
 
   RenderBox child;
-  BoxConstraints additionalConstraints;
+
+  // Additional constraints to apply to [child] during layout
+  BoxConstraints get additionalConstraints => _additionalConstraints;
+  BoxConstraints _additionalConstraints;
+  set additionalConstraints(BoxConstraints value) {
+    assert(value != null);
+    if (_additionalConstraints == value)
+      return;
+    _additionalConstraints = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -39,7 +50,7 @@ class RenderVideoBox extends RenderBox
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(additionalConstraints, parentUsesSize: true);
+      child.layout(_additionalConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -54,9 +65,38 @@ class RenderVideoBox extends RenderBox
   }
 }
 
+List<VideoPlayerController> videoControllers = [];
+
+// dispose all video player when Dart VM is going to shutdown
+Future<void> shutDownVideoPlayer() async {
+  for (int i = 0; i < videoControllers.length; i ++) {
+    await videoControllers[i].dispose();
+  }
+  videoControllers.clear();
+}
+
 class VideoElement extends Element {
   VideoPlayerController controller;
+
   String _src;
+  String get src => _src;
+  set src(String value) {
+    if (_src != value) {
+      bool needDispose = _src != null;
+      _src = value;
+
+      if (needDispose) {
+        controller.dispose().then((_) {
+          videoControllers.remove(controller);
+          _removeVideoBox();
+
+          _createVideoBox();
+        });
+      } else {
+        _createVideoBox();
+      }
+    }
+  }
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {
@@ -79,15 +119,42 @@ class VideoElement extends Element {
           tagName: VIDEO,
           properties: props,
           events: events,
-        ) {
-    addVideoBox();
-  }
+        );
 
   int nodeId;
   Map<String, dynamic> props;
   List<String> events;
+  RenderVideoBox renderVideoBox;
 
-  void addVideoBox() {
+  Future<int> createVideoPlayer(String src) {
+    Completer<int> completer = new Completer();
+
+    controller = VideoPlayerController.network(src);
+    _src = src;
+
+    controller.setLooping(props['loop'] ?? false);
+    controller.onCanPlay = onCanPlay;
+    controller.onCanPlayThrough = onCanPlayThrough;
+    controller.onPlay = onPlay;
+    controller.onPause = onPause;
+    controller.onSeeked = onSeeked;
+    controller.onSeeking = onSeeking;
+    controller.onEnded = onEnded;
+    controller.onError = onError;
+    controller.initialize().then((int textureId) {
+      if (props['muted'] == true) {
+        controller.setMuted(props['muted']);
+      }
+
+      completer.complete(textureId);
+    });
+
+    videoControllers.add(controller);
+
+    return completer.future;
+  }
+
+  void addVideoBox(int textureId) {
     RegExp exp = RegExp(r"^(http|https)://");
 
     if (props['src'] == null) {
@@ -100,43 +167,33 @@ class VideoElement extends Element {
       throw Exception('video url\'s prefix should be http:// or https://');
     }
 
-    controller = VideoPlayerController.network(props['src']);
-    _src = props['src'];
+    TextureBox box = TextureBox(textureId: textureId);
 
-    controller.setLooping(props['loop'] ?? false);
+    // @TODO get video's original dimension if width or height not specified as web
+    BoxConstraints additionalConstraints = BoxConstraints(
+      minWidth: 0,
+      maxWidth: getDisplayPortedLength(style['width']),
+      minHeight: 0,
+      maxHeight: getDisplayPortedLength(style['height']),
+    );
+    renderVideoBox = RenderVideoBox(
+      additionalConstraints: additionalConstraints,
+      child: box,
+    );
+    addChild(renderVideoBox);
 
-    controller.onCanPlay = onCanPlay;
-    controller.onCanPlayThrough = onCanPlayThrough;
-    controller.onPlay = onPlay;
-    controller.onPause = onPause;
-    controller.onSeeked = onSeeked;
-    controller.onSeeking = onSeeking;
-    controller.onEnded = onEnded;
-    controller.onError = onError;
-    controller.initialize().then((int textureId) {
-      controller.setMuted(props['muted'] ?? false);
-      TextureBox box = TextureBox(textureId: textureId);
+    if (props['autoplay'].toString() == 'true') {
+      controller.play();
+    }
+  }
 
-      // @TODO get video's original dimension if width or height not specified as web
-      BoxConstraints additionalConstraints = BoxConstraints(
-        minWidth: 0,
-        maxWidth: getDisplayPortedLength(props['style']['width']),
-        minHeight: 0,
-        maxHeight: getDisplayPortedLength(props['style']['height']),
-      );
-      RenderVideoBox videoBox = RenderVideoBox(
-        additionalConstraints: additionalConstraints,
-        child: box,
-      );
-      addChild(videoBox);
-
-      if (props['autoPlay'] == true) {
-        controller.play();
-      }
+  void _createVideoBox() {
+    createVideoPlayer(_src).then((textureId) {
+      addVideoBox(textureId);
     });
   }
 
-  void removeVideoBox() {
+  void _removeVideoBox() {
     renderLayoutElement.removeAll();
   }
 
@@ -233,11 +290,10 @@ class VideoElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
+  void setProperty(String key, value) {
     super.setProperty(key, value);
-    if (key == 'src' || key == '.style.width' || key == '.style.height') {
-      removeVideoBox();
-      addVideoBox();
+    if (key == 'src') {
+      src = value.toString();
     }
   }
 }
