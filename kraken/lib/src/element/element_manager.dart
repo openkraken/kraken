@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -34,6 +34,8 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
         VideoElement.setDefaultPropsStyle(props);
         return VideoElement(id, props, events);
       }
+    case IFRAME:
+      return IFrameElement(id, props, events);
     case AUDIO:
       return AudioElement(id, props, events);
     default:
@@ -244,9 +246,10 @@ class ElementManager {
     RendererBinding.instance.renderView.child = result;
   }
 
-  void disconnect() {
+  void disconnect() async {
     RendererBinding.instance.renderView.child = null;
     nodeMap.clear();
+    await shutDownVideoPlayer();
     _managerSingleton = ElementManager._();
   }
 

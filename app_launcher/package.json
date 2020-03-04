@@ -1,0 +1,7 @@
+{
+  "name": "app_launcher",
+  "version": "0.0.0",
+  "scripts": {
+    "run:android": "flutter build apk --debug --target-platform=android-arm && flutter run --use-application-binary=build/app/outputs/apk/debug/app-debug.apk"
+  }
+}

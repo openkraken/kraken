@@ -1,73 +1,47 @@
+var el = document.createElement('div');
+var child1 = document.createElement('div');
+child1.style.backgroundColor = 'black';
 
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":2}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"style":{"backgroundColor":"black"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":4,"props":{"style":{"width":"100rpx","height":"100rpx","backgroundColor":"blue","display":"block"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":5,"nodeType":3,"data":"block"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[4,"beforeend",5]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":6,"props":{"style":{"width":"120rpx","height":"100rpx","backgroundColor":"green","display":"flex"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":7,"nodeType":3,"data":"flex"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[6,"beforeend",7]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",6]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":8,"props":{"style":{"width":"150rpx","height":"100rpx","backgroundColor":"purple","display":"inline-flex"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":9,"nodeType":3,"data":"inline-flex"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[8,"beforeend",9]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",8]])
-);
-__kraken_ui_manager__(
-  JSON.stringify( ["createElement",[{"type":"SPAN","id":10,"props":{"style":{"width":"200rpx","height":"150rpx","backgroundColor":"yellow"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":11,"nodeType":3,"data":"inline"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[10,"beforeend",11]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",10]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"SPAN","id":12,"props":{"style":{"width":"200rpx","height":"100rpx","backgroundColor":"brown","display":"inline-block"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":13,"nodeType":3,"data":"inline-block"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[12,"beforeend",13]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",12]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
-);
+var blockContainer = document.createElement('div');
+blockContainer.style.width = blockContainer.style.height = '100rpx';
+blockContainer.style.display = 'block';
+blockContainer.style.backgroundColor = 'blue';
+var textBlock = document.createTextNode('block');
+blockContainer.appendChild(textBlock);
+child1.appendChild(blockContainer);
+
+var flexContainer = document.createElement('div');
+flexContainer.style.width = '120rpx';
+flexContainer.style.height = '100rpx';
+flexContainer.style.backgroundColor = 'green';
+flexContainer.style.display = 'flex';
+var textFlex = document.createTextNode('flex');
+flexContainer.appendChild(textFlex);
+child1.appendChild(flexContainer);
+
+var inlineFlexContainer = document.createElement('div');
+inlineFlexContainer.style.width = '150rpx';
+inlineFlexContainer.style.height = '100rpx';
+inlineFlexContainer.style.backgroundColor = 'purple';
+inlineFlexContainer.style.display = 'inline-flex';
+var textInlineFlex = document.createTextNode('inline-flex');
+inlineFlexContainer.appendChild(textInlineFlex);
+child1.appendChild(flexContainer);
+
+
+var inlineContainer = document.createElement('span');
+inlineContainer.style.width = '200rpx';
+inlineContainer.style.height = '150rpx';
+inlineContainer.style.backgroundColor = 'yellow';
+inlineContainer.appendChild(document.createTextNode('inline'));
+child1.appendChild(inlineContainer);
+
+var inlineBlockContainer = document.createElement('span');
+inlineBlockContainer.style.display = 'inline-block';
+inlineBlockContainer.style.width = '200rpx';
+inlineBlockContainer.style.height = '100rpx';
+inlineBlockContainer.style.backgroundColor = 'brown';
+inlineBlockContainer.appendChild(document.createTextNode('inline-block'));
+child1.appendChild(inlineBlockContainer);
+
+document.body.appendChild(child1);

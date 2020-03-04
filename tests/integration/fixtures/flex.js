@@ -1,88 +1,30 @@
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":2,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column", "alignItems": "center", "alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"SPAN","id":4}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":5,"nodeType":3,"data":"flex direction column 1"}]]
-  )
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[4,"beforeend",5]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"SPAN","id":6}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":7,"nodeType":3,"data":"flex direction column 2"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[6,"beforeend",7]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":22,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"column", "alignItems": "flex-end", "alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[22,"beforeend",6]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",22]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":8,"props":{"className":"rax-view","style":{"boxSizing":"border-box","display":"flex","flexDirection":"row","alignContent":"flex-start","flexShrink":0,"position":"relative"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"SPAN","id":9}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":10,"nodeType":3,"data":"flex direction row 1"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[9,"beforeend",10]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[8,"beforeend",9]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"SPAN","id":11}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":12,"nodeType":3,"data":"flex direction row 2"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[11,"beforeend",12]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[8,"beforeend",11]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",8]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"COMMENT","id":13,"props":{"data":"EMPTY"}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"afterend",13]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"COMMENT","id":14,"props":{"data":"EMPTY"}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[13,"afterend",14]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["removeNode",[13]])
-);
+var container = document.createElement('div');
+Object.assign(container.style, { "boxSizing": "border-box", "display": "flex", "flexDirection": "column", "alignContent": "flex-start", "flexShrink": 0, "position": "relative" });
+
+var div1 = document.createElement('div');
+Object.assign(div1.style, { "boxSizing": "border-box", "display": "flex", "flexDirection": "column", "alignItems": "center", "alignContent": "flex-start", "flexShrink": 0, "position": "relative" });
+
+var span = document.createElement('span');
+span.appendChild(document.createTextNode('flex direction column 1'));
+div1.appendChild(span);
+
+var span2 = document.createElement('span');
+span2.appendChild(document.createTextNode('flex direction column 2'));
+div1.appendChild(span2);
+
+container.appendChild(div1);
+
+var div2 = document.createElement('div');
+Object.assign(div2.style, { "boxSizing": "border-box", "display": "flex", "flexDirection": "column", "alignItems": "flex-end", "alignContent": "flex-start", "flexShrink": 0, "position": "relative" });
+
+var span1 = document.createElement('span');
+span1.appendChild(document.createTextNode('flex direction row 1'));
+div2.appendChild(span1);
+
+var span2 = document.createElement('span');
+span2.appendChild(document.createTextNode('flex direction row 2'));
+div2.appendChild(span2);
+
+container.appendChild(div2);
+
+document.body.appendChild(container);

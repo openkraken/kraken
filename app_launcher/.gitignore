@@ -38,6 +38,6 @@ lib/generated_plugin_registrant.dart
 .flutter-plugins-dependencies
 
 pubspec.lock
-android/gradle.properties
 assets/*
 !assets/.gitkeep
+android/targets
