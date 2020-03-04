@@ -1,57 +1,28 @@
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":2}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":3,"props":{"style":{"overflowX":"scroll","width":"100px"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":4,"nodeType":3,"data":"overflow_X_auto_test"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[3,"beforeend",4]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",3]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":5,"props":{"style":{"overflowX":"visible","width":"100px"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":6,"nodeType":3,"data":"overflow_X_visible_test"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[5,"beforeend",6]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",5]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"DIV","id":7,"props":{"style":{"overflowX":"hidden","width":"100px"}}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createTextNode",[{"id":8,"nodeType":3,"data":"overflow_X_hidden_test"}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[7,"beforeend",8]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"beforeend",7]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"COMMENT","id":9,"props":{"data":"EMPTY"}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[-1,"beforeend",2]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[2,"afterend",9]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["createElement",[{"type":"COMMENT","id":10,"props":{"data":"EMPTY"}}]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["insertAdjacentNode",[9,"afterend",10]])
-);
-__kraken_ui_manager__(
-  JSON.stringify(["removeNode",[9]])
-);
+var container = document.createElement('div');
+
+var div1 = document.createElement('div');
+Object.assign(div1.style, {
+  "overflowX": "scroll",
+  "width": "100px"
+});
+div1.appendChild(document.createTextNode('overflow_X_auto_test'));
+container.appendChild(div1);
+
+var div2 = document.createElement('div');
+Object.assign(div2.style, {
+  "overflowX": "visible",
+  "width": "100px"
+});
+div2.appendChild(document.createTextNode('overflow_X_visible_test'));
+container.appendChild(div2);
+
+
+var div3 = document.createElement('div');
+Object.assign(div3.style, {
+  "overflowX": "hidden",
+  "width": "100px"
+});
+div3.appendChild(document.createTextNode('overflow_X_hidden_test'));
+container.appendChild(div3);
+
+document.body.appendChild(container);
