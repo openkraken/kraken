@@ -78,6 +78,25 @@ Future<void> shutDownVideoPlayer() async {
 class VideoElement extends Element {
   VideoPlayerController controller;
   String _src;
+  set src(String value) {
+    if (value == _src) return;
+
+    if (_src != null) {
+      controller.dispose().then((_) {
+        videoControllers.remove(controller);
+        removeVideoBox();
+
+        createVideoPlayer(value).then((textureId) {
+          addVideoBox(textureId);
+        });
+      });
+    } else {
+      createVideoPlayer(value).then((textureId) {
+        addVideoBox(textureId);
+      });
+    }
+    _src = value;
+  }
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {
@@ -100,9 +119,7 @@ class VideoElement extends Element {
           tagName: VIDEO,
           properties: props,
           events: events,
-        ) {
-    // nothing to do with createElement
-  }
+        );
 
   int nodeId;
   Map<String, dynamic> props;
@@ -269,15 +286,6 @@ class VideoElement extends Element {
   @override
   void setProperty(String key, dynamic value) async {
     super.setProperty(key, value);
-    if (key == 'src') {
-      if (_src != null) {
-        await controller.dispose();
-        videoControllers.remove(controller);
-        removeVideoBox();
-      }
-
-      int textureId = await createVideoPlayer(props['src']);
-      addVideoBox(textureId);
-    }
+    src = props['src'];
   }
 }
