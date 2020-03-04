@@ -1,6 +1,5 @@
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin TransformStyleMixin {

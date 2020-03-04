@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 class BoxModelParentData extends ContainerBoxParentData<RenderBox> {}
