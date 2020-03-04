@@ -10,3 +10,4 @@ export 'src/module/fetch.dart';
 export 'src/module/flush_callbacks.dart';
 export 'src/module/timer.dart';
 export 'src/module/async_storage.dart';
+export 'src/module/geolocation.dart';

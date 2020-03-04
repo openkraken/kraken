@@ -23,6 +23,8 @@ dependencies:
     path: ../plugins/kraken_webview
   audioplayers:
     path: ../plugins/audioplayers
+  location:
+    path: ../plugins/geolocation
 
 dev_dependencies:
   flutter_test:
