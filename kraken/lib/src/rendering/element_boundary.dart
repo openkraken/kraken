@@ -5,12 +5,12 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/style.dart';
 
-class BoxModelParentData extends ContainerBoxParentData<RenderBox> {}
+class ElementBoundaryParentData extends ContainerBoxParentData<RenderBox> {}
 
 class RenderElementBoundary extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, BoxModelParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, BoxModelParentData> {
+        ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary({
     this.child,
     Style style,
@@ -34,8 +34,8 @@ class RenderElementBoundary extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! BoxModelParentData) {
-      child.parentData = BoxModelParentData();
+    if (child.parentData is! ElementBoundaryParentData) {
+      child.parentData = ElementBoundaryParentData();
     }
   }
 

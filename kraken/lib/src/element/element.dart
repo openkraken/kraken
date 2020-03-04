@@ -133,7 +133,7 @@ abstract class Element extends Node
     renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // margin
-    renderObject = initRenderMargin(renderObject, style, nodeId, this);
+    renderObject = initRenderMargin(renderObject, style, this);
 
     renderObject = renderElementBoundary = RenderElementBoundary(child: renderObject, style: style, nodeId: nodeId);
 

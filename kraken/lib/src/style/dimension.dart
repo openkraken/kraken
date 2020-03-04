@@ -261,7 +261,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, Style style, int nodeId, Element element) {
+      RenderObject renderObject, Style style, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     if (element != null) {
       element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
