@@ -472,7 +472,7 @@ class RenderFlexLayout extends RenderBox
     int childNodeId;
     if (child is RenderTextNode) {
       childNodeId = child.nodeId;
-    } else if (child is RenderBoxModel) {
+    } else if (child is RenderElementBoundary) {
       childNodeId = child.nodeId;
     }
     dynamic current = childSizeMap[childNodeId];
@@ -482,7 +482,7 @@ class RenderFlexLayout extends RenderBox
     return minusConstraints;
   }
 
-  double _getBaseConstraints(RenderBoxModel child) {
+  double _getBaseConstraints(RenderElementBoundary child) {
     double minConstraints;
     String flexBasis = _getFlexBasis(child);
 
@@ -689,7 +689,7 @@ class RenderFlexLayout extends RenderBox
       int childNodeId;
       if (child is RenderTextNode) {
         childNodeId = child.nodeId;
-      } else if (child is RenderBoxModel) {
+      } else if (child is RenderElementBoundary) {
         childNodeId = child.nodeId;
       }
 
@@ -734,7 +734,7 @@ class RenderFlexLayout extends RenderBox
           int childNodeId;
           if (child is RenderTextNode) {
             childNodeId = child.nodeId;
-          } else if (child is RenderBoxModel) {
+          } else if (child is RenderElementBoundary) {
             childNodeId = child.nodeId;
           }
           dynamic current = childSizeMap[childNodeId];
@@ -943,7 +943,7 @@ class RenderFlexLayout extends RenderBox
       Style childStyle;
       if (child is RenderTextNode) {
         childStyle = nodeMap[nodeId].style;
-      } else if (child is RenderBoxModel) {
+      } else if (child is RenderElementBoundary) {
         int childNodeId = child.nodeId;
         childStyle = nodeMap[childNodeId].style;
       }

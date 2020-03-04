@@ -32,6 +32,7 @@ abstract class Element extends Node
         RenderDecoratedBoxMixin,
         DimensionMixin,
         FlexMixin,
+        FlowMixin,
         StyleOverflowMixin,
         ColorMixin,
         TransformStyleMixin,
@@ -42,7 +43,7 @@ abstract class Element extends Node
   RenderRepaintBoundary renderRepaintBoundary;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutElement;
-  RenderBoxModel renderBoxModel;
+  RenderElementBoundary renderElementBoundary;
   Map<String, dynamic> properties;
   RenderIntersectionObserver renderIntersectionObserver;
 
@@ -127,12 +128,14 @@ abstract class Element extends Node
     initTransition(style);
 
     // transform
-    renderObject = renderBoxModel = initTransform(renderObject, style, nodeId);
+    renderObject = initTransform(renderObject, style);
 
     renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // margin
     renderObject = initRenderMargin(renderObject, style, this);
+
+    renderObject = renderElementBoundary = RenderElementBoundary(child: renderObject, style: style, nodeId: nodeId);
 
     /// Element event listener
     if (events != null) {
@@ -171,13 +174,15 @@ abstract class Element extends Node
         renderLayoutElement = createRenderLayoutElement(newStyle, children);
         parent.child = renderLayoutElement as RenderBox;
         // update style reference
-        renderBoxModel.style = newStyle;
+        renderElementBoundary.style = newStyle;
       }
 
-      // update flex related properties
-      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
+      if (newDisplay == 'flex' || newDisplay == 'inline-flex') { // update flex layout properties
         decorateRenderFlex(renderLayoutElement, newStyle);
+      } else { // update flow layout properties
+        decorateRenderFlow(renderLayoutElement, newStyle);
       }
+
       // update style reference
       if (renderLayoutElement is RenderFlowLayout) {
         (renderLayoutElement as RenderFlowLayout).style = newStyle;
@@ -378,7 +383,7 @@ abstract class Element extends Node
       if (style.position == 'absolute' || style.position == 'fixed' || style.position == 'sticky') {
         // remove positioned element from parent element stack
         Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-        parentElementWithStack.renderStack.remove(renderBoxModel);
+        parentElementWithStack.renderStack.remove(renderElementBoundary);
 
         // remove sticky placeholder
         if (style.position == 'sticky') {
@@ -400,17 +405,17 @@ abstract class Element extends Node
           }
         }
         // find pre non positioned renderObject
-        RenderBoxModel preNonPositionedObject = null;
+        RenderElementBoundary preNonPositionedObject = null;
         if (preNonPositionedElement != null) {
           RenderObjectVisitor visitor = (child) {
-            if (child is RenderBoxModel && preNonPositionedElement.nodeId == child.nodeId) {
+            if (child is RenderElementBoundary && preNonPositionedElement.nodeId == child.nodeId) {
               preNonPositionedObject = child;
             }
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
         // insert non positioned renderObject to parent element in the order of original element tree
-        parentElement.renderLayoutElement.insert(renderBoxModel, after: preNonPositionedObject);
+        parentElement.renderLayoutElement.insert(renderElementBoundary, after: preNonPositionedObject);
 
         needsReposition = false;
       }
@@ -716,15 +721,6 @@ abstract class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      MainAxisAlignment alignment = MainAxisAlignment.start;
-      switch (newStyle['textAlign']) {
-        case 'right':
-          alignment = MainAxisAlignment.end;
-          break;
-        case 'center':
-          alignment = MainAxisAlignment.center;
-          break;
-      }
       MainAxisAlignment runAlignment = MainAxisAlignment.start;
       switch (newStyle['alignContent']) {
         case 'end':
@@ -744,7 +740,6 @@ abstract class Element extends Node
           break;
       }
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
-        mainAxisAlignment: alignment,
         runAlignment: runAlignment,
         children: children,
         style: newStyle,
@@ -753,6 +748,8 @@ abstract class Element extends Node
 
       if (isFlexWrap) {
         decorateRenderFlex(flowLayout, newStyle);
+      } else {
+        decorateRenderFlow(flowLayout, newStyle);
       }
       return flowLayout;
     } else {
@@ -764,14 +761,20 @@ abstract class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
-    appendElement(child);
+    // Only append node types which is visible in RenderObject tree
+    if (child is Element || child is TextNode) {
+      appendElement(child);
+    }
     return child;
   }
 
   @override
   @mustCallSuper
   Node removeChild(Node child) {
-    removeElement(child);
+    // Not remove node type which is not present in RenderObject tree such as Comment
+    if (child is Element || child is TextNode) {
+      removeElement(child);
+    }
     super.removeChild(child);
     return child;
   }
@@ -848,7 +851,7 @@ abstract class Element extends Node
       int childId;
       if (childNode is RenderTextNode) {
         childId = childNode.nodeId;
-      } else if (childNode is RenderBoxModel) {
+      } else if (childNode is RenderElementBoundary) {
         childId = childNode.nodeId;
       }
       if (childId == child.nodeId) {

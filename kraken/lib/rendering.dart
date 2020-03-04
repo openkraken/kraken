@@ -4,7 +4,7 @@
  */
 
 export 'src/rendering/box.dart';
-export 'src/rendering/box_model.dart';
+export 'src/rendering/element_boundary.dart';
 export 'src/rendering/canvas.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/gradient.dart';
