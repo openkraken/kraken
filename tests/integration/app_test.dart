@@ -17,6 +17,7 @@ String addJavaScriptClosure(String input) {
 }
 
 void main() {
+  bool hasNotMatchSnapshot = false;
   if (!snapshots.existsSync()) {
     snapshots.createSync();
   }
@@ -45,12 +46,13 @@ void main() {
         if (diffCounts == 0) {
           print('$pass $fixture snaphost is equal!');
         } else {
+          hasNotMatchSnapshot = true;
           final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
           newSnap.writeAsBytes(screenPixels);
           if (diffCounts == -1) {
-            throw Exception('$err $fixture snapshot is NOT equal with old ones');
+            print('$err $fixture snapshot is NOT equal with old ones');
           } else {
-            throw Exception('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
+            print('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
                 'please compare manually with ${snap.path} and ${newSnap.path}');
           }
         }
@@ -89,5 +91,8 @@ void main() {
         });
       }
     }
+
+    expect(hasNotMatchSnapshot, false,
+        reason: 'Some snapshot not matched, please check the log.');
   });
 }

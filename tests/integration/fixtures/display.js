@@ -3,12 +3,12 @@ var child1 = document.createElement('div');
 child1.style.backgroundColor = 'black';
 
 var blockContainer = document.createElement('div');
-blockContainert.style.width = blockContainert.style.height = '100rpx';
-blockContainert.style.display = 'block';
-blockContainert.style.backgroundColor = 'blue';
+blockContainer.style.width = blockContainer.style.height = '100rpx';
+blockContainer.style.display = 'block';
+blockContainer.style.backgroundColor = 'blue';
 var textBlock = document.createTextNode('block');
-blockContainert.appendChild(textBlock);
-child1.appendChild(blockContainert);
+blockContainer.appendChild(textBlock);
+child1.appendChild(blockContainer);
 
 var flexContainer = document.createElement('div');
 flexContainer.style.width = '120rpx';
@@ -37,11 +37,11 @@ inlineContainer.appendChild(document.createTextNode('inline'));
 child1.appendChild(inlineContainer);
 
 var inlineBlockContainer = document.createElement('span');
-span.style.display = 'inline-block';
-span.style.width = '200rpx';
-span.style.height = '100rpx';
-span.style.backgroundColor = 'brown';
-span.appendChild(document.createTextNode('inline-block'));
-child1.appendChild(span);
+inlineBlockContainer.style.display = 'inline-block';
+inlineBlockContainer.style.width = '200rpx';
+inlineBlockContainer.style.height = '100rpx';
+inlineBlockContainer.style.backgroundColor = 'brown';
+inlineBlockContainer.appendChild(document.createTextNode('inline-block'));
+child1.appendChild(inlineBlockContainer);
 
 document.body.appendChild(child1);
