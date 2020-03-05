@@ -8,17 +8,13 @@ Object.defineProperty(global, 'onload', {
   },
 });
 
-const WINDOW_PROPERTIES : Array<Array<any>> = [
-  ['devicePixelRatio', () => krakenWindow.devicePixelRatio],
-];
-
-for (let i = 0; i < WINDOW_PROPERTIES.length; i++) {
-  Object.defineProperty(global, WINDOW_PROPERTIES[i][0], {
-    enumerable: true,
-    configurable: false,
-    get: WINDOW_PROPERTIES[i][1],
-  });
-}
+Object.defineProperty(global, 'devicePixelRatio', {
+  enumerable: true,
+  configurable: false,
+  get() {
+    return krakenWindow.devicePixelRatio;
+  },
+});
 
 Object.defineProperty(global, 'window', {
   enumerable: true,

@@ -36,9 +36,3 @@ export class TextNode extends Node {
     return this._data;
   }
 }
-
-Object.defineProperty(global, 'TextNode', {
-  enumerable: true,
-  configurable: false,
-  get: () => TextNode,
-});
