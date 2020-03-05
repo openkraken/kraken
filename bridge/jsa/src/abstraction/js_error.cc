@@ -115,7 +115,7 @@ void JSError::setValue(JSContext &context, Value &&value) {
 
     if (what_.empty()) {
       if (kind_.empty()) {
-        what_ = message_ + "\n" + stack_;
+        what_ = "\n" + message_ + "\n" + stack_;
       } else {
         what_ = "\n" + kind_ + ": " + message_ + "\n" + stack_;
       }

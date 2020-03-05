@@ -340,7 +340,7 @@ function fibonacci(num) {
 TEST(V8Context, callFunctionWithException) {
   initV8Engine("");
   auto errorHandler = [](const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "function throwAnError() { throw new Error('1234');}; throwAnError; \n"
+    EXPECT_STREQ(error.what(), "\nfunction throwAnError() { throw new Error('1234');}; throwAnError; \n"
                                "                          ^\n"
                                "Error: 1234\n"
                                "    at throwAnError (<anonymous>:1:33)");
@@ -451,7 +451,7 @@ TEST(V8Context, hostFunctionWithThis) {
 TEST(V8Context, hostFunctionThrowError) {
   initV8Engine("");
   auto errorHandler = [](const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "object.causeError()\n"
+    EXPECT_STREQ(error.what(), "\nobject.causeError()\n"
                                "       ^\n"
                                "Error: ops !!\n"
                                "    at <anonymous>:1:8");
@@ -704,5 +704,35 @@ TEST(V8Context, getHostObject) {
       jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
   });
 }
+
+
+TEST(JSCContext, codeSyntaxError) {
+  initV8Engine("");
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "qwe823-qe,sd.a.\n"
+                               "               \n"
+                               "SyntaxError: Unexpected end of input");
+  };
+  auto context = std::make_unique<V8Context>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("qwe823-qe,sd.a.", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
+TEST(JSCContext, undefinedError) {
+  initV8Engine("");
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "function f(obj) {obj.abc()}; f(null);\n"
+                               "                     ^\n"
+                               "TypeError: Cannot read property 'abc' of null\n"
+                               "    at f (internal://:1:22)\n"
+                               "    at internal://:1:30");
+  };
+  auto context = std::make_unique<V8Context>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("function f(obj) {obj.abc()}; f(null);", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
 
 #endif

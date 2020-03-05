@@ -648,4 +648,26 @@ TEST(JSCContext, getHostObject) {
   });
 }
 
+TEST(JSCContext, codeSyntaxError) {
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\nSyntaxError: Unexpected end of script\n"
+                               "no stack");
+  };
+  auto context = std::make_unique<JSCContext>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("qwe823-qe,sd.a.", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
+TEST(JSCContext, undefinedError) {
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "TypeError: null is not an object (evaluating 'obj.abc')\n"
+                               "    at f (internal://:1:21)\n"
+                               "    at global code (internal://:1:31");
+  };
+  auto context = std::make_unique<JSCContext>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("function f(obj) {obj.abc()}; f(null);", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
 #endif

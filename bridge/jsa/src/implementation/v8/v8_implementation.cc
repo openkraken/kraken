@@ -117,14 +117,14 @@ jsa::Value V8Context::evaluateJavaScript(const char *code,
 
   if (!v8::Script::Compile(context, sourceCode, &origin).ToLocal(&script)) {
     reportException(tryCatch);
-    return jsa::Value::undefined();
+    return jsa::Value::null();
   }
 
   v8::Local<v8::Value> result;
   if (!script->Run(context).ToLocal(&result)) {
     assert(tryCatch.HasCaught());
     reportException(tryCatch);
-    return jsa::Value::undefined();
+    return jsa::Value::null();
   }
 
   return createValue(result);
@@ -1095,7 +1095,7 @@ jsa::Value V8Context::call(const jsa::Function &function,
 
   if (!success) {
     reportException(tryCatch);
-    return jsa::Value::undefined();
+    return jsa::Value::null();
   }
 
   return createValue(result);
@@ -1117,7 +1117,7 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
           .ToLocal(&result);
   if (!success) {
     reportException(tryCatch);
-    return jsa::Value::undefined();
+    return jsa::Value::null();
   }
 
   return createValue(result);
