@@ -5,25 +5,24 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/style.dart';
 
-const String COLOR = 'color';
-const String HEIGHT = 'height';
-const String LINE_HEIGHT = 'lineHeight';
-const String TEXT_DECORATION = 'textDecoration';
-const String TEXT_DECORATION_LINE = 'textDecorationLine';
-const String TEXT_DECORATION_COLOR = 'textDecorationColor';
-const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
-const String LETTER_SPACING = 'letterSpacing';
-const String WORD_SPACING = 'wordSpacing';
-const String FONT_SIZE = 'fontSize';
-const String FONT_FAMILY = 'fontFamily';
-const String FONT_WEIGHT = 'fontWeight';
-const String FONT_STYLE = 'fontStyle';
-const String NORMAL = 'normal';
-const double DEFAULT_FONT_SIZE = 14.0;
-const double DEFAULT_LETTER_SPACING = 0.0;
-const double DEFAULT_WORD_SPACING = 0.0;
+mixin TextStyleMixin {static const String COLOR = 'color';
+  static const String HEIGHT = 'height';
+  static const String LINE_HEIGHT = 'lineHeight';
+  static const String TEXT_DECORATION = 'textDecoration';
+  static const String TEXT_DECORATION_LINE = 'textDecorationLine';
+  static const String TEXT_DECORATION_COLOR = 'textDecorationColor';
+  static const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
+  static const String LETTER_SPACING = 'letterSpacing';
+  static const String WORD_SPACING = 'wordSpacing';
+  static const String FONT_SIZE = 'fontSize';
+  static const String FONT_FAMILY = 'fontFamily';
+  static const String FONT_WEIGHT = 'fontWeight';
+  static const String FONT_STYLE = 'fontStyle';
+  static const String NORMAL = 'normal';
+  static const double DEFAULT_FONT_SIZE = 14.0;
+  static const double DEFAULT_LETTER_SPACING = 0.0;
+  static const double DEFAULT_WORD_SPACING = 0.0;
 
-mixin TextStyleMixin {
   TextSpan createTextSpanWithStyle(String text, Style style) {
     return TextSpan(
       text: text,
@@ -92,6 +91,7 @@ mixin TextStyleMixin {
       fontWeight: getFontWeight(style),
       fontStyle: getFontStyle(style),
       textBaseline: getTextBaseLine(style),
+      package: getFontPackage(style),
       fontFamily: getFontFamily(style),
       fontSize: getFontSize(style),
       letterSpacing: getLetterSpacing(style),
@@ -169,8 +169,8 @@ mixin TextStyleMixin {
 
   FontWeight getFontWeight(Style style) {
     if (style.contains(FONT_WEIGHT)) {
-      dynamic fontWeight = style[FONT_WEIGHT];
-      if (fontWeight is int || fontWeight is double) {
+      var fontWeight = style[FONT_WEIGHT];
+      if (fontWeight is! String) {
         fontWeight = fontWeight.toString();
       }
 
@@ -180,12 +180,14 @@ mixin TextStyleMixin {
         case '200':
         case 'lighter':
           return FontWeight.w200;
+        case 'light':
         case '300':
           return FontWeight.w300;
         case '400':
         case 'normal':
           return FontWeight.w400;
         case '500':
+        case 'medium':
           return FontWeight.w500;
         case '600':
           return FontWeight.w600;
@@ -196,6 +198,7 @@ mixin TextStyleMixin {
           return FontWeight.w800;
         case '900':
         case 'bolder':
+        case 'heavy':
           return FontWeight.w900;
       }
     }
@@ -219,8 +222,28 @@ mixin TextStyleMixin {
     return TextBaseline.alphabetic; // TODO: impl vertical-align
   }
 
+  /// Specfify package for built-in fonts.
+  static const String BUILTIN_FONT_PACKAGE = 'kraken';
+  static const String FONT_ALIBABA_PUHUITI = 'AlibabaPuHuiTi';
+  static const String FONT_ALIBABA_SANS = 'AlibabaSans';
+  static const List<String> BUILTIN_FONT_FAMILIES = [
+    FONT_ALIBABA_PUHUITI,
+    FONT_ALIBABA_SANS,
+  ];
+  String getFontPackage(Style style) {
+    String fontFamily = getFontFamily(style);
+    if (BUILTIN_FONT_FAMILIES.contains(fontFamily)) {
+      return BUILTIN_FONT_PACKAGE;
+    } else {
+      return '';
+    }
+  }
+
+  /// Set default font family to Alibaba PuHuiTi.
   String getFontFamily(Style style) {
-    return style.contains(FONT_FAMILY) ? style[FONT_FAMILY] : null;
+    return style.contains(FONT_FAMILY)
+      ? style[FONT_FAMILY]
+      : FONT_ALIBABA_PUHUITI;
   }
 
   double getFontSize(Style style) {
