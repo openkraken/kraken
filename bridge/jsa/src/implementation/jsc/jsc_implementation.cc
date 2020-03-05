@@ -176,6 +176,10 @@ bool JSCContext::isValid() {
   return !ctxInvalid_.load();
 }
 
+void JSCContext::reportError(jsa::JSError &error) {
+  _handler(error);
+}
+
 namespace {
 
 bool smellsLikeES6Symbol(JSGlobalContextRef ctx, JSValueRef ref) {

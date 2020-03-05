@@ -149,6 +149,8 @@ public:
   /// use this API unless you know what you're doing.
   virtual bool isInspectable() = 0;
 
+  virtual void reportError(jsa::JSError &error) = 0;
+
   /// \return an interface to extract metrics from this \c Runtime.  The default
   /// implementation of this function returns an \c Instrumentation instance
   /// which returns no metrics.

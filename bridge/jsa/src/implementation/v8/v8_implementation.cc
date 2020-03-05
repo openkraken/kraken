@@ -210,6 +210,10 @@ V8Context::~V8Context() {
 
 bool V8Context::isValid() { return !ctxInvalid_.load(); }
 
+void V8Context::reportError(jsa::JSError &error) {
+  
+}
+
 jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);

@@ -44,6 +44,8 @@ public:
 
   bool isValid() override;
 
+  void reportError(jsa::JSError &error) override;
+
 protected:
   // Symbol
   class V8SymbolValue final : public PointerValue {

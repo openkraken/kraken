@@ -61,6 +61,8 @@ public:
 
   bool isValid() override;
 
+  void reportError(jsa::JSError &error) override;
+
 protected:
   friend class detail::ArgsConverter;
 

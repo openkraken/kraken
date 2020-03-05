@@ -38,8 +38,10 @@ std::string reformatStack(std::string const &&stack) {
 }
 
 #elif KRAKEN_V8_ENGINE
+std::string reformatStack(std::string const &&stack) {
+  return stack;
+}
 #endif
-
 }
 
 JSError::JSError(JSContext &context, Value &&value) { setValue(context, std::move(value)); }
@@ -59,6 +61,7 @@ JSError::JSError(JSContext &context, std::string msg, std::string stack)
     Object e(context);
     e.setProperty(context, "message", String::createFromUtf8(context, message_));
     e.setProperty(context, "stack", String::createFromUtf8(context, stack_));
+    e.setProperty(context, "name", String::createFromAscii(context, "NativeBridgeError"));
     setValue(context, std::move(e));
   } catch (...) {
     setValue(context, Value());
