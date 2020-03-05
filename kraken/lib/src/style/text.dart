@@ -93,6 +93,7 @@ mixin TextStyleMixin {static const String COLOR = 'color';
       textBaseline: getTextBaseLine(style),
       package: getFontPackage(style),
       fontFamily: getFontFamily(style),
+      fontFamilyFallback: getFontFamilyFallback(style),
       fontSize: getFontSize(style),
       letterSpacing: getLetterSpacing(style),
       wordSpacing: getWordSpacing(style),
@@ -222,15 +223,21 @@ mixin TextStyleMixin {static const String COLOR = 'color';
     return TextBaseline.alphabetic; // TODO: impl vertical-align
   }
 
-  static const String BUILTIN_FONT_PACKAGE = '';
+  static String BUILTIN_FONT_PACKAGE = null;
   String getFontPackage(Style style) {
     return BUILTIN_FONT_PACKAGE;
   }
 
+  static String DEFAULT_FONT_FAMILY = '';
   String getFontFamily(Style style) {
     return style.contains(FONT_FAMILY)
       ? style[FONT_FAMILY]
-      : '';
+      : DEFAULT_FONT_FAMILY;
+  }
+
+  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = [];
+  List<String> getFontFamilyFallback(Style style) {
+    return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
   double getFontSize(Style style) {

@@ -4,11 +4,15 @@ import 'dart:convert';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
+import 'package:kraken/style.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   initBridge();
   if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+  // Set render font family AlibabaPuHuiTi to resolve rendering difference.
+  TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String message) {
