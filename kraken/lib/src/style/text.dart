@@ -222,28 +222,15 @@ mixin TextStyleMixin {static const String COLOR = 'color';
     return TextBaseline.alphabetic; // TODO: impl vertical-align
   }
 
-  /// Specfify package for built-in fonts.
-  static const String BUILTIN_FONT_PACKAGE = 'kraken';
-  static const String FONT_ALIBABA_PUHUITI = 'AlibabaPuHuiTi';
-  static const String FONT_ALIBABA_SANS = 'AlibabaSans';
-  static const List<String> BUILTIN_FONT_FAMILIES = [
-    FONT_ALIBABA_PUHUITI,
-    FONT_ALIBABA_SANS,
-  ];
+  static const String BUILTIN_FONT_PACKAGE = '';
   String getFontPackage(Style style) {
-    String fontFamily = getFontFamily(style);
-    if (BUILTIN_FONT_FAMILIES.contains(fontFamily)) {
-      return BUILTIN_FONT_PACKAGE;
-    } else {
-      return '';
-    }
+    return BUILTIN_FONT_PACKAGE;
   }
 
-  /// Set default font family to Alibaba PuHuiTi.
   String getFontFamily(Style style) {
     return style.contains(FONT_FAMILY)
       ? style[FONT_FAMILY]
-      : FONT_ALIBABA_PUHUITI;
+      : '';
   }
 
   double getFontSize(Style style) {
