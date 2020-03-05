@@ -410,7 +410,6 @@ TEST(JSCContext, hostFunctionThrowError) {
   auto errorPrint = [](const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
                                "Error: ops !!\n"
-                               "    at \n"
                                "    at global code");
   };
   auto context = std::make_unique<JSCContext>(errorPrint);
@@ -663,11 +662,21 @@ TEST(JSCContext, undefinedError) {
     EXPECT_STREQ(error.what(), "\n"
                                "TypeError: null is not an object (evaluating 'obj.abc')\n"
                                "    at f (internal://:1:21)\n"
-                               "    at global code (internal://:1:31");
+                               "    at global code (internal://:1:31)");
   };
   auto context = std::make_unique<JSCContext>(errorPrint);
   jsa::Value result = context->evaluateJavaScript("function f(obj) {obj.abc()}; f(null);", "internal://", 0);
   EXPECT_EQ(result.isNull(), true);
+}
+
+TEST(JSCContext, test) {
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "ReferenceError: Can't find variable: setTimeout\n"
+                               "    at global code (internal://:1:11)");
+  };
+  auto context = std::make_unique<JSCContext>(errorPrint);
+  context->evaluateJavaScript("setTimeout('12345');", "internal://", 0);
 }
 
 #endif

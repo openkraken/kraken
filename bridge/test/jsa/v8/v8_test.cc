@@ -706,7 +706,7 @@ TEST(V8Context, getHostObject) {
 }
 
 
-TEST(JSCContext, codeSyntaxError) {
+TEST(V8Context, codeSyntaxError) {
   initV8Engine("");
   auto errorPrint = [](const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
@@ -719,7 +719,7 @@ TEST(JSCContext, codeSyntaxError) {
   EXPECT_EQ(result.isNull(), true);
 }
 
-TEST(JSCContext, undefinedError) {
+TEST(V8Context, undefinedError) {
   initV8Engine("");
   auto errorPrint = [](const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"

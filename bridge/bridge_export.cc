@@ -16,7 +16,7 @@ std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
 
 void printError(const alibaba::jsa::JSError &error) {
-  std::cout << error.what() << std::endl;
+  std::cerr << error.what() << std::endl;
 }
 
 Screen screen;

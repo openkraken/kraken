@@ -15,8 +15,11 @@ std::string reformatStack(std::string const &&stack) {
   std::string formatted;
   formatted.reserve(stack.length());
 
-  formatted += "    at ";
+  const std::string prefix = "    at ";
+
+  formatted += prefix;
   bool hasName = false;
+  
   for (size_t i = 0; i < stack.length(); i ++) {
     if (stack[i] == '@') {
       formatted += " (";
@@ -28,18 +31,23 @@ std::string reformatStack(std::string const &&stack) {
       if (hasName) {
         formatted += ')';
       }
+
+      if (formatted == prefix) {
+        formatted = "";
+      } else {
+        formatted += '\n';
+      }
       hasName = false;
-      formatted += "\n    at ";
+      formatted += "    at ";
     } else {
       formatted += stack[i];
     }
   }
-  return formatted;
-}
 
-#elif KRAKEN_V8_ENGINE
-std::string reformatStack(std::string const &&stack) {
-  return stack;
+  if (hasName) {
+    formatted += ')';
+  }
+  return formatted;
 }
 #endif
 }
@@ -99,7 +107,7 @@ void JSError::setValue(JSContext &context, Value &&value) {
 #ifdef KRAKEN_JSC_ENGINE
           stack_ = reformatStack(stack.toString(context).utf8(context));
 #elif KRAKEN_V8_ENGINE
-          stack_ = reformatStack(stack.toString(context).utf8(context));
+          stack_ = stack.toString(context).utf8(context);
 #endif
         }
       }
