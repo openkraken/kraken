@@ -1,49 +1,37 @@
 import { Element } from '../element';
 import { method } from '../UIManager';
 
+/**
+ * Use the HTML <canvas> element with either the canvas
+ * scripting API or the WebGL API to draw graphics and
+ * animations.
+ *
+ * Attributes:
+ * - height: The height of the coordinate space in CSS pixels. Defaults to 150.
+ * - width: The width of the coordinate space in CSS pixels. Defaults to 300.
+ *
+ * Definition: https://html.spec.whatwg.org/multipage/scripting.html#the-canvas-element
+ */
 export class CanvasElement extends Element {
+  static DEFAULT_WIDTH = 300;
+  static DEFAULT_HEIGHT = 150;
+
   constructor(tagName: string) {
     super(tagName);
   }
 
-  play() {
-    method(this.nodeId, 'play');
+  set width(value: number) {
+    this.style['width'] = value + 'px';
+  }
+  get width() {
+    return parseInt(this.style['width']) || CanvasElement.DEFAULT_WIDTH;
   }
 
-  pause() {
-    method(this.nodeId, 'pause');
+  set height(value: number) {
+    this.style['height'] = value + 'px';
   }
-
-  fastSeek = (duration: number) => {
-    method(this.nodeId, 'fastSeek', [duration]);
-  };
-
-  set src(value: string) {
-    this.setAttribute('src', value);
-  }
-  get src() {
-    return this.getAttribute('src');
-  }
-
-  set autoplay(value: any) {
-    this.setAttribute('autoplay', value);
-  }
-  get autoplay() {
-    return this.getAttribute('autoplay');
-  }
-
-  set loop(value: any) {
-    this.setAttribute('loop', value);
-  }
-  get loop() {
-    return this.getAttribute('loop');
-  }
-
-  set poster(value: any) {
-    this.setAttribute('poster', value);
-  }
-  get poster() {
-    return this.getAttribute('poster');
+  get height() {
+    return parseInt(this.style['height']) || CanvasElement.DEFAULT_HEIGHT;
   }
 
   getContext(contextType: string) {
@@ -102,5 +90,4 @@ class CanvasRenderingContext2D {
       };
     });
   }
-
 }
