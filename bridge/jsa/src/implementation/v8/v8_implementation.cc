@@ -28,46 +28,6 @@ const char *ToCString(const v8::String::Utf8Value &value) {
   return *value ? *value : "<string conversion failed>";
 }
 
-void reportException(v8::Isolate *isolate, v8::TryCatch &tryCatch) {
-  v8::HandleScope handleScope(isolate);
-  v8::String::Utf8Value exception(isolate, tryCatch.Exception());
-  const char *exception_string = ToCString(exception);
-  v8::Local<v8::Message> message = tryCatch.Message();
-  if (message.IsEmpty()) {
-    fprintf(stderr, "%s\n", exception_string);
-  } else {
-    v8::String::Utf8Value filename(isolate,
-                                   message->GetScriptOrigin().ResourceName());
-    v8::Local<v8::Context> context(isolate->GetCurrentContext());
-    const char *filename_string = ToCString(filename);
-    int linenum = message->GetLineNumber(context).FromJust();
-    fprintf(stderr, "%s:%i: %s\n", filename_string, linenum, exception_string);
-
-    v8::String::Utf8Value sourceline(
-        isolate, message->GetSourceLine(context).ToLocalChecked());
-    const char *sourceline_string = ToCString(sourceline);
-    fprintf(stderr, "%s\n", sourceline_string);
-
-    int start = message->GetStartColumn(context).FromJust();
-    for (int i = 0; i < start; i++) {
-      fprintf(stderr, " ");
-    }
-    int end = message->GetEndColumn(context).FromJust();
-    for (int i = start; i < end; i++) {
-      fprintf(stderr, "^");
-    }
-    fprintf(stderr, "\n");
-    v8::Local<v8::Value> stack_trace_string;
-    if (tryCatch.StackTrace(context).ToLocal(&stack_trace_string) &&
-        stack_trace_string->IsString() &&
-        v8::Local<v8::String>::Cast(stack_trace_string)->Length() > 0) {
-      v8::String::Utf8Value stack_trace(isolate, stack_trace_string);
-      const char *stack_trace_string = ToCString(stack_trace);
-      fprintf(stderr, "%s\n", stack_trace_string);
-    }
-  }
-};
-
 // jsa::Values* -> v8::Local<v8::Value>*
 class ArgsConverter {
 public:
@@ -151,26 +111,28 @@ jsa::Value V8Context::evaluateJavaScript(const char *code,
       v8::String::NewFromUtf8(_isolate, sourceURL.c_str(),
                               v8::NewStringType::kNormal)
           .ToLocalChecked();
+  v8::Local<v8::Integer> lineOffset = v8::Integer::New(_isolate, startLine);
   v8::Local<v8::Script> script;
-  v8::ScriptOrigin origin(sourceURLCode);
+  v8::ScriptOrigin origin(sourceURLCode, lineOffset);
 
   if (!v8::Script::Compile(context, sourceCode, &origin).ToLocal(&script)) {
-    reportException(_isolate, tryCatch);
+    reportException(tryCatch);
     return jsa::Value::undefined();
   }
 
   v8::Local<v8::Value> result;
   if (!script->Run(context).ToLocal(&result)) {
     assert(tryCatch.HasCaught());
-    reportException(_isolate, tryCatch);
+    reportException(tryCatch);
     return jsa::Value::undefined();
   }
 
   return createValue(result);
 }
 
-V8Context::V8Context()
-    : ctxInvalid_(false)
+V8Context::V8Context(jsa::JSExceptionHandler handler)
+    : ctxInvalid_(false),
+    handler_(handler)
 #ifndef NDEBUG
       ,
       objectCounter_(0), stringCounter_(0)
@@ -209,6 +171,47 @@ V8Context::~V8Context() {
 }
 
 bool V8Context::isValid() { return !ctxInvalid_.load(); }
+
+void V8Context::reportException(v8::TryCatch &tryCatch) {
+  v8::HandleScope handleScope(_isolate);
+  v8::String::Utf8Value exception(_isolate, tryCatch.Exception());
+  const char *exception_string = ToCString(exception);
+  v8::Local<v8::Message> message = tryCatch.Message();
+  if (message.IsEmpty()) {
+    jsa::JSError error(*this, exception_string);
+    handler_(error);
+  } else {
+    v8::Local<v8::Context> context(_isolate->GetCurrentContext());
+
+    std::string errorMessage;
+    std::string errorStack;
+
+    v8::String::Utf8Value sourceline(
+        _isolate, message->GetSourceLine(context).ToLocalChecked());
+    const char *sourceline_string = ToCString(sourceline);
+    errorMessage += sourceline_string;
+    errorMessage += '\n';
+    int start = message->GetStartColumn(context).FromJust();
+    for (int i = 0; i < start; i++) {
+      errorMessage += " ";
+    }
+    int end = message->GetEndColumn(context).FromJust();
+    for (int i = start; i < end; i++) {
+      errorMessage += "^";
+    }
+    v8::Local<v8::Value> stack_trace_string;
+    if (tryCatch.StackTrace(context).ToLocal(&stack_trace_string) &&
+        stack_trace_string->IsString() &&
+        v8::Local<v8::String>::Cast(stack_trace_string)->Length() > 0) {
+      v8::String::Utf8Value stack_trace(_isolate, stack_trace_string);
+      const char *stack_trace_string = ToCString(stack_trace);
+      errorStack = std::string(stack_trace_string);
+    }
+
+    jsa::JSError error(*this, errorMessage, errorStack);
+    handler_(error);
+  }
+};
 
 void V8Context::reportError(jsa::JSError &error) {
   
@@ -1091,7 +1094,7 @@ jsa::Value V8Context::call(const jsa::Function &function,
           .ToLocal(&result);
 
   if (!success) {
-    reportException(_isolate, tryCatch);
+    reportException(tryCatch);
     return jsa::Value::undefined();
   }
 
@@ -1113,7 +1116,7 @@ jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
       func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
           .ToLocal(&result);
   if (!success) {
-    reportException(_isolate, tryCatch);
+    reportException(tryCatch);
     return jsa::Value::undefined();
   }
 
@@ -1234,8 +1237,8 @@ V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
 
 V8Instrumentation &V8Context::instrumentation() { return *inst; }
 
-std::unique_ptr<jsa::JSContext> createJSContext() {
-  return std::make_unique<V8Context>();
+std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler) {
+  return std::make_unique<V8Context>(handler);
 }
 
 } // namespace jsa_v8

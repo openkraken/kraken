@@ -61,7 +61,6 @@ JSError::JSError(JSContext &context, std::string msg, std::string stack)
     Object e(context);
     e.setProperty(context, "message", String::createFromUtf8(context, message_));
     e.setProperty(context, "stack", String::createFromUtf8(context, stack_));
-    e.setProperty(context, "name", String::createFromAscii(context, "NativeBridgeError"));
     setValue(context, std::move(e));
   } catch (...) {
     setValue(context, Value());
@@ -115,7 +114,11 @@ void JSError::setValue(JSContext &context, Value &&value) {
     }
 
     if (what_.empty()) {
-      what_ = "\n" + kind_ + ": " + message_ + "\n" + stack_;
+      if (kind_.empty()) {
+        what_ = message_ + "\n" + stack_;
+      } else {
+        what_ = "\n" + kind_ + ": " + message_ + "\n" + stack_;
+      }
     }
   } catch (...) {
     message_ = "[Exception caught creating message string]";

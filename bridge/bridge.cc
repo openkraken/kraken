@@ -238,7 +238,7 @@ JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
   context = alibaba::jsc::createJSContext(handler);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
-  context = alibaba::jsa_v8::createJSContext();
+  context = alibaba::jsa_v8::createJSContext(handler);
 #endif
 
   // Inject JSC global objects
