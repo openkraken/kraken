@@ -26,4 +26,3 @@ Object.defineProperty(global, 'window', {
   configurable: false,
   value: global,
 });
-Object.setPrototypeOf(window, global);
