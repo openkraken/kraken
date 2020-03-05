@@ -4,7 +4,6 @@
 */
 
 #include "toBlob.h"
-#include "foundation/logging.h"
 #include "dart_methods.h"
 #include "blob.h"
 #include "foundation/callback_context.h"
@@ -21,18 +20,15 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args,
   const Value &callback = args[1];
 
   if (!id.isNumber()) {
-    KRAKEN_LOG(ERROR) << "Failed to export blob: missing element's id" << std::endl;
-    return Value::undefined();
+    throw JSError(context, "Failed to export blob: missing element's id");
   }
 
   if (!callback.isObject() && !callback.getObject(context).isFunction(context)) {
-    KRAKEN_LOG(ERROR) << "Failed to export blob: callback should be a function type" << std::endl;
-    return Value::undefined();
+    throw JSError(context, "Failed to export blob: callback should be a function type");
   }
 
   if (getDartMethod()->toBlob == nullptr) {
-    KRAKEN_LOG(ERROR) << "[toBlob] dart callback not register." << std::endl;
-    return Value::undefined();
+    throw JSError(context, "[toBlob] dart callback not register.");
   }
 
   std::shared_ptr<Value> func = std::make_shared<Value>(Value(context, callback));

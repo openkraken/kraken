@@ -49,6 +49,8 @@ using HostFunctionType = std::function<Value(
     JSContext &context, const Value &thisVal,
                                              const Value *args, size_t count)>;
 
+using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
+
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
 class HostObject {
@@ -146,6 +148,8 @@ public:
   /// registering a runtime with the debugger is still in flux, so please don't
   /// use this API unless you know what you're doing.
   virtual bool isInspectable() = 0;
+
+  virtual void reportError(jsa::JSError &error) = 0;
 
   /// \return an interface to extract metrics from this \c Runtime.  The default
   /// implementation of this function returns an \c Instrumentation instance
