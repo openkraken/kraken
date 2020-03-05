@@ -8,21 +8,27 @@
 #include "bridge.h"
 #include <atomic>
 #include <string>
+#include <iostream>
 
 kraken::DartMethodPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
+
+void printError(const alibaba::jsa::JSError &error) {
+  std::cerr << error.what() << std::endl;
+}
+
 Screen screen;
 
 void reloadJsContext() {
   inited = false;
-  bridge = std::make_unique<kraken::JSBridge>();
+  bridge = std::make_unique<kraken::JSBridge>(printError);
   inited = true;
 }
 
 void initJsEngine() {
-  bridge = std::make_unique<kraken::JSBridge>();
+  bridge = std::make_unique<kraken::JSBridge>(printError);
   inited = true;
 }
 

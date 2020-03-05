@@ -16,11 +16,12 @@ namespace alibaba {
 namespace jsa_v8 {
 
 void initV8Engine(const char *current_directory);
-std::unique_ptr<jsa::JSContext> createJSContext();
+std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler);
 
 class V8Context : public jsa::JSContext {
 public:
-  V8Context();
+  V8Context() = delete;
+  V8Context(jsa::JSExceptionHandler handler);
   ~V8Context() override;
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL,
@@ -43,6 +44,8 @@ public:
   v8::Local<v8::Value> valueRef(const jsa::Value &value);
 
   bool isValid() override;
+
+  void reportError(jsa::JSError &error) override;
 
 protected:
   // Symbol
@@ -198,11 +201,14 @@ private:
   jsa::JSContext::PointerValue *makeObjectValue(v8::Local<v8::Object> &obj,
                                                 T *privateData) const;
 
+  void reportException(v8::TryCatch &tryCatch);
+
   v8::Isolate *_isolate;
   v8::Persistent<v8::Context> _context;
   v8::Persistent<v8::Object> _global;
   std::atomic<bool> ctxInvalid_;
   std::unique_ptr<V8Instrumentation> inst;
+  jsa::JSExceptionHandler handler_;
 
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;

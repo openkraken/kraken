@@ -24,9 +24,11 @@ private:
   std::shared_ptr<kraken::binding::JSWebSocket> websocket_;
   std::shared_ptr<kraken::binding::JSScreen> screen_;
   std::shared_ptr<kraken::binding::JSWindow> window_;
+  alibaba::jsa::JSExceptionHandler handler_;
 
 public:
-  JSBridge();
+  JSBridge() = delete;
+  JSBridge(alibaba::jsa::JSExceptionHandler handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
