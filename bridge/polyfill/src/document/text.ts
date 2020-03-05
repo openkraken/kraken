@@ -1,7 +1,7 @@
 import { Node, NodeType } from './node';
 import { createTextNode, setProperty } from './UIManager';
 
-export class Text extends Node {
+export class TextNode extends Node {
   public nodeName: string = '#text';
   public _data: string = '';
 
@@ -36,3 +36,9 @@ export class Text extends Node {
     return this._data;
   }
 }
+
+Object.defineProperty(global, 'TextNode', {
+  enumerable: true,
+  configurable: false,
+  get: () => TextNode,
+});

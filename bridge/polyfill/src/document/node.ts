@@ -137,3 +137,9 @@ export function traverseNode(node: Node, handle: Function) {
     }
   }
 }
+
+Object.defineProperty(global, 'Node', {
+  enumerable: true,
+  configurable: false,
+  get: () => Node,
+});
