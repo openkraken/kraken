@@ -137,7 +137,7 @@ JSWebSocket::JSWebSocket() {
 Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
                            const Value *args, size_t count) {
   if (count < 5) {
-    throw JSError(context, "WebSocket.connect method takes 5 arguments. "
+    throw JSError(context, "WebSocket connect Failed: WebSocket.connect method takes 5 arguments. "
                            "[connect(url, onMessage, onOpen, onClose, onError)]");
   }
   auto &&url = args[0];
@@ -148,7 +148,7 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
 
   assert(_websocket != nullptr);
   if (!url.isString()) {
-    throw JSError(context, "websocket url must be string");
+    throw JSError(context, "WebSocket connect Failed: parameter 1 (url) must be string");
   }
 
   getDartMethod()->startFlushCallbacksInUIThread();
@@ -165,16 +165,16 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
 Value JSWebSocket::send(JSContext &context, const Value &thisVal,
                         const Value *args, size_t count) {
   if (count < 2) {
-    throw JSError(context, "websocket.send method takes 2 arguments. [send(token, message)]");
+    throw JSError(context, "WebSocket failed to send: send method takes 2 arguments. [send(token, message)]");
   }
   auto &&token = args[0];
   auto &&message = args[1];
 
   if (!token.isNumber()) {
-    throw JSError(context, "token must be number");
+    throw JSError(context, "WebSoket failed to send: parameter 1 (token) must be number");
   }
   if (!message.isString()) {
-    throw JSError(context, "message must be string");
+    throw JSError(context, "WebSocket failed to send: parameter 2 (message) must be string");
   }
 
   assert(_websocket != nullptr);
@@ -186,20 +186,20 @@ Value JSWebSocket::send(JSContext &context, const Value &thisVal,
 Value JSWebSocket::close(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
   if (count < 3) {
-    throw JSError(context, "websocket.close method takes 3 arguments. "
+    throw JSError(context, "WebSocket failed to close: close method takes 3 arguments. "
                            "[close(token, code, reason)]");
   }
   auto &&token = args[0];
   auto &&code = args[1];
   auto &&reason = args[2];
   if (!token.isNumber()) {
-    throw JSError(context, "token must be number");
+    throw JSError(context, "WebSocket failed to close: parameter 1 (token) must be number");
   }
   if (!code.isNumber()) {
-    throw JSError(context, "code must be number");
+    throw JSError(context, "WebSocket failed to close: parameter 2 (code) must be number");
   }
   if (!reason.isString()) {
-    throw JSError(context, "reason must be string");
+    throw JSError(context, "WebSocket failed to close: parameter 3 (reason) must be string");
   }
   assert(_websocket != nullptr);
   _websocket->close(static_cast<int>(token.getNumber()),
@@ -210,7 +210,7 @@ Value JSWebSocket::close(JSContext &context, const Value &thisVal,
 }
 
 void JSWebSocket::set(JSContext &context, const PropNameID &name, const Value &value) {
-  throw JSError(context, "global.websocket not support set property");
+  throw JSError(context, "WebSocket not support set property.");
 #ifndef NDEBUG
   std::abort();
 #endif

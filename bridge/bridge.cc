@@ -41,7 +41,7 @@ ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
 Value krakenUIManager(JSContext &context, const Value &thisVal,
                      const Value *args, size_t count) {
   if (count < 1) {
-    throw JSError(context, "[krakenUIManager ERROR]: function missing parameter");
+    throw JSError(context, "Failed to execute '__kraken_ui_manager__': 1 argument required, but only 0 present.");
   }
 
   auto &&message = args[0];
@@ -53,7 +53,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal,
   }
 
   if (getDartMethod()->invokeUIManager == nullptr) {
-    throw JSError(context, "[krakenUIManager ERROR]: dart callbacks not register");
+    throw JSError(context, "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
   const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
@@ -81,7 +81,7 @@ void handleInvokeModuleTransientCallback(char *json, void *data) {
     return;
 
   if (obj->_callback == nullptr) {
-    JSError error(obj->_context, "Callback is null");
+    JSError error(obj->_context, "Failed to execute '__kraken_invoke_module__': callback is null.");
     obj->_context.reportError(error);
     return;
   }
@@ -105,7 +105,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
-    throw JSError(context, "Dart method 'invokeModule' not registered.");
+    throw JSError(context, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
   }
 
   CallbackContext *callbackContext = nullptr;
@@ -137,11 +137,11 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
 Value krakenUIListener(JSContext &context, const Value &thisVal,
                  const Value *args, size_t count) {
   if (count < 1) {
-    throw JSError(context, "[krakenUIListener ERROR]: function missing parameter");
+    throw JSError(context, "Failed to execute '__kraken_ui_listener__': 1 parameter required, but only 0 present.");
   }
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
-    throw JSError(context, "[krakenUIListener ERROR]: parameter should be a function");
+    throw JSError(context, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.");
   }
 
   std::shared_ptr<Value> val =
@@ -156,11 +156,11 @@ Value krakenUIListener(JSContext &context, const Value &thisVal,
 Value krakenModuleListener(JSContext &context, const Value &thisVal,
                      const Value *args, size_t count) {
   if (count < 1) {
-    throw JSError(context, "[krakenModuleListener ERROR]: function missing parameter");
+    throw JSError(context, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
   }
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
-    throw JSError(context, "[krakenModuleListener ERROR]: parameter should be a function");
+    throw JSError(context, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
   }
 
   std::shared_ptr<Value> val =
@@ -179,7 +179,7 @@ void handleTransientCallback(void *data) {
     return;
 
   if (obj->_callback == nullptr) {
-    JSError error(obj->_context, "Callback is null");
+    JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
     obj->_context.reportError(error);
     return;
   }
@@ -192,11 +192,11 @@ void handleTransientCallback(void *data) {
 Value requestBatchUpdate(JSContext &context, const Value &thisVal,
                             const Value *args, size_t count) {
   if (count <= 0) {
-    throw JSError(context, "[requestBatchUpdate] function missing parameters");
+    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': 1 parameter required, but only 0 present.");
   }
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
-    throw JSError(context, "[requestBatchUpdate] first param should be a function");
+    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.");
   }
 
   std::shared_ptr<Value> callbackValue =
@@ -207,7 +207,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal,
   auto *callbackContext = new CallbackContext(context, callbackValue);
 
   if (getDartMethod()->requestBatchUpdate == nullptr) {
-    throw JSError(context, "[requestBatchUpdate] dart callback not register");
+    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
   getDartMethod()->requestBatchUpdate(handleTransientCallback, static_cast<void *>(callbackContext));
@@ -302,11 +302,11 @@ void JSBridge::handleUIListener(const char *args) {
     krakenUIListenerList.get(i, callback);
 
     if (callback.get() == nullptr) {
-      throw JSError(*context, "[krakenUIListener ERROR]: you should initialize UI listener");
+      throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
     }
 
     if (!callback->getObject(*context).isFunction(*context)) {
-      throw JSError(*context, "[krakenUIListener ERROR]: callback is not a function");
+      throw JSError(*context, "Failed to execute '__kraken_ui_listener__': callback is not a function.");
     }
 
     const String str = String::createFromAscii(*context, args);
@@ -324,11 +324,11 @@ void JSBridge::handleModuleListener(const char *args) {
     krakenModuleListenerList.get(i, callback);
 
     if (callback == nullptr) {
-      throw JSError(*context, "[krakenModuleListener ERROR]: you should initialize Module listener");
+      throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
     }
 
     if (!callback->getObject(*context).isFunction(*context)) {
-      throw JSError(*context, "[krakenModuleListener ERROR]: callback is not a function");
+      throw JSError(*context, "Failed to execute '__kraken_module_listener__': callback is not a function.");
     }
 
     const String str = String::createFromAscii(*context, args);

@@ -25,7 +25,7 @@ Value JSScreen::get(JSContext &context, const PropNameID &name) {
   auto propertyName = name.utf8(context);
 
   if (getDartMethod()->getScreen == nullptr) {
-    throw JSError(context, "getScreen dart API not register");
+    throw JSError(context, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
   Screen *screen = getDartMethod()->getScreen();

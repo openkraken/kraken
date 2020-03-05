@@ -22,7 +22,7 @@ void JSWindow::invokeOnloadCallback(std::unique_ptr<JSContext> &context) {
   if (funcObject.isFunction(*context)) {
     funcObject.asFunction(*context).call(*context);
   } else {
-    throw JSError(*context, "onLoad callback is not a function");
+    throw JSError(*context, "Failed to reload: onLoad callback is not a function.");
   }
 }
 
@@ -36,7 +36,7 @@ void JSWindow::invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSConte
   if (funcObject.isFunction(*context)) {
     funcObject.asFunction(*context).call(*context);
   } else {
-    throw JSError(*context, "onPlatformBrightnessChanged callback is not a function");
+    throw JSError(*context, "onPlatformBrightnessChanged callback is not a function.");
   }
 }
 
@@ -45,14 +45,14 @@ Value JSWindow::get(JSContext &context,
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
-      throw JSError(context, "devicePixelRatio dart callback not register");
+      throw JSError(context, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
     }
 
     double devicePixelRatio = getDartMethod()->devicePixelRatio();
     return Value(devicePixelRatio);
   } else if (_name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
-      throw JSError(context, "platformBrightness dart callback not register");
+      throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
 
     return String::createFromUtf8(context, getDartMethod()->platformBrightness());
@@ -69,7 +69,7 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
     _onLoadCallback = Value(context, value);
   } else if (_name == "onColorSchemeChange") {
     if (getDartMethod()->onPlatformBrightnessChanged == nullptr) {
-      throw JSError(context, "onPlatformBrightnessChanged dart callback not register");
+      throw JSError(context, "Failed to set onColorSchemeChange: dart method (onPlatformBrightnessChanged) is not register.");
     }
     _onPlatformBrightnessChanged = Value(context, value);
     getDartMethod()->onPlatformBrightnessChanged();

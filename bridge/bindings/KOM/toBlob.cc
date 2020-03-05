@@ -20,15 +20,15 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args,
   const Value &callback = args[1];
 
   if (!id.isNumber()) {
-    throw JSError(context, "Failed to export blob: missing element's id");
+    throw JSError(context, "Failed to export blob: missing element's id.");
   }
 
   if (!callback.isObject() && !callback.getObject(context).isFunction(context)) {
-    throw JSError(context, "Failed to export blob: callback should be a function type");
+    throw JSError(context, "Failed to export blob: callback should be a function type.");
   }
 
   if (getDartMethod()->toBlob == nullptr) {
-    throw JSError(context, "[toBlob] dart callback not register.");
+    throw JSError(context, "Failed to export blob: dart method (toBlob) is not registered.");
   }
 
   std::shared_ptr<Value> func = std::make_shared<Value>(Value(context, callback));
