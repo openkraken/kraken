@@ -6,7 +6,6 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
-import 'dart:convert';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
