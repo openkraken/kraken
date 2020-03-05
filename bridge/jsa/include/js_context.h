@@ -49,6 +49,8 @@ using HostFunctionType = std::function<Value(
     JSContext &context, const Value &thisVal,
                                              const Value *args, size_t count)>;
 
+using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
+
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
 class HostObject {

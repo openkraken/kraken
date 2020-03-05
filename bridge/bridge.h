@@ -26,8 +26,10 @@ private:
   std::shared_ptr<kraken::binding::JSWindow> window_;
 
 public:
-  JSBridge();
+  JSBridge() = delete;
+  JSBridge(alibaba::jsa::JSExceptionHandler handler);
   ~JSBridge();
+  void handleException(const char* what);
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();

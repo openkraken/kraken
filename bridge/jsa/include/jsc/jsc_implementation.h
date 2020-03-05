@@ -28,7 +28,8 @@ class JSCContext;
 class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
-  JSCContext();
+  JSCContext() = delete;
+  JSCContext(jsa::JSExceptionHandler handler);
   ~JSCContext();
 
 
@@ -237,14 +238,15 @@ private:
   jsa::JSContext::PointerValue* makeStringValue(JSStringRef str) const;
   jsa::JSContext::PointerValue* makeObjectValue(JSObjectRef obj) const;
 
-  void checkException(JSValueRef exc);
-  void checkException(JSValueRef res, JSValueRef exc);
-  void checkException(JSValueRef exc, const char* msg);
-  void checkException(JSValueRef res, JSValueRef exc, const char* msg);
+  bool hasException(JSValueRef exc);
+  bool hasException(JSValueRef res, JSValueRef exc);
+  bool hasException(JSValueRef exc, const char* msg);
+  bool hasException(JSValueRef res, JSValueRef exc, const char* msg);
 
   JSGlobalContextRef ctx_;
   std::atomic<bool> ctxInvalid_;
   std::string desc_;
+  jsa::JSExceptionHandler _handler;
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;
   mutable std::atomic<intptr_t> symbolCounter_;
@@ -253,7 +255,7 @@ private:
 };// JSCContext
 
 
-std::unique_ptr<jsa::JSContext> createJSContext();
+std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler);
 
 } // namespace jsc
 } // namespace alibaba

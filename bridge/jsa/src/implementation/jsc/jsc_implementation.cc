@@ -95,7 +95,7 @@ std::string to_string(void* value) {
 }
 } // namespace
 
-JSCContext::JSCContext(): ctxInvalid_(false)
+JSCContext::JSCContext(jsa::JSExceptionHandler handler): ctxInvalid_(false), _handler(handler)
 #ifndef NDEBUG
     ,
     objectCounter_(0),
@@ -148,7 +148,7 @@ jsa::Value JSCContext::evaluateJavaScript(
   }
 
   // step3: 查看是否有异常
-  checkException(res, exc);
+  if (hasException(res, exc)) return jsa::Value::null();
   return createValue(res);
 }
 
@@ -576,7 +576,7 @@ jsa::Value JSCContext::getProperty(
   JSObjectRef objRef = objectRef(obj);
   JSValueRef exc = nullptr;
   JSValueRef res = JSObjectGetProperty(ctx_, objRef, stringRef(name), &exc);
-  checkException(exc);
+  if (hasException(exc)) return jsa::Value::null();
   return createValue(res);
 }
 
@@ -586,7 +586,7 @@ jsa::Value JSCContext::getProperty(
   JSObjectRef objRef = objectRef(obj);
   JSValueRef exc = nullptr;
   JSValueRef res = JSObjectGetProperty(ctx_, objRef, stringRef(name), &exc);
-  checkException(exc);
+  if (hasException(exc)) return jsa::Value::null();
   return createValue(res);
 }
 
@@ -614,7 +614,7 @@ void JSCContext::setPropertyValue(
       valueRef(value),
       kJSPropertyAttributeNone,
       &exc);
-  checkException(exc);
+  hasException(exc);
 }
 
 void JSCContext::setPropertyValue(
@@ -629,7 +629,7 @@ void JSCContext::setPropertyValue(
       valueRef(value),
       kJSPropertyAttributeNone,
       &exc);
-  checkException(exc);
+  hasException(exc);
 }
 
 bool JSCContext::isArray(const jsa::Object& obj) const {
@@ -677,24 +677,38 @@ bool JSCContext::isArrayBufferView(const jsa::Object &obj) const {
 }
 
 void* JSCContext::data(const jsa::ArrayBuffer& obj) {
-  return JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), nullptr);
+  JSValueRef exc = nullptr;
+  void* data = JSObjectGetArrayBufferBytesPtr(ctx_, objectRef(obj), &exc);
+  if (hasException(exc)) return nullptr;
+  return data;
 }
 
 void *JSCContext::data(const jsa::ArrayBufferView &obj) {
-  return JSObjectGetTypedArrayBytesPtr(ctx_, objectRef(obj), nullptr);
+  JSValueRef exc = nullptr;
+  void* data = JSObjectGetTypedArrayBytesPtr(ctx_, objectRef(obj), &exc);
+  if (hasException(exc)) return nullptr;
+  return data;
 }
 
 size_t JSCContext::size(const jsa::ArrayBuffer& obj) {
-  return JSObjectGetArrayBufferByteLength(ctx_, objectRef(obj), nullptr);
+  JSValueRef exc = nullptr;
+  size_t size = JSObjectGetArrayBufferByteLength(ctx_, objectRef(obj), &exc);
+  if (hasException(exc)) return 0;
+  return size;
 }
 
 size_t JSCContext::size(const jsa::ArrayBufferView& obj) {
-  return JSObjectGetTypedArrayByteLength(ctx_, objectRef(obj), nullptr);
+  JSValueRef exc = nullptr;
+  size_t size = JSObjectGetTypedArrayByteLength(ctx_, objectRef(obj), &exc);
+  if (hasException(exc)) return 0;
+  return size;
 }
 
 jsa::ArrayBufferViewType
 JSCContext::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
-  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(arrayBufferView), nullptr);
+  JSValueRef exc = nullptr;
+  auto typedArrayType = JSValueGetTypedArrayType(ctx_, objectRef(arrayBufferView), &exc);
+  if (hasException(exc)) return jsa::ArrayBufferViewType::none;;
 
   switch(typedArrayType) {
     case kJSTypedArrayTypeInt8Array:
@@ -760,7 +774,7 @@ jsa::Value JSCContext::lockWeakObject(const jsa::WeakObject& obj) {
 jsa::Array JSCContext::createArray(size_t length) {
   JSValueRef exc = nullptr;
   JSObjectRef obj = JSObjectMakeArray(ctx_, 0, nullptr, &exc);
-  checkException(obj, exc);
+  hasException(obj, exc);
   JSObjectSetProperty(
       ctx_,
       obj,
@@ -768,7 +782,7 @@ jsa::Array JSCContext::createArray(size_t length) {
       JSValueMakeNumber(ctx_, static_cast<double>(length)),
       0,
       &exc);
-  checkException(exc);
+  hasException(exc);
   return createObject(obj).getArray(*this);
 }
 
@@ -784,7 +798,7 @@ jsa::ArrayBuffer JSCContext::createArrayBuffer(uint8_t *data, size_t length, jsa
         auto context = static_cast<DeallocatorContext*>(deallocatorContext);
         context->deallocator(data);
       }, new DeallocatorContext(deallocator), &exc);
-  checkException(arrayBuffer, exc);
+  hasException(arrayBuffer, exc);
   return createObject(arrayBuffer).getArrayBuffer(*this);
 }
 
@@ -796,7 +810,7 @@ size_t JSCContext::size(const jsa::Array& arr) {
 jsa::Value JSCContext::getValueAtIndex(const jsa::Array& arr, size_t i) {
   JSValueRef exc = nullptr;
   auto res = JSObjectGetPropertyAtIndex(ctx_, objectRef(arr), (int)i, &exc);
-  checkException(exc);
+  if (hasException(exc)) return jsa::Value::null();
   return createValue(res);
 }
 
@@ -806,7 +820,7 @@ void JSCContext::setValueAtIndexImpl(
     const jsa::Value& value) {
   JSValueRef exc = nullptr;
   JSObjectSetPropertyAtIndex(ctx_, objectRef(arr), (int)i, valueRef(value), &exc);
-  checkException(exc);
+  hasException(exc);
 }
 
 namespace {
@@ -1036,7 +1050,7 @@ jsa::Value JSCContext::call(
       count,
       detail::ArgsConverter(*this, args, count),
       &exc);
-  checkException(exc);
+  hasException(exc);
   return createValue(res);
 }
 
@@ -1051,7 +1065,7 @@ jsa::Value JSCContext::callAsConstructor(
       count,
       detail::ArgsConverter(*this, args, count),
       &exc);
-  checkException(exc);
+  hasException(exc);
   return createValue(res);
 }
 
@@ -1059,7 +1073,7 @@ bool JSCContext::strictEquals(const jsa::Symbol& a, const jsa::Symbol& b)
     const {
   JSValueRef exc = nullptr;
   bool ret = JSValueIsEqual(ctx_, symbolRef(a), symbolRef(b), &exc);
-  const_cast<JSCContext *>(this)->checkException(exc);
+  const_cast<JSCContext *>(this)->hasException(exc);
   return ret;
 }
 
@@ -1077,7 +1091,7 @@ bool JSCContext::instanceOf(const jsa::Object& o, const jsa::Function& f) {
   JSValueRef exc = nullptr;
   bool res =
       JSValueIsInstanceOfConstructor(ctx_, objectRef(o), objectRef(f), &exc);
-  checkException(exc);
+  hasException(exc);
   return res;
 }
 
@@ -1203,40 +1217,48 @@ JSObjectRef JSCContext::objectRef(const jsa::Object& obj) {
   return static_cast<const JSCObjectValue*>(getPointerValue(obj))->obj_;
 }
 
-void JSCContext::checkException(JSValueRef exc) {
+bool JSCContext::hasException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
+    _handler(error);
+    return true;
   }
+  return false;
 }
 
-void JSCContext::checkException(JSValueRef res, JSValueRef exc) {
+bool JSCContext::hasException(JSValueRef res, JSValueRef exc) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
+    _handler(error);
+    return true;
   }
+  return false;
 }
 
-void JSCContext::checkException(JSValueRef exc, const char* msg) {
+bool JSCContext::hasException(JSValueRef exc, const char* msg) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
+    _handler(error);
+    return true;
   }
+  return false;
 }
 
-void JSCContext::checkException(
+bool JSCContext::hasException(
     JSValueRef res,
     JSValueRef exc,
     const char* msg) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-    fprintf(stderr, "%s\n:%s", error.getMessage().c_str(), error.getStack().c_str());
+    _handler(error);
+    return true;
   }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<jsa::JSContext> createJSContext() {
-  return std::make_unique<JSCContext>();
+std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler) {
+  return std::make_unique<JSCContext>(handler);
 }
 
 } // namespace jsc

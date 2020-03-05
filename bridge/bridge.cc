@@ -245,9 +245,9 @@ Value getValue(JSContext &context, const Value &thisVal, const Value *args,
 /**
  * JSRuntime
  */
-JSBridge::JSBridge() {
+JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
 #ifdef KRAKEN_JSC_ENGINE
-  context = alibaba::jsc::createJSContext();
+  context = alibaba::jsc::createJSContext(handler);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
   context = alibaba::jsa_v8::createJSContext();
@@ -405,6 +405,10 @@ JSBridge::~JSBridge() {
   websocket_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
+}
+
+void JSBridge::handleException(const char* what) {
+
 }
 
 Value JSBridge::getGlobalValue(std::string code) {
