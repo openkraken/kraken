@@ -16,7 +16,6 @@
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
 #include "jsa.h"
-#include "logging.h"
 #include "thread_safe_array.h"
 #include <atomic>
 #include <cassert>
@@ -42,8 +41,7 @@ ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
 Value krakenUIManager(JSContext &context, const Value &thisVal,
                      const Value *args, size_t count) {
   if (count < 1) {
-    KRAKEN_LOG(WARN) << "[krakenUIManager ERROR]: function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "[krakenUIManager ERROR]: function missing parameter");
   }
 
   auto &&message = args[0];
@@ -55,8 +53,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal,
   }
 
   if (getDartMethod()->invokeUIManager == nullptr) {
-    KRAKEN_LOG(ERROR) << "[krakenUIManager ERROR]: dart callbacks not register";
-    return Value::undefined();
+    throw JSError(context, "[krakenUIManager ERROR]: dart callbacks not register");
   }
 
   const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
@@ -84,7 +81,8 @@ void handleInvokeModuleTransientCallback(char *json, void *data) {
     return;
 
   if (obj->_callback == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    JSError error(obj->_context, "Callback is null");
+    obj->_context.reportError(error);
     return;
   }
 
@@ -107,8 +105,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
-    KRAKEN_LOG(ERROR) << "Dart method 'invokeModule' not registered.";
-    return Value::undefined();
+    throw JSError(context, "Dart method 'invokeModule' not registered.");
   }
 
   CallbackContext *callbackContext = nullptr;
@@ -140,19 +137,16 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
 Value krakenUIListener(JSContext &context, const Value &thisVal,
                  const Value *args, size_t count) {
   if (count < 1) {
-    KRAKEN_LOG(WARN) << "[krakenUIListener ERROR]: function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "[krakenUIListener ERROR]: function missing parameter");
+  }
+
+  if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
+    throw JSError(context, "[krakenUIListener ERROR]: parameter should be a function");
   }
 
   std::shared_ptr<Value> val =
       std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
-
-  if (!func.isFunction(context)) {
-    KRAKEN_LOG(WARN)
-        << "[krakenUIListener ERROR]: parameter should be a function";
-    return Value::undefined();
-  }
 
   krakenUIListenerList.push(val);
 
@@ -162,19 +156,16 @@ Value krakenUIListener(JSContext &context, const Value &thisVal,
 Value krakenModuleListener(JSContext &context, const Value &thisVal,
                      const Value *args, size_t count) {
   if (count < 1) {
-    KRAKEN_LOG(WARN) << "[krakenModuleListener ERROR]: function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "[krakenModuleListener ERROR]: function missing parameter");
+  }
+
+  if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
+    throw JSError(context, "[krakenModuleListener ERROR]: parameter should be a function");
   }
 
   std::shared_ptr<Value> val =
       std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
-
-  if (!func.isFunction(context)) {
-    KRAKEN_LOG(WARN)
-        << "[krakenModuleListener ERROR]: parameter should be a function";
-    return Value::undefined();
-  }
 
   krakenModuleListenerList.push(val);
 
@@ -188,7 +179,8 @@ void handleTransientCallback(void *data) {
     return;
 
   if (obj->_callback == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    JSError error(obj->_context, "Callback is null");
+    obj->_context.reportError(error);
     return;
   }
 
@@ -200,26 +192,22 @@ void handleTransientCallback(void *data) {
 Value requestBatchUpdate(JSContext &context, const Value &thisVal,
                             const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[requestBatchUpdate] function missing parameters";
-    return Value::undefined();
+    throw JSError(context, "[requestBatchUpdate] function missing parameters");
+  }
+
+  if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
+    throw JSError(context, "[requestBatchUpdate] first param should be a function");
   }
 
   std::shared_ptr<Value> callbackValue =
       std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN)
-        << "[requestBatchUpdate] first param should be a function";
-    return Value::undefined();
-  }
-
   // the context pointer which will be pass by pointer address to dart code.
   auto *callbackContext = new CallbackContext(context, callbackValue);
 
   if (getDartMethod()->requestBatchUpdate == nullptr) {
-    KRAKEN_LOG(ERROR) << "[requestBatchUpdate] dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "[requestBatchUpdate] dart callback not register");
   }
 
   getDartMethod()->requestBatchUpdate(handleTransientCallback, static_cast<void *>(callbackContext));
@@ -314,13 +302,11 @@ void JSBridge::handleUIListener(const char *args) {
     krakenUIListenerList.get(i, callback);
 
     if (callback.get() == nullptr) {
-      KRAKEN_LOG(WARN) << "[krakenUIListener ERROR]: you should initialize UI listener";
-      return;
+      throw JSError(*context, "[krakenUIListener ERROR]: you should initialize UI listener");
     }
 
     if (!callback->getObject(*context).isFunction(*context)) {
-      KRAKEN_LOG(WARN) << "[krakenUIListener ERROR]: callback is not a function";
-      return;
+      throw JSError(*context, "[krakenUIListener ERROR]: callback is not a function");
     }
 
     const String str = String::createFromAscii(*context, args);
@@ -337,14 +323,12 @@ void JSBridge::handleModuleListener(const char *args) {
     std::shared_ptr<Value> callback;
     krakenModuleListenerList.get(i, callback);
 
-    if (callback.get() == nullptr) {
-      KRAKEN_LOG(WARN) << "[krakenModuleListener ERROR]: you should initialize Module listener";
-      return;
+    if (callback == nullptr) {
+      throw JSError(*context, "[krakenModuleListener ERROR]: you should initialize Module listener");
     }
 
     if (!callback->getObject(*context).isFunction(*context)) {
-      KRAKEN_LOG(WARN) << "[krakenModuleListener ERROR]: callback is not a function";
-      return;
+      throw JSError(*context, "[krakenModuleListener ERROR]: callback is not a function");
     }
 
     const String str = String::createFromAscii(*context, args);
@@ -370,26 +354,15 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
       this->handleModuleListener(args);
     }
   } catch (JSError &error) {
-    auto &&stack = error.getStack();
-    auto &&message = error.getMessage();
-    // TODO throw error in js context
-    KRAKEN_LOG(ERROR) << message << "\n" << stack;
+    handler_(error);
   }
 }
 
 alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url,
                               int startLine) {
   if (!context->isValid()) return Value::undefined();
-  try {
-    binding::updateLocation(url);
-    return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
-  } catch (JSError error) {
-    auto &&stack = error.getStack();
-    auto &&message = error.getMessage();
-
-    // TODO throw error in js context
-    KRAKEN_LOG(ERROR) << message << "\n" << stack;
-  }
+  binding::updateLocation(url);
+  return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
 
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
@@ -407,27 +380,35 @@ JSBridge::~JSBridge() {
   krakenModuleListenerList.clear();
 }
 
-void JSBridge::handleException(const char* what) {
-
-}
-
 Value JSBridge::getGlobalValue(std::string code) {
   return context->evaluateJavaScript(code.c_str(), "test://", 0);
 }
 
 void JSBridge::invokeOnloadCallback() {
   if (!context->isValid()) return;
-  window_->invokeOnloadCallback(context);
+  try {
+    window_->invokeOnloadCallback(context);
+  } catch (JSError &error) {
+    handler_(error);
+  }
 }
 
 void JSBridge::invokeOnPlatformBrightnessChangedCallback() {
   if (!context->isValid()) return;
-  window_->invokeOnPlatformBrightnessChangedCallback(context);
+  try {
+    window_->invokeOnPlatformBrightnessChangedCallback(context);
+  } catch (JSError &error) {
+    handler_(error);
+  }
 }
 
 void JSBridge::flushUITask() {
   if (!context->isValid()) return;
-  kraken::foundation::flushUITask();
+  try {
+    kraken::foundation::flushUITask();
+  } catch (JSError &error) {
+    handler_(error);
+  }
 }
 
 } // namespace kraken

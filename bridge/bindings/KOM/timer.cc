@@ -6,7 +6,6 @@
 #include "timer.h"
 #include "dart_methods.h"
 #include "jsa.h"
-#include "logging.h"
 #include "thread_safe_map.h"
 #include "foundation/callback_context.h"
 #include <atomic>
@@ -29,7 +28,10 @@ void handlePersistentCallback(void *data) {
     return;
 
   if (obj->_callback == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    // throw JSError inside of dart function callback will directly cause crash
+    // so we handle it instead of throw
+    JSError error(_context,  "Callback is null");
+    obj->_context.reportError(error);
     return;
   }
 
@@ -44,7 +46,10 @@ void handleRAFPersistentCallback(void *data, double result) {
     return;
 
   if (obj->_callback == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "Callback is null";
+    // throw JSError inside of dart function callback will directly cause crash
+    // so we handle it instead of throw
+    JSError error(_context, "Callback is null");
+    obj->_context.reportError(error);
     return;
   }
 
@@ -65,18 +70,16 @@ void handleRAFTransientCallback(void *data, double result) {
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
                  size_t count) {
   if (count < 1) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'setTimeout': 1 argument required, but only 0 present.";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
+  }
+
+  if (!args->isObject() || !args->getObject(context).isFunction(context)) {
+    throw JSError(context, "[setTimeout] first params should be a function");
   }
 
   std::shared_ptr<Value> callbackValue =
       std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
-
-  if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN) << "[setTimeout] first params should be a function";
-    return Value::undefined();
-  }
 
   auto &&time = args[1];
   int32_t timeout;
@@ -86,13 +89,11 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
   } else if (time.isNumber()) {
     timeout = time.getNumber();
   } else {
-    KRAKEN_LOG(WARN) << "[setTimeout] timeout should be a number";
-    return Value::undefined();
+    throw JSError(context, "[setTimeout] timeout should be a number");
   }
 
   if (getDartMethod()->setTimeout == nullptr) {
-    KRAKEN_LOG(ERROR) << "Dart method 'setTimeout' not registered.";
-    return Value::undefined();
+    throw JSError(context, "Dart method 'setTimeout' not registered.");
   }
 
   auto *callbackContext = new CallbackContext(context, callbackValue);
@@ -102,7 +103,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
-    KRAKEN_LOG(ERROR) << "[setTimeout] dart method call failed";
+    throw JSError(context, "[setTimeout] dart method call failed") ;
   }
 
   return Value(timerId);
@@ -111,8 +112,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
 Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
                   size_t count) {
   if (count < 1) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'setInterval': 1 argument required, but only 0 present.";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
 
   std::shared_ptr<Value> callbackValue =
@@ -120,8 +120,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   Object &&callbackFunction = callbackValue->getObject(context);
 
   if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN) << "[setInterval] first params should be a function";
-    return Value::undefined();
+    throw JSError(context, "[setInterval] first params should be a function");
   }
 
   auto &&time = args[1];
@@ -132,13 +131,11 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
   } else if (time.isNumber()) {
     delay = time.getNumber();
   } else {
-    KRAKEN_LOG(WARN) << "[setInterval] timeout should be a number";
-    return Value::undefined();
+    throw JSError(context, "[setInterval] timeout should be a number");
   }
 
   if (getDartMethod()->setInterval == nullptr) {
-    KRAKEN_LOG(ERROR) << "[setInterval] dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "[setInterval] dart callback not register");
   }
 
   // the context pointer which will be pass by pointer address to dart code.
@@ -149,7 +146,8 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
     if (!obj->_context.isValid())
       return;
     if (obj->_callback == nullptr) {
-      KRAKEN_LOG(VERBOSE) << "Callback is null";
+      JSError error(obj->_context, "Callback is null");
+      obj->_context.reportError(error);
       return;
     }
 
@@ -158,7 +156,9 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
       callback.asFunction(obj->_context)
           .call(obj->_context, Value::undefined(), 0);
     } else {
-      KRAKEN_LOG(VERBOSE) << "Callback is not a function";
+      JSError error(obj->_context, "Callback is not a function");
+      obj->_context.reportError(error);
+      return;
     }
   };
 
@@ -166,7 +166,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
       handlePersistentCallback, static_cast<void *>(callbackContext), delay);
 
   if (timerId == -1) {
-    KRAKEN_LOG(ERROR) << "[setInterval] dart method call failed";
+    throw JSError(context, "[setInterval] dart method call failed");
   }
 
   return Value(timerId);
@@ -175,22 +175,18 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
 Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args,
                    size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[clearTimeout] function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "[clearTimeout] function missing parameter");
   }
 
   const Value &timerId = args[0];
   if (!timerId.isNumber()) {
-    KRAKEN_LOG(WARN)
-        << "[clearTimeout] clearTimeout accept number as parameter";
-    return Value::undefined();
+    throw JSError(context, "[clearTimeout] clearTimeout accept number as parameter");
   }
 
   auto id = static_cast<int32_t>(timerId.asNumber());
 
   if (getDartMethod()->clearTimeout == nullptr) {
-    KRAKEN_LOG(ERROR) << "[clearTimeout]: dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "[clearTimeout]: dart callback not register");
   }
 
   getDartMethod()->clearTimeout(id);
@@ -200,22 +196,19 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args,
 Value cancelAnimationFrame(JSContext &context, const Value &thisVal,
                            const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "[cancelAnimationFrame] function missing parameter");
   }
 
   const Value &requestId = args[0];
   if (!requestId.isNumber()) {
-    KRAKEN_LOG(WARN) << "[clearAnimationFrame] cancelAnimationFrame accept "
-                        "number as parameter";
-    return Value::undefined();
+    throw JSError(context, "[clearAnimationFrame] cancelAnimationFrame accept "
+                           "number as parameter");
   }
 
   auto id = static_cast<int32_t>(requestId.asNumber());
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
-    KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "[cancelAnimationFrame]: dart callback not register");
   }
 
   getDartMethod()->cancelAnimationFrame(id);
@@ -226,8 +219,7 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal,
 Value requestAnimationFrame(JSContext &context, const Value &thisVal,
                             const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[requestAnimationFrame] function missing parameters";
-    return Value::undefined();
+    throw JSError(context,"[requestAnimationFrame] function missing parameters");
   }
 
   std::shared_ptr<Value> callbackValue =
@@ -235,17 +227,14 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
   Object &&callbackFunction = callbackValue->getObject(context);
 
   if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN)
-        << "[requestAnimationFrame] first param should be a function";
-    return Value::undefined();
+    throw JSError(context, "[requestAnimationFrame] first param should be a function");
   }
 
   // the context pointer which will be pass by pointer address to dart code.
   auto *callbackContext = new CallbackContext(context, callbackValue);
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
-    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "[requestAnimationFrame] dart callback not register");
   }
 
   int32_t requestId = getDartMethod()->requestAnimationFrame(
@@ -253,7 +242,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal,
 
   // `-1` represents some error occurred.
   if (requestId == -1) {
-    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] requestAnimationFrame error";
+    throw JSError(context, "[requestAnimationFrame] requestAnimationFrame error");
   }
 
   return Value(requestId);

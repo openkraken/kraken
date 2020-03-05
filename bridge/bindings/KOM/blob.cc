@@ -113,8 +113,7 @@ Value JSBlob::constructor(JSContext &context, const Value &thisVal,
   const Value &options = args[1];
 
   if (!array.isObject() || !array.getObject(context).isArray(context)) {
-    KRAKEN_LOG(ERROR) << "Failed to construct 'Blob': The provided value cannot be converted to a sequence";
-    return Value::undefined();
+    throw JSError(context, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");
   }
 
   if (options.isUndefined()) {
@@ -125,9 +124,8 @@ Value JSBlob::constructor(JSContext &context, const Value &thisVal,
   }
 
   if (!options.isObject()) {
-    KRAKEN_LOG(ERROR) << "Failed to construct 'Blob': parameter 2 ('options') "
-                         "is not an object";
-    return Value::undefined();
+    throw JSError(context, "Failed to construct 'Blob': parameter 2 ('options') "
+                           "is not an object");
   }
 
   auto mimeType = args[1]
