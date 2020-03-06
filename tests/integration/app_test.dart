@@ -88,13 +88,8 @@ void main() {
             'payload': payload,
           }));
 
-          List _snapshot = jsonDecode(imageListJSON);
           // Transform List<dynamic> to List<int>
-          List<int> snapshot = [];
-          _snapshot.forEach((e) {
-            snapshot.add(e is int ? e : int.parse(e));
-          });
-
+          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>();
           await matchSnapshots(basename, snapshot);
         });
       }
