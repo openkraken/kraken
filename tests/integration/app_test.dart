@@ -50,9 +50,9 @@ void main() {
           final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
           newSnap.writeAsBytes(screenPixels);
           if (diffCounts == -1) {
-            print('$err $fixture snapshot is NOT equal with old ones');
+            stderr.write('$err $fixture snapshot is NOT equal with old ones');
           } else {
-            print('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
+            stderr.write('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
                 'please compare manually with ${snap.path} and ${newSnap.path}');
           }
         }
