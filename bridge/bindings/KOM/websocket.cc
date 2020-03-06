@@ -8,7 +8,6 @@
 #include "foundation/flushUITask.h"
 #include "dart_methods.h"
 
-#include "logging.h"
 #include "websocket_client.h"
 #include <cassert>
 
@@ -138,9 +137,8 @@ JSWebSocket::JSWebSocket() {
 Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
                            const Value *args, size_t count) {
   if (count < 5) {
-    KRAKEN_LOG(WARN) << "WebSocket.connect method takes 5 arguments. "
-                        "[connect(url, onMessage, onOpen, onClose, onError)]";
-    return Value::undefined();
+    throw JSError(context, "WebSocket connect Failed: WebSocket.connect method takes 5 arguments. "
+                           "[connect(url, onMessage, onOpen, onClose, onError)]");
   }
   auto &&url = args[0];
   Object onMessage = std::move(args[1]).getObject(context);
@@ -150,8 +148,7 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
 
   assert(_websocket != nullptr);
   if (!url.isString()) {
-    KRAKEN_LOG(ERROR) << "websocket url must be string";
-    return Value::undefined();
+    throw JSError(context, "WebSocket connect Failed: parameter 1 (url) must be string");
   }
 
   getDartMethod()->startFlushCallbacksInUIThread();
@@ -168,20 +165,16 @@ Value JSWebSocket::connect(JSContext &context, const Value &thisVal,
 Value JSWebSocket::send(JSContext &context, const Value &thisVal,
                         const Value *args, size_t count) {
   if (count < 2) {
-    KRAKEN_LOG(WARN)
-        << "websocket.send method takes 2 arguments. [send(token, message)]";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to send: send method takes 2 arguments. [send(token, message)]");
   }
   auto &&token = args[0];
   auto &&message = args[1];
 
   if (!token.isNumber()) {
-    KRAKEN_LOG(ERROR) << "token must be number";
-    return Value::undefined();
+    throw JSError(context, "WebSoket failed to send: parameter 1 (token) must be number");
   }
   if (!message.isString()) {
-    KRAKEN_LOG(ERROR) << "message must be string";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to send: parameter 2 (message) must be string");
   }
 
   assert(_websocket != nullptr);
@@ -193,24 +186,20 @@ Value JSWebSocket::send(JSContext &context, const Value &thisVal,
 Value JSWebSocket::close(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
   if (count < 3) {
-    KRAKEN_LOG(WARN) << "websocket.close method takes 3 arguments. "
-                        "[close(token, code, reason)]";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to close: close method takes 3 arguments. "
+                           "[close(token, code, reason)]");
   }
   auto &&token = args[0];
   auto &&code = args[1];
   auto &&reason = args[2];
   if (!token.isNumber()) {
-    KRAKEN_LOG(ERROR) << "token must be number";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to close: parameter 1 (token) must be number");
   }
   if (!code.isNumber()) {
-    KRAKEN_LOG(ERROR) << "code must be number";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to close: parameter 2 (code) must be number");
   }
   if (!reason.isString()) {
-    KRAKEN_LOG(ERROR) << "reason must be string";
-    return Value::undefined();
+    throw JSError(context, "WebSocket failed to close: parameter 3 (reason) must be string");
   }
   assert(_websocket != nullptr);
   _websocket->close(static_cast<int>(token.getNumber()),
@@ -220,8 +209,8 @@ Value JSWebSocket::close(JSContext &context, const Value &thisVal,
   return Value::undefined();
 }
 
-void JSWebSocket::set(JSContext &, const PropNameID &name, const Value &value) {
-  KRAKEN_LOG(ERROR) << "global.websocket not support set property";
+void JSWebSocket::set(JSContext &context, const PropNameID &name, const Value &value) {
+  throw JSError(context, "WebSocket not support set property.");
 #ifndef NDEBUG
   std::abort();
 #endif

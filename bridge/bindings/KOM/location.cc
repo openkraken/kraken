@@ -69,8 +69,7 @@ void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 Value JSLocation::reload(JSContext &context, const Value &thisVal,
                          const Value *args, size_t count) {
   if (getDartMethod()->reloadApp == nullptr) {
-    KRAKEN_LOG(ERROR) << "[location.reload()] dart callback not register";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'reload': dart method (reloadApp) is not registered.");
   }
   getDartMethod()->reloadApp();
   return Value::undefined();

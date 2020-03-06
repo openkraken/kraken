@@ -1,7 +1,7 @@
 import { Element } from '../element';
 import { method } from '../UIManager';
 
-export class Video extends Element {
+export class VideoElement extends Element {
   constructor(tagName: string) {
     super(tagName);
   }

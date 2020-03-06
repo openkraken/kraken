@@ -224,8 +224,12 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
   return requestBatchUpdate((Duration timeStamp) {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -244,8 +248,12 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setTimeout(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -265,8 +273,12 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setInterval(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -304,8 +316,12 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
   return requestAnimationFrame((double highResTimeStamp) {
-    DartRAFAsyncCallback func = callback.asFunction();
-    func(context, highResTimeStamp);
+    try {
+      DartRAFAsyncCallback func = callback.asFunction();
+      func(context, highResTimeStamp);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
