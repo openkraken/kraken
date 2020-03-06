@@ -1,7 +1,7 @@
 import { Node, NodeType, NodeId, traverseNode } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
-import { Text } from './text';
+import { TextNode } from './text';
 import { ElementRegistry } from './elementRegistry';
 
 export class Document extends Node {
@@ -21,7 +21,7 @@ export class Document extends Node {
   }
 
   createTextNode(text: string) {
-    return new Text(text);
+    return new TextNode(text);
   }
 
   /**
