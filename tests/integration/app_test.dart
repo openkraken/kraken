@@ -25,7 +25,7 @@ void main() {
   group('Test Kraken App', () {
     FlutterDriver driver;
 
-    int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+    int _countDifferentPixels(Uint8List imageA, List<int> imageB) {
       if (imageA.length != imageB.length) {
         return -1;
       }
