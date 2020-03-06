@@ -2,8 +2,7 @@ import { Node, NodeType, NodeId, traverseNode } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
 import { Text } from './text';
-import { Video } from './tags/video';
-import { Audio } from './tags/audio';
+import { ElementRegistry } from './elementRegistry';
 
 export class Document extends Node {
   public body: Element = new Element('BODY', NodeId.BODY);
@@ -17,19 +16,8 @@ export class Document extends Node {
   }
 
   createElement(tagName: string) : Element {
-    let element;
-    switch(tagName) {
-      case 'video':
-        element = new Video(tagName);
-        break;
-      case 'audio':
-        element = new Audio(tagName);
-        break;
-      default:
-        element = new Element(tagName);
-        break;
-    }
-    return element;
+    const ElementConstructor = ElementRegistry.get(tagName) || Element;
+    return new ElementConstructor(tagName);
   }
 
   createTextNode(text: string) {
