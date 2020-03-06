@@ -89,7 +89,7 @@ void main() {
           }));
 
           // Transform List<dynamic> to List<int>
-          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>();
+          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>().toList();
           await matchSnapshots(basename, snapshot);
         });
       }
