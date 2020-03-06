@@ -42,3 +42,5 @@ build/
 .project
 .classpath
 .settings
+
+macos/Flutter/
