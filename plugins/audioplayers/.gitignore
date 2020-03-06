@@ -1,0 +1,8 @@
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+android/app/
+ios/Flutter/
+ios/Runner/
+macos/Flutter/

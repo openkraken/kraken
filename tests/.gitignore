@@ -39,3 +39,5 @@ lib/generated_plugin_registrant.dart
 temp/
 *.current.png
 
+pubspec.lock
+GeneratedPluginRegistrant.swift
