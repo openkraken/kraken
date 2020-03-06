@@ -35,6 +35,6 @@ const wrapper = document.createElement('div');
 document.body.appendChild(wrapper);
 wrapper.appendChild(document.createTextNode('Click DIV 2: '));
 
-setTimeout(() => {
+requestAnimationFrame(() => {
   container2.click();
-}, 500);
+});

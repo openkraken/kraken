@@ -6,8 +6,8 @@
 #ifndef JSA_JSEXCEPTION_H_
 #define JSA_JSEXCEPTION_H_
 
-#include <js_context.h>
-#include <js_type.h>
+#include "js_context.h"
+#include "js_type.h"
 #include <cassert>
 #include <exception>
 #include <stdexcept>
@@ -81,6 +81,7 @@ private:
   std::shared_ptr<jsa::Value> value_;
   std::string message_;
   std::string stack_;
+  std::string kind_;
 };
 } // namespace jsa
 } // namespace alibaba

@@ -6,13 +6,6 @@ set(JSA_INCLUDE_DIRS)
 add_definitions(-fPIC)
 list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
 
-add_library(jsa_abstraction STATIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_context.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_error.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_type.cc
-)
-target_include_directories(jsa_abstraction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
-
 ### JSC implementations
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
@@ -89,6 +82,14 @@ if($ENV{KRAKEN_JS_ENGINE} MATCHES "v8" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
     list(APPEND JSA_LINK_LIBS v8 v8_base v8_platform v8_icui18n v8_icuuc)
   endif ()
 endif()
+
+add_library(jsa_abstraction STATIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_context.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_error.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_type.cc
+        )
+target_include_directories(jsa_abstraction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
+
 
 add_library(jsa_implementation ${JSA_IMPLEMENTATION})
 target_link_libraries(jsa_implementation PRIVATE ${JSA_LINK_LIBS})
