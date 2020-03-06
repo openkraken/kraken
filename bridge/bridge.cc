@@ -12,6 +12,7 @@
 #include "bindings/KOM/toBlob.h"
 #include "bindings/KOM/window.h"
 #include "polyfill.h"
+#include "testframework.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
@@ -346,6 +347,18 @@ alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const st
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
+}
+
+std::atomic<bool> test_inited {false};
+bool JSBridge::evaluteTestScript(const std::string &script, const std::string &url, int startLine) {
+  if (!context->isValid()) return false;
+  binding::updateLocation(url);
+  if (test_inited == false) {
+    initKrakenTestFramework(context.get());
+    test_inited = true;
+  }
+
+  return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
 }
 
 JSBridge::~JSBridge() {

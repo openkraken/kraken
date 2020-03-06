@@ -35,7 +35,11 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
+  /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
+
+  /// evaluete JavaScript source code with build-in test frameworks, use in test only.
+  bool evaluteTestScript(const std::string &script, const std::string &url, int startLine);
 
   alibaba::jsa::JSContext *getContext() const {
     return context.get();

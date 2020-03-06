@@ -41,6 +41,9 @@ void initJsEngine();
 KRAKEN_EXPORT
 void evaluateScripts(const char *code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT
+int8_t evaluteTestScripts(const char* code, const char *bundleFilename, int startLine);
+
+KRAKEN_EXPORT
 void reloadJsContext();
 KRAKEN_EXPORT
 void invokeEventListener(int32_t type, const char *json);

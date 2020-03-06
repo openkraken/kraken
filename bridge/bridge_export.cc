@@ -6,6 +6,7 @@
 #include "bridge_export.h"
 #include "bridge.h"
 #include "dart_methods.h"
+#include "jsa.h"
 
 #include <atomic>
 #include <iostream>
@@ -39,6 +40,11 @@ void initJsEngine() {
 void evaluateScripts(const char *code, const char *bundleFilename, int startLine) {
   if (!inited) return;
   bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
+}
+
+int8_t evaluteTestScripts(const char *code, const char *bundleFilename, int startLine) {
+  if (!inited) return false;
+  return bridge->evaluteTestScript(std::string(code), std::string(bundleFilename), startLine) ? 1 : 0;
 }
 
 void invokeEventListener(int32_t type, const char *data) {
