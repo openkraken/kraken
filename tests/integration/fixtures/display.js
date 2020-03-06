@@ -26,7 +26,7 @@ inlineFlexContainer.style.backgroundColor = 'purple';
 inlineFlexContainer.style.display = 'inline-flex';
 var textInlineFlex = document.createTextNode('inline-flex');
 inlineFlexContainer.appendChild(textInlineFlex);
-child1.appendChild(flexContainer);
+child1.appendChild(inlineFlexContainer);
 
 
 var inlineContainer = document.createElement('span');
