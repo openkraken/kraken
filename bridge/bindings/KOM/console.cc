@@ -5,7 +5,6 @@
 
 #include "console.h"
 #include <algorithm>
-#include <cassert>
 #include <sstream>
 
 #ifdef ENABLE_DEBUGGER
@@ -59,20 +58,17 @@ void printLog(std::stringstream &stream, std::string level) {
   }
 
 #ifdef ENABLE_DEBUGGER
-  auto client = reinterpret_cast<JSC::JSGlobalObject *>(context.globalImpl())
-                    ->consoleClient();
+  auto client = reinterpret_cast<JSC::JSGlobalObject *>(context.globalImpl())->consoleClient();
   if (client && client != ((void *)0x1)) {
-    auto client_impl =
-        reinterpret_cast<kraken::Debugger::JSCConsoleClientImpl *>(client);
+    auto client_impl = reinterpret_cast<kraken::Debugger::JSCConsoleClientImpl *>(client);
     client_impl->sendMessageToConsole(_log_level, stream.str());
   }
 #endif
 }
 
-Value print(JSContext &context, const Value &thisVal, const Value *args,
-          size_t count) {
+Value print(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   std::stringstream stream;
-  
+
   const Value &log = args[0];
   if (log.isString()) {
     stream << log.getString(context).utf8(context);
@@ -96,8 +92,7 @@ Value print(JSContext &context, const Value &thisVal, const Value *args,
 ////////////////
 
 void bindConsole(std::unique_ptr<JSContext> &context) {
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_print__", 0,
-                       print);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_print__", 0, print);
 }
 
 } // namespace binding

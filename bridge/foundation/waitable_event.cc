@@ -12,31 +12,25 @@ namespace foundation {
 // |condition()| ever returns true. |condition()| should have no side effects
 // (and will always be called with |*mutex| held).
 template <typename ConditionFn>
-bool WaitWithTimeoutImpl(std::unique_lock<std::mutex> *locker,
-                         std::condition_variable *cv, ConditionFn condition,
+bool WaitWithTimeoutImpl(std::unique_lock<std::mutex> *locker, std::condition_variable *cv, ConditionFn condition,
                          TimeDelta timeout) {
-  if (condition())
-    return false;
+  if (condition()) return false;
 
   // We may get spurious wakeups.
   TimeDelta wait_remaining = timeout;
   TimePoint start = TimePoint::Now();
   while (true) {
-    if (std::cv_status::timeout ==
-        cv->wait_for(*locker,
-                     std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
+    if (std::cv_status::timeout == cv->wait_for(*locker, std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
       return true; // Definitely timed out.
 
     // We may have been awoken.
-    if (condition())
-      return false;
+    if (condition()) return false;
 
     // Or the wakeup may have been spurious.
     TimePoint now = TimePoint::Now();
     TimeDelta elapsed = now - start;
     // It's possible that we may have timed out anyway.
-    if (elapsed >= timeout)
-      return true;
+    if (elapsed >= timeout) return true;
 
     // Otherwise, recalculate the amount that we have left to wait.
     wait_remaining = timeout - elapsed;
@@ -75,21 +69,17 @@ bool AutoResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
   TimeDelta wait_remaining = timeout;
   TimePoint start = TimePoint::Now();
   while (true) {
-    if (std::cv_status::timeout ==
-        cv_.wait_for(locker,
-                     std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
+    if (std::cv_status::timeout == cv_.wait_for(locker, std::chrono::nanoseconds(wait_remaining.ToNanoseconds())))
       return true; // Definitely timed out.
 
     // We may have been awoken.
-    if (signaled_)
-      break;
+    if (signaled_) break;
 
     // Or the wakeup may have been spurious.
     TimePoint now = TimePoint::Now();
     TimeDelta elapsed = now - start;
     // It's possible that we may have timed out anyway.
-    if (elapsed >= timeout)
-      return true;
+    if (elapsed >= timeout) return true;
 
     // Otherwise, recalculate the amount that we have left to wait.
     wait_remaining = timeout - elapsed;
@@ -121,8 +111,7 @@ void ManualResetWaitableEvent::Reset() {
 void ManualResetWaitableEvent::Wait() {
   std::unique_lock<std::mutex> locker(mutex_);
 
-  if (signaled_)
-    return;
+  if (signaled_) return;
 
   auto last_signal_id = signal_id_;
   do {
@@ -139,12 +128,12 @@ bool ManualResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
   // isn't able to figure out that |WaitWithTimeoutImpl()| calls it while
   // holding |mutex_|.
   bool rv = WaitWithTimeoutImpl(
-      &locker, &cv_,
-      [this, last_signal_id]() KRAKEN_NO_THREAD_SAFETY_ANALYSIS {
-        // Also check |signaled_| in case we're already signaled.
-        return signaled_ || signal_id_ != last_signal_id;
-      },
-      timeout);
+    &locker, &cv_,
+    [this, last_signal_id]() KRAKEN_NO_THREAD_SAFETY_ANALYSIS {
+      // Also check |signaled_| in case we're already signaled.
+      return signaled_ || signal_id_ != last_signal_id;
+    },
+    timeout);
   return rv;
 }
 

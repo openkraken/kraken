@@ -8,16 +8,15 @@
 
 #include "thread_safe_stack.h"
 
-using Task = void (*)(void*);
+using Task = void (*)(void *);
 
 namespace kraken {
 namespace foundation {
 
 void flushUITask();
-void registerUITask(Task task, void* context);
+void registerUITask(Task task, void *context);
 
-}
-}
-
+} // namespace foundation
+} // namespace kraken
 
 #endif // KRAKENBRIDGE_FLUSHUITASK_H

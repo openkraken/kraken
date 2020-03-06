@@ -1,8 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
-
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef JSA_MACROS_H_
 #define JSA_MACROS_H_
@@ -19,11 +18,11 @@
 #define JSC_UNLIKELY(EXPR) (EXPR)
 #endif
 
-#define JSC_ASSERT(x)          \
-  do {                         \
-    if (JSC_UNLIKELY(!!(x))) { \
-      abort();                 \
-    }                          \
+#define JSC_ASSERT(x)                                                                                                  \
+  do {                                                                                                                 \
+    if (JSC_UNLIKELY(!!(x))) {                                                                                         \
+      abort();                                                                                                         \
+    }                                                                                                                  \
   } while (0)
 
 #if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
@@ -43,23 +42,20 @@
 #endif
 
 // binding hostFunctionType functions into object
-#define JSA_BINDING_FUNCTION(context, obj, name, paramCount, func)                  \
-  {                                                                            \
-    auto _name = alibaba::jsa::PropNameID::forUtf8(context, name);                  \
-    obj.setProperty(context, _name,                                           \
-                     alibaba::jsa::Function::createFromHostFunction(           \
-                         context, _name, paramCount, func));                        \
+#define JSA_BINDING_FUNCTION(context, obj, name, paramCount, func)                                                     \
+  {                                                                                                                    \
+    auto _name = alibaba::jsa::PropNameID::forUtf8(context, name);                                                     \
+    obj.setProperty(context, _name, alibaba::jsa::Function::createFromHostFunction(context, _name, paramCount, func)); \
   }
 
 #define JSA_CREATE_OBJECT(context) alibaba::jsa::Object(context)
 
-#define JSA_CREATE_HOST_FUNCTION(context, name, paramCount, func)                   \
-    alibaba::jsa::Function::createFromHostFunction(context, alibaba::jsa::PropNameID::forUtf8(context, name), paramCount, func);
+#define JSA_CREATE_HOST_FUNCTION(context, name, paramCount, func)                                                      \
+  alibaba::jsa::Function::createFromHostFunction(context, alibaba::jsa::PropNameID::forUtf8(context, name),            \
+                                                 paramCount, func);
 
-#define JSA_SET_PROPERTY(context, obj, name, value) \
-    obj.setProperty(context, name, value)
+#define JSA_SET_PROPERTY(context, obj, name, value) obj.setProperty(context, name, value)
 
-#define JSA_GET_PROPERTY(context, obj, name) \
-    obj.getProperty(context, name)
+#define JSA_GET_PROPERTY(context, obj, name) obj.getProperty(context, name)
 
 #endif

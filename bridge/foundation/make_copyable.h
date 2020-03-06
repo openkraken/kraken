@@ -16,8 +16,7 @@ namespace internal {
 
 template <typename T> class CopyableLambda {
 public:
-  explicit CopyableLambda(T func)
-      : impl_(MakeRefCounted<Impl>(std::move(func))) {}
+  explicit CopyableLambda(T func) : impl_(MakeRefCounted<Impl>(std::move(func))) {}
 
   template <typename... ArgType> auto operator()(ArgType &&... args) const {
     return impl_->func_(std::forward<ArgType>(args)...);
