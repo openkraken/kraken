@@ -35,6 +35,7 @@ typedef void (*OnPlatformBrightnessChanged)();
 typedef void (*StartFlushCallbacksInUIThread)();
 typedef void (*StopFlushCallbacksInUIThread)();
 typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void* context, int32_t);
+typedef void (*OnJSError)(const char*);
 
 KRAKEN_EXPORT
 void initJsEngine();
@@ -88,5 +89,7 @@ void registerStopFlushCallbacksInUIThread(
     StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
+KRAKEN_EXPORT
+void registerOnJSError(OnJSError jsError);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -80,4 +80,8 @@ void registerToBlob(ToBlob toBlob) {
   methodPointer->toBlob = toBlob;
 }
 
+void registerOnJSError(OnJSError onJsError) {
+  methodPointer->onJsError = onJsError;
+}
+
 } // namespace kraken

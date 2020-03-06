@@ -16,6 +16,9 @@ std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
 
 void printError(const alibaba::jsa::JSError &error) {
+  if (kraken::getDartMethod()->onJsError != nullptr) {
+    kraken::getDartMethod()->onJsError(error.what());
+  }
   std::cerr << error.what() << std::endl;
 }
 
@@ -126,4 +129,8 @@ void registerStopFlushCallbacksInUIThread(
 
 void registerToBlob(ToBlob toBlob) {
   kraken::registerToBlob(toBlob);
+}
+
+void registerOnJSError(OnJSError jsError) {
+  kraken::registerOnJSError(jsError);
 }
