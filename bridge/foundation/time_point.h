@@ -34,7 +34,9 @@ public:
     return TimePoint(ticks.ToNanoseconds());
   }
 
-  TimeDelta ToEpochDelta() const { return TimeDelta::FromNanoseconds(ticks_); }
+  TimeDelta ToEpochDelta() const {
+    return TimeDelta::FromNanoseconds(ticks_);
+  }
 
   // Compute the difference between two time points.
   TimeDelta operator-(TimePoint other) const {
@@ -48,12 +50,24 @@ public:
     return TimePoint(ticks_ - duration.ToNanoseconds());
   }
 
-  bool operator==(TimePoint other) const { return ticks_ == other.ticks_; }
-  bool operator!=(TimePoint other) const { return ticks_ != other.ticks_; }
-  bool operator<(TimePoint other) const { return ticks_ < other.ticks_; }
-  bool operator<=(TimePoint other) const { return ticks_ <= other.ticks_; }
-  bool operator>(TimePoint other) const { return ticks_ > other.ticks_; }
-  bool operator>=(TimePoint other) const { return ticks_ >= other.ticks_; }
+  bool operator==(TimePoint other) const {
+    return ticks_ == other.ticks_;
+  }
+  bool operator!=(TimePoint other) const {
+    return ticks_ != other.ticks_;
+  }
+  bool operator<(TimePoint other) const {
+    return ticks_ < other.ticks_;
+  }
+  bool operator<=(TimePoint other) const {
+    return ticks_ <= other.ticks_;
+  }
+  bool operator>(TimePoint other) const {
+    return ticks_ > other.ticks_;
+  }
+  bool operator>=(TimePoint other) const {
+    return ticks_ >= other.ticks_;
+  }
 
 private:
   explicit constexpr TimePoint(int64_t ticks) : ticks_(ticks) {}

@@ -20,8 +20,7 @@ using namespace alibaba::jsa;
 #elif defined(__ANDROID__)
 #define PLATFORM "android" // Android (implies Linux, so it must come first)
 #elif defined(__linux__)
-#define PLATFORM                                                               \
-  "linux" // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#define PLATFORM "linux"                      // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
 #elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULATOR == 1

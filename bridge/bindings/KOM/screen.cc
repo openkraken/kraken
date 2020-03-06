@@ -4,9 +4,8 @@
  */
 
 #include "screen.h"
-#include "jsa.h"
-#include "logging.h"
 #include "dart_methods.h"
+#include "jsa.h"
 
 namespace kraken {
 namespace binding {

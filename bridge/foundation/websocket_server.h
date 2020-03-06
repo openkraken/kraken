@@ -21,8 +21,7 @@
 namespace kraken {
 namespace foundation {
 using OnMessageCallback = std::function<void(const std::string &message)>;
-using OnCloseCallback =
-    std::function<void(int code, const std::string &reason)>;
+using OnCloseCallback = std::function<void(int code, const std::string &reason)>;
 using OnErrorCallback = std::function<void(const std::string &error)>;
 
 class WebSocketSession {
@@ -36,8 +35,7 @@ public:
   virtual void close(int code, const std::string &reason) = 0;
 };
 
-using ConnectionCallback =
-    std::function<void(std::shared_ptr<WebSocketSession>)>;
+using ConnectionCallback = std::function<void(std::shared_ptr<WebSocketSession>)>;
 
 class WebSocketServer {
 public:
@@ -45,8 +43,7 @@ public:
 
   static std::unique_ptr<WebSocketServer> buildDefault();
   /*listen on port. can not listen multiple times.*/
-  virtual bool listen(int port,
-                      ConnectionCallback connectionCallback /*sub thread*/) = 0;
+  virtual bool listen(int port, ConnectionCallback connectionCallback /*sub thread*/) = 0;
   virtual void stopListening() = 0;
 
   /**

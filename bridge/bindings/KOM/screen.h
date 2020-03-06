@@ -14,8 +14,7 @@ namespace binding {
 
 using namespace alibaba::jsa;
 
-class JSScreen : public HostObject,
-                 public std::enable_shared_from_this<JSScreen> {
+class JSScreen : public HostObject, public std::enable_shared_from_this<JSScreen> {
 public:
   void bind(std::unique_ptr<JSContext> &context);
   void unbind(std::unique_ptr<JSContext> &context);
@@ -25,7 +24,9 @@ public:
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
-  std::shared_ptr<JSScreen> sharedSelf() { return shared_from_this(); }
+  std::shared_ptr<JSScreen> sharedSelf() {
+    return shared_from_this();
+  }
 };
 
 } // namespace binding

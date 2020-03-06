@@ -6,8 +6,8 @@
 #ifndef KRAKEN_DART_METHODS_H_
 #define KRAKEN_DART_METHODS_H_
 
-#include "thread_safe_map.h"
 #include "bridge_export.h"
+#include "thread_safe_map.h"
 #include <memory>
 
 namespace kraken {
@@ -30,6 +30,7 @@ struct DartMethodPointer {
   StartFlushCallbacksInUIThread startFlushCallbacksInUIThread{nullptr};
   StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
   ToBlob toBlob{nullptr};
+  OnJSError onJsError{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -48,6 +49,7 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 void registerToBlob(ToBlob toBlob);
+void registerOnJSError(OnJSError onJsError);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

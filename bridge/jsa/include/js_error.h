@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef JSA_JSEXCEPTION_H_
 #define JSA_JSEXCEPTION_H_
@@ -22,7 +22,9 @@ protected:
   JSAException(std::string what) : what_(std::move(what)){};
 
 public:
-  virtual const char *what() const noexcept override { return what_.c_str(); }
+  virtual const char *what() const noexcept override {
+    return what_.c_str();
+  }
 
 protected:
   std::string what_;
@@ -49,8 +51,7 @@ public:
 
   /// Creates a JSError referring to new \c Error instance capturing current
   /// JavaScript stack. The error message property is set to given \c message.
-  JSError(JSContext &context, const char *message)
-      : JSError(context, std::string(message)){};
+  JSError(JSContext &context, const char *message) : JSError(context, std::string(message)){};
 
   /// Creates a JSError referring to a JavaScript Object having message and
   /// stack properties set to provided values.
@@ -61,9 +62,13 @@ public:
   /// but necessary to avoid ambiguity with the above.
   JSError(std::string what, JSContext &context, Value &&value);
 
-  const std::string &getStack() const { return stack_; }
+  const std::string &getStack() const {
+    return stack_;
+  }
 
-  const std::string &getMessage() const { return message_; }
+  const std::string &getMessage() const {
+    return message_;
+  }
 
   const jsa::Value &value() const {
     assert(value_);

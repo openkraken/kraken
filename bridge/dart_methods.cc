@@ -9,8 +9,7 @@
 
 namespace kraken {
 
-std::shared_ptr<DartMethodPointer> methodPointer =
-    std::make_shared<DartMethodPointer>();
+std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;
@@ -78,6 +77,10 @@ void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlush
 
 void registerToBlob(ToBlob toBlob) {
   methodPointer->toBlob = toBlob;
+}
+
+void registerOnJSError(OnJSError onJsError) {
+  methodPointer->onJsError = onJsError;
 }
 
 } // namespace kraken
