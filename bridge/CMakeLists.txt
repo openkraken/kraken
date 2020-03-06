@@ -32,6 +32,7 @@ list(APPEND BRIDGE_SOURCE
     bridge.cc
     bridge.h
     polyfill/dist/polyfill.cc
+    polyfill/dist/testframework.cc
 )
 
 list(APPEND BRIDGE_INCLUDE
