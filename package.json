@@ -8,7 +8,7 @@
     "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
-    "pretest": "npm i && scripts/build_darwin_dylib",
+    "pretest": "npm i && node scripts/build_darwin_dylib",
     "test": "cd tests && npm test",
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
