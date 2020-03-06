@@ -170,9 +170,3 @@ export class Element extends Node {
     return toBlob(this.nodeId);
   }
 }
-
-Object.defineProperty(global, 'Element', {
-  enumerable: true,
-  configurable: false,
-  get: () => Element,
-});
