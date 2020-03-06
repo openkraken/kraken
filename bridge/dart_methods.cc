@@ -9,8 +9,7 @@
 
 namespace kraken {
 
-std::shared_ptr<DartMethodPointer> methodPointer =
-    std::make_shared<DartMethodPointer>();
+std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
   return methodPointer;

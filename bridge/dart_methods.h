@@ -6,8 +6,8 @@
 #ifndef KRAKEN_DART_METHODS_H_
 #define KRAKEN_DART_METHODS_H_
 
-#include "thread_safe_map.h"
 #include "bridge_export.h"
+#include "thread_safe_map.h"
 #include <memory>
 
 namespace kraken {

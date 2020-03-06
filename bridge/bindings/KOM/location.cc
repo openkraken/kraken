@@ -5,9 +5,7 @@
 
 #include "location.h"
 #include "dart_methods.h"
-#include "logging.h"
 #include "websocketpp/uri.hpp"
-#include "window.h"
 
 namespace kraken {
 namespace binding {
@@ -38,10 +36,10 @@ void updateLocation(std::string url = "") {
 Value JSLocation::get(JSContext &context, const PropNameID &name) {
   auto propertyName = name.utf8(context);
   if (propertyName == "reload") {
-    auto reloadFunc = JSA_CREATE_HOST_FUNCTION(
-        context, "reload", 4, std::bind(&JSLocation::reload, this, std::placeholders::_1,
-                                        std::placeholders::_2, std::placeholders::_3,
-                                        std::placeholders::_4));
+    auto reloadFunc =
+      JSA_CREATE_HOST_FUNCTION(context, "reload", 4,
+                               std::bind(&JSLocation::reload, this, std::placeholders::_1, std::placeholders::_2,
+                                         std::placeholders::_3, std::placeholders::_4));
     return Value(context, reloadFunc);
   } else if (propertyName == "origin") {
     return String::createFromUtf8(context, origin);
@@ -66,8 +64,7 @@ Value JSLocation::get(JSContext &context, const PropNameID &name) {
 
 void JSLocation::set(JSContext &, const PropNameID &name, const Value &value) {}
 
-Value JSLocation::reload(JSContext &context, const Value &thisVal,
-                         const Value *args, size_t count) {
+Value JSLocation::reload(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (getDartMethod()->reloadApp == nullptr) {
     throw JSError(context, "Failed to execute 'reload': dart method (reloadApp) is not registered.");
   }
@@ -81,10 +78,7 @@ void JSLocation::bind(std::unique_ptr<JSContext> &context, Object &window) {
 }
 
 void JSLocation::unbind(std::unique_ptr<JSContext> &context, Object &window) {
-  JSA_SET_PROPERTY(
-      *context, window, "location",
-      Value::undefined()
-  );
+  JSA_SET_PROPERTY(*context, window, "location", Value::undefined());
 }
 
 std::vector<PropNameID> JSLocation::getPropertyNames(JSContext &context) {

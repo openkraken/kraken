@@ -4,8 +4,8 @@
  */
 
 #include "window.h"
-#include <cassert>
 #include "dart_methods.h"
+#include <cassert>
 
 namespace kraken {
 namespace binding {
@@ -40,8 +40,7 @@ void JSWindow::invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSConte
   }
 }
 
-Value JSWindow::get(JSContext &context,
-                                  const PropNameID &name) {
+Value JSWindow::get(JSContext &context, const PropNameID &name) {
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
@@ -69,7 +68,8 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
     _onLoadCallback = Value(context, value);
   } else if (_name == "onColorSchemeChange") {
     if (getDartMethod()->onPlatformBrightnessChanged == nullptr) {
-      throw JSError(context, "Failed to set onColorSchemeChange: dart method (onPlatformBrightnessChanged) is not register.");
+      throw JSError(context,
+                    "Failed to set onColorSchemeChange: dart method (onPlatformBrightnessChanged) is not register.");
     }
     _onPlatformBrightnessChanged = Value(context, value);
     getDartMethod()->onPlatformBrightnessChanged();
@@ -79,8 +79,7 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
 void JSWindow::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
 
-  Object&& window =
-      Object::createFromHostObject(*context, sharedSelf());
+  Object &&window = Object::createFromHostObject(*context, sharedSelf());
   location_->bind(context, window);
   JSA_SET_PROPERTY(*context, context->global(), "__kraken_window__", window);
 }
