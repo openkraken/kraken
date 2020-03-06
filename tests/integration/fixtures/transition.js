@@ -18,8 +18,8 @@ setStyle(container1, {
 });
 container1.appendChild(document.createTextNode('DIV 1'));
 
-setTimeout(() => {
+requestAnimationFrame(() => {
   setStyle(container1, {
     top: 0
   });
-}, 1000);
+});
