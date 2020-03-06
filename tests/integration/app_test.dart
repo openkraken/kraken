@@ -37,8 +37,7 @@ void main() {
       return (delta / 4).floor();
     }
 
-    Future<void> matchSnapshots(String fixture) async {
-      final List<int> screenPixels = await driver.screenshot();
+    Future<void> matchSnapshots(String fixture, List<int> screenPixels) async {
       final snap = File(path.join(snapshots.path, fixture + '.png'));
       if (snap.existsSync()) {
         Uint8List snapPixels = snap.readAsBytesSync();
@@ -81,13 +80,22 @@ void main() {
         String basename = path.basename(fixture.path);
         basename = basename.substring(0, basename.length - 3);
 
-        test('screenshot-$basename}', () async {
+        test('Match Snapshot $basename', () async {
           String payload = addJavaScriptClosure(File(fixture.path).readAsStringSync());
-          await driver.requestData(jsonEncode({
+          String imageListJSON = await driver.requestData(jsonEncode({
             'type': 'startup',
+            'case': basename,
             'payload': payload,
           }));
-          await matchSnapshots(basename);
+
+          List _snapshot = jsonDecode(imageListJSON);
+          // Transform List<dynamic> to List<int>
+          List<int> snapshot = [];
+          _snapshot.forEach((e) {
+            snapshot.add(e is int ? e : int.parse(e));
+          });
+
+          await matchSnapshots(basename, snapshot);
         });
       }
     }
