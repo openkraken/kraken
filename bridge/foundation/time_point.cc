@@ -31,8 +31,7 @@ mach_timebase_info_data_t GetMachTimebaseInfo() {
 // static
 TimePoint TimePoint::Now() {
   static mach_timebase_info_data_t timebase_info = GetMachTimebaseInfo();
-  return TimePoint(mach_absolute_time() * timebase_info.numer /
-                   timebase_info.denom);
+  return TimePoint(mach_absolute_time() * timebase_info.numer / timebase_info.denom);
 }
 
 #elif defined(IS_WIN)

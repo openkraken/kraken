@@ -16,13 +16,12 @@ void updateLocation(std::string url);
 
 class JSWindow;
 
-class JSLocation : public HostObject,
-                   public std::enable_shared_from_this<JSLocation> {
+class JSLocation : public HostObject, public std::enable_shared_from_this<JSLocation> {
 public:
   JSLocation(){};
   ~JSLocation(){};
 
-  void bind(std::unique_ptr<JSContext> &context, Object& window);
+  void bind(std::unique_ptr<JSContext> &context, Object &window);
   void unbind(std::unique_ptr<JSContext> &context, Object &window);
 
   Value get(JSContext &, const PropNameID &name) override;
@@ -30,12 +29,13 @@ public:
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
-  std::shared_ptr<JSLocation> sharedSelf() { return shared_from_this(); }
-  Value reload(JSContext &context, const Value &thisVal, const Value *args,
-               size_t count);
+  std::shared_ptr<JSLocation> sharedSelf() {
+    return shared_from_this();
+  }
+  Value reload(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 };
 
-}
-}
+} // namespace binding
+} // namespace kraken
 
 #endif // KRAKENBRIDGE_LOCATION_H

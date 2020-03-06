@@ -13,10 +13,9 @@ namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
-class JSWindow : public HostObject,
-                 public std::enable_shared_from_this<JSWindow> {
+class JSWindow : public HostObject, public std::enable_shared_from_this<JSWindow> {
 public:
-  JSWindow(){
+  JSWindow() {
     location_ = std::make_shared<kraken::binding::JSLocation>();
   };
 
@@ -37,7 +36,9 @@ public:
   void invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSContext> &context);
 
 private:
-  std::shared_ptr<JSWindow> sharedSelf() { return shared_from_this(); }
+  std::shared_ptr<JSWindow> sharedSelf() {
+    return shared_from_this();
+  }
   Value _onLoadCallback;
   Value _onPlatformBrightnessChanged;
   int _devicePixelRatio = 1;

@@ -23,61 +23,44 @@
 
 #define KRAKEN_GUARDED_BY(x) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
 
-#define KRAKEN_PT_GUARDED_BY(x)                                                \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
+#define KRAKEN_PT_GUARDED_BY(x) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
 
-#define KRAKEN_ACQUIRE(...)                                                    \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
+#define KRAKEN_ACQUIRE(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
 
-#define KRAKEN_RELEASE(...)                                                    \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
+#define KRAKEN_RELEASE(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
 
-#define KRAKEN_ACQUIRED_AFTER(...)                                             \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
+#define KRAKEN_ACQUIRED_AFTER(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
 
-#define KRAKEN_ACQUIRED_BEFORE(...)                                            \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
+#define KRAKEN_ACQUIRED_BEFORE(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
 
-#define KRAKEN_EXCLUSIVE_LOCKS_REQUIRED(...)                                   \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(exclusive_locks_required(__VA_ARGS__))
+#define KRAKEN_EXCLUSIVE_LOCKS_REQUIRED(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(exclusive_locks_required(__VA_ARGS__))
 
-#define KRAKEN_SHARED_LOCKS_REQUIRED(...)                                      \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_locks_required(__VA_ARGS__))
+#define KRAKEN_SHARED_LOCKS_REQUIRED(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_locks_required(__VA_ARGS__))
 
-#define KRAKEN_LOCKS_EXCLUDED(...)                                             \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
+#define KRAKEN_LOCKS_EXCLUDED(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
 
-#define KRAKEN_LOCK_RETURNED(x)                                                \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(lock_returned(x))
+#define KRAKEN_LOCK_RETURNED(x) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(lock_returned(x))
 
 #define KRAKEN_LOCKABLE KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(lockable)
 
-#define KRAKEN_SCOPED_LOCKABLE                                                 \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(scoped_lockable)
+#define KRAKEN_SCOPED_LOCKABLE KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(scoped_lockable)
 
-#define KRAKEN_EXCLUSIVE_LOCK_FUNCTION(...)                                    \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(exclusive_lock_function(__VA_ARGS__))
+#define KRAKEN_EXCLUSIVE_LOCK_FUNCTION(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(exclusive_lock_function(__VA_ARGS__))
 
-#define KRAKEN_SHARED_LOCK_FUNCTION(...)                                       \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_lock_function(__VA_ARGS__))
+#define KRAKEN_SHARED_LOCK_FUNCTION(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_lock_function(__VA_ARGS__))
 
-#define KRAKEN_ASSERT_EXCLUSIVE_LOCK(...)                                      \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(assert_exclusive_lock(__VA_ARGS__))
+#define KRAKEN_ASSERT_EXCLUSIVE_LOCK(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(assert_exclusive_lock(__VA_ARGS__))
 
-#define KRAKEN_ASSERT_SHARED_LOCK(...)                                         \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_lock(__VA_ARGS__))
+#define KRAKEN_ASSERT_SHARED_LOCK(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_lock(__VA_ARGS__))
 
-#define KRAKEN_EXCLUSIVE_TRYLOCK_FUNCTION(...)                                 \
+#define KRAKEN_EXCLUSIVE_TRYLOCK_FUNCTION(...)                                                                         \
   KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(exclusive_trylock_function(__VA_ARGS__))
 
-#define KRAKEN_SHARED_TRYLOCK_FUNCTION(...)                                    \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_trylock_function(__VA_ARGS__))
+#define KRAKEN_SHARED_TRYLOCK_FUNCTION(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(shared_trylock_function(__VA_ARGS__))
 
-#define KRAKEN_UNLOCK_FUNCTION(...)                                            \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(unlock_function(__VA_ARGS__))
+#define KRAKEN_UNLOCK_FUNCTION(...) KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(unlock_function(__VA_ARGS__))
 
-#define KRAKEN_NO_THREAD_SAFETY_ANALYSIS                                       \
-  KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
+#define KRAKEN_NO_THREAD_SAFETY_ANALYSIS KRAKEN_THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
 // Use this in the header to annotate a function/method as not being
 // thread-safe. This is equivalent to |KRAKEN_NO_THREAD_SAFETY_ANALYSIS|, but

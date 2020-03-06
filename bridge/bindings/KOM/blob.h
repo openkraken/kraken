@@ -46,31 +46,26 @@ public:
 
   JSBlob(std::vector<uint8_t> &&data) : size(data.size()), _data(std::move(data)) {}
 
-  JSBlob(std::vector<uint8_t> &&data, std::string &mime)
-      : mimeType(mime), size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &&data, std::string &mime) : mimeType(mime), size(data.size()), _data(std::move(data)) {}
 
-  JSBlob(std::vector<uint8_t> &data, std::string &mime)
-      : mimeType(mime), size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &data, std::string &mime) : mimeType(mime), size(data.size()), _data(std::move(data)) {}
 
   Value get(JSContext &, const PropNameID &name) override;
 
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 
   /// the new Blob constructor, return Blob instance.
-  static Value constructor(JSContext &context, const Value &thisVal,
-                           const Value *args, size_t count);
+  static Value constructor(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 
   /// Returns a new Blob object containing the data in the specified range of
   /// bytes of the blob on which it's called.
-  static Value slice(JSContext &context, const Value &thisVal,
-                     const Value *args, size_t count);
+  static Value slice(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 
-  /// Returns a promise that resolves with a USVString containing the entire contents of the blob interpreted as UTF-8 text.
-  static Value text(JSContext &context, const Value &thisVal,
-                    const Value *args, size_t count);
+  /// Returns a promise that resolves with a USVString containing the entire contents of the blob interpreted as UTF-8
+  /// text.
+  static Value text(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 
-  static Value arrayBuffer(JSContext &context, const Value &thisVal,
-                           const Value *args, size_t count);
+  static Value arrayBuffer(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
@@ -81,7 +76,7 @@ private:
   std::vector<uint8_t> _data;
 };
 
-} // namespace bindings
+} // namespace binding
 } // namespace kraken
 
 #endif // KRAKENBRIDGE_BLOB_H

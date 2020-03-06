@@ -14,7 +14,9 @@ class TimeDelta {
 public:
   constexpr TimeDelta() = default;
 
-  static constexpr TimeDelta Zero() { return TimeDelta(); }
+  static constexpr TimeDelta Zero() {
+    return TimeDelta();
+  }
   static constexpr TimeDelta Min() {
     return TimeDelta(std::numeric_limits<int64_t>::min());
   }
@@ -38,13 +40,25 @@ public:
     return FromNanoseconds(seconds * (1000.0 * 1000.0 * 1000.0));
   }
 
-  constexpr int64_t ToNanoseconds() const { return delta_; }
-  constexpr int64_t ToMicroseconds() const { return ToNanoseconds() / 1000; }
-  constexpr int64_t ToMilliseconds() const { return ToMicroseconds() / 1000; }
-  constexpr int64_t ToSeconds() const { return ToMilliseconds() / 1000; }
+  constexpr int64_t ToNanoseconds() const {
+    return delta_;
+  }
+  constexpr int64_t ToMicroseconds() const {
+    return ToNanoseconds() / 1000;
+  }
+  constexpr int64_t ToMilliseconds() const {
+    return ToMicroseconds() / 1000;
+  }
+  constexpr int64_t ToSeconds() const {
+    return ToMilliseconds() / 1000;
+  }
 
-  constexpr double ToNanosecondsF() const { return delta_; }
-  constexpr double ToMicrosecondsF() const { return delta_ / 1000.0; }
+  constexpr double ToNanosecondsF() const {
+    return delta_;
+  }
+  constexpr double ToMicrosecondsF() const {
+    return delta_ / 1000.0;
+  }
   constexpr double ToMillisecondsF() const {
     return delta_ / (1000.0 * 1000.0);
   }
@@ -76,16 +90,27 @@ public:
     return TimeDelta::FromNanoseconds(delta_ % other.delta_);
   }
 
-  bool operator==(TimeDelta other) const { return delta_ == other.delta_; }
-  bool operator!=(TimeDelta other) const { return delta_ != other.delta_; }
-  bool operator<(TimeDelta other) const { return delta_ < other.delta_; }
-  bool operator<=(TimeDelta other) const { return delta_ <= other.delta_; }
-  bool operator>(TimeDelta other) const { return delta_ > other.delta_; }
-  bool operator>=(TimeDelta other) const { return delta_ >= other.delta_; }
+  bool operator==(TimeDelta other) const {
+    return delta_ == other.delta_;
+  }
+  bool operator!=(TimeDelta other) const {
+    return delta_ != other.delta_;
+  }
+  bool operator<(TimeDelta other) const {
+    return delta_ < other.delta_;
+  }
+  bool operator<=(TimeDelta other) const {
+    return delta_ <= other.delta_;
+  }
+  bool operator>(TimeDelta other) const {
+    return delta_ > other.delta_;
+  }
+  bool operator>=(TimeDelta other) const {
+    return delta_ >= other.delta_;
+  }
 
   static constexpr TimeDelta FromTimespec(struct timespec ts) {
-    return TimeDelta::FromSeconds(ts.tv_sec) +
-           TimeDelta::FromNanoseconds(ts.tv_nsec);
+    return TimeDelta::FromSeconds(ts.tv_sec) + TimeDelta::FromNanoseconds(ts.tv_nsec);
   }
   struct timespec ToTimespec() {
     struct timespec ts;

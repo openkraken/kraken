@@ -1,6 +1,7 @@
-//
-// Created by rowandjj on 2019/3/21.
-//
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "websocket_client.h"
 #include "logging.h"
@@ -23,13 +24,11 @@ public:
 
   connection_metadata(int id, websocketpp::connection_hdl hdl, std::string uri,
                       std::shared_ptr<WebSocketCallback> callback)
-      : m_id(id), m_hdl(hdl), m_status("Connecting"), m_uri(uri),
-        m_server("N/A"), m_callback(callback) {}
+    : m_id(id), m_hdl(hdl), m_status("Connecting"), m_uri(uri), m_server("N/A"), m_callback(callback) {}
 
   void on_open(client *c, websocketpp::connection_hdl hdl) {
     if (strcmp(m_status.c_str(), "Destroyed") == 0) {
-      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id
-                          << " destroyed...";
+      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id << " destroyed...";
       return;
     }
     m_status = "Open";
@@ -43,8 +42,7 @@ public:
 
   void on_fail(client *c, websocketpp::connection_hdl hdl) {
     if (strcmp(m_status.c_str(), "Destroyed") == 0) {
-      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id
-                          << " destroyed...";
+      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id << " destroyed...";
       return;
     }
     m_status = "Failed";
@@ -59,8 +57,7 @@ public:
 
   void on_close(client *c, websocketpp::connection_hdl hdl) {
     if (strcmp(m_status.c_str(), "Destroyed") == 0) {
-      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id
-                          << " destroyed...";
+      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id << " destroyed...";
       return;
     }
     m_status = "Closed";
@@ -72,15 +69,13 @@ public:
     m_error_reason = s.str();
 
     if (m_callback != nullptr) {
-      m_callback->onClose(con->get_remote_close_code(),
-                          con->get_remote_close_reason());
+      m_callback->onClose(con->get_remote_close_code(), con->get_remote_close_reason());
     }
   }
 
   void on_message(websocketpp::connection_hdl, client::message_ptr msg) {
     if (strcmp(m_status.c_str(), "Destroyed") == 0) {
-      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id
-                          << " destroyed...";
+      KRAKEN_LOG(VERBOSE) << "[websocket] connection " << m_id << " destroyed...";
       return;
     }
     if (msg->get_opcode() == websocketpp::frame::opcode::text) {
@@ -92,19 +87,26 @@ public:
 #endif
     } else {
 #ifdef NDEBUG
-      m_messages.push_back("<< " +
-                           websocketpp::utility::to_hex(msg->get_payload()));
+      m_messages.push_back("<< " + websocketpp::utility::to_hex(msg->get_payload()));
 #endif
     }
   }
 
-  websocketpp::connection_hdl get_hdl() const { return m_hdl; }
+  websocketpp::connection_hdl get_hdl() const {
+    return m_hdl;
+  }
 
-  int get_id() const { return m_id; }
+  int get_id() const {
+    return m_id;
+  }
 
-  std::string get_status() const { return m_status; }
+  std::string get_status() const {
+    return m_status;
+  }
 
-  void set_status(const std::string &status) { this->m_status = status; }
+  void set_status(const std::string &status) {
+    this->m_status = status;
+  }
 
   void record_sent_message(std::string message) {
 #ifdef NDEBUG
@@ -134,8 +136,7 @@ public:
     m_endpoint.init_asio();
     m_endpoint.start_perpetual();
 
-    m_thread = websocketpp::lib::make_shared<websocketpp::lib::thread>(
-        &client::run, &m_endpoint);
+    m_thread = websocketpp::lib::make_shared<websocketpp::lib::thread>(&client::run, &m_endpoint);
   }
 
   ~WebSocketClientImpl() {
@@ -144,8 +145,7 @@ public:
     m_thread->join();
   }
 
-  int connect(const std::string &url,
-              std::shared_ptr<WebSocketCallback> callback) override;
+  int connect(const std::string &url, std::shared_ptr<WebSocketCallback> callback) override;
 
   void send(int token, const std::string &message) override;
 
@@ -176,35 +176,29 @@ std::unique_ptr<WebSocketClient> WebSocketClient::buildDefault() {
   return std::make_unique<WebSocketClientImpl>();
 }
 
-int WebSocketClientImpl::connect(const std::string &url,
-                                 std::shared_ptr<WebSocketCallback> callback) {
+int WebSocketClientImpl::connect(const std::string &url, std::shared_ptr<WebSocketCallback> callback) {
   websocketpp::lib::error_code ec;
   client::connection_ptr con = m_endpoint.get_connection(url, ec);
   if (ec) {
-    KRAKEN_LOG(ERROR) << "[websocket] Connect initialization error: "
-                      << ec.message();
+    KRAKEN_LOG(ERROR) << "[websocket] Connect initialization error: " << ec.message();
     if (callback != nullptr) {
       callback->onError(ec.message());
     }
     return -1;
   }
   int new_id = m_next_id++;
-  auto metadata_ptr = websocketpp::lib::make_shared<connection_metadata>(
-      new_id, con->get_handle(), url, callback);
+  auto metadata_ptr = websocketpp::lib::make_shared<connection_metadata>(new_id, con->get_handle(), url, callback);
   m_connection_list[new_id] = metadata_ptr;
 
-  con->set_open_handler(
-      websocketpp::lib::bind(&connection_metadata::on_open, metadata_ptr,
-                             &m_endpoint, websocketpp::lib::placeholders::_1));
-  con->set_fail_handler(
-      websocketpp::lib::bind(&connection_metadata::on_fail, metadata_ptr,
-                             &m_endpoint, websocketpp::lib::placeholders::_1));
-  con->set_close_handler(
-      websocketpp::lib::bind(&connection_metadata::on_close, metadata_ptr,
-                             &m_endpoint, websocketpp::lib::placeholders::_1));
-  con->set_message_handler(websocketpp::lib::bind(
-      &connection_metadata::on_message, metadata_ptr,
-      websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+  con->set_open_handler(websocketpp::lib::bind(&connection_metadata::on_open, metadata_ptr, &m_endpoint,
+                                               websocketpp::lib::placeholders::_1));
+  con->set_fail_handler(websocketpp::lib::bind(&connection_metadata::on_fail, metadata_ptr, &m_endpoint,
+                                               websocketpp::lib::placeholders::_1));
+  con->set_close_handler(websocketpp::lib::bind(&connection_metadata::on_close, metadata_ptr, &m_endpoint,
+                                                websocketpp::lib::placeholders::_1));
+  con->set_message_handler(websocketpp::lib::bind(&connection_metadata::on_message, metadata_ptr,
+                                                  websocketpp::lib::placeholders::_1,
+                                                  websocketpp::lib::placeholders::_2));
 
   m_endpoint.connect(con);
   return new_id;
@@ -219,8 +213,7 @@ void WebSocketClientImpl::send(int token, const std::string &message) {
     return;
   }
 
-  m_endpoint.send(metadata_it->second->get_hdl(), message,
-                  websocketpp::frame::opcode::text, ec);
+  m_endpoint.send(metadata_it->second->get_hdl(), message, websocketpp::frame::opcode::text, ec);
   if (ec) {
     KRAKEN_LOG(ERROR) << "[websocket] Error sending message: " << ec.message();
     return;
@@ -229,15 +222,12 @@ void WebSocketClientImpl::send(int token, const std::string &message) {
   metadata_it->second->record_sent_message(message);
 }
 
-void WebSocketClientImpl::close(int token, int code,
-                                const std::string &reason) {
+void WebSocketClientImpl::close(int token, int code, const std::string &reason) {
   websocketpp::lib::error_code ec;
 
-  bool invalid_code =
-      websocketpp::close::status::invalid(static_cast<uint16_t>(code));
+  bool invalid_code = websocketpp::close::status::invalid(static_cast<uint16_t>(code));
   if (invalid_code) {
-    KRAKEN_LOG(VERBOSE)
-        << "[websocket] close code invalid. reset to 1000 : token " << token;
+    KRAKEN_LOG(VERBOSE) << "[websocket] close code invalid. reset to 1000 : token " << token;
     code = websocketpp::close::status::normal;
   }
 
@@ -247,32 +237,26 @@ void WebSocketClientImpl::close(int token, int code,
     return;
   }
 
-  m_endpoint.close(metadata_it->second->get_hdl(), static_cast<uint16_t>(code),
-                   reason, ec);
+  m_endpoint.close(metadata_it->second->get_hdl(), static_cast<uint16_t>(code), reason, ec);
   if (ec) {
-    KRAKEN_LOG(VERBOSE) << "[websocket] Error initiating close: "
-                        << ec.message();
+    KRAKEN_LOG(VERBOSE) << "[websocket] Error initiating close: " << ec.message();
   }
 }
 
 void WebSocketClientImpl::_perform_destroy() {
   // 关闭所有活跃连接
-  for (auto it = m_connection_list.begin(); it != m_connection_list.end();
-       ++it) {
+  for (auto it = m_connection_list.begin(); it != m_connection_list.end(); ++it) {
     if (it->second->get_status() != "Open") {
       // Only close open connections
       continue;
     }
 
-    KRAKEN_LOG(VERBOSE) << "[websocket] Closing connection "
-                        << it->second->get_id();
+    KRAKEN_LOG(VERBOSE) << "[websocket] Closing connection " << it->second->get_id();
     it->second->set_status("Destroyed");
     websocketpp::lib::error_code ec;
-    m_endpoint.close(it->second->get_hdl(),
-                     websocketpp::close::status::going_away, "", ec);
+    m_endpoint.close(it->second->get_hdl(), websocketpp::close::status::going_away, "", ec);
     if (ec) {
-      KRAKEN_LOG(VERBOSE) << "[websocket] Error closing connection "
-                          << it->second->get_id() << ": " << ec.message();
+      KRAKEN_LOG(VERBOSE) << "[websocket] Error closing connection " << it->second->get_id() << ": " << ec.message();
     }
   }
 }

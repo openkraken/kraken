@@ -7,40 +7,39 @@
 #define KRAKEN_BRIDGE_EXPORT_H
 
 #include <cstdint>
-#define KRAKEN_EXPORT                                                          \
-  extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 struct Screen {
   double width;
   double height;
 };
-using AsyncCallback = void (*)(void*);
-using AsyncRAFCallback = void (*)(void*, double);
+using AsyncCallback = void (*)(void *);
+using AsyncRAFCallback = void (*)(void *, double);
 using AsyncModuleCallback = void (*)(char *, void *);
-using AsyncBlobCallback = void (*)(void*, const char*, uint8_t*, int32_t);
-typedef const char *(*InvokeUIManager)(const char*);
-typedef const char *(*InvokeModule)(const char*, AsyncModuleCallback callback, void* context);
-typedef void (*RequestBatchUpdate)(AsyncCallback callback, void* context);
+using AsyncBlobCallback = void (*)(void *, const char *, uint8_t *, int32_t);
+typedef const char *(*InvokeUIManager)(const char *);
+typedef const char *(*InvokeModule)(const char *, AsyncModuleCallback callback, void *context);
+typedef void (*RequestBatchUpdate)(AsyncCallback callback, void *context);
 typedef void (*ReloadApp)();
-typedef int32_t (*SetTimeout)(AsyncCallback callback, void* context, int32_t);
-typedef int32_t (*SetInterval)(AsyncCallback callback, void* context, int32_t);
-typedef int32_t (*RequestAnimationFrame)(AsyncRAFCallback callback, void* context);
+typedef int32_t (*SetTimeout)(AsyncCallback callback, void *context, int32_t);
+typedef int32_t (*SetInterval)(AsyncCallback callback, void *context, int32_t);
+typedef int32_t (*RequestAnimationFrame)(AsyncRAFCallback callback, void *context);
 typedef void (*ClearTimeout)(int32_t);
 typedef void (*CancelAnimationFrame)(int32_t);
 typedef Screen *(*GetScreen)();
-typedef void (*InvokeFetch)(int32_t, const char*, const char*);
+typedef void (*InvokeFetch)(int32_t, const char *, const char *);
 typedef double (*DevicePixelRatio)();
 typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
 typedef void (*StartFlushCallbacksInUIThread)();
 typedef void (*StopFlushCallbacksInUIThread)();
-typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void* context, int32_t);
+typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t);
+typedef void (*OnJSError)(const char *);
 
 KRAKEN_EXPORT
 void initJsEngine();
 KRAKEN_EXPORT
-void evaluateScripts(const char *code, const char *bundleFilename,
-                     int startLine);
+void evaluateScripts(const char *code, const char *bundleFilename, int startLine);
 KRAKEN_EXPORT
 void reloadJsContext();
 KRAKEN_EXPORT
@@ -81,12 +80,12 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
-void registerStartFlushCallbacksInUIThread(
-    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread);
+void registerStartFlushCallbacksInUIThread(StartFlushCallbacksInUIThread startFlushCallbacksInUIThread);
 KRAKEN_EXPORT
-void registerStopFlushCallbacksInUIThread(
-    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
+void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
+KRAKEN_EXPORT
+void registerOnJSError(OnJSError jsError);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

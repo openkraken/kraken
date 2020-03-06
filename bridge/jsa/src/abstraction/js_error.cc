@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "js_error.h"
 #include "js_type.h"
@@ -19,8 +19,8 @@ std::string reformatStack(std::string const &&stack) {
 
   formatted += prefix;
   bool hasName = false;
-  
-  for (size_t i = 0; i < stack.length(); i ++) {
+
+  for (size_t i = 0; i < stack.length(); i++) {
     if (stack[i] == '@') {
       formatted += " (";
       hasName = true;
@@ -50,21 +50,22 @@ std::string reformatStack(std::string const &&stack) {
   return formatted;
 }
 #endif
-}
+} // namespace
 
-JSError::JSError(JSContext &context, Value &&value) { setValue(context, std::move(value)); }
+JSError::JSError(JSContext &context, Value &&value) {
+  setValue(context, std::move(value));
+}
 
 JSError::JSError(JSContext &context, std::string msg) : message_(std::move(msg)) {
   try {
-    setValue(context,
-             context.global().getPropertyAsFunction(context, "Error").call(context, message_));
+    setValue(context, context.global().getPropertyAsFunction(context, "Error").call(context, message_));
   } catch (...) {
     setValue(context, Value());
   }
 }
 
 JSError::JSError(JSContext &context, std::string msg, std::string stack)
-    : message_(std::move(msg)), stack_(std::move(stack)) {
+  : message_(std::move(msg)), stack_(std::move(stack)) {
   try {
     Object e(context);
     e.setProperty(context, "message", String::createFromUtf8(context, message_));
@@ -75,8 +76,7 @@ JSError::JSError(JSContext &context, std::string msg, std::string stack)
   }
 }
 
-JSError::JSError(std::string what, JSContext &context, Value &&value)
-    : JSAException(std::move(what)) {
+JSError::JSError(std::string what, JSContext &context, Value &&value) : JSAException(std::move(what)) {
   setValue(context, std::move(value));
 }
 
