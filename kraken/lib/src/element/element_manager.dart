@@ -29,10 +29,7 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
     case ANIMATION:
       return AnimationElement(id, props, events);
     case VIDEO:
-      {
-        VideoElement.setDefaultPropsStyle(props);
-        return VideoElement(id, props, events);
-      }
+      return VideoElement(id, props, events);
     case IFRAME:
       return IFrameElement(id, props, events);
     case AUDIO:

@@ -97,6 +97,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration textInputConfiguration;
 
+  static const String DEFAULT_WIDTH = '150px';
+
+  @override
+  void setDefaultProps(Map<String, dynamic> props) {
+    if (props['style'] == null) {
+      props['style'] = Map<String, dynamic>();
+    }
+
+    if (props['style']['width'] == null) {
+      props['style']['width'] = DEFAULT_WIDTH;
+    }
+  }
+
   InputElement(
     int nodeId,
     Map<String, dynamic> properties,
@@ -105,7 +118,14 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(nodeId: nodeId, tagName: INPUT, defaultDisplay: 'inline', properties: properties, events: events) {
+  }) : super(
+    nodeId: nodeId,
+    tagName: INPUT,
+    defaultDisplay: 'inline-block',
+    isContainer: false,
+    properties: properties,
+    events: events
+  ) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,

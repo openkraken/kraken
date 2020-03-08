@@ -13,56 +13,6 @@ const String VIDEO = 'VIDEO';
 
 class VideoParentData extends ContainerBoxParentData<RenderBox> {}
 
-class RenderVideoBox extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, VideoParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, VideoParentData> {
-  RenderVideoBox({
-    this.child,
-    BoxConstraints additionalConstraints,
-  }) : assert(child != null) {
-    _additionalConstraints = additionalConstraints;
-    add(child);
-  }
-
-  RenderBox child;
-
-  // Additional constraints to apply to [child] during layout
-  BoxConstraints get additionalConstraints => _additionalConstraints;
-  BoxConstraints _additionalConstraints;
-  set additionalConstraints(BoxConstraints value) {
-    assert(value != null);
-    if (_additionalConstraints == value)
-      return;
-    _additionalConstraints = value;
-    markNeedsLayout();
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! VideoParentData) {
-      child.parentData = VideoParentData();
-    }
-  }
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      child.layout(_additionalConstraints, parentUsesSize: true);
-      size = child.size;
-    } else {
-      performResize();
-    }
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      context.paintChild(child, offset);
-    }
-  }
-}
-
 List<VideoPlayerController> videoControllers = [];
 
 // dispose all video player when Dart VM is going to shutdown
@@ -99,7 +49,8 @@ class VideoElement extends Element {
   static const String DEFAULT_WIDTH = '300px';
   static const String DEFAULT_HEIGHT = '150px';
 
-  static void setDefaultPropsStyle(Map<String, dynamic> props) {
+  @override
+  void setDefaultProps(Map<String, dynamic> props) {
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
     }
@@ -117,6 +68,7 @@ class VideoElement extends Element {
       : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
+          isContainer: false,
           tagName: VIDEO,
           properties: props,
           events: events,
@@ -125,7 +77,7 @@ class VideoElement extends Element {
   int nodeId;
   Map<String, dynamic> props;
   List<String> events;
-  RenderVideoBox renderVideoBox;
+  // RenderVideoBox renderVideoBox;
 
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();
@@ -170,18 +122,7 @@ class VideoElement extends Element {
 
     TextureBox box = TextureBox(textureId: textureId);
 
-    // @TODO get video's original dimension if width or height not specified as web
-    BoxConstraints additionalConstraints = BoxConstraints(
-      minWidth: 0,
-      maxWidth: getDisplayPortedLength(style['width']),
-      minHeight: 0,
-      maxHeight: getDisplayPortedLength(style['height']),
-    );
-    renderVideoBox = RenderVideoBox(
-      additionalConstraints: additionalConstraints,
-      child: box,
-    );
-    addChild(renderVideoBox);
+    addChild(box);
 
     if (props['autoplay'].toString() == 'true') {
       controller.play();
@@ -195,7 +136,7 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    renderLayoutElement.removeAll();
+    renderPadding.child = null;
   }
 
   Future<Map<String, dynamic>> getVideoDetail() async {
@@ -204,8 +145,8 @@ class VideoElement extends Element {
       var value = controller.value;
       var duration = value.duration;
 
-      if (renderLayoutElement.firstChild != null) {
-        Size size = (renderLayoutElement.firstChild as RenderBox).size;
+      if (renderPadding.child != null) {
+        Size size = (renderPadding as RenderBox).size;
         detailCompleter.complete({
           'videoWidth': size.width,
           'videoHeight': size.height,
