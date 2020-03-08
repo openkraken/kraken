@@ -146,7 +146,7 @@ class VideoElement extends Element {
       var duration = value.duration;
 
       if (renderPadding.child != null) {
-        Size size = (renderPadding as RenderBox).size;
+        Size size = renderPadding.size;
         detailCompleter.complete({
           'videoWidth': size.width,
           'videoHeight': size.height,
