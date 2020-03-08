@@ -1,6 +1,7 @@
-//
-// Created by rowandjj on 2019/3/21.
-//
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKEN_FOUNDATION_WEBSOCKET_CLIENT_H
 #define KRAKEN_FOUNDATION_WEBSOCKET_CLIENT_H
@@ -30,8 +31,7 @@ public:
    * @param callback 回调
    * @return token
    * */
-  virtual int connect(const std::string &url,
-                      std::shared_ptr<WebSocketCallback> callback) = 0;
+  virtual int connect(const std::string &url, std::shared_ptr<WebSocketCallback> callback) = 0;
   virtual void send(int token, const std::string &message) = 0;
   virtual void close(int token, int code, const std::string &reason) = 0;
 };

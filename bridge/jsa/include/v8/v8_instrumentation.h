@@ -26,11 +26,9 @@ public:
 
   bool createSnapshotToStream(std::ostream &os, bool compact) override;
 
-  void
-  writeBridgeTrafficTraceToFile(const std::string &fileName) const override;
+  void writeBridgeTrafficTraceToFile(const std::string &fileName) const override;
 
-  void
-  writeBasicBlockProfileTraceToFile(const std::string &fileName) const override;
+  void writeBasicBlockProfileTraceToFile(const std::string &fileName) const override;
 
   void dumpProfilerSymbolsToFile(const std::string &fileName) const override;
 

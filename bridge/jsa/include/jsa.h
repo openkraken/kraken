@@ -6,10 +6,10 @@
 #ifndef JSA_JSA_H_
 #define JSA_JSA_H_
 
+#include "instrumentation.h"
 #include "js_context.h"
 #include "js_error.h"
 #include "js_type.h"
-#include "instrumentation.h"
 #include "macros.h"
 
 #ifdef KRAKEN_JSC_ENGINE

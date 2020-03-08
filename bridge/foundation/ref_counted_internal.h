@@ -18,7 +18,9 @@ namespace internal {
 // See ref_counted.h for comments on the public methods.
 class RefCountedThreadSafeBase {
 public:
-  void AddRef() const { ref_count_.fetch_add(1u, std::memory_order_relaxed); }
+  void AddRef() const {
+    ref_count_.fetch_add(1u, std::memory_order_relaxed);
+  }
 
   bool HasOneRef() const {
     return ref_count_.load(std::memory_order_acquire) == 1u;
@@ -55,7 +57,9 @@ protected:
   }
 
 #ifndef NDEBUG
-  void Adopt() { adoption_required_ = false; }
+  void Adopt() {
+    adoption_required_ = false;
+  }
 #endif
 
 private:
@@ -70,10 +74,10 @@ private:
 };
 
 inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
-    : ref_count_(1u)
+  : ref_count_(1u)
 #ifndef NDEBUG
-      ,
-      adoption_required_(true), destruction_started_(false)
+    ,
+    adoption_required_(true), destruction_started_(false)
 #endif
 {
 }

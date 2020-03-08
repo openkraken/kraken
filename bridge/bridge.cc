@@ -4,13 +4,13 @@
  */
 
 #include "bridge.h"
+#include "bindings/KOM/blob.h"
 #include "bindings/KOM/console.h"
 #include "bindings/KOM/location.h"
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/timer.h"
-#include "bindings/KOM/window.h"
-#include "bindings/KOM/blob.h"
 #include "bindings/KOM/toBlob.h"
+#include "bindings/KOM/window.h"
 #include "polyfill.h"
 
 #include "dart_methods.h"
@@ -38,8 +38,7 @@ ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
  * @param count
  * @return JSValue
  */
-Value krakenUIManager(JSContext &context, const Value &thisVal,
-                     const Value *args, size_t count) {
+Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count < 1) {
     throw JSError(context, "Failed to execute '__kraken_ui_manager__': 1 argument required, but only 0 present.");
   }
@@ -47,13 +46,13 @@ Value krakenUIManager(JSContext &context, const Value &thisVal,
   auto &&message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
 
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[krakenUIManager]: " << messageStr << std::endl;
   }
 
   if (getDartMethod()->invokeUIManager == nullptr) {
-    throw JSError(context, "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
+    throw JSError(context,
+                  "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
   const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
@@ -65,20 +64,16 @@ Value krakenUIManager(JSContext &context, const Value &thisVal,
 
 struct CallbackContext {
   CallbackContext(JSContext &context, std::shared_ptr<Value> callback)
-      : _context(context), _callback(std::move(callback)){};
+    : _context(context), _callback(std::move(callback)){};
 
   JSContext &_context;
   std::shared_ptr<Value> _callback;
 };
 
-
-
-
 void handleInvokeModuleTransientCallback(char *json, void *data) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
-  if (!_context.isValid())
-    return;
+  if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_invoke_module__': callback is null.");
@@ -92,33 +87,30 @@ void handleInvokeModuleTransientCallback(char *json, void *data) {
   delete obj;
 }
 
-
-Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
-                 size_t count) {
+Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
 
   const Value &message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
 
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeModule]: " << messageStr << std::endl;
   }
 
   if (getDartMethod()->invokeModule == nullptr) {
-    throw JSError(context, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+    throw JSError(context,
+                  "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
   }
 
   CallbackContext *callbackContext = nullptr;
 
   if (count == 2) {
-    std::shared_ptr<Value> callbackValue =
-      std::make_shared<Value>(Value(context, args[1].getObject(context)));
+    std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
     callbackContext = new CallbackContext(context, callbackValue);
   }
 
-  const char *result = getDartMethod()->invokeModule(messageStr.c_str(),
-      handleInvokeModuleTransientCallback, static_cast<void *>(callbackContext));
+  const char *result = getDartMethod()->invokeModule(messageStr.c_str(), handleInvokeModuleTransientCallback,
+                                                     static_cast<void *>(callbackContext));
 
   if (result == nullptr) {
     return Value::null();
@@ -134,8 +126,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args,
  * @param count
  * @return
  */
-Value krakenUIListener(JSContext &context, const Value &thisVal,
-                 const Value *args, size_t count) {
+Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count < 1) {
     throw JSError(context, "Failed to execute '__kraken_ui_listener__': 1 parameter required, but only 0 present.");
   }
@@ -144,8 +135,7 @@ Value krakenUIListener(JSContext &context, const Value &thisVal,
     throw JSError(context, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.");
   }
 
-  std::shared_ptr<Value> val =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
   krakenUIListenerList.push(val);
@@ -153,18 +143,17 @@ Value krakenUIListener(JSContext &context, const Value &thisVal,
   return Value::undefined();
 }
 
-Value krakenModuleListener(JSContext &context, const Value &thisVal,
-                     const Value *args, size_t count) {
+Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count < 1) {
     throw JSError(context, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
   }
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
-    throw JSError(context, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+    throw JSError(context,
+                  "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
   }
 
-  std::shared_ptr<Value> val =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
   krakenModuleListenerList.push(val);
@@ -175,8 +164,7 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal,
 void handleTransientCallback(void *data) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
-  if (!_context.isValid())
-    return;
+  if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
@@ -189,25 +177,27 @@ void handleTransientCallback(void *data) {
   delete obj;
 }
 
-Value requestBatchUpdate(JSContext &context, const Value &thisVal,
-                            const Value *args, size_t count) {
+Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
-    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': 1 parameter required, but only 0 present.");
+    throw JSError(context,
+                  "Failed to execute '__kraken_request_batch_update__': 1 parameter required, but only 0 present.");
   }
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
-    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.");
+    throw JSError(context,
+                  "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.");
   }
 
-  std::shared_ptr<Value> callbackValue =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 
   // the context pointer which will be pass by pointer address to dart code.
   auto *callbackContext = new CallbackContext(context, callbackValue);
 
   if (getDartMethod()->requestBatchUpdate == nullptr) {
-    throw JSError(context, "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
+    throw JSError(
+      context,
+      "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
   getDartMethod()->requestBatchUpdate(handleTransientCallback, static_cast<void *>(callbackContext));
@@ -216,8 +206,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal,
 }
 
 #ifdef IS_TEST
-Value getValue(JSContext &context, const Value &thisVal, const Value *args,
-               size_t count) {
+Value getValue(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count != 1) {
     KRAKEN_LOG(VERBOSE) << "[TEST] getValue() accept 1 params";
     return Value::undefined();
@@ -255,16 +244,11 @@ JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
   screen_ = std::make_shared<kraken::binding::JSScreen>();
   screen_->bind(context);
 
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_ui_manager__", 0,
-                       krakenUIManager);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_ui_listener__", 0,
-                       krakenUIListener);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_module_listener__", 0,
-                       krakenModuleListener);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_invoke_module__", 0,
-                       invokeModule);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_request_batch_update__", 0,
-                       requestBatchUpdate);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_ui_manager__", 0, krakenUIManager);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_ui_listener__", 0, krakenUIListener);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_module_listener__", 0, krakenModuleListener);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_invoke_module__", 0, invokeModule);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_request_batch_update__", 0, requestBatchUpdate);
 
   initKrakenPolyFill(context.get());
 }
@@ -280,9 +264,8 @@ void JSBridge::attachDevtools() {
   JSC::JSLockHolder locker(exec);
   globalImpl = exec->lexicalGlobalObject();
 #endif
-  devtools_front_door_ = kraken::Debugger::FrontDoor::newInstance(
-      reinterpret_cast<JSC::JSGlobalObject *>(globalImpl), nullptr,
-      "127.0.0.1");
+  devtools_front_door_ =
+    kraken::Debugger::FrontDoor::newInstance(reinterpret_cast<JSC::JSGlobalObject *>(globalImpl), nullptr, "127.0.0.1");
   devtools_front_door_->setup();
 }
 
@@ -310,8 +293,7 @@ void JSBridge::handleUIListener(const char *args) {
     }
 
     const String str = String::createFromAscii(*context, args);
-    callback->getObject(*context).asFunction(*context).callWithThis(
-        *context, context->global(), str, 1);
+    callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }
 
@@ -332,8 +314,7 @@ void JSBridge::handleModuleListener(const char *args) {
     }
 
     const String str = String::createFromAscii(*context, args);
-    callback->getObject(*context).asFunction(*context).callWithThis(
-        *context, context->global(), str, 1);
+    callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }
 
@@ -343,8 +324,7 @@ const int MODULE_EVENT = 1;
 void JSBridge::invokeEventListener(int32_t type, const char *args) {
   if (!context->isValid()) return;
 
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
+  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeEventListener VERBOSE]: message " << args;
   }
   try {
@@ -358,8 +338,7 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
   }
 }
 
-alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url,
-                              int startLine) {
+alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const std::string &url, int startLine) {
   if (!context->isValid()) return Value::undefined();
   binding::updateLocation(url);
   return context->evaluateJavaScript(script.c_str(), url.c_str(), startLine);
@@ -367,8 +346,6 @@ alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const st
 #ifdef ENABLE_DEBUGGER
   devtools_front_door_->notifyPageDiscovered(url, script);
 #endif
-
-  return Value::undefined();
 }
 
 JSBridge::~JSBridge() {

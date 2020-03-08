@@ -25,13 +25,11 @@ void SetCurrentThreadName(const std::string &name) {
   info.dwThreadID = GetCurrentThreadId();
   info.dwFlags = 0;
   __try {
-    RaiseException(kVCThreadNameException, 0, sizeof(info) / sizeof(DWORD),
-                   reinterpret_cast<DWORD_PTR *>(&info));
+    RaiseException(kVCThreadNameException, 0, sizeof(info) / sizeof(DWORD), reinterpret_cast<DWORD_PTR *>(&info));
   } __except (EXCEPTION_CONTINUE_EXECUTION) {
   }
 #else
-  KRAKEN_LOG(INFO) << "Could not set the thread name to '" << name
-                   << "' on this platform.";
+  KRAKEN_LOG(INFO) << "Could not set the thread name to '" << name << "' on this platform.";
 #endif
 }
 } // namespace foundation
