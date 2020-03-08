@@ -28,6 +28,12 @@
 @import kraken_video_player;
 #endif
 
+#if __has_include(<location/LocationPlugin.h>)
+#import <location/LocationPlugin.h>
+#else
+@import location;
+#endif
+
 #if __has_include(<path_provider/FLTPathProviderPlugin.h>)
 #import <path_provider/FLTPathProviderPlugin.h>
 #else
@@ -53,6 +59,7 @@
   [FLTConnectivityPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTConnectivityPlugin"]];
   [FLTDeviceInfoPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTDeviceInfoPlugin"]];
   [FLTVideoPlayerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTVideoPlayerPlugin"]];
+  [LocationPlugin registerWithRegistrar:[registry registrarForPlugin:@"LocationPlugin"]];
   [FLTPathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTPathProviderPlugin"]];
   [FLTSharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTSharedPreferencesPlugin"]];
   [FLTWebViewFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTWebViewFlutterPlugin"]];

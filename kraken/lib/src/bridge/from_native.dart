@@ -96,15 +96,18 @@ final Dart_RegisterInvokeModule _registerInvokeModule =
 
 String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void> context) {
   dynamic args = jsonDecode(json);
-  String method = args[0];
+  String module = args[0];
   String result = '';
-  if (method == 'getConnectivity') {
-    getConnectivity((String json) {
-      callback(Utf8.toUtf8(json), context);
-    });
-  } else if (method == 'onConnectivityChanged') {
-    onConnectivityChanged();
-  } else if (method == 'fetch') {
+  if (module == 'Connection') {
+    String method = args[1];
+    if (method == 'getConnectivity') {
+      Connection.getConnectivity((String json) {
+        callback(Utf8.toUtf8(json), context);
+      });
+    } else if (method == 'onConnectivityChanged') {
+      Connection.onConnectivityChanged();
+    }
+  } else if (module == 'fetch') {
     List fetchArgs = args[1];
     String url = fetchArgs[0];
     Map<String, dynamic> options = fetchArgs[1];
@@ -117,60 +120,96 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       String json = jsonEncode([errorMessage, e.response.statusCode, '']);
       callback(Utf8.toUtf8(json), context);
     });
-  } else if (method == 'getDeviceInfo') {
-    getDeviceInfo().then((String json) {
-      callback(Utf8.toUtf8(json), context);
-    });
-  } else if (method == 'getHardwareConcurrency') {
-    result = getHardwareConcurrency().toString();
-  } else if (method == 'AsyncStorage.getItem') {
-    List getItemArgs = args[1];
-    String key = getItemArgs[0];
-    AsyncStorage.getItem(key).then((String value) {
-      callback(Utf8.toUtf8(value), context);
-    });
-  } else if (method == 'AsyncStorage.setItem') {
-    List setItemArgs = args[1];
-    String key = setItemArgs[0];
-    String value = setItemArgs[1];
-    AsyncStorage.setItem(key, value).then((bool o) {
-      callback(Utf8.toUtf8(value), context);
-    });
-  } else if (method == 'AsyncStorage.removeItem') {
-    List removeItemArgs = args[1];
-    String key = removeItemArgs[0];
-    AsyncStorage.removeItem(key).then((bool value) {
-      callback(Utf8.toUtf8(value.toString()), context);
-    });
-  } else if (method == 'AsyncStorage.getAllKeys') {
-    AsyncStorage.getAllKeys().then((Set<String> set) {
-      List<String> list = List.from(set);
-      callback(Utf8.toUtf8(jsonEncode(list)), context);
-    });
-  } else if (method == 'AsyncStorage.clear') {
-    AsyncStorage.clear().then((bool value) {
-      callback(Utf8.toUtf8(value.toString()), context);
-    });
-  } else if (method == 'getCurrentPosition') {
-    List locationArgs = args[1];
-    Map<String, dynamic> options;
-    if (locationArgs.length > 0) {
-      options = locationArgs[0];
+  } else if (module == 'DeviceInfo') {
+    String method = args[1];
+    if (method == 'getDeviceInfo') {
+      DeviceInfo.getDeviceInfo().then((String json) {
+        callback(Utf8.toUtf8(json), context);
+      });
+    } else if (method == 'getHardwareConcurrency') {
+      result = DeviceInfo.getHardwareConcurrency().toString();
     }
-    getCurrentPosition(options, (json) {
-      callback(Utf8.toUtf8(json), context);
-    });
-  } else if (method == 'watchPosition') {
-    List locationArgs = args[1];
-    Map<String, dynamic> options;
-    if (locationArgs.length > 0) {
-      options = locationArgs[0];
+  } else if (module == 'AsyncStorage') {
+    String method = args[1];
+    if (method == 'getItem') {
+      List getItemArgs = args[2];
+      String key = getItemArgs[0];
+      AsyncStorage.getItem(key).then((String value) {
+        callback(Utf8.toUtf8(value), context);
+      });
+    } else if (method == 'setItem') {
+      List setItemArgs = args[2];
+      String key = setItemArgs[0];
+      String value = setItemArgs[1];
+      AsyncStorage.setItem(key, value).then((bool o) {
+        callback(Utf8.toUtf8(value), context);
+      });
+    } else if (method == 'removeItem') {
+      List removeItemArgs = args[2];
+      String key = removeItemArgs[0];
+      AsyncStorage.removeItem(key).then((bool value) {
+        callback(Utf8.toUtf8(value.toString()), context);
+      });
+    } else if (method == 'getAllKeys') {
+      AsyncStorage.getAllKeys().then((Set<String> set) {
+        List<String> list = List.from(set);
+        callback(Utf8.toUtf8(jsonEncode(list)), context);
+      });
+    } else if (method == 'clear') {
+      AsyncStorage.clear().then((bool value) {
+        callback(Utf8.toUtf8(value.toString()), context);
+      });
     }
-    result = watchPosition(options).toString();
-  } else if (method == 'clearWatch') {
-    List locationArgs = args[1];
-    int id = locationArgs[0];
-    clearWatch(id);
+  }  else if(module == 'MQTT') {
+    String method = args[1];
+    if (method == 'init') {
+      List mqttArgs = args[2]; 
+      return MQTT.init(mqttArgs[0], mqttArgs[1]);
+    } else if(method == 'open') {
+      List mqttArgs = args[2];
+      MQTT.open(mqttArgs[0], mqttArgs[1]);
+    } else if(method == 'close') {
+      List mqttArgs = args[2];
+      MQTT.close(mqttArgs[0]);
+    } else if(method == 'publish') {
+      List mqttArgs = args[2];
+      MQTT.publish(mqttArgs[0], mqttArgs[1], mqttArgs[2], mqttArgs[3], mqttArgs[4]);
+    } else if(method == 'subscribe') {
+      List mqttArgs = args[2];
+      MQTT.subscribe(mqttArgs[0], mqttArgs[1], mqttArgs[2]);
+    } else if(method == 'unsubscribe') {
+      List mqttArgs = args[2];
+      MQTT.unsubscribe(mqttArgs[0], mqttArgs[1]);
+    } else if(method == 'getReadyState') {
+      List mqttArgs = args[2];
+      return MQTT.getReadyState(mqttArgs[0]);
+    } else if(method == 'addEvent') {
+      List mqttArgs = args[2];
+      MQTT.addEvent(mqttArgs[0], mqttArgs[1]);
+    }
+  } else if (module == 'Geolocation') {
+    String method = args[1];
+    if (method == 'getCurrentPosition') {
+      List positionArgs = args[2];
+      Map<String, dynamic> options;
+      if (positionArgs.length > 0) {
+        options = positionArgs[0];
+      }
+      Geolocation.getCurrentPosition(options, (json) {
+        callback(Utf8.toUtf8(json), context);
+      });
+    } else if (method == 'watchPosition') {
+      List positionArgs = args[2];
+      Map<String, dynamic> options;
+      if (positionArgs.length > 0) {
+        options = positionArgs[0];
+      }
+      return Geolocation.watchPosition(options).toString();
+    } else if (method == 'clearWatch') {
+      List positionArgs = args[2];
+      int id = positionArgs[0];
+      Geolocation.clearWatch(id);
+    }
   }
 
   return result;

@@ -5,12 +5,6 @@ import 'package:kraken/bridge.dart';
 
 Connectivity _connectivity;
 
-void _initConnectivity() {
-  if (_connectivity == null) {
-    _connectivity = Connectivity();
-  }
-}
-
 String _toString(ConnectivityResult connectivityResult){
   String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
   String type = _parseConnectivityResult(connectivityResult);
@@ -30,17 +24,25 @@ String _parseConnectivityResult(ConnectivityResult state) {
   }
 }
 
-void getConnectivity(callback) {
-  _initConnectivity();
-  _connectivity.checkConnectivity().then((ConnectivityResult connectivityResult) {
-    callback(_toString(connectivityResult));
-  });
-}
+class Connection {
+  
+  static void _initConnectivity() {
+    if (_connectivity == null) {
+      _connectivity = Connectivity();
+    }
+  }
+  static void getConnectivity(callback) {
+    _initConnectivity();
+    _connectivity.checkConnectivity().then((ConnectivityResult connectivityResult) {
+      callback(_toString(connectivityResult));
+    });
+  }
 
-void onConnectivityChanged() {
-  _initConnectivity();
-  _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
-    String json = _toString(connectivityResul);
-    emitModuleEvent('["onConnectivityChanged", $json]');
-  });
+  static void onConnectivityChanged() {
+    _initConnectivity();
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
+      String json = _toString(connectivityResul);
+      emitModuleEvent('["onConnectivityChanged", $json]');
+    });
+  }
 }

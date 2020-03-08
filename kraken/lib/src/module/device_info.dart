@@ -11,38 +11,43 @@ void _initDeviceInfoPlugin() {
   }
 }
 
-Future<String> getDeviceInfo() async {
-  _initDeviceInfoPlugin();
-  Map<String, dynamic> deviceData;
+class DeviceInfo {
+  static Future<String> getDeviceInfo() async {
+    _initDeviceInfoPlugin();
+    Map<String, dynamic> deviceData;
 
-  if (Platform.isAndroid) {
-    deviceData = _readAndroidBuildData(await _deviceInfoPlugin.androidInfo);
-  } else if (Platform.isIOS) {
-    deviceData = _readIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
-  } else if (Platform.isMacOS){
-    deviceData = {
-      'brand': 'Apple',
-      'platformName': 'Mac OS',
-      'name': Platform.localeName ?? Platform.localHostname,
-      'isPhysicalDevice': true,
-    };
-  } else if (Platform.isLinux){
-    deviceData = {
-      'platformName': 'Linux',
-      'name': Platform.localeName ?? Platform.localHostname,
-      'isPhysicalDevice': true,
-    };
-  } else if (Platform.isWindows){
-    deviceData = {
-      'platformName': 'Windows',
-      'name': Platform.localeName ?? Platform.localHostname,
-      'isPhysicalDevice': true,
-    };
-  } else {
-    deviceData = {};
+    if (Platform.isAndroid) {
+      deviceData = _readAndroidBuildData(await _deviceInfoPlugin.androidInfo);
+    } else if (Platform.isIOS) {
+      deviceData = _readIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
+    } else if (Platform.isMacOS){
+      deviceData = {
+        'brand': 'Apple',
+        'platformName': 'Mac OS',
+        'name': Platform.localeName ?? Platform.localHostname,
+        'isPhysicalDevice': true,
+      };
+    } else if (Platform.isLinux){
+      deviceData = {
+        'platformName': 'Linux',
+        'name': Platform.localeName ?? Platform.localHostname,
+        'isPhysicalDevice': true,
+      };
+    } else if (Platform.isWindows){
+      deviceData = {
+        'platformName': 'Windows',
+        'name': Platform.localeName ?? Platform.localHostname,
+        'isPhysicalDevice': true,
+      };
+    } else {
+      deviceData = {};
+    }
+
+    return jsonEncode(deviceData);
   }
-
-  return jsonEncode(deviceData);
+  static int getHardwareConcurrency() {
+    return Platform.numberOfProcessors;
+  }
 }
 
 Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
@@ -73,8 +78,4 @@ Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
     'platformVersion': data.systemVersion,
     'isPhysicalDevice': data.isPhysicalDevice
   };
-}
-
-int getHardwareConcurrency() {
-  return Platform.numberOfProcessors;
 }

@@ -5,6 +5,7 @@ import xyz.luan.audioplayers.AudioplayersPlugin;
 import io.flutter.plugins.connectivity.ConnectivityPlugin;
 import io.flutter.plugins.deviceinfo.DeviceInfoPlugin;
 import io.flutter.plugins.videoplayer.VideoPlayerPlugin;
+import com.lyokone.location.LocationPlugin;
 import io.flutter.plugins.pathprovider.PathProviderPlugin;
 import io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin;
 import io.flutter.plugins.webviewflutter.WebViewFlutterPlugin;
@@ -21,6 +22,7 @@ public final class GeneratedPluginRegistrant {
     ConnectivityPlugin.registerWith(registry.registrarFor("io.flutter.plugins.connectivity.ConnectivityPlugin"));
     DeviceInfoPlugin.registerWith(registry.registrarFor("io.flutter.plugins.deviceinfo.DeviceInfoPlugin"));
     VideoPlayerPlugin.registerWith(registry.registrarFor("io.flutter.plugins.videoplayer.VideoPlayerPlugin"));
+    LocationPlugin.registerWith(registry.registrarFor("com.lyokone.location.LocationPlugin"));
     PathProviderPlugin.registerWith(registry.registrarFor("io.flutter.plugins.pathprovider.PathProviderPlugin"));
     SharedPreferencesPlugin.registerWith(registry.registrarFor("io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin"));
     WebViewFlutterPlugin.registerWith(registry.registrarFor("io.flutter.plugins.webviewflutter.WebViewFlutterPlugin"));
