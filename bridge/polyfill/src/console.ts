@@ -334,7 +334,10 @@ const console = {
     }
   },
   assert(expression: boolean, ...args: Array<any>) {
-    if (!expression) console.error('Assertion failed:', ...args);
+    if (!expression) {
+      let msg = args.join(' ');
+      throw new Error('Assertion failed:' + msg);
+    }
   },
   time(label = 'default') {
     label = String(label);

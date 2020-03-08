@@ -4,36 +4,44 @@
  */
 
 #include "bridge_export.h"
-#include "dart_methods.h"
 #include "bridge.h"
+#include "dart_methods.h"
+
 #include <atomic>
+#include <iostream>
 #include <string>
 
 kraken::DartMethodPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
+
+void printError(const alibaba::jsa::JSError &error) {
+  if (kraken::getDartMethod()->onJsError != nullptr) {
+    kraken::getDartMethod()->onJsError(error.what());
+  }
+  std::cerr << error.what() << std::endl;
+}
+
 Screen screen;
 
 void reloadJsContext() {
   inited = false;
-  bridge = std::make_unique<kraken::JSBridge>();
+  bridge = std::make_unique<kraken::JSBridge>(printError);
   inited = true;
 }
 
 void initJsEngine() {
-  bridge = std::make_unique<kraken::JSBridge>();
+  bridge = std::make_unique<kraken::JSBridge>(printError);
   inited = true;
 }
 
-void evaluateScripts(const char *code, const char *bundleFilename,
-                      int startLine) {
+void evaluateScripts(const char *code, const char *bundleFilename, int startLine) {
   if (!inited) return;
-  bridge->evaluateScript(std::string(code), std::string(bundleFilename),
-                         startLine);
+  bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
 }
 
-void invokeEventListener(int32_t type,const char *data) {
+void invokeEventListener(int32_t type, const char *data) {
   if (!inited) return;
   bridge->invokeEventListener(type, data);
 }
@@ -108,16 +116,18 @@ void flushUITask() {
   bridge->flushUITask();
 }
 
-void registerStartFlushCallbacksInUIThread(
-    StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
+void registerStartFlushCallbacksInUIThread(StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
   kraken::registerStartFlushUILoop(startFlushCallbacksInUIThread);
 }
 
-void registerStopFlushCallbacksInUIThread(
-    StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
+void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
   kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
 }
 
 void registerToBlob(ToBlob toBlob) {
   kraken::registerToBlob(toBlob);
+}
+
+void registerOnJSError(OnJSError jsError) {
+  kraken::registerOnJSError(jsError);
 }

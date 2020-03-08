@@ -14,14 +14,15 @@ void V8Instrumentation::collectGarbage() {
   _isolate->RequestGarbageCollectionForTesting(v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
 }
 
-std::string V8Instrumentation::getRecordedGCStats() { return std::string(); }
+std::string V8Instrumentation::getRecordedGCStats() {
+  return std::string();
+}
 
 jsa::Value V8Instrumentation::getHeapInfo(bool includeExpensive) {
   return jsa::Value();
 }
 
-bool V8Instrumentation::createSnapshotToFile(const std::string &path,
-                                             bool compact) {
+bool V8Instrumentation::createSnapshotToFile(const std::string &path, bool compact) {
   return false;
 }
 
@@ -30,17 +31,11 @@ bool V8Instrumentation::createSnapshotToStream(std::ostream &os, bool compact) {
   return false;
 }
 
-void V8Instrumentation::writeBridgeTrafficTraceToFile(const std::string &fileName) const {
+void V8Instrumentation::writeBridgeTrafficTraceToFile(const std::string &fileName) const {}
 
-}
+void V8Instrumentation::writeBasicBlockProfileTraceToFile(const std::string &fileName) const {}
 
-void V8Instrumentation::writeBasicBlockProfileTraceToFile(const std::string &fileName) const {
+void V8Instrumentation::dumpProfilerSymbolsToFile(const std::string &fileName) const {}
 
-}
-
-void V8Instrumentation::dumpProfilerSymbolsToFile(const std::string &fileName) const {
-
-}
-
-}
-}
+} // namespace jsa_v8
+} // namespace alibaba

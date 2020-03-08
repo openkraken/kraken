@@ -14,23 +14,27 @@
 using namespace alibaba::jsa_v8;
 using namespace alibaba;
 
+void normalErrorHandler(const jsa::JSError &error) {
+  FAIL();
+}
+
 TEST(V8Context, undefined) {
   initV8Engine("");
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("undefined;", "", 0);
   EXPECT_EQ(result.isUndefined(), true);
 }
 
 TEST(V8Context, null) {
   initV8Engine("");
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("null", "", 0);
   EXPECT_EQ(result.isNull(), true);
 }
 
 TEST(V8Context, number) {
   initV8Engine("");
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalErrorHandler);
   EXPECT_EQ(context->evaluateJavaScript("123456", "", 0).isNumber(), true);
   EXPECT_EQ(context->evaluateJavaScript("2.455", "", 0).isNumber(), true);
   EXPECT_EQ(context->evaluateJavaScript("parseInt('42')", "", 0).isNumber(),
@@ -46,13 +50,13 @@ TEST(V8Context, number) {
 
 TEST(V8Context, boolean) {
   initV8Engine("");
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext();
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalErrorHandler);
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
 }
 
 TEST(V8Context, V8StringValue_newString) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   const std::string str = "helloworld";
 
   jsa::String string = jsa::String::createFromUtf8(*context, str);
@@ -62,7 +66,7 @@ TEST(V8Context, V8StringValue_newString) {
 
 TEST(V8Context, V8StringValue_evaluateString) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("'12345'", "", 0);
   EXPECT_EQ(result.isString(), true);
   std::string resultStr = result.getString(*context).utf8(*context);
@@ -71,13 +75,13 @@ TEST(V8Context, V8StringValue_evaluateString) {
 
 TEST(V8Context, V8StringCopyRefer) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::String a = jsa::String::createFromAscii(*context, "1234");
 }
 
 TEST(V8Context, V8StringValue_evaluateStringObject) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   auto result = context->evaluateJavaScript("new String(12345)", "", 0);
   EXPECT_EQ(result.isString(), true);
   auto resultStr = result.getString(*context).utf8(*context);
@@ -86,7 +90,7 @@ TEST(V8Context, V8StringValue_evaluateStringObject) {
 
 TEST(V8Context, V8StringValue_createString) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value string = jsa::String::createFromAscii(*context, "helloworld");
   EXPECT_EQ(string.isString(), true);
   auto result = string.getString(*context).utf8(*context);
@@ -95,7 +99,7 @@ TEST(V8Context, V8StringValue_createString) {
 
 TEST(V8Context, V8SymbolValue_evaluateString) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("Symbol(1234)", "", 0);
   EXPECT_EQ(result.isSymbol(), true);
   // TODO verify symbol toString
@@ -104,7 +108,7 @@ TEST(V8Context, V8SymbolValue_evaluateString) {
 
 TEST(V8Context, V8ObjectValue_getProperty) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
   EXPECT_EQ(result.isObject(), true);
   jsa::Object obj = result.getObject(*context);
@@ -114,7 +118,7 @@ TEST(V8Context, V8ObjectValue_getProperty) {
 
 TEST(V8Context, V8ObjectValue_GetGlobalProperty) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Object global = context->global();
   global.setProperty(*context, "name", jsa::Value(1));
   jsa::Value result = context->evaluateJavaScript("this.name = 2", "", 0);
@@ -128,7 +132,7 @@ TEST(V8Context, V8ObjectValue_GetGlobalProperty) {
 
 TEST(V8Context, V8ObjectValue_setProperty) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value = jsa::Value(*context, jsa::Object(*context));
   value.getObject(*context).setProperty(*context, "name", jsa::Value(1));
   EXPECT_EQ(value.isObject(), true);
@@ -152,7 +156,7 @@ TEST(V8Context, V8ObjectValue_setProperty) {
 
 TEST(V8Context, V8ObjectValue_hasProperty) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value = context->evaluateJavaScript("({name: '12345'})", "", 0);
   EXPECT_EQ(value.isObject(), true);
   EXPECT_EQ(value.getObject(*context).hasProperty(*context, "name"), true);
@@ -166,7 +170,7 @@ TEST(V8Context, V8ObjectValue_hasProperty) {
 
 TEST(V8Context, getPropertyNames) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value =
       context->evaluateJavaScript("({name: '12345', age: 20})", "", 0);
   jsa::Array names = value.getObject(*context).getPropertyNames(*context);
@@ -182,7 +186,7 @@ TEST(V8Context, getPropertyNames) {
 
 TEST(V8Context, global) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   auto global = context->global();
   global.setProperty(*context, "helloworld", "12345");
   jsa::Value result = context->evaluateJavaScript("global.helloworld", "", 0);
@@ -192,7 +196,7 @@ TEST(V8Context, global) {
 
 TEST(V8Context, global_with_none_global_var) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   auto global = context->global();
   global.setProperty(*context, "helloworld", "12345");
   jsa::Value result = context->evaluateJavaScript("helloworld", "", 0);
@@ -202,7 +206,7 @@ TEST(V8Context, global_with_none_global_var) {
 
 TEST(V8Context, propIdStrictEquals) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::PropNameID &&left = jsa::PropNameID::forAscii(*context, "1234");
   jsa::PropNameID &&right = jsa::PropNameID::forAscii(*context, "1234");
   EXPECT_EQ(left.compare(*context, left, right), true);
@@ -210,7 +214,7 @@ TEST(V8Context, propIdStrictEquals) {
 
 TEST(V8Context, symbolStrictEquals) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value left = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
   jsa::Value right = context->evaluateJavaScript("Symbol.for('1234')", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
@@ -218,7 +222,7 @@ TEST(V8Context, symbolStrictEquals) {
 
 TEST(V8Context, stringStrictEquals) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value left = jsa::String::createFromAscii(*context, "helloworld");
   jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
@@ -226,7 +230,7 @@ TEST(V8Context, stringStrictEquals) {
 
 TEST(V8Context, array_get) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("[1,2,3,4]", "", 0);
   EXPECT_EQ(result.getObject(*context).isArray(*context), true);
   jsa::Array array = result.getObject(*context).getArray(*context);
@@ -240,7 +244,7 @@ TEST(V8Context, array_get) {
 
 TEST(V8Context, array_set) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript("a = [1,2,3,4]", "", 0);
   jsa::Array array = result.getObject(*context).getArray(*context);
   size_t length = array.length(*context);
@@ -257,7 +261,7 @@ TEST(V8Context, array_set) {
 
 TEST(V8Context, arrayBuffer_uint8) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value =
       context->evaluateJavaScript("new Int8Array([1,2,3,4,5]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
@@ -274,7 +278,7 @@ TEST(V8Context, arrayBuffer_uint8) {
 
 TEST(V8Context, arrayBuffer_uint16) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value = context->evaluateJavaScript(
       "new Int16Array([1000, 2000, 3000, 4000, 5000]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
@@ -291,7 +295,7 @@ TEST(V8Context, arrayBuffer_uint16) {
 
 TEST(V8Context, instanceof) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value constructor = context->evaluateJavaScript("Object", "", 0);
   jsa::Object obj = jsa::Object(*context);
   obj.instanceOf(*context,
@@ -300,7 +304,7 @@ TEST(V8Context, instanceof) {
 
 TEST(V8Context, callFunction) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value value =
       context->evaluateJavaScript("function A() {return 11;}; A;", "", 0);
   jsa::Function func = value.getObject(*context).getFunction(*context);
@@ -317,7 +321,7 @@ TEST(V8Context, callFunction) {
 
 TEST(V8Context, callFunctionWithArgs) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   context->evaluateJavaScript(R"(
 function fibonacci(num) {
   if (num <= 1) return 1;
@@ -335,7 +339,13 @@ function fibonacci(num) {
 
 TEST(V8Context, callFunctionWithException) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto errorHandler = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\nfunction throwAnError() { throw new Error('1234');}; throwAnError; \n"
+                               "                          ^\n"
+                               "Error: 1234\n"
+                               "    at throwAnError (<anonymous>:1:33)");
+  };
+  auto context = std::make_unique<V8Context>(errorHandler);
   jsa::Value result = context->evaluateJavaScript(
       R"(function throwAnError() { throw new Error('1234');}; throwAnError; )",
       "", 0);
@@ -345,7 +355,7 @@ TEST(V8Context, callFunctionWithException) {
 
 TEST(V8Context, callFunctionWithThis) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript(R"(
 function callThis() {
   this.name = 20;
@@ -360,7 +370,7 @@ function callThis() {
 
 TEST(V8Context, callAsConstructor) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result = context->evaluateJavaScript(
       "function F(name) { this.prop = name}; F;", "", 0);
   jsa::Function F = result.getObject(*context).getFunction(*context);
@@ -377,7 +387,7 @@ TEST(V8Context, callAsConstructor) {
 
 TEST(V8Context, hostFunction) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -398,7 +408,7 @@ TEST(V8Context, hostFunction) {
 
 TEST(V8Context, hostFunctionWithParams) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args, size_t count) -> jsa::Value {
@@ -418,7 +428,7 @@ TEST(V8Context, hostFunctionWithParams) {
 
 TEST(V8Context, hostFunctionWithThis) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args, size_t count) -> jsa::Value {
@@ -440,7 +450,13 @@ TEST(V8Context, hostFunctionWithThis) {
 
 TEST(V8Context, hostFunctionThrowError) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto errorHandler = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\nobject.causeError()\n"
+                               "       ^\n"
+                               "Error: ops !!\n"
+                               "    at <anonymous>:1:8");
+  };
+  auto context = std::make_unique<V8Context>(errorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -453,7 +469,7 @@ TEST(V8Context, hostFunctionThrowError) {
 
 TEST(V8Context, isHostFunction) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -466,7 +482,7 @@ TEST(V8Context, isHostFunction) {
 
 TEST(V8Context, getHostFunction) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -484,7 +500,7 @@ TEST(V8Context, getHostFunction) {
 
 TEST(V8Context, hostObject_get) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
       auto _prop = prop.utf8(context);
@@ -525,7 +541,7 @@ TEST(V8Context, hostObject_get) {
 
 TEST(V8Context, hostObjectAsArgs) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
   jsa::HostFunctionType getBlob =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
@@ -543,7 +559,7 @@ TEST(V8Context, hostObjectAsArgs) {
 
 TEST(V8Context, hostObject_set) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
       auto _prop = prop.utf8(context);
@@ -584,7 +600,7 @@ TEST(V8Context, hostObject_set) {
 
 TEST(V8Context, hostObject_getPropertyNames) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     std::vector<jsa::PropNameID> getPropertyNames(jsa::JSContext &context) {
       std::vector<jsa::PropNameID> propertyNames;
@@ -608,7 +624,7 @@ TEST(V8Context, hostObject_getPropertyNames) {
 
 TEST(V8Context, createArrayBuffer) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   const size_t len = 20;
   uint8_t *data = new uint8_t[len];
   for (int i = 0; i < 20; i++) {
@@ -641,7 +657,7 @@ TEST(V8Context, createArrayBuffer) {
 
 TEST(V8Context, isArrayBufferView) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result =
       context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
   EXPECT_EQ(result.getObject(*context).isArrayBufferView(*context), true);
@@ -652,7 +668,7 @@ TEST(V8Context, isArrayBufferView) {
 
 TEST(V8Context, ArrayBufferView_data) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   jsa::Value result =
       context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
   jsa::ArrayBufferView bufferView =
@@ -669,7 +685,7 @@ TEST(V8Context, ArrayBufferView_data) {
 
 TEST(V8Context, getHostObject) {
   initV8Engine("");
-  auto context = std::make_unique<V8Context>();
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
   std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
   jsa::HostFunctionType getBlob =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
@@ -688,5 +704,35 @@ TEST(V8Context, getHostObject) {
       jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
   });
 }
+
+
+TEST(V8Context, codeSyntaxError) {
+  initV8Engine("");
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "qwe823-qe,sd.a.\n"
+                               "               \n"
+                               "SyntaxError: Unexpected end of input");
+  };
+  auto context = std::make_unique<V8Context>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("qwe823-qe,sd.a.", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
+TEST(V8Context, undefinedError) {
+  initV8Engine("");
+  auto errorPrint = [](const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\n"
+                               "function f(obj) {obj.abc()}; f(null);\n"
+                               "                     ^\n"
+                               "TypeError: Cannot read property 'abc' of null\n"
+                               "    at f (internal://:1:22)\n"
+                               "    at internal://:1:30");
+  };
+  auto context = std::make_unique<V8Context>(errorPrint);
+  jsa::Value result = context->evaluateJavaScript("function f(obj) {obj.abc()}; f(null);", "internal://", 0);
+  EXPECT_EQ(result.isNull(), true);
+}
+
 
 #endif

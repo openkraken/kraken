@@ -6,7 +6,6 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
-import 'dart:convert';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -184,8 +183,7 @@ class ElementManagerActionDelegate {
     Element target = nodeMap[targetId];
     assert(target != null);
     assert(target.method != null);
-    List<dynamic> arguments = jsonDecode(args);
-    dynamic res = target.method(method, arguments);
+    dynamic res = target.method(method, args);
     return res;
   }
 }

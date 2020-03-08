@@ -92,7 +92,8 @@ void main() {
       }
     }
 
-    expect(hasNotMatchSnapshot, false,
-        reason: 'Some snapshot not matched, please check the log.');
+    if (hasNotMatchSnapshot) {
+      fail('Some snapshot not matched, please check the log above.');
+    }
   });
 }

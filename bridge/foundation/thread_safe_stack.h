@@ -20,8 +20,7 @@ template <typename T> class ThreadSafeStack {
 public:
   enum QueueResult { OK, CLOSED };
 
-  explicit ThreadSafeStack(size_t maxSize = 0)
-      : state(State::OPEN), currentSize(0), maxSize(maxSize) {}
+  explicit ThreadSafeStack(size_t maxSize = 0) : state(State::OPEN), currentSize(0), maxSize(maxSize) {}
 
   void push(T const &v) {
     std::list<T> tmpList;
@@ -33,14 +32,12 @@ public:
       while (currentSize == maxSize)
         cvPush.wait(lock);
 
-      if (state == State::CLOSED)
-        throw std::runtime_error("Trying to push to a closed queue.");
+      if (state == State::CLOSED) throw std::runtime_error("Trying to push to a closed queue.");
 
       currentSize += 1;
       list.splice(list.end(), tmpList, tmpList.begin());
 
-      if (currentSize == 1u)
-        cvPop.notify_one();
+      if (currentSize == 1u) cvPop.notify_one();
     }
   }
 
@@ -54,8 +51,7 @@ public:
       while (currentSize == maxSize)
         cvPush.wait(lock);
 
-      if (state == State::CLOSED)
-        throw std::runtime_error("Trying to push to a closed queue.");
+      if (state == State::CLOSED) throw std::runtime_error("Trying to push to a closed queue.");
 
       currentSize += 1;
       list.splice(list.end(), tmpList, tmpList.begin());
@@ -102,7 +98,7 @@ private:
   std::list<T> list;
 };
 
-}
-}
+} // namespace foundation
+} // namespace kraken
 
 #endif // KRAKENBRIDGE_THREAD_SAFE_STACK_H

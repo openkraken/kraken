@@ -19,54 +19,13 @@ std::unique_ptr<v8::Platform> platform;
 v8::Isolate *isolate_{nullptr};
 
 v8::Local<v8::String> getEmptyString(v8::Isolate *isolate) {
-  static v8::Local<v8::String> empty =
-      v8::String::NewFromUtf8(isolate, "").ToLocalChecked();
+  static v8::Local<v8::String> empty = v8::String::NewFromUtf8(isolate, "").ToLocalChecked();
   return empty;
 }
 
 const char *ToCString(const v8::String::Utf8Value &value) {
   return *value ? *value : "<string conversion failed>";
 }
-
-void reportException(v8::Isolate *isolate, v8::TryCatch &tryCatch) {
-  v8::HandleScope handleScope(isolate);
-  v8::String::Utf8Value exception(isolate, tryCatch.Exception());
-  const char *exception_string = ToCString(exception);
-  v8::Local<v8::Message> message = tryCatch.Message();
-  if (message.IsEmpty()) {
-    fprintf(stderr, "%s\n", exception_string);
-  } else {
-    v8::String::Utf8Value filename(isolate,
-                                   message->GetScriptOrigin().ResourceName());
-    v8::Local<v8::Context> context(isolate->GetCurrentContext());
-    const char *filename_string = ToCString(filename);
-    int linenum = message->GetLineNumber(context).FromJust();
-    fprintf(stderr, "%s:%i: %s\n", filename_string, linenum, exception_string);
-
-    v8::String::Utf8Value sourceline(
-        isolate, message->GetSourceLine(context).ToLocalChecked());
-    const char *sourceline_string = ToCString(sourceline);
-    fprintf(stderr, "%s\n", sourceline_string);
-
-    int start = message->GetStartColumn(context).FromJust();
-    for (int i = 0; i < start; i++) {
-      fprintf(stderr, " ");
-    }
-    int end = message->GetEndColumn(context).FromJust();
-    for (int i = start; i < end; i++) {
-      fprintf(stderr, "^");
-    }
-    fprintf(stderr, "\n");
-    v8::Local<v8::Value> stack_trace_string;
-    if (tryCatch.StackTrace(context).ToLocal(&stack_trace_string) &&
-        stack_trace_string->IsString() &&
-        v8::Local<v8::String>::Cast(stack_trace_string)->Length() > 0) {
-      v8::String::Utf8Value stack_trace(isolate, stack_trace_string);
-      const char *stack_trace_string = ToCString(stack_trace);
-      fprintf(stderr, "%s\n", stack_trace_string);
-    }
-  }
-};
 
 // jsa::Values* -> v8::Local<v8::Value>*
 class ArgsConverter {
@@ -97,10 +56,11 @@ private:
 
 class HostFunctionProxy {
 public:
-  HostFunctionProxy(jsa::HostFunctionType hostFunction)
-      : hostFunction_(hostFunction) {}
+  HostFunctionProxy(jsa::HostFunctionType hostFunction) : hostFunction_(hostFunction) {}
 
-  jsa::HostFunctionType &getHostFunction() { return hostFunction_; }
+  jsa::HostFunctionType &getHostFunction() {
+    return hostFunction_;
+  }
 
 protected:
   jsa::HostFunctionType hostFunction_;
@@ -109,9 +69,7 @@ protected:
 v8::Global<v8::ObjectTemplate> hostObjectTemplate;
 
 struct HostObjectProxyBase {
-  HostObjectProxyBase(V8Context *ctx,
-                      const std::shared_ptr<jsa::HostObject> &sho)
-      : ctx_(ctx), hostObject(sho) {}
+  HostObjectProxyBase(V8Context *ctx, const std::shared_ptr<jsa::HostObject> &sho) : ctx_(ctx), hostObject(sho) {}
 
   V8Context *ctx_;
   std::shared_ptr<jsa::HostObject> hostObject;
@@ -130,14 +88,11 @@ void initV8Engine(const char *current_directory) {
   v8::V8::InitializePlatform(platform.get());
   v8::V8::Initialize();
   v8::Isolate::CreateParams createParams;
-  createParams.array_buffer_allocator =
-      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+  createParams.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
   isolate_ = v8::Isolate::New(createParams);
 }
 
-jsa::Value V8Context::evaluateJavaScript(const char *code,
-                                         const std::string &sourceURL,
-                                         int startLine) {
+jsa::Value V8Context::evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) {
   v8::Isolate::Scope isolate_scope(_isolate);
   v8::HandleScope handle_scope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
@@ -145,35 +100,33 @@ jsa::Value V8Context::evaluateJavaScript(const char *code,
   v8::TryCatch tryCatch(_isolate);
 
   v8::Local<v8::String> sourceCode =
-      v8::String::NewFromUtf8(_isolate, code, v8::NewStringType::kNormal)
-          .ToLocalChecked();
+    v8::String::NewFromUtf8(_isolate, code, v8::NewStringType::kNormal).ToLocalChecked();
   v8::Local<v8::String> sourceURLCode =
-      v8::String::NewFromUtf8(_isolate, sourceURL.c_str(),
-                              v8::NewStringType::kNormal)
-          .ToLocalChecked();
+    v8::String::NewFromUtf8(_isolate, sourceURL.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+  v8::Local<v8::Integer> lineOffset = v8::Integer::New(_isolate, startLine);
   v8::Local<v8::Script> script;
-  v8::ScriptOrigin origin(sourceURLCode);
+  v8::ScriptOrigin origin(sourceURLCode, lineOffset);
 
   if (!v8::Script::Compile(context, sourceCode, &origin).ToLocal(&script)) {
-    reportException(_isolate, tryCatch);
-    return jsa::Value::undefined();
+    reportException(tryCatch);
+    return jsa::Value::null();
   }
 
   v8::Local<v8::Value> result;
   if (!script->Run(context).ToLocal(&result)) {
     assert(tryCatch.HasCaught());
-    reportException(_isolate, tryCatch);
-    return jsa::Value::undefined();
+    reportException(tryCatch);
+    return jsa::Value::null();
   }
 
   return createValue(result);
 }
 
-V8Context::V8Context()
-    : ctxInvalid_(false)
+V8Context::V8Context(jsa::JSExceptionHandler handler)
+  : ctxInvalid_(false), handler_(handler)
 #ifndef NDEBUG
-      ,
-      objectCounter_(0), stringCounter_(0)
+    ,
+    objectCounter_(0), stringCounter_(0)
 #endif
 {
   assert(isolate_ != nullptr);
@@ -189,8 +142,7 @@ V8Context::V8Context()
   _context.Reset(_isolate, context);
   v8::Local<v8::Object> global = context->Global();
   v8::Local<v8::Value> globalValue = v8::Local<v8::Value>::Cast(global);
-  v8::Local<v8::String> globalKey =
-      v8::String::NewFromUtf8(_isolate, "global").ToLocalChecked();
+  v8::Local<v8::String> globalKey = v8::String::NewFromUtf8(_isolate, "global").ToLocalChecked();
   global->Set(context, globalKey, globalValue).ToChecked();
   _global.Reset(_isolate, global);
 }
@@ -201,14 +153,55 @@ V8Context::~V8Context() {
   _global.Reset();
 
 #ifndef NDEBUG
-  assert(objectCounter_ == 0 &&
-         "V8Context destroyed with a dangling API object");
-  assert(stringCounter_ == 0 &&
-         "V8Context destroyed with a dangling API string");
+  assert(objectCounter_ == 0 && "V8Context destroyed with a dangling API object");
+  assert(stringCounter_ == 0 && "V8Context destroyed with a dangling API string");
 #endif
 }
 
-bool V8Context::isValid() { return !ctxInvalid_.load(); }
+bool V8Context::isValid() {
+  return !ctxInvalid_.load();
+}
+
+void V8Context::reportException(v8::TryCatch &tryCatch) {
+  v8::HandleScope handleScope(_isolate);
+  v8::String::Utf8Value exception(_isolate, tryCatch.Exception());
+  const char *exception_string = ToCString(exception);
+  v8::Local<v8::Message> message = tryCatch.Message();
+  if (message.IsEmpty()) {
+    jsa::JSError error(*this, exception_string);
+    handler_(error);
+  } else {
+    v8::Local<v8::Context> context(_isolate->GetCurrentContext());
+
+    std::string errorMessage;
+    std::string errorStack;
+
+    v8::String::Utf8Value sourceline(_isolate, message->GetSourceLine(context).ToLocalChecked());
+    const char *sourceline_string = ToCString(sourceline);
+    errorMessage += sourceline_string;
+    errorMessage += '\n';
+    int start = message->GetStartColumn(context).FromJust();
+    for (int i = 0; i < start; i++) {
+      errorMessage += " ";
+    }
+    int end = message->GetEndColumn(context).FromJust();
+    for (int i = start; i < end; i++) {
+      errorMessage += "^";
+    }
+    v8::Local<v8::Value> stack_trace_string;
+    if (tryCatch.StackTrace(context).ToLocal(&stack_trace_string) && stack_trace_string->IsString() &&
+        v8::Local<v8::String>::Cast(stack_trace_string)->Length() > 0) {
+      v8::String::Utf8Value stack_trace(_isolate, stack_trace_string);
+      const char *stack_trace_string = ToCString(stack_trace);
+      errorStack = std::string(stack_trace_string);
+    }
+
+    jsa::JSError error(*this, errorMessage, errorStack);
+    handler_(error);
+  }
+};
+
+void V8Context::reportError(jsa::JSError &error) {}
 
 jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
   v8::HandleScope handleScope(_isolate);
@@ -225,14 +218,12 @@ jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
     bool result = value.As<v8::Boolean>()->BooleanValue(_isolate);
     return jsa::Value(result);
   } else if (value->IsString()) {
-    v8::Local<v8::String> str = v8::Local<v8::String>::New(
-        _isolate, v8::Local<v8::String>::Cast(value));
+    v8::Local<v8::String> str = v8::Local<v8::String>::New(_isolate, v8::Local<v8::String>::Cast(value));
     return jsa::Value(createString(str));
   } else if (value->IsStringObject()) {
     v8::Local<v8::StringObject> str = v8::Local<v8::StringObject>::Cast(value);
     v8::String::Utf8Value utf8Value(_isolate, str);
-    return jsa::Value(
-        this->createStringFromAscii(*utf8Value, strlen(*utf8Value)));
+    return jsa::Value(this->createStringFromAscii(*utf8Value, strlen(*utf8Value)));
   } else if (value->IsSymbol() || value->IsSymbolObject()) {
     v8::Local<v8::Symbol> sym = v8::Local<v8::Symbol>::Cast(value);
     return jsa::Value(createSymbol(sym));
@@ -244,8 +235,7 @@ jsa::Value V8Context::createValue(v8::Local<v8::Value> &value) {
     bool success = value->ToString(context).ToLocal(&result);
     if (success) {
       v8::String::Utf8Value utf8Value(_isolate, result);
-      fprintf(stderr, "unknown V8 value kind, val: %s \n",
-              ToCString(utf8Value));
+      fprintf(stderr, "unknown V8 value kind, val: %s \n", ToCString(utf8Value));
     } else {
       fprintf(stderr, "unknown V8 value kind");
     }
@@ -269,12 +259,9 @@ v8::Local<v8::Value> V8Context::valueRef(const jsa::Value &value) {
     return handleScope.Escape(symbolRef(value.getSymbol(*this)));
   } else if (value.isString()) {
     return handleScope.Escape(
-        v8::String::NewFromUtf8(_isolate,
-                                value.getString(*this).utf8(*this).c_str())
-            .ToLocalChecked());
+      v8::String::NewFromUtf8(_isolate, value.getString(*this).utf8(*this).c_str()).ToLocalChecked());
   } else if (value.isObject()) {
-    return handleScope.Escape(v8::Local<v8::Object>::New(
-        _isolate, objectRef(value.getObject(*this))));
+    return handleScope.Escape(v8::Local<v8::Object>::New(_isolate, objectRef(value.getObject(*this))));
   } else {
     // What are you?
     abort();
@@ -287,28 +274,31 @@ jsa::Object V8Context::global() {
   return createObject(global);
 }
 
-std::string V8Context::description() { return std::string(""); }
+std::string V8Context::description() {
+  return std::string("");
+}
 
-bool V8Context::isInspectable() { return false; }
+bool V8Context::isInspectable() {
+  return false;
+}
 
-void *V8Context::globalImpl() { return nullptr; }
+void *V8Context::globalImpl() {
+  return nullptr;
+}
 
 void V8Context::setDescription(const std::string &desc) {}
 
 #ifndef NDEBUG
-V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
-                                        v8::Local<v8::String> string,
+V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate, v8::Local<v8::String> string,
                                         std::atomic<intptr_t> &counter)
-    : counter_(counter), isolate_(isolate) {
+  : counter_(counter), isolate_(isolate) {
   // Since std::atomic returns a copy instead of a reference when calling
   // operator+= we must do this explicitly in the constructor
   counter_ += 1;
   str_.Reset(isolate, string);
 }
 #else
-V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate,
-                                        v8::Local<v8::String> string)
-    : isolate_(isolate) {
+V8Context::V8StringValue::V8StringValue(v8::Isolate *isolate, v8::Local<v8::String> string) : isolate_(isolate) {
   str_.Reset(isolate, string);
 }
 #endif
@@ -321,18 +311,17 @@ void V8Context::V8StringValue::invalidate() {
   delete this;
 }
 
-V8Context::V8SymbolValue::V8SymbolValue(v8::Isolate *isolate,
-                                        const std::atomic<bool> &ctxInvalid,
+V8Context::V8SymbolValue::V8SymbolValue(v8::Isolate *isolate, const std::atomic<bool> &ctxInvalid,
                                         v8::Local<v8::Symbol> sym
 #ifndef NDEBUG
                                         ,
                                         std::atomic<intptr_t> &counter
 #endif
                                         )
-    : ctxInvalid_(ctxInvalid), isolate_(isolate)
+  : ctxInvalid_(ctxInvalid), isolate_(isolate)
 #ifndef NDEBUG
-      ,
-      counter_(counter)
+    ,
+    counter_(counter)
 #endif
 {
 #ifndef NDEBUG
@@ -353,19 +342,17 @@ void V8Context::V8SymbolValue::invalidate() {
 }
 
 template <typename T>
-V8Context::V8ObjectValue<T>::V8ObjectValue(v8::Isolate *isolate,
-                                           const std::atomic<bool> &ctxInvalid,
-                                           v8::Local<v8::Object> &obj,
-                                           T *privateData
+V8Context::V8ObjectValue<T>::V8ObjectValue(v8::Isolate *isolate, const std::atomic<bool> &ctxInvalid,
+                                           v8::Local<v8::Object> &obj, T *privateData
 #ifndef NDEBUG
                                            ,
                                            std::atomic<intptr_t> &counter
 #endif
                                            )
-    : ctxInvalid_(ctxInvalid), isolate_(isolate), privateData_(privateData)
+  : ctxInvalid_(ctxInvalid), isolate_(isolate), privateData_(privateData)
 #ifndef NDEBUG
-      ,
-      counter_(counter)
+    ,
+    counter_(counter)
 #endif
 {
 #ifndef NDEBUG
@@ -374,8 +361,7 @@ V8Context::V8ObjectValue<T>::V8ObjectValue(v8::Isolate *isolate,
   obj_.Reset(isolate, obj);
 }
 
-template<typename T>
-void V8Context::V8ObjectValue<T>::invalidate() {
+template <typename T> void V8Context::V8ObjectValue<T>::invalidate() {
 #ifndef NDEBUG
   counter_ -= 1;
 #endif
@@ -390,15 +376,12 @@ void V8Context::V8ObjectValue<T>::invalidate() {
   delete this;
 }
 
-template<typename T>
-void V8Context::V8ObjectValue<T>::finalize(
-    const v8::WeakCallbackInfo<T> &data) {
+template <typename T> void V8Context::V8ObjectValue<T>::finalize(const v8::WeakCallbackInfo<T> &data) {
   T *parameter = data.GetParameter();
   delete parameter;
 }
 
-jsa::JSContext::PointerValue *
-V8Context::cloneString(const jsa::JSContext::PointerValue *pv) {
+jsa::JSContext::PointerValue *V8Context::cloneString(const jsa::JSContext::PointerValue *pv) {
   if (!pv) {
     return nullptr;
   }
@@ -407,8 +390,7 @@ V8Context::cloneString(const jsa::JSContext::PointerValue *pv) {
   return makeStringValue(string->str_.Get(_isolate));
 }
 
-jsa::JSContext::PointerValue *
-V8Context::cloneSymbol(const jsa::JSContext::PointerValue *pv) {
+jsa::JSContext::PointerValue *V8Context::cloneSymbol(const jsa::JSContext::PointerValue *pv) {
   if (!pv) {
     return nullptr;
   }
@@ -417,8 +399,7 @@ V8Context::cloneSymbol(const jsa::JSContext::PointerValue *pv) {
   return makeSymbolValue(symbol->sym_.Get(_isolate));
 }
 
-jsa::JSContext::PointerValue *
-V8Context::cloneObject(const jsa::JSContext::PointerValue *pv) {
+jsa::JSContext::PointerValue *V8Context::cloneObject(const jsa::JSContext::PointerValue *pv) {
   if (!pv) {
     return nullptr;
   }
@@ -428,8 +409,7 @@ V8Context::cloneObject(const jsa::JSContext::PointerValue *pv) {
   return makeObjectValue(obj, pointer->privateData_);
 }
 
-jsa::JSContext::PointerValue *
-V8Context::clonePropNameID(const jsa::JSContext::PointerValue *pv) {
+jsa::JSContext::PointerValue *V8Context::clonePropNameID(const jsa::JSContext::PointerValue *pv) {
   if (!pv) {
     return nullptr;
   }
@@ -437,27 +417,22 @@ V8Context::clonePropNameID(const jsa::JSContext::PointerValue *pv) {
   return makeStringValue(string->str_.Get(_isolate));
 }
 
-jsa::PropNameID V8Context::createPropNameIDFromAscii(const char *str,
-                                                     size_t length) {
+jsa::PropNameID V8Context::createPropNameIDFromAscii(const char *str, size_t length) {
   v8::HandleScope handleScope(_isolate);
-  v8::Local<v8::String> value =
-      v8::String::NewFromUtf8(_isolate, str).ToLocalChecked();
+  v8::Local<v8::String> value = v8::String::NewFromUtf8(_isolate, str).ToLocalChecked();
   return createPropNameID(value);
 }
 
-jsa::PropNameID V8Context::createPropNameIDFromUtf8(const uint8_t *utf8,
-                                                    size_t length) {
+jsa::PropNameID V8Context::createPropNameIDFromUtf8(const uint8_t *utf8, size_t length) {
   v8::HandleScope handleScope(_isolate);
-  v8::Local<v8::String> value =
-      v8::String::NewFromOneByte(_isolate, utf8).ToLocalChecked();
+  v8::Local<v8::String> value = v8::String::NewFromOneByte(_isolate, utf8).ToLocalChecked();
   return createPropNameID(value);
 }
 
 jsa::PropNameID V8Context::createPropNameIDFromString(const jsa::String &str) {
   v8::HandleScope handleScope(_isolate);
   std::string source = str.utf8(*this);
-  v8::Local<v8::String> value =
-      v8::String::NewFromUtf8(_isolate, source.c_str()).ToLocalChecked();
+  v8::Local<v8::String> value = v8::String::NewFromUtf8(_isolate, source.c_str()).ToLocalChecked();
   return createPropNameID(value);
 }
 
@@ -468,8 +443,7 @@ std::string V8Context::utf8(const jsa::PropNameID &propNameId) {
   return std::string(*utf8Value);
 }
 
-bool V8Context::compare(const jsa::PropNameID &left,
-                        const jsa::PropNameID &right) {
+bool V8Context::compare(const jsa::PropNameID &left, const jsa::PropNameID &right) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
@@ -485,17 +459,14 @@ std::string V8Context::symbolToString(const jsa::Symbol &sym) {
 jsa::String V8Context::createStringFromAscii(const char *str, size_t length) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::String> ref =
-      v8::String::NewFromUtf8(_isolate, str, v8::NewStringType::kNormal, length)
-          .ToLocalChecked();
+    v8::String::NewFromUtf8(_isolate, str, v8::NewStringType::kNormal, length).ToLocalChecked();
   return createString(ref);
 }
 
 jsa::String V8Context::createStringFromUtf8(const uint8_t *str, size_t length) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::String> ref =
-      v8::String::NewFromOneByte(_isolate, str, v8::NewStringType::kNormal,
-                                 length)
-          .ToLocalChecked();
+    v8::String::NewFromOneByte(_isolate, str, v8::NewStringType::kNormal, length).ToLocalChecked();
   return createString(ref);
 }
 
@@ -519,21 +490,18 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
   v8::Context::Scope contextScope(context);
 
   struct HostObjectMetaData : public HostObjectProxyBase {
-    HostObjectMetaData(V8Context *ctx,
-                       const std::shared_ptr<jsa::HostObject> &sho,
-                       v8::Isolate *isolate, v8::Local<v8::Context> v8Context)
-        : HostObjectProxyBase(ctx, sho), isolate(isolate) {
+    HostObjectMetaData(V8Context *ctx, const std::shared_ptr<jsa::HostObject> &sho, v8::Isolate *isolate,
+                       v8::Local<v8::Context> v8Context)
+      : HostObjectProxyBase(ctx, sho), isolate(isolate) {
       this->v8Context.Reset(isolate, v8Context);
     }
 
     static HostObjectMetaData *unwrap(v8::Local<v8::Object> holder) {
-      v8::Local<v8::External> field =
-          v8::Local<v8::External>::Cast(holder->GetInternalField(0));
+      v8::Local<v8::External> field = v8::Local<v8::External>::Cast(holder->GetInternalField(0));
       return static_cast<HostObjectMetaData *>(field->Value());
     }
 
-    static void namedGetter(v8::Local<v8::Name> property,
-                            const v8::PropertyCallbackInfo<v8::Value> &info) {
+    static void namedGetter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Value> &info) {
       HostObjectMetaData *p = unwrap(info.Holder());
       V8Context *ctx = p->ctx_;
       v8::HandleScope handleScope(p->isolate);
@@ -545,8 +513,7 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
         return;
       }
 
-      jsa::PropNameID nameId =
-          jsa::PropNameID::forString(*ctx, prop.getString(*ctx));
+      jsa::PropNameID nameId = jsa::PropNameID::forString(*ctx, prop.getString(*ctx));
       jsa::Value ret;
       try {
         ret = p->hostObject->get(*ctx, nameId);
@@ -555,23 +522,19 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
         p->isolate->ThrowException(exception);
       } catch (const std::exception &exception) {
         const char *what = exception.what();
-        v8::Local<v8::String> msg =
-            v8::String::NewFromUtf8(p->isolate, what).ToLocalChecked();
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(p->isolate, what).ToLocalChecked();
         p->isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
       } catch (...) {
-        auto excValue =
-            ctx->global()
-                .getPropertyAsFunction(*ctx, "Error")
-                .call(*ctx,
-                      std::string("Exception in HostObject::get(propName:") +
-                          nameId.utf8(*ctx) + std::string("): <unknown>"));
+        auto excValue = ctx->global()
+                          .getPropertyAsFunction(*ctx, "Error")
+                          .call(*ctx, std::string("Exception in HostObject::get(propName:") + nameId.utf8(*ctx) +
+                                        std::string("): <unknown>"));
         v8::Local<v8::Value> exception = ctx->valueRef(excValue);
         p->isolate->ThrowException(exception);
       }
       info.GetReturnValue().Set(ctx->valueRef(ret));
     }
-    static void namedSetter(v8::Local<v8::Name> property,
-                            v8::Local<v8::Value> value,
+    static void namedSetter(v8::Local<v8::Name> property, v8::Local<v8::Value> value,
                             const v8::PropertyCallbackInfo<v8::Value> &info) {
       HostObjectMetaData *p = unwrap(info.Holder());
       v8::HandleScope handleScope(p->isolate);
@@ -582,13 +545,10 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
 
       if (property->IsSymbol() || property->IsSymbolObject()) {
         p->isolate->ThrowException(
-            v8::String::NewFromUtf8(p->isolate,
-                                    "symbol kind key is not allowed")
-                .ToLocalChecked());
+          v8::String::NewFromUtf8(p->isolate, "symbol kind key is not allowed").ToLocalChecked());
       }
 
-      jsa::PropNameID nameId =
-          jsa::PropNameID::forString(*ctx, prop.getString(*ctx));
+      jsa::PropNameID nameId = jsa::PropNameID::forString(*ctx, prop.getString(*ctx));
       try {
         p->hostObject->set(*ctx, nameId, jsaValue);
       } catch (const jsa::JSError &error) {
@@ -596,38 +556,29 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
         p->isolate->ThrowException(exception);
       } catch (const std::exception &exception) {
         const char *what = exception.what();
-        v8::Local<v8::String> msg =
-            v8::String::NewFromUtf8(p->isolate, what).ToLocalChecked();
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(p->isolate, what).ToLocalChecked();
         p->isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
       } catch (...) {
-        auto excValue =
-            ctx->global()
-                .getPropertyAsFunction(*ctx, "Error")
-                .call(*ctx,
-                      std::string("Exception in HostObject::set(propName:") +
-                          nameId.utf8(*ctx) + std::string("): <unknown>"));
+        auto excValue = ctx->global()
+                          .getPropertyAsFunction(*ctx, "Error")
+                          .call(*ctx, std::string("Exception in HostObject::set(propName:") + nameId.utf8(*ctx) +
+                                        std::string("): <unknown>"));
         v8::Local<v8::Value> exception = ctx->valueRef(excValue);
         p->isolate->ThrowException(exception);
       }
 
       info.GetReturnValue().Set(v8::Undefined(p->isolate));
     }
-    static void namedQuery(v8::Local<v8::Name> property,
-                           const v8::PropertyCallbackInfo<v8::Integer> &info) {}
-    static void
-    namedDeleter(v8::Local<v8::Name> property,
-                 const v8::PropertyCallbackInfo<v8::Boolean> &info) {}
-    static void
-    namedEnumerator(const v8::PropertyCallbackInfo<v8::Array> &info) {
+    static void namedQuery(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Integer> &info) {}
+    static void namedDeleter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean> &info) {}
+    static void namedEnumerator(const v8::PropertyCallbackInfo<v8::Array> &info) {
       HostObjectMetaData *p = unwrap(info.Holder());
       V8Context *ctx = p->ctx_;
       v8::HandleScope handleScope(p->isolate);
       v8::Local<v8::Context> context = p->v8Context.Get(p->isolate);
       v8::Context::Scope contextScope(context);
-      std::vector<jsa::PropNameID> names =
-          p->hostObject->getPropertyNames(*ctx);
-      v8::Local<v8::Array> enumerator =
-          v8::Array::New(p->isolate, names.size());
+      std::vector<jsa::PropNameID> names = p->hostObject->getPropertyNames(*ctx);
+      v8::Local<v8::Array> enumerator = v8::Array::New(p->isolate, names.size());
       for (size_t i = 0; i < names.size(); i++) {
         v8::Local<v8::String> str = ctx->stringRef(names[i]);
         v8::Local<v8::Name> name = v8::Local<v8::Name>::Cast(str);
@@ -641,79 +592,66 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
   };
 
   if (hostObjectTemplate.IsEmpty()) {
-    v8::Local<v8::ObjectTemplate> rawTemplate =
-        v8::ObjectTemplate::New(_isolate);
+    v8::Local<v8::ObjectTemplate> rawTemplate = v8::ObjectTemplate::New(_isolate);
     rawTemplate->SetInternalFieldCount(1);
     // we only implemented handler callback for named property, not number
     // index. we may need to implement index handler when taken hostObject as
     // array.
     rawTemplate->SetHandler(v8::NamedPropertyHandlerConfiguration(
-        HostObjectMetaData::namedGetter, HostObjectMetaData::namedSetter,
-        HostObjectMetaData::namedQuery, HostObjectMetaData::namedDeleter,
-        HostObjectMetaData::namedEnumerator, v8::Local<v8::Value>(),
-        v8::PropertyHandlerFlags::kOnlyInterceptStrings));
+      HostObjectMetaData::namedGetter, HostObjectMetaData::namedSetter, HostObjectMetaData::namedQuery,
+      HostObjectMetaData::namedDeleter, HostObjectMetaData::namedEnumerator, v8::Local<v8::Value>(),
+      v8::PropertyHandlerFlags::kOnlyInterceptStrings));
     hostObjectTemplate.Reset(_isolate, rawTemplate);
   }
 
   auto metaData = new HostObjectMetaData(this, ho, isolate_, context);
   v8::Local<v8::External> external = v8::External::New(_isolate, metaData);
-  v8::Local<v8::ObjectTemplate> temp =
-      v8::Local<v8::ObjectTemplate>::New(_isolate, hostObjectTemplate);
+  v8::Local<v8::ObjectTemplate> temp = v8::Local<v8::ObjectTemplate>::New(_isolate, hostObjectTemplate);
   v8::Local<v8::Object> object = temp->NewInstance(context).ToLocalChecked();
   object->SetInternalField(0, external);
   return createObject(object, metaData);
 }
 
-std::shared_ptr<jsa::HostObject>
-V8Context::getHostObject(const jsa::Object &obj) {
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
+std::shared_ptr<jsa::HostObject> V8Context::getHostObject(const jsa::Object &obj) {
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> object = pointer->obj_.Get(_isolate);
   v8::Local<v8::External> external = v8::Local<v8::External>::Cast(object->GetInternalField(0));
-  HostObjectProxyBase* proxyBase = static_cast<HostObjectProxyBase *>(external->Value());
+  HostObjectProxyBase *proxyBase = static_cast<HostObjectProxyBase *>(external->Value());
   return proxyBase->hostObject;
 }
 
 jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
   v8::Local<v8::Function> function = v8::Local<v8::Function>::Cast(pointer->obj_.Get(_isolate));
   v8::Local<v8::External> hostFunction = v8::Local<v8::External>::Cast(
-      function->Get(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToLocalChecked());
+    function->Get(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToLocalChecked());
   HostFunctionProxy *proxy = static_cast<HostFunctionProxy *>(hostFunction->Value());
   return proxy->getHostFunction();
 }
 
-jsa::Value V8Context::getProperty(const jsa::Object &obj,
-                                  const jsa::String &name) {
+jsa::Value V8Context::getProperty(const jsa::Object &obj, const jsa::String &name) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   v8::Local<v8::Object> object = pointer->obj_.Get(pointer->isolate_);
   std::string cKey = name.utf8(*this);
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
   v8::Local<v8::Value> result = object->Get(context, key).ToLocalChecked();
   return createValue(result);
 }
 
-jsa::Value V8Context::getProperty(const jsa::Object &obj,
-                                  const jsa::PropNameID &name) {
+jsa::Value V8Context::getProperty(const jsa::Object &obj, const jsa::PropNameID &name) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
 
   v8::Local<v8::Object> object = objectRef(obj);
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
   v8::Local<v8::Value> result = object->Get(context, key).ToLocalChecked();
   return createValue(result);
 }
@@ -723,47 +661,35 @@ bool V8Context::hasProperty(const jsa::Object &obj, const jsa::String &name) {
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
   v8::Local<v8::Object> object = objectRef(obj);
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
   return object->Has(context, key).ToChecked();
 }
 
-bool V8Context::hasProperty(const jsa::Object &obj,
-                            const jsa::PropNameID &name) {
+bool V8Context::hasProperty(const jsa::Object &obj, const jsa::PropNameID &name) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
   v8::Local<v8::Object> object = objectRef(obj);
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
   return object->Has(context, key).ToChecked();
 }
 
-void V8Context::setPropertyValue(jsa::Object &obj, const jsa::String &name,
-                                 const jsa::Value &val) {
+void V8Context::setPropertyValue(jsa::Object &obj, const jsa::String &name, const jsa::Value &val) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
   v8::Local<v8::Object> object = objectRef(obj);
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(object->GetIsolate(), name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(object->GetIsolate(), name.utf8(*this).c_str()).ToLocalChecked();
   v8::Local<v8::Value> value = valueRef(val);
   object->Set(context, key, value).ToChecked();
 }
 
-void V8Context::setPropertyValue(jsa::Object &obj, const jsa::PropNameID &name,
-                                 const jsa::Value &val) {
+void V8Context::setPropertyValue(jsa::Object &obj, const jsa::PropNameID &name, const jsa::Value &val) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  v8::Local<v8::Object> object =
-      v8::Local<v8::Object>::New(_isolate, objectRef(obj));
-  v8::Local<v8::String> key =
-      v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-          .ToLocalChecked();
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
   v8::Local<v8::Value> value = valueRef(val);
   object->Set(context, key, value).ToChecked();
 }
@@ -776,28 +702,24 @@ bool V8Context::isArray(const jsa::Object &obj) const {
 
 bool V8Context::isArrayBuffer(const jsa::Object &obj) const {
   v8::HandleScope handleScope(_isolate);
-  v8::Local<v8::Object> object =
-      v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(_isolate, objectRef(obj));
   return object->IsArrayBuffer();
 }
 
 bool V8Context::isArrayBufferView(const jsa::Object &obj) const {
   v8::HandleScope handleScope(_isolate);
-  v8::Local<v8::Object> object =
-      v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(_isolate, objectRef(obj));
   return object->IsArrayBufferView();
 }
 
 bool V8Context::isFunction(const jsa::Object &obj) const {
   v8::HandleScope handleScope(_isolate);
-  v8::Local<v8::Object> object =
-      v8::Local<v8::Object>::New(_isolate, objectRef(obj));
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::New(_isolate, objectRef(obj));
   return object->IsFunction();
 }
 
 bool V8Context::isHostObject(const jsa::Object &obj) const {
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> object = pointer->obj_.Get(_isolate);
   if (object->InternalFieldCount() == 0) {
@@ -809,8 +731,7 @@ bool V8Context::isHostObject(const jsa::Object &obj) const {
 }
 
 bool V8Context::isHostFunction(const jsa::Function &func) const {
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
@@ -824,11 +745,10 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
   v8::Context::Scope contextScope(context);
   v8::Local<v8::Object> object = objectRef(obj);
   v8::Local<v8::Array> names =
-      object
-          ->GetPropertyNames(context, v8::KeyCollectionMode::kOwnOnly,
-                             v8::PropertyFilter::ALL_PROPERTIES,
-                             v8::IndexFilter::kIncludeIndices)
-          .ToLocalChecked();
+    object
+      ->GetPropertyNames(context, v8::KeyCollectionMode::kOwnOnly, v8::PropertyFilter::ALL_PROPERTIES,
+                         v8::IndexFilter::kIncludeIndices)
+      .ToLocalChecked();
   jsa::Array result = createArray(names->Length());
 
   for (size_t i = 0; i < names->Length(); i++) {
@@ -858,35 +778,32 @@ jsa::Array V8Context::createArray(size_t length) {
 }
 
 //
-template<typename T>
-struct ArrayBufferDealloactorProxy {
+template <typename T> struct ArrayBufferDealloactorProxy {
   ArrayBufferDealloactorProxy() = delete;
 
-  ArrayBufferDealloactorProxy(jsa::ArrayBufferDeallocator<T> deallocator,
-                              T *data)
-      : _deallocator(deallocator), _data(data) {}
+  ArrayBufferDealloactorProxy(jsa::ArrayBufferDeallocator<T> deallocator, T *data)
+    : _deallocator(deallocator), _data(data) {}
 
-  ~ArrayBufferDealloactorProxy() { _deallocator(_data); }
+  ~ArrayBufferDealloactorProxy() {
+    _deallocator(_data);
+  }
 
   jsa::ArrayBufferDeallocator<T> _deallocator;
   T *_data;
 };
 
-jsa::ArrayBuffer
-V8Context::createArrayBuffer(uint8_t *data, size_t length,
-                             jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
+jsa::ArrayBuffer V8Context::createArrayBuffer(uint8_t *data, size_t length,
+                                              jsa::ArrayBufferDeallocator<uint8_t> deallocator) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  v8::Local<v8::ArrayBuffer> buffer =
-      v8::ArrayBuffer::New(_isolate, data, length);
+  v8::Local<v8::ArrayBuffer> buffer = v8::ArrayBuffer::New(_isolate, data, length);
   v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(buffer);
   auto proxy = new ArrayBufferDealloactorProxy<uint8_t>(deallocator, data);
 
   // when v8 arrayBuffer is gc collected, it will recycle
   // ArrayBufferDealloactorProxy's memory
-  return createObject<ArrayBufferDealloactorProxy<uint8_t>>(object, proxy)
-      .getArrayBuffer(*this);
+  return createObject<ArrayBufferDealloactorProxy<uint8_t>>(object, proxy).getArrayBuffer(*this);
 }
 
 size_t V8Context::size(const jsa::Array &arr) {
@@ -922,18 +839,15 @@ void *V8Context::data(const jsa::ArrayBufferView &arrayBufferView) {
   assert(isArrayBufferView(arrayBufferView));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> obj = objectRef(arrayBufferView);
-  v8::Local<v8::ArrayBufferView> bufferView =
-      v8::Local<v8::ArrayBufferView>::Cast(obj);
+  v8::Local<v8::ArrayBufferView> bufferView = v8::Local<v8::ArrayBufferView>::Cast(obj);
   return bufferView->Buffer()->GetContents().Data();
 }
 
-jsa::ArrayBufferViewType
-V8Context::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
+jsa::ArrayBufferViewType V8Context::arrayBufferViewType(const jsa::ArrayBufferView &arrayBufferView) {
   assert(isArrayBufferView(arrayBufferView));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Object> obj = objectRef(arrayBufferView);
-  v8::Local<v8::ArrayBufferView> bufferView =
-      v8::Local<v8::ArrayBufferView>::Cast(obj);
+  v8::Local<v8::ArrayBufferView> bufferView = v8::Local<v8::ArrayBufferView>::Cast(obj);
   if (bufferView->IsInt8Array()) {
     return jsa::ArrayBufferViewType::Int8Array;
   } else if (bufferView->IsInt16Array()) {
@@ -967,8 +881,7 @@ jsa::Value V8Context::getValueAtIndex(const jsa::Array &arr, size_t i) {
   return createValue(result);
 }
 
-void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i,
-                                    const jsa::Value &value) {
+void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i, const jsa::Value &value) {
   assert(isArray(arr));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
@@ -979,20 +892,16 @@ void V8Context::setValueAtIndexImpl(jsa::Array &arr, size_t i,
   assert(success);
 }
 
-jsa::Function
-V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
-                                          unsigned int paramCount,
-                                          jsa::HostFunctionType func) {
+jsa::Function V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name, unsigned int paramCount,
+                                                        jsa::HostFunctionType func) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
 
   struct HostFunctionMetaData : public HostFunctionProxy {
-    HostFunctionMetaData(V8Context *ctx, v8::Isolate *isolate,
-                         v8::Local<v8::Context> v8Context,
+    HostFunctionMetaData(V8Context *ctx, v8::Isolate *isolate, v8::Local<v8::Context> v8Context,
                          jsa::HostFunctionType f)
-        : HostFunctionProxy(std::move(f)), ctx(ctx),
-          isolate(isolate) {
+      : HostFunctionProxy(std::move(f)), ctx(ctx), isolate(isolate) {
       this->v8Context.Reset(isolate, v8Context);
     }
 
@@ -1031,14 +940,11 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
         isolate->ThrowException(msg);
       } catch (const std::exception &exception) {
         const char *what = exception.what();
-        v8::Local<v8::String> msg =
-            v8::String::NewFromUtf8(isolate, what).ToLocalChecked();
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(isolate, what).ToLocalChecked();
         isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
       } catch (...) {
         std::string exceptionString("Exception in HostFunction: <unknown>");
-        v8::Local<v8::String> msg =
-            v8::String::NewFromUtf8(isolate, exceptionString.c_str())
-                .ToLocalChecked();
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(isolate, exceptionString.c_str()).ToLocalChecked();
         isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
       }
       return escapeScope.Escape(res);
@@ -1060,57 +966,48 @@ V8Context::createFunctionFromHostFunction(const jsa::PropNameID &name,
   };
 
   v8::Local<v8::Function> function =
-      v8::Function::New(context, callback, hostCallback, (int) paramCount)
-          .ToLocalChecked();
+    v8::Function::New(context, callback, hostCallback, (int)paramCount).ToLocalChecked();
 
-  function->SetName(v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str())
-                        .ToLocalChecked());
-  function->Set(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked(), hostCallback).ToChecked();
+  function->SetName(v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked());
+  function->Set(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked(), hostCallback)
+    .ToChecked();
   v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
   return createObject(funcObject, proxy).getFunction(*this);
 }
 
-jsa::Value V8Context::call(const jsa::Function &function,
-                           const jsa::Value &jsThis, const jsa::Value *args,
+jsa::Value V8Context::call(const jsa::Function &function, const jsa::Value &jsThis, const jsa::Value *args,
                            size_t count) {
   assert(isFunction(function));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  v8::Local<v8::Function> func =
-      v8::Local<v8::Function>::Cast(objectRef(function));
+  v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(objectRef(function));
   v8::Local<v8::Value> thisVal = valueRef(jsThis);
   v8::Local<v8::Value> result;
   v8::TryCatch tryCatch(_isolate);
-  bool success =
-      func->Call(context, thisVal, count, ArgsConverter(*this, args, count))
-          .ToLocal(&result);
+  bool success = func->Call(context, thisVal, count, ArgsConverter(*this, args, count)).ToLocal(&result);
 
   if (!success) {
-    reportException(_isolate, tryCatch);
-    return jsa::Value::undefined();
+    reportException(tryCatch);
+    return jsa::Value::null();
   }
 
   return createValue(result);
 }
 
-jsa::Value V8Context::callAsConstructor(const jsa::Function &function,
-                                        const jsa::Value *args, size_t count) {
+jsa::Value V8Context::callAsConstructor(const jsa::Function &function, const jsa::Value *args, size_t count) {
   assert(isFunction(function));
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
-  v8::Local<v8::Function> func =
-      v8::Local<v8::Function>::Cast(objectRef(function));
+  v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(objectRef(function));
   v8::TryCatch tryCatch(_isolate);
   v8::Local<v8::Value> result;
 
-  bool success =
-      func->CallAsConstructor(context, count, ArgsConverter(*this, args, count))
-          .ToLocal(&result);
+  bool success = func->CallAsConstructor(context, count, ArgsConverter(*this, args, count)).ToLocal(&result);
   if (!success) {
-    reportException(_isolate, tryCatch);
-    return jsa::Value::undefined();
+    reportException(tryCatch);
+    return jsa::Value::null();
   }
 
   return createValue(result);
@@ -1158,18 +1055,15 @@ v8::Local<v8::String> V8Context::stringRef(const jsa::String &str) const {
   return handleScope.Escape(pointer->str_.Get(pointer->isolate_));
 }
 
-v8::Local<v8::String>
-V8Context::stringRef(const jsa::PropNameID &propNameId) const {
+v8::Local<v8::String> V8Context::stringRef(const jsa::PropNameID &propNameId) const {
   v8::EscapableHandleScope handleScope(_isolate);
-  auto pointer =
-      static_cast<const V8StringValue *>(getPointerValue(propNameId));
+  auto pointer = static_cast<const V8StringValue *>(getPointerValue(propNameId));
   return handleScope.Escape(pointer->str_.Get(pointer->isolate_));
 }
 
 v8::Local<v8::Object> V8Context::objectRef(const jsa::Object &obj) const {
   v8::EscapableHandleScope handleScope(_isolate);
-  auto pointer =
-      static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(obj));
   return handleScope.Escape(pointer->obj_.Get(pointer->isolate_));
 }
 
@@ -1189,14 +1083,11 @@ jsa::Object V8Context::createObject(v8::Local<v8::Object> &object) const {
   return make<jsa::Object>(makeObjectValue<void *>(object, nullptr));
 }
 
-template<typename T>
-jsa::Object V8Context::createObject(v8::Local<v8::Object> &object,
-                                    T *privateData) const {
+template <typename T> jsa::Object V8Context::createObject(v8::Local<v8::Object> &object, T *privateData) const {
   return make<jsa::Object>(makeObjectValue(object, privateData));
 }
 
-jsa::JSContext::PointerValue *
-V8Context::makeSymbolValue(v8::Local<v8::Symbol> sym) const {
+jsa::JSContext::PointerValue *V8Context::makeSymbolValue(v8::Local<v8::Symbol> sym) const {
 #ifndef NDEBUG
   return new V8SymbolValue(_isolate, ctxInvalid_, sym, symbolCounter_);
 #else
@@ -1204,8 +1095,7 @@ V8Context::makeSymbolValue(v8::Local<v8::Symbol> sym) const {
 #endif
 }
 
-jsa::JSContext::PointerValue *
-V8Context::makeStringValue(v8::Local<v8::String> ref) const {
+jsa::JSContext::PointerValue *V8Context::makeStringValue(v8::Local<v8::String> ref) const {
   if (ref.IsEmpty()) {
     ref = getEmptyString(_isolate);
   }
@@ -1217,21 +1107,21 @@ V8Context::makeStringValue(v8::Local<v8::String> ref) const {
 #endif
 }
 
-template<typename T>
-jsa::JSContext::PointerValue *
-V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
+template <typename T>
+jsa::JSContext::PointerValue *V8Context::makeObjectValue(v8::Local<v8::Object> &obj, T *privateData) const {
 #ifndef NDEBUG
-  return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData,
-                              objectCounter_);
+  return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData, objectCounter_);
 #else
   return new V8ObjectValue<T>(_isolate, ctxInvalid_, obj, privateData);
 #endif
 }
 
-V8Instrumentation &V8Context::instrumentation() { return *inst; }
+V8Instrumentation &V8Context::instrumentation() {
+  return *inst;
+}
 
-std::unique_ptr<jsa::JSContext> createJSContext() {
-  return std::make_unique<V8Context>();
+std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler) {
+  return std::make_unique<V8Context>(handler);
 }
 
 } // namespace jsa_v8

@@ -13,12 +13,12 @@ Object.defineProperty(global, 'devicePixelRatio', {
   configurable: false,
   get() {
     return krakenWindow.devicePixelRatio;
-  }
+  },
 });
 
 Object.defineProperty(global, 'window', {
   enumerable: true,
   writable: false,
+  configurable: false,
   value: global,
-  configurable: false
 });

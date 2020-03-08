@@ -7,6 +7,7 @@ library kraken;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/src/bridge/from_native.dart';
 
 import 'bridge.dart';
 import 'element.dart';
@@ -26,6 +27,11 @@ void connect(bool showPerformanceOverlay) {
     if (_connectedCallback != null) {
       _connectedCallback();
     }
+
+    addOnJSErrorListener((String errmsg) {
+      print(errmsg);
+    });
+
     RendererBinding.instance.addPostFrameCallback((time) {
       invokeOnloadCallback();
     });

@@ -69,7 +69,7 @@ Value JSBlob::get(JSContext &context, const PropNameID &name) {
 
   // lower method of new Blob();
   if (_name == "size") {
-    return Value((int) size);
+    return Value((int)size);
   } else if (_name == "type") {
     return String::createFromUtf8(context, mimeType);
   } else if (_name == "slice") {
@@ -100,45 +100,35 @@ std::vector<PropNameID> JSBlob::getPropertyNames(JSContext &context) {
   return propertyNames;
 }
 
-Value JSBlob::constructor(JSContext &context, const Value &thisVal,
-                          const Value *args, size_t count) {
+Value JSBlob::constructor(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   BlobBuilder builder;
 
   if (count == 0) {
-    return Object::createFromHostObject(
-        context, std::make_shared<JSBlob>(builder.finalize()));
+    return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize()));
   }
 
   const Value &array = args[0];
   const Value &options = args[1];
 
   if (!array.isObject() || !array.getObject(context).isArray(context)) {
-    KRAKEN_LOG(ERROR) << "Failed to construct 'Blob': The provided value cannot be converted to a sequence";
-    return Value::undefined();
+    throw JSError(context, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");
   }
 
   if (options.isUndefined()) {
     Value val = Value(context, array);
     builder.append(context, val);
-    return Object::createFromHostObject(
-        context, std::make_shared<JSBlob>(builder.finalize()));
+    return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize()));
   }
 
   if (!options.isObject()) {
-    KRAKEN_LOG(ERROR) << "Failed to construct 'Blob': parameter 2 ('options') "
-                         "is not an object";
-    return Value::undefined();
+    throw JSError(context, "Failed to construct 'Blob': parameter 2 ('options') "
+                           "is not an object");
   }
 
-  auto mimeType = args[1]
-      .getObject(context)
-      .getProperty(context, "type")
-      .getString(context)
-      .utf8(context);
+  auto mimeType = args[1].getObject(context).getProperty(context, "type").getString(context).utf8(context);
   Value val = Value(context, args[0]);
   builder.append(context, val);
-  return Object::createFromHostObject(
-      context, std::make_shared<JSBlob>(builder.finalize(), mimeType));
+  return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize(), mimeType));
 }
 
 Value JSBlob::slice(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -169,8 +159,7 @@ Value JSBlob::slice(JSContext &context, const Value &thisVal, const Value *args,
 
   std::vector<uint8_t> newData;
   newData.reserve(blob->_data.size() - (end - start));
-  newData.insert(newData.begin(), blob->_data.begin() + start,
-                 blob->_data.end() - (blob->_data.size() - end));
+  newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
   return Object::createFromHostObject(context, std::make_shared<JSBlob>(newData, mimeType));
 }
 
@@ -181,17 +170,16 @@ Value JSBlob::text(JSContext &context, const Value &thisVal, const Value *args, 
 
 Value JSBlob::arrayBuffer(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   std::shared_ptr<JSBlob> blob = thisVal.getObject(context).getHostObject<JSBlob>(context);
-  return ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t* bytes) {
+  return ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
     // there is no need to collect blob's memory
   });
 }
 
 void bindBlob(std::unique_ptr<JSContext> &context) {
-  JSA_SET_PROPERTY(
-      *context, context->global(), "__kraken_blob__",
-      Function::createFromHostFunction(
-          *context, PropNameID::forAscii(*context, "__kraken_blob__"), 2, JSBlob::constructor));
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_blob__",
+                   Function::createFromHostFunction(*context, PropNameID::forAscii(*context, "__kraken_blob__"), 2,
+                                                    JSBlob::constructor));
 }
 
-} // namespace bindings
+} // namespace binding
 } // namespace kraken

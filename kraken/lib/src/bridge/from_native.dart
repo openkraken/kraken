@@ -263,8 +263,12 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
   return requestBatchUpdate((Duration timeStamp) {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -283,8 +287,12 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setTimeout(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -304,8 +312,12 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setInterval(timeout, () {
-    DartAsyncCallback func = callback.asFunction();
-    func(context);
+    try {
+      DartAsyncCallback func = callback.asFunction();
+      func(context);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -343,8 +355,12 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
   return requestAnimationFrame((double highResTimeStamp) {
-    DartRAFAsyncCallback func = callback.asFunction();
-    func(context, highResTimeStamp);
+    try {
+      DartRAFAsyncCallback func = callback.asFunction();
+      func(context, highResTimeStamp);
+    } catch (e, stack) {
+      print('Dart Error: $e \n $stack');
+    }
   });
 }
 
@@ -543,6 +559,34 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
+typedef Native_OnJSError = Void Function(Pointer<Utf8>);
+typedef Native_RegisterOnJSError = Void Function(
+    Pointer<NativeFunction<Native_OnJSError>>);
+typedef Dart_RegisterOnJSError = void Function(
+    Pointer<NativeFunction<Native_OnJSError>>);
+
+final Dart_RegisterOnJSError _registerOnJSError = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterOnJSError>>('registerOnJSError')
+    .asFunction();
+
+typedef JSErrorListener = void Function(String);
+JSErrorListener _listener;
+void addOnJSErrorListener(JSErrorListener listener) {
+  _listener = listener;
+}
+
+void _onJSError(Pointer<Utf8> charStr) {
+  if (_listener == null) return;
+  String msg = Utf8.fromUtf8(charStr);
+  _listener(msg);
+}
+
+void registerOnJSError() {
+  Pointer<NativeFunction<Native_OnJSError>> pointer =
+  Pointer.fromFunction(_onJSError);
+  _registerOnJSError(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -560,4 +604,5 @@ void registerDartMethodsToCpp() {
   registerStartFlushCallbacksInUIThread();
   registerStopFlushCallbacksInUIThread();
   registerToBlob();
+  registerOnJSError();
 }

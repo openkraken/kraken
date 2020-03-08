@@ -1,25 +1,71 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
-#include <js_error.h>
+#include "js_error.h"
+#include "js_type.h"
 
 namespace alibaba {
 namespace jsa {
-JSError::JSError(JSContext &context, Value &&value) { setValue(context, std::move(value)); }
+
+namespace {
+#ifdef KRAKEN_JSC_ENGINE
+std::string reformatStack(std::string const &&stack) {
+  std::string formatted;
+  formatted.reserve(stack.length());
+
+  const std::string prefix = "    at ";
+
+  formatted += prefix;
+  bool hasName = false;
+
+  for (size_t i = 0; i < stack.length(); i++) {
+    if (stack[i] == '@') {
+      formatted += " (";
+      hasName = true;
+    } else if (stack[i] == '[') {
+      size_t nextBracket = stack.find(']', i);
+      i += nextBracket - i;
+    } else if (stack[i] == '\n') {
+      if (hasName) {
+        formatted += ')';
+      }
+
+      if (formatted == prefix) {
+        formatted = "";
+      } else {
+        formatted += '\n';
+      }
+      hasName = false;
+      formatted += "    at ";
+    } else {
+      formatted += stack[i];
+    }
+  }
+
+  if (hasName) {
+    formatted += ')';
+  }
+  return formatted;
+}
+#endif
+} // namespace
+
+JSError::JSError(JSContext &context, Value &&value) {
+  setValue(context, std::move(value));
+}
 
 JSError::JSError(JSContext &context, std::string msg) : message_(std::move(msg)) {
   try {
-    setValue(context,
-             context.global().getPropertyAsFunction(context, "Error").call(context, message_));
+    setValue(context, context.global().getPropertyAsFunction(context, "Error").call(context, message_));
   } catch (...) {
     setValue(context, Value());
   }
 }
 
 JSError::JSError(JSContext &context, std::string msg, std::string stack)
-    : message_(std::move(msg)), stack_(std::move(stack)) {
+  : message_(std::move(msg)), stack_(std::move(stack)) {
   try {
     Object e(context);
     e.setProperty(context, "message", String::createFromUtf8(context, message_));
@@ -30,8 +76,7 @@ JSError::JSError(JSContext &context, std::string msg, std::string stack)
   }
 }
 
-JSError::JSError(std::string what, JSContext &context, Value &&value)
-    : JSAException(std::move(what)) {
+JSError::JSError(std::string what, JSContext &context, Value &&value) : JSAException(std::move(what)) {
   setValue(context, std::move(value));
 }
 
@@ -41,6 +86,13 @@ void JSError::setValue(JSContext &context, Value &&value) {
   try {
     if ((message_.empty() || stack_.empty()) && value_->isObject()) {
       auto obj = value_->getObject(context);
+
+      if (kind_.empty()) {
+        jsa::Value kind = obj.getProperty(context, "name");
+        if (!kind.isUndefined()) {
+          kind_ = kind.toString(context).utf8(context);
+        }
+      }
 
       if (message_.empty()) {
         jsa::Value message = obj.getProperty(context, "message");
@@ -52,7 +104,11 @@ void JSError::setValue(JSContext &context, Value &&value) {
       if (stack_.empty()) {
         jsa::Value stack = obj.getProperty(context, "stack");
         if (!stack.isUndefined()) {
+#ifdef KRAKEN_JSC_ENGINE
+          stack_ = reformatStack(stack.toString(context).utf8(context));
+#elif KRAKEN_V8_ENGINE
           stack_ = stack.toString(context).utf8(context);
+#endif
         }
       }
     }
@@ -66,7 +122,11 @@ void JSError::setValue(JSContext &context, Value &&value) {
     }
 
     if (what_.empty()) {
-      what_ = message_ + "\n\n" + stack_;
+      if (kind_.empty()) {
+        what_ = "\n" + message_ + "\n" + stack_;
+      } else {
+        what_ = "\n" + kind_ + ": " + message_ + "\n" + stack_;
+      }
     }
   } catch (...) {
     message_ = "[Exception caught creating message string]";

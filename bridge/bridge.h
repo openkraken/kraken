@@ -6,11 +6,11 @@
 #ifndef KRAKEN_JS_BRIDGE_H_
 #define KRAKEN_JS_BRIDGE_H_
 
-#include "bindings/kraken.h"
+#include "bindings/KOM/screen.h"
 #include "bindings/KOM/websocket.h"
 #include "bindings/KOM/window.h"
-#include "bindings/KOM/websocket.h"
-#include "bindings/KOM/screen.h"
+
+#include "bindings/kraken.h"
 #include <atomic>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
@@ -24,19 +24,22 @@ private:
   std::shared_ptr<kraken::binding::JSWebSocket> websocket_;
   std::shared_ptr<kraken::binding::JSScreen> screen_;
   std::shared_ptr<kraken::binding::JSWindow> window_;
+  alibaba::jsa::JSExceptionHandler handler_;
 
 public:
-  JSBridge();
+  JSBridge() = delete;
+  JSBridge(alibaba::jsa::JSExceptionHandler handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-  alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url,
-                      int startLine);
+  alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 
-  alibaba::jsa::JSContext *getContext() const { return context.get(); }
+  alibaba::jsa::JSContext *getContext() const {
+    return context.get();
+  }
 
 #ifndef ENABLE_TEST
   alibaba::jsa::Value getGlobalValue(std::string code);

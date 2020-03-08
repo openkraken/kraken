@@ -1,15 +1,15 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef JSA_JSCONTEXT_H
 #define JSA_JSCONTEXT_H
 
+#include "macros.h"
 #include <functional>
 #include <memory>
 #include <vector>
-#include "macros.h"
 
 namespace alibaba {
 namespace jsa {
@@ -31,8 +31,7 @@ class Scope;
 class JSAException;
 class JSError;
 
-template<typename T>
-using ArrayBufferDeallocator = void (*)(T* bytes);
+template <typename T> using ArrayBufferDeallocator = void (*)(T *bytes);
 
 /// A function which has this type can be registered as a function
 /// callable from JavaScript using Function::createFromHostFunction().
@@ -45,9 +44,10 @@ using ArrayBufferDeallocator = void (*)(T* bytes);
 /// HostFunctions may or may not be called in strict mode; that is `thisVal`
 /// can be any value - it will not necessarily be coerced to an object or
 /// or set to the global object.
-using HostFunctionType = std::function<Value(
-    JSContext &context, const Value &thisVal,
-                                             const Value *args, size_t count)>;
+using HostFunctionType =
+  std::function<Value(JSContext &context, const Value &thisVal, const Value *args, size_t count)>;
+
+using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
 
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
@@ -127,9 +127,7 @@ public:
   /// through the JSA API. For example, it will be much slower to use this to
   /// call a global function than using the JSA APIs to read the function
   /// property from the global object and then calling it explicitly.
-  virtual Value evaluateJavaScript(const char* code,
-                                   const std::string &sourceURL,
-                                   int startLine) = 0;
+  virtual Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) = 0;
 
   /// \return the global object
   virtual Object global() = 0;
@@ -147,6 +145,8 @@ public:
   /// use this API unless you know what you're doing.
   virtual bool isInspectable() = 0;
 
+  virtual void reportError(jsa::JSError &error) = 0;
+
   /// \return an interface to extract metrics from this \c Runtime.  The default
   /// implementation of this function returns an \c Instrumentation instance
   /// which returns no metrics.
@@ -158,6 +158,7 @@ public:
 
   /// verify is JS Engine is ready to use
   virtual bool isValid() = 0;
+
 protected:
   friend class Pointer;
   friend class PropNameID;
@@ -194,10 +195,8 @@ protected:
   virtual PointerValue *cloneObject(const JSContext::PointerValue *pv) = 0;
   virtual PointerValue *clonePropNameID(const JSContext::PointerValue *pv) = 0;
 
-  virtual PropNameID createPropNameIDFromAscii(const char *str,
-                                               size_t length) = 0;
-  virtual PropNameID createPropNameIDFromUtf8(const uint8_t *utf8,
-                                              size_t length) = 0;
+  virtual PropNameID createPropNameIDFromAscii(const char *str, size_t length) = 0;
+  virtual PropNameID createPropNameIDFromUtf8(const uint8_t *utf8, size_t length) = 0;
   virtual PropNameID createPropNameIDFromString(const String &str) = 0;
   virtual std::string utf8(const PropNameID &) = 0;
   virtual bool compare(const PropNameID &, const PropNameID &) = 0;
@@ -217,10 +216,8 @@ protected:
   virtual Value getProperty(const Object &, const String &name) = 0;
   virtual bool hasProperty(const Object &, const PropNameID &name) = 0;
   virtual bool hasProperty(const Object &, const String &name) = 0;
-  virtual void setPropertyValue(Object &, const PropNameID &name,
-                                const Value &value) = 0;
-  virtual void setPropertyValue(Object &, const String &name,
-                                const Value &value) = 0;
+  virtual void setPropertyValue(Object &, const PropNameID &name, const Value &value) = 0;
+  virtual void setPropertyValue(Object &, const String &name, const Value &value) = 0;
 
   virtual bool isArray(const Object &) const = 0;
   virtual bool isArrayBuffer(const Object &) const = 0;
@@ -234,7 +231,7 @@ protected:
   virtual Value lockWeakObject(const WeakObject &) = 0;
 
   virtual Array createArray(size_t length) = 0;
-  virtual ArrayBuffer createArrayBuffer(uint8_t* data, size_t length, ArrayBufferDeallocator<uint8_t>deallocator) = 0;
+  virtual ArrayBuffer createArrayBuffer(uint8_t *data, size_t length, ArrayBufferDeallocator<uint8_t> deallocator) = 0;
   virtual size_t size(const Array &) = 0;
   virtual size_t size(const ArrayBuffer &) = 0;
   virtual size_t size(const ArrayBufferView &) = 0;
@@ -245,13 +242,10 @@ protected:
   virtual Value getValueAtIndex(const Array &, size_t i) = 0;
   virtual void setValueAtIndexImpl(Array &, size_t i, const Value &value) = 0;
 
-  virtual Function createFunctionFromHostFunction(const PropNameID &name,
-                                                  unsigned int paramCount,
+  virtual Function createFunctionFromHostFunction(const PropNameID &name, unsigned int paramCount,
                                                   HostFunctionType func) = 0;
-  virtual Value call(const Function &, const Value &jsThis, const Value *args,
-                     size_t count) = 0;
-  virtual Value callAsConstructor(const Function &, const Value *args,
-                                  size_t count) = 0;
+  virtual Value call(const Function &, const Value &jsThis, const Value *args, size_t count) = 0;
+  virtual Value callAsConstructor(const Function &, const Value *args, size_t count) = 0;
 
   // Private data for managing scopes.
   struct ScopeState;
@@ -266,7 +260,9 @@ protected:
 
   // These exist so derived classes can access the private parts of
   // Value, Symbol, String, and Object, which are all friends of JSContext.
-  template <typename T> static T make(PointerValue *pv) { return T(pv); }
+  template <typename T> static T make(PointerValue *pv) {
+    return T(pv);
+  }
   static const PointerValue *getPointerValue(const Pointer &pointer);
   static const PointerValue *getPointerValue(const Value &value);
 
@@ -294,7 +290,9 @@ protected:
 class Scope {
 public:
   explicit Scope(JSContext &context) : rt_(context), prv_(context.pushScope()) {}
-  ~Scope() { rt_.popScope(prv_); };
+  ~Scope() {
+    rt_.popScope(prv_);
+  };
 
   Scope(const Scope &) = delete;
   Scope(Scope &&) = delete;
@@ -302,8 +300,7 @@ public:
   Scope &operator=(const Scope &) = delete;
   Scope &operator=(Scope &&) = delete;
 
-  template <typename F>
-  static auto callInNewScope(JSContext &context, F f) -> decltype(f()) {
+  template <typename F> static auto callInNewScope(JSContext &context, F f) -> decltype(f()) {
     Scope s(context);
     return f();
   }
