@@ -349,18 +349,6 @@ alibaba::jsa::Value JSBridge::evaluateScript(const std::string &script, const st
 #endif
 }
 
-std::atomic<bool> test_inited {false};
-bool JSBridge::evaluteTestScript(const std::string &script, const std::string &url, int startLine) {
-  if (!context->isValid()) return false;
-  binding::updateLocation(url);
-  if (test_inited == false) {
-    initKrakenTestFramework(context.get());
-    test_inited = true;
-  }
-
-  return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
-}
-
 JSBridge::~JSBridge() {
   if (!context->isValid()) return;
   window_->unbind(context);

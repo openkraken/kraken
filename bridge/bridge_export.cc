@@ -17,11 +17,16 @@ kraken::DartMethodPointer funcPointer;
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
 
+void *getBridge() {
+  return bridge.get();
+}
+
 void printError(const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(error.what());
+  } else {
+    std::cerr << error.what() << std::endl;
   }
-  std::cerr << error.what() << std::endl;
 }
 
 Screen screen;
@@ -40,11 +45,6 @@ void initJsEngine() {
 void evaluateScripts(const char *code, const char *bundleFilename, int startLine) {
   if (!inited) return;
   bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
-}
-
-int8_t evaluteTestScripts(const char *code, const char *bundleFilename, int startLine) {
-  if (!inited) return false;
-  return bridge->evaluteTestScript(std::string(code), std::string(bundleFilename), startLine) ? 1 : 0;
 }
 
 void invokeEventListener(int32_t type, const char *data) {
@@ -132,8 +132,4 @@ void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlush
 
 void registerToBlob(ToBlob toBlob) {
   kraken::registerToBlob(toBlob);
-}
-
-void registerOnJSError(OnJSError jsError) {
-  kraken::registerOnJSError(jsError);
 }

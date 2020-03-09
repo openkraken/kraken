@@ -7,6 +7,7 @@
 #define KRAKEN_DART_METHODS_H_
 
 #include "bridge_export.h"
+#include "bridge_test_export.h"
 #include "thread_safe_map.h"
 #include <memory>
 
@@ -31,6 +32,8 @@ struct DartMethodPointer {
   StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
+  Describe describe{nullptr};
+  It it{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -50,6 +53,11 @@ void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 void registerToBlob(ToBlob toBlob);
 void registerOnJSError(OnJSError onJsError);
+
+
+/// methods only used for testing
+void registerDescribe(Describe describe);
+void registerIt(It it);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

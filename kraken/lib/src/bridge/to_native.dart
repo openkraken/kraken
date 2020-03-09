@@ -83,19 +83,6 @@ void evaluateScripts(String code, String url, int line) {
   _evaluateScripts(_code, _url, line);
 }
 
-// Register evaluteTestScripts
-typedef Native_EvaluateTestScripts = Int8 Function(Pointer<Utf8>, Pointer<Utf8>, Int32);
-typedef Dart_EvaluateTestScripts = int Function(Pointer<Utf8>, Pointer<Utf8>, int);
-
-final Dart_EvaluateTestScripts _evaluateTestScripts =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateScripts').asFunction();
-
-void evaluateTestScripts(String code, {String url = 'test://', int line = 0}) {
-  Pointer<Utf8> _code = Utf8.toUtf8(code);
-  Pointer<Utf8> _url = Utf8.toUtf8(url);
-  _evaluateTestScripts(_code, _url, line);
-}
-
 // Register initJsEngine
 typedef Native_InitJSEngine = Void Function();
 typedef Dart_InitJSEngine = void Function();

@@ -520,34 +520,6 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-typedef Native_OnJSError = Void Function(Pointer<Utf8>);
-typedef Native_RegisterOnJSError = Void Function(
-    Pointer<NativeFunction<Native_OnJSError>>);
-typedef Dart_RegisterOnJSError = void Function(
-    Pointer<NativeFunction<Native_OnJSError>>);
-
-final Dart_RegisterOnJSError _registerOnJSError = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterOnJSError>>('registerOnJSError')
-    .asFunction();
-
-typedef JSErrorListener = void Function(String);
-JSErrorListener _listener;
-void addOnJSErrorListener(JSErrorListener listener) {
-  _listener = listener;
-}
-
-void _onJSError(Pointer<Utf8> charStr) {
-  if (_listener == null) return;
-  String msg = Utf8.fromUtf8(charStr);
-  _listener(msg);
-}
-
-void registerOnJSError() {
-  Pointer<NativeFunction<Native_OnJSError>> pointer =
-  Pointer.fromFunction(_onJSError);
-  _registerOnJSError(pointer);
-}
-
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -565,5 +537,4 @@ void registerDartMethodsToCpp() {
   registerStartFlushCallbacksInUIThread();
   registerStopFlushCallbacksInUIThread();
   registerToBlob();
-  registerOnJSError();
 }

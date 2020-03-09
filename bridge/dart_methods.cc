@@ -83,4 +83,12 @@ void registerOnJSError(OnJSError onJsError) {
   methodPointer->onJsError = onJsError;
 }
 
+void registerDescribe(Describe describe) {
+  methodPointer->describe = describe;
+}
+
+void registerIt(It it) {
+  methodPointer->it = it;
+}
+
 } // namespace kraken
