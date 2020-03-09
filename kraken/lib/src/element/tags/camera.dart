@@ -44,24 +44,70 @@ class CameraElement extends Element with CameraPreviewMixin {
 
   bool enableAudio = false;
   RenderConstrainedBox sizedBox;
+  CameraDescription cameraDescription;
 
   /// Element attribute width
-  double _width = Length.toDisplayPortValue(DEFAULT_WIDTH);
+  double _width;
   double get width => _width;
   set width(double newValue) {
     if (newValue != null) {
       _width = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.loose(Size(width, height));
+      sizedBox.additionalConstraints = BoxConstraints.expand(
+        width: width,
+        height: height ?? width / aspectRatio,
+      );
     }
   }
 
   /// Element attribute height
-  double _height = Length.toDisplayPortValue(DEFAULT_HEIGHT);
+  double _height;
   double get height => _height;
   set height(double newValue) {
     if (newValue != null) {
       _height = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.loose(Size(width, height));
+      sizedBox.additionalConstraints = BoxConstraints.expand(
+        width: width ?? height * aspectRatio,
+        height: height,
+      );
+    }
+  }
+
+  double get aspectRatio {
+    if (width != null && height != null) {
+      return width / height;
+    } else if (controller != null) {
+      return controller.value.aspectRatio;
+    } else {
+      return 1.0;
+    }
+  }
+
+  ResolutionPreset _resolutionPreset;
+  ResolutionPreset get resolutionPreset => _resolutionPreset;
+  set resolutionPreset(ResolutionPreset value) {
+    if (_resolutionPreset != value) {
+      _resolutionPreset = value;
+      _initCamera();
+    }
+  }
+
+  void _initCamera () async {
+    if (cameraDescription != null) {
+      TextureBox textureBox = await createCameraTextureBox(cameraDescription);
+      sizedBox.child = RenderAspectRatio(
+        aspectRatio: aspectRatio,
+        child: textureBox
+      );
+    }
+  }
+
+  void _initCameraWithLens(String lens) async {
+    cameraDescription = await detectCamera(lens);
+    if (cameraDescription == null) {
+      sizedBox.child = buildFallbackView('Camera Fallback View');
+    } else {
+      this.cameraDescription = cameraDescription;
+      await _initCamera();
     }
   }
 
@@ -91,36 +137,23 @@ class CameraElement extends Element with CameraPreviewMixin {
       additionalConstraints: BoxConstraints.loose(Size(width, height)),
     );
 
-    detectCamera(props['lens']).then((CameraDescription cameraDescription) {
-      if (cameraDescription == null) {
-        sizedBox.child = buildFallbackView('Camera Fallback View');
-      } else {
-        createtCameraTextureBox(cameraDescription)
-          .then((TextureBox textureBox) {
-            sizedBox.child = RenderAspectRatio(
-              aspectRatio: controller.value.aspectRatio,
-              child: textureBox
-            );
-          });
-      }
-    });
+    _initCameraWithLens(props['lens']);
 
     addChild(sizedBox);
   }
 
-  void _takePhoto(List args) {
-    // @TODO takePhoto
-  }
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
 
-  // @TODO: impl methods
-    @override
-  method(String name, List args) {
-    if (controller == null) {
-      return;
-    }
-
-    switch (name) {
-      case 'takePhoto': return _takePhoto(args);
+    if (key == 'resolution-preset') {
+      resolutionPreset = getResolutionPreset(value);
+    } else if (key == 'width') {
+      width = Length.toDisplayPortValue(value);
+    } else if (key == 'height') {
+      height = Length.toDisplayPortValue(value);
+    } else if (key == 'lens') {
+      _initCameraWithLens(value);
     }
   }
 }

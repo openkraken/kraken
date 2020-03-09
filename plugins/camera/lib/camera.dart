@@ -139,7 +139,7 @@ class CameraException implements Exception {
 
 // Build the UI texture view of the video data with textureId.
 mixin CameraPreviewMixin on Element {
-  Future<TextureBox> createtCameraTextureBox(CameraDescription cameraDescription) async{
+  Future<TextureBox> createCameraTextureBox(CameraDescription cameraDescription) async{
     this.cameraDescription = cameraDescription;
     await _createCameraController();
     return TextureBox(textureId: controller._textureId);
