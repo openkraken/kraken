@@ -134,6 +134,10 @@ class CanvasElement extends Element {
         break;
       case 'strokeStyle':
         painter.context.strokeStyle = WebColor.generate(args[1]);
+        break;
+      case 'font':
+        painter.context.font = args[1];
+        break;
     }
   }
 
