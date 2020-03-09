@@ -27,10 +27,31 @@ Future<void> detectCameras() async {
 
 
 class CameraElement extends Element with CameraPreviewMixin {
-  bool enableAudio = false;
-
   static String DEFAULT_WIDTH = '300px';
   static String DEFAULT_HEIGHT = '150px';
+
+  bool enableAudio = false;
+  RenderConstrainedBox sizedBox;
+
+  /// Element attribute width
+  double _width = Length.toDisplayPortValue(DEFAULT_WIDTH);
+  double get width => _width;
+  set width(double newValue) {
+    if (newValue != null) {
+      _width = newValue;
+      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+    }
+  }
+
+  /// Element attribute height
+  double _height = Length.toDisplayPortValue(DEFAULT_HEIGHT);
+  double get height => _height;
+  set height(double newValue) {
+    if (newValue != null) {
+      _height = newValue;
+      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+    }
+  }
 
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {
@@ -54,12 +75,21 @@ class CameraElement extends Element with CameraPreviewMixin {
           properties: props,
           events: events,
         ) {
+    sizedBox = RenderConstrainedBox(
+      additionalConstraints: BoxConstraints.tight(Size(width, height)),
+    );
+
     if (cameras.isEmpty) {
-      addChild(buildFallbackView('Camera Fallback View'));
+      sizedBox.child = buildFallbackView('Camera Fallback View');
     } else {
-      initCamera(cameras.first);
+      createtCameraTextureBox(cameras.first)
+        .then((TextureBox textureBox) {
+          sizedBox.child = textureBox;
+        });
     }
+    addChild(sizedBox);
   }
+
 
   // @TODO: impl methods
   //  @override
