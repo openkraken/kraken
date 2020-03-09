@@ -39,12 +39,23 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraElement extends Element with CameraPreviewMixin {
-  static String DEFAULT_WIDTH = '300px';
-  static String DEFAULT_HEIGHT = '150px';
+  static const String DEFAULT_WIDTH = '300px';
+  static const String DEFAULT_HEIGHT = '150px';
 
   bool enableAudio = false;
+  bool isFallback = false;
   RenderConstrainedBox sizedBox;
   CameraDescription cameraDescription;
+  List<VoidCallback> detectedFunc = [];
+
+  void waitUntilReady(VoidCallback fn) {
+    detectedFunc.add(fn);
+  }
+
+  void _invokeReady() {
+    for (VoidCallback fn in detectedFunc) fn();
+    detectedFunc = [];
+  }
 
   /// Element attribute width
   double _width;
@@ -94,6 +105,7 @@ class CameraElement extends Element with CameraPreviewMixin {
   void _initCamera () async {
     if (cameraDescription != null) {
       TextureBox textureBox = await createCameraTextureBox(cameraDescription);
+      _invokeReady();
       sizedBox.child = RenderAspectRatio(
         aspectRatio: aspectRatio,
         child: textureBox
@@ -104,6 +116,8 @@ class CameraElement extends Element with CameraPreviewMixin {
   void _initCameraWithLens(String lens) async {
     cameraDescription = await detectCamera(lens);
     if (cameraDescription == null) {
+      isFallback = true;
+      _invokeReady();
       sizedBox.child = buildFallbackView('Camera Fallback View');
     } else {
       this.cameraDescription = cameraDescription;
@@ -134,7 +148,10 @@ class CameraElement extends Element with CameraPreviewMixin {
           events: events,
         ) {
     sizedBox = RenderConstrainedBox(
-      additionalConstraints: BoxConstraints.loose(Size(width, height)),
+      additionalConstraints: BoxConstraints.loose(Size(
+        Length.toDisplayPortValue(DEFAULT_WIDTH),
+        Length.toDisplayPortValue(DEFAULT_HEIGHT),
+      )),
     );
 
     _initCameraWithLens(props['lens']);
@@ -143,14 +160,24 @@ class CameraElement extends Element with CameraPreviewMixin {
   }
 
   @override
-  void setProperty(String key, value) {
+  void setProperty(String key, value) async {
     super.setProperty(key, value);
 
+    if (isFallback || controller != null) {
+      _setProperty(key, value);
+    } else {
+      waitUntilReady(() {
+        _setProperty(key, value);
+      });
+    }
+  }
+
+  void _setProperty(String key, value) {
     if (key == 'resolution-preset') {
       resolutionPreset = getResolutionPreset(value);
-    } else if (key == 'width') {
+    } else if (key == 'width' || key == '.style.width') {
       width = Length.toDisplayPortValue(value);
-    } else if (key == 'height') {
+    } else if (key == 'height' || key == '.style.height') {
       height = Length.toDisplayPortValue(value);
     } else if (key == 'lens') {
       _initCameraWithLens(value);
