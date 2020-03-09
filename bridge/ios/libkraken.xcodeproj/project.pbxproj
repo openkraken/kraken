@@ -67,7 +67,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libkraken.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D46BAE023FD6A9B0080E1B4 /* libkraken_jsc.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libkraken_jsc.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D46BAE423FD6A9B0080E1B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D46BAEB23FD6C200080E1B4 /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bridge.h; path = ../../bridge.h; sourceTree = "<group>"; };
 		7D46BAEC23FD6C200080E1B4 /* foundation */ = {isa = PBXFileReference; lastKnownFileType = folder; name = foundation; path = ../../foundation; sourceTree = "<group>"; };
@@ -199,7 +199,7 @@
 		7D46BAE123FD6A9B0080E1B4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */,
+				7D46BAE023FD6A9B0080E1B4 /* libkraken_jsc.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -265,7 +265,7 @@
 			);
 			name = libkraken;
 			productName = libkraken;
-			productReference = 7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */;
+			productReference = 7D46BAE023FD6A9B0080E1B4 /* libkraken_jsc.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -505,6 +505,7 @@
 					"VERSION_APP=\\\"0.3.0-0\\\"",
 					"PRODUCT=\\\"kraken\\\"",
 					"PRODUCT_SUB=\\\"\\\"",
+					"KRAKEN_JSC_ENGINE=\\\"jsc\\\"",
 				);
 				HEADER_SEARCH_PATHS = "$SRCROOT/../**";
 				INFOPLIST_FILE = Info.plist;
@@ -516,7 +517,7 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.taobao.libkraken;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = libkraken_jsc;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
@@ -542,6 +543,7 @@
 					"VERSION_APP=\\\"0.3.0-0\\\"",
 					"PRODUCT=\\\"kraken\\\"",
 					"PRODUCT_SUB=\\\"\\\"",
+					"KRAKEN_JSC_ENGINE=\\\"jsc\\\"",
 				);
 				HEADER_SEARCH_PATHS = "$SRCROOT/../**";
 				INFOPLIST_FILE = Info.plist;
@@ -553,7 +555,7 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.taobao.libkraken;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = libkraken_jsc;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
