@@ -95,4 +95,20 @@ void registerItDone(ItDone itDone) {
   methodPointer->itDone = itDone;
 }
 
+void registerBeforeEach(BeforeEach beforeEach) {
+  methodPointer->beforeEach = beforeEach;
+}
+
+void registerBeforeAll(BeforeAll beforeAll) {
+  methodPointer->beforeAll = beforeAll;
+}
+
+void registerAfterEach(AfterEach afterEach) {
+  methodPointer->afterEach = afterEach;
+}
+
+void registerAfterAll(AfterAll afterAll) {
+  methodPointer->afterAll = afterAll;
+}
+
 } // namespace kraken

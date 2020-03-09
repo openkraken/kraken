@@ -35,6 +35,10 @@ struct DartMethodPointer {
   Describe describe{nullptr};
   It it{nullptr};
   ItDone itDone{nullptr};
+  BeforeEach beforeEach{nullptr};
+  BeforeAll beforeAll{nullptr};
+  AfterEach afterEach{nullptr};
+  AfterAll afterAll{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -60,6 +64,10 @@ void registerOnJSError(OnJSError onJsError);
 void registerDescribe(Describe describe);
 void registerIt(It it);
 void registerItDone(ItDone itDone);
+void registerBeforeEach(BeforeEach beforeEach);
+void registerBeforeAll(BeforeAll beforeAll);
+void registerAfterEach(AfterEach afterEach);
+void registerAfterAll(AfterAll afterAll);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

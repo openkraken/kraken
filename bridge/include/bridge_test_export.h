@@ -10,12 +10,17 @@
 #include <cstdint>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
-using DescribeCallback = void (*)(void *);
-typedef void *(*Describe)(const char *, void *context, DescribeCallback callback);
+using TestCallback = void (*)(void *);
+typedef void *(*Describe)(const char *, void *context, TestCallback callback);
 
 using ItCallback = void (*)(void*, int32_t);
 typedef void *(*It)(const char *, void *context, ItCallback callback);
 typedef void *(*ItDone)(int32_t, const char*);
+
+typedef void *(*BeforeEach)(void *context, TestCallback callback);
+typedef void *(*BeforeAll)(void *context, TestCallback callback);
+typedef void *(*AfterEach)(void *context, TestCallback callback);
+typedef void *(*AfterAll)(void *context, TestCallback callback);
 
 KRAKEN_EXPORT
 void initTestFramework();
@@ -31,5 +36,13 @@ KRAKEN_EXPORT
 void registerIt(It it);
 KRAKEN_EXPORT
 void registerItDone(ItDone itDone);
+KRAKEN_EXPORT
+void registerBeforeEach(BeforeEach beforeEach);
+KRAKEN_EXPORT
+void registerBeforeAll(BeforeAll beforeAll);
+KRAKEN_EXPORT
+void registerAfterEach(AfterEach afterEach);
+KRAKEN_EXPORT
+void registerAfterAll(AfterAll afterAll);
 
 #endif

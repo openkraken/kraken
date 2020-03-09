@@ -18,7 +18,6 @@ function It(name: string, fn: any) {
         ret.then(() => {
           done();
         }).catch((err: any) => {
-          console.log('promise error');
           done(err);
         });
       } else {

@@ -19,19 +19,19 @@ import 'platform.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.
 
-typedef NativeDescribeCallback = Void Function(Pointer<Void> context);
-typedef DartDescribeCallback = void Function(Pointer<Void> context);
+typedef NativeTestCallback = Void Function(Pointer<Void> context);
+typedef DartTestCallback = void Function(Pointer<Void> context);
+
 typedef Native_Describe = Void Function(
-    Pointer<Utf8> name, Pointer<Void> context, Pointer<NativeFunction<NativeDescribeCallback>>);
+    Pointer<Utf8> name, Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>>);
 typedef Native_RegisterDescribe = Void Function(Pointer<NativeFunction<Native_Describe>>);
 typedef Dart_RegisterDescribe = void Function(Pointer<NativeFunction<Native_Describe>>);
 
 final Dart_RegisterDescribe _registerDescribe =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterDescribe>>('registerDescribe').asFunction();
 
-void _describe(
-    Pointer<Utf8> namePtr, Pointer<Void> context, Pointer<NativeFunction<NativeDescribeCallback>> callbackPtr) {
-  DartDescribeCallback callback = callbackPtr.asFunction();
+void _describe(Pointer<Utf8> namePtr, Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>> callbackPtr) {
+  DartTestCallback callback = callbackPtr.asFunction();
   group(Utf8.fromUtf8(namePtr), () {
     callback(context);
   });
@@ -60,8 +60,6 @@ void _it(Pointer<Utf8> namePtr, Pointer<Void> context, Pointer<NativeFunction<Na
 
     // cache completer into an list, and use callback to consume it later.
     testCompleter.add(completer);
-
-    print(testCompleter.length);
 
     callback(context, testCompleter.length);
 
@@ -97,12 +95,89 @@ void registerItDone() {
   _registerItDone(pointer);
 }
 
+
+typedef Native_BeforeAll = Void Function(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>>);
+typedef Native_RegisterBeforeAll = Void Function(Pointer<NativeFunction<Native_BeforeAll>>);
+typedef Dart_RegisterBeforeAll = void Function(Pointer<NativeFunction<Native_BeforeAll>>);
+
+final Dart_RegisterBeforeAll _registerBeforeAll =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterBeforeAll>>('registerBeforeAll').asFunction();
+
+void _beforeAll(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>> callbackPtr) {
+  DartTestCallback callback = callbackPtr.asFunction();
+  setUpAll(() {
+    callback(context);
+  });
+}
+
+void registerBeforeAll() {
+  Pointer<NativeFunction<Native_BeforeAll>> pointer = Pointer.fromFunction(_beforeAll);
+  _registerBeforeAll(pointer);
+}
+
+typedef Native_BeforeEach = Void Function(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>>);
+typedef Native_RegisterBeforeEach = Void Function(Pointer<NativeFunction<Native_BeforeEach>>);
+typedef Dart_RegisterBeforeEach = void Function(Pointer<NativeFunction<Native_BeforeEach>>);
+
+final Dart_RegisterBeforeEach _registerBeforeEach =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterBeforeEach>>('registerBeforeEach').asFunction();
+
+void _beforeEach(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>> callbackPtr) {
+  DartTestCallback callback = callbackPtr.asFunction();
+  setUp(() {
+    callback(context);
+  });
+}
+
+void registerBeforeEach() {
+  Pointer<NativeFunction<Native_BeforeEach>> pointer = Pointer.fromFunction(_beforeEach);
+  _registerBeforeEach(pointer);
+}
+
+typedef Native_AfterAll = Void Function(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>>);
+typedef Native_RegisterAfterAll = Void Function(Pointer<NativeFunction<Native_AfterAll>>);
+typedef Dart_RegisterAfterAll = void Function(Pointer<NativeFunction<Native_AfterAll>>);
+
+final Dart_RegisterBeforeEach _registerAfterAll =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterAfterAll>>('registerAfterAll').asFunction();
+
+void _afterAll(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>> callbackPtr) {
+  DartTestCallback callback = callbackPtr.asFunction();
+  tearDownAll(() {
+    callback(context);
+  });
+}
+
+void registerAfterAll() {
+  Pointer<NativeFunction<Native_AfterAll>> pointer = Pointer.fromFunction(_afterAll);
+  _registerAfterAll(pointer);
+}
+
+typedef Native_AfterEach = Void Function(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>>);
+typedef Native_RegisterAfterEach = Void Function(Pointer<NativeFunction<Native_AfterEach>>);
+typedef Dart_RegisterAfterEach = void Function(Pointer<NativeFunction<Native_AfterEach>>);
+
+final Dart_RegisterBeforeEach _registerAfterEach =
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterAfterEach>>('registerAfterEach').asFunction();
+
+void _afterEach(Pointer<Void> context, Pointer<NativeFunction<NativeTestCallback>> callbackPtr) {
+  DartTestCallback callback = callbackPtr.asFunction();
+  tearDown(() {
+    callback(context);
+  });
+}
+
+void registerAfterEach() {
+  Pointer<NativeFunction<Native_AfterEach>> pointer = Pointer.fromFunction(_afterEach);
+  _registerAfterEach(pointer);
+}
+
 typedef Native_OnJSError = Void Function(Pointer<Utf8>);
 typedef Native_RegisterOnJSError = Void Function(Pointer<NativeFunction<Native_OnJSError>>);
 typedef Dart_RegisterOnJSError = void Function(Pointer<NativeFunction<Native_OnJSError>>);
 
 final Dart_RegisterOnJSError _registerOnJSError =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterOnJSError>>('registerOnJSError').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterOnJSError>>('registerOnJSError').asFunction();
 
 typedef JSErrorListener = void Function(String);
 
@@ -127,5 +202,9 @@ void registerDartTestMethodsToCpp() {
   registerDescribe();
   registerIt();
   registerItDone();
+  registerBeforeAll();
+  registerBeforeEach();
+  registerAfterAll();
+  registerAfterEach();
   registerOnJSError();
 }

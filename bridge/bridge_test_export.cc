@@ -45,3 +45,19 @@ void registerIt(It it) {
 void registerItDone(ItDone itDone) {
   kraken::registerItDone(itDone);
 }
+
+void registerBeforeEach(BeforeEach beforeEach) {
+  kraken::registerBeforeEach(beforeEach);
+}
+
+void registerBeforeAll(BeforeAll beforeAll) {
+  kraken::registerBeforeAll(beforeAll);
+}
+
+void registerAfterEach(AfterEach afterEach) {
+  kraken::registerAfterEach(afterEach);
+}
+
+void registerAfterAll(AfterAll afterAll) {
+  kraken::registerAfterAll(afterAll);
+}
