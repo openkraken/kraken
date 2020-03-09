@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin ColorMixin on Node {
@@ -35,14 +36,21 @@ mixin ColorMixin on Node {
   }
 
   void updateRenderOpacity(Style style, Style newStyle,
-      {RenderObjectWithChildMixin rootRenderObject, RenderDecoratedBox childRenderObject}) {
+      {RenderObjectWithChildMixin parentRenderObject}) {
 
     String oldVisibility = style['visibility'] ?? 'visible';
     String newVisibility = newStyle['visibility'] ?? 'visible';
 
     if (newVisibility != oldVisibility) { // visibility change
-      rootRenderObject.child = null;
-      rootRenderObject.child = initRenderOpacity(childRenderObject, newStyle);
+      RenderObject childRenderObject;
+      if (newVisibility == 'visible') {
+        childRenderObject = renderOpacity.child;
+        renderOpacity.child = null;
+      } else {
+        childRenderObject = parentRenderObject.child;
+      }
+      parentRenderObject.child = null;
+      parentRenderObject.child = initRenderOpacity(childRenderObject, newStyle);
     } else { // opacity change
       bool existsOpacity = newStyle.contains('opacity');
       bool invisible = newStyle['visibility'] == 'hidden';
@@ -57,14 +65,14 @@ mixin ColorMixin on Node {
         if (renderOpacity != null) {
           renderOpacity.opacity = opacity;
         } else {
-          RenderObject child = rootRenderObject.child;
-          rootRenderObject.child = null;
+          RenderObject child = parentRenderObject.child;
+          parentRenderObject.child = null;
 
           renderOpacity = RenderOpacity(
             opacity: opacity,
             child: child,
           );
-          rootRenderObject.child = invisible ?
+          parentRenderObject.child = invisible ?
             RenderIgnorePointer(
               child: renderOpacity,
               ignoring: true,
