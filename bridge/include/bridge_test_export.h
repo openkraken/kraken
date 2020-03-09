@@ -13,9 +13,9 @@
 using DescribeCallback = void (*)(void *);
 typedef void *(*Describe)(const char *, void *context, DescribeCallback callback);
 
-using ItDone = void (*)();
-using ItCallback = void (*)(ItDone done);
+using ItCallback = void (*)(void*, int32_t);
 typedef void *(*It)(const char *, void *context, ItCallback callback);
+typedef void *(*ItDone)(int32_t, const char*);
 
 KRAKEN_EXPORT
 void initTestFramework();
@@ -29,5 +29,7 @@ KRAKEN_EXPORT
 void registerDescribe(Describe describe);
 KRAKEN_EXPORT
 void registerIt(It it);
+KRAKEN_EXPORT
+void registerItDone(ItDone itDone);
 
 #endif

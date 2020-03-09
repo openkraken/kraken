@@ -23,9 +23,9 @@ private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
   /// the pointer of JSContext, overship belongs to JSContext
-  alibaba::jsa::JSContext* context;
+  alibaba::jsa::JSContext *context;
 };
 
-}
+} // namespace kraken
 
 #endif // KRAKENBRIDGE_BRIDGE_TEST_H

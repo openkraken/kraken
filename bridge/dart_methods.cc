@@ -91,4 +91,8 @@ void registerIt(It it) {
   methodPointer->it = it;
 }
 
+void registerItDone(ItDone itDone) {
+  methodPointer->itDone = itDone;
+}
+
 } // namespace kraken

@@ -34,6 +34,7 @@ struct DartMethodPointer {
   OnJSError onJsError{nullptr};
   Describe describe{nullptr};
   It it{nullptr};
+  ItDone itDone{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -58,6 +59,7 @@ void registerOnJSError(OnJSError onJsError);
 /// methods only used for testing
 void registerDescribe(Describe describe);
 void registerIt(It it);
+void registerItDone(ItDone itDone);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

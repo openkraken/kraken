@@ -42,3 +42,6 @@ void registerIt(It it) {
   kraken::registerIt(it);
 }
 
+void registerItDone(ItDone itDone) {
+  kraken::registerItDone(itDone);
+}

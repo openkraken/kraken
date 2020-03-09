@@ -1,3 +1,9 @@
-describe('1234', function () {
-  console.info('1234qwe');
+describe('setTimeout', function () {
+  it('resolve after 1 seconds', () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+  });
 });

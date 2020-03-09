@@ -5,6 +5,7 @@
 
 import 'package:colorize/colorize.dart';
 import 'package:kraken/src/element/binding.dart';
+import 'package:kraken/src/bridge/from_native.dart';
 import 'package:test/test.dart';
 import 'bridge/from_native.dart';
 import 'bridge/to_native.dart';
@@ -15,6 +16,7 @@ final Directory javascriptSource = Directory('./unit/js_api/src');
 void main() {
   initTestFramework();
   registerDartTestMethodsToCpp();
+  registerDartMethodsToCpp();
   addOnJSErrorListener((String errmsg) {
     Colorize color = Colorize(errmsg);
     color.red();
