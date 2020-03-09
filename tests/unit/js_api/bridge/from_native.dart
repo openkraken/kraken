@@ -1,7 +1,10 @@
-import 'dart:convert';
+/*
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+// ignore_for_file: unused_import, undefined_function
+
 import 'dart:ffi';
-import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:test/test.dart';

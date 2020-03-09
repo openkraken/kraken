@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 // ignore_for_file: unused_import, undefined_function
