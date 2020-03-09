@@ -14,10 +14,16 @@
 4. Support async operation by return a promise object from `it`. 
 
 #### Before Start (macOS user only)
-need to remove flutter_tester executable file's signature.
+1. need to remove flutter_tester executable file's signature.
 
 ```bash
 codesign --remove-signature /path/to/flutter/bin/cache/artifacts/engine/darwin-x64/flutter_tester
+```
+
+2. Make sure `KRAKEN_LIBRARY_PATH` is exist in your env.
+
+```
+export KRAKEN_LIBRARY_PATH=/path/to/kraken/targets/darwin/debug/lib
 ```
 
 ## Integration test
