@@ -9,6 +9,7 @@ canvas.style.width = canvas.style.height = '200px';
 requestAnimationFrame(() => {
   var context = canvas.getContext('2d');
 
+  context.font = '24px AlibabaSans';
   context.fillStyle = 'green';
   context.fillRect(10, 10, 50, 50);
   context.clearRect(15, 15, 30, 30);
