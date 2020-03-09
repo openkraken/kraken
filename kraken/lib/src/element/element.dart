@@ -262,8 +262,7 @@ abstract class Element extends Node
       updateRenderOpacity(
         style,
         newStyle,
-        rootRenderObject: renderMargin,
-        childRenderObject: renderDecoratedBox,
+        parentRenderObject: transform,
       );
 
       ///9.update transform
