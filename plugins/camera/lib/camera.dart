@@ -4,10 +4,12 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 
 part 'camera_image.dart';
 
@@ -136,16 +138,46 @@ class CameraException implements Exception {
 }
 
 // Build the UI texture view of the video data with textureId.
-class CameraPreview extends StatelessWidget {
-  const CameraPreview(this.controller);
+mixin CameraPreviewMixin on Element {
+  Future<void> initCamera(CameraDescription cameraDescription) async{
+    this.cameraDescription = cameraDescription;
+    await _createCameraController();
+    renderTextureBox = TextureBox(textureId: controller._textureId);
+    addChild(renderTextureBox);
+  }
 
-  final CameraController controller;
+  CameraDescription cameraDescription;
+  TextureBox renderTextureBox;
+  CameraController controller;
 
-  @override
-  Widget build(BuildContext context) {
-    return controller.value.isInitialized
-        ? Texture(textureId: controller._textureId)
-        : Container();
+  Future<void> _createCameraController({
+    ResolutionPreset resoluton = ResolutionPreset.medium,
+    bool enableAudio = false,
+  }) async {
+    if (controller != null) {
+      await controller.dispose();
+    }
+    controller = CameraController(
+      cameraDescription,
+      resoluton,
+      enableAudio: enableAudio,
+    );
+
+    // If the controller is updated then update the UI.
+    controller.addListener(() {
+      // TODO: after isConnected is impled
+      // if (isConnected)
+      renderLayoutElement.markNeedsPaint();
+      if (controller.value.hasError) {
+        print('Camera error ${controller.value.errorDescription}');
+      }
+    });
+
+    try {
+      await controller.initialize();
+    } on CameraException catch (err) {
+      print('Error while initializing camera controller: $err');
+    }
   }
 }
 
