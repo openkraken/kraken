@@ -16,7 +16,7 @@ const getPolyFillHeader = (outputName) => `/*
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
 
-#include "bridge.h"
+#include "jsa.h"
 
 void initKraken${outputName}(alibaba::jsa::JSContext *context);
 
@@ -28,8 +28,7 @@ const getPolyFillSource = (source, outputName) => `/*
  * Author: Kraken Team.
  */
 
-#include "polyfill.h"
-#include "logging.h"
+#include "${outputName.toLowerCase()}.h"
 
 static const char* jsCode = R"(${source})";
 

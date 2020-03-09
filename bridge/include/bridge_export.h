@@ -9,6 +9,8 @@
 #include <cstdint>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
+void *getBridge();
+
 struct Screen {
   double width;
   double height;
@@ -40,8 +42,6 @@ KRAKEN_EXPORT
 void initJsEngine();
 KRAKEN_EXPORT
 void evaluateScripts(const char *code, const char *bundleFilename, int startLine);
-KRAKEN_EXPORT
-int8_t evaluteTestScripts(const char* code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
 void reloadJsContext();
@@ -88,7 +88,5 @@ KRAKEN_EXPORT
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
-KRAKEN_EXPORT
-void registerOnJSError(OnJSError jsError);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
