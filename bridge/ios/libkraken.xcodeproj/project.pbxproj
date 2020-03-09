@@ -60,10 +60,14 @@
 		7D46BB5623FD70EA0080E1B4 /* websocket_client.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BB3C23FD70EA0080E1B4 /* websocket_client.cc */; };
 		7D46BB5823FD71560080E1B4 /* polyfill.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BB5723FD71560080E1B4 /* polyfill.cc */; };
 		7D46BB5C23FD71920080E1B4 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D46BB5A23FD718F0080E1B4 /* JavaScriptCore.framework */; };
+		7DC489CB241625E500C0D500 /* toBlob.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7DC489C9241625E500C0D500 /* toBlob.cc */; };
+		7DC489CC241625E500C0D500 /* toBlob.h in Headers */ = {isa = PBXBuildFile; fileRef = 7DC489CA241625E500C0D500 /* toBlob.h */; };
+		7DC489CF2416265600C0D500 /* blob.h in Headers */ = {isa = PBXBuildFile; fileRef = 7DC489CD2416265600C0D500 /* blob.h */; };
+		7DC489D02416265600C0D500 /* blob.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7DC489CE2416265600C0D500 /* blob.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7D46BAE023FD6A9B0080E1B4 /* libkraken.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libkraken.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libkraken.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D46BAE423FD6A9B0080E1B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D46BAEB23FD6C200080E1B4 /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bridge.h; path = ../../bridge.h; sourceTree = "<group>"; };
 		7D46BAEC23FD6C200080E1B4 /* foundation */ = {isa = PBXFileReference; lastKnownFileType = folder; name = foundation; path = ../../foundation; sourceTree = "<group>"; };
@@ -119,6 +123,10 @@
 		7D46BB3C23FD70EA0080E1B4 /* websocket_client.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = websocket_client.cc; path = ../foundation/websocket_client.cc; sourceTree = "<group>"; };
 		7D46BB5723FD71560080E1B4 /* polyfill.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = polyfill.cc; path = ../polyfill/dist/polyfill.cc; sourceTree = "<group>"; };
 		7D46BB5A23FD718F0080E1B4 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		7DC489C9241625E500C0D500 /* toBlob.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = toBlob.cc; path = ../bindings/KOM/toBlob.cc; sourceTree = "<group>"; };
+		7DC489CA241625E500C0D500 /* toBlob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = toBlob.h; path = ../bindings/KOM/toBlob.h; sourceTree = "<group>"; };
+		7DC489CD2416265600C0D500 /* blob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = blob.h; path = ../bindings/KOM/blob.h; sourceTree = "<group>"; };
+		7DC489CE2416265600C0D500 /* blob.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blob.cc; path = ../bindings/KOM/blob.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +144,10 @@
 		7D46BAD623FD6A9B0080E1B4 = {
 			isa = PBXGroup;
 			children = (
+				7DC489C9241625E500C0D500 /* toBlob.cc */,
+				7DC489CA241625E500C0D500 /* toBlob.h */,
+				7DC489CE2416265600C0D500 /* blob.cc */,
+				7DC489CD2416265600C0D500 /* blob.h */,
 				7D46BB5723FD71560080E1B4 /* polyfill.cc */,
 				7D46BB2C23FD70E60080E1B4 /* colors.h */,
 				7D46BB2523FD70E40080E1B4 /* count_down_latch.cc */,
@@ -187,7 +199,7 @@
 		7D46BAE123FD6A9B0080E1B4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7D46BAE023FD6A9B0080E1B4 /* libkraken.framework */,
+				7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -226,10 +238,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DC489CC241625E500C0D500 /* toBlob.h in Headers */,
 				7D46BB0923FD6F740080E1B4 /* asio.hpp in Headers */,
 				7D46BB0723FD6F500080E1B4 /* kraken.h in Headers */,
 				7D46BAF923FD6C220080E1B4 /* dart_methods.h in Headers */,
 				7D46BAF623FD6C220080E1B4 /* bridge.h in Headers */,
+				7DC489CF2416265600C0D500 /* blob.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,7 +265,7 @@
 			);
 			name = libkraken;
 			productName = libkraken;
-			productReference = 7D46BAE023FD6A9B0080E1B4 /* libkraken.framework */;
+			productReference = 7D46BAE023FD6A9B0080E1B4 /* libkraken.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -324,6 +338,7 @@
 				7D46BB4923FD70EA0080E1B4 /* thread_safe_stack.h in Sources */,
 				7D46BB4A23FD70EA0080E1B4 /* ref_counted.h in Sources */,
 				7D46BB4B23FD70EA0080E1B4 /* time_delta.h in Sources */,
+				7DC489CB241625E500C0D500 /* toBlob.cc in Sources */,
 				7D46BB4C23FD70EA0080E1B4 /* websocket_server.cc in Sources */,
 				7D46BB4D23FD70EA0080E1B4 /* time_point.cc in Sources */,
 				7D46BB4E23FD70EA0080E1B4 /* waitable_event.cc in Sources */,
@@ -336,6 +351,7 @@
 				7D46BB5523FD70EA0080E1B4 /* ref_ptr_internal.h in Sources */,
 				7D46BB5623FD70EA0080E1B4 /* websocket_client.cc in Sources */,
 				7D46BB1E23FD70940080E1B4 /* js_context.cc in Sources */,
+				7DC489D02416265600C0D500 /* blob.cc in Sources */,
 				7D46BB1F23FD70940080E1B4 /* js_error.cc in Sources */,
 				7D46BB2023FD70940080E1B4 /* jsc_implementation.cc in Sources */,
 				7D46BB2123FD70940080E1B4 /* js_type.cc in Sources */,
