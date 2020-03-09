@@ -1219,7 +1219,7 @@ abstract class Element extends Node
     Completer<Uint8List> completer = new Completer();
 
     // need to make sure all renderObject had repainted.
-    ElementsBinding.instance.addPostFrameCallback((_) async {
+    RendererBinding.instance.addPostFrameCallback((_) async {
       Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
       completer.complete(byteData.buffer.asUint8List());

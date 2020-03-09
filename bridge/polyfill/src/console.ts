@@ -9,7 +9,7 @@ const times = {};
 const counts = {};
 const INDEX = '(index)';
 const VALUE = '(value)';
-const EMPTY = ' ';
+const PLACEHOLDER = ' '; // empty placeholder
 let groupIndent = '';
 
 function printer(message: string, level?: string) {
@@ -43,7 +43,7 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
       }
       break;
     default:
-      return obj.toString();
+      return '' + obj;
   }
 
   var prefix;
@@ -60,7 +60,7 @@ function formatter(obj: any, limit: number, stack: Array<any>): string {
       case 'string':
         primitive = `'${obj}'`;
       default:
-        primitive = obj.toString();
+        primitive = '' + obj; // Use "+" convert undefined to "undefined"
     }
     if (primitive) {
       prefix += primitive + ' ';
@@ -162,7 +162,7 @@ function inspect(obj: any, within?: boolean): string {
         }
         return result + properties.join(', ') + '}';
       } else {
-        return obj.toString();
+        return '' + obj;
       }
   }
 }
@@ -259,7 +259,7 @@ const console = {
         if (columnName === INDEX) cellString = index[rowIndex];
         else if (row[columnName] !== undefined) cellString = logger([row[columnName]]);
         else if (columnName === VALUE && (row === null || typeof row !== 'object')) cellString = logger([row]);
-        else cellString = EMPTY; // empty
+        else cellString = PLACEHOLDER; // empty
 
         stringRows[rowIndex] = stringRows[rowIndex] || [];
         stringRows[rowIndex][columnIndex] = cellString;
@@ -372,7 +372,7 @@ const console = {
     if (data.length > 0) {
       console.log(...data);
     }
-    groupIndent += '  ';
+    groupIndent += INDENT;
   },
   groupCollapsed(...data: Array<any>) {
     console.group(...data);

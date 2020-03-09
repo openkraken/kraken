@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
+import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:flutter_driver/driver_extension.dart';
@@ -22,14 +24,20 @@ void main() {
     var ret = jsonDecode(message);
     if (ret['type'] == 'startup') {
       String payload = ret['payload'];
-
+      String caseName = ret['case'];
       runApp(
         shouldInitializeBinding: false,
         enableDebug: true,
         afterConnected: () {
-          evaluateScripts(payload, 'TEST_CASE', 0);
-          RendererBinding.instance.addPostFrameCallback((Duration timeout) {
-            completer.complete('done');
+          evaluateScripts(payload, caseName, 0);
+          // Force wait to execute async ops.
+          sleep(const Duration(microseconds: 200));
+
+          RendererBinding.instance.addPostFrameCallback((Duration timeout) async {
+            BodyElement body = ElementManager().getRootElement();
+            Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
+            List<int> bodyImageList = bodyImage.toList();
+            completer.complete(jsonEncode(bodyImageList));
           });
         }
       );

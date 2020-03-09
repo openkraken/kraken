@@ -25,7 +25,7 @@ void main() {
   group('Test Kraken App', () {
     FlutterDriver driver;
 
-    int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+    int _countDifferentPixels(Uint8List imageA, List<int> imageB) {
       if (imageA.length != imageB.length) {
         return -1;
       }
@@ -37,8 +37,7 @@ void main() {
       return (delta / 4).floor();
     }
 
-    Future<void> matchSnapshots(String fixture) async {
-      final List<int> screenPixels = await driver.screenshot();
+    Future<void> matchSnapshots(String fixture, List<int> screenPixels) async {
       final snap = File(path.join(snapshots.path, fixture + '.png'));
       if (snap.existsSync()) {
         Uint8List snapPixels = snap.readAsBytesSync();
@@ -50,10 +49,10 @@ void main() {
           final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
           newSnap.writeAsBytes(screenPixels);
           if (diffCounts == -1) {
-            print('$err $fixture snapshot is NOT equal with old ones');
+            stderr.write('$err $fixture snapshot is NOT equal with old ones\n');
           } else {
-            print('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
-                'please compare manually with ${snap.path} and ${newSnap.path}');
+            stderr.write('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
+                'please compare manually with ${snap.path} and ${newSnap.path}\n');
           }
         }
       } else {
@@ -81,13 +80,17 @@ void main() {
         String basename = path.basename(fixture.path);
         basename = basename.substring(0, basename.length - 3);
 
-        test('screenshot-$basename}', () async {
+        test('Match Snapshot $basename', () async {
           String payload = addJavaScriptClosure(File(fixture.path).readAsStringSync());
-          await driver.requestData(jsonEncode({
+          String imageListJSON = await driver.requestData(jsonEncode({
             'type': 'startup',
+            'case': basename,
             'payload': payload,
           }));
-          await matchSnapshots(basename);
+
+          // Transform List<dynamic> to List<int>
+          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>().toList();
+          await matchSnapshots(basename, snapshot);
         });
       }
     }

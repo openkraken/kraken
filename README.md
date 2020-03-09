@@ -12,7 +12,10 @@ Web standards based rendering engine.
   - npm run build:android
   - npm run build:linux
 
+- Test (Unit Test and Integration Test)
+  - npm test
+
 ## More Information
 
-- [Development Documentation](https://yuque.antfin-inc.com/kraken/development)
+- [Documentation for Developers](https://yuque.antfin-inc.com/kraken/development)
 - [Site](http://rax.alibaba-inc.com/kraken)

@@ -10,7 +10,6 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/scheduler.dart';
-import 'package:kraken/style.dart';
 
 Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
   switch (type) {
@@ -47,7 +46,7 @@ class ElementManagerActionDelegate {
 
   ElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
-    _root = RenderDecoratedBox(decoration: BoxDecoration(color: WebColor.white), child: rootElement.renderObject);
+    _root = rootElement.renderObject;
     nodeMap[BODY_ID] = rootElement;
   }
 
