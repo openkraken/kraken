@@ -1,4 +1,4 @@
-import { krakenFetch } from './kraken';
+import { krakenInvokeModule } from './kraken';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
@@ -20,9 +20,7 @@ function normalizeValue(value: any) {
 class FetchHeader implements Headers {
   private map = {};
 
-  constructor(init?: HeadersInit) {
-
-  }
+  constructor(init?: HeadersInit) { }
 
   append(name: string, value: string): void {
     name = normalizeName(name);
@@ -217,27 +215,21 @@ class FetchResponse extends FetchBody {
   }
 }
 
-export function fetch(input: FetchRequest | string, init?: RequestInit) {
+function fetch(input: FetchRequest | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
 
-    krakenFetch(url, JSON.stringify(init), function(err, response, body) {
-      // network error did't have statusCode
-      if (err && !response.statusCode) {
+    krakenInvokeModule(`["fetch", ["${url}", ${JSON.stringify(init)}]]`, function(json) {
+      var [err, statusCode, body] = JSON.parse(json);
+      // network error didn't have statusCode
+      if (err && !statusCode) {
         reject(new Error(err));
         return;
       }
 
-      init = init || {};
-
-      if (response.statusCode !== 200) {
-        let method = init.method ? normalizeMethod(init.method) : 'GET';
-        console.error(`${method} ${url} ${response.statusCode}`);
-      }
-
       let res = new FetchResponse(body, {
-        status: response.statusCode
+        status: statusCode
       });
 
       res.url = url;

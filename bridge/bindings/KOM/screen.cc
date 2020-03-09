@@ -4,9 +4,8 @@
  */
 
 #include "screen.h"
+#include "dart_methods.h"
 #include "jsa.h"
-#include "logging.h"
-#include "dart_callbacks.h"
 
 namespace kraken {
 namespace binding {
@@ -24,12 +23,11 @@ void JSScreen::unbind(std::unique_ptr<JSContext> &context) {
 Value JSScreen::get(JSContext &context, const PropNameID &name) {
   auto propertyName = name.utf8(context);
 
-  if (getDartFunc()->getScreen == nullptr) {
-    KRAKEN_LOG(ERROR) << "getScreen dart API not register";
-    return Value::undefined();
+  if (getDartMethod()->getScreen == nullptr) {
+    throw JSError(context, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
-  Screen *screen = getDartFunc()->getScreen();
+  Screen *screen = getDartMethod()->getScreen();
 
   if (propertyName == "width" || propertyName == "availWidth") {
     return Value(screen->width);

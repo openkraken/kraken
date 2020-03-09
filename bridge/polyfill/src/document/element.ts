@@ -1,125 +1,122 @@
-import { NodeImpl, NodeType } from './node';
-import { krakenDartToJS } from '../kraken';
+import { Node, NodeType } from './node';
 import {
   addEvent,
   createElement,
-  removeEvent,
   setProperty,
+  removeProperty,
   setStyle,
-  frameTick,
-  enableBatchUpdate
-} from './bridge';
+  method,
+  toBlob
+} from './UIManager';
 
-type EventListener = () => void;
+const RECT_PROPERTIES = [
+  'offsetTop',
+  'offsetLeft',
+  'offsetWidth',
+  'offsetHeight',
 
-let nodeMap: {
-  [nodeId: number]: ElementImpl;
-} = {};
-const TARGET_JS = 'J';
-const FRAME_BEGIN = '$';
+  'clientWidth',
+  'clientHeight',
+  'clientLeft',
+  'clientTop',
 
-krakenDartToJS((message) => {
-  if (message[2] === FRAME_BEGIN) {
-    enableBatchUpdate();
-    frameTick();
-    return;
-  }
+  'scrollTop',
+  'scrollLeft',
+  'scrollHeight',
+  'scrollWidth',
+];
 
-  if (message[1] === TARGET_JS) {
-    message = message.slice(2);
-  } else {
-    // Target is not js, ignore that.
-    return;
-  }
-
-  let parsedMessage = null;
-  try {
-    parsedMessage = JSON.parse(message);
-  } catch (err) {
-    console.error('Can not parse message from backend, the raw message:', message);
-    console.error(err);
-  }
-
-  if (parsedMessage !== null) {
-    try {
-      const action = parsedMessage[0];
-      const target = nodeMap[parsedMessage[1][0]];
-      const arg = parsedMessage[1][1];
-      if (action === 'event') {
-        handleEvent(target, arg);
-      } else {
-        console.error(`ERROR: Unknown action from backend ${action}, with arg: ${JSON.stringify(arg)}`);
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
-  }
-});
-
-function handleEvent(currentTarget: ElementImpl, event: any) {
-  const target = nodeMap[event.target];
-  event.targetId = event.target;
-  event.target = target;
-
-  event.currentTargetId = event.currentTarget;
-  event.currentTarget = currentTarget;
-
-  if (currentTarget) {
-    currentTarget.dispatchEvent(event);
-  }
+interface ICamelize {
+  (str: string): string;
 }
 
-export class ElementImpl extends NodeImpl {
+/**
+ * Create a cached version of a pure function.
+ */
+function cached(fn: ICamelize) {
+  const cache = Object.create(null);
+  return function cachedFn(str : string) {
+    const hit = cache[str];
+    return hit || (cache[str] = fn(str));
+  };
+};
+
+/**
+ * Camelize a hyphen-delimited string.
+ */
+const camelize: ICamelize = (str: string) => {
+  const camelizeRE = /-(\w)/g;
+  return str.replace(camelizeRE, function(_ : string, c : string) {
+    return c ? c.toUpperCase() : '';
+  });
+}
+
+// Cached camelize utility
+const cachedCamelize = cached(camelize);
+
+export class Element extends Node {
   public readonly tagName: string;
   private events: {
-    [eventName: string]: EventListener;
+    [eventName: string]: any;
   } = {};
   public style: object = {};
+  // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
+  public attributes: Array<any> = [];
 
-  private toCamelCase(key: string) {
-    let  strArray = key.split(/_|-/);
-    let humpStr = strArray[0];
-    for (let i = 1, l = strArray.length; i < l; i+=1) {
-      humpStr += strArray[i].slice(0, 1).toUpperCase() + strArray[i].slice(1);
-    }
-    return humpStr;
-  }
-
-  constructor(tagName: string, id: number) {
-    super(NodeType.ELEMENT_NODE, id);
+  constructor(tagName: string, _nodeId?: number) {
+    super(NodeType.ELEMENT_NODE, _nodeId);
     this.tagName = tagName.toUpperCase();
-    const toCamelCase = this.toCamelCase;
-
+    const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
-      set(target: any, p: string | number | symbol, value: any, receiver: any): boolean {
-        let styleKey = toCamelCase(String(p));
-        this[styleKey] = value;
-        setStyle(id, styleKey, value);
+      set(target: any, key: string, value: any, receiver: any): boolean {
+        const cKey = cachedCamelize(key);
+        this[cKey] = value;
+        setStyle(nodeId, cKey, value);
         return true;
       },
-      get(target: any, props: string | number | symbol, receiver) {
-        let styleKey = toCamelCase(String(props));
-        return this[styleKey];
-      }
+      get(target: any, key: string, receiver) {
+        const cKey = cachedCamelize(key);
+        return this[cKey];
+      },
     });
 
+    // Define rect properties
+    for (let i = 0; i < RECT_PROPERTIES.length; i++) {
+      const prop = RECT_PROPERTIES[i];
+      Object.defineProperty(this, prop, {
+        configurable: false,
+        enumerable: true,
+        get() {
+          return Number(method(nodeId, prop));
+        },
+      });
+    }
+
     if (tagName != 'BODY') {
-      createElement(this.tagName, id, {}, []);
+      createElement(this.tagName, nodeId, {}, []);
     }
   }
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    addEvent(this.id, eventName);
-    this.events[eventName] = eventListener;
-    nodeMap[this.id] = this;
+    if (!this.events.hasOwnProperty(eventName)) {
+      addEvent(this.nodeId, eventName);
+      this.events[eventName] = eventListener;
+    }
   }
 
+  // Do not really emit remove event, due to performance consideration.
   removeEventListener(eventName: string, eventListener: any) {
     super.removeEventListener(eventName, eventListener);
-    delete nodeMap[this.id];
-    delete this.events[eventName];
-    removeEvent(this.id, eventName);
+  }
+
+  getBoundingClientRect = () => {
+    const rectInformation = method(this.nodeId, 'getBoundingClientRect');
+    if (typeof rectInformation === 'string') {
+      return JSON.parse(rectInformation);
+    } else {
+      return null;
+    }
   }
 
   get nodeName() {
@@ -127,6 +124,49 @@ export class ElementImpl extends NodeImpl {
   }
 
   public setAttribute(name: string, value: string) {
-    setProperty(this.id, name, value);
+    name = String(name);
+    value = String(value);
+    if (this.attributes[name]) {
+      this.attributes[name].value = value;
+    } else {
+      const attr = {name, value};
+      this.attributes[name] = attr;
+      this.attributes.push(attr);
+    }
+
+    setProperty(this.nodeId, name, value);
+  }
+
+  public getAttribute(name: string) {
+    name = String(name);
+    if (this.attributes[name]) {
+      return this.attributes[name].value;
+    }
+  }
+
+  public hasAttribute(name: string) {
+    name = String(name);
+    return Boolean(this.attributes[name]);
+  }
+
+  public removeAttribute(name: string) {
+    if (this.attributes[name]) {
+      const attr = this.attributes[name];
+      const idx = this.attributes.indexOf(attr);
+      if (idx !== -1) {
+        this.attributes.splice(idx, 1);
+      }
+
+      removeProperty(this.nodeId, name);
+      delete this.attributes[name];
+    }
+  }
+
+  public click() {
+    method(this.nodeId, 'click');
+  }
+
+  async toBlob() {
+    return toBlob(this.nodeId);
   }
 }

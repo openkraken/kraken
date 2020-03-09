@@ -56,7 +56,7 @@ class WebSocket extends EventTarget {
   private _onClose = (code: number, reason: string) => {
     this.readyState = ReadyState.CLOSED;
     this.dispatchEvent({
-      type: 'event',
+      type: 'close',
       code: code,
       reason: reason,
       wasClean: true // is close really clean ??
@@ -117,7 +117,6 @@ class WebSocket extends EventTarget {
   public get onclose() {
     return this._onclose;
   }
-
 
   public set onmessage(messageHandler: any) {
     if (this._onmessage) {

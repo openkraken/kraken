@@ -4,9 +4,9 @@
  */
 
 #include "timer.h"
-#include "dart_callbacks.h"
+#include "dart_methods.h"
+#include "foundation/callback_context.h"
 #include "jsa.h"
-#include "logging.h"
 #include "thread_safe_map.h"
 #include <atomic>
 
@@ -14,320 +14,216 @@ namespace kraken {
 namespace binding {
 
 using namespace alibaba::jsa;
+using namespace kraken::foundation;
 
-ThreadSafeMap<int32_t, std::shared_ptr<Value>> timerCallbackMap;
-ThreadSafeMap<int32_t, int32_t> timerIdToCallbackIdMap;
-std::atomic<int32_t> timerCallbackId = {1};
-
-Value setTimeout(JSContext &context, const Value &thisVal, const Value *args,
-                 size_t count) {
-  if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[setTimeout] function missing parameter";
-    return Value::undefined();
-  }
-
-  std::shared_ptr<Value> callbackValue =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
-  Object &&callbackFunction = callbackValue->getObject(context);
-
-  if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN) << "[setTimeout] first params should be a function";
-    return Value::undefined();
-  }
-
-  auto &&timeout = args[1];
-  int32_t time;
-
-  if (timeout.isUndefined() || count < 2) {
-    time = 0;
-  } else if (timeout.isNumber()) {
-    time = timeout.getNumber();
-  } else {
-    KRAKEN_LOG(WARN) << "[setTimeout] timeout should be a number";
-    return Value::undefined();
-  }
-
-  int32_t callbackId = timerCallbackId.load();
-
-  timerCallbackMap.set(callbackId, callbackValue);
-
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[setTimeout]: "
-                        << "([\"setTimeout\",[" << callbackId << "]])"
-                        << std::endl;
-  }
-
-  if (getDartFunc()->setTimeout == nullptr) {
-    KRAKEN_LOG(ERROR) << "[setTimeout] dart callback not register";
-    return Value::undefined();
-  }
-
-  int32_t timerId = getDartFunc()->setTimeout(callbackId, time);
-  timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId = callbackId + 1;
-  return Value(timerId);
+void destoryCallbackContext(void *data) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  delete obj;
 }
 
-Value setInterval(JSContext &context, const Value &thisVal, const Value *args,
-                  size_t count) {
-  if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[setInterval] function missing parameter";
-    return Value::undefined();
+void handlePersistentCallback(void *data) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  JSContext &_context = obj->_context;
+  if (!_context.isValid()) return;
+
+  if (obj->_callback == nullptr) {
+    // throw JSError inside of dart function callback will directly cause crash
+    // so we handle it instead of throw
+    JSError error(_context, "Failed to trigger callback: timer callback is null.");
+    obj->_context.reportError(error);
+    return;
   }
 
-  std::shared_ptr<Value> callbackValue =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object callback = obj->_callback->getObject(_context);
+  callback.asFunction(_context).call(_context, Value::undefined(), 0);
+}
+
+void handleRAFPersistentCallback(void *data, double result) {
+  auto *obj = static_cast<CallbackContext *>(data);
+  JSContext &_context = obj->_context;
+  if (!_context.isValid()) return;
+
+  if (obj->_callback == nullptr) {
+    // throw JSError inside of dart function callback will directly cause crash
+    // so we handle it instead of throw
+    JSError error(_context, "Failed to trigger callback: requestAnimationFrame callback is null.");
+    obj->_context.reportError(error);
+    return;
+  }
+
+  Object callback = obj->_callback->getObject(_context);
+  callback.asFunction(_context).call(_context, Value(result), 0);
+}
+
+void handleTransientCallback(void *data) {
+  handlePersistentCallback(data);
+  destoryCallbackContext(data);
+}
+
+void handleRAFTransientCallback(void *data, double result) {
+  handleRAFPersistentCallback(data, result);
+  destoryCallbackContext(data);
+}
+
+Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (count < 1) {
+    throw JSError(context, "Failed to execute 'setTimeout': 1 argument required, but only 0 present.");
+  }
+
+  if (!args->isObject() || !args->getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.");
+  }
+
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN) << "[setInterval] first params should be a function";
-    return Value::undefined();
-  }
+  auto &&time = args[1];
+  int32_t timeout;
 
-  auto &&timeout = args[1];
-  int32_t time;
-
-  if (timeout.isUndefined()) {
-    time = 0;
-  } else if (timeout.isNumber()) {
-    time = timeout.getNumber();
+  if (time.isUndefined() || count < 2) {
+    timeout = 0;
+  } else if (time.isNumber()) {
+    timeout = time.getNumber();
   } else {
-    KRAKEN_LOG(WARN) << "[setInterval] timeout should be a number";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-  int32_t callbackId = timerCallbackId.load();
-
-  timerCallbackMap.set(callbackId, callbackValue);
-
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[setInterval]: "
-                        << "([\"setTimeout\",[" << callbackId << "]])"
-                        << std::endl;
+  if (getDartMethod()->setTimeout == nullptr) {
+    throw JSError(context, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
   }
 
-  if (getDartFunc()->setInterval == nullptr) {
-    KRAKEN_LOG(ERROR) << "[setInterval] dart callback not register";
-    return Value::undefined();
+  auto *callbackContext = new CallbackContext(context, callbackValue);
+
+  int32_t timerId = getDartMethod()->setTimeout(handleTransientCallback, static_cast<void *>(callbackContext), timeout);
+
+  // `-1` represents ffi error occurred.
+  if (timerId == -1) {
+    throw JSError(context, "Failed to execute 'setTimeout': dart method (setTimeout) execute failed");
   }
-
-  int32_t timerId = getDartFunc()->setInterval(callbackId, time);
-
-  timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId = callbackId + 1;
 
   return Value(timerId);
 }
 
-Value clearTimeout(JSContext &rt, const Value &thisVal, const Value *args,
-                   size_t count) {
+Value setInterval(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (count < 1) {
+    throw JSError(context, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
+  }
+
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  Object &&callbackFunction = callbackValue->getObject(context);
+
+  if (!callbackFunction.isFunction(context)) {
+    throw JSError(context, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
+  }
+
+  auto &&time = args[1];
+  int32_t delay;
+
+  if (time.isUndefined()) {
+    delay = 0;
+  } else if (time.isNumber()) {
+    delay = time.getNumber();
+  } else {
+    throw JSError(context, "Failed to execute 'setInterval': parameter 2 (timeout) only can be a number or undefined.");
+  }
+
+  if (getDartMethod()->setInterval == nullptr) {
+    throw JSError(context, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
+  }
+
+  // the context pointer which will be pass by pointer address to dart code.
+  auto *callbackContext = new CallbackContext(context, callbackValue);
+
+  int32_t timerId = getDartMethod()->setInterval(handlePersistentCallback, static_cast<void *>(callbackContext), delay);
+
+  if (timerId == -1) {
+    throw JSError(context, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.");
+  }
+
+  return Value(timerId);
+}
+
+Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[clearTimeout] function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
 
   const Value &timerId = args[0];
   if (!timerId.isNumber()) {
-    KRAKEN_LOG(WARN)
-        << "[clearTimeout] clearTimeout accept number as parameter";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'clearTimeout': parameter 1  is not an timer kind.");
   }
 
-  int32_t timer = static_cast<int32_t>(timerId.asNumber());
-  int32_t callbackId = 0;
-  timerIdToCallbackIdMap.get(timer, callbackId);
+  auto id = static_cast<int32_t>(timerId.asNumber());
 
-  if (callbackId == 0) {
-    KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of timerId: "
-                     << timer;
-    return Value::undefined();
+  if (getDartMethod()->clearTimeout == nullptr) {
+    throw JSError(context, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
-  if (getDartFunc()->clearTimeout == nullptr) {
-    KRAKEN_LOG(ERROR) << "[clearTimeout]: dart callback not register";
-    return Value::undefined();
-  }
-
-  getDartFunc()->clearTimeout(timer);
-
-  std::shared_ptr<Value> callbackValue;
-  timerCallbackMap.get(callbackId, callbackValue);
-
-  if (callbackValue == nullptr ||
-      !callbackValue->getObject(rt).isFunction(rt)) {
-    KRAKEN_LOG(WARN) << "[clearTimeout] can not stop timer of callbackId: "
-                     << callbackId;
-    return Value::undefined();
-  }
-
-  timerCallbackMap.erase(callbackId);
+  getDartMethod()->clearTimeout(id);
   return Value::undefined();
 }
 
-Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args,
-                          size_t count) {
+Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] function missing parameter";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
   }
 
-  const Value &timerId = args[0];
-  if (!timerId.isNumber()) {
-    KRAKEN_LOG(WARN)
-    << "[clearAnimationFrame] cancelAnimationFrame accept number as parameter";
-    return Value::undefined();
+  const Value &requestId = args[0];
+  if (!requestId.isNumber()) {
+    throw JSError(context, "Failed to execute 'cancelAnimationFrame': parameter 1 (timer) is not a timer kind.");
   }
 
-  auto timer = static_cast<int32_t>(timerId.asNumber());
-  int32_t callbackId = 0;
-  timerIdToCallbackIdMap.get(timer, callbackId);
+  auto id = static_cast<int32_t>(requestId.asNumber());
 
-  if (callbackId == 0) {
-    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of timerId: "
-                     << timer;
-    return Value::undefined();
+  if (getDartMethod()->cancelAnimationFrame == nullptr) {
+    throw JSError(context,
+                  "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
 
-  if (getDartFunc()->cancelAnimationFrame == nullptr) {
-    KRAKEN_LOG(ERROR) << "[cancelAnimationFrame]: dart callback not register";
-    return Value::undefined();
-  }
+  getDartMethod()->cancelAnimationFrame(id);
 
-  getDartFunc()->cancelAnimationFrame(timer);
-
-  std::shared_ptr<Value> callbackValue;
-  timerCallbackMap.get(callbackId, callbackValue);
-
-  if (callbackValue == nullptr ||
-      !callbackValue->getObject(context).isFunction(context)) {
-    KRAKEN_LOG(WARN) << "[cancelAnimationFrame] can not stop timer of callbackId: "
-                     << callbackId;
-    return Value::undefined();
-  }
-
-  timerCallbackMap.erase(callbackId);
   return Value::undefined();
 }
 
-Value requestAnimationFrame(JSContext &context, const Value &thisVal,
-                            const Value *args, size_t count) {
+Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
-    KRAKEN_LOG(WARN) << "[requestAnimationFrame] function missing parameters";
-    return Value::undefined();
+    throw JSError(context, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
   }
 
-  std::shared_ptr<Value> callbackValue =
-      std::make_shared<Value>(Value(context, args[0].getObject(context)));
+  if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+  }
+
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 
-  if (!callbackFunction.isFunction(context)) {
-    KRAKEN_LOG(WARN)
-        << "[requestAnimationFrame] first param should be a function";
-    return Value::undefined();
+  // the context pointer which will be pass by pointer address to dart code.
+  auto *callbackContext = new CallbackContext(context, callbackValue);
+
+  if (getDartMethod()->requestAnimationFrame == nullptr) {
+    throw JSError(context,
+                  "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  int32_t callbackId = timerCallbackId.load();
+  int32_t requestId =
+    getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, static_cast<void *>(callbackContext));
 
-  timerCallbackMap.set(callbackId, callbackValue);
-
-  if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr &&
-      strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
-    KRAKEN_LOG(VERBOSE) << "[requestAnimationFrame]: "
-                        << "([\"requestAnimationFrame\",[" << callbackId << "]])"
-                        << std::endl;
+  // `-1` represents some error occurred.
+  if (requestId == -1) {
+    throw JSError(context, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
+                           "with unexpected error.");
   }
 
-  if (getDartFunc()->requestAnimationFrame == nullptr) {
-    KRAKEN_LOG(ERROR) << "[requestAnimationFrame] dart callback not register";
-    return Value::undefined();
-  }
-
-  int32_t timerId = getDartFunc()->requestAnimationFrame(callbackId);
-
-  timerIdToCallbackIdMap.set(timerId, callbackId);
-  timerCallbackId = callbackId + 1;
-
-  return Value(timerId);
-}
-
-void invokeSetTimeoutCallback(std::unique_ptr<JSContext> &context,
-                              int32_t callbackId) {
-  std::shared_ptr<Value> callbackValue;
-  timerCallbackMap.get(callbackId, callbackValue);
-
-  if (callbackValue == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
-    return;
-  }
-
-  Object callback = callbackValue->getObject(*context);
-
-  if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context, Value::undefined(), 0);
-    timerCallbackMap.erase(callbackId);
-  } else {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
-  }
-}
-
-void invokeSetIntervalCallback(std::unique_ptr<JSContext> &context,
-                               int32_t callbackId) {
-  std::shared_ptr<Value> callbackValue;
-  timerCallbackMap.get(callbackId, callbackValue);
-
-  if (callbackValue == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
-    return;
-  }
-
-  Object callback = callbackValue->getObject(*context);
-
-  if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context, Value::undefined(), 0);
-  } else {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
-  }
-}
-
-void invokeRequestAnimationFrameCallback(std::unique_ptr<JSContext> &context,
-                                         int32_t callbackId) {
-  std::shared_ptr<Value> callbackValue;
-  timerCallbackMap.get(callbackId, callbackValue);
-
-  if (callbackValue == nullptr) {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function" << callbackId;
-    return;
-  }
-
-  Object callback = callbackValue->getObject(*context);
-
-  if (callback.isFunction(*context)) {
-    callback.asFunction(*context).call(*context, Value::undefined(), 0);
-    timerCallbackMap.erase(callbackId);
-  } else {
-    KRAKEN_LOG(VERBOSE) << "callback is not a function";
-  }
+  return Value(requestId);
 }
 
 void bindTimer(std::unique_ptr<JSContext> &context) {
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setTimeout);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(), setInterval);
-  JSA_BINDING_FUNCTION_SIMPLIFIED(*context, context->global(),
-                                  requestAnimationFrame);
-  JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0,
-                       clearTimeout);
-  JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0,
-                       clearTimeout);
-  JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0,
-                       cancelAnimationFrame);
-}
-
-void unbindTimer() {
-  timerCallbackMap.reset();
-  timerIdToCallbackIdMap.reset();
-  timerCallbackId = 1;
+  JSA_BINDING_FUNCTION(*context, context->global(), "setTimeout", 0, setTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "setInterval", 0, setInterval);
+  JSA_BINDING_FUNCTION(*context, context->global(), "requestAnimationFrame", 0, requestAnimationFrame);
+  JSA_BINDING_FUNCTION(*context, context->global(), "clearTimeout", 0, clearTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "clearInterval", 0, clearTimeout);
+  JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0, cancelAnimationFrame);
 }
 
 } // namespace binding

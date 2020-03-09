@@ -1,16 +1,20 @@
-# Kraken test
+# Kraken test framework
 
-渲染容器测试框架
+## Unit test
 
-## 测试原理
+1. Simply use flutter test command.
+2. More to see https://flutter.dev/docs/cookbook/testing/unit/introduction
+3. Package test usage: https://pub.dev/packages/test
 
-1. 使用 flutter integration test 注入已经运行的 app.dart
-2. 每个 fixtures 下的 js 文件都是一个测试用例
-3. 用例串行执行
-4. app_test.dart 会驱动 app.dart 执行测试，并截图进行像素对比, 若 snapshots 中对应图片不存在会直接保存
+## Integration test
+
+1. We use flutter integration test to inject a running app.dart.
+2. Each js file in fixtures is a test case payload.
+3. Each case executed in serial.
+4. app_test.dart will drive app.dart to run the test.
+5. Compare detection screenshot content.
+6. More to see https://flutter.dev/docs/cookbook/testing/integration/introduction
 
 ## Usage
 
-- 执行测试：npm run test:flutter
-  - 需要注意的是，kraken 需要传入 localEngine 的类型和地址, 请替换成本地的 eg:
-  `npm run test:flutter  --  --local-engine=host_debug --local-engine-src-path=/Users/zhuoling/workspace/kraken_workspace/engine/src`
+- npm run test

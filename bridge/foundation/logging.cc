@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <iostream>
 
-#include "logging.h"
 #include "colors.h"
+#include "logging.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -18,11 +18,10 @@
 namespace foundation {
 namespace {
 
-const char *const kLogSeverityNames[LOG_NUM_SEVERITIES] = {
-    "VERBOSE", BOLD("INFO"), FYEL("WARN"), BOLD("DEBUG"), FRED("ERROR")};
+const char *const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"VERBOSE", BOLD("INFO"), FYEL("WARN"), BOLD("DEBUG"),
+                                                           FRED("ERROR")};
 const char *GetNameForLogSeverity(LogSeverity severity) {
-  if (severity >= LOG_INFO && severity < LOG_NUM_SEVERITIES)
-    return kLogSeverityNames[severity];
+  if (severity >= LOG_INFO && severity < LOG_NUM_SEVERITIES) return kLogSeverityNames[severity];
   return FCYN("UNKNOWN");
 }
 
@@ -42,18 +41,14 @@ const char *StripPath(const char *path) {
 
 } // namespace
 
-LogMessage::LogMessage(LogSeverity severity, const char *file, int line,
-                       const char *condition)
-    : severity_(severity), file_(file), line_(line) {
-  stream_ << "bridge: [";
-  if (severity >= LOG_INFO)
-    stream_ << GetNameForLogSeverity(severity);
-  else
-    stream_ << "VERBOSE";
-  stream_ << "] ";
+LogMessage::LogMessage(LogSeverity severity, const char *file, int line)
+  : severity_(severity), file_(file), line_(line) {
 
-  if (condition)
-    stream_ << "Check failed: " << condition << ". ";
+  if (severity >= LOG_WARN) {
+    stream_ << "[";
+    stream_ << GetNameForLogSeverity(severity);
+    stream_ << "] ";
+  }
 }
 
 LogMessage::~LogMessage() {

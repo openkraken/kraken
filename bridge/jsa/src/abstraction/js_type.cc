@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
+#include <cassert>
 #include <js_error.h>
 #include <js_type.h>
-#include <cassert>
 
 namespace alibaba {
 namespace jsa {
 namespace {
 
 // This is used for generating short exception strings.
-std::string kindToString(const Value &v, JSContext *rt = nullptr) {
+std::string kindToString(const Value &v, JSContext *context = nullptr) {
   if (v.isUndefined()) {
     return "undefined";
   } else if (v.isNull()) {
@@ -27,8 +27,7 @@ std::string kindToString(const Value &v, JSContext *rt = nullptr) {
     return "a symbol";
   } else {
     assert(v.isObject() && "Expecting object.");
-    return rt != nullptr && v.getObject(*rt).isFunction(*rt) ? "a function"
-                                                             : "an object";
+    return context != nullptr && v.getObject(*context).isFunction(*context) ? "a function" : "an object";
   }
 }
 
@@ -36,7 +35,9 @@ std::string kindToString(const Value &v, JSContext *rt = nullptr) {
 
 namespace detail {
 
-void throwJSError(JSContext &rt, const char *msg) { throw JSError(rt, msg); }
+void throwJSError(JSContext &context, const char *msg) {
+  throw JSError(context, msg);
+}
 } // namespace detail
 
 Pointer &Pointer::operator=(Pointer &&other) {
@@ -52,22 +53,18 @@ Object Object::getPropertyAsObject(JSContext &runtime, const char *name) const {
   Value v = getProperty(runtime, name);
 
   if (!v.isObject()) {
-    throw JSError(runtime, std::string("getPropertyAsObject: property '") +
-                               name + "' is " + kindToString(v, &runtime) +
-                               ", expected an Object");
+    throw JSError(runtime, std::string("getPropertyAsObject: property '") + name + "' is " + kindToString(v, &runtime) +
+                             ", expected an Object");
   }
 
   return v.getObject(runtime);
 }
 
-Function Object::getPropertyAsFunction(JSContext &runtime,
-                                       const char *name) const {
+Function Object::getPropertyAsFunction(JSContext &runtime, const char *name) const {
   Object obj = getPropertyAsObject(runtime, name);
   if (!obj.isFunction(runtime)) {
-    throw JSError(runtime, std::string("getPropertyAsFunction: property '") +
-                               name + "' is " +
-                               kindToString(std::move(obj), &runtime) +
-                               ", expected a Function");
+    throw JSError(runtime, std::string("getPropertyAsFunction: property '") + name + "' is " +
+                             kindToString(std::move(obj), &runtime) + ", expected a Function");
   };
 
   JSContext::PointerValue *value = obj.ptr_;
@@ -77,36 +74,28 @@ Function Object::getPropertyAsFunction(JSContext &runtime,
 
 Array Object::asArray(JSContext &runtime) const & {
   if (!isArray(runtime)) {
-    throw JSError(runtime, "Object is " +
-                               kindToString(Value(runtime, *this), &runtime) +
-                               ", expected an array");
+    throw JSError(runtime, "Object is " + kindToString(Value(runtime, *this), &runtime) + ", expected an array");
   }
   return getArray(runtime);
 }
 
 Array Object::asArray(JSContext &runtime) && {
   if (!isArray(runtime)) {
-    throw JSError(runtime, "Object is " +
-                               kindToString(Value(runtime, *this), &runtime) +
-                               ", expected an array");
+    throw JSError(runtime, "Object is " + kindToString(Value(runtime, *this), &runtime) + ", expected an array");
   }
   return std::move(*this).getArray(runtime);
 }
 
 Function Object::asFunction(JSContext &runtime) const & {
   if (!isFunction(runtime)) {
-    throw JSError(runtime, "Object is " +
-                               kindToString(Value(runtime, *this), &runtime) +
-                               ", expected a function");
+    throw JSError(runtime, "Object is " + kindToString(Value(runtime, *this), &runtime) + ", expected a function");
   }
   return getFunction(runtime);
 }
 
 Function Object::asFunction(JSContext &runtime) && {
   if (!isFunction(runtime)) {
-    throw JSError(runtime, "Object is " +
-                               kindToString(Value(runtime, *this), &runtime) +
-                               ", expected a function");
+    throw JSError(runtime, "Object is " + kindToString(Value(runtime, *this), &runtime) + ", expected a function");
   }
   return std::move(*this).getFunction(runtime);
 }
@@ -147,11 +136,8 @@ Value::~Value() {
   }
 }
 
-Value Value::createFromJsonUtf8(JSContext &runtime, const uint8_t *json,
-                                size_t length) {
-  Function parseJson = runtime.global()
-                           .getPropertyAsObject(runtime, "JSON")
-                           .getPropertyAsFunction(runtime, "parse");
+Value Value::createFromJsonUtf8(JSContext &runtime, const uint8_t *json, size_t length) {
+  Function parseJson = runtime.global().getPropertyAsObject(runtime, "JSON").getPropertyAsFunction(runtime, "parse");
   return parseJson.call(runtime, String::createFromUtf8(runtime, json, length));
 }
 
@@ -182,66 +168,59 @@ bool Value::strictEquals(JSContext &runtime, const Value &a, const Value &b) {
 
 double Value::asNumber() const {
   if (!isNumber()) {
-    throw JSANativeException("Value is " + kindToString(*this) +
-                             ", expected a number");
+    throw JSANativeException("Value is " + kindToString(*this) + ", expected a number");
   }
 
   return getNumber();
 }
 
-Object Value::asObject(JSContext &rt) const & {
+Object Value::asObject(JSContext &context) const & {
   if (!isObject()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected an Object");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected an Object");
   }
 
-  return getObject(rt);
+  return getObject(context);
 }
 
-Object Value::asObject(JSContext &rt) && {
+Object Value::asObject(JSContext &context) && {
   if (!isObject()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected an Object");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected an Object");
   }
   auto ptr = data_.pointer.ptr_;
   data_.pointer.ptr_ = nullptr;
   return static_cast<Object>(ptr);
 }
 
-Symbol Value::asSymbol(JSContext &rt) const & {
+Symbol Value::asSymbol(JSContext &context) const & {
   if (!isSymbol()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected a Symbol");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected a Symbol");
   }
 
-  return getSymbol(rt);
+  return getSymbol(context);
 }
 
-Symbol Value::asSymbol(JSContext &rt) && {
+Symbol Value::asSymbol(JSContext &context) && {
   if (!isSymbol()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected a Symbol");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected a Symbol");
   }
 
-  return std::move(*this).getSymbol(rt);
+  return std::move(*this).getSymbol(context);
 }
 
-String Value::asString(JSContext &rt) const & {
+String Value::asString(JSContext &context) const & {
   if (!isString()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected a String");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected a String");
   }
 
-  return getString(rt);
+  return getString(context);
 }
 
-String Value::asString(JSContext &rt) && {
+String Value::asString(JSContext &context) && {
   if (!isString()) {
-    throw JSError(rt, "Value is " + kindToString(*this, &rt) +
-                          ", expected a String");
+    throw JSError(context, "Value is " + kindToString(*this, &context) + ", expected a String");
   }
 
-  return std::move(*this).getString(rt);
+  return std::move(*this).getString(context);
 }
 
 String Value::toString(JSContext &runtime) const {
@@ -249,12 +228,17 @@ String Value::toString(JSContext &runtime) const {
   return toString.call(runtime, *this).getString(runtime);
 }
 
-Array Array::createWithElements(JSContext &rt,
-                                std::initializer_list<Value> elements) {
-  Array result(rt, elements.size());
+std::string Value::toJSON(JSContext &context) const {
+  Function stringify =
+    context.global().getPropertyAsObject(context, "JSON").getPropertyAsFunction(context, "stringify");
+  return stringify.call(context, *this).getString(context).utf8(context);
+}
+
+Array Array::createWithElements(JSContext &context, std::initializer_list<Value> elements) {
+  Array result(context, elements.size());
   size_t index = 0;
   for (const auto &element : elements) {
-    result.setValueAtIndex(rt, index++, element);
+    result.setValueAtIndex(context, index++, element);
   }
   return result;
 }

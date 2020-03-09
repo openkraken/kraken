@@ -17,7 +17,9 @@ CountDownLatch::CountDownLatch(size_t count) : count_(count) {
 
 CountDownLatch::~CountDownLatch() = default;
 
-void CountDownLatch::Wait() { waitable_event_.Wait(); }
+void CountDownLatch::Wait() {
+  waitable_event_.Wait();
+}
 
 void CountDownLatch::CountDown() {
   if (--count_ == 0) {

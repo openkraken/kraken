@@ -4,9 +4,8 @@
  */
 
 #include "window.h"
-#include "logging.h"
+#include "dart_methods.h"
 #include <cassert>
-#include "dart_callbacks.h"
 
 namespace kraken {
 namespace binding {
@@ -23,7 +22,7 @@ void JSWindow::invokeOnloadCallback(std::unique_ptr<JSContext> &context) {
   if (funcObject.isFunction(*context)) {
     funcObject.asFunction(*context).call(*context);
   } else {
-    KRAKEN_LOG(VERBOSE) << "onLoad callback is not a function";
+    throw JSError(*context, "Failed to reload: onLoad callback is not a function.");
   }
 }
 
@@ -37,28 +36,25 @@ void JSWindow::invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSConte
   if (funcObject.isFunction(*context)) {
     funcObject.asFunction(*context).call(*context);
   } else {
-    KRAKEN_LOG(VERBOSE) << "onPlatformBrightnessChanged callback is not a function";
+    throw JSError(*context, "onPlatformBrightnessChanged callback is not a function.");
   }
 }
 
-Value JSWindow::get(JSContext &context,
-                                  const PropNameID &name) {
+Value JSWindow::get(JSContext &context, const PropNameID &name) {
   auto _name = name.utf8(context);
   if (_name == "devicePixelRatio") {
-    if (getDartFunc()->devicePixelRatio == nullptr) {
-      KRAKEN_LOG(ERROR) << "devicePixelRatio dart callback not register";
-      return Value::undefined();
+    if (getDartMethod()->devicePixelRatio == nullptr) {
+      throw JSError(context, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
     }
 
-    double devicePixelRatio = getDartFunc()->devicePixelRatio();
+    double devicePixelRatio = getDartMethod()->devicePixelRatio();
     return Value(devicePixelRatio);
   } else if (_name == "colorScheme") {
-    if (getDartFunc()->platformBrightness == nullptr) {
-      KRAKEN_LOG(ERROR) << "platformBrightness dart callback not register";
-      return Value::undefined();
+    if (getDartMethod()->platformBrightness == nullptr) {
+      throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
-    
-    return String::createFromUtf8(context, getDartFunc()->platformBrightness());
+
+    return String::createFromUtf8(context, getDartMethod()->platformBrightness());
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }
@@ -71,37 +67,39 @@ void JSWindow::set(JSContext &context, const PropNameID &name, const Value &valu
   if (_name == "onLoad") {
     _onLoadCallback = Value(context, value);
   } else if (_name == "onColorSchemeChange") {
-    if (getDartFunc()->onPlatformBrightnessChanged == nullptr) {
-      KRAKEN_LOG(ERROR) << "onPlatformBrightnessChanged dart callback not register";
-      return;
+    if (getDartMethod()->onPlatformBrightnessChanged == nullptr) {
+      throw JSError(context,
+                    "Failed to set onColorSchemeChange: dart method (onPlatformBrightnessChanged) is not register.");
     }
     _onPlatformBrightnessChanged = Value(context, value);
-    getDartFunc()->onPlatformBrightnessChanged();
+    getDartMethod()->onPlatformBrightnessChanged();
   }
 }
 
 void JSWindow::bind(std::unique_ptr<JSContext> &context) {
   assert(context != nullptr);
 
-  Object&& window =
-      Object::createFromHostObject(*context, sharedSelf());
+  Object &&window = Object::createFromHostObject(*context, sharedSelf());
   location_->bind(context, window);
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", window);
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_window__", window);
 }
 
 void JSWindow::unbind(std::unique_ptr<JSContext> &context) {
-  Value &&window = JSA_GLOBAL_GET_PROPERTY(*context, "__kraken_window__");
+  Value &&window = JSA_GET_PROPERTY(*context, context->global(), "__kraken_window__");
   Object &&object = window.getObject(*context);
   location_->unbind(context, object);
   _onLoadCallback = Value::undefined();
   _onPlatformBrightnessChanged = Value::undefined();
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken_window__", Value::undefined());
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken_window__", Value::undefined());
 }
 
 std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {
   std::vector<PropNameID> names;
+  names.emplace_back(PropNameID::forUtf8(context, "colorScheme"));
   names.emplace_back(PropNameID::forUtf8(context, "devicePixelRatio"));
   names.emplace_back(PropNameID::forUtf8(context, "location"));
+  names.emplace_back(PropNameID::forUtf8(context, "onColorSchemeChange"));
+  names.emplace_back(PropNameID::forUtf8(context, "onLoad"));
   return names;
 }
 

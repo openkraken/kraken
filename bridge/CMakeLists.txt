@@ -3,6 +3,8 @@ project(KrakenBridge)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
+string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
 include(./jsa/jsa.cmake)
 
@@ -10,78 +12,62 @@ include(./jsa/jsa.cmake)
 add_subdirectory(foundation)
 include_directories(foundation)
 
-add_library(bindings STATIC
-  bindings/KOM/console.cc
-  bindings/KOM/fetch.cc
-  bindings/KOM/screen.cc
-  bindings/KOM/timer.cc
-  bindings/KOM/websocket.cc
-  bindings/KOM/websocket.h
-  bindings/KOM/window.cc
-  bindings/KOM/window.h
-  bindings/KOM/location.cc
-  bindings/KOM/location.h
-  bindings/kraken.cc
-)
-add_library(bridge STATIC bridge.cc bridge.h)
-add_library(dart_callback STATIC dart_callbacks.cc dart_callbacks.h)
-add_library(js_code STATIC polyfill/dist/polyfill.h polyfill/dist/polyfill.cc)
-add_library(kraken SHARED kraken_bridge_export.cc)
-
-### Bindings
-target_include_directories(bindings PRIVATE
-  ./jsa/include
-  ./foundation
-  ./
-  ./foundation/websockettpp-0.8.1
-  ${ADDITIONAL_INCLUDE_DIRS}
-  )
-target_link_libraries(bindings PRIVATE
-  jsa_abstraction
-  jsc_implementation
-  dart_callback
-  foundation)
-
-### Bridges
-target_link_libraries(bridge PRIVATE
-  jsc_implementation
-  jsa_abstraction
-  dart_callback
-  bindings
-  -pthread)
-target_include_directories(bridge PRIVATE
-  ./jsa/include
-  ${ADDITIONAL_INCLUDE_DIRS})
-
-target_include_directories(dart_callback PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include
+list(APPEND BRIDGE_SOURCE
+    bindings/KOM/console.cc
+    bindings/KOM/screen.cc
+    bindings/KOM/timer.cc
+    bindings/KOM/websocket.cc
+    bindings/KOM/websocket.h
+    bindings/KOM/window.cc
+    bindings/KOM/window.h
+    bindings/KOM/location.cc
+    bindings/KOM/location.h
+    bindings/kraken.cc
+    bindings/KOM/blob.cc
+    bindings/KOM/blob.h
+    bindings/KOM/toBlob.cc
+    bindings/KOM/toBlob.h
+    dart_methods.cc
+    dart_methods.h
+    bridge.cc
+    bridge.h
+    polyfill/dist/polyfill.cc
 )
 
-message(STATUS ${ADDITIONAL_INCLUDE_DIRS})
+list(APPEND BRIDGE_INCLUDE
+    ./jsa/include
+    ./foundation
+    ./
+    ./include
+    ./polyfill/dist
+    ./foundation/websockettpp-0.8.1
+    ${ADDITIONAL_INCLUDE_DIRS}
+    ${JSA_INCLUDE_DIRS}
+)
 
-### Js Code
-target_link_libraries(js_code PRIVATE bridge)
-target_include_directories(js_code PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ./jsa/include
-  ${ADDITIONAL_INCLUDE_DIRS}
-  )
+list(APPEND BRIDGE_LINK_LIBS
+        jsa_abstraction
+        jsa_implementation
+        foundation
+        -pthread
+)
+
+add_library(bridge STATIC ${BRIDGE_SOURCE})
+add_library(kraken SHARED bridge_export.cc)
+
+### bridge
+target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
+target_include_directories(bridge PRIVATE ${BRIDGE_INCLUDE})
 
 ### Kraken
-target_link_libraries(kraken PRIVATE
-  bridge
-  js_code
-  )
+target_link_libraries(kraken PRIVATE bridge)
 target_include_directories(kraken PRIVATE
-  ./foundation
-  ./polyfill/dist
-  ./jsa/include
-  ${ADDITIONAL_INCLUDE_DIRS}
+  ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../dartfm
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
   OUTPUT_VARIABLE APP_VER
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
@@ -96,12 +82,16 @@ execute_process(
 string(REPLACE \n "" GIT_HEAD ${GIT_HEAD}) # Remove last \n
 add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
 
+include(./test/test.cmake)
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
-  add_subdirectory(./test/googletest)
-  add_subdirectory(test)
-  include_directories(test)
 endif ()
+
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
+elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+  set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
+endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken
@@ -111,6 +101,6 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
 else ()
   set_target_properties(kraken
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../cli/build/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
     )
 endif ()

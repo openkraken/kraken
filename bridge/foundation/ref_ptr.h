@@ -72,23 +72,22 @@ public:
   // be taken, since the object being constructed will not have been adopted
   // yet.)
   template <typename U> explicit RefPtr(U *p) : ptr_(p) {
-    if (ptr_)
-      ptr_->AddRef();
+    if (ptr_) ptr_->AddRef();
   }
 
   // Copy constructor.
   RefPtr(const RefPtr<T> &r) : ptr_(r.ptr_) {
-    if (ptr_)
-      ptr_->AddRef();
+    if (ptr_) ptr_->AddRef();
   }
 
   template <typename U> RefPtr(const RefPtr<U> &r) : ptr_(r.ptr_) {
-    if (ptr_)
-      ptr_->AddRef();
+    if (ptr_) ptr_->AddRef();
   }
 
   // Move constructor.
-  RefPtr(RefPtr<T> &&r) : ptr_(r.ptr_) { r.ptr_ = nullptr; }
+  RefPtr(RefPtr<T> &&r) : ptr_(r.ptr_) {
+    r.ptr_ = nullptr;
+  }
 
   template <typename U> RefPtr(RefPtr<U> &&r) : ptr_(r.ptr_) {
     r.ptr_ = nullptr;
@@ -96,36 +95,37 @@ public:
 
   // Destructor.
   ~RefPtr() {
-    if (ptr_)
-      ptr_->Release();
+    if (ptr_) ptr_->Release();
   }
 
-  T *get() const { return ptr_; }
+  T *get() const {
+    return ptr_;
+  }
 
-  T &operator*() const { return *ptr_; }
+  T &operator*() const {
+    return *ptr_;
+  }
 
-  T *operator->() const { return ptr_; }
+  T *operator->() const {
+    return ptr_;
+  }
 
   // Copy assignment.
   RefPtr<T> &operator=(const RefPtr<T> &r) {
     // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_)
-      r.ptr_->AddRef();
+    if (r.ptr_) r.ptr_->AddRef();
     T *old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr)
-      old_ptr->Release();
+    if (old_ptr) old_ptr->Release();
     return *this;
   }
 
   template <typename U> RefPtr<T> &operator=(const RefPtr<U> &r) {
     // Call |AddRef()| first so self-assignments work.
-    if (r.ptr_)
-      r.ptr_->AddRef();
+    if (r.ptr_) r.ptr_->AddRef();
     T *old_ptr = ptr_;
     ptr_ = r.ptr_;
-    if (old_ptr)
-      old_ptr->Release();
+    if (old_ptr) old_ptr->Release();
     return *this;
   }
 
@@ -151,9 +151,13 @@ public:
   // Returns a new |RefPtr<T>| with the same contents as this pointer. Useful
   // when a function takes a |RefPtr<T>&&| argument and the caller wants to
   // retain its reference (rather than moving it).
-  RefPtr<T> Clone() const { return *this; }
+  RefPtr<T> Clone() const {
+    return *this;
+  }
 
-  explicit operator bool() const { return !!ptr_; }
+  explicit operator bool() const {
+    return !!ptr_;
+  }
 
   template <typename U> bool operator==(const RefPtr<U> &rhs) const {
     return ptr_ == rhs.ptr_;
@@ -198,7 +202,9 @@ template <typename T> inline RefPtr<T> AdoptRef(T *ptr) {
 //   auto foo_ref = Ref(foo);
 //
 // (|foo_ref| will be of type |RefPtr<Foo>|.)
-template <typename T> inline RefPtr<T> Ref(T *ptr) { return RefPtr<T>(ptr); }
+template <typename T> inline RefPtr<T> Ref(T *ptr) {
+  return RefPtr<T>(ptr);
+}
 
 // Creates an intrusively reference counted |T|, producing a |RefPtr<T>| (and
 // performing the required adoption). Use like:
@@ -206,10 +212,8 @@ template <typename T> inline RefPtr<T> Ref(T *ptr) { return RefPtr<T>(ptr); }
 //   auto my_foo = MakeRefCounted<Foo>(ctor_arg1, ctor_arg2);
 //
 // (|my_foo| will be of type |RefPtr<Foo>|.)
-template <typename T, typename... Args>
-RefPtr<T> MakeRefCounted(Args &&... args) {
-  return internal::MakeRefCountedHelper<T>::MakeRefCounted(
-      std::forward<Args>(args)...);
+template <typename T, typename... Args> RefPtr<T> MakeRefCounted(Args &&... args) {
+  return internal::MakeRefCountedHelper<T>::MakeRefCounted(std::forward<Args>(args)...);
 }
 
 } // namespace foundation

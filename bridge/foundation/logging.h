@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
@@ -30,11 +30,12 @@ public:
 
 class LogMessage {
 public:
-  LogMessage(LogSeverity severity, const char *file, int line,
-             const char *condition);
+  LogMessage(LogSeverity severity, const char *file, int line);
   ~LogMessage();
 
-  std::ostream &stream() { return stream_; }
+  std::ostream &stream() {
+    return stream_;
+  }
 
 private:
   std::ostringstream stream_;
@@ -47,22 +48,15 @@ private:
 
 } // namespace foundation
 
-#define KRAKEN_LOG_STREAM(severity)                                            \
-  ::foundation::LogMessage(::foundation::LOG_##severity, __FILE__, __LINE__,   \
-                           nullptr)                                            \
-      .stream()
+#define KRAKEN_LOG_STREAM(severity) ::foundation::LogMessage(::foundation::LOG_##severity, __FILE__, __LINE__).stream()
 
-#define KRAKEN_LAZY_STREAM(stream, condition)                                  \
-  !(condition) ? (void)0 : ::foundation::LogMessageVoidify() & (stream)
+#define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : ::foundation::LogMessageVoidify() & (stream)
 
-#define KRAKEN_EAT_STREAM_PARAMETERS(ignored)                                  \
-  true || (ignored)                                                            \
-      ? (void)0                                                                \
-      : ::foundation::LogMessageVoidify() &                                    \
-            ::foundation::LogMessage(::foundation::LOG_FATAL, 0, 0, nullptr)   \
-                .stream()
+#define KRAKEN_EAT_STREAM_PARAMETERS(ignored)                                                                          \
+  true || (ignored)                                                                                                    \
+    ? (void)0                                                                                                          \
+    : ::foundation::LogMessageVoidify() & ::foundation::LogMessage(::foundation::LOG_FATAL, 0, 0).stream()
 
-#define KRAKEN_LOG(severity)                                                   \
-  KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
+#define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
 
 #endif // KRAKEN_FOUNDATION_LOGGING_H_

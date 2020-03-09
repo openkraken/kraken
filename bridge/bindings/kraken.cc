@@ -20,8 +20,7 @@ using namespace alibaba::jsa;
 #elif defined(__ANDROID__)
 #define PLATFORM "android" // Android (implies Linux, so it must come first)
 #elif defined(__linux__)
-#define PLATFORM                                                               \
-  "linux" // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#define PLATFORM "linux"                      // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
 #elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULATOR == 1
@@ -39,13 +38,13 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
   auto kraken = JSA_CREATE_OBJECT(*context);
 
   // Other properties are injected by dart.
-  JSA_SET_PROPERTY(*context, kraken, "appName", "Kraken App");
+  JSA_SET_PROPERTY(*context, kraken, "appName", "Kraken");
   JSA_SET_PROPERTY(*context, kraken, "appVersion", VERSION_APP);
   JSA_SET_PROPERTY(*context, kraken, "platform", PLATFORM);
   JSA_SET_PROPERTY(*context, kraken, "product", PRODUCT);
   JSA_SET_PROPERTY(*context, kraken, "productSub", PRODUCT_SUB);
 
-  JSA_GLOBAL_SET_PROPERTY(*context, "__kraken__", kraken);
+  JSA_SET_PROPERTY(*context, context->global(), "__kraken__", kraken);
 }
 
 } // namespace binding
