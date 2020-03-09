@@ -77,7 +77,6 @@ class VideoElement extends Element {
   int nodeId;
   Map<String, dynamic> props;
   List<String> events;
-  // RenderVideoBox renderVideoBox;
 
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();
