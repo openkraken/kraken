@@ -20,7 +20,7 @@ class ImgElement extends Element {
       : super(
             nodeId: nodeId,
             defaultDisplay: 'inline-block',
-            isContainer: false,
+            allowChildren: false,
             tagName: IMAGE,
             properties: props,
             events: events) {

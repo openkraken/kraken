@@ -48,7 +48,7 @@ abstract class Element extends Node
   Map<String, dynamic> properties;
   RenderIntersectionObserver renderIntersectionObserver;
 
-  bool isContainer = true; // Whether element can container elements
+  bool allowChildren = true; // Whether element allows children
   bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
   bool _inited = false; // True after constructor finished.
   bool shouldBlockStretch = true;
@@ -67,7 +67,7 @@ abstract class Element extends Node
       @required this.tagName,
       this.properties,
       this.needsReposition,
-      this.isContainer,
+      this.allowChildren,
       List<String> events,
       @required this.defaultDisplay})
       : assert(tagName != null),
@@ -87,11 +87,11 @@ abstract class Element extends Node
       needsReposition = true;
     }
 
-    if (isContainer == null) {
-      isContainer = true;
+    if (allowChildren == null) {
+      allowChildren = true;
     }
 
-    if (isContainer) {
+    if (allowChildren) {
       renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
     }
 
@@ -102,7 +102,7 @@ abstract class Element extends Node
       renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
     // overflow
-    if (isContainer) {
+    if (allowChildren) {
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
     // constrained box

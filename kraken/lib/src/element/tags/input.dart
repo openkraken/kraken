@@ -122,7 +122,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     nodeId: nodeId,
     tagName: INPUT,
     defaultDisplay: 'inline-block',
-    isContainer: false,
+    allowChildren: false,
     properties: properties,
     events: events
   ) {

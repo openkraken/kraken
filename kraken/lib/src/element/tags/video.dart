@@ -68,7 +68,7 @@ class VideoElement extends Element {
       : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
-          isContainer: false,
+          allowChildren: false,
           tagName: VIDEO,
           properties: props,
           events: events,
