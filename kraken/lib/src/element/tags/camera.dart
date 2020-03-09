@@ -150,14 +150,13 @@ class CameraElement extends Element {
   }
 
   @override
-  dynamic method(String name, List<dynamic> args) {
+  method(String name, List args) {
     if (controller == null) {
       return;
     }
 
     switch (name) {
       case 'play':
-//        controller.play();
         break;
     }
   }
