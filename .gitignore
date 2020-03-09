@@ -58,9 +58,10 @@ cmake-build-debug
 cmake-build-release
 cmake-build-macos
 
+# Node.js
+package-lock.json
+
 libkraken.dylib
 Podfile.lock
 .cxx
 !scripts/build
-
-package-lock.json

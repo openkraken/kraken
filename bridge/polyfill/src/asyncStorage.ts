@@ -3,35 +3,35 @@ import { krakenInvokeModule } from './kraken';
 const asyncStorage = {
   getItem(key: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage.getItem", ["${key}"]]`, (value) => {
+      krakenInvokeModule(`["AsyncStorage","getItem",["${key}"]]`, (value) => {
         resolve(value);
       });
     });
   },
   setItem(key: string, value: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage.setItem", ["${key}", "${value}"]]`, () => {
+      krakenInvokeModule(`["AsyncStorage","setItem",["${key}","${value}"]]`, () => {
         resolve();
       });
     });
   },
   removeItem(key: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage.removeItem", ["${key}"]]`, () => {
+      krakenInvokeModule(`["AsyncStorage","removeItem",["${key}"]]`, () => {
         resolve();
       });
     });
   },
   clear() {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage.clear"]`, () => {
+      krakenInvokeModule(`["AsyncStorage","clear"]`, () => {
         resolve();
       });
     });
   },
   getAllKeys() {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage.getAllKeys"]`, (json) => {
+      krakenInvokeModule(`["AsyncStorage","getAllKeys"]`, (json) => {
         resolve(JSON.parse(json));
       });
     });
