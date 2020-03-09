@@ -37,13 +37,14 @@ void main() {
       return (delta / 4).floor();
     }
 
-    Future<void> matchSnapshots(String fixture, List<int> screenPixels) async {
+    Future<bool> matchSnapshots(String fixture, List<int> screenPixels) async {
       final snap = File(path.join(snapshots.path, fixture + '.png'));
       if (snap.existsSync()) {
         Uint8List snapPixels = snap.readAsBytesSync();
         int diffCounts = _countDifferentPixels(snapPixels, screenPixels);
         if (diffCounts == 0) {
           print('$pass $fixture snaphost is equal!');
+          return true;
         } else {
           hasNotMatchSnapshot = true;
           final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
@@ -54,10 +55,12 @@ void main() {
             stderr.write('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
                 'please compare manually with ${snap.path} and ${newSnap.path}\n');
           }
+          return false;
         }
       } else {
         await snap.writeAsBytes(screenPixels);
         print('Wrote ${snap.path} successfully!');
+        return true;
       }
     }
 
@@ -90,7 +93,8 @@ void main() {
 
           // Transform List<dynamic> to List<int>
           List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>().toList();
-          await matchSnapshots(basename, snapshot);
+          expect(await matchSnapshots(basename, snapshot), true,
+            reason: 'Snapshot "$basename" NOT equal.');
         });
       }
     }
