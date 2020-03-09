@@ -15,16 +15,28 @@ const String CAMERA = 'CAMERA';
 bool camerasDetected = false;
 List<CameraDescription> cameras = [];
 
-Future<void> detectCameras() async {
-  // Obtain a list of the available cameras on the device.
-  try {
-    cameras = await availableCameras();
-  } on CameraException catch (_) {
-    // No available camera devices, need to fallback.
-  }
-  camerasDetected = true;
-}
+Future<CameraDescription> detectCamera(String lens) async {
+  if (lens == null) lens = 'back';
 
+  if (!camerasDetected) {
+    try {
+      // Obtain a list of the available cameras on the device.
+      cameras = await availableCameras();
+    } on CameraException catch (err) {
+      // No available camera devices, need to fallback.
+      print('CameraException $err');
+    }
+    camerasDetected = true;
+  }
+
+  for (CameraDescription description in cameras) {
+    if (description.lensDirection == parseCameraLensDirection(lens)) {
+      return description;
+    }
+  }
+
+  return null;
+}
 
 class CameraElement extends Element with CameraPreviewMixin {
   static String DEFAULT_WIDTH = '300px';
@@ -39,7 +51,7 @@ class CameraElement extends Element with CameraPreviewMixin {
   set width(double newValue) {
     if (newValue != null) {
       _width = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+      sizedBox.additionalConstraints = BoxConstraints.loose(Size(width, height));
     }
   }
 
@@ -49,7 +61,7 @@ class CameraElement extends Element with CameraPreviewMixin {
   set height(double newValue) {
     if (newValue != null) {
       _height = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+      sizedBox.additionalConstraints = BoxConstraints.loose(Size(width, height));
     }
   }
 
@@ -76,28 +88,41 @@ class CameraElement extends Element with CameraPreviewMixin {
           events: events,
         ) {
     sizedBox = RenderConstrainedBox(
-      additionalConstraints: BoxConstraints.tight(Size(width, height)),
+      additionalConstraints: BoxConstraints.loose(Size(width, height)),
     );
 
-    if (cameras.isEmpty) {
-      sizedBox.child = buildFallbackView('Camera Fallback View');
-    } else {
-      createtCameraTextureBox(cameras.first)
-        .then((TextureBox textureBox) {
-          sizedBox.child = textureBox;
-        });
-    }
+    detectCamera(props['lens']).then((CameraDescription cameraDescription) {
+      if (cameraDescription == null) {
+        sizedBox.child = buildFallbackView('Camera Fallback View');
+      } else {
+        createtCameraTextureBox(cameraDescription)
+          .then((TextureBox textureBox) {
+            sizedBox.child = RenderAspectRatio(
+              aspectRatio: controller.value.aspectRatio,
+              child: textureBox
+            );
+          });
+      }
+    });
+
     addChild(sizedBox);
   }
 
+  void _takePhoto(List args) {
+    // @TODO takePhoto
+  }
 
   // @TODO: impl methods
-  //  @override
-  //  method(String name, List args) {
-  //    if (controller == null) {
-  //      return;
-  //    }
-  //  }
+    @override
+  method(String name, List args) {
+    if (controller == null) {
+      return;
+    }
+
+    switch (name) {
+      case 'takePhoto': return _takePhoto(args);
+    }
+  }
 }
 
 RenderBox buildFallbackView(String description) {
@@ -117,4 +142,23 @@ RenderBox buildFallbackView(String description) {
       textDirection: TextDirection.ltr,
     ),
   );
+}
+
+/// Returns the resolution preset from string.
+ResolutionPreset getResolutionPreset(String preset) {
+  switch (preset) {
+    case 'max':
+      return ResolutionPreset.max;
+    case 'ultraHigh':
+      return ResolutionPreset.ultraHigh;
+    case 'veryHigh':
+      return ResolutionPreset.veryHigh;
+    case 'high':
+      return ResolutionPreset.high;
+    case 'low':
+      return ResolutionPreset.low;
+    case 'medium':
+    default:
+      return ResolutionPreset.medium;
+  }
 }

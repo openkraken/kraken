@@ -62,7 +62,7 @@ String serializeResolutionPreset(ResolutionPreset resolutionPreset) {
   throw ArgumentError('Unknown ResolutionPreset value');
 }
 
-CameraLensDirection _parseCameraLensDirection(String string) {
+CameraLensDirection parseCameraLensDirection(String string) {
   switch (string) {
     case 'front':
       return CameraLensDirection.front;
@@ -84,7 +84,7 @@ Future<List<CameraDescription>> availableCameras() async {
     return cameras.map((Map<dynamic, dynamic> camera) {
       return CameraDescription(
         name: camera['name'],
-        lensDirection: _parseCameraLensDirection(camera['lensFacing']),
+        lensDirection: parseCameraLensDirection(camera['lensFacing']),
         sensorOrientation: camera['sensorOrientation'],
       );
     }).toList();
