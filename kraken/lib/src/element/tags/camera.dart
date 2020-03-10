@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
-import 'package:camera/camera.dart';
+import 'package:kraken_camera/camera.dart';
 
 const String CAMERA = 'CAMERA';
 

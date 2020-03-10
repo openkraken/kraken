@@ -5,53 +5,50 @@ const fs = require('fs');
 
 if (argv.help) {
   process.stdout.write(`Convert Javascript Code into Cpp source code
-Usage: node js_to_c.js -s /path/to/source.js -o /path/to/dist.c\n`);
+Usage: node js_to_c.js -s /path/to/source.js -o /path/to/dist.cc -n polyfill\n`);
   process.exit(0);
 }
 
-const getPolyFillHeader = () => `/*
+const getPolyFillHeader = (outputName) => `/*
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-#ifndef KRAKEN_POLYFILL_H
-#define KRAKEN_POLYFILL_H
+#ifndef KRAKEN_${outputName.toUpperCase()}_H
+#define KRAKEN_${outputName.toUpperCase()}_H
 
-#include "bridge.h"
+#include "jsa.h"
 
-void initKrakenPolyFill(alibaba::jsa::JSContext *context);
+void initKraken${outputName}(alibaba::jsa::JSContext *context);
 
-#endif // KRAKEN_POLYFILL_H
+#endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
 
-const getPolyFillSource = (source) => `/*
+const getPolyFillSource = (source, outputName) => `/*
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
-#include "polyfill.h"
-#include "logging.h"
+#include "${outputName.toLowerCase()}.h"
 
 static const char* jsCode = R"(${source})";
 
-void initKrakenPolyFill(alibaba::jsa::JSContext *context) {
+void initKraken${outputName}(alibaba::jsa::JSContext *context) {
   try {
     context->evaluateJavaScript(jsCode, "internal://", 0);
   } catch (alibaba::jsa::JSError &error) {
-    auto &&stack = error.getStack();
-    auto &&message = error.getMessage();
-
-    // TODO throw error in js context
-    KRAKEN_LOG(VERBOSE) << message << "\\n" << stack;
+    context->reportError(error);
   }
 }
 `;
 
-function convertJSToCpp(code) {
-  return getPolyFillSource(code);
+function convertJSToCpp(code, outputName) {
+  code = code.replace(')"', ')\\"');
+  return getPolyFillSource(code, outputName);
 }
 
 let source = argv.s;
 let output = argv.o;
+let outputName = argv.n || 'PolyFill';
 
 if (!source || !output) {
   console.error('-s and -o params are required');
@@ -71,10 +68,8 @@ let outputPath = getAbsolutePath(output);
 
 let jsCode = fs.readFileSync(sourcePath, { encoding: 'utf-8' });
 
-let headerSource = getPolyFillHeader();
-let ccSource = convertJSToCpp(jsCode);
+let headerSource = getPolyFillHeader(outputName);
+let ccSource = convertJSToCpp(jsCode, outputName);
 
-fs.writeFileSync(path.join(outputPath, 'polyfill.h'), headerSource);
-fs.writeFileSync(path.join(outputPath, 'polyfill.cc'), ccSource);
-
-console.log('convert success!');
+fs.writeFileSync(path.join(outputPath, outputName.toLowerCase() + '.h'), headerSource);
+fs.writeFileSync(path.join(outputPath, outputName.toLowerCase() + '.cc'), ccSource);

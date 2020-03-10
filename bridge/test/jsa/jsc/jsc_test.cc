@@ -15,6 +15,7 @@ using namespace alibaba;
 using namespace jsc;
 
 void normalPrint(const jsa::JSError &error) {
+  std::cerr << error.what() << std::endl;
   FAIL();
 }
 

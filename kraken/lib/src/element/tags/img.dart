@@ -5,7 +5,6 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 const String IMAGE = 'IMG';
@@ -20,7 +19,8 @@ class ImgElement extends Element {
   ImgElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
             nodeId: nodeId,
-            defaultDisplay: 'inline',
+            defaultDisplay: 'inline-block',
+            allowChildren: false,
             tagName: IMAGE,
             properties: props,
             events: events) {
@@ -36,12 +36,11 @@ class ImgElement extends Element {
   }
 
   void removeImgBox() {
-    renderLayoutElement.removeAll();
+    renderPadding.child = null;
   }
 
   void _constructImageChild() {
     imageBox = getRenderDecoratedBox(style, image);
-    imageConstrainedBox = getRenderConstraintedBox(imageBox);
 
     if (!determinBothWidthAndHeight) {
       imageStream = image.resolve(imageBox.configuration);
@@ -50,7 +49,7 @@ class ImgElement extends Element {
     }
 
     if (childNodes.isEmpty) {
-      addChild(imageConstrainedBox);
+      addChild(imageBox);
     }
   }
 
@@ -92,21 +91,13 @@ class ImgElement extends Element {
         height: height,
       );
     }
-
-    imageConstrainedBox.additionalConstraints = constraints;
+    renderConstrainedBox.additionalConstraints = constraints;
   }
 
   BoxConstraints getBoxConstraintsFromStyle(Style style) {
     double width = getDisplayPortedLength(style['width']);
     double height = getDisplayPortedLength(style['height']);
     return BoxConstraints.tightFor(width: width, height: height);
-  }
-
-  RenderConstrainedBox getRenderConstraintedBox(RenderBox child) {
-    return KrakenRenderConstrainedBox(
-      additionalConstraints: getBoxConstraintsFromStyle(style),
-      child: child,
-    );
   }
 
   BoxFit _getBoxFit(Style style) {
@@ -165,10 +156,7 @@ class ImgElement extends Element {
   @override
   void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
-    if (key == 'src' ||
-      key == '.style.width' ||
-      key == '.style.height'
-    ) {
+    if (key == 'src') {
       removeImgBox();
       addImgBox();
     }

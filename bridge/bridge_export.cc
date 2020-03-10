@@ -6,6 +6,7 @@
 #include "bridge_export.h"
 #include "bridge.h"
 #include "dart_methods.h"
+#include "jsa.h"
 
 #include <atomic>
 #include <iostream>
@@ -16,11 +17,16 @@ kraken::DartMethodPointer funcPointer;
 std::atomic<bool> inited{false};
 std::unique_ptr<kraken::JSBridge> bridge;
 
+void *getBridge() {
+  return bridge.get();
+}
+
 void printError(const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(error.what());
+  } else {
+    std::cerr << error.what() << std::endl;
   }
-  std::cerr << error.what() << std::endl;
 }
 
 Screen screen;
@@ -126,8 +132,4 @@ void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlush
 
 void registerToBlob(ToBlob toBlob) {
   kraken::registerToBlob(toBlob);
-}
-
-void registerOnJSError(OnJSError jsError) {
-  kraken::registerOnJSError(jsError);
 }

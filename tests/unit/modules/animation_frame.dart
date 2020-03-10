@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:kraken/module.dart';
 import 'package:kraken/src/element/binding.dart';
 import 'package:test/test.dart';

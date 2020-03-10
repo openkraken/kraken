@@ -1,5 +1,5 @@
 import 'package:kraken/element.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
 const String AUDIO = 'AUDIO';
 
@@ -14,6 +14,7 @@ class AudioElement extends Element {
   ) : super(
     nodeId: nodeId,
     defaultDisplay: 'block',
+    allowChildren: false,
     tagName: AUDIO,
     properties: props,
     events: events,
