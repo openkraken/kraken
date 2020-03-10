@@ -43,10 +43,12 @@ abstract class Element extends Node
   RenderRepaintBoundary renderRepaintBoundary;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutElement;
+  RenderPadding renderPadding;
   RenderElementBoundary renderElementBoundary;
   Map<String, dynamic> properties;
   RenderIntersectionObserver renderIntersectionObserver;
 
+  bool allowChildren = true; // Whether element allows children
   bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
   bool _inited = false; // True after constructor finished.
   bool shouldBlockStretch = true;
@@ -65,12 +67,15 @@ abstract class Element extends Node
       @required this.tagName,
       this.properties,
       this.needsReposition,
+      this.allowChildren,
       List<String> events,
       @required this.defaultDisplay})
       : assert(tagName != null),
         assert(defaultDisplay != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
+
     properties = properties ?? {};
+    setDefaultProps(properties);
 
     /// Element style render
 
@@ -82,15 +87,22 @@ abstract class Element extends Node
       needsReposition = true;
     }
 
-    renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
+    if (allowChildren == null) {
+      allowChildren = true;
+    }
+
+    if (allowChildren) {
+      renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
+    }
+
     // padding
-    renderObject = initRenderPadding(renderObject, style);
+    renderObject = renderPadding = initRenderPadding(renderObject, style);
     // background image
     if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
-    // display
-    if (style.get('display') != 'inline') {
+    // overflow
+    if (allowChildren) {
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
     // constrained box
@@ -147,6 +159,9 @@ abstract class Element extends Node
     _inited = true;
   }
 
+  // Set default properties, override this for individual element
+  void setDefaultProps(Map<String, dynamic> props) {}
+
   Element get parent => this.parentNode;
 
   Style _style;
@@ -156,38 +171,40 @@ abstract class Element extends Node
 
     // Update style;
     if (_inited) {
-      ///1.update display
-      String oldDisplay = style.get('display');
-      String newDisplay = newStyle.get('display');
-      bool hasFlexChange = isFlexStyleChanged(newStyle);
-      if (newDisplay != oldDisplay || hasFlexChange) {
-        ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
-        List<RenderBox> children = [];
-        RenderObjectVisitor visitor = (child) {
-          children.add(child);
-        };
-        oldRenderElement
-          ..visitChildren(visitor)
-          ..removeAll();
-        RenderPadding parent = renderLayoutElement.parent;
-        parent.child = null;
-        renderLayoutElement = createRenderLayoutElement(newStyle, children);
-        parent.child = renderLayoutElement as RenderBox;
+      ///1.update layout properties
+      if (renderLayoutElement != null) {
+        String oldDisplay = style.get('display');
+        String newDisplay = newStyle.get('display');
+        bool hasFlexChange = isFlexStyleChanged(newStyle);
+        if (newDisplay != oldDisplay || hasFlexChange) {
+          ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
+          List<RenderBox> children = [];
+          RenderObjectVisitor visitor = (child) {
+            children.add(child);
+          };
+          oldRenderElement
+            ..visitChildren(visitor)
+            ..removeAll();
+          RenderPadding parent = renderLayoutElement.parent;
+          parent.child = null;
+          renderLayoutElement = createRenderLayoutElement(newStyle, children);
+          parent.child = renderLayoutElement as RenderBox;
+          // update style reference
+          renderElementBoundary.style = newStyle;
+        }
+
+        if (newDisplay == 'flex' || newDisplay == 'inline-flex') { // update flex layout properties
+          decorateRenderFlex(renderLayoutElement, newStyle);
+        } else { // update flow layout properties
+          decorateRenderFlow(renderLayoutElement, newStyle);
+        }
+
         // update style reference
-        renderElementBoundary.style = newStyle;
-      }
-
-      if (newDisplay == 'flex' || newDisplay == 'inline-flex') { // update flex layout properties
-        decorateRenderFlex(renderLayoutElement, newStyle);
-      } else { // update flow layout properties
-        decorateRenderFlow(renderLayoutElement, newStyle);
-      }
-
-      // update style reference
-      if (renderLayoutElement is RenderFlowLayout) {
-        (renderLayoutElement as RenderFlowLayout).style = newStyle;
-      } else {
-        (renderLayoutElement as RenderFlexLayout).style = newStyle;
+        if (renderLayoutElement is RenderFlowLayout) {
+          (renderLayoutElement as RenderFlowLayout).style = newStyle;
+        } else {
+          (renderLayoutElement as RenderFlexLayout).style = newStyle;
+        }
       }
 
       // update transiton map
@@ -245,8 +262,7 @@ abstract class Element extends Node
       updateRenderOpacity(
         style,
         newStyle,
-        rootRenderObject: renderMargin,
-        childRenderObject: renderDecoratedBox,
+        parentRenderObject: transform,
       );
 
       ///9.update transform
@@ -702,8 +718,11 @@ abstract class Element extends Node
   }
 
   void addChild(RenderObject child) {
-    assert(renderLayoutElement != null);
-    renderLayoutElement.add(child);
+    if (renderLayoutElement != null) {
+      renderLayoutElement.add(child);
+    } else {
+      renderPadding.child = child;
+    }
   }
 
   ContainerRenderObjectMixin createRenderLayoutElement(Style newStyle, List<RenderBox> children) {

@@ -14,6 +14,7 @@ class AudioElement extends Element {
   ) : super(
     nodeId: nodeId,
     defaultDisplay: 'block',
+    allowChildren: false,
     tagName: AUDIO,
     properties: props,
     events: events,
