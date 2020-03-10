@@ -5,7 +5,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/style.dart';
 
-mixin TextStyleMixin {static const String COLOR = 'color';
+mixin TextStyleMixin {
+  static const String COLOR = 'color';
   static const String HEIGHT = 'height';
   static const String LINE_HEIGHT = 'lineHeight';
   static const String TEXT_DECORATION = 'textDecoration';
@@ -235,7 +236,7 @@ mixin TextStyleMixin {static const String COLOR = 'color';
       : DEFAULT_FONT_FAMILY;
   }
 
-  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = [];
+  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
   List<String> getFontFamilyFallback(Style style) {
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
