@@ -1,0 +1,10 @@
+example
+.dart_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+ios/Runner/GeneratedPluginRegistrant.m
+

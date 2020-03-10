@@ -10,7 +10,6 @@ Pod::Spec.new do |s|
 Kraken Video Player
                        DESC
   s.homepage         = 'http://example.com'
-  s.license          = { :file => '../LICENSE' }
   s.author           = { 'chenghuai.dtc' => 'chenghuai.dtc@alibaba-inc.com' }
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
