@@ -23,6 +23,8 @@ target_link_libraries(jsa_test ${TEST_LINK_LIBRARY})
 target_include_directories(jsa_test PUBLIC ${TEST_INCLUDE_DIR})
 
 add_executable(bridge_test
-    ./test/bridge/blob.cc)
+  ./test/bridge/blob.cc
+  ./test/bridge/testframework.cc
+)
 target_link_libraries(bridge_test ${TEST_LINK_LIBRARY})
 target_include_directories(bridge_test PUBLIC ${TEST_INCLUDE_DIR})

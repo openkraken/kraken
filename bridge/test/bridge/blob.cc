@@ -10,8 +10,13 @@
 
 using namespace alibaba;
 
+void handleError(const jsa::JSError &error) {
+  std::cerr << error.what() << std::endl;
+  FAIL();
+}
+
 TEST(Blob, initWithString) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript("new Blob(['1234']);", "", 0);
   EXPECT_EQ(result.isObject(), true);
@@ -20,7 +25,7 @@ TEST(Blob, initWithString) {
 }
 
 TEST(Blob, initWithArrayBuffer) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 new Blob([new Int8Array([1,2,3,4,5]).buffer]);
@@ -31,7 +36,7 @@ new Blob([new Int8Array([1,2,3,4,5]).buffer]);
 }
 
 TEST(Blob, initWithArrayBufferView) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 new Blob([new Int8Array([1,2,3,4,5])]);
@@ -42,7 +47,7 @@ new Blob([new Int8Array([1,2,3,4,5])]);
 }
 
 TEST(Blob, sliceWithStart) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 let blob = new Blob([new Int8Array([1,2,3,4,5])]);
@@ -54,7 +59,7 @@ blob.slice(1);
 }
 
 TEST(Blob, sliceWithStartEnd) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 let blob = new Blob([new Int8Array([1,2,3,4,5])]);
@@ -66,7 +71,7 @@ blob.slice(1, 3);
 }
 
 TEST(Blob, sliceWithStartWithJsaApi) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 new Blob([new Int8Array([1,2,3,4,5])]);
@@ -84,7 +89,7 @@ new Blob([new Int8Array([1,2,3,4,5])]);
 }
 
 TEST(Blob, text) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 var blob = __kraken_blob__([new Int8Array([97,98,99,100,101])]);
@@ -95,7 +100,7 @@ blob.text();
 }
 
 TEST(Blob, arrayBuffer) {
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>();
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();
   jsa::Value result = bridge->evaluateScript(R"(
 var blob = __kraken_blob__([new Int8Array([97,98,99,100,101])]);
