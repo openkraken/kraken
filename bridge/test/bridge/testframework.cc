@@ -4,7 +4,7 @@
 */
 
 #include "gtest/gtest.h"
-#include "bridge.h"
+#include "bridge_test.h"
 #include "jsa.h"
 
 using namespace alibaba;
@@ -17,6 +17,7 @@ TEST(TestFramework, evaluteTestFramework) {
   };
 
   std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
-  bool result = bridge->evaluteTestScript("assert.strictEqual(false, [])", "internal://", 0);
+  std::unique_ptr<kraken::JSBridgeTest> tester = std::make_unique<kraken::JSBridgeTest>(bridge.get());
+  bool result = tester->evaluateTestScripts("assert.strictEqual(false, [])", "internal://", 0);
   EXPECT_EQ(result, false);
 }

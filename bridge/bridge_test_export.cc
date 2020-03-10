@@ -22,16 +22,16 @@ void initTestFramework() {
   inited = true;
 }
 
-int8_t evaluteTestScripts(const char *code, const char *bundleFilename, int startLine) {
+int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine) {
   if (inited == false) return 0;
 
   std::cout << code << std::endl;
 
-  return bridgeTest->evaluteTestScript(std::string(code), std::string(bundleFilename), startLine);
+  return bridgeTest->evaluateTestScripts(std::string(code), std::string(bundleFilename), startLine);
 }
 
-void registerOnJSError(OnJSError jsError) {
-  kraken::registerOnJSError(jsError);
+void registerJSError(OnJSError jsError) {
+  kraken::registerJSError(jsError);
 }
 
 void registerDescribe(Describe describe) {

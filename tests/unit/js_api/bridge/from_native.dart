@@ -172,18 +172,18 @@ void registerAfterEach() {
   _registerAfterEach(pointer);
 }
 
-typedef Native_OnJSError = Void Function(Pointer<Utf8>);
-typedef Native_RegisterOnJSError = Void Function(Pointer<NativeFunction<Native_OnJSError>>);
-typedef Dart_RegisterOnJSError = void Function(Pointer<NativeFunction<Native_OnJSError>>);
+typedef Native_JSError = Void Function(Pointer<Utf8>);
+typedef Native_RegisterJSError = Void Function(Pointer<NativeFunction<Native_JSError>>);
+typedef Dart_RegisterJSError = void Function(Pointer<NativeFunction<Native_JSError>>);
 
-final Dart_RegisterOnJSError _registerOnJSError =
-nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterOnJSError>>('registerOnJSError').asFunction();
+final Dart_RegisterJSError _registerOnJSError =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterJSError>>('registerJSError').asFunction();
 
 typedef JSErrorListener = void Function(String);
 
 JSErrorListener _listener;
 
-void addOnJSErrorListener(JSErrorListener listener) {
+void addJSErrorListener(JSErrorListener listener) {
   _listener = listener;
 }
 
@@ -193,8 +193,8 @@ void _onJSError(Pointer<Utf8> charStr) {
   _listener(msg);
 }
 
-void registerOnJSError() {
-  Pointer<NativeFunction<Native_OnJSError>> pointer = Pointer.fromFunction(_onJSError);
+void registerJSError() {
+  Pointer<NativeFunction<Native_JSError>> pointer = Pointer.fromFunction(_onJSError);
   _registerOnJSError(pointer);
 }
 
@@ -206,5 +206,5 @@ void registerDartTestMethodsToCpp() {
   registerBeforeEach();
   registerAfterAll();
   registerAfterEach();
-  registerOnJSError();
+  registerJSError();
 }

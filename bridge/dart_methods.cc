@@ -79,7 +79,7 @@ void registerToBlob(ToBlob toBlob) {
   methodPointer->toBlob = toBlob;
 }
 
-void registerOnJSError(OnJSError onJsError) {
+void registerJSError(OnJSError onJsError) {
   methodPointer->onJsError = onJsError;
 }
 

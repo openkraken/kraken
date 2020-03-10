@@ -239,7 +239,7 @@ Value afterAll(JSContext &context, const Value &thisVal, const Value *args, size
   return Value::undefined();
 }
 
-bool JSBridgeTest::evaluteTestScript(const std::string &script, const std::string &url, int startLine) {
+bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::string &url, int startLine) {
   if (!context->isValid()) return false;
   binding::updateLocation(url);
   return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();

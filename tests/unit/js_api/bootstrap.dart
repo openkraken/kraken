@@ -17,7 +17,7 @@ void main() {
   initTestFramework();
   registerDartTestMethodsToCpp();
   registerDartMethodsToCpp();
-  addOnJSErrorListener((String errmsg) {
+  addJSErrorListener((String errmsg) {
     Colorize color = Colorize(errmsg);
     color.red();
     print(color);

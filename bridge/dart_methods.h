@@ -57,7 +57,7 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 void registerToBlob(ToBlob toBlob);
-void registerOnJSError(OnJSError onJsError);
+void registerJSError(OnJSError onJsError);
 
 
 /// methods only used for testing

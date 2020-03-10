@@ -17,7 +17,7 @@ public:
   ~JSBridgeTest() = default;
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
-  bool evaluteTestScript(const std::string &script, const std::string &url, int startLine);
+  bool evaluateTestScripts(const std::string &script, const std::string &url, int startLine);
 
 private:
   /// the pointer of bridge, ownership belongs to JSBridge

@@ -25,11 +25,11 @@ typedef void *(*AfterAll)(void *context, TestCallback callback);
 KRAKEN_EXPORT
 void initTestFramework();
 KRAKEN_EXPORT
-int8_t evaluteTestScripts(const char *code, const char *bundleFilename, int startLine);
+int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine);
 
 
 KRAKEN_EXPORT
-void registerOnJSError(OnJSError jsError);
+void registerJSError(OnJSError jsError);
 KRAKEN_EXPORT
 void registerDescribe(Describe describe);
 KRAKEN_EXPORT
