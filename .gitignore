@@ -64,4 +64,3 @@ package-lock.json
 libkraken.dylib
 Podfile.lock
 .cxx
-!scripts/build

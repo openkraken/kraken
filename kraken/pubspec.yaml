@@ -20,6 +20,8 @@ dependencies:
   device_info: ^0.4.1 # Only support iOS and Android.
   kraken_video_player:
     path: ../plugins/kraken_video_player
+  camera:
+    path: ../plugins/camera
   kraken_webview:
     path: ../plugins/kraken_webview
   audioplayers:
