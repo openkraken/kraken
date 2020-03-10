@@ -18,7 +18,7 @@ import '../platform_interface.dart';
 ///
 /// This is used as the default implementation for [WebViewElement.platform]. It uses
 /// an [RenderParagraph] to show basic information of webview settings, only for developers.
-class FallbackWebView implements WebViewPlatform with TextStyleMixin {
+class FallbackWebView with TextStyleMixin implements WebViewPlatform {
   @override
   RenderBox buildRenderBox({
     CreationParams creationParams,
