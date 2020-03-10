@@ -657,16 +657,19 @@ class RenderFlexLayout extends RenderBox
         totalFlexGrow += childParentData.flexGrow;
       }
 
+      double baseConstraints = _getBaseConstraints(child);
       BoxConstraints innerConstraints;
       if (crossAxisAlignment == CrossAxisAlignment.stretch) {
         switch (_direction) {
           case Axis.horizontal:
             innerConstraints = BoxConstraints(
+                minWidth: baseConstraints,
                 minHeight: constraints.minHeight,
                 maxHeight: constraints.maxHeight);
             break;
           case Axis.vertical:
             innerConstraints = BoxConstraints(
+                minHeight: baseConstraints,
                 minWidth: constraints.minWidth,
                 maxWidth: constraints.maxWidth);
             break;
@@ -674,11 +677,16 @@ class RenderFlexLayout extends RenderBox
       } else {
         switch (_direction) {
           case Axis.horizontal:
-            innerConstraints =
-                BoxConstraints(maxHeight: constraints.maxHeight);
+            innerConstraints = BoxConstraints(
+                minWidth: baseConstraints,
+                maxHeight: constraints.maxHeight
+            );
             break;
           case Axis.vertical:
-            innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+            innerConstraints = BoxConstraints(
+                minHeight: baseConstraints,
+                maxWidth: constraints.maxWidth
+            );
             break;
         }
       }
