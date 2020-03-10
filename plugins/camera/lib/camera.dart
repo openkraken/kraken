@@ -1,6 +1,10 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// @NOTE: Modified by zhuoling.lcl:
+//   1. Remove widgets support, remove CameraPreview.
+//   2. Add kraken element reference.
+//   3. Implement CameraPreviewMixin for native camera.
 
 import 'dart:async';
 import 'dart:typed_data';
