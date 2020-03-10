@@ -28,7 +28,7 @@ class FallbackWebView with TextStyleMixin implements WebViewPlatform {
     String description = _getWebViewDescriptionFromCreationParams(creationParams);
     TextSpan text = createTextSpanWithStyle(
       description,
-      const Style({
+      Style({
         'backgroundColor': 'white',
         'color': 'black'
       })
