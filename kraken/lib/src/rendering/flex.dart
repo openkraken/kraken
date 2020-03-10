@@ -555,7 +555,7 @@ class RenderFlexLayout extends RenderBox
 
     double maxHeight = 0;
     if (style.get('height') != null) {
-      double height = Length.toDisplayPortValue(style.get('height'));
+      double height = getCurrentHeight(style);
       if (height != null) {
         maxHeight = height;
       }

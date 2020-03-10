@@ -514,6 +514,13 @@ class RenderFlowLayout extends RenderBox
       double parentHeight = getStretchParentHeight(nodeId);
       if (parentHeight != null) {
         constraintHeight = parentHeight;
+      } else if (!isInline) {
+        if (style.get('height') != null) {
+          double height = getCurrentHeight(style);
+          if (height != null) {
+            constraintHeight = height;
+          }
+        }
       }
 
       // calculate size according to element size
@@ -619,6 +626,14 @@ class RenderFlowLayout extends RenderBox
     double parentHeight = getStretchParentHeight(nodeId);
     if (parentHeight != null) {
       constraintHeight = parentHeight;
+    } else if (!isInline) {
+      // Use container height as constraints if exists
+      if (style.get('height') != null) {
+        double height = getCurrentHeight(style);
+        if (height != null) {
+          constraintHeight = height;
+        }
+      }
     }
 
     // get container height
