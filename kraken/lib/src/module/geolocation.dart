@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:kraken/bridge.dart';
-import 'package:location/location.dart';
+import 'package:kraken_geolocation/kraken_geolocation.dart';
 
 // getCurrentPosition relative
 bool enableHighAccuracy = false;

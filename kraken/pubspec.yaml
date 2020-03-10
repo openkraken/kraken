@@ -20,14 +20,14 @@ dependencies:
   device_info: ^0.4.1 # Only support iOS and Android.
   kraken_video_player:
     path: ../plugins/kraken_video_player
-  camera:
-    path: ../plugins/camera
+  kraken_camera:
+    path: ../plugins/kraken_camera
   kraken_webview:
     path: ../plugins/kraken_webview
-  audioplayers:
-    path: ../plugins/audioplayers
-  location:
-    path: ../plugins/geolocation
+  kraken_audioplayers:
+    path: ../plugins/kraken_audioplayers
+  kraken_geolocation:
+    path: ../plugins/kraken_geolocation
 
 dev_dependencies:
   flutter_test:
