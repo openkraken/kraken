@@ -47,6 +47,7 @@ const GET_CANVAS_CONTEXT = 'getContext';
 const UPDATE_CANVAS_CONTEXT_2D_PROPERTY = 'updateContext2DProperty';
 const APPLY_CANVAS_CONTEXT_2D_METHOD = 'applyContext2DMethod';
 const PROPERTIES = [
+  'font',
   'fillStyle',
   'strokeStyle',
 ];
