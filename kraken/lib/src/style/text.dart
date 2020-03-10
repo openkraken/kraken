@@ -236,7 +236,7 @@ mixin TextStyleMixin {
       : DEFAULT_FONT_FAMILY;
   }
 
-  static const DEFAULT_FONT_FAMILY_FALLBACK = null;
+  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
   List<String> getFontFamilyFallback(Style style) {
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }

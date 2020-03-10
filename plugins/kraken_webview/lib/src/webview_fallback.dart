@@ -26,17 +26,11 @@ class FallbackWebView with TextStyleMixin implements WebViewPlatform {
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
   }) {
     String description = _getWebViewDescriptionFromCreationParams(creationParams);
-    TextSpan text = createTextSpanWithStyle(
-      description,
-      Style({
-        'backgroundColor': 'white',
-        'color': 'black'
-      })
-    );
+    TextStyle style = getTextStyle(Style(null)).copyWith(backgroundColor: WebColor.white);
 
     return RenderFallbackViewBox(
       child: RenderParagraph(
-        text,
+        TextSpan(text: description, style: style),
         textDirection: TextDirection.ltr,
       ),
     );
