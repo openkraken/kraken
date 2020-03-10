@@ -5,6 +5,11 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/style.dart';
 
+/// Default font family for kraken.
+///
+/// reference: https://www.granneman.com/webdev/coding/css/fonts-and-formatting/web-browser-font-defaults
+const List<String> KRAKEN_DEFAULT_FONT_FAMILY_FALLBACK = ['Arial', 'Helvetica'];
+
 mixin TextStyleMixin {static const String COLOR = 'color';
   static const String HEIGHT = 'height';
   static const String LINE_HEIGHT = 'lineHeight';
@@ -235,9 +240,8 @@ mixin TextStyleMixin {static const String COLOR = 'color';
       : DEFAULT_FONT_FAMILY;
   }
 
-  static List<String> DEFAULT_FONT_FAMILY_FALLBACK = [];
   List<String> getFontFamilyFallback(Style style) {
-    return DEFAULT_FONT_FAMILY_FALLBACK;
+    return KRAKEN_DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
   double getFontSize(Style style) {

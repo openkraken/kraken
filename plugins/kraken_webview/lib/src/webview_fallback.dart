@@ -31,6 +31,9 @@ class FallbackWebView implements WebViewPlatform {
       style: const TextStyle(
         backgroundColor: WebColor.white,
         color: WebColor.black,
+        // Use a fixed font family fallback to avoid
+        // rendering difference in multi platforms.
+        fontFamilyFallback: KRAKEN_DEFAULT_FONT_FAMILY_FALLBACK,
       ),
     );
 
