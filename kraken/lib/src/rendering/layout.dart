@@ -573,7 +573,7 @@ class RenderFlowLayout extends RenderBox
       if (childCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
-              (runMainAxisExtent + spacing + childMainAxisExtent >=
+              (runMainAxisExtent + spacing + childMainAxisExtent >
                   mainAxisLimit))) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
