@@ -18,7 +18,7 @@ import '../platform_interface.dart';
 ///
 /// This is used as the default implementation for [WebViewElement.platform]. It uses
 /// an [RenderParagraph] to show basic information of webview settings, only for developers.
-class FallbackWebView implements WebViewPlatform {
+class FallbackWebView implements WebViewPlatform with TextStyleMixin {
   @override
   RenderBox buildRenderBox({
     CreationParams creationParams,
@@ -26,15 +26,12 @@ class FallbackWebView implements WebViewPlatform {
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
   }) {
     String description = _getWebViewDescriptionFromCreationParams(creationParams);
-    TextSpan text = TextSpan(
-      text: description,
-      style: const TextStyle(
-        backgroundColor: WebColor.white,
-        color: WebColor.black,
-        // Use a fixed font family fallback to avoid
-        // rendering difference in multi platforms.
-        fontFamilyFallback: KRAKEN_DEFAULT_FONT_FAMILY_FALLBACK,
-      ),
+    TextSpan text = createTextSpanWithStyle(
+      description,
+      const Style({
+        'backgroundColor': 'white',
+        'color': 'black'
+      })
     );
 
     return RenderFallbackViewBox(

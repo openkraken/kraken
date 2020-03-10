@@ -125,6 +125,19 @@ class CameraElement extends Element with CameraPreviewMixin {
     }
   }
 
+
+  RenderBox buildFallbackView(String description) {
+    assert(description != null);
+
+    TextSpan text = createTextSpanWithStyle(description, style);
+    return RenderFallbackViewBox(
+      child: RenderParagraph(
+        text,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+  }
+
   static void setDefaultPropsStyle(Map<String, dynamic> props) {
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
@@ -183,28 +196,6 @@ class CameraElement extends Element with CameraPreviewMixin {
       _initCameraWithLens(value);
     }
   }
-}
-
-RenderBox buildFallbackView(String description) {
-  assert(description != null);
-
-  TextSpan text = TextSpan(
-    text: description,
-    style: const TextStyle(
-      backgroundColor: WebColor.white,
-      color: WebColor.black,
-      // Use a fixed font family fallback to avoid
-      // rendering difference in multi platforms.
-      fontFamilyFallback: KRAKEN_DEFAULT_FONT_FAMILY_FALLBACK,
-    ),
-  );
-
-  return RenderFallbackViewBox(
-    child: RenderParagraph(
-      text,
-      textDirection: TextDirection.ltr,
-    ),
-  );
 }
 
 /// Returns the resolution preset from string.
