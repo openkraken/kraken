@@ -2,7 +2,7 @@
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
 #
 Pod::Spec.new do |s|
-  s.name             = 'audioplayers'
+  s.name             = 'kraken_audioplayers'
   s.version          = '0.0.1'
   s.summary          = 'A flutter plugin to play multiple simultaneously audio files.'
   s.description      = <<-DESC

@@ -24,8 +24,8 @@ dependencies:
     path: ../plugins/camera
   kraken_webview:
     path: ../plugins/kraken_webview
-  audioplayers:
-    path: ../plugins/audioplayers
+  kraken_audioplayers:
+    path: ../plugins/kraken_audioplayers
   location:
     path: ../plugins/geolocation
 
