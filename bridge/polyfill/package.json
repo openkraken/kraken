@@ -5,9 +5,10 @@
   "description": "js polyfill for kraken export JS API",
   "main": "dist/index.js",
   "scripts": {
-    "build": "webpack -c webpack.config.js && npm run jsToC",
-    "build:release": "KRAKEN_WEBPACK_BUILD=production webpack -c webpack.config.js && npm run jsToC",
-    "jsToC": "node scripts/js_to_c.js -s ../dist/main.js -o ../dist",
+    "build": "webpack -c webpack.config.js && npm run mainToC && npm run testToC",
+    "build:release": "KRAKEN_WEBPACK_BUILD=production webpack -c webpack.config.js && npm run mainToC && npm run testToC",
+    "mainToC": "node scripts/js_to_c.js -s ../dist/main.js -o ../dist",
+    "testToC": "node scripts/js_to_c.js -s ../dist/test.js -o ../dist -n TestFramework",
     "start": "webpack-dev-server -c webpack.config.js --host=0.0.0.0"
   },
   "author": "",
@@ -23,6 +24,7 @@
   "dependencies": {
     "@types/jest": "^24.0.25",
     "@types/raf": "^3.4.0",
+    "assert": "^2.0.0",
     "event-target-shim": "^5.0.1",
     "raf": "^3.4.1",
     "ts-jest": "^24.3.0"

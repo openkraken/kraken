@@ -7,7 +7,7 @@ const { resolve } = require('path');
 const { spawnSync } = require('child_process');
 
 const testRoot = resolve(__dirname, '..');
-const unitRoot = resolve(testRoot, 'unit');
+const unitRoot = resolve(testRoot, 'unit/modules');
 const globOptions = {
   cwd: unitRoot,
   // Not search dot files.

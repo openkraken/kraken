@@ -15,6 +15,7 @@ using namespace alibaba::jsa_v8;
 using namespace alibaba;
 
 void normalErrorHandler(const jsa::JSError &error) {
+  std::cerr << error.what() << std::endl;
   FAIL();
 }
 

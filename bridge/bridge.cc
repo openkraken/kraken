@@ -12,6 +12,7 @@
 #include "bindings/KOM/toBlob.h"
 #include "bindings/KOM/window.h"
 #include "polyfill.h"
+#include "testframework.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
