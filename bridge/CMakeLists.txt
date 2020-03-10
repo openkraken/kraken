@@ -52,12 +52,8 @@ list(APPEND BRIDGE_LINK_LIBS
         -pthread
 )
 
-add_library(bridge STATIC ${BRIDGE_SOURCE} bridge_test.cc bridge_test.h)
+add_library(bridge STATIC ${BRIDGE_SOURCE})
 add_library(kraken SHARED bridge_export.cc)
-add_library(kraken_test SHARED
-  bridge_test_export.cc include/bridge_test_export.h
-  polyfill/dist/testframework.cc
-  bridge_test.cc bridge_test.h)
 
 ### bridge
 target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
@@ -66,12 +62,6 @@ target_include_directories(bridge PRIVATE ${BRIDGE_INCLUDE})
 ### Kraken
 target_link_libraries(kraken PRIVATE bridge)
 target_include_directories(kraken PRIVATE
-  ${BRIDGE_INCLUDE}
-  ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-
-### kraken_test
-target_link_libraries(kraken_test PRIVATE kraken)
-target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
@@ -99,10 +89,8 @@ endif ()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_jsc)
-  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_jsc)
 elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
-  set_target_properties(kraken_test PROPERTIES OUTPUT_NAME kraken_test_v8)
 endif()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
@@ -110,16 +98,8 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
     )
-  set_target_properties(kraken_test
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-    )
 else ()
   set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
-    )
-  set_target_properties(kraken_test
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
     )
