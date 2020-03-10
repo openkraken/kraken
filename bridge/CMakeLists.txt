@@ -92,9 +92,9 @@ execute_process(
 string(REPLACE \n "" GIT_HEAD ${GIT_HEAD}) # Remove last \n
 add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
 
-include(./test/test.cmake)
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)
+  include(./test/test.cmake)
 endif ()
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
