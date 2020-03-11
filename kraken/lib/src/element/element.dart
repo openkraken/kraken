@@ -304,11 +304,17 @@ abstract class Element extends Node
   }
 
   void _scrollListener(double scrollTop) {
+    // Only trigger on body element
     if (this != ElementManager().getRootElement()) {
       return;
     }
+    _updateStickyPosition(scrollTop);
+  }
 
-    List stickyEls = findStickyChildren(this);
+  // Calculate sticky status according to scrollTop
+  void _updateStickyPosition(double scrollTop) {
+    Element bodyEl = ElementManager().getRootElement();
+    List stickyEls = findStickyChildren(bodyEl);
 
     for (int i = 0; i < stickyEls.length; i++) {
       Element el = stickyEls[i];
@@ -402,9 +408,15 @@ abstract class Element extends Node
         newStyle.position == 'relative' ||
         (newStyle.position == 'sticky' && !stickyFixed)) {
       // move element back to document flow
-      if (style.position == 'absolute' || style.position == 'fixed' || style.position == 'sticky') {
-        // remove positioned element from parent element stack
-        Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+      if (style.position == 'absolute' || style.position == 'fixed' || (style.position == 'sticky' && stickyFixed)) {
+        Element parentElementWithStack;
+        // find positioned element to remove
+        if (style.position == 'absolute') {
+          parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+        } else {
+          parentElementWithStack = ElementManager().getRootElement();
+        }
+        // Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
         parentElementWithStack.renderStack.remove(renderElementBoundary);
 
         // remove sticky placeholder
@@ -988,6 +1000,15 @@ abstract class Element extends Node
         child.markShouldUpdateMargin(); // Update margin for flex child.
         renderObject.markNeedsLayout();
       }
+
+      // @TODO move to connected callback instead use of timer
+      Timer(Duration(milliseconds: 0), () {
+        // Trigger sticky update logic after node is connected
+        if (childStyle.get('position') == 'sticky') {
+          _updateStickyPosition(0);
+        }
+      });
+
     } else if (child is TextNode) {
       RenderTextNode newTextNode = RenderTextNode(
         nodeId: child.nodeId,
