@@ -1,4 +1,5 @@
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin RelativeStyleMixin on RenderBox {
@@ -7,7 +8,10 @@ mixin RelativeStyleMixin on RenderBox {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
-      styleOffset = getRelativeOffset(style);
+      // Text node does not have relative offset
+      if (renderBox is! RenderTextNode) {
+        styleOffset = getRelativeOffset(style);
+      }
       boxParentData.offset = relativeOffset == null
           ? styleOffset
           : styleOffset == null

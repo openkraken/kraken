@@ -954,12 +954,17 @@ class RenderFlexLayout extends RenderBox
           break;
       }
 
-      if (child is RenderElementBoundary) {
+      Style childStyle;
+      if (child is RenderTextNode) {
+        childStyle = nodeMap[nodeId].style;
+      } else if (child is RenderElementBoundary) {
         int childNodeId = child.nodeId;
-        Style childStyle = nodeMap[childNodeId].style;
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
+        childStyle = nodeMap[childNodeId].style;
       }
+
+      ///apply position relative offset change
+      applyRelativeOffset(relativeOffset, child, childStyle);
+
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {
