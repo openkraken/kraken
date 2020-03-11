@@ -244,6 +244,7 @@ abstract class Element extends Node
         int oldZIndex = _style.zIndex;
         // zIndex change
         if (newZIndex != oldZIndex) {
+          needsReposition = true;
           _updateZIndex(newStyle);
         }
 
@@ -516,6 +517,10 @@ abstract class Element extends Node
   }
 
   void _updateZIndex(Style style) {
+    // new node not in the tree, wait for append in appenedElement
+    if (renderObject.parent == null) {
+      return;
+    }
     Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
     RenderStack parentStack = parentElementWithStack.renderStack;
 
