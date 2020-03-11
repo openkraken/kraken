@@ -142,6 +142,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
 
     const makeFileArgs = [
       '-DCMAKE_BUILD_TYPE=' + buildMode,
+      '-DENABLE_TEST=true',
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
@@ -174,6 +175,8 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
+      'kom_test',
+      'jsa_test',
       '--',
       '-j',
       '4'
@@ -194,7 +197,7 @@ task('generate-cmake-embedded-files', (done) => {
   const args = [
     '-DCMAKE_BUILD_TYPE=' + buildMode,
     '-G',
-    'CodeBlocks - Unix Makefiles',
+    'CodeBlocks - Unix Makefiles', 
     '-B',
     resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '-S',
