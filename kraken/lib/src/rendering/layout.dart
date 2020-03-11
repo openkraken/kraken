@@ -742,16 +742,12 @@ class RenderFlowLayout extends RenderBox
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
-        Style childStyle;
-        if (child is RenderTextNode) {
-          childStyle = nodeMap[nodeId].style;
-        } else if (child is RenderElementBoundary) {
+        if (child is RenderElementBoundary) {
           int childNodeId = child.nodeId;
-          childStyle = nodeMap[childNodeId].style;
+          Style childStyle = nodeMap[childNodeId].style;
+          ///apply position relative offset change
+          applyRelativeOffset(relativeOffset, child, childStyle);
         }
-
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;

@@ -482,31 +482,36 @@ class RenderFlexLayout extends RenderBox
     return minusConstraints;
   }
 
-  double _getBaseConstraints(RenderElementBoundary child) {
+  double _getBaseConstraints(RenderObject child) {
     double minConstraints;
-    String flexBasis = _getFlexBasis(child);
+    if (child is RenderTextNode) {
+      minConstraints = 0;
+      return minConstraints;
+    } else if (child is RenderElementBoundary) {
+      String flexBasis = _getFlexBasis(child);
 
-    if (_direction == Axis.horizontal) {
-      String width = child.style.get('width');
-      if (flexBasis == 'auto') {
-        if (width != null) {
-          minConstraints = Length.toDisplayPortValue(width);
+      if (_direction == Axis.horizontal) {
+        String width = child.style.get('width');
+        if (flexBasis == 'auto') {
+          if (width != null) {
+            minConstraints = Length.toDisplayPortValue(width);
+          } else {
+            minConstraints = 0;
+          }
         } else {
-          minConstraints = 0;
+          minConstraints = Length.toDisplayPortValue(flexBasis);
         }
       } else {
-        minConstraints = Length.toDisplayPortValue(flexBasis);
-      }
-    } else {
-      String height = child.style.get('height');
-      if (flexBasis == 'auto') {
-        if (height != null) {
-          minConstraints = Length.toDisplayPortValue(height);
+        String height = child.style.get('height');
+        if (flexBasis == 'auto') {
+          if (height != null) {
+            minConstraints = Length.toDisplayPortValue(height);
+          } else {
+            minConstraints = 0;
+          }
         } else {
-          minConstraints = 0;
+          minConstraints = Length.toDisplayPortValue(flexBasis);
         }
-      } else {
-        minConstraints = Length.toDisplayPortValue(flexBasis);
       }
     }
     return minConstraints;
@@ -948,16 +953,13 @@ class RenderFlexLayout extends RenderBox
           relativeOffset = Offset(childCrossPosition, childMainPosition);
           break;
       }
-      Style childStyle;
-      if (child is RenderTextNode) {
-        childStyle = nodeMap[nodeId].style;
-      } else if (child is RenderElementBoundary) {
-        int childNodeId = child.nodeId;
-        childStyle = nodeMap[childNodeId].style;
-      }
 
-      ///apply position relative offset change
-      applyRelativeOffset(relativeOffset, child, childStyle);
+      if (child is RenderElementBoundary) {
+        int childNodeId = child.nodeId;
+        Style childStyle = nodeMap[childNodeId].style;
+        ///apply position relative offset change
+        applyRelativeOffset(relativeOffset, child, childStyle);
+      }
       if (flipMainAxis) {
         childMainPosition -= betweenSpace;
       } else {
