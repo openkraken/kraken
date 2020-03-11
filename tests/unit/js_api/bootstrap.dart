@@ -14,6 +14,7 @@ import 'dart:io';
 final Directory javascriptSource = Directory('./unit/js_api/src');
 
 void main() {
+  testEnvironment = TestEnvironment.Unit;
   initTestFramework();
   registerDartTestMethodsToCpp();
   registerDartMethodsToCpp();

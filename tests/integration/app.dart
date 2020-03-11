@@ -1,8 +1,7 @@
 import 'dart:io';
+import 'dart:ui';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:flutter/rendering.dart';
 import 'package:colorize/colorize.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
@@ -13,6 +12,7 @@ import '../bridge/from_native.dart';
 import '../bridge/to_native.dart';
 
 void main() {
+  testEnvironment = TestEnvironment.Integration;
   initTestFramework();
   registerDartTestMethodsToCpp();
   registerDartMethodsToCpp();
