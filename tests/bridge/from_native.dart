@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'platform.dart';
@@ -53,18 +54,28 @@ typedef Dart_RegisterIt = void Function(Pointer<NativeFunction<Native_It>>);
 final Dart_RegisterIt _registerIt =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterIt>>('registerIt').asFunction();
 
+enum TestEnvironment { Unit, Integration }
+
+TestEnvironment testEnvironment;
+
 void _it(Pointer<Utf8> namePtr, Pointer<Void> context, Pointer<NativeFunction<NativeItCallback>> callbackPtr) {
   DartItCallback callback = callbackPtr.asFunction();
-  test(Utf8.fromUtf8(namePtr), () async {
-    Completer completer = Completer<void>();
 
+  Future<void> f() {
+    Completer completer = Completer<void>();
     // cache completer into an list, and use callback to consume it later.
     testCompleter.add(completer);
-
     callback(context, testCompleter.length);
-
     return completer.future;
-  });
+  }
+
+  if (testEnvironment == TestEnvironment.Unit) {
+    test(Utf8.fromUtf8(namePtr), () async {
+      return f();
+    });
+  } else {
+    f();
+  }
 }
 
 void registerIt() {
@@ -79,14 +90,29 @@ typedef Dart_RegisterItDone = void Function(Pointer<NativeFunction<Native_ItDone
 final Dart_RegisterItDone _registerItDone =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterItDone>>('registerItDone').asFunction();
 
+typedef ItDoneCallback = void Function(String errmsg);
+
+ItDoneCallback _itDoneCallback;
+
+void onItDone(ItDoneCallback callback) {
+  _itDoneCallback = callback;
+}
+
 void _itDone(int completerId, Pointer<Utf8> errmsg) {
   if (testCompleter[completerId - 1] == null) return;
   Completer<void> completer = testCompleter[completerId - 1];
 
   if (errmsg == nullptr) {
     completer.complete();
+    if (_itDoneCallback != null) {
+      _itDoneCallback(null);
+    }
   } else {
-    completer.completeError(new Exception(Utf8.fromUtf8(errmsg)));
+    String msg = Utf8.fromUtf8(errmsg);
+    completer.completeError(new Exception(msg));
+    if (_itDoneCallback != null) {
+      _itDoneCallback(msg);
+    }
   }
 }
 

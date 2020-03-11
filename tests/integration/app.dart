@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:colorize/colorize.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/src/bridge/from_native.dart';
@@ -38,18 +37,21 @@ void main() {
       String payload = ret['payload'];
       String caseName = ret['case'];
       runApp(
-        shouldInitializeBinding: false,
-        enableDebug: true,
-        afterConnected: () {
-          evaluateTestScripts(payload, url: caseName);
-          RendererBinding.instance.addPostFrameCallback((Duration timeout) async {
-            BodyElement body = ElementManager().getRootElement();
-            Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
-            List<int> bodyImageList = bodyImage.toList();
-            completer.complete(jsonEncode(bodyImageList));
+          shouldInitializeBinding: false,
+          enableDebug: true,
+          afterConnected: () {
+            onItDone((String errmsg) {
+              Map<String, double> screenData = {
+                'devicePixelRatio': window.devicePixelRatio,
+                'width': window.physicalSize.width,
+                'height': window.physicalSize.height
+              };
+              completer.complete(jsonEncode(screenData));
+            });
+
+            // javascript it is equal to dart's test().
+            evaluateTestScripts(payload, url: caseName);
           });
-        }
-      );
     }
 
     return completer.future;
