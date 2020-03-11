@@ -16,11 +16,6 @@ void main() {
   initTestFramework();
   registerDartTestMethodsToCpp();
   registerDartMethodsToCpp();
-  addJSErrorListener((String errmsg) {
-    Colorize color = Colorize(errmsg);
-    color.red();
-    print(color);
-  });
 
   if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -41,6 +36,11 @@ void main() {
           enableDebug: true,
           afterConnected: () {
             onItDone((String errmsg) {
+              if (errmsg != null) {
+                completer.completeError(Exception(errmsg));
+                return;
+              }
+
               Map<String, double> screenData = {
                 'devicePixelRatio': window.devicePixelRatio,
                 'width': window.physicalSize.width,
