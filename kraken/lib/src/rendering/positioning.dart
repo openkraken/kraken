@@ -9,17 +9,18 @@ class ZIndexParentData extends StackParentData {
 
 class RenderPosition extends RenderStack {
   RenderPosition({
-    List<RenderBox> children,
+    this.children,
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection = TextDirection.ltr,
     StackFit fit = StackFit.passthrough,
     Overflow overflow = Overflow.visible,
-  }) : super(
-            children: children,
+  }) : super( children: children,
             alignment: alignment,
             textDirection: textDirection,
             fit: fit,
             overflow: overflow);
+
+  List<RenderBox> children;
 
   @override
   void performLayout() {
@@ -48,6 +49,9 @@ class RenderPosition extends RenderStack {
         height = math.max(height, childSize.height);
         childParentData.offset = Offset.zero;
       } else {
+        var onlyChild = children[0];
+        Size size = onlyChild.size;
+
         BoxConstraints childConstraints = const BoxConstraints();
 
         if (childParentData.width != null)
