@@ -32,6 +32,7 @@ add_subdirectory(./third_party/googletest)
 
 set(TEST_LINK_LIBRARY
         ${BRIDGE_LINK_LIBS}
+        kraken_test
         bridge
         gtest
         gtest_main
@@ -45,16 +46,36 @@ set(TEST_INCLUDE_DIR
         ${BRIDGE_INCLUDE}
         )
 
-
 add_executable(jsa_test
         ./test/jsa/v8/v8_test.cc
         ./test/jsa/jsc/jsc_test.cc)
 target_link_libraries(jsa_test ${TEST_LINK_LIBRARY})
 target_include_directories(jsa_test PUBLIC ${TEST_INCLUDE_DIR})
 
-add_executable(bridge_test
-  ./test/bridge/blob.cc
-  ./test/bridge/testframework.cc
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  set_target_properties(jsa_test PROPERTIES RUNTIME_OUTPUT_NAME jsa_test_jsc)
+endif()
+
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+  set_target_properties(jsa_test PROPERTIES RUNTIME_OUTPUT_NAME jsa_test_v8)
+endif()
+
+add_executable(kom_test
+  ./test/kom/blob.cc
+  ./test/kom/testframework.cc
 )
-target_link_libraries(bridge_test ${TEST_LINK_LIBRARY})
-target_include_directories(bridge_test PUBLIC ${TEST_INCLUDE_DIR})
+target_link_libraries(kom_test ${TEST_LINK_LIBRARY})
+target_include_directories(kom_test PUBLIC ${TEST_INCLUDE_DIR})
+
+if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+  set_target_properties(jsa_test
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    )
+  set_target_properties(kom_test
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    )
+endif()
