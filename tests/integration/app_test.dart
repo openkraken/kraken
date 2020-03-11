@@ -85,7 +85,7 @@ void main() {
         basename = basename.substring(0, basename.length - 3);
 
         test('Match Snapshot $basename', () async {
-          String payload = addJavaScriptClosure(File(fixture.path).readAsStringSync());
+          String payload = File(fixture.path).readAsStringSync();
           String screenData = await driver.requestData(jsonEncode({
             'type': 'startup',
             'case': basename,
