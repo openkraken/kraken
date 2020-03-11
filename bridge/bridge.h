@@ -42,10 +42,6 @@ public:
     return context.get();
   }
 
-#ifndef ENABLE_TEST
-  alibaba::jsa::Value getGlobalValue(std::string code);
-#endif
-
   void invokeEventListener(int32_t type, const char *args);
   void handleUIListener(const char *args);
   void handleModuleListener(const char *args);

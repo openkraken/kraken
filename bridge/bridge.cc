@@ -206,18 +206,6 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   return Value::undefined();
 }
 
-#ifdef IS_TEST
-Value getValue(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count != 1) {
-    KRAKEN_LOG(VERBOSE) << "[TEST] getValue() accept 1 params";
-    return Value::undefined();
-  }
-
-  const Value &name = args[0];
-  return JSA_GLOBAL_GET_PROPERTY(context, name.getString(context).utf8(context).c_str());
-}
-#endif
-
 } // namespace
 
 /**
@@ -356,10 +344,6 @@ JSBridge::~JSBridge() {
   websocket_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
-}
-
-Value JSBridge::getGlobalValue(std::string code) {
-  return context->evaluateJavaScript(code.c_str(), "test://", 0);
 }
 
 void JSBridge::invokeOnloadCallback() {
