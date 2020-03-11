@@ -3,7 +3,8 @@
   "scripts": {
     "pretest": "npm install",
     "test": "flutter pub get && flutter clean && npm run unit && npm run integration",
-    "unit": "node ./scripts/bootstrap_unit_test",
+    "unit": "npm run unit:kraken && npm run unit:js_api",
+    "unit:kraken": "node ./scripts/bootstrap_unit_test",
     "unit:js_api": "flutter test ./unit/js_api/bootstrap.dart",
     "integration": "flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
   },
