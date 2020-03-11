@@ -23,9 +23,9 @@ void main() {
   TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
-  enableFlutterDriverExtension(handler: (String message) {
+  enableFlutterDriverExtension(handler: (String message) async {
     Completer<String> completer = new Completer();
-    unmountApp();
+    await unmountApp();
 
     var ret = jsonDecode(message);
     if (ret['type'] == 'startup') {
