@@ -1,22 +1,25 @@
-var iframe = document.createElement('iframe');
+it('iframe', () => {
+  throw new Error('iframe 需要load事件');
 
-iframe.setAttribute('src', 'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html');
-iframe.style.width = '100vw';
-iframe.style.height = '375rpx';
+  var iframe = document.createElement('iframe');
 
-var div = document.createElement('div');
+  iframe.setAttribute('src', 'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html');
+  iframe.style.width = '100vw';
+  iframe.style.height = '375rpx';
 
-div.style.width = div.style.height = '200px';
+  var div = document.createElement('div');
 
-div.style.backgroundColor = 'cyan';
-document.body.appendChild(div);
+  div.style.width = div.style.height = '200px';
 
-document.body.appendChild(iframe);
+  div.style.backgroundColor = 'cyan';
+  document.body.appendChild(div);
 
-var div2 = document.createElement('div');
+  document.body.appendChild(iframe);
 
-div2.style.width = div2.style.height = '100px';
+  var div2 = document.createElement('div');
 
-div2.style.backgroundColor = 'red';
-document.body.appendChild(div2);
+  div2.style.width = div2.style.height = '100px';
 
+  div2.style.backgroundColor = 'red';
+  document.body.appendChild(div2);
+});
