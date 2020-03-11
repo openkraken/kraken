@@ -7,13 +7,14 @@ import 'package:colorize/colorize.dart';
 import 'package:kraken/src/element/binding.dart';
 import 'package:kraken/src/bridge/from_native.dart';
 import 'package:test/test.dart';
-import 'bridge/from_native.dart';
-import 'bridge/to_native.dart';
+import '../../bridge/from_native.dart';
+import '../../bridge/to_native.dart';
 import 'dart:io';
 
 final Directory javascriptSource = Directory('./unit/js_api/src');
 
 void main() {
+  testEnvironment = TestEnvironment.Unit;
   initTestFramework();
   registerDartTestMethodsToCpp();
   registerDartMethodsToCpp();
