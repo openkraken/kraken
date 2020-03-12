@@ -195,10 +195,9 @@ abstract class Element extends Node
           oldRenderElement
             ..visitChildren(visitor)
             ..removeAll();
-          RenderPadding parent = renderLayoutElement.parent;
-          parent.child = null;
+          renderPadding.child = null;
           renderLayoutElement = createRenderLayoutElement(newStyle, children);
-          parent.child = renderLayoutElement as RenderBox;
+          renderPadding.child = renderLayoutElement as RenderBox;
           // update style reference
           renderElementBoundary.style = newStyle;
         }
@@ -935,12 +934,15 @@ abstract class Element extends Node
 
       if (isFlex) {
         // Add FlexItem wrap for flex child node.
-        RenderPadding parent = child.renderLayoutElement.parent;
-        RenderBox childRenderBox = child.renderLayoutElement as RenderBox;
-        parent.child = null;
-        parent.child = RenderFlexItem(
-          child: childRenderBox,
-        );
+        RenderPadding parentRenderPadding = child.renderPadding;
+        if (child.renderLayoutElement != null) {
+          RenderBox childRenderBox = child.renderLayoutElement as RenderBox;
+          parentRenderPadding.child = null;
+          parentRenderPadding.child = RenderFlexItem(
+            child: childRenderBox,
+          );
+        }
+
       } else {
         Style childStyle = Style(child.properties[STYLE]);
         String childDisplay = childStyle.contains('display') ? childStyle['display'] : defaultDisplay;
