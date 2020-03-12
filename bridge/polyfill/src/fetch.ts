@@ -17,10 +17,32 @@ function normalizeValue(value: any) {
   return value;
 }
 
+function consumed(body: FetchBody) {
+  if (body.bodyUsed) {
+    return Promise.reject(new TypeError('Already read'))
+  }
+  body.bodyUsed = true;
+  return null;
+}
+
 class FetchHeader implements Headers {
   private map = {};
 
-  constructor(init?: HeadersInit) { }
+  constructor(headers?: HeadersInit) {
+    if (headers instanceof Headers) {
+      headers.forEach((value, name) => {
+        this.append(name, value);
+      }, this);
+    } else if (Array.isArray(headers)) {
+      headers.forEach((header) => {
+        this.append(header[0], header[1])
+      }, this);
+    } else if (headers) {
+      Object.getOwnPropertyNames(headers).forEach((name) => {
+        this.append(name, headers[name])
+      }, this);
+    }
+  }
 
   append(name: string, value: string): void {
     name = normalizeName(name);
@@ -96,6 +118,10 @@ class FetchBody {
   }
 
   async text(): Promise<string> {
+    let rejected = consumed(this);
+    if (rejected) {
+      return rejected;
+    }
     this.bodyUsed = true;
     return this.body || '';
   }
@@ -246,7 +272,7 @@ Object.defineProperty(global, 'Request', {
   configurable: false
 });
 
-Object.defineProperty(global, 'Header', {
+Object.defineProperty(global, 'Headers', {
   value: FetchHeader,
   enumerable: true,
   writable: false,
