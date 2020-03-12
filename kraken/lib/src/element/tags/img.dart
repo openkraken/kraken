@@ -14,7 +14,7 @@ class ImgElement extends Element {
   RenderDecoratedBox imageBox;
   RenderConstrainedBox imageConstrainedBox;
   ImageStream imageStream;
-  ImageStreamListener imageListener;
+  List<ImageStreamListener> imageListeners;
 
   ImgElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
@@ -44,8 +44,13 @@ class ImgElement extends Element {
 
     if (!determinBothWidthAndHeight) {
       imageStream = image.resolve(imageBox.configuration);
-      imageListener = ImageStreamListener(resizeAfterImageLoaded);
-      imageStream.addListener(imageListener);
+      imageListeners = [
+        ImageStreamListener(resizeAfterImageLoaded),
+        ImageStreamListener(handleEventAfterImageLoaded),
+      ];
+      imageListeners.forEach((ImageStreamListener imageListener) {
+        imageStream.addListener(imageListener);
+      });
     }
 
     if (childNodes.isEmpty) {
@@ -63,8 +68,15 @@ class ImgElement extends Element {
     return url;
   }
 
+  void handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
+    dispatchEvent(Event('load'));
+  }
+
   void resizeAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    imageStream.removeListener(imageListener);
+    imageListeners?.forEach((ImageStreamListener imageListener) {
+      imageStream.removeListener(imageListener);
+    });
+    imageListeners = null;
 
     BoxConstraints constraints;
     double realWidth = imageInfo.image.width + 0.0;
