@@ -1,4 +1,4 @@
-it('audio', () => {
+it('element audio', () => {
   function setStyle(dom, object) {
     for (const key in object) {
       if (object.hasOwnProperty(key)) {
