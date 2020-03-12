@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:convert';
-import 'package:colorize/colorize.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
+import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/src/bridge/from_native.dart';
@@ -35,18 +37,19 @@ void main() {
           shouldInitializeBinding: false,
           enableDebug: true,
           afterConnected: () {
-            onItDone((String errmsg) {
+            onItDone((String errmsg) async {
+              print('it Done $errmsg');
+
               if (errmsg != null) {
                 completer.completeError(Exception(errmsg));
                 return;
               }
 
-              Map<String, double> screenData = {
-                'devicePixelRatio': window.devicePixelRatio,
-                'width': window.physicalSize.width,
-                'height': window.physicalSize.height
-              };
-              completer.complete(jsonEncode(screenData));
+              BodyElement body = ElementManager().getRootElement();
+              body.renderObject.markNeedsPaint();
+              Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
+              List<int> bodyImageList = bodyImage.toList();
+              completer.complete(jsonEncode(bodyImageList));
             });
 
             // javascript it is equal to dart's test().
