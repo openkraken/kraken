@@ -309,16 +309,16 @@ task('patch-flutter-tester', (done) => {
 });
 
 task('integration-test', (done) => {
-  try {
-    execSync('npm run integration', {
-      stdio: 'inherit',
-      cwd: paths.tests
-    });
-  } catch (err) {
+  const { status } = spawnSync('npm', ['run', 'integration'], {
+    stdio: 'inherit',
+    cwd: paths.tests
+  });
+  if (status !== 0) {
     console.error('Run intefration test with error.');
-    process.exit(1);
+    process.exit(status);
+  } else {
+    done();
   }
-  done();
 });
 
 task('js-api-test', (done) => {
