@@ -177,7 +177,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '--target',
       'kraken',
       'kom_test',
-      'jsa_test',
+      'jsa_test_' + jsEngine,
       '--',
       '-j',
       '4'
