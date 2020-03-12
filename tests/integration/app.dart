@@ -38,8 +38,6 @@ void main() {
           enableDebug: true,
           afterConnected: () {
             onItDone((String errmsg) async {
-              print('it Done $errmsg');
-
               if (errmsg != null) {
                 completer.completeError(Exception(errmsg));
                 return;
@@ -47,9 +45,11 @@ void main() {
 
               BodyElement body = ElementManager().getRootElement();
               body.renderObject.markNeedsPaint();
-              Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
-              List<int> bodyImageList = bodyImage.toList();
-              completer.complete(jsonEncode(bodyImageList));
+              RendererBinding.instance.addPostFrameCallback((_) async {
+                Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
+                List<int> bodyImageList = bodyImage.toList();
+                completer.complete(jsonEncode(bodyImageList));
+              });
             });
 
             // javascript it is equal to dart's test().
