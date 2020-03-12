@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:convert';
-import 'package:colorize/colorize.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
