@@ -133,8 +133,8 @@ class JavascriptChannel {
 }
 
 /// A web view widget for showing html content.
-class WebViewElement extends Element {
-  static String WEBVIEW = 'WEBVIEW';
+abstract class WebViewElement extends Element {
+  static const String WEBVIEW = 'WEBVIEW';
   /// Creates a new web view.
   ///
   /// The web view can be controlled using a `WebViewController` that is passed to the
@@ -149,8 +149,6 @@ class WebViewElement extends Element {
     this.javascriptChannels,
     this.navigationDelegate,
     this.gestureRecognizers,
-    this.onPageStarted,
-    this.onPageFinished,
     this.debuggingEnabled = false,
     this.gestureNavigationEnabled = false,
     this.userAgent = DEFAULT_USER_AGENT,
@@ -346,7 +344,7 @@ class WebViewElement extends Element {
   final NavigationDelegate navigationDelegate;
 
   /// Invoked when a page starts loading.
-  final PageStartedCallback onPageStarted;
+  void onPageStarted(String url);
 
   /// Invoked when a page has finished loading.
   ///
@@ -358,7 +356,7 @@ class WebViewElement extends Element {
   /// When invoked on iOS or Android, any Javascript code that is embedded
   /// directly in the HTML has been loaded and code injected with
   /// [WebViewController.evaluateJavascript] can assume this.
-  final PageFinishedCallback onPageFinished;
+  void onPageFinished(String url);
 
   /// Controls whether WebView debugging is enabled.
   ///
