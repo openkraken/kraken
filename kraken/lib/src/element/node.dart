@@ -24,7 +24,7 @@ class Comment extends Node {
   Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
 }
 
-class TextNode extends Node with TextStyleMixin {
+class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   TextNode(int nodeId, String data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     assert(data != null);
     this.data = data;
@@ -65,6 +65,33 @@ class TextNode extends Node with TextStyleMixin {
     parentElement.renderLayoutElement
       ..remove(children[curIdx])
       ..insert(newTextNode, after: insertNode);
+  }
+}
+
+mixin NodeLifeCycle on Node {
+  List<VoidCallback> _afterConnected = [];
+  List<VoidCallback> _beforeDisconnected = [];
+
+  void fireAfterConnected() {
+    _afterConnected.forEach((VoidCallback fn) {
+      fn();
+    });
+    _afterConnected = [];
+  }
+
+  void queueAfterConnected(VoidCallback callback) {
+    _afterConnected.add(callback);
+  }
+
+  void fireBeforeDisconnected() {
+    _beforeDisconnected.forEach((VoidCallback fn) {
+      fn();
+    });
+    _beforeDisconnected = [];
+  }
+
+  void queueBeforeDisconnected(VoidCallback callback) {
+    _beforeDisconnected.add(callback);
   }
 }
 
