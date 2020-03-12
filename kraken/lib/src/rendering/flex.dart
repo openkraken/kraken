@@ -831,8 +831,7 @@ class RenderFlexLayout extends RenderBox
         : allocatedSize;
     double actualSize;
     double actualSizeDelta;
-    double constraintWidth;
-
+    double constraintWidth = idealSize;
     String display = style.get('display');
     bool isInline = isElementInline(display, nodeId);
     if (!isInline) {
@@ -841,8 +840,7 @@ class RenderFlexLayout extends RenderBox
       } else {
         constraintWidth = getParentWidth(nodeId);
       }
-    } else {
-      constraintWidth = idealSize;
+      constraintWidth = math.max(idealSize, constraintWidth);
     }
 
     double constraintHeight =
@@ -850,12 +848,12 @@ class RenderFlexLayout extends RenderBox
     if (style.get('height') != null) {
       double height = Length.toDisplayPortValue(style.get('height'));
       if (height != null) {
-        constraintHeight = height;
+        constraintHeight = math.max(height, constraintHeight);
       }
     } else {
       double parentHeight = getStretchParentHeight(nodeId);
       if (parentHeight != null) {
-        constraintHeight = parentHeight;
+        constraintHeight = math.max(parentHeight, constraintHeight);
       }
     }
 

@@ -46,11 +46,11 @@ class Style {
       _overflowX = _overflowX ?? AUTO;
     }
 
-    if (_overflowX == VISIBLE && (_overflowY == SCROLL || _overflowY == AUTO)) {
+    if (_overflowX == VISIBLE && (_overflowY != VISIBLE)) {
       _overflowX = AUTO;
     }
 
-    if (_overflowY == VISIBLE && (_overflowX == SCROLL || _overflowX == AUTO)) {
+    if (_overflowY == VISIBLE && (_overflowX != VISIBLE)) {
       _overflowY = AUTO;
     }
     backgroundAttachment = _styleMap['backgroundAttachment'] ?? SCROLL;

@@ -608,7 +608,7 @@ class RenderFlowLayout extends RenderBox
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
-    double constraintWidth;
+    double constraintWidth = mainAxisExtent;
     String display = style.get('display');
     bool isInline = isElementInline(display, nodeId);
     if (!isInline) {
@@ -617,21 +617,21 @@ class RenderFlowLayout extends RenderBox
       } else {
         constraintWidth = getParentWidth(nodeId);
       }
-    } else {
-      constraintWidth = mainAxisExtent;
+      constraintWidth = math.max(mainAxisExtent, constraintWidth);
     }
+
 
     double constraintHeight = crossAxisExtent;
     // stretch height to container height if alignItems is stretch
     double parentHeight = getStretchParentHeight(nodeId);
     if (parentHeight != null) {
-      constraintHeight = parentHeight;
+      constraintHeight = math.max(parentHeight, constraintHeight);
     } else if (!isInline) {
       // Use container height as constraints if exists
       if (style.get('height') != null) {
         double height = getCurrentHeight(style);
         if (height != null) {
-          constraintHeight = height;
+          constraintHeight = math.max(height, constraintHeight);
         }
       }
     }
