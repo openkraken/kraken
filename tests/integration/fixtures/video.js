@@ -1,5 +1,5 @@
-it('initVideo', () => {
-  return new Promise((resolve, reject) => {
+it('video', () => {
+  return new Promise((resolve) => {
     function setStyle(dom, object) {
       for (const key in object) {
         if (object.hasOwnProperty(key)) {
@@ -34,7 +34,6 @@ it('initVideo', () => {
     });
 
     video.addEventListener('canplay', () => {
-      console.log('can play');
       resolve();
     });
 
@@ -53,7 +52,5 @@ it('initVideo', () => {
       video.play();
     });
     container1.appendChild(playBtn);
-
-    console.log('video element created');
   });
 });
