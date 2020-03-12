@@ -117,7 +117,12 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       callback(Utf8.toUtf8(json), context);
     }).catchError((e) {
       String errorMessage = e is HTTPException ? e.message : e.toString();
-      String json = jsonEncode([errorMessage, e.response.statusCode, '']);
+      String json;
+      if (e is ArgumentError) {
+        json = jsonEncode([errorMessage, null, '']);
+      } else {
+        json = jsonEncode([errorMessage, e.response.statusCode, '']);
+      }
       callback(Utf8.toUtf8(json), context);
     });
   } else if (module == 'DeviceInfo') {

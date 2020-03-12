@@ -297,7 +297,7 @@ Object.defineProperty(global, 'Headers', {
 });
 
 Object.defineProperty(global, 'Response', {
-  value: Request,
+  value: Response,
   enumerable: true,
   writable: false,
   configurable: false
