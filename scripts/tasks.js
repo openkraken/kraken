@@ -2,7 +2,7 @@ const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const { writeFileSync } = require('fs');
-const { spawnSync, execSync } = require('child_process');
+const { spawnSync, execSync, fork } = require('child_process');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -321,6 +321,7 @@ task('integration-test', (done) => {
 });
 
 task('js-api-test', (done) => {
+  fork(path.join(paths.tests, 'unit/js_api/tools/simple_server.js'));
   execSync('flutter test ./unit/js_api/bootstrap.dart', {
     env: {
       ...process.env,

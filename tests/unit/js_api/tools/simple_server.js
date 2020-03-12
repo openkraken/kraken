@@ -20,5 +20,4 @@ http.createServer(((req, res) => {
     method: 'GET',
     data: JSON.stringify(query.query)
   }));
-  console.log('server listening at :9450');
 })).listen(9450);
