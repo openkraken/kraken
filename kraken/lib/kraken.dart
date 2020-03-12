@@ -53,7 +53,7 @@ void runApp({
   connect(showPerformanceOverlay);
 }
 
-void unmountApp() async {
+Future<void> unmountApp() async {
   if (elementManager != null) {
     await elementManager.disconnect();
     elementManager = null;

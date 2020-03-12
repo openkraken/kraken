@@ -3,6 +3,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:ansicolor/ansicolor.dart';
+import 'package:image/image.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:io';
@@ -84,17 +85,26 @@ void main() {
         basename = basename.substring(0, basename.length - 3);
 
         test('Match Snapshot $basename', () async {
-          String payload = addJavaScriptClosure(File(fixture.path).readAsStringSync());
-          String imageListJSON = await driver.requestData(jsonEncode({
+          String payload = File(fixture.path).readAsStringSync();
+          String screenData = await driver.requestData(jsonEncode({
             'type': 'startup',
             'case': basename,
             'payload': payload,
           }));
 
-          // Transform List<dynamic> to List<int>
-          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>().toList();
-          expect(await matchSnapshots(basename, snapshot), true,
-            reason: 'Snapshot "$basename" NOT equal.');
+          Map<String, dynamic> screen = jsonDecode(screenData);
+          List<int> snapshot = await driver.screenshot();
+          double devicePixelRatio = screen['devicePixelRatio'];
+          Image image = decodePng(snapshot.toList());
+
+          if (screen['devicePixelRatio'] > 1) {
+            final double scale = 1 / devicePixelRatio;
+            final int width = (image.width * scale).round();
+            final int height = (image.height * scale).round();
+            image = copyResize(image, width: width, height: height);
+          }
+
+          expect(await matchSnapshots(basename, encodePng(image)), true, reason: 'Snapshot "$basename" NOT equal.');
         });
       }
     }
