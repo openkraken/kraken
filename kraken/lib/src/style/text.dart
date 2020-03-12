@@ -273,7 +273,7 @@ mixin TextStyleMixin {
 
   double getHeight(Style style) {
     if (style.contains(LINE_HEIGHT)) {
-      return Length.toDisplayPortValue(style[LINE_HEIGHT]);
+      return Length.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
     } else {
       return null;
     }
