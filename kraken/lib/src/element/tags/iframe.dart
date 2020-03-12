@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken_webview/kraken_webview.dart' show WebViewElement;
+import 'package:kraken/element.dart';
 
 const String IFRAME = 'IFRAME';
 
@@ -35,4 +36,18 @@ const String IFRAME = 'IFRAME';
 class IFrameElement extends WebViewElement {
   IFrameElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(nodeId, props, events, tagName: IFRAME);
+
+  bool _isFirstLoaded;
+  @override
+  void onPageStarted(String url) {
+    if (_isFirstLoaded) {
+      dispatchEvent(Event('unload'));
+    }
+  }
+
+  @override
+  void onPageFinished(String url) {
+    _isFirstLoaded = true;
+    dispatchEvent(Event('load'));
+  }
 }
