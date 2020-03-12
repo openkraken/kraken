@@ -8,8 +8,8 @@
 #include "jsa.h"
 
 using namespace alibaba;
-using namespace jsc;
 
+#ifdef KRAKEN_JSC_ENGINE
 TEST(TestFramework, evaluteTestFramework) {
   auto handleError = [](const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\nAssertionError: false === []\n"
@@ -21,3 +21,4 @@ TEST(TestFramework, evaluteTestFramework) {
   bool result = tester->evaluateTestScripts("assert.strictEqual(false, [])", "internal://", 0);
   EXPECT_EQ(result, false);
 }
+#endif
