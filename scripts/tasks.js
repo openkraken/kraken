@@ -198,7 +198,7 @@ task('generate-cmake-embedded-files', (done) => {
   const args = [
     '-DCMAKE_BUILD_TYPE=' + buildMode,
     '-G',
-    'CodeBlocks - Unix Makefiles', 
+    'CodeBlocks - Unix Makefiles',
     '-B',
     resolve(paths.platform, 'linux_' + os.arch(), 'cmake-build-' + buildMode.toLowerCase()),
     '-S',
