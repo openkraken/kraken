@@ -8,7 +8,7 @@
     "build": "webpack -c webpack.config.js && npm run mainToC && npm run testToC",
     "build:release": "KRAKEN_WEBPACK_BUILD=production webpack -c webpack.config.js && npm run mainToC && npm run testToC",
     "mainToC": "node scripts/js_to_c.js -s ../dist/main.js -o ../dist",
-    "testToC": "node scripts/js_to_c.js -s ../dist/test.js -o ../dist -n Test_Framework",
+    "testToC": "node scripts/js_to_c.js -s ../dist/test.js -o ../dist -n TestFramework",
     "start": "webpack-dev-server -c webpack.config.js --host=0.0.0.0"
   },
   "author": "",

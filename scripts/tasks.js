@@ -308,7 +308,7 @@ task('patch-flutter-tester', (done) => {
   done();
 });
 
-task('jsApi-test', (done) => {
+task('js-api-test', (done) => {
   execSync('flutter test ./unit/js_api/bootstrap.dart', {
     env: {
       ...process.env,
