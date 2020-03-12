@@ -14,7 +14,7 @@
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
-    "ci": "npm run lint && npm run test"
+    "ci": "npm run lint && node scripts/build_linux.js && node scripts/test.js"
   },
   "repository": {
     "type": "git",
