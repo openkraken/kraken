@@ -27,6 +27,7 @@ const paths = {
   devtools: resolveKraken('devtools'),
   tools: resolveKraken('cli/tools'),
   jsa: resolveKraken('jsa'),
+  tests: resolveKraken('tests')
 };
 
 function resolveKraken(submodule) {
@@ -142,6 +143,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
 
     const makeFileArgs = [
       '-DCMAKE_BUILD_TYPE=' + buildMode,
+      '-DENABLE_TEST=true',
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
@@ -174,6 +176,8 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
+      'kom_test',
+      'jsa_test_' + jsEngine,
       '--',
       '-j',
       '4'
@@ -280,6 +284,42 @@ task('upload-dist', (done) => {
     cwd: paths.tools,
     env: process.env,
     stdio: 'inherit'
+  });
+  done();
+});
+
+task('bridge-test', (done) => {
+  if (platform === 'darwin') {
+    execSync(`${libOutputPath}/jsa_test_v8`);
+  }
+  execSync(`${libOutputPath}/jsa_test_jsc`);
+  execSync(`${libOutputPath}/kom_test`);
+  done();
+});
+
+task('patch-flutter-tester', (done) => {
+  const flutterBin = execSync('which flutter', {
+    encoding: 'utf-8'
+  });
+  const flutterRoot = flutterBin.split('/').slice(0, -1).join('/');
+  execSync(`codesign --remove-signature ${flutterRoot}/cache/artifacts/engine/darwin-x64/flutter_tester`, {
+    stdio: 'inherit'
+  });
+  done();
+});
+
+task('js-api-test', (done) => {
+  execSync('flutter test ./unit/js_api/bootstrap.dart', {
+    env: {
+      ...process.env,
+      KRAKEN_LIBRARY_PATH: libOutputPath
+    },
+    stdio: 'inherit',
+    cwd: paths.tests
+  });
+  execSync('node ./scripts/bootstrap_unit_test', {
+    stdio: 'inherit',
+    cwd: paths.tests
   });
   done();
 });
