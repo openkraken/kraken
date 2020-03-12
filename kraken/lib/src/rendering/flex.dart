@@ -99,7 +99,7 @@ class RenderFlexLayout extends RenderBox
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    TextBaseline textBaseline,
+    TextBaseline textBaseline = TextBaseline.alphabetic,
     this.nodeId,
     this.style,
   })  : assert(direction != null),
@@ -719,8 +719,9 @@ class RenderFlexLayout extends RenderBox
     final double freeSpace = maxMainSize == 0 ? 0 :
         (canFlex ? maxMainSize : 0.0) - allocatedSize;
     double maxBaselineDistance = 0.0;
-    if ((freeSpace >= 0 &&  totalFlexGrow > 0) ||
-        (freeSpace < 0 && hasFlexShrink) ||
+    bool isFlexFlow = freeSpace >= 0 &&  totalFlexGrow > 0;
+    bool isFlexShrink = freeSpace < 0 && hasFlexShrink;
+    if (isFlexFlow || isFlexShrink ||
         crossAxisAlignment == CrossAxisAlignment.baseline) {
       final double spacePerFlex =
           canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
@@ -728,72 +729,74 @@ class RenderFlexLayout extends RenderBox
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
       while (child != null) {
-        final int flexGrow = _getFlexGrow(child);
-        final double mainSize = _getMainSize(child);
-        double maxChildExtent;
-        double minChildExtent;
+        if (isFlexFlow || isFlexShrink) {
+          double maxChildExtent;
+          double minChildExtent;
 
-        if (freeSpace >= 0) {
-          maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
-            : double.infinity;
+          if (freeSpace >= 0) {
+            final int flexGrow = _getFlexGrow(child);
+            final double mainSize = _getMainSize(child);
+            maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
+              : double.infinity;
 
-          double baseConstraints = _getBaseConstraints(child);
-          if (baseConstraints != 0) {
-            maxChildExtent = baseConstraints;
+            double baseConstraints = _getBaseConstraints(child);
+            if (baseConstraints != 0) {
+              maxChildExtent = baseConstraints;
+            }
+            minChildExtent = maxChildExtent;
+          } else {
+            double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
+            int childNodeId;
+            if (child is RenderTextNode) {
+              childNodeId = child.nodeId;
+            } else if (child is RenderElementBoundary) {
+              childNodeId = child.nodeId;
+            }
+            dynamic current = childSizeMap[childNodeId];
+            minChildExtent = maxChildExtent = current['size'] + shrinkValue;
           }
-          minChildExtent = maxChildExtent;
-        } else {
-          double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
-          int childNodeId;
-          if (child is RenderTextNode) {
-            childNodeId = child.nodeId;
-          } else if (child is RenderElementBoundary) {
-            childNodeId = child.nodeId;
+
+          assert(minChildExtent != null);
+          BoxConstraints innerConstraints;
+          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+            switch (_direction) {
+              case Axis.horizontal:
+                innerConstraints = BoxConstraints(
+                    minWidth: minChildExtent,
+                    maxWidth: maxChildExtent,
+                    minHeight: constraints.minHeight,
+                    maxHeight: constraints.maxHeight);
+                break;
+              case Axis.vertical:
+                innerConstraints = BoxConstraints(
+                    minWidth: constraints.minWidth,
+                    maxWidth: constraints.maxWidth,
+                    minHeight: minChildExtent,
+                    maxHeight: maxChildExtent);
+                break;
+            }
+          } else {
+            switch (_direction) {
+              case Axis.horizontal:
+                innerConstraints = BoxConstraints(
+                    minWidth: minChildExtent,
+                    maxWidth: maxChildExtent,
+                    maxHeight: constraints.maxHeight);
+                break;
+              case Axis.vertical:
+                innerConstraints = BoxConstraints(
+                    maxWidth: constraints.maxWidth,
+                    minHeight: minChildExtent,
+                    maxHeight: maxChildExtent);
+                break;
+            }
           }
-          dynamic current = childSizeMap[childNodeId];
-          minChildExtent = maxChildExtent = current['size'] + shrinkValue;
+          child.layout(innerConstraints, parentUsesSize: true);
+          final double childSize = _getMainSize(child);
+          assert(childSize <= maxChildExtent);
+          allocatedSize += childSize;
+          crossSize = math.max(crossSize, _getCrossSize(child));
         }
-
-        assert(minChildExtent != null);
-        BoxConstraints innerConstraints;
-        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints = BoxConstraints(
-                  minWidth: minChildExtent,
-                  maxWidth: maxChildExtent,
-                  minHeight: constraints.minHeight,
-                  maxHeight: constraints.maxHeight);
-              break;
-            case Axis.vertical:
-              innerConstraints = BoxConstraints(
-                  minWidth: constraints.minWidth,
-                  maxWidth: constraints.maxWidth,
-                  minHeight: minChildExtent,
-                  maxHeight: maxChildExtent);
-              break;
-          }
-        } else {
-          switch (_direction) {
-            case Axis.horizontal:
-              innerConstraints = BoxConstraints(
-                  minWidth: minChildExtent,
-                  maxWidth: maxChildExtent,
-                  maxHeight: constraints.maxHeight);
-              break;
-            case Axis.vertical:
-              innerConstraints = BoxConstraints(
-                  maxWidth: constraints.maxWidth,
-                  minHeight: minChildExtent,
-                  maxHeight: maxChildExtent);
-              break;
-          }
-        }
-        child.layout(innerConstraints, parentUsesSize: true);
-        final double childSize = _getMainSize(child);
-        assert(childSize <= maxChildExtent);
-        allocatedSize += childSize;
-        crossSize = math.max(crossSize, _getCrossSize(child));
 
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(() {
