@@ -22,8 +22,9 @@ import 'platform.dart';
 typedef Native_InitTestFramework = Void Function();
 typedef Dart_InitTestFramework = void Function();
 
-final Dart_InitTestFramework _initTestFramework =
-nativeDynamicLibrary.lookup<NativeFunction<Native_InitTestFramework>>('initTestFramework').asFunction();
+final Dart_InitTestFramework _initTestFramework = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_InitTestFramework>>('initTestFramework')
+    .asFunction();
 
 void initTestFramework() {
   initJSEngine();
@@ -31,11 +32,14 @@ void initTestFramework() {
 }
 
 // Register evaluteTestScripts
-typedef Native_EvaluateTestScripts = Int8 Function(Pointer<Utf8>, Pointer<Utf8>, Int32);
-typedef Dart_EvaluateTestScripts = int Function(Pointer<Utf8>, Pointer<Utf8>, int);
+typedef Native_EvaluateTestScripts = Int8 Function(
+    Pointer<Utf8>, Pointer<Utf8>, Int32);
+typedef Dart_EvaluateTestScripts = int Function(
+    Pointer<Utf8>, Pointer<Utf8>, int);
 
-final Dart_EvaluateTestScripts _evaluateTestScripts =
-nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateScripts').asFunction();
+final Dart_EvaluateTestScripts _evaluateTestScripts = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateScripts')
+    .asFunction();
 
 void evaluateTestScripts(String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
