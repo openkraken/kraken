@@ -379,3 +379,9 @@ task('build-embedded-assets', (done) => {
   });
   done();
 });
+
+task('integration', () => {
+  spawnSync('npm', ['run', 'test:integration'], {
+    stdio: 'inherit',
+  });
+});

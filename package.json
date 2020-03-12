@@ -9,7 +9,7 @@
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
     "pretest": "npm i && node scripts/build_darwin_dylib",
-    "test": "node scripts/test.js",
+    "test": "node scripts/run_test.js",
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
