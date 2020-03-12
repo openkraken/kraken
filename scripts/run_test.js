@@ -11,7 +11,7 @@ series(
   'bridge-test',
   'patch-flutter-tester',
   'js-api-test',
-  'integration'
+  'integration-test'
 )((err) => {
   if (err) {
     console.log(err);

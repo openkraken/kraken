@@ -1,4 +1,12 @@
 it('transform', () => {
+  function setStyle(dom, object) {
+    for (let key in object) {
+      if (object.hasOwnProperty(key)) {
+        dom.style[key] = object[key];
+      }
+    }
+  }
+
   const div1 = document.createElement('div');
   document.body.appendChild(div1);
   setStyle(div1, {
