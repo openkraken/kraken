@@ -17,7 +17,25 @@ class Position {
     this.size = size;
     List<String> items = position.split(" ");
     if (items.length == 1) {
-      alignment = Alignment(getValue(items[0], true), 0.0);
+      switch(items[0]) {
+        case RIGHT:
+          alignment = Alignment(1.0, 0.0);
+          break;
+        case LEFT:
+          alignment = Alignment(-1.0, 0.0);
+          break;
+        case TOP:
+          alignment = Alignment(0.0, -1.0);
+          break;
+        case BOTTOM:
+          alignment = Alignment(0.0, 1.0);
+          break;
+        case CENTER:
+          alignment = Alignment(0.0, 0.0);
+          break;
+        default:
+          alignment = Alignment(getValue(items[0], true), 0.0);
+      }
     } else if (items.length == 2) {
       alignment =
           Alignment(getValue(items[0], true), getValue(items[1], false));
