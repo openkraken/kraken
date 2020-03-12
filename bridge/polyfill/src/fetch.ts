@@ -17,7 +17,7 @@ function normalizeValue(value: any) {
   return value;
 }
 
-function consumed(body: FetchBody) {
+function consumed(body: Body) {
   if (body.bodyUsed) {
     return Promise.reject(new TypeError('Already read'))
   }
@@ -25,7 +25,7 @@ function consumed(body: FetchBody) {
   return null;
 }
 
-class FetchHeader implements Headers {
+class Headers implements Headers {
   private map = {};
 
   constructor(headers?: HeadersInit) {
@@ -77,22 +77,32 @@ class FetchHeader implements Headers {
   }
 }
 
-class FetchBody {
+class Body {
   // TODO support readableStream
-  // readonly body: ReadableStream<Uint8Array> | null;
+  _bodyInit: any;
   body: string | null;
   bodyUsed: boolean;
+  headers: Headers;
 
-  constructor(body?: BodyInit | null) {
-    if (body) {
-      this.initBody(body);
-    }
+  constructor() {
+    this.bodyUsed = false;
   }
 
-  initBody(body: BodyInit) {
+  _initBody(body: BodyInit | null) {
+    this._bodyInit = body;
     // only support string from now
-    if (typeof body === 'string') {
+    if (!body) {
+      this.body = '';
+    } else if (typeof body === 'string') {
       this.body = body;
+    } else {
+      this.body = body = Object.prototype.toString.call(body);
+    }
+
+    if (!this.headers.get('content-type')) {
+      if (typeof body === 'string') {
+        this.headers.set('content-type', 'text/plain;charset=UTF-8')
+      }
     }
   }
 
@@ -133,26 +143,26 @@ function normalizeMethod(method: string) {
   return methods.indexOf(upcased) > -1 ? upcased : method;
 }
 
-class FetchRequest extends FetchBody {
-  constructor(input: FetchRequest | string, init?: RequestInit) {
+class Request extends Body {
+  constructor(input: Request | string, init?: RequestInit) {
+    super();
     if (!init) {
       init = {};
     }
-    super(init.body);
     let body = init.body;
 
-    if (input instanceof FetchRequest) {
+    if (input instanceof Request) {
       if (input.bodyUsed) {
         throw new TypeError('Already read');
       }
       this.url = input.url;
       if (!init.headers) {
-        this.headers = new FetchHeader(input.headers);
+        this.headers = new Headers(input.headers);
       }
       this.method = input.method;
       this.mode = input.mode;
-      if (!body && input.body != null) {
-        this.body = input.body;
+      if (!body && input._bodyInit != null) {
+        body = input._bodyInit;
         input.bodyUsed = true;
       }
     } else {
@@ -160,7 +170,7 @@ class FetchRequest extends FetchBody {
     }
 
     if (init.headers || !this.headers) {
-      this.headers = new FetchHeader(init.headers);
+      this.headers = new Headers(init.headers);
     }
     this.method = normalizeMethod(init.method || this.method || 'GET');
     this.mode = init.mode || this.mode || null;
@@ -168,6 +178,8 @@ class FetchRequest extends FetchBody {
     if ((this.method === 'GET' || this.method === 'HEAD') && body) {
       throw new TypeError('Body not allowed for GET or HEAD requests')
     }
+
+    this._initBody(body || null);
   }
 
   // readonly cache: RequestCache; // not supported
@@ -187,25 +199,25 @@ class FetchRequest extends FetchBody {
   readonly headers: Headers;
   readonly mode: RequestMode;
 
-  clone(): FetchRequest {
-    return Object.assign({}, this);
+  clone(): Request {
+    return new Request(this, {body: this._bodyInit});
   }
 }
 
 let redirectStatuses = [301, 302, 303, 307, 308];
-class FetchResponse extends FetchBody {
-  static error(): FetchResponse {
-    let response = new FetchResponse(null, {status: 0, statusText: ''});
+class Response extends Body {
+  static error(): Response {
+    let response = new Response(null, {status: 0, statusText: ''});
     response.type = 'error';
     return response;
   };
 
-  static redirect(url: string, status?: number): FetchResponse {
+  static redirect(url: string, status?: number): Response {
     if (!status || redirectStatuses.indexOf(status) === -1) {
       throw new RangeError('Invalid status code')
     }
 
-    let response = new FetchResponse(null, {status: status, headers: {location: url}});
+    let response = new Response(null, {status: status, headers: {location: url}});
     response.redirected = true;
     return response;
   };
@@ -223,8 +235,7 @@ class FetchResponse extends FetchBody {
   url: string;
 
   constructor(body?: BodyInit | null, init?: ResponseInit) {
-    super(body);
-
+    super();
     if (!init) {
       init = {};
     }
@@ -233,15 +244,21 @@ class FetchResponse extends FetchBody {
     this.status = init.status === undefined ? 200 : init.status;
     this.ok = this.status >= 200 && this.status < 300;
     this.statusText = 'statusText' in init ? (init.statusText || '') : 'OK';
-    this.headers = new FetchHeader(init.headers);
+    this.headers = new Headers(init.headers);
+
+    this._initBody(body || null);
   }
 
-  clone(): FetchResponse {
-    return Object.assign({}, this);
+  clone(): Response {
+    return new Response(this._bodyInit, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: new Headers(this.headers)
+    })
   }
 }
 
-function fetch(input: FetchRequest | string, init?: RequestInit) {
+function fetch(input: Request | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
@@ -254,7 +271,7 @@ function fetch(input: FetchRequest | string, init?: RequestInit) {
         return;
       }
 
-      let res = new FetchResponse(body, {
+      let res = new Response(body, {
         status: statusCode
       });
 
@@ -266,21 +283,21 @@ function fetch(input: FetchRequest | string, init?: RequestInit) {
 }
 
 Object.defineProperty(global, 'Request', {
-  value: FetchRequest,
+  value: Request,
   enumerable: true,
   writable: false,
   configurable: false
 });
 
 Object.defineProperty(global, 'Headers', {
-  value: FetchHeader,
+  value: Headers,
   enumerable: true,
   writable: false,
   configurable: false
 });
 
 Object.defineProperty(global, 'Response', {
-  value: FetchRequest,
+  value: Request,
   enumerable: true,
   writable: false,
   configurable: false

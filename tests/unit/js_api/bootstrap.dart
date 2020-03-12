@@ -32,7 +32,7 @@ void main() {
   for (FileSystemEntity file in cases) {
     if (file.path.endsWith('.js')) {
       String code = File(file.path).readAsStringSync();
-      evaluateTestScripts(code);
+      evaluateTestScripts(code, url: file.path);
     }
   }
 }
