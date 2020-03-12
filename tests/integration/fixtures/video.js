@@ -34,7 +34,9 @@ it('video', () => {
     });
 
     video.addEventListener('canplay', () => {
-      resolve();
+      setTimeout(() => {
+        resolve();
+      }, 1000);
     });
 
     container1.appendChild(video);
