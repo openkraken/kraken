@@ -9,16 +9,12 @@
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
     "pretest": "npm i && node scripts/build_darwin_dylib",
-    "test": "cd tests && npm test",
+    "test": "node scripts/test.js",
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
-    "ci": "npm run lint && npm run test:unit && npm run test:bridge",
-    "test:bridge": "npm run test:bridge:jsa:v8 && npm run test:bridge:jsa:jsc && npm run test:bridge:kom",
-    "test:bridge:jsa:v8": "./targets/darwin/debug/lib/jsa_test_v8",
-    "test:bridge:jsa:jsc": "./targets/darwin/debug/lib/jsa_test_jsc",
-    "test:bridge:kom": "./targets/darwin/debug/lib/kom_test"
+    "ci": "npm run lint && npm run test"
   },
   "repository": {
     "type": "git",

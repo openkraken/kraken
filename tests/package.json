@@ -5,8 +5,8 @@
     "test": "flutter pub get && flutter clean && npm run unit && npm run integration",
     "unit": "npm run unit:kraken && npm run unit:js_api",
     "unit:kraken": "node ./scripts/bootstrap_unit_test",
-    "unit:js_api": "flutter test ./unit/js_api/bootstrap.dart",
-    "integration": "flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
+    "unit:js_api": "KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter test ./unit/js_api/bootstrap.dart",
+    "integration": "KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
   },
   "devDependencies": {
     "chalk": "^3.0.0",
