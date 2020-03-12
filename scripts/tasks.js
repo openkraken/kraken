@@ -177,7 +177,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '--target',
       'kraken',
       'kom_test',
-      'jsa_test',
+      'jsa_test_' + jsEngine,
       '--',
       '-j',
       '4'
@@ -290,10 +290,10 @@ task('upload-dist', (done) => {
 
 task('bridge-test', (done) => {
   if (platform === 'darwin') {
-    execSync(`${libOutputPath}/jsa_test_v8`);
+    execSync(`${libOutputPath}/jsa_test_v8`, {stdio: 'inherit'});
   }
-  execSync(`${libOutputPath}/jsa_test_jsc`);
-  execSync(`${libOutputPath}/kom_test`);
+  execSync(`${libOutputPath}/jsa_test_jsc`, {stdio: 'inherit'});
+  execSync(`${libOutputPath}/kom_test`, {stdio: 'inherit'});
   done();
 });
 
@@ -304,6 +304,18 @@ task('patch-flutter-tester', (done) => {
   const flutterRoot = flutterBin.split('/').slice(0, -1).join('/');
   execSync(`codesign --remove-signature ${flutterRoot}/cache/artifacts/engine/darwin-x64/flutter_tester`, {
     stdio: 'inherit'
+  });
+  done();
+});
+
+task('integration-test', (done) => {
+  execSync('flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos', {
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      KRAKEN_LIBRARY_PATH: libOutputPath
+    },
+    cwd: paths.tests
   });
   done();
 });
