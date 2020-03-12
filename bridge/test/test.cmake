@@ -32,6 +32,7 @@ add_subdirectory(./third_party/googletest)
 
 set(TEST_LINK_LIBRARY
         ${BRIDGE_LINK_LIBS}
+        kraken_test
         bridge
         gtest
         gtest_main
@@ -45,16 +46,45 @@ set(TEST_INCLUDE_DIR
         ${BRIDGE_INCLUDE}
         )
 
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+  add_executable(jsa_test_jsc ./test/jsa/jsc/jsc_test.cc)
+  target_link_libraries(jsa_test_jsc ${TEST_LINK_LIBRARY})
+  target_include_directories(jsa_test_jsc PUBLIC ${TEST_INCLUDE_DIR})
+endif()
 
-add_executable(jsa_test
-        ./test/jsa/v8/v8_test.cc
-        ./test/jsa/jsc/jsc_test.cc)
-target_link_libraries(jsa_test ${TEST_LINK_LIBRARY})
-target_include_directories(jsa_test PUBLIC ${TEST_INCLUDE_DIR})
+if ($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+  add_executable(jsa_test_v8 ./test/jsa/v8/v8_test.cc)
+  target_link_libraries(jsa_test_v8 ${TEST_LINK_LIBRARY})
+  target_include_directories(jsa_test_v8 PUBLIC ${TEST_INCLUDE_DIR})
+endif()
 
-add_executable(bridge_test
-  ./test/bridge/blob.cc
-  ./test/bridge/testframework.cc
+add_executable(kom_test
+  ./test/kom/blob.cc
+  ./test/kom/test_framework.cc
 )
-target_link_libraries(bridge_test ${TEST_LINK_LIBRARY})
-target_include_directories(bridge_test PUBLIC ${TEST_INCLUDE_DIR})
+target_link_libraries(kom_test ${TEST_LINK_LIBRARY})
+target_include_directories(kom_test PUBLIC ${TEST_INCLUDE_DIR})
+
+if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+    set_target_properties(jsa_test_jsc
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      )
+  endif()
+
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
+    set_target_properties(jsa_test_v8
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      )
+  endif()
+
+  set_target_properties(kom_test
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+    )
+endif()
