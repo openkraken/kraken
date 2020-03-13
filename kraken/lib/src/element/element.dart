@@ -950,12 +950,11 @@ abstract class Element extends Node
 
       if (isFlex) {
         // Add FlexItem wrap for flex child node.
-        RenderPadding parent = child.renderLayoutElement.parent;
-        RenderBox childRenderBox = child.renderLayoutElement as RenderBox;
-        parent.child = null;
-        parent.child = RenderFlexItem(
-          child: childRenderBox,
-        );
+        if (child.renderLayoutElement != null) {
+          child.renderPadding.child = null;
+          child.renderPadding.child =
+              RenderFlexItem(child: child.renderLayoutElement as RenderBox);
+        }
       }
 
       RenderObject createStackObject(child) {
@@ -996,21 +995,6 @@ abstract class Element extends Node
         addChild(childRenderObject);
       } else {
         renderLayoutElement.insert(childRenderObject, after: afterRenderObject);
-      }
-
-      // append positioned children not appended to renderStack yet to element's renderStack
-      if (renderStack != null) {
-        List targets = findPositionedChildren(child, true);
-        for (int i = 0; i < targets.length; i++) {
-          Element target = targets[i];
-          // remove positioned element from parent
-          target.parent.renderLayoutElement.remove(target.renderObject);
-
-          RenderObject stackObject = createStackObject(target);
-
-          ///insert by z-index
-          insertByZIndex(renderStack, stackObject, target, target.style.zIndex);
-        }
       }
 
       ParentData childParentData = childRenderObject.parentData;
