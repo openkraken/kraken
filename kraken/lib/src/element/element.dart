@@ -139,15 +139,13 @@ abstract class Element extends Node
     // transition
     initTransition(style);
 
-    // transform
-    renderObject = initTransform(renderObject, style);
-
     renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // margin
     renderObject = initRenderMargin(renderObject, style, this);
 
-    renderObject = renderElementBoundary = RenderElementBoundary(child: renderObject, style: style, nodeId: nodeId);
+    // transform
+    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
 
     /// Element event listener
     if (events != null) {
