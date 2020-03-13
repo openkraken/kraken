@@ -9,7 +9,7 @@ import 'package:kraken/style.dart';
 class TextParentData extends ContainerBoxParentData<RenderBox> {
 }
 
-class RenderTextNode extends RenderBox
+class RenderTextBox extends RenderBox
   with
     ElementStyleMixin,
     TextStyleMixin,
@@ -17,12 +17,11 @@ class RenderTextNode extends RenderBox
     ContainerRenderObjectMixin<RenderBox, TextParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
 
-  RenderTextNode({
+  RenderTextBox({
     this.nodeId,
     this.style,
     this.text,
   }) : assert(text != null) {
-
     RenderParagraph paragraphNode = RenderParagraph(
       createTextSpanWithStyle(text, style),
       textAlign: getTextAlignFromStyle(style),

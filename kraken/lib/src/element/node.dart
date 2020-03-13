@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
@@ -28,7 +29,7 @@ class Comment extends Node {
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text');
 
-  RenderTextNode renderTextNode;
+  RenderTextBox renderTextBox;
 
   // The text string.
   String _data;
@@ -39,33 +40,38 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
     updateTextStyle();
   }
 
-  void updateTextStyle({ Style style }) {
+  // Sync to frame tick.
+  final Debouncing _updateTextNodeDeb = new Debouncing();
+
+  void updateTextStyle() {
+    // [_doUpdateTextStyle] is an idempotent(幂等 in Chinese) method, debounce it
+    // to improve performance.
+    _updateTextNodeDeb.debounce(_doUpdateTextStyle);
+  }
+
+  void _doUpdateTextStyle() {
     // parentNode must be an element.
     Element parentElement = parentNode;
-    // inherit parent style
-    if (style == null) {
-      style = parentElement.style;
-    } else {
-      style = parentElement.style.copyWith(style.getOriginalStyleMap());
-    }
-
-    RenderTextNode newTextNode = RenderTextNode(
+    RenderTextBox newTextBox = RenderTextBox(
       nodeId: nodeId,
       text: data,
-      style: style,
+      // inherit parent style
+      style: parentElement.style,
     );
 
     ContainerRenderObjectMixin parentRenderLayoutBox = parentElement.renderLayoutElement;
     if (parentRenderLayoutBox != null) {
-      if (renderTextNode != null) {
-        RenderObject after = (renderTextNode.parentData as ContainerParentDataMixin).previousSibling;
+      if (renderTextBox != null) {
+        RenderObject after = (renderTextBox.parentData as ContainerParentDataMixin).previousSibling;
         parentRenderLayoutBox
-          ..remove(renderTextNode)
-          ..insert(newTextNode, after: after);
+          ..remove(renderTextBox)
+          ..insert(newTextBox, after: after);
       } else {
-        parentRenderLayoutBox.add(newTextNode);
+        parentRenderLayoutBox.add(newTextBox);
       }
     }
+
+    renderTextBox = newTextBox;
   }
 }
 

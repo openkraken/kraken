@@ -890,7 +890,7 @@ abstract class Element extends Node
       int childIdx;
       children.forEach((childNode) {
         int childId;
-        if (childNode is RenderTextNode) {
+        if (childNode is RenderTextBox) {
           childId = childNode.nodeId;
         } else if (childNode is RenderElementBoundary) {
           childId = childNode.nodeId;
@@ -1010,13 +1010,6 @@ abstract class Element extends Node
         child.markShouldUpdateMargin(); // Update margin for flex child.
         renderObject.markNeedsLayout();
       }
-    } else if (child is TextNode) {
-      RenderTextNode newTextNode = RenderTextNode(
-        nodeId: child.nodeId,
-        text: child.data,
-        style: style,
-      );
-      addChild(newTextNode);
     }
   }
 
@@ -1069,7 +1062,7 @@ abstract class Element extends Node
   // Update textNode style when container style changed
   void updateTextNodeStyle() {
     childNodes.forEach((node) {
-      if (node is TextNode) node.updateTextStyle(style: style);
+      if (node is TextNode) node.updateTextStyle();
     });
   }
 
