@@ -26,6 +26,7 @@ typedef Statement = bool Function(Element element);
 
 abstract class Element extends Node
     with
+        NodeLifeCycle,
         EventHandlerMixin,
         TextStyleMixin,
         BackgroundImageMixin,
@@ -157,6 +158,15 @@ abstract class Element extends Node
     }
 
     _inited = true;
+  }
+
+  // If element is on the tree, the root parent is body.
+  bool get isConnected {
+    Element parent = this;
+    while (parent.parent != null) {
+      parent = parent.parent;
+    }
+    return parent == ElementManager().getRootElement();
   }
 
   // Set default properties, override this for individual element
@@ -802,10 +812,21 @@ abstract class Element extends Node
   @mustCallSuper
   Node appendChild(Node child) {
     super.appendChild(child);
-    // Only append node types which is visible in RenderObject tree
-    if (child is Element || child is TextNode) {
-      appendElement(child);
+
+    VoidCallback doAppendChild = () {
+      // Only append node types which is visible in RenderObject tree
+      if (child is NodeLifeCycle) {
+        appendElement(child);
+        child.fireAfterConnected();
+      }
+    };
+
+    if (isConnected) {
+      doAppendChild();
+    } else {
+      queueAfterConnected(doAppendChild);
     }
+
     return child;
   }
 
@@ -813,9 +834,11 @@ abstract class Element extends Node
   @mustCallSuper
   Node removeChild(Node child) {
     // Not remove node type which is not present in RenderObject tree such as Comment
-    if (child is Element || child is TextNode) {
+    // Only append node types which is visible in RenderObject tree
+    if (child is NodeLifeCycle) {
       removeElement(child);
     }
+
     super.removeChild(child);
     return child;
   }
@@ -828,20 +851,29 @@ abstract class Element extends Node
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
-    if (referenceIndex != -1) {
-      Node after;
-      RenderObject afterRenderObject;
-      if (referenceIndex == 0) {
-        after = null;
-      } else {
-        do {
-          after = childNodes[--referenceIndex];
-        } while (after is! Element && referenceIndex > 0);
-        if (after is Element) {
-          afterRenderObject = after?.renderObject;
+
+    VoidCallback doInsertBefore = () {
+      if (referenceIndex != -1) {
+        Node after;
+        RenderObject afterRenderObject;
+        if (referenceIndex == 0) {
+          after = null;
+        } else {
+          do {
+            after = childNodes[--referenceIndex];
+          } while (after is! Element && referenceIndex > 0);
+          if (after is Element) {
+            afterRenderObject = after?.renderObject;
+          }
         }
+        appendElement(child, afterRenderObject: afterRenderObject, isAppend: false);
       }
-      appendElement(child, afterRenderObject: afterRenderObject, isAppend: false);
+    };
+
+    if (isConnected) {
+      doInsertBefore();
+    } else {
+      queueAfterConnected(doInsertBefore);
     }
     return node;
   }
@@ -1236,6 +1268,7 @@ abstract class Element extends Node
     Completer<Uint8List> completer = new Completer();
 
     // need to make sure all renderObject had repainted.
+    renderObject.markNeedsPaint();
     RendererBinding.instance.addPostFrameCallback((_) async {
       Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
