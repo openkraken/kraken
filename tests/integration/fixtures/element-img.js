@@ -1,4 +1,4 @@
-it('img', () => new Promise(done => {
+it('element img', () => new Promise(done => {
   const img = document.createElement('img');
   img.addEventListener('load', () => {
     done();

@@ -97,20 +97,17 @@ class ElementManagerActionDelegate {
     nodeMap.remove(targetId);
   }
 
-  void setProperty(int targetId, String key, dynamic value) {
+  void setProperty(int targetId, String key, value) {
     assert(nodeMap.containsKey(targetId));
     Node target = nodeMap[targetId];
     assert(target != null);
 
-    target.setProperty(key, value);
-  }
-
-  void setStyle(int targetId, String key, String value) {
-    assert(nodeMap.containsKey(targetId));
-    Element target = nodeMap[targetId];
-    assert(target != null);
-
-    target.setProperty(STYLE_PATH_PREFIX + '.' + key, value);
+    if (target is Element) {
+      // Only Element has properties
+      target.setProperty(key, value);
+    } else {
+      debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
+    }
   }
 
   void removeProperty(int targetId, String key) {
@@ -118,7 +115,23 @@ class ElementManagerActionDelegate {
     Node target = nodeMap[targetId];
     assert(target != null);
 
-    target.removeProperty(key);
+    if (target is Element) {
+      target.removeProperty(key);
+    } else {
+      debugPrint('Only element has properties, try removing $key from Node(#$targetId).');
+    }
+  }
+
+  void setStyle(int targetId, String key, String value) {
+    assert(nodeMap.containsKey(targetId));
+    Node target = nodeMap[targetId];
+    assert(target != null);
+
+    if (target is Element) {
+      target.setStyle(key, value);
+    } else {
+      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+    }
   }
 
   /// <!-- beforebegin -->

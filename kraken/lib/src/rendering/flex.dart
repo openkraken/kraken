@@ -470,7 +470,7 @@ class RenderFlexLayout extends RenderBox
     });
 
     int childNodeId;
-    if (child is RenderTextNode) {
+    if (child is RenderTextBox) {
       childNodeId = child.nodeId;
     } else if (child is RenderElementBoundary) {
       childNodeId = child.nodeId;
@@ -700,7 +700,7 @@ class RenderFlexLayout extends RenderBox
       crossSize = math.max(crossSize, _getCrossSize(child));
 
       int childNodeId;
-      if (child is RenderTextNode) {
+      if (child is RenderTextBox) {
         childNodeId = child.nodeId;
       } else if (child is RenderElementBoundary) {
         childNodeId = child.nodeId;
@@ -747,7 +747,7 @@ class RenderFlexLayout extends RenderBox
           } else {
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
             int childNodeId;
-            if (child is RenderTextNode) {
+            if (child is RenderTextBox) {
               childNodeId = child.nodeId;
             } else if (child is RenderElementBoundary) {
               childNodeId = child.nodeId;
@@ -956,7 +956,7 @@ class RenderFlexLayout extends RenderBox
       }
 
       Style childStyle;
-      if (child is RenderTextNode) {
+      if (child is RenderTextBox) {
         childStyle = nodeMap[nodeId].style;
       } else if (child is RenderElementBoundary) {
         int childNodeId = child.nodeId;

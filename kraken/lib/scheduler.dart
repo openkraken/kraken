@@ -4,4 +4,5 @@
  */
 
 export 'src/scheduler/throttle.dart';
+export 'src/scheduler/debounce.dart';
 export 'src/scheduler/fps.dart';

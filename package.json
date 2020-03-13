@@ -8,13 +8,13 @@
     "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
-    "pretest": "tnpm i && node scripts/build_darwin_dylib",
-    "test": "node scripts/test.js",
+    "pretest": "npm i && node scripts/build_darwin_dylib",
+    "test": "node scripts/run_test.js",
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
     "format": "cd kraken && flutter format",
-    "ci": "npm run lint && node scripts/build_linux.js && node scripts/test.js"
+    "ci": "npm i && npm run lint && node scripts/build_linux.js && node scripts/test.js"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "chalk": "^3.0.0",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.4",
     "mkdirp": "^0.5.1"
   },
   "author": "Kraken Team"

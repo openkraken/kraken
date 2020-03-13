@@ -3,12 +3,14 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
+
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,
@@ -18,53 +20,62 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  String data;
-  Map<String, dynamic> properties;
-
   Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+
+  // The comment information.
+  String data;
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, String data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
-    assert(data != null);
-    this.data = data;
+  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+    // Update text after connected.
+    queueAfterConnected(updateTextStyle);
   }
 
-  String get data => properties['data'];
-  set data(value) {
-    properties['data'] = value;
+  RenderTextBox renderTextBox;
+
+
+  // The text string.
+  String _data;
+  String get data => _data;
+  set data(String newData) {
+    assert(newData != null);
+    _data = newData;
+    updateTextStyle();
   }
-  Map<String, dynamic> properties = {};
 
-  @mustCallSuper
-  void setProperty(String key, value) {
-    properties[key] = value;
+  // Sync to frame tick.
+  final Debouncing _updateTextNodeDeb = new Debouncing();
 
-    Element parentElement = this.parentNode;
-    Style parentStyle = parentElement.style;
+  void updateTextStyle() {
+    // [_doUpdateTextStyle] is an idempotent(幂等 in Chinese) method, debounce it
+    // to improve performance.
+    _updateTextNodeDeb.debounce(_doUpdateTextStyle);
+  }
 
-    Style textNodeStyle = parentStyle;
-    if (key == STYLE && value is Style)
-      textNodeStyle = textNodeStyle.copyWith(value.getOriginalStyleMap());
-
-    RenderTextNode newTextNode = RenderTextNode(
+  void _doUpdateTextStyle() {
+    // parentNode must be an element.
+    Element parentElement = parentNode;
+    RenderTextBox newTextBox = RenderTextBox(
       nodeId: nodeId,
       text: data,
-      style: textNodeStyle,
+      // inherit parent style
+      style: parentElement.style,
     );
 
-    int curIdx = parentElement.childNodes.indexOf(this);
+    ContainerRenderObjectMixin parentRenderLayoutBox = parentElement.renderLayoutElement;
+    if (parentRenderLayoutBox != null) {
+      if (renderTextBox != null) {
+        RenderObject after = (renderTextBox.parentData as ContainerParentDataMixin).previousSibling;
+        parentRenderLayoutBox
+          ..remove(renderTextBox)
+          ..insert(newTextBox, after: after);
+      } else {
+        parentRenderLayoutBox.add(newTextBox);
+      }
+    }
 
-    List<RenderObject> children = [];
-    RenderObjectVisitor visitor = (child) {
-      children.add(child);
-    };
-    parentElement.renderLayoutElement..visitChildren(visitor);
-    RenderObject insertNode = curIdx - 1 > -1 ? children[curIdx - 1] : null;
-
-    parentElement.renderLayoutElement
-      ..remove(children[curIdx])
-      ..insert(newTextNode, after: insertNode);
+    renderTextBox = newTextBox;
   }
 }
 
@@ -116,9 +127,6 @@ abstract class Node extends EventTarget {
     if (index == null) return null;
     return parentNode.childNodes[index + 1];
   }
-
-  void setProperty(String key, dynamic value) {}
-  void removeProperty(String key) {}
 
   @mustCallSuper
   Node appendChild(Node child) {
