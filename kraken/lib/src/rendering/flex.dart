@@ -484,7 +484,7 @@ class RenderFlexLayout extends RenderBox
 
   double _getBaseConstraints(RenderObject child) {
     double minConstraints;
-    if (child is RenderTextNode) {
+    if (child is RenderTextBox) {
       minConstraints = 0;
       return minConstraints;
     } else if (child is RenderElementBoundary) {

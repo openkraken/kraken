@@ -9,7 +9,7 @@ mixin RelativeStyleMixin on RenderBox {
     if (boxParentData != null) {
       Offset styleOffset;
       // Text node does not have relative offset
-      if (renderBox is! RenderTextNode) {
+      if (renderBox is! RenderTextBox) {
         styleOffset = getRelativeOffset(style);
       }
       boxParentData.offset = relativeOffset == null

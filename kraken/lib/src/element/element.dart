@@ -931,7 +931,8 @@ abstract class Element extends Node
       RenderBox getStackedRenderBox(Element element) {
         ZIndexParentData stackParentData =
             getPositionParentDataFromStyle(element.style);
-        RenderBox stackedRenderBox = element.renderLayoutElement as RenderBox;
+        RenderBox stackedRenderBox = element.renderObject as RenderBox;
+
 
         if (!isFlex) {
           stackParentData.hookRenderObject =
