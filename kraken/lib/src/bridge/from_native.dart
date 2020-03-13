@@ -59,14 +59,21 @@ String handleAction(List directive) {
 }
 
 String invokeUIManager(String json) {
-  dynamic directive = jsonDecode(json);
+  dynamic directive;
+  try {
+    directive = jsonDecode(json);
+  } catch(e) {
+    print(e);
+    return '';
+  }
+
   if (directive[0] == BATCH_UPDATE) {
     List<dynamic> directiveList = directive[1];
     List<String> result = [];
     for (dynamic item in directiveList) {
       result.add(handleAction(item as List));
     }
-    return result.join(',');
+    return '';
   } else {
     return handleAction(directive);
   }
