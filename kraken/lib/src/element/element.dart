@@ -12,8 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
@@ -1192,8 +1194,13 @@ abstract class Element extends Node
 
   void click() {
     Event clickEvent = Event('click', EventInit());
+
     if (isConnected) {
-      final RenderBox box = renderObject as RenderBox;
+      final RenderBox box = renderElementBoundary;
+      // Must flush every times, or child may has no size.
+      box.markNeedsLayout();
+      box.owner.flushLayout();
+
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero));
       final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
@@ -1212,6 +1219,7 @@ abstract class Element extends Node
         }
       }
     } else {
+      // If element not in tree, click is fired and only response to itself.
       handleClick(clickEvent);
     }
   }
