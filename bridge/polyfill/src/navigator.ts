@@ -31,7 +31,11 @@ const navigator = {
   },
   geolocation: {
     getCurrentPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
-      krakenInvokeModule(`["Geolocation","getCurrentPosition", [${JSON.stringify(options)}]]`, (json) => {
+      let optionsStr = '';
+      if (options != null) {
+        optionsStr = JSON.stringify(options);
+      }
+      krakenInvokeModule(`["Geolocation","getCurrentPosition", [${optionsStr}]]`, (json) => {
         let result = JSON.parse(json);
         if (result['coords'] != null) {
           success(result);
@@ -41,7 +45,11 @@ const navigator = {
       });
     },
     watchPosition(success: (data: any) => void, error?: (error: any) => void, options?: any) {
-      const watchId = krakenInvokeModule(`["Geolocation","watchPosition", [${JSON.stringify(options)}]]`);
+      let optionsStr = '';
+      if (options != null) {
+        optionsStr = JSON.stringify(options);
+      }
+      const watchId = krakenInvokeModule(`["Geolocation","watchPosition", [${optionsStr}]]`);
       positionWatcherMap.set(watchId, { success: success, error: error });
       return parseInt(watchId);
     },
