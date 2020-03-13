@@ -217,6 +217,9 @@ abstract class Element extends Node
     ///5.update decorated
     updateRenderDecoratedBox(newStyle, this, transitionMap);
 
+    ///6.update margin
+    updateRenderMargin(newStyle, this, transitionMap);
+
     ///7.update position
     String newPosition = newStyle['position'] ?? 'static';
     String oldPosition = _style['position'] ?? 'static';
