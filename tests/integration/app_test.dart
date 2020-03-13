@@ -31,7 +31,7 @@ void main() {
       }
 
       int delta = 0;
-      for (int i = 0; i < imageA.length; i+=1) {
+      for (int i = 0; i < imageA.length; i += 1) {
         if (imageA[i] != imageB[i]) delta++;
       }
       return (delta / 4).floor();
@@ -47,12 +47,14 @@ void main() {
           return true;
         } else {
           hasNotMatchSnapshot = true;
-          final newSnap = File(path.join(snapshots.path, fixture + '.current.png'));
+          final newSnap =
+              File(path.join(snapshots.path, fixture + '.current.png'));
           newSnap.writeAsBytes(screenPixels);
           if (diffCounts == -1) {
             stderr.write('$err $fixture snapshot is NOT equal with old ones\n');
           } else {
-            stderr.write('$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
+            stderr.write(
+                '$err $fixture snaphost is NOT equal with $diffCounts} pixels. '
                 'please compare manually with ${snap.path} and ${newSnap.path}\n');
           }
           return false;
@@ -91,11 +93,11 @@ void main() {
             'payload': payload,
           }));
 
-          print('$basename complete');
-
           // Transform List<dynamic> to List<int>
-          List<int> snapshot = (jsonDecode(imageListJSON) as List).cast<int>().toList();
-          expect(await matchSnapshots(basename, snapshot), true, reason: 'Snapshot "$basename" NOT equal.');
+          List<int> snapshot =
+              (jsonDecode(imageListJSON) as List).cast<int>().toList();
+          expect(await matchSnapshots(basename, snapshot), true,
+              reason: 'Snapshot "$basename" NOT equal.');
         });
       }
     }

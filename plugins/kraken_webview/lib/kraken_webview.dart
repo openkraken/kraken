@@ -177,18 +177,30 @@ abstract class WebViewElement extends Element {
   RenderBox platformRenderBox;
   _PlatformCallbacksHandler _platformCallbacksHandler;
 
+  static const String SRC = 'src';
+  static const String WIDTH = 'width';
+  static const String HEIGHT = 'height';
+
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
 
-    if (key == 'src') {
+    if (key == SRC) {
       initialUrl = value;
       renderLayoutElement.removeAll();
       _buildPlatformRenderBox();
       addChild(sizedBox);
-    } else if (key.endsWith('width')) {
+    } else if (key == WIDTH || key == HEIGHT) {
+      setStyle(key, value);
+    }
+  }
+
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+    if (key == WIDTH) {
       width = Length.toDisplayPortValue(value);
-    } else if (key.endsWith('height')) {
+    } else if (key == HEIGHT) {
       height = Length.toDisplayPortValue(value);
     }
   }

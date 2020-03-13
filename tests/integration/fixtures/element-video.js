@@ -1,4 +1,4 @@
-it('video', () => {
+it('element video', () => {
   return new Promise((resolve) => {
     function setStyle(dom, object) {
       for (const key in object) {
