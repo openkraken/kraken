@@ -4,7 +4,7 @@
  * - EventTarget.prototype.removeEventListener
  * - EventTarget.prototype.dispatchEvent
  */
-it('DOM EventTarget', () => {
+it('DOM EventTarget', () => new Promise(resolve => {
   let clickTime = 0;
   const div = document.createElement('div');
   div.appendChild(document.createTextNode('Click: ' + clickTime + 'times.'));
@@ -25,5 +25,8 @@ it('DOM EventTarget', () => {
   div.removeEventListener('click', clickHandler);
   div.click(); // Should be `2`.
 
-  assert(clickTime === 2);
-});
+  setTimeout(() => {
+    assert(clickTime === 2);
+    resolve();
+  }, 100);
+}));
