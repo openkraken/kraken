@@ -24,4 +24,6 @@ it('DOM EventTarget', () => {
 
   div.removeEventListener('click', clickHandler);
   div.click(); // Should be `2`.
+
+  assert(clickTime === 2);
 });

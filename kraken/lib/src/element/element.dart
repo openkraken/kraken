@@ -1191,17 +1191,29 @@ abstract class Element extends Node
   }
 
   void click() {
-    final RenderBox box = renderObject as RenderBox;
-    // Click at the center of the element
-    Offset position = box.localToGlobal(box.size.center(Offset.zero));
-    PointerEvent downEvent = PointerDownEvent(position: position);
-
-    final HitTestResult hitTestResult = HitTestResult();
-    GestureBinding.instance.hitTest(hitTestResult, position);
-    GestureBinding.instance.dispatchEvent(downEvent, hitTestResult);
-
-    PointerEvent upEvent = PointerUpEvent(position: position);
-    GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
+    Event clickEvent = Event('click', EventInit());
+    if (isConnected) {
+      final RenderBox box = renderObject as RenderBox;
+      // Position the center of element.
+      Offset position = box.localToGlobal(box.size.center(Offset.zero));
+      final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
+      GestureBinding.instance.hitTest(boxHitTestResult, position);
+      bool hitTest = true;
+      Element currentElement = this;
+      while (hitTest) {
+        currentElement.handleClick(clickEvent);
+        if (currentElement.parent != null) {
+          currentElement = currentElement.parent;
+          hitTest = currentElement
+              .renderElementBoundary
+              .hitTest(boxHitTestResult, position: position);
+        } else {
+          hitTest = false;
+        }
+      }
+    } else {
+      handleClick(clickEvent);
+    }
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {
