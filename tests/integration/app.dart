@@ -34,27 +34,25 @@ void main() {
       String payload = ret['payload'];
       String caseName = ret['case'];
       runApp(
-          shouldInitializeBinding: false,
-          enableDebug: true,
-          afterConnected: () {
-            onItDone((String errmsg) async {
-              if (errmsg != null) {
-                completer.completeError(Exception(errmsg));
-                return;
-              }
-
+        shouldInitializeBinding: false,
+        enableDebug: true,
+        afterConnected: () {
+          onItDone((String errmsg) async {
+            if (errmsg != null) {
+              completer.completeError(Exception(errmsg));
+            } else {
               BodyElement body = ElementManager().getRootElement();
-              body.renderObject.markNeedsPaint();
-              RendererBinding.instance.addPostFrameCallback((_) async {
-                Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
-                List<int> bodyImageList = bodyImage.toList();
-                completer.complete(jsonEncode(bodyImageList));
-              });
-            });
-
-            // javascript it is equal to dart's test().
-            evaluateTestScripts(payload, url: caseName);
+              // Force wait to execute async ops.
+              await Future.delayed(const Duration(milliseconds: 200));
+              Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
+              List<int> bodyImageList = bodyImage.toList();
+              completer.complete(jsonEncode(bodyImageList));
+            }
           });
+
+          evaluateTestScripts(payload, url: caseName);
+        },
+      );
     }
 
     return completer.future;
