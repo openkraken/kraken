@@ -20,9 +20,7 @@ import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
 
-const String STYLE_PATH_PREFIX = '.style';
-
-typedef Statement = bool Function(Element element);
+typedef TestElement = bool Function(Element element);
 
 abstract class Element extends Node
     with
@@ -38,89 +36,56 @@ abstract class Element extends Node
         ColorMixin,
         TransformStyleMixin,
         TransitionStyleMixin {
-  RenderConstrainedBox renderConstrainedBox;
-  RenderObject stickyPlaceholder;
-  RenderObject renderObject; // Style decorated renderObject
-  RenderRepaintBoundary renderRepaintBoundary;
-  RenderStack renderStack;
-  ContainerRenderObjectMixin renderLayoutElement;
-  RenderPadding renderPadding;
-  RenderElementBoundary renderElementBoundary;
-  Map<String, dynamic> properties;
-  RenderIntersectionObserver renderIntersectionObserver;
-
-  bool allowChildren = true; // Whether element allows children
-  bool needsReposition = false; // whether element needs reposition when append to tree or changing position property
-  bool _inited = false; // True after constructor finished.
-  bool shouldBlockStretch = true;
-  double cropWidth = 0;
-  double cropHeight = 0;
-  double cropBorderWidth = 0;
-  double cropBorderHeight = 0;
-  double offsetTop = null; // offset to the top of viewport
-  bool stickyFixed = false;
-
-  final String tagName;
-  final String defaultDisplay;
-
-  Element(
-      {@required int nodeId,
-      @required this.tagName,
-      this.properties,
-      this.needsReposition,
-      this.allowChildren,
-      List<String> events,
-      @required this.defaultDisplay})
-      : assert(tagName != null),
+  Element({
+    @required int nodeId,
+    @required this.tagName,
+    @required this.defaultDisplay,
+    this.properties = const {},
+    this.needsReposition = false,
+    this.allowChildren = true,
+    this.events,
+  })  : assert(nodeId != null),
+        assert(tagName != null),
         assert(defaultDisplay != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
-
-    properties = properties ?? {};
     setDefaultProps(properties);
-
     /// Element style render
+    _style = Style(properties[STYLE]);
+    _style.set('display', style.get('display') ?? defaultDisplay);
 
-    style = Style(properties[STYLE]);
-    style.set('display', style.contains('display') ? style['display'] : defaultDisplay);
-
-    // mark element needs to reposition according to position property
-    if (style.contains('position') && (style.position == 'absolute' || style.position == 'fixed')) {
-      needsReposition = true;
-    }
-
-    if (allowChildren == null) {
-      allowChildren = true;
-    }
+    // Mark element needs to reposition according to position CSS.
+    if (_isPositioned(_style)) needsReposition = true;
 
     if (allowChildren) {
-      renderObject = renderLayoutElement = createRenderLayoutElement(style, null);
+      renderObject =
+          renderLayoutElement = createRenderLayoutElement(_style, null);
     }
 
     // padding
-    renderObject = renderPadding = initRenderPadding(renderObject, style);
+    renderObject = renderPadding = initRenderPadding(renderObject, _style);
     // background image
-    if (style.backgroundAttachment == 'local' && style.backgroundImage != null) {
-      renderObject = initBackgroundImage(renderObject, style, nodeId);
+    if (_style.backgroundAttachment == 'local' &&
+        _style.backgroundImage != null) {
+      renderObject = initBackgroundImage(renderObject, _style, nodeId);
     }
     // overflow
     if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, style, _scrollListener);
+      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
     }
     // constrained box
-    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
     // position
-    if (style.position != 'static') {
+    if (_style.position != 'static') {
       renderObject = renderStack = RenderPosition(
         textDirection: TextDirection.ltr,
         fit: StackFit.passthrough,
         overflow: Overflow.visible,
-        children: [
-          renderObject,
-        ],
+        children: [renderObject],
       );
     }
     // border
-    renderObject = initRenderDecoratedBox(renderObject, style, this);
+    renderObject = initRenderDecoratedBox(renderObject, _style, this);
 
     // Pointer event listener
     renderObject = RenderPointerListener(
@@ -133,32 +98,63 @@ abstract class Element extends Node
     );
 
     // Intersection observer
-    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
+    renderObject = renderIntersectionObserver =
+        RenderIntersectionObserver(child: renderObject);
     // opacity
-    renderObject = initRenderOpacity(renderObject, style);
+    renderObject = initRenderOpacity(renderObject, _style);
 
     // transition
     initTransition(style);
 
     // transform
-    renderObject = initTransform(renderObject, style);
+    renderObject = initTransform(renderObject, _style);
 
-    renderObject = renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
+    // RenderRepaintBoundary to support toBlob.
+    renderObject =
+        renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
-    // margin
-    renderObject = initRenderMargin(renderObject, style, this);
+    // Margin
+    renderObject = initRenderMargin(renderObject, _style, this);
 
-    renderObject = renderElementBoundary = RenderElementBoundary(child: renderObject, style: style, nodeId: nodeId);
+    // The layout boundary of element.
+    renderObject = renderElementBoundary = RenderElementBoundary(
+        child: renderObject, style: _style, nodeId: nodeId);
 
-    /// Element event listener
-    if (events != null) {
-      for (String eventName in events) {
-        addEvent(eventName);
-      }
-    }
-
-    _inited = true;
+    // Add element event listener
+    events?.forEach((String eventName) {
+      addEvent(eventName);
+    });
   }
+
+  Map<String, dynamic> properties;
+  List<String> events;
+
+  // A point reference to treed renderObject.
+  RenderObject renderObject;
+  RenderConstrainedBox renderConstrainedBox;
+  RenderObject stickyPlaceholder;
+  RenderRepaintBoundary renderRepaintBoundary;
+  RenderStack renderStack;
+  ContainerRenderObjectMixin renderLayoutElement;
+  RenderPadding renderPadding;
+  RenderIntersectionObserver renderIntersectionObserver;
+  RenderElementBoundary renderElementBoundary;
+
+  bool allowChildren = true; // Whether element allows children
+  bool needsReposition =
+  false; // whether element needs reposition when append to tree or changing position property
+  bool shouldBlockStretch = true;
+  double cropWidth = 0;
+  double cropHeight = 0;
+  double cropBorderWidth = 0;
+  double cropBorderHeight = 0;
+  double offsetTop = null; // offset to the top of viewport
+  bool stickyFixed = false;
+
+  final String tagName;
+
+  /// The default display type of
+  final String defaultDisplay;
 
   // If element is on the tree, the root parent is body.
   bool get isConnected {
@@ -177,110 +173,110 @@ abstract class Element extends Node
   Style _style;
   Style get style => _style;
   set style(Style newStyle) {
-    newStyle.set('display', newStyle.contains('display') ? newStyle['display'] : defaultDisplay);
+    newStyle.set('display', newStyle.get('display') ?? defaultDisplay);
 
     // Update style;
-    if (_inited) {
-      ///1.update layout properties
-      if (renderLayoutElement != null) {
-        String oldDisplay = style.get('display');
-        String newDisplay = newStyle.get('display');
-        bool hasFlexChange = isFlexStyleChanged(newStyle);
-        if (newDisplay != oldDisplay || hasFlexChange) {
-          ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
-          List<RenderBox> children = [];
-          RenderObjectVisitor visitor = (child) {
-            children.add(child);
-          };
-          oldRenderElement
-            ..visitChildren(visitor)
-            ..removeAll();
-          renderPadding.child = null;
-          renderLayoutElement = createRenderLayoutElement(newStyle, children);
-          renderPadding.child = renderLayoutElement as RenderBox;
-          // update style reference
-          renderElementBoundary.style = newStyle;
-        }
-
-        if (newDisplay == 'flex' || newDisplay == 'inline-flex') { // update flex layout properties
-          decorateRenderFlex(renderLayoutElement, newStyle);
-        } else { // update flow layout properties
-          decorateRenderFlow(renderLayoutElement, newStyle);
-        }
-
+    ///1.update layout properties
+    if (renderLayoutElement != null) {
+      String oldDisplay = style.get('display');
+      String newDisplay = newStyle.get('display');
+      bool hasFlexChange = isFlexStyleChanged(newStyle);
+      if (newDisplay != oldDisplay || hasFlexChange) {
+        ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
+        List<RenderBox> children = [];
+        RenderObjectVisitor visitor = (child) {
+          children.add(child);
+        };
+        oldRenderElement
+          ..visitChildren(visitor)
+          ..removeAll();
+        renderPadding.child = null;
+        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        renderPadding.child = renderLayoutElement as RenderBox;
         // update style reference
-        if (renderLayoutElement is RenderFlowLayout) {
-          (renderLayoutElement as RenderFlowLayout).style = newStyle;
-        } else {
-          (renderLayoutElement as RenderFlexLayout).style = newStyle;
-        }
+        renderElementBoundary.style = newStyle;
       }
 
-      // update transiton map
-      if (newStyle.contains('transition')) {
-        initTransition(newStyle);
+      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
+        // update flex layout properties
+        decorateRenderFlex(renderLayoutElement, newStyle);
+      } else {
+        // update flow layout properties
+        decorateRenderFlow(renderLayoutElement, newStyle);
       }
 
-      ///2.update overflow
-      updateOverFlowBox(newStyle, _scrollListener);
+      // update style reference
+      if (renderLayoutElement is RenderFlowLayout) {
+        (renderLayoutElement as RenderFlowLayout).style = newStyle;
+      } else {
+        (renderLayoutElement as RenderFlexLayout).style = newStyle;
+      }
+    }
 
-      ///3.update padding
-      updateRenderPadding(newStyle, transitionMap);
+    // update transiton map
+    if (newStyle.contains('transition')) {
+      initTransition(newStyle);
+    }
 
-      ///4.update constrained
-      updateConstraints(newStyle, transitionMap);
+    ///2.update overflow
+    updateOverFlowBox(newStyle, _scrollListener);
 
-      ///5.update decorated
-      updateRenderDecoratedBox(newStyle, this, transitionMap);
+    ///3.update padding
+    updateRenderPadding(newStyle, transitionMap);
 
-      ///6.update margin
-      updateRenderMargin(newStyle, this, transitionMap);
+    ///4.update constrained
+    updateConstraints(newStyle, transitionMap);
 
-      ///7.update position
-      String newPosition = newStyle['position'] ?? 'static';
-      String oldPosition = _style['position'] ?? 'static';
-      bool positionChanged = false;
-      if (newPosition != oldPosition) {
-        positionChanged = true;
+    ///5.update decorated
+    updateRenderDecoratedBox(newStyle, this, transitionMap);
+
+    ///6.update margin
+    updateRenderMargin(newStyle, this, transitionMap);
+
+    ///7.update position
+    String newPosition = newStyle['position'] ?? 'static';
+    String oldPosition = _style['position'] ?? 'static';
+    bool positionChanged = false;
+    if (newPosition != oldPosition) {
+      positionChanged = true;
+    }
+
+    // position change
+    if (positionChanged) {
+      needsReposition = true;
+      updatePosition(newStyle);
+    } else if (newPosition != 'static') {
+      int newZIndex = newStyle.zIndex;
+      int oldZIndex = _style.zIndex;
+      // zIndex change
+      if (newZIndex != oldZIndex) {
+        _updateZIndex(newStyle);
       }
 
-      // position change
-      if (positionChanged) {
-        needsReposition = true;
-        updatePosition(newStyle);
-      } else if (newPosition != 'static') {
-        int newZIndex = newStyle.zIndex;
-        int oldZIndex = _style.zIndex;
-        // zIndex change
-        if (newZIndex != oldZIndex) {
-          _updateZIndex(newStyle);
-        }
-
-        // offset change
-        if (newStyle.top != _style.top ||
-            newStyle.bottom != _style.bottom ||
-            newStyle.left != _style.left ||
-            newStyle.right != _style.right ||
-            newStyle.width != _style.width ||
-            newStyle.height != _style.height) {
-          _updateOffset(newStyle);
-        }
+      // offset change
+      if (newStyle.top != _style.top ||
+          newStyle.bottom != _style.bottom ||
+          newStyle.left != _style.left ||
+          newStyle.right != _style.right ||
+          newStyle.width != _style.width ||
+          newStyle.height != _style.height) {
+        _updateOffset(newStyle);
       }
+    }
 
-      ///8.update opacity and visiblity
-      updateRenderOpacity(
-        style,
-        newStyle,
-        parentRenderObject: transform,
-      );
+    ///8.update opacity and visiblity
+    updateRenderOpacity(
+      style,
+      newStyle,
+      parentRenderObject: transform,
+    );
 
-      ///9.update transform
-      updateTransform(newStyle, transitionMap);
+    ///9.update transform
+    updateTransform(newStyle, transitionMap);
 
-      if (transitionMap != null) {
-        for (Transition transition in transitionMap.values) {
-          transition?.apply();
-        }
+    if (transitionMap != null) {
+      for (Transition transition in transitionMap.values) {
+        transition?.apply();
       }
     }
 
@@ -312,14 +308,11 @@ abstract class Element extends Node
   }
 
   void _scrollListener(double scrollTop) {
-    if (this != ElementManager().getRootElement()) {
-      return;
-    }
+    // Only works with body.
+    if (nodeId != -1) return;
 
-    List stickyEls = findStickyChildren(this);
-
-    for (int i = 0; i < stickyEls.length; i++) {
-      Element el = stickyEls[i];
+    List<Element> stickyElements = findStickyChildren(this);
+    stickyElements.forEach((Element el) {
       Style elStyle = el.style;
       bool isFixed;
 
@@ -352,23 +345,7 @@ abstract class Element extends Node
           el.updatePosition(elStyle.copyWith({'position': 'sticky'}));
         }
       }
-    }
-  }
-
-  static List<Element> findStickyChildren(Element element) {
-    assert(element != null);
-    List<Element> result = [];
-
-    element.children.forEach((Element child) {
-      if (_isSticky(child.style)) result.add(child);
-
-      List<Element> mergedChildren = findStickyChildren(child);
-      mergedChildren.forEach((Element child) {
-        result.add(child);
-      });
     });
-
-    return result;
   }
 
   void updatePosition(Style newStyle) {
@@ -399,9 +376,12 @@ abstract class Element extends Node
         newStyle.position == 'relative' ||
         (newStyle.position == 'sticky' && !stickyFixed)) {
       // move element back to document flow
-      if (style.position == 'absolute' || style.position == 'fixed' || style.position == 'sticky') {
+      if (style.position == 'absolute' ||
+          style.position == 'fixed' ||
+          style.position == 'sticky') {
         // remove positioned element from parent element stack
-        Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+        Element parentElementWithStack =
+            findParent(this, (element) => element.renderStack != null);
         parentElementWithStack.renderStack.remove(renderElementBoundary);
 
         // remove sticky placeholder
@@ -418,7 +398,8 @@ abstract class Element extends Node
           var style = element.properties['style'];
           if (style == null ||
               !style.containsKey('position') ||
-              (style.containsKey('position') && style['position'] == 'static')) {
+              (style.containsKey('position') &&
+                  style['position'] == 'static')) {
             preNonPositionedElement = element;
             break;
           }
@@ -427,14 +408,16 @@ abstract class Element extends Node
         RenderElementBoundary preNonPositionedObject = null;
         if (preNonPositionedElement != null) {
           RenderObjectVisitor visitor = (child) {
-            if (child is RenderElementBoundary && preNonPositionedElement.nodeId == child.nodeId) {
+            if (child is RenderElementBoundary &&
+                preNonPositionedElement.nodeId == child.nodeId) {
               preNonPositionedObject = child;
             }
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
         // insert non positioned renderObject to parent element in the order of original element tree
-        parentElement.renderLayoutElement.insert(renderElementBoundary, after: preNonPositionedObject);
+        parentElement.renderLayoutElement
+            .insert(renderElementBoundary, after: preNonPositionedObject);
 
         needsReposition = false;
       }
@@ -455,7 +438,8 @@ abstract class Element extends Node
   }
 
   void removeStickyPlaceholder() {
-    (stickyPlaceholder.parent as ContainerRenderObjectMixin).remove(stickyPlaceholder);
+    (stickyPlaceholder.parent as ContainerRenderObjectMixin)
+        .remove(stickyPlaceholder);
   }
 
   void insertStickyPlaceholder() {
@@ -465,7 +449,8 @@ abstract class Element extends Node
     });
     stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
     stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, this);
-    (renderObject.parent as ContainerRenderObjectMixin).insert(stickyPlaceholder, after: renderObject);
+    (renderObject.parent as ContainerRenderObjectMixin)
+        .insert(stickyPlaceholder, after: renderObject);
   }
 
   // reposition element with position absolute/fixed
@@ -482,7 +467,8 @@ abstract class Element extends Node
     // find positioned element to attach
     Element parentElementWithStack;
     if (style.position == 'absolute') {
-      parentElementWithStack = findParent(el, (element) => element.renderStack != null);
+      parentElementWithStack =
+          findParent(el, (element) => element.renderStack != null);
     } else {
       parentElementWithStack = ElementManager().getRootElement();
     }
@@ -506,7 +492,8 @@ abstract class Element extends Node
 
     // current element's zIndex
     int currentZIndex = 0;
-    if (currentElement.style.contains('zIndex') && currentElement.style['zIndex'] != null) {
+    if (currentElement.style.contains('zIndex') &&
+        currentElement.style['zIndex'] != null) {
       currentZIndex = currentElement.style['zIndex'];
     }
     // add current element back to parent stack by zIndex
@@ -514,7 +501,8 @@ abstract class Element extends Node
   }
 
   void _updateZIndex(Style style) {
-    Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+    Element parentElementWithStack =
+        findParent(this, (element) => element.renderStack != null);
     RenderStack parentStack = parentElementWithStack.renderStack;
 
     // remove current element from parent stack
@@ -535,7 +523,8 @@ abstract class Element extends Node
   void _updateOffset(Style style) {
     ZIndexParentData zIndexParentData;
     AbstractNode renderParent = renderObject.parent;
-    if (renderParent is RenderPosition && renderObject.parentData is ZIndexParentData) {
+    if (renderParent is RenderPosition &&
+        renderObject.parentData is ZIndexParentData) {
       zIndexParentData = renderObject.parentData;
       Transition allTransition,
           topTransition,
@@ -588,7 +577,12 @@ abstract class Element extends Node
           bottomTransition != null ||
           widthTransition != null ||
           heightTransition != null) {
-        bool hasTop = false, hasLeft = false, hasRight = false, hasBottom = false, hasWidth = false, hasHeight = false;
+        bool hasTop = false,
+            hasLeft = false,
+            hasRight = false,
+            hasBottom = false,
+            hasWidth = false,
+            hasHeight = false;
         if (topDiff != null) {
           if (topTransition == null) {
             hasTop = true;
@@ -655,7 +649,13 @@ abstract class Element extends Node
             });
           }
         }
-        if (allTransition != null && (hasTop || hasBottom || hasLeft || hasRight || hasWidth || hasHeight)) {
+        if (allTransition != null &&
+            (hasTop ||
+                hasBottom ||
+                hasLeft ||
+                hasRight ||
+                hasWidth ||
+                hasHeight)) {
           allTransition.addProgressListener((percent) {
             if (hasTop) {
               progressParentData.top = topBase + topDiff * percent;
@@ -723,10 +723,12 @@ abstract class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutElement(Style newStyle, List<RenderBox> children) {
+  ContainerRenderObjectMixin createRenderLayoutElement(
+      Style newStyle, List<RenderBox> children) {
     String display = newStyle.get('display');
     String flexWrap = newStyle.get('flexWrap');
-    bool isFlexWrap = (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
+    bool isFlexWrap =
+        (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
     if ((display == 'flex' || display == 'inline-flex') && flexWrap != 'wrap') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         textDirection: TextDirection.ltr,
@@ -837,7 +839,8 @@ abstract class Element extends Node
             afterRenderObject = after?.renderObject;
           }
         }
-        appendElement(child, afterRenderObject: afterRenderObject, isAppend: false);
+        appendElement(child,
+            afterRenderObject: afterRenderObject, isAppend: false);
       }
     };
 
@@ -850,9 +853,8 @@ abstract class Element extends Node
   }
 
   // Loop element's children to find elements need to reposition
-  List<Element> findPositionedChildren(Element element, {
-    bool needsReposition = false
-  }) {
+  List<Element> findPositionedChildren(Element element,
+      {bool needsReposition = false}) {
     assert(element != null);
     List<Element> result = [];
 
@@ -865,7 +867,8 @@ abstract class Element extends Node
         }
       }
 
-      List<Element> mergeChildren = findPositionedChildren(child, needsReposition: needsReposition);
+      List<Element> mergeChildren =
+          findPositionedChildren(child, needsReposition: needsReposition);
       if (mergeChildren != null) {
         mergeChildren.forEach((Element child) {
           result.add(child);
@@ -900,7 +903,8 @@ abstract class Element extends Node
     }
   }
 
-  void appendElement(Node child, {RenderObject afterRenderObject, bool isAppend = true}) {
+  void appendElement(Node child,
+      {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
       Style childStyle = child.style;
@@ -919,9 +923,8 @@ abstract class Element extends Node
         // Add FlexItem wrap for flex child node.
         if (child.renderLayoutElement != null) {
           child.renderPadding.child = null;
-          child.renderPadding.child = RenderFlexItem(
-            child: child.renderLayoutElement as RenderBox
-          );
+          child.renderPadding.child =
+              RenderFlexItem(child: child.renderLayoutElement as RenderBox);
         }
       } else {
         Style childStyle = child.style;
@@ -929,39 +932,41 @@ abstract class Element extends Node
 
         // Remove inline element dimension in flow layout
         if (childDisplay == 'inline') {
-          RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
+          RenderConstrainedBox renderConstrainedBox =
+              child.renderConstrainedBox;
           renderConstrainedBox.additionalConstraints = BoxConstraints();
         }
       }
 
       RenderBox getStackedRenderBox(Element element) {
-        ZIndexParentData stackParentData = getPositionParentDataFromStyle(element.style);
+        ZIndexParentData stackParentData =
+            getPositionParentDataFromStyle(element.style);
         RenderBox stackedRenderBox = element.renderLayoutElement as RenderBox;
 
         if (!isFlex) {
-          stackParentData.hookRenderObject = RenderPadding(padding: EdgeInsets.zero);
+          stackParentData.hookRenderObject =
+              RenderPadding(padding: EdgeInsets.zero);
         }
         stackedRenderBox.parentData = stackParentData;
         return stackedRenderBox;
       }
 
       if (childPosition == 'absolute') {
-        Element parentStackedElement = findParent(child, (element) => element.renderStack != null);
+        Element parentStackedElement =
+            findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
           RenderObject renderBoxToBeStacked = getStackedRenderBox(child);
-          insertByZIndex(
-            parentStackedElement.renderStack,
-            renderBoxToBeStacked,
-            child,
-            childStyle.zIndex
-          );
+          insertByZIndex(parentStackedElement.renderStack, renderBoxToBeStacked,
+              child, childStyle.zIndex);
           return;
         }
       } else if (childPosition == 'fixed') {
-        final RenderPosition rootRenderStack = ElementManager().getRootElement().renderStack;
+        final RenderPosition rootRenderStack =
+            ElementManager().getRootElement().renderStack;
         if (rootRenderStack != null) {
           RenderBox stackedRenderBox = getStackedRenderBox(child);
-          insertByZIndex(rootRenderStack, stackedRenderBox, child, childStyle.zIndex);
+          insertByZIndex(
+              rootRenderStack, stackedRenderBox, child, childStyle.zIndex);
           return;
         }
 
@@ -976,22 +981,23 @@ abstract class Element extends Node
 
       // append positioned children not appended to renderStack yet to element's renderStack
       if (renderStack != null) {
-        List<Element> targets = findPositionedChildren(child, needsReposition: true);
-        if (targets != null) {
-          targets.forEach((Element target) {
-            RenderBox stackedRenderBox = getStackedRenderBox(target);
+        List<Element> targets =
+            findPositionedChildren(child, needsReposition: true);
+        targets.forEach((Element target) {
+          RenderBox stackedRenderBox = getStackedRenderBox(target);
 
-            ///insert by z-index
-            insertByZIndex(renderStack, stackedRenderBox, target, target.style.zIndex);
-          });
-        }
+          ///insert by z-index
+          insertByZIndex(
+              renderStack, stackedRenderBox, target, target.style.zIndex);
+        });
       }
 
       ParentData childParentData = childRenderObject.parentData;
       if (isFlex) {
         assert(childParentData is KrakenFlexParentData);
         final KrakenFlexParentData parentData = childParentData;
-        KrakenFlexParentData flexParentData = FlexItem.getParentData(childStyle);
+        KrakenFlexParentData flexParentData =
+            FlexItem.getParentData(childStyle);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;
         parentData.flexBasis = flexParentData.flexBasis;
@@ -1014,7 +1020,8 @@ abstract class Element extends Node
     }
   }
 
-  void insertByZIndex(RenderStack renderStack, RenderObject renderObject, Element el, int zIndex) {
+  void insertByZIndex(RenderStack renderStack, RenderObject renderObject,
+      Element el, int zIndex) {
     el.needsReposition = false;
     RenderBox child = renderStack.lastChild;
     while (child != null) {
@@ -1024,7 +1031,8 @@ abstract class Element extends Node
           renderStack.insert(renderObject, after: child);
         } else {
           final ContainerParentDataMixin childParentData = child.parentData;
-          renderStack.insert(renderObject, after: childParentData.previousSibling);
+          renderStack.insert(renderObject,
+              after: childParentData.previousSibling);
         }
         return;
       } else if (zIndex >= 0) {
@@ -1035,15 +1043,6 @@ abstract class Element extends Node
       child = childParentData.previousSibling;
     }
     renderStack.insert(renderObject, after: null);
-  }
-
-  static Element findParent(Element element, Statement statement) {
-    Element _el = element.parent;
-    while (_el != null && !statement(_el)) {
-      _el = _el.parent;
-    }
-
-    return _el;
   }
 
   static ZIndexParentData getPositionParentDataFromStyle(Style style) {
@@ -1067,37 +1066,27 @@ abstract class Element extends Node
     return parentData;
   }
 
-  // update textNode style when container style changed
-  void updateTextNodeStyle(String key) {
+  // Update textNode style when container style changed
+  void updateTextNodeStyle() {
     childNodes.forEach((node) {
-      if (node is TextNode) {
-        node.setProperty('style', style);
-      }
+      if (node is TextNode) node.updateTextStyle(style: style);
     });
   }
 
+  void setStyle(String key, value) {
+    Style newStyle = _style.copyWith({ key: value });
+    properties['style'] = newStyle.getOriginalStyleMap();
+    style = newStyle;
+    updateTextNodeStyle();
+  }
+
   @mustCallSuper
-  void setProperty(String key, dynamic value) {
-    if (key.indexOf(STYLE_PATH_PREFIX) >= 0) {
-      String styleKey = key.substring(1).split('.')[1];
-      Style newStyle = _style.copyWith({styleKey: value});
-      properties['style'] = newStyle.getOriginalStyleMap();
-      style = newStyle;
-      updateTextNodeStyle(styleKey);
-    } else {
-      properties[key] = value;
-      if (key == STYLE) {
-        if (value is String) {
-          // if value is raw style string, should convert it into map
-          value = jsonEncode(value);
-        }
+  void setProperty(String key, value) {
+    properties[key] = value;
 
-        style = _style.copyWith(value);
-      }
-
-      if (key == STYLE) {
-        updateTextNodeStyle(key);
-      }
+    if (key == STYLE) {
+      style = _style.copyWith(value);
+      updateTextNodeStyle();
     }
   }
 
@@ -1106,7 +1095,7 @@ abstract class Element extends Node
     properties.remove(key);
   }
 
-  dynamic method(String name, List<dynamic> args) {
+  method(String name, List args) {
     switch (name) {
       case 'offsetTop':
         return getOffsetY();
@@ -1121,9 +1110,17 @@ abstract class Element extends Node
       case 'clientHeight':
         return renderPadding.hasSize ? renderPadding.size.height : 0;
       case 'clientLeft':
-        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
+        return renderPadding.hasSize
+            ? renderPadding
+                .localToGlobal(Offset.zero, ancestor: renderMargin)
+                .dx
+            : 0;
       case 'clientTop':
-        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
+        return renderPadding.hasSize
+            ? renderPadding
+                .localToGlobal(Offset.zero, ancestor: renderMargin)
+                .dy
+            : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
@@ -1137,12 +1134,12 @@ abstract class Element extends Node
       case 'click':
         return click();
       default:
-        debugPrint('unknown method call. name: $name, args: ${args}');
+        debugPrint('Unknown method call. name: $name, args: ${args}');
     }
   }
 
-  Map getBoundingClientRect() {
-    Map rect = {};
+  Map<String, double> getBoundingClientRect() {
+    Map<String, double> rect = {};
     if (renderBorderMargin.hasSize) {
       Offset offset = getOffset(renderBorderMargin);
       Size size = renderBorderMargin.size;
@@ -1177,7 +1174,8 @@ abstract class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    Element element = findParent(this, (element) => element.renderStack != null);
+    Element element =
+        findParent(this, (element) => element.renderStack != null);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1189,7 +1187,8 @@ abstract class Element extends Node
     super.addEventListener(eventName, this._eventResponder);
 
     if (_isIntersectionObserverEvent(eventName)) {
-      renderIntersectionObserver.onIntersectionChange = handleIntersectionChange;
+      renderIntersectionObserver.onIntersectionChange =
+          handleIntersectionChange;
     }
   }
 
@@ -1233,7 +1232,8 @@ abstract class Element extends Node
     // need to make sure all renderObject had repainted.
     renderObject.markNeedsPaint();
     RendererBinding.instance.addPostFrameCallback((_) async {
-      Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
+      Image image =
+          await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
       completer.complete(byteData.buffer.asUint8List());
     });
@@ -1242,8 +1242,34 @@ abstract class Element extends Node
   }
 }
 
+Element findParent(Element element, TestElement testElement) {
+  Element _el = element?.parent;
+  while (_el != null && !testElement(_el)) {
+    _el = _el.parent;
+  }
+  return _el;
+}
+
+List<Element> findStickyChildren(Element element) {
+  assert(element != null);
+  List<Element> result = [];
+
+  element.children.forEach((Element child) {
+    if (_isSticky(child.style)) result.add(child);
+
+    List<Element> mergedChildren = findStickyChildren(child);
+    mergedChildren.forEach((Element child) {
+      result.add(child);
+    });
+  });
+
+  return result;
+}
+
 bool _isIntersectionObserverEvent(String eventName) {
-  return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
+  return eventName == 'appear' ||
+      eventName == 'disappear' ||
+      eventName == 'intersectionchange';
 }
 
 bool _hasIntersectionObserverEvent(eventHandlers) {
@@ -1253,9 +1279,11 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 }
 
 bool _isPositioned(Style style) {
-  return style.contains('position') && style.position == 'absolute' || style.position == 'fixed';
+  return style.contains('position') && style.position == 'absolute' ||
+      style.position == 'fixed';
 }
 
 bool _isSticky(Style style) {
-  return style.position == 'sticky' && style.top != null || style.bottom != null;
+  return style.position == 'sticky' && style.top != null ||
+      style.bottom != null;
 }

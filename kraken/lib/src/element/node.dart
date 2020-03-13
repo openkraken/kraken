@@ -9,6 +9,7 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
+
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,
@@ -18,53 +19,53 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  String data;
-  Map<String, dynamic> properties;
-
   Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+
+  // The comment information.
+  String data;
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, String data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
-    assert(data != null);
-    this.data = data;
+  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text');
+
+  RenderTextNode renderTextNode;
+
+  // The text string.
+  String _data;
+  String get data => _data;
+  set data(String newData) {
+    assert(newData != null);
+    _data = newData;
+    updateTextStyle();
   }
 
-  String get data => properties['data'];
-  set data(value) {
-    properties['data'] = value;
-  }
-  Map<String, dynamic> properties = {};
-
-  @mustCallSuper
-  void setProperty(String key, value) {
-    properties[key] = value;
-
-    Element parentElement = this.parentNode;
-    Style parentStyle = parentElement.style;
-
-    Style textNodeStyle = parentStyle;
-    if (key == STYLE && value is Style)
-      textNodeStyle = textNodeStyle.copyWith(value.getOriginalStyleMap());
+  void updateTextStyle({ Style style }) {
+    // parentNode must be an element.
+    Element parentElement = parentNode;
+    // inherit parent style
+    if (style == null) {
+      style = parentElement.style;
+    } else {
+      style = parentElement.style.copyWith(style.getOriginalStyleMap());
+    }
 
     RenderTextNode newTextNode = RenderTextNode(
       nodeId: nodeId,
       text: data,
-      style: textNodeStyle,
+      style: style,
     );
 
-    int curIdx = parentElement.childNodes.indexOf(this);
-
-    List<RenderObject> children = [];
-    RenderObjectVisitor visitor = (child) {
-      children.add(child);
-    };
-    parentElement.renderLayoutElement..visitChildren(visitor);
-    RenderObject insertNode = curIdx - 1 > -1 ? children[curIdx - 1] : null;
-
-    parentElement.renderLayoutElement
-      ..remove(children[curIdx])
-      ..insert(newTextNode, after: insertNode);
+    ContainerRenderObjectMixin parentRenderLayoutBox = parentElement.renderLayoutElement;
+    if (parentRenderLayoutBox != null) {
+      if (renderTextNode != null) {
+        RenderObject after = (renderTextNode.parentData as ContainerParentDataMixin).previousSibling;
+        parentRenderLayoutBox
+          ..remove(renderTextNode)
+          ..insert(newTextNode, after: after);
+      } else {
+        parentRenderLayoutBox.add(newTextNode);
+      }
+    }
   }
 }
 
@@ -116,9 +117,6 @@ abstract class Node extends EventTarget {
     if (index == null) return null;
     return parentNode.childNodes[index + 1];
   }
-
-  void setProperty(String key, dynamic value) {}
-  void removeProperty(String key) {}
 
   @mustCallSuper
   Node appendChild(Node child) {
