@@ -4,6 +4,7 @@
  */
 
 import 'package:colorize/colorize.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/src/element/binding.dart';
 import 'package:kraken/src/bridge/from_native.dart';
 import 'package:test/test.dart';
