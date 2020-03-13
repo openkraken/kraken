@@ -543,7 +543,7 @@ abstract class Element extends Node
     // current element's zIndex
     int curZIndex = 0;
     if (style['zIndex'] != null) {
-      curZIndex = style['zIndex'];
+      curZIndex = int.parse(style['zIndex']);
     }
     // add current element back to parent stack by zIndex
     insertByZIndex(parentStack, renderObject, this, curZIndex);
