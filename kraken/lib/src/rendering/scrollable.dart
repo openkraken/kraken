@@ -42,6 +42,7 @@ class KrakenScrollable
             offset: position,
             child: child,
             scrollListener: scrollListener,
+            shouldClip: true,
         );
 
     _renderBox = child;

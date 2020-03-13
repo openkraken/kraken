@@ -9,6 +9,7 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 const String DATA = 'data';
+
 enum NodeType {
   ELEMENT_NODE,
   TEXT_NODE,
@@ -18,53 +19,53 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  String data;
-  Map<String, dynamic> properties;
-
   Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+
+  // The comment information.
+  String data;
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, String data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
-    assert(data != null);
-    this.data = data;
+  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+    // Update text after connected.
+    queueAfterConnected(_onTextNodeConnected);
   }
 
-  String get data => properties['data'];
-  set data(value) {
-    properties['data'] = value;
-  }
-  Map<String, dynamic> properties = {};
+  RenderTextBox renderTextBox;
 
-  @mustCallSuper
-  void setProperty(String key, value) {
-    properties[key] = value;
-
-    Element parentElement = this.parentNode;
-    Style parentStyle = parentElement.style;
-
-    Style textNodeStyle = parentStyle;
-    if (key == STYLE && value is Style)
-      textNodeStyle = textNodeStyle.copyWith(value.getOriginalStyleMap());
-
-    RenderTextNode newTextNode = RenderTextNode(
+  void _onTextNodeConnected() {
+    Element parentElement = parentNode;
+    renderTextBox = RenderTextBox(
       nodeId: nodeId,
       text: data,
-      style: textNodeStyle,
+      // inherit parent style
+      style: parentElement.style,
     );
+    parentElement.renderLayoutElement.add(renderTextBox);
+  }
 
-    int curIdx = parentElement.childNodes.indexOf(this);
+  // The text string.
+  String _data;
+  String get data => _data;
+  set data(String newData) {
+    assert(newData != null);
+    _data = newData;
+    updateTextStyle();
+  }
 
-    List<RenderObject> children = [];
-    RenderObjectVisitor visitor = (child) {
-      children.add(child);
-    };
-    parentElement.renderLayoutElement..visitChildren(visitor);
-    RenderObject insertNode = curIdx - 1 > -1 ? children[curIdx - 1] : null;
+  void updateTextStyle() {
+    if (isConnected) {
+      _doUpdateTextStyle();
+    } else {
+      queueAfterConnected(_doUpdateTextStyle);
+    }
+  }
 
-    parentElement.renderLayoutElement
-      ..remove(children[curIdx])
-      ..insert(newTextNode, after: insertNode);
+  void _doUpdateTextStyle() {
+    // parentNode must be an element.
+    Element parentElement = parentNode;
+    renderTextBox.text = data;
+    renderTextBox.style = parentElement.style;
   }
 }
 
@@ -108,6 +109,15 @@ abstract class Node extends EventTarget {
     nodeName = nodeName ?? '';
   }
 
+  // If node is on the tree, the root parent is body.
+  bool get isConnected {
+    Node parent = this;
+    while (parent.parentNode != null) {
+      parent = parent.parentNode;
+    }
+    return parent == ElementManager().getRootElement();
+  }
+
   Node get firstChild => childNodes?.first;
   Node get lastChild => childNodes?.last;
   Node get nextSibling {
@@ -116,9 +126,6 @@ abstract class Node extends EventTarget {
     if (index == null) return null;
     return parentNode.childNodes[index + 1];
   }
-
-  void setProperty(String key, dynamic value) {}
-  void removeProperty(String key) {}
 
   @mustCallSuper
   Node appendChild(Node child) {

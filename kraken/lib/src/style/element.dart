@@ -71,17 +71,24 @@ mixin ElementStyleMixin on RenderBox {
     return heightD;
   }
 
-  // get parent node height if parent is flex and stretch children height
+  // Get parent node height if parent is flex and stretch children height
   double getStretchParentHeight(int nodeId) {
     double parentHeight;
-    Element parentNode = nodeMap[nodeId].parent;
+    Element currentNode = nodeMap[nodeId];
+    Element parentNode = currentNode.parent;
+    if (currentNode.style.get('height') != null) {
+    }
 
     if (parentNode != null && parentNode.style != null) {
       Style parentStyle = parentNode.style;
+      Style currentStyle = currentNode.style;
 
-      if (parentStyle.contains('display') &&
-          parentStyle['display'] == 'flex' &&
+      String parentDisplay = parentStyle.get('display');
+      bool isParentFlex = parentDisplay == 'flex' || parentDisplay == 'inline-flex';
+
+      if (isParentFlex &&
           parentStyle['flexDirection'] == 'row' &&
+          currentStyle.get('height') == null &&
           parentStyle.contains('height') &&
           (!parentStyle.contains('alignItems') ||
               (parentStyle.contains('alignItems') &&
@@ -92,6 +99,14 @@ mixin ElementStyleMixin on RenderBox {
     return parentHeight;
   }
 
+  // Get height of current node
+  double getCurrentHeight(Style style) {
+    double height = Length.toDisplayPortValue(style.get('height'));
+    // minus padding
+    Padding padding = baseGetPaddingFromStyle(style);
+    return height - padding.top - padding.bottom;
+  }
+
   // Whether current node is inline
   bool isElementInline(String defaultDisplay, int nodeId) {
     var node = nodeMap[nodeId];
@@ -99,12 +114,14 @@ mixin ElementStyleMixin on RenderBox {
 
     String display = defaultDisplay;
 
-    // Display as inline-block if parent node is flex and with align-items not stretch
+    // Display as inline if parent node is flex and with align-items not stretch
     if (parentNode != null) {
       Style style = parentNode.style;
 
-      if (style.contains('display') && style['display'] == 'flex') {
-        display = 'inline-block';
+      bool isFlex = style['display'] == 'flex' || style['display'] == 'inline-flex';
+
+      if (style.contains('display') && isFlex) {
+        display = 'inline';
 
         if (style.contains('flexDirection') &&
             style['flexDirection'] == 'column' &&
@@ -116,9 +133,6 @@ mixin ElementStyleMixin on RenderBox {
       }
     }
 
-    if (display == 'flex' || display == 'block') {
-      return false;
-    }
-    return true;
+    return display == 'inline';
   }
 }

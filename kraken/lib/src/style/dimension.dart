@@ -223,6 +223,13 @@ mixin DimensionMixin {
         renderConstrainedBox.additionalConstraints =
             newConstraints.toBoxConstraints();
       }
+
+      String display = style.get('display');
+      // Remove inline element dimension
+      if (display == 'inline') {
+        renderConstrainedBox.additionalConstraints = BoxConstraints();
+      }
+
       oldConstraints = newConstraints;
     }
   }

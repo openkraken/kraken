@@ -4,7 +4,7 @@
 
 require('./tasks');
 
-const { series, parallel } = require('gulp');
+const { series } = require('gulp');
 const chalk = require('chalk');
 
 series(
@@ -12,10 +12,6 @@ series(
   'patch-flutter-tester',
   'js-api-test',
   'integration-test'
-)((err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(chalk.green('Success.'));
-  }
+)(() => {
+  console.log(chalk.green('Test Success.'));
 });
