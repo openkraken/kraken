@@ -1122,21 +1122,26 @@ abstract class Element extends Node
     }
   }
 
-  Map<String, double> getBoundingClientRect() {
-    Map<String, double> rect = {};
-    if (renderBorderMargin.hasSize) {
-      Offset offset = getOffset(renderBorderMargin);
-      Size size = renderBorderMargin.size;
-      rect['x'] = offset.dx;
-      rect['y'] = offset.dy;
-      rect['width'] = size.width;
-      rect['height'] = size.height;
-      rect['top'] = offset.dy;
-      rect['left'] = offset.dx;
-      rect['right'] = offset.dx + size.width;
-      rect['bottom'] = offset.dy + size.height;
-    }
-    return rect;
+  String getBoundingClientRect() {
+    Map<String, double> boundingClientRect = {};
+
+    // Force flush layout.
+    renderBorderMargin.markNeedsLayout();
+    renderBorderMargin.owner.flushLayout();
+
+    Offset offset = getOffset(renderBorderMargin);
+    Size size = renderBorderMargin.size;
+    boundingClientRect['x'] = offset.dx;
+    boundingClientRect['y'] = offset.dy;
+    boundingClientRect['width'] = size.width;
+    boundingClientRect['height'] = size.height;
+    boundingClientRect['top'] = offset.dy;
+    boundingClientRect['left'] = offset.dx;
+    boundingClientRect['right'] = offset.dx + size.width;
+    boundingClientRect['bottom'] = offset.dy + size.height;
+
+    print(boundingClientRect);
+    return jsonEncode(boundingClientRect);
   }
 
   double getOffsetX() {

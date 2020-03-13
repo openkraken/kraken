@@ -5,7 +5,11 @@ it('Appear & Disappear', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
 
+    let triggered = false;
     div.addEventListener('disappear', () => {
+      // Only trigger once, in case of test case error.
+      if (triggered) return;
+      triggered = true;
       div.style.backgroundColor = 'green';
       div.style.bottom = '0';
       resolve();
