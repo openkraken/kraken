@@ -305,7 +305,6 @@ abstract class Element extends Node
 
   // Calculate sticky status according to scrollTop
   void _updateStickyPosition(double scrollTop) {
-    Element bodyEl = ElementManager().getRootElement();
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
       Style elStyle = el.style;
@@ -1055,6 +1054,7 @@ abstract class Element extends Node
     });
   }
 
+  @mustCallSuper
   void setStyle(String key, value) {
     Style newStyle = _style.copyWith({ key: value });
     properties['style'] = newStyle.getOriginalStyleMap();
