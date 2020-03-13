@@ -10,7 +10,8 @@ const chalk = require('chalk');
 series(
   'bridge-test',
   'patch-flutter-tester',
-  'js-api-test'
+  'js-api-test',
+  'integration-test'
 )((err) => {
   if (err) {
     console.log(err);
