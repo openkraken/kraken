@@ -839,8 +839,8 @@ abstract class Element extends Node
             afterRenderObject = after?.renderObject;
           }
         }
-        appendElement(child,
-            afterRenderObject: afterRenderObject, isAppend: false);
+        appendElement(child, afterRenderObject: afterRenderObject, isAppend: false);
+        if (child is NodeLifeCycle) child.fireAfterConnected();
       }
     };
 

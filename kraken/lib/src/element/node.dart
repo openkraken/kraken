@@ -27,9 +27,13 @@ class Comment extends Node {
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text');
+  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+    // Update text after connected.
+    queueAfterConnected(updateTextStyle);
+  }
 
   RenderTextBox renderTextBox;
+
 
   // The text string.
   String _data;
