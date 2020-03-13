@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/scheduler.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
@@ -29,11 +28,21 @@ class Comment extends Node {
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
     // Update text after connected.
-    queueAfterConnected(updateTextStyle);
+    queueAfterConnected(_onTextNodeConnected);
   }
 
   RenderTextBox renderTextBox;
 
+  void _onTextNodeConnected() {
+    Element parentElement = parentNode;
+    renderTextBox = RenderTextBox(
+      nodeId: nodeId,
+      text: data,
+      // inherit parent style
+      style: parentElement.style,
+    );
+    parentElement.renderLayoutElement.add(renderTextBox);
+  }
 
   // The text string.
   String _data;
@@ -44,38 +53,19 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
     updateTextStyle();
   }
 
-  // Sync to frame tick.
-  final Debouncing _updateTextNodeDeb = new Debouncing();
-
   void updateTextStyle() {
-    // [_doUpdateTextStyle] is an idempotent(幂等 in Chinese) method, debounce it
-    // to improve performance.
-    _updateTextNodeDeb.debounce(_doUpdateTextStyle);
+    if (isConnected) {
+      _doUpdateTextStyle();
+    } else {
+      queueAfterConnected(_doUpdateTextStyle);
+    }
   }
 
   void _doUpdateTextStyle() {
     // parentNode must be an element.
     Element parentElement = parentNode;
-    RenderTextBox newTextBox = RenderTextBox(
-      nodeId: nodeId,
-      text: data,
-      // inherit parent style
-      style: parentElement.style,
-    );
-
-    ContainerRenderObjectMixin parentRenderLayoutBox = parentElement.renderLayoutElement;
-    if (parentRenderLayoutBox != null) {
-      if (renderTextBox != null) {
-        RenderObject after = (renderTextBox.parentData as ContainerParentDataMixin).previousSibling;
-        parentRenderLayoutBox
-          ..remove(renderTextBox)
-          ..insert(newTextBox, after: after);
-      } else {
-        parentRenderLayoutBox.add(newTextBox);
-      }
-    }
-
-    renderTextBox = newTextBox;
+    renderTextBox.text = data;
+    renderTextBox.style = parentElement.style;
   }
 }
 
@@ -117,6 +107,15 @@ abstract class Node extends EventTarget {
     assert(nodeType != null);
     assert(nodeId != null);
     nodeName = nodeName ?? '';
+  }
+
+  // If node is on the tree, the root parent is body.
+  bool get isConnected {
+    Node parent = this;
+    while (parent.parentNode != null) {
+      parent = parent.parentNode;
+    }
+    return parent == ElementManager().getRootElement();
   }
 
   Node get firstChild => childNodes?.first;

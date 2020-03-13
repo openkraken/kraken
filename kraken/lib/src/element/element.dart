@@ -156,15 +156,6 @@ abstract class Element extends Node
   /// The default display type of
   final String defaultDisplay;
 
-  // If element is on the tree, the root parent is body.
-  bool get isConnected {
-    Element parent = this;
-    while (parent.parent != null) {
-      parent = parent.parent;
-    }
-    return parent == ElementManager().getRootElement();
-  }
-
   // Set default properties, override this for individual element
   void setDefaultProps(Map<String, dynamic> props) {}
 
