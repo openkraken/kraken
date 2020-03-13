@@ -1,6 +1,6 @@
-it('intersectionObserver', () => {
+it('Appear & Disappear', () => {
   return new Promise((resolve, reject) => {
-    var div = document.createElement('div');
+    const div = document.createElement('div');
     div.style.width = '300px';
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
@@ -11,15 +11,12 @@ it('intersectionObserver', () => {
       resolve();
     });
 
+    setTimeout(reject, 500);
     setTimeout(() => {
-      reject();
-    }, 500);
-
-    document.body.appendChild(div);
-
-    requestAnimationFrame(() => {
       div.style.position = 'absolute';
       div.style.bottom = '-600px';
-    });
+    }, 100);
+
+    document.body.appendChild(div);
   });
 });
