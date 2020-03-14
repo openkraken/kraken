@@ -15,9 +15,9 @@ export class Document extends Node {
     super(NodeType.DOCUMENT_NODE, NodeId.BODY);
   }
 
-  createElement(tagName: string, props: object) : Element {
+  createElement(tagName: string) : Element {
     const ElementConstructor = ElementRegistry.get(tagName) || Element;
-    return new ElementConstructor(tagName, props);
+    return new ElementConstructor(tagName);
   }
 
   createTextNode(text: string) {
