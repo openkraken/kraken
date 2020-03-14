@@ -30,19 +30,5 @@ int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int sta
 
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);
-KRAKEN_EXPORT
-void registerDescribe(Describe describe);
-KRAKEN_EXPORT
-void registerIt(It it);
-KRAKEN_EXPORT
-void registerItDone(ItDone itDone);
-KRAKEN_EXPORT
-void registerBeforeEach(BeforeEach beforeEach);
-KRAKEN_EXPORT
-void registerBeforeAll(BeforeAll beforeAll);
-KRAKEN_EXPORT
-void registerAfterEach(AfterEach afterEach);
-KRAKEN_EXPORT
-void registerAfterAll(AfterAll afterAll);
 
 #endif
