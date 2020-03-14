@@ -12,31 +12,31 @@ mixin StyleOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  Style _style;
+  CSSStyleDeclaration _style;
 
-  RenderObject initOverflowBox(RenderObject current, Style style, void scrollListener(double scrollTop)) {
+  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     if (style != null) {
       _style = style;
       _child = current;
-      _renderObjectX = _getRenderObjectByOverflow(style.overflowX, current, AxisDirection.right, scrollListener);
+      _renderObjectX = _getRenderObjectByOverflow(style['overflowX'], current, AxisDirection.right, scrollListener);
 
-      _renderObjectY = _getRenderObjectByOverflow(style.overflowY, _renderObjectX, AxisDirection.down, scrollListener);
+      _renderObjectY = _getRenderObjectByOverflow(style['overflowY'], _renderObjectX, AxisDirection.down, scrollListener);
     }
     return _renderObjectY;
   }
 
-  void updateOverFlowBox(Style style, void scrollListener(double scrollTop)) {
+  void updateOverFlowBox(CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     if (style != null) {
       String oldOverflowY = null;
       if (_style != null) {
-        oldOverflowY = _style.overflowY;
+        oldOverflowY = _style['overflowY'];
       }
-      if (style.overflowY != oldOverflowY && _renderObjectY != null) {
+      if (style['overflowY'] != oldOverflowY && _renderObjectY != null) {
         AbstractNode parent = _renderObjectY.parent;
         AbstractNode childParent = _renderObjectX.parent;
         AxisDirection axisDirection = AxisDirection.down;
-        switch (style.overflowY) {
-          case Style.VISIBLE:
+        switch (style['overflowY']) {
+          case 'visible':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -47,8 +47,8 @@ mixin StyleOverflowMixin {
               _scrollableY = null;
             }
             break;
-          case Style.AUTO:
-          case Style.SCROLL:
+          case 'auto':
+          case 'scroll':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -57,7 +57,7 @@ mixin StyleOverflowMixin {
               parent.child = _renderObjectY = _scrollableY.getScrollableRenderObject(_renderObjectX);
             }
             break;
-          case Style.HIDDEN:
+          case 'hidden':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -72,14 +72,14 @@ mixin StyleOverflowMixin {
 
       String oldOverflowX = null;
       if (_style != null) {
-        oldOverflowX = _style.overflowX;
+        oldOverflowX = _style['overflowX'];
       }
-      if (style.overflowX != oldOverflowX && _renderObjectX != null) {
+      if (style['overflowX'] != oldOverflowX && _renderObjectX != null) {
         AbstractNode parent = _renderObjectX.parent;
         AbstractNode childParent = _child.parent;
         AxisDirection axisDirection = AxisDirection.right;
-        switch (style.overflowX) {
-          case Style.VISIBLE:
+        switch (style['overflowX']) {
+          case 'visible':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -89,8 +89,8 @@ mixin StyleOverflowMixin {
               _scrollableX = null;
             }
             break;
-          case Style.AUTO:
-          case Style.SCROLL:
+          case 'auto':
+          case 'scroll':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -99,7 +99,7 @@ mixin StyleOverflowMixin {
               parent.child = _renderObjectX = _scrollableX.getScrollableRenderObject(_child);
             }
             break;
-          case Style.HIDDEN:
+          case 'hidden':
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -118,7 +118,7 @@ mixin StyleOverflowMixin {
   RenderObject _getRenderObjectByOverflow(
       String overflow, RenderObject current, AxisDirection axisDirection, void scrollListener(double scrollTop)) {
     switch (overflow) {
-      case Style.VISIBLE:
+      case 'visible':
         if (axisDirection == AxisDirection.right) {
           _scrollableX = null;
         } else {
@@ -126,8 +126,8 @@ mixin StyleOverflowMixin {
         }
         current = OverflowCustomBox(child: current, textDirection: TextDirection.ltr, axisDirection: axisDirection);
         break;
-      case Style.AUTO:
-      case Style.SCROLL:
+      case 'auto':
+      case 'scroll':
         KrakenScrollable scrollable = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
         if (axisDirection == AxisDirection.right) {
           _scrollableX = scrollable;
@@ -136,7 +136,7 @@ mixin StyleOverflowMixin {
         }
         current = scrollable.getScrollableRenderObject(current);
         break;
-      case Style.HIDDEN:
+      case 'hidden':
         if (axisDirection == AxisDirection.right) {
           _scrollableX = null;
         } else {

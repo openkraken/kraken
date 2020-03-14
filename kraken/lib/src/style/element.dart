@@ -12,7 +12,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropWidth = 0;
     while (!isParentWithWidth) {
       if (childNode is Element) {
-        Style style = childNode.style;
+        CSSStyleDeclaration style = childNode.style;
         if (style.contains('width')) {
           isParentWithWidth = true;
           width = style['width'];
@@ -46,7 +46,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropHeight = 0;
     while (!isParentWithHeight) {
       if (childNode is Element) {
-        Style style = childNode.style;
+        CSSStyleDeclaration style = childNode.style;
         if (style.contains('height')) {
           isParentWithHeight = true;
           height = style['height'];
@@ -76,19 +76,17 @@ mixin ElementStyleMixin on RenderBox {
     double parentHeight;
     Element currentNode = nodeMap[nodeId];
     Element parentNode = currentNode.parent;
-    if (currentNode.style.get('height') != null) {
-    }
 
     if (parentNode != null && parentNode.style != null) {
-      Style parentStyle = parentNode.style;
-      Style currentStyle = currentNode.style;
+      CSSStyleDeclaration parentStyle = parentNode.style;
+      CSSStyleDeclaration currentStyle = currentNode.style;
 
-      String parentDisplay = parentStyle.get('display');
+      String parentDisplay = parentStyle['display'];
       bool isParentFlex = parentDisplay == 'flex' || parentDisplay == 'inline-flex';
 
       if (isParentFlex &&
           parentStyle['flexDirection'] == 'row' &&
-          currentStyle.get('height') == null &&
+          currentStyle.contains('height') &&
           parentStyle.contains('height') &&
           (!parentStyle.contains('alignItems') ||
               (parentStyle.contains('alignItems') &&
@@ -100,8 +98,8 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get height of current node
-  double getCurrentHeight(Style style) {
-    double height = Length.toDisplayPortValue(style.get('height'));
+  double getCurrentHeight(CSSStyleDeclaration style) {
+    double height = Length.toDisplayPortValue(style['height']);
     // minus padding
     Padding padding = baseGetPaddingFromStyle(style);
     return height - padding.top - padding.bottom;
@@ -116,7 +114,7 @@ mixin ElementStyleMixin on RenderBox {
 
     // Display as inline if parent node is flex and with align-items not stretch
     if (parentNode != null) {
-      Style style = parentNode.style;
+      CSSStyleDeclaration style = parentNode.style;
 
       bool isFlex = style['display'] == 'flex' || style['display'] == 'inline-flex';
 

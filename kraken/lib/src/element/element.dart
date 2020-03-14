@@ -53,33 +53,33 @@ abstract class Element extends Node
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
     setDefaultProps(properties);
     /// Element style render
-    _style = Style(properties[STYLE]);
-    _style.set('display', style.get('display') ?? defaultDisplay);
+    style = CSSStyleDeclaration(style: properties[STYLE]);
+    if (!style.contains('display')) style['display'] = defaultDisplay;
 
     // Mark element needs to reposition according to position CSS.
-    if (_isPositioned(_style)) needsReposition = true;
+    if (_isPositioned(style)) needsReposition = true;
 
     if (allowChildren) {
       renderObject =
-          renderLayoutElement = createRenderLayoutElement(_style, null);
+          renderLayoutElement = createRenderLayoutElement(style, null);
     }
 
     // padding
-    renderObject = renderPadding = initRenderPadding(renderObject, _style);
+    renderObject = renderPadding = initRenderPadding(renderObject, style);
     // background image
-    if (_style.backgroundAttachment == 'local' &&
-        _style.backgroundImage != null) {
-      renderObject = initBackgroundImage(renderObject, _style, nodeId);
+    if (style['backgroundAttachment'] == 'local' &&
+        style.contains('backgroundImage') != null) {
+      renderObject = initBackgroundImage(renderObject, style, nodeId);
     }
     // overflow
     if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
+      renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
     // constrained box
     renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
     // position
-    if (_style.position != 'static') {
+    if (style.contains('position') && style['position'] != 'static') {
       renderObject = renderStack = RenderPosition(
         textDirection: TextDirection.ltr,
         fit: StackFit.passthrough,
@@ -88,7 +88,7 @@ abstract class Element extends Node
       );
     }
     // border
-    renderObject = initRenderDecoratedBox(renderObject, _style, this);
+    renderObject = initRenderDecoratedBox(renderObject, style, this);
 
     // Pointer event listener
     renderObject = RenderPointerListener(
@@ -104,7 +104,7 @@ abstract class Element extends Node
     renderObject = renderIntersectionObserver =
         RenderIntersectionObserver(child: renderObject);
     // opacity
-    renderObject = initRenderOpacity(renderObject, _style);
+    renderObject = initRenderOpacity(renderObject, style);
 
     // transition
     initTransition(style);
@@ -114,7 +114,7 @@ abstract class Element extends Node
         renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // Margin
-    renderObject = initRenderMargin(renderObject, _style, this);
+    renderObject = initRenderMargin(renderObject, style, this);
 
     // The layout boundary of element.
     renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
@@ -206,11 +206,11 @@ abstract class Element extends Node
         el.offsetTop = offsetTop;
       }
 
-      if (elStyle.get('top') != null) {
-        double top = baseGetDisplayPortedLength(elStyle.get('top'));
+      if (elStyle.contains('top')) {
+        double top = baseGetDisplayPortedLength(elStyle['top']);
         isFixed = el.offsetTop - scrollTop <= top;
-      } else if (elStyle.get('bottom') != null) {
-        double bottom = baseGetDisplayPortedLength(elStyle.get('bottom'));
+      } else if (elStyle.contains('bottom')) {
+        double bottom = baseGetDisplayPortedLength(elStyle['bottom']);
         double viewPortHeight = renderMargin?.size?.height;
         double elViewPortTop = el.offsetTop - scrollTop;
         isFixed = viewPortHeight - elViewPortTop <= bottom;
@@ -232,9 +232,9 @@ abstract class Element extends Node
     });
   }
 
-  void updatePosition(Style newStyle) {
+  void updatePosition(CSSStyleDeclaration newStyle) {
     // remove stack node when change to non positioned
-    if (newStyle.position == 'static') {
+    if (!newStyle.contains('position') || newStyle['position'] == 'static') {
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
       (renderStack.parent as RenderDecoratedBox).child = child;
@@ -256,16 +256,17 @@ abstract class Element extends Node
     }
 
     // move element back to document flow
-    if (newStyle.position == 'static' ||
-        newStyle.position == 'relative' ||
-        (newStyle.position == 'sticky' && !stickyFixed)) {
+    if (newStyle['position'] == '' ||
+        newStyle['position'] == 'static' ||
+        newStyle['position'] == 'relative' ||
+        (newStyle['position'] == 'sticky' && !stickyFixed)) {
       // move element back to document flow
-      if (style.position == 'absolute' ||
-          style.position == 'fixed' ||
-          (style.position == 'sticky' && stickyFixed)) {
+      if (style['position'] == 'absolute' ||
+          style['position'] == 'fixed' ||
+          (style['position'] == 'sticky' && stickyFixed)) {
         Element parentElementWithStack;
         // find positioned element to remove
-        if (style.position == 'absolute') {
+        if (style['position'] == 'absolute') {
           parentElementWithStack = findParent(this, (element) => element.renderStack != null);
         } else {
           parentElementWithStack = ElementManager().getRootElement();
@@ -273,7 +274,7 @@ abstract class Element extends Node
         parentElementWithStack.renderStack.remove(renderElementBoundary);
 
         // remove sticky placeholder
-        if (style.position == 'sticky') {
+        if (style['position'] == 'sticky') {
           removeStickyPlaceholder();
         }
         // find pre non positioned element
@@ -283,11 +284,8 @@ abstract class Element extends Node
         int curIdx = parentElement.childNodes.indexOf(currentElement);
         for (int i = curIdx - 1; i > -1; i--) {
           var element = parentElement.childNodes[i];
-          var style = element.properties['style'];
-          if (style == null ||
-              !style.containsKey('position') ||
-              (style.containsKey('position') &&
-                  style['position'] == 'static')) {
+          CSSStyleDeclaration style = element.style;
+          if (!style.contains('position') || style['position'] == 'static') {
             preNonPositionedElement = element;
             break;
           }
@@ -331,7 +329,7 @@ abstract class Element extends Node
   }
 
   void insertStickyPlaceholder() {
-    Style pStyle = Style({
+    CSSStyleDeclaration pStyle = CSSStyleDeclaration(style: {
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
     });
@@ -431,32 +429,32 @@ abstract class Element extends Node
 
       if (transitionMap != null) {
         allTransition = transitionMap["all"];
-        if (style.top != _style.top) {
+        if (style['top'] != _style['top']) {
           topTransition = transitionMap["top"];
-          topDiff = (style.top ?? 0) - (_style.top ?? 0);
-          topBase = _style.top ?? 0;
+          topDiff = Length.toDisplayPortValue(style['top']) - (_style['top'] ?? 0);
+          topBase = _style['top'] ?? 0;
         }
-        if (style.left != _style.left) {
+        if (style['left'] != _style['left']) {
           leftTransition = transitionMap["left"];
           leftDiff = (style.left ?? 0) - (_style.left ?? 0);
           leftBase = _style.left ?? 0;
         }
-        if (style.right != _style.right) {
+        if (style['right'] != _style['right']) {
           rightTransition = transitionMap["right"];
           rightDiff = (style.right ?? 0) - (_style.left ?? 0);
           rightBase = _style.right ?? 0;
         }
-        if (style.bottom != _style.bottom) {
+        if (style['bottom'] != _style['bottom']) {
           bottomTransition = transitionMap["bottom"];
           bottomDiff = (style.bottom ?? 0) - (_style.bottom ?? 0);
           bottomBase = _style.bottom ?? 0;
         }
-        if (style.width != _style.width) {
+        if (style['width'] != _style['width']) {
           widthTransition = transitionMap["width"];
           widthDiff = (style.width ?? 0) - (_style.width ?? 0);
           widthBase = _style.bottom ?? 0;
         }
-        if (style.height != _style.height) {
+        if (style['height'] != _style['height']) {
           heightTransition = transitionMap["height"];
           heightDiff = (style.height ?? 0) - (_style.height ?? 0);
           heightBase = _style.height ?? 0;
@@ -840,7 +838,7 @@ abstract class Element extends Node
         if (parentStackedElement != null) {
           RenderObject renderBoxToBeStacked = getStackedRenderBox(child);
           insertByZIndex(parentStackedElement.renderStack, renderBoxToBeStacked,
-              child, childStyle.zIndex);
+              child, int.parse(childStyle['zIndex']));
           return;
         }
       } else if (childPosition == 'fixed') {
@@ -849,7 +847,7 @@ abstract class Element extends Node
         if (rootRenderStack != null) {
           RenderBox stackedRenderBox = getStackedRenderBox(child);
           insertByZIndex(
-              rootRenderStack, stackedRenderBox, child, childStyle.zIndex);
+              rootRenderStack, stackedRenderBox, child, int.parse(childStyle['zIndex']));
           return;
         }
 
@@ -881,10 +879,9 @@ abstract class Element extends Node
         renderObject.markNeedsLayout();
       }
 
-      // @TODO move to connected callback instead use of timer
-      Timer(Duration(milliseconds: 0), () {
-        // Trigger sticky update logic after node is connected
-        if (childStyle.get('position') == 'sticky') {
+      // Trigger sticky update logic after node is connected
+      queueAfterConnected(() {
+        if (childStyle['position'] == 'sticky') {
           _updateStickyPosition(0);
         }
       });
@@ -1294,12 +1291,12 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
       eventHandlers.containsKey('intersectionchange');
 }
 
-bool _isPositioned(Style style) {
-  return style.contains('position') && style.position == 'absolute' ||
-      style.position == 'fixed';
+bool _isPositioned(CSSStyleDeclaration style) {
+  return style.contains('position') && style['position'] == 'absolute' ||
+      style['position'] == 'fixed';
 }
 
-bool _isSticky(Style style) {
-  return style.position == 'sticky' && style.top != null ||
-      style.bottom != null;
+bool _isSticky(CSSStyleDeclaration style) {
+  return style['position'] == 'sticky' && style.contains('top') ||
+      style.contains('bottom');
 }

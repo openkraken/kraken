@@ -117,7 +117,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   // Element style;
-  Style style;
+  CSSStyleDeclaration style;
 
   // id of current element
   int nodeId;
@@ -491,7 +491,7 @@ class RenderFlexLayout extends RenderBox
       String flexBasis = _getFlexBasis(child);
 
       if (_direction == Axis.horizontal) {
-        String width = child.style.get('width');
+        String width = child.style['width'];
         if (flexBasis == 'auto') {
           if (width != null) {
             minConstraints = Length.toDisplayPortValue(width);
@@ -502,7 +502,7 @@ class RenderFlexLayout extends RenderBox
           minConstraints = Length.toDisplayPortValue(flexBasis);
         }
       } else {
-        String height = child.style.get('height');
+        String height = child.style['height'];
         if (flexBasis == 'auto') {
           if (height != null) {
             minConstraints = Length.toDisplayPortValue(height);
@@ -559,7 +559,7 @@ class RenderFlexLayout extends RenderBox
     }
 
     double maxHeight = 0;
-    if (style.get('height') != null) {
+    if (style.contains('height')) {
       double height = getCurrentHeight(style);
       if (height != null) {
         maxHeight = height;
@@ -568,8 +568,8 @@ class RenderFlexLayout extends RenderBox
       double parentHeight = getStretchParentHeight(nodeId);
       if (parentHeight != null) {
         maxHeight = parentHeight;
-      } else if (style.height != null) {
-        maxHeight = style.height;
+      } else if (style.contains('height')) {
+        maxHeight = Length.toDisplayPortValue(style['height']);
       }
     }
 
@@ -832,7 +832,7 @@ class RenderFlexLayout extends RenderBox
     double actualSize;
     double actualSizeDelta;
     double constraintWidth = idealSize;
-    String display = style.get('display');
+    String display = style['display'];
     bool isInline = isElementInline(display, nodeId);
     if (!isInline) {
       if (constraints.maxWidth != double.infinity) {
@@ -845,8 +845,8 @@ class RenderFlexLayout extends RenderBox
 
     double constraintHeight =
         _direction == Axis.horizontal ? crossSize : idealSize;
-    if (style.get('height') != null) {
-      double height = Length.toDisplayPortValue(style.get('height'));
+    if (style.contains('height')) {
+      double height = Length.toDisplayPortValue(style['height']);
       if (height != null) {
         constraintHeight = math.max(height, constraintHeight);
       }
@@ -955,7 +955,7 @@ class RenderFlexLayout extends RenderBox
           break;
       }
 
-      Style childStyle;
+      CSSStyleDeclaration childStyle;
       if (child is RenderTextBox) {
         childStyle = nodeMap[nodeId].style;
       } else if (child is RenderElementBoundary) {

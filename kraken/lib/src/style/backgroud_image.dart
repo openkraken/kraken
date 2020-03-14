@@ -13,11 +13,11 @@ import 'package:kraken/style.dart';
 mixin BackgroundImageMixin {
 
   double linearAngle;
-  RenderObject initBackgroundImage(RenderObject renderObject, Style style, int nodeId) {
+  RenderObject initBackgroundImage(RenderObject renderObject, CSSStyleDeclaration style, int nodeId) {
     DecorationImage decorationImage;
     Gradient gradient;
     if (style.contains("backgroundImage")) {
-      List<Method> methods = Method.parseMethod(style.backgroundImage);
+      List<Method> methods = Method.parseMethod(style['backgroundImage']);
       //FIXME flutter just support one property
       for (Method method in methods) {
         if (method.name == 'url') {
@@ -37,7 +37,7 @@ mixin BackgroundImageMixin {
         child: renderObject);
   }
 
-  DecorationImage getBackgroundImage(String url, Style style) {
+  DecorationImage getBackgroundImage(String url, CSSStyleDeclaration style) {
     DecorationImage backgroundImage = null;
     if (style.contains('backgroundImage')) {
       ImageRepeat imageRepeat = ImageRepeat.noRepeat;
@@ -88,7 +88,7 @@ mixin BackgroundImageMixin {
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method, Style style) {
+  Gradient getBackgroundGradient(Method method, CSSStyleDeclaration style) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];

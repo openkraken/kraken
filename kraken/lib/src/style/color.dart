@@ -9,7 +9,7 @@ import 'package:kraken/style.dart';
 mixin ColorMixin on Node {
   RenderOpacity renderOpacity;
 
-  RenderObject initRenderOpacity(RenderObject renderObject, Style style) {
+  RenderObject initRenderOpacity(RenderObject renderObject, CSSStyleDeclaration style) {
     bool existsOpacity = style.contains('opacity');
     bool invisible = style['visibility'] == 'hidden';
     if (existsOpacity || invisible) {
@@ -34,7 +34,7 @@ mixin ColorMixin on Node {
     }
   }
 
-  void updateRenderOpacity(Style style, Style newStyle,
+  void updateRenderOpacity(CSSStyleDeclaration style, CSSStyleDeclaration newStyle,
       {RenderObjectWithChildMixin parentRenderObject}) {
 
     String oldVisibility = style['visibility'] ?? 'visible';

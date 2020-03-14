@@ -21,7 +21,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   Padding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
-      RenderObject renderObject, Style style, Element element) {
+      RenderObject renderObject, CSSStyleDeclaration style, Element element) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
     if (element != null) {
@@ -43,7 +43,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   void updateRenderDecoratedBox(
-      Style style, Element element, Map<String, Transition> transitionMap) {
+      CSSStyleDeclaration style, Element element, Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition allTransition = transitionMap['all'];
@@ -438,13 +438,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  TransitionDecoration getTransitionDecoration(Style style) {
+  TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     BorderRadius borderRadius = getBorderRadius(style);
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style.backgroundAttachment == 'scroll' &&
+    if (style['backgroundAttachment'] == 'scroll' &&
         style.contains("backgroundImage")) {
-      List<Method> methods = Method.parseMethod(style.backgroundImage);
+      List<Method> methods = Method.parseMethod(style['backgroundImage']);
       for (Method method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : "";
@@ -492,7 +492,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
 
   /// Tip: inset not supported.
   static RegExp commaRegExp = RegExp(r',');
-  List<BoxShadow> getBoxShadow(Style style) {
+  List<BoxShadow> getBoxShadow(CSSStyleDeclaration style) {
     List<BoxShadow> boxShadow = [];
     if (style.contains('boxShadow')) {
       String processedValue =
@@ -531,7 +531,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     'BottomLeft',
     'BottomRight'
   ];
-  BorderRadiusGeometry getBorderRadius(Style style) {
+  BorderRadiusGeometry getBorderRadius(CSSStyleDeclaration style) {
     List<Radius> borderRadiusTLTRBLBR = [
       Radius.zero,
       Radius.zero,
@@ -563,7 +563,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     );
   }
 
-  Color getBackgroundColor(Style style) {
+  Color getBackgroundColor(CSSStyleDeclaration style) {
     Color backgroundColor = WebColor.transparent;
     if (style.contains('backgroundColor')) {
       backgroundColor = WebColor.generate(style['backgroundColor']);
@@ -611,7 +611,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   TransitionBorderSide getBorderSideByStyle(
-      Style style, String side, TransitionBorderSide borderSide) {
+      CSSStyleDeclaration style, String side, TransitionBorderSide borderSide) {
     if (style.contains('border' + side)) {
       borderSide = getBorderSide(style['border' + side] ?? '');
     }

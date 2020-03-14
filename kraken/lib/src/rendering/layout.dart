@@ -56,7 +56,7 @@ class RenderFlowLayout extends RenderBox
   }
 
   // Element style;
-  Style style;
+  CSSStyleDeclaration style;
 
   // id of current element
   int nodeId;
@@ -500,7 +500,7 @@ class RenderFlowLayout extends RenderBox
     RenderBox child = firstChild;
     if (child == null) {
       double constraintWidth = 0;
-      String display = style.get('display');
+      String display = style['display'];
       bool isInline = isElementInline(display, nodeId);
       if (!isInline) {
         if (constraints.maxWidth != double.infinity) {
@@ -515,7 +515,7 @@ class RenderFlowLayout extends RenderBox
       if (parentHeight != null) {
         constraintHeight = parentHeight;
       } else if (!isInline) {
-        if (style.get('height') != null) {
+        if (style.contains('height')) {
           double height = getCurrentHeight(style);
           if (height != null) {
             constraintHeight = height;
@@ -609,7 +609,7 @@ class RenderFlowLayout extends RenderBox
     double containerCrossAxisExtent = 0.0;
 
     double constraintWidth = mainAxisExtent;
-    String display = style.get('display');
+    String display = style['display'];
     bool isInline = isElementInline(display, nodeId);
     if (!isInline) {
       if (constraints.maxWidth != double.infinity) {
@@ -628,7 +628,7 @@ class RenderFlowLayout extends RenderBox
       constraintHeight = math.max(parentHeight, constraintHeight);
     } else if (!isInline) {
       // Use container height as constraints if exists
-      if (style.get('height') != null) {
+      if (style.contains('height')) {
         double height = getCurrentHeight(style);
         if (height != null) {
           constraintHeight = math.max(height, constraintHeight);
@@ -638,7 +638,7 @@ class RenderFlowLayout extends RenderBox
 
     // get container height
     double containerHeight = crossAxisExtent;
-    double containerParentHeight = style.height;
+    double containerParentHeight = Length.toDisplayPortValue(style['height']);
     if (containerParentHeight != null) {
       containerHeight = containerParentHeight;
     }
@@ -743,7 +743,7 @@ class RenderFlowLayout extends RenderBox
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
-        Style childStyle;
+        CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
           childStyle = nodeMap[nodeId].style;
         } else if (child is RenderElementBoundary) {
@@ -773,7 +773,7 @@ class RenderFlowLayout extends RenderBox
       displayType = child.style['display'];
 
       String display = style['display'];
-      String flexWrap = style.get('flexWrap');
+      String flexWrap = style['flexWrap'];
       if ((display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap') {
         displayType = 'inline';
       }

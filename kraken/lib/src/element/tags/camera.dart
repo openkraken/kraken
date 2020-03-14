@@ -129,7 +129,7 @@ class CameraElement extends Element with CameraPreviewMixin {
   RenderBox buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(Style(null)).copyWith(backgroundColor: WebColor.white);
+    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: WebColor.white);
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),

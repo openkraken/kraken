@@ -5,7 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'style.dart';
+import 'css_style_declaration.dart';
 
 class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
   /// Flex grow
@@ -42,7 +42,7 @@ mixin FlexMixin {
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
-  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, Style style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -92,7 +92,7 @@ mixin FlexMixin {
     }
   }
 
-  MainAxisAlignment _getJustifyContent(Style style, Axis axis) {
+  MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style, Axis axis) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
     if (style.contains(TEXT_ALIGN) && axis == Axis.horizontal) {
@@ -127,7 +127,7 @@ mixin FlexMixin {
     return mainAxisAlignment;
   }
 
-  CrossAxisAlignment _getAlignItems(Style style, Axis axis) {
+  CrossAxisAlignment _getAlignItems(CSSStyleDeclaration style, Axis axis) {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch;
     if (style.contains(TEXT_ALIGN) && axis == Axis.vertical) {
       String textAlign = style[TEXT_ALIGN];
@@ -167,7 +167,7 @@ class FlexItem {
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
 
-  static KrakenFlexParentData getParentData(Style style) {
+  static KrakenFlexParentData getParentData(CSSStyleDeclaration style) {
     KrakenFlexParentData parentData = KrakenFlexParentData();
     parentData.flexGrow = 0;
     parentData.flexShrink = 1;

@@ -23,7 +23,7 @@ List<String> baseGetShorttedProperties(String input) {
   return input.trim().split(spaceRegExp);
 }
 
-Padding baseGetPaddingFromStyle(Style style) {
+Padding baseGetPaddingFromStyle(CSSStyleDeclaration style) {
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -98,7 +98,7 @@ mixin DimensionMixin {
     return baseGetDisplayPortedLength(input);
   }
 
-  void updateConstraints(Style style, Map<String, Transition> transitionMap) {
+  void updateConstraints(CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
     if (renderConstrainedBox != null && style != null) {
       Transition allTransition,
           widthTransition,
@@ -224,7 +224,7 @@ mixin DimensionMixin {
             newConstraints.toBoxConstraints();
       }
 
-      String display = style.get('display');
+      String display = style['display'];
       // Remove inline element dimension
       if (display == 'inline') {
         renderConstrainedBox.additionalConstraints = BoxConstraints();
@@ -235,7 +235,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderConstrainedBox(
-      RenderObject renderObject, Style style) {
+      RenderObject renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       oldConstraints = _getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
@@ -247,7 +247,7 @@ mixin DimensionMixin {
     }
   }
 
-  SizeConstraints _getConstraints(Style style) {
+  SizeConstraints _getConstraints(CSSStyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -268,7 +268,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, Style style, Element element) {
+      RenderObject renderObject, CSSStyleDeclaration style, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     if (element != null) {
       element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
@@ -280,7 +280,7 @@ mixin DimensionMixin {
     );
   }
 
-  Padding getMarginFromStyle(Style style) {
+  Padding getMarginFromStyle(CSSStyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double right = 0.0;
@@ -336,13 +336,13 @@ mixin DimensionMixin {
     return Padding(left, top, right, bottom);
   }
 
-  EdgeInsets getMarginInsetsFromStyle(Style style) {
+  EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
     oldMargin = getMarginFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(Style style, Element element,
+  void updateRenderMargin(CSSStyleDeclaration style, Element element,
       [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
@@ -461,23 +461,23 @@ mixin DimensionMixin {
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, Style style) {
+  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  Padding getPaddingFromStyle(Style style) {
+  Padding getPaddingFromStyle(CSSStyleDeclaration style) {
     return baseGetPaddingFromStyle(style);
   }
 
-  EdgeInsets getPaddingInsetsFromStyle(Style style) {
+  EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
     oldPadding = getPaddingFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(Style style,
+  void updateRenderPadding(CSSStyleDeclaration style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
     Transition all,

@@ -78,5 +78,15 @@ class CSSStyleDeclaration {
     return value != null && value.isNotEmpty;
   }
 
+  CSSStyleDeclaration copyWith(Map<String, String> override) {
+    Map<String, dynamic> mergedProperties = {};
+    var copy = (key, value) {
+      mergedProperties[key] = value;
+    };
+    this._cssProperties.forEach(copy);
+    override?.forEach(copy);
+    return CSSStyleDeclaration(style: mergedProperties);
+  }
+
   String toString() => cssText;
 }

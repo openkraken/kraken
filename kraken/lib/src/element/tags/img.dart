@@ -106,13 +106,13 @@ class ImgElement extends Element {
     renderConstrainedBox.additionalConstraints = constraints;
   }
 
-  BoxConstraints getBoxConstraintsFromStyle(Style style) {
+  BoxConstraints getBoxConstraintsFromStyle(CSSStyleDeclaration style) {
     double width = getDisplayPortedLength(style['width']);
     double height = getDisplayPortedLength(style['height']);
     return BoxConstraints.tightFor(width: width, height: height);
   }
 
-  BoxFit _getBoxFit(Style style) {
+  BoxFit _getBoxFit(CSSStyleDeclaration style) {
     String fit = style['objectFit'];
     switch (fit) {
       case 'contain':
@@ -142,7 +142,7 @@ class ImgElement extends Element {
     }
   }
 
-  RenderDecoratedBox getRenderDecoratedBox(Style style, ImageProvider image) {
+  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     return RenderDecoratedBox(
       decoration: BoxDecoration(
