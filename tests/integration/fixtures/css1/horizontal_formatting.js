@@ -20,7 +20,7 @@ it('Horizontal Formatting', () => {
   ruleImg.setAttribute('src', 'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_pixel_ruler.gif');
   
   setStyle(ruleImg, {
-    width: '641ox',
+    width: '641px',
     height: '20px'
   });
   
@@ -54,7 +54,7 @@ it('Horizontal Formatting', () => {
   
   ruleImg2.setAttribute('src', 'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_description.gif');
   setStyle(ruleImg2, {
-    width: '640ox',
+    width: '640px',
     height: '64px'
   });
   

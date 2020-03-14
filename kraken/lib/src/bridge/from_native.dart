@@ -30,6 +30,7 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeUIManager>>('registerInvokeUIManager').asFunction();
 
 const String BATCH_UPDATE = 'batchUpdate';
+const String EMPTY_STRING = '';
 
 String handleAction(List directive) {
   String action = directive[0];
@@ -38,13 +39,12 @@ String handleAction(List directive) {
   var result;
   try {
     result = ElementManager.applyAction(action, payload);
-  } catch (error, stackTrace) {
-    print(error);
-    print(stackTrace);
+  } catch (e, stack) {
+    print('Dart Error: $e\n$stack');
   }
 
   if (result == null) {
-    return '';
+    return EMPTY_STRING;
   }
 
   switch (result.runtimeType) {
@@ -62,9 +62,12 @@ String invokeUIManager(String json) {
   dynamic directive;
   try {
     directive = jsonDecode(json);
-  } catch(e) {
-    print(e);
-    return '';
+  } catch (e, stack) {
+    print('Dart Error: $e\n$stack');
+  }
+
+  if (directive == null) {
+    return EMPTY_STRING;
   }
 
   if (directive[0] == BATCH_UPDATE) {
@@ -73,7 +76,7 @@ String invokeUIManager(String json) {
     for (dynamic item in directiveList) {
       result.add(handleAction(item as List));
     }
-    return '';
+    return EMPTY_STRING;
   } else {
     return handleAction(directive);
   }
@@ -104,7 +107,7 @@ final Dart_RegisterInvokeModule _registerInvokeModule =
 String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void> context) {
   dynamic args = jsonDecode(json);
   String module = args[0];
-  String result = '';
+  String result = EMPTY_STRING;
   if (module == 'Connection') {
     String method = args[1];
     if (method == 'getConnectivity') {
@@ -244,8 +247,8 @@ final Dart_RegisterReloadApp _registerReloadApp =
 void _reloadApp() {
   try {
     reloadApp();
-  } catch (err, stack) {
-    print('$err\n$stack');
+  } catch (e, stack) {
+    print('Dart Error: $e\n$stack');
   }
 }
 
@@ -274,7 +277,7 @@ void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, 
       DartAsyncCallback func = callback.asFunction();
       func(context);
     } catch (e, stack) {
-      print('Dart Error: $e \n $stack');
+      print('Dart Error: $e\n$stack');
     }
   });
 }
@@ -298,7 +301,7 @@ int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<V
       DartAsyncCallback func = callback.asFunction();
       func(context);
     } catch (e, stack) {
-      print('Dart Error: $e \n $stack');
+      print('Dart Error: $e\n$stack');
     }
   });
 }
@@ -323,7 +326,7 @@ int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<
       DartAsyncCallback func = callback.asFunction();
       func(context);
     } catch (e, stack) {
-      print('Dart Error: $e \n $stack');
+      print('Dart Error: $e\n$stack');
     }
   });
 }
@@ -366,7 +369,7 @@ int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callb
       DartRAFAsyncCallback func = callback.asFunction();
       func(context, highResTimeStamp);
     } catch (e, stack) {
-      print('Dart Error: $e \n $stack');
+      print('Dart Error: $e\n$stack');
     }
   });
 }
@@ -534,7 +537,7 @@ void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<
   DartAsyncBlobCallback func = callback.asFunction();
   try {
     if (!nodeMap.containsKey(id)) {
-      Pointer<Utf8> msg = Utf8.toUtf8("toBlob: unknown node id: $id");
+      Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unknown node id: $id');
       func(context, msg, nullptr, -1);
       return;
     }
@@ -547,16 +550,16 @@ void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<
         byteList.setAll(0, bytes);
         func(context, nullptr, bytePtr, bytes.length);
       }).catchError((e, stack) {
-        Pointer<Utf8> msg = Utf8.toUtf8("toBlob: failed to export image data from element id: $id. error: $e}.\n stack: $stack");
+        Pointer<Utf8> msg = Utf8.toUtf8('toBlob: failed to export image data from element id: $id. error: $e}.\n$stack');
         func(context, msg, nullptr, -1);
       });
     } else {
-      Pointer<Utf8> msg = Utf8.toUtf8("toBlob: node is not an element, id: $id");
+      Pointer<Utf8> msg = Utf8.toUtf8('toBlob: node is not an element, id: $id');
       func(context, msg, nullptr, -1);
       return;
     }
   } catch (e, stack) {
-    Pointer<Utf8> msg = Utf8.toUtf8("toBlob: unexpected error: $e\n stack: $stack");
+    Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unexpected error: $e\n$stack');
     func(context, msg, nullptr, -1);
   }
 }
