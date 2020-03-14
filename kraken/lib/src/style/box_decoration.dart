@@ -608,15 +608,15 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   TransitionBorderSide getBorderSideByStyle(Style style, String side) {
     TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, 0, defaultBorderStyle);
     final String borderName = 'border';
-    final String borderSideName = borderName + side;
+    final String borderSideName = borderName + side; // eg. borderLeft/borderRight
     // Same with the key in shortted info map
     final String widthName = 'Width';
     final String styleName = 'Style';
     final String colorName = 'Color';
     Map borderShorttedInfo;
     Map borderSideShorttedInfo;
-    if (style.contains('border') &&  (style['border'] as String).isNotEmpty){
-      borderShorttedInfo = _getShorttedInfoFromString(style['border']);
+    if (style.contains(borderName) &&  (style[borderName] as String).isNotEmpty){
+      borderShorttedInfo = _getShorttedInfoFromString(style[borderName]);
     }
     
     if (style.contains(borderSideName) && (style[borderSideName] as String).isNotEmpty) {
@@ -630,12 +630,12 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       (style[borderSideWidthName] as String).isNotEmpty) { 
       borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
-      borderSide.borderStyle = borderSideShorttedInfo[widthName];
+      borderSide.borderWidth = borderSideShorttedInfo[widthName];
     } else if (style.contains(borderWidthName) &&
       (style[borderWidthName] as String).isNotEmpty) { 
       borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
-      borderSide.borderStyle = borderShorttedInfo[widthName];
+      borderSide.borderWidth = borderShorttedInfo[widthName];
     } 
 
     // Set border style
