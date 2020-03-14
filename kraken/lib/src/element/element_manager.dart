@@ -191,14 +191,13 @@ class ElementManagerActionDelegate {
     target.removeEvent(eventName);
   }
 
-  dynamic method(int targetId, String method, dynamic args) {
+  method(int targetId, String method, dynamic args) {
     assert(nodeMap.containsKey(targetId));
 
     Element target = nodeMap[targetId];
     assert(target != null);
     assert(target.method != null);
-    dynamic res = target.method(method, args);
-    return res;
+    return target.method(method, args);
   }
 }
 
@@ -265,7 +264,7 @@ class ElementManager {
     _managerSingleton = ElementManager._();
   }
 
-  static dynamic applyAction(String action, List payload) {
+  static applyAction(String action, List payload) {
     var returnValue;
 
     switch (action) {
