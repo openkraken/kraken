@@ -12,8 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
@@ -1121,21 +1123,26 @@ abstract class Element extends Node
     }
   }
 
-  Map<String, double> getBoundingClientRect() {
-    Map<String, double> rect = {};
-    if (renderBorderMargin.hasSize) {
-      Offset offset = getOffset(renderBorderMargin);
-      Size size = renderBorderMargin.size;
-      rect['x'] = offset.dx;
-      rect['y'] = offset.dy;
-      rect['width'] = size.width;
-      rect['height'] = size.height;
-      rect['top'] = offset.dy;
-      rect['left'] = offset.dx;
-      rect['right'] = offset.dx + size.width;
-      rect['bottom'] = offset.dy + size.height;
-    }
-    return rect;
+  String getBoundingClientRect() {
+    Map<String, double> boundingClientRect = {};
+
+    // Force flush layout.
+    renderBorderMargin.markNeedsLayout();
+    renderBorderMargin.owner.flushLayout();
+
+    Offset offset = getOffset(renderBorderMargin);
+    Size size = renderBorderMargin.size;
+    boundingClientRect['x'] = offset.dx;
+    boundingClientRect['y'] = offset.dy;
+    boundingClientRect['width'] = size.width;
+    boundingClientRect['height'] = size.height;
+    boundingClientRect['top'] = offset.dy;
+    boundingClientRect['left'] = offset.dx;
+    boundingClientRect['right'] = offset.dx + size.width;
+    boundingClientRect['bottom'] = offset.dy + size.height;
+
+    print(boundingClientRect);
+    return jsonEncode(boundingClientRect);
   }
 
   double getOffsetX() {
@@ -1192,17 +1199,35 @@ abstract class Element extends Node
   }
 
   void click() {
-    final RenderBox box = renderObject as RenderBox;
-    // Click at the center of the element
-    Offset position = box.localToGlobal(box.size.center(Offset.zero));
-    PointerEvent downEvent = PointerDownEvent(position: position);
+    Event clickEvent = Event('click', EventInit());
 
-    final HitTestResult hitTestResult = HitTestResult();
-    GestureBinding.instance.hitTest(hitTestResult, position);
-    GestureBinding.instance.dispatchEvent(downEvent, hitTestResult);
+    if (isConnected) {
+      final RenderBox box = renderElementBoundary;
+      // Must flush every times, or child may has no size.
+      box.markNeedsLayout();
+      box.owner.flushLayout();
 
-    PointerEvent upEvent = PointerUpEvent(position: position);
-    GestureBinding.instance.dispatchEvent(upEvent, hitTestResult);
+      // Position the center of element.
+      Offset position = box.localToGlobal(box.size.center(Offset.zero));
+      final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
+      GestureBinding.instance.hitTest(boxHitTestResult, position);
+      bool hitTest = true;
+      Element currentElement = this;
+      while (hitTest) {
+        currentElement.handleClick(clickEvent);
+        if (currentElement.parent != null) {
+          currentElement = currentElement.parent;
+          hitTest = currentElement
+              .renderElementBoundary
+              .hitTest(boxHitTestResult, position: position);
+        } else {
+          hitTest = false;
+        }
+      }
+    } else {
+      // If element not in tree, click is fired and only response to itself.
+      handleClick(clickEvent);
+    }
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {

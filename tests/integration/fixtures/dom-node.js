@@ -23,8 +23,8 @@ it('DOM Node', () => {
 
   const child_1 = document.createTextNode('second child');
   el.appendChild(child_1);
-  assert(child_1.previousSibling === child0);
-  assert(child_0.nextSibling === child1);
+  assert(child_1.previousSibling === child_0);
+  assert(child_0.nextSibling === child_1);
 
   el.removeChild(child_0);
   const child_2 = document.createTextNode('third child');
