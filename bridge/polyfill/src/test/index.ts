@@ -1,4 +1,4 @@
-import assert from 'assert';
+import expect from 'expect';
 
 type It = (name: string, fn: (done: (status?: any) => void) => any) => {};
 
@@ -23,9 +23,9 @@ Object.defineProperty(global, 'it', {
   value: it
 });
 
-Object.defineProperty(global, 'assert', {
+Object.defineProperty(global, 'expect', {
   configurable: false,
   enumerable: true,
   writable: false,
-  value: assert
+  value: expect
 });
