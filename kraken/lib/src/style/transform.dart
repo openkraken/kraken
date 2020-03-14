@@ -7,12 +7,12 @@ mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
-  RenderObject initTransform(RenderObject current, Style style, int nodeId) {
-    if (style?.transform != null) {
-      List<Method> methods = Method.parseMethod(style.transform);
+  RenderObject initTransform(RenderObject current, CSSStyleDeclaration style, int nodeId) {
+    if (style.contains('transform')) {
+      List<Method> methods = Method.parseMethod(style['transform']);
       matrix4 = combineTransform(methods) ?? matrix4;
     }
-    Offset offset = parseOrigin(style?.transformOrigin);
+    Offset offset = parseOrigin(style['transformOrigin']);
     transform = RenderElementBoundary(
         child: current,
         transform: matrix4,
@@ -22,18 +22,18 @@ mixin TransformStyleMixin {
     return transform;
   }
 
-  void updateTransform(Style style, [Map<String, Transition> transitionMap]) {
-    Offset offset = parseOrigin(style?.transformOrigin);
+  void updateTransform(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
+    Offset offset = parseOrigin(style['transformOrigin']);
     transform.origin = offset;
     Matrix4 newMatrix4;
-    if (style?.transform != null) {
-      List<Method> methods = Method.parseMethod(style.transform);
+    if (style.contains('transform')) {
+      List<Method> methods = Method.parseMethod(style['transform']);
       newMatrix4 = combineTransform(methods);
     }
     if (newMatrix4 != null) {
       if (transitionMap != null) {
-        Transition transition = transitionMap["transform"];
-        Transition all = transitionMap["all"];
+        Transition transition = transitionMap['transform'];
+        Transition all = transitionMap['all'];
         Matrix4 oldMatrix4 = matrix4.clone();
         ProgressListener progressListener = (progress) {
           transform.transform =
@@ -56,7 +56,7 @@ mixin TransformStyleMixin {
   Offset parseOrigin(String origin) {
     Offset offset;
     if (origin != null && origin.isNotEmpty) {
-      List<String> originList = origin.split(" ");
+      List<String> originList = origin.split(' ');
       //FIXME need support percentage and value
       //FIXME just support two value
       if (originList.length == 2) {

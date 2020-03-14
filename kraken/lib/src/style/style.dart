@@ -2,126 +2,81 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'package:kraken/style.dart';
-
 const String STYLE = 'style';
 
-class Style {
-  static const String VISIBLE = 'visible';
-  static const String HIDDEN = 'hidden';
-  static const String SCROLL = 'scroll';
-  static const String AUTO = 'auto';
-  static const String FIXED = 'fixed';
-  static const String LOCAL = 'local';
-
-  Map<String, dynamic> _styleMap;
-  String _overflowX;
-  String _overflowY;
-  String backgroundAttachment;
-  String backgroundImage;
-  int zIndex = 0;
-  String position;
-  double left;
-  double right;
-  double top;
-  double bottom;
-  double width;
-  double height;
-  String transform;
-  String transformOrigin;
-  String transition;
-
-  Style(Map<String, dynamic> styleMap) {
-    this._styleMap = styleMap ?? {};
-    _overflowX = _overflowY = _styleMap['overflow'];
-    _overflowX = _styleMap['overflowX'] ?? _overflowX ?? VISIBLE;
-    _overflowY = _styleMap['overflowY'] ?? _overflowY ?? VISIBLE;
-
-    if (_overflowX != null && _overflowX != VISIBLE) {
-      _overflowY = _overflowY ?? AUTO;
-    }
-
-    if (_overflowY != null && _overflowY != VISIBLE) {
-      _overflowX = _overflowX ?? AUTO;
-    }
-
-    if (_overflowX == VISIBLE && (_overflowY != VISIBLE)) {
-      _overflowX = AUTO;
-    }
-
-    if (_overflowY == VISIBLE && (_overflowX != VISIBLE)) {
-      _overflowY = AUTO;
-    }
-    backgroundAttachment = _styleMap['backgroundAttachment'] ?? SCROLL;
-    backgroundImage = _styleMap['backgroundImage'];
-    dynamic zIndexValue = _styleMap['zIndex'];
-    zIndex =  zIndexValue != null ? int.parse(zIndexValue) : 0;
-    position = _styleMap['position'] ?? 'static';
-    left = _styleMap.containsKey('left')
-        ? Length.toDisplayPortValue(_styleMap['left'])
-        : null;
-    right = _styleMap.containsKey('right')
-        ? Length.toDisplayPortValue(_styleMap['right'])
-        : null;
-    top = _styleMap.containsKey('top')
-        ? Length.toDisplayPortValue(_styleMap['top'])
-        : null;
-    bottom = _styleMap.containsKey('bottom')
-        ? Length.toDisplayPortValue(_styleMap['bottom'])
-        : null;
-    width = _styleMap.containsKey('width')
-        ? Length.toDisplayPortValue(_styleMap['width'])
-        : null;
-    if (width != null && width.isNegative) width = 0.0;
-    height = _styleMap.containsKey('height')
-        ? Length.toDisplayPortValue(_styleMap['height'])
-        : null;
-    if (height != null && height.isNegative) height = 0.0;
-    transform = _styleMap['transform'];
-    transformOrigin = _styleMap['transformOrigin'];
-    transition = _styleMap['transition'];
-  }
-
-  String get overflowY => _overflowY;
-
-  String get overflowX => _overflowX;
-
-  dynamic get(String key) => _styleMap[key];
-
-  void set(String key, dynamic value) {
-    _styleMap[key] = value;
-  }
-
-  dynamic operator [](String key) => this.get(key);
-  bool contains(String key) {
-    if (_styleMap.containsKey(key)) {
-      dynamic value = _styleMap[key];
-      // Null or empty string both means the style not exists.
-      return !(value == null || (value is String && value.isEmpty));
-    } else {
-      return false;
+/// The [CSSStyleDeclaration] interface represents an object that is a CSS
+/// declaration block, and exposes style information and various style-related
+/// methods and properties.
+///
+/// A [CSSStyleDeclaration] object can be exposed using three different APIs:
+/// 1. Via [HTMLElement.style], which deals with the inline styles of a single
+///    element (e.g., <div style="...">).
+/// 2. Via the [CSSStyleSheet] API. For example,
+///    document.styleSheets[0].cssRules[0].style returns a [CSSStyleDeclaration]
+///    object on the first CSS rule in the document's first stylesheet.
+/// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
+///    object as a read-only interface.
+class CSSStyleDeclaration {
+  CSSStyleDeclaration({ Map<String, dynamic> style }) {
+    if (style != null ) {
+      style.forEach((key, value) {
+        if (value != null) this.setProperty(key, value: value.toString());
+      });
     }
   }
 
-  /// Reserved to use.
-  Map<String, dynamic> getOriginalStyleMap() => _styleMap;
+  Map<String, String> _cssProperties = {};
 
-  Style copyWith(Map<String, dynamic> overrides) {
-    Map<String, dynamic> copiedStyleMap =
-        Map<String, dynamic>.from(getOriginalStyleMap());
-    overrides?.forEach((String key, value) {
-      copiedStyleMap[key] = value;
+  /// Textual representation of the declaration block.
+  /// Setting this attribute changes the style.
+  String get cssText {
+    String _cssText = '';
+    _cssProperties.forEach((key, value) {
+      if (_cssText.isNotEmpty) _cssText += ' ';
+      _cssText += '$key: $value;';
     });
-    return Style(copiedStyleMap);
+    return _cssText;
   }
 
-  void remove(String key) {
-    _styleMap.remove(key);
+  // @TODO: Impl the cssText setter.
+
+  /// The number of properties.
+  int get length => _cssProperties.length;
+
+  /// Returns the property value given a property name.
+  /// value is a String containing the value of the property.
+  /// If not set, returns the empty string.
+  String getPropertyValue(String propertyName) {
+    return _cssProperties[propertyName] ?? '';
   }
 
-  @override
-  String toString() {
-    return _styleMap.toString();
+  /// Returns a property name.
+  String item(int index) {
+    return _cssProperties.keys.elementAt(index);
   }
+
+  /// Removes a property from the CSS declaration block.
+  String removeProperty(String property) {
+    return _cssProperties.remove(property);
+  }
+
+  /// Modifies an existing CSS property or creates a new CSS property in
+  /// the declaration block.
+  void setProperty(String propertyName, { String value = '' }) {
+    if (value != null) _cssProperties[propertyName] = value;
+  }
+
+  /// Override [] and []= operator to get/set style properties.
+  operator [](String key) => this.getPropertyValue(key);
+  operator []=(String key, value) {
+    this.setProperty(key, value: value);
+  }
+
+  /// Check a css key is valid.
+  bool contains(String key) {
+    String value = getPropertyValue(key);
+    return value != null && value.isNotEmpty;
+  }
+
+  String toString() => cssText;
 }

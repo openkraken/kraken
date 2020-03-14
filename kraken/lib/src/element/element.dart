@@ -17,6 +17,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
@@ -158,127 +159,14 @@ abstract class Element extends Node
   void setDefaultProps(Map<String, dynamic> props) {}
 
   Element get parent => this.parentNode;
-
-  Style _style;
-  Style get style => _style;
-  set style(Style newStyle) {
-    newStyle.set('display', newStyle.get('display') ?? defaultDisplay);
-
-    // Update style;
-    ///1.update layout properties
-    if (renderLayoutElement != null) {
-      String oldDisplay = style.get('display');
-      String newDisplay = newStyle.get('display');
-      bool hasFlexChange = isFlexStyleChanged(newStyle);
-      if (newDisplay != oldDisplay || hasFlexChange) {
-        ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
-        List<RenderBox> children = [];
-        RenderObjectVisitor visitor = (child) {
-          children.add(child);
-        };
-        oldRenderElement
-          ..visitChildren(visitor)
-          ..removeAll();
-        renderPadding.child = null;
-        renderLayoutElement = createRenderLayoutElement(newStyle, children);
-        renderPadding.child = renderLayoutElement as RenderBox;
-        // update style reference
-        renderElementBoundary.style = newStyle;
-      }
-
-      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
-        // update flex layout properties
-        decorateRenderFlex(renderLayoutElement, newStyle);
-      } else {
-        // update flow layout properties
-        decorateRenderFlow(renderLayoutElement, newStyle);
-      }
-
-      // update style reference
-      if (renderLayoutElement is RenderFlowLayout) {
-        (renderLayoutElement as RenderFlowLayout).style = newStyle;
-      } else {
-        (renderLayoutElement as RenderFlexLayout).style = newStyle;
-      }
-    }
-
-    // update transiton map
-    if (newStyle.contains('transition')) {
-      initTransition(newStyle);
-    }
-
-    ///2.update overflow
-    updateOverFlowBox(newStyle, _scrollListener);
-
-    ///3.update padding
-    updateRenderPadding(newStyle, transitionMap);
-
-    ///4.update constrained
-    updateConstraints(newStyle, transitionMap);
-
-    ///5.update decorated
-    updateRenderDecoratedBox(newStyle, this, transitionMap);
-
-    ///6.update margin
-    updateRenderMargin(newStyle, this, transitionMap);
-
-    ///7.update position
-    String newPosition = newStyle['position'] ?? 'static';
-    String oldPosition = _style['position'] ?? 'static';
-    bool positionChanged = false;
-    if (newPosition != oldPosition) {
-      positionChanged = true;
-    }
-
-    // position change
-    if (positionChanged) {
-      needsReposition = true;
-      updatePosition(newStyle);
-    } else if (newPosition != 'static') {
-      int newZIndex = newStyle.zIndex;
-      int oldZIndex = _style.zIndex;
-      // zIndex change
-      if (newZIndex != oldZIndex) {
-        needsReposition = true;
-        _updateZIndex(newStyle);
-      }
-
-      // offset change
-      if (newStyle.top != _style.top ||
-          newStyle.bottom != _style.bottom ||
-          newStyle.left != _style.left ||
-          newStyle.right != _style.right ||
-          newStyle.width != _style.width ||
-          newStyle.height != _style.height) {
-        _updateOffset(newStyle);
-      }
-    }
-
-    ///8.update opacity and visiblity
-    updateRenderOpacity(
-      style,
-      newStyle,
-      parentRenderObject: renderRepaintBoundary,
-    );
-
-    ///9.update transform
-    updateTransform(newStyle, transitionMap);
-
-    if (transitionMap != null) {
-      for (Transition transition in transitionMap.values) {
-        transition?.apply();
-      }
-    }
-
-    _style = newStyle;
-  }
+  CSSStyleDeclaration style;
 
   markShouldUpdateMargin() {
     updateRenderMargin(style, this);
   }
 
-  bool isFlexStyleChanged(Style newStyle) {
-    String display = newStyle.get('display');
+  bool isFlexStyleChanged(CSSStyleDeclaration newStyle) {
+    String display = newStyle['display'];
     List flexStyles = [
       'flexDirection',
       'flexWrap',
@@ -289,7 +177,7 @@ abstract class Element extends Node
     bool hasChanged = false;
     if (display == 'flex' || display == 'inline-flex') {
       flexStyles.forEach((key) {
-        if (style.get(key) != newStyle.get(key)) {
+        if (style[key] != newStyle[key]) {
           hasChanged = true;
         }
       });
@@ -309,7 +197,7 @@ abstract class Element extends Node
   void _updateStickyPosition(double scrollTop) {
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
-      Style elStyle = el.style;
+      CSSStyleDeclaration elStyle = el.style;
       bool isFixed;
 
       if (el.offsetTop == null) {
@@ -456,7 +344,7 @@ abstract class Element extends Node
   // reposition element with position absolute/fixed
   void _repositionElement(Element el) {
     RenderObject renderObject = el.renderObject;
-    Style style = el.style;
+    CSSStyleDeclaration style = el.style;
     int nodeId = el.nodeId;
 
     // new node not in the tree, wait for append in appenedElement
@@ -466,7 +354,7 @@ abstract class Element extends Node
 
     // find positioned element to attach
     Element parentElementWithStack;
-    if (style.position == 'absolute') {
+    if (style['position'] == 'absolute') {
       parentElementWithStack =
           findParent(el, (element) => element.renderStack != null);
     } else {
@@ -476,7 +364,7 @@ abstract class Element extends Node
     if (parentElementWithStack == null) return;
 
     // add placeholder for sticky element before moved
-    if (style.position == 'sticky') {
+    if (style['position'] == 'sticky') {
       insertStickyPlaceholder();
     }
 
@@ -500,7 +388,7 @@ abstract class Element extends Node
     insertByZIndex(parentStack, renderObject, el, currentZIndex);
   }
 
-  void _updateZIndex(Style style) {
+  void _updateZIndex(CSSStyleDeclaration style) {
     // new node not in the tree, wait for append in appenedElement
     if (renderObject.parent == null) {
       return;
@@ -524,7 +412,7 @@ abstract class Element extends Node
     insertByZIndex(parentStack, renderObject, this, currentZIndex);
   }
 
-  void _updateOffset(Style style) {
+  void _updateOffset(CSSStyleDeclaration style) {
     ZIndexParentData zIndexParentData;
     AbstractNode renderParent = renderObject.parent;
     if (renderParent is RenderPosition &&
@@ -728,9 +616,9 @@ abstract class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutElement(
-      Style newStyle, List<RenderBox> children) {
-    String display = newStyle.get('display');
-    String flexWrap = newStyle.get('flexWrap');
+      CSSStyleDeclaration newStyle, List<RenderBox> children) {
+    String display = newStyle['display'];
+    String flexWrap = newStyle['flexWrap'];
     bool isFlexWrap =
         (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
     if ((display == 'flex' || display == 'inline-flex') && flexWrap != 'wrap') {
@@ -911,9 +799,9 @@ abstract class Element extends Node
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
-      Style childStyle = child.style;
+      CSSStyleDeclaration childStyle = child.style;
       String childPosition = childStyle['position'] ?? 'static';
-      String display = style.get('display');
+      String display = style['display'];
       bool isFlex = display == 'flex' || display == 'inline-flex';
 
       // Set audio element size to zero
@@ -1028,7 +916,7 @@ abstract class Element extends Node
     renderStack.insert(renderObject, after: null);
   }
 
-  static ZIndexParentData getPositionParentDataFromStyle(Style style) {
+  static ZIndexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
     ZIndexParentData parentData = ZIndexParentData();
 
     if (style.contains('top')) {
@@ -1056,12 +944,129 @@ abstract class Element extends Node
     });
   }
 
+  Debouncing _styleDeb = Debouncing();
+
+  void updateStyle() {
+    _styleDeb.debounce(flushStyle);
+  }
+
+  void flushStyle() {
+
+    if (!newStyle.contains('display')) newStyle['display'] = defaultDisplay;
+
+    // Update style;
+    ///1.update layout properties
+    if (renderLayoutElement != null) {
+      String oldDisplay = style['display'];
+      String newDisplay = newStyle['display'];
+      bool hasFlexChange = isFlexStyleChanged(newStyle);
+      if (newDisplay != oldDisplay || hasFlexChange) {
+        ContainerRenderObjectMixin oldRenderElement = renderLayoutElement;
+        List<RenderBox> children = [];
+        RenderObjectVisitor visitor = (child) {
+          children.add(child);
+        };
+        oldRenderElement
+          ..visitChildren(visitor)
+          ..removeAll();
+        renderPadding.child = null;
+        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        renderPadding.child = renderLayoutElement as RenderBox;
+        // update style reference
+        renderElementBoundary.style = newStyle;
+      }
+
+      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
+        // update flex layout properties
+        decorateRenderFlex(renderLayoutElement, newStyle);
+      } else {
+        // update flow layout properties
+        decorateRenderFlow(renderLayoutElement, newStyle);
+      }
+
+      // update style reference
+      if (renderLayoutElement is RenderFlowLayout) {
+        (renderLayoutElement as RenderFlowLayout).style = newStyle;
+      } else {
+        (renderLayoutElement as RenderFlexLayout).style = newStyle;
+      }
+    }
+
+    // update transiton map
+    if (newStyle.contains('transition')) {
+      initTransition(newStyle);
+    }
+
+    ///2.update overflow
+    updateOverFlowBox(newStyle, _scrollListener);
+
+    ///3.update padding
+    updateRenderPadding(newStyle, transitionMap);
+
+    ///4.update constrained
+    updateConstraints(newStyle, transitionMap);
+
+    ///5.update decorated
+    updateRenderDecoratedBox(newStyle, this, transitionMap);
+
+    ///6.update margin
+    updateRenderMargin(newStyle, this, transitionMap);
+
+    ///7.update position
+    String newPosition = newStyle['position'] ?? 'static';
+    String oldPosition = _style['position'] ?? 'static';
+    bool positionChanged = false;
+    if (newPosition != oldPosition) {
+      positionChanged = true;
+    }
+
+    // position change
+    if (positionChanged) {
+      needsReposition = true;
+      updatePosition(newStyle);
+    } else if (newPosition != 'static') {
+      int newZIndex = newStyle.zIndex;
+      int oldZIndex = _style.zIndex;
+      // zIndex change
+      if (newZIndex != oldZIndex) {
+        needsReposition = true;
+        _updateZIndex(newStyle);
+      }
+
+      // offset change
+      if (newStyle.top != _style.top ||
+          newStyle.bottom != _style.bottom ||
+          newStyle.left != _style.left ||
+          newStyle.right != _style.right ||
+          newStyle.width != _style.width ||
+          newStyle.height != _style.height) {
+        _updateOffset(newStyle);
+      }
+    }
+
+    ///8.update opacity and visiblity
+    updateRenderOpacity(
+      style,
+      newStyle,
+      parentRenderObject: renderRepaintBoundary,
+    );
+
+    ///9.update transform
+    updateTransform(newStyle, transitionMap);
+
+    if (transitionMap != null) {
+      for (Transition transition in transitionMap.values) {
+        transition?.apply();
+      }
+    }
+
+    updateTextNodeStyle();
+  }
+
   @mustCallSuper
   void setStyle(String key, value) {
-    Style newStyle = _style.copyWith({ key: value });
-    properties['style'] = newStyle.getOriginalStyleMap();
-    style = newStyle;
-    updateTextNodeStyle();
+    style[key] = value;
+    updateStyle();
   }
 
   @mustCallSuper
@@ -1069,14 +1074,18 @@ abstract class Element extends Node
     properties[key] = value;
 
     if (key == STYLE) {
-      style = _style.copyWith(value);
-      updateTextNodeStyle();
+      style = CSSStyleDeclaration(style: value is Map<String, dynamic> ? value : null);
+      updateStyle();
     }
   }
 
   @mustCallSuper
   void removeProperty(String key) {
     properties.remove(key);
+
+    if (key == STYLE) {
+      setProperty(STYLE, null);
+    }
   }
 
   method(String name, List args) {
