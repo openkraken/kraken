@@ -268,7 +268,7 @@ abstract class Element extends Node
       }
     }
 
-    // 10.update childNodes style if need
+    /// 10.update childNodes style if need
     updateChildNodesStyle();
 
     _style = newStyle;
@@ -1058,7 +1058,7 @@ abstract class Element extends Node
   }
 
   @mustCallSuper
-  void setStyle(String key, value) {
+  void setStyle(String key, String value) {
     Style newStyle = _style.copyWith({ key: value });
     properties['style'] = newStyle.getOriginalStyleMap();
     style = newStyle;
