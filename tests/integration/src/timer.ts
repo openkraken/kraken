@@ -25,6 +25,7 @@ describe('setTimeout', function () {
 
   it('first param not function will throw', () => {
     try {
+      // @ts-ignore
       setTimeout(null);
       throw new Error('setTimeout: parameter 1 is not an function should to throw');
     } catch (e) {
@@ -34,6 +35,7 @@ describe('setTimeout', function () {
   it('second param not number will throw', () => {
     try {
       setTimeout(() => {
+        // @ts-ignore
       }, []);
       throw new Error('setTimeout: parameter 2 is not an number should be throw');
     } catch (e) {
@@ -60,6 +62,7 @@ describe('setInterval', function () {
 
   it('first param not function will throw', () => {
     try {
+      // @ts-ignore
       setInterval(null);
       throw new Error('setInterval: parameter 1 is not an function should to throw');
     } catch (e) {
@@ -69,6 +72,7 @@ describe('setInterval', function () {
   it('second param not number will throw', () => {
     try {
       setInterval(() => {
+        // @ts-ignore
       }, []);
       throw new Error('setInterval: parameter 2 is not an number should be throw');
     } catch (e) {
