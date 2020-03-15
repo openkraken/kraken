@@ -86,5 +86,4 @@ mixin EventHandlerMixin on Node {
       handleDisappear();
     }
   }
-
 }

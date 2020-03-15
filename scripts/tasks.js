@@ -156,12 +156,12 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
     if (platform === 'darwin') {
       const xcodeArgs = [
         '-DCMAKE_BUILD_TYPE=' + buildMode,
-          '-G',
-          'Xcode',
-          '-B',
-          resolve(paths.bridge, 'cmake-build-macos'),
-          '-S',
-          paths.bridge
+        '-G',
+        'Xcode',
+        '-B',
+        resolve(paths.bridge, 'cmake-build-macos'),
+        '-S',
+        paths.bridge
       ];
       generateCmake(xcodeArgs);
     }
@@ -290,10 +290,10 @@ task('upload-dist', (done) => {
 
 task('bridge-test', (done) => {
   if (platform === 'darwin') {
-    execSync(`${libOutputPath}/jsa_test_v8`, {stdio: 'inherit'});
+    execSync(`${libOutputPath}/jsa_test_v8`, { stdio: 'inherit' });
   }
-  execSync(`${libOutputPath}/jsa_test_jsc`, {stdio: 'inherit'});
-  execSync(`${libOutputPath}/kom_test`, {stdio: 'inherit'});
+  execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
+  execSync(`${libOutputPath}/kom_test`, { stdio: 'inherit' });
   done();
 });
 
@@ -309,15 +309,16 @@ task('patch-flutter-tester', (done) => {
 });
 
 task('integration-test', (done) => {
-  execSync('flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos', {
+  const { status } = spawnSync('npm', ['run', 'integration'], {
     stdio: 'inherit',
-    env: {
-      ...process.env,
-      KRAKEN_LIBRARY_PATH: libOutputPath
-    },
     cwd: paths.tests
   });
-  done();
+  if (status !== 0) {
+    console.error('Run intefration test with error.');
+    process.exit(status);
+  } else {
+    done();
+  }
 });
 
 task('js-api-test', (done) => {
@@ -392,3 +393,4 @@ task('build-embedded-assets', (done) => {
   });
   done();
 });
+

@@ -9,7 +9,7 @@ import 'package:kraken/style.dart';
 class TextParentData extends ContainerBoxParentData<RenderBox> {
 }
 
-class RenderTextNode extends RenderBox
+class RenderTextBox extends RenderBox
   with
     ElementStyleMixin,
     TextStyleMixin,
@@ -17,23 +17,43 @@ class RenderTextNode extends RenderBox
     ContainerRenderObjectMixin<RenderBox, TextParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
 
-  RenderTextNode({
+  RenderTextBox({
     this.nodeId,
-    this.style,
-    this.text,
+    String text,
+    Style style,
   }) : assert(text != null) {
+    _text = text;
+    _style = style;
 
-    RenderParagraph paragraphNode = RenderParagraph(
+    _renderParagraph = RenderParagraph(
       createTextSpanWithStyle(text, style),
       textAlign: getTextAlignFromStyle(style),
       textDirection: TextDirection.ltr,
     );
-    add(paragraphNode);
+    add(_renderParagraph);
   }
 
+  void _rebuild() {
+    _renderParagraph.text = createTextSpanWithStyle(text, style);
+    _renderParagraph.textAlign = getTextAlignFromStyle(style);
+    _renderParagraph.markNeedsLayout();
+  }
+
+  RenderParagraph _renderParagraph;
   int nodeId;
-  String text;
-  Style style;
+  String _text;
+  String get text => _text;
+  set text(String newText) {
+    _text = newText;
+    _rebuild();
+  }
+
+  Style _style;
+  Style get style => _style;
+  set style(Style newStyle) {
+    _style = newStyle;
+    _rebuild();
+  }
 
   @override
   void setupParentData(RenderBox child) {

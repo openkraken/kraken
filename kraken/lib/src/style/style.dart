@@ -46,17 +46,17 @@ class Style {
       _overflowX = _overflowX ?? AUTO;
     }
 
-    if (_overflowX == VISIBLE && (_overflowY == SCROLL || _overflowY == AUTO)) {
+    if (_overflowX == VISIBLE && (_overflowY != VISIBLE)) {
       _overflowX = AUTO;
     }
 
-    if (_overflowY == VISIBLE && (_overflowX == SCROLL || _overflowX == AUTO)) {
+    if (_overflowY == VISIBLE && (_overflowX != VISIBLE)) {
       _overflowY = AUTO;
     }
     backgroundAttachment = _styleMap['backgroundAttachment'] ?? SCROLL;
     backgroundImage = _styleMap['backgroundImage'];
     dynamic zIndexValue = _styleMap['zIndex'];
-    zIndex = zIndexValue is num ? zIndexValue.toInt() : 0;
+    zIndex =  zIndexValue != null ? int.parse(zIndexValue) : 0;
     position = _styleMap['position'] ?? 'static';
     left = _styleMap.containsKey('left')
         ? Length.toDisplayPortValue(_styleMap['left'])

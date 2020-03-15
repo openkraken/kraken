@@ -7,15 +7,22 @@ import 'package:kraken/style.dart';
 
 class ElementBoundaryParentData extends ContainerBoxParentData<RenderBox> {}
 
-class RenderElementBoundary extends RenderBox
+class RenderElementBoundary extends RenderTransform
     with
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary({
     this.child,
     Style style,
+    Matrix4 transform,
+    Offset origin,
     this.nodeId,
-  }) : assert(child != null) {
+  }) : assert(child != null),
+    super(
+      child: child,
+      transform: transform,
+      origin: origin,
+  ) {
     _style = style;
     add(child);
   }
@@ -54,17 +61,5 @@ class RenderElementBoundary extends RenderBox
         size = constraints.constrain(Size(0, 0));
       }
     }
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      context.paintChild(child, offset);
-    }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
   }
 }
