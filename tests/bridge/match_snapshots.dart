@@ -32,16 +32,16 @@ Future<List<int>> getScreenShot() {
   return completer.future;
 }
 
-Future<bool> matchSnapshots(String filename, int index) async {
+Future<bool> matchScreenShot(String filename) async {
   List<int> screenPixels = await getScreenShot();
-  final snap = File(path.join(snapshots.path, '$filename-$index.png'));
+  final snap = File(path.join(snapshots.path, '$filename.png'));
   if (snap.existsSync()) {
     Uint8List snapPixels = snap.readAsBytesSync();
     int diffCounts = _countDifferentPixels(snapPixels, screenPixels);
     if (diffCounts == 0) {
       return true;
     } else {
-      final newSnap = File(path.join(snapshots.path, '$filename-$index.current.png'));
+      final newSnap = File(path.join(snapshots.path, '$filename.current.png'));
       newSnap.writeAsBytes(screenPixels);
       return false;
     }

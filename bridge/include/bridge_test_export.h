@@ -15,7 +15,7 @@ void initTestFramework();
 KRAKEN_EXPORT
 int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine);
 
-using ExecuteCallback = void*(*)(const char* status);
+using ExecuteCallback = void *(*)(const char *status);
 
 KRAKEN_EXPORT
 void executeTest(ExecuteCallback executeCallback);
@@ -23,9 +23,14 @@ void executeTest(ExecuteCallback executeCallback);
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);
 
-using RefreshPaintCallback = void(*)(void* data);
-using RefreshPaint = void(*)(void* data, RefreshPaintCallback callback);
+using RefreshPaintCallback = void (*)(void *data);
+using RefreshPaint = void (*)(void *data, RefreshPaintCallback callback);
 KRAKEN_EXPORT
 void registerRefreshPaint(RefreshPaint refreshPaint);
+
+using MatchScreenShotCallback = void (*)(void *data, int8_t);
+using MatchScreenShot = void (*)(const char* name, void *data, MatchScreenShotCallback callback);
+KRAKEN_EXPORT
+void registerMatchScreenShot(MatchScreenShot matchScreenShot);
 
 #endif

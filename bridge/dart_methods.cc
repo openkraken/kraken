@@ -87,4 +87,8 @@ void registerRefreshPaint(RefreshPaint refreshPaint) {
   methodPointer->refreshPaint = refreshPaint;
 }
 
+void registerMatchScreenShot(MatchScreenShot matchScreenShot) {
+  methodPointer->matchScreenShot = matchScreenShot;
+}
+
 } // namespace kraken

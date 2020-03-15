@@ -4,9 +4,9 @@
  */
 
 #include "bridge_test.h"
+#include "callback_context.h"
 #include "dart_methods.h"
 #include "testframework.h"
-#include "callback_context.h"
 #include <iostream>
 
 namespace kraken {
@@ -49,13 +49,48 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   auto ctx = new CallbackContext(context, callbackValue);
 
   auto fn = [](void *data) {
-    auto ctx = static_cast<CallbackContext*>(data);
+    auto ctx = static_cast<CallbackContext *>(data);
     JSContext &context = ctx->_context;
     ctx->_callback->getObject(context).getFunction(context).call(context);
     delete ctx;
   };
 
-  getDartMethod()->refreshPaint(static_cast<void*>(ctx), fn);
+  getDartMethod()->refreshPaint(static_cast<void *>(ctx), fn);
+
+  return Value::undefined();
+}
+
+Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &screenShotName = args[0];
+  const Value &callback = args[1];
+
+  if (!screenShotName.isString()) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_screenshot__': parameter 1 (screenShotName) must be an string.");
+  }
+
+  if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_screenshot__': parameter 2 (callback) is not an function.");
+  }
+
+  if (getDartMethod()->matchScreenShot == nullptr) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_screenshot__': dart method (matchScreenShot) is not registered.");
+  }
+
+  std::string &&name = screenShotName.getString(context).utf8(context);
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
+  auto ctx = new CallbackContext(context, callbackValue);
+
+  auto fn = [](void *data, int8_t result) {
+    auto ctx = static_cast<CallbackContext *>(data);
+    JSContext &context = ctx->_context;
+    ctx->_callback->getObject(context).getFunction(context).call(context, {Value(static_cast<bool>(result))});
+    delete ctx;
+  };
+
+  getDartMethod()->matchScreenShot(name.c_str(), static_cast<void *>(ctx), fn);
 
   return Value::undefined();
 }
@@ -63,6 +98,7 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_screenshot__", 0, matchScreenShot);
   initKrakenTestFramework(bridge->getContext());
 }
 

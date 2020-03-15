@@ -39,3 +39,7 @@ void executeTest(ExecuteCallback executeCallback) {
 void registerRefreshPaint(RefreshPaint refreshPaint) {
   kraken::registerRefreshPaint(refreshPaint);
 }
+
+void registerMatchScreenShot(MatchScreenShot matchScreenShot) {
+  kraken::registerMatchScreenShot(matchScreenShot);
+}
