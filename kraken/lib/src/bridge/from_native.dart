@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
@@ -118,10 +119,11 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     }).catchError((e) {
       String errorMessage = e is HTTPException ? e.message : e.toString();
       String json;
-      if (e is ArgumentError) {
-        json = jsonEncode([errorMessage, null, '']);
-      } else {
+      SocketException a;
+      if (e is HTTPException) {
         json = jsonEncode([errorMessage, e.response.statusCode, '']);
+      } else {
+        json = jsonEncode([errorMessage, null, '']);
       }
       callback(Utf8.toUtf8(json), context);
     });
