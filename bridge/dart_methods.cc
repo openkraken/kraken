@@ -83,4 +83,8 @@ void registerJSError(OnJSError onJsError) {
   methodPointer->onJsError = onJsError;
 }
 
+void registerRefreshPaint(RefreshPaint refreshPaint) {
+  methodPointer->refreshPaint = refreshPaint;
+}
+
 } // namespace kraken

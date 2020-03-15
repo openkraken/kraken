@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
+import 'package:kraken/kraken.dart';
 import 'package:test/test.dart';
 
 import 'platform.dart';
@@ -49,6 +50,28 @@ void registerJSError() {
   _registerOnJSError(pointer);
 }
 
+typedef Native_RefreshPaintCallback = Void Function(Pointer<Void>);
+typedef Dart_RefreshPaintCallback = void Function(Pointer<Void>);
+typedef Native_RefreshPaint = Void Function(Pointer<Void>, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
+typedef Native_RegisterRefreshPaint = Void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
+typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
+
+final Dart_RegisterRefreshPaint _registerRefreshPaint =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterRefreshPaint>>('registerRefreshPaint').asFunction();
+
+void _refreshPaint(Pointer<Void> context, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
+  Dart_RefreshPaintCallback callback = pointer.asFunction();
+  refreshPaint().then((_) {
+    callback(context);
+  });
+}
+
+void registerRefreshPaint() {
+  Pointer<NativeFunction<Native_RefreshPaint>> pointer = Pointer.fromFunction(_refreshPaint);
+  _registerRefreshPaint(pointer);
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
+  registerRefreshPaint();
 }

@@ -32,6 +32,7 @@ struct DartMethodPointer {
   StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
+  RefreshPaint refreshPaint{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -51,6 +52,9 @@ void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
 void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
+
+// test only methods
+void registerRefreshPaint(RefreshPaint refreshPaint);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

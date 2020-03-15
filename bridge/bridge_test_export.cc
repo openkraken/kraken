@@ -35,3 +35,7 @@ void registerJSError(OnJSError jsError) {
 void executeTest(ExecuteCallback executeCallback) {
   bridgeTest->invokeExecuteTest(executeCallback);
 }
+
+void registerRefreshPaint(RefreshPaint refreshPaint) {
+  kraken::registerRefreshPaint(refreshPaint);
+}

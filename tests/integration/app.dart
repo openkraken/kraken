@@ -24,7 +24,7 @@ void main() {
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {
     Completer<String> completer = Completer();
-    List<Map<String, dynamic>> fileInfo = jsonDecode(payload);
+    List<dynamic> fileInfo = jsonDecode(payload);
 
     // preload load test cases
     for (Map<String, dynamic> file in fileInfo) {
@@ -39,10 +39,15 @@ void main() {
         enableDebug: true,
         afterConnected: () async {
           String status = await executeTest();
-          print('test $status');
+          if (status == 'failed') {
+            print((AnsiPen()..red())('test $status'));
+          } else {
+            print((AnsiPen()..green())('test $status'));
+          }
+
           completer.complete();
         });
-//
+
     return completer.future;
   });
 }

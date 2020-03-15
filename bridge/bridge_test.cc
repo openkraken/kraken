@@ -6,6 +6,7 @@
 #include "bridge_test.h"
 #include "dart_methods.h"
 #include "testframework.h"
+#include "callback_context.h"
 #include <iostream>
 
 namespace kraken {
@@ -32,8 +33,36 @@ Value executeTest(JSContext &context, const Value &thisVal, const Value *args, s
   return Value::undefined();
 }
 
+Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &callback = args[0];
+
+  if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.");
+  }
+
+  if (getDartMethod()->refreshPaint == nullptr) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_refresh_paint__': dart method (refreshPaint) is not registered.");
+  }
+
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
+  auto ctx = new CallbackContext(context, callbackValue);
+
+  auto fn = [](void *data) {
+    auto ctx = static_cast<CallbackContext*>(data);
+    JSContext &context = ctx->_context;
+    ctx->_callback->getObject(context).getFunction(context).call(context);
+    delete ctx;
+  };
+
+  getDartMethod()->refreshPaint(static_cast<void*>(ctx), fn);
+
+  return Value::undefined();
+}
+
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
   initKrakenTestFramework(bridge->getContext());
 }
 
