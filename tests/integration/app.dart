@@ -1,23 +1,20 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui';
-import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/src/bridge/from_native.dart';
+import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import '../bridge/from_native.dart';
 import '../bridge/to_native.dart';
 
+String pass = (AnsiPen()..green())('[TEST]');
+String err = (AnsiPen()..red())('[TEST]');
+
 void main() {
-  testEnvironment = TestEnvironment.Integration;
   initTestFramework();
   registerDartTestMethodsToCpp();
-  registerDartMethodsToCpp();
 
   if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -25,38 +22,27 @@ void main() {
   TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
-  enableFlutterDriverExtension(handler: (String message) async {
-    Completer<String> completer = new Completer();
-    await unmountApp();
+  enableFlutterDriverExtension(handler: (String payload) async {
+    Completer<String> completer = Completer();
+    List<Map<String, dynamic>> fileInfo = jsonDecode(payload);
 
-    var ret = jsonDecode(message);
-    if (ret['type'] == 'startup') {
-      String payload = ret['payload'];
-      String caseName = ret['case'];
-      runApp(
-          shouldInitializeBinding: false,
-          enableDebug: true,
-          afterConnected: () {
-            onItDone((String errmsg) async {
-              if (errmsg != null) {
-                completer.completeError(Exception(errmsg));
-                return;
-              }
-
-              BodyElement body = ElementManager().getRootElement();
-              body.renderObject.markNeedsPaint();
-              RendererBinding.instance.addPostFrameCallback((_) async {
-                Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
-                List<int> bodyImageList = bodyImage.toList();
-                completer.complete(jsonEncode(bodyImageList));
-              });
-            });
-
-            // javascript it is equal to dart's test().
-            evaluateTestScripts(payload, url: caseName);
-          });
+    // preload load test cases
+    for (Map<String, dynamic> file in fileInfo) {
+      String filename = file['filename'];
+      String code = file['code'];
+      evaluateTestScripts(code, url: filename);
     }
 
+    // init flutter app at first time
+    runApp(
+        shouldInitializeBinding: false,
+        enableDebug: true,
+        afterConnected: () async {
+          String status = await executeTest();
+          print('test $status');
+          completer.complete();
+        });
+//
     return completer.future;
   });
 }
