@@ -22,7 +22,6 @@
     "webpack-dev-server": "^3.9.0"
   },
   "dependencies": {
-    "@types/jest": "^24.0.25",
     "@types/raf": "^3.4.0",
     "event-target-shim": "^5.0.1",
     "expect": "^25.1.0",

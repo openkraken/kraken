@@ -22,13 +22,3 @@ TEST(TestFramework, evaluteTestFramework) {
   EXPECT_EQ(result, false);
 }
 #endif
-
-TEST(TestFramework, expect) {
-  auto handleError = [](const jsa::JSError &error) {
-    std::cerr << error.what() << std::endl;
-    FAIL();
-  };
-  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
-  std::unique_ptr<kraken::JSBridgeTest> tester = std::make_unique<kraken::JSBridgeTest>(bridge.get());
-  tester->evaluateTestScripts("expect(1).toBe(1)", "interval://", 0);
-}

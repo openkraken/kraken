@@ -15,6 +15,10 @@ void initTestFramework();
 KRAKEN_EXPORT
 int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine);
 
+using ExecuteCallback = void*(*)(const char* status);
+
+KRAKEN_EXPORT
+void executeTest(ExecuteCallback executeCallback);
 
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);

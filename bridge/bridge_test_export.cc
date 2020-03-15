@@ -31,3 +31,7 @@ int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int sta
 void registerJSError(OnJSError jsError) {
   kraken::registerJSError(jsError);
 }
+
+void executeTest(ExecuteCallback executeCallback) {
+  bridgeTest->invokeExecuteTest(executeCallback);
+}
