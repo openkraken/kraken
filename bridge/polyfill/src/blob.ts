@@ -9,6 +9,7 @@ export class Blob {
       // extract internal hostObject from polyfill wrapper.
       blobParts = blobParts.map(item => {
         if (item instanceof Blob) {
+          // @ts-ignore
           return item.blob;
         }
         return item;
