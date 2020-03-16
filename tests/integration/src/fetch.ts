@@ -407,15 +407,15 @@ describe('Response', function () {
     });
   });
 
-  // describe('text', function () {
-  //   it('resolves text promise', function () {
-  //     return fetch('http://127.0.0.1:9450')
-  //       .then(function (response) {
-  //         return response.text();
-  //       })
-  //       .then(function (text) {
-  //         expect(text).toBe('{"method":"GET","data":"null"}');
-  //       })
-  //   });
-  // });
+  describe('text', function () {
+    it('resolves text promise', function () {
+      return fetch('https://kraken.oss-cn-hangzhou.aliyuncs.com/data/data.json')
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (text) {
+          expect(text.replace(/\s+/g, '')).toBe('{"method":"GET","data":{"userName":"12345"}}');
+        })
+    });
+  });
 });

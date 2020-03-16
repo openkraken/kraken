@@ -1,7 +1,11 @@
 describe('setTimeout', function () {
-  it('resolve after 1 seconds', () => {
+  it('resolve after 100ms', () => {
+    let startTime = Date.now();
     return new Promise((resolve) => {
       setTimeout(() => {
+        let duration = Date.now() - startTime;
+        // 10ms delay accepted
+        expect((duration - 100) < 10).toBe(true);
         resolve();
       }, 100);
     });
@@ -24,22 +28,18 @@ describe('setTimeout', function () {
   });
 
   it('first param not function will throw', () => {
-    try {
+    expect(() => {
       // @ts-ignore
       setTimeout(null);
-      throw new Error('setTimeout: parameter 1 is not an function should to throw');
-    } catch (e) {
-    }
+    }).toThrowError();
   });
 
   it('second param not number will throw', () => {
-    try {
+    expect(() => {
       setTimeout(() => {
         // @ts-ignore
       }, []);
-      throw new Error('setTimeout: parameter 2 is not an number should be throw');
-    } catch (e) {
-    }
+    }).toThrowError();
   });
 });
 
@@ -61,21 +61,17 @@ describe('setInterval', function () {
   });
 
   it('first param not function will throw', () => {
-    try {
+    expect(() => {
       // @ts-ignore
       setInterval(null);
-      throw new Error('setInterval: parameter 1 is not an function should to throw');
-    } catch (e) {
-    }
+    }).toThrowError();
   });
 
   it('second param not number will throw', () => {
-    try {
+    expect(() => {
       setInterval(() => {
         // @ts-ignore
       }, []);
-      throw new Error('setInterval: parameter 2 is not an number should be throw');
-    } catch (e) {
-    }
+    }).toThrowError();
   });
 });
