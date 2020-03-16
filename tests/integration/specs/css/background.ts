@@ -59,12 +59,8 @@ describe('background', () => {
     repeat.appendChild(div4);
 
     document.body.appendChild(repeat);
-    await new Promise((resolve) => {
-      setTimeout(async () => {
-        await expectAsync(repeat.toBlob()).toMatchImageSnapshot('');
-        resolve();
-      }, 1000);
-    });
+    await sleep(1);
+    await expectAsync(repeat.toBlob()).toMatchImageSnapshot('');
   });
 
   it('backgroundPosition', async () => {
@@ -125,6 +121,8 @@ describe('background', () => {
     position.appendChild(position5);
     document.body.appendChild(position);
 
+    // Wait for picture loaded.
+    await sleep(1);
     await expectAsync(position.toBlob()).toMatchImageSnapshot('');
   });
 });
