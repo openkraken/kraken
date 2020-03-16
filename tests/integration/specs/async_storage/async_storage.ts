@@ -1,16 +1,12 @@
-interface Async_storage {
+interface AsyncStorage {
   setItem(key: string, value: string): Promise<void>;
-
   getItem(key: string): Promise<string>;
-
   removeItem(key: string): Promise<void>;
-
   getAllKeys(): Promise<Array<string>>;
-
   clear(): Promise<void>;
 }
 
-declare const asyncStorage: Async_storage;
+declare const asyncStorage: AsyncStorage;
 
 describe('asyncStorage', () => {
   beforeEach(async () => {
