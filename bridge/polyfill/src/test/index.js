@@ -32,7 +32,7 @@ const jasmineTracker = new JasmineTracker();
 // @NOTE: Hack for kraken js engine have no stdout.
 function createPrinter(logger) {
   let stdoutMessage = '';
-  function printToStdout(msg) {
+  return function printToStdout(msg) {
     for (let w of msg) {
       if (w === '\n') {
         logger(stdoutMessage);
