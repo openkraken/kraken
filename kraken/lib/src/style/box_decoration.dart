@@ -615,11 +615,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     final String colorName = 'Color';
     Map borderShorttedInfo;
     Map borderSideShorttedInfo;
-    if (style.contains(borderName) &&  (style[borderName] as String).isNotEmpty){
+    if (style.contains(borderName)){
       borderShorttedInfo = _getShorttedInfoFromString(style[borderName]);
     }
-    
-    if (style.contains(borderSideName) && (style[borderSideName] as String).isNotEmpty) {
+
+    if (style.contains(borderSideName)) {
       borderSideShorttedInfo = _getShorttedInfoFromString(style[borderSideName]);
     }
 
@@ -627,27 +627,24 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
     final String borderWidthName = borderName + widthName; // borderWidth
     if (style.contains(borderSideWidthName) &&
-      (style[borderSideWidthName] as String).isNotEmpty) { 
+      (style[borderSideWidthName] as String).isNotEmpty) {
       borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
       borderSide.borderWidth = borderSideShorttedInfo[widthName];
-    } else if (style.contains(borderWidthName) &&
-      (style[borderWidthName] as String).isNotEmpty) { 
+    } else if (style.contains(borderWidthName)) {
       borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
       borderSide.borderWidth = borderShorttedInfo[widthName];
-    } 
+    }
 
     // Set border style
     final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
     final String borderStyleName = borderName + widthName; // borderStyle
-    if (style.contains(borderSideStyleName)  &&
-      (style[borderSideStyleName] as String).isNotEmpty) { 
+    if (style.contains(borderSideStyleName)) {
       borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[styleName] != null) {
       borderSide.borderStyle = borderSideShorttedInfo[styleName];
-    } else if (style.contains(borderStyleName) &&
-      (style[borderStyleName] as String).isNotEmpty) { 
+    } else if (style.contains(borderStyleName)) {
       borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[styleName] != null) {
       borderSide.borderStyle = borderShorttedInfo[styleName];
@@ -657,13 +654,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     Color borderColor;
     final String borderSideColorName = borderSideName + colorName; // eg. borderLeftColor/borderRightColor
     final String borderColorName = borderName + colorName; // borderColor
-    if (style.contains(borderSideColorName) &&
-      (style[borderSideColorName] as String).isNotEmpty) { 
+    if (style.contains(borderSideColorName)) {
       borderColor = WebColor.generate(style[borderSideColorName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[colorName] != null) {
       borderColor = borderSideShorttedInfo[colorName];
-    } else if (style.contains(borderColorName) &&
-      (style[borderColorName] as String).isNotEmpty) { 
+    } else if (style.contains(borderColorName)) {
       borderColor = WebColor.generate(style[borderColorName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[colorName] != null) {
       borderColor = borderShorttedInfo[colorName];
