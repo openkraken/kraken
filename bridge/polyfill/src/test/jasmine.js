@@ -4060,8 +4060,8 @@ getJasmineRequireObj().toMatchImageSnapshot = function(j$) {
           throw new Error('Expected toMatchImageSnapshot to be called on a promise.');
         }
 
-        if (!expectedValue) {
-          throw new Error('Expected toMatchImageSnapshot to have expectedSnapshot name.');
+        if (typeof expectedValue != 'string') {
+          throw new Error('Expected toMatchImageSnapshot to have a expectedSnapshot name.');
         }
 
         if (expectedValue) {

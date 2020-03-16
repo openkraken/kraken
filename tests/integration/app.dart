@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -37,11 +38,11 @@ void main() {
         String status = await executeTest();
         if (status == 'failed') {
           print('$err with $status.');
+          completer.complete('failed');
         } else {
           print('$pass with $status.');
+          completer.complete('success');
         }
-
-        completer.complete();
       },
     );
 

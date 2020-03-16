@@ -23,6 +23,10 @@ interface HTMLDivElement {
     toBlob(): Promise<Blob>;
 }
 
+interface HTMLElement {
+    toBlob: Function;
+}
+
 /**
  * @deprecated Use {@link jasmine.ImplementationCallback} instead.
  */

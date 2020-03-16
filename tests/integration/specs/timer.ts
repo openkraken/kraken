@@ -5,7 +5,7 @@ describe('setTimeout', function () {
       setTimeout(() => {
         let duration = Date.now() - startTime;
         // 10ms delay accepted
-        expect((duration - 100) < 10).toBe(true);
+        expect((duration - 100) < 15).toBe(true);
         resolve();
       }, 100);
     });
