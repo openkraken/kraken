@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
-import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -9,14 +7,12 @@ import 'package:flutter_driver/driver_extension.dart';
 import '../bridge/from_native.dart';
 import '../bridge/to_native.dart';
 
-String pass = (AnsiPen()..green())('[TEST]');
-String err = (AnsiPen()..red())('[TEST]');
+String pass = (AnsiPen()..green())('[TEST PASS]');
+String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
   initTestFramework();
   registerDartTestMethodsToCpp();
-
-  if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
@@ -24,29 +20,29 @@ void main() {
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {
     Completer<String> completer = Completer();
-    List<dynamic> fileInfo = jsonDecode(payload);
+    List<Map<String, String>> specDescriptions = jsonDecode(payload);
 
-    // preload load test cases
-    for (Map<String, dynamic> file in fileInfo) {
-      String filename = file['filename'];
-      String code = file['code'];
+    // Preload load test cases
+    for (Map<String, String> spec in specDescriptions) {
+      String filename = spec['filename'];
+      String code = spec['code'];
       evaluateTestScripts(code, url: filename);
     }
 
-    // init flutter app at first time
     runApp(
-        shouldInitializeBinding: false,
-        enableDebug: true,
-        afterConnected: () async {
-          String status = await executeTest();
-          if (status == 'failed') {
-            print((AnsiPen()..red())('test $status'));
-          } else {
-            print((AnsiPen()..green())('test $status'));
-          }
+      shouldInitializeBinding: false,
+      enableDebug: true,
+      afterConnected: () async {
+        String status = await executeTest();
+        if (status == 'failed') {
+          print('$err with $status.');
+        } else {
+          print('$pass with $status.');
+        }
 
-          completer.complete();
-        });
+        completer.complete();
+      },
+    );
 
     return completer.future;
   });

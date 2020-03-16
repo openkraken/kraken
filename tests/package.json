@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "pretest": "npm install",
-    "compile:ts": "cd integration && tsc --outDir ./dist",
+    "compile:ts": "cd integration && tsc --outDir ./.specs",
     "test": "flutter pub get && flutter clean && npm run integration",
     "integration": "npm run compile:ts && KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
   },

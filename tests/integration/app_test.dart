@@ -4,30 +4,35 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'dart:io';
 
-final Directory srcDirectory = Directory('./integration/dist');
-final Directory snapshots = Directory('./integration/snapshots');
+final Directory specsDirectory = Directory('./integration/.specs');
+final Directory snapshotsDirectory = Directory('./integration/snapshots');
 
 void main() async {
-  if (!snapshots.existsSync()) {
-    snapshots.createSync();
+  if (!snapshotsDirectory.existsSync()) {
+    snapshotsDirectory.createSync();
   }
 
   FlutterDriver driver = await FlutterDriver.connect();
 
-  List<FileSystemEntity> sources = srcDirectory.listSync(recursive: true);
-  List<Map<String, dynamic>> fileInfo = [];
-  for (FileSystemEntity file in sources) {
-    if (file.path.endsWith(('js'))) {
+  List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);
+  List<Map<String, String>> testPayload = [];
+  for (FileSystemEntity file in specs) {
+    if (file.path.endsWith('js')) {
       String filename = path.basename(file.path);
       String code = File(file.path).readAsStringSync();
-      fileInfo.add({
+      testPayload.add({
         'filename': filename,
-        'code': code
+        'code': code,
       });
     }
   }
 
-  await driver.requestData(jsonEncode(fileInfo));
-
+  await driver.requestData(jsonEncode(testPayload));
   await driver.close();
+}
+
+Future<ProcessResult> exec(String command, List<String> args,
+    { String workingDirectory }) async {
+  return await Process.run(command, args,
+      workingDirectory: workingDirectory, runInShell: true);
 }
