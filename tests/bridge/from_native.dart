@@ -9,7 +9,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/launcher.dart';
 import 'package:test/test.dart';
 
 import 'platform.dart';

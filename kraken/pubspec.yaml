@@ -28,6 +28,8 @@ dependencies:
     path: ../plugins/kraken_audioplayers
   kraken_geolocation:
     path: ../plugins/kraken_geolocation
+  path_provider: ^1.1.0
+  dio: ^2.0.2
 
 dev_dependencies:
   flutter_test:
