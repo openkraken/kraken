@@ -284,7 +284,7 @@ class ElementManager {
         _actionDelegate.removeNode(payload[0]);
         break;
       case 'setStyle':
-        _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
+        _actionDelegate.setStyle(payload[0], payload[1], payload[2].toString());
         break;
       case 'setProperty':
         _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
