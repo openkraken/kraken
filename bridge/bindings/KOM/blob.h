@@ -28,6 +28,7 @@ public:
   void append(JSContext &context, ArrayBufferView &&);
 
   void append(JSContext &context, JSBlob &&);
+  void append(JSContext &context, std::shared_ptr<JSBlob> blob);
 
   void append(JSContext &context, String &&text);
 
@@ -42,17 +43,23 @@ class JSBlob : public HostObject {
 public:
   JSBlob() = delete;
 
-  JSBlob(std::vector<uint8_t> &data) : size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &data) : _size(data.size()), _data(std::move(data)) {}
 
-  JSBlob(std::vector<uint8_t> &&data) : size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &&data) : _size(data.size()), _data(std::move(data)) {}
 
-  JSBlob(std::vector<uint8_t> &&data, std::string &mime) : mimeType(mime), size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &&data, std::string &mime) : mimeType(mime), _size(data.size()), _data(std::move(data)) {}
 
-  JSBlob(std::vector<uint8_t> &data, std::string &mime) : mimeType(mime), size(data.size()), _data(std::move(data)) {}
+  JSBlob(std::vector<uint8_t> &data, std::string &mime) : mimeType(mime), _size(data.size()), _data(std::move(data)) {}
 
   Value get(JSContext &, const PropNameID &name) override;
 
   void set(JSContext &, const PropNameID &name, const Value &value) override;
+
+  /// get an pointer of bytes data from JSBlob
+  uint8_t* bytes();
+
+  /// get bytes data's length
+  int32_t size();
 
   /// the new Blob constructor, return Blob instance.
   static Value constructor(JSContext &context, const Value &thisVal, const Value *args, size_t count);
@@ -71,7 +78,7 @@ public:
 
 private:
   friend BlobBuilder;
-  size_t size;
+  size_t _size;
   std::string mimeType;
   std::vector<uint8_t> _data;
 };
