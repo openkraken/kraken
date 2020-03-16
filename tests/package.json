@@ -8,9 +8,7 @@
   },
   "devDependencies": {
     "chalk": "^3.0.0",
-    "glob": "^7.1.6"
-  },
-  "dependencies": {
+    "glob": "^7.1.6",
     "typescript": "^3.8.3"
   }
 }

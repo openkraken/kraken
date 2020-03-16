@@ -150,11 +150,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       List getItemArgs = args[2];
       String key = getItemArgs[0];
       AsyncStorage.getItem(key).then((String value) {
-        if (value == null) {
-          callback(Utf8.toUtf8(''), context);
-        } else {
-          callback(Utf8.toUtf8(value), context);
-        }
+        callback(Utf8.toUtf8(value ?? ''), context);
       });
     } else if (method == 'setItem') {
       List setItemArgs = args[2];

@@ -50,7 +50,7 @@ describe('setInterval', function () {
       let timer = setInterval(() => {
         count++;
         if (count > 5) {
-          clearTimeout(timer);
+          clearInterval(timer);
           resolve();
         }
       }, 10);
