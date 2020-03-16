@@ -1,3 +1,0 @@
-it('Appear & Disappear', () => {
-
-});
