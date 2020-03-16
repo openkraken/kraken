@@ -1,5 +1,6 @@
 const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
 const path = require('path');
 const { writeFileSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
@@ -19,14 +20,14 @@ const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 const targetDist = join(TARGET_PATH, platform, buildMode.toLowerCase());
 const paths = {
   cli: resolveKraken('cli'),
+  targets: resolveKraken('targets'),
+  scripts: resolveKraken('scripts'),
   app_launcher: resolveKraken('app_launcher'),
   kraken: resolveKraken('kraken'),
   bridge: resolveKraken('bridge'),
   polyfill: resolveKraken('bridge/polyfill'),
   thirdParty: resolveKraken('third_party'),
   devtools: resolveKraken('devtools'),
-  tools: resolveKraken('cli/tools'),
-  jsa: resolveKraken('jsa'),
   tests: resolveKraken('tests')
 };
 
@@ -274,15 +275,32 @@ task('pub-get', (done) => {
   done()
 });
 
-task('upload-dist', (done) => {
-  const filename = `kraken-${os.platform()}-${require('../cli/package.json').version}.tar.gz`;
-  execSync(`tar -zcf ${paths.cli}/vendors/${filename} ./build`, {
-    cwd: __dirname
-  });
-  const filepath = path.join(__dirname, 'vendors', filename);
-  execSync(`node oss.js --ak ${process.env.OSS_AK} --sk ${process.env.OSS_SK} -s ${filepath} -n ${filename}`, {
-    cwd: paths.tools,
-    env: process.env,
+task('pack', (done) => {
+  const { version } = require(join(paths.cli, 'package.json'));
+  const filename = `kraken-${platform}-${version}.tar.gz`;
+  const fileFullPath = join(paths.targets, filename);
+  const source = join(paths.targets, platform);
+  // Make sure packed file not exists.
+  rimraf.sync(fileFullPath);
+
+  try {
+    // Ignore lib files, which is already copied to app shared frameworks.
+    execSync(`tar --exclude ./${platform}/*/lib -zcvf ${filename} ./${platform}`, {
+      cwd: paths.targets,
+      stdio: 'inherit',
+    });
+    done();
+  } catch (err) {
+    done(err.message);
+  }
+});
+
+task('upload', (done) => {
+  const { version } = require(join(paths.cli, 'package.json'));
+  const filename = `kraken-${platform}-${version}.tar.gz`;
+  const fileFullPath = join(paths.targets, filename);
+  execSync(`node oss.js --ak ${process.env.OSS_AK} --sk ${process.env.OSS_SK} -s ${fileFullPath} -n ${filename}`, {
+    cwd: paths.scripts,
     stdio: 'inherit'
   });
   done();
