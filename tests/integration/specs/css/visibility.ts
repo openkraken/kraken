@@ -4,6 +4,7 @@ describe('visibility', () => {
     return new Promise((resolve) => {
       const container1 = document.createElement('div');
       document.body.appendChild(container1);
+
       setStyle(container1, {
         backgroundColor: '#f40',
         width: '200px',

@@ -8,7 +8,7 @@ describe('background', () => {
     });
 
     document.body.appendChild(div);
-    expectAsync(div.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(div.toBlob()).toMatchImageSnapshot('');
   });
 
   it('backgroundRepeat', async () => {
@@ -67,7 +67,7 @@ describe('background', () => {
     });
   });
 
-  it('backgroundPosition', () => {
+  it('backgroundPosition', async () => {
 
     // position
     const position = document.createElement('div');
@@ -125,6 +125,6 @@ describe('background', () => {
     position.appendChild(position5);
     document.body.appendChild(position);
 
-    expectAsync(position.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(position.toBlob()).toMatchImageSnapshot('');
   });
 });
