@@ -297,17 +297,6 @@ task('bridge-test', (done) => {
   done();
 });
 
-task('patch-flutter-tester', (done) => {
-  const flutterBin = execSync('which flutter', {
-    encoding: 'utf-8'
-  });
-  const flutterRoot = flutterBin.split('/').slice(0, -1).join('/');
-  execSync(`codesign --remove-signature ${flutterRoot}/cache/artifacts/engine/darwin-x64/flutter_tester`, {
-    stdio: 'inherit'
-  });
-  done();
-});
-
 task('integration-test', (done) => {
   const { status } = spawnSync('npm', ['run', 'integration'], {
     stdio: 'inherit',
@@ -319,23 +308,6 @@ task('integration-test', (done) => {
   } else {
     done();
   }
-});
-
-task('js-api-test', (done) => {
-  fork(path.join(paths.tests, 'unit/js_api/tools/simple_server.js'));
-  execSync('flutter test ./unit/js_api/bootstrap.dart', {
-    env: {
-      ...process.env,
-      KRAKEN_LIBRARY_PATH: libOutputPath
-    },
-    stdio: 'inherit',
-    cwd: paths.tests
-  });
-  execSync('node ./scripts/bootstrap_unit_test', {
-    stdio: 'inherit',
-    cwd: paths.tests
-  });
-  done();
 });
 
 task('build-embedded-assets', (done) => {
