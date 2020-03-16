@@ -1,16 +1,16 @@
-const {EventEmitter} = require('events');
+const { EventEmitter } = require('events');
 const jasmineCore = require('./jasmine.js');
 const ConsoleReporter = require('jasmine/lib/reporters/console_reporter');
 const jasmine = jasmineCore.core(jasmineCore);
-const env = jasmine.getEnv({suppressLoadErrors: true});
+const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
 
 class JasmineTracker extends EventEmitter {
   constructor() {
     super();
-    this.onJasmineStarted = () => {};
-    this.onJasmineDone = () => {};
-    this.onSpecStarted = () => {};
+    this.onJasmineStarted = () => { };
+    this.onJasmineDone = () => { };
+    this.onSpecStarted = () => { };
   }
 
   jasmineStarted(result) {
@@ -58,7 +58,8 @@ Object.assign(global, jasmineInterface);
 __kraken_executeTest__((done) => {
   jasmineTracker.onSpecStarted = (result) => {
     return new Promise((resolve, reject) => {
-      __kraken_refresh_paint__(function() {
+      __request_update_frame__();
+      __kraken_refresh_paint__(function () {
         resolve();
       });
     });

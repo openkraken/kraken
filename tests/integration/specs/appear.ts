@@ -7,6 +7,7 @@ describe('appear', () => {
       div.style.backgroundColor = 'red';
 
       let triggered = false;
+
       div.addEventListener('disappear', () => {
         // Only trigger once, in case of test case error.
         if (triggered) return;

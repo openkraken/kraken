@@ -388,7 +388,6 @@ describe('Response', function () {
         .then(function (json) {
           expect(json.method).toBe('GET');
           expect(json.data.userName).toBe('12345');
-          console.log(json);
         })
     });
 

@@ -83,3 +83,12 @@ export function toBlob(id: number) {
     });
   });
 }
+
+// Expose requestUpdateFrame for test framewotk to force
+// flush frames before spec finished.
+Object.defineProperty(global, '__request_update_frame__', {
+  enumerable: true,
+  writable: false,
+  configurable: false,
+  value: requestUpdateFrame,
+});

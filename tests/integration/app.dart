@@ -20,10 +20,11 @@ void main() {
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {
     Completer<String> completer = Completer();
-    List<Map<String, String>> specDescriptions = jsonDecode(payload);
+    List specDescriptions = jsonDecode(payload);
+
 
     // Preload load test cases
-    for (Map<String, String> spec in specDescriptions) {
+    for (Map spec in specDescriptions) {
       String filename = spec['filename'];
       String code = spec['code'];
       evaluateTestScripts(code, url: filename);
