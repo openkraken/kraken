@@ -428,34 +428,34 @@ abstract class Element extends Node
       ZIndexParentData progressParentData = zIndexParentData;
 
       if (transitionMap != null) {
-        allTransition = transitionMap["all"];
-        if (style['top'] != _style['top']) {
-          topTransition = transitionMap["top"];
-          topDiff = Length.toDisplayPortValue(style['top']) - (_style['top'] ?? 0);
-          topBase = _style['top'] ?? 0;
+        allTransition = transitionMap['all'];
+        if (style.top != _style.top) {
+          topTransition = transitionMap['top'];
+          topDiff = (style.top ?? 0) - (_style.top ?? 0);
+          topBase = _style.top ?? 0;
         }
-        if (style['left'] != _style['left']) {
-          leftTransition = transitionMap["left"];
+        if (style.left != _style.left) {
+          leftTransition = transitionMap['left'];
           leftDiff = (style.left ?? 0) - (_style.left ?? 0);
           leftBase = _style.left ?? 0;
         }
-        if (style['right'] != _style['right']) {
-          rightTransition = transitionMap["right"];
+        if (style.right != _style.right) {
+          rightTransition = transitionMap['right'];
           rightDiff = (style.right ?? 0) - (_style.left ?? 0);
           rightBase = _style.right ?? 0;
         }
-        if (style['bottom'] != _style['bottom']) {
-          bottomTransition = transitionMap["bottom"];
+        if (style.bottom != _style.bottom) {
+          bottomTransition = transitionMap['bottom'];
           bottomDiff = (style.bottom ?? 0) - (_style.bottom ?? 0);
           bottomBase = _style.bottom ?? 0;
         }
-        if (style['width'] != _style['width']) {
-          widthTransition = transitionMap["width"];
+        if (style.width != _style.width) {
+          widthTransition = transitionMap['width'];
           widthDiff = (style.width ?? 0) - (_style.width ?? 0);
           widthBase = _style.bottom ?? 0;
         }
-        if (style['height'] != _style['height']) {
-          heightTransition = transitionMap["height"];
+        if (style.height != _style.height) {
+          heightTransition = transitionMap['height'];
           heightDiff = (style.height ?? 0) - (_style.height ?? 0);
           heightBase = _style.height ?? 0;
         }
@@ -935,7 +935,7 @@ abstract class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void updateTextNodeStyle() {
+  void updateChildNodesStyle() {
     childNodes.forEach((node) {
       if (node is TextNode) node.updateTextStyle();
     });

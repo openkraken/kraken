@@ -10,7 +10,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
 
-
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
@@ -447,7 +446,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       List<Method> methods = Method.parseMethod(style['backgroundImage']);
       for (Method method in methods) {
         if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : "";
+          String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url, style);
           }
@@ -458,22 +457,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     }
     Color color = getBackgroundColor(style);
 
-    TransitionBorderSide defaultBorderSide =
-        TransitionBorderSide(0, 0, 0, 0, 0, defaultBorderStyle);
 
-    TransitionBorderSide leftSide = defaultBorderSide;
-    TransitionBorderSide topSide = defaultBorderSide;
-    TransitionBorderSide rightSide = defaultBorderSide;
-    TransitionBorderSide bottomSide = defaultBorderSide;
-    if (style.contains('border')) {
-      leftSide = topSide =
-          rightSide = bottomSide = getBorderSide(style['border'] ?? '');
-    }
-
-    leftSide = getBorderSideByStyle(style, 'Left', leftSide);
-    topSide = getBorderSideByStyle(style, 'Top', topSide);
-    rightSide = getBorderSideByStyle(style, 'Right', rightSide);
-    bottomSide = getBorderSideByStyle(style, 'Bottom', bottomSide);
+    TransitionBorderSide leftSide = getBorderSideByStyle(style, 'Left');
+    TransitionBorderSide topSide = getBorderSideByStyle(style, 'Top');
+    TransitionBorderSide rightSide = getBorderSideByStyle(style, 'Right');
+    TransitionBorderSide bottomSide = getBorderSideByStyle(style, 'Bottom');
 
     return TransitionDecoration(
         color?.alpha,
@@ -571,7 +559,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     return backgroundColor;
   }
 
-  static RegExp spaceRegExp = RegExp(r" ");
+  static RegExp spaceRegExp = RegExp(r' ');
   List<String> getShorttedProperties(String input) {
     assert(input != null);
     return input.trim().split(spaceRegExp);
@@ -593,42 +581,96 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     }
     return borderStyle;
   }
-
-  TransitionBorderSide getBorderSide(String input) {
+  // TODO: Shortted order in web not keep in same order
+  Map _getShorttedInfoFromString(String input) {
     List<String> splittedBorder = getShorttedProperties(input);
-    Color color = splittedBorder.length > 2
-        ? WebColor.generate(splittedBorder[2])
-        : defaultBorderColor;
-    BorderStyle style = splittedBorder.length > 1
-        ? getBorderStyle(splittedBorder[1])
-        : defaultBorderStyle;
-    double width = splittedBorder.length > 0
-        ? Length.toDisplayPortValue(splittedBorder[0])
-        : defaultBorderLineWidth;
 
-    return TransitionBorderSide(
-        color.alpha, color.red, color.green, color.blue, width, style);
+    double width = splittedBorder.length > 0
+      ? Length.toDisplayPortValue(splittedBorder[0])
+      : null;
+
+    BorderStyle style = splittedBorder.length > 1
+      ? getBorderStyle(splittedBorder[1])
+      : null;
+
+    Color color = splittedBorder.length > 2
+      ? WebColor.generate(splittedBorder[2])
+      : null;
+
+    return {
+      'Color': color,
+      'Style': style,
+      'Width': width
+    };
   }
 
-  TransitionBorderSide getBorderSideByStyle(
-      CSSStyleDeclaration style, String side, TransitionBorderSide borderSide) {
-    if (style.contains('border' + side)) {
-      borderSide = getBorderSide(style['border' + side] ?? '');
+  // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
+  TransitionBorderSide getBorderSideByStyle(CSSStyleDeclaration style, String side) {
+    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, 0, defaultBorderStyle);
+    final String borderName = 'border';
+    final String borderSideName = borderName + side; // eg. borderLeft/borderRight
+    // Same with the key in shortted info map
+    final String widthName = 'Width';
+    final String styleName = 'Style';
+    final String colorName = 'Color';
+    Map borderShorttedInfo;
+    Map borderSideShorttedInfo;
+    if (style.contains(borderName)){
+      borderShorttedInfo = _getShorttedInfoFromString(style[borderName]);
     }
-    if (style.contains('border' + side + 'Width')) {
-      borderSide.borderWidth =
-          Length.toDisplayPortValue(style['border' + side + 'Width']);
+
+    if (style.contains(borderSideName)) {
+      borderSideShorttedInfo = _getShorttedInfoFromString(style[borderSideName]);
     }
-    if (style.contains('border' + side + 'Style')) {
-      borderSide.borderStyle = getBorderStyle(style['border' + side + 'Style']);
+
+    // Set border width
+    final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
+    final String borderWidthName = borderName + widthName; // borderWidth
+    if (style.contains(borderSideWidthName) &&
+      (style[borderSideWidthName] as String).isNotEmpty) {
+      borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
+    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
+      borderSide.borderWidth = borderSideShorttedInfo[widthName];
+    } else if (style.contains(borderWidthName)) {
+      borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
+    } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
+      borderSide.borderWidth = borderShorttedInfo[widthName];
     }
-    if (style.contains('border' + side + 'Color')) {
-      Color borderColor = WebColor.generate(style['border' + side + 'Color']);
+
+    // Set border style
+    final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
+    final String borderStyleName = borderName + widthName; // borderStyle
+    if (style.contains(borderSideStyleName)) {
+      borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
+    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[styleName] != null) {
+      borderSide.borderStyle = borderSideShorttedInfo[styleName];
+    } else if (style.contains(borderStyleName)) {
+      borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
+    } else if (borderShorttedInfo != null && borderShorttedInfo[styleName] != null) {
+      borderSide.borderStyle = borderShorttedInfo[styleName];
+    }
+
+    // Set border color
+    Color borderColor;
+    final String borderSideColorName = borderSideName + colorName; // eg. borderLeftColor/borderRightColor
+    final String borderColorName = borderName + colorName; // borderColor
+    if (style.contains(borderSideColorName)) {
+      borderColor = WebColor.generate(style[borderSideColorName]);
+    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[colorName] != null) {
+      borderColor = borderSideShorttedInfo[colorName];
+    } else if (style.contains(borderColorName)) {
+      borderColor = WebColor.generate(style[borderColorName]);
+    } else if (borderShorttedInfo != null && borderShorttedInfo[colorName] != null) {
+      borderColor = borderShorttedInfo[colorName];
+    }
+
+    if (borderColor != null) {
       borderSide.borderAlpha = borderColor.alpha;
       borderSide.borderRed = borderColor.red;
       borderSide.borderGreen = borderColor.green;
       borderSide.borderBlue = borderColor.blue;
     }
+
     return borderSide;
   }
 }
