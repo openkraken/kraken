@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
