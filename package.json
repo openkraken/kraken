@@ -8,6 +8,7 @@
     "build:macos": "node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
+    "upload": "node scripts/pack_and_upload",
     "pretest": "npm i && node scripts/build_darwin_dylib",
     "test": "node scripts/run_test.js",
     "test:unit": "cd tests && npm run unit",
@@ -25,12 +26,14 @@
     "w3c"
   ],
   "devDependencies": {
-    "ali-oss": "^6.4.0",
+    "ali-oss": "^6.5.1",
     "chalk": "^3.0.0",
+    "commander": "^5.0.0",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "minimist": "^1.2.4",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "rimraf": "^3.0.2"
   },
   "author": "Kraken Team"
 }

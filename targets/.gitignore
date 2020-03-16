@@ -3,3 +3,4 @@ linux
 ios
 android
 darwin
+*.tar.gz

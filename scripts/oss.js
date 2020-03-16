@@ -1,11 +1,11 @@
-const OSS = require('ali-oss');
 const fs = require('fs');
 const chalk = require('chalk');
 const { execSync } = require('child_process');
-const packageJSON = require('../package.json');
 const os = require('os');
 const path = require('path');
 const program = require('commander');
+const OSS = require('ali-oss');
+const packageJSON = require('../package.json');
 
 program
   .version(packageJSON.version)
@@ -41,6 +41,8 @@ if (!path.isAbsolute(source)) {
 }
 
 const client = createClient(program.ak, program.sk);
+console.log('[Tips]: Uploading', source);
+
 upload(client, `kraken-cli-vendors/${program.name}`, source).then(() => {
   console.log(chalk.green('Uploaded successfully.'));
 }).catch((err) => {

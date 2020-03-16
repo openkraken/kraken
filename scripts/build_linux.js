@@ -32,7 +32,7 @@ series(
     'build-kraken-embedded-lib',
     'build-embedded-assets'
   ),
-  uploadToOSS ? 'upload-dist' : []
+  uploadToOSS ? ['pack', 'upload'] : []
 )((err) => {
   if (err) {
     console.log(err);
