@@ -24,6 +24,18 @@ TEST(Blob, initWithString) {
   EXPECT_EQ(size, 4);
 }
 
+TEST(Blob, initWithAnotherBlob) {
+  std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
+  jsa::JSContext *context = bridge->getContext();
+  jsa::Value result = bridge->evaluateScript(R"(
+var blob = new Blob(['1234']);
+new Blob([blob]);
+)", "internal://", 0);
+  EXPECT_EQ(result.isObject(), true);
+  size_t size = result.getObject(*context).getProperty(*context, "size").getNumber();
+  EXPECT_EQ(size, 4);
+}
+
 TEST(Blob, initWithArrayBuffer) {
   std::unique_ptr<kraken::JSBridge> bridge = std::make_unique<kraken::JSBridge>(handleError);
   jsa::JSContext *context = bridge->getContext();

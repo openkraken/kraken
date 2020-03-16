@@ -2,14 +2,13 @@
   "private": true,
   "scripts": {
     "pretest": "npm install",
-    "test": "flutter pub get && flutter clean && npm run unit && npm run integration",
-    "unit": "npm run unit:kraken && npm run unit:js_api",
-    "unit:kraken": "node ./scripts/bootstrap_unit_test",
-    "unit:js_api": "KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter test ./unit/js_api/bootstrap.dart",
-    "integration": "KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
+    "compile:ts": "cd integration && tsc --outDir ./dist",
+    "test": "flutter pub get && flutter clean && npm run integration",
+    "integration": "npm run compile:ts && KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/debug/lib/ flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
   },
   "devDependencies": {
     "chalk": "^3.0.0",
-    "glob": "^7.1.6"
+    "glob": "^7.1.6",
+    "typescript": "^3.8.3"
   }
 }

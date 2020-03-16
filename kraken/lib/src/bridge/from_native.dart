@@ -127,7 +127,12 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       callback(Utf8.toUtf8(json), context);
     }).catchError((e) {
       String errorMessage = e is HTTPException ? e.message : e.toString();
-      String json = jsonEncode([errorMessage, e.response.statusCode, '']);
+      String json;
+      if (e is HTTPException) {
+        json = jsonEncode([errorMessage, e.response.statusCode, '']);
+      } else {
+        json = jsonEncode([errorMessage, null, '']);
+      }
       callback(Utf8.toUtf8(json), context);
     });
   } else if (module == 'DeviceInfo') {
@@ -145,7 +150,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       List getItemArgs = args[2];
       String key = getItemArgs[0];
       AsyncStorage.getItem(key).then((String value) {
-        callback(Utf8.toUtf8(value), context);
+        callback(Utf8.toUtf8(value ?? ''), context);
       });
     } else if (method == 'setItem') {
       List setItemArgs = args[2];

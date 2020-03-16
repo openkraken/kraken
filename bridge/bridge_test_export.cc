@@ -25,8 +25,6 @@ void initTestFramework() {
 int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine) {
   if (inited == false) return 0;
 
-  std::cout << code << std::endl;
-
   return bridgeTest->evaluateTestScripts(std::string(code), std::string(bundleFilename), startLine);
 }
 
@@ -34,30 +32,14 @@ void registerJSError(OnJSError jsError) {
   kraken::registerJSError(jsError);
 }
 
-void registerDescribe(Describe describe) {
-  kraken::registerDescribe(describe);
+void executeTest(ExecuteCallback executeCallback) {
+  bridgeTest->invokeExecuteTest(executeCallback);
 }
 
-void registerIt(It it) {
-  kraken::registerIt(it);
+void registerRefreshPaint(RefreshPaint refreshPaint) {
+  kraken::registerRefreshPaint(refreshPaint);
 }
 
-void registerItDone(ItDone itDone) {
-  kraken::registerItDone(itDone);
-}
-
-void registerBeforeEach(BeforeEach beforeEach) {
-  kraken::registerBeforeEach(beforeEach);
-}
-
-void registerBeforeAll(BeforeAll beforeAll) {
-  kraken::registerBeforeAll(beforeAll);
-}
-
-void registerAfterEach(AfterEach afterEach) {
-  kraken::registerAfterEach(afterEach);
-}
-
-void registerAfterAll(AfterAll afterAll) {
-  kraken::registerAfterAll(afterAll);
+void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
+  kraken::registerMatchImageSnapshot(matchImageSnapshot);
 }

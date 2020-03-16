@@ -60,11 +60,21 @@ Future<void> unmountApp() async {
   }
 }
 
+// refresh flutter paint and reload js context
 void reloadApp() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
   appLoading = true;
   await unmountApp();
   await reloadJSContext();
+  appLoading = false;
+  connect(prevShowPerformanceOverlay);
+}
+
+// refresh flutter paint only
+Future<void> refreshPaint() async {
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  appLoading = true;
+  await unmountApp();
   appLoading = false;
   connect(prevShowPerformanceOverlay);
 }

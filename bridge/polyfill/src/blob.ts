@@ -5,6 +5,17 @@ export class Blob {
   public type: string;
   private blob: KrakenBlob;
   constructor(blobParts?: BlobPart[], options?: BlobPropertyBag) {
+    if (Array.isArray(blobParts)) {
+      // extract internal hostObject from polyfill wrapper.
+      blobParts = blobParts.map(item => {
+        if (item instanceof Blob) {
+          // @ts-ignore
+          return item.blob;
+        }
+        return item;
+      });
+    }
+
     let blob = krakenBlob(blobParts, options);
     this.blob = blob;
     this.size = blob.size;

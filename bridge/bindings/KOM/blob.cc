@@ -40,6 +40,12 @@ void BlobBuilder::append(JSContext &context, JSBlob &&blob) {
   _data.insert(_data.end(), blobData.begin(), blobData.end());
 }
 
+void BlobBuilder::append(JSContext &context, std::shared_ptr<JSBlob> blob) {
+  std::vector<uint8_t> blobData = blob->_data;
+  _data.reserve(_data.size() + blobData.size());
+  _data.insert(_data.end(), blobData.begin(), blobData.end());
+}
+
 void BlobBuilder::append(JSContext &context, Value &value) {
   if (value.isString()) {
     append(context, value.getString(context));
@@ -56,6 +62,9 @@ void BlobBuilder::append(JSContext &context, Value &value) {
       append(context, obj.getArrayBuffer(context));
     } else if (obj.isArrayBufferView(context)) {
       append(context, obj.getArrayBufferView(context));
+    } else if (obj.isHostObject(context)) {
+      std::shared_ptr<JSBlob> blob = obj.getHostObject<JSBlob>(context);
+      append(context, blob);
     }
   }
 }
@@ -69,7 +78,7 @@ Value JSBlob::get(JSContext &context, const PropNameID &name) {
 
   // lower method of new Blob();
   if (_name == "size") {
-    return Value((int)size);
+    return Value((int)_size);
   } else if (_name == "type") {
     return String::createFromUtf8(context, mimeType);
   } else if (_name == "slice") {
@@ -173,6 +182,14 @@ Value JSBlob::arrayBuffer(JSContext &context, const Value &thisVal, const Value 
   return ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
     // there is no need to collect blob's memory
   });
+}
+
+uint8_t *JSBlob::bytes() {
+  return _data.data();
+}
+
+int32_t JSBlob::size() {
+  return _data.size();
 }
 
 void bindBlob(std::unique_ptr<JSContext> &context) {

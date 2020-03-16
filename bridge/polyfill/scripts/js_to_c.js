@@ -30,11 +30,11 @@ const getPolyFillSource = (source, outputName) => `/*
 
 #include "${outputName.toLowerCase()}.h"
 
-static const char* jsCode = R"(${source})";
+static std::string jsCode = std::string(R"(${source})");
 
 void initKraken${outputName}(alibaba::jsa::JSContext *context) {
   try {
-    context->evaluateJavaScript(jsCode, "internal://", 0);
+    context->evaluateJavaScript(jsCode.c_str(), "internal://", 0);
   } catch (alibaba::jsa::JSError &error) {
     context->reportError(error);
   }
@@ -42,7 +42,7 @@ void initKraken${outputName}(alibaba::jsa::JSContext *context) {
 `;
 
 function convertJSToCpp(code, outputName) {
-  code = code.replace(')"', ')\\"');
+  code = code.replace(/\)\"/g, '))") + std::string(R"("');
   return getPolyFillSource(code, outputName);
 }
 
@@ -66,7 +66,7 @@ function getAbsolutePath(p) {
 let sourcePath = getAbsolutePath(source);
 let outputPath = getAbsolutePath(output);
 
-let jsCode = fs.readFileSync(sourcePath, { encoding: 'utf-8' });
+let jsCode = fs.readFileSync(sourcePath, {encoding: 'utf-8'});
 
 let headerSource = getPolyFillHeader(outputName);
 let ccSource = convertJSToCpp(jsCode, outputName);

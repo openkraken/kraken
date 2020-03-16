@@ -1,22 +1,20 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart'
-    show debugDefaultTargetPlatformOverride, TargetPlatform;
-import 'package:kraken/element.dart';
+import 'dart:io';
+import 'dart:async';
+import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, TargetPlatform;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/src/bridge/from_native.dart';
+import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import '../bridge/from_native.dart';
 import '../bridge/to_native.dart';
 
+String pass = (AnsiPen()..green())('[TEST]');
+String err = (AnsiPen()..red())('[TEST]');
+
 void main() {
-  testEnvironment = TestEnvironment.Integration;
   initTestFramework();
   registerDartTestMethodsToCpp();
-  registerDartMethodsToCpp();
 
   if (Platform.isMacOS) debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -24,35 +22,31 @@ void main() {
   TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
-  enableFlutterDriverExtension(handler: (String message) async {
-    Completer<String> completer = new Completer();
-    await unmountApp();
+  enableFlutterDriverExtension(handler: (String payload) async {
+    Completer<String> completer = Completer();
+    List<dynamic> fileInfo = jsonDecode(payload);
 
-    var ret = jsonDecode(message);
-    if (ret['type'] == 'startup') {
-      String payload = ret['payload'];
-      String caseName = ret['case'];
-      runApp(
+    // preload load test cases
+    for (Map<String, dynamic> file in fileInfo) {
+      String filename = file['filename'];
+      String code = file['code'];
+      evaluateTestScripts(code, url: filename);
+    }
+
+    // init flutter app at first time
+    runApp(
         shouldInitializeBinding: false,
         enableDebug: true,
-        afterConnected: () {
-          onItDone((String errmsg) async {
-            if (errmsg != null) {
-              completer.completeError(Exception(errmsg));
-            } else {
-              BodyElement body = ElementManager().getRootElement();
-              // Force wait to execute async ops.
-              await Future.delayed(const Duration(milliseconds: 200));
-              Uint8List bodyImage = await body.toBlob(devicePixelRatio: 1.0);
-              List<int> bodyImageList = bodyImage.toList();
-              completer.complete(jsonEncode(bodyImageList));
-            }
-          });
+        afterConnected: () async {
+          String status = await executeTest();
+          if (status == 'failed') {
+            print((AnsiPen()..red())('test $status'));
+          } else {
+            print((AnsiPen()..green())('test $status'));
+          }
 
-          evaluateTestScripts(payload, url: caseName);
-        },
-      );
-    }
+          completer.complete();
+        });
 
     return completer.future;
   });
