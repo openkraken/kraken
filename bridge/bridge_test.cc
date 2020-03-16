@@ -3,241 +3,16 @@
  * Author: Kraken Team.
  */
 
+#include "bindings/KOM/blob.h"
 #include "bridge_test.h"
 #include "callback_context.h"
 #include "dart_methods.h"
-#include "jsa.h"
 #include "testframework.h"
+#include <iostream>
 
 namespace kraken {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
-
-Value describe(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count < 2) {
-    throw JSError(context, "2 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &name = args[0];
-  const Value &func = args[1];
-
-  if (!name.isString()) {
-    throw JSError(context, "failed to execute 'describe': parameter 1 (name) should be a string.");
-  }
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'describe': parameter 2 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_unique<Value>(Value(context, func));
-
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-    ctx->_callback->getObject(context).getFunction(context).call(context);
-
-    delete ctx;
-  };
-
-  if (getDartMethod()->describe == nullptr) {
-    throw JSError(context, "failed to execute 'describe': dart method (describe) is not registered.");
-  }
-
-  getDartMethod()->describe(name.getString(context).utf8(context).c_str(), static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
-
-Value it(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count < 2) {
-    throw JSError(context, "2 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &name = args[0];
-  const Value &func = args[1];
-
-  if (!name.isString()) {
-    throw JSError(context, "failed to execute 'it': parameter 1 (name) should be a string.");
-  }
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'it': parameter 2 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_unique<Value>(Value(context, func));
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data, int32_t completerId) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-
-    if (getDartMethod()->itDone == nullptr) {
-      throw JSError(context, "failed to execute 'done': dart method (itDone) is not registered.");
-    }
-
-    // the callback when js callback resolved with done();
-    auto doneCallback = [=](JSContext &context, const Value &thisVal, const Value *args, size_t count) -> Value {
-      if (count == 0) {
-        // notify dart this test is success.
-        getDartMethod()->itDone(completerId, nullptr);
-        return Value::undefined();
-      }
-
-      if (count > 1) {
-        throw JSError(context, "failed to execute 'done': only 1 parameter is accepted.");
-      }
-
-      const Value &error = args[0];
-      if (error.isObject()) {
-        JSError err(context, Value(context, error));
-        getDartMethod()->itDone(completerId, err.what());
-      } else {
-        JSError err(context, error.toString(context).utf8(context));
-        getDartMethod()->itDone(completerId, err.what());
-      }
-
-      // clear CallbackContext's memory
-      return Value::undefined();
-    };
-
-    ctx->_callback->getObject(context).getFunction(context).call(
-      context, {Function::createFromHostFunction(context, PropNameID::forAscii(context, "done"), 1, doneCallback)});
-  };
-
-  if (getDartMethod()->it == nullptr) {
-    throw JSError(context, "failed to execute 'it': dart method (it) is not registered.");
-  }
-
-  getDartMethod()->it(name.getString(context).utf8(context).c_str(), static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
-
-Value beforeEach(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count != 1) {
-    throw JSError(context, "1 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &func = args[0];
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'beforEach': parameter 1 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, func));
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-
-    if (getDartMethod()->beforeEach == nullptr) {
-      throw JSError(context, "failed to execute 'beforeEach': dart method (beforeEach) is not registered.");
-    }
-
-    ctx->_callback->getObject(context).getFunction(context).call(context);
-  };
-
-  if (getDartMethod()->beforeEach == nullptr) {
-    throw JSError(context, "failed to execute 'beforeEach': dart method (beforEach) is not registered.");
-  }
-
-  getDartMethod()->beforeEach(static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
-
-Value beforeAll(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count != 1) {
-    throw JSError(context, "1 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &func = args[0];
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'beforeAll': parameter 1 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, func));
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-
-    if (getDartMethod()->beforeAll == nullptr) {
-      throw JSError(context, "failed to execute 'beforeAll': dart method (beforeAll) is not registered.");
-    }
-
-    ctx->_callback->getObject(context).getFunction(context).call(context);
-  };
-
-  if (getDartMethod()->beforeAll == nullptr) {
-    throw JSError(context, "failed to execute 'beforeAll': dart method (beforeAll) is not registered.");
-  }
-
-  getDartMethod()->beforeAll(static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
-
-Value afterEach(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count != 1) {
-    throw JSError(context, "1 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &func = args[0];
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'afterEach': parameter 1 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, func));
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-
-    if (getDartMethod()->afterEach == nullptr) {
-      throw JSError(context, "failed to execute 'afterEach': dart method (afterEach) is not registered.");
-    }
-
-    ctx->_callback->getObject(context).getFunction(context).call(context);
-  };
-
-  if (getDartMethod()->afterEach == nullptr) {
-    throw JSError(context, "failed to execute 'afterEach': dart method (afterEach) is not registered.");
-  }
-
-  getDartMethod()->afterEach(static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
-
-Value afterAll(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  if (count != 1) {
-    throw JSError(context, "1 argument required, but only " + std::to_string(count) + " present.");
-  }
-
-  const Value &func = args[0];
-  if (!func.isObject() || !func.getObject(context).isFunction(context)) {
-    throw JSError(context, "failed to execute 'afterAll': parameter 1 (func) should be a function.");
-  }
-
-  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, func));
-  auto *ctx = new CallbackContext(context, callbackValue);
-  auto callback = [](void *data) {
-    auto *ctx = static_cast<CallbackContext *>(data);
-    JSContext &context = ctx->_context;
-
-    if (getDartMethod()->afterAll == nullptr) {
-      throw JSError(context, "failed to execute 'afterAll': dart method (afterAll) is not registered.");
-    }
-
-    ctx->_callback->getObject(context).getFunction(context).call(context);
-  };
-
-  if (getDartMethod()->afterAll== nullptr) {
-    throw JSError(context, "failed to execute 'afterALl': dart method (afterAll) is not registered.");
-  }
-
-  getDartMethod()->afterAll(static_cast<void *>(ctx), callback);
-
-  return Value::undefined();
-}
 
 bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::string &url, int startLine) {
   if (!context->isValid()) return false;
@@ -245,15 +20,114 @@ bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::str
   return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
 }
 
-JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
-  JSA_BINDING_FUNCTION(*context, context->global(), "describe", 2, describe);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_it__", 2, it);
-  JSA_BINDING_FUNCTION(*context, context->global(), "beforeEach", 1, beforeEach);
-  JSA_BINDING_FUNCTION(*context, context->global(), "beforeAll", 1, beforeAll);
-  JSA_BINDING_FUNCTION(*context, context->global(), "afterEach", 1, afterEach);
-  JSA_BINDING_FUNCTION(*context, context->global(), "afterAll", 1, afterAll);
+std::shared_ptr<Value> executeTestCallback{nullptr};
 
+Value executeTest(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &callback = args[0];
+
+  if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+  }
+
+  executeTestCallback = std::make_shared<Value>(Value(context, args[0]));
+
+  return Value::undefined();
+}
+
+Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &callback = args[0];
+
+  if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.");
+  }
+
+  if (getDartMethod()->refreshPaint == nullptr) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_refresh_paint__': dart method (refreshPaint) is not registered.");
+  }
+
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
+  auto ctx = new CallbackContext(context, callbackValue);
+
+  auto fn = [](void *data) {
+    auto ctx = static_cast<CallbackContext *>(data);
+    JSContext &context = ctx->_context;
+    ctx->_callback->getObject(context).getFunction(context).call(context);
+    delete ctx;
+  };
+
+  getDartMethod()->refreshPaint(static_cast<void *>(ctx), fn);
+
+  return Value::undefined();
+}
+
+Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &blob = args[0];
+  const Value &screenShotName = args[1];
+  const Value &callback = args[2];
+
+  if (!blob.isObject() || !blob.getObject(context).isHostObject(context)) {
+    throw JSError(context, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.");
+  }
+
+  if (!screenShotName.isString()) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.");
+  }
+
+  if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
+  }
+
+  if (getDartMethod()->matchImageSnapshot == nullptr) {
+    throw JSError(context,
+                  "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
+  }
+
+  std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
+
+  std::string &&name = screenShotName.getString(context).utf8(context);
+  std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
+  auto ctx = new CallbackContext(context, callbackValue);
+
+  auto fn = [](void *data, int8_t result) {
+    auto ctx = static_cast<CallbackContext *>(data);
+    JSContext &context = ctx->_context;
+    ctx->_callback->getObject(context).getFunction(context).call(context, {Value(static_cast<bool>(result))});
+    delete ctx;
+  };
+
+  getDartMethod()->matchImageSnapshot(jsBlob->bytes(), jsBlob->size(), name.c_str(), static_cast<void *>(ctx), fn);
+
+  return Value::undefined();
+}
+
+JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
   initKrakenTestFramework(bridge->getContext());
+}
+
+void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
+  if (executeTestCallback == nullptr) {
+    return;
+  }
+
+  auto done = [=](JSContext &context, const Value &thisVal, const Value *args, size_t count) -> Value {
+    const Value &status = args[0];
+    if (!status.isString()) {
+      throw JSError(context, "failed to execute 'done': parameter 1 (status) is not a string");
+    }
+    executeCallback(status.getString(context).utf8(context).c_str());
+    return Value::undefined();
+  };
+
+  executeTestCallback->getObject(*context).getFunction(*context).call(
+    *context, {Function::createFromHostFunction(*context, PropNameID::forUtf8(*context, "done"), 0, done)});
+  executeTestCallback.reset();
+  executeTestCallback = nullptr;
 }
 
 } // namespace kraken

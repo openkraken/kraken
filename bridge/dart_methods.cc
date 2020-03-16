@@ -83,32 +83,12 @@ void registerJSError(OnJSError onJsError) {
   methodPointer->onJsError = onJsError;
 }
 
-void registerDescribe(Describe describe) {
-  methodPointer->describe = describe;
+void registerRefreshPaint(RefreshPaint refreshPaint) {
+  methodPointer->refreshPaint = refreshPaint;
 }
 
-void registerIt(It it) {
-  methodPointer->it = it;
-}
-
-void registerItDone(ItDone itDone) {
-  methodPointer->itDone = itDone;
-}
-
-void registerBeforeEach(BeforeEach beforeEach) {
-  methodPointer->beforeEach = beforeEach;
-}
-
-void registerBeforeAll(BeforeAll beforeAll) {
-  methodPointer->beforeAll = beforeAll;
-}
-
-void registerAfterEach(AfterEach afterEach) {
-  methodPointer->afterEach = afterEach;
-}
-
-void registerAfterAll(AfterAll afterAll) {
-  methodPointer->afterAll = afterAll;
+void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
+  methodPointer->matchImageSnapshot = matchImageSnapshot;
 }
 
 } // namespace kraken

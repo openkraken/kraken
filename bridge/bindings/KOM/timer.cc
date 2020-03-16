@@ -109,6 +109,10 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
     throw JSError(context, "Failed to execute 'setInterval': 1 argument required, but only 0 present.");
   }
 
+  if (!args->isObject() || !args->getObject(context).isFunction(context)) {
+    throw JSError(context, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
+  }
+
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 

@@ -32,13 +32,8 @@ struct DartMethodPointer {
   StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
-  Describe describe{nullptr};
-  It it{nullptr};
-  ItDone itDone{nullptr};
-  BeforeEach beforeEach{nullptr};
-  BeforeAll beforeAll{nullptr};
-  AfterEach afterEach{nullptr};
-  AfterAll afterAll{nullptr};
+  RefreshPaint refreshPaint{nullptr};
+  MatchImageSnapshot matchImageSnapshot{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -59,15 +54,9 @@ void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlush
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
 
-
-/// methods only used for testing
-void registerDescribe(Describe describe);
-void registerIt(It it);
-void registerItDone(ItDone itDone);
-void registerBeforeEach(BeforeEach beforeEach);
-void registerBeforeAll(BeforeAll beforeAll);
-void registerAfterEach(AfterEach afterEach);
-void registerAfterAll(AfterAll afterAll);
+// test only methods
+void registerRefreshPaint(RefreshPaint refreshPaint);
+void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

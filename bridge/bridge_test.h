@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_BRIDGE_TEST_H
 
 #include "bridge.h"
+#include "bridge_test_export.h"
 
 namespace kraken {
 
@@ -14,10 +15,10 @@ class JSBridgeTest final {
 public:
   explicit JSBridgeTest() = delete;
   explicit JSBridgeTest(JSBridge *bridge);
-  ~JSBridgeTest() = default;
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
   bool evaluateTestScripts(const std::string &script, const std::string &url, int startLine);
+  void invokeExecuteTest(ExecuteCallback executeCallback);
 
 private:
   /// the pointer of bridge, ownership belongs to JSBridge

@@ -3,7 +3,7 @@ const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const path = require('path');
 const { writeFileSync } = require('fs');
-const { spawnSync, execSync } = require('child_process');
+const { spawnSync, execSync, fork } = require('child_process');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -315,19 +315,8 @@ task('bridge-test', (done) => {
   done();
 });
 
-task('patch-flutter-tester', (done) => {
-  const flutterBin = execSync('which flutter', {
-    encoding: 'utf-8'
-  });
-  const flutterRoot = flutterBin.split('/').slice(0, -1).join('/');
-  execSync(`codesign --remove-signature ${flutterRoot}/cache/artifacts/engine/darwin-x64/flutter_tester`, {
-    stdio: 'inherit'
-  });
-  done();
-});
-
 task('integration-test', (done) => {
-  const { status } = spawnSync('npm', ['run', 'integration'], {
+  const { status } = spawnSync('npm', ['run', 'test'], {
     stdio: 'inherit',
     cwd: paths.tests
   });
@@ -337,22 +326,6 @@ task('integration-test', (done) => {
   } else {
     done();
   }
-});
-
-task('js-api-test', (done) => {
-  execSync('flutter test ./unit/js_api/bootstrap.dart', {
-    env: {
-      ...process.env,
-      KRAKEN_LIBRARY_PATH: libOutputPath
-    },
-    stdio: 'inherit',
-    cwd: paths.tests
-  });
-  execSync('node ./scripts/bootstrap_unit_test', {
-    stdio: 'inherit',
-    cwd: paths.tests
-  });
-  done();
 });
 
 task('build-embedded-assets', (done) => {
