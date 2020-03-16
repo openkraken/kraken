@@ -1,5 +1,5 @@
 describe('appear', () => {
-  it('Appear & Disappear', () => {
+  it('appear & disappear', () => {
     return new Promise(async (resolve, reject) => {
       const div = document.createElement('div');
       div.style.width = '300px';
@@ -7,13 +7,13 @@ describe('appear', () => {
       div.style.backgroundColor = 'red';
 
       let triggered = false;
-
-      div.addEventListener('disappear', () => {
+      div.addEventListener('disappear', async () => {
         // Only trigger once, in case of test case error.
         if (triggered) return;
         triggered = true;
         div.style.backgroundColor = 'green';
         div.style.bottom = '0';
+        await expectAsync(div.toBlob()).toMatchImageSnapshot('disappeared');
         resolve();
       });
 
@@ -24,6 +24,8 @@ describe('appear', () => {
       }, 100);
 
       document.body.appendChild(div);
+
+      await expectAsync(div.toBlob()).toMatchImageSnapshot('original');
     });
   });
 });

@@ -27,12 +27,10 @@ void main() async {
     }
   }
 
-  await driver.requestData(jsonEncode(testPayload));
+  String status = await driver.requestData(jsonEncode(testPayload));
   await driver.close();
-}
 
-Future<ProcessResult> exec(String command, List<String> args,
-    { String workingDirectory }) async {
-  return await Process.run(command, args,
-      workingDirectory: workingDirectory, runInShell: true);
+  if (status == 'failed') {
+    exit(1);
+  }
 }

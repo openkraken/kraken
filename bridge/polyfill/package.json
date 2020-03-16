@@ -25,8 +25,6 @@
     "@types/raf": "^3.4.0",
     "event-target-shim": "^5.0.1",
     "expect": "^25.1.0",
-    "jasmine": "^3.5.0",
-    "jasmine-core": "^3.5.0",
     "raf": "^3.4.1",
     "ts-jest": "^24.3.0"
   }
