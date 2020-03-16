@@ -50,7 +50,7 @@ series(
   libKrakenSeries,
   'copy-build-libs',
   buildAppTasks,
-  uploadToOSS ? 'upload-dist' : []
+  uploadToOSS ? ['pack', 'upload'] : []
 )((err) => {
   if (err) {
     console.log(err);

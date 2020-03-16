@@ -25,12 +25,14 @@
     "w3c"
   ],
   "devDependencies": {
-    "ali-oss": "^6.4.0",
+    "ali-oss": "^6.5.1",
     "chalk": "^3.0.0",
+    "commander": "^5.0.0",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "minimist": "^1.2.4",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "rimraf": "^3.0.2"
   },
   "author": "Kraken Team"
 }

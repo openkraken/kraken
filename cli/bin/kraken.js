@@ -82,11 +82,16 @@ program
         env['KRAKEN_BUNDLE_PATH'] = tempPath;
       }
 
-      console.log(chalk.green('Execute binary:'), shellPath, '\n');
-      spawnSync(shellPath, [], {
-        stdio: 'inherit',
-        env,
-      });
+      if (fs.existsSync(shellPath)) {
+        console.error(chalk.red('Kraken Binary NOT exists, try reinstall.'));
+        process.exit(1);
+      } else {
+        console.log(chalk.green('Execute binary:'), shellPath, '\n');
+        spawnSync(shellPath, [], {
+          stdio: 'inherit',
+          env,
+        });
+      }
     }
   });
 
@@ -96,15 +101,12 @@ function getShellPath(runtimeMode) {
   const platform = os.platform();
   const appPath = join(__dirname, '../build', platform);
   if (platform === 'darwin') {
-    if (runtimeMode === 'release') {
-      return join(appPath, 'release/Kraken.app/Contents/MacOS/Kraken');
-    } else {
-      return join(appPath, 'debug/Kraken.app/Contents/MacOS/Kraken');
-    }
+    // Runtime mode = release/debug
+    return join(appPath, runtimeMode, 'Kraken.app/Contents/MacOS/Kraken');
   } else if (platform === 'linux') {
     return join(appPath, 'kraken');
   } else {
-    console.log(chalk.red('[ERROR]: If anything goes wrong, please contact Kraken Team.'));
+    console.log(chalk.red(`[ERROR]: Platform ${platform} not supported by ${packageJSON.name}.`));
     process.exit(1);
   }
 }
