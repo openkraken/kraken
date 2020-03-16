@@ -1,5 +1,5 @@
 describe('boxModel', () => {
-  it('boxModelMixed', async () => {
+  it('mixed', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       padding: '20rpx', backgroundColor: '#999', margin: '40rpx', border: '5px solid #000'
@@ -21,7 +21,7 @@ describe('boxModel', () => {
     container2.appendChild(container3);
     container3.appendChild(textNode);
 
-    await expectAsync(document.body.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
   });
 
   it('border', async () => {
@@ -35,6 +35,50 @@ describe('boxModel', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await expectAsync(document.body.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
   });
+
+  it('height', async () => {
+    const div = document.createElement('div');
+    setStyle(div, {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#666',
+    });
+
+    document.body.appendChild(div);
+    div.style.height = '200px';
+    await expectAsync(div.toBlob(1)).toMatchImageSnapshot('');
+  });
+
+  it('block_nesting', async () => {
+    var container = document.createElement('div');
+    container.style.width = '300px';
+    container.style.height = '300px';
+    container.style.backgroundColor = 'red';
+
+    var box = document.createElement('div');
+    box.style.width = '150px';
+    box.style.height = '150px';
+    box.style.backgroundColor = 'green';
+
+    container.appendChild(box);
+    document.body.appendChild(container);
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+  });
+
+  // it('height', async () => {
+  //   const div = document.createElement('div');
+  //   setStyle(div, {
+  //     width: '100px',
+  //     height: '100px',
+  //     backgroundColor: '#666',
+  //   });
+  //
+  //   document.body.appendChild(div);
+  //
+  //   requestAnimationFrame(() => {
+  //     div.style.height = '200px';
+  //   });
+  // });
 });

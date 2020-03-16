@@ -1,4 +1,4 @@
-describe('appear', () => {
+describe('Appear Event', () => {
   it('appear & disappear', () => {
     return new Promise(async (resolve, reject) => {
       const div = document.createElement('div');
@@ -13,7 +13,7 @@ describe('appear', () => {
         triggered = true;
         div.style.backgroundColor = 'green';
         div.style.bottom = '0';
-        await expectAsync(div.toBlob()).toMatchImageSnapshot('disappeared');
+        await expectAsync(div.toBlob(1)).toMatchImageSnapshot('disappeared');
         resolve();
       });
 
@@ -25,7 +25,7 @@ describe('appear', () => {
 
       document.body.appendChild(div);
 
-      await expectAsync(div.toBlob()).toMatchImageSnapshot('original');
+      await expectAsync(div.toBlob(1)).toMatchImageSnapshot('original');
     });
   });
 });

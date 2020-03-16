@@ -35,7 +35,7 @@ typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
 typedef void (*StartFlushCallbacksInUIThread)();
 typedef void (*StopFlushCallbacksInUIThread)();
-typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t);
+typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t, double);
 typedef void (*OnJSError)(const char *);
 
 KRAKEN_EXPORT

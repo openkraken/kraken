@@ -20,11 +20,15 @@
 // For ddescribe / iit use : https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/karma-jasmine/karma-jasmine.d.ts
 
 interface HTMLDivElement {
-    toBlob(): Promise<Blob>;
+    toBlob(devicePixelRatio: number): Promise<Blob>;
+}
+
+interface HTMLCanvasElement {
+    toBlob(devicePixcelRatio: number): Promise<Blob>;
 }
 
 interface HTMLElement {
-    toBlob: Function;
+    toBlob(devicePixcelRatio: number): Promise<Blob>;
 }
 
 /**
@@ -149,7 +153,7 @@ declare function expect(): jasmine.NothingMatcher;
  * @checkReturnValue see https://tsetse.info/check-return-value
  * @param actual - Actual computed value to test expectations against.
  */
-declare function expectAsync<T, U>(actual: T|PromiseLike<T>): jasmine.AsyncMatchers<T, U>;
+declare function expectAsync<T, U>(actual: Promise<T>): jasmine.AsyncMatchers<T, U>;
 
 /**
  * Explicitly mark a spec as failed.

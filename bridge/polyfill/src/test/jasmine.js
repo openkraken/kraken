@@ -3339,7 +3339,7 @@ getJasmineRequireObj().Expectation = function(j$) {
         'expectAsync is unavailable because the environment does not support promises.'
       );
     }
-    this.expector.description = options.spec.description;
+    this.expector.description = options.spec.getFullName();
 
     var customAsyncMatchers = options.customAsyncMatchers || {};
     for (var matcherName in customAsyncMatchers) {

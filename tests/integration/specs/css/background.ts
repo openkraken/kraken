@@ -1,5 +1,5 @@
 describe('background', () => {
-  it('backgroundColor', async () => {
+  it('color', async () => {
     const div = document.createElement('div');
     setStyle(div, {
       width: '200px',
@@ -8,10 +8,10 @@ describe('background', () => {
     });
 
     document.body.appendChild(div);
-    await expectAsync(div.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(div.toBlob(1)).toMatchImageSnapshot('');
   });
 
-  it('backgroundRepeat', async () => {
+  it('repeat', async (done) => {
     // repeat
     const repeat = document.createElement('div');
     setStyle(repeat, {
@@ -59,16 +59,15 @@ describe('background', () => {
     repeat.appendChild(div4);
 
     document.body.appendChild(repeat);
-    await new Promise((resolve) => {
-      setTimeout(async () => {
-        await expectAsync(repeat.toBlob()).toMatchImageSnapshot('');
-        resolve();
-      }, 1000);
-    });
+
+    await expectAsync(repeat.toBlob(1)).toMatchImageSnapshot('');
+
+    setTimeout(() => {
+      done();
+    }, 1000);
   });
 
-  it('backgroundPosition', async () => {
-
+  it('position', async (done) => {
     // position
     const position = document.createElement('div');
     setStyle(position, {
@@ -125,6 +124,10 @@ describe('background', () => {
     position.appendChild(position5);
     document.body.appendChild(position);
 
-    await expectAsync(position.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(position.toBlob(1)).toMatchImageSnapshot('');
+
+    setTimeout(() => {
+      done();
+    }, 1000);
   });
 });

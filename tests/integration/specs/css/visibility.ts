@@ -1,39 +1,39 @@
 describe('visibility', () => {
+  it('visibility', async () => {
+    const container1 = document.createElement('div');
+    document.body.appendChild(container1);
 
-  it('visibility', () => {
-    return new Promise((resolve) => {
-      const container1 = document.createElement('div');
-      document.body.appendChild(container1);
-
-      setStyle(container1, {
-        backgroundColor: '#f40',
-        width: '200px',
-        height: '200px',
-      });
-
-      const container2 = document.createElement('div');
-      container2.appendChild(document.createTextNode('visibility test'));
-      setStyle(container2, {
-        backgroundColor: '#999',
-        width: '100px',
-        height: '100px',
-      });
-
-      container1.appendChild(container2);
-
-      container1.addEventListener('click', () => {
-        console.log('container clicked');
-      });
-      container2.addEventListener('click', () => {
-        console.log('inner clicked');
-      });
-
-      requestAnimationFrame(function () {
-        setStyle(container2, {
-          visibility: 'hidden',
-        });
-        resolve();
-      });
+    setStyle(container1, {
+      backgroundColor: '#f40',
+      width: '200px',
+      height: '200px',
     });
+
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('1');
+
+    const container2 = document.createElement('div');
+    container2.appendChild(document.createTextNode('visibility test'));
+    setStyle(container2, {
+      backgroundColor: '#999',
+      width: '100px',
+      height: '100px',
+    });
+
+    container1.appendChild(container2);
+
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('2');
+
+    container1.addEventListener('click', () => {
+      console.log('container clicked');
+    });
+    container2.addEventListener('click', () => {
+      console.log('inner clicked');
+    });
+
+    setStyle(container2, {
+      visibility: 'hidden',
+    });
+
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('3');
   });
 });

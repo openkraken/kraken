@@ -528,7 +528,7 @@ void registerStopFlushCallbacksInUIThread() {
 
 typedef NativeAsyncBlobCallback = Void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32);
+typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(
     Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(
@@ -538,7 +538,7 @@ final Dart_RegisterToBlob _registerToBlob = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob')
     .asFunction();
 
-void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id) {
+void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
   try {
     if (!nodeMap.containsKey(id)) {
@@ -549,7 +549,7 @@ void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<
 
     dynamic node = nodeMap[id];
     if (node is Element) {
-      node.toBlob().then((Uint8List bytes) {
+      node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
         Uint8List byteList = bytePtr.asTypedList(bytes.length);
         byteList.setAll(0, bytes);

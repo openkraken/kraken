@@ -70,11 +70,11 @@ export function method(id: number, methodName: string, params: any[] = []) {
   return sendMessage(['method', [id, methodName, params]]);
 }
 
-export function toBlob(id: number) {
+export function toBlob(nodeId: number, devicePixelRatio: number) {
   // need to flush all pending frame messages
   requestUpdateFrame();
   return new Promise((resolve, reject) => {
-    krakenToBlob(id, (err, blob) => {
+    krakenToBlob(nodeId, devicePixelRatio, (err, blob) => {
       if (err) {
         return reject(new Error(err));
       }

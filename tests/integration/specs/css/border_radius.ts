@@ -1,5 +1,5 @@
 describe('border_radius', () => {
-  it('borderRadius', async () => {
+  it('all_direction', async () => {
     let container = document.createElement('div');
     setStyle(container, {
       display: 'flex',
@@ -24,6 +24,6 @@ describe('border_radius', () => {
 
     document.body.appendChild(container);
 
-    await expectAsync(document.body.toBlob()).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
   });
 });
