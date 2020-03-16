@@ -1,5 +1,5 @@
 describe('visibility', () => {
-  it('visibility', async () => {
+  it('should turn to hidden', async () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
 

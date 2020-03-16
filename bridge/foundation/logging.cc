@@ -42,14 +42,7 @@ const char *StripPath(const char *path) {
 } // namespace
 
 LogMessage::LogMessage(LogSeverity severity, const char *file, int line)
-  : severity_(severity), file_(file), line_(line) {
-
-  if (severity >= LOG_WARN) {
-    stream_ << "[";
-    stream_ << GetNameForLogSeverity(severity);
-    stream_ << "] ";
-  }
-}
+  : severity_(severity), file_(file), line_(line) {}
 
 LogMessage::~LogMessage() {
 #if defined(IS_ANDROID)
