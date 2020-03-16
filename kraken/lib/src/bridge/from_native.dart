@@ -129,7 +129,6 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     }).catchError((e) {
       String errorMessage = e is HTTPException ? e.message : e.toString();
       String json;
-      SocketException a;
       if (e is HTTPException) {
         json = jsonEncode([errorMessage, e.response.statusCode, '']);
       } else {
