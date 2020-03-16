@@ -4041,7 +4041,7 @@ getJasmineRequireObj().toBeResolvedTo = function(j$) {
   };
 };
 
-getJasmineRequireObj().toMatchScreenShot = function(j$) {
+getJasmineRequireObj().toMatchImageSnapshot = function(j$) {
   /**
    * Expect a element to be equal with it's screenshot image.
    * @function
@@ -4049,25 +4049,40 @@ getJasmineRequireObj().toMatchScreenShot = function(j$) {
    * @name async-matchers#toBeResolvedTo
    * @param {Object} expected - DOM element
    * @example
-   * await expectAsync(document.body).toMatchScreenShot();
+   * await expectAsync(document.body).toMatchImageSnapshot();
    * @example
-   * await expectAsync(document.body).toMatchScreenShot('imageName');
+   * await expectAsync(document.body).toMatchImageSnapshot('imageName');
    */
-  return function toMatchScreenShot(util, customEqualityTesters) {
+  return function toMatchImageSnapshot(util, customEqualityTesters) {
     return {
-      compare: function(element, expectedValue) {
+      compare: function(blobPromise, expectedValue) {
+        if (!j$.isPromiseLike(blobPromise)) {
+          throw new Error('Expected toMatchImageSnapshot to be called on a promise.');
+        }
+
+        if (!expectedValue) {
+          throw new Error('Expected toMatchImageSnapshot to have expectedSnapshot name.');
+        }
+
         if (expectedValue) {
           expectedValue = '_' + expectedValue;
         }
 
-        const screenShotName = `${this.description}${expectedValue || ''}`;
-        return new Promise((resolve) => {
-          __kraken_match_screenshot__(element.nodeId, screenShotName, (status) => {
-            if (status) {
-              return resolve({pass: true});
-            } else {
-              return resolve({pass: false, message: `Expected an screenshot is not equal with ${screenShotName}.png`});
-            }
+        return blobPromise.then(blob => {
+          if (!(blob instanceof Blob)) {
+            throw new Error('Expected toMatchImageSnapshot \' to have Blob as first parameter');
+          }
+          const name = `${this.description}${expectedValue || ''}`;
+          return new Promise((resolve) => {
+            // TODO the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
+            const privateBlob = blob.blob;
+            __kraken_match_image_snapshot__(privateBlob, name, (status) => {
+              if (status) {
+                return resolve({pass: true});
+              } else {
+                return resolve({pass: false, message: `Expected an screenshot is not equal with ${name}.png`});
+              }
+            });
           });
         });
       }
@@ -4666,7 +4681,7 @@ getJasmineRequireObj().requireAsyncMatchers = function(jRequire, j$) {
       'toBeResolved',
       'toBeRejected',
       'toBeResolvedTo',
-      'toMatchScreenShot',
+      'toMatchImageSnapshot',
       'toBeRejectedWith',
       'toBeRejectedWithError'
     ],

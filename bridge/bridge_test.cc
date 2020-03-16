@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+#include "bindings/KOM/blob.h"
 #include "bridge_test.h"
 #include "callback_context.h"
 #include "dart_methods.h"
@@ -60,29 +61,31 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   return Value::undefined();
 }
 
-Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  const Value &nodeId = args[0];
+Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  const Value &blob = args[0];
   const Value &screenShotName = args[1];
   const Value &callback = args[2];
 
-  if (!nodeId.isNumber()) {
-    throw JSError(context, "Failed to execute '__kraken_match_screenshot__': parameter 1 (nodeId) must be an number.");
+  if (!blob.isObject() || !blob.getObject(context).isHostObject(context)) {
+    throw JSError(context, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.");
   }
 
   if (!screenShotName.isString()) {
     throw JSError(context,
-                  "Failed to execute '__kraken_match_screenshot__': parameter 2 (screenShotName) must be an string.");
+                  "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.");
   }
 
   if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
     throw JSError(context,
-                  "Failed to execute '__kraken_match_screenshot__': parameter 3 (callback) is not an function.");
+                  "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
   }
 
-  if (getDartMethod()->matchScreenShot == nullptr) {
+  if (getDartMethod()->matchImageSnapshot == nullptr) {
     throw JSError(context,
-                  "Failed to execute '__kraken_match_screenshot__': dart method (matchScreenShot) is not registered.");
+                  "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
   }
+
+  std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
 
   std::string &&name = screenShotName.getString(context).utf8(context);
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
@@ -95,7 +98,7 @@ Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *arg
     delete ctx;
   };
 
-  getDartMethod()->matchScreenShot(nodeId.getNumber(), name.c_str(), static_cast<void *>(ctx), fn);
+  getDartMethod()->matchImageSnapshot(jsBlob->bytes(), jsBlob->size(), name.c_str(), static_cast<void *>(ctx), fn);
 
   return Value::undefined();
 }
@@ -103,7 +106,7 @@ Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *arg
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
-  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_screenshot__", 0, matchScreenShot);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
   initKrakenTestFramework(bridge->getContext());
 }
 

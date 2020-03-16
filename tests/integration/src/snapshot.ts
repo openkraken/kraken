@@ -12,10 +12,8 @@ describe('snapshotTest', () => {
     setStyle(container1, {
       padding: '20rpx', backgroundColor: '#999', margin: '40rpx', border: '5px solid #000'
     });
-
     document.body.appendChild(container1);
-
-    await expectAsync(container1).toMatchScreenShot('container1');
-    await expectAsync(document.body).toMatchScreenShot('body');
+    await expectAsync(container1.toBlob()).toMatchImageSnapshot('container1');
+    await expectAsync(container1.toBlob()).toMatchImageSnapshot('body');
   });
 });

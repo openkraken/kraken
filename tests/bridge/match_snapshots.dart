@@ -19,30 +19,8 @@ int _countDifferentPixels(Uint8List imageA, List<int> imageB) {
   return (delta / 4).floor();
 }
 
-Future<dynamic> getScreenShot(int nodeId) {
-  Completer completer = Completer();
-  // 20ms is enough for next frame paint
-  Timer(Duration(milliseconds: 20), () {
-    if (!nodeMap.containsKey(nodeId)) {
-      throw ('getScreenShot error: node (id: $nodeId) is not contains in nodeMap.');
-    }
-    if (!(nodeMap[nodeId] is Element)) {
-      throw ('getScreenShot error: node (id: $nodeId) is not an Element.');
-    }
-    // repaint to get latest screenshot.
-    Element node = nodeMap[nodeId];
-    node.renderObject.markNeedsPaint();
-    RendererBinding.instance.addPostFrameCallback((_) async {
-      Uint8List bodyImage = await node.toBlob(devicePixelRatio: 1.0);
-      List<int> bodyImageList = bodyImage.toList();
-      completer.complete(bodyImageList);
-    });
-  });
-  return completer.future;
-}
-
-Future<bool> matchScreenShot(int nodeId, String filename) async {
-  List<int> screenPixels = await getScreenShot(nodeId);
+Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
+  List<int> screenPixels = bytes.toList();
   final snap = File(path.join(snapshots.path, '$filename.png'));
   if (snap.existsSync()) {
     Uint8List snapPixels = snap.readAsBytesSync();

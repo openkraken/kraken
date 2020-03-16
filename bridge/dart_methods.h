@@ -33,7 +33,7 @@ struct DartMethodPointer {
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
   RefreshPaint refreshPaint{nullptr};
-  MatchScreenShot matchScreenShot{nullptr};
+  MatchImageSnapshot matchImageSnapshot{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -56,7 +56,7 @@ void registerJSError(OnJSError onJsError);
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);
-void registerMatchScreenShot(MatchScreenShot matchScreenShot);
+void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

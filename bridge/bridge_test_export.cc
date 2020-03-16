@@ -40,6 +40,6 @@ void registerRefreshPaint(RefreshPaint refreshPaint) {
   kraken::registerRefreshPaint(refreshPaint);
 }
 
-void registerMatchScreenShot(MatchScreenShot matchScreenShot) {
-  kraken::registerMatchScreenShot(matchScreenShot);
+void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
+  kraken::registerMatchImageSnapshot(matchImageSnapshot);
 }

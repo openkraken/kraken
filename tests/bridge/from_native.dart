@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
@@ -72,31 +73,32 @@ void registerRefreshPaint() {
   _registerRefreshPaint(pointer);
 }
 
-typedef Native_MatchScreenShotCallback = Void Function(Pointer<Void>, Int8);
-typedef Dart_MatchScreenShotCallback = void Function(Pointer<Void>, int);
-typedef Native_MatchScreenShot = Void Function(
-    Int32, Pointer<Utf8>, Pointer<Void>, Pointer<NativeFunction<Native_MatchScreenShotCallback>>);
-typedef Native_RegisterMatchScreenShot = Void Function(Pointer<NativeFunction<Native_MatchScreenShot>>);
-typedef Dart_RegisterMatchScreenShot = void Function(Pointer<NativeFunction<Native_MatchScreenShot>>);
+typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<Void>, Int8);
+typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<Void>, int);
+typedef Native_MatchImageSnapshot = Void Function(
+    Pointer<Uint8>, Int32, Pointer<Utf8>, Pointer<Void>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
+typedef Native_RegisterMatchImageSnapshot = Void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
+typedef Dart_RegisterMatchImageSnapshot = void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
 
-final Dart_RegisterMatchScreenShot _registerMatchScreenShot =
-nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterMatchScreenShot>>('registerMatchScreenShot').asFunction();
+final Dart_RegisterMatchImageSnapshot _registerMatchImageSnapshot = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterMatchImageSnapshot>>('registerMatchImageSnapshot')
+    .asFunction();
 
-void _matchScreenShot(int nodeId, Pointer<Utf8> snapshotNamePtr, Pointer<Void> context,
-    Pointer<NativeFunction<Native_MatchScreenShotCallback>> pointer) {
-  Dart_MatchScreenShotCallback callback = pointer.asFunction();
-  matchScreenShot(nodeId, Utf8.fromUtf8(snapshotNamePtr)).then((value) {
+void _matchImageSnapshot(Pointer<Uint8> bytes, int size, Pointer<Utf8> snapshotNamePtr, Pointer<Void> context,
+    Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
+  Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
+  matchImageSnapshot(bytes.asTypedList(size), Utf8.fromUtf8(snapshotNamePtr)).then((value) {
     callback(context, value ? 1 : 0);
   });
 }
 
-void registerMatchScreenShot() {
-  Pointer<NativeFunction<Native_MatchScreenShot>> pointer = Pointer.fromFunction(_matchScreenShot);
-  _registerMatchScreenShot(pointer);
+void registerMatchImageSnapshot() {
+  Pointer<NativeFunction<Native_MatchImageSnapshot>> pointer = Pointer.fromFunction(_matchImageSnapshot);
+  _registerMatchImageSnapshot(pointer);
 }
 
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
-  registerMatchScreenShot();
+  registerMatchImageSnapshot();
 }

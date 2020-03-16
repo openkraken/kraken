@@ -19,6 +19,10 @@
 // TypeScript Version: 2.8
 // For ddescribe / iit use : https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/karma-jasmine/karma-jasmine.d.ts
 
+interface HTMLDivElement {
+    toBlob(): Promise<Blob>;
+}
+
 /**
  * @deprecated Use {@link jasmine.ImplementationCallback} instead.
  */
@@ -668,10 +672,10 @@ declare namespace jasmine {
 
     interface AsyncMatchers<T, U> {
         /**
-         * Expect a element to match a screnshot image.
+         * Expect a element to match a image.
          * @param screenShotName
          */
-        toMatchScreenShot(screenShotName: string): Promise<boolean>;
+        toMatchImageSnapshot(screenShotName: string): Promise<boolean>;
 
         /**
          * Expect a promise to be resolved.
