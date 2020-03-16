@@ -1239,6 +1239,7 @@ getJasmineRequireObj().Env = function(j$) {
         customEqualityTesters: runnableResources[spec.id].customEqualityTesters,
         customAsyncMatchers: runnableResources[spec.id].customAsyncMatchers,
         actual: actual,
+        spec: spec,
         addExpectationResult: addExpectationResult
       });
 
@@ -3338,6 +3339,7 @@ getJasmineRequireObj().Expectation = function(j$) {
         'expectAsync is unavailable because the environment does not support promises.'
       );
     }
+    this.expector.description = options.spec.description;
 
     var customAsyncMatchers = options.customAsyncMatchers || {};
     for (var matcherName in customAsyncMatchers) {
@@ -3657,8 +3659,7 @@ getJasmineRequireObj().Expector = function(j$) {
       matcherFactory,
       args
     );
-    console.log('matcherCompare', matcherName, matcherCompare);
-    return matcherCompare.apply(null, this.args);
+    return matcherCompare.apply(this, this.args);
   };
 
   Expector.prototype.addFilter = function(filter) {
@@ -4035,6 +4036,40 @@ getJasmineRequireObj().toBeResolvedTo = function(j$) {
             };
           }
         );
+      }
+    };
+  };
+};
+
+getJasmineRequireObj().toMatchScreenShot = function(j$) {
+  /**
+   * Expect a element to be equal with it's screenshot image.
+   * @function
+   * @async
+   * @name async-matchers#toBeResolvedTo
+   * @param {Object} expected - DOM element
+   * @example
+   * await expectAsync(document.body).toMatchScreenShot();
+   * @example
+   * await expectAsync(document.body).toMatchScreenShot('imageName');
+   */
+  return function toMatchScreenShot(util, customEqualityTesters) {
+    return {
+      compare: function(element, expectedValue) {
+        if (expectedValue) {
+          expectedValue = '_' + expectedValue;
+        }
+
+        const screenShotName = `${this.description}${expectedValue || ''}`;
+        return new Promise((resolve) => {
+          __kraken_match_screenshot__(element.nodeId, screenShotName, (status) => {
+            if (status) {
+              return resolve({pass: true});
+            } else {
+              return resolve({pass: false, message: `Expected an screenshot is not equal with ${screenShotName}.png`});
+            }
+          });
+        });
       }
     };
   };
@@ -4631,6 +4666,7 @@ getJasmineRequireObj().requireAsyncMatchers = function(jRequire, j$) {
       'toBeResolved',
       'toBeRejected',
       'toBeResolvedTo',
+      'toMatchScreenShot',
       'toBeRejectedWith',
       'toBeRejectedWithError'
     ],

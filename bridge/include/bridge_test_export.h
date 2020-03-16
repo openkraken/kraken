@@ -29,7 +29,7 @@ KRAKEN_EXPORT
 void registerRefreshPaint(RefreshPaint refreshPaint);
 
 using MatchScreenShotCallback = void (*)(void *data, int8_t);
-using MatchScreenShot = void (*)(const char* name, void *data, MatchScreenShotCallback callback);
+using MatchScreenShot = void (*)(int32_t, const char* name, void *data, MatchScreenShotCallback callback);
 KRAKEN_EXPORT
 void registerMatchScreenShot(MatchScreenShot matchScreenShot);
 

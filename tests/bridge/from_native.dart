@@ -74,16 +74,18 @@ void registerRefreshPaint() {
 
 typedef Native_MatchScreenShotCallback = Void Function(Pointer<Void>, Int8);
 typedef Dart_MatchScreenShotCallback = void Function(Pointer<Void>, int);
-typedef Native_MatchScreenShot = Void Function(Pointer<Utf8>, Pointer<Void>, Pointer<NativeFunction<Native_MatchScreenShotCallback>>);
+typedef Native_MatchScreenShot = Void Function(
+    Int32, Pointer<Utf8>, Pointer<Void>, Pointer<NativeFunction<Native_MatchScreenShotCallback>>);
 typedef Native_RegisterMatchScreenShot = Void Function(Pointer<NativeFunction<Native_MatchScreenShot>>);
 typedef Dart_RegisterMatchScreenShot = void Function(Pointer<NativeFunction<Native_MatchScreenShot>>);
 
 final Dart_RegisterMatchScreenShot _registerMatchScreenShot =
 nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterMatchScreenShot>>('registerMatchScreenShot').asFunction();
 
-void _matchScreenShot(Pointer<Utf8> snapshotNamePtr, Pointer<Void> context, Pointer<NativeFunction<Native_MatchScreenShotCallback>> pointer) {
+void _matchScreenShot(int nodeId, Pointer<Utf8> snapshotNamePtr, Pointer<Void> context,
+    Pointer<NativeFunction<Native_MatchScreenShotCallback>> pointer) {
   Dart_MatchScreenShotCallback callback = pointer.asFunction();
-  matchScreenShot(Utf8.fromUtf8(snapshotNamePtr)).then((value) {
+  matchScreenShot(nodeId, Utf8.fromUtf8(snapshotNamePtr)).then((value) {
     callback(context, value ? 1 : 0);
   });
 }

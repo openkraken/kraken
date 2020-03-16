@@ -61,17 +61,22 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
 }
 
 Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-  const Value &screenShotName = args[0];
-  const Value &callback = args[1];
+  const Value &nodeId = args[0];
+  const Value &screenShotName = args[1];
+  const Value &callback = args[2];
+
+  if (!nodeId.isNumber()) {
+    throw JSError(context, "Failed to execute '__kraken_match_screenshot__': parameter 1 (nodeId) must be an number.");
+  }
 
   if (!screenShotName.isString()) {
     throw JSError(context,
-                  "Failed to execute '__kraken_match_screenshot__': parameter 1 (screenShotName) must be an string.");
+                  "Failed to execute '__kraken_match_screenshot__': parameter 2 (screenShotName) must be an string.");
   }
 
   if (!callback.isObject() || !callback.getObject(context).isFunction(context)) {
     throw JSError(context,
-                  "Failed to execute '__kraken_match_screenshot__': parameter 2 (callback) is not an function.");
+                  "Failed to execute '__kraken_match_screenshot__': parameter 3 (callback) is not an function.");
   }
 
   if (getDartMethod()->matchScreenShot == nullptr) {
@@ -90,7 +95,7 @@ Value matchScreenShot(JSContext &context, const Value &thisVal, const Value *arg
     delete ctx;
   };
 
-  getDartMethod()->matchScreenShot(name.c_str(), static_cast<void *>(ctx), fn);
+  getDartMethod()->matchScreenShot(nodeId.getNumber(), name.c_str(), static_cast<void *>(ctx), fn);
 
   return Value::undefined();
 }

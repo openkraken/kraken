@@ -671,7 +671,7 @@ declare namespace jasmine {
          * Expect a element to match a screnshot image.
          * @param screenShotName
          */
-        toMatchScreenShot(screenShotName?: string): Promise<boolean>;
+        toMatchScreenShot(screenShotName: string): Promise<boolean>;
 
         /**
          * Expect a promise to be resolved.
