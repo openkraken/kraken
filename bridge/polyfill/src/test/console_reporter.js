@@ -1,7 +1,8 @@
 module.exports = exports = ConsoleReporter;
 
 function ConsoleReporter() {
-  var print = function() {},
+  var print = function () { },
+    printError = function () { },
     showColors = false,
     jasmineCorePath = null,
     specCount,
@@ -18,10 +19,10 @@ function ConsoleReporter() {
     failedSuites = [],
     stackFilter = defaultStackFilter;
 
-  this.setOptions = function(options) {
-    if (options.print) {
-      print = options.print;
-    }
+  this.setOptions = function (options) {
+    if (options.print) print = options.print;
+    if (options.printError) printError = options.printError;
+
     showColors = options.showColors || false;
     if (options.jasmineCorePath) {
       jasmineCorePath = options.jasmineCorePath;
@@ -31,7 +32,7 @@ function ConsoleReporter() {
     }
   };
 
-  this.jasmineStarted = function(options) {
+  this.jasmineStarted = function (options) {
     specCount = 0;
     executableSpecCount = 0;
     failureCount = 0;
@@ -43,17 +44,17 @@ function ConsoleReporter() {
     printNewline();
   };
 
-  this.jasmineDone = function(result) {
+  this.jasmineDone = function (result) {
     printNewline();
     printNewline();
-    if(failedSpecs.length > 0) {
-      print('Failures:');
+    if (failedSpecs.length > 0) {
+      printError('Failures:');
     }
     for (var i = 0; i < failedSpecs.length; i++) {
       specFailureDetails(failedSpecs[i], i + 1);
     }
 
-    for(i = 0; i < failedSuites.length; i++) {
+    for (i = 0; i < failedSuites.length; i++) {
       suiteFailureDetails(failedSuites[i]);
     }
 
@@ -64,14 +65,14 @@ function ConsoleReporter() {
     if (pendingSpecs.length > 0) {
       print("Pending:");
     }
-    for(i = 0; i < pendingSpecs.length; i++) {
+    for (i = 0; i < pendingSpecs.length; i++) {
       pendingSpecDetails(pendingSpecs[i], i + 1);
     }
 
-    if(specCount > 0) {
+    if (specCount > 0) {
       printNewline();
 
-      if(executableSpecCount !== specCount) {
+      if (executableSpecCount !== specCount) {
         print('Ran ' + executableSpecCount + ' of ' + specCount + plural(' spec', specCount));
         printNewline();
       }
@@ -104,12 +105,12 @@ function ConsoleReporter() {
     }
   };
 
-  this.specStarted = function(result) {
+  this.specStarted = function (result) {
     print(colored('green', 'Running: ' + result.fullName));
     printNewline();
   };
 
-  this.specDone = function(result) {
+  this.specDone = function (result) {
     specCount++;
 
     if (result.status == 'pending') {
@@ -130,7 +131,7 @@ function ConsoleReporter() {
     }
   };
 
-  this.suiteDone = function(result) {
+  this.suiteDone = function (result) {
     if (result.failedExpectations && result.failedExpectations.length > 0) {
       failureCount++;
       failedSuites.push(result);
@@ -142,6 +143,11 @@ function ConsoleReporter() {
   function printNewline() {
     print('\n');
   }
+
+  function printErrorNewline() {
+    printError('\n');
+  }
+
 
   function colored(color, str) {
     return showColors ? (ansi[color] + str + ansi.none) : str;
@@ -173,39 +179,39 @@ function ConsoleReporter() {
       return '';
     }
 
-    var filteredStack = stack.split('\n').filter(function(stackLine) {
+    var filteredStack = stack.split('\n').filter(function (stackLine) {
       return stackLine.indexOf(jasmineCorePath) === -1;
     }).join('\n');
     return filteredStack;
   }
 
   function specFailureDetails(result, failedSpecNumber) {
-    printNewline();
-    print(failedSpecNumber + ') ');
-    print(result.fullName);
+    printErrorNewline();
+    printError(failedSpecNumber + ') ');
+    printError(result.fullName);
     printFailedExpectations(result);
   }
 
   function suiteFailureDetails(result) {
-    printNewline();
-    print('Suite error: ' + result.fullName);
+    printErrorNewline();
+    printError('Suite error: ' + result.fullName);
     printFailedExpectations(result);
   }
 
   function printFailedExpectations(result) {
     for (var i = 0; i < result.failedExpectations.length; i++) {
       var failedExpectation = result.failedExpectations[i];
-      printNewline();
-      print(indent('Message:', 2));
-      printNewline();
-      print(colored('red', indent(failedExpectation.message, 4)));
-      printNewline();
-      print(indent('Stack:', 2));
-      printNewline();
-      print(indent(stackFilter(failedExpectation.stack), 4));
+      printErrorNewline();
+      printError(indent('Message:', 2));
+      printErrorNewline();
+      printError(colored('red', indent(failedExpectation.message, 4)));
+      printErrorNewline();
+      printError(indent('Stack:', 2));
+      printErrorNewline();
+      printError(indent(stackFilter(failedExpectation.stack), 4));
     }
 
-    printNewline();
+    printErrorNewline();
   }
 
   function pendingSpecDetails(result, pendingSpecNumber) {

@@ -29,23 +29,25 @@ class JasmineTracker extends EventEmitter {
 const consoleReporter = new ConsoleReporter();
 const jasmineTracker = new JasmineTracker();
 
-let printCache = '';
-function handlePrint(msg) {
-  for (let w of msg) {
-    if (w === '\n') {
-      console.log(printCache);
-      printCache = '';
-    } else {
-      printCache += w;
+// @NOTE: Hack for kraken js engine have no stdout.
+function createPrinter(logger) {
+  let stdoutMessage = '';
+  function printToStdout(msg) {
+    for (let w of msg) {
+      if (w === '\n') {
+        logger(stdoutMessage);
+        stdoutMessage = '';
+      } else {
+        stdoutMessage += w;
+      }
     }
   }
 }
 
 consoleReporter.setOptions({
   timer: new jasmine.Timer(),
-  print: (msg) => {
-    handlePrint(msg);
-  },
+  print: createPrinter(console.log),
+  printError: createPrinter(console.error),
   showColors: true,
   random: false,
   jasmineCorePath: 'internal://'

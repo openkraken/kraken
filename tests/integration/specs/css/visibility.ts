@@ -1,14 +1,7 @@
 describe('visibility', () => {
+
   it('visibility', () => {
     return new Promise((resolve) => {
-      function setStyle(dom, object) {
-        for (let key in object) {
-          if (object.hasOwnProperty(key)) {
-            dom.style[key] = object[key];
-          }
-        }
-      }
-
       const container1 = document.createElement('div');
       document.body.appendChild(container1);
       setStyle(container1, {
