@@ -316,7 +316,7 @@ task('bridge-test', (done) => {
 });
 
 task('integration-test', (done) => {
-  const { status } = spawnSync('npm', ['run', 'integration'], {
+  const { status } = spawnSync('npm', ['run', 'test'], {
     stdio: 'inherit',
     cwd: paths.tests
   });
