@@ -1,6 +1,6 @@
 {
-  "name": "@ali/kraken-cli",
-  "version": "0.3.0",
+  "name": "@kraken-project/cli",
+  "version": "0.3.0-0",
   "description": "Kraken Cli Client for desktop including macOS and Linux.",
   "bin": {
     "kraken": "bin/kraken.js"
@@ -17,8 +17,5 @@
     "commander": "^4.0.1",
     "temp": "^0.9.1",
     "chalk": "^2.4.2"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npm.alibaba-inc.com"
   }
 }
