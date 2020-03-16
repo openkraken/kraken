@@ -18,4 +18,4 @@ Web standards based rendering engine.
 ## More Information
 
 - [Documentation for Developers](https://yuque.antfin-inc.com/kraken/development)
-- [Site](http://rax.alibaba-inc.com/kraken)
+- [WebSite](http://rax.alibaba-inc.com/kraken)
