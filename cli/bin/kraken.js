@@ -83,14 +83,14 @@ program
       }
 
       if (fs.existsSync(shellPath)) {
-        console.error(chalk.red('Kraken Binary NOT exists, try reinstall.'));
-        process.exit(1);
-      } else {
         console.log(chalk.green('Execute binary:'), shellPath, '\n');
         spawnSync(shellPath, [], {
           stdio: 'inherit',
           env,
         });
+      } else {
+        console.error(chalk.red('Kraken Binary NOT exists, try reinstall.'));
+        process.exit(1);
       }
     }
   });
