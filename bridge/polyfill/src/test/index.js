@@ -50,6 +50,32 @@ function createPrinter(logger) {
   }
 }
 
+let config = {
+  oneFailurePerSpec: true
+};
+
+function HtmlSpecFilter(options) {
+  var filterString =
+    options &&
+    options.filterString() &&
+    options.filterString().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  var filterPattern = new RegExp(filterString);
+
+  this.matches = function(specName) {
+    return filterPattern.test(specName);
+  };
+}
+
+var specFilter = new HtmlSpecFilter({
+  filterString: function() { return queryString.getParam("spec"); }
+});
+
+config.specFilter = function(spec) {
+  return specFilter.matches(spec.getFullName());
+};
+
+env.configure(config);
+
 consoleReporter.setOptions({
   timer: new jasmine.Timer(),
   print: createPrinter(console.log),

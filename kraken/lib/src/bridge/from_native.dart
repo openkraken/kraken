@@ -256,10 +256,10 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
-typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
-typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data);
-typedef DartAsyncCallback = void Function(Pointer<Void> context);
-typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data);
+typedef NativeAsyncCallback = Void Function(Pointer<Void> context, Pointer<Utf8>);
+typedef DartAsyncCallback = void Function(Pointer<Void> context, Pointer<Utf8>);
+typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data, Pointer<Utf8>);
+typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data, Pointer<Utf8>);
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
@@ -272,11 +272,11 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
   return requestBatchUpdate((Duration timeStamp) {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -296,11 +296,11 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setTimeout(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -321,11 +321,11 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setInterval(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -364,11 +364,11 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
   return requestAnimationFrame((double highResTimeStamp) {
+    DartRAFAsyncCallback func = callback.asFunction();
     try {
-      DartRAFAsyncCallback func = callback.asFunction();
-      func(context, highResTimeStamp);
+      func(context, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, highResTimeStamp, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }

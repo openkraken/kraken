@@ -171,13 +171,19 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *data) {
+void handleTransientCallback(void *data, const char* errmsg) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
+    obj->_context.reportError(error);
+    return;
+  }
+
+  if (errmsg != nullptr) {
+    JSError error(obj->_context, errmsg);
     obj->_context.reportError(error);
     return;
   }
