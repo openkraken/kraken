@@ -13,7 +13,7 @@ describe('Appear Event', () => {
         triggered = true;
         div.style.backgroundColor = 'green';
         div.style.bottom = '0';
-        await expectAsync(div.toBlob(1)).toMatchImageSnapshot('disappeared');
+        await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot('disappeared');
         resolve();
       });
 
@@ -25,7 +25,7 @@ describe('Appear Event', () => {
 
       document.body.appendChild(div);
 
-      await expectAsync(div.toBlob(1)).toMatchImageSnapshot('original');
+      await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot('original');
     });
   });
 });

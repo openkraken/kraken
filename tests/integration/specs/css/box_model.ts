@@ -2,17 +2,27 @@ describe('BoxModel', () => {
   it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
-      padding: '20rpx', backgroundColor: '#999', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      backgroundColor: '#999',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const container2 = document.createElement('div');
     setStyle(container2, {
-      padding: '20rpx', backgroundColor: '#666', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      backgroundColor: '#666',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const container3 = document.createElement('div');
     setStyle(container3, {
-      padding: '20rpx', height: '100rpx', backgroundColor: '#f40', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      height: '100rpx',
+      backgroundColor: '#f40',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const textNode = document.createTextNode('Hello World');
@@ -21,7 +31,7 @@ describe('BoxModel', () => {
     container2.appendChild(container3);
     container3.appendChild(textNode);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with border', async () => {
@@ -35,7 +45,7 @@ describe('BoxModel', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with height', async () => {
@@ -48,7 +58,7 @@ describe('BoxModel', () => {
 
     document.body.appendChild(div);
     div.style.height = '200px';
-    await expectAsync(div.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with block_nesting', async () => {
@@ -64,7 +74,7 @@ describe('BoxModel', () => {
 
     container.appendChild(box);
     document.body.appendChild(container);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with margin', async () => {
@@ -73,12 +83,12 @@ describe('BoxModel', () => {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
-      margin: 0
+      margin: 0,
     });
 
     document.body.appendChild(div);
     div.style.margin = '20px';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with padding', async () => {
@@ -87,7 +97,7 @@ describe('BoxModel', () => {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
-      padding: 0
+      padding: 0,
     });
 
     document.body.appendChild(container1);
@@ -102,7 +112,7 @@ describe('BoxModel', () => {
     container1.appendChild(container2);
     container1.style.padding = '20px';
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with width', async () => {
@@ -115,11 +125,10 @@ describe('BoxModel', () => {
 
     document.body.appendChild(div);
     div.style.width = '200px';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with position', async () => {
-
     var container = document.createElement('div');
     var div1 = document.createElement('div');
     var div2 = document.createElement('span');
@@ -147,6 +156,6 @@ describe('BoxModel', () => {
     container.style.position = 'relative';
     container.style.top = '100px';
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 });

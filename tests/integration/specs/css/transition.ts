@@ -1,13 +1,5 @@
-it('transition', () => {
-  return new Promise((resolve) => {
-    function setStyle(dom, object) {
-      for (let key in object) {
-        if (object.hasOwnProperty(key)) {
-          dom.style[key] = object[key];
-        }
-      }
-    }
-
+describe('Transition', () => {
+  it('transition', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setStyle(container1, {
@@ -22,11 +14,13 @@ it('transition', () => {
 
     requestAnimationFrame(() => {
       setStyle(container1, {
-        top: 0
+        top: 0,
       });
 
-      setTimeout(() => {
-        resolve();
+      // Wait for animation finished.
+      setTimeout(async () => {
+        await matchScreenshot();
+        done();
       }, 1100);
     });
   });

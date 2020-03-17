@@ -6,7 +6,7 @@ describe('border_radius', () => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#252423',
-      height: '500px'
+      height: '500px',
     });
 
     for (let i = 0; i < 5; i++) {
@@ -17,13 +17,13 @@ describe('border_radius', () => {
         width: '40px',
         height: '40px',
         borderRadius: '20px',
-        backgroundColor: '#FF4B4B'
+        backgroundColor: '#FF4B4B',
       });
       container.appendChild(dotEl);
     }
 
     document.body.appendChild(container);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 });
