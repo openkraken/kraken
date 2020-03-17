@@ -71,6 +71,6 @@ it('transform', () => {
     height: '100px',
     marginTop: '10px',
     backgroundColor: 'red',
-    transform: 'scale3d(0.6, 0.8, 0.3) rotate3d(5deg, 8deg, 3deg)',
+    transform: 'scale3d(0.6, 0.8, 0.3) rotate3d(10, 40, 60, 3deg)',
   });
 });

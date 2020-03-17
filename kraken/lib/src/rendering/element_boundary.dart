@@ -61,5 +61,8 @@ class RenderElementBoundary extends RenderTransform
         size = constraints.constrain(Size(0, 0));
       }
     }
+    if (origin == null) {
+      origin = Offset(size.width / 2, size.height / 2);
+    }
   }
 }
