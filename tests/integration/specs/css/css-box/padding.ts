@@ -1,5 +1,5 @@
-describe('box', () => {
-  it('should work with padding', async () => {
+describe('Box padding', () => {
+  it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       width: '100px',

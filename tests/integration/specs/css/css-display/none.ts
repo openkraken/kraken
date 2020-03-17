@@ -1,6 +1,5 @@
-describe('display', () => {
+describe('Display', () => {
   it('should work with none', async () => {
-
     const container = document.createElement('div');
     setStyle(container, {
       width: '100px',

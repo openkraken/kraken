@@ -1,5 +1,5 @@
-describe('box', () => {
-  it('should work with margin', async () => {
+describe('Box margin', () => {
+  it('should work with basic samples', async () => {
     const div = document.createElement('div');
     setStyle(div, {
       width: '100px',

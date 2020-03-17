@@ -1,6 +1,5 @@
-describe('display', () => {
-  it('should work with inline-block', async () => {
-
+describe('Display inline-block', () => {
+  it('should work with basic samples', async () => {
     const container = document.createElement('div');
     setStyle(container, {
       width: '100px',

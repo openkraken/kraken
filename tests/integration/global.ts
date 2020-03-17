@@ -4,6 +4,7 @@
  * - setStyle: Apply style object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
+ * - matchScreenshot: match snapshot of body's image.
  */
 
 function setStyle(dom: any, object: any) {
@@ -23,4 +24,8 @@ function create(tag: string, style: object) {
   const el = document.createElement(tag);
   setStyle(el, style);
   return el;
+}
+
+async function matchScreenshot() {
+  return await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
 }

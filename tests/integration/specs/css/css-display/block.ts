@@ -1,6 +1,5 @@
-describe('display', () => {
-  it('should work with block', async () => {
-
+describe('Display block', () => {
+  it('should work with basic samples', async () => {
     const container = document.createElement('div');
     setStyle(container, {
       width: '100px',
@@ -8,7 +7,6 @@ describe('display', () => {
       display: 'block',
       backgroundColor: '#666',
     });
-    container.appendChild(document.createTextNode('block'));
 
     document.body.appendChild(container);
     document.body.appendChild(document.createTextNode('This text should wrap into next line from the box.'));

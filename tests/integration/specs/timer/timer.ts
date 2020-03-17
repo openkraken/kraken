@@ -1,11 +1,11 @@
-describe('setTimeout', function () {
+describe('setTimeout', function() {
   it('resolve after 100ms', () => {
     let startTime = Date.now();
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         let duration = Date.now() - startTime;
         // 10ms delay accepted
-        expect((duration - 100) < 15).toBe(true);
+        expect(duration - 100 < 15).toBe(true);
         resolve();
       }, 100);
     });
@@ -43,7 +43,7 @@ describe('setTimeout', function () {
   });
 });
 
-describe('setInterval', function () {
+describe('setInterval', function() {
   it('trigger 5 times and stop', () => {
     return new Promise((resolve, reject) => {
       let count = 0;

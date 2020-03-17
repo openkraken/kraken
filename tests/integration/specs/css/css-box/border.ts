@@ -1,5 +1,5 @@
-describe('box', () => {
-  it('should work with border', async () => {
+describe('Box border', () => {
+  it('should work with basic samples', async () => {
     const div = document.createElement('div');
     setStyle(div, {
       width: '100px',

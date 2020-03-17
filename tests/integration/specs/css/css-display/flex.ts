@@ -1,5 +1,5 @@
-describe('display', () => {
-  it('should work with flex', async () => {
+describe('Display flex', () => {
+  it('should work with basic samples', async () => {
 
     const container = document.createElement('div');
     setStyle(container, {

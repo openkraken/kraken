@@ -9,7 +9,7 @@ describe('visibility', () => {
       height: '200px',
     });
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
 
     const container2 = document.createElement('div');
     container2.appendChild(document.createTextNode('visibility test'));
@@ -21,7 +21,7 @@ describe('visibility', () => {
 
     container1.appendChild(container2);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
 
     container1.addEventListener('click', () => {
       console.log('container clicked');
@@ -34,6 +34,6 @@ describe('visibility', () => {
       visibility: 'hidden',
     });
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 });

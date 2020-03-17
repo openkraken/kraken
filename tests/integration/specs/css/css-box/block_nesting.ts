@@ -1,5 +1,5 @@
-describe('box', () => {
-  it('should work with block_nesting', async () => {
+describe('Box nesting', () => {
+  it('should work with basic samples', async () => {
     var container = document.createElement('div');
     container.style.width = '300px';
     container.style.height = '300px';

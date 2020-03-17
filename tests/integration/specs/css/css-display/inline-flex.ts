@@ -1,5 +1,5 @@
-describe('display', () => {
-  it('should work with inline-flex', async () => {
+describe('Display inline-flex', () => {
+  it('should work with basic samples', async () => {
 
     const container = document.createElement('div');
     setStyle(container, {
