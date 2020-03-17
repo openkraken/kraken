@@ -38,7 +38,7 @@ describe('Offset api', () => {
 
     document.body.appendChild(div);
     let str = '';
-    RECT_PROPERTIES.forEach((key) => {
+    RECT_PROPERTIES.forEach(key => {
       str += `${key}: ${div[key]}px `;
     });
 

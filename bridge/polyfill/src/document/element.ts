@@ -112,7 +112,6 @@ export class Element extends Node {
 
   getBoundingClientRect = () => {
     const rectInformation = method(this.nodeId, 'getBoundingClientRect');
-    console.log('rectInformation', rectInformation);
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {

@@ -4,7 +4,8 @@ describe('Background linear-gradient', () => {
     Object.assign(div1.style, {
       width: '200px',
       height: '100px',
-      backgroundImage: 'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
+      backgroundImage:
+        'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
     });
 
     var div2 = document.createElement('div');
@@ -26,7 +27,8 @@ describe('Background linear-gradient', () => {
     Object.assign(div4.style, {
       width: '200px',
       height: '100px',
-      backgroundImage: 'linear-gradient(135deg, red, red 10%, blue 75%, yellow 75%)',
+      backgroundImage:
+        'linear-gradient(135deg, red, red 10%, blue 75%, yellow 75%)',
     });
 
     document.body.appendChild(div1);

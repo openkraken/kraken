@@ -1,4 +1,4 @@
-describe('Element input', () => {
+describe('Tags audio', () => {
   it('basic', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
@@ -14,7 +14,8 @@ describe('Element input', () => {
     });
     setAttributes(audio, {
       controls: true,
-      src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3',
+      src:
+        'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3',
     });
 
     container1.appendChild(audio);

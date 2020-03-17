@@ -1,5 +1,5 @@
-describe('Element video', () => {
-  it('element video', done => {
+describe('Tags video', () => {
+  it('basic', done => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       height: '500rpx',
@@ -15,7 +15,8 @@ describe('Element video', () => {
 
     setAttributes(video, {
       autoPlay: true,
-      src: 'https://videocdn.taobao.com/oss/ali-video/1fa0c3345eb3433b8af7e995e2013cea/1458900536/video.mp4',
+      src:
+        'https://videocdn.taobao.com/oss/ali-video/1fa0c3345eb3433b8af7e995e2013cea/1458900536/video.mp4',
     });
 
     video.addEventListener('canplay', () => {

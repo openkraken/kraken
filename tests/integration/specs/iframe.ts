@@ -1,7 +1,10 @@
 describe('IframeElement', () => {
   it('basic', async () => {
     const iframe = document.createElement('iframe');
-    iframe.setAttribute('src', 'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html');
+    iframe.setAttribute(
+      'src',
+      'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html'
+    );
     iframe.style.width = '100vw';
     iframe.style.height = '375rpx';
 

@@ -1152,7 +1152,6 @@ abstract class Element extends Node
       boundingClientRect = BoundingClientRect();
     }
 
-    print('el ${boundingClientRect.toJSON()}');
     return boundingClientRect.toJSON();
   }
 
