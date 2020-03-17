@@ -1,5 +1,5 @@
-describe('TextAlign', () => {
-  it('should work with text-align', async () => {
+describe('Align text-align', () => {
+  it('001', async () => {
     var container = document.createElement('div');
 
     var div1 = document.createElement('div');

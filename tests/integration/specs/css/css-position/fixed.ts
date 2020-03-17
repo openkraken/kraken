@@ -1,4 +1,4 @@
-describe('position fixed', () => {
+describe('Position fixed', () => {
   it('001', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {

@@ -1,5 +1,5 @@
 describe('Position none-static', () => {
-  it('should work from none-static to static', async () => {
+  it('to static', async () => {
     const container = document.createElement('div');
     setStyle(container, {
       width: '400px',

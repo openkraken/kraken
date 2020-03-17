@@ -26,6 +26,6 @@ function create(tag: string, style: object) {
   return el;
 }
 
-async function matchScreenshot() {
-  return await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
+async function matchScreenshot(element: HTMLElement = document.body) {
+  return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
 }

@@ -1,5 +1,5 @@
 describe('Position static', () => {
-  it('position_static_to_nonstatic', async () => {
+  it('to nonestatic', async () => {
     const container = document.createElement('div');
     setStyle(container, {
       width: '400px',
