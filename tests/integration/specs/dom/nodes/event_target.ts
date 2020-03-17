@@ -15,7 +15,7 @@ describe('DOM EventTarget', () => {
         clickTime++;
         div.replaceChild(
           document.createTextNode('Click: ' + clickTime + 'times.'),
-          div.firstChild
+          div.firstChild as Node
         );
       };
       div.addEventListener('click', clickHandler);
@@ -27,7 +27,7 @@ describe('DOM EventTarget', () => {
       div.removeEventListener('click', clickHandler);
       div.click(); // Should be `2`.
 
-      setTimeout(() => {
+      setTimeout(async () => {
         expect(clickTime === 2).toBe(true);
         await matchScreenshot();
         resolve();

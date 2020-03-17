@@ -30,9 +30,9 @@ describe('Event trigger order', () => {
       document.body.appendChild(wrapper);
       wrapper.appendChild(document.createTextNode('Click DIV 2: '));
 
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
         container2.click();
-        await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
+        await matchScreenshot();
         resolve();
       });
 

@@ -1,5 +1,7 @@
 describe('flexbox flex-item', () => {
   it('should work with width', async () => {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
     var flex2 = document.createElement('div');
     setStyle(flex2, {
       display: 'flex',
@@ -27,7 +29,6 @@ describe('flexbox flex-item', () => {
     flex2.appendChild(div5);
     flex2.appendChild(div6);
 
-    container.appendChild(flex1);
     container.appendChild(flex2);
     await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
   });

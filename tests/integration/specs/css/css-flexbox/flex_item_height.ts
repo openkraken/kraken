@@ -44,6 +44,7 @@ describe('flexbox flex-item', () => {
     var text4 = document.createTextNode('4444');
     div4.appendChild(text4);
 
+    container.appendChild(flex1);
     flex1.appendChild(div1);
     flex1.appendChild(div2);
     flex1.appendChild(div3);
