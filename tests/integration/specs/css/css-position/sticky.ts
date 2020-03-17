@@ -14,7 +14,8 @@ describe('Position sticky', () => {
     const block1 = document.createElement('div');
     block1.appendChild(document.createTextNode('block1'));
     setStyle(block1, {
-      backgroundColor: '#999', height: '200px'
+      backgroundColor: '#999',
+      height: '200px',
     });
 
     const sticky2 = document.createElement('div');
@@ -31,9 +32,9 @@ describe('Position sticky', () => {
     const block2 = document.createElement('div');
     block2.appendChild(document.createTextNode('block2'));
     setStyle(block2, {
-      backgroundColor: '#999', height: '200px'
+      backgroundColor: '#999',
+      height: '200px',
     });
-
 
     const sticky3 = document.createElement('div');
     sticky3.appendChild(document.createTextNode('sticky top 3'));
@@ -49,7 +50,8 @@ describe('Position sticky', () => {
     const block3 = document.createElement('div');
     block3.appendChild(document.createTextNode('block3'));
     setStyle(block3, {
-      backgroundColor: '#999', height: '200px'
+      backgroundColor: '#999',
+      height: '200px',
     });
 
     const sticky4 = document.createElement('div');
@@ -66,7 +68,8 @@ describe('Position sticky', () => {
     const block4 = document.createElement('div');
     block4.appendChild(document.createTextNode('bottom block'));
     setStyle(block4, {
-      backgroundColor: '#999', height: '800px'
+      backgroundColor: '#999',
+      height: '800px',
     });
 
     document.body.appendChild(sticky1);

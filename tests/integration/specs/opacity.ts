@@ -1,13 +1,5 @@
-it('opacity', () => {
-  return new Promise((resolve) => {
-    function setStyle(dom, object) {
-      for (let key in object) {
-        if (object.hasOwnProperty(key)) {
-          dom.style[key] = object[key];
-        }
-      }
-    }
-
+describe('Opacity', () => {
+  it('opacity', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setStyle(container1, {
@@ -34,11 +26,13 @@ it('opacity', () => {
       console.log('inner clicked');
     });
 
-    requestAnimationFrame(function () {
+    requestAnimationFrame(async () => {
       setStyle(container2, {
         opacity: 0.5,
       });
-      resolve();
+
+      await matchScreenshot();
+      done();
     });
   });
 });

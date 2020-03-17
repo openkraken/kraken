@@ -1,3 +1,1 @@
-describe('Display block', () => {
-
-});
+describe('Display block', () => {});

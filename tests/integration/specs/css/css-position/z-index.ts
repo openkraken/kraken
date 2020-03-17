@@ -1,5 +1,4 @@
 describe('ZIndex', () => {
-
   it('basic', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
@@ -18,7 +17,7 @@ describe('ZIndex', () => {
       position: 'absolute',
       top: '50px',
       left: '50px',
-      zIndex: 2
+      zIndex: 2,
     });
     div1.appendChild(document.createTextNode('z-index 2'));
 
@@ -32,7 +31,7 @@ describe('ZIndex', () => {
       position: 'absolute',
       top: '100px',
       left: '100px',
-      zIndex: 1
+      zIndex: 1,
     });
     div2.appendChild(document.createTextNode('z-index 1'));
 
@@ -40,5 +39,4 @@ describe('ZIndex', () => {
 
     await matchScreenshot();
   });
-
 });

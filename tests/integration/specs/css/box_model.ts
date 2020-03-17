@@ -48,8 +48,6 @@ describe('BoxModel', () => {
     await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
-
-
   it('should work with block nested', async () => {
     var container = document.createElement('div');
     container.style.width = '300px';
@@ -66,11 +64,7 @@ describe('BoxModel', () => {
     await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
-  it('should work with margin', async () => {
+  it('should work with margin', async () => {});
 
-  });
-
-  it('should work with padding', async () => {
-
-  });
+  it('should work with padding', async () => {});
 });

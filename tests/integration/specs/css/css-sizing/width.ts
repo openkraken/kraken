@@ -1,4 +1,4 @@
-describe('Width', function () {
+describe('Width', function() {
   it('001', async () => {
     const div = document.createElement('div');
     setStyle(div, {

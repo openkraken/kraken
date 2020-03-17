@@ -5,7 +5,7 @@ describe('Box padding', () => {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
-      padding: 0
+      padding: 0,
     });
 
     document.body.appendChild(container1);

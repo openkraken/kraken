@@ -1,9 +1,5 @@
-it('iframe', () => {
-  return new Promise((done) => {
-    // There are no load event fired at desktop kraken.
-    // MOCK async logic.
-    setTimeout(done, 2000);
-
+describe('IframeElement', () => {
+  it('basic', async () => {
     const iframe = document.createElement('iframe');
     iframe.setAttribute('src', 'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html');
     iframe.style.width = '100vw';
@@ -19,5 +15,10 @@ it('iframe', () => {
     div2.style.width = div2.style.height = '100px';
     div2.style.backgroundColor = 'red';
     document.body.appendChild(div2);
+
+    // There are no load event fired at desktop kraken.
+    // MOCK async logic.
+    await sleep(2);
+    await matchScreenshot();
   });
 });

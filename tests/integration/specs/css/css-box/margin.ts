@@ -5,7 +5,7 @@ describe('Box margin', () => {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
-      margin: 0
+      margin: 0,
     });
 
     document.body.appendChild(div);

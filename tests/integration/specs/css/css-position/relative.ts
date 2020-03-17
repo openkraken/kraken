@@ -26,5 +26,4 @@ describe('Position relative', () => {
 
     await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
   });
-
 });

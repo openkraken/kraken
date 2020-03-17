@@ -43,7 +43,7 @@ describe('Position', () => {
     await matchScreenshot();
   });
 
-  it('should work with flex', async() => {
+  it('should work with flex', async () => {
     const WIDTH = '100vw';
     const HEIGHT = '100vh';
 
@@ -251,7 +251,4 @@ describe('Position', () => {
 
     await matchScreenshot();
   });
-
-
-
 });

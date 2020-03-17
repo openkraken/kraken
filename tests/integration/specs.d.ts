@@ -19,6 +19,24 @@
 // TypeScript Version: 2.8
 // For ddescribe / iit use : https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/karma-jasmine/karma-jasmine.d.ts
 
+interface Connection {
+  isConnected: boolean;
+  type: string;
+}
+
+interface DeviceInfo {
+  brand: string;
+  isPhysicalDevice: boolean;
+  platformName: string;
+}
+
+interface Navigator {
+  connection: {
+    getConnectivity(): Connection;
+  }
+  getDeviceInfo(): DeviceInfo;
+}
+
 interface HTMLDivElement {
     toBlob(devicePixelRatio: number): Promise<Blob>;
 }
