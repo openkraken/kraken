@@ -1,5 +1,5 @@
 describe('Position static', () => {
-  it('position_static', async () => {
+  it('001', async () => {
     const div1 = document.createElement('div');
     setStyle(div1, {
       width: '100px',

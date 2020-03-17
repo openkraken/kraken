@@ -1,5 +1,5 @@
 describe('Box padding', () => {
-  it('001', async () => {
+  it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       width: '100px',
@@ -20,6 +20,6 @@ describe('Box padding', () => {
     container1.appendChild(container2);
     container1.style.padding = '20px';
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
   });
 });
