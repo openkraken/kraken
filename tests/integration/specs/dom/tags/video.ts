@@ -1,21 +1,6 @@
-it('element video', () => {
-  return new Promise((resolve) => {
-    function setStyle(dom, object) {
-      for (const key in object) {
-        if (object.hasOwnProperty(key)) {
-          dom.style[key] = object[key];
-        }
-      }
-    }
+describe('Element video', () => {
 
-    function setAttribute(dom, object) {
-      for (const key in object) {
-        if (object.hasOwnProperty(key)) {
-          dom.setAttribute(key, object[key]);
-        }
-      }
-    }
-
+  it('element video', (done) => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       height: '500rpx',
@@ -28,15 +13,14 @@ it('element video', () => {
       width: '750rpx',
       height: '400rpx'
     });
-    setAttribute(video, {
+
+    setAttributes(video, {
       autoPlay: true,
       src: 'https://videocdn.taobao.com/oss/ali-video/1fa0c3345eb3433b8af7e995e2013cea/1458900536/video.mp4'
     });
 
     video.addEventListener('canplay', () => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
+      done();
     });
 
     container1.appendChild(video);
@@ -55,4 +39,5 @@ it('element video', () => {
     });
     container1.appendChild(playBtn);
   });
+
 });
