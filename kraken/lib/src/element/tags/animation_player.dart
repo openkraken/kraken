@@ -4,23 +4,24 @@ import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
-const String ANIMATION = "ANIMATION";
+const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 
-class AnimationElement extends Element {
-  static final String ANIMATION_TYPE_FLARE = "flare";
+// Ref: https://github.com/LottieFiles/lottie-player
+class AnimationPlayerElement extends Element {
+  static final String ANIMATION_TYPE_FLARE = 'flare';
 
   String type = ANIMATION_TYPE_FLARE;
   String objectFit = 'contain';
   RenderObject animationRenderObject;
 
-  AnimationElement(
+  AnimationPlayerElement(
       int nodeId, Map<String, dynamic> properties, List<String> events)
       : super(
             nodeId: nodeId,
             properties: properties,
             events: events,
-            defaultDisplay: "block",
-            tagName: ANIMATION) {
+            defaultDisplay: 'block',
+            tagName: ANIMATION_PLAYER) {
     if (properties.containsKey('type')) {
       type = properties['type'];
     }
@@ -32,6 +33,7 @@ class AnimationElement extends Element {
     if (type == ANIMATION_TYPE_FLARE) {
       animationRenderObject = _createFlareRenderObject(properties);
     }
+
     if (animationRenderObject != null) {
       addChild(animationRenderObject);
     }
@@ -66,7 +68,7 @@ class AnimationElement extends Element {
           AssetFlare(bundle: NetworkAssetBundle(Uri.parse(properties['src'])), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center
-      ..animationName = properties['animationName']
+      ..animationName = properties['name']
       ..shouldClip = false
       ..useIntrinsicSize = true;
   }
