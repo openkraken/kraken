@@ -21,6 +21,7 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
+import 'bounding_client_rect.dart';
 
 typedef TestElement = bool Function(Element element);
 
@@ -1124,25 +1125,24 @@ abstract class Element extends Node
   }
 
   String getBoundingClientRect() {
-    Map<String, double> boundingClientRect = {};
-
     // Force flush layout.
     renderBorderMargin.markNeedsLayout();
     renderBorderMargin.owner.flushLayout();
 
     Offset offset = getOffset(renderBorderMargin);
     Size size = renderBorderMargin.size;
-    boundingClientRect['x'] = offset.dx;
-    boundingClientRect['y'] = offset.dy;
-    boundingClientRect['width'] = size.width;
-    boundingClientRect['height'] = size.height;
-    boundingClientRect['top'] = offset.dy;
-    boundingClientRect['left'] = offset.dx;
-    boundingClientRect['right'] = offset.dx + size.width;
-    boundingClientRect['bottom'] = offset.dy + size.height;
 
-    print(boundingClientRect);
-    return jsonEncode(boundingClientRect);
+    BoundingClientRect boundingClientRect = BoundingClientRect(
+      x: offset.dx,
+      y: offset.dy,
+      width: size.width,
+      height: size.height,
+      top: offset.dy,
+      left: offset.dx,
+      right: offset.dx + size.width,
+      bottom: offset.dy + size.height,
+    );
+    return boundingClientRect.toJSON();
   }
 
   double getOffsetX() {

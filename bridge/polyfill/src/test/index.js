@@ -24,6 +24,12 @@ class JasmineTracker extends EventEmitter {
   specStarted(result) {
     return this.onSpecStarted(result);
   }
+
+  specDone(result) {
+    // Force update frames.
+    __request_update_frame__();
+  }
+
 }
 
 const consoleReporter = new ConsoleReporter();
