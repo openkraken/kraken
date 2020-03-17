@@ -1,5 +1,5 @@
-describe('Background gradient', () => {
-  it('linear-gradient', async () => {
+describe('Background linear-gradient', () => {
+  it('001', async () => {
     var div1 = document.createElement('div');
     Object.assign(div1.style, {
       width: '200px',
