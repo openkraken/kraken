@@ -1,4 +1,4 @@
-describe('Transform skew', function () {
+describe('Transform skew', function() {
   it('001', async () => {
     document.body.appendChild(
       create('div', {

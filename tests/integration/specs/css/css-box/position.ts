@@ -1,6 +1,5 @@
 describe('Box position', () => {
   it('should work with basic samples', async () => {
-
     var container = document.createElement('div');
     var div1 = document.createElement('div');
     var div2 = document.createElement('span');

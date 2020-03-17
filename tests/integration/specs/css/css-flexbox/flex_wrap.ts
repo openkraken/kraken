@@ -9,7 +9,7 @@ describe('flexbox flex-wrap', () => {
       width: '300rpx',
       height: '1000rpx',
       marginBottom: '10rpx',
-      backgroundColor: '#ddd'
+      backgroundColor: '#ddd',
     });
 
     document.body.appendChild(container1);
@@ -20,7 +20,7 @@ describe('flexbox flex-wrap', () => {
       backgroundColor: '#f40',
       width: '100rpx',
       height: '100rpx',
-      margin: '10rpx'
+      margin: '10rpx',
     });
     container1.appendChild(child1);
 
@@ -30,7 +30,7 @@ describe('flexbox flex-wrap', () => {
       backgroundColor: '#f40',
       width: '100rpx',
       height: '100rpx',
-      margin: '10rpx'
+      margin: '10rpx',
     });
     container1.appendChild(child2);
 
@@ -40,7 +40,7 @@ describe('flexbox flex-wrap', () => {
       backgroundColor: '#f40',
       width: '100rpx',
       height: '100rpx',
-      margin: '10rpx'
+      margin: '10rpx',
     });
     container1.appendChild(child3);
     await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');

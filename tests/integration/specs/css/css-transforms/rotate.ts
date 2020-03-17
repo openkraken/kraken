@@ -1,5 +1,5 @@
-describe('Transform rotate', function () {
-  it('001', async function () {
+describe('Transform rotate', function() {
+  it('001', async function() {
     document.body.appendChild(
       create('div', {
         width: '100px',

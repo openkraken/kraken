@@ -1,5 +1,5 @@
 describe('Transform matrix', () => {
-  it('001', async function () {
+  it('001', async function() {
     document.body.appendChild(
       create('div', {
         width: '100px',
