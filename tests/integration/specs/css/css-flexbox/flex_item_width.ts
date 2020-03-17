@@ -6,7 +6,7 @@ describe('flexbox flex-item', () => {
       flexDirection: 'column',
       backgroundColor: 'blue',
       justifyContent: 'center',
-      height: '100px'
+      height: '100px',
     });
 
     var div5 = document.createElement('div');
@@ -16,7 +16,6 @@ describe('flexbox flex-item', () => {
     });
     var text5 = document.createTextNode('5555');
     div5.appendChild(text5);
-
 
     var div6 = document.createElement('div');
     setStyle(div6, {

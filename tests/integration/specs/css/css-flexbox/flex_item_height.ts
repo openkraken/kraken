@@ -9,13 +9,13 @@ describe('flexbox flex-item', () => {
       flexDirection: 'row',
       justifyContent: 'space-between',
       backgroundColor: '#f40',
-      height: '100px'
+      height: '100px',
     });
 
     var div1 = document.createElement('div');
     setStyle(div1, {
       backgroundColor: '#999',
-      height: '50px'
+      height: '50px',
     });
     var text1 = document.createTextNode('1111');
     div1.appendChild(text1);
@@ -27,12 +27,11 @@ describe('flexbox flex-item', () => {
     var text2 = document.createTextNode('2222');
     div2.appendChild(text2);
 
-
     var div3 = document.createElement('div');
     setStyle(div3, {
       display: 'flex',
       backgroundColor: '#999',
-      height: '50px'
+      height: '50px',
     });
     var text3 = document.createTextNode('3333');
     div3.appendChild(text3);
@@ -44,7 +43,6 @@ describe('flexbox flex-item', () => {
     });
     var text4 = document.createTextNode('4444');
     div4.appendChild(text4);
-
 
     flex1.appendChild(div1);
     flex1.appendChild(div2);

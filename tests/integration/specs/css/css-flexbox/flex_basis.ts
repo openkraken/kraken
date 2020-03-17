@@ -7,7 +7,7 @@ describe('flexbox flex-basis', () => {
       width: '300px',
       height: '100px',
       backgroundColor: '#999',
-      justifyContent: 'center'
+      justifyContent: 'center',
     });
 
     document.body.appendChild(container1);
@@ -21,14 +21,14 @@ describe('flexbox flex-basis', () => {
 
     const child2 = document.createElement('div');
     setStyle(child2, {
-      backgroundColor: '#f40'
+      backgroundColor: '#f40',
     });
     child2.appendChild(document.createTextNode('Item Two'));
     container1.appendChild(child2);
 
     const child3 = document.createElement('div');
     setStyle(child3, {
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     });
     child3.appendChild(document.createTextNode('Item Three'));
     container1.appendChild(child3);
@@ -44,7 +44,7 @@ describe('flexbox flex-basis', () => {
       width: '300px',
       height: '100px',
       backgroundColor: '#999',
-      justifyContent: 'center'
+      justifyContent: 'center',
     });
 
     document.body.appendChild(container1);
@@ -59,14 +59,14 @@ describe('flexbox flex-basis', () => {
 
     const child2 = document.createElement('div');
     setStyle(child2, {
-      backgroundColor: '#f40'
+      backgroundColor: '#f40',
     });
     child2.appendChild(document.createTextNode('Item Two'));
     container1.appendChild(child2);
 
     const child3 = document.createElement('div');
     setStyle(child3, {
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     });
     child3.appendChild(document.createTextNode('Item Three'));
     container1.appendChild(child3);

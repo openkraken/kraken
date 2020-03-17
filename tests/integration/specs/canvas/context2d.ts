@@ -1,4 +1,4 @@
-describe('context2d', () => {
+describe('Canvas context 2d', () => {
   it('should work with font and rect', async () => {
     var div = document.createElement('div');
     div.style.width = div.style.height = '300px';

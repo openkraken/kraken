@@ -1,4 +1,4 @@
-describe('DOM insert before', () => {
+describe('Insert before', () => {
   it('basic', async () => {
     var div = document.createElement('div');
     var span = document.createElement('span');

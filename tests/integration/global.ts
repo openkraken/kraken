@@ -2,6 +2,7 @@
  * This file will expose global functions for specs to use.
  *
  * - setStyle: Apply style object to a specfic DOM.
+ * - setStyle: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
  * - matchScreenshot: match snapshot of body's image.
@@ -12,6 +13,14 @@ function setStyle(dom: any, object: any) {
   for (let key in object) {
     if (object.hasOwnProperty(key)) {
       dom.style[key] = object[key];
+    }
+  }
+}
+
+function setAttributes(dom: any, object: any) {
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      dom.setAttribute(key, object[key]);
     }
   }
 }

@@ -1,5 +1,5 @@
-describe('Transition all', function () {
-  it('001', (done) => {
+describe('Transition all', function() {
+  it('001', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setStyle(container1, {
