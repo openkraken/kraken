@@ -45,6 +45,14 @@ interface HTMLCanvasElement {
     toBlob(devicePixcelRatio: number): Promise<Blob>;
 }
 
+interface HTMLMediaElement {
+  /**
+   * The HTMLMediaElement.fastSeek() method quickly seeks the media to the new time with precision tradeoff.
+   * @param time A double.
+   */
+  fastSeek(time: number): void;
+}
+
 interface HTMLElement {
     toBlob(devicePixcelRatio: number): Promise<Blob>;
 }
