@@ -1008,6 +1008,9 @@ abstract class Element extends Node
       Timer(Duration(milliseconds: 0), () {
         // Trigger sticky update logic after node is connected
         if (childStyle.get('position') == 'sticky') {
+          if (!renderMargin.hasSize) {
+            renderMargin.owner.flushLayout();
+          }
           _updateStickyPosition(0);
         }
       });
