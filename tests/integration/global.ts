@@ -3,9 +3,11 @@
  *
  * - setStyle: Apply style object to a specfic DOM.
  * - sleep: wait for several seconds.
+ * - create: create element.
  */
 
 function setStyle(dom: any, object: any) {
+  if (object == null) return;
   for (let key in object) {
     if (object.hasOwnProperty(key)) {
       dom.style[key] = object[key];
@@ -15,4 +17,10 @@ function setStyle(dom: any, object: any) {
 
 function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
+}
+
+function create(tag: string, style: object) {
+  const el = document.createElement(tag);
+  setStyle(el, style);
+  return el;
 }
