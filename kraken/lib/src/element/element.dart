@@ -451,6 +451,9 @@ abstract class Element extends Node
   }
 
   void insertStickyPlaceholder() {
+    if (!renderMargin.hasSize) {
+      renderMargin.owner.flushLayout();
+    }
     Style pStyle = Style({
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
@@ -1133,8 +1136,10 @@ abstract class Element extends Node
 
     if (isConnected) {
       // Force flush layout.
-      renderBorderHolder.markNeedsLayout();
-      renderBorderHolder.owner.flushLayout();
+      if (!renderBorderHolder.hasSize) {
+        renderBorderHolder.markNeedsLayout();
+        renderBorderHolder.owner.flushLayout();
+      }
 
       Offset offset = getOffset(renderBorderHolder);
       Size size = renderBorderHolder.size;
@@ -1214,8 +1219,10 @@ abstract class Element extends Node
     if (isConnected) {
       final RenderBox box = renderElementBoundary;
       // Must flush every times, or child may has no size.
-      box.markNeedsLayout();
-      box.owner.flushLayout();
+      if (!box.hasSize) {
+        box.markNeedsLayout();
+        box.owner.flushLayout();
+      }
 
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero));

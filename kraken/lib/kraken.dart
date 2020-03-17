@@ -20,7 +20,7 @@ ConnectedCallback _connectedCallback;
 
 Future<void> connect(bool showPerformanceOverlay) {
   Completer<void> completer = Completer();
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
+  RendererBinding.instance.scheduleFrameCallback((_) {
     elementManager = ElementManager();
     elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
@@ -41,7 +41,7 @@ void runApp({
   bool showPerformanceOverlay = false,
   bool shouldInitializeBinding = true,
   ConnectedCallback afterConnected,
-}) {
+}) async {
   if (enableDebug) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     debugPaintSizeEnabled = true;
@@ -53,7 +53,7 @@ void runApp({
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-  connect(showPerformanceOverlay);
+  await connect(showPerformanceOverlay);
 }
 
 Future<void> unmountApp() async {
