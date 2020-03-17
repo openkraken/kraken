@@ -1,16 +1,19 @@
 describe('display', () => {
-  it('should work with none', async () => {
+  it('should work with flex', async () => {
 
     const container = document.createElement('div');
     setStyle(container, {
       width: '100px',
       height: '100px',
-      display: 'none',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       backgroundColor: '#666',
     });
+    container.appendChild(document.createTextNode('flex'));
 
     document.body.appendChild(container);
-    document.body.appendChild(document.createTextNode('The box should not display.'));
+    document.body.appendChild(document.createTextNode('This text should wrap into next line from the box.'));
 
     await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
   });

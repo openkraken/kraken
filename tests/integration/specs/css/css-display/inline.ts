@@ -1,5 +1,5 @@
-describe('Display inline', () => {
-  it('should work with basic samples', async () => {
+describe('display', () => {
+  it('should work with inline', async () => {
 
     const container = document.createElement('div');
     setStyle(container, {

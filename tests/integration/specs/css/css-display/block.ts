@@ -1,5 +1,5 @@
-describe('Display block', () => {
-  it('should work with basic samples', async () => {
+describe('display', () => {
+  it('should work with block', async () => {
 
     const container = document.createElement('div');
     setStyle(container, {
