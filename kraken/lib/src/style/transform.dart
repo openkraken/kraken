@@ -275,9 +275,9 @@ mixin TransformStyleMixin {
       case 'skew':
         try {
           if (method.args.length >= 1) {
-            double alpha = double.parse(method.args[0].trim());
+            double alpha = Angle(method.args[0].trim()).angleValue;
             if (method.args.length == 2) {
-              double beta = double.parse(method.args[1].trim());
+              double beta = Angle(method.args[1].trim()).angleValue;
               matrix4 = Matrix4.skew(alpha, beta);
             } else if (method.args.length == 1) {
               matrix4 = Matrix4.skewX(alpha);
@@ -288,14 +288,14 @@ mixin TransformStyleMixin {
       case 'skewX':
         if (method.args.length == 1) {
           try {
-            matrix4 = Matrix4.skewX(double.parse(method.args[0].trim()));
+            matrix4 = Matrix4.skewX(Angle(method.args[0].trim()).angleValue);
           } catch (exception) {}
         }
         break;
       case 'skewY':
         if (method.args.length == 1) {
           try {
-            matrix4 = Matrix4.skewY(double.parse(method.args[0].trim()));
+            matrix4 = Matrix4.skewY(Angle(method.args[0].trim()).angleValue);
           } catch (exception) {}
         }
         break;
