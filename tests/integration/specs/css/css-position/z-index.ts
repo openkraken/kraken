@@ -1,5 +1,4 @@
 describe('ZIndex', () => {
-
   it('basic', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {

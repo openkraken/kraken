@@ -251,7 +251,4 @@ describe('Position', () => {
 
     await matchScreenshot();
   });
-
-
-
 });
