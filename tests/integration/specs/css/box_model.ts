@@ -61,7 +61,7 @@ describe('BoxModel', () => {
     await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
   });
 
-  it('should work with block_nesting', async () => {
+  it('should work with block nested', async () => {
     var container = document.createElement('div');
     container.style.width = '300px';
     container.style.height = '300px';
