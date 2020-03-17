@@ -31,6 +31,6 @@ describe('Box', () => {
     container2.appendChild(container3);
     container3.appendChild(textNode);
 
-    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

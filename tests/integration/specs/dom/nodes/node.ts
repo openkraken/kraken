@@ -10,7 +10,7 @@
  * - Node.prototype.insertBefore
  * - Node.prototype.replaceChild
  */
-describe('Node api', () => {
+describe('Node API', () => {
   it('should work', async () => {
     const el = document.createElement('div');
     expect(el.isConnected === false).toBe(true);

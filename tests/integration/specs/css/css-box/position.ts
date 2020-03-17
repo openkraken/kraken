@@ -27,6 +27,6 @@ describe('Box position', () => {
     container.style.position = 'relative';
     container.style.top = '100px';
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

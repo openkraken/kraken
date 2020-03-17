@@ -105,11 +105,6 @@ function ConsoleReporter() {
     }
   };
 
-  this.specStarted = function (result) {
-    print(colored('green', 'Running: ' + result.fullName));
-    printNewline();
-  };
-
   this.specDone = function (result) {
     specCount++;
 
@@ -120,11 +115,19 @@ function ConsoleReporter() {
     }
 
     if (result.status == 'passed') {
+      print(colored('green', 'PASS: ') + result.fullName);
+      printNewline();
       executableSpecCount++;
       return;
     }
 
     if (result.status == 'failed') {
+      print(colored('red', 'FAIL: ') + result.fullName);
+      printNewline();
+      result.failedExpectations && result.failedExpectations.forEach((failedExpectation) => {
+        print('    Message: ' + colored('red', failedExpectation.message));
+        printNewline();
+      });
       failureCount++;
       failedSpecs.push(result);
       executableSpecCount++;

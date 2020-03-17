@@ -12,6 +12,6 @@ describe('Box nesting', () => {
 
     container.appendChild(box);
     document.body.appendChild(container);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

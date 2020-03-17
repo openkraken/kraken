@@ -37,7 +37,7 @@ describe('flexbox flex-shrink', () => {
     child3.appendChild(document.createTextNode('flex-shrink: 1'));
     container1.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work when flex-direction is column', async () => {
@@ -78,6 +78,6 @@ describe('flexbox flex-shrink', () => {
     child6.appendChild(document.createTextNode('flex-shrink: 1'));
     container2.appendChild(child6);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

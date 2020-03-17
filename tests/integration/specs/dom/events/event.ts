@@ -1,5 +1,5 @@
-describe('Event trigger order', () => {
-  it('should work', async () => {
+describe('Event', () => {
+  it('should work with order', async () => {
     return new Promise(async (resolve, reject) => {
       const container1 = document.createElement('div');
       document.body.appendChild(container1);

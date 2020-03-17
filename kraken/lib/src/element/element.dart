@@ -21,6 +21,7 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
+import 'bounding_client_rect.dart';
 
 typedef TestElement = bool Function(Element element);
 
@@ -60,23 +61,23 @@ abstract class Element extends Node
 
     if (allowChildren) {
       renderObject =
-          renderLayoutElement = createRenderLayoutElement(_style, null);
+          renderLayoutElement = createRenderLayoutBox(_style, null);
     }
 
     // padding
     renderObject = renderPadding = initRenderPadding(renderObject, _style);
+
+    // overflow
+    if (allowChildren) {
+      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
+    }
+
     // background image
     if (_style.backgroundAttachment == 'local' &&
         _style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, _style, nodeId);
     }
-    // overflow
-    if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
-    }
-    // constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
+
     // position
     if (_style.position != 'static') {
       renderObject = renderStack = RenderPosition(
@@ -88,6 +89,10 @@ abstract class Element extends Node
     }
     // border
     renderObject = initRenderDecoratedBox(renderObject, _style, this);
+
+    // constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
 
     // Pointer event listener
     renderObject = RenderPointerListener(
@@ -180,7 +185,7 @@ abstract class Element extends Node
           ..visitChildren(visitor)
           ..removeAll();
         renderPadding.child = null;
-        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        renderLayoutElement = createRenderLayoutBox(newStyle, children);
         renderPadding.child = renderLayoutElement as RenderBox;
         // update style reference
         renderElementBoundary.style = newStyle;
@@ -730,7 +735,7 @@ abstract class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutElement(
+  ContainerRenderObjectMixin createRenderLayoutBox(
       Style newStyle, List<RenderBox> children) {
     String display = newStyle.get('display');
     String flexWrap = newStyle.get('flexWrap');
@@ -1124,25 +1129,31 @@ abstract class Element extends Node
   }
 
   String getBoundingClientRect() {
-    Map<String, double> boundingClientRect = {};
+    BoundingClientRect boundingClientRect;
 
-    // Force flush layout.
-    renderBorderMargin.markNeedsLayout();
-    renderBorderMargin.owner.flushLayout();
+    if (isConnected) {
+      // Force flush layout.
+      renderBorderHolder.markNeedsLayout();
+      renderBorderHolder.owner.flushLayout();
 
-    Offset offset = getOffset(renderBorderMargin);
-    Size size = renderBorderMargin.size;
-    boundingClientRect['x'] = offset.dx;
-    boundingClientRect['y'] = offset.dy;
-    boundingClientRect['width'] = size.width;
-    boundingClientRect['height'] = size.height;
-    boundingClientRect['top'] = offset.dy;
-    boundingClientRect['left'] = offset.dx;
-    boundingClientRect['right'] = offset.dx + size.width;
-    boundingClientRect['bottom'] = offset.dy + size.height;
+      Offset offset = getOffset(renderBorderHolder);
+      Size size = renderBorderHolder.size;
+      boundingClientRect = BoundingClientRect(
+        x: offset.dx,
+        y: offset.dy,
+        width: size.width,
+        height: size.height,
+        top: offset.dy,
+        left: offset.dx,
+        right: offset.dx + size.width,
+        bottom: offset.dy + size.height,
+      );
+    } else {
+      boundingClientRect = BoundingClientRect();
+    }
 
-    print(boundingClientRect);
-    return jsonEncode(boundingClientRect);
+    print('el ${boundingClientRect.toJSON()}');
+    return boundingClientRect.toJSON();
   }
 
   double getOffsetX() {

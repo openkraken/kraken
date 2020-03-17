@@ -26,7 +26,7 @@ describe('flexbox flex-direction', () => {
       backgroundColor: 'red',
     });
     container.appendChild(child2);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with column', async () => {
@@ -56,6 +56,6 @@ describe('flexbox flex-direction', () => {
       backgroundColor: 'red',
     });
     container2.appendChild(child4);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

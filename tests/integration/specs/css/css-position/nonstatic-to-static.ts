@@ -57,13 +57,13 @@ describe('Position none-static', () => {
     div4.appendChild(document.createTextNode('sticky to static'));
     container.appendChild(div4);
 
-    await expectAsync(container.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
 
     div1.style.position = 'static';
     div2.style.position = 'static';
     div3.style.position = 'static';
     div4.style.position = 'static';
 
-    await expectAsync(container.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

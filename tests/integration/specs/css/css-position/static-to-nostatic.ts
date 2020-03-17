@@ -4,7 +4,6 @@ describe('Position static', () => {
     setStyle(container, {
       width: '400px',
       height: '400px',
-      marginBottom: '20px',
       backgroundColor: '#999',
       position: 'relative',
     });
@@ -58,6 +57,6 @@ describe('Position static', () => {
     div3.style.position = 'fixed';
     div4.style.position = 'sticky';
 
-    await expectAsync(container.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

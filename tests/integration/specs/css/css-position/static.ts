@@ -13,6 +13,6 @@ describe('Position static', () => {
 
     document.body.appendChild(div1);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

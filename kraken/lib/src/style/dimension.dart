@@ -582,9 +582,10 @@ mixin DimensionMixin {
             progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
-    } else {
-      renderPadding.padding = getPaddingInsetsFromStyle(style);
     }
+
+    // Update renderPadding.
+    renderPadding.padding = getPaddingInsetsFromStyle(style);
   }
 }
 

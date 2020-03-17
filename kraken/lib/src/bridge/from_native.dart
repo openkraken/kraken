@@ -172,7 +172,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
   }  else if(module == 'MQTT') {
     String method = args[1];
     if (method == 'init') {
-      List mqttArgs = args[2]; 
+      List mqttArgs = args[2];
       return MQTT.init(mqttArgs[0], mqttArgs[1]);
     } else if(method == 'open') {
       List mqttArgs = args[2];
@@ -541,7 +541,7 @@ void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<
       return;
     }
 
-    dynamic node = nodeMap[id];
+    var node = nodeMap[id];
     if (node is Element) {
       node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
