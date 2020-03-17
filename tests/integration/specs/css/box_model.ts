@@ -2,17 +2,27 @@ describe('BoxModel', () => {
   it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
-      padding: '20rpx', backgroundColor: '#999', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      backgroundColor: '#999',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const container2 = document.createElement('div');
     setStyle(container2, {
-      padding: '20rpx', backgroundColor: '#666', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      backgroundColor: '#666',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const container3 = document.createElement('div');
     setStyle(container3, {
-      padding: '20rpx', height: '100rpx', backgroundColor: '#f40', margin: '40rpx', border: '5px solid #000'
+      padding: '20rpx',
+      height: '100rpx',
+      backgroundColor: '#f40',
+      margin: '40rpx',
+      border: '5px solid #000',
     });
 
     const textNode = document.createTextNode('Hello World');
@@ -21,7 +31,7 @@ describe('BoxModel', () => {
     container2.appendChild(container3);
     container3.appendChild(textNode);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with border', async () => {
@@ -35,7 +45,7 @@ describe('BoxModel', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
 
@@ -53,7 +63,7 @@ describe('BoxModel', () => {
 
     container.appendChild(box);
     document.body.appendChild(container);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('should work with margin', async () => {

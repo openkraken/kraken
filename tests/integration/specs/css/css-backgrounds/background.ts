@@ -4,11 +4,11 @@ describe('background', () => {
     setStyle(div, {
       width: '200px',
       height: '200px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
 
     document.body.appendChild(div);
-    await expectAsync(div.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('repeat', async () => {
@@ -19,7 +19,7 @@ describe('background', () => {
       height: '200px',
       marginTop: '10px',
       display: 'flex',
-      flexDirection: 'row'
+      flexDirection: 'row',
     });
 
     const div1 = document.createElement('div');
@@ -27,7 +27,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'no-repeat'
+      backgroundRepeat: 'no-repeat',
     });
     repeat.appendChild(div1);
 
@@ -36,7 +36,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat-x'
+      backgroundRepeat: 'repeat-x',
     });
     repeat.appendChild(div2);
 
@@ -45,7 +45,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat-y'
+      backgroundRepeat: 'repeat-y',
     });
     repeat.appendChild(div3);
 
@@ -54,13 +54,13 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat'
+      backgroundRepeat: 'repeat',
     });
     repeat.appendChild(div4);
 
     document.body.appendChild(repeat);
     await sleep(1);
-    await expectAsync(repeat.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
   });
 
   it('position', async () => {
@@ -71,7 +71,7 @@ describe('background', () => {
       height: '200px',
       marginTop: '10px',
       display: 'flex',
-      flexDirection: 'row'
+      flexDirection: 'row',
     });
 
     const position1 = document.createElement('div');
@@ -79,7 +79,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'center'
+      backgroundPosition: 'center',
     });
     position.appendChild(position1);
 
@@ -88,7 +88,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'left'
+      backgroundPosition: 'left',
     });
     position.appendChild(position2);
 
@@ -97,7 +97,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'top'
+      backgroundPosition: 'top',
     });
     position.appendChild(position3);
 
@@ -106,7 +106,7 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'right'
+      backgroundPosition: 'right',
     });
     position.appendChild(position4);
 
@@ -115,13 +115,13 @@ describe('background', () => {
       width: '100px',
       height: '200px',
       backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'bottom'
+      backgroundPosition: 'bottom',
     });
     position.appendChild(position5);
     document.body.appendChild(position);
 
     // Wait for picture loaded.
     await sleep(1);
-    await expectAsync(position.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(position.toBlob(1.0)).toMatchImageSnapshot();
   });
 });

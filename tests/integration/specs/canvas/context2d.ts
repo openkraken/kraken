@@ -25,6 +25,6 @@ describe('context2d', () => {
 
     document.body.appendChild(div);
 
-    await expectAsync(canvas.toBlob(1)).toMatchImageSnapshot('');
+    await expectAsync(canvas.toBlob(1.0)).toMatchImageSnapshot();
   });
 });
