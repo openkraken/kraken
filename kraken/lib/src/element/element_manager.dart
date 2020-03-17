@@ -25,8 +25,8 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
       return InputElement(id, props, events);
     case CANVAS:
       return CanvasElement(id, props, events);
-    case ANIMATION:
-      return AnimationElement(id, props, events);
+    case ANIMATION_PLAYER:
+      return AnimationPlayerElement(id, props, events);
     case VIDEO:
       return VideoElement(id, props, events);
     case CAMERA:

@@ -29,7 +29,7 @@ class AudioElement extends Element {
   void initAudioPlayer() {
     audioPlayer = AudioPlayer();
 
-    RegExp exp = RegExp(r"^(http|https)://");
+    RegExp exp = RegExp(r'^(http|https)://');
     if (props['src'] != null && !exp.hasMatch(props['src'])) {
       throw Exception('audio url\'s prefix should be http:// or https://');
     }
