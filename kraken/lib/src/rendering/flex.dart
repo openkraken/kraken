@@ -545,6 +545,13 @@ class RenderFlexLayout extends RenderBox
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
+
+    // Size fixed to zero if no child exists.
+    if (firstChild == null) {
+      size = Size.zero;
+      return;
+    }
+
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlexGrow = 0;
     bool hasFlexShrink = false;
