@@ -1,5 +1,4 @@
 describe('Position', () => {
-
   it('should work with flow', async () => {
     const container1 = create('div', {
       width: '200px',
