@@ -1,5 +1,5 @@
 describe('Element img', async () => {
-  it('basic', (done) => {
+  it('basic', done => {
     const img = document.createElement('img');
     img.addEventListener('load', () => {
       done();
@@ -13,5 +13,4 @@ describe('Element img', async () => {
       done();
     };
   });
-
 });

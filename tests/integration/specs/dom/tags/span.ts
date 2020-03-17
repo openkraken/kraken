@@ -1,6 +1,5 @@
 describe('Element span', () => {
   it('should work with texts', async () => {
-
     const span = document.createElement('span');
     const text = document.createTextNode('hello world');
     span.appendChild(text);
@@ -25,4 +24,4 @@ describe('Element span', () => {
 
     await matchScreenshot();
   });
-})
+});

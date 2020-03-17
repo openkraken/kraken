@@ -1,5 +1,5 @@
 describe('Element input', () => {
-  it('basic', async() => {
+  it('basic', async () => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       height: '500rpx',
@@ -10,11 +10,11 @@ describe('Element input', () => {
     const audio = document.createElement('audio');
     setStyle(audio, {
       width: '300px',
-      height: '45px'
+      height: '45px',
     });
     setAttributes(audio, {
       controls: true,
-      src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3'
+      src: 'https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3',
     });
 
     container1.appendChild(audio);

@@ -1,5 +1,5 @@
 describe('Element input', () => {
-  it('basic', async() => {
+  it('basic', async () => {
     const input = document.createElement('input');
     input.style.width = '60px';
     input.style.fontSize = '16px';

@@ -1,6 +1,5 @@
 describe('Element video', () => {
-
-  it('element video', (done) => {
+  it('element video', done => {
     const container1 = document.createElement('div');
     setStyle(container1, {
       height: '500rpx',
@@ -11,12 +10,12 @@ describe('Element video', () => {
     const video = document.createElement('video');
     setStyle(video, {
       width: '750rpx',
-      height: '400rpx'
+      height: '400rpx',
     });
 
     setAttributes(video, {
       autoPlay: true,
-      src: 'https://videocdn.taobao.com/oss/ali-video/1fa0c3345eb3433b8af7e995e2013cea/1458900536/video.mp4'
+      src: 'https://videocdn.taobao.com/oss/ali-video/1fa0c3345eb3433b8af7e995e2013cea/1458900536/video.mp4',
     });
 
     video.addEventListener('canplay', () => {
@@ -39,5 +38,4 @@ describe('Element video', () => {
     });
     container1.appendChild(playBtn);
   });
-
 });
