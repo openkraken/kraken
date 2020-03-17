@@ -10,6 +10,6 @@ describe('Box border', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

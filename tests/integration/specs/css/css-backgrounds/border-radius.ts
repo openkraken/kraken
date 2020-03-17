@@ -24,6 +24,6 @@ describe('border_radius', () => {
 
     document.body.appendChild(container);
 
-    await expectAsync(document.body.toBlob(1.0)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

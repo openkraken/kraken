@@ -36,7 +36,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with flex-end when flex-direction is row', async () => {
@@ -76,7 +76,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with center when flex-direction is row', async () => {
@@ -116,7 +116,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with stretch when flex-direction is row', async () => {
@@ -156,7 +156,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with flex-start when flex-direction is column', async () => {
@@ -196,7 +196,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with flex-end when flex-direction is column', async () => {
@@ -236,7 +236,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with center when flex-direction is column', async () => {
@@ -276,7 +276,7 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work with stretch when flex-direction is column', async () => {
@@ -316,6 +316,6 @@ describe('flexbox align-items', () => {
     });
     container.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

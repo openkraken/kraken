@@ -34,7 +34,7 @@ describe('flexbox flex-grow', () => {
     child3.appendChild(document.createTextNode('flex-grow: 1'));
     container1.appendChild(child3);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 
   it('should work when flex-direction is column', async () => {
@@ -72,6 +72,6 @@ describe('flexbox flex-grow', () => {
     child6.appendChild(document.createTextNode('flex-grow: 1'));
     container2.appendChild(child6);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

@@ -43,6 +43,6 @@ describe('flexbox flex-wrap', () => {
       margin: '10rpx',
     });
     container1.appendChild(child3);
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

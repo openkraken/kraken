@@ -9,6 +9,6 @@ describe('Box width', () => {
 
     document.body.appendChild(div);
     div.style.width = '200px';
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot('');
+    await matchScreenshot();
   });
 });

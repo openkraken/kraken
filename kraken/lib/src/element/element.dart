@@ -61,23 +61,23 @@ abstract class Element extends Node
 
     if (allowChildren) {
       renderObject =
-          renderLayoutElement = createRenderLayoutElement(_style, null);
+          renderLayoutElement = createRenderLayoutBox(_style, null);
     }
 
     // padding
     renderObject = renderPadding = initRenderPadding(renderObject, _style);
+
+    // overflow
+    if (allowChildren) {
+      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
+    }
+
     // background image
     if (_style.backgroundAttachment == 'local' &&
         _style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, _style, nodeId);
     }
-    // overflow
-    if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
-    }
-    // constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
+
     // position
     if (_style.position != 'static') {
       renderObject = renderStack = RenderPosition(
@@ -89,6 +89,10 @@ abstract class Element extends Node
     }
     // border
     renderObject = initRenderDecoratedBox(renderObject, _style, this);
+
+    // constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
 
     // Pointer event listener
     renderObject = RenderPointerListener(
@@ -181,7 +185,7 @@ abstract class Element extends Node
           ..visitChildren(visitor)
           ..removeAll();
         renderPadding.child = null;
-        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        renderLayoutElement = createRenderLayoutBox(newStyle, children);
         renderPadding.child = renderLayoutElement as RenderBox;
         // update style reference
         renderElementBoundary.style = newStyle;
@@ -731,7 +735,7 @@ abstract class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutElement(
+  ContainerRenderObjectMixin createRenderLayoutBox(
       Style newStyle, List<RenderBox> children) {
     String display = newStyle.get('display');
     String flexWrap = newStyle.get('flexWrap');
@@ -1125,23 +1129,30 @@ abstract class Element extends Node
   }
 
   String getBoundingClientRect() {
-    // Force flush layout.
-    renderBorderMargin.markNeedsLayout();
-    renderBorderMargin.owner.flushLayout();
+    BoundingClientRect boundingClientRect;
 
-    Offset offset = getOffset(renderBorderMargin);
-    Size size = renderBorderMargin.size;
+    if (isConnected) {
+      // Force flush layout.
+      renderBorderHolder.markNeedsLayout();
+      renderBorderHolder.owner.flushLayout();
 
-    BoundingClientRect boundingClientRect = BoundingClientRect(
-      x: offset.dx,
-      y: offset.dy,
-      width: size.width,
-      height: size.height,
-      top: offset.dy,
-      left: offset.dx,
-      right: offset.dx + size.width,
-      bottom: offset.dy + size.height,
-    );
+      Offset offset = getOffset(renderBorderHolder);
+      Size size = renderBorderHolder.size;
+      boundingClientRect = BoundingClientRect(
+        x: offset.dx,
+        y: offset.dy,
+        width: size.width,
+        height: size.height,
+        top: offset.dy,
+        left: offset.dx,
+        right: offset.dx + size.width,
+        bottom: offset.dy + size.height,
+      );
+    } else {
+      boundingClientRect = BoundingClientRect();
+    }
+
+    print('el ${boundingClientRect.toJSON()}');
     return boundingClientRect.toJSON();
   }
 

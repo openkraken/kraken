@@ -463,6 +463,7 @@ mixin DimensionMixin {
 
   RenderObject initRenderPadding(RenderObject renderObject, Style style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
+    print('padding edgeInsets, $edgeInsets');
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
@@ -582,9 +583,11 @@ mixin DimensionMixin {
             progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
-    } else {
-      renderPadding.padding = getPaddingInsetsFromStyle(style);
     }
+
+    // Update renderPadding.
+    renderPadding.padding = getPaddingInsetsFromStyle(style);
+    print('new padding ${renderPadding.padding}');
   }
 }
 
