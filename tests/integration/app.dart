@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:async';
-import 'dart:io';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/style.dart';
 import 'package:ansicolor/ansicolor.dart';
