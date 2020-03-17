@@ -36,12 +36,7 @@ String handleAction(List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  var result;
-  try {
-    result = ElementManager.applyAction(action, payload);
-  } catch (e, stack) {
-    print('Dart Error: $e\n$stack');
-  }
+  var result = ElementManager.applyAction(action, payload);
 
   if (result == null) {
     return EMPTY_STRING;
@@ -59,12 +54,7 @@ String handleAction(List directive) {
 }
 
 String invokeUIManager(String json) {
-  dynamic directive;
-  try {
-    directive = jsonDecode(json);
-  } catch (e, stack) {
-    print('Dart Error: $e\n$stack');
-  }
+  dynamic directive = jsonDecode(json);
 
   if (directive == null) {
     return EMPTY_STRING;
@@ -83,8 +73,12 @@ String invokeUIManager(String json) {
 }
 
 Pointer<Utf8> _invokeUIManager(Pointer<Utf8> json) {
-  String result = invokeUIManager(Utf8.fromUtf8(json));
-  return Utf8.toUtf8(result);
+  try {
+    String result = invokeUIManager(Utf8.fromUtf8(json));
+    return Utf8.toUtf8(result);
+  } catch (e, stack) {
+    return Utf8.toUtf8('Dart Error: $e\n$stack');
+  }
 }
 
 void registerInvokeUIManager() {
