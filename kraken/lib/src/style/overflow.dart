@@ -15,13 +15,13 @@ mixin StyleOverflowMixin {
   CSSStyleDeclaration _style;
 
   RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
-    if (style != null) {
-      _style = style;
-      _child = current;
-      _renderObjectX = _getRenderObjectByOverflow(style['overflowX'], current, AxisDirection.right, scrollListener);
-
-      _renderObjectY = _getRenderObjectByOverflow(style['overflowY'], _renderObjectX, AxisDirection.down, scrollListener);
-    }
+    assert(style != null);
+    _style = style;
+    _child = current;
+    // X direction overflow
+    _renderObjectX = _getRenderObjectByOverflow(style['overflowX'], current, AxisDirection.right, scrollListener);
+    // Y direction overflow
+    _renderObjectY = _getRenderObjectByOverflow(style['overflowY'], _renderObjectX, AxisDirection.down, scrollListener);
     return _renderObjectY;
   }
 
@@ -41,7 +41,7 @@ mixin StyleOverflowMixin {
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              OverflowCustomBox overflowCustomBox = OverflowCustomBox(
+              OverflowDirectionBox overflowCustomBox = OverflowDirectionBox(
                   child: _renderObjectX, textDirection: TextDirection.ltr, axisDirection: axisDirection);
               parent.child = _renderObjectY = overflowCustomBox;
               _scrollableY = null;
@@ -85,7 +85,7 @@ mixin StyleOverflowMixin {
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = _renderObjectX =
-                  OverflowCustomBox(child: _child, textDirection: TextDirection.ltr, axisDirection: axisDirection);
+                  OverflowDirectionBox(child: _child, textDirection: TextDirection.ltr, axisDirection: axisDirection);
               _scrollableX = null;
             }
             break;
@@ -124,7 +124,11 @@ mixin StyleOverflowMixin {
         } else {
           _scrollableY = null;
         }
-        current = OverflowCustomBox(child: current, textDirection: TextDirection.ltr, axisDirection: axisDirection);
+        current = OverflowDirectionBox(
+          child: current,
+          textDirection: TextDirection.ltr,
+          axisDirection: axisDirection,
+        );
         break;
       case 'auto':
       case 'scroll':
@@ -184,16 +188,16 @@ mixin StyleOverflowMixin {
   }
 }
 
-class OverflowCustomBox extends RenderSizedOverflowBox {
+class OverflowDirectionBox extends RenderSizedOverflowBox {
   AxisDirection axisDirection;
-  OverflowCustomBox(
+
+  OverflowDirectionBox(
       {RenderBox child,
       Size requestedSize = Size.zero,
       AlignmentGeometry alignment = Alignment.topLeft,
       TextDirection textDirection,
-      AxisDirection axisDirection})
+      this.axisDirection})
       : assert(requestedSize != null),
-        axisDirection = axisDirection,
         super(child: child, alignment: alignment, textDirection: textDirection, requestedSize: requestedSize);
 
   @override
@@ -208,5 +212,22 @@ class OverflowCustomBox extends RenderSizedOverflowBox {
     child.layout(childConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);
     alignChild();
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      final Rect outerRect = offset & size;
+      debugPaintPadding(context.canvas, outerRect, outerRect);
+      return true;
+    }());
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

@@ -19,11 +19,19 @@ class _RunMetrics {
   final int childCount;
 }
 
+class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
+  /// Row index of child when wrapping
+  int runIndex = 0;
+
+  @override
+  String toString() => '${super.toString()}; runIndex: $runIndex;';
+}
+
 /// Impl flow layout algorithm.
 class RenderFlowLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
         ElementStyleMixin,
         RelativeStyleMixin {
   RenderFlowLayout({
@@ -308,8 +316,8 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! KrakenFlexParentData) {
-      child.parentData = KrakenFlexParentData();
+    if (child.parentData is! RenderLayoutParentData) {
+      child.parentData = RenderLayoutParentData();
     }
   }
 
@@ -498,34 +506,10 @@ class RenderFlowLayout extends RenderBox
   void performLayout() {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
+
+    // If no child exists, stop layout.
     if (child == null) {
-      double constraintWidth = 0;
-      String display = style['display'];
-      bool isInline = isElementInline(display, nodeId);
-      if (!isInline) {
-        if (constraints.maxWidth != double.infinity) {
-          constraintWidth = constraints.maxWidth;
-        } else {
-          constraintWidth = getParentWidth(nodeId);
-        }
-      }
-
-      double constraintHeight = 0;
-      double parentHeight = getStretchParentHeight(nodeId);
-      if (parentHeight != null) {
-        constraintHeight = parentHeight;
-      } else if (!isInline) {
-        if (style.contains('height')) {
-          double height = getCurrentHeight(style);
-          if (height != null) {
-            constraintHeight = height;
-          }
-        }
-      }
-
-      // calculate size according to element size
-      size = constraints.constrain(Size(constraintWidth, constraintHeight));
-
+      size = Size.zero;
       return;
     }
 
@@ -567,7 +551,7 @@ class RenderFlowLayout extends RenderBox
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
-      final KrakenFlexParentData childParentData = child.parentData;
+      final RenderLayoutParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
       if (childCount > 0 &&
@@ -732,7 +716,7 @@ class RenderFlowLayout extends RenderBox
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);

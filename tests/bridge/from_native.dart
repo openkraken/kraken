@@ -5,7 +5,9 @@
 // ignore_for_file: unused_import, undefined_function
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +54,8 @@ void registerJSError() {
   _registerOnJSError(pointer);
 }
 
-typedef Native_RefreshPaintCallback = Void Function(Pointer<Void>);
-typedef Dart_RefreshPaintCallback = void Function(Pointer<Void>);
+typedef Native_RefreshPaintCallback = Void Function(Pointer<Void>, Pointer<Utf8>);
+typedef Dart_RefreshPaintCallback = void Function(Pointer<Void>, Pointer<Utf8>);
 typedef Native_RefreshPaint = Void Function(Pointer<Void>, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
 typedef Native_RegisterRefreshPaint = Void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
 typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
@@ -64,7 +66,9 @@ final Dart_RegisterRefreshPaint _registerRefreshPaint =
 void _refreshPaint(Pointer<Void> context, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
   Dart_RefreshPaintCallback callback = pointer.asFunction();
   refreshPaint().then((_) {
-    callback(context);
+    callback(context, nullptr);
+  }).catchError((e, stack) {
+    callback(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
   });
 }
 
@@ -97,8 +101,27 @@ void registerMatchImageSnapshot() {
   _registerMatchImageSnapshot(pointer);
 }
 
+typedef Native_Environment = Pointer<Utf8> Function();
+typedef Dart_Environment = Pointer<Utf8> Function();
+
+typedef Native_RegisterEnvironment = Void Function(Pointer<NativeFunction<Native_Environment>>);
+typedef Dart_RegisterEnvironment = void Function(Pointer<NativeFunction<Native_Environment>>);
+
+final Dart_RegisterEnvironment _registerEnvironment =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterEnvironment>>('registerEnvironment').asFunction();
+
+Pointer<Utf8> _environment() {
+  return Utf8.toUtf8(jsonEncode(Platform.environment));
+}
+
+void registerEnvironment() {
+  Pointer<NativeFunction<Native_Environment>> pointer = Pointer.fromFunction(_environment);
+  _registerEnvironment(pointer);
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
   registerMatchImageSnapshot();
+  registerEnvironment();
 }

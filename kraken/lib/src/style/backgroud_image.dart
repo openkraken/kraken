@@ -7,21 +7,33 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-mixin BackgroundImageMixin {
+mixin BackgroundImageMixin on Node {
 
   double linearAngle;
-  RenderObject initBackgroundImage(RenderObject renderObject, CSSStyleDeclaration style, int nodeId) {
+
+  bool shouldInitBackgroundImage(CSSStyleDeclaration style) {
+    return style['backgroundAttachment'] == 'local' &&
+        style.contains('backgroundImage');
+  }
+
+  RenderObject initBackgroundImage(
+    RenderObject renderObject,
+    CSSStyleDeclaration style,
+    int nodeId
+  ) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style.contains("backgroundImage")) {
+
+    if (style.contains('backgroundImage')) {
       List<Method> methods = Method.parseMethod(style['backgroundImage']);
       //FIXME flutter just support one property
       for (Method method in methods) {
         if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : "";
+          String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url, style);
           }

@@ -8,41 +8,41 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
-import 'package:kraken/element.dart';
 
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
 mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   RenderDecoratedBox renderDecoratedBox;
-  RenderMargin renderBorderMargin;
+  RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
   Padding oldBorderPadding;
 
+  double cropBorderWidth = 0;
+  double cropBorderHeight = 0;
+
   RenderObject initRenderDecoratedBox(
-      RenderObject renderObject, CSSStyleDeclaration style, Element element) {
+      RenderObject renderObject, CSSStyleDeclaration style, int nodeId) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
-    if (element != null) {
-      element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
-    }
+    cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     // Flutter Border width is inside the element
     // but w3c border is outside the element
     // so use margin to fix it
-    renderBorderMargin = RenderMargin(
-        margin: margin,
-        child: renderObject
+    renderBorderHolder = RenderMargin(
+      margin: margin,
+      child: renderObject,
     );
     return renderDecoratedBox = RenderGradient(
-      nodeId: element.nodeId,
+      nodeId: nodeId,
       decoration: oldDecoration.toBoxDecoration(),
-      child: renderBorderMargin,
+      child: renderBorderHolder,
     );
   }
 
   void updateRenderDecoratedBox(
-      CSSStyleDeclaration style, Element element, Map<String, Transition> transitionMap) {
+      CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition allTransition = transitionMap['all'];
@@ -217,7 +217,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             }
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
         backgroundColorTransition?.addProgressListener((progress) {
           progressDecoration.alpha =
@@ -253,7 +253,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
                     baseDecoration.borderBottomSide.borderWidth;
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
 
         borderLeftWidthTransition?.addProgressListener((progress) {
@@ -261,28 +261,28 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
               borderLeftWidthDiff * progress +
                   baseDecoration.borderLeftSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
         borderTopWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderTopSide.borderWidth =
               borderTopWidthDiff * progress +
                   baseDecoration.borderTopSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
         borderRightWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderRightSide.borderWidth =
               borderRightWidthDiff * progress +
                   baseDecoration.borderRightSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
         borderBottomWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderBottomSide.borderWidth =
               borderBottomWidthDiff * progress +
                   baseDecoration.borderBottomSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
         });
 
         borderColorTransition?.addProgressListener((progress) {
@@ -406,27 +406,25 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         });
       } else {
         renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-        _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+        _updateBorderInsets(newDecoration.getBorderEdgeInsets());
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
       // Update can not trigger performlayout.
       // Gradient need trigger performlayout to recaculate the alignment
       // when linearAngle not null (other situation doesn't need).
-      if (element.linearAngle != null) {
+      if (linearAngle != null) {
         renderDecoratedBox.markNeedsLayout();
       }
-      _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+      _updateBorderInsets(newDecoration.getBorderEdgeInsets());
     }
     oldDecoration = newDecoration;
   }
 
-  void _updateMargin(EdgeInsets margin, Element element) {
-    if (element != null) {
-      element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
-    }
-    renderBorderMargin.margin = margin;
+  void _updateBorderInsets(EdgeInsets insets) {
+    cropBorderWidth = (insets.left ?? 0) + (insets.right ?? 0);
+    cropBorderHeight = (insets.top ?? 0) + (insets.bottom ?? 0);
+    renderBorderHolder.margin = insets;
   }
 
   /// Shorted border property:

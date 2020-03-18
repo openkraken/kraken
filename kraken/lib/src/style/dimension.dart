@@ -93,6 +93,8 @@ mixin DimensionMixin {
   Padding oldPadding;
   Padding oldMargin;
   SizeConstraints oldConstraints;
+  double cropWidth = 0;
+  double cropHeight = 0;
 
   double getDisplayPortedLength(input) {
     return baseGetDisplayPortedLength(input);
@@ -268,12 +270,10 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, CSSStyleDeclaration style, Element element) {
+      RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
-    if (element != null) {
-      element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
-      element.cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
-    }
+    cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+    cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
@@ -342,8 +342,7 @@ mixin DimensionMixin {
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, Element element,
-      [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -391,8 +390,7 @@ mixin DimensionMixin {
           }
           _updateMargin(
               EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                  progressMargin.right, progressMargin.bottom),
-              element);
+                  progressMargin.right, progressMargin.bottom));
         }
       });
 
@@ -413,8 +411,7 @@ mixin DimensionMixin {
         }
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top = progress * marginTopInterval + baseMargin.top;
@@ -426,38 +423,33 @@ mixin DimensionMixin {
             progress * marginBottomInterval + baseMargin.bottom;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left = progress * marginLeftInterval + baseMargin.left;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right =
             progress * marginRightInterval + baseMargin.right;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       oldMargin = newMargin;
     } else {
-      _updateMargin(getMarginInsetsFromStyle(style), element);
+      _updateMargin(getMarginInsetsFromStyle(style));
     }
   }
 
-  void _updateMargin(EdgeInsets margin, Element element) {
+  void _updateMargin(EdgeInsets margin) {
     if (margin == null) {
       return;
     }
-    if (element != null) {
-      element.cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
-    }
+    cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     renderMargin.margin = margin;
   }
 
@@ -582,9 +574,10 @@ mixin DimensionMixin {
             progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
-    } else {
-      renderPadding.padding = getPaddingInsetsFromStyle(style);
     }
+
+    // Update renderPadding.
+    renderPadding.padding = getPaddingInsetsFromStyle(style);
   }
 }
 

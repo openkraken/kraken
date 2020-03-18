@@ -42,14 +42,7 @@ const char *StripPath(const char *path) {
 } // namespace
 
 LogMessage::LogMessage(LogSeverity severity, const char *file, int line)
-  : severity_(severity), file_(file), line_(line) {
-
-  if (severity >= LOG_WARN) {
-    stream_ << "[";
-    stream_ << GetNameForLogSeverity(severity);
-    stream_ << "] ";
-  }
-}
+  : severity_(severity), file_(file), line_(line) {}
 
 LogMessage::~LogMessage() {
 #if defined(IS_ANDROID)
@@ -76,9 +69,13 @@ LogMessage::~LogMessage() {
 #elif defined(IS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
-  std::cout << stream_.str();
-  std::cout << std::endl;
-  std::cout.flush();
+  if (severity_ == LOG_ERROR) {
+    std::cerr << stream_.str() << std::endl;
+    std::cerr.flush();
+  } else {
+    std::cout << stream_.str() << std::endl;
+    std::cout.flush();
+  }
 #endif
 }
 
