@@ -46,7 +46,7 @@ class ImgElement extends Element {
     if (!determinBothWidthAndHeight) {
       imageStream = image.resolve(imageBox.configuration);
       imageListeners = [
-        ImageStreamListener(getImageInfo),
+        ImageStreamListener(initImageInfo),
         ImageStreamListener(handleEventAfterImageLoaded),
       ];
       imageListeners.forEach((ImageStreamListener imageListener) {
@@ -73,7 +73,7 @@ class ImgElement extends Element {
     dispatchEvent(Event('load'));
   }
 
-  void getImageInfo(ImageInfo imageInfo, bool synchronousCall) {
+  void initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
     _resize();
   }
