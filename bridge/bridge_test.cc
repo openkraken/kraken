@@ -113,10 +113,22 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   return Value::undefined();
 }
 
+Value environment(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (getDartMethod()->environment == nullptr) {
+    throw JSError(context, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
+  }
+
+  const char* env = getDartMethod()->environment();
+  return context.global().getPropertyAsObject(context, "JSON").getPropertyAsFunction(context, "parse").call(context, {
+    String::createFromAscii(context, env)
+  });
+}
+
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_environment__", 0, environment);
   initKrakenTestFramework(bridge->getContext());
 }
 

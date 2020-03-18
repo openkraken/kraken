@@ -11,8 +11,8 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
-  initTestFramework();
   registerDartTestMethodsToCpp();
+  initTestFramework();
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];

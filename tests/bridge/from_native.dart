@@ -5,7 +5,9 @@
 // ignore_for_file: unused_import, undefined_function
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
@@ -99,8 +101,28 @@ void registerMatchImageSnapshot() {
   _registerMatchImageSnapshot(pointer);
 }
 
+typedef Native_Environment = Pointer<Utf8> Function();
+typedef Dart_Environment = Pointer<Utf8> Function();
+
+typedef Native_RegisterEnvironment = Void Function(Pointer<NativeFunction<Native_Environment>>);
+typedef Dart_RegisterEnvironment = void Function(Pointer<NativeFunction<Native_Environment>>);
+
+final Dart_RegisterEnvironment _registerEnvironment =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterEnvironment>>('registerEnvironment').asFunction();
+
+Pointer<Utf8> _environment() {
+  return Utf8.toUtf8(jsonEncode(Platform.environment));
+}
+
+void registerEnvironment() {
+  print('register env');
+  Pointer<NativeFunction<Native_Environment>> pointer = Pointer.fromFunction(_environment);
+  _registerEnvironment(pointer);
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
   registerMatchImageSnapshot();
+  registerEnvironment();
 }

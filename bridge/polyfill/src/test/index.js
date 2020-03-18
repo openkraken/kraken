@@ -69,7 +69,7 @@ function HtmlSpecFilter(options) {
 }
 
 var specFilter = new HtmlSpecFilter({
-  filterString: function() { return undefined; }
+  filterString: function() { return __kraken_environment__().KRAKEN_TEST_FILTER; }
 });
 
 config.specFilter = function(spec) {
@@ -95,9 +95,7 @@ __kraken_executeTest__((done) => {
   jasmineTracker.onSpecStarted = (result) => {
     return new Promise((resolve, reject) => {
       try {
-        console.log(result.fullName + ' call request update frame');
         __request_update_frame__();
-        console.log(result.fullName + ' call refresh paint.');
         __kraken_refresh_paint__(function (e) {
           if (e) {
             reject(e);

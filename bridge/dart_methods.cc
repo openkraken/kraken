@@ -91,4 +91,8 @@ void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
   methodPointer->matchImageSnapshot = matchImageSnapshot;
 }
 
+void registerEnvironment(Environment environment) {
+  methodPointer->environment = environment;
+}
+
 } // namespace kraken
