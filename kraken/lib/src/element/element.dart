@@ -419,9 +419,7 @@ abstract class Element extends Node
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
-        if (renderElementBoundary.parent != null) {
-          renderElementBoundary.parent.dropChild(renderElementBoundary);
-        }
+        
         // insert non positioned renderObject to parent element in the order of original element tree
         parentElement.renderLayoutElement
             .insert(renderElementBoundary, after: preNonPositionedObject);
