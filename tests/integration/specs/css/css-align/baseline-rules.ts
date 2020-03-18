@@ -131,3 +131,7 @@ describe('Baseline-rules', () => {
     await matchScreenshot(wrapper);
   });
 });
+
+describe('Baseline-rules', () => {
+
+});
