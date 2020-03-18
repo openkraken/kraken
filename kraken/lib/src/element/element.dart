@@ -21,6 +21,7 @@ import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
+import 'bounding_client_rect.dart';
 
 typedef TestElement = bool Function(Element element);
 
@@ -60,23 +61,23 @@ abstract class Element extends Node
 
     if (allowChildren) {
       renderObject =
-          renderLayoutElement = createRenderLayoutElement(_style, null);
+          renderLayoutElement = createRenderLayoutBox(_style, null);
     }
 
     // padding
     renderObject = renderPadding = initRenderPadding(renderObject, _style);
+
+    // overflow
+    if (allowChildren) {
+      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
+    }
+
     // background image
     if (_style.backgroundAttachment == 'local' &&
         _style.backgroundImage != null) {
       renderObject = initBackgroundImage(renderObject, _style, nodeId);
     }
-    // overflow
-    if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, _style, _scrollListener);
-    }
-    // constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
+
     // position
     if (_style.position != 'static') {
       renderObject = renderStack = RenderPosition(
@@ -88,6 +89,10 @@ abstract class Element extends Node
     }
     // border
     renderObject = initRenderDecoratedBox(renderObject, _style, this);
+
+    // constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, _style);
 
     // Pointer event listener
     renderObject = RenderPointerListener(
@@ -180,7 +185,7 @@ abstract class Element extends Node
           ..visitChildren(visitor)
           ..removeAll();
         renderPadding.child = null;
-        renderLayoutElement = createRenderLayoutElement(newStyle, children);
+        renderLayoutElement = createRenderLayoutBox(newStyle, children);
         renderPadding.child = renderLayoutElement as RenderBox;
         // update style reference
         renderElementBoundary.style = newStyle;
@@ -330,7 +335,6 @@ abstract class Element extends Node
         double elViewPortTop = el.offsetTop - scrollTop;
         isFixed = viewPortHeight - elViewPortTop <= bottom;
       }
-
       if (isFixed) {
         // change to fixed behavior
         if (!el.stickyFixed) {
@@ -377,21 +381,18 @@ abstract class Element extends Node
       // move element back to document flow
       if (style.position == 'absolute' ||
           style.position == 'fixed' ||
-          (style.position == 'sticky' && stickyFixed)) {
-        Element parentElementWithStack;
-        // find positioned element to remove
-        if (style.position == 'absolute') {
-          parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-        } else {
-          parentElementWithStack = ElementManager().getRootElement();
-        }
-        parentElementWithStack.renderStack.remove(renderElementBoundary);
+          style.position == 'sticky') {
 
-        // remove sticky placeholder
+        // Find positioned element to remove
+        ContainerRenderObjectMixin parentRenderObject = renderElementBoundary.parent;
+        parentRenderObject.remove(renderElementBoundary);
+
+        // Remove sticky placeholder
         if (style.position == 'sticky') {
           removeStickyPlaceholder();
         }
-        // find pre non positioned element
+
+        // Find pre non positioned element
         var preNonPositionedElement = null;
         var currentElement = nodeMap[nodeId];
         var parentElement = currentElement.parentNode;
@@ -418,6 +419,7 @@ abstract class Element extends Node
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
+        
         // insert non positioned renderObject to parent element in the order of original element tree
         parentElement.renderLayoutElement
             .insert(renderElementBoundary, after: preNonPositionedObject);
@@ -441,11 +443,17 @@ abstract class Element extends Node
   }
 
   void removeStickyPlaceholder() {
-    (stickyPlaceholder.parent as ContainerRenderObjectMixin)
-        .remove(stickyPlaceholder);
+    if (stickyPlaceholder != null) {
+      ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder
+        .parent;
+      stickyPlaceholderParent.remove(stickyPlaceholder);
+    }
   }
 
   void insertStickyPlaceholder() {
+    if (!renderMargin.hasSize) {
+      renderMargin.owner.flushLayout();
+    }
     Style pStyle = Style({
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
@@ -495,8 +503,7 @@ abstract class Element extends Node
 
     // current element's zIndex
     int currentZIndex = 0;
-    if (currentElement.style.contains('zIndex') &&
-        currentElement.style['zIndex'] != null) {
+    if (currentElement.style.contains('zIndex')) {
       currentZIndex = currentElement.style['zIndex'];
     }
     // add current element back to parent stack by zIndex
@@ -730,7 +737,7 @@ abstract class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutElement(
+  ContainerRenderObjectMixin createRenderLayoutBox(
       Style newStyle, List<RenderBox> children) {
     String display = newStyle.get('display');
     String flexWrap = newStyle.get('flexWrap');
@@ -978,10 +985,9 @@ abstract class Element extends Node
       }
 
       ParentData childParentData = childRenderObject.parentData;
-      if (isFlex) {
-        assert(childParentData is KrakenFlexParentData);
-        final KrakenFlexParentData parentData = childParentData;
-        KrakenFlexParentData flexParentData =
+      if (childParentData is RenderFlexParentData) {
+        final RenderFlexParentData parentData = childParentData;
+        RenderFlexParentData flexParentData =
             FlexItem.getParentData(childStyle);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;
@@ -996,13 +1002,14 @@ abstract class Element extends Node
         renderObject.markNeedsLayout();
       }
 
-      // @TODO move to connected callback instead use of timer
-      Timer(Duration(milliseconds: 0), () {
-        // Trigger sticky update logic after node is connected
-        if (childStyle.get('position') == 'sticky') {
-          _updateStickyPosition(0);
+      // Trigger sticky update logic after node is connected
+      if (childStyle.get('position') == 'sticky') {
+        // Force flush layout of child
+        if (!child.renderMargin.hasSize) {
+          child.renderMargin.owner.flushLayout();
         }
-      });
+        _updateStickyPosition(0);
+      }
     }
   }
 
@@ -1013,10 +1020,10 @@ abstract class Element extends Node
     while (child != null) {
       ParentData parentData = child.parentData;
       if (parentData is ZIndexParentData) {
+        final ContainerParentDataMixin childParentData = child.parentData;
         if (parentData.zIndex <= zIndex) {
           renderStack.insert(renderObject, after: child);
         } else {
-          final ContainerParentDataMixin childParentData = child.parentData;
           renderStack.insert(renderObject,
               after: childParentData.previousSibling);
         }
@@ -1124,25 +1131,32 @@ abstract class Element extends Node
   }
 
   String getBoundingClientRect() {
-    Map<String, double> boundingClientRect = {};
+    BoundingClientRect boundingClientRect;
 
-    // Force flush layout.
-    renderBorderMargin.markNeedsLayout();
-    renderBorderMargin.owner.flushLayout();
+    if (isConnected) {
+      // Force flush layout.
+      if (!renderBorderHolder.hasSize) {
+        renderBorderHolder.markNeedsLayout();
+        renderBorderHolder.owner.flushLayout();
+      }
 
-    Offset offset = getOffset(renderBorderMargin);
-    Size size = renderBorderMargin.size;
-    boundingClientRect['x'] = offset.dx;
-    boundingClientRect['y'] = offset.dy;
-    boundingClientRect['width'] = size.width;
-    boundingClientRect['height'] = size.height;
-    boundingClientRect['top'] = offset.dy;
-    boundingClientRect['left'] = offset.dx;
-    boundingClientRect['right'] = offset.dx + size.width;
-    boundingClientRect['bottom'] = offset.dy + size.height;
+      Offset offset = getOffset(renderBorderHolder);
+      Size size = renderBorderHolder.size;
+      boundingClientRect = BoundingClientRect(
+        x: offset.dx,
+        y: offset.dy,
+        width: size.width,
+        height: size.height,
+        top: offset.dy,
+        left: offset.dx,
+        right: offset.dx + size.width,
+        bottom: offset.dy + size.height,
+      );
+    } else {
+      boundingClientRect = BoundingClientRect();
+    }
 
-    print(boundingClientRect);
-    return jsonEncode(boundingClientRect);
+    return boundingClientRect.toJSON();
   }
 
   double getOffsetX() {
@@ -1203,9 +1217,10 @@ abstract class Element extends Node
 
     if (isConnected) {
       final RenderBox box = renderElementBoundary;
-      // Must flush every times, or child may has no size.
-      box.markNeedsLayout();
-      box.owner.flushLayout();
+      // HitTest will test rootView's every child (including
+      // child's child), so must flush rootView every times,
+      // or child may miss size.
+      RendererBinding.instance.renderView.owner.flushLayout();
 
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero));

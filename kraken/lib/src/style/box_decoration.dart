@@ -15,7 +15,7 @@ import 'package:kraken/element.dart';
 /// - border
 mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   RenderDecoratedBox renderDecoratedBox;
-  RenderMargin renderBorderMargin;
+  RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
   Padding oldBorderPadding;
 
@@ -30,14 +30,14 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     // Flutter Border width is inside the element
     // but w3c border is outside the element
     // so use margin to fix it
-    renderBorderMargin = RenderMargin(
-        margin: margin,
-        child: renderObject
+    renderBorderHolder = RenderMargin(
+      margin: margin,
+      child: renderObject,
     );
     return renderDecoratedBox = RenderGradient(
       nodeId: element.nodeId,
       decoration: oldDecoration.toBoxDecoration(),
-      child: renderBorderMargin,
+      child: renderBorderHolder,
     );
   }
 
@@ -217,7 +217,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             }
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
         backgroundColorTransition?.addProgressListener((progress) {
           progressDecoration.alpha =
@@ -253,7 +253,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
                     baseDecoration.borderBottomSide.borderWidth;
           }
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
 
         borderLeftWidthTransition?.addProgressListener((progress) {
@@ -261,28 +261,28 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
               borderLeftWidthDiff * progress +
                   baseDecoration.borderLeftSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
         borderTopWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderTopSide.borderWidth =
               borderTopWidthDiff * progress +
                   baseDecoration.borderTopSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
         borderRightWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderRightSide.borderWidth =
               borderRightWidthDiff * progress +
                   baseDecoration.borderRightSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
         borderBottomWidthTransition?.addProgressListener((progress) {
           progressDecoration.borderBottomSide.borderWidth =
               borderBottomWidthDiff * progress +
                   baseDecoration.borderBottomSide.borderWidth;
           renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+          _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
         });
 
         borderColorTransition?.addProgressListener((progress) {
@@ -406,7 +406,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         });
       } else {
         renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-        _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+        _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
@@ -416,17 +416,17 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       if (element.linearAngle != null) {
         renderDecoratedBox.markNeedsLayout();
       }
-      _updateMargin(newDecoration.getBorderEdgeInsets(), element);
+      _updateBorderInsets(newDecoration.getBorderEdgeInsets(), element);
     }
     oldDecoration = newDecoration;
   }
 
-  void _updateMargin(EdgeInsets margin, Element element) {
+  void _updateBorderInsets(EdgeInsets insets, Element element) {
     if (element != null) {
-      element.cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
+      element.cropBorderWidth = (insets.left ?? 0) + (insets.right ?? 0);
+      element.cropBorderHeight = (insets.top ?? 0) + (insets.bottom ?? 0);
     }
-    renderBorderMargin.margin = margin;
+    renderBorderHolder.margin = insets;
   }
 
   /// Shorted border property:

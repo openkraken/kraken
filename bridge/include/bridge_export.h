@@ -15,8 +15,8 @@ struct Screen {
   double width;
   double height;
 };
-using AsyncCallback = void (*)(void *);
-using AsyncRAFCallback = void (*)(void *, double);
+using AsyncCallback = void (*)(void *, const char*);
+using AsyncRAFCallback = void (*)(void *, double, const char*);
 using AsyncModuleCallback = void (*)(char *, void *);
 using AsyncBlobCallback = void (*)(void *, const char *, uint8_t *, int32_t);
 typedef const char *(*InvokeUIManager)(const char *);
@@ -35,7 +35,7 @@ typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
 typedef void (*StartFlushCallbacksInUIThread)();
 typedef void (*StopFlushCallbacksInUIThread)();
-typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t);
+typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t, double);
 typedef void (*OnJSError)(const char *);
 
 KRAKEN_EXPORT

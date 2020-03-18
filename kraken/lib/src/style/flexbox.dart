@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'style.dart';
 
-class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
+class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex grow
   int flexGrow;
 
@@ -16,9 +16,6 @@ class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
 
   /// Flex basis
   String flexBasis;
-
-  /// Row index of child when wrapping
-  int runIndex = 0;
 
   /// How a flexible child is inscribed into the available space.
   ///
@@ -30,7 +27,7 @@ class KrakenFlexParentData extends ContainerBoxParentData<RenderBox> {
   FlexFit fit;
 
   @override
-  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; fit=$fit';
+  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis, fit=$fit';
 }
 
 mixin FlexMixin {
@@ -167,8 +164,8 @@ class FlexItem {
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
 
-  static KrakenFlexParentData getParentData(Style style) {
-    KrakenFlexParentData parentData = KrakenFlexParentData();
+  static RenderFlexParentData getParentData(Style style) {
+    RenderFlexParentData parentData = RenderFlexParentData();
     parentData.flexGrow = 0;
     parentData.flexShrink = 1;
     parentData.flexBasis = 'auto';

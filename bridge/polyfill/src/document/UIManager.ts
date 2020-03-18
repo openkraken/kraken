@@ -70,11 +70,11 @@ export function method(id: number, methodName: string, params: any[] = []) {
   return sendMessage(['method', [id, methodName, params]]);
 }
 
-export function toBlob(id: number) {
+export function toBlob(nodeId: number, devicePixelRatio: number) {
   // need to flush all pending frame messages
   requestUpdateFrame();
   return new Promise((resolve, reject) => {
-    krakenToBlob(id, (err, blob) => {
+    krakenToBlob(nodeId, devicePixelRatio, (err, blob) => {
       if (err) {
         return reject(new Error(err));
       }
@@ -83,3 +83,12 @@ export function toBlob(id: number) {
     });
   });
 }
+
+// Expose requestUpdateFrame for test framewotk to force
+// flush frames before spec finished.
+Object.defineProperty(global, '__request_update_frame__', {
+  enumerable: true,
+  writable: false,
+  configurable: false,
+  value: requestUpdateFrame,
+});
