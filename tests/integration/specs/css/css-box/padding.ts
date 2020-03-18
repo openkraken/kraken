@@ -22,4 +22,22 @@ describe('Box padding', () => {
 
     await matchScreenshot();
   });
+
+  it('should work with background-color', async () => {
+    let div = create('div', {
+      width: '200px',
+      height: '200px',
+      backgroundColor: 'yellow',
+      border: '10px solid cyan',
+      padding: '15px',
+    });
+    append(BODY, div);
+    let box = create('div', {
+      width: '50px',
+      height: '50px',
+      backgroundColor: 'red'
+    });
+    append(div, box);
+    await matchScreenshot(BODY);
+  });
 });

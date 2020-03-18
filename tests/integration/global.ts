@@ -37,7 +37,7 @@ function create(tag: string, style: object) {
   return el;
 }
 
-function append(parent: HTMLElement, child: HTMLElement) {
+function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
