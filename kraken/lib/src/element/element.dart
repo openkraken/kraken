@@ -987,10 +987,9 @@ abstract class Element extends Node
       }
 
       ParentData childParentData = childRenderObject.parentData;
-      if (isFlex) {
-        assert(childParentData is KrakenFlexParentData);
-        final KrakenFlexParentData parentData = childParentData;
-        KrakenFlexParentData flexParentData =
+      if (childParentData is RenderFlexParentData) {
+        final RenderFlexParentData parentData = childParentData;
+        RenderFlexParentData flexParentData =
             FlexItem.getParentData(childStyle);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;

@@ -19,7 +19,7 @@ class _RunMetrics {
   final int childCount;
 }
 
-class RenderFlowParentData extends ContainerBoxParentData<RenderBox> {
+class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// Row index of child when wrapping
   int runIndex = 0;
 
@@ -30,8 +30,8 @@ class RenderFlowParentData extends ContainerBoxParentData<RenderBox> {
 /// Impl flow layout algorithm.
 class RenderFlowLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, RenderFlowParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlowParentData>,
+        ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
         ElementStyleMixin,
         RelativeStyleMixin {
   RenderFlowLayout({
@@ -316,8 +316,8 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! RenderFlowParentData) {
-      child.parentData = RenderFlowParentData();
+    if (child.parentData is! RenderLayoutParentData) {
+      child.parentData = RenderLayoutParentData();
     }
   }
 
@@ -551,7 +551,7 @@ class RenderFlowLayout extends RenderBox
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
-      final RenderFlowParentData childParentData = child.parentData;
+      final RenderLayoutParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
       if (childCount > 0 &&
@@ -716,7 +716,7 @@ class RenderFlowLayout extends RenderBox
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final RenderFlowParentData childParentData = child.parentData;
+        final RenderLayoutParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
