@@ -1,4 +1,4 @@
-describe('Geolocation getCurrentPosition', function() {
+xdescribe('Geolocation getCurrentPosition', function() {
   it('001', done => {
     navigator.geolocation.getCurrentPosition(
       position => {
