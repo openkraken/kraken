@@ -9,8 +9,10 @@ describe('Display', () => {
     });
 
     document.body.appendChild(container);
-    document.body.appendChild(document.createTextNode('The box should not display.'));
+    document.body.appendChild(
+      document.createTextNode('The box should not display.')
+    );
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

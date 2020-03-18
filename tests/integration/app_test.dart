@@ -22,6 +22,7 @@ void main() async {
       String code = File(file.path).readAsStringSync();
       testPayload.add({
         'filename': filename,
+        'filepath': file.path,
         'code': code,
       });
     }

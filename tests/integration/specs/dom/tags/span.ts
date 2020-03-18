@@ -1,4 +1,4 @@
-describe('Element span', () => {
+describe('Tags span', () => {
   it('should work with texts', async () => {
     const span = document.createElement('span');
     const text = document.createTextNode('hello world');

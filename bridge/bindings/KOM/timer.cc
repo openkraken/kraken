@@ -21,7 +21,7 @@ void destoryCallbackContext(void *data) {
   delete obj;
 }
 
-void handlePersistentCallback(void *data) {
+void handlePersistentCallback(void *data, const char* errmsg) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
@@ -34,11 +34,17 @@ void handlePersistentCallback(void *data) {
     return;
   }
 
+  if (errmsg != nullptr) {
+    JSError error(_context, errmsg);
+    obj->_context.reportError(error);
+    return;
+  }
+
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *data, double result) {
+void handleRAFPersistentCallback(void *data, double result, const char* errmsg) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
@@ -51,17 +57,23 @@ void handleRAFPersistentCallback(void *data, double result) {
     return;
   }
 
+  if (errmsg != nullptr) {
+    JSError error(_context, errmsg);
+    obj->_context.reportError(error);
+    return;
+  }
+
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, Value(result), 0);
 }
 
-void handleTransientCallback(void *data) {
-  handlePersistentCallback(data);
+void handleTransientCallback(void *data, const char* errmsg) {
+  handlePersistentCallback(data, errmsg);
   destoryCallbackContext(data);
 }
 
-void handleRAFTransientCallback(void *data, double result) {
-  handleRAFPersistentCallback(data, result);
+void handleRAFTransientCallback(void *data, double result, const char* errmsg) {
+  handleRAFPersistentCallback(data, result, errmsg);
   destoryCallbackContext(data);
 }
 

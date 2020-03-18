@@ -12,8 +12,12 @@ describe('Display inline-flex', () => {
     container.appendChild(document.createTextNode('inline-flex'));
 
     document.body.appendChild(container);
-    document.body.appendChild(document.createTextNode('This text should display as the same line as the box'));
+    document.body.appendChild(
+      document.createTextNode(
+        'This text should display as the same line as the box'
+      )
+    );
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

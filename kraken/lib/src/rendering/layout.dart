@@ -498,34 +498,10 @@ class RenderFlowLayout extends RenderBox
   void performLayout() {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
+
+    // If no child exists, stop layout.
     if (child == null) {
-      double constraintWidth = 0;
-      String display = style.get('display');
-      bool isInline = isElementInline(display, nodeId);
-      if (!isInline) {
-        if (constraints.maxWidth != double.infinity) {
-          constraintWidth = constraints.maxWidth;
-        } else {
-          constraintWidth = getParentWidth(nodeId);
-        }
-      }
-
-      double constraintHeight = 0;
-      double parentHeight = getStretchParentHeight(nodeId);
-      if (parentHeight != null) {
-        constraintHeight = parentHeight;
-      } else if (!isInline) {
-        if (style.get('height') != null) {
-          double height = getCurrentHeight(style);
-          if (height != null) {
-            constraintHeight = height;
-          }
-        }
-      }
-
-      // calculate size according to element size
-      size = constraints.constrain(Size(constraintWidth, constraintHeight));
-
+      size = Size.zero;
       return;
     }
 

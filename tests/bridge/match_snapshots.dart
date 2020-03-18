@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io';
 import 'dart:async';
-import 'package:kraken/element.dart';
-import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
 
 final Directory snapshots = Directory('./integration/snapshots');

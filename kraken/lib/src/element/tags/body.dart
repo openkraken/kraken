@@ -5,7 +5,7 @@
 
 import 'package:kraken/element.dart';
 
-final String BODY = 'BODY';
+const String BODY = 'BODY';
 final Map<String, dynamic> bodyProps = {
   'style': {
     'position': 'absolute',

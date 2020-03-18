@@ -9,24 +9,35 @@
  * - Element.prototype.click
  * - Element.prototype.toBlob
  */
-describe('Element api', () => {
-  it('should work', async () => {
+describe('DOM Element API', () => {
+  it('should work', () => {
     const div = document.createElement('div');
-    expect(div.nodeName === 'DIV').toBe(true);
+    expect(div.nodeName === 'DIV').toBeTrue();
 
     div.style.width = div.style.height = '200px';
+    div.style.border = '1px solid red';
+    div.style.padding = '10px';
     div.style.margin = '20px';
     div.style.backgroundColor = 'grey';
     document.body.appendChild(div);
-    const boundingClientRect = JSON.stringify(div.getBoundingClientRect());
-    document.body.appendChild(document.createTextNode(boundingClientRect));
+
+    const boundingClientRect = div.getBoundingClientRect();
+    expect(boundingClientRect).toEqual({
+      x: 20.0,
+      y: 20.0,
+      width: 200.0,
+      height: 200.0,
+      top: 20.0,
+      left: 20.0,
+      right: 220.0,
+      bottom: 220.0,
+    } as any);
 
     div.setAttribute('foo', 'bar');
-    expect(div.getAttribute('foo') === 'bar').toBe(true);
-    expect(div.hasAttribute('foo') === true).toBe(true);
-    div.removeAttribute('foo');
-    expect(div.hasAttribute('foo') === false).toBe(true);
+    expect(div.getAttribute('foo')).toBe('bar');
+    expect(div.hasAttribute('foo')).toBeTrue();
 
-    await matchScreenshot();
+    div.removeAttribute('foo');
+    expect(div.hasAttribute('foo')).toBeFalse();
   });
 });

@@ -24,6 +24,6 @@ describe('Position relative', () => {
     div2.appendChild(document.createTextNode('relative bottom & right'));
     document.body.appendChild(div2);
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });

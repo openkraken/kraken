@@ -1,5 +1,5 @@
-describe('Element p', () => {
-  it('element p', async () => {
+describe('Tags p', () => {
+  it('basic', async () => {
     const p = document.createElement('p');
     p.style.width = '300px';
     p.style.height = '300px';

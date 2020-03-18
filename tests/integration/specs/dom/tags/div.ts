@@ -1,4 +1,4 @@
-describe('Element div', () => {
+describe('Tags div', () => {
   it('basic', async () => {
     const div = document.createElement('div');
     div.style.width = '300px';

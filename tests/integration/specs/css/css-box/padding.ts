@@ -20,6 +20,6 @@ describe('Box padding', () => {
     container1.appendChild(container2);
     container1.style.padding = '20px';
 
-    await expectAsync(document.body.toBlob(1)).toMatchImageSnapshot();
+    await matchScreenshot();
   });
 });
