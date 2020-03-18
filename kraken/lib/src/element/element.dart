@@ -1005,9 +1005,9 @@ abstract class Element extends Node
 
       // Trigger sticky update logic after node is connected
       if (childStyle.get('position') == 'sticky') {
-        // Force flush layout.
-        if (!renderMargin.hasSize) {
-          renderMargin.owner.flushLayout();
+        // Force flush layout of child
+        if (!child.renderMargin.hasSize) {
+          child.renderMargin.owner.flushLayout();
         }
         _updateStickyPosition(0);
       }
