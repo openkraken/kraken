@@ -82,8 +82,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlexLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
         ElementStyleMixin,
         RelativeStyleMixin {
@@ -313,8 +313,8 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! KrakenFlexParentData)
-      child.parentData = KrakenFlexParentData();
+    if (child.parentData is! RenderFlexParentData)
+      child.parentData = RenderFlexParentData();
   }
 
   double _getIntrinsicSize({
@@ -342,7 +342,7 @@ class RenderFlexLayout extends RenderBox
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       return maxFlexFractionSoFar * totalFlexGrow + inflexibleSpace;
@@ -377,7 +377,7 @@ class RenderFlexLayout extends RenderBox
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
@@ -393,7 +393,7 @@ class RenderFlexLayout extends RenderBox
         if (flex > 0)
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
 
@@ -449,17 +449,17 @@ class RenderFlexLayout extends RenderBox
   }
 
   int _getFlexGrow(RenderBox child) {
-    final KrakenFlexParentData childParentData = child.parentData;
+    final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexGrow ?? 0;
   }
 
   int _getFlexShrink(RenderBox child) {
-    final KrakenFlexParentData childParentData = child.parentData;
+    final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexShrink ?? 1;
   }
 
   String _getFlexBasis(RenderBox child) {
-    final KrakenFlexParentData childParentData = child.parentData;
+    final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexBasis ?? 'auto';
   }
 
@@ -518,7 +518,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   FlexFit _getFit(RenderBox child) {
-    final KrakenFlexParentData childParentData = child.parentData;
+    final RenderFlexParentData childParentData = child.parentData;
     return childParentData.fit ?? FlexFit.tight;
   }
 
@@ -591,7 +591,7 @@ class RenderFlexLayout extends RenderBox
     RenderBox child = firstChild;
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
-      final KrakenFlexParentData childParentData = child.parentData;
+      final RenderFlexParentData childParentData = child.parentData;
       totalChildren++;
       final int flexGrow = _getFlexGrow(child);
       final int flexShrink = _getFlexShrink(child);
@@ -827,7 +827,7 @@ class RenderFlexLayout extends RenderBox
             crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
           }
         }
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderFlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
     }
@@ -923,7 +923,7 @@ class RenderFlexLayout extends RenderBox
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
-      final KrakenFlexParentData childParentData = child.parentData;
+      final RenderFlexParentData childParentData = child.parentData;
       double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -1024,8 +1024,8 @@ class RenderFlexLayout extends RenderBox
 
 class RenderFlexItem extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
         RelativeStyleMixin {
   RenderFlexItem({RenderBox child}) {
@@ -1034,8 +1034,8 @@ class RenderFlexItem extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! KrakenFlexParentData) {
-      KrakenFlexParentData flexParentData = KrakenFlexParentData();
+    if (child.parentData is! RenderFlexParentData) {
+      RenderFlexParentData flexParentData = RenderFlexParentData();
       flexParentData.fit = FlexFit.tight;
       child.parentData = flexParentData;
     }

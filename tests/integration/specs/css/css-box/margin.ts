@@ -15,8 +15,7 @@ describe('Box margin', () => {
     const div3 = document.createElement('div');
     div3.style.width = '200px';
     div3.style.height = '200px';
-    div3.style.backgroundImage =
-      'radial-gradient(50%, red 0%, yellow 20%, blue 80%)';
+    div3.style.backgroundImage = 'radial-gradient(50%, red 0%, yellow 20%, blue 80%)';
 
     document.body.appendChild(div3);
 

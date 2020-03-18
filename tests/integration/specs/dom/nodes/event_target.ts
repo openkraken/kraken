@@ -8,14 +8,9 @@ describe('DOM EventTarget', () => {
   it('should work', async () => {
     let clickTime = 0;
     const div = document.createElement('div');
-    div.appendChild(document.createTextNode('Click: ' + clickTime + 'times.'));
 
     const clickHandler = () => {
       clickTime++;
-      div.replaceChild(
-        document.createTextNode('Click: ' + clickTime + 'times.'),
-        div.firstChild as Node
-      );
     };
     div.addEventListener('click', clickHandler);
 
@@ -24,8 +19,9 @@ describe('DOM EventTarget', () => {
     div.click();
 
     div.removeEventListener('click', clickHandler);
-    div.click(); // Should be `2`.
+    div.click();
 
-    await matchScreenshot();
+    // Only 2 times recorded.
+    expect(clickTime).toBe(2);
   });
 });
