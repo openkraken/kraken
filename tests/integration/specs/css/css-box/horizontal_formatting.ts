@@ -10,7 +10,10 @@ describe('horizontal_formatting', () => {
     const topRuler = document.createElement('div');
     const ruleImg = document.createElement('img');
 
-    ruleImg.setAttribute('src', 'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_pixel_ruler.gif');
+    ruleImg.setAttribute(
+      'src',
+      'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_pixel_ruler.gif'
+    );
 
     setStyle(ruleImg, {
       width: '641px',
@@ -47,7 +50,10 @@ describe('horizontal_formatting', () => {
     const bottomRuler = document.createElement('div');
     const ruleImg2 = document.createElement('img');
 
-    ruleImg2.setAttribute('src', 'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_description.gif');
+    ruleImg2.setAttribute(
+      'src',
+      'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_description.gif'
+    );
     setStyle(ruleImg2, {
       width: '640px',
       height: '64px',

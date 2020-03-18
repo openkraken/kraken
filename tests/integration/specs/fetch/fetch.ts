@@ -131,10 +131,16 @@ describe('Request', () => {
 
       return request1.text().then(
         function() {
-          console.assert(false, 'original request body should have been consumed');
+          console.assert(
+            false,
+            'original request body should have been consumed'
+          );
         },
         function(error) {
-          console.assert(error instanceof TypeError, 'expected TypeError for already read body');
+          console.assert(
+            error instanceof TypeError,
+            'expected TypeError for already read body'
+          );
         }
       );
     });
@@ -274,7 +280,9 @@ describe('Request', () => {
     expect(clone.headers != req.headers).toBe(true);
     expect(req.bodyUsed).toBe(false);
 
-    return Promise.all([clone.text(), req.clone().text()]).then(function(bodies) {
+    return Promise.all([clone.text(), req.clone().text()]).then(function(
+      bodies
+    ) {
       expect(bodies).toEqual(['I work out', 'I work out']);
     });
   });
@@ -324,7 +332,10 @@ describe('Response', function() {
     expect(clone.headers.get('content-type')).toBe('application/json');
 
     return Promise.all([clone.json(), res.json()]).then(function(jsons) {
-      expect(jsons[0]).toEqual(jsons[1], 'json of cloned object is the same as original');
+      expect(jsons[0]).toEqual(
+        jsons[1],
+        'json of cloned object is the same as original'
+      );
     });
   });
 
@@ -406,7 +417,10 @@ describe('Response', function() {
           return response.json();
         })
         .catch(function(error) {
-          console.assert(error instanceof Error, 'Promise rejected after body consumed');
+          console.assert(
+            error instanceof Error,
+            'Promise rejected after body consumed'
+          );
         });
     });
   });
@@ -418,7 +432,9 @@ describe('Response', function() {
           return response.text();
         })
         .then(function(text) {
-          expect(text.replace(/\s+/g, '')).toBe('{"method":"GET","data":{"userName":"12345"}}');
+          expect(text.replace(/\s+/g, '')).toBe(
+            '{"method":"GET","data":{"userName":"12345"}}'
+          );
         });
     });
   });

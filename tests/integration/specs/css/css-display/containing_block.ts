@@ -2,7 +2,11 @@ describe('Containing block for', () => {
   it('relative positioned elements near block-level ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if there is a filled green square and no red.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -28,7 +32,11 @@ describe('Containing block for', () => {
   it('relative positioned elements near inline-block ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if there is a filled green square and no red.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -57,7 +65,11 @@ describe('Containing block for', () => {
   it('static positioned elements near block-level ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if there is a filled green square and no red.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -83,7 +95,11 @@ describe('Containing block for', () => {
   it('static positioned elements near block-level ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if there is a filled green square and no red.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -110,7 +126,9 @@ describe('Containing block for', () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
     p.appendChild(
-      document.createTextNode('Test passes if there is a filled blue square in the upper-right corner of the page.')
+      document.createTextNode(
+        'Test passes if there is a filled blue square in the upper-right corner of the page.'
+      )
     );
 
     var div1 = document.createElement('div');
