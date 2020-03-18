@@ -1219,11 +1219,10 @@ abstract class Element extends Node
 
     if (isConnected) {
       final RenderBox box = renderElementBoundary;
-      // Must flush every times, or child may has no size.
-      if (!box.hasSize) {
-        box.markNeedsLayout();
-        box.owner.flushLayout();
-      }
+      // HitTest will test rootView's every child (including
+      // child's child), so must flush rootView every times,
+      // or child may miss size.
+      RendererBinding.instance.renderView.owner.flushLayout();
 
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero));
