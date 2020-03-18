@@ -115,7 +115,6 @@ Pointer<Utf8> _environment() {
 }
 
 void registerEnvironment() {
-  print('register env');
   Pointer<NativeFunction<Native_Environment>> pointer = Pointer.fromFunction(_environment);
   _registerEnvironment(pointer);
 }
