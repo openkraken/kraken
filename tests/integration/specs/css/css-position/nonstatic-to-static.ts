@@ -1,4 +1,4 @@
-describe('Position none-static', () => {
+describe('Position non-static', () => {
   it('to static', async () => {
     const container = document.createElement('div');
     setStyle(container, {
