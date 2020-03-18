@@ -19,11 +19,19 @@ class _RunMetrics {
   final int childCount;
 }
 
+class RenderFlowParentData extends ContainerBoxParentData<RenderBox> {
+  /// Row index of child when wrapping
+  int runIndex = 0;
+
+  @override
+  String toString() => '${super.toString()}; runIndex: $runIndex;';
+}
+
 /// Impl flow layout algorithm.
 class RenderFlowLayout extends RenderBox
     with
-        ContainerRenderObjectMixin<RenderBox, KrakenFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, KrakenFlexParentData>,
+        ContainerRenderObjectMixin<RenderBox, RenderFlowParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlowParentData>,
         ElementStyleMixin,
         RelativeStyleMixin {
   RenderFlowLayout({
@@ -308,8 +316,8 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! KrakenFlexParentData) {
-      child.parentData = KrakenFlexParentData();
+    if (child.parentData is! RenderFlowParentData) {
+      child.parentData = RenderFlowParentData();
     }
   }
 
@@ -543,7 +551,7 @@ class RenderFlowLayout extends RenderBox
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
-      final KrakenFlexParentData childParentData = child.parentData;
+      final RenderFlowParentData childParentData = child.parentData;
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
       if (childCount > 0 &&
@@ -708,7 +716,7 @@ class RenderFlowLayout extends RenderBox
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final KrakenFlexParentData childParentData = child.parentData;
+        final RenderFlowParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);

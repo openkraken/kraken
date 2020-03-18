@@ -382,20 +382,17 @@ abstract class Element extends Node
       if (style.position == 'absolute' ||
           style.position == 'fixed' ||
           style.position == 'sticky') {
-        Element parentElementWithStack;
-        // find positioned element to remove
-        if (style.position == 'absolute') {
-          parentElementWithStack = findParent(this, (element) => element.renderStack != null);
-        } else {
-          parentElementWithStack = ElementManager().getRootElement();
-        }
-        parentElementWithStack.renderStack.remove(renderElementBoundary);
 
-        // remove sticky placeholder
+        // Find positioned element to remove
+        ContainerRenderObjectMixin parentRenderObject = renderElementBoundary.parent;
+        parentRenderObject.remove(renderElementBoundary);
+
+        // Remove sticky placeholder
         if (style.position == 'sticky') {
           removeStickyPlaceholder();
         }
-        // find pre non positioned element
+
+        // Find pre non positioned element
         var preNonPositionedElement = null;
         var currentElement = nodeMap[nodeId];
         var parentElement = currentElement.parentNode;
@@ -422,6 +419,9 @@ abstract class Element extends Node
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
+        if (renderElementBoundary.parent != null) {
+          renderElementBoundary.parent.dropChild(renderElementBoundary);
+        }
         // insert non positioned renderObject to parent element in the order of original element tree
         parentElement.renderLayoutElement
             .insert(renderElementBoundary, after: preNonPositionedObject);
@@ -445,8 +445,11 @@ abstract class Element extends Node
   }
 
   void removeStickyPlaceholder() {
-    (stickyPlaceholder.parent as ContainerRenderObjectMixin)
-        .remove(stickyPlaceholder);
+    if (stickyPlaceholder != null) {
+      ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder
+        .parent;
+      stickyPlaceholderParent.remove(stickyPlaceholder);
+    }
   }
 
   void insertStickyPlaceholder() {
@@ -502,8 +505,7 @@ abstract class Element extends Node
 
     // current element's zIndex
     int currentZIndex = 0;
-    if (currentElement.style.contains('zIndex') &&
-        currentElement.style['zIndex'] != null) {
+    if (currentElement.style.contains('zIndex')) {
       currentZIndex = currentElement.style['zIndex'];
     }
     // add current element back to parent stack by zIndex
@@ -1021,10 +1023,10 @@ abstract class Element extends Node
     while (child != null) {
       ParentData parentData = child.parentData;
       if (parentData is ZIndexParentData) {
+        final ContainerParentDataMixin childParentData = child.parentData;
         if (parentData.zIndex <= zIndex) {
           renderStack.insert(renderObject, after: child);
         } else {
-          final ContainerParentDataMixin childParentData = child.parentData;
           renderStack.insert(renderObject,
               after: childParentData.previousSibling);
         }
