@@ -84,7 +84,7 @@ class VideoElement extends Element {
     controller = VideoPlayerController.network(src);
     _src = src;
 
-    controller.setLooping(props['loop'] == 'true' ? true : false);
+    controller.setLooping(props.containsKey('loop'));
     controller.onCanPlay = onCanPlay;
     controller.onCanPlayThrough = onCanPlayThrough;
     controller.onPlay = onPlay;
@@ -94,7 +94,7 @@ class VideoElement extends Element {
     controller.onEnded = onEnded;
     controller.onError = onError;
     controller.initialize().then((int textureId) {
-      if (props['muted'] == 'true') {
+      if (props.containsKey('muted')) {
         controller.setMuted(true);
       }
 
@@ -123,7 +123,7 @@ class VideoElement extends Element {
 
     addChild(box);
 
-    if (props['autoplay'].toString() == 'true') {
+    if (props.containsKey('autoplay')) {
       controller.play();
     }
   }

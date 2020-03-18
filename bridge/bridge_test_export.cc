@@ -43,3 +43,7 @@ void registerRefreshPaint(RefreshPaint refreshPaint) {
 void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
   kraken::registerMatchImageSnapshot(matchImageSnapshot);
 }
+
+void registerEnvironment(Environment environment) {
+  kraken::registerEnvironment(environment);
+}

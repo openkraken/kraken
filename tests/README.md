@@ -25,5 +25,11 @@
 ## Usage
 
 + **intergration test**: npm run test 
-+ **dart unit test**: npm run unit
-+ **js API unit test**: npm run jsUnit
+
+
+### Run single spec
+
+this above command will execute which spec's name contains "synthesized-baseline-flexbox-001"
+```
+ KRAKEN_TEST_FILTER="synthesized-baseline-flexbox-001" npm run integration
+```

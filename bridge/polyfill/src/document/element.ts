@@ -168,7 +168,7 @@ export class Element extends Node {
     method(this.nodeId, 'click');
   }
 
-  async toBlob() {
-    return toBlob(this.nodeId);
+  async toBlob(devicePixelRatio: number = window.devicePixelRatio) {
+    return toBlob(this.nodeId, devicePixelRatio);
   }
 }

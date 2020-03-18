@@ -248,7 +248,6 @@ task('compile-polyfill', (done) => {
   if (!fs.existsSync(path.join(paths.polyfill, 'node_modules'))) {
     spawnSync('npm', ['install'], {
       cwd: paths.polyfill,
-      env: process.env,
       stdio: 'inherit'
     });
   }

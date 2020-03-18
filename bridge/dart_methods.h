@@ -34,6 +34,7 @@ struct DartMethodPointer {
   OnJSError onJsError{nullptr};
   RefreshPaint refreshPaint{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
+  Environment environment{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -57,6 +58,7 @@ void registerJSError(OnJSError onJsError);
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);
 void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);
+void registerEnvironment(Environment environment);
 
 std::shared_ptr<DartMethodPointer> getDartMethod();
 

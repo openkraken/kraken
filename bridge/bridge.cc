@@ -13,6 +13,7 @@
 #include "bindings/KOM/window.h"
 #include "polyfill.h"
 #include "testframework.h"
+#include "callback_context.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
@@ -28,6 +29,7 @@ namespace kraken {
 namespace {
 
 using namespace alibaba::jsa;
+using namespace foundation;
 
 ThreadSafeArray<std::shared_ptr<Value>> krakenUIListenerList;
 ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
@@ -57,10 +59,17 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   }
 
   const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
-  if (result == nullptr) {
+  std::string resultStr = std::string(result);
+
+  if (resultStr.find("Error:", 0) != std::string::npos) {
+    throw JSError(context, result);
+  }
+
+  if (resultStr.empty()) {
     return Value::null();
   }
-  return String::createFromUtf8(context, std::string(result));
+
+  return String::createFromUtf8(context, resultStr);
 }
 
 struct CallbackContext {
@@ -162,13 +171,19 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *data) {
+void handleTransientCallback(void *data, const char* errmsg) {
   auto *obj = static_cast<CallbackContext *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
+    obj->_context.reportError(error);
+    return;
+  }
+
+  if (errmsg != nullptr) {
+    JSError error(obj->_context, errmsg);
     obj->_context.reportError(error);
     return;
   }

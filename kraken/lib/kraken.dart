@@ -7,6 +7,7 @@ library kraken;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:async';
 
 import 'bridge.dart';
 import 'element.dart';
@@ -16,10 +17,10 @@ export 'bridge.dart';
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
-bool appLoading = false;
 
-void connect(bool showPerformanceOverlay) {
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
+Future<void> connect(bool showPerformanceOverlay) {
+  Completer<void> completer = Completer();
+  RendererBinding.instance.scheduleFrameCallback((_) {
     elementManager = ElementManager();
     elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
@@ -27,10 +28,12 @@ void connect(bool showPerformanceOverlay) {
       _connectedCallback();
     }
 
+    completer.complete();
     RendererBinding.instance.addPostFrameCallback((time) {
       invokeOnloadCallback();
     });
   });
+  return completer.future;
 }
 
 void runApp({
@@ -38,7 +41,7 @@ void runApp({
   bool showPerformanceOverlay = false,
   bool shouldInitializeBinding = true,
   ConnectedCallback afterConnected,
-}) {
+}) async {
   if (enableDebug) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     debugPaintSizeEnabled = true;
@@ -50,7 +53,7 @@ void runApp({
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-  connect(showPerformanceOverlay);
+  await connect(showPerformanceOverlay);
 }
 
 Future<void> unmountApp() async {
@@ -63,18 +66,14 @@ Future<void> unmountApp() async {
 // refresh flutter paint and reload js context
 void reloadApp() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-  appLoading = true;
   await unmountApp();
   await reloadJSContext();
-  appLoading = false;
-  connect(prevShowPerformanceOverlay);
+  await connect(prevShowPerformanceOverlay);
 }
 
 // refresh flutter paint only
 Future<void> refreshPaint() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-  appLoading = true;
   await unmountApp();
-  appLoading = false;
-  connect(prevShowPerformanceOverlay);
+  await connect(prevShowPerformanceOverlay);
 }

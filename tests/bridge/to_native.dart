@@ -28,8 +28,8 @@ final Dart_InitTestFramework _initTestFramework =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InitTestFramework>>('initTestFramework').asFunction();
 
 void initTestFramework() {
-  initJSEngine();
   registerDartMethodsToCpp();
+  initJSEngine();
   _initTestFramework();
 }
 
