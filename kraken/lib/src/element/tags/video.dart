@@ -84,7 +84,7 @@ class VideoElement extends Element {
     controller = VideoPlayerController.network(src);
     _src = src;
 
-    controller.setLooping(props['loop'] ?? false);
+    controller.setLooping(props['loop'] == 'true' ? true : false);
     controller.onCanPlay = onCanPlay;
     controller.onCanPlayThrough = onCanPlayThrough;
     controller.onPlay = onPlay;
@@ -94,8 +94,8 @@ class VideoElement extends Element {
     controller.onEnded = onEnded;
     controller.onError = onError;
     controller.initialize().then((int textureId) {
-      if (props['muted'] == true) {
-        controller.setMuted(props['muted']);
+      if (props['muted'] == 'true') {
+        controller.setMuted(true);
       }
 
       completer.complete(textureId);
