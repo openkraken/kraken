@@ -4,7 +4,7 @@ describe('horizontal_formatting', () => {
     const rulerStyle = {
       padding: '0px',
       margin: '0px',
-      borderWidth: '0px'
+      borderWidth: '0px',
     };
 
     const topRuler = document.createElement('div');
@@ -14,7 +14,7 @@ describe('horizontal_formatting', () => {
 
     setStyle(ruleImg, {
       width: '641px',
-      height: '20px'
+      height: '20px',
     });
 
     setStyle(topRuler, rulerStyle);
@@ -22,7 +22,9 @@ describe('horizontal_formatting', () => {
     topRuler.appendChild(ruleImg);
 
     const p = document.createElement('p');
-    const text = document.createTextNode('This text is inside a P element. The border, padding, and margins for this paragraph should line up with the boundaries denoted in the image below; the edges of the light blue background should line up with the boundary between "padding" and "border." There should be no top or bottom margin; the images above and below should be flush with this paragraph.');
+    const text = document.createTextNode(
+      'This text is inside a P element. The border, padding, and margins for this paragraph should line up with the boundaries denoted in the image below; the edges of the light blue background should line up with the boundary between "padding" and "border." There should be no top or bottom margin; the images above and below should be flush with this paragraph.'
+    );
     p.appendChild(text);
 
     setStyle(p, {
@@ -39,7 +41,7 @@ describe('horizontal_formatting', () => {
       marginTop: '0px',
       marginBottom: '0px',
       marginLeft: '40px',
-      marginRight: '40px'
+      marginRight: '40px',
     });
 
     const bottomRuler = document.createElement('div');
@@ -48,7 +50,7 @@ describe('horizontal_formatting', () => {
     ruleImg2.setAttribute('src', 'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_description.gif');
     setStyle(ruleImg2, {
       width: '640px',
-      height: '64px'
+      height: '64px',
     });
 
     setStyle(bottomRuler, rulerStyle);

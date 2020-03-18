@@ -35,7 +35,7 @@ describe('Box padding', () => {
     let box = create('div', {
       width: '50px',
       height: '50px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     append(div, box);
     await matchScreenshot(BODY);

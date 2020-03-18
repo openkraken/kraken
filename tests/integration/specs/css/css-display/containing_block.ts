@@ -109,7 +109,9 @@ describe('Containing block for', () => {
   it('fixed positioned elements', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if there is a filled blue square in the upper-right corner of the page.'));
+    p.appendChild(
+      document.createTextNode('Test passes if there is a filled blue square in the upper-right corner of the page.')
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -135,7 +137,11 @@ describe('Containing block for', () => {
   it('absolute positioned elements near absolute ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if a filled blue square is in the upper-right corner of an hollow black square.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -169,7 +175,11 @@ describe('Containing block for', () => {
   it('absolute positioned elements near relative ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if a filled blue square is in the upper-right corner of an hollow black square.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {
@@ -203,7 +213,11 @@ describe('Containing block for', () => {
   it('absolute positioned elements near fixed ancestor', async () => {
     var p = document.createElement('p');
     document.body.appendChild(p);
-    p.appendChild(document.createTextNode('Test passes if a filled blue square is in the upper-right corner of an hollow black square.'));
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
 
     var div1 = document.createElement('div');
     setStyle(div1, {

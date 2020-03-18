@@ -20,7 +20,7 @@ describe('Display block in inline', () => {
     document.body.appendChild(div1);
     div1.appendChild(div2);
     div2.appendChild(div3);
-    div3.appendChild(document.createTextNode('There should be no red.'))
+    div3.appendChild(document.createTextNode('There should be no red.'));
 
     await matchScreenshot();
   });
