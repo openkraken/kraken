@@ -1,5 +1,6 @@
-describe('Geolocation getCurrentPosition', function() {
-  it('001', done => {
+// Authority require, which will pending tests, disable it.
+xdescribe('Geolocation', () => {
+  it('getCurrentPosition', done => {
     navigator.geolocation.getCurrentPosition(
       position => {
         expect(typeof position.coords).toBe('object');
