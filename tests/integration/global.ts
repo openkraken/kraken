@@ -8,7 +8,9 @@
  * - matchScreenshot: match snapshot of body's image.
  */
 
-function setStyle(dom: any, object: any) {
+let BODY = document.body;
+
+function setStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
   for (let key in object) {
     if (object.hasOwnProperty(key)) {
@@ -33,6 +35,10 @@ function create(tag: string, style: object) {
   const el = document.createElement(tag);
   setStyle(el, style);
   return el;
+}
+
+function append(parent: HTMLElement, child: HTMLElement) {
+  parent.appendChild(child);
 }
 
 async function matchScreenshot(element: HTMLElement = document.body) {
