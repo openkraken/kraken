@@ -1,5 +1,3 @@
-// Generated file. Do not edit.
-
 def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
 

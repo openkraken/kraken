@@ -1,5 +1,3 @@
-// Generated file. Do not edit.
-
 def localProperties = new Properties()
 def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
 if (localPropertiesFile.exists()) {
