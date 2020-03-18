@@ -52,8 +52,8 @@ void registerJSError() {
   _registerOnJSError(pointer);
 }
 
-typedef Native_RefreshPaintCallback = Void Function(Pointer<Void>);
-typedef Dart_RefreshPaintCallback = void Function(Pointer<Void>);
+typedef Native_RefreshPaintCallback = Void Function(Pointer<Void>, Pointer<Utf8>);
+typedef Dart_RefreshPaintCallback = void Function(Pointer<Void>, Pointer<Utf8>);
 typedef Native_RefreshPaint = Void Function(Pointer<Void>, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
 typedef Native_RegisterRefreshPaint = Void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
 typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
@@ -64,7 +64,9 @@ final Dart_RegisterRefreshPaint _registerRefreshPaint =
 void _refreshPaint(Pointer<Void> context, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
   Dart_RefreshPaintCallback callback = pointer.asFunction();
   refreshPaint().then((_) {
-    callback(context);
+    callback(context, nullptr);
+  }).catchError((e, stack) {
+    callback(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
   });
 }
 

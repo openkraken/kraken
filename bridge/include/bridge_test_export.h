@@ -23,7 +23,7 @@ void executeTest(ExecuteCallback executeCallback);
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);
 
-using RefreshPaintCallback = void (*)(void *data);
+using RefreshPaintCallback = void (*)(void *data, const char*);
 using RefreshPaint = void (*)(void *data, RefreshPaintCallback callback);
 KRAKEN_EXPORT
 void registerRefreshPaint(RefreshPaint refreshPaint);

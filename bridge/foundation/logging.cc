@@ -69,9 +69,13 @@ LogMessage::~LogMessage() {
 #elif defined(IS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
-  std::cout << stream_.str();
-  std::cout << std::endl;
-  std::cout.flush();
+  if (severity_ == LOG_ERROR) {
+    std::cerr << stream_.str() << std::endl;
+    std::cerr.flush();
+  } else {
+    std::cout << stream_.str() << std::endl;
+    std::cout.flush();
+  }
 #endif
 }
 

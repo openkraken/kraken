@@ -92,10 +92,18 @@ Object.assign(global, jasmineInterface);
 __kraken_executeTest__((done) => {
   jasmineTracker.onSpecStarted = (result) => {
     return new Promise((resolve, reject) => {
-      __request_update_frame__();
-      __kraken_refresh_paint__(function () {
-        resolve();
-      });
+      try {
+        __request_update_frame__();
+        __kraken_refresh_paint__(function (e) {
+          if (e) {
+            reject(e);
+          } else {
+            resolve();
+          }
+        });
+      } catch (e) {
+        reject(e);
+      }
     });
   };
 
