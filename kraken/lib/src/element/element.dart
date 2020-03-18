@@ -330,7 +330,6 @@ abstract class Element extends Node
         double elViewPortTop = el.offsetTop - scrollTop;
         isFixed = viewPortHeight - elViewPortTop <= bottom;
       }
-
       if (isFixed) {
         // change to fixed behavior
         if (!el.stickyFixed) {
@@ -377,7 +376,7 @@ abstract class Element extends Node
       // move element back to document flow
       if (style.position == 'absolute' ||
           style.position == 'fixed' ||
-          (style.position == 'sticky' && stickyFixed)) {
+          style.position == 'sticky') {
         Element parentElementWithStack;
         // find positioned element to remove
         if (style.position == 'absolute') {
@@ -996,13 +995,13 @@ abstract class Element extends Node
         renderObject.markNeedsLayout();
       }
 
-      // @TODO move to connected callback instead use of timer
-      Timer(Duration(milliseconds: 0), () {
-        // Trigger sticky update logic after node is connected
-        if (childStyle.get('position') == 'sticky') {
-          _updateStickyPosition(0);
-        }
-      });
+      // Trigger sticky update logic after node is connected
+      if (childStyle.get('position') == 'sticky') {
+        // Force flush layout.
+        renderMargin.markNeedsLayout();
+        renderMargin.owner.flushLayout();
+        _updateStickyPosition(0);
+      }
     }
   }
 
