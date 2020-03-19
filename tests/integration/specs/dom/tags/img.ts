@@ -1,7 +1,8 @@
-describe('Tags img', async () => {
+describe('Tags img',  () => {
   it('basic', done => {
     const img = document.createElement('img');
-    img.addEventListener('load', () => {
+    img.addEventListener('load', async () => {
+      await matchScreenshot(img);
       done();
     });
     img.style.width = '60px';
@@ -11,9 +12,5 @@ describe('Tags img', async () => {
     );
 
     document.body.appendChild(img);
-    img.onload = async () => {
-      await matchScreenshot();
-      done();
-    };
   });
 });

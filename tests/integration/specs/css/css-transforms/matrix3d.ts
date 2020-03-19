@@ -1,4 +1,4 @@
-describe('Transform matrix3d', async function() {
+describe('Transform matrix3d', function() {
   it('001', async () => {
     document.body.appendChild(
       create('div', {

@@ -5,6 +5,8 @@ const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
 
+const environment = __kraken_environment__();
+
 class JasmineTracker extends EventEmitter {
   constructor() {
     super();
@@ -52,7 +54,7 @@ function createPrinter(logger) {
 
 let config = {
   oneFailurePerSpec: true,
-  failFast: true,
+  failFast: environment.KRAKEN_STOP_ON_FAIL !== 'false',
   random: false
 };
 
@@ -69,7 +71,7 @@ function HtmlSpecFilter(options) {
 }
 
 var specFilter = new HtmlSpecFilter({
-  filterString: function() { return __kraken_environment__().KRAKEN_TEST_FILTER; }
+  filterString: function() { return environment.KRAKEN_TEST_FILTER; }
 });
 
 config.specFilter = function(spec) {
