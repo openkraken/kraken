@@ -1,127 +1,60 @@
-describe('background', () => {
-  it('color', async () => {
-    const div = document.createElement('div');
-    setStyle(div, {
-      width: '200px',
-      height: '200px',
-      backgroundColor: 'red',
-    });
-
-    document.body.appendChild(div);
-    await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
+xdescribe('background-331', () => {
+  const divStyle = {
+    background: 'red'
+  };
+  it('background initial value for background-image', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-image')).toBe('none');
   });
 
-  it('repeat', async () => {
-    // repeat
-    const repeat = document.createElement('div');
-    setStyle(repeat, {
-      width: '100vw',
-      height: '200px',
-      marginTop: '10px',
-      display: 'flex',
-      flexDirection: 'row',
-    });
-
-    const div1 = document.createElement('div');
-    setStyle(div1, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'no-repeat',
-    });
-    repeat.appendChild(div1);
-
-    const div2 = document.createElement('div');
-    setStyle(div2, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat-x',
-    });
-    repeat.appendChild(div2);
-
-    const div3 = document.createElement('div');
-    setStyle(div3, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat-y',
-    });
-    repeat.appendChild(div3);
-
-    const div4 = document.createElement('div');
-    setStyle(div4, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundRepeat: 'repeat',
-    });
-    repeat.appendChild(div4);
-
-    document.body.appendChild(repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+  it('background initial value for background-position', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-position')).toBe('0% 0%');
   });
 
-  it('position', async () => {
-    // position
-    const position = document.createElement('div');
-    setStyle(position, {
-      width: '100vw',
-      height: '200px',
-      marginTop: '10px',
-      display: 'flex',
-      flexDirection: 'row',
-    });
+  it('background initial value for background-size', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-size')).toBe('auto');
+  });
 
-    const position1 = document.createElement('div');
-    setStyle(position1, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'center',
-    });
-    position.appendChild(position1);
+  it('background initial value for background-repeat', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-repeat')).toBe('repeat');
+  });
 
-    const position2 = document.createElement('div');
-    setStyle(position2, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'left',
-    });
-    position.appendChild(position2);
+  it('background initial value for background-attachment', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-attachment')).toBe('scroll');
+  });
 
-    const position3 = document.createElement('div');
-    setStyle(position3, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'top',
-    });
-    position.appendChild(position3);
+  it('background initial value for background-origin', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-origin')).toBe('padding-box');
+  });
 
-    const position4 = document.createElement('div');
-    setStyle(position4, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'right',
-    });
-    position.appendChild(position4);
+  it('background initial value for background-clip', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-clip')).toBe('border-box');
+  });
 
-    const position5 = document.createElement('div');
-    setStyle(position5, {
-      width: '100px',
-      height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
-      backgroundPosition: 'bottom',
-    });
-    position.appendChild(position5);
-    document.body.appendChild(position);
-
-    // Wait for picture loaded.
-    await sleep(1);
-    await expectAsync(position.toBlob(1.0)).toMatchImageSnapshot();
+  it('background initial value for background-color', async () => {
+    let div = create('div', divStyle);
+    append(BODY, div);
+    let cs = window.getComputedStyle(div, null);
+    expect(cs.getPropertyValue('background-color')).toBe('rgba(255, 0, 0, 0)')
   });
 });
