@@ -92,4 +92,30 @@ describe('background-repeat', () => {
     await sleep(1);
     await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
   });
+
+  xit('round', async () => {
+    let div = create('div', {
+      width: '220px',
+      height: '220px',
+      backgroundColor: 'red',
+      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+      backgroundRepeat: 'round'
+    });
+    append(BODY, div);
+    await sleep(1);
+    await matchScreenshot(div);
+  });
+
+  xit('no-repeat will stop round to repeat', async () => {
+    let div = create('div', {
+      width: '220px',
+      height: '220px',
+      backgroundColor: 'red',
+      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+      backgroundRepeat: 'round'
+    });
+    append(BODY, div);
+    await sleep(1);
+    await matchScreenshot(div);
+  });
 });

@@ -121,4 +121,26 @@ describe('Background-position', () => {
     await sleep(1);
     await matchScreenshot(position);
   });
+
+  fit('right center', async () => {
+    const position = document.createElement('div');
+    setStyle(position, {
+      width: '100vw',
+      height: '200px',
+      marginTop: '10px',
+      display: 'flex',
+      flexDirection: 'row',
+    });
+    const div = document.createElement('div');
+    setStyle(div, {
+      width: '100vw',
+      height: '200px',
+      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundPosition: 'right center',
+    });
+    append(position, div);
+    append(BODY, position);
+    await sleep(1);
+    await matchScreenshot(position);
+  });
 });
