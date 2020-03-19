@@ -271,8 +271,8 @@ mixin DimensionMixin {
       RenderObject renderObject, Style style, Element element) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     if (element != null) {
-      element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
-      element.cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
+      element.cropMarginWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+      element.cropMarginHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     }
     return renderMargin = RenderMargin(
       margin: edgeInsets,
@@ -455,14 +455,18 @@ mixin DimensionMixin {
       return;
     }
     if (element != null) {
-      element.cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
+      element.cropMarginWidth = (margin.left ?? 0) + (margin.right ?? 0);
+      element.cropMarginHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     }
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, Style style) {
+  RenderObject initRenderPadding(RenderObject renderObject, Style style, Element element) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
+    if (element != null) {
+      element.cropPaddingWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+      element.cropPaddingHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
+    }
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
@@ -477,7 +481,7 @@ mixin DimensionMixin {
         oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(Style style,
+  void updateRenderPadding(Style style, Element element,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
     Transition all,
@@ -584,8 +588,15 @@ mixin DimensionMixin {
       oldPadding = newPadding;
     }
 
+    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
+
     // Update renderPadding.
-    renderPadding.padding = getPaddingInsetsFromStyle(style);
+    renderPadding.padding = edgeInsets;
+
+    if (element != null) {
+      element.cropPaddingWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+      element.cropPaddingHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
+    }
   }
 }
 

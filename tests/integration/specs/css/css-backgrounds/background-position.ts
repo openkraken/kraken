@@ -122,7 +122,7 @@ describe('Background-position', () => {
     await matchScreenshot(position);
   });
 
-  fit('right center', async () => {
+  it('right center', async () => {
     const position = document.createElement('div');
     setStyle(position, {
       width: '100vw',

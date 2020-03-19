@@ -65,7 +65,7 @@ abstract class Element extends Node
     }
 
     // padding
-    renderObject = renderPadding = initRenderPadding(renderObject, _style);
+    renderObject = renderPadding = initRenderPadding(renderObject, _style, this);
 
     // overflow
     if (allowChildren) {
@@ -147,10 +147,12 @@ abstract class Element extends Node
   bool needsReposition =
   false; // whether element needs reposition when append to tree or changing position property
   bool shouldBlockStretch = true;
-  double cropWidth = 0;
-  double cropHeight = 0;
+  double cropMarginWidth = 0;
+  double cropMarginHeight = 0;
   double cropBorderWidth = 0;
   double cropBorderHeight = 0;
+  double cropPaddingWidth = 0;
+  double cropPaddingHeight = 0;
   double offsetTop = null; // offset to the top of viewport
   bool stickyFixed = false;
 
@@ -216,7 +218,7 @@ abstract class Element extends Node
     updateOverFlowBox(newStyle, _scrollListener);
 
     ///3.update padding
-    updateRenderPadding(newStyle, transitionMap);
+    updateRenderPadding(newStyle, this, transitionMap);
 
     ///4.update constrained
     updateConstraints(newStyle, transitionMap);
@@ -419,7 +421,7 @@ abstract class Element extends Node
           };
           parentElement.renderLayoutElement.visitChildren(visitor);
         }
-        
+
         // insert non positioned renderObject to parent element in the order of original element tree
         parentElement.renderLayoutElement
             .insert(renderElementBoundary, after: preNonPositionedObject);

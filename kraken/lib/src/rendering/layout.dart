@@ -524,6 +524,8 @@ class RenderFlowLayout extends RenderBox
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
+        } else {
+          mainAxisLimit = getConstainWidth(nodeId);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;

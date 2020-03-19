@@ -70,14 +70,17 @@ class RenderTextBox extends RenderBox
     // @TODO when in flex-grow or flex-shrink width needs to be recalulated
     var currentNode = nodeMap[nodeId];
     var parentNode = currentNode.parentNode;
-    double constraintWidth = getElementWidth(parentNode.nodeId);
+    double elementWidth = getElementWidth(parentNode.nodeId);
     if (child != null) {
-      BoxConstraints additionalConstraints = BoxConstraints(
-        minWidth: 0,
-        maxWidth: constraintWidth,
-        minHeight: 0,
-        maxHeight: double.infinity,
-      );
+      BoxConstraints additionalConstraints = constraints;
+      if (elementWidth != null) {
+        additionalConstraints = BoxConstraints(
+          minWidth: 0,
+          maxWidth: elementWidth,
+          minHeight: 0,
+          maxHeight: double.infinity,
+        );
+      }
       child.layout(additionalConstraints, parentUsesSize: true);
       size = child.size;
     } else {
