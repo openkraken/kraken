@@ -64,7 +64,7 @@ class RenderFlowLayout extends RenderBox
   }
 
   // Element style;
-  CSSStyleDeclaration style;
+  StyleDeclaration style;
 
   // id of current element
   int nodeId;
@@ -727,7 +727,7 @@ class RenderFlowLayout extends RenderBox
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
-        CSSStyleDeclaration childStyle;
+        StyleDeclaration childStyle;
         if (child is RenderTextBox) {
           childStyle = nodeMap[nodeId].style;
         } else if (child is RenderElementBoundary) {

@@ -4,7 +4,7 @@ import 'package:kraken/style.dart';
 
 mixin RelativeStyleMixin on RenderBox {
   void applyRelativeOffset(
-      Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
+      Offset relativeOffset, RenderBox renderBox, StyleDeclaration style) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
@@ -20,7 +20,7 @@ mixin RelativeStyleMixin on RenderBox {
     }
   }
 
-  Offset getRelativeOffset(CSSStyleDeclaration style) {
+  Offset getRelativeOffset(StyleDeclaration style) {
     if (style['position'] == 'relative') {
       double dx;
       double dy;

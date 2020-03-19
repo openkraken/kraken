@@ -5,19 +5,19 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/style/css_style_declaration.dart';
-import 'css_style_declaration.dart';
+import 'package:kraken/src/style/style_declaration.dart';
+import 'style_declaration.dart';
 
 mixin FlowMixin {
   static const String TEXT_ALIGN = 'textAlign';
 
-  void decorateRenderFlow(RenderObject renderObject, CSSStyleDeclaration style) {
+  void decorateRenderFlow(RenderObject renderObject, StyleDeclaration style) {
     if (style != null && renderObject is RenderFlowLayout) {
       renderObject.mainAxisAlignment = _getTextAlign(style);
     }
   }
 
-  MainAxisAlignment _getTextAlign(CSSStyleDeclaration style) {
+  MainAxisAlignment _getTextAlign(StyleDeclaration style) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
     if (style.contains(TEXT_ALIGN)) {

@@ -6,7 +6,7 @@
 export 'src/style/backgroud_image.dart';
 export 'src/style/box_decoration.dart';
 export 'src/style/color.dart';
-export 'src/style/css_style_declaration.dart';
+export 'src/style/style_declaration.dart';
 export 'src/style/dimension.dart';
 export 'src/style/element.dart';
 export 'src/style/flexbox.dart';

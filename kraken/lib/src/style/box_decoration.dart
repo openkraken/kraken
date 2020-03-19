@@ -22,7 +22,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   double cropBorderHeight = 0;
 
   RenderObject initRenderDecoratedBox(
-      RenderObject renderObject, CSSStyleDeclaration style, int nodeId) {
+      RenderObject renderObject, StyleDeclaration style, int nodeId) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
     cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
@@ -42,7 +42,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   void updateRenderDecoratedBox(
-      CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
+      StyleDeclaration style, Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition allTransition = transitionMap['all'];
@@ -435,7 +435,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
+  TransitionDecoration getTransitionDecoration(StyleDeclaration style) {
     BorderRadius borderRadius = getBorderRadius(style);
     DecorationImage decorationImage;
     Gradient gradient;
@@ -478,7 +478,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
 
   /// Tip: inset not supported.
   static RegExp commaRegExp = RegExp(r',');
-  List<BoxShadow> getBoxShadow(CSSStyleDeclaration style) {
+  List<BoxShadow> getBoxShadow(StyleDeclaration style) {
     List<BoxShadow> boxShadow = [];
     if (style.contains('boxShadow')) {
       String processedValue =
@@ -517,7 +517,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     'BottomLeft',
     'BottomRight'
   ];
-  BorderRadiusGeometry getBorderRadius(CSSStyleDeclaration style) {
+  BorderRadiusGeometry getBorderRadius(StyleDeclaration style) {
     List<Radius> borderRadiusTLTRBLBR = [
       Radius.zero,
       Radius.zero,
@@ -549,7 +549,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     );
   }
 
-  Color getBackgroundColor(CSSStyleDeclaration style) {
+  Color getBackgroundColor(StyleDeclaration style) {
     Color backgroundColor = WebColor.transparent;
     if (style.contains('backgroundColor')) {
       backgroundColor = WebColor.generate(style['backgroundColor']);
@@ -603,7 +603,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
-  TransitionBorderSide getBorderSideByStyle(CSSStyleDeclaration style, String side) {
+  TransitionBorderSide getBorderSideByStyle(StyleDeclaration style, String side) {
     TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, 0, defaultBorderStyle);
     final String borderName = 'border';
     final String borderSideName = borderName + side; // eg. borderLeft/borderRight

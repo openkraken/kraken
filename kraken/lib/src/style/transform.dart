@@ -7,7 +7,7 @@ mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
-  RenderObject initTransform(RenderObject current, CSSStyleDeclaration style, int nodeId) {
+  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId) {
     if (style.contains('transform')) {
       List<Method> methods = Method.parseMethod(style['transform']);
       matrix4 = combineTransform(methods) ?? matrix4;
@@ -22,7 +22,7 @@ mixin TransformStyleMixin {
     return transform;
   }
 
-  void updateTransform(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
+  void updateTransform(StyleDeclaration style, [Map<String, Transition> transitionMap]) {
     Offset offset = parseOrigin(style['transformOrigin']);
     transform.origin = offset;
     Matrix4 newMatrix4;

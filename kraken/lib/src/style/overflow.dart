@@ -12,9 +12,9 @@ mixin StyleOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  CSSStyleDeclaration _style;
+  StyleDeclaration _style;
 
-  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
+  RenderObject initOverflowBox(RenderObject current, StyleDeclaration style, void scrollListener(double scrollTop)) {
     assert(style != null);
     _style = style;
     _child = current;
@@ -25,7 +25,7 @@ mixin StyleOverflowMixin {
     return _renderObjectY;
   }
 
-  void updateOverFlowBox(CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
+  void updateOverFlowBox(StyleDeclaration style, void scrollListener(double scrollTop)) {
     if (style != null) {
       String oldOverflowY = null;
       if (_style != null) {

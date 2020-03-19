@@ -12,7 +12,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropWidth = 0;
     while (!isParentWithWidth) {
       if (childNode is Element) {
-        CSSStyleDeclaration style = childNode.style;
+        StyleDeclaration style = childNode.style;
         if (style.contains('width')) {
           isParentWithWidth = true;
           width = style['width'];
@@ -46,7 +46,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropHeight = 0;
     while (!isParentWithHeight) {
       if (childNode is Element) {
-        CSSStyleDeclaration style = childNode.style;
+        StyleDeclaration style = childNode.style;
         if (style.contains('height')) {
           isParentWithHeight = true;
           height = style['height'];
@@ -78,8 +78,8 @@ mixin ElementStyleMixin on RenderBox {
     Element parentNode = currentNode.parent;
 
     if (parentNode != null && parentNode.style != null) {
-      CSSStyleDeclaration parentStyle = parentNode.style;
-      CSSStyleDeclaration currentStyle = currentNode.style;
+      StyleDeclaration parentStyle = parentNode.style;
+      StyleDeclaration currentStyle = currentNode.style;
 
       String parentDisplay = parentStyle['display'];
       bool isParentFlex = parentDisplay == 'flex' || parentDisplay == 'inline-flex';
@@ -98,7 +98,7 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get height of current node
-  double getCurrentHeight(CSSStyleDeclaration style) {
+  double getCurrentHeight(StyleDeclaration style) {
     double height = Length.toDisplayPortValue(style['height']);
     // minus padding
     Padding padding = baseGetPaddingFromStyle(style);
@@ -114,7 +114,7 @@ mixin ElementStyleMixin on RenderBox {
 
     // Display as inline if parent node is flex and with align-items not stretch
     if (parentNode != null) {
-      CSSStyleDeclaration style = parentNode.style;
+      StyleDeclaration style = parentNode.style;
 
       bool isFlex = style['display'] == 'flex' || style['display'] == 'inline-flex';
 

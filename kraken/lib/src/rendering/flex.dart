@@ -117,7 +117,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   // Element style;
-  CSSStyleDeclaration style;
+  StyleDeclaration style;
 
   // id of current element
   int nodeId;
@@ -962,7 +962,7 @@ class RenderFlexLayout extends RenderBox
           break;
       }
 
-      CSSStyleDeclaration childStyle;
+      StyleDeclaration childStyle;
       if (child is RenderTextBox) {
         childStyle = nodeMap[nodeId].style;
       } else if (child is RenderElementBoundary) {

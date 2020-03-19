@@ -4,7 +4,6 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
@@ -23,7 +22,7 @@ List<String> baseGetShorttedProperties(String input) {
   return input.trim().split(spaceRegExp);
 }
 
-Padding baseGetPaddingFromStyle(CSSStyleDeclaration style) {
+Padding baseGetPaddingFromStyle(StyleDeclaration style) {
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -100,7 +99,7 @@ mixin DimensionMixin {
     return baseGetDisplayPortedLength(input);
   }
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
+  void updateConstraints(StyleDeclaration style, Map<String, Transition> transitionMap) {
     if (renderConstrainedBox != null && style != null) {
       Transition allTransition,
           widthTransition,
@@ -237,7 +236,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderConstrainedBox(
-      RenderObject renderObject, CSSStyleDeclaration style) {
+      RenderObject renderObject, StyleDeclaration style) {
     if (style != null) {
       oldConstraints = _getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
@@ -249,7 +248,7 @@ mixin DimensionMixin {
     }
   }
 
-  SizeConstraints _getConstraints(CSSStyleDeclaration style) {
+  SizeConstraints _getConstraints(StyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -270,7 +269,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, CSSStyleDeclaration style) {
+      RenderObject renderObject, StyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
     cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
@@ -280,7 +279,7 @@ mixin DimensionMixin {
     );
   }
 
-  Padding getMarginFromStyle(CSSStyleDeclaration style) {
+  Padding getMarginFromStyle(StyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double right = 0.0;
@@ -336,13 +335,13 @@ mixin DimensionMixin {
     return Padding(left, top, right, bottom);
   }
 
-  EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
+  EdgeInsets getMarginInsetsFromStyle(StyleDeclaration style) {
     oldMargin = getMarginFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(StyleDeclaration style, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -453,23 +452,23 @@ mixin DimensionMixin {
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderPadding(RenderObject renderObject, StyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  Padding getPaddingFromStyle(CSSStyleDeclaration style) {
+  Padding getPaddingFromStyle(StyleDeclaration style) {
     return baseGetPaddingFromStyle(style);
   }
 
-  EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
+  EdgeInsets getPaddingInsetsFromStyle(StyleDeclaration style) {
     oldPadding = getPaddingFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(CSSStyleDeclaration style,
+  void updateRenderPadding(StyleDeclaration style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
     Transition all,

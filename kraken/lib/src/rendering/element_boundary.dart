@@ -29,7 +29,7 @@ class RenderElementBoundary extends RenderTransform
   RenderBox child;
   int nodeId;
 
-  CSSStyleDeclaration style;
+  StyleDeclaration style;
 
   @override
   void setupParentData(RenderBox child) {

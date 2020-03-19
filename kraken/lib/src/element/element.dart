@@ -17,7 +17,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
 
@@ -65,7 +64,7 @@ abstract class Element extends Node
   void setDefaultProps(Map<String, dynamic> props) {}
 
   // Style declaration from user.
-  CSSStyleDeclaration style;
+  StyleDeclaration style;
 
 
   // A point reference to treed renderObject.
@@ -83,20 +82,18 @@ abstract class Element extends Node
   Element({
     @required int nodeId,
     @required this.tagName,
-    @required this.defaultDisplay,
+    this.defaultDisplay = 'block',
     this.properties = const {},
     this.needsReposition = false,
     this.allowChildren = true,
     this.events,
   })  : assert(nodeId != null),
         assert(tagName != null),
-        assert(defaultDisplay != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
-
     setDefaultProps(properties);
-    style = CSSStyleDeclaration(style: properties[STYLE]);
+    style = StyleDeclaration(style: properties[STYLE]);
 
-    if (!style.contains('display')) style['display'] = defaultDisplay;
+    _registerStyleChangedListeners();
 
     // Mark element needs to reposition according to position CSS.
     if (_isPositioned(style)) needsReposition = true;
@@ -173,26 +170,6 @@ abstract class Element extends Node
     });
   }
 
-  bool isFlexStyleChanged(CSSStyleDeclaration newStyle) {
-    String display = newStyle['display'];
-    List flexStyles = [
-      'flexDirection',
-      'flexWrap',
-      'alignItems',
-      'justifyContent',
-      'alignContent',
-    ];
-    bool hasChanged = false;
-    if (display == 'flex' || display == 'inline-flex') {
-      flexStyles.forEach((key) {
-        if (style[key] != newStyle[key]) {
-          hasChanged = true;
-        }
-      });
-    }
-    return hasChanged;
-  }
-
   void _scrollListener(double scrollTop) {
     // Only trigger on body element
     if (this != ElementManager().getRootElement()) {
@@ -205,7 +182,7 @@ abstract class Element extends Node
   void _updateStickyPosition(double scrollTop) {
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
-      CSSStyleDeclaration elStyle = el.style;
+      StyleDeclaration elStyle = el.style;
       bool isFixed;
 
       if (el.offsetTop == null) {
@@ -227,27 +204,30 @@ abstract class Element extends Node
         // change to fixed behavior
         if (!el.stickyFixed) {
           el.stickyFixed = true;
-          el.updatePosition(elStyle.copyWith({'position': 'fixed'}));
+          el._doUpdatePosition(el.style['position'], 'fixed');
         }
       } else {
         // change to relative behavior
         if (el.stickyFixed) {
           el.stickyFixed = false;
-          el.updatePosition(elStyle.copyWith({'position': 'sticky'}));
+          el._doUpdatePosition(el.style['position'], 'sticky');
         }
       }
     });
   }
 
-  void updatePosition(CSSStyleDeclaration newStyle) {
-    // remove stack node when change to non positioned
-    if (!newStyle.contains('position') || newStyle['position'] == 'static') {
+  void _doUpdatePosition(String prevPosition, String currentPosition) {
+    if (isEmptyStyleValue(prevPosition)) prevPosition = 'static';
+    if (isEmptyStyleValue(currentPosition)) currentPosition = 'static';
+    // Remove stack node when change to non positioned.
+
+    if (currentPosition == 'static') {
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
       (renderStack.parent as RenderDecoratedBox).child = child;
       renderStack = null;
     } else {
-      // add stack node when change to positioned
+      // Add stack node when change to positioned.
       if (renderStack == null) {
         RenderObject child = renderDecoratedBox.child;
         renderDecoratedBox.child = null;
@@ -263,21 +243,20 @@ abstract class Element extends Node
     }
 
     // move element back to document flow
-    if (newStyle['position'] == '' ||
-        newStyle['position'] == 'static' ||
-        newStyle['position'] == 'relative' ||
-        (newStyle['position'] == 'sticky' && !stickyFixed)) {
+    if (currentPosition == 'static' ||
+        currentPosition == 'relative' ||
+        (currentPosition == 'sticky' && !stickyFixed)) {
       // move element back to document flow
-      if (style['position'] == 'absolute' ||
-          style['position'] == 'fixed' ||
-          (style['position'] == 'sticky' && stickyFixed)) {
+      if (prevPosition == 'absolute' ||
+          prevPosition == 'fixed' ||
+          (prevPosition == 'sticky' && stickyFixed)) {
 
         // Find positioned element to remove
         ContainerRenderObjectMixin parentRenderObject = renderElementBoundary.parent;
         parentRenderObject.remove(renderElementBoundary);
 
         // Remove sticky placeholder
-        if (style['position'] == 'sticky') {
+        if (prevPosition == 'sticky') {
           removeStickyPlaceholder();
         }
 
@@ -288,8 +267,7 @@ abstract class Element extends Node
         int curIdx = parentElement.childNodes.indexOf(currentElement);
         for (int i = curIdx - 1; i > -1; i--) {
           var element = parentElement.childNodes[i];
-          CSSStyleDeclaration style = element.style;
-          if (!style.contains('position') || style['position'] == 'static') {
+          if (prevPosition == 'static') {
             preNonPositionedElement = element;
             break;
           }
@@ -331,7 +309,7 @@ abstract class Element extends Node
   void removeStickyPlaceholder() {
     if (stickyPlaceholder != null) {
       ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder
-        .parent;
+          .parent;
       stickyPlaceholderParent.remove(stickyPlaceholder);
     }
   }
@@ -341,7 +319,7 @@ abstract class Element extends Node
       renderMargin.owner.flushLayout();
     }
 
-    CSSStyleDeclaration pStyle = CSSStyleDeclaration(style: {
+    StyleDeclaration pStyle = StyleDeclaration(style: {
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
     });
@@ -354,7 +332,7 @@ abstract class Element extends Node
   // reposition element with position absolute/fixed
   void _repositionElement(Element el) {
     RenderObject renderObject = el.renderObject;
-    CSSStyleDeclaration style = el.style;
+    StyleDeclaration style = el.style;
     int nodeId = el.nodeId;
 
     // new node not in the tree, wait for append in appenedElement
@@ -397,202 +375,202 @@ abstract class Element extends Node
     insertByZIndex(parentStack, renderObject, el, currentZIndex);
   }
 
-  void _updateZIndex(CSSStyleDeclaration style) {
-    // new node not in the tree, wait for append in appenedElement
-    if (renderObject.parent == null) {
-      return;
-    }
-    Element parentElementWithStack =
-        findParent(this, (element) => element.renderStack != null);
-    RenderStack parentStack = parentElementWithStack.renderStack;
+//  void _updateZIndex(StyleDeclaration style) {
+//    // new node not in the tree, wait for append in appenedElement
+//    if (renderObject.parent == null) {
+//      return;
+//    }
+//    Element parentElementWithStack =
+//    findParent(this, (element) => element.renderStack != null);
+//    RenderStack parentStack = parentElementWithStack.renderStack;
+//
+//    // remove current element from parent stack
+//    parentStack.remove(renderObject);
+//
+//    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+//    renderObject.parentData = stackParentData;
+//
+//    // current element's zIndex
+//    int currentZIndex = 0;
+//    if (style['zIndex'] != null) {
+//      currentZIndex = int.parse(style['zIndex']);
+//    }
+//    // add current element back to parent stack by zIndex
+//    insertByZIndex(parentStack, renderObject, this, currentZIndex);
+//  }
 
-    // remove current element from parent stack
-    parentStack.remove(renderObject);
-
-    StackParentData stackParentData = getPositionParentDataFromStyle(style);
-    renderObject.parentData = stackParentData;
-
-    // current element's zIndex
-    int currentZIndex = 0;
-    if (style['zIndex'] != null) {
-      currentZIndex = int.parse(style['zIndex']);
-    }
-    // add current element back to parent stack by zIndex
-    insertByZIndex(parentStack, renderObject, this, currentZIndex);
-  }
-
-  void _updateOffset(CSSStyleDeclaration style) {
-    ZIndexParentData zIndexParentData;
-    AbstractNode renderParent = renderObject.parent;
-    if (renderParent is RenderPosition &&
-        renderObject.parentData is ZIndexParentData) {
-      zIndexParentData = renderObject.parentData;
-      Transition allTransition,
-          topTransition,
-          leftTransition,
-          rightTransition,
-          bottomTransition,
-          widthTransition,
-          heightTransition;
-      double topDiff, leftDiff, rightDiff, bottomDiff, widthDiff, heightDiff;
-      double topBase, leftBase, rightBase, bottomBase, widthBase, heightBase;
-      ZIndexParentData progressParentData = zIndexParentData;
-
-      if (transitionMap != null) {
-        allTransition = transitionMap['all'];
-        if (style.top != _style.top) {
-          topTransition = transitionMap['top'];
-          topDiff = (style.top ?? 0) - (_style.top ?? 0);
-          topBase = _style.top ?? 0;
-        }
-        if (style.left != _style.left) {
-          leftTransition = transitionMap['left'];
-          leftDiff = (style.left ?? 0) - (_style.left ?? 0);
-          leftBase = _style.left ?? 0;
-        }
-        if (style.right != _style.right) {
-          rightTransition = transitionMap['right'];
-          rightDiff = (style.right ?? 0) - (_style.left ?? 0);
-          rightBase = _style.right ?? 0;
-        }
-        if (style.bottom != _style.bottom) {
-          bottomTransition = transitionMap['bottom'];
-          bottomDiff = (style.bottom ?? 0) - (_style.bottom ?? 0);
-          bottomBase = _style.bottom ?? 0;
-        }
-        if (style.width != _style.width) {
-          widthTransition = transitionMap['width'];
-          widthDiff = (style.width ?? 0) - (_style.width ?? 0);
-          widthBase = _style.bottom ?? 0;
-        }
-        if (style.height != _style.height) {
-          heightTransition = transitionMap['height'];
-          heightDiff = (style.height ?? 0) - (_style.height ?? 0);
-          heightBase = _style.height ?? 0;
-        }
-      }
-      if (allTransition != null ||
-          topTransition != null ||
-          leftTransition != null ||
-          rightTransition != null ||
-          bottomTransition != null ||
-          widthTransition != null ||
-          heightTransition != null) {
-        bool hasTop = false,
-            hasLeft = false,
-            hasRight = false,
-            hasBottom = false,
-            hasWidth = false,
-            hasHeight = false;
-        if (topDiff != null) {
-          if (topTransition == null) {
-            hasTop = true;
-          } else {
-            topTransition.addProgressListener((percent) {
-              progressParentData.top = topBase + topDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (leftDiff != null) {
-          if (leftTransition == null) {
-            hasLeft = true;
-          } else {
-            leftTransition.addProgressListener((percent) {
-              progressParentData.left = leftBase + leftDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (rightDiff != null) {
-          if (rightTransition == null) {
-            hasRight = true;
-          } else {
-            rightTransition.addProgressListener((percent) {
-              progressParentData.right = rightBase + rightDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (bottomDiff != null) {
-          if (bottomTransition == null) {
-            hasBottom = true;
-          } else {
-            bottomTransition.addProgressListener((percent) {
-              progressParentData.bottom = bottomBase + bottomDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (widthDiff != null) {
-          if (widthTransition == null) {
-            hasWidth = true;
-          } else {
-            widthTransition.addProgressListener((percent) {
-              progressParentData.width = widthBase + widthDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (heightDiff != null) {
-          if (heightTransition == null) {
-            hasHeight = true;
-          } else {
-            heightTransition.addProgressListener((percent) {
-              progressParentData.height = heightBase + heightDiff * percent;
-              renderObject.parentData = progressParentData;
-              renderParent.markNeedsLayout();
-            });
-          }
-        }
-        if (allTransition != null &&
-            (hasTop ||
-                hasBottom ||
-                hasLeft ||
-                hasRight ||
-                hasWidth ||
-                hasHeight)) {
-          allTransition.addProgressListener((percent) {
-            if (hasTop) {
-              progressParentData.top = topBase + topDiff * percent;
-            }
-            if (hasLeft) {
-              progressParentData.left = leftBase + leftDiff * percent;
-            }
-            if (hasRight) {
-              progressParentData.right = rightBase + rightDiff * percent;
-            }
-            if (hasBottom) {
-              progressParentData.bottom = bottomBase + bottomDiff * percent;
-            }
-            if (hasWidth) {
-              progressParentData.width = widthBase + widthDiff * percent;
-            }
-            if (hasHeight) {
-              progressParentData.height = heightBase + heightDiff * percent;
-            }
-            renderObject.parentData = progressParentData;
-            renderParent.markNeedsLayout();
-          });
-        }
-      } else {
-        zIndexParentData.zIndex = style['zIndex'];
-        zIndexParentData.top = style['top'];
-        zIndexParentData.left = style['left'];
-        zIndexParentData.right = style['right'];
-        zIndexParentData.bottom = style['bottom'];
-        zIndexParentData.width = style['width'];
-        zIndexParentData.height = style['height'];
-        renderObject.parentData = zIndexParentData;
-        renderParent.markNeedsLayout();
-      }
-    }
-  }
+//  void _updateOffset(StyleDeclaration style) {
+//    ZIndexParentData zIndexParentData;
+//    AbstractNode renderParent = renderObject.parent;
+//    if (renderParent is RenderPosition &&
+//        renderObject.parentData is ZIndexParentData) {
+//      zIndexParentData = renderObject.parentData;
+//      Transition allTransition,
+//          topTransition,
+//          leftTransition,
+//          rightTransition,
+//          bottomTransition,
+//          widthTransition,
+//          heightTransition;
+//      double topDiff, leftDiff, rightDiff, bottomDiff, widthDiff, heightDiff;
+//      double topBase, leftBase, rightBase, bottomBase, widthBase, heightBase;
+//      ZIndexParentData progressParentData = zIndexParentData;
+//
+//      if (transitionMap != null) {
+//        allTransition = transitionMap['all'];
+//        if (style.top != _style.top) {
+//          topTransition = transitionMap['top'];
+//          topDiff = (style.top ?? 0) - (_style.top ?? 0);
+//          topBase = _style.top ?? 0;
+//        }
+//        if (style.left != _style.left) {
+//          leftTransition = transitionMap['left'];
+//          leftDiff = (style.left ?? 0) - (_style.left ?? 0);
+//          leftBase = _style.left ?? 0;
+//        }
+//        if (style.right != _style.right) {
+//          rightTransition = transitionMap['right'];
+//          rightDiff = (style.right ?? 0) - (_style.left ?? 0);
+//          rightBase = _style.right ?? 0;
+//        }
+//        if (style.bottom != _style.bottom) {
+//          bottomTransition = transitionMap['bottom'];
+//          bottomDiff = (style.bottom ?? 0) - (_style.bottom ?? 0);
+//          bottomBase = _style.bottom ?? 0;
+//        }
+//        if (style.width != _style.width) {
+//          widthTransition = transitionMap['width'];
+//          widthDiff = (style.width ?? 0) - (_style.width ?? 0);
+//          widthBase = _style.bottom ?? 0;
+//        }
+//        if (style.height != _style.height) {
+//          heightTransition = transitionMap['height'];
+//          heightDiff = (style.height ?? 0) - (_style.height ?? 0);
+//          heightBase = _style.height ?? 0;
+//        }
+//      }
+//      if (allTransition != null ||
+//          topTransition != null ||
+//          leftTransition != null ||
+//          rightTransition != null ||
+//          bottomTransition != null ||
+//          widthTransition != null ||
+//          heightTransition != null) {
+//        bool hasTop = false,
+//            hasLeft = false,
+//            hasRight = false,
+//            hasBottom = false,
+//            hasWidth = false,
+//            hasHeight = false;
+//        if (topDiff != null) {
+//          if (topTransition == null) {
+//            hasTop = true;
+//          } else {
+//            topTransition.addProgressListener((percent) {
+//              progressParentData.top = topBase + topDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (leftDiff != null) {
+//          if (leftTransition == null) {
+//            hasLeft = true;
+//          } else {
+//            leftTransition.addProgressListener((percent) {
+//              progressParentData.left = leftBase + leftDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (rightDiff != null) {
+//          if (rightTransition == null) {
+//            hasRight = true;
+//          } else {
+//            rightTransition.addProgressListener((percent) {
+//              progressParentData.right = rightBase + rightDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (bottomDiff != null) {
+//          if (bottomTransition == null) {
+//            hasBottom = true;
+//          } else {
+//            bottomTransition.addProgressListener((percent) {
+//              progressParentData.bottom = bottomBase + bottomDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (widthDiff != null) {
+//          if (widthTransition == null) {
+//            hasWidth = true;
+//          } else {
+//            widthTransition.addProgressListener((percent) {
+//              progressParentData.width = widthBase + widthDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (heightDiff != null) {
+//          if (heightTransition == null) {
+//            hasHeight = true;
+//          } else {
+//            heightTransition.addProgressListener((percent) {
+//              progressParentData.height = heightBase + heightDiff * percent;
+//              renderObject.parentData = progressParentData;
+//              renderParent.markNeedsLayout();
+//            });
+//          }
+//        }
+//        if (allTransition != null &&
+//            (hasTop ||
+//                hasBottom ||
+//                hasLeft ||
+//                hasRight ||
+//                hasWidth ||
+//                hasHeight)) {
+//          allTransition.addProgressListener((percent) {
+//            if (hasTop) {
+//              progressParentData.top = topBase + topDiff * percent;
+//            }
+//            if (hasLeft) {
+//              progressParentData.left = leftBase + leftDiff * percent;
+//            }
+//            if (hasRight) {
+//              progressParentData.right = rightBase + rightDiff * percent;
+//            }
+//            if (hasBottom) {
+//              progressParentData.bottom = bottomBase + bottomDiff * percent;
+//            }
+//            if (hasWidth) {
+//              progressParentData.width = widthBase + widthDiff * percent;
+//            }
+//            if (hasHeight) {
+//              progressParentData.height = heightBase + heightDiff * percent;
+//            }
+//            renderObject.parentData = progressParentData;
+//            renderParent.markNeedsLayout();
+//          });
+//        }
+//      } else {
+//        zIndexParentData.zIndex = style['zIndex'];
+//        zIndexParentData.top = style['top'];
+//        zIndexParentData.left = style['left'];
+//        zIndexParentData.right = style['right'];
+//        zIndexParentData.bottom = style['bottom'];
+//        zIndexParentData.width = style['width'];
+//        zIndexParentData.height = style['height'];
+//        renderObject.parentData = zIndexParentData;
+//        renderParent.markNeedsLayout();
+//      }
+//    }
+//  }
 
   Element getElementById(Element parentElement, int nodeId) {
     Element result = null;
@@ -617,9 +595,11 @@ abstract class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutBox(
-      CSSStyleDeclaration newStyle, List<RenderBox> children) {
-    String display = newStyle['display'];
-    String flexWrap = newStyle['flexWrap'];
+      StyleDeclaration style, List<RenderBox> children) {
+    String display = isEmptyStyleValue(style['display'])
+        ? defaultDisplay
+        : style['display'];
+    String flexWrap = style['flexWrap'];
     bool isFlexWrap =
         (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
     if ((display == 'flex' || display == 'inline-flex') && flexWrap != 'wrap') {
@@ -628,10 +608,10 @@ abstract class Element extends Node
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: children,
-        style: newStyle,
+        style: style,
         nodeId: nodeId,
       );
-      decorateRenderFlex(flexLayout, newStyle);
+      decorateRenderFlex(flexLayout, style);
       return flexLayout;
     } else if (display == 'none' ||
         display == 'inline' ||
@@ -639,7 +619,7 @@ abstract class Element extends Node
         display == 'block' ||
         isFlexWrap) {
       MainAxisAlignment runAlignment = MainAxisAlignment.start;
-      switch (newStyle['alignContent']) {
+      switch (style['alignContent']) {
         case 'end':
           runAlignment = MainAxisAlignment.end;
           break;
@@ -659,14 +639,14 @@ abstract class Element extends Node
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
         runAlignment: runAlignment,
         children: children,
-        style: newStyle,
+        style: style,
         nodeId: nodeId,
       );
 
       if (isFlexWrap) {
-        decorateRenderFlex(flowLayout, newStyle);
+        decorateRenderFlex(flowLayout, style);
       } else {
-        decorateRenderFlow(flowLayout, newStyle);
+        decorateRenderFlow(flowLayout, style);
       }
       return flowLayout;
     } else {
@@ -761,7 +741,7 @@ abstract class Element extends Node
       }
 
       List<Element> mergeChildren =
-          findPositionedChildren(child, needsReposition: needsReposition);
+      findPositionedChildren(child, needsReposition: needsReposition);
       if (mergeChildren != null) {
         mergeChildren.forEach((Element child) {
           result.add(child);
@@ -800,7 +780,7 @@ abstract class Element extends Node
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
-      CSSStyleDeclaration childStyle = child.style;
+      StyleDeclaration childStyle = child.style;
       String childPosition = childStyle['position'] ?? 'static';
       String display = style['display'];
       bool isFlex = display == 'flex' || display == 'inline-flex';
@@ -823,7 +803,7 @@ abstract class Element extends Node
 
       RenderBox getStackedRenderBox(Element element) {
         ZIndexParentData stackParentData =
-            getPositionParentDataFromStyle(element.style);
+        getPositionParentDataFromStyle(element.style);
         RenderBox stackedRenderBox = element.renderObject as RenderBox;
 
 
@@ -837,7 +817,7 @@ abstract class Element extends Node
 
       if (childPosition == 'absolute') {
         Element parentStackedElement =
-            findParent(child, (element) => element.renderStack != null);
+        findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
           RenderObject renderBoxToBeStacked = getStackedRenderBox(child);
           insertByZIndex(parentStackedElement.renderStack, renderBoxToBeStacked,
@@ -867,7 +847,7 @@ abstract class Element extends Node
       if (childParentData is RenderFlexParentData) {
         final RenderFlexParentData parentData = childParentData;
         RenderFlexParentData flexParentData =
-            FlexItem.getParentData(childStyle);
+        FlexItem.getParentData(childStyle);
         parentData.flexGrow = flexParentData.flexGrow;
         parentData.flexShrink = flexParentData.flexShrink;
         parentData.flexBasis = flexParentData.flexBasis;
@@ -917,25 +897,171 @@ abstract class Element extends Node
     renderStack.insert(renderObject, after: null);
   }
 
-  static ZIndexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-    ZIndexParentData parentData = ZIndexParentData();
+  void _registerStyleChangedListeners() {
+    style.addStyleChangeListener('display', _styleDisplayChangedListener);
+    style.addStyleChangeListener('position', _stylePositionChangedListener);
 
-    if (style.contains('top')) {
-      parentData..top = Length.toDisplayPortValue(style['top']);
+    style.addStyleChangeListener('flexDirection', _styleFlexChangedListener);
+    style.addStyleChangeListener('flexWrap', _styleFlexChangedListener);
+    style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
+    style.addStyleChangeListener('justifyContent', _styleFlexChangedListener);
+    style.addStyleChangeListener('alignContent', _styleFlexChangedListener);
+
+    style.addStyleChangeListener('padding', _stylePaddingChangedListener);
+    style.addStyleChangeListener('paddingLeft', _stylePaddingChangedListener);
+    style.addStyleChangeListener('paddingTop', _stylePaddingChangedListener);
+    style.addStyleChangeListener('paddingRight', _stylePaddingChangedListener);
+    style.addStyleChangeListener('paddingBottom', _stylePaddingChangedListener);
+
+    style.addStyleChangeListener('width', _styleSizeChangedListener);
+    style.addStyleChangeListener('min-width', _styleSizeChangedListener);
+    style.addStyleChangeListener('max-width', _styleSizeChangedListener);
+    style.addStyleChangeListener('height', _styleSizeChangedListener);
+    style.addStyleChangeListener('min-height', _styleSizeChangedListener);
+    style.addStyleChangeListener('max-height', _styleSizeChangedListener);
+
+    style.addStyleChangeListener('overflow', _styleOverflowChangedListener);
+    style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);
+    style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
+
+    style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('border', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeft', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRight', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottom', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomColor', _styleDecoratedChangedListener);
+
+    style.addStyleChangeListener('margin', _styleMarginChangedListener);
+    style.addStyleChangeListener('marginLeft', _styleMarginChangedListener);
+    style.addStyleChangeListener('marginTop', _styleMarginChangedListener);
+    style.addStyleChangeListener('marginRight', _styleMarginChangedListener);
+    style.addStyleChangeListener('marginBottom', _styleMarginChangedListener);
+
+    style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
+    style.addStyleChangeListener('visibility', _styleOpacityChangedListener);
+    style.addStyleChangeListener('transform', _styleTransformChangedListener);
+    style.addStyleChangeListener('transition', _styleTransitionChangedListener);
+  }
+
+  void _styleDisplayChangedListener(String property, original, present) {
+    if (renderLayoutBox != null) {
+      String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
+      String currentDisplay = isEmptyStyleValue(present) ? defaultDisplay : present;
+      if (prevDisplay != currentDisplay) {
+        ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
+        // Collect children of renderLayoutBox and remove their relationship.
+        List<RenderBox> children = [];
+        prevRenderLayoutBox
+          ..visitChildren((child) {
+            children.add(child);
+          })
+          ..removeAll();
+
+        renderPadding.child = null;
+        renderLayoutBox = createRenderLayoutBox(style, children);
+        renderPadding.child = renderLayoutBox as RenderBox;
+      }
+
+      if (currentDisplay.endsWith('flex')) {
+        // update flex layout properties
+        decorateRenderFlex(renderLayoutBox, style);
+      } else {
+        // update flow layout properties
+        decorateRenderFlow(renderLayoutBox, style);
+      }
     }
-    if (style.contains('left')) {
-      parentData..left = Length.toDisplayPortValue(style['left']);
+  }
+
+  void _stylePositionChangedListener(String property, original, present) {
+    /// Update position.
+    String prevPosition = isEmptyStyleValue(original) ? 'static' : original;
+    String currentPosition = isEmptyStyleValue(present) ? 'static' : present;
+
+    // Position changed.
+    if (prevPosition != currentPosition) {
+      needsReposition = true;
+      _doUpdatePosition(prevPosition, currentPosition);
     }
-    if (style.contains('bottom')) {
-      parentData..bottom = Length.toDisplayPortValue(style['bottom']);
+  }
+
+  void _styleTransitionChangedListener(String property, original, present) {
+    if (present != null) initTransition(style);
+  }
+
+  void _styleOverflowChangedListener(String property, original, present) {
+    updateOverFlowBox(style, _scrollListener);
+  }
+
+  void _stylePaddingChangedListener(String property, original, present) {
+    updateRenderPadding(style, transitionMap);
+  }
+
+  void _styleSizeChangedListener(String property, original, present) {
+    // Update constrained box.
+    updateConstraints(style, transitionMap);
+  }
+
+  void _styleMarginChangedListener(String property, original, present) {
+    /// Update margin.
+    updateRenderMargin(style, transitionMap);
+  }
+
+  void _styleFlexChangedListener(String property, original, present) {
+    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    if (display.endsWith('flex')) {
+      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
+      // Collect children of renderLayoutBox and remove their relationship.
+      List<RenderBox> children = [];
+      prevRenderLayoutBox
+        ..visitChildren((child) {
+          children.add(child);
+        })
+        ..removeAll();
+
+      renderPadding.child = null;
+      renderLayoutBox = createRenderLayoutBox(style, children);
+      renderPadding.child = renderLayoutBox as RenderBox;
     }
-    if (style.contains('right')) {
-      parentData..right = Length.toDisplayPortValue(style['right']);
+  }
+
+  void _styleDecoratedChangedListener(String property, original, present) {
+    // Update decorated box.
+    updateRenderDecoratedBox(style, transitionMap);
+  }
+
+  void _styleOpacityChangedListener(String property, original, present) {
+    // Update opacity and visibility.
+    double opacity = isEmptyStyleValue(style['opacity'])
+        ? 1.0
+        : Length.toDouble(style['opacity']);
+    if (property == 'visibility') {
+      switch (present) {
+        case 'hidden': opacity = 0; break;
+      }
     }
-    parentData.width = Length.toDisplayPortValue(style['width']);
-    parentData.height = Length.toDisplayPortValue(style['height']);
-    parentData.zIndex = style['zIndex'];
-    return parentData;
+
+    updateRenderOpacity(opacity, parentRenderObject: renderRepaintBoundary,);
+  }
+
+  void _styleTransformChangedListener(String property, original, present) {
+    // Update transform.
+    updateTransform(style, transitionMap);
   }
 
   // Update textNode style when container style changed
@@ -945,138 +1071,35 @@ abstract class Element extends Node
     });
   }
 
-  Debouncing _styleDeb = Debouncing();
-
-  void updateStyle() {
-    _styleDeb.debounce(flushStyle);
-  }
-
-  void flushStyle() {
-
-    if (!newStyle.contains('display')) newStyle['display'] = defaultDisplay;
-
-    // Update style;
-    ///1.update layout properties
-    if (renderLayoutBox != null) {
-      String oldDisplay = style['display'];
-      String newDisplay = newStyle['display'];
-      bool hasFlexChange = isFlexStyleChanged(newStyle);
-      if (newDisplay != oldDisplay || hasFlexChange) {
-        ContainerRenderObjectMixin oldRenderElement = renderLayoutBox;
-        List<RenderBox> children = [];
-        RenderObjectVisitor visitor = (child) {
-          children.add(child);
-        };
-        oldRenderElement
-          ..visitChildren(visitor)
-          ..removeAll();
-        renderPadding.child = null;
-        renderLayoutBox = createRenderLayoutBox(newStyle, children);
-        renderPadding.child = renderLayoutBox as RenderBox;
-        // update style reference
-        renderElementBoundary.style = newStyle;
-      }
-
-      if (newDisplay == 'flex' || newDisplay == 'inline-flex') {
-        // update flex layout properties
-        decorateRenderFlex(renderLayoutBox, newStyle);
-      } else {
-        // update flow layout properties
-        decorateRenderFlow(renderLayoutBox, newStyle);
-      }
-
-      // update style reference
-      if (renderLayoutBox is RenderFlowLayout) {
-        (renderLayoutBox as RenderFlowLayout).style = newStyle;
-      } else {
-        (renderLayoutBox as RenderFlexLayout).style = newStyle;
-      }
-    }
-
-    // update transiton map
-    if (newStyle.contains('transition')) {
-      initTransition(newStyle);
-    }
-
-    ///2.update overflow
-    updateOverFlowBox(newStyle, _scrollListener);
-
-    ///3.update padding
-    updateRenderPadding(newStyle, transitionMap);
-
-    ///4.update constrained
-    updateConstraints(newStyle, transitionMap);
-
-    ///5.update decorated
-    updateRenderDecoratedBox(newStyle, this, transitionMap);
-
-    ///6.update margin
-    updateRenderMargin(newStyle, this, transitionMap);
-
-    ///7.update position
-    String newPosition = newStyle['position'] ?? 'static';
-    String oldPosition = _style['position'] ?? 'static';
-    bool positionChanged = false;
-    if (newPosition != oldPosition) {
-      positionChanged = true;
-    }
-
-    // position change
-    if (positionChanged) {
-      needsReposition = true;
-      updatePosition(newStyle);
-    } else if (newPosition != 'static') {
-      int newZIndex = newStyle.zIndex;
-      int oldZIndex = _style.zIndex;
-      // zIndex change
-      if (newZIndex != oldZIndex) {
-        needsReposition = true;
-        _updateZIndex(newStyle);
-      }
-
-      // offset change
-      if (newStyle.top != _style.top ||
-          newStyle.bottom != _style.bottom ||
-          newStyle.left != _style.left ||
-          newStyle.right != _style.right ||
-          newStyle.width != _style.width ||
-          newStyle.height != _style.height) {
-        _updateOffset(newStyle);
-      }
-    }
-
-    ///8.update opacity and visiblity
-    updateRenderOpacity(
-      style,
-      newStyle,
-      parentRenderObject: renderRepaintBoundary,
-    );
-
-    ///9.update transform
-    updateTransform(newStyle, transitionMap);
-
+  // @TODO(refactor): Need to remove it.
+  void _flushStyle() {
     if (transitionMap != null) {
       for (Transition transition in transitionMap.values) {
         transition?.apply();
       }
     }
 
-    updateTextNodeStyle();
+    updateChildNodesStyle();
   }
 
+// Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
+    // @NOTE: See [StyleDeclaration.setProperty], value change will trigger
+    // [StyleChangeListener] to be invoked in sync.
     style[key] = value;
-    updateStyle();
+    _flushStyle();
   }
 
   @mustCallSuper
   void setProperty(String key, value) {
     properties[key] = value;
 
+    // Each key change will emit to `setStyle`
     if (key == STYLE) {
-      style = CSSStyleDeclaration(style: value is Map<String, dynamic> ? value : null);
-      updateStyle();
+      assert(value is Map<String, dynamic>);
+      // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
+      (value as Map<String, dynamic>).forEach(setStyle);
     }
   }
 
@@ -1106,14 +1129,14 @@ abstract class Element extends Node
       case 'clientLeft':
         return renderPadding.hasSize
             ? renderPadding
-                .localToGlobal(Offset.zero, ancestor: renderMargin)
-                .dx
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dx
             : 0;
       case 'clientTop':
         return renderPadding.hasSize
             ? renderPadding
-                .localToGlobal(Offset.zero, ancestor: renderMargin)
-                .dy
+            .localToGlobal(Offset.zero, ancestor: renderMargin)
+            .dy
             : 0;
       case 'scrollTop':
         return getScrollTop();
@@ -1181,7 +1204,7 @@ abstract class Element extends Node
 
   Offset getOffset(RenderBox renderBox) {
     Element element =
-        findParent(this, (element) => element.renderStack != null);
+    findParent(this, (element) => element.renderStack != null);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1258,7 +1281,7 @@ abstract class Element extends Node
     renderObject.markNeedsPaint();
     RendererBinding.instance.addPostFrameCallback((_) async {
       Image image =
-          await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
+      await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
       ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
       completer.complete(byteData.buffer.asUint8List());
     });
@@ -1303,7 +1326,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
       eventHandlers.containsKey('intersectionchange');
 }
 
-bool _isPositioned(CSSStyleDeclaration style) {
+bool _isPositioned(StyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
     return position != 'static' && position != 'relative';
@@ -1312,7 +1335,28 @@ bool _isPositioned(CSSStyleDeclaration style) {
   }
 }
 
-bool _isSticky(CSSStyleDeclaration style) {
+bool _isSticky(StyleDeclaration style) {
   return style['position'] == 'sticky' && style.contains('top') ||
       style.contains('bottom');
+}
+
+ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
+  ZIndexParentData parentData = ZIndexParentData();
+
+  if (style.contains('top')) {
+    parentData..top = Length.toDisplayPortValue(style['top']);
+  }
+  if (style.contains('left')) {
+    parentData..left = Length.toDisplayPortValue(style['left']);
+  }
+  if (style.contains('bottom')) {
+    parentData..bottom = Length.toDisplayPortValue(style['bottom']);
+  }
+  if (style.contains('right')) {
+    parentData..right = Length.toDisplayPortValue(style['right']);
+  }
+  parentData.width = Length.toDisplayPortValue(style['width']);
+  parentData.height = Length.toDisplayPortValue(style['height']);
+  parentData.zIndex = style['zIndex'];
+  return parentData;
 }

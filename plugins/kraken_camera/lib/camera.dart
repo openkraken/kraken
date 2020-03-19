@@ -168,9 +168,9 @@ mixin CameraPreviewMixin on Element {
 
     // If the controller is updated then update the UI.
     controller.addListener(() {
-      // TODO: after isConnected is impled
-      // if (isConnected)
-      renderLayoutElement.markNeedsPaint();
+      if (isConnected) {
+        renderLayoutBox.markNeedsPaint();
+      }
       if (controller.value.hasError) {
         print('Camera error ${controller.value.errorDescription}');
       }

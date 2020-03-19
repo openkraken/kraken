@@ -15,14 +15,14 @@ mixin BackgroundImageMixin on Node {
 
   double linearAngle;
 
-  bool shouldInitBackgroundImage(CSSStyleDeclaration style) {
+  bool shouldInitBackgroundImage(StyleDeclaration style) {
     return style['backgroundAttachment'] == 'local' &&
         style.contains('backgroundImage');
   }
 
   RenderObject initBackgroundImage(
     RenderObject renderObject,
-    CSSStyleDeclaration style,
+    StyleDeclaration style,
     int nodeId
   ) {
     DecorationImage decorationImage;
@@ -49,7 +49,7 @@ mixin BackgroundImageMixin on Node {
         child: renderObject);
   }
 
-  DecorationImage getBackgroundImage(String url, CSSStyleDeclaration style) {
+  DecorationImage getBackgroundImage(String url, StyleDeclaration style) {
     DecorationImage backgroundImage = null;
     if (style.contains('backgroundImage')) {
       ImageRepeat imageRepeat = ImageRepeat.noRepeat;
@@ -100,7 +100,7 @@ mixin BackgroundImageMixin on Node {
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method, CSSStyleDeclaration style) {
+  Gradient getBackgroundGradient(Method method, StyleDeclaration style) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];

@@ -5,7 +5,7 @@ import 'package:kraken/style.dart';
 mixin TransitionStyleMixin {
   Map<String, Transition> transitionMap;
 
-  void initTransition(CSSStyleDeclaration style) {
+  void initTransition(StyleDeclaration style) {
     if (style.contains('transition')) {
       transitionMap = Transition.parseTransitions(style);
     }
@@ -63,7 +63,7 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(CSSStyleDeclaration style) {
+  static Map<String, Transition> parseTransitions(StyleDeclaration style) {
     List<String> list = style['transition'].split(",");
     Map<String, Transition> map = {};
 
