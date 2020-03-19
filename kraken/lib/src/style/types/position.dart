@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/painting.dart';
+import 'package:kraken/style.dart';
 import 'length.dart';
 
 class Position {
@@ -10,12 +11,15 @@ class Position {
   Alignment alignment = Alignment.topLeft;
   Size size;
 
-  Position(String position, Size size) {
-    if (position == null) {
-      return;
-    }
-    this.size = size;
-    List<String> items = position.split(" ");
+  @override
+  String toString() {
+    return 'Posotion(alignment: $alignment, size: $size)';
+  }
+
+  Position(String position, this.size) {
+    if (isEmptyStyleValue(position)) return;
+
+    List<String> items = position.split(' ');
     if (items.length == 1) {
       switch(items[0]) {
         case RIGHT:

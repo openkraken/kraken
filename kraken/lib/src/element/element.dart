@@ -219,8 +219,8 @@ abstract class Element extends Node
   void _doUpdatePosition(String prevPosition, String currentPosition) {
     if (isEmptyStyleValue(prevPosition)) prevPosition = 'static';
     if (isEmptyStyleValue(currentPosition)) currentPosition = 'static';
-    // Remove stack node when change to non positioned.
 
+    // Remove stack node when change to non positioned.
     if (currentPosition == 'static') {
       RenderObject child = renderStack.firstChild;
       renderStack.remove(child);
@@ -261,30 +261,30 @@ abstract class Element extends Node
         }
 
         // Find pre non positioned element
-        var preNonPositionedElement = null;
-        var currentElement = nodeMap[nodeId];
-        var parentElement = currentElement.parentNode;
-        int curIdx = parentElement.childNodes.indexOf(currentElement);
-        for (int i = curIdx - 1; i > -1; i--) {
-          var element = parentElement.childNodes[i];
-          if (prevPosition == 'static') {
-            preNonPositionedElement = element;
+        Element preNonPositionedElement = null;
+        int currentChildIndex = parent.children.indexOf(this);
+        for (int i = currentChildIndex - 1; i > -1; i--) {
+          Element childElement = parent.children[i];
+          String childPosition = childElement.style['position'];
+          if (childPosition == 'static') {
+            preNonPositionedElement = childElement;
             break;
           }
         }
+
         // find pre non positioned renderObject
         RenderElementBoundary preNonPositionedObject = null;
         if (preNonPositionedElement != null) {
-          RenderObjectVisitor visitor = (child) {
+          parentElement.renderLayoutBox.visitChildren((child) {
             if (child is RenderElementBoundary &&
                 preNonPositionedElement.nodeId == child.nodeId) {
               preNonPositionedObject = child;
             }
-          };
-          parentElement.renderLayoutBox.visitChildren(visitor);
+          });
         }
 
-        // insert non positioned renderObject to parent element in the order of original element tree
+        // Insert non positioned renderObject to parent element in the
+        // order of original element tree
         parentElement.renderLayoutBox
             .insert(renderElementBoundary, after: preNonPositionedObject);
 
@@ -372,49 +372,46 @@ abstract class Element extends Node
     insertByZIndex(parentStack, renderObject, el, currentZIndex);
   }
 
-//  void _updateZIndex(StyleDeclaration style) {
-//    // new node not in the tree, wait for append in appenedElement
-//    if (renderObject.parent == null) {
-//      return;
-//    }
-//    Element parentElementWithStack =
-//    findParent(this, (element) => element.renderStack != null);
-//    RenderStack parentStack = parentElementWithStack.renderStack;
-//
-//    // remove current element from parent stack
-//    parentStack.remove(renderObject);
-//
-//    StackParentData stackParentData = getPositionParentDataFromStyle(style);
-//    renderObject.parentData = stackParentData;
-//
-//    // current element's zIndex
-//    int currentZIndex = 0;
-//    if (style['zIndex'] != null) {
-//      currentZIndex = int.parse(style['zIndex']);
-//    }
-//    // add current element back to parent stack by zIndex
-//    insertByZIndex(parentStack, renderObject, this, currentZIndex);
-//  }
+  void _updateZIndex() {
+    // new node not in the tree, wait for append in appenedElement
+    if (renderObject.parent == null) {
+      return;
+    }
 
-//  void _updateOffset(StyleDeclaration style) {
-//    ZIndexParentData zIndexParentData;
-//    AbstractNode renderParent = renderObject.parent;
-//    if (renderParent is RenderPosition &&
-//        renderObject.parentData is ZIndexParentData) {
-//      zIndexParentData = renderObject.parentData;
-//      Transition allTransition,
-//          topTransition,
-//          leftTransition,
-//          rightTransition,
-//          bottomTransition,
-//          widthTransition,
-//          heightTransition;
-//      double topDiff, leftDiff, rightDiff, bottomDiff, widthDiff, heightDiff;
-//      double topBase, leftBase, rightBase, bottomBase, widthBase, heightBase;
-//      ZIndexParentData progressParentData = zIndexParentData;
-//
-//      if (transitionMap != null) {
-//        allTransition = transitionMap['all'];
+    Element parentElementWithStack = findParent(this, (element) => element.renderStack != null);
+    RenderStack parentStack = parentElementWithStack.renderStack;
+
+    // remove current element from parent stack
+    parentStack.remove(renderObject);
+
+    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    renderObject.parentData = stackParentData;
+
+    // current element's zIndex
+    int currentZIndex = Length.toInt(style['zIndex']);
+    // add current element back to parent stack by zIndex
+    insertByZIndex(parentStack, renderObject, this, currentZIndex);
+  }
+
+  void _updateOffset() {
+    ZIndexParentData zIndexParentData;
+    AbstractNode renderParent = renderObject.parent;
+    if (renderParent is RenderPosition &&
+        renderObject.parentData is ZIndexParentData) {
+      zIndexParentData = renderObject.parentData;
+      Transition allTransition,
+          topTransition,
+          leftTransition,
+          rightTransition,
+          bottomTransition,
+          widthTransition,
+          heightTransition;
+      double topDiff, leftDiff, rightDiff, bottomDiff, widthDiff, heightDiff;
+      double topBase, leftBase, rightBase, bottomBase, widthBase, heightBase;
+      ZIndexParentData progressParentData = zIndexParentData;
+
+      if (transitionMap != null) {
+        allTransition = transitionMap['all'];
 //        if (style.top != _style.top) {
 //          topTransition = transitionMap['top'];
 //          topDiff = (style.top ?? 0) - (_style.top ?? 0);
@@ -440,134 +437,134 @@ abstract class Element extends Node
 //          widthDiff = (style.width ?? 0) - (_style.width ?? 0);
 //          widthBase = _style.bottom ?? 0;
 //        }
-//        if (style.height != _style.height) {
+//        if (style['height'] != _style.height) {
 //          heightTransition = transitionMap['height'];
 //          heightDiff = (style.height ?? 0) - (_style.height ?? 0);
 //          heightBase = _style.height ?? 0;
 //        }
-//      }
-//      if (allTransition != null ||
-//          topTransition != null ||
-//          leftTransition != null ||
-//          rightTransition != null ||
-//          bottomTransition != null ||
-//          widthTransition != null ||
-//          heightTransition != null) {
-//        bool hasTop = false,
-//            hasLeft = false,
-//            hasRight = false,
-//            hasBottom = false,
-//            hasWidth = false,
-//            hasHeight = false;
-//        if (topDiff != null) {
-//          if (topTransition == null) {
-//            hasTop = true;
-//          } else {
-//            topTransition.addProgressListener((percent) {
-//              progressParentData.top = topBase + topDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (leftDiff != null) {
-//          if (leftTransition == null) {
-//            hasLeft = true;
-//          } else {
-//            leftTransition.addProgressListener((percent) {
-//              progressParentData.left = leftBase + leftDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (rightDiff != null) {
-//          if (rightTransition == null) {
-//            hasRight = true;
-//          } else {
-//            rightTransition.addProgressListener((percent) {
-//              progressParentData.right = rightBase + rightDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (bottomDiff != null) {
-//          if (bottomTransition == null) {
-//            hasBottom = true;
-//          } else {
-//            bottomTransition.addProgressListener((percent) {
-//              progressParentData.bottom = bottomBase + bottomDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (widthDiff != null) {
-//          if (widthTransition == null) {
-//            hasWidth = true;
-//          } else {
-//            widthTransition.addProgressListener((percent) {
-//              progressParentData.width = widthBase + widthDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (heightDiff != null) {
-//          if (heightTransition == null) {
-//            hasHeight = true;
-//          } else {
-//            heightTransition.addProgressListener((percent) {
-//              progressParentData.height = heightBase + heightDiff * percent;
-//              renderObject.parentData = progressParentData;
-//              renderParent.markNeedsLayout();
-//            });
-//          }
-//        }
-//        if (allTransition != null &&
-//            (hasTop ||
-//                hasBottom ||
-//                hasLeft ||
-//                hasRight ||
-//                hasWidth ||
-//                hasHeight)) {
-//          allTransition.addProgressListener((percent) {
-//            if (hasTop) {
-//              progressParentData.top = topBase + topDiff * percent;
-//            }
-//            if (hasLeft) {
-//              progressParentData.left = leftBase + leftDiff * percent;
-//            }
-//            if (hasRight) {
-//              progressParentData.right = rightBase + rightDiff * percent;
-//            }
-//            if (hasBottom) {
-//              progressParentData.bottom = bottomBase + bottomDiff * percent;
-//            }
-//            if (hasWidth) {
-//              progressParentData.width = widthBase + widthDiff * percent;
-//            }
-//            if (hasHeight) {
-//              progressParentData.height = heightBase + heightDiff * percent;
-//            }
-//            renderObject.parentData = progressParentData;
-//            renderParent.markNeedsLayout();
-//          });
-//        }
-//      } else {
-//        zIndexParentData.zIndex = Length.toDouble(style['zIndex']).toInt();;
-//        zIndexParentData.top = Length.toDisplayPortValue(style['top']);
-//        zIndexParentData.left = Length.toDisplayPortValue(style['left']);
-//        zIndexParentData.right = Length.toDisplayPortValue(style['right']);
-//        zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
-//        zIndexParentData.width = Length.toDisplayPortValue(style['width']);
-//        zIndexParentData.height = Length.toDisplayPortValue(style['height');
-//        renderObject.parentData = zIndexParentData;
-//        renderParent.markNeedsLayout();
-//      }
-//    }
-//  }
+      }
+      if (allTransition != null ||
+          topTransition != null ||
+          leftTransition != null ||
+          rightTransition != null ||
+          bottomTransition != null ||
+          widthTransition != null ||
+          heightTransition != null) {
+        bool hasTop = false,
+            hasLeft = false,
+            hasRight = false,
+            hasBottom = false,
+            hasWidth = false,
+            hasHeight = false;
+        if (topDiff != null) {
+          if (topTransition == null) {
+            hasTop = true;
+          } else {
+            topTransition.addProgressListener((percent) {
+              progressParentData.top = topBase + topDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (leftDiff != null) {
+          if (leftTransition == null) {
+            hasLeft = true;
+          } else {
+            leftTransition.addProgressListener((percent) {
+              progressParentData.left = leftBase + leftDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (rightDiff != null) {
+          if (rightTransition == null) {
+            hasRight = true;
+          } else {
+            rightTransition.addProgressListener((percent) {
+              progressParentData.right = rightBase + rightDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (bottomDiff != null) {
+          if (bottomTransition == null) {
+            hasBottom = true;
+          } else {
+            bottomTransition.addProgressListener((percent) {
+              progressParentData.bottom = bottomBase + bottomDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (widthDiff != null) {
+          if (widthTransition == null) {
+            hasWidth = true;
+          } else {
+            widthTransition.addProgressListener((percent) {
+              progressParentData.width = widthBase + widthDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (heightDiff != null) {
+          if (heightTransition == null) {
+            hasHeight = true;
+          } else {
+            heightTransition.addProgressListener((percent) {
+              progressParentData.height = heightBase + heightDiff * percent;
+              renderObject.parentData = progressParentData;
+              renderParent.markNeedsLayout();
+            });
+          }
+        }
+        if (allTransition != null &&
+            (hasTop ||
+                hasBottom ||
+                hasLeft ||
+                hasRight ||
+                hasWidth ||
+                hasHeight)) {
+          allTransition.addProgressListener((percent) {
+            if (hasTop) {
+              progressParentData.top = topBase + topDiff * percent;
+            }
+            if (hasLeft) {
+              progressParentData.left = leftBase + leftDiff * percent;
+            }
+            if (hasRight) {
+              progressParentData.right = rightBase + rightDiff * percent;
+            }
+            if (hasBottom) {
+              progressParentData.bottom = bottomBase + bottomDiff * percent;
+            }
+            if (hasWidth) {
+              progressParentData.width = widthBase + widthDiff * percent;
+            }
+            if (hasHeight) {
+              progressParentData.height = heightBase + heightDiff * percent;
+            }
+            renderObject.parentData = progressParentData;
+            renderParent.markNeedsLayout();
+          });
+        }
+      } else {
+        zIndexParentData.zIndex = Length.toInt(style['zIndex']);;
+        zIndexParentData.top = Length.toDisplayPortValue(style['top']);
+        zIndexParentData.left = Length.toDisplayPortValue(style['left']);
+        zIndexParentData.right = Length.toDisplayPortValue(style['right']);
+        zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
+        zIndexParentData.width = Length.toDisplayPortValue(style['width']);
+        zIndexParentData.height = Length.toDisplayPortValue(style['height']);
+        renderObject.parentData = zIndexParentData;
+        renderParent.markNeedsLayout();
+      }
+    }
+  }
 
   Element getElementById(Element parentElement, int nodeId) {
     Element result = null;
@@ -891,6 +888,11 @@ abstract class Element extends Node
     style.addStyleChangeListener('display', _styleDisplayChangedListener);
     style.addStyleChangeListener('position', _stylePositionChangedListener);
 
+    style.addStyleChangeListener('top', _styleOffsetChangedListener);
+    style.addStyleChangeListener('left', _styleOffsetChangedListener);
+    style.addStyleChangeListener('bottom', _styleOffsetChangedListener);
+    style.addStyleChangeListener('right', _styleOffsetChangedListener);
+
     style.addStyleChangeListener('flexDirection', _styleFlexChangedListener);
     style.addStyleChangeListener('flexWrap', _styleFlexChangedListener);
     style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
@@ -919,6 +921,10 @@ abstract class Element extends Node
     style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundImage', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('backgroundRepeat', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('backgroundSize', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('backgroundPosition', _styleDecoratedChangedListener);
+
     style.addStyleChangeListener('border', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderLeft', _styleDecoratedChangedListener);
@@ -992,8 +998,15 @@ abstract class Element extends Node
     // Position changed.
     if (prevPosition != currentPosition) {
       needsReposition = true;
+      print('position change from $prevPosition to $currentPosition');
       _doUpdatePosition(prevPosition, currentPosition);
+    } else if (currentPosition != 'static') {
+      _updateZIndex();
     }
+  }
+
+  void _styleOffsetChangedListener(String property, original, present) {
+    _updateOffset();
   }
 
   void _styleTextAlignChangedListener(String property, original, present) {
@@ -1023,6 +1036,8 @@ abstract class Element extends Node
   void _styleSizeChangedListener(String property, original, present) {
     // Update constrained box.
     updateConstraints(style, transitionMap);
+    // Update offsets
+    _updateOffset();
   }
 
   void _styleMarginChangedListener(String property, original, present) {
