@@ -2,6 +2,24 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
+enum PositionType {
+  static,
+  relative,
+  absolute,
+  fixed,
+  sticky,
+}
+
+PositionType getPositionFromStyle(StyleDeclaration style) {
+  switch (style['position']) {
+    case 'relative': return PositionType.relative;
+    case 'absolute': return PositionType.absolute;
+    case 'fixed': return PositionType.fixed;
+    case 'sticky': return PositionType.sticky;
+  }
+  return PositionType.static;
+}
+
 mixin RelativeStyleMixin on RenderBox {
   void applyRelativeOffset(
       Offset relativeOffset, RenderBox renderBox, StyleDeclaration style) {
@@ -21,7 +39,8 @@ mixin RelativeStyleMixin on RenderBox {
   }
 
   Offset getRelativeOffset(StyleDeclaration style) {
-    if (style['position'] == 'relative') {
+    PositionType postion = getPositionFromStyle(style);
+    if (postion == PositionType.relative) {
       double dx;
       double dy;
       if (style.contains('left')) {

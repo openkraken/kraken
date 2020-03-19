@@ -730,11 +730,13 @@ class RenderFlowLayout extends RenderBox
         if (child is RenderTextBox) {
           childStyle = nodeMap[nodeId].style;
         } else if (child is RenderElementBoundary) {
-          int childNodeId = child.nodeId;
-          childStyle = nodeMap[childNodeId].style;
+          childStyle = nodeMap[child.nodeId].style;
         }
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
+
+        if (childStyle != null) {
+          ///apply position relative offset change
+          applyRelativeOffset(relativeOffset, child, childStyle);
+        }
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
