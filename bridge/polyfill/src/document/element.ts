@@ -124,7 +124,9 @@ export class Element extends Node {
   }
 
   public setAttribute(name: string, value: string) {
-    name = String(name);
+    // The attribute name is automatically converted to
+    // all lower-case when setAttribute() is called on an HTML element in an HTML document
+    name = String(name).toLowerCase();
     value = String(value);
     if (this.attributes[name]) {
       this.attributes[name].value = value;

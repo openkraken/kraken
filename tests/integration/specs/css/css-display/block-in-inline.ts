@@ -61,7 +61,9 @@ describe('Display block in inline', () => {
     setStyle(div2, {
       display: 'inline',
     });
-    div2.appendChild(document.createTextNode('This text should all split into'));
+    div2.appendChild(
+      document.createTextNode('This text should all split into')
+    );
     var div3 = document.createElement('div');
     setStyle(div3, {
       display: 'inline',
