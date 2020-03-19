@@ -1,4 +1,4 @@
-fdescribe('Color text', () => {
+describe('Color text', () => {
   function testColor(name: string, rgba: [number, number, number, number]) {
     it(name, async () => {
       let container = create('div', {});
