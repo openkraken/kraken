@@ -4,11 +4,11 @@ import 'package:kraken/style.dart';
 
 mixin ElementStyleMixin on RenderBox {
   // Get constrain width of element
-  double getConstainWidth(int nodeId) {
+  static double getConstrainedWidth(int nodeId) {
     String width;
     double cropWidth = 0;
-    var childNode = nodeMap[nodeId];
-    Style style = childNode.style;
+    Element child = nodeMap[nodeId];
+    StyleDeclaration style = child.style;
     String display = getElementDisplay(nodeId);
 
     void cropMargin(Element childNode) {
@@ -23,23 +23,23 @@ mixin ElementStyleMixin on RenderBox {
     // Get width of element if it's not inline
     if (display != 'inline' && style.contains('width')) {
       width = style['width'];
-      cropPaddingBorder(childNode);
+      cropPaddingBorder(child);
     } else {
       // Get the nearest width of ancestor with width
       while (true) {
-        if (childNode.parentNode != null) {
-          cropMargin(childNode);
-          cropPaddingBorder(childNode);
-          childNode = childNode.parentNode;
+        if (child.parentNode != null) {
+          cropMargin(child);
+          cropPaddingBorder(child);
+          child = child.parentNode;
         } else {
           break;
         }
-        if (childNode is Element) {
-          Style style = childNode.style;
-          String display = getElementDisplay(childNode.nodeId);
+        if (child is Element) {
+          StyleDeclaration style = child.style;
+          String display = getElementDisplay(child.nodeId);
           if (style.contains('width') && display != 'inline') {
             width = style['width'];
-            cropPaddingBorder(childNode);
+            cropPaddingBorder(child);
             break;
           }
         }
@@ -57,9 +57,8 @@ mixin ElementStyleMixin on RenderBox {
   double getElementWidth(int nodeId) {
     String width;
     double cropWidth = 0;
-    bool isParentWithWidth = false;
-    var childNode = nodeMap[nodeId];
-    Style style = childNode.style;
+    Element child = nodeMap[nodeId];
+    StyleDeclaration style = child.style;
     String display = getElementDisplay(nodeId);
 
     void cropMargin(Element childNode) {
@@ -77,22 +76,22 @@ mixin ElementStyleMixin on RenderBox {
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains('width')) {
           width = style['width'];
-          cropPaddingBorder(childNode);
+          cropPaddingBorder(child);
         } else {
           while (true) {
-            if (childNode.parentNode != null) {
-              cropMargin(childNode);
-              cropPaddingBorder(childNode);
-              childNode = childNode.parentNode;
+            if (child.parentNode != null) {
+              cropMargin(child);
+              cropPaddingBorder(child);
+              child = child.parentNode;
             } else {
               break;
             }
-            if (childNode is Element) {
-              Style style = childNode.style;
-              String display = getElementDisplay(childNode.nodeId);
+            if (child is Element) {
+              StyleDeclaration style = child.style;
+              String display = getElementDisplay(child.nodeId);
               if (style.contains('width') && display != 'inline') {
                 width = style['width'];
-                cropPaddingBorder(childNode);
+                cropPaddingBorder(child);
                 break;
               }
             }
@@ -103,7 +102,7 @@ mixin ElementStyleMixin on RenderBox {
       case 'inline-flex':
         if (style.contains('width')) {
           width = style['width'];
-          cropPaddingBorder(childNode);
+          cropPaddingBorder(child);
         }
         break;
       case 'inline':
@@ -123,8 +122,8 @@ mixin ElementStyleMixin on RenderBox {
   // Get element width according to element tree
   double getElementHeight(int nodeId) {
     String height;
-    var childNode = nodeMap[nodeId];
-    Style style = childNode.style;
+    Element child = nodeMap[nodeId];
+    StyleDeclaration style = child.style;
     String display = getElementDisplay(nodeId);
     double cropHeight = 0;
 
@@ -141,25 +140,25 @@ mixin ElementStyleMixin on RenderBox {
     if (display == 'inline') {
       return null;
     } else if (style.contains('height')) {
-      if (childNode is Element) {
+      if (child is Element) {
         height = style['height'];
-        cropPaddingBorder(childNode);
+        cropPaddingBorder(child);
       }
     } else {
       while (true) {
-        if (childNode.parentNode != null) {
-          cropMargin(childNode);
-          cropPaddingBorder(childNode);
-          childNode = childNode.parentNode;
+        if (child.parentNode != null) {
+          cropMargin(child);
+          cropPaddingBorder(child);
+          child = child.parentNode;
         } else {
           break;
         }
-        if (childNode is Element) {
-          Style style = childNode.style;
-          if (isStretchChildrenHeight(childNode)) {
+        if (child is Element) {
+          StyleDeclaration style = child.style;
+          if (isStretchChildrenHeight(child)) {
             if (style.contains('height')) {
               height = style['height'];
-              cropPaddingBorder(childNode);
+              cropPaddingBorder(child);
               break;
             }
           } else {
@@ -179,8 +178,8 @@ mixin ElementStyleMixin on RenderBox {
   // Whether current node should stretch children's height
   bool isStretchChildrenHeight(Element currentNode) {
     bool isStretch = false;
-    Style style = currentNode.style;
-    String display = style.get('display');
+    StyleDeclaration style = currentNode.style;
+    String display = getElementDisplay(currentNode.nodeId);
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
       style['flexDirection'] == 'row' &&
@@ -194,19 +193,18 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get element display according to element hierarchy
-  String getElementDisplay(int nodeId) {
-    var currentNode = nodeMap[nodeId];
-    var parentNode = currentNode.parentNode;
-    String defaultDisplay = currentNode.style.get('display');
-    String display = defaultDisplay;
+  static String getElementDisplay(int nodeId) {
+    Element element = nodeMap[nodeId];
+    Element parentNode = element.parentNode;
+    String display = isEmptyStyleValue(element.style['display'])
+        ? element.defaultDisplay
+        : element.style['display'];
 
     if (parentNode != null) {
-      Style style = parentNode.style;
-
-      bool isParentFlex = style['display'] == 'flex' || style['display'] == 'inline-flex';
+      StyleDeclaration style = parentNode.style;
 
       // Display as inline-block if parent node is flex
-      if (isParentFlex) {
+      if (style['display'].endsWith('flex')) {
         display = 'inline-block';
       }
 

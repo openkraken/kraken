@@ -117,7 +117,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   // Element style;
-  Style style;
+  StyleDeclaration style;
 
   // id of current element
   int nodeId;
@@ -491,7 +491,7 @@ class RenderFlexLayout extends RenderBox
       String flexBasis = _getFlexBasis(child);
 
       if (_direction == Axis.horizontal) {
-        String width = child.style.get('width');
+        String width = child.style['width'];
         if (flexBasis == 'auto') {
           if (width != null) {
             minConstraints = Length.toDisplayPortValue(width);
@@ -502,7 +502,7 @@ class RenderFlexLayout extends RenderBox
           minConstraints = Length.toDisplayPortValue(flexBasis);
         }
       } else {
-        String height = child.style.get('height');
+        String height = child.style['height'];
         if (flexBasis == 'auto') {
           if (height != null) {
             minConstraints = Length.toDisplayPortValue(height);
@@ -942,7 +942,7 @@ class RenderFlexLayout extends RenderBox
           break;
       }
 
-      Style childStyle;
+      StyleDeclaration childStyle;
       if (child is RenderTextBox) {
         childStyle = nodeMap[nodeId].style;
       } else if (child is RenderElementBoundary) {

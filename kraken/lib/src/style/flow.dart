@@ -3,35 +3,20 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'style.dart';
+import 'package:kraken/element.dart';
+import 'package:kraken/style.dart';
 
 mixin FlowMixin {
   static const String TEXT_ALIGN = 'textAlign';
+  static const String JUSTIFY_CONTENT = 'justifyContent';
 
-  void decorateRenderFlow(ContainerRenderObjectMixin renderObject, Style style) {
-    if (style != null) {
-      (renderObject as RenderFlowLayout).mainAxisAlignment = _getTextAlign(style);
-    }
-  }
+  void decorateRenderFlow(RenderFlowLayout renderFlowLayout, StyleDeclaration style) {
+    bool isFlexDisplay = (style['display'] as String).endsWith('flex');
 
-  MainAxisAlignment _getTextAlign(Style style) {
-    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
-
-    if (style.contains(TEXT_ALIGN)) {
-      String textAlign = style[TEXT_ALIGN];
-      switch (textAlign) {
-        case 'right':
-          mainAxisAlignment = MainAxisAlignment.end;
-          break;
-        case 'center':
-          mainAxisAlignment = MainAxisAlignment.center;
-          break;
-      }
-    }
-
-    return mainAxisAlignment;
+    renderFlowLayout.mainAxisAlignment = isFlexDisplay
+        ? getRunAlignmentFromFlexProperty(style[JUSTIFY_CONTENT])
+        : getRunAlignmentFromFlexProperty(style[TEXT_ALIGN]);
   }
 }
 
