@@ -926,6 +926,7 @@ abstract class Element extends Node
 
     style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('backgroundImage', _styleDecoratedChangedListener);
     style.addStyleChangeListener('border', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderLeft', _styleDecoratedChangedListener);

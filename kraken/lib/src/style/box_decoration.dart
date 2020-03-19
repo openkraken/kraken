@@ -439,8 +439,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     BorderRadius borderRadius = getBorderRadius(style);
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style['backgroundAttachment'] == 'scroll' &&
-        style.contains("backgroundImage")) {
+    if (style['backgroundAttachment'] == ''
+        || style['backgroundAttachment'] == 'scroll'
+            && style.contains('backgroundImage')) {
       List<Method> methods = Method.parseMethod(style['backgroundImage']);
       for (Method method in methods) {
         if (method.name == 'url') {

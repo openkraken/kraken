@@ -12,7 +12,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin on Node {
-
   double linearAngle;
 
   bool shouldInitBackgroundImage(StyleDeclaration style) {
