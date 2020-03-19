@@ -5,7 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'style_declaration.dart';
+import 'package:kraken/style.dart';
 
 class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex grow
@@ -172,19 +172,15 @@ class FlexItem {
     parentData.fit = FlexFit.loose;
 
     if (style != null) {
-      dynamic grow = style[GROW];
-      if (grow != null) {
-        parentData.fit = FlexFit.tight;
-        parentData.flexGrow = int.parse(grow);
-      }
-      dynamic shrink = style[SHRINK];
-      if (shrink != null) {
-        parentData.flexShrink = int.parse(shrink);
-      }
-      dynamic basis = style[BASIS];
-      if (basis != null) {
-        parentData.flexBasis = basis;
-      }
+      String grow = style[GROW];
+      parentData.fit = FlexFit.tight;
+      parentData.flexGrow = Length.toInt(grow);
+
+      String shrink = style[SHRINK];
+      parentData.flexShrink = Length.toInt(shrink);
+
+      String basis = style[BASIS];
+      parentData.flexBasis = basis;
     }
     return parentData;
   }

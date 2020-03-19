@@ -369,7 +369,7 @@ abstract class Element extends Node
     // current element's zIndex
     int currentZIndex = 0;
     if (currentElement.style.contains('zIndex')) {
-      currentZIndex = currentElement.style['zIndex'];
+      currentZIndex = Length.toInt(currentElement.style['zIndex']);
     }
     // add current element back to parent stack by zIndex
     insertByZIndex(parentStack, renderObject, el, currentZIndex);
@@ -559,13 +559,13 @@ abstract class Element extends Node
 //          });
 //        }
 //      } else {
-//        zIndexParentData.zIndex = style['zIndex'];
-//        zIndexParentData.top = style['top'];
-//        zIndexParentData.left = style['left'];
-//        zIndexParentData.right = style['right'];
-//        zIndexParentData.bottom = style['bottom'];
-//        zIndexParentData.width = style['width'];
-//        zIndexParentData.height = style['height'];
+//        zIndexParentData.zIndex = Length.toDouble(style['zIndex']).toInt();;
+//        zIndexParentData.top = Length.toDisplayPortValue(style['top']);
+//        zIndexParentData.left = Length.toDisplayPortValue(style['left']);
+//        zIndexParentData.right = Length.toDisplayPortValue(style['right']);
+//        zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
+//        zIndexParentData.width = Length.toDisplayPortValue(style['width']);
+//        zIndexParentData.height = Length.toDisplayPortValue(style['height');
 //        renderObject.parentData = zIndexParentData;
 //        renderParent.markNeedsLayout();
 //      }
@@ -821,7 +821,7 @@ abstract class Element extends Node
         if (parentStackedElement != null) {
           RenderObject renderBoxToBeStacked = getStackedRenderBox(child);
           insertByZIndex(parentStackedElement.renderStack, renderBoxToBeStacked,
-              child, int.parse(childStyle['zIndex']));
+              child, Length.toInt(childStyle['zIndex']));
           return;
         }
       } else if (childPosition == 'fixed') {
@@ -830,7 +830,7 @@ abstract class Element extends Node
         if (rootRenderStack != null) {
           RenderBox stackedRenderBox = getStackedRenderBox(child);
           insertByZIndex(
-              rootRenderStack, stackedRenderBox, child, int.parse(childStyle['zIndex']));
+              rootRenderStack, stackedRenderBox, child, Length.toInt(childStyle['zIndex']));
           return;
         }
 
@@ -1357,6 +1357,6 @@ ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
   }
   parentData.width = Length.toDisplayPortValue(style['width']);
   parentData.height = Length.toDisplayPortValue(style['height']);
-  parentData.zIndex = Length.toDouble(style['zIndex']).toInt();
+  parentData.zIndex = Length.toInt(style['zIndex']);
   return parentData;
 }
