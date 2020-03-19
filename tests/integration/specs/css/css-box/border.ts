@@ -33,4 +33,48 @@ describe('Box border', () => {
     append(BODY, div);
     await matchScreenshot(div);
   });
+
+  xit('border-bottom-left-radius', async () => {
+    let div = create('div', {
+      width: '100px',
+      height: '100px',
+      'border-bottom-left-radius': '100px',
+      backgroundColor: 'red'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
+
+  xit('border-bottom-right-radius', async () => {
+    let div = create('div', {
+      width: '100px',
+      height: '100px',
+      'border-bottom-right-radius': '100px',
+      backgroundColor: 'red'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
+
+  xit('border-top-left-radius', async () => {
+    let div = create('div', {
+      width: '100px',
+      height: '100px',
+      'border-top-left-radius': '100px',
+      backgroundColor: 'red'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
+
+  xit('border-top-right-radius', async () => {
+    let div = create('div', {
+      width: '100px',
+      height: '100px',
+      'border-top-right-radius': '100px',
+      backgroundColor: 'red'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
 });
