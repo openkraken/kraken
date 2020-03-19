@@ -13,7 +13,7 @@ describe('Box border', () => {
     await matchScreenshot();
   });
 
-  fit('test pass if there is a hollow black square', async () => {
+  it('test pass if there is a hollow black square', async () => {
     let div = create('div', {
       width: '100px',
       height: '100px',
