@@ -594,9 +594,8 @@ abstract class Element extends Node
         ? defaultDisplay
         : style['display'];
     String flexWrap = style['flexWrap'];
-    bool isFlexWrap =
-        (display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap';
-    if ((display == 'flex' || display == 'inline-flex') && flexWrap != 'wrap') {
+    bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
+    if (display.endsWith('flex') && flexWrap != 'wrap') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         textDirection: TextDirection.ltr,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,36 +606,20 @@ abstract class Element extends Node
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == 'none' ||
-        display == 'inline' ||
-        display == 'inline-block' ||
-        display == 'block' ||
-        isFlexWrap) {
-      MainAxisAlignment runAlignment = MainAxisAlignment.start;
-      switch (style['alignContent']) {
-        case 'end':
-          runAlignment = MainAxisAlignment.end;
-          break;
-        case 'center':
-          runAlignment = MainAxisAlignment.center;
-          break;
-        case 'space-around':
-          runAlignment = MainAxisAlignment.spaceAround;
-          break;
-        case 'space-between':
-          runAlignment = MainAxisAlignment.spaceBetween;
-          break;
-        case 'space-evenly':
-          runAlignment = MainAxisAlignment.spaceEvenly;
-          break;
-      }
+    } else if (
+      display == 'none' ||
+      display == 'inline' ||
+      display == 'inline-block' ||
+      display == 'block' ||
+      isFlexWrap
+    ) {
+      MainAxisAlignment runAlignment = getRunAlignmentFromFlexProperty(style['alignContent']);
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
         runAlignment: runAlignment,
         children: children,
         style: style,
         nodeId: nodeId,
       );
-
       if (isFlexWrap) {
         decorateRenderFlex(flowLayout, style);
       } else {
@@ -1063,7 +1046,9 @@ abstract class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, original, present) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = isEmptyStyleValue(style['display'])
+        ? defaultDisplay
+        : style['display'];
     if (display.endsWith('flex')) {
       ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
       // Collect children of renderLayoutBox and remove their relationship.
@@ -1414,4 +1399,26 @@ ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
   parentData.height = Length.toDisplayPortValue(style['height']);
   parentData.zIndex = Length.toInt(style['zIndex']);
   return parentData;
+}
+
+MainAxisAlignment getRunAlignmentFromFlexProperty(String flexProperty) {
+  MainAxisAlignment runAlignment = MainAxisAlignment.start;
+  switch (flexProperty) {
+    case 'end':
+      runAlignment = MainAxisAlignment.end;
+      break;
+    case 'center':
+      runAlignment = MainAxisAlignment.center;
+      break;
+    case 'space-around':
+      runAlignment = MainAxisAlignment.spaceAround;
+      break;
+    case 'space-between':
+      runAlignment = MainAxisAlignment.spaceBetween;
+      break;
+    case 'space-evenly':
+      runAlignment = MainAxisAlignment.spaceEvenly;
+      break;
+  }
+  return runAlignment;
 }
