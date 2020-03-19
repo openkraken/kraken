@@ -10,7 +10,10 @@ import 'package:kraken/style.dart';
 RegExp spaceRegExp = RegExp(r" ");
 
 double baseGetDisplayPortedLength(input) {
-  if (input == null) return null;
+  if (isEmptyStyleValue(input)) {
+    // Null is not euqal with 0.0
+    return null;
+  }
   if (input is num) {
     input = input.toString();
   }
@@ -91,7 +94,7 @@ mixin DimensionMixin {
   RenderPadding renderPadding;
   Padding oldPadding;
   Padding oldMargin;
-  SizeConstraints oldConstraints;
+  SizedConstraints oldConstraints;
   double cropWidth = 0;
   double cropHeight = 0;
 
@@ -100,7 +103,7 @@ mixin DimensionMixin {
   }
 
   void updateConstraints(StyleDeclaration style, Map<String, Transition> transitionMap) {
-    if (renderConstrainedBox != null && style != null) {
+    if (renderConstrainedBox != null) {
       Transition allTransition,
           widthTransition,
           heightTransition,
@@ -118,7 +121,7 @@ mixin DimensionMixin {
         maxHeightTransition = transitionMap['max-height'];
       }
 
-      SizeConstraints newConstraints = _getConstraints(style);
+      SizedConstraints newConstraints = _getConstraints(style);
 
       if (allTransition != null ||
           widthTransition != null ||
@@ -140,7 +143,7 @@ mixin DimensionMixin {
         double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) -
             (oldConstraints.maxHeight ?? 0.0);
 
-        SizeConstraints progressConstraints = SizeConstraints(
+        SizedConstraints progressConstraints = SizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -148,7 +151,7 @@ mixin DimensionMixin {
             oldConstraints.minHeight,
             oldConstraints.maxHeight);
 
-        SizeConstraints baseConstraints = SizeConstraints(
+        SizedConstraints baseConstraints = SizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -225,9 +228,8 @@ mixin DimensionMixin {
             newConstraints.toBoxConstraints();
       }
 
-      String display = style['display'];
       // Remove inline element dimension
-      if (display == 'inline') {
+      if (style['display'] == 'inline') {
         renderConstrainedBox.additionalConstraints = BoxConstraints();
       }
 
@@ -248,7 +250,7 @@ mixin DimensionMixin {
     }
   }
 
-  SizeConstraints _getConstraints(StyleDeclaration style) {
+  SizedConstraints _getConstraints(StyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -256,9 +258,8 @@ mixin DimensionMixin {
       double maxWidth = getDisplayPortedLength(style['maxWidth']);
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
-
-      return SizeConstraints(
-          width, height, minWidth, maxWidth, minHeight, maxHeight);
+      return SizedConstraints(
+        width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
       return null;
     }
@@ -589,7 +590,7 @@ class Padding {
   Padding(this.left, this.top, this.right, this.bottom);
 }
 
-class SizeConstraints {
+class SizedConstraints {
   double width;
   double height;
   double minWidth;
@@ -597,7 +598,7 @@ class SizeConstraints {
   double minHeight;
   double maxHeight;
 
-  SizeConstraints(this.width, this.height, this.minWidth, this.maxWidth,
+  SizedConstraints(this.width, this.height, this.minWidth, this.maxWidth,
       this.minHeight, this.maxHeight);
 
   BoxConstraints toBoxConstraints() {
@@ -607,5 +608,10 @@ class SizeConstraints {
       maxWidth: maxWidth ?? width ?? double.infinity,
       maxHeight: maxHeight ?? height ?? double.infinity,
     );
+  }
+
+  @override
+  String toString() {
+    return 'SizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
   }
 }
