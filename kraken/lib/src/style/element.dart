@@ -66,9 +66,7 @@ mixin ElementStyleMixin on RenderBox {
       }
     }
 
-    double heightD = Length.toDisplayPortValue(height) - cropHeight;
-
-    return heightD;
+    return Length.toDisplayPortValue(height) - cropHeight;
   }
 
   // Get parent node height if parent is flex and stretch children height
@@ -81,16 +79,21 @@ mixin ElementStyleMixin on RenderBox {
       StyleDeclaration parentStyle = parentNode.style;
       StyleDeclaration currentStyle = currentNode.style;
 
-      String parentDisplay = parentStyle['display'];
+      String parentDisplay = isEmptyStyleValue(parentStyle['display'])
+        ? parentNode.defaultDisplay
+        : parentStyle['display'];
       bool isParentFlex = parentDisplay == 'flex' || parentDisplay == 'inline-flex';
-
-      if (isParentFlex &&
-          parentStyle['flexDirection'] == 'row' &&
-          currentStyle.contains('height') &&
-          parentStyle.contains('height') &&
-          (!parentStyle.contains('alignItems') ||
-              (parentStyle.contains('alignItems') &&
-                  parentStyle['alignItems'] == 'stretch'))) {
+      
+      if (
+        isParentFlex
+          && (parentStyle['flexDirection'] == '' || parentStyle['flexDirection'] == 'row')
+          && !currentStyle.contains('height')
+          && parentStyle.contains('height')
+          && (
+            !parentStyle.contains('alignItems')
+              || (parentStyle.contains('alignItems') && parentStyle['alignItems'] == 'stretch')
+          )
+      ) {
         parentHeight = Length.toDisplayPortValue(parentStyle['height']);
       }
     }

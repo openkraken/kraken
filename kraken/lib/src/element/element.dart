@@ -830,22 +830,10 @@ abstract class Element extends Node
         renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
       }
 
-      ParentData childParentData = childRenderObject.parentData;
-      if (childParentData is RenderFlexParentData) {
-        final RenderFlexParentData parentData = childParentData;
-        RenderFlexParentData flexParentData =
-        FlexItem.getParentData(childStyle);
-        parentData.flexGrow = flexParentData.flexGrow;
-        parentData.flexShrink = flexParentData.flexShrink;
-        parentData.flexBasis = flexParentData.flexBasis;
-        parentData.fit = flexParentData.fit;
-        String alignItems = style[FlexItem.ALIGN_ITEMS];
-        if (alignItems != null && style[FlexItem.ALIGN_ITEMS] != 'stretch') {
-          flexParentData.fit = FlexFit.tight;
-        }
-
-        child.updateRenderMargin(child.style); // Update margin for flex child.
-        renderObject.markNeedsLayout();
+      if (isFlex) {
+        children.forEach((Element child) {
+          _updateFlexItemStyle(child);
+        });
       }
 
       // Trigger sticky update logic after node is connected
@@ -856,6 +844,25 @@ abstract class Element extends Node
         }
         _updateStickyPosition(0);
       }
+    }
+  }
+
+  void _updateFlexItemStyle(Element element) {
+    ParentData childParentData = element.renderObject.parentData;
+    if (childParentData is RenderFlexParentData) {
+      final RenderFlexParentData parentData = childParentData;
+      RenderFlexParentData flexParentData = FlexItem.getParentData(element.style);
+      parentData.flexGrow = flexParentData.flexGrow;
+      parentData.flexShrink = flexParentData.flexShrink;
+      parentData.flexBasis = flexParentData.flexBasis;
+      parentData.fit = flexParentData.fit;
+      if (element.style[FlexItem.ALIGN_ITEMS] != 'stretch') {
+        flexParentData.fit = FlexFit.tight;
+      }
+
+      // Update margin for flex child.
+      element.updateRenderMargin(element.style);
+      element.renderObject.markNeedsLayout();
     }
   }
 
@@ -895,9 +902,16 @@ abstract class Element extends Node
 
     style.addStyleChangeListener('flexDirection', _styleFlexChangedListener);
     style.addStyleChangeListener('flexWrap', _styleFlexChangedListener);
-    style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
+    style.addStyleChangeListener('flexFlow', _styleFlexItemChangedListener);
     style.addStyleChangeListener('justifyContent', _styleFlexChangedListener);
+    style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
     style.addStyleChangeListener('alignContent', _styleFlexChangedListener);
+    style.addStyleChangeListener('textAlign', _styleFlexChangedListener);
+
+    style.addStyleChangeListener('flexGrow', _styleFlexItemChangedListener);
+    style.addStyleChangeListener('flexShrink', _styleFlexItemChangedListener);
+    style.addStyleChangeListener('flexBasis', _styleFlexItemChangedListener);
+    style.addStyleChangeListener('alignItems', _styleFlexItemChangedListener);
 
     style.addStyleChangeListener('textAlign', _styleTextAlignChangedListener);
 
@@ -998,7 +1012,6 @@ abstract class Element extends Node
     // Position changed.
     if (prevPosition != currentPosition) {
       needsReposition = true;
-      print('position change from $prevPosition to $currentPosition');
       _doUpdatePosition(prevPosition, currentPosition);
     } else if (currentPosition != 'static') {
       _updateZIndex();
@@ -1010,6 +1023,10 @@ abstract class Element extends Node
   }
 
   void _styleTextAlignChangedListener(String property, original, present) {
+    _updateDecorationRenderLayoutBox();
+  }
+
+  void _updateDecorationRenderLayoutBox() {
     if (renderLayoutBox is RenderFlexLayout) {
       if (style['flexWrap'] == 'wrap') {
         decorateRenderFlow(renderLayoutBox, style);
@@ -1060,6 +1077,21 @@ abstract class Element extends Node
       renderPadding.child = null;
       renderLayoutBox = createRenderLayoutBox(style, children);
       renderPadding.child = renderLayoutBox as RenderBox;
+
+      this.children.forEach((Element child) {
+        _updateFlexItemStyle(child);
+      });
+    }
+
+    _updateDecorationRenderLayoutBox();
+  }
+
+  void _styleFlexItemChangedListener(String property, original, present) {
+    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    if (display.endsWith('flex')) {
+      children.forEach((Element child) {
+        _updateFlexItemStyle(child);
+      });
     }
   }
 
