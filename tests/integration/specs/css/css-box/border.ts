@@ -22,4 +22,15 @@ describe('Box border', () => {
     append(BODY, div);
     await matchScreenshot(div);
   });
+
+  xit('dashed with backgroundColor', async () => {
+    const div = create('div', {
+      width: '100px',
+      height: '100px',
+      border: '10px dashed red',
+      backgroundColor: 'green'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
 });
