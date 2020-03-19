@@ -765,6 +765,7 @@ class RenderFlexLayout extends RenderBox
 
           assert(minChildExtent != null);
           BoxConstraints innerConstraints;
+          // @TODO: minChildExtent.isNegative
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
