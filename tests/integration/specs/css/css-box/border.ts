@@ -12,4 +12,14 @@ describe('Box border', () => {
     div.style.border = '4px solid blue';
     await matchScreenshot();
   });
+
+  xit('dashed border', async () => {
+    const div = create('div', {
+      width: '100px',
+      height: '100px',
+      border: '2px dashed red'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
 });

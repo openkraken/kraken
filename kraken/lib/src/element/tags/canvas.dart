@@ -15,7 +15,7 @@ class CanvasElement extends Element {
   CanvasElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
           nodeId: nodeId,
-          defaultDisplay: 'block',
+          defaultDisplay: 'inline-block',
           tagName: CANVAS,
           properties: props,
           events: events,
