@@ -1,4 +1,4 @@
-describe('Transform scale3d', async () => {
+describe('Transform scale3d',  () => {
   it('001', async () => {
     document.body.appendChild(
       create('div', {
