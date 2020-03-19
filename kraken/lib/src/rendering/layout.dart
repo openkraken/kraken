@@ -752,7 +752,7 @@ class RenderFlowLayout extends RenderBox
     }
   }
 
-  String _getDisplayFromRenderBox(RenderBox child) {
+  String _getChildDisplayFromRenderBox(RenderBox child) {
     String display = 'inline'; // Default value.
     int nodeId;
     if (child is RenderFlowLayout) nodeId = child.nodeId;
@@ -766,7 +766,12 @@ class RenderFlowLayout extends RenderBox
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
-        if (display.endsWith('flex') && element.style['flexWrap'] == 'wrap') {
+        Element currentElement = nodeMap[this.nodeId];
+        String currentElementDisplay = isEmptyStyleValue(style['display'])
+          ? currentElement.defaultDisplay
+          : style['display'];
+        if (currentElementDisplay.endsWith('flex')
+          && style['flexWrap'] == 'wrap') {
           display = 'inline';
         }
       }
@@ -780,7 +785,7 @@ class RenderFlowLayout extends RenderBox
       'block',
       'flex',
     ];
-    return blockTypes.contains(_getDisplayFromRenderBox(child));
+    return blockTypes.contains(_getChildDisplayFromRenderBox(child));
   }
 
   @override
