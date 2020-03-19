@@ -509,7 +509,7 @@ class RenderFlowLayout extends RenderBox
 
     // If no child exists, stop layout.
     if (child == null) {
-      size = Size.zero;
+      size = constraints.smallest;
       return;
     }
 
@@ -593,8 +593,7 @@ class RenderFlowLayout extends RenderBox
     double containerCrossAxisExtent = 0.0;
 
     double constraintWidth = mainAxisExtent;
-    String display = style['display'];
-    bool isInline = isElementInline(display, nodeId);
+    bool isInline = isElementInline(nodeId);
     if (!isInline) {
       if (constraints.maxWidth != double.infinity) {
         constraintWidth = constraints.maxWidth;
@@ -751,31 +750,35 @@ class RenderFlowLayout extends RenderBox
     }
   }
 
-  String _getDisplayType(child) {
-    String displayType;
-    if (child is RenderFlowLayout || child is RenderElementBoundary) {
-      displayType = child.style['display'];
+  String _getDisplayFromRenderBox(RenderBox child) {
+    String display = 'inline'; // Default value.
+    int nodeId;
+    if (child is RenderFlowLayout) nodeId = child.nodeId;
+    if (child is RenderElementBoundary) nodeId = child.nodeId;
+    if (nodeId != null) {
+      Element element = nodeMap[nodeId];
+      if (element != null) {
+        String elementDisplayDeclaration = element.style['display'];
+        display = isEmptyStyleValue(elementDisplayDeclaration)
+            ? element.defaultDisplay
+            : element.style['display'];
 
-      String display = style['display'];
-      String flexWrap = style['flexWrap'];
-      if ((display == 'flex' || display == 'inline-flex') && flexWrap == 'wrap') {
-        displayType = 'inline';
+        // @HACK: Use inline to impl flexWrap in with flex layout.
+        if (display.endsWith('flex') && element.style['flexWrap'] == 'wrap') {
+          display = 'inline';
+        }
       }
-    } else {
-      displayType = 'inline';
     }
-    return displayType;
+
+    return display;
   }
 
-  bool _isBlockElement(child) {
-    List blockTypes = [
+  bool _isBlockElement(RenderBox child) {
+    List<String> blockTypes = [
       'block',
       'flex',
     ];
-    if (blockTypes.indexOf(_getDisplayType(child)) != -1) {
-      return true;
-    }
-    return false;
+    return blockTypes.contains(_getDisplayFromRenderBox(child));
   }
 
   @override

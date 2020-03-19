@@ -839,8 +839,7 @@ class RenderFlexLayout extends RenderBox
     double actualSize;
     double actualSizeDelta;
     double constraintWidth = idealSize;
-    String display = style['display'];
-    bool isInline = isElementInline(display, nodeId);
+    bool isInline = isElementInline(nodeId);
     if (!isInline) {
       if (constraints.maxWidth != double.infinity) {
         constraintWidth = constraints.maxWidth;

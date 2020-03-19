@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-RegExp spaceRegExp = RegExp(r" ");
+RegExp spaceRegExp = RegExp(r' ');
 
 double baseGetDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {

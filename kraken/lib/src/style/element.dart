@@ -106,11 +106,13 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Whether current node is inline
-  bool isElementInline(String defaultDisplay, int nodeId) {
-    var node = nodeMap[nodeId];
-    var parentNode = node.parentNode;
+  bool isElementInline(int nodeId) {
+    Element node = nodeMap[nodeId];
+    Element parentNode = node.parentNode;
 
-    String display = defaultDisplay;
+    String display = isEmptyStyleValue(node.style['display'])
+        ? node.defaultDisplay
+        : node.style['display'];
 
     // Display as inline if parent node is flex and with align-items not stretch
     if (parentNode != null) {

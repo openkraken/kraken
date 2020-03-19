@@ -124,7 +124,8 @@ class StyleDeclaration {
     return StyleDeclaration(style: mergedProperties);
   }
 
-  String toString() => cssText;
+  @override
+  String toString() => 'StyleDeclaration($cssText)';
 }
 
 bool isEmptyStyleValue(String value) {

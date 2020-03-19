@@ -12,7 +12,7 @@ mixin FlowMixin {
   static const String TEXT_ALIGN = 'textAlign';
 
   void decorateRenderFlow(RenderObject renderObject, StyleDeclaration style) {
-    if (style != null && renderObject is RenderFlowLayout) {
+    if (renderObject is RenderFlowLayout) {
       renderObject.mainAxisAlignment = _getTextAlign(style);
     }
   }
