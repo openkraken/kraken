@@ -32,7 +32,7 @@ mixin TextStyleMixin {
   }
 
   TextAlign getTextAlignFromStyle(StyleDeclaration style) {
-    TextAlign textAlign;
+    TextAlign textAlign = TextAlign.left;
     switch (style['textAlign']) {
       case 'center':
         textAlign = TextAlign.center;

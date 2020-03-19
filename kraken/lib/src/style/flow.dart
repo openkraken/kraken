@@ -11,10 +11,8 @@ import 'style_declaration.dart';
 mixin FlowMixin {
   static const String TEXT_ALIGN = 'textAlign';
 
-  void decorateRenderFlow(RenderObject renderObject, StyleDeclaration style) {
-    if (renderObject is RenderFlowLayout) {
-      renderObject.mainAxisAlignment = _getTextAlign(style);
-    }
+  void decorateRenderFlow(RenderFlowLayout renderObject, StyleDeclaration style) {
+    renderObject.mainAxisAlignment = _getTextAlign(style);
   }
 
   MainAxisAlignment _getTextAlign(StyleDeclaration style) {

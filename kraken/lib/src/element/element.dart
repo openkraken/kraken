@@ -367,10 +367,7 @@ abstract class Element extends Node
     Element currentElement = nodeMap[nodeId];
 
     // current element's zIndex
-    int currentZIndex = 0;
-    if (currentElement.style.contains('zIndex')) {
-      currentZIndex = Length.toInt(currentElement.style['zIndex']);
-    }
+    int currentZIndex = Length.toInt(currentElement.style['zIndex']);
     // add current element back to parent stack by zIndex
     insertByZIndex(parentStack, renderObject, el, currentZIndex);
   }
@@ -781,16 +778,9 @@ abstract class Element extends Node
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
       StyleDeclaration childStyle = child.style;
-      String childPosition = childStyle['position'] ?? 'static';
-      String display = style['display'];
-      bool isFlex = display == 'flex' || display == 'inline-flex';
-
-      // Set audio element size to zero
-      // TODO(refactor): Should not exists here.
-      if (child is AudioElement) {
-        RenderConstrainedBox renderConstrainedBox = child.renderConstrainedBox;
-        renderConstrainedBox.additionalConstraints = BoxConstraints();
-      }
+      String childPosition = childStyle['position'] == '' ? 'static' : childStyle['position'];
+      String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+      bool isFlex = display.endsWith('flex');
 
       if (isFlex) {
         // Add FlexItem wrap for flex child node.
@@ -862,7 +852,7 @@ abstract class Element extends Node
       }
 
       // Trigger sticky update logic after node is connected
-      if (childStyle['position'] == 'sticky') {
+      if (childPosition == 'sticky') {
         // Force flush layout of child
         if (!child.renderMargin.hasSize) {
           child.renderMargin.owner.flushLayout();
@@ -906,6 +896,8 @@ abstract class Element extends Node
     style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
     style.addStyleChangeListener('justifyContent', _styleFlexChangedListener);
     style.addStyleChangeListener('alignContent', _styleFlexChangedListener);
+
+    style.addStyleChangeListener('textAlign', _styleTextAlignChangedListener);
 
     style.addStyleChangeListener('padding', _stylePaddingChangedListener);
     style.addStyleChangeListener('paddingLeft', _stylePaddingChangedListener);
@@ -961,6 +953,9 @@ abstract class Element extends Node
   }
 
   void _styleDisplayChangedListener(String property, original, present) {
+    // Display change may case width/height doesn't works at all.
+    _styleSizeChangedListener(property, original, present);
+
     if (renderLayoutBox != null) {
       String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
       String currentDisplay = isEmptyStyleValue(present) ? defaultDisplay : present;
@@ -998,6 +993,18 @@ abstract class Element extends Node
     if (prevPosition != currentPosition) {
       needsReposition = true;
       _doUpdatePosition(prevPosition, currentPosition);
+    }
+  }
+
+  void _styleTextAlignChangedListener(String property, original, present) {
+    if (renderLayoutBox is RenderFlexLayout) {
+      if (style['flexWrap'] == 'wrap') {
+        decorateRenderFlow(renderLayoutBox, style);
+      } else {
+        decorateRenderFlex(renderLayoutBox, style);
+      }
+    } else if (renderLayoutBox is RenderFlowLayout) {
+      decorateRenderFlow(renderLayoutBox, style);
     }
   }
 
