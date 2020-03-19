@@ -1357,6 +1357,6 @@ ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
   }
   parentData.width = Length.toDisplayPortValue(style['width']);
   parentData.height = Length.toDisplayPortValue(style['height']);
-  parentData.zIndex = style['zIndex'];
+  parentData.zIndex = Length.toDouble(style['zIndex']).toInt();
   return parentData;
 }
