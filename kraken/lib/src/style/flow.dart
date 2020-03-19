@@ -16,7 +16,22 @@ mixin FlowMixin {
 
     renderFlowLayout.mainAxisAlignment = isFlexDisplay
         ? getRunAlignmentFromFlexProperty(style[JUSTIFY_CONTENT])
-        : getRunAlignmentFromFlexProperty(style[TEXT_ALIGN]);
+        : _getTextAlign(style[TEXT_ALIGN]);
+  }
+
+  MainAxisAlignment _getTextAlign(String textAlign) {
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
+
+    switch (textAlign) {
+      case 'right':
+        mainAxisAlignment = MainAxisAlignment.end;
+        break;
+      case 'center':
+        mainAxisAlignment = MainAxisAlignment.center;
+        break;
+    }
+
+    return mainAxisAlignment;
   }
 }
 
