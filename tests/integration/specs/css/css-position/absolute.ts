@@ -29,4 +29,29 @@ describe('Position absolute', () => {
 
     await matchScreenshot();
   });
+
+  it('should be a green square below', async (done) => {
+    let parent = create('div', {
+      width: '150px',
+      height: '150px',
+      backgroundColor: 'green'
+    });
+    let child = create('div', {
+      width: '150px',
+      height: '150px',
+      backgroundColor: 'white',
+      position: 'absolute'
+    });
+    append(parent, child);
+    append(BODY, parent);
+    await matchScreenshot(parent);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        child.style.left = '150px';
+        await matchScreenshot(parent);
+        done();
+      });
+    });
+  });
 });

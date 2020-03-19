@@ -13,6 +13,18 @@ describe('Box border', () => {
     await matchScreenshot();
   });
 
+  fit('test pass if there is a hollow black square', async () => {
+    let div = create('div', {
+      width: '100px',
+      height: '100px',
+      border: '25px',
+      borderStyle: 'solid',
+      borderColor: 'black'
+    });
+    append(BODY, div);
+    await matchScreenshot(div);
+  });
+
   xit('dashed border', async () => {
     const div = create('div', {
       width: '100px',
@@ -76,5 +88,34 @@ describe('Box border', () => {
     });
     append(BODY, div);
     await matchScreenshot(div);
+  });
+
+  it('border radius with absolute', async () => {
+    let red = create('div', {
+      position: 'absolute',
+      width: '100px',
+      height: '100px',
+      top: '50px',
+      left: '50px',
+      backgroundColor: 'red'
+    });
+    let green = create('div', {
+      position: 'absolute',
+      top: '50px',
+      left: '50px',
+      width: '100px',
+      height: '100px',
+      borderRadius: '50px',
+      backgroundColor: 'green'
+    });
+    let container = create('div', {
+      width: '200px',
+      height: '200px',
+      position: 'absolute'
+    });
+    append(container, red);
+    append(container, green);
+    append(BODY, container);
+    await matchScreenshot(container);
   });
 });
