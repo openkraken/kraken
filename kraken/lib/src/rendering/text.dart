@@ -5,6 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/element.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {
 }
@@ -67,7 +68,9 @@ class RenderTextBox extends RenderBox
     RenderBox child = firstChild;
 
     // @TODO when in flex-grow or flex-shrink width needs to be recalulated
-    double constraintWidth = getParentWidth(nodeId);
+    var currentNode = nodeMap[nodeId];
+    var parentNode = currentNode.parentNode;
+    double constraintWidth = getElementWidth(parentNode.nodeId);
     if (child != null) {
       BoxConstraints additionalConstraints = BoxConstraints(
         minWidth: 0,

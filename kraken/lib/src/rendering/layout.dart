@@ -512,6 +512,8 @@ class RenderFlowLayout extends RenderBox
       size = Size.zero;
       return;
     }
+    double elementWidth = getElementWidth(nodeId);
+    double elementHeight = getElementHeight(nodeId);
 
     BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
@@ -520,11 +522,8 @@ class RenderFlowLayout extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-        if (constraints.maxWidth != double.infinity) {
-          mainAxisLimit = constraints.maxWidth;
-        } else {
-          // calculate max width limit according to element width
-          mainAxisLimit = getParentWidth(nodeId);
+        if (elementWidth != null) {
+          mainAxisLimit = elementWidth;
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -592,32 +591,18 @@ class RenderFlowLayout extends RenderBox
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
+    // Default to children's width
     double constraintWidth = mainAxisExtent;
-    String display = style.get('display');
-    bool isInline = isElementInline(display, nodeId);
-    if (!isInline) {
-      if (constraints.maxWidth != double.infinity) {
-        constraintWidth = constraints.maxWidth;
-      } else {
-        constraintWidth = getParentWidth(nodeId);
-      }
-      constraintWidth = math.max(mainAxisExtent, constraintWidth);
+    // Get max of element's width and children's width if element's width exists
+    if (elementWidth != null) {
+      constraintWidth = math.max(constraintWidth, elementWidth);
     }
 
-
+    // Default to children's height
     double constraintHeight = crossAxisExtent;
-    // stretch height to container height if alignItems is stretch
-    double parentHeight = getStretchParentHeight(nodeId);
-    if (parentHeight != null) {
-      constraintHeight = math.max(parentHeight, constraintHeight);
-    } else if (!isInline) {
-      // Use container height as constraints if exists
-      if (style.get('height') != null) {
-        double height = getCurrentHeight(style);
-        if (height != null) {
-          constraintHeight = math.max(height, constraintHeight);
-        }
-      }
+    // Get max of element's height and children's height if element's height exists
+    if (elementHeight != null) {
+      constraintHeight = math.max(constraintHeight, elementHeight);
     }
 
     // get container height
