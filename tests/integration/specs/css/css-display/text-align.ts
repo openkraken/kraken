@@ -14,6 +14,6 @@ describe('text-align', () => {
     append(container, text);
     append(container, div);
     append(BODY, container);
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 });

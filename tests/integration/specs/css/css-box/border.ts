@@ -22,7 +22,7 @@ describe('Box border', () => {
       borderColor: 'black'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('dashed border', async () => {
@@ -32,7 +32,7 @@ describe('Box border', () => {
       border: '2px dashed red'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('dashed with backgroundColor', async () => {
@@ -43,7 +43,7 @@ describe('Box border', () => {
       backgroundColor: 'green'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('border-bottom-left-radius', async () => {
@@ -54,7 +54,7 @@ describe('Box border', () => {
       backgroundColor: 'red'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('border-bottom-right-radius', async () => {
@@ -65,7 +65,7 @@ describe('Box border', () => {
       backgroundColor: 'red'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('border-top-left-radius', async () => {
@@ -76,7 +76,7 @@ describe('Box border', () => {
       backgroundColor: 'red'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('border-top-right-radius', async () => {
@@ -87,7 +87,7 @@ describe('Box border', () => {
       backgroundColor: 'red'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   it('border radius with absolute', async () => {
@@ -116,6 +116,6 @@ describe('Box border', () => {
     append(container, red);
     append(container, green);
     append(BODY, container);
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 });

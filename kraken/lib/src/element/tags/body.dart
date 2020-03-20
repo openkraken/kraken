@@ -10,6 +10,7 @@ final Map<String, dynamic> bodyProps = {
   'style': {
     'position': 'absolute',
     'width': '100vw',
+    'height': '100vh',
     'overflow': 'auto',
     'backgroundColor': 'white',
   },

@@ -33,7 +33,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchScreenshot(BODY);
+    await matchScreenshot();
   });
 
   xit('inline-block nest inline-block should behavior like inline-block', async () => {
@@ -50,7 +50,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchScreenshot(magenta);
+    await matchElementImageSnapshot(magenta);
   });
 
   xit('inline-block nest block should behavior like inline-block', async () => {
@@ -67,6 +67,6 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchScreenshot(magenta);
+    await matchElementImageSnapshot(magenta);
   });
 });

@@ -6,7 +6,7 @@ describe('Canvas element', () => {
       backgroundColor: 'blue'
     });
     append(BODY, canvas);
-    await matchScreenshot(canvas);
+    await matchElementImageSnapshot(canvas);
   });
 
   it('behavior like inline element', async () => {
@@ -23,6 +23,6 @@ describe('Canvas element', () => {
     append(wrapper, canvas);
     append(wrapper, text);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 });

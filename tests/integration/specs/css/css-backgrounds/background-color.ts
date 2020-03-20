@@ -19,7 +19,7 @@ describe('Background-color',  () => {
       height: '100px'
     });
     append(BODY, div);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('red with display when window.onload', (done) => {

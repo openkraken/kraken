@@ -103,7 +103,7 @@ describe('background-repeat', () => {
     });
     append(BODY, div);
     await sleep(1);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('no-repeat will stop round to repeat', async () => {
@@ -116,6 +116,6 @@ describe('background-repeat', () => {
     });
     append(BODY, div);
     await sleep(1);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 });

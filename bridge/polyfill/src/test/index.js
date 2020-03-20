@@ -54,7 +54,7 @@ function createPrinter(logger) {
 
 let config = {
   oneFailurePerSpec: true,
-  failFast: environment.KRAKEN_STOP_ON_FAIL !== 'false',
+  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
   random: false
 };
 
@@ -65,16 +65,16 @@ function HtmlSpecFilter(options) {
     options.filterString().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
   var filterPattern = new RegExp(filterString);
 
-  this.matches = function(specName) {
+  this.matches = function (specName) {
     return filterPattern.test(specName);
   };
 }
 
 var specFilter = new HtmlSpecFilter({
-  filterString: function() { return environment.KRAKEN_TEST_FILTER; }
+  filterString: function () { return environment.KRAKEN_TEST_FILTER; }
 });
 
-config.specFilter = function(spec) {
+config.specFilter = function (spec) {
   return specFilter.matches(spec.getFullName());
 };
 

@@ -20,7 +20,7 @@ describe('Background-position', () => {
     position.appendChild(position1);
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 
   it('left', async () => {
@@ -45,7 +45,7 @@ describe('Background-position', () => {
 
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 
   it('top', async () => {
@@ -71,7 +71,7 @@ describe('Background-position', () => {
 
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 
   it('right', async () => {
@@ -96,7 +96,7 @@ describe('Background-position', () => {
 
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 
   it('bottom', async () => {
@@ -119,7 +119,7 @@ describe('Background-position', () => {
     position.appendChild(position5);
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 
   it('right center', async () => {
@@ -141,6 +141,6 @@ describe('Background-position', () => {
     append(position, div);
     append(BODY, position);
     await sleep(1);
-    await matchScreenshot(position);
+    await matchElementImageSnapshot(position);
   });
 });

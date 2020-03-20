@@ -2,7 +2,7 @@ describe('Tags img',  () => {
   it('basic', done => {
     const img = document.createElement('img');
     img.addEventListener('load', async () => {
-      await matchScreenshot(img);
+      await matchElementImageSnapshot(img);
       done();
     });
     img.style.width = '60px';
