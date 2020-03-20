@@ -29,6 +29,10 @@ const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
+String _bundleURLOverride;
+String _bundlePathOverride;
+String _zipBundleURLOverride;
+String _bundleContentOverride;
 
 void runApp({
   bool enableDebug = false,
@@ -107,9 +111,9 @@ String getCommandPathFromEnv() {
   return Platform.environment[COMMAND_PATH];
 }
 
-Future<String> getBundleContent({String bundleUrl, String bundlePath, String zipBundleUrl}) async {
-  if (bundleUrl != null) {
-    return Requests.get(bundleUrl).then((Response response) => response.content());
+Future<String> getBundleContent({String bundleURL, String bundlePath, String zipBundleURL}) async {
+  if (bundleURL != null) {
+    return Requests.get(bundleURL).then((Response response) => response.content());
   }
 
   if (bundlePath != null) {
@@ -117,8 +121,8 @@ Future<String> getBundleContent({String bundleUrl, String bundlePath, String zip
     return Future<String>.value(content);
   }
 
-  if (zipBundleUrl != null) {
-    return await BundleManager().downloadAndParse(zipBundleUrl);
+  if (zipBundleURL != null) {
+    return await BundleManager().downloadAndParse(zipBundleURL);
   }
 
   try {
@@ -145,20 +149,30 @@ void afterConnectedForCommand() async {
   CommandRun(getCommandPathFromEnv()).run();
 }
 
-void afterConnected() async {
-  String bundleUrl = getBundleURLFromEnv();
-  String bundlePath = getBundlePathFromEnv();
-  String zipBundleUrl = getZipBundleURLFromEnv();
-  String content = await getBundleContent(bundleUrl: bundleUrl, bundlePath: bundlePath, zipBundleUrl: zipBundleUrl);
-  evaluateScripts(content, bundleUrl ?? bundlePath ?? zipBundleUrl ?? DEFAULT_BUNDLE_PATH, 0);
+void defaultAfterConnected() async {
+  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
+  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
+  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();
+  String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
+  evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
-void launch() {
+void launch({
+  String bundleURLOverride,
+  String bundlePathOverride,
+  String zipBundleURLOverride,
+  String bundleContentOverride,
+}) {
+  if (bundleURLOverride != null) _bundleURLOverride = bundleURLOverride;
+  if (bundlePathOverride != null) _bundlePathOverride = bundlePathOverride;
+  if (zipBundleURLOverride != null) _zipBundleURLOverride = zipBundleURLOverride;
+  if (bundleContentOverride != null) _bundleContentOverride = bundleContentOverride;
+
   initBridge();
   _setTargetPlatformForDesktop();
   runApp(
-    enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-    afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected
+      enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : defaultAfterConnected
   );
 }
