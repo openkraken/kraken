@@ -36,12 +36,7 @@ String handleAction(List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  var result;
-  try {
-    result = ElementManager.applyAction(action, payload);
-  } catch (e, stack) {
-    print('Dart Error: $e\n$stack');
-  }
+  var result = ElementManager.applyAction(action, payload);
 
   if (result == null) {
     return EMPTY_STRING;
@@ -59,12 +54,7 @@ String handleAction(List directive) {
 }
 
 String invokeUIManager(String json) {
-  dynamic directive;
-  try {
-    directive = jsonDecode(json);
-  } catch (e, stack) {
-    print('Dart Error: $e\n$stack');
-  }
+  dynamic directive = jsonDecode(json);
 
   if (directive == null) {
     return EMPTY_STRING;
@@ -83,8 +73,12 @@ String invokeUIManager(String json) {
 }
 
 Pointer<Utf8> _invokeUIManager(Pointer<Utf8> json) {
-  String result = invokeUIManager(Utf8.fromUtf8(json));
-  return Utf8.toUtf8(result);
+  try {
+    String result = invokeUIManager(Utf8.fromUtf8(json));
+    return Utf8.toUtf8(result);
+  } catch (e, stack) {
+    return Utf8.toUtf8('Dart Error: $e\n$stack');
+  }
 }
 
 void registerInvokeUIManager() {
@@ -178,7 +172,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
   }  else if(module == 'MQTT') {
     String method = args[1];
     if (method == 'init') {
-      List mqttArgs = args[2]; 
+      List mqttArgs = args[2];
       return MQTT.init(mqttArgs[0], mqttArgs[1]);
     } else if(method == 'open') {
       List mqttArgs = args[2];
@@ -262,10 +256,10 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
-typedef NativeAsyncCallback = Void Function(Pointer<Void> context);
-typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data);
-typedef DartAsyncCallback = void Function(Pointer<Void> context);
-typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data);
+typedef NativeAsyncCallback = Void Function(Pointer<Void> context, Pointer<Utf8>);
+typedef DartAsyncCallback = void Function(Pointer<Void> context, Pointer<Utf8>);
+typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data, Pointer<Utf8>);
+typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data, Pointer<Utf8>);
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
@@ -278,11 +272,11 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
   return requestBatchUpdate((Duration timeStamp) {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -302,11 +296,11 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setTimeout(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -327,11 +321,11 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
   return setInterval(timeout, () {
+    DartAsyncCallback func = callback.asFunction();
     try {
-      DartAsyncCallback func = callback.asFunction();
-      func(context);
+      func(context, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -370,11 +364,11 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
   return requestAnimationFrame((double highResTimeStamp) {
+    DartRAFAsyncCallback func = callback.asFunction();
     try {
-      DartRAFAsyncCallback func = callback.asFunction();
-      func(context, highResTimeStamp);
+      func(context, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      print('Dart Error: $e\n$stack');
+      func(context, highResTimeStamp, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -528,7 +522,7 @@ void registerStopFlushCallbacksInUIThread() {
 
 typedef NativeAsyncBlobCallback = Void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32);
+typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(
     Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(
@@ -538,7 +532,7 @@ final Dart_RegisterToBlob _registerToBlob = nativeDynamicLibrary
     .lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob')
     .asFunction();
 
-void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id) {
+void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
   try {
     if (!nodeMap.containsKey(id)) {
@@ -547,9 +541,9 @@ void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<
       return;
     }
 
-    dynamic node = nodeMap[id];
+    var node = nodeMap[id];
     if (node is Element) {
-      node.toBlob().then((Uint8List bytes) {
+      node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
         Uint8List byteList = bytePtr.asTypedList(bytes.length);
         byteList.setAll(0, bytes);

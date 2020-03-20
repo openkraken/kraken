@@ -2,9 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-library kraken;
-
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,7 +17,6 @@ import 'package:requests/requests.dart';
 import 'bundle.dart';
 import 'command.dart';
 
-export 'package:kraken/bridge.dart';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -32,29 +29,13 @@ const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
-bool appLoading = false;
-
-void connect(bool showPerformanceOverlay) {
-  RendererBinding.instance.scheduleFrameCallback((Duration time) {
-    elementManager = ElementManager();
-    elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
-
-    if (_connectedCallback != null) {
-      _connectedCallback();
-    }
-
-    RendererBinding.instance.addPostFrameCallback((time) {
-      invokeOnloadCallback();
-    });
-  });
-}
 
 void runApp({
   bool enableDebug = false,
   bool showPerformanceOverlay = false,
   bool shouldInitializeBinding = true,
   ConnectedCallback afterConnected,
-}) {
+}) async {
   if (enableDebug) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     debugPaintSizeEnabled = true;
@@ -66,7 +47,7 @@ void runApp({
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 
-  connect(showPerformanceOverlay);
+  await connect(showPerformanceOverlay);
 }
 
 Future<void> unmountApp() async {
@@ -79,11 +60,35 @@ Future<void> unmountApp() async {
 // refresh flutter paint and reload js context
 void reloadApp() async {
   bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-  appLoading = true;
   await unmountApp();
   await reloadJSContext();
-  appLoading = false;
-  connect(prevShowPerformanceOverlay);
+  await connect(prevShowPerformanceOverlay);
+}
+
+// refresh flutter paint only
+Future<void> refreshPaint() async {
+  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  await unmountApp();
+  await connect(prevShowPerformanceOverlay);
+}
+
+/// Connect render object to start rendering.
+Future<void> connect(bool showPerformanceOverlay) {
+  Completer<void> completer = Completer();
+  RendererBinding.instance.scheduleFrameCallback((_) {
+    elementManager = ElementManager();
+    elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
+
+    if (_connectedCallback != null) {
+      _connectedCallback();
+    }
+
+    completer.complete();
+    RendererBinding.instance.addPostFrameCallback((time) {
+      invokeOnloadCallback();
+    });
+  });
+  return completer.future;
 }
 
 String getBundleURLFromEnv() {
@@ -148,20 +153,12 @@ void afterConnected() async {
   evaluateScripts(content, bundleUrl ?? bundlePath ?? zipBundleUrl ?? DEFAULT_BUNDLE_PATH, 0);
 }
 
-void launchKraken() {
+void launch() {
   initBridge();
   _setTargetPlatformForDesktop();
   runApp(
-      enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected);
-}
-
-// refresh flutter paint only
-Future<void> refreshPaint() async {
-  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
-  appLoading = true;
-  await unmountApp();
-  appLoading = false;
-  connect(prevShowPerformanceOverlay);
+    enableDebug: Platform.environment[ENABLE_DEBUG] != null,
+    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+    afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : afterConnected
+  );
 }

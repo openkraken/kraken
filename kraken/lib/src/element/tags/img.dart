@@ -15,6 +15,7 @@ class ImgElement extends Element {
   RenderConstrainedBox imageConstrainedBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
+  ImageInfo _imageInfo;
 
   ImgElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
@@ -45,7 +46,7 @@ class ImgElement extends Element {
     if (!determinBothWidthAndHeight) {
       imageStream = image.resolve(imageBox.configuration);
       imageListeners = [
-        ImageStreamListener(resizeAfterImageLoaded),
+        ImageStreamListener(initImageInfo),
         ImageStreamListener(handleEventAfterImageLoaded),
       ];
       imageListeners.forEach((ImageStreamListener imageListener) {
@@ -72,15 +73,23 @@ class ImgElement extends Element {
     dispatchEvent(Event('load'));
   }
 
-  void resizeAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
+  void initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
+    _imageInfo = imageInfo;
+    _resize();
+  }
+
+  void _resize() {
+    if (_imageInfo == null) {
+      return;
+    }
     imageListeners?.forEach((ImageStreamListener imageListener) {
       imageStream.removeListener(imageListener);
     });
     imageListeners = null;
 
     BoxConstraints constraints;
-    double realWidth = imageInfo.image.width + 0.0;
-    double realHeight = imageInfo.image.height + 0.0;
+    double realWidth = _imageInfo.image.width + 0.0;
+    double realHeight = _imageInfo.image.height + 0.0;
     double width = 0.0;
     double height = 0.0;
     bool containWidth = style.contains('width');
@@ -172,5 +181,11 @@ class ImgElement extends Element {
       removeImgBox();
       addImgBox();
     }
+  }
+
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+    _resize();
   }
 }

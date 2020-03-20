@@ -16,10 +16,15 @@ using namespace kraken::foundation;
 
 Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   const Value &id = args[0];
-  const Value &callback = args[1];
+  const Value &devicePixelRatio = args[1];
+  const Value &callback = args[2];
 
   if (!id.isNumber()) {
     throw JSError(context, "Failed to export blob: missing element's id.");
+  }
+
+  if (!devicePixelRatio.isNumber()) {
+    throw JSError(context, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.");
   }
 
   if (!callback.isObject() && !callback.getObject(context).isFunction(context)) {
@@ -50,7 +55,7 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
 
       delete ctx;
     },
-    static_cast<void *>(ctx), id.getNumber());
+    static_cast<void *>(ctx), id.getNumber(), devicePixelRatio.getNumber());
   return Value::undefined();
 }
 
