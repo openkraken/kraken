@@ -14,7 +14,7 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 
   xit('local', async () => {
@@ -32,7 +32,7 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 
   xit('scroll', async () => {
@@ -61,6 +61,6 @@ describe('background-attachment', () => {
     append(container, text);
     append(BODY, container);
     await sleep(1);
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 });

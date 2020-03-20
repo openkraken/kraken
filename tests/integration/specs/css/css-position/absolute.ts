@@ -44,14 +44,12 @@ describe('Position absolute', () => {
     });
     append(parent, child);
     append(BODY, parent);
-    await matchScreenshot(parent);
+    await matchElementImageSnapshot(parent);
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(async () => {
-        child.style.left = '150px';
-        await matchScreenshot(parent);
-        done();
-      });
+    requestAnimationFrame(async () => {
+      child.style.left = '150px';
+      await matchElementImageSnapshot(parent);
+      done();
     });
   });
 });

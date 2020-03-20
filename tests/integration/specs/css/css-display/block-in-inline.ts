@@ -137,7 +137,7 @@ describe('Display block in inline', () => {
     append(inline, innerBlock);
     append(block, inline);
     append(BODY, block);
-    await matchScreenshot(block);
+    await matchElementImageSnapshot(block);
   });
 
   it('text should all coolapse into one line when click', async (done) => {
@@ -160,11 +160,11 @@ describe('Display block in inline', () => {
 
     document.body.addEventListener('click', async () => {
       toggleBlock.style.display = 'inline';
-      await matchScreenshot(block);
+      await matchElementImageSnapshot(block);
       done();
     });
 
-    await matchScreenshot(block);
+    await matchElementImageSnapshot(block);
 
     document.body.click();
   });
@@ -189,11 +189,11 @@ describe('Display block in inline', () => {
 
     document.body.addEventListener('click', async () => {
       toggleBlock.style.display = 'block';
-      await matchScreenshot(block);
+      await matchElementImageSnapshot(block);
       done();
     });
 
-    await matchScreenshot(block);
+    await matchElementImageSnapshot(block);
 
     document.body.click();
   });
@@ -257,6 +257,6 @@ describe('Display block in inline', () => {
     append(container, bControl2);
     append(BODY, container);
 
-    await matchScreenshot(container);
+    await matchElementImageSnapshot(container);
   });
 });
