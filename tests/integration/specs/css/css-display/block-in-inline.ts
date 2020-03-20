@@ -218,7 +218,7 @@ describe('Display block in inline', () => {
     await matchScreenshot();
   });
 
-  fit('sliver boxs', async () => {
+  it('sliver boxs', async () => {
     const containerStyle = {
       margin: '20px',
       font: '40px',

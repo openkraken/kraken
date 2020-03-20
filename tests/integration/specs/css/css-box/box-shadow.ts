@@ -16,6 +16,6 @@ describe('BoxShadow', () => {
     });
     append(reference, div);
     append(BODY, reference);
-    await matchScreenshot(reference);
+    await matchElementImageSnapshot(reference);
   });
 });
