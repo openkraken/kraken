@@ -1,7 +1,6 @@
 name: kraken
 description: Kraken Dart Framework
-version: 0.3.0
-author: Kraken Team
+version: 0.3.0+1
 homepage: http://rax.alibaba-inc.com/kraken
 
 environment:
@@ -11,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  archive: ^ 2.0.13
+  archive: ^2.0.11
   path: ^1.6.4
   requests: ^3.0.1
   meta: ^1.1.6
