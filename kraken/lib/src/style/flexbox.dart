@@ -166,22 +166,26 @@ class FlexItem {
 
   static RenderFlexParentData getParentData(StyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
-    parentData.flexGrow = 0;
-    parentData.flexShrink = 1;
-    parentData.flexBasis = 'auto';
-    parentData.fit = FlexFit.loose;
 
-    if (style != null) {
-      String grow = style[GROW];
-      parentData.fit = FlexFit.tight;
-      parentData.flexGrow = Length.toInt(grow);
+    // @NOTE(zhuoling): Describe this logic @zw.
+    parentData.fit = FlexFit.tight;
 
-      String shrink = style[SHRINK];
-      parentData.flexShrink = Length.toInt(shrink);
+    String grow = style[GROW];
+    parentData.flexGrow =
+        isEmptyStyleValue(grow)
+        ? 0 // Shrink default to 0.
+        : Length.toInt(grow);
 
-      String basis = style[BASIS];
-      parentData.flexBasis = basis;
-    }
+    String shrink = style[SHRINK];
+    parentData.flexShrink = isEmptyStyleValue(shrink)
+        ? 1  // Shrink default to 1.
+        : Length.toInt(shrink);
+
+    String basis = style[BASIS];
+    parentData.flexBasis = isEmptyStyleValue(basis)
+        ? 'auto' // flexBasis default to auto.
+        : basis;
+
     return parentData;
   }
 }
