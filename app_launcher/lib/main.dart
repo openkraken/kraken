@@ -1,5 +1,5 @@
-import 'package:kraken/launcher.dart';
+import 'package:kraken/kraken.dart' as kraken;
 
 void main() {
-  launchKraken();
+  kraken.launch();
 }
