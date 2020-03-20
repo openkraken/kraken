@@ -15,23 +15,41 @@ mixin FlowMixin {
   void decorateRenderFlow(RenderFlowLayout renderFlowLayout, StyleDeclaration style) {
     bool isFlexDisplay = (style['display'] as String).endsWith('flex');
 
-    renderFlowLayout.mainAxisAlignment = isFlexDisplay
-        ? getRunAlignmentFromFlexProperty(style[JUSTIFY_CONTENT])
-        : _getTextAlign(style[TEXT_ALIGN]);
+    renderFlowLayout.mainAxisAlignment = _getJustifyContent(style);
   }
 
-  MainAxisAlignment _getTextAlign(String textAlign) {
+  MainAxisAlignment _getJustifyContent(StyleDeclaration style) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
-    switch (textAlign) {
-      case 'right':
-        mainAxisAlignment = MainAxisAlignment.end;
-        break;
-      case 'center':
-        mainAxisAlignment = MainAxisAlignment.center;
-        break;
+    if (style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          mainAxisAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          mainAxisAlignment = MainAxisAlignment.center;
+          break;
+      }
     }
 
+    if (style.contains(JUSTIFY_CONTENT)) {
+      String justifyContent = style[JUSTIFY_CONTENT];
+      switch (justifyContent) {
+        case 'flex-end':
+          mainAxisAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          mainAxisAlignment = MainAxisAlignment.center;
+          break;
+        case 'space-between':
+          mainAxisAlignment = MainAxisAlignment.spaceBetween;
+          break;
+        case 'space-around':
+          mainAxisAlignment = MainAxisAlignment.spaceAround;
+          break;
+      }
+    }
     return mainAxisAlignment;
   }
 }

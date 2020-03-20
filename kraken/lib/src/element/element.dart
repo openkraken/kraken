@@ -619,9 +619,7 @@ abstract class Element extends Node
       display == 'block' ||
       isFlexWrap
     ) {
-      MainAxisAlignment runAlignment = getRunAlignmentFromFlexProperty(style['alignContent']);
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
-        runAlignment: runAlignment,
         children: children,
         style: style,
         nodeId: nodeId,
@@ -1407,24 +1405,3 @@ ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
   return parentData;
 }
 
-MainAxisAlignment getRunAlignmentFromFlexProperty(String flexProperty) {
-  MainAxisAlignment runAlignment = MainAxisAlignment.start;
-  switch (flexProperty) {
-    case 'end':
-      runAlignment = MainAxisAlignment.end;
-      break;
-    case 'center':
-      runAlignment = MainAxisAlignment.center;
-      break;
-    case 'space-around':
-      runAlignment = MainAxisAlignment.spaceAround;
-      break;
-    case 'space-between':
-      runAlignment = MainAxisAlignment.spaceBetween;
-      break;
-    case 'space-evenly':
-      runAlignment = MainAxisAlignment.spaceEvenly;
-      break;
-  }
-  return runAlignment;
-}

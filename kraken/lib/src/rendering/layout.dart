@@ -42,7 +42,7 @@ class RenderFlowLayout extends RenderBox
     double spacing = 0.0,
     MainAxisAlignment runAlignment = MainAxisAlignment.start,
     double runSpacing = 0.0,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
     this.nodeId,

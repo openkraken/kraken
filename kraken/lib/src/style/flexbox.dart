@@ -79,6 +79,7 @@ mixin FlexMixin {
         renderObject.textDirection = textDirection;
         renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
         renderObject.crossAxisAlignment = _getAlignItems(style, axis);
+        renderObject.runAlignment = _getAlignContent(style, axis);
       } else if (renderObject is RenderFlexLayout) {
         renderObject.verticalDirection = verticalDirection;
         renderObject.direction = axis;
@@ -87,6 +88,30 @@ mixin FlexMixin {
         renderObject.crossAxisAlignment = _getAlignItems(style, axis);
       }
     }
+  }
+
+  MainAxisAlignment _getAlignContent(StyleDeclaration style, Axis axis) {
+    // @TODO: add flex-direction column support
+    String flexProperty = style['alignContent'];
+    MainAxisAlignment runAlignment = MainAxisAlignment.start;
+    switch (flexProperty) {
+      case 'end':
+        runAlignment = MainAxisAlignment.end;
+        break;
+      case 'center':
+        runAlignment = MainAxisAlignment.center;
+        break;
+      case 'space-around':
+        runAlignment = MainAxisAlignment.spaceAround;
+        break;
+      case 'space-between':
+        runAlignment = MainAxisAlignment.spaceBetween;
+        break;
+      case 'space-evenly':
+        runAlignment = MainAxisAlignment.spaceEvenly;
+        break;
+    }
+    return runAlignment;
   }
 
   MainAxisAlignment _getJustifyContent(StyleDeclaration style, Axis axis) {
