@@ -172,15 +172,22 @@ class FlexItem {
     parentData.fit = FlexFit.loose;
 
     if (style != null) {
-      String grow = style[GROW];
       parentData.fit = FlexFit.tight;
-      parentData.flexGrow = Length.toInt(grow);
+
+      String grow = style[GROW];
+      if (grow != '') {
+        parentData.flexGrow = Length.toInt(grow);
+      }
 
       String shrink = style[SHRINK];
-      parentData.flexShrink = Length.toInt(shrink);
+      if (shrink != '') {
+        parentData.flexShrink = Length.toInt(shrink);
+      }
 
       String basis = style[BASIS];
-      parentData.flexBasis = basis;
+      if (basis != '') {
+        parentData.flexBasis = basis;
+      }
     }
     return parentData;
   }
