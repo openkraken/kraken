@@ -139,4 +139,124 @@ describe('Display block in inline', () => {
     append(BODY, block);
     await matchScreenshot(block);
   });
+
+  it('text should all coolapse into one line when click', async (done) => {
+    const inlineStyle = {display: 'inline'};
+    const blockStyle = {display: 'block'};
+
+    let block = create('div', blockStyle);
+    let inline = create('div', inlineStyle);
+    let text1 = createText('This text should all collapse');
+    let toggleBlock = create('div', blockStyle);
+    let text2 = createText('into one line of text when');
+    let text3 = createText('you click on the text');
+
+    append(toggleBlock, text2);
+    append(inline, text1);
+    append(inline, toggleBlock);
+    append(inline, text3);
+    append(block, inline);
+    append(BODY, block);
+
+    document.body.addEventListener('click', async () => {
+      toggleBlock.style.display = 'inline';
+      await matchScreenshot(block);
+      done();
+    });
+
+    await matchScreenshot(block);
+
+    document.body.click();
+  });
+
+  it('text should all split into three line when click', async (done) => {
+    const inlineStyle = {display: 'inline'};
+    const blockStyle = {display: 'block'};
+
+    let block = create('div', blockStyle);
+    let inline = create('div', inlineStyle);
+    let text1 = createText('This text should split into');
+    let toggleBlock = create('div', inlineStyle);
+    let text2 = createText('three separate lines when');
+    let text3 = createText('you click on the text');
+
+    append(toggleBlock, text2);
+    append(inline, text1);
+    append(inline, toggleBlock);
+    append(inline, text3);
+    append(block, inline);
+    append(BODY, block);
+
+    document.body.addEventListener('click', async () => {
+      toggleBlock.style.display = 'block';
+      await matchScreenshot(block);
+      done();
+    });
+
+    await matchScreenshot(block);
+
+    document.body.click();
+  });
+
+  it('There should be no red 2', async () => {
+    const controlStyle = {backgroundColor: 'red', height: '50px', width: '50px'};
+    const inlineStyle = {display: 'inline'};
+    const blockStyle = {display: 'block'};
+    const testStyle = {backgroundColor: 'green', height: '50px', width: '50px', position: 'relative', top: '-50px'};
+
+    let control = create('div', controlStyle);
+    let wrap = create('div', {});
+    let inline = create('div', inlineStyle);
+    let block = create('div', {
+      ...blockStyle,
+      ...testStyle
+    });
+    append(inline, block);
+    append(wrap, inline);
+    append(BODY, control);
+    append(BODY, wrap);
+    await matchScreenshot();
+  });
+
+  fit('sliver boxs', async () => {
+    const containerStyle = {
+      margin: '20px',
+      font: '40px',
+      border: '1px solid sliver',
+      width: '80px',
+      color: 'aqua',
+      backgroundColor: 'fuchsia'
+    };
+    const cStyle = {
+      color: 'orange',
+      backgroundColor: 'orange',
+      width: '40px',
+      marginLeft: '0',
+      borderLeft: '40px solid blue',
+    };
+    const bStyle = {
+      color: 'yellow'
+    };
+    let container = create('div', containerStyle);
+    let aText = createText(' A ');
+    let bControl = create('span', bStyle);
+    let bText = createText('B');
+    let cControl = create('div', cStyle);
+    let cText = createText('C');
+    let aText2 = createText('  A');
+    let bControl2 = create('span', bStyle);
+    let bText2 = createText('B');
+
+    append(bControl, bText);
+    append(bControl2, bText2);
+    append(cControl, cText);
+    append(container, aText);
+    append(container, bControl);
+    append(container, cControl);
+    append(container, aText2);
+    append(container, bControl2);
+    append(BODY, container);
+
+    await matchScreenshot(container);
+  });
 });
