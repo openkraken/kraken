@@ -40,22 +40,40 @@ class RenderElementBoundary extends RenderTransform
 
   @override
   void performLayout() {
+    String display = style['display'];
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
+      BoxConstraints additionalConstraints = constraints;
+      if (display == 'none') {
+        additionalConstraints = BoxConstraints(
+          minWidth: 0,
+          maxWidth: 0,
+          minHeight: 0,
+          maxHeight: 0,
+        );
+      }
+      child.layout(additionalConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
     }
 
-    if (style != null) {
-      String display = style['display'];
-      if (display == 'none') {
-        size = constraints.constrain(Size(0, 0));
-      }
-    }
     // default transform origin center
     if (origin == null) {
       origin = Offset(size.width / 2, size.height / 2);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    String display = style['display'];
+    void painter(PaintingContext context, Offset offset) {}
+
+    // Donnot paint when display none
+    if (display == 'none') {
+      context.pushClipRect(
+          needsCompositing, offset, Offset.zero & size, painter);
+    } else {
+      super.paint(context, offset);
     }
   }
 }

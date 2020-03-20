@@ -965,6 +965,8 @@ abstract class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
+    renderElementBoundary.markNeedsLayout();
+
     if (renderLayoutBox != null) {
       String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
       String currentDisplay = isEmptyStyleValue(present) ? defaultDisplay : present;
