@@ -525,7 +525,7 @@ class RenderFlowLayout extends RenderBox
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
-          mainAxisLimit = ElementStyleMixin.getConstrainedWidth(nodeId);
+          mainAxisLimit = ElementStyleMixin.getElementMaxWidth(nodeId);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;

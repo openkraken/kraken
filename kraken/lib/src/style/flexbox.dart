@@ -17,17 +17,8 @@ class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex basis
   String flexBasis;
 
-  /// How a flexible child is inscribed into the available space.
-  ///
-  /// If [flex] is non-zero, the [fit] determines whether the child fills the
-  /// space the parent makes available during layout. If the fit is
-  /// [FlexFit.tight], the child is required to fill the available space. If the
-  /// fit is [FlexFit.loose], the child can be at most as large as the available
-  /// space (but is allowed to be smaller).
-  FlexFit fit;
-
   @override
-  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis, fit=$fit';
+  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
 
 mixin FlexMixin {
@@ -191,9 +182,6 @@ class FlexItem {
 
   static RenderFlexParentData getParentData(StyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
-
-    // @NOTE(zhuoling): Describe this logic @zw.
-    parentData.fit = FlexFit.tight;
 
     String grow = style[GROW];
     parentData.flexGrow =

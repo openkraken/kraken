@@ -517,11 +517,6 @@ class RenderFlexLayout extends RenderBox
     return minConstraints;
   }
 
-  FlexFit _getFit(RenderBox child) {
-    final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.fit ?? FlexFit.tight;
-  }
-
   double _getCrossSize(RenderBox child) {
     switch (_direction) {
       case Axis.horizontal:
@@ -598,9 +593,7 @@ class RenderFlexLayout extends RenderBox
               _direction == Axis.horizontal ? 'width' : 'height';
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
-          if (!canFlex &&
-              (mainAxisSize == MainAxisSize.max ||
-                  _getFit(child) == FlexFit.tight)) {
+          if (!canFlex) {
             error = ErrorSummary(
                 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
             message = ErrorDescription(
@@ -1017,7 +1010,6 @@ class RenderFlexItem extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderFlexParentData) {
       RenderFlexParentData flexParentData = RenderFlexParentData();
-      flexParentData.fit = FlexFit.tight;
       child.parentData = flexParentData;
     }
   }

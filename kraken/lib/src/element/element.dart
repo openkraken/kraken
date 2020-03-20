@@ -78,11 +78,17 @@ abstract class Element extends Node
   RenderIntersectionObserver renderIntersectionObserver;
   RenderElementBoundary renderElementBoundary;
 
+  // Horizontal margin dimension (left + right)
   double get cropMarginWidth => renderMargin.margin.horizontal;
+  // Vertial margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
+  // Horizontal padding dimension (left + right)
   double get cropPaddingWidth => renderPadding.padding.horizontal;
+  // Vertial padding dimension (top + bottom)
   double get cropPaddingHeight => renderPadding.padding.vertical;
+  // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderBorderHolder.margin.horizontal;
+  // Vertial border dimension (top + bottom)
   double get cropBorderHeight => renderBorderHolder.margin.vertical;
 
   Element({
@@ -842,10 +848,6 @@ abstract class Element extends Node
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
-      parentData.fit = flexParentData.fit;
-      if (element.style[FlexItem.ALIGN_ITEMS] != 'stretch') {
-        flexParentData.fit = FlexFit.tight;
-      }
 
       // Update margin for flex child.
       element.updateRenderMargin(element.style);
