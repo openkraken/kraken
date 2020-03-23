@@ -26,7 +26,7 @@ const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
-typedef ConnectedCallback = void Function();
+typedef ConnectedCallback = Future<void> Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
 String _bundleURLOverride;
@@ -79,12 +79,12 @@ Future<void> refreshPaint() async {
 /// Connect render object to start rendering.
 Future<void> connect(bool showPerformanceOverlay) {
   Completer<void> completer = Completer();
-  RendererBinding.instance.scheduleFrameCallback((_) {
+  RendererBinding.instance.scheduleFrameCallback((_) async {
     elementManager = ElementManager();
     elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
     if (_connectedCallback != null) {
-      _connectedCallback();
+      await _connectedCallback();
     }
 
     completer.complete();
@@ -149,7 +149,7 @@ void afterConnectedForCommand() async {
   CommandRun(getCommandPathFromEnv()).run();
 }
 
-void defaultAfterConnected() async {
+Future<void> defaultAfterConnected() async {
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();

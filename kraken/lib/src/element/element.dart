@@ -1100,7 +1100,7 @@ abstract class Element extends Node
       case 'scroll':
         return scroll(args);
       case 'scrollBy':
-        return scroll(args, true);
+        return scroll(args, isScrollBy: true);
       default:
         debugPrint('Unknown method call. name: $name, args: ${args}');
     }

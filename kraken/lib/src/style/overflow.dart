@@ -220,7 +220,7 @@ mixin StyleOverflowMixin {
     return 0;
   }
 
-  void scroll(List args, [bool isScrollBy]) {
+  void scroll(List args, {bool isScrollBy}) {
     if (args != null && args.length > 0) {
       dynamic option = args[0];
       if (option is Map) {
