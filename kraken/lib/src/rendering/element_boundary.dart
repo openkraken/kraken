@@ -17,7 +17,9 @@ class RenderElementBoundary extends RenderTransform
     Matrix4 transform,
     Offset origin,
     this.nodeId,
+    bool shouldRender,
   }) : assert(child != null),
+    _shouldRender = shouldRender,
     super(
       child: child,
       transform: transform,
@@ -27,9 +29,20 @@ class RenderElementBoundary extends RenderTransform
   }
 
   RenderBox child;
+
   int nodeId;
 
   StyleDeclaration style;
+
+  bool _shouldRender;
+  bool get shouldRender => _shouldRender;
+  set shouldRender(bool value) {
+    assert(value != null);
+    if (_shouldRender != value) {
+      markNeedsLayout();
+     _shouldRender = value;
+    }
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -40,10 +53,9 @@ class RenderElementBoundary extends RenderTransform
 
   @override
   void performLayout() {
-    String display = style['display'];
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
-      if (display == 'none') {
+      if (!shouldRender) {
         additionalConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: 0,
@@ -65,11 +77,9 @@ class RenderElementBoundary extends RenderTransform
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    String display = style['display'];
     void painter(PaintingContext context, Offset offset) {}
 
-    // Donnot paint when display none
-    if (display == 'none') {
+    if (!shouldRender) {
       context.pushClipRect(
           needsCompositing, offset, Offset.zero & size, painter);
     } else {
