@@ -38,5 +38,5 @@ lib/generated_plugin_registrant.dart
 
 
 .specs
-
+.pubspec.lock
 GeneratedPluginRegistrant.swift
