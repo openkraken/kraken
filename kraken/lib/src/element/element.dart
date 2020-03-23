@@ -987,6 +987,9 @@ abstract class Element extends Node
   void _styleDecoratedChangedListener(String property, original, present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
+    if (shouldInitBackgroundImage(style)) {
+      updateBackgroundImage(style, renderPadding, nodeId);
+    }
   }
 
   void _styleOpacityChangedListener(String property, original, present) {

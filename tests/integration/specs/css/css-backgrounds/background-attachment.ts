@@ -17,7 +17,7 @@ describe('background-attachment', () => {
     await matchScreenshot(container);
   });
 
-  xit('local', async () => {
+  it('local', async () => {
     let container = create('div', {
       'background-attachment': 'local',
       'background-image': 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
@@ -35,7 +35,7 @@ describe('background-attachment', () => {
     await matchScreenshot(container);
   });
 
-  xit('scroll', async () => {
+  it('scroll', async () => {
     let container = create('div', {
       'background-attachment': 'local',
       'background-image': 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
