@@ -19,9 +19,21 @@ abstract class Length {
     } else if (value is int) {
       return value.toDouble();
     } else if (value is String) {
-      return double.parse(value);
+      return double.tryParse(value) ?? 0.0;
     } else {
       return 0.0;
+    }
+  }
+
+  static int toInt(value) {
+    if (value is double) {
+      return value.toInt();
+    } else if (value is int) {
+      return value;
+    } else if (value is String) {
+      return int.tryParse(value) ?? 0;
+    } else {
+      return 0;
     }
   }
 

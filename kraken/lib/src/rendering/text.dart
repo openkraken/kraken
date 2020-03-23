@@ -20,7 +20,7 @@ class RenderTextBox extends RenderBox
   RenderTextBox({
     this.nodeId,
     String text,
-    Style style,
+    StyleDeclaration style,
   }) : assert(text != null) {
     _text = text;
     _style = style;
@@ -48,9 +48,9 @@ class RenderTextBox extends RenderBox
     _rebuild();
   }
 
-  Style _style;
-  Style get style => _style;
-  set style(Style newStyle) {
+  StyleDeclaration _style;
+  StyleDeclaration get style => _style;
+  set style(StyleDeclaration newStyle) {
     _style = newStyle;
     _rebuild();
   }

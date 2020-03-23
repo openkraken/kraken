@@ -187,7 +187,7 @@ abstract class WebViewElement extends Element {
 
     if (key == SRC) {
       initialUrl = value;
-      renderLayoutElement.removeAll();
+      renderLayoutBox.removeAll();
       _buildPlatformRenderBox();
       addChild(sizedBox);
     } else if (key == WIDTH || key == HEIGHT) {

@@ -4,14 +4,16 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-RegExp spaceRegExp = RegExp(r" ");
+RegExp spaceRegExp = RegExp(r' ');
 
 double baseGetDisplayPortedLength(input) {
-  if (input == null) return null;
+  if (isEmptyStyleValue(input)) {
+    // Null is not euqal with 0.0
+    return null;
+  }
   if (input is num) {
     input = input.toString();
   }
@@ -23,7 +25,7 @@ List<String> baseGetShorttedProperties(String input) {
   return input.trim().split(spaceRegExp);
 }
 
-Padding baseGetPaddingFromStyle(Style style) {
+Padding baseGetPaddingFromStyle(StyleDeclaration style) {
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -92,14 +94,16 @@ mixin DimensionMixin {
   RenderPadding renderPadding;
   Padding oldPadding;
   Padding oldMargin;
-  SizeConstraints oldConstraints;
+  SizedConstraints oldConstraints;
+  double cropWidth = 0;
+  double cropHeight = 0;
 
   double getDisplayPortedLength(input) {
     return baseGetDisplayPortedLength(input);
   }
 
-  void updateConstraints(Style style, Map<String, Transition> transitionMap) {
-    if (renderConstrainedBox != null && style != null) {
+  void updateConstraints(StyleDeclaration style, Map<String, Transition> transitionMap) {
+    if (renderConstrainedBox != null) {
       Transition allTransition,
           widthTransition,
           heightTransition,
@@ -117,7 +121,7 @@ mixin DimensionMixin {
         maxHeightTransition = transitionMap['max-height'];
       }
 
-      SizeConstraints newConstraints = _getConstraints(style);
+      SizedConstraints newConstraints = _getConstraints(style);
 
       if (allTransition != null ||
           widthTransition != null ||
@@ -139,7 +143,7 @@ mixin DimensionMixin {
         double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) -
             (oldConstraints.maxHeight ?? 0.0);
 
-        SizeConstraints progressConstraints = SizeConstraints(
+        SizedConstraints progressConstraints = SizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -147,7 +151,7 @@ mixin DimensionMixin {
             oldConstraints.minHeight,
             oldConstraints.maxHeight);
 
-        SizeConstraints baseConstraints = SizeConstraints(
+        SizedConstraints baseConstraints = SizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -224,9 +228,8 @@ mixin DimensionMixin {
             newConstraints.toBoxConstraints();
       }
 
-      String display = style.get('display');
       // Remove inline element dimension
-      if (display == 'inline') {
+      if (style['display'] == 'inline') {
         renderConstrainedBox.additionalConstraints = BoxConstraints();
       }
 
@@ -235,7 +238,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderConstrainedBox(
-      RenderObject renderObject, Style style) {
+      RenderObject renderObject, StyleDeclaration style) {
     if (style != null) {
       oldConstraints = _getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
@@ -247,7 +250,7 @@ mixin DimensionMixin {
     }
   }
 
-  SizeConstraints _getConstraints(Style style) {
+  SizedConstraints _getConstraints(StyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -255,9 +258,8 @@ mixin DimensionMixin {
       double maxWidth = getDisplayPortedLength(style['maxWidth']);
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
-
-      return SizeConstraints(
-          width, height, minWidth, maxWidth, minHeight, maxHeight);
+      return SizedConstraints(
+        width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
       return null;
     }
@@ -268,19 +270,17 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, Style style, Element element) {
+      RenderObject renderObject, StyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
-    if (element != null) {
-      element.cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
-      element.cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
-    }
+    cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
+    cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
     );
   }
 
-  Padding getMarginFromStyle(Style style) {
+  Padding getMarginFromStyle(StyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double right = 0.0;
@@ -336,14 +336,13 @@ mixin DimensionMixin {
     return Padding(left, top, right, bottom);
   }
 
-  EdgeInsets getMarginInsetsFromStyle(Style style) {
+  EdgeInsets getMarginInsetsFromStyle(StyleDeclaration style) {
     oldMargin = getMarginFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(Style style, Element element,
-      [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(StyleDeclaration style, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -391,8 +390,7 @@ mixin DimensionMixin {
           }
           _updateMargin(
               EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                  progressMargin.right, progressMargin.bottom),
-              element);
+                  progressMargin.right, progressMargin.bottom));
         }
       });
 
@@ -413,8 +411,7 @@ mixin DimensionMixin {
         }
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top = progress * marginTopInterval + baseMargin.top;
@@ -426,58 +423,53 @@ mixin DimensionMixin {
             progress * marginBottomInterval + baseMargin.bottom;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left = progress * marginLeftInterval + baseMargin.left;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right =
             progress * marginRightInterval + baseMargin.right;
         _updateMargin(
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom),
-            element);
+                progressMargin.right, progressMargin.bottom));
       });
       oldMargin = newMargin;
     } else {
-      _updateMargin(getMarginInsetsFromStyle(style), element);
+      _updateMargin(getMarginInsetsFromStyle(style));
     }
   }
 
-  void _updateMargin(EdgeInsets margin, Element element) {
+  void _updateMargin(EdgeInsets margin) {
     if (margin == null) {
       return;
     }
-    if (element != null) {
-      element.cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
-      element.cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
-    }
+    cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
+    cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, Style style) {
+  RenderObject initRenderPadding(RenderObject renderObject, StyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  Padding getPaddingFromStyle(Style style) {
+  Padding getPaddingFromStyle(StyleDeclaration style) {
     return baseGetPaddingFromStyle(style);
   }
 
-  EdgeInsets getPaddingInsetsFromStyle(Style style) {
+  EdgeInsets getPaddingInsetsFromStyle(StyleDeclaration style) {
     oldPadding = getPaddingFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(Style style,
+  void updateRenderPadding(StyleDeclaration style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
     Transition all,
@@ -598,7 +590,7 @@ class Padding {
   Padding(this.left, this.top, this.right, this.bottom);
 }
 
-class SizeConstraints {
+class SizedConstraints {
   double width;
   double height;
   double minWidth;
@@ -606,7 +598,7 @@ class SizeConstraints {
   double minHeight;
   double maxHeight;
 
-  SizeConstraints(this.width, this.height, this.minWidth, this.maxWidth,
+  SizedConstraints(this.width, this.height, this.minWidth, this.maxWidth,
       this.minHeight, this.maxHeight);
 
   BoxConstraints toBoxConstraints() {
@@ -616,5 +608,10 @@ class SizeConstraints {
       maxWidth: maxWidth ?? width ?? double.infinity,
       maxHeight: maxHeight ?? height ?? double.infinity,
     );
+  }
+
+  @override
+  String toString() {
+    return 'SizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
   }
 }

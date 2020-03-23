@@ -41,7 +41,7 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
       // inherit parent style
       style: parentElement.style,
     );
-    parentElement.renderLayoutElement.add(renderTextBox);
+    parentElement.renderLayoutBox.add(renderTextBox);
   }
 
   // The text string.
@@ -102,6 +102,17 @@ abstract class Node extends EventTarget {
   Node parentNode;
   NodeType nodeType;
   String nodeName;
+
+  Element get parent => this.parentNode;
+  Element get parentElement => parent;
+
+  List<Element> get children {
+    List<Element> _children = [];
+    for (var child in this.childNodes) {
+      if (child is Element) _children.add(child);
+    }
+    return _children;
+  }
 
   Node(this.nodeType, this.nodeId, this.nodeName) {
     assert(nodeType != null);
