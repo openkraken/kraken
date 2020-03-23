@@ -5,7 +5,6 @@ import 'package:kraken/element.dart';
 import 'package:meta/meta.dart';
 
 class RenderGradient extends RenderDecoratedBox {
-
   int _nodeId;
 
   RenderGradient({
@@ -19,8 +18,6 @@ class RenderGradient extends RenderDecoratedBox {
           position: position,
           configuration: configuration,
           child: child);
-
-
 
   @override
   void performLayout() {

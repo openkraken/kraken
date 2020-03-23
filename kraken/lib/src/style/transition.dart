@@ -64,7 +64,7 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   static Map<String, Transition> parseTransitions(StyleDeclaration style) {
-    List<String> list = style['transition'].split(",");
+    List<String> list = style['transition'].split(',');
     Map<String, Transition> map = {};
 
     for (String transition in list) {

@@ -23,9 +23,6 @@ dependencies:
   kraken:
     path: ../kraken
 
-  path_provider: ^1.1.0
-  dio: ^2.0.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

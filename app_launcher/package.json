@@ -1,7 +1,8 @@
 {
-  "name": "app_launcher",
+  "name": "kraken-app-launcher",
   "version": "0.0.0",
   "scripts": {
+    "start": "flutter run",
     "run:android": "flutter build apk --debug --target-platform=android-arm && flutter run --use-application-binary=build/app/outputs/apk/debug/app-debug.apk"
   }
 }
