@@ -246,7 +246,7 @@ abstract class Element extends Node
       // move element back to document flow
       if (prevPosition == 'absolute' ||
           prevPosition == 'fixed' ||
-          (prevPosition == 'sticky' && stickyFixed)) {
+          (prevPosition == 'sticky')) {
 
         // Find positioned element to remove
         ContainerRenderObjectMixin parentRenderObject = renderElementBoundary.parent;
