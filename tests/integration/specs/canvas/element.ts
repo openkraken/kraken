@@ -3,7 +3,7 @@ describe('Canvas element', () => {
     let canvas = create('canvas', {
       width: '200px',
       height: '200px',
-      backgroundColor: 'blue'
+      backgroundColor: 'blue',
     });
     append(BODY, canvas);
     await matchElementImageSnapshot(canvas);
@@ -12,12 +12,12 @@ describe('Canvas element', () => {
   it('behavior like inline element', async () => {
     let wrapper = create('div', {
       width: '200px',
-      height: '200px'
+      height: '200px',
     });
     let canvas = create('canvas', {
       width: '100px',
       height: '100px',
-      backgroundColor: 'blue'
+      backgroundColor: 'blue',
     });
     let text = create('span', {}, document.createTextNode('12345'));
     append(wrapper, canvas);

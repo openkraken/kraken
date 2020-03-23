@@ -121,16 +121,16 @@ describe('Display block in inline', () => {
   it('there should be no red', async () => {
     let block = create('div', {
       color: 'green',
-      display: 'block'
+      display: 'block',
     });
     let inline = create('div', {
       background: 'red',
       color: 'red',
-      display: 'inline'
+      display: 'inline',
     });
     let innerBlock = create('div', {
       color: 'green',
-      display: 'block'
+      display: 'block',
     });
     let text = createText('There should be no red');
     append(innerBlock, text);
@@ -140,9 +140,9 @@ describe('Display block in inline', () => {
     await matchElementImageSnapshot(block);
   });
 
-  it('text should all coolapse into one line when click', async (done) => {
-    const inlineStyle = {display: 'inline'};
-    const blockStyle = {display: 'block'};
+  it('text should all coolapse into one line when click', async done => {
+    const inlineStyle = { display: 'inline' };
+    const blockStyle = { display: 'block' };
 
     let block = create('div', blockStyle);
     let inline = create('div', inlineStyle);
@@ -170,9 +170,9 @@ describe('Display block in inline', () => {
     document.body.click();
   });
 
-  it('text should all split into three line when click', async (done) => {
-    const inlineStyle = {display: 'inline'};
-    const blockStyle = {display: 'block'};
+  it('text should all split into three line when click', async done => {
+    const inlineStyle = { display: 'inline' };
+    const blockStyle = { display: 'block' };
 
     let block = create('div', blockStyle);
     let inline = create('div', inlineStyle);
@@ -201,17 +201,27 @@ describe('Display block in inline', () => {
   });
 
   it('There should be no red 2', async () => {
-    const controlStyle = {backgroundColor: 'red', height: '50px', width: '50px'};
-    const inlineStyle = {display: 'inline'};
-    const blockStyle = {display: 'block'};
-    const testStyle = {backgroundColor: 'green', height: '50px', width: '50px', position: 'relative', top: '-50px'};
+    const controlStyle = {
+      backgroundColor: 'red',
+      height: '50px',
+      width: '50px',
+    };
+    const inlineStyle = { display: 'inline' };
+    const blockStyle = { display: 'block' };
+    const testStyle = {
+      backgroundColor: 'green',
+      height: '50px',
+      width: '50px',
+      position: 'relative',
+      top: '-50px',
+    };
 
     let control = create('div', controlStyle);
     let wrap = create('div', {});
     let inline = create('div', inlineStyle);
     let block = create('div', {
       ...blockStyle,
-      ...testStyle
+      ...testStyle,
     });
     append(inline, block);
     append(wrap, inline);
@@ -227,7 +237,7 @@ describe('Display block in inline', () => {
       border: '1px solid sliver',
       width: '80px',
       color: 'aqua',
-      backgroundColor: 'fuchsia'
+      backgroundColor: 'fuchsia',
     };
     const cStyle = {
       color: 'orange',
@@ -237,7 +247,7 @@ describe('Display block in inline', () => {
       borderLeft: '40px solid blue',
     };
     const bStyle = {
-      color: 'yellow'
+      color: 'yellow',
     };
     let container = create('div', containerStyle);
     let aText = createText(' A ');

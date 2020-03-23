@@ -1,4 +1,4 @@
-describe('Tags img',  () => {
+describe('Tags img', () => {
   it('basic', done => {
     const img = document.createElement('img');
     img.addEventListener('load', async () => {

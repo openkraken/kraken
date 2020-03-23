@@ -1,4 +1,4 @@
-describe('Background-color',  () => {
+describe('Background-color', () => {
   it('red', async () => {
     const div = document.createElement('div');
     setStyle(div, {
@@ -16,13 +16,13 @@ describe('Background-color',  () => {
       backgroundColor: 'red',
       display: 'none',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
   });
 
-  xit('red with display when window.onload', (done) => {
+  xit('red with display when window.onload', done => {
     window.onload = async () => {
       div.style.display = 'none';
       await matchScreenshot();
@@ -31,7 +31,7 @@ describe('Background-color',  () => {
     const div = create('div', {
       backgroundColor: 'red',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     append(BODY, div);
   });
@@ -40,20 +40,20 @@ describe('Background-color',  () => {
     let red = create('div', {
       width: '60px',
       height: '60px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     let green = create('div', {
       width: '100px',
       height: '100px',
       position: 'relative',
       bottom: '60px',
-      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/green-60-60.png)',
-      backgroundRepeat: 'no-repeat'
+      backgroundImage:
+        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/green-60-60.png)',
+      backgroundRepeat: 'no-repeat',
     });
     append(BODY, red);
     append(BODY, green);
     await sleep(1);
     await matchScreenshot();
   });
-
 });

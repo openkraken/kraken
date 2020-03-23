@@ -1,5 +1,5 @@
 describe('setTimeout', () => {
-  it('resolve after 100ms', (done) => {
+  it('resolve after 100ms', done => {
     const startTime = Date.now();
     setTimeout(() => {
       const duration = Date.now() - startTime;

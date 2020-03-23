@@ -46,7 +46,7 @@ describe('Display inline-block', () => {
       padding: '15px',
       margin: '20px 0px',
       backgroundColor: 'yellow',
-      display: 'inline-block'
+      display: 'inline-block',
     });
     append(magenta, box);
     append(BODY, magenta);
@@ -63,7 +63,7 @@ describe('Display inline-block', () => {
       padding: '15px',
       margin: '20px 0px',
       backgroundColor: 'yellow',
-      display: 'block'
+      display: 'block',
     });
     append(magenta, box);
     append(BODY, magenta);

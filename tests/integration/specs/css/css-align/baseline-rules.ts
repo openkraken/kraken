@@ -11,7 +11,7 @@ describe('Baseline-rules flexbox', () => {
     width: '50px',
     height: '50px',
     backgroundColor: 'blue',
-    display: 'inline-block'
+    display: 'inline-block',
   };
 
   const boxStyle = {

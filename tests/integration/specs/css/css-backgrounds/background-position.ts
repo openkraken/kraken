@@ -14,7 +14,8 @@ describe('Background-position', () => {
     setStyle(position1, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+      backgroundImage:
+        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
       backgroundPosition: 'center',
     });
     position.appendChild(position1);
@@ -38,7 +39,8 @@ describe('Background-position', () => {
     setStyle(position2, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'left',
     });
     position.appendChild(position2);
@@ -59,12 +61,12 @@ describe('Background-position', () => {
       flexDirection: 'row',
     });
 
-
     const position3 = document.createElement('div');
     setStyle(position3, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'top',
     });
     position.appendChild(position3);
@@ -89,7 +91,8 @@ describe('Background-position', () => {
     setStyle(position4, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'right',
     });
     position.appendChild(position4);
@@ -113,7 +116,8 @@ describe('Background-position', () => {
     setStyle(position5, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'bottom',
     });
     position.appendChild(position5);
@@ -135,7 +139,8 @@ describe('Background-position', () => {
     setStyle(div, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'right center',
     });
     append(position, div);

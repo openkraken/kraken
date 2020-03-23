@@ -3,13 +3,13 @@ describe('Color text', () => {
     it(name, async () => {
       let container = create('div', {});
       let p1 = create('p', {
-        color: `rgb(${rgba[0]},${rgba[1]},${rgba[2]})`
+        color: `rgb(${rgba[0]},${rgba[1]},${rgba[2]})`,
       });
       let p2 = create('p', {
-        color: name
+        color: name,
       });
       let p3 = create('p', {
-        color: `#${rgbToHex(rgba[0])}${rgbToHex(rgba[1])}${rgbToHex(rgba[2])}`
+        color: `#${rgbToHex(rgba[0])}${rgbToHex(rgba[1])}${rgbToHex(rgba[2])}`,
       });
       let t1 = createText('helloworld');
       let t2 = createText('helloworld');
@@ -28,7 +28,7 @@ describe('Color text', () => {
   function rgbToHex(rgb: number) {
     var hex = Number(rgb).toString(16);
     if (hex.length < 2) {
-      hex = "0" + hex;
+      hex = '0' + hex;
     }
     return hex;
   }
@@ -188,23 +188,21 @@ describe('Color text', () => {
     testColor(arr[0] as string, arr[1] as [number, number, number, number]);
   }
 
-
   it('blue border', async () => {
     let test = create('div', {
       border: '5px solid blue',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     let div = create('div', {
       borderBottomStyle: 'solid',
       borderBottomWidth: '1px',
       borderBottomColor: '#1000',
       height: 0,
-      width: '100px'
+      width: '100px',
     });
     append(test, div);
     append(BODY, test);
     await matchElementImageSnapshot(test);
   });
-
 });

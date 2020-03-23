@@ -19,7 +19,7 @@ describe('Box border', () => {
       height: '100px',
       border: '25px',
       borderStyle: 'solid',
-      borderColor: 'black'
+      borderColor: 'black',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -29,7 +29,7 @@ describe('Box border', () => {
     const div = create('div', {
       width: '100px',
       height: '100px',
-      border: '2px dashed red'
+      border: '2px dashed red',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -40,7 +40,7 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       border: '10px dashed red',
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -51,7 +51,7 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       'border-bottom-left-radius': '100px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -62,7 +62,7 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       'border-bottom-right-radius': '100px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -73,7 +73,7 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       'border-top-left-radius': '100px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -84,7 +84,7 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       'border-top-right-radius': '100px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     append(BODY, div);
     await matchElementImageSnapshot(div);
@@ -97,7 +97,7 @@ describe('Box border', () => {
       height: '100px',
       top: '50px',
       left: '50px',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     let green = create('div', {
       position: 'absolute',
@@ -106,12 +106,12 @@ describe('Box border', () => {
       width: '100px',
       height: '100px',
       borderRadius: '50px',
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     });
     let container = create('div', {
       width: '200px',
       height: '200px',
-      position: 'absolute'
+      position: 'absolute',
     });
     append(container, red);
     append(container, green);
