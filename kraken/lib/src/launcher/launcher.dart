@@ -15,12 +15,10 @@ import 'package:kraken/element.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
-import 'command.dart';
 
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
@@ -107,10 +105,6 @@ String getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
-String getCommandPathFromEnv() {
-  return Platform.environment[COMMAND_PATH];
-}
-
 Future<String> getBundleContent({String bundleURL, String bundlePath, String zipBundleURL}) async {
   if (bundleURL != null) {
     return Requests.get(bundleURL).then((Response response) => response.content());
@@ -145,10 +139,6 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-void afterConnectedForCommand() async {
-  CommandRun(getCommandPathFromEnv()).run();
-}
-
 Future<void> defaultAfterConnected() async {
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
@@ -173,6 +163,6 @@ void launch({
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : defaultAfterConnected
+      afterConnected: defaultAfterConnected
   );
 }
