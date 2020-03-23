@@ -7,7 +7,7 @@ mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
 
-  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId) {
+  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId, bool shouldRender) {
     if (style.contains('transform')) {
       List<Method> methods = Method.parseMethod(style['transform']);
       matrix4 = combineTransform(methods) ?? matrix4;
@@ -18,7 +18,9 @@ mixin TransformStyleMixin {
         transform: matrix4,
         nodeId: nodeId,
         style: style,
-        origin: offset);
+        origin: offset,
+        shouldRender: shouldRender,
+    );
     return transform;
   }
 
