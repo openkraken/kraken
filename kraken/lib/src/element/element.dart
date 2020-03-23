@@ -1094,6 +1094,10 @@ abstract class Element extends Node
         return getBoundingClientRect();
       case 'click':
         return click();
+      case 'scroll':
+        return scroll(args);
+      case 'scrollBy':
+        return scroll(args, true);
       default:
         debugPrint('Unknown method call. name: $name, args: ${args}');
     }

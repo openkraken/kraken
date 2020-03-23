@@ -219,6 +219,48 @@ mixin StyleOverflowMixin {
     }
     return 0;
   }
+
+  void scroll(List args, [bool isScrollBy]) {
+    if (args != null && args.length > 0) {
+      dynamic option = args[0];
+      if (option is Map) {
+        dynamic top = option['top'];
+        dynamic left = option['left'];
+        dynamic behavior = option['behavior'];
+        Duration duration;
+        Curve curve;
+        if (behavior == 'smooth') {
+          curve = Curves.linear;
+        }
+        if (top is num && _scrollableY != null) {
+          if (curve != null) {
+            double diff = top - (_scrollableY.position?.pixels ?? 0);
+            duration = Duration(milliseconds: diff.abs().toInt()*5);
+          }
+          double distance;
+          if (isScrollBy == true) {
+            distance = (_scrollableY.position?.pixels ?? 0) + top;
+          } else {
+            distance = top.toDouble();
+          }
+          _scrollableY.position.moveTo(distance, duration: duration, curve: curve);
+        }
+        if (left is num && _scrollableX != null) {
+          if (curve != null) {
+            double diff = left - (_scrollableX.position?.pixels ?? 0);
+            duration = Duration(milliseconds: diff.abs().toInt()*5);
+          }
+          double distance;
+          if (isScrollBy == true) {
+            distance = (_scrollableX.position?.pixels ?? 0) + left;
+          } else {
+            distance = left.toDouble();
+          }
+          _scrollableX.position.moveTo(distance,duration: duration, curve: curve);
+        }
+      }
+    }
+  }
 }
 
 class OverflowDirectionBox extends RenderSizedOverflowBox {
