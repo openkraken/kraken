@@ -48,6 +48,11 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function matchScreenshot(element: HTMLElement = document.body) {
+async function matchScreenshot() {
+  return await matchElementImageSnapshot(document.body);
+}
+
+
+async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
 }

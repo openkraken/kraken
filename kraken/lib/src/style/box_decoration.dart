@@ -18,18 +18,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   TransitionDecoration oldDecoration;
   Padding oldBorderPadding;
 
-  double cropBorderWidth = 0;
-  double cropBorderHeight = 0;
-
   RenderObject initRenderDecoratedBox(
       RenderObject renderObject, StyleDeclaration style, int nodeId) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
-    cropBorderWidth = (margin.left ?? 0) + (margin.right ?? 0);
-    cropBorderHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     // Flutter Border width is inside the element
     // but w3c border is outside the element
-    // so use margin to fix it
+    // so use margin to fix it.
     renderBorderHolder = RenderMargin(
       margin: margin,
       child: renderObject,
@@ -422,8 +417,6 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   void _updateBorderInsets(EdgeInsets insets) {
-    cropBorderWidth = (insets.left ?? 0) + (insets.right ?? 0);
-    cropBorderHeight = (insets.top ?? 0) + (insets.bottom ?? 0);
     renderBorderHolder.margin = insets;
   }
 

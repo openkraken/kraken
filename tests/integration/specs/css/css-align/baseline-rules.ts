@@ -11,7 +11,7 @@ describe('Baseline-rules flexbox', () => {
     width: '50px',
     height: '50px',
     backgroundColor: 'blue',
-    display: 'inline-block'
+    display: 'inline-block',
   };
 
   const boxStyle = {
@@ -36,7 +36,7 @@ describe('Baseline-rules flexbox', () => {
     append(wrapper, box);
     append(BODY, wrapper);
 
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 
   xit('synthesized-baseline-flexbox-002', async () => {
@@ -55,7 +55,7 @@ describe('Baseline-rules flexbox', () => {
     append(magenta, box);
     append(BODY, wrapper);
     await sleep(10);
-    await matchScreenshot(BODY);
+    await matchScreenshot();
   });
 
   xit('synthesized-baseline-flexbox-003', async () => {
@@ -73,7 +73,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 
   xit('synthesized-baseline-flexbox-004', async () => {
@@ -90,7 +90,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 
   xit('synthesized-baseline-flexbox-005', async () => {
@@ -108,7 +108,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 
   xit('synthesized-baseline-flexbox-006', async () => {
@@ -129,7 +129,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 
   xit('synthesized-baseline-flexbox-007', async () => {
@@ -150,7 +150,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot(wrapper);
+    await matchElementImageSnapshot(wrapper);
   });
 });
 

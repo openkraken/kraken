@@ -14,7 +14,8 @@ describe('background-repeat', () => {
     setStyle(div1, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundRepeat: 'no-repeat',
     });
     repeat.appendChild(div1);
@@ -37,7 +38,8 @@ describe('background-repeat', () => {
     setStyle(div2, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundRepeat: 'repeat-x',
     });
     repeat.appendChild(div2);
@@ -61,7 +63,8 @@ describe('background-repeat', () => {
     setStyle(div3, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundRepeat: 'repeat-y',
     });
     repeat.appendChild(div3);
@@ -84,7 +87,8 @@ describe('background-repeat', () => {
     setStyle(div4, {
       width: '100vw',
       height: '200px',
-      backgroundImage: 'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundRepeat: 'repeat',
     });
     repeat.appendChild(div4);
@@ -98,12 +102,13 @@ describe('background-repeat', () => {
       width: '220px',
       height: '220px',
       backgroundColor: 'red',
-      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
-      backgroundRepeat: 'round'
+      backgroundImage:
+        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+      backgroundRepeat: 'round',
     });
     append(BODY, div);
     await sleep(1);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 
   xit('no-repeat will stop round to repeat', async () => {
@@ -111,11 +116,12 @@ describe('background-repeat', () => {
       width: '220px',
       height: '220px',
       backgroundColor: 'red',
-      backgroundImage: 'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
-      backgroundRepeat: 'round'
+      backgroundImage:
+        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+      backgroundRepeat: 'round',
     });
     append(BODY, div);
     await sleep(1);
-    await matchScreenshot(div);
+    await matchElementImageSnapshot(div);
   });
 });

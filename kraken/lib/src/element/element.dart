@@ -78,6 +78,18 @@ abstract class Element extends Node
   RenderIntersectionObserver renderIntersectionObserver;
   RenderElementBoundary renderElementBoundary;
 
+  // Horizontal margin dimension (left + right)
+  double get cropMarginWidth => renderMargin.margin.horizontal;
+  // Vertial margin dimension (top + bottom)
+  double get cropMarginHeight => renderMargin.margin.vertical;
+  // Horizontal padding dimension (left + right)
+  double get cropPaddingWidth => renderPadding.padding.horizontal;
+  // Vertial padding dimension (top + bottom)
+  double get cropPaddingHeight => renderPadding.padding.vertical;
+  // Horizontal border dimension (left + right)
+  double get cropBorderWidth => renderBorderHolder.margin.horizontal;
+  // Vertial border dimension (top + bottom)
+  double get cropBorderHeight => renderBorderHolder.margin.vertical;
 
   Element({
     @required int nodeId,
@@ -92,6 +104,8 @@ abstract class Element extends Node
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
+
+    String display = style['display'];
 
     _registerStyleChangedListeners();
 
@@ -158,8 +172,9 @@ abstract class Element extends Node
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
 
+    bool shouldRender = display != 'none';
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId, shouldRender);
 
     // Add element event listener
     events?.forEach((String eventName) {
@@ -501,9 +516,7 @@ abstract class Element extends Node
       display == 'block' ||
       isFlexWrap
     ) {
-      MainAxisAlignment runAlignment = getRunAlignmentFromFlexProperty(style['alignContent']);
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
-        runAlignment: runAlignment,
         children: children,
         style: style,
         nodeId: nodeId,
@@ -726,10 +739,6 @@ abstract class Element extends Node
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
-      parentData.fit = flexParentData.fit;
-      if (element.style[FlexItem.ALIGN_ITEMS] != 'stretch') {
-        flexParentData.fit = FlexFit.tight;
-      }
 
       // Update margin for flex child.
       element.updateRenderMargin(element.style);
@@ -846,6 +855,10 @@ abstract class Element extends Node
   void _styleDisplayChangedListener(String property, original, present) {
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
+
+    String display = style['display'];
+    bool shouldRender = display != 'none';
+    renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
       String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
@@ -1304,24 +1317,3 @@ ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
   return parentData;
 }
 
-MainAxisAlignment getRunAlignmentFromFlexProperty(String flexProperty) {
-  MainAxisAlignment runAlignment = MainAxisAlignment.start;
-  switch (flexProperty) {
-    case 'end':
-      runAlignment = MainAxisAlignment.end;
-      break;
-    case 'center':
-      runAlignment = MainAxisAlignment.center;
-      break;
-    case 'space-around':
-      runAlignment = MainAxisAlignment.spaceAround;
-      break;
-    case 'space-between':
-      runAlignment = MainAxisAlignment.spaceBetween;
-      break;
-    case 'space-evenly':
-      runAlignment = MainAxisAlignment.spaceEvenly;
-      break;
-  }
-  return runAlignment;
-}

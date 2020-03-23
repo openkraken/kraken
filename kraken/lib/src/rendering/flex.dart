@@ -517,11 +517,6 @@ class RenderFlexLayout extends RenderBox
     return minConstraints;
   }
 
-  FlexFit _getFit(RenderBox child) {
-    final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.fit ?? FlexFit.tight;
-  }
-
   double _getCrossSize(RenderBox child) {
     switch (_direction) {
       case Axis.horizontal:
@@ -551,6 +546,8 @@ class RenderFlexLayout extends RenderBox
       size = Size.zero;
       return;
     }
+    double elementWidth = getElementWidth(nodeId);
+    double elementHeight = getElementHeight(nodeId);
 
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlexGrow = 0;
@@ -559,25 +556,13 @@ class RenderFlexLayout extends RenderBox
     assert(constraints != null);
 
     double maxWidth = 0;
-    if (constraints.maxWidth != double.infinity) {
-      maxWidth = constraints.maxWidth;
-    } else {
-      maxWidth = getParentWidth(nodeId);
+    if (elementWidth != null) {
+      maxWidth = elementWidth;
     }
 
     double maxHeight = 0;
-    if (style.contains('height')) {
-      double height = getCurrentHeight(style);
-      if (height != null) {
-        maxHeight = height;
-      }
-    } else {
-      double parentHeight = getStretchParentHeight(nodeId);
-      if (parentHeight != null) {
-        maxHeight = parentHeight;
-      } else if (style.contains('height')) {
-        maxHeight = Length.toDisplayPortValue(style['height']);
-      }
+    if (elementHeight != null) {
+      maxHeight = elementHeight;
     }
 
     final double maxMainSize = _direction == Axis.horizontal
@@ -608,9 +593,7 @@ class RenderFlexLayout extends RenderBox
               _direction == Axis.horizontal ? 'width' : 'height';
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
-          if (!canFlex &&
-              (mainAxisSize == MainAxisSize.max ||
-                  _getFit(child) == FlexFit.tight)) {
+          if (!canFlex) {
             error = ErrorSummary(
                 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
             message = ErrorDescription(
@@ -839,29 +822,20 @@ class RenderFlexLayout extends RenderBox
         : allocatedSize;
     double actualSize;
     double actualSizeDelta;
+
+    // Default to children's width
     double constraintWidth = idealSize;
-    bool isInline = isElementInline(nodeId);
-    if (!isInline) {
-      if (constraints.maxWidth != double.infinity) {
-        constraintWidth = constraints.maxWidth;
-      } else {
-        constraintWidth = getParentWidth(nodeId);
-      }
-      constraintWidth = math.max(idealSize, constraintWidth);
+    // Get max of element's width and children's width if element's width exists
+    if (elementWidth != null) {
+      constraintWidth = math.max(constraintWidth, elementWidth);
     }
 
+    // Default to children's height
     double constraintHeight =
         _direction == Axis.horizontal ? crossSize : idealSize;
-    if (style.contains('height')) {
-      double height = Length.toDisplayPortValue(style['height']);
-      if (height != null) {
-        constraintHeight = math.max(height, constraintHeight);
-      }
-    } else {
-      double parentHeight = getStretchParentHeight(nodeId);
-      if (parentHeight != null) {
-        constraintHeight = math.max(parentHeight, constraintHeight);
-      }
+    // Get max of element's height and children's height if element's height exists
+    if (elementHeight != null) {
+      constraintHeight = math.max(constraintHeight, elementHeight);
     }
 
     switch (_direction) {
@@ -1036,7 +1010,6 @@ class RenderFlexItem extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderFlexParentData) {
       RenderFlexParentData flexParentData = RenderFlexParentData();
-      flexParentData.fit = FlexFit.tight;
       child.parentData = flexParentData;
     }
   }

@@ -38,6 +38,6 @@ describe('Box padding', () => {
       backgroundColor: 'red',
     });
     append(div, box);
-    await matchScreenshot(BODY);
+    await matchScreenshot();
   });
 });

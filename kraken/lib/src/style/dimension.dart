@@ -11,7 +11,7 @@ RegExp spaceRegExp = RegExp(r' ');
 
 double baseGetDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {
-    // Null is not euqal with 0.0
+    // Null is not equal with 0.0
     return null;
   }
   if (input is num) {
@@ -95,8 +95,6 @@ mixin DimensionMixin {
   Padding oldPadding;
   Padding oldMargin;
   SizedConstraints oldConstraints;
-  double cropWidth = 0;
-  double cropHeight = 0;
 
   double getDisplayPortedLength(input) {
     return baseGetDisplayPortedLength(input);
@@ -272,8 +270,6 @@ mixin DimensionMixin {
   RenderObject initRenderMargin(
       RenderObject renderObject, StyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
-    cropWidth = (edgeInsets.left ?? 0) + (edgeInsets.right ?? 0);
-    cropHeight = (edgeInsets.top ?? 0) + (edgeInsets.bottom ?? 0);
     return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
@@ -445,11 +441,6 @@ mixin DimensionMixin {
   }
 
   void _updateMargin(EdgeInsets margin) {
-    if (margin == null) {
-      return;
-    }
-    cropWidth = (margin.left ?? 0) + (margin.right ?? 0);
-    cropHeight = (margin.top ?? 0) + (margin.bottom ?? 0);
     renderMargin.margin = margin;
   }
 
@@ -576,8 +567,10 @@ mixin DimensionMixin {
       oldPadding = newPadding;
     }
 
+    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
+
     // Update renderPadding.
-    renderPadding.padding = getPaddingInsetsFromStyle(style);
+    renderPadding.padding = edgeInsets;
   }
 }
 

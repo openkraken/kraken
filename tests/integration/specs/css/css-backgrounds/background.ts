@@ -1,6 +1,6 @@
 xdescribe('background-331', () => {
   const divStyle = {
-    background: 'red'
+    background: 'red',
   };
   it('background initial value for background-image', async () => {
     let div = create('div', divStyle);
@@ -55,6 +55,6 @@ xdescribe('background-331', () => {
     let div = create('div', divStyle);
     append(BODY, div);
     let cs = window.getComputedStyle(div, null);
-    expect(cs.getPropertyValue('background-color')).toBe('rgba(255, 0, 0, 0)')
+    expect(cs.getPropertyValue('background-color')).toBe('rgba(255, 0, 0, 0)');
   });
 });

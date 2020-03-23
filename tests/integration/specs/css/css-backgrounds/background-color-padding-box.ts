@@ -1,19 +1,20 @@
-describe('Background-color-padding-box', function () {
+describe('Background-color-padding-box', function() {
   const divStyle = {
     width: '250px',
     height: '250px',
     padding: '10px',
-    backgroundImage: 'url("https://kraken.oss-cn-hangzhou.aliyuncs.com/images/blue_color.png"), url("https://kraken.oss-cn-hangzhou.aliyuncs.com/images/orange_color.png"), url("support/white_color.png")',
+    backgroundImage:
+      'url("https://kraken.oss-cn-hangzhou.aliyuncs.com/images/blue_color.png"), url("https://kraken.oss-cn-hangzhou.aliyuncs.com/images/orange_color.png"), url("support/white_color.png")',
     'background-repeat': 'no-repeat',
     'background-clip': 'border-box, border-box, padding-box',
     'background-position': '30px 30px, 60px 60px, 90px 90px',
-    'background-color': 'black'
+    'background-color': 'black',
   };
   xit('basic', async () => {
     let parent = create('div', {
       ...divStyle,
       width: '290px',
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     });
     let div = create('div', divStyle);
     append(parent, div);

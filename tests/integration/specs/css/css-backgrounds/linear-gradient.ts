@@ -9,7 +9,7 @@ describe('Background linear-gradient', () => {
     });
 
     append(BODY, div1);
-    await matchScreenshot(div1);
+    await matchElementImageSnapshot(div1);
   });
 
   it('conic-gradient', async () => {
@@ -22,7 +22,7 @@ describe('Background linear-gradient', () => {
     });
 
     append(BODY, div2);
-    await matchScreenshot(div2);
+    await matchElementImageSnapshot(div2);
   });
 
   it('radial-gradient', async () => {
@@ -34,7 +34,7 @@ describe('Background linear-gradient', () => {
     });
 
     append(BODY, div3);
-    await matchScreenshot(div3);
+    await matchElementImageSnapshot(div3);
   });
 
   it('linear-gradient-rotate', async () => {
@@ -46,6 +46,6 @@ describe('Background linear-gradient', () => {
         'linear-gradient(135deg, red, red 10%, blue 75%, yellow 75%)',
     });
     append(BODY, div4);
-    await matchScreenshot(div4);
+    await matchElementImageSnapshot(div4);
   });
 });

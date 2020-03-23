@@ -1,14 +1,12 @@
-describe('setTimeout', function() {
-  it('resolve after 100ms', () => {
-    let startTime = Date.now();
-    return new Promise(resolve => {
-      setTimeout(() => {
-        let duration = Date.now() - startTime;
-        // 10ms delay accepted
-        expect(duration - 100 < 15).toBe(true);
-        resolve();
-      }, 100);
-    });
+describe('setTimeout', () => {
+  it('resolve after 100ms', done => {
+    const startTime = Date.now();
+    setTimeout(() => {
+      const duration = Date.now() - startTime;
+      // 20ms delay accepted
+      expect(duration - 100).toBeLessThanOrEqual(20);
+      done();
+    }, 100);
   });
 
   it('stop before resolved', () => {
