@@ -1,4 +1,4 @@
-import { Node, NodeType } from './node';
+import { Node, NodeType, NodeId } from './node';
 import {
   addEvent,
   createElement,
@@ -99,7 +99,8 @@ export class Element extends Node {
 
   addEventListener(eventName: string, eventListener: any) {
     super.addEventListener(eventName, eventListener);
-    if (!this.events.hasOwnProperty(eventName)) {
+    // Body will always exists, so can not merge body events.
+    if (!this.events.hasOwnProperty(eventName) || this.nodeId === NodeId.BODY) {
       addEvent(this.nodeId, eventName);
       this.events[eventName] = eventListener;
     }
