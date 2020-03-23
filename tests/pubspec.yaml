@@ -21,8 +21,7 @@ dependencies:
   colorize: ^2.0.0
   flutter:
     sdk: flutter
-  kraken:
-    path: ../kraken
+  kraken: any
 
 dev_dependencies:
   flutter_driver:
