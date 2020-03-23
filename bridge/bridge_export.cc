@@ -15,10 +15,10 @@
 kraken::DartMethodPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
-std::unique_ptr<kraken::JSBridge> bridge;
+kraken::JSBridge *bridge;
 
 void *getBridge() {
-  return bridge.get();
+  return bridge;
 }
 
 void printError(const alibaba::jsa::JSError &error) {
@@ -33,12 +33,14 @@ Screen screen;
 
 void reloadJsContext() {
   inited = false;
-  bridge = std::make_unique<kraken::JSBridge>(printError);
+  delete bridge;
+  bridge = new kraken::JSBridge(printError);
   inited = true;
 }
 
 void initJsEngine() {
-  bridge = std::make_unique<kraken::JSBridge>(printError);
+  delete bridge;
+  bridge = new kraken::JSBridge(printError);
   inited = true;
 }
 
