@@ -447,9 +447,8 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         }
       }
     }
+
     Color color = getBackgroundColor(style);
-
-
     TransitionBorderSide leftSide = getBorderSideByStyle(style, 'Left');
     TransitionBorderSide topSide = getBorderSideByStyle(style, 'Top');
     TransitionBorderSide rightSide = getBorderSideByStyle(style, 'Right');
