@@ -7,7 +7,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:requests/requests.dart';
 
