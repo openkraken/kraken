@@ -17,7 +17,9 @@ class RenderElementBoundary extends RenderTransform
     Matrix4 transform,
     Offset origin,
     this.nodeId,
+    bool shouldRender,
   }) : assert(child != null),
+    _shouldRender = shouldRender,
     super(
       child: child,
       transform: transform,
@@ -27,9 +29,20 @@ class RenderElementBoundary extends RenderTransform
   }
 
   RenderBox child;
+
   int nodeId;
 
   StyleDeclaration style;
+
+  bool _shouldRender;
+  bool get shouldRender => _shouldRender;
+  set shouldRender(bool value) {
+    assert(value != null);
+    if (_shouldRender != value) {
+      markNeedsLayout();
+     _shouldRender = value;
+    }
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -41,21 +54,36 @@ class RenderElementBoundary extends RenderTransform
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
+      BoxConstraints additionalConstraints = constraints;
+      if (!shouldRender) {
+        additionalConstraints = BoxConstraints(
+          minWidth: 0,
+          maxWidth: 0,
+          minHeight: 0,
+          maxHeight: 0,
+        );
+      }
+      child.layout(additionalConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
     }
 
-    if (style != null) {
-      String display = style['display'];
-      if (display == 'none') {
-        size = constraints.constrain(Size(0, 0));
-      }
-    }
     // default transform origin center
     if (origin == null) {
       origin = Offset(size.width / 2, size.height / 2);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    void painter(PaintingContext context, Offset offset) {}
+
+    if (!shouldRender) {
+      context.pushClipRect(
+          needsCompositing, offset, Offset.zero & size, painter);
+    } else {
+      super.paint(context, offset);
     }
   }
 }

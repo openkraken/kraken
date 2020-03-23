@@ -105,6 +105,8 @@ abstract class Element extends Node
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
 
+    String display = style['display'];
+
     _registerStyleChangedListeners();
 
     // Mark element needs to reposition according to position CSS.
@@ -173,8 +175,9 @@ abstract class Element extends Node
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
 
+    bool shouldRender = display != 'none';
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId, shouldRender);
 
     // Add element event listener
     events?.forEach((String eventName) {
@@ -964,6 +967,10 @@ abstract class Element extends Node
   void _styleDisplayChangedListener(String property, original, present) {
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
+
+    String display = style['display'];
+    bool shouldRender = display != 'none';
+    renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
       String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
