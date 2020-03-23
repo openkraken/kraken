@@ -1,7 +1,7 @@
 name: kraken_audioplayers
 description: A flutter plugin to play multiple audio files simultaneously
-version: 0.14.0
-homepage: https://github.com/luanpotter/audioplayer
+version: 0.1.0
+homepage: http://rax.alibaba-inc.com/kraken
 
 flutter:
   plugin:

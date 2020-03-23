@@ -2,9 +2,27 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
+enum PositionType {
+  static,
+  relative,
+  absolute,
+  fixed,
+  sticky,
+}
+
+PositionType getPositionFromStyle(StyleDeclaration style) {
+  switch (style['position']) {
+    case 'relative': return PositionType.relative;
+    case 'absolute': return PositionType.absolute;
+    case 'fixed': return PositionType.fixed;
+    case 'sticky': return PositionType.sticky;
+  }
+  return PositionType.static;
+}
+
 mixin RelativeStyleMixin on RenderBox {
   void applyRelativeOffset(
-      Offset relativeOffset, RenderBox renderBox, Style style) {
+      Offset relativeOffset, RenderBox renderBox, StyleDeclaration style) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
@@ -20,20 +38,21 @@ mixin RelativeStyleMixin on RenderBox {
     }
   }
 
-  Offset getRelativeOffset(Style style) {
-    if (style?.position == 'relative') {
+  Offset getRelativeOffset(StyleDeclaration style) {
+    PositionType postion = getPositionFromStyle(style);
+    if (postion == PositionType.relative) {
       double dx;
       double dy;
-      if (style.left != null) {
-        dx = style.left;
-      } else if (style.right != null) {
-        dx = -style.right;
+      if (style.contains('left')) {
+        dx = Length.toDisplayPortValue(style['left']);
+      } else if (style.contains('right')) {
+        dx = -Length.toDisplayPortValue(style['right']);
       }
 
-      if (style.top != null) {
-        dy = style.top;
-      } else if (style.bottom != null) {
-        dy = -style.bottom;
+      if (style.contains('top')) {
+        dy = Length.toDisplayPortValue(style['top']);
+      } else if (style.contains('bottom')) {
+        dy = -Length.toDisplayPortValue(style['bottom']);
       }
 
       if (dx != null || dy != null) {

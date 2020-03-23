@@ -5,8 +5,8 @@ import 'package:kraken/style.dart';
 mixin TransitionStyleMixin {
   Map<String, Transition> transitionMap;
 
-  void initTransition(Style style) {
-    if (style?.transition != null) {
+  void initTransition(StyleDeclaration style) {
+    if (style.contains('transition')) {
       transitionMap = Transition.parseTransitions(style);
     }
   }
@@ -63,8 +63,8 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(Style style) {
-    List<String> list = style.transition.split(",");
+  static Map<String, Transition> parseTransitions(StyleDeclaration style) {
+    List<String> list = style['transition'].split(',');
     Map<String, Transition> map = {};
 
     for (String transition in list) {

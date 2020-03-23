@@ -24,15 +24,15 @@ mixin TextStyleMixin {
   static const double DEFAULT_LETTER_SPACING = 0.0;
   static const double DEFAULT_WORD_SPACING = 0.0;
 
-  TextSpan createTextSpanWithStyle(String text, Style style) {
+  TextSpan createTextSpanWithStyle(String text, StyleDeclaration style) {
     return TextSpan(
       text: text,
       style: getTextStyle(style),
     );
   }
 
-  TextAlign getTextAlignFromStyle(Style style) {
-    TextAlign textAlign;
+  TextAlign getTextAlignFromStyle(StyleDeclaration style) {
+    TextAlign textAlign = TextAlign.left;
     switch (style['textAlign']) {
       case 'center':
         textAlign = TextAlign.center;
@@ -83,7 +83,7 @@ mixin TextStyleMixin {
   ///   locale: The locale used to select region-specific glyphs.
   ///   background: The paint drawn as a background for the text.
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
-  TextStyle getTextStyle(Style style) {
+  TextStyle getTextStyle(StyleDeclaration style) {
     return TextStyle(
       color: getColor(style),
       decoration: getDecorationLine(style),
@@ -106,7 +106,7 @@ mixin TextStyleMixin {
     );
   }
 
-  Color getColor(Style style) {
+  Color getColor(StyleDeclaration style) {
     if (style.contains(COLOR)) {
       return WebColor.generate(style[COLOR]);
     } else {
@@ -118,7 +118,7 @@ mixin TextStyleMixin {
 
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
-  TextDecoration getDecorationLine(Style style) {
+  TextDecoration getDecorationLine(StyleDeclaration style) {
     TextDecoration textDecorationLine;
     if (style.contains(TEXT_DECORATION_LINE)) {
       textDecorationLine = _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
@@ -143,7 +143,7 @@ mixin TextStyleMixin {
     return null;
   }
 
-  Color getDecorationColor(Style style) {
+  Color getDecorationColor(StyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return WebColor.generate(style[TEXT_DECORATION_COLOR]);
     } else {
@@ -151,7 +151,7 @@ mixin TextStyleMixin {
     }
   }
 
-  TextDecorationStyle getDecorationStyle(Style style) {
+  TextDecorationStyle getDecorationStyle(StyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_STYLE)) {
       switch (style[TEXT_DECORATION_STYLE]) {
         case 'solid':
@@ -169,7 +169,7 @@ mixin TextStyleMixin {
     return TextDecorationStyle.solid;
   }
 
-  FontWeight getFontWeight(Style style) {
+  FontWeight getFontWeight(StyleDeclaration style) {
     if (style.contains(FONT_WEIGHT)) {
       var fontWeight = style[FONT_WEIGHT];
       if (fontWeight is! String) {
@@ -207,7 +207,7 @@ mixin TextStyleMixin {
     return FontWeight.normal;
   }
 
-  FontStyle getFontStyle(Style style) {
+  FontStyle getFontStyle(StyleDeclaration style) {
     if (style.contains(FONT_STYLE)) {
       switch (style[FONT_STYLE]) {
         case 'oblique':
@@ -220,28 +220,28 @@ mixin TextStyleMixin {
     return FontStyle.normal;
   }
 
-  TextBaseline getTextBaseLine(Style style) {
+  TextBaseline getTextBaseLine(StyleDeclaration style) {
     return TextBaseline.alphabetic; // TODO: impl vertical-align
   }
 
   static String BUILTIN_FONT_PACKAGE = null;
-  String getFontPackage(Style style) {
+  String getFontPackage(StyleDeclaration style) {
     return BUILTIN_FONT_PACKAGE;
   }
 
   static String DEFAULT_FONT_FAMILY = '';
-  String getFontFamily(Style style) {
+  String getFontFamily(StyleDeclaration style) {
     return style.contains(FONT_FAMILY)
       ? style[FONT_FAMILY]
       : DEFAULT_FONT_FAMILY;
   }
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
-  List<String> getFontFamilyFallback(Style style) {
+  List<String> getFontFamilyFallback(StyleDeclaration style) {
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
-  double getFontSize(Style style) {
+  double getFontSize(StyleDeclaration style) {
     if (style.contains(FONT_SIZE)) {
       return Length.toDisplayPortValue(style[FONT_SIZE]);
     } else {
@@ -249,7 +249,7 @@ mixin TextStyleMixin {
     }
   }
 
-  double getLetterSpacing(Style style) {
+  double getLetterSpacing(StyleDeclaration style) {
     if (style.contains(LETTER_SPACING)) {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
@@ -260,7 +260,7 @@ mixin TextStyleMixin {
     }
   }
 
-  double getWordSpacing(Style style) {
+  double getWordSpacing(StyleDeclaration style) {
     if (style.contains(WORD_SPACING)) {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
@@ -271,7 +271,7 @@ mixin TextStyleMixin {
     }
   }
 
-  double getHeight(Style style) {
+  double getHeight(StyleDeclaration style) {
     if (style.contains(LINE_HEIGHT)) {
       return Length.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
     } else {
@@ -279,23 +279,23 @@ mixin TextStyleMixin {
     }
   }
 
-  Locale getLocale(Style style) {
+  Locale getLocale(StyleDeclaration style) {
     // TODO: impl locale for text decoration.
     return null;
   }
 
-  Paint getBackground(Style style) {
+  Paint getBackground(StyleDeclaration style) {
     // TODO: Reserved port for customize text decoration background.
     return null;
   }
 
-  Paint getForeground(Style style) {
+  Paint getForeground(StyleDeclaration style) {
     // TODO: Reserved port for customize text decoration foreground.
     return null;
   }
 
   static RegExp commaRegExp = RegExp(r',');
-  List<Shadow> getShadows(Style style) {
+  List<Shadow> getShadows(StyleDeclaration style) {
     List<Shadow> textShadows = [];
     if (style.contains('textShadow')) {
       String processedValue =

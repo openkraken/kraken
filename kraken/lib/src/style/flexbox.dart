@@ -5,7 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'style.dart';
+import 'package:kraken/style.dart';
 
 class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex grow
@@ -39,7 +39,7 @@ mixin FlexMixin {
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
-  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, Style style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, StyleDeclaration style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -89,7 +89,7 @@ mixin FlexMixin {
     }
   }
 
-  MainAxisAlignment _getJustifyContent(Style style, Axis axis) {
+  MainAxisAlignment _getJustifyContent(StyleDeclaration style, Axis axis) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
     if (style.contains(TEXT_ALIGN) && axis == Axis.horizontal) {
@@ -124,7 +124,7 @@ mixin FlexMixin {
     return mainAxisAlignment;
   }
 
-  CrossAxisAlignment _getAlignItems(Style style, Axis axis) {
+  CrossAxisAlignment _getAlignItems(StyleDeclaration style, Axis axis) {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch;
     if (style.contains(TEXT_ALIGN) && axis == Axis.vertical) {
       String textAlign = style[TEXT_ALIGN];
@@ -164,28 +164,28 @@ class FlexItem {
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
 
-  static RenderFlexParentData getParentData(Style style) {
+  static RenderFlexParentData getParentData(StyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
-    parentData.flexGrow = 0;
-    parentData.flexShrink = 1;
-    parentData.flexBasis = 'auto';
-    parentData.fit = FlexFit.loose;
 
-    if (style != null) {
-      dynamic grow = style[GROW];
-      if (grow != null) {
-        parentData.fit = FlexFit.tight;
-        parentData.flexGrow = int.parse(grow);
-      }
-      dynamic shrink = style[SHRINK];
-      if (shrink != null) {
-        parentData.flexShrink = int.parse(shrink);
-      }
-      dynamic basis = style[BASIS];
-      if (basis != null) {
-        parentData.flexBasis = basis;
-      }
-    }
+    // @NOTE(zhuoling): Describe this logic @zw.
+    parentData.fit = FlexFit.tight;
+
+    String grow = style[GROW];
+    parentData.flexGrow =
+        isEmptyStyleValue(grow)
+        ? 0 // Shrink default to 0.
+        : Length.toInt(grow);
+
+    String shrink = style[SHRINK];
+    parentData.flexShrink = isEmptyStyleValue(shrink)
+        ? 1  // Shrink default to 1.
+        : Length.toInt(shrink);
+
+    String basis = style[BASIS];
+    parentData.flexBasis = isEmptyStyleValue(basis)
+        ? 'auto' // flexBasis default to auto.
+        : basis;
+
     return parentData;
   }
 }

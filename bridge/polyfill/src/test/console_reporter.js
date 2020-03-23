@@ -40,7 +40,6 @@ function ConsoleReporter() {
       print('Randomized with seed ' + options.order.seed);
       printNewline();
     }
-    print('Started');
     printNewline();
   };
 

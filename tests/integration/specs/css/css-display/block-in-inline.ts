@@ -117,4 +117,26 @@ describe('Display block in inline', () => {
 
     await matchScreenshot();
   });
+
+  it('there should be no red', async () => {
+    let block = create('div', {
+      color: 'green',
+      display: 'block'
+    });
+    let inline = create('div', {
+      background: 'red',
+      color: 'red',
+      display: 'inline'
+    });
+    let innerBlock = create('div', {
+      color: 'green',
+      display: 'block'
+    });
+    let text = createText('There should be no red');
+    append(innerBlock, text);
+    append(inline, innerBlock);
+    append(block, inline);
+    append(BODY, block);
+    await matchScreenshot(block);
+  });
 });

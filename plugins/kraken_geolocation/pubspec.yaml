@@ -1,8 +1,7 @@
 name: kraken_geolocation
 description: A Flutter plugin to easily handle realtime location in iOS and Android. Provides settings for optimizing performance or battery.
-version: 2.5.3
-author: Guillaume Bernos <guillaume@bernos.dev>
-homepage: https://github.com/Lyokone/flutterlocation
+version: 0.1.0
+homepage: http://rax.alibaba-inc.com/kraken
 
 environment:
   sdk: ">=2.0.0 <3.0.0"
@@ -18,7 +17,7 @@ flutter:
         pluginClass: LocationPlugin
       macos:
         pluginClass: LocationPlugin
-        
+
 dependencies:
   flutter:
     sdk: flutter

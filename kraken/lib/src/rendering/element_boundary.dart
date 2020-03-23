@@ -13,7 +13,7 @@ class RenderElementBoundary extends RenderTransform
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary({
     this.child,
-    Style style,
+    this.style,
     Matrix4 transform,
     Offset origin,
     this.nodeId,
@@ -23,21 +23,13 @@ class RenderElementBoundary extends RenderTransform
       transform: transform,
       origin: origin,
   ) {
-    _style = style;
     add(child);
   }
 
   RenderBox child;
   int nodeId;
 
-  Style _style;
-  Style get style => _style;
-  set style(Style value) {
-    if (_style == value) {
-      return;
-    }
-    _style = value;
-  }
+  StyleDeclaration style;
 
   @override
   void setupParentData(RenderBox child) {
@@ -56,7 +48,7 @@ class RenderElementBoundary extends RenderTransform
     }
 
     if (style != null) {
-      String display = style.get('display');
+      String display = style['display'];
       if (display == 'none') {
         size = constraints.constrain(Size(0, 0));
       }

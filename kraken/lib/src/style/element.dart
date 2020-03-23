@@ -12,7 +12,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropWidth = 0;
     while (!isParentWithWidth) {
       if (childNode is Element) {
-        Style style = childNode.style;
+        StyleDeclaration style = childNode.style;
         if (style.contains('width')) {
           isParentWithWidth = true;
           width = style['width'];
@@ -46,7 +46,7 @@ mixin ElementStyleMixin on RenderBox {
     double cropHeight = 0;
     while (!isParentWithHeight) {
       if (childNode is Element) {
-        Style style = childNode.style;
+        StyleDeclaration style = childNode.style;
         if (style.contains('height')) {
           isParentWithHeight = true;
           height = style['height'];
@@ -66,9 +66,7 @@ mixin ElementStyleMixin on RenderBox {
       }
     }
 
-    double heightD = Length.toDisplayPortValue(height) - cropHeight;
-
-    return heightD;
+    return Length.toDisplayPortValue(height) - cropHeight;
   }
 
   // Get parent node height if parent is flex and stretch children height
@@ -76,23 +74,26 @@ mixin ElementStyleMixin on RenderBox {
     double parentHeight;
     Element currentNode = nodeMap[nodeId];
     Element parentNode = currentNode.parent;
-    if (currentNode.style.get('height') != null) {
-    }
 
     if (parentNode != null && parentNode.style != null) {
-      Style parentStyle = parentNode.style;
-      Style currentStyle = currentNode.style;
+      StyleDeclaration parentStyle = parentNode.style;
+      StyleDeclaration currentStyle = currentNode.style;
 
-      String parentDisplay = parentStyle.get('display');
+      String parentDisplay = isEmptyStyleValue(parentStyle['display'])
+        ? parentNode.defaultDisplay
+        : parentStyle['display'];
       bool isParentFlex = parentDisplay == 'flex' || parentDisplay == 'inline-flex';
-
-      if (isParentFlex &&
-          parentStyle['flexDirection'] == 'row' &&
-          currentStyle.get('height') == null &&
-          parentStyle.contains('height') &&
-          (!parentStyle.contains('alignItems') ||
-              (parentStyle.contains('alignItems') &&
-                  parentStyle['alignItems'] == 'stretch'))) {
+      
+      if (
+        isParentFlex
+          && (parentStyle['flexDirection'] == '' || parentStyle['flexDirection'] == 'row')
+          && !currentStyle.contains('height')
+          && parentStyle.contains('height')
+          && (
+            !parentStyle.contains('alignItems')
+              || (parentStyle.contains('alignItems') && parentStyle['alignItems'] == 'stretch')
+          )
+      ) {
         parentHeight = Length.toDisplayPortValue(parentStyle['height']);
       }
     }
@@ -100,23 +101,25 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get height of current node
-  double getCurrentHeight(Style style) {
-    double height = Length.toDisplayPortValue(style.get('height'));
+  double getCurrentHeight(StyleDeclaration style) {
+    double height = Length.toDisplayPortValue(style['height']);
     // minus padding
     Padding padding = baseGetPaddingFromStyle(style);
     return height - padding.top - padding.bottom;
   }
 
   // Whether current node is inline
-  bool isElementInline(String defaultDisplay, int nodeId) {
-    var node = nodeMap[nodeId];
-    var parentNode = node.parentNode;
+  bool isElementInline(int nodeId) {
+    Element node = nodeMap[nodeId];
+    Element parentNode = node.parentNode;
 
-    String display = defaultDisplay;
+    String display = isEmptyStyleValue(node.style['display'])
+        ? node.defaultDisplay
+        : node.style['display'];
 
     // Display as inline if parent node is flex and with align-items not stretch
     if (parentNode != null) {
-      Style style = parentNode.style;
+      StyleDeclaration style = parentNode.style;
 
       bool isFlex = style['display'] == 'flex' || style['display'] == 'inline-flex';
 

@@ -40,6 +40,10 @@ function create(tag: string, style: object, child?: Node) {
   return el;
 }
 
+function createText(content: string) {
+  return document.createTextNode(content);
+}
+
 function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
