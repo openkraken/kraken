@@ -158,9 +158,10 @@ describe('Display block in inline', () => {
     append(block, inline);
     append(BODY, block);
 
-    document.body.addEventListener('click', async () => {
+    document.body.addEventListener('click', async function listener() {
       toggleBlock.style.display = 'inline';
       await matchElementImageSnapshot(block);
+      document.body.removeEventListener('click', listener);
       done();
     });
 
@@ -187,9 +188,10 @@ describe('Display block in inline', () => {
     append(block, inline);
     append(BODY, block);
 
-    document.body.addEventListener('click', async () => {
+    document.body.addEventListener('click', async function listener() {
       toggleBlock.style.display = 'block';
       await matchElementImageSnapshot(block);
+      document.body.removeEventListener('click', listener);
       done();
     });
 
