@@ -1,4 +1,4 @@
-import { EventTarget, Event } from 'event-target-shim';
+import { EventTarget } from 'event-target-shim';
 import { krakenWindow, KrakenLocation } from './kraken';
 
 function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
@@ -18,6 +18,7 @@ function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   });
 }
 
+
 class Window extends EventTarget {
 
   constructor() {
@@ -26,10 +27,22 @@ class Window extends EventTarget {
 
     // Bridge native event callback to EventTarget.
     krakenWindow.onLoad = () => {
-      this.dispatchEvent(new Event('load'));
+      this.dispatchEvent({
+        type: 'load',
+        target: this,
+        currentTarget: this,
+        bubbles: false,
+        cancelable: false,
+      });
     };
     krakenWindow.onColorSchemeChange = () => {
-      this.dispatchEvent(new Event('colorschemechange'));
+      this.dispatchEvent({
+        type: 'colorschemechange',
+        target: this,
+        currentTarget: this,
+        bubbles: false,
+        cancelable: false,
+      });
     };
   }
 
