@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/module.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
@@ -24,7 +25,7 @@ const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
-typedef ConnectedCallback = Future<void> Function();
+typedef ConnectedCallback = void Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
 String _bundleURLOverride;
@@ -77,18 +78,15 @@ Future<void> refreshPaint() async {
 /// Connect render object to start rendering.
 Future<void> connect(bool showPerformanceOverlay) {
   Completer<void> completer = Completer();
-  RendererBinding.instance.scheduleFrameCallback((_) async {
+  RendererBinding.instance.scheduleFrameCallback((_) {
     elementManager = ElementManager();
     elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
     if (_connectedCallback != null) {
-      await _connectedCallback();
+      _connectedCallback();
     }
 
     completer.complete();
-    RendererBinding.instance.addPostFrameCallback((time) {
-      invokeOnloadCallback();
-    });
   });
   return completer.future;
 }
@@ -139,13 +137,19 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-Future<void> defaultAfterConnected() async {
+void defaultAfterConnected() async {
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
+
+  // Invoke onload after scripts executed.
+  requestAnimationFrame((_) {
+    invokeOnloadCallback();
+  });
 }
+
 
 void launch({
   String bundleURLOverride,
