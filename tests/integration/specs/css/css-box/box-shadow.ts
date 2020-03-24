@@ -1,18 +1,18 @@
 describe('BoxShadow', () => {
-  xit('', async () => {
-    let reference = create('div', {
+  it('basic usage', async () => {
+    const reference = create('div', {
       width: '100px',
       height: '50px',
       backgroundColor: 'red',
       border: '1px solid black',
     });
 
-    let div = create('div', {
+    const div = create('div', {
       width: '50px',
       height: '50px',
       border: '1px solid black',
       backgroundColor: 'white',
-      boxShadow: 'black 50px 0px',
+      boxShadow: '50px 0px black',
     });
     append(reference, div);
     append(BODY, reference);
