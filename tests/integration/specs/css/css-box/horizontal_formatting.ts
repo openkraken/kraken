@@ -12,7 +12,7 @@ describe('horizontal_formatting', () => {
 
     ruleImg.setAttribute(
       'src',
-      'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_pixel_ruler.gif'
+      'https://img.alicdn.com/tfs/TB1xF94zxn1gK0jSZKPXXXvUXXa-640-20.gif'
     );
 
     setStyle(ruleImg, {
@@ -52,7 +52,7 @@ describe('horizontal_formatting', () => {
 
     ruleImg2.setAttribute(
       'src',
-      'https://www.w3.org/Style/CSS/Test/CSS1/current/horiz_description.gif'
+      'https://img.alicdn.com/tfs/TB1GV14zxn1gK0jSZKPXXXvUXXa-640-64.gif'
     );
     setStyle(ruleImg2, {
       width: '640px',

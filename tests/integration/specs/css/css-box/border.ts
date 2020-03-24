@@ -46,7 +46,7 @@ describe('Box border', () => {
     await matchElementImageSnapshot(div);
   });
 
-  xit('border-bottom-left-radius', async () => {
+  it('border-bottom-left-radius', async () => {
     let div = create('div', {
       width: '100px',
       height: '100px',
@@ -57,7 +57,7 @@ describe('Box border', () => {
     await matchElementImageSnapshot(div);
   });
 
-  xit('border-bottom-right-radius', async () => {
+  it('border-bottom-right-radius', async () => {
     let div = create('div', {
       width: '100px',
       height: '100px',
@@ -68,7 +68,7 @@ describe('Box border', () => {
     await matchElementImageSnapshot(div);
   });
 
-  xit('border-top-left-radius', async () => {
+  it('border-top-left-radius', async () => {
     let div = create('div', {
       width: '100px',
       height: '100px',
@@ -79,7 +79,7 @@ describe('Box border', () => {
     await matchElementImageSnapshot(div);
   });
 
-  xit('border-top-right-radius', async () => {
+  it('border-top-right-radius', async () => {
     let div = create('div', {
       width: '100px',
       height: '100px',
