@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
@@ -499,6 +500,12 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
             ));
           }
         }
+      }
+
+      // Tips only debug.
+      if (!PRODUCTION && boxShadow.isEmpty) {
+        print('[Warning] Wrong style format with boxShadow: ${style['boxShadow']}');
+        print('    Correct syntax: inset? && <length>{2,4} && <color>?');
       }
     }
     return boxShadow;

@@ -840,6 +840,7 @@ abstract class Element extends Node
     style.addStyleChangeListener('borderTopColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderRightColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderBottomColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('boxShadow', _styleDecoratedChangedListener);
 
     style.addStyleChangeListener('margin', _styleMarginChangedListener);
     style.addStyleChangeListener('marginLeft', _styleMarginChangedListener);
