@@ -1,6 +1,5 @@
-import { EventTarget } from 'event-target-shim';
+import { EventTarget, Event } from 'event-target-shim';
 import { krakenWindow, KrakenLocation } from './kraken';
-
 
 function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   events.forEach((event: string) => {
@@ -19,14 +18,19 @@ function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   });
 }
 
-
 class Window extends EventTarget {
 
   constructor() {
     super();
     bindLegacyListeners(this, ['load', 'colorschemechange']);
-    krakenWindow.onLoad = this.dispatchEvent;
-    krakenWindow.onColorSchemeChange = this.dispatchEvent;
+
+    // Bridge native event callback to EventTarget.
+    krakenWindow.onLoad = () => {
+      this.dispatchEvent(new Event('load'));
+    };
+    krakenWindow.onColorSchemeChange = () => {
+      this.dispatchEvent(new Event('colorschemechange'));
+    };
   }
 
   public get colorScheme() : string {
@@ -41,10 +45,13 @@ class Window extends EventTarget {
   public get location() : KrakenLocation {
     return krakenWindow.location;
   }
+
+  public get window() {
+    return this;
+  }
 }
 
-
-const window = new Window();
+export const window = new Window();
 
 Object.defineProperty(global, 'window', {
   enumerable: true,
