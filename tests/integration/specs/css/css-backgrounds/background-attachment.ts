@@ -20,7 +20,7 @@ describe('background-attachment', () => {
     await matchElementImageSnapshot(container);
   });
 
-  xit('local', async () => {
+  it('local', async () => {
     let container = create('div', {
       'background-attachment': 'local',
       'background-image':
@@ -41,7 +41,7 @@ describe('background-attachment', () => {
     await matchElementImageSnapshot(container);
   });
 
-  xit('scroll', async () => {
+  it('scroll', async () => {
     let container = create('div', {
       'background-attachment': 'local',
       'background-image':

@@ -15,18 +15,16 @@ import 'package:kraken/element.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
-import 'command.dart';
 
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String COMMAND_PATH = 'KRAKEN_INSTRUCT_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
-typedef ConnectedCallback = void Function();
+typedef ConnectedCallback = Future<void> Function();
 ElementManager elementManager;
 ConnectedCallback _connectedCallback;
 String _bundleURLOverride;
@@ -79,12 +77,12 @@ Future<void> refreshPaint() async {
 /// Connect render object to start rendering.
 Future<void> connect(bool showPerformanceOverlay) {
   Completer<void> completer = Completer();
-  RendererBinding.instance.scheduleFrameCallback((_) {
+  RendererBinding.instance.scheduleFrameCallback((_) async {
     elementManager = ElementManager();
     elementManager.connect(showPerformanceOverlay: showPerformanceOverlay);
 
     if (_connectedCallback != null) {
-      _connectedCallback();
+      await _connectedCallback();
     }
 
     completer.complete();
@@ -105,10 +103,6 @@ String getZipBundleURLFromEnv() {
 
 String getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
-}
-
-String getCommandPathFromEnv() {
-  return Platform.environment[COMMAND_PATH];
 }
 
 Future<String> getBundleContent({String bundleURL, String bundlePath, String zipBundleURL}) async {
@@ -145,11 +139,7 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-void afterConnectedForCommand() async {
-  CommandRun(getCommandPathFromEnv()).run();
-}
-
-void defaultAfterConnected() async {
+Future<void> defaultAfterConnected() async {
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();
@@ -173,6 +163,6 @@ void launch({
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      afterConnected: Platform.environment[COMMAND_PATH] != null ? afterConnectedForCommand : defaultAfterConnected
+      afterConnected: defaultAfterConnected
   );
 }

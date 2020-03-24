@@ -12,6 +12,9 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
 mixin BackgroundImageMixin on Node {
+
+  RenderGradient _renderGradient;
+
   double linearAngle;
 
   bool shouldInitBackgroundImage(StyleDeclaration style) {
@@ -35,17 +38,69 @@ mixin BackgroundImageMixin on Node {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url, style);
+            if (decorationImage != null) {
+              return _renderGradient = RenderGradient(
+                nodeId: nodeId,
+                decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+                child: renderObject);
+            }
           }
         } else {
           gradient = getBackgroundGradient(method, style);
+          if (gradient != null) {
+            return _renderGradient = RenderGradient(
+              nodeId: nodeId,
+              decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+              child: renderObject);
+          }
         }
       }
     }
 
-    return RenderGradient(
+    return renderObject;
+  }
+
+  void updateBackgroundImage(StyleDeclaration style, RenderObjectWithChildMixin parent, int nodeId) {
+    DecorationImage decorationImage;
+    Gradient gradient;
+    if (style.contains("backgroundImage")) {
+      List<Method> methods = Method.parseMethod(style['backgroundImage']);
+      //FIXME flutter just support one property
+      for (Method method in methods) {
+        if (method.name == 'url') {
+          String url = method.args.length > 0 ? method.args[0] : "";
+          if (url != null && url.isNotEmpty) {
+            decorationImage = getBackgroundImage(url, style);
+            if (decorationImage != null) {
+              _updateRenderGradient(decorationImage, gradient, parent, nodeId);
+              return;
+            }
+          }
+        } else {
+          gradient = getBackgroundGradient(method, style);
+          if (gradient != null) {
+            _updateRenderGradient(decorationImage, gradient, parent, nodeId);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
+    RenderObjectWithChildMixin parent, int nodeId) {
+    if (_renderGradient != null) {
+      _renderGradient.decoration =
+        BoxDecoration(image: decorationImage, gradient: gradient);
+    } else {
+      RenderObject child = parent.child;
+      parent.child = null;
+      _renderGradient = RenderGradient(
         nodeId: nodeId,
         decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-        child: renderObject);
+        child: child);
+      parent.child = _renderGradient;
+    }
   }
 
   DecorationImage getBackgroundImage(String url, StyleDeclaration style) {

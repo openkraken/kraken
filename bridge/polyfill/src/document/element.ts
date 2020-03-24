@@ -172,4 +172,34 @@ export class Element extends Node {
   async toBlob(devicePixelRatio: number = window.devicePixelRatio) {
     return toBlob(this.nodeId, devicePixelRatio);
   }
+
+  public scroll(x: number | any, y?: number) {
+    let option = x;
+    if (typeof x === 'number') {
+      option = {
+        'top': y,
+        'left': x
+      };
+    }
+    method(this.nodeId, 'scroll', [option]);
+  }
+
+  public scrollTo(x: number | any, y?: number) {
+    if (typeof y === "number") {
+      scroll(x, y);
+    } else {
+      scroll(x, 0);
+    }
+  }
+
+  public scrollBy(x: number | any, y?: number) {
+    let option = x;
+    if (typeof x === 'number') {
+      option = {
+        'top': y,
+        'left': x
+      };
+    }
+    method(this.nodeId, 'scrollBy', [option]);
+  }
 }

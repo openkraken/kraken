@@ -118,6 +118,11 @@ abstract class Element extends Node
           renderLayoutBox = createRenderLayoutBox(style, null);
     }
 
+    // background image
+    if (shouldInitBackgroundImage(style)) {
+      renderObject = initBackgroundImage(renderObject, style, nodeId);
+    }
+
     // BoxModel Padding.
     renderObject = renderPadding = initRenderPadding(renderObject, style);
 
@@ -126,10 +131,13 @@ abstract class Element extends Node
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
 
-    // Background image for gradients.
-    if (shouldInitBackgroundImage(style)) {
-      renderObject = initBackgroundImage(renderObject, style, nodeId);
-    }
+
+    // border
+    renderObject = initRenderDecoratedBox(renderObject, style, nodeId);
+
+    // constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Positioned boundary.
     if (_isPositioned(style)) {
@@ -140,13 +148,6 @@ abstract class Element extends Node
         children: [renderObject],
       );
     }
-
-    // BoxModel border.
-    renderObject = initRenderDecoratedBox(renderObject, style, nodeId);
-
-    // Constrained box, for size(width/height) of BoxModel.
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Pointer event listener boundary.
     renderObject = RenderPointerListener(
@@ -999,6 +1000,9 @@ abstract class Element extends Node
   void _styleDecoratedChangedListener(String property, original, present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
+    if (shouldInitBackgroundImage(style)) {
+      updateBackgroundImage(style, renderPadding, nodeId);
+    }
   }
 
   void _styleOpacityChangedListener(String property, original, present) {
@@ -1106,6 +1110,10 @@ abstract class Element extends Node
         return getBoundingClientRect();
       case 'click':
         return click();
+      case 'scroll':
+        return scroll(args);
+      case 'scrollBy':
+        return scroll(args, isScrollBy: true);
       default:
         debugPrint('Unknown method call. name: $name, args: ${args}');
     }
