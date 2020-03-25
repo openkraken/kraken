@@ -1,8 +1,15 @@
-import { krakenUIManager, krakenRequestBatchUpdate, krakenToBlob } from '../kraken';
+import { krakenUIManager, krakenRequestAnimationFrame, krakenRequestBatchUpdate, krakenToBlob } from '../kraken';
 import { Blob } from '../blob';
 
 const updateMessageQueue: any[] = [];
 let updateRequested: boolean = false;
+
+
+// Clear all pending frames to keep execution order.
+function requestAnimationFrame(callback: any) {
+  requestUpdateFrame();
+  return krakenRequestAnimationFrame(callback);
+}
 
 function appendMessage(message: any[]) {
   updateMessageQueue.push(message);
@@ -91,4 +98,11 @@ Object.defineProperty(global, '__request_update_frame__', {
   writable: false,
   configurable: false,
   value: requestUpdateFrame,
+});
+
+Object.defineProperty(global, 'requestAnimationFrame', {
+  enumerable: true,
+  writable: false,
+  configurable: false,
+  value: requestAnimationFrame,
 });
