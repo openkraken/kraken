@@ -1,17 +1,16 @@
 describe('containing-block', () => {
-
   it('001', async () => {
     let div1 = create('div', {
       backgroundColor: 'red',
       display: 'block',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     let child = create('div', {
       backgroundColor: 'green',
       height: '100px',
       width: '100px',
-      position: 'relative'
+      position: 'relative',
     });
     append(div1, child);
     append(BODY, div1);
@@ -24,7 +23,7 @@ describe('containing-block', () => {
       height: '60px',
       padding: '20px',
       display: 'inline-block',
-      backgroundColor: 'red'
+      backgroundColor: 'red',
     });
     let child = create('div', {
       backgroundColor: 'green',
@@ -32,7 +31,7 @@ describe('containing-block', () => {
       width: '100px',
       left: '-20px',
       position: 'relative',
-      top: '-20px'
+      top: '-20px',
     });
     append(div1, child);
     append(BODY, div1);
@@ -44,13 +43,13 @@ describe('containing-block', () => {
       width: '100px',
       height: '100px',
       backgroundColor: 'red',
-      display: 'block'
+      display: 'block',
     });
     let child = create('div', {
       backgroundColor: 'green',
       height: '100%',
       width: '100%',
-      position: 'static'
+      position: 'static',
     });
     append(div1, child);
     append(BODY, div1);
@@ -60,7 +59,7 @@ describe('containing-block', () => {
   it('007', async () => {
     let div1 = create('div', {
       position: 'relative',
-      bottom: 0
+      bottom: 0,
     });
     let child = create('div', {
       backgroundColor: 'blue',
@@ -68,7 +67,7 @@ describe('containing-block', () => {
       position: 'fixed',
       right: 0,
       top: 0,
-      width: '100px'
+      width: '100px',
     });
     append(div1, child);
     append(BODY, div1);
@@ -80,12 +79,12 @@ describe('containing-block', () => {
       border: '1px solid black',
       margin: '50px',
       position: 'absolute',
-      top: 0
+      top: 0,
     });
     let div2 = create('div', {
       margin: '50px',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     let div3 = create('div', {
       backgroundColor: 'blue',
@@ -93,7 +92,7 @@ describe('containing-block', () => {
       position: 'absolute',
       top: 0,
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     append(div2, div3);
     append(div1, div2);
@@ -105,12 +104,12 @@ describe('containing-block', () => {
       border: '1px solid black',
       margin: '50px',
       position: 'relative',
-      top: 0
+      top: 0,
     });
     let div2 = create('div', {
       margin: '50px',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     let div3 = create('div', {
       backgroundColor: 'blue',
@@ -118,7 +117,7 @@ describe('containing-block', () => {
       position: 'absolute',
       top: 0,
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     append(div2, div3);
     append(div1, div2);
@@ -130,12 +129,12 @@ describe('containing-block', () => {
       border: '1px solid black',
       margin: '50px',
       position: 'fixed',
-      top: 0
+      top: 0,
     });
     let div2 = create('div', {
       margin: '50px',
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     let div3 = create('div', {
       backgroundColor: 'blue',
@@ -143,7 +142,7 @@ describe('containing-block', () => {
       position: 'absolute',
       top: 0,
       width: '100px',
-      height: '100px'
+      height: '100px',
     });
     append(div2, div3);
     append(div1, div2);
@@ -155,13 +154,13 @@ describe('containing-block', () => {
       border: '1px solid black',
       padding: '100px',
       position: 'relative',
-      width: 0
+      width: 0,
     });
     let span = create('span', {
       backgroundColor: 'blue',
       height: '100px',
       position: 'absolute',
-      width: '100px'
+      width: '100px',
     });
     append(div2, span);
     append(BODY, div2);
@@ -172,13 +171,13 @@ describe('containing-block', () => {
       border: '1px solid black',
       padding: '100px',
       position: 'absolute',
-      width: 0
+      width: 0,
     });
     let span = create('span', {
       backgroundColor: 'blue',
       height: '100px',
       width: '100px',
-      position: 'absolute'
+      position: 'absolute',
     });
     append(div2, span);
     append(BODY, div2);
@@ -189,13 +188,13 @@ describe('containing-block', () => {
       border: '1px solid black',
       padding: '100px',
       position: 'fixed',
-      width: 0
+      width: 0,
     });
     let span = create('span', {
       backgroundColor: 'blue',
       height: '100px',
       width: '100px',
-      position: 'absolute'
+      position: 'absolute',
     });
     append(div2, span);
     append(BODY, div2);
@@ -207,31 +206,31 @@ describe('containing-block', () => {
       border: '3px solid silver',
       marginBottom: '20px',
       padding: '100px',
-      width: '450px'
+      width: '450px',
     };
     let container = create('div', divStyle);
     let test = create('span', {
       border: '5px solid silver',
       padding: '50px',
-      position: 'relative'
+      position: 'relative',
     });
     let firstBox = create('span', {
-      color: 'silver'
+      color: 'silver',
     });
     let lastBox = create('span', {
-      color: 'silver'
+      color: 'silver',
     });
     let tlControl = create('span', {
       borderTop: '30px solid red',
       marginLeft: '-50px',
       marginRight: '20px',
-      padding: '20px 15px'
+      padding: '20px 15px',
     });
     let brControl = create('span', {
       borderBottom: '30px solid red',
       marginLeft: '20px',
       marginRight: '-50px',
-      padding: '20px 15px'
+      padding: '20px 15px',
     });
     let positionStyle = {
       height: '30px',
@@ -241,28 +240,34 @@ describe('containing-block', () => {
     let topLeftStyle = {
       backgroundColor: 'green',
       left: 0,
-      top: 0
+      top: 0,
     };
     let bottomrightStyle = {
       backgroundColor: 'green',
       bottom: 0,
-      right: 0
+      right: 0,
     };
     append(firstBox, tlControl);
-    append(firstBox, createText('Filler Text Filler Text Filler Text Filler Text'));
+    append(
+      firstBox,
+      createText('Filler Text Filler Text Filler Text Filler Text')
+    );
     let BR = create('span', {
       ...positionStyle,
-      ...bottomrightStyle
+      ...bottomrightStyle,
     });
     append(BR, createText('BR'));
     append(test, BR);
     let TL = create('span', {
       ...positionStyle,
-      ...topLeftStyle
+      ...topLeftStyle,
     });
     append(TL, createText('TL'));
     append(test, TL);
-    append(lastBox, createText('Filler Text Filler Text Filler Text Filler Text'));
+    append(
+      lastBox,
+      createText('Filler Text Filler Text Filler Text Filler Text')
+    );
     append(lastBox, brControl);
     append(test, lastBox);
     append(container, test);
@@ -275,15 +280,15 @@ describe('containing-block', () => {
       border: '3px solid silver',
       marginBottom: '20px',
       padding: '100px',
-      width: '450px'
+      width: '450px',
     };
     let testStyle = {
       border: '5px solid silver',
       padding: '50px',
-      position: 'relative'
+      position: 'relative',
     };
     let boxStyle = {
-      color: 'silver'
+      color: 'silver',
     };
     let positionStyle = {
       height: '30px',
@@ -294,23 +299,23 @@ describe('containing-block', () => {
       borderTop: '30px solid red',
       marginLeft: '20px',
       marginRight: '-50px',
-      padding: '20px 15px'
+      padding: '20px 15px',
     };
     let blControlStyle = {
       borderBottom: '30px solid red',
       marginLeft: '-50px',
       marginRight: '20px',
-      padding: '20px 15px'
+      padding: '20px 15px',
     };
     let topRightStyle = {
       backgroundColor: 'green',
       right: 0,
-      top: 0
+      top: 0,
     };
     let bottomLeftStyle = {
       backgroundColor: 'green',
       bottom: 0,
-      left: 0
+      left: 0,
     };
     let container = create('div', divStyle);
     let test = create('span', testStyle);
@@ -318,11 +323,11 @@ describe('containing-block', () => {
     let trControl = create('span', trControlStyle);
     let BL = create('span', {
       ...positionStyle,
-      ...bottomLeftStyle
+      ...bottomLeftStyle,
     });
     let TR = create('span', {
       ...positionStyle,
-      ...topRightStyle
+      ...topRightStyle,
     });
     let lastBox = create('span', boxStyle);
     let blControl = create('span', blControlStyle);
@@ -345,16 +350,16 @@ describe('containing-block', () => {
       border: '3px solid black',
       padding: '100px',
       position: 'absolute',
-      width: 0
+      width: 0,
     };
-    let spanStyle = {display: 'block'};
+    let spanStyle = { display: 'block' };
     let spanSpanStyle = {
       backgroundColor: 'blue',
       height: '100px',
       left: 'auto',
       position: 'absolute',
       top: 'auto',
-      width: '100px'
+      width: '100px',
     };
     let div = create('div', divStyle);
     let span = create('span', spanStyle);
@@ -367,10 +372,10 @@ describe('containing-block', () => {
 
   it('023', async () => {
     let bodyStyle = {
-      margin: '8px'
+      margin: '8px',
     };
     let div1Anddiv2Style = {
-      margin: '100px'
+      margin: '100px',
     };
     let div3Style = {
       backgroundColor: 'blue',
@@ -378,7 +383,7 @@ describe('containing-block', () => {
       width: '100px',
       left: 0,
       bottom: 0,
-      position: 'absolute'
+      position: 'absolute',
     };
     setStyle(BODY, bodyStyle);
     let div1 = create('div', div1Anddiv2Style);
@@ -394,16 +399,16 @@ describe('containing-block', () => {
     let divStyle = {
       backgroundColor: 'red',
       width: '100px',
-      height: '100px'
+      height: '100px',
     };
     let divDivStyle = {
-      backgroundColor: 'green'
+      backgroundColor: 'green',
     };
     let child = create('div', {
       ...divStyle,
-      ...divDivStyle
+      ...divDivStyle,
     });
-    let wrapper = create('div',  divStyle);
+    let wrapper = create('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchElementImageSnapshot(wrapper);
@@ -414,18 +419,18 @@ describe('containing-block', () => {
       backgroundColor: 'blue',
       width: '100px',
       height: '100px',
-      paddingTop: '5px'
+      paddingTop: '5px',
     };
     let divDivStyle = {
       backgroundColor: 'orange',
       height: '50px',
-      width: '200px'
+      width: '200px',
     };
     let child = create('div', {
       ...divStyle,
-      ...divDivStyle
+      ...divDivStyle,
     });
-    let wrapper = create('div',  divStyle);
+    let wrapper = create('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchScreenshot();
@@ -436,20 +441,20 @@ describe('containing-block', () => {
       backgroundColor: 'blue',
       width: '100px',
       height: '100px',
-      position: 'absolute'
+      position: 'absolute',
     };
     let divDivStyle = {
       backgroundColor: 'orange',
       bottom: 0,
       right: 0,
       width: '25px',
-      height: '25px'
+      height: '25px',
     };
     let child = create('div', {
       ...divStyle,
-      ...divDivStyle
+      ...divDivStyle,
     });
-    let wrapper = create('div',  divStyle);
+    let wrapper = create('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchScreenshot();
@@ -460,17 +465,284 @@ describe('containing-block', () => {
       backgroundColor: 'blue',
       height: '100px',
       paddingLeft: '5px',
-      width: '100px'
+      width: '100px',
     };
     let soleChildStyle = {
       backgroundColor: 'orange',
       height: '200px',
-      width: '50px'
+      width: '50px',
     };
     let div = create('div', soleChildStyle);
     let container = create('div', containingBlockStyle);
     append(container, div);
     append(BODY, container);
     await matchScreenshot();
+  });
+
+  it('relative positioned elements near block-level ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      backgroundColor: 'red',
+      display: 'block',
+      height: '100px',
+      width: '100px',
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      backgroundColor: 'green',
+      width: '100px',
+      height: '100px',
+      position: 'relative',
+    });
+    div1.appendChild(div2);
+
+    await matchScreenshot();
+  });
+
+  it('relative positioned elements near inline-block ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      backgroundColor: 'red',
+      display: 'inline-block',
+      height: '60px',
+      padding: '20px',
+      width: '60px',
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      backgroundColor: 'green',
+      height: '100px',
+      left: '-20px',
+      position: 'relative',
+      top: '-20px',
+      width: '100px',
+    });
+    div1.appendChild(div2);
+
+    await matchScreenshot();
+  });
+
+  it('static positioned elements near block-level ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      backgroundColor: 'red',
+      display: 'block',
+      height: '100px',
+      width: '100px',
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      backgroundColor: 'green',
+      height: '100px',
+      position: 'static',
+      width: '100px',
+    });
+    div1.appendChild(div2);
+
+    await matchScreenshot();
+  });
+
+  it('static positioned elements near block-level ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled green square and no red.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      backgroundColor: 'red',
+      display: 'inline-block',
+      height: '100px',
+      width: '100px',
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      backgroundColor: 'green',
+      height: '100px',
+      position: 'static',
+      width: '100px',
+    });
+    div1.appendChild(div2);
+
+    await matchScreenshot();
+  });
+
+  it('fixed positioned elements', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if there is a filled blue square in the upper-right corner of the page.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      position: 'relative',
+      bottom: 0,
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      backgroundColor: 'blue',
+      height: '100px',
+      position: 'fixed',
+      right: 0,
+      top: 0,
+      width: '100px',
+    });
+    div1.appendChild(div2);
+
+    await matchScreenshot();
+  });
+
+  it('absolute positioned elements near absolute ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      border: '1px solid black',
+      margin: '50px',
+      position: 'absolute',
+      top: 0,
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      margin: '50px',
+      width: '50px',
+      height: '50px',
+    });
+    div1.appendChild(div2);
+
+    var div3 = document.createElement('div');
+    setStyle(div3, {
+      backgroundColor: 'blue',
+      right: 0,
+      position: 'absolute',
+      top: 0,
+      width: '50px',
+      height: '50px',
+    });
+    div2.appendChild(div3);
+  });
+
+  it('absolute positioned elements near relative ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      border: '1px solid black',
+      margin: '50px',
+      position: 'relative',
+      top: 0,
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      margin: '50px',
+      width: '50px',
+      height: '50px',
+    });
+    div1.appendChild(div2);
+
+    var div3 = document.createElement('div');
+    setStyle(div3, {
+      backgroundColor: 'blue',
+      right: 0,
+      position: 'absolute',
+      top: 0,
+      width: '50px',
+      height: '50px',
+    });
+    div2.appendChild(div3);
+  });
+
+  it('absolute positioned elements near fixed ancestor', async () => {
+    var p = document.createElement('p');
+    document.body.appendChild(p);
+    p.appendChild(
+      document.createTextNode(
+        'Test passes if a filled blue square is in the upper-right corner of an hollow black square.'
+      )
+    );
+
+    var div1 = document.createElement('div');
+    setStyle(div1, {
+      border: '1px solid black',
+      margin: '50px',
+      position: 'fixed',
+      top: 0,
+    });
+    document.body.appendChild(div1);
+
+    var div2 = document.createElement('div');
+    setStyle(div2, {
+      margin: '50px',
+      width: '50px',
+      height: '50px',
+    });
+    div1.appendChild(div2);
+
+    var div3 = document.createElement('div');
+    setStyle(div3, {
+      backgroundColor: 'blue',
+      right: 0,
+      position: 'absolute',
+      top: 0,
+      width: '50px',
+      height: '50px',
+    });
+    div2.appendChild(div3);
   });
 });
