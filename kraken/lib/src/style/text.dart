@@ -23,6 +23,7 @@ mixin TextStyleMixin {
   static const double DEFAULT_FONT_SIZE = 14.0;
   static const double DEFAULT_LETTER_SPACING = 0.0;
   static const double DEFAULT_WORD_SPACING = 0.0;
+  static const double DEFAULT_FONT_WEIGHT = 400.0;
 
   TextSpan createTextSpanWithStyle(String text, StyleDeclaration style) {
     return TextSpan(
@@ -172,36 +173,53 @@ mixin TextStyleMixin {
   FontWeight getFontWeight(StyleDeclaration style) {
     if (style.contains(FONT_WEIGHT)) {
       var fontWeight = style[FONT_WEIGHT];
-      if (fontWeight is! String) {
-        fontWeight = fontWeight.toString();
+      double fontWeightValue = DEFAULT_FONT_WEIGHT; // Default to 400.
+      if (fontWeight is String) {
+        switch (fontWeight) {
+          case 'lighter':
+            fontWeightValue = 200;
+            break;
+          case 'light':
+            fontWeightValue = 300;
+            break;
+          case 'normal':
+            fontWeightValue = 400;
+            break;
+          case 'medium':
+            fontWeightValue = 500;
+            break;
+          case 'bold':
+            fontWeightValue = 700;
+            break;
+          case 'bolder':
+          case 'heavy':
+            fontWeightValue = 900;
+            break;
+          default:
+            fontWeightValue =
+                double.tryParse(fontWeight) ?? DEFAULT_FONT_WEIGHT;
+            break;
+        }
       }
 
-      switch (fontWeight) {
-        case '100':
-          return FontWeight.w100;
-        case '200':
-        case 'lighter':
-          return FontWeight.w200;
-        case 'light':
-        case '300':
-          return FontWeight.w300;
-        case '400':
-        case 'normal':
-          return FontWeight.w400;
-        case '500':
-        case 'medium':
-          return FontWeight.w500;
-        case '600':
-          return FontWeight.w600;
-        case '700':
-        case 'bold':
-          return FontWeight.w700;
-        case '800':
-          return FontWeight.w800;
-        case '900':
-        case 'bolder':
-        case 'heavy':
-          return FontWeight.w900;
+      if (fontWeightValue >= 900) {
+        return FontWeight.w900;
+      } else if (fontWeightValue >= 800) {
+        return FontWeight.w800;
+      } else if (fontWeightValue >= 700) {
+        return FontWeight.w700;
+      } else if (fontWeightValue >= 600) {
+        return FontWeight.w600;
+      } else if (fontWeightValue >= 500) {
+        return FontWeight.w500;
+      } else if (fontWeightValue >= 400) {
+        return FontWeight.w400;
+      } else if (fontWeightValue >= 300) {
+        return FontWeight.w300;
+      } else if (fontWeightValue >= 200) {
+        return FontWeight.w200;
+      } else {
+        return FontWeight.w100;
       }
     }
     return FontWeight.normal;
