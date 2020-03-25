@@ -1,4 +1,4 @@
-fdescribe('insert-block-in-blocks-n-inlines', () => {
+describe('insert-block-in-blocks-n-inlines', () => {
   it('begin-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
