@@ -41,365 +41,73 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       StyleDeclaration style, Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
-      Transition allTransition = transitionMap['all'];
-      Transition backgroundColorTransition = transitionMap['background-color'];
-      Transition borderWidthTransition = transitionMap['border-width'];
-      Transition borderColorTransition = transitionMap['border-color'];
-      Transition borderLeftWidthTransition = transitionMap['border-left-width'];
-      Transition borderLeftColorTransition = transitionMap['border-left-color'];
-      Transition borderTopWidthTransition = transitionMap['border-top-width'];
-      Transition borderTopColorTransition = transitionMap['border-top-color'];
-      Transition borderRightWidthTransition =
-          transitionMap['border-right-width'];
-      Transition borderRightColorTransition =
-          transitionMap['border-right-color'];
-      Transition borderBottomWidthTransition =
-          transitionMap['border-bottom-width'];
-      Transition borderBottomColorTransition =
-          transitionMap['border-bottom-color'];
-      if (allTransition != null ||
-          backgroundColorTransition != null ||
-          borderWidthTransition != null ||
-          borderColorTransition != null ||
-          borderLeftWidthTransition != null ||
-          borderLeftColorTransition != null ||
-          borderTopColorTransition != null ||
-          borderTopWidthTransition != null ||
-          borderRightColorTransition != null ||
-          borderRightWidthTransition != null ||
-          borderBottomColorTransition != null ||
-          borderBottomWidthTransition != null) {
-        int alphaDiff = newDecoration.alpha - oldDecoration.alpha;
-        int redDiff = newDecoration.red - oldDecoration.red;
-        int greenDiff = newDecoration.green - oldDecoration.green;
-        int blueDiff = newDecoration.blue - oldDecoration.blue;
+      Transition backgroundColorTransition = getTransition(
+          transitionMap, 'background-color');
+      // border color and width transition add inorder left top right bottom
+      List<Transition> borderColorTransitionsLTRB = [
+        getTransition(transitionMap, 'border-left-color',
+            parentProperty: 'border-color'),
+        getTransition(transitionMap, 'border-top-color',
+            parentProperty: 'border-color'),
+        getTransition(transitionMap, 'border-right-color',
+            parentProperty: 'border-color'),
+        getTransition(transitionMap, 'border-bottom-color',
+            parentProperty: 'border-color')
+      ];
+      List<Transition> borderWidthTransitionsLTRB = [
+        getTransition(transitionMap, 'border-left-width',
+            parentProperty: 'border-width'),
+        getTransition(transitionMap, 'border-top-width',
+            parentProperty: 'border-width'),
+        getTransition(transitionMap, 'border-right-width',
+            parentProperty: 'border-width'),
+        getTransition(transitionMap, 'border-bottom-width',
+            parentProperty: 'border-width')
+      ];
 
-        double borderLeftWidthDiff = newDecoration.borderLeftSide.borderWidth -
-            oldDecoration.borderLeftSide.borderWidth;
-        double borderTopWidthDiff = newDecoration.borderTopSide.borderWidth -
-            oldDecoration.borderTopSide.borderWidth;
-        double borderRightWidthDiff =
-            newDecoration.borderRightSide.borderWidth -
-                oldDecoration.borderRightSide.borderWidth;
-        double borderBottomWidthDiff =
-            newDecoration.borderBottomSide.borderWidth -
-                oldDecoration.borderBottomSide.borderWidth;
-
-        int borderLeftAlphaDiff = newDecoration.borderLeftSide.borderAlpha -
-            oldDecoration.borderLeftSide.borderAlpha;
-        int borderLeftRedDiff = newDecoration.borderLeftSide.borderRed -
-            oldDecoration.borderLeftSide.borderRed;
-        int borderLeftGreenDiff = newDecoration.borderLeftSide.borderGreen -
-            oldDecoration.borderLeftSide.borderGreen;
-        int borderLeftBlueDiff = newDecoration.borderLeftSide.borderBlue -
-            oldDecoration.borderLeftSide.borderBlue;
-        int borderTopAlphaDiff = newDecoration.borderTopSide.borderAlpha -
-            oldDecoration.borderTopSide.borderAlpha;
-        int borderTopRedDiff = newDecoration.borderTopSide.borderRed -
-            oldDecoration.borderTopSide.borderRed;
-        int borderTopGreenDiff = newDecoration.borderTopSide.borderGreen -
-            oldDecoration.borderTopSide.borderGreen;
-        int borderTopBlueDiff = newDecoration.borderTopSide.borderBlue -
-            oldDecoration.borderTopSide.borderBlue;
-        int borderRightAlphaDiff = newDecoration.borderRightSide.borderAlpha -
-            oldDecoration.borderRightSide.borderAlpha;
-        int borderRightRedDiff = newDecoration.borderRightSide.borderRed -
-            oldDecoration.borderRightSide.borderRed;
-        int borderRightGreenDiff = newDecoration.borderRightSide.borderGreen -
-            oldDecoration.borderRightSide.borderGreen;
-        int borderRightBlueDiff = newDecoration.borderRightSide.borderBlue -
-            oldDecoration.borderRightSide.borderBlue;
-        int borderBottomAlphaDiff = newDecoration.borderBottomSide.borderAlpha -
-            oldDecoration.borderBottomSide.borderAlpha;
-        int borderBottomRedDiff = newDecoration.borderBottomSide.borderRed -
-            oldDecoration.borderBottomSide.borderRed;
-        int borderBottomGreenDiff = newDecoration.borderBottomSide.borderGreen -
-            oldDecoration.borderBottomSide.borderGreen;
-        int borderBottomBlueDiff = newDecoration.borderBottomSide.borderBlue -
-            oldDecoration.borderBottomSide.borderBlue;
-
+      // border radius transition add inorder topLeft topRight bottomLeft
+      // bottomRight
+      List<Transition> borderRadiusTransitionTLTRBLBR = [
+        getTransition(transitionMap, 'border-top-left-radius',
+            parentProperty: 'border-radius'),
+        getTransition(transitionMap, 'border-top-right-radius',
+            parentProperty: 'border-radius'),
+        getTransition(transitionMap, 'border-bottom-left-radius',
+            parentProperty: 'border-radius'),
+        getTransition(transitionMap, 'border-bottom-right-radius',
+            parentProperty: 'border-radius')
+      ];
+      if (backgroundColorTransition != null ||
+          borderWidthTransitionsLTRB.isNotEmpty ||
+          borderColorTransitionsLTRB.isNotEmpty ||
+          borderRadiusTransitionTLTRBLBR.isNotEmpty) {
         TransitionDecoration progressDecoration = oldDecoration.clone();
         TransitionDecoration baseDecoration = oldDecoration.clone();
-        allTransition?.addProgressListener((progress) {
-          if (backgroundColorTransition == null) {
-            progressDecoration.alpha =
-                (alphaDiff * progress).toInt() + baseDecoration.alpha;
-            progressDecoration.red =
-                (redDiff * progress).toInt() + baseDecoration.red;
-            progressDecoration.green =
-                (greenDiff * progress).toInt() + baseDecoration.green;
-            progressDecoration.blue =
-                (blueDiff * progress).toInt() + baseDecoration.blue;
-          }
-          if (borderWidthTransition == null) {
-            if (borderLeftWidthTransition == null) {
-              progressDecoration.borderLeftSide.borderWidth =
-                  borderLeftWidthDiff * progress +
-                      baseDecoration.borderLeftSide.borderWidth;
-            }
-            if (borderTopWidthTransition == null) {
-              progressDecoration.borderTopSide.borderWidth =
-                  borderTopWidthDiff * progress +
-                      baseDecoration.borderTopSide.borderWidth;
-            }
-            if (borderRightWidthTransition == null) {
-              progressDecoration.borderRightSide.borderWidth =
-                  borderRightWidthDiff * progress +
-                      baseDecoration.borderRightSide.borderWidth;
-            }
-            if (borderBottomWidthTransition == null) {
-              progressDecoration.borderBottomSide.borderWidth =
-                  borderBottomWidthDiff * progress +
-                      baseDecoration.borderBottomSide.borderWidth;
-            }
-          }
 
-          if (borderColorTransition == null) {
-            if (borderLeftColorTransition == null) {
-              progressDecoration.borderLeftSide.borderAlpha =
-                  (borderLeftAlphaDiff * progress).toInt() +
-                      baseDecoration.borderLeftSide.borderAlpha;
-              progressDecoration.borderLeftSide.borderRed =
-                  (borderLeftRedDiff * progress).toInt() +
-                      baseDecoration.borderLeftSide.borderRed;
-              progressDecoration.borderLeftSide.borderGreen =
-                  (borderLeftGreenDiff * progress).toInt() +
-                      baseDecoration.borderLeftSide.borderGreen;
-              progressDecoration.borderLeftSide.borderBlue =
-                  (borderLeftBlueDiff * progress).toInt() +
-                      baseDecoration.borderLeftSide.borderBlue;
-            }
-            if (borderTopColorTransition == null) {
-              progressDecoration.borderTopSide.borderAlpha =
-                  (borderTopAlphaDiff * progress).toInt() +
-                      baseDecoration.borderTopSide.borderAlpha;
-              progressDecoration.borderTopSide.borderRed =
-                  (borderTopRedDiff * progress).toInt() +
-                      baseDecoration.borderTopSide.borderRed;
-              progressDecoration.borderTopSide.borderGreen =
-                  (borderTopGreenDiff * progress).toInt() +
-                      baseDecoration.borderTopSide.borderGreen;
-              progressDecoration.borderTopSide.borderBlue =
-                  (borderTopBlueDiff * progress).toInt() +
-                      baseDecoration.borderTopSide.borderBlue;
-            }
-            if (borderRightColorTransition == null) {
-              progressDecoration.borderRightSide.borderAlpha =
-                  (borderRightAlphaDiff * progress).toInt() +
-                      baseDecoration.borderRightSide.borderAlpha;
-              progressDecoration.borderRightSide.borderRed =
-                  (borderRightRedDiff * progress).toInt() +
-                      baseDecoration.borderRightSide.borderRed;
-              progressDecoration.borderRightSide.borderGreen =
-                  (borderRightGreenDiff * progress).toInt() +
-                      baseDecoration.borderRightSide.borderGreen;
-              progressDecoration.borderRightSide.borderBlue =
-                  (borderRightBlueDiff * progress).toInt() +
-                      baseDecoration.borderRightSide.borderBlue;
-            }
-            if (borderBottomColorTransition == null) {
-              progressDecoration.borderBottomSide.borderAlpha =
-                  (borderBottomAlphaDiff * progress).toInt() +
-                      baseDecoration.borderBottomSide.borderAlpha;
-              progressDecoration.borderBottomSide.borderRed =
-                  (borderBottomRedDiff * progress).toInt() +
-                      baseDecoration.borderBottomSide.borderRed;
-              progressDecoration.borderBottomSide.borderGreen =
-                  (borderBottomGreenDiff * progress).toInt() +
-                      baseDecoration.borderBottomSide.borderGreen;
-              progressDecoration.borderBottomSide.borderBlue =
-                  (borderBottomBlueDiff * progress).toInt() +
-                      baseDecoration.borderBottomSide.borderBlue;
-            }
-          }
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
-        backgroundColorTransition?.addProgressListener((progress) {
-          progressDecoration.alpha =
-              (alphaDiff * progress).toInt() + baseDecoration.alpha;
-          progressDecoration.red =
-              (redDiff * progress).toInt() + baseDecoration.red;
-          progressDecoration.green =
-              (greenDiff * progress).toInt() + baseDecoration.green;
-          progressDecoration.blue =
-              (blueDiff * progress).toInt() + baseDecoration.blue;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
+        // background color transition
+        addColorProcessListener(
+            backgroundColorTransition, newDecoration, oldDecoration,
+            progressDecoration, baseDecoration, progressDecoration);
 
-        borderWidthTransition?.addProgressListener((progress) {
-          if (borderLeftWidthTransition == null) {
-            progressDecoration.borderLeftSide.borderWidth =
-                borderLeftWidthDiff * progress +
-                    baseDecoration.borderLeftSide.borderWidth;
-          }
-          if (borderTopWidthTransition == null) {
-            progressDecoration.borderTopSide.borderWidth =
-                borderTopWidthDiff * progress +
-                    baseDecoration.borderTopSide.borderWidth;
-          }
-          if (borderRightWidthTransition == null) {
-            progressDecoration.borderRightSide.borderWidth =
-                borderRightWidthDiff * progress +
-                    baseDecoration.borderRightSide.borderWidth;
-          }
-          if (borderBottomWidthTransition == null) {
-            progressDecoration.borderBottomSide.borderWidth =
-                borderBottomWidthDiff * progress +
-                    baseDecoration.borderBottomSide.borderWidth;
-          }
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
+        // side read inorder left top right bottom
+        // radius read inorder topLeft topRight bottomLeft bottomRight
+        for (int i = 0; i < 4; i++) {
 
-        borderLeftWidthTransition?.addProgressListener((progress) {
-          progressDecoration.borderLeftSide.borderWidth =
-              borderLeftWidthDiff * progress +
-                  baseDecoration.borderLeftSide.borderWidth;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
-        borderTopWidthTransition?.addProgressListener((progress) {
-          progressDecoration.borderTopSide.borderWidth =
-              borderTopWidthDiff * progress +
-                  baseDecoration.borderTopSide.borderWidth;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
-        borderRightWidthTransition?.addProgressListener((progress) {
-          progressDecoration.borderRightSide.borderWidth =
-              borderRightWidthDiff * progress +
-                  baseDecoration.borderRightSide.borderWidth;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
-        borderBottomWidthTransition?.addProgressListener((progress) {
-          progressDecoration.borderBottomSide.borderWidth =
-              borderBottomWidthDiff * progress +
-                  baseDecoration.borderBottomSide.borderWidth;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-          _updateBorderInsets(newDecoration.getBorderEdgeInsets());
-        });
+          // add border color transition
+          addColorProcessListener(
+              borderColorTransitionsLTRB[i], newDecoration.borderSidesLTRB[i],
+              oldDecoration.borderSidesLTRB[i], progressDecoration.borderSidesLTRB[i],
+              baseDecoration.borderSidesLTRB[i], progressDecoration);
 
-        borderColorTransition?.addProgressListener((progress) {
-          if (borderLeftColorTransition == null) {
-            progressDecoration.borderLeftSide.borderAlpha =
-                (borderLeftAlphaDiff * progress).toInt() +
-                    baseDecoration.borderLeftSide.borderAlpha;
-            progressDecoration.borderLeftSide.borderRed =
-                (borderLeftRedDiff * progress).toInt() +
-                    baseDecoration.borderLeftSide.borderRed;
-            progressDecoration.borderLeftSide.borderGreen =
-                (borderLeftGreenDiff * progress).toInt() +
-                    baseDecoration.borderLeftSide.borderGreen;
-            progressDecoration.borderLeftSide.borderBlue =
-                (borderLeftBlueDiff * progress).toInt() +
-                    baseDecoration.borderLeftSide.borderBlue;
-          }
-          if (borderTopColorTransition == null) {
-            progressDecoration.borderTopSide.borderAlpha =
-                (borderTopAlphaDiff * progress).toInt() +
-                    baseDecoration.borderTopSide.borderAlpha;
-            progressDecoration.borderTopSide.borderRed =
-                (borderTopRedDiff * progress).toInt() +
-                    baseDecoration.borderTopSide.borderRed;
-            progressDecoration.borderTopSide.borderGreen =
-                (borderTopGreenDiff * progress).toInt() +
-                    baseDecoration.borderTopSide.borderGreen;
-            progressDecoration.borderTopSide.borderBlue =
-                (borderTopBlueDiff * progress).toInt() +
-                    baseDecoration.borderTopSide.borderBlue;
-          }
-          if (borderRightColorTransition == null) {
-            progressDecoration.borderRightSide.borderAlpha =
-                (borderRightAlphaDiff * progress).toInt() +
-                    baseDecoration.borderRightSide.borderAlpha;
-            progressDecoration.borderRightSide.borderRed =
-                (borderRightRedDiff * progress).toInt() +
-                    baseDecoration.borderRightSide.borderRed;
-            progressDecoration.borderRightSide.borderGreen =
-                (borderRightGreenDiff * progress).toInt() +
-                    baseDecoration.borderRightSide.borderGreen;
-            progressDecoration.borderRightSide.borderBlue =
-                (borderRightBlueDiff * progress).toInt() +
-                    baseDecoration.borderRightSide.borderBlue;
-          }
-          if (borderBottomColorTransition == null) {
-            progressDecoration.borderBottomSide.borderAlpha =
-                (borderBottomAlphaDiff * progress).toInt() +
-                    baseDecoration.borderBottomSide.borderAlpha;
-            progressDecoration.borderBottomSide.borderRed =
-                (borderBottomRedDiff * progress).toInt() +
-                    baseDecoration.borderBottomSide.borderRed;
-            progressDecoration.borderBottomSide.borderGreen =
-                (borderBottomGreenDiff * progress).toInt() +
-                    baseDecoration.borderBottomSide.borderGreen;
-            progressDecoration.borderBottomSide.borderBlue =
-                (borderBottomBlueDiff * progress).toInt() +
-                    baseDecoration.borderBottomSide.borderBlue;
-          }
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
-        borderLeftColorTransition?.addProgressListener((progress) {
-          progressDecoration.borderLeftSide.borderAlpha =
-              (borderLeftAlphaDiff * progress).toInt() +
-                  baseDecoration.borderLeftSide.borderAlpha;
-          progressDecoration.borderLeftSide.borderRed =
-              (borderLeftRedDiff * progress).toInt() +
-                  baseDecoration.borderLeftSide.borderRed;
-          progressDecoration.borderLeftSide.borderGreen =
-              (borderLeftGreenDiff * progress).toInt() +
-                  baseDecoration.borderLeftSide.borderGreen;
-          progressDecoration.borderLeftSide.borderBlue =
-              (borderLeftBlueDiff * progress).toInt() +
-                  baseDecoration.borderLeftSide.borderBlue;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
-        borderTopColorTransition?.addProgressListener((progress) {
-          progressDecoration.borderTopSide.borderAlpha =
-              (borderTopAlphaDiff * progress).toInt() +
-                  baseDecoration.borderTopSide.borderAlpha;
-          progressDecoration.borderTopSide.borderRed =
-              (borderTopRedDiff * progress).toInt() +
-                  baseDecoration.borderTopSide.borderRed;
-          progressDecoration.borderTopSide.borderGreen =
-              (borderTopGreenDiff * progress).toInt() +
-                  baseDecoration.borderTopSide.borderGreen;
-          progressDecoration.borderTopSide.borderBlue =
-              (borderTopBlueDiff * progress).toInt() +
-                  baseDecoration.borderTopSide.borderBlue;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
-        borderRightColorTransition?.addProgressListener((progress) {
-          progressDecoration.borderRightSide.borderAlpha =
-              (borderRightAlphaDiff * progress).toInt() +
-                  baseDecoration.borderRightSide.borderAlpha;
-          progressDecoration.borderRightSide.borderRed =
-              (borderRightRedDiff * progress).toInt() +
-                  baseDecoration.borderRightSide.borderRed;
-          progressDecoration.borderRightSide.borderGreen =
-              (borderRightGreenDiff * progress).toInt() +
-                  baseDecoration.borderRightSide.borderGreen;
-          progressDecoration.borderRightSide.borderBlue =
-              (borderRightBlueDiff * progress).toInt() +
-                  baseDecoration.borderRightSide.borderBlue;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
-        borderBottomColorTransition?.addProgressListener((progress) {
-          progressDecoration.borderBottomSide.borderAlpha =
-              (borderBottomAlphaDiff * progress).toInt() +
-                  baseDecoration.borderBottomSide.borderAlpha;
-          progressDecoration.borderBottomSide.borderRed =
-              (borderBottomRedDiff * progress).toInt() +
-                  baseDecoration.borderBottomSide.borderRed;
-          progressDecoration.borderBottomSide.borderGreen =
-              (borderBottomGreenDiff * progress).toInt() +
-                  baseDecoration.borderBottomSide.borderGreen;
-          progressDecoration.borderBottomSide.borderBlue =
-              (borderBottomBlueDiff * progress).toInt() +
-                  baseDecoration.borderBottomSide.borderBlue;
-          renderDecoratedBox.decoration = progressDecoration.toBoxDecoration();
-        });
+          addWidthAndRadiusProcessListener(
+              borderWidthTransitionsLTRB[i],
+              borderRadiusTransitionTLTRBLBR[i],
+              i,
+              newDecoration,
+              oldDecoration,
+              baseDecoration,
+              progressDecoration);
+        }
       } else {
         renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
         _updateBorderInsets(newDecoration.getBorderEdgeInsets());
@@ -417,6 +125,73 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     oldDecoration = newDecoration;
   }
 
+  // add color relate transition listener
+  void addColorProcessListener(Transition transition,
+      TransitionColorMixin newColor, TransitionColorMixin oldColor,
+      TransitionColorMixin processColor, TransitionColorMixin baseColor,
+      TransitionDecoration processDecoration) {
+    if (transition != null) {
+      int alphaDiff = newColor.color.alpha - oldColor.color.alpha;
+      int redDiff = newColor.color.red - oldColor.color.red;
+      int greenDiff = newColor.color.green - oldColor.color.green;
+      int blueDiff = newColor.color.blue - oldColor.color.blue;
+      transition.addProgressListener((progress) {
+        processColor.color = processColor.color.withAlpha(
+            (alphaDiff * progress).toInt() + baseColor.color.alpha);
+        processColor.color = processColor.color.withRed(
+            (redDiff * progress).toInt() + baseColor.color.red);
+        processColor.color = processColor.color.withBlue(
+            (blueDiff * progress).toInt() + baseColor.color.blue);
+        processColor.color = processColor.color.withGreen(
+            (greenDiff * progress).toInt() + baseColor.color.green);
+        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
+      });
+    }
+  }
+
+  // add width and radius relate transition listener
+  void addWidthAndRadiusProcessListener(Transition widthTransition,
+      Transition radiusTransition, int index,
+      TransitionDecoration newDecoration, TransitionDecoration oldDecoration,
+      TransitionDecoration baseDecoration,
+      TransitionDecoration processDecoration) {
+    if (widthTransition != null) {
+      double widthDiff = newDecoration.borderSidesLTRB[index].borderWidth
+          - oldDecoration.borderSidesLTRB[index].borderWidth;
+      widthTransition.addProgressListener((progress) {
+        processDecoration.borderSidesLTRB[index].borderWidth =
+            widthDiff * progress +
+                baseDecoration.borderSidesLTRB[index].borderWidth;
+        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
+        _updateBorderInsets(processDecoration.getBorderEdgeInsets());
+      });
+    }
+
+    if (radiusTransition != null) {
+      double radiusDiff = newDecoration.borderRadiusTLTRBLBR[index]
+          - oldDecoration.borderRadiusTLTRBLBR[index];
+      radiusTransition.addProgressListener((progress) {
+        processDecoration.borderRadiusTLTRBLBR[index] =
+            radiusDiff * progress +
+                baseDecoration.borderRadiusTLTRBLBR[index];
+        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
+      });
+    }
+  }
+
+  Transition getTransition(Map<String, Transition> transitionMap,
+      String property, {String parentProperty}) {
+    if (transitionMap.containsKey(property)) {
+      return transitionMap[property];
+    } else if (parentProperty?.isNotEmpty != null &&
+        transitionMap.containsKey(parentProperty)) {
+      return transitionMap[parentProperty];
+    } else if (transitionMap.containsKey('all')) {
+      return transitionMap['all'];
+    }
+    return null;
+  }
+
   void _updateBorderInsets(EdgeInsets insets) {
     renderBorderHolder.margin = insets;
   }
@@ -430,7 +205,6 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
   TransitionDecoration getTransitionDecoration(StyleDeclaration style) {
-    BorderRadius borderRadius = getBorderRadius(style);
     DecorationImage decorationImage;
     Gradient gradient;
     if (style['backgroundAttachment'] == ''
@@ -455,6 +229,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     TransitionBorderSide rightSide = getBorderSideByStyle(style, 'Right');
     TransitionBorderSide bottomSide = getBorderSideByStyle(style, 'Bottom');
 
+    // border radius add inorder topLeft topRight bottomLeft bottomRight
+    List<double> borderRadiusTLTRBLBR = [
+      getBorderRadius(style, 'borderTopLeftRadius'),
+      getBorderRadius(style, 'borderTopRightRadius'),
+      getBorderRadius(style, 'borderBottomLeftRadius'),
+      getBorderRadius(style, 'borderBottomRightRadius')
+    ];
     return TransitionDecoration(
         color?.alpha,
         color?.red,
@@ -466,7 +247,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
         bottomSide,
         decorationImage,
         getBoxShadow(style),
-        borderRadius,
+        borderRadiusTLTRBLBR,
         gradient);
   }
 
@@ -511,42 +292,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     return boxShadow;
   }
 
-  static List<String> TLTRBLBR = [
-    'TopLeft',
-    'TopRight',
-    'BottomLeft',
-    'BottomRight'
-  ];
-  BorderRadiusGeometry getBorderRadius(StyleDeclaration style) {
-    List<Radius> borderRadiusTLTRBLBR = [
-      Radius.zero,
-      Radius.zero,
-      Radius.zero,
-      Radius.zero,
-    ];
-    if (style.contains('borderRadius')) {
-      double radius = Length.toDisplayPortValue(style['borderRadius']);
-      borderRadiusTLTRBLBR[0] = borderRadiusTLTRBLBR[1] =
-          borderRadiusTLTRBLBR[2] =
-              borderRadiusTLTRBLBR[3] = Radius.circular(radius);
-    } else {
-      return null;
+  double getBorderRadius(StyleDeclaration style, String side) {
+    if (style.contains(side)) {
+      return Length.toDisplayPortValue(style[side]);
+    } else if (style.contains('borderRadius')) {
+      return Length.toDisplayPortValue(style['borderRadius']);
     }
-    TLTRBLBR.forEach((String corner) {
-      String key = 'borderRadius' + corner;
-      if (style.contains(key)) {
-        double radius = Length.toDisplayPortValue(style[key]);
-        int index = TLTRBLBR.indexOf(corner);
-        borderRadiusTLTRBLBR[index] = Radius.circular(radius);
-      }
-    });
-
-    return BorderRadius.only(
-      topLeft: borderRadiusTLTRBLBR[0],
-      topRight: borderRadiusTLTRBLBR[1],
-      bottomLeft: borderRadiusTLTRBLBR[2],
-      bottomRight: borderRadiusTLTRBLBR[3],
-    );
+    return 0.0;
   }
 
   Color getBackgroundColor(StyleDeclaration style) {
@@ -563,8 +315,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     return input.trim().split(spaceRegExp);
   }
 
-  static double defaultBorderLineWidth = 0.0;
-  static BorderStyle defaultBorderStyle = BorderStyle.solid;
+  // border default width 3.0
+  static double defaultBorderLineWidth = 3.0;
+  static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = WebColor.transparent;
 
   BorderStyle getBorderStyle(String input) {
@@ -604,7 +357,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
   TransitionBorderSide getBorderSideByStyle(StyleDeclaration style, String side) {
-    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, 0, defaultBorderStyle);
+    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);
     final String borderName = 'border';
     final String borderSideName = borderName + side; // eg. borderLeft/borderRight
     // Same with the key in shortted info map
@@ -621,23 +374,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSideShorttedInfo = _getShorttedInfoFromString(style[borderSideName]);
     }
 
-    // Set border width
-    final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
-    final String borderWidthName = borderName + widthName; // borderWidth
-    if (style.contains(borderSideWidthName) &&
-      (style[borderSideWidthName] as String).isNotEmpty) {
-      borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
-    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
-      borderSide.borderWidth = borderSideShorttedInfo[widthName];
-    } else if (style.contains(borderWidthName)) {
-      borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
-    } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
-      borderSide.borderWidth = borderShorttedInfo[widthName];
-    }
-
     // Set border style
     final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
-    final String borderStyleName = borderName + widthName; // borderStyle
+    final String borderStyleName = borderName + styleName; // borderStyle
     if (style.contains(borderSideStyleName)) {
       borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[styleName] != null) {
@@ -646,6 +385,25 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[styleName] != null) {
       borderSide.borderStyle = borderShorttedInfo[styleName];
+    }
+
+    // border width should be zero when style is none
+    if (borderSide.borderStyle == BorderStyle.none) {
+      borderSide.borderWidth = 0.0;
+    } else {
+      // Set border width
+      final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
+      final String borderWidthName = borderName + widthName; // borderWidth
+      if (style.contains(borderSideWidthName) &&
+          (style[borderSideWidthName] as String).isNotEmpty) {
+        borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
+      } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
+        borderSide.borderWidth = borderSideShorttedInfo[widthName];
+      } else if (style.contains(borderWidthName)) {
+        borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
+      } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
+        borderSide.borderWidth = borderShorttedInfo[widthName];
+      }
     }
 
     // Set border color
@@ -663,101 +421,135 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     }
 
     if (borderColor != null) {
-      borderSide.borderAlpha = borderColor.alpha;
-      borderSide.borderRed = borderColor.red;
-      borderSide.borderGreen = borderColor.green;
-      borderSide.borderBlue = borderColor.blue;
+      borderSide.color = borderSide.color.withAlpha(borderColor.alpha);
+      borderSide.color = borderSide.color.withRed(borderColor.red);
+      borderSide.color = borderSide.color.withGreen(borderColor.green);
+      borderSide.color = borderSide.color.withBlue(borderColor.blue);
     }
 
     return borderSide;
   }
 }
 
-class TransitionBorderSide {
-  int borderAlpha, borderRed, borderGreen, borderBlue;
+mixin TransitionColorMixin {
+  Color color;
+
+  void initColor(Color color) {
+    this.color = color;
+  }
+}
+
+class TransitionBorderSide with TransitionColorMixin {
   double borderWidth;
   BorderStyle borderStyle;
 
-  TransitionBorderSide(this.borderAlpha, this.borderRed, this.borderGreen,
-      this.borderBlue, this.borderWidth, this.borderStyle);
+  TransitionBorderSide(borderAlpha, borderRed, borderGreen, borderBlue,
+      this.borderWidth, this.borderStyle) {
+    initColor(Color.fromARGB(
+        borderAlpha, borderRed, borderGreen, borderBlue));
+  }
 
   TransitionBorderSide clone() {
-    return TransitionBorderSide(this.borderAlpha, this.borderRed,
-        this.borderGreen, this.borderBlue, this.borderWidth, this.borderStyle);
+    return TransitionBorderSide(color.alpha, color.red,
+        color.green, color.blue, this.borderWidth, this.borderStyle);
   }
 
   BorderSide toBorderSide() {
     return BorderSide(
-        color: Color.fromARGB(borderAlpha, borderRed, borderGreen, borderBlue),
+        color: color,
         width: borderWidth,
         style: borderStyle);
   }
 }
 
-class TransitionDecoration {
-  int alpha, red, green, blue;
-  TransitionBorderSide borderLeftSide,
-      borderTopSide,
-      borderRightSide,
-      borderBottomSide;
+class TransitionDecoration with TransitionColorMixin {
+  // radius inorder topLeft topRight bottomLeft bottomRight
+  List<double> borderRadiusTLTRBLBR;
+  // side inorder left top right bottom
+  List<TransitionBorderSide> borderSidesLTRB;
   DecorationImage image;
   List<BoxShadow> boxShadow;
-  BorderRadiusGeometry borderRadius;
   Gradient gradient;
 
   TransitionDecoration(
-      this.alpha,
-      this.red,
-      this.green,
-      this.blue,
-      this.borderLeftSide,
-      this.borderTopSide,
-      this.borderRightSide,
-      this.borderBottomSide,
+      alpha,
+      red,
+      green,
+      blue,
+      borderLeftSide,
+      borderTopSide,
+      borderRightSide,
+      borderBottomSide,
       this.image,
       this.boxShadow,
-      this.borderRadius,
-      this.gradient);
+      this.borderRadiusTLTRBLBR,
+      this.gradient) {
+    initColor(Color.fromARGB(alpha, red, green, blue));
+    // side add inorder left top right bottom
+    borderSidesLTRB = [
+      borderLeftSide,
+      borderTopSide,
+      borderRightSide,
+      borderBottomSide,
+    ];
+  }
 
   TransitionDecoration clone() {
     return TransitionDecoration(
-        this.alpha,
-        this.red,
-        this.green,
-        this.blue,
-        this.borderLeftSide.clone(),
-        this.borderTopSide.clone(),
-        this.borderRightSide.clone(),
-        this.borderBottomSide.clone(),
+        color.alpha,
+        color.red,
+        color.green,
+        color.blue,
+        // side read inorder left top right bottom
+        this.borderSidesLTRB[0].clone(),
+        this.borderSidesLTRB[1].clone(),
+        this.borderSidesLTRB[2].clone(),
+        this.borderSidesLTRB[3].clone(),
         this.image,
         this.boxShadow,
-        this.borderRadius,
+        // radius read inorder topLeft topRight bottomLeft bottomRight
+        List.of(this.borderRadiusTLTRBLBR),
         this.gradient);
   }
 
   BoxDecoration toBoxDecoration() {
-    Color color = Color.fromARGB(alpha, red, green, blue);
     if (gradient != null) {
       color = null;
     }
+    // side read inorder left top right bottom
+    Border border = Border(
+        left: borderSidesLTRB[0].toBorderSide(),
+        top: borderSidesLTRB[1].toBorderSide(),
+        right: borderSidesLTRB[2].toBorderSide(),
+        bottom: borderSidesLTRB[3].toBorderSide());
+    BorderRadius borderRadius;
+
+    // flutter border limit, when border is not uniform, should set borderRadius
+    if (border.isUniform) {
+      // radius read inorder topLeft topRight bottomLeft bottomRight
+      borderRadius = BorderRadius.only(
+        topLeft: Radius.circular(borderRadiusTLTRBLBR[0]),
+        topRight: Radius.circular(borderRadiusTLTRBLBR[1]),
+        bottomLeft: Radius.circular(borderRadiusTLTRBLBR[2]),
+        bottomRight: Radius.circular(borderRadiusTLTRBLBR[3])
+      );
+    }
+
     return BoxDecoration(
         color: color,
         image: image,
-        border: Border(
-            top: borderTopSide.toBorderSide(),
-            right: borderRightSide.toBorderSide(),
-            bottom: borderBottomSide.toBorderSide(),
-            left: borderLeftSide.toBorderSide()),
+        border: border,
         borderRadius: borderRadius,
         boxShadow: boxShadow,
         gradient: gradient);
   }
 
   EdgeInsets getBorderEdgeInsets() {
+    // side read inorder left top right bottom
     return EdgeInsets.fromLTRB(
-        borderLeftSide.borderWidth ?? 0,
-        borderTopSide.borderWidth ?? 0,
-        borderRightSide.borderWidth ?? 0,
-        borderBottomSide.borderWidth ?? 0);
+        borderSidesLTRB[0].borderWidth,
+        borderSidesLTRB[1].borderWidth,
+        borderSidesLTRB[2].borderWidth,
+        borderSidesLTRB[3].borderWidth);
   }
 }
