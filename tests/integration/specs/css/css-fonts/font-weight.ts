@@ -1,9 +1,13 @@
 describe('FontWeight', () => {
   const WEIGHTS = [
     'normal',
+    'medium',
+    'light',
     'bold',
+    'heavy',
     'lighter',
     'bolder',
+    'alibaba',
     1,
     100,
     100.6,
@@ -18,6 +22,7 @@ describe('FontWeight', () => {
     800,
     900,
     1000,
+    10000,
   ];
 
   WEIGHTS.forEach(value => {
