@@ -20,16 +20,24 @@ describe('FontWeight', () => {
     1000,
   ];
 
-  WEIGHTS.forEach((value) => {
+  WEIGHTS.forEach(value => {
     it(`should work with ${value}`, () => {
-      const p1 = create('p', {
-        fontSize: '24px',
-        fontWeight: value,
-      }, createText(`These text weight should be ${value}.`));
-      const p2 = create('p', {
-        fontSize: '24px',
-        fontWeight: value,
-      }, createText(`文本的 fontWeight 是: ${value}`));
+      const p1 = create(
+        'p',
+        {
+          fontSize: '24px',
+          fontWeight: value,
+        },
+        createText(`These text weight should be ${value}.`)
+      );
+      const p2 = create(
+        'p',
+        {
+          fontSize: '24px',
+          fontWeight: value,
+        },
+        createText(`文本的 fontWeight 是: ${value}`)
+      );
       append(BODY, p1);
       append(BODY, p2);
 
