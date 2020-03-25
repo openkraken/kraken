@@ -36,7 +36,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  fit('end-001', async (done) => {
+  it('end-001', async (done) => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
@@ -73,7 +73,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  fit('middle-001', async (done) => {
+  it('middle-001', async (done) => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
@@ -110,7 +110,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  fit('middle-002', async (done) => {
+  it('middle-002', async (done) => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
@@ -147,7 +147,7 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  fit('middle-003', async (done) => {
+  it('middle-003', async (done) => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
