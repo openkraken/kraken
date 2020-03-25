@@ -184,4 +184,274 @@ describe('containing-block', () => {
     append(BODY, div2);
     await matchElementImageSnapshot(BODY);
   });
+  xit('015', async () => {
+    let div2 = create('div', {
+      border: '1px solid black',
+      padding: '100px',
+      position: 'fixed',
+      width: 0
+    });
+    let span = create('span', {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      position: 'absolute'
+    });
+    append(div2, span);
+    append(BODY, div2);
+    await matchElementImageSnapshot(BODY);
+  });
+
+  xit('017', async () => {
+    let divStyle = {
+      border: '3px solid silver',
+      marginBottom: '20px',
+      padding: '100px',
+      width: '450px'
+    };
+    let container = create('div', divStyle);
+    let test = create('span', {
+      border: '5px solid silver',
+      padding: '50px',
+      position: 'relative'
+    });
+    let firstBox = create('span', {
+      color: 'silver'
+    });
+    let lastBox = create('span', {
+      color: 'silver'
+    });
+    let tlControl = create('span', {
+      borderTop: '30px solid red',
+      marginLeft: '-50px',
+      marginRight: '20px',
+      padding: '20px 15px'
+    });
+    let brControl = create('span', {
+      borderBottom: '30px solid red',
+      marginLeft: '20px',
+      marginRight: '-50px',
+      padding: '20px 15px'
+    });
+    let positionStyle = {
+      height: '30px',
+      width: '30px',
+      position: 'absolute',
+    };
+    let topLeftStyle = {
+      backgroundColor: 'green',
+      left: 0,
+      top: 0
+    };
+    let bottomrightStyle = {
+      backgroundColor: 'green',
+      bottom: 0,
+      right: 0
+    };
+    append(firstBox, tlControl);
+    append(firstBox, createText('Filler Text Filler Text Filler Text Filler Text'));
+    let BR = create('span', {
+      ...positionStyle,
+      ...bottomrightStyle
+    });
+    append(BR, createText('BR'));
+    append(test, BR);
+    let TL = create('span', {
+      ...positionStyle,
+      ...topLeftStyle
+    });
+    append(TL, createText('TL'));
+    append(test, TL);
+    append(lastBox, createText('Filler Text Filler Text Filler Text Filler Text'));
+    append(lastBox, brControl);
+    append(test, lastBox);
+    append(container, test);
+    append(BODY, container);
+    await matchScreenshot();
+  });
+
+  xit('018', async () => {
+    let divStyle = {
+      border: '3px solid silver',
+      marginBottom: '20px',
+      padding: '100px',
+      width: '450px'
+    };
+    let testStyle = {
+      border: '5px solid silver',
+      padding: '50px',
+      position: 'relative'
+    };
+    let boxStyle = {
+      color: 'silver'
+    };
+    let positionStyle = {
+      height: '30px',
+      width: '30px',
+      position: 'absolute',
+    };
+    let trControlStyle = {
+      borderTop: '30px solid red',
+      marginLeft: '20px',
+      marginRight: '-50px',
+      padding: '20px 15px'
+    };
+    let blControlStyle = {
+      borderBottom: '30px solid red',
+      marginLeft: '-50px',
+      marginRight: '20px',
+      padding: '20px 15px'
+    };
+    let topRightStyle = {
+      backgroundColor: 'green',
+      right: 0,
+      top: 0
+    };
+    let bottomLeftStyle = {
+      backgroundColor: 'green',
+      bottom: 0,
+      left: 0
+    };
+    let container = create('div', divStyle);
+    let test = create('span', testStyle);
+    let firstBox = create('span', boxStyle);
+    let trControl = create('span', trControlStyle);
+    let BL = create('span', {
+      ...positionStyle,
+      ...bottomLeftStyle
+    });
+    let TR = create('span', {
+      ...positionStyle,
+      ...topRightStyle
+    });
+    let lastBox = create('span', boxStyle);
+    let blControl = create('span', blControlStyle);
+
+    append(firstBox, trControl);
+    append(lastBox, blControl);
+    append(test, firstBox);
+    append(BL, createText('BL'));
+    append(test, BL);
+    append(TR, createText('TR'));
+    append(test, TR);
+    append(test, lastBox);
+    append(container, test);
+    append(BODY, container);
+    await matchScreenshot();
+  });
+
+  xit('019', async () => {
+    let divStyle = {
+      border: '3px solid black',
+      padding: '100px',
+      position: 'absolute',
+      width: 0
+    };
+    let spanStyle = {display: 'block'};
+    let spanSpanStyle = {
+      backgroundColor: 'blue',
+      height: '100px',
+      left: 'auto',
+      position: 'absolute',
+      top: 'auto',
+      width: '100px'
+    };
+    let div = create('div', divStyle);
+    let span = create('span', spanStyle);
+    let spanSpan = create('span', spanSpanStyle);
+    append(span, spanSpan);
+    append(div, span);
+    append(BODY, div);
+    await matchScreenshot();
+  });
+
+  it('023', async () => {
+    let bodyStyle = {
+      margin: '8px'
+    };
+    let div1Anddiv2Style = {
+      margin: '100px'
+    };
+    let div3Style = {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      left: 0,
+      bottom: 0,
+      position: 'absolute'
+    };
+    setStyle(BODY, bodyStyle);
+    let div1 = create('div', div1Anddiv2Style);
+    let div2 = create('div', div1Anddiv2Style);
+    let div3 = create('div', div3Style);
+    append(div2, div3);
+    append(div1, div2);
+    append(BODY, div1);
+    await matchScreenshot();
+  });
+
+  it('026', async () => {
+    let divStyle = {
+      backgroundColor: 'red',
+      width: '100px',
+      height: '100px'
+    };
+    let divDivStyle = {
+      backgroundColor: 'green'
+    };
+    let child = create('div', {
+      ...divStyle,
+      ...divDivStyle
+    });
+    let wrapper = create('div',  divStyle);
+    append(wrapper, child);
+    append(BODY, wrapper);
+    await matchElementImageSnapshot(wrapper);
+  });
+
+  it('027', async () => {
+    let divStyle = {
+      backgroundColor: 'blue',
+      width: '100px',
+      height: '100px',
+      paddingTop: '5px'
+    };
+    let divDivStyle = {
+      backgroundColor: 'orange',
+      height: '50px',
+      width: '200px'
+    };
+    let child = create('div', {
+      ...divStyle,
+      ...divDivStyle
+    });
+    let wrapper = create('div',  divStyle);
+    append(wrapper, child);
+    append(BODY, wrapper);
+    await matchScreenshot();
+  });
+
+  fit('028', async () => {
+    let divStyle = {
+      backgroundColor: 'blue',
+      width: '100px',
+      height: '100px',
+      position: 'absolute'
+    };
+    let divDivStyle = {
+      backgroundColor: 'orange',
+      bottom: 0,
+      right: 0,
+      width: '25px',
+      height: '25px'
+    };
+    let child = create('div', {
+      ...divStyle,
+      ...divDivStyle
+    });
+    let wrapper = create('div',  divStyle);
+    append(wrapper, child);
+    append(BODY, wrapper);
+    await matchScreenshot();
+  });
 });
