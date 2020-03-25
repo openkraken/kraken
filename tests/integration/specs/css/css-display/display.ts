@@ -1,4 +1,4 @@
-fdescribe('display', () => {
+describe('display', () => {
   it('001', async () => {
     let divStyle = {
       display: 'inline'
