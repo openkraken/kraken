@@ -74,7 +74,7 @@ describe('containing-block', () => {
     await matchScreenshot();
   });
 
-  xit('008', async () => {
+  it('008', async () => {
     let div1 = create('div', {
       border: '1px solid black',
       margin: '50px',

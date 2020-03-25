@@ -201,21 +201,24 @@ mixin ElementStyleMixin on RenderBox {
     String display = isEmptyStyleValue(element.style['display'])
         ? element.defaultDisplay
         : element.style['display'];
+    String position = element.style['position'];
 
-    if (parentNode != null) {
+    // Display as inline-block when element is positioned
+    if (position == 'absolute' ||
+      position == 'fixed'
+      ) {
+      display = 'inline-block';
+    } else if (parentNode != null) {
       StyleDeclaration style = parentNode.style;
 
-      // Display as inline-block if parent node is flex
       if (style['display'].endsWith('flex')) {
+        // Display as inline-block if parent node is flex
         display = 'inline-block';
-      }
 
-      // Display as block when following conditions met
-      if (style['flexDirection'] == 'column' &&
-        (!style.contains('alignItems') ||
-          (style.contains('alignItems') && style['alignItems'] == 'stretch'))
-      ) {
-        display = 'block';
+        // Display as block if flex vertical layout children
+        if (style['flexDirection'] == 'column') {
+          display = 'block';
+        }
       }
     }
 
