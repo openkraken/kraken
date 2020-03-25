@@ -1,11 +1,11 @@
 describe('display', () => {
   it('001', async () => {
     let divStyle = {
-      display: 'inline'
+      display: 'inline',
     };
     let element = create('div', {}, [
       create('div', divStyle, createText('Filter text')),
-      create('div', divStyle, createText('Filter text'))
+      create('div', divStyle, createText('Filter text')),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -13,7 +13,7 @@ describe('display', () => {
 
   it('002', async () => {
     let divStyle = {
-      display: 'block'
+      display: 'block',
     };
     let element = create('div', {}, [
       create('div', divStyle, createText('Filter text')),
@@ -24,11 +24,11 @@ describe('display', () => {
   });
   it('005', async () => {
     let divdivStyle = {
-      display: 'inline-block'
+      display: 'inline-block',
     };
     let element = create('div', {}, [
       createText('Filter text'),
-      create('div', divdivStyle, createText('Filter text'))
+      create('div', divdivStyle, createText('Filter text')),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -36,7 +36,7 @@ describe('display', () => {
   it('016', async () => {
     let divStyle = {
       color: 'red',
-      display: 'none'
+      display: 'none',
     };
     let element = create('div', divStyle, createText('FAIL'));
     append(BODY, element);
@@ -44,12 +44,12 @@ describe('display', () => {
   });
   it('applies-to-001', async () => {
     let spanStyle = {
-      display: 'inline'
+      display: 'inline',
     };
     let element = create('div', {}, [
       createText('Filter text'),
       create('span', spanStyle, createText('Filter Text')),
-      createText('Filter text')
+      createText('Filter text'),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -58,7 +58,7 @@ describe('display', () => {
     let divStyle = {
       backgroundColor: 'red',
       display: 'none',
-      position: 'absolute'
+      position: 'absolute',
     };
     let element = create('div', divStyle, createText('Filter Text'));
     append(BODY, element);
@@ -68,7 +68,7 @@ describe('display', () => {
     let divStyle = {
       backgroundColor: 'red',
       display: 'none',
-      position: 'fixed'
+      position: 'fixed',
     };
     let element = create('div', divStyle, createText('Filter Text'));
     append(BODY, element);

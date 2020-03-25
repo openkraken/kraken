@@ -1,20 +1,24 @@
 fdescribe('insert-block-in-blocks-n-inlines', () => {
-  it('begin-001', async (done) => {
+  it('begin-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, firstBlock);
@@ -40,22 +44,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('begin-002', async (done) => {
+  it('begin-002', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -81,22 +89,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('begin-003', async (done) => {
+  it('begin-003', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -123,22 +135,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('end-001', async (done) => {
+  it('end-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -165,22 +181,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('end-002', async (done) => {
+  it('end-002', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -207,22 +227,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('end-003', async (done) => {
+  it('end-003', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -249,22 +273,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('middle-001', async (done) => {
+  it('middle-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -291,22 +319,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('middle-002', async (done) => {
+  it('middle-002', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -335,22 +367,26 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
     BODY.click();
   });
 
-  it('middle-003', async (done) => {
+  it('middle-003', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
 
     let childDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
 
-    let inserted = create('div', {
-      borderLeft: '3px solid yellow',
-      borderRight: '3px solid yellow'
-    }, createText('Inserted new Block'));
+    let inserted = create(
+      'div',
+      {
+        borderLeft: '3px solid yellow',
+        borderRight: '3px solid yellow',
+      },
+      createText('Inserted new Block')
+    );
 
     BODY.addEventListener('click', async function onClick() {
       element.insertBefore(inserted, insertPoint);
@@ -378,5 +414,4 @@ fdescribe('insert-block-in-blocks-n-inlines', () => {
 
     BODY.click();
   });
-
 });
