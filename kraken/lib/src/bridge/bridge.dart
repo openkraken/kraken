@@ -7,6 +7,7 @@ import 'from_native.dart';
 import 'to_native.dart';
 
 void initBridge() {
-  initJSEngine();
+  // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
+  initJSEngine();
 }
