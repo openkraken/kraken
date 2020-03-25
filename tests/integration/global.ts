@@ -31,10 +31,12 @@ function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
 }
 
-function create(tag: string, style: object, child?: Node) {
+function create(tag: string, style: object, child?: Node | Array<Node>) {
   const el = document.createElement(tag);
   setStyle(el, style);
-  if (child) {
+  if (Array.isArray(child)) {
+    child.forEach(c => el.appendChild(c));
+  } else if (child) {
     el.appendChild(child);
   }
   return el;
