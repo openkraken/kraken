@@ -315,19 +315,19 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     return input.trim().split(spaceRegExp);
   }
 
-  // border default width 3.0, default style solid
+  // border default width 3.0
   static double defaultBorderLineWidth = 3.0;
-  static BorderStyle defaultBorderStyle = BorderStyle.solid;
+  static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = WebColor.transparent;
 
   BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
     switch (input) {
-      case 'none':
-        borderStyle = BorderStyle.none;
+      case 'solid':
+        borderStyle = BorderStyle.solid;
         break;
       default:
-        borderStyle = BorderStyle.solid;
+        borderStyle = BorderStyle.none;
         break;
     }
     return borderStyle;
@@ -374,23 +374,9 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSideShorttedInfo = _getShorttedInfoFromString(style[borderSideName]);
     }
 
-    // Set border width
-    final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
-    final String borderWidthName = borderName + widthName; // borderWidth
-    if (style.contains(borderSideWidthName) &&
-      (style[borderSideWidthName] as String).isNotEmpty) {
-      borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
-    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
-      borderSide.borderWidth = borderSideShorttedInfo[widthName];
-    } else if (style.contains(borderWidthName)) {
-      borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
-    } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
-      borderSide.borderWidth = borderShorttedInfo[widthName];
-    }
-
     // Set border style
     final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
-    final String borderStyleName = borderName + widthName; // borderStyle
+    final String borderStyleName = borderName + styleName; // borderStyle
     if (style.contains(borderSideStyleName)) {
       borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[styleName] != null) {
@@ -399,6 +385,25 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[styleName] != null) {
       borderSide.borderStyle = borderShorttedInfo[styleName];
+    }
+
+    // border width should be zero when style is none
+    if (borderSide.borderStyle == BorderStyle.none) {
+      borderSide.borderWidth = 0.0;
+    } else {
+      // Set border width
+      final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
+      final String borderWidthName = borderName + widthName; // borderWidth
+      if (style.contains(borderSideWidthName) &&
+          (style[borderSideWidthName] as String).isNotEmpty) {
+        borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
+      } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
+        borderSide.borderWidth = borderSideShorttedInfo[widthName];
+      } else if (style.contains(borderWidthName)) {
+        borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
+      } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
+        borderSide.borderWidth = borderShorttedInfo[widthName];
+      }
     }
 
     // Set border color
@@ -539,17 +544,12 @@ class TransitionDecoration with TransitionColorMixin {
         gradient: gradient);
   }
 
-  // get width, should be zero when style is none
-  double getBorderWidth(TransitionBorderSide borderSide) {
-    return borderSide.borderStyle == BorderStyle.none ? 0 : borderSide.borderWidth ?? 0;
-  }
-
   EdgeInsets getBorderEdgeInsets() {
     // side read inorder left top right bottom
     return EdgeInsets.fromLTRB(
-        getBorderWidth(borderSidesLTRB[0]),
-        getBorderWidth(borderSidesLTRB[1]),
-        getBorderWidth(borderSidesLTRB[2]),
-        getBorderWidth(borderSidesLTRB[3]));
+        borderSidesLTRB[0].borderWidth,
+        borderSidesLTRB[1].borderWidth,
+        borderSidesLTRB[2].borderWidth,
+        borderSidesLTRB[3].borderWidth);
   }
 }
