@@ -431,7 +431,7 @@ describe('containing-block', () => {
     await matchScreenshot();
   });
 
-  fit('028', async () => {
+  it('028', async () => {
     let divStyle = {
       backgroundColor: 'blue',
       width: '100px',
@@ -452,6 +452,25 @@ describe('containing-block', () => {
     let wrapper = create('div',  divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
+    await matchScreenshot();
+  });
+
+  fit('030', async () => {
+    let containingBlockStyle = {
+      backgroundColor: 'blue',
+      height: '100px',
+      paddingLeft: '5px',
+      width: '100px'
+    };
+    let soleChildStyle = {
+      backgroundColor: 'orange',
+      height: '200px',
+      width: '50px'
+    };
+    let div = create('div', soleChildStyle);
+    let container = create('div', containingBlockStyle);
+    append(container, div);
+    append(BODY, container);
     await matchScreenshot();
   });
 });
