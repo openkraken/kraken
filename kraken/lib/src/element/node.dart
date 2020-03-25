@@ -7,6 +7,7 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:meta/meta.dart';
+import 'package:matcher/matcher.dart';
 
 const String DATA = 'data';
 
@@ -26,7 +27,9 @@ class Comment extends Node {
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, this._data) : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int nodeId, String data) :
+    _data = collapseWhitespace(data),
+    super(NodeType.TEXT_NODE, nodeId, '#text') {
     // Update text after connected.
     queueAfterConnected(_onTextNodeConnected);
   }
@@ -49,7 +52,7 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   String get data => _data;
   set data(String newData) {
     assert(newData != null);
-    _data = newData;
+    _data = collapseWhitespace(newData);
     updateTextStyle();
   }
 
