@@ -10,8 +10,8 @@ xdescribe('delete-inline-in-blocks', () => {
       margin: '5px 0'
     };
     let nodeToDeleteStyle = {
-      borderLeft: 'yellow solid 5px',
-      borderRight: 'yellow solid 5px'
+      borderLeft: '5px solid yellow',
+      borderRight: '5px solid yellow'
     };
     let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
     let container1 = create('div', containerStyle, [
@@ -47,8 +47,8 @@ xdescribe('delete-inline-in-blocks', () => {
       margin: '10px 0'
     };
     let nodeToDeleteStyle = {
-      borderLeft: 'yellow solid 5px',
-      borderRight: 'yellow solid 5px'
+      borderLeft: '5px solid yellow',
+      borderRight: '5px solid yellow'
     };
     let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
     let container1 = create('div', containerStyle, [
@@ -84,8 +84,8 @@ xdescribe('delete-inline-in-blocks', () => {
       margin: '10px 0'
     };
     let nodeToDeleteStyle = {
-      borderLeft: 'yellow solid 5px',
-      borderRight: 'yellow solid 5px'
+      borderLeft: '5px solid yellow',
+      borderRight: '5px solid yellow'
     };
     let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
     let container1 = create('div', containerStyle, [
@@ -121,8 +121,8 @@ xdescribe('delete-inline-in-blocks', () => {
       margin: '10px 0'
     };
     let nodeToDeleteStyle = {
-      borderLeft: 'yellow solid 5px',
-      borderRight: 'yellow solid 5px'
+      borderLeft: '5px solid yellow',
+      borderRight: '5px solid yellow'
     };
     let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
     let container1 = create('div', containerStyle, [
@@ -158,8 +158,8 @@ xdescribe('delete-inline-in-blocks', () => {
       margin: '10px 0em'
     };
     let nodeToDeleteStyle = {
-      borderLeft: 'yellow solid 5px',
-      borderRight: 'yellow solid 5px'
+      borderLeft: '5px solid yellow',
+      borderRight: '5px solid yellow'
     };
     let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
     let container1 = create('div', containerStyle, [
