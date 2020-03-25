@@ -1,24 +1,28 @@
 xdescribe('delete-inline-in-blocks', () => {
-  it('beginning-001', async (done) => {
+  it('beginning-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
     let innerDivStyle = {
-      margin: '5px 0'
+      margin: '5px 0',
     };
     let nodeToDeleteStyle = {
       borderLeft: '5px solid yellow',
-      borderRight: '5px solid yellow'
+      borderRight: '5px solid yellow',
     };
-    let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
+    let nodeToDelete = create(
+      'span',
+      nodeToDeleteStyle,
+      createText('Span to remove')
+    );
     let container1 = create('div', containerStyle, [
       nodeToDelete,
       create('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
-      create('div', innerDivStyle, createText('Third block'))
+      create('div', innerDivStyle, createText('Third block')),
     ]);
 
     async function onClick() {
@@ -36,21 +40,25 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  it('end-001', async (done) => {
+  it('end-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
     let innerDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
     let nodeToDeleteStyle = {
       borderLeft: '5px solid yellow',
-      borderRight: '5px solid yellow'
+      borderRight: '5px solid yellow',
     };
-    let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
+    let nodeToDelete = create(
+      'span',
+      nodeToDeleteStyle,
+      createText('Span to remove')
+    );
     let container1 = create('div', containerStyle, [
       create('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
@@ -73,21 +81,25 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  it('middle-001', async (done) => {
+  it('middle-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
     let innerDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
     let nodeToDeleteStyle = {
       borderLeft: '5px solid yellow',
-      borderRight: '5px solid yellow'
+      borderRight: '5px solid yellow',
     };
-    let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
+    let nodeToDelete = create(
+      'span',
+      nodeToDeleteStyle,
+      createText('Span to remove')
+    );
     let container1 = create('div', containerStyle, [
       create('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
@@ -110,21 +122,25 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  it('middle-002', async (done) => {
+  it('middle-002', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
     let innerDivStyle = {
-      margin: '10px 0'
+      margin: '10px 0',
     };
     let nodeToDeleteStyle = {
       borderLeft: '5px solid yellow',
-      borderRight: '5px solid yellow'
+      borderRight: '5px solid yellow',
     };
-    let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
+    let nodeToDelete = create(
+      'span',
+      nodeToDeleteStyle,
+      createText('Span to remove')
+    );
     let container1 = create('div', containerStyle, [
       create('div', innerDivStyle, createText('First block')),
       nodeToDelete,
@@ -147,21 +163,25 @@ xdescribe('delete-inline-in-blocks', () => {
     BODY.click();
   });
 
-  it('middle-003', async (done) => {
+  it('middle-003', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '10px'
+      margin: '10px',
     };
     let innerDivStyle = {
-      margin: '10px 0em'
+      margin: '10px 0em',
     };
     let nodeToDeleteStyle = {
       borderLeft: '5px solid yellow',
-      borderRight: '5px solid yellow'
+      borderRight: '5px solid yellow',
     };
-    let nodeToDelete = create('span', nodeToDeleteStyle, createText('Span to remove'));
+    let nodeToDelete = create(
+      'span',
+      nodeToDeleteStyle,
+      createText('Span to remove')
+    );
     let container1 = create('div', containerStyle, [
       create('div', innerDivStyle, createText('First block')),
       create('div', innerDivStyle, createText('Second block')),
@@ -182,5 +202,5 @@ xdescribe('delete-inline-in-blocks', () => {
     await matchScreenshot();
 
     BODY.click();
-  })
+  });
 });
