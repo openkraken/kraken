@@ -14,4 +14,14 @@ describe('Display block', () => {
     document.body.appendChild(container);
     await matchScreenshot();
   });
+
+  it('002', async () => {
+    var container = document.createElement('div');
+    container.style.width = '300px';
+    container.style.height = '300px';
+    container.style.backgroundColor = 'red';
+
+    document.body.appendChild(container);
+    await matchScreenshot();
+  });
 });
