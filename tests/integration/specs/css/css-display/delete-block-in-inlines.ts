@@ -1,25 +1,32 @@
 describe('delete-block-in-inlines', () => {
-  it('beginning-001', async (done) => {
+  it('beginning-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em'
+      margin: '1em',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
 
-    let nodeToDelete = create('div', {
-      borderLeft: 'yellow solid 0.5em',
-      borderRight: 'yellow solid 0.5em',
-      margin: '1em 0em'
-    }, createText('block to remove'));
+    let nodeToDelete = create(
+      'div',
+      {
+        borderLeft: 'yellow solid 0.5em',
+        borderRight: 'yellow solid 0.5em',
+        margin: '1em 0em',
+      },
+      createText('block to remove')
+    );
 
-    BODY.addEventListener('click', async () => {
+    async function onClick() {
       container.removeChild(nodeToDelete);
       await matchScreenshot();
+      BODY.removeEventListener('click', onClick);
       done();
-    });
+    }
+
+    BODY.addEventListener('click', onClick);
 
     append(container, nodeToDelete);
     append(container, create('span', {}, createText('Several')));
@@ -28,7 +35,10 @@ describe('delete-block-in-inlines', () => {
     append(container, create('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
-    append(container2, createText('Several inline elements are in this sentence.'));
+    append(
+      container2,
+      createText('Several inline elements are in this sentence.')
+    );
 
     append(BODY, container);
     append(BODY, container2);
@@ -37,27 +47,34 @@ describe('delete-block-in-inlines', () => {
     BODY.click();
   });
 
-  fit('end-001', async (done) => {
+  it('end-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em'
+      margin: '1em',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
 
-    let nodeToDelete = create('div', {
-      borderLeft: 'yellow solid 0.5em',
-      borderRight: 'yellow solid 0.5em',
-      margin: '1em 0em'
-    }, createText('block to remove'));
+    let nodeToDelete = create(
+      'div',
+      {
+        borderLeft: 'yellow solid 0.5em',
+        borderRight: 'yellow solid 0.5em',
+        margin: '1em 0em',
+      },
+      createText('block to remove')
+    );
 
-    BODY.addEventListener('click', async () => {
+    async function onClick() {
       container.removeChild(nodeToDelete);
       await matchScreenshot();
+      BODY.removeEventListener('click', onClick);
       done();
-    });
+    }
+
+    BODY.addEventListener('click', onClick);
 
     append(container, create('span', {}, createText('Several')));
     append(container, create('span', {}, createText('inline elements')));
@@ -65,7 +82,10 @@ describe('delete-block-in-inlines', () => {
     append(container, create('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
-    append(container2, createText('Several inline elements are in this sentence.'));
+    append(
+      container2,
+      createText('Several inline elements are in this sentence.')
+    );
     append(container, nodeToDelete);
 
     append(BODY, container);
@@ -75,27 +95,34 @@ describe('delete-block-in-inlines', () => {
     BODY.click();
   });
 
-  fit('middle-001', async (done) => {
+  it('middle-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em'
+      margin: '1em',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
 
-    let nodeToDelete = create('div', {
-      borderLeft: 'yellow solid 0.5em',
-      borderRight: 'yellow solid 0.5em',
-      margin: '1em 0em'
-    }, createText('block to remove'));
+    let nodeToDelete = create(
+      'div',
+      {
+        borderLeft: 'yellow solid 0.5em',
+        borderRight: 'yellow solid 0.5em',
+        margin: '1em 0em',
+      },
+      createText('block to remove')
+    );
 
-    BODY.addEventListener('click', async () => {
+    async function onClick() {
       container.removeChild(nodeToDelete);
       await matchScreenshot();
+      BODY.removeEventListener('click', onClick);
       done();
-    });
+    }
+
+    BODY.addEventListener('click', onClick);
 
     append(container, create('span', {}, createText('Several')));
     append(container, create('span', {}, createText('inline elements')));
@@ -104,7 +131,10 @@ describe('delete-block-in-inlines', () => {
     append(container, create('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
-    append(container2, createText('Several inline elements are in this sentence.'));
+    append(
+      container2,
+      createText('Several inline elements are in this sentence.')
+    );
 
     append(BODY, container);
     append(BODY, container2);

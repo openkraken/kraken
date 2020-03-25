@@ -1,3 +1,0 @@
-describe('Containing block for', () => {
-
-});
