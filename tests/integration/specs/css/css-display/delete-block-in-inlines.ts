@@ -4,7 +4,7 @@ describe('delete-block-in-inlines', () => {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em',
+      margin: '10px',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
@@ -12,9 +12,9 @@ describe('delete-block-in-inlines', () => {
     let nodeToDelete = create(
       'div',
       {
-        borderLeft: 'yellow solid 0.5em',
-        borderRight: 'yellow solid 0.5em',
-        margin: '1em 0em',
+        borderLeft: '5px solid yellow',
+        borderRight: '5px solid yellow',
+        margin: '10px 0',
       },
       createText('block to remove')
     );
@@ -52,7 +52,7 @@ describe('delete-block-in-inlines', () => {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em',
+      margin: '10px',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
@@ -60,9 +60,9 @@ describe('delete-block-in-inlines', () => {
     let nodeToDelete = create(
       'div',
       {
-        borderLeft: 'yellow solid 0.5em',
-        borderRight: 'yellow solid 0.5em',
-        margin: '1em 0em',
+        borderLeft: '5px solid yellow',
+        borderRight: '5px solid yellow',
+        margin: '10px 0px',
       },
       createText('block to remove')
     );
@@ -100,7 +100,7 @@ describe('delete-block-in-inlines', () => {
       backgroundColor: 'fuchsia',
       color: 'black',
       font: '20px',
-      margin: '1em',
+      margin: '10px',
     };
     let container = create('div', containerStyle);
     let container2 = create('div', containerStyle);
@@ -108,9 +108,9 @@ describe('delete-block-in-inlines', () => {
     let nodeToDelete = create(
       'div',
       {
-        borderLeft: 'yellow solid 0.5em',
-        borderRight: 'yellow solid 0.5em',
-        margin: '1em 0em',
+        borderLeft: '5px solid yellow',
+        borderRight: '5px solid yellow',
+        margin: '10px 0',
       },
       createText('block to remove')
     );
