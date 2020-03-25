@@ -541,13 +541,17 @@ class RenderFlexLayout extends RenderBox
   void performLayout() {
     assert(_debugHasNecessaryDirections);
 
-    // Size fixed to zero if no child exists.
-    if (firstChild == null) {
-      size = Size.zero;
-      return;
-    }
     double elementWidth = getElementWidth(nodeId);
     double elementHeight = getElementHeight(nodeId);
+
+    // If no child exists, stop layout.
+    if (firstChild == null) {
+      size = constraints.constrain(Size(
+        elementWidth ?? 0,
+        elementHeight ?? 0,
+      ));
+      return;
+    }
 
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlexGrow = 0;

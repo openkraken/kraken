@@ -507,13 +507,17 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    // If no child exists, stop layout.
-    if (child == null) {
-      size = constraints.smallest;
-      return;
-    }
     double elementWidth = getElementWidth(nodeId);
     double elementHeight = getElementHeight(nodeId);
+
+    // If no child exists, stop layout.
+    if (child == null) {
+      size = constraints.constrain(Size(
+        elementWidth ?? 0,
+        elementHeight ?? 0,
+      ));
+      return;
+    }
 
     BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
