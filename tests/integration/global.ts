@@ -31,7 +31,7 @@ function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
 }
 
-function create(tag: string, style: object, child?: Node | Array<Node>) {
+function create(tag: string, style: {[key: string]: string|number}, child?: Node | Array<Node>) {
   const el = document.createElement(tag);
   setStyle(el, style);
   if (Array.isArray(child)) {
