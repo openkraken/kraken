@@ -1,6 +1,8 @@
 import 'package:flare_flutter/provider/asset_flare.dart';
+import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
@@ -10,9 +12,8 @@ const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 class AnimationPlayerElement extends Element {
   static final String ANIMATION_TYPE_FLARE = 'flare';
 
-  String type = ANIMATION_TYPE_FLARE;
-  String objectFit = 'contain';
-  RenderObject animationRenderObject;
+  RenderObject _animationRenderObject;
+  FlareControls _animationController;
 
   AnimationPlayerElement(
       int nodeId, Map<String, dynamic> properties, List<String> events)
@@ -21,55 +22,120 @@ class AnimationPlayerElement extends Element {
             properties: properties,
             events: events,
             defaultDisplay: 'block',
-            tagName: ANIMATION_PLAYER) {
-    if (properties.containsKey('type')) {
-      type = properties['type'];
-    }
+            tagName: ANIMATION_PLAYER);
 
-    if (style.contains('objectFit')) {
-      objectFit = style['objectFit'];
-    }
 
-    if (type == ANIMATION_TYPE_FLARE) {
-      animationRenderObject = _createFlareRenderObject(properties);
-    }
+  String get objectFit => style['objectFit'];
 
-    if (animationRenderObject != null) {
-      addChild(animationRenderObject);
+  String get type {
+    if (properties.containsKey('type')) return properties['type'];
+    // Default type to flare
+    return ANIMATION_TYPE_FLARE;
+  }
+
+  String get src {
+    if (properties.containsKey('src')) return properties['src'];
+    return null;
+  }
+
+  void _updateRenderObject() {
+    if (src == null) return;
+    bool shouldAddChild = _animationRenderObject == null;
+
+    _animationRenderObject = _createFlareRenderObject(properties);
+    if (shouldAddChild) addChild(_animationRenderObject);
+  }
+
+  void _play(List args) {
+    assert(args[0] is String);
+    String name = args[0];
+    double mix = 1.0;
+    double mixSeconds = 0.2;
+    if (args.length > 1 && args[1] != null) {
+      assert(args[1] is Map);
+      Map options = args[1];
+      if (options.containsKey('mix')) {
+        mix = Length.toDouble(options['mix']);
+      }
+      if (options.containsKey('mixSeconds')) {
+        mix = Length.toDouble(options['mixSeconds']);
+      }
+    }
+    _animationController?.play(name, mix: mix, mixSeconds: mixSeconds);
+  }
+
+  void _updateObjectFit() {
+    if (_animationRenderObject is FlareRenderObject) {
+      FlareRenderObject renderBox = _animationRenderObject;
+      renderBox?.fit = _getObjectFit();
+    }
+  }
+
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+
+    _updateRenderObject();
+  }
+
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+    if (key == 'objectFit') {
+      _updateObjectFit();
+    }
+  }
+
+  @override
+  method(String key, List args) {
+    switch (key) {
+      case 'play':
+        _play(args);
+        break;
+    }
+  }
+
+  BoxFit _getObjectFit() {
+    switch(objectFit) {
+      case 'fill':
+        return BoxFit.fill;
+        break;
+      case 'cover':
+        return BoxFit.cover;
+        break;
+      case 'fit-height':
+        return BoxFit.fitHeight;
+        break;
+      case 'fit-width':
+        return BoxFit.fitWidth;
+        break;
+      case 'scale-down':
+        return BoxFit.scaleDown;
+        break;
+      case 'contain':
+      default:
+        return BoxFit.contain;
     }
   }
 
   FlareRenderObject _createFlareRenderObject(
       Map<String, dynamic> properties) {
     assert(properties.containsKey('src'));
-    BoxFit boxFit;
-    switch(objectFit) {
-      case 'fill':
-        boxFit = BoxFit.fill;
-        break;
-      case 'cover':
-        boxFit = BoxFit.cover;
-        break;
-      case 'fit-height':
-        boxFit = BoxFit.fitHeight;
-        break;
-      case 'fit-width':
-        boxFit = BoxFit.fitWidth;
-        break;
-      case 'scale-down':
-        boxFit = BoxFit.scaleDown;
-        break;
-      case 'contain':
-      default:
-        boxFit = BoxFit.contain;
-    }
+
+    BoxFit boxFit = _getObjectFit();
+    _animationController = FlareControls();
+
     return FlareRenderObject(nodeId)
       ..assetProvider =
-          AssetFlare(bundle: NetworkAssetBundle(Uri.parse(properties['src'])), name: '')
+          AssetFlare(
+            bundle: NetworkAssetBundle(Uri.parse(src)),
+            name: ''
+          )
       ..fit = boxFit
       ..alignment = Alignment.center
       ..animationName = properties['name']
       ..shouldClip = false
-      ..useIntrinsicSize = true;
+      ..useIntrinsicSize = true
+      ..controller = _animationController;
   }
 }

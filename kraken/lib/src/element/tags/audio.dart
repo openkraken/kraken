@@ -37,7 +37,7 @@ class AudioElement extends Element {
   }
 
   @override
-  dynamic method(String name, List<dynamic> args) {
+  dynamic method(String name, List args) {
     if (audioPlayer == null) {
       return;
     }
