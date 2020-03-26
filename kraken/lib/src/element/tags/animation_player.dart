@@ -1,6 +1,8 @@
 import 'package:flare_flutter/provider/asset_flare.dart';
+import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:kraken/style.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
@@ -10,9 +12,9 @@ const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 class AnimationPlayerElement extends Element {
   static final String ANIMATION_TYPE_FLARE = 'flare';
 
-  String type = ANIMATION_TYPE_FLARE;
   String objectFit = 'contain';
-  RenderObject animationRenderObject;
+  RenderObject _animationRenderObject;
+  FlareControls _animationController;
 
   AnimationPlayerElement(
       int nodeId, Map<String, dynamic> properties, List<String> events)
@@ -21,21 +23,58 @@ class AnimationPlayerElement extends Element {
             properties: properties,
             events: events,
             defaultDisplay: 'block',
-            tagName: ANIMATION_PLAYER) {
-    if (properties.containsKey('type')) {
-      type = properties['type'];
-    }
+            tagName: ANIMATION_PLAYER);
 
-    if (style.contains('objectFit')) {
-      objectFit = style['objectFit'];
-    }
+  String get type {
+    if (properties.containsKey('type')) return properties['type'];
+    // Default type to flare
+    return ANIMATION_TYPE_FLARE;
+  }
 
-    if (type == ANIMATION_TYPE_FLARE) {
-      animationRenderObject = _createFlareRenderObject(properties);
-    }
+  String get src {
+    if (properties.containsKey('src')) return properties['src'];
+    return null;
+  }
 
-    if (animationRenderObject != null) {
-      addChild(animationRenderObject);
+  void _updateRenderObject() {
+    if (src == null) return;
+    bool shouldAddChild = _animationRenderObject == null;
+
+    _animationRenderObject = _createFlareRenderObject(properties);
+    if (shouldAddChild) addChild(_animationRenderObject);
+  }
+
+  void _play(List args) {
+    assert(args[0] is String);
+    String name = args[0];
+    double mix = 1.0;
+    double mixSeconds = 0.2;
+    if (args[1] != null) {
+      assert( args[1] is Map);
+      Map options = args[1];
+      if (options.containsKey('mix')) {
+        mix = Length.toDouble(options['mix']);
+      }
+      if (options.containsKey('mixSeconds')) {
+        mix = Length.toDouble(options['mixSeconds']);
+      }
+    }
+    _animationController?.play(name, mix: mix, mixSeconds: mixSeconds);
+  }
+
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+
+    _updateRenderObject();
+  }
+
+  @override
+  method(String key, List args) {
+    switch (key) {
+      case 'play':
+        _play(args);
+        break;
     }
   }
 
@@ -63,6 +102,9 @@ class AnimationPlayerElement extends Element {
       default:
         boxFit = BoxFit.contain;
     }
+
+    _animationController = FlareControls();
+
     return FlareRenderObject(nodeId)
       ..assetProvider =
           AssetFlare(bundle: NetworkAssetBundle(Uri.parse(properties['src'])), name: '')
@@ -70,6 +112,7 @@ class AnimationPlayerElement extends Element {
       ..alignment = Alignment.center
       ..animationName = properties['name']
       ..shouldClip = false
-      ..useIntrinsicSize = true;
+      ..useIntrinsicSize = true
+      ..controller = _animationController;
   }
 }

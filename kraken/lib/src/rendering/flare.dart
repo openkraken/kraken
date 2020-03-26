@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kraken/style.dart';
 
 class FlareRenderObject extends FlareActorRenderObject with ElementStyleMixin {
-
   int _nodeId;
-
 
   FlareRenderObject(this._nodeId);
 
