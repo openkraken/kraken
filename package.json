@@ -6,6 +6,7 @@
     "install": "cd cli && npm link --ignore-scripts && rm -rf build && ln -s ../targets build",
     "start": "cd app_launcher && flutter run",
     "build:macos": "node scripts/build_darwin",
+    "build:macos:release": "KRAKEN_BUILD=Release node scripts/build_darwin",
     "build:android": "node scripts/build_android",
     "build:linux": "node scripts/build_linux",
     "upload": "node scripts/pack_and_upload",
