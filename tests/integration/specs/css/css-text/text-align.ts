@@ -1,4 +1,4 @@
-fdescribe('Text TextAlign', () => {
+describe('Text TextAlign', () => {
   const TEXT_ALIGN = [
     'start',
     'end',
