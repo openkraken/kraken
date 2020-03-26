@@ -12,7 +12,6 @@ const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 class AnimationPlayerElement extends Element {
   static final String ANIMATION_TYPE_FLARE = 'flare';
 
-  String objectFit = 'contain';
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
@@ -24,6 +23,9 @@ class AnimationPlayerElement extends Element {
             events: events,
             defaultDisplay: 'block',
             tagName: ANIMATION_PLAYER);
+
+
+  String get objectFit => style['objectFit'];
 
   String get type {
     if (properties.containsKey('type')) return properties['type'];
@@ -62,11 +64,26 @@ class AnimationPlayerElement extends Element {
     _animationController?.play(name, mix: mix, mixSeconds: mixSeconds);
   }
 
+  void _updateObjectFit() {
+    if (_animationRenderObject is FlareRenderObject) {
+      FlareRenderObject renderBox = _animationRenderObject;
+      renderBox?.fit = _getObjectFit();
+    }
+  }
+
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
 
     _updateRenderObject();
+  }
+
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+    if (key == 'objectFit') {
+      _updateObjectFit();
+    }
   }
 
   @override
@@ -78,36 +95,42 @@ class AnimationPlayerElement extends Element {
     }
   }
 
-  FlareRenderObject _createFlareRenderObject(
-      Map<String, dynamic> properties) {
-    assert(properties.containsKey('src'));
-    BoxFit boxFit;
+  BoxFit _getObjectFit() {
     switch(objectFit) {
       case 'fill':
-        boxFit = BoxFit.fill;
+        return BoxFit.fill;
         break;
       case 'cover':
-        boxFit = BoxFit.cover;
+        return BoxFit.cover;
         break;
       case 'fit-height':
-        boxFit = BoxFit.fitHeight;
+        return BoxFit.fitHeight;
         break;
       case 'fit-width':
-        boxFit = BoxFit.fitWidth;
+        return BoxFit.fitWidth;
         break;
       case 'scale-down':
-        boxFit = BoxFit.scaleDown;
+        return BoxFit.scaleDown;
         break;
       case 'contain':
       default:
-        boxFit = BoxFit.contain;
+        return BoxFit.contain;
     }
+  }
 
+  FlareRenderObject _createFlareRenderObject(
+      Map<String, dynamic> properties) {
+    assert(properties.containsKey('src'));
+
+    BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();
 
     return FlareRenderObject(nodeId)
       ..assetProvider =
-          AssetFlare(bundle: NetworkAssetBundle(Uri.parse(properties['src'])), name: '')
+          AssetFlare(
+            bundle: NetworkAssetBundle(Uri.parse(src)),
+            name: ''
+          )
       ..fit = boxFit
       ..alignment = Alignment.center
       ..animationName = properties['name']
