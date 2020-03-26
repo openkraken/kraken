@@ -1,9 +1,21 @@
 describe('Text LetterSpacing', () => {
-  it('should work with normal', () => {
-    // default to normal
-    document.body.appendChild(document.createTextNode('\n there should \t\n\r be  no\n'));
-    document.body.appendChild(document.createTextNode(' new line'));
+  const LETTER_SPACING = [
+    'normal',
+    '-5px',
+    0,
+    '10px',
+  ];
 
-    return matchScreenshot();
+  LETTER_SPACING.forEach((value) => {
+    it(`should work with ${value}`, () => {
+      const cont = create('div', {
+        margin: '10px',
+        border: '1px solid #000',
+        letterSpacing: value,
+      }, createText(`These text should be letter-spacing: ${value}.`));
+      append(BODY, cont);
+
+      return matchElementImageSnapshot(cont);
+    });
   });
 });

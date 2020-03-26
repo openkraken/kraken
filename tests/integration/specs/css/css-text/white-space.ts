@@ -1,4 +1,4 @@
-describe('WhiteSpace', () => {
+describe('Text WhiteSpace', () => {
   it('should work with normal', () => {
     // default to normal
     document.body.appendChild(document.createTextNode('\n there should \t\n\r be  no\n'));
