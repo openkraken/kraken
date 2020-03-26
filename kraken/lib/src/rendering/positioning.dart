@@ -68,32 +68,24 @@ class RenderPosition extends RenderStack {
           y = childParentData.top;
         } else if (childParentData.bottom != null) {
           y = size.height - childParentData.bottom - child.size.height;
-        } else if (x != null) {
-          y = 0;
         }
-        if (x != null ||
-          y != null
-        ) {
-          if (x == null) {
-            x = 0;
-          }
-          if (y == null) {
-            y = 0;
-          }
-          childParentData.offset = Offset(x, y);
-        } else if (x == null &&
-            y == null &&
-            childParentData is ZIndexParentData &&
-            childParentData.hookRenderObject != null) {
-          RenderBox renderBox = childParentData.hookRenderObject;
-          ParentData parentData = renderBox.parentData;
-          if (parentData is BoxParentData) {
-            childParentData.offset = parentData.offset;
-          }
+
+        // Offset to global coordinate system of parent
+        Offset parentOffset = this.localToGlobal(Offset.zero);
+        RenderBox renderBox = (childParentData as ZIndexParentData).hookRenderObject;
+        ParentData parentData = renderBox.parentData;
+
+        // Offset to global coordinate system of original element in document flow
+        Offset originalOffset = renderBox.localToGlobal(Offset.zero);
+
+        if (x == null) {
+          x = originalOffset.dx - parentOffset.dx;
         }
-        if (childParentData.offset == null) {
-          childParentData.offset = Offset.zero;
+        if (y == null) {
+          y = originalOffset.dy - parentOffset.dy;
         }
+
+        childParentData.offset = Offset(x, y);
       }
 
       child = childParentData.nextSibling;
