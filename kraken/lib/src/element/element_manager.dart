@@ -9,6 +9,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 
 Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
@@ -191,13 +192,21 @@ class ElementManagerActionDelegate {
     target.removeEvent(eventName);
   }
 
-  method(int targetId, String method, dynamic args) {
+  method(int targetId, String method, args) {
     assert(nodeMap.containsKey(targetId));
-
     Element target = nodeMap[targetId];
+    List _args;
+    try {
+      _args = (args as List).cast();
+    } catch(e, stack) {
+      if (!PRODUCTION) {
+        print('Method parse error: $e\n$stack');
+      }
+      _args = [];
+    }
     assert(target != null);
     assert(target.method != null);
-    return target.method(method, args);
+    return target.method(method, _args);
   }
 }
 
