@@ -27,9 +27,11 @@ class Comment extends Node {
 }
 
 class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
-  TextNode(int nodeId, String data) :
-    _data = collapseWhitespace(data),
-    super(NodeType.TEXT_NODE, nodeId, '#text') {
+  static bool _isWhitespace(String ch) =>
+      ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
+
+  TextNode(int nodeId, this._data)
+      : super(NodeType.TEXT_NODE, nodeId, '#text') {
     // Update text after connected.
     queueAfterConnected(_onTextNodeConnected);
   }
@@ -47,12 +49,23 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
     parentElement.renderLayoutBox.add(renderTextBox);
   }
 
+  static const String NORMAL_SPACE = '\u0020';
   // The text string.
   String _data;
-  String get data => _data;
+  String get data {
+    String collapsedData = collapseWhitespace(_data);
+    if (previousSibling != null && _isWhitespace(_data[0])) {
+      collapsedData = NORMAL_SPACE + collapsedData;
+    }
+
+    if (nextSibling != null && _isWhitespace(_data[_data.length - 1])) {
+      collapsedData = collapsedData + NORMAL_SPACE;
+    }
+    return collapsedData;
+  }
   set data(String newData) {
     assert(newData != null);
-    _data = collapseWhitespace(newData);
+    _data = newData;
     updateTextStyle();
   }
 
@@ -134,10 +147,18 @@ abstract class Node extends EventTarget {
 
   Node get firstChild => childNodes?.first;
   Node get lastChild => childNodes?.last;
+  Node get previousSibling {
+    if (parentNode == null) return null;
+    int index = parentNode.childNodes?.indexOf(this);
+    if (index == null) return null;
+    if (index - 1 < 0) return null;
+    return parentNode.childNodes[index - 1];
+  }
   Node get nextSibling {
     if (parentNode == null) return null;
     int index = parentNode.childNodes?.indexOf(this);
     if (index == null) return null;
+    if (index + 1 > parentNode.childNodes.length - 1) return null;
     return parentNode.childNodes[index + 1];
   }
 
