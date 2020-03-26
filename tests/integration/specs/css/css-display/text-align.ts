@@ -1,5 +1,5 @@
 describe('text-align', () => {
-  it('test passes if "Filler Text" is centered above the blue stripe.', async () => {
+  it('001', async () => {
     let container = create('div', {
       width: '200px',
       'text-align': 'center',
@@ -11,6 +11,7 @@ describe('text-align', () => {
       backgroundColor: 'blue',
     });
 
+    append(container, create('p', {}, createText('test passes if "Filler Text" is centered above the blue stripe.')));
     append(container, text);
     append(container, div);
     append(BODY, container);

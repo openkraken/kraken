@@ -3,7 +3,7 @@ describe('FontFamily', () => {
     const p1 = create(
       'p',
       {
-        fontFamily: 'SimSun',
+        fontFamily: 'Songti SC',
         fontSize: '32px',
       },
       createText('These two lines should use the same font.')
@@ -11,7 +11,7 @@ describe('FontFamily', () => {
     const p2 = create(
       'p',
       {
-        fontFamily: 'SimSun',
+        fontFamily: 'Songti SC',
         fontSize: '32px',
       },
       createText('These two lines should use the same font.')
@@ -26,7 +26,7 @@ describe('FontFamily', () => {
     const p1 = create(
       'p',
       {
-        fontFamily: 'SimSun',
+        fontFamily: 'Songti SC',
         fontSize: '32px',
       },
       createText('字体文本测试。')
@@ -34,7 +34,7 @@ describe('FontFamily', () => {
     const p2 = create(
       'p',
       {
-        fontFamily: 'SimSun',
+        fontFamily: 'Songti SC',
         fontSize: '32px',
       },
       createText('字体文本测试。')
