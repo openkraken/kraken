@@ -120,54 +120,69 @@ mixin TextStyleMixin {
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
   TextDecoration getDecorationLine(StyleDeclaration style) {
-    TextDecoration textDecorationLine;
     if (style.contains(TEXT_DECORATION_LINE)) {
-      textDecorationLine = _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
+      return _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
     } else if (style.contains(TEXT_DECORATION)) {
-      List<String> splittedTextDecoration =
-          style[TEXT_DECORATION].split(spaceRegExp);
-      for (String value in splittedTextDecoration) {
-        textDecorationLine = _getTextDecorationLine(value);
+      String textDecoration = style[TEXT_DECORATION];
+      List<String> splittedTextDecoration = textDecoration.split(spaceRegExp);
+      // Compatible with CSS 2.1: text-decoration = text-decoration-line.
+      if (splittedTextDecoration.length >= 1) {
+        return _getTextDecorationLine(splittedTextDecoration[0]);
       }
     }
-    return textDecorationLine;
+    return _getTextDecorationLine();
   }
 
-  TextDecoration _getTextDecorationLine(String type) {
+  TextDecoration _getTextDecorationLine([String type]) {
     if (type == 'line-through')
       return TextDecoration.lineThrough;
     else if (type == 'overline')
       return TextDecoration.overline;
     else if (type == 'underline')
       return TextDecoration.underline;
-    else if (type == 'none') return TextDecoration.none;
-    return null;
+    else return TextDecoration.none;
   }
 
   Color getDecorationColor(StyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return WebColor.generate(style[TEXT_DECORATION_COLOR]);
-    } else {
-      return getColor(style); // Default to currentColor (style.color)
+    } else if (style.contains(TEXT_DECORATION)) {
+      String textDecoration = style[TEXT_DECORATION];
+      List<String> splitedDecoration = textDecoration.split(spaceRegExp);
+      if (splitedDecoration.length >= 2) {
+        return WebColor.generate(splitedDecoration.last);
+      }
     }
+    return getColor(style); // Default to currentColor (style.color)
   }
 
   TextDecorationStyle getDecorationStyle(StyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_STYLE)) {
-      switch (style[TEXT_DECORATION_STYLE]) {
-        case 'solid':
-          return TextDecorationStyle.solid;
-        case 'double':
-          return TextDecorationStyle.double;
-        case 'dotted':
-          return TextDecorationStyle.dotted;
-        case 'dashed':
-          return TextDecorationStyle.dashed;
-        case 'wavy':
-          return TextDecorationStyle.wavy;
+      return _getDecorationStyle(style[TEXT_DECORATION_STYLE]);
+    } else if (style.contains(TEXT_DECORATION)) {
+      String textDecoration = style[TEXT_DECORATION];
+      List<String> splitedDecoration = textDecoration.split(spaceRegExp);
+      if (splitedDecoration.length >= 2) {
+        return _getDecorationStyle(splitedDecoration[1]);
       }
     }
-    return TextDecorationStyle.solid;
+    return _getDecorationStyle();
+  }
+
+  TextDecorationStyle _getDecorationStyle([String value]) {
+    switch (value) {
+      case 'double':
+        return TextDecorationStyle.double;
+      case 'dotted':
+        return TextDecorationStyle.dotted;
+      case 'dashed':
+        return TextDecorationStyle.dashed;
+      case 'wavy':
+        return TextDecorationStyle.wavy;
+      case 'solid':
+      default:
+        return TextDecorationStyle.solid;
+    }
   }
 
   FontWeight getFontWeight(StyleDeclaration style) {

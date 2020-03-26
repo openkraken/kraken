@@ -21,12 +21,23 @@ mixin FlowMixin {
     if (style.contains(TEXT_ALIGN)) {
       String textAlign = style[TEXT_ALIGN];
       switch (textAlign) {
+        case 'start':
+        case 'left':
+          // Use default value: start
+          break;
+        case 'end':
         case 'right':
           mainAxisAlignment = MainAxisAlignment.end;
           break;
         case 'center':
           mainAxisAlignment = MainAxisAlignment.center;
           break;
+        case 'justify-all':
+          mainAxisAlignment = MainAxisAlignment.spaceBetween;
+          break;
+        // Like inherit, which is the same with parent element.
+        // Not impl it due to performance consideration.
+        // case 'match-parent':
       }
     }
 
