@@ -53,12 +53,19 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   // The text string.
   String _data;
   String get data {
+    // @TODO(zl): Need to judge style white-spacing.
     String collapsedData = collapseWhitespace(_data);
-    if (previousSibling != null && _isWhitespace(_data[0])) {
+    // Append space while prev is element.
+    //   Consider:
+    //        <ltr><span>foo</span>bar</ltr>
+    // Append space while next is node(including textNode).
+    //   Consider: (PS: ` is text node seperater.)
+    //        <ltr><span>foo</span>`bar``hello`</ltr>
+    if (previousSibling is Element && _isWhitespace(_data[0])) {
       collapsedData = NORMAL_SPACE + collapsedData;
     }
 
-    if (nextSibling != null && _isWhitespace(_data[_data.length - 1])) {
+    if (nextSibling is Node && _isWhitespace(_data[_data.length - 1])) {
       collapsedData = collapsedData + NORMAL_SPACE;
     }
     return collapsedData;
