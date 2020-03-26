@@ -1,8 +1,9 @@
-describe('Text', () => {
-  it('001', async () => {
+describe('Text WordSpacing', () => {
+  it('should work with normal', () => {
+    // default to normal
     document.body.appendChild(document.createTextNode('\n there should \t\n\r be  no\n'));
     document.body.appendChild(document.createTextNode(' new line'));
 
-    await matchScreenshot();
+    return matchScreenshot();
   });
 });
