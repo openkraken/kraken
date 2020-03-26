@@ -21,7 +21,7 @@ describe('Display inline', () => {
     await matchScreenshot();
   });
 
-  it('textNode only if have one space', async () => {
+  xit('textNode only if have one space', async () => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
