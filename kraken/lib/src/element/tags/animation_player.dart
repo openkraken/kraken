@@ -51,8 +51,8 @@ class AnimationPlayerElement extends Element {
     String name = args[0];
     double mix = 1.0;
     double mixSeconds = 0.2;
-    if (args[1] != null) {
-      assert( args[1] is Map);
+    if (args.length > 1 && args[1] != null) {
+      assert(args[1] is Map);
       Map options = args[1];
       if (options.containsKey('mix')) {
         mix = Length.toDouble(options['mix']);
