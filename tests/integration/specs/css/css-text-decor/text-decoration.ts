@@ -1,4 +1,4 @@
-fdescribe('Text TextDecoration', () => {
+describe('Text TextDecoration', () => {
   const TEXT_DECORATION_LINE = [
     'none',
     'underline',
