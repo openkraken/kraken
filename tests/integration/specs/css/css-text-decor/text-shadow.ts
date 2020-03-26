@@ -1,4 +1,4 @@
-fdescribe('Text TextDecoration', () => {
+describe('Text TextDecoration', () => {
   const TEXT_SHADOW = [
     '3px 3px rgba(0,0,0,.3)',
     '4px 4px 4px rgba(0,0,0,.3)',
