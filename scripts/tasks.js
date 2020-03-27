@@ -124,7 +124,7 @@ task('clean', () => {
   }
 });
 
-const libOutputPath = join(TARGET_PATH, platform, buildMode.toLowerCase(), 'lib');
+const libOutputPath = join(TARGET_PATH, platform, 'lib');
 for (let jsEngine of SUPPORTED_JS_ENGINES) {
   task('generate-cmake-files-' + jsEngine, (done) => {
     function generateCmake(args) {
