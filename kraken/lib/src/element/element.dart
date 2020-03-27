@@ -830,6 +830,11 @@ abstract class Element extends Node
     style.addStyleChangeListener('borderTopWidth', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderRightWidth', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderBottomWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopRightRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomRightRadius', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderStyle', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderLeftStyle', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTopStyle', _styleDecoratedChangedListener);
