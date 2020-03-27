@@ -710,10 +710,13 @@ class RenderFlowLayout extends RenderBox
         final RenderLayoutParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
+        bool isPositionPlaceholder = child is RenderPadding;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
-        final double childCrossAxisOffset = _getChildCrossAxisOffset(
-            flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
+        // Always align to the top of run when positioning positioned element placeholder
+        final double childCrossAxisOffset = isPositionPlaceholder ? 0 :
+            _getChildCrossAxisOffset(
+              flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
@@ -724,11 +727,8 @@ class RenderFlowLayout extends RenderBox
         } else if (child is RenderElementBoundary) {
           childStyle = nodeMap[child.nodeId].style;
         }
-
-        if (childStyle != null) {
-          ///apply position relative offset change
-          applyRelativeOffset(relativeOffset, child, childStyle);
-        }
+        ///apply position relative offset change
+        applyRelativeOffset(relativeOffset, child, childStyle);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
