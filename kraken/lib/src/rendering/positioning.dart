@@ -72,12 +72,14 @@ class RenderPosition extends RenderStack {
 
         // Offset to global coordinate system of parent
         Offset parentOffset = this.localToGlobal(Offset.zero);
+        // Access placeholder renderObject from the reference of parent data
         RenderBox renderBox = (childParentData as ZIndexParentData).hookRenderObject;
-        ParentData parentData = renderBox.parentData;
 
         // Offset to global coordinate system of original element in document flow
         Offset originalOffset = renderBox.localToGlobal(Offset.zero);
 
+        // Following web standard, if top or left of positioned element do not exists,
+        // use the original position before moved away from document flow
         if (x == null) {
           x = originalOffset.dx - parentOffset.dx;
         }

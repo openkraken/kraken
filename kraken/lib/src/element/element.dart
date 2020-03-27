@@ -77,6 +77,8 @@ abstract class Element extends Node
   RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
   RenderElementBoundary renderElementBoundary;
+  // Placeholder renderObject of positioned element(absolute/fixed)
+  // used to get original coordinate before move away from document flow
   RenderPadding renderPositionedPlaceholder;
 
   // Horizontal margin dimension (left + right)
@@ -656,6 +658,8 @@ abstract class Element extends Node
     }
   }
 
+  // Store placeholder renderObject reference to parentData of element boundary
+  // to enable access from parent RenderStack
   RenderBox getStackedRenderBox(Element element) {
     renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
     ZIndexParentData stackParentData =
@@ -666,6 +670,8 @@ abstract class Element extends Node
     return stackedRenderBox;
   }
 
+  // Add placeholder to positioned element for calculate original
+  // coordinate before moved away
   void addPositionPlaceholder() {
     if (renderPositionedPlaceholder == null ||
         !renderPositionedPlaceholder.attached) {
