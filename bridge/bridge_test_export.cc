@@ -12,7 +12,6 @@
 #include <iostream>
 
 std::unique_ptr<kraken::JSBridgeTest> bridgeTest;
-std::atomic<bool> hasInjectTestFramework{false};
 std::atomic<bool> inited{false};
 
 void initTestFramework() {
