@@ -77,6 +77,9 @@ abstract class Element extends Node
   RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
   RenderElementBoundary renderElementBoundary;
+  // Placeholder renderObject of positioned element(absolute/fixed)
+  // used to get original coordinate before move away from document flow
+  RenderPadding renderPositionedPlaceholder;
 
   // Horizontal margin dimension (left + right)
   double get cropMarginWidth => renderMargin.margin.horizontal;
@@ -382,7 +385,7 @@ abstract class Element extends Node
     // current element's zIndex
     int currentZIndex = Length.toInt(currentElement.style['zIndex']);
     // add current element back to parent stack by zIndex
-    insertByZIndex(parentStack, renderObject, el, currentZIndex);
+    insertByZIndex(parentStack, el, currentZIndex);
   }
 
   void _updateZIndex() {
@@ -403,7 +406,7 @@ abstract class Element extends Node
     // current element's zIndex
     int currentZIndex = Length.toInt(style['zIndex']);
     // add current element back to parent stack by zIndex
-    insertByZIndex(parentStack, renderObject, this, currentZIndex);
+    insertByZIndex(parentStack, this, currentZIndex);
   }
 
   void _updateOffset({
@@ -655,6 +658,27 @@ abstract class Element extends Node
     }
   }
 
+  // Store placeholder renderObject reference to parentData of element boundary
+  // to enable access from parent RenderStack
+  RenderBox getStackedRenderBox(Element element) {
+    renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
+    ZIndexParentData stackParentData =
+      getPositionParentDataFromStyle(element.style);
+    RenderBox stackedRenderBox = element.renderObject as RenderBox;
+    stackParentData.hookRenderObject = renderPositionedPlaceholder;
+    stackedRenderBox.parentData = stackParentData;
+    return stackedRenderBox;
+  }
+
+  // Add placeholder to positioned element for calculate original
+  // coordinate before moved away
+  void addPositionPlaceholder() {
+    if (renderPositionedPlaceholder == null ||
+        !renderPositionedPlaceholder.attached) {
+      addChild(renderPositionedPlaceholder);
+    }
+  }
+
   void appendElement(Node child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
@@ -672,37 +696,20 @@ abstract class Element extends Node
               RenderFlexItem(child: child.renderLayoutBox as RenderBox);
         }
       }
-
-      RenderBox getStackedRenderBox(Element element) {
-        ZIndexParentData stackParentData =
-        getPositionParentDataFromStyle(element.style);
-        RenderBox stackedRenderBox = element.renderObject as RenderBox;
-
-
-        if (!isFlex) {
-          stackParentData.hookRenderObject =
-              RenderPadding(padding: EdgeInsets.zero);
-        }
-        stackedRenderBox.parentData = stackParentData;
-        return stackedRenderBox;
-      }
-
       if (childPosition == 'absolute') {
         Element parentStackedElement =
-        findParent(child, (element) => element.renderStack != null);
+          findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
-          RenderObject renderBoxToBeStacked = getStackedRenderBox(child);
-          insertByZIndex(parentStackedElement.renderStack, renderBoxToBeStacked,
-              child, Length.toInt(childStyle['zIndex']));
+          insertByZIndex(
+              parentStackedElement.renderStack, child, Length.toInt(childStyle['zIndex']));
           return;
         }
       } else if (childPosition == 'fixed') {
         final RenderPosition rootRenderStack =
             ElementManager().getRootElement().renderStack;
         if (rootRenderStack != null) {
-          RenderBox stackedRenderBox = getStackedRenderBox(child);
           insertByZIndex(
-              rootRenderStack, stackedRenderBox, child, Length.toInt(childStyle['zIndex']));
+              rootRenderStack, child, Length.toInt(childStyle['zIndex']));
           return;
         }
 
@@ -747,8 +754,8 @@ abstract class Element extends Node
     }
   }
 
-  void insertByZIndex(RenderStack renderStack, RenderObject renderObject,
-      Element el, int zIndex) {
+  void insertByZIndex(RenderStack renderStack, Element el, int zIndex) {
+    RenderObject renderObject = getStackedRenderBox(el);
     el.needsReposition = false;
     RenderBox child = renderStack.lastChild;
     while (child != null) {
@@ -761,20 +768,24 @@ abstract class Element extends Node
           renderStack.insert(renderObject,
               after: childParentData.previousSibling);
         }
+        addPositionPlaceholder();
         return;
       } else if (zIndex >= 0) {
         renderStack.insert(renderObject, after: child);
+        addPositionPlaceholder();
         return;
       }
       final ContainerParentDataMixin childParentData = child.parentData;
       child = childParentData.previousSibling;
     }
     renderStack.insert(renderObject, after: null);
+    addPositionPlaceholder();
   }
 
   void _registerStyleChangedListeners() {
     style.addStyleChangeListener('display', _styleDisplayChangedListener);
     style.addStyleChangeListener('position', _stylePositionChangedListener);
+    style.addStyleChangeListener('zIndex', _stylePositionChangedListener);
 
     style.addStyleChangeListener('top', _styleOffsetChangedListener);
     style.addStyleChangeListener('left', _styleOffsetChangedListener);
@@ -830,6 +841,11 @@ abstract class Element extends Node
     style.addStyleChangeListener('borderTopWidth', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderRightWidth', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderBottomWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopRightRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomRightRadius', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderStyle', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderLeftStyle', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTopStyle', _styleDecoratedChangedListener);

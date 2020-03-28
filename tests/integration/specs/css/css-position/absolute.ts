@@ -52,4 +52,112 @@ describe('Position absolute', () => {
       done();
     });
   });
+
+  it('with no left following inline element', async () => {
+    let div1 = create('div', {
+      border: '1px solid black',
+      padding: '100px',
+      position: 'relative',
+    });
+    let div2 = create('div', {
+      border: '1px solid black',
+      padding: '50px',
+      backgroundColor: 'green',
+    });
+    append(div2, createText('inline'));
+    const span = create('span', {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      top: '50px',
+      position: 'absolute'
+    });
+    append(span, createText('absolute with no left'));
+    append(div2, span);
+    append(BODY, div1);
+    append(div1, div2);
+    await matchScreenshot();
+  });
+
+  it('with no top following inline element', async () => {
+    let div1 = create('div', {
+      border: '1px solid black',
+      padding: '100px',
+      position: 'relative',
+    });
+    let div2 = create('div', {
+      border: '1px solid black',
+      padding: '50px',
+      backgroundColor: 'green',
+    });
+    append(div2, createText('inline'));
+    const span = create('span', {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      left: '50px',
+      position: 'absolute'
+    });
+    append(span, createText('absolute with no top'));
+    append(div2, span);
+    append(BODY, div1);
+    append(div1, div2);
+    await matchScreenshot();
+  });
+
+  it('with no left following block element', async () => {
+    let div1 = create('div', {
+      border: '1px solid black',
+      padding: '100px',
+      position: 'relative',
+    });
+    let div2 = create('div', {
+      border: '1px solid black',
+      padding: '50px',
+      backgroundColor: 'green',
+    });
+    let div3 = create('div', {});
+    append(div3, createText('block'));
+    append(div2, div3);
+    const span = create('span', {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      top: '50px',
+      position: 'absolute'
+    });
+    append(span, createText('absolute with no left'));
+    append(div2, span);
+    append(BODY, div1);
+    append(div1, div2);
+    await matchScreenshot();
+  });
+
+  it('with no top following block element', async () => {
+    let div1 = create('div', {
+      border: '1px solid black',
+      padding: '100px',
+      position: 'relative',
+    });
+    let div2 = create('div', {
+      border: '1px solid black',
+      padding: '50px',
+      backgroundColor: 'green',
+    });
+    let div3 = create('div', {});
+    append(div3, createText('block'));
+    append(div2, div3);
+    const span = create('span', {
+      backgroundColor: 'blue',
+      height: '100px',
+      width: '100px',
+      left: '50px',
+      position: 'absolute'
+    });
+    append(span, createText('absolute with no top'));
+    append(div2, span);
+    append(BODY, div1);
+    append(div1, div2);
+    await matchScreenshot();
+  });
 });

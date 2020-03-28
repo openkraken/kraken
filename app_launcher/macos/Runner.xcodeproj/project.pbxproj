@@ -21,13 +21,13 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1BABEC7323FE88EC003D0814 /* libv8_libplatform.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC6C23FE88EB003D0814 /* libv8_libplatform.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7423FE88EC003D0814 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC6D23FE88EB003D0814 /* libv8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7523FE88EC003D0814 /* libkraken_jsc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC6E23FE88EB003D0814 /* libkraken_jsc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7623FE88EC003D0814 /* libicuuc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC6F23FE88EB003D0814 /* libicuuc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7723FE88EC003D0814 /* libv8_libbase.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC7023FE88EC003D0814 /* libv8_libbase.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7823FE88EC003D0814 /* libicui18n.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC7123FE88EC003D0814 /* libicui18n.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BABEC7923FE88EC003D0814 /* libkraken_v8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BABEC7223FE88EC003D0814 /* libkraken_v8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA455242CC54F00FB3624 /* libkraken_jsc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA44E242CC54E00FB3624 /* libkraken_jsc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA456242CC54F00FB3624 /* libicuuc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA44F242CC54F00FB3624 /* libicuuc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA457242CC54F00FB3624 /* libv8_libbase.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA458242CC54F00FB3624 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA451242CC54F00FB3624 /* libv8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA459242CC54F00FB3624 /* libicui18n.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA452242CC54F00FB3624 /* libicui18n.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA45A242CC54F00FB3624 /* libkraken_v8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1B9FA45B242CC54F00FB3624 /* libv8_libplatform.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
@@ -53,17 +53,17 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		1BABEC5B23FE87ED003D0814 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1BABEC7323FE88EC003D0814 /* libv8_libplatform.dylib in CopyFiles */,
-				1BABEC7423FE88EC003D0814 /* libv8.dylib in CopyFiles */,
-				1BABEC7523FE88EC003D0814 /* libkraken_jsc.dylib in CopyFiles */,
-				1BABEC7623FE88EC003D0814 /* libicuuc.dylib in CopyFiles */,
-				1BABEC7723FE88EC003D0814 /* libv8_libbase.dylib in CopyFiles */,
-				1BABEC7823FE88EC003D0814 /* libicui18n.dylib in CopyFiles */,
-				1BABEC7923FE88EC003D0814 /* libkraken_v8.dylib in CopyFiles */,
+				1B9FA455242CC54F00FB3624 /* libkraken_jsc.dylib in CopyFiles */,
+				1B9FA456242CC54F00FB3624 /* libicuuc.dylib in CopyFiles */,
+				1B9FA457242CC54F00FB3624 /* libv8_libbase.dylib in CopyFiles */,
+				1B9FA458242CC54F00FB3624 /* libv8.dylib in CopyFiles */,
+				1B9FA459242CC54F00FB3624 /* libicui18n.dylib in CopyFiles */,
+				1B9FA45A242CC54F00FB3624 /* libkraken_v8.dylib in CopyFiles */,
+				1B9FA45B242CC54F00FB3624 /* libv8_libplatform.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,13 +82,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1BABEC6C23FE88EB003D0814 /* libv8_libplatform.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libplatform.dylib; path = ../../targets/darwin/debug/lib/libv8_libplatform.dylib; sourceTree = "<group>"; };
-		1BABEC6D23FE88EB003D0814 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = ../../targets/darwin/debug/lib/libv8.dylib; sourceTree = "<group>"; };
-		1BABEC6E23FE88EB003D0814 /* libkraken_jsc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_jsc.dylib; path = ../../targets/darwin/debug/lib/libkraken_jsc.dylib; sourceTree = "<group>"; };
-		1BABEC6F23FE88EB003D0814 /* libicuuc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicuuc.dylib; path = ../../targets/darwin/debug/lib/libicuuc.dylib; sourceTree = "<group>"; };
-		1BABEC7023FE88EC003D0814 /* libv8_libbase.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libbase.dylib; path = ../../targets/darwin/debug/lib/libv8_libbase.dylib; sourceTree = "<group>"; };
-		1BABEC7123FE88EC003D0814 /* libicui18n.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicui18n.dylib; path = ../../targets/darwin/debug/lib/libicui18n.dylib; sourceTree = "<group>"; };
-		1BABEC7223FE88EC003D0814 /* libkraken_v8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_v8.dylib; path = ../../targets/darwin/debug/lib/libkraken_v8.dylib; sourceTree = "<group>"; };
+		1B9FA44E242CC54E00FB3624 /* libkraken_jsc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_jsc.dylib; path = ../../targets/darwin/lib/libkraken_jsc.dylib; sourceTree = "<group>"; };
+		1B9FA44F242CC54F00FB3624 /* libicuuc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicuuc.dylib; path = ../../targets/darwin/lib/libicuuc.dylib; sourceTree = "<group>"; };
+		1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libbase.dylib; path = ../../targets/darwin/lib/libv8_libbase.dylib; sourceTree = "<group>"; };
+		1B9FA451242CC54F00FB3624 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = ../../targets/darwin/lib/libv8.dylib; sourceTree = "<group>"; };
+		1B9FA452242CC54F00FB3624 /* libicui18n.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicui18n.dylib; path = ../../targets/darwin/lib/libicui18n.dylib; sourceTree = "<group>"; };
+		1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_v8.dylib; path = ../../targets/darwin/lib/libkraken_v8.dylib; sourceTree = "<group>"; };
+		1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8_libplatform.dylib; path = ../../targets/darwin/lib/libv8_libplatform.dylib; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
 		33CC10ED2044A3C60003C045 /* Kraken.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kraken.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -207,13 +207,13 @@
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1BABEC7123FE88EC003D0814 /* libicui18n.dylib */,
-				1BABEC6F23FE88EB003D0814 /* libicuuc.dylib */,
-				1BABEC6E23FE88EB003D0814 /* libkraken_jsc.dylib */,
-				1BABEC7223FE88EC003D0814 /* libkraken_v8.dylib */,
-				1BABEC7023FE88EC003D0814 /* libv8_libbase.dylib */,
-				1BABEC6C23FE88EB003D0814 /* libv8_libplatform.dylib */,
-				1BABEC6D23FE88EB003D0814 /* libv8.dylib */,
+				1B9FA452242CC54F00FB3624 /* libicui18n.dylib */,
+				1B9FA44F242CC54F00FB3624 /* libicuuc.dylib */,
+				1B9FA44E242CC54E00FB3624 /* libkraken_jsc.dylib */,
+				1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */,
+				1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */,
+				1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */,
+				1B9FA451242CC54F00FB3624 /* libv8.dylib */,
 				849F0F3F2CC229A7BAD19E6C /* Pods_Runner.framework */,
 			);
 			name = Frameworks;
