@@ -284,7 +284,7 @@ task('pack', (done) => {
 
   try {
     // Ignore lib files, which is already copied to app shared frameworks.
-    execSync(`tar --exclude ./${platform}/*/lib -zcvf ${filename} ./${platform}`, {
+    execSync(`tar --exclude ./${platform}/lib -zcvf ${filename} ./${platform}`, {
       cwd: paths.targets,
       stdio: 'inherit',
     });
