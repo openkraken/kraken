@@ -2,7 +2,7 @@ import { Node, NodeType, NodeId, traverseNode } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
-import { ElementRegistry } from './elementRegistry';
+import { ElementRegistry } from './element-registry';
 
 export class Document extends Node {
   public body: Element = new Element('BODY', NodeId.BODY);

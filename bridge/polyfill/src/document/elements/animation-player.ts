@@ -1,5 +1,5 @@
 import { Element } from '../element';
-import { method } from '../UIManager';
+import { method } from '../ui-manager';
 
 export class AnimationPlayerElement extends Element {
   constructor(tagName: string) {

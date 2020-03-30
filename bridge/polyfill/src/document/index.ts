@@ -1,5 +1,5 @@
 
-import './UIListener';
+import './ui-listener';
 import { document } from './document';
 
 Object.defineProperty(global, 'document', {

@@ -7,7 +7,7 @@ import {
   setStyle,
   method,
   toBlob
-} from './UIManager';
+} from './ui-manager';
 
 const RECT_PROPERTIES = [
   'offsetTop',
