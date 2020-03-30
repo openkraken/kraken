@@ -828,7 +828,8 @@ class RenderFlexLayout extends RenderBox
     double actualSizeDelta;
 
     // Default to children's width
-    double constraintWidth = idealSize;
+    double constraintWidth =
+        _direction == Axis.horizontal ? idealSize : crossSize;
     // Get max of element's width and children's width if element's width exists
     if (elementWidth != null) {
       constraintWidth = math.max(constraintWidth, elementWidth);
