@@ -1,5 +1,4 @@
 // https://github.com/WebReflection/url-search-params
-// const Symbol = require('./symbol');
 
 const find = /[!'\(\)~]|%20|%00/g;
 const plus = /\+/g;
@@ -130,70 +129,6 @@ class URLSearchParamsPolyfill {
     }, params);
   }
   /**
-   * Returns an iterator allowing iteration through all keys of the key/value pairs contained in this object.
-   */
-  keys() {
-    var items: any[] = [];
-    this.forEach(function(value, name) {
-      items.push(name);
-    });
-    var iterator = {
-      next: function() {
-        var value = items.shift();
-        return {done: value === undefined, value: value};
-      }
-    };
-
-    iterator[Symbol.iterator] = function() {
-      return iterator;
-    };
-
-    return iterator;
-  }
-
-  values() {
-    var items: any[] = [];
-    this.forEach(function(value) {
-      items.push(value);
-    });
-    var iterator = {
-      next: function() {
-        var value = items.shift();
-        return {done: value === undefined, value: value};
-      }
-    };
-
-    iterator[Symbol.iterator] = function() {
-      return iterator;
-    };
-
-    return iterator;
-  }
-  /**
-   * Returns an iterator allowing iteration through all key/value pairs contained in this object.
-   */
-  entries() {
-    var items: any[] = [];
-    this.forEach(function(value, name) {
-      items.push([name, value]);
-    });
-    var iterator = {
-      next: function() {
-        var value = items.shift();
-        return {
-          done: value === undefined,
-          value: value
-        };
-      }
-    };
-
-    iterator[Symbol.iterator] = function() {
-      return iterator;
-    };
-
-    return iterator;
-  }
-  /**
    * Returns a string containing a query string suitable for use in a URL. Does not include the question mark.
    */
   toString() {
@@ -207,8 +142,6 @@ class URLSearchParamsPolyfill {
     return query.join('&');
   }
 }
-
-URLSearchParamsPolyfill.prototype[Symbol.iterator] = URLSearchParamsPolyfill.prototype.entries;
 
 Object.defineProperty(global, 'URLSearchParams', {
   enumerable: true,
