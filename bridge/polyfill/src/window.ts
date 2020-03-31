@@ -1,7 +1,7 @@
 import { EventTarget } from 'event-target-shim';
 import { krakenWindow, KrakenLocation } from './kraken';
-import {NodeId} from "./document/node";
-import {addEvent} from "./document/UIManager";
+import { NodeId } from "./document/node";
+import { addEvent } from "./document/ui-manager";
 
 function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   events.forEach((event: string) => {
