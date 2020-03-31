@@ -14,8 +14,6 @@ describe('insert-inline-in-blocks', () => {
       borderRight: '5px solid yellow'
     };
 
-    title('Test passes if the 2 colorized rectangles are identical.');
-
     let insertPoint = create('div', innerDivStyle, createText('First block'));
 
     let container1 = create('div', containerStyle, [
@@ -65,8 +63,6 @@ describe('insert-inline-in-blocks', () => {
       borderRight: '5px solid yellow'
     };
 
-    title('Test passes if the 2 colorized rectangles are identical.');
-
     let container1 = create('div', containerStyle, [
       create('div', innerDivStyle, createText('First block')),
       createText('Anonymous second block'),
@@ -113,8 +109,6 @@ describe('insert-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow'
     };
-
-    title('Test passes if the 2 colorized rectangles are identical.');
 
     let insertPoint = create('div', innerDivStyle, createText('Second block'));
     let container1 = create('div', containerStyle, [

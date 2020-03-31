@@ -46,11 +46,6 @@ function createText(content: string) {
   return document.createTextNode(content);
 }
 
-function title(title: string) {
-  let element = create('span', {}, createText(title));
-  append(BODY, element);
-}
-
 function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
