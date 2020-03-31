@@ -1,6 +1,6 @@
 import {KrakenBlob, krakenBlob} from './kraken';
 
-export class Blob {
+class Blob {
   public size: number;
   public type: string;
   private blob: KrakenBlob;

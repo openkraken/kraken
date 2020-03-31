@@ -2,10 +2,12 @@ import './console';
 import './websocket';
 import './fetch';
 import './document';
-import './matchMedia';
+import './match-media';
 import './location';
 import './navigator';
 import './window';
 import './blob';
-import './asyncStorage';
-import './moduleListener'
+import './async-storage';
+import './url-search-params';
+import './url';
+import './module-listener'

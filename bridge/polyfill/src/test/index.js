@@ -1,6 +1,6 @@
 const { EventEmitter } = require('events');
 const jasmineCore = require('./jasmine.js');
-const ConsoleReporter = require('./console_reporter');
+const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
