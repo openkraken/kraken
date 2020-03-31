@@ -1,5 +1,5 @@
 import { Node, NodeType } from './node';
-import { createComment } from './UIManager';
+import { createComment } from './ui-manager';
 
 export class Comment extends Node {
   public nodeName: string = '#comment';

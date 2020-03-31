@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from './UIManager';
+import { insertAdjacentNode, removeNode } from './ui-manager';
 
 export type NodeList = Array<Node>;
 export enum NodeId {
