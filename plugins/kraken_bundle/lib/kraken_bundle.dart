@@ -17,7 +17,7 @@ class KrakenBundle {
     KrakenBundle.reloadListener = reloadListener;
   }
 
-  static Future<String> get bundleUrl async {
+  static Future<String> getBundleUrl() async {
     String bundleUrl;
     try {
       bundleUrl = await _channel.invokeMethod('getBundleUrl');
@@ -27,7 +27,7 @@ class KrakenBundle {
     return bundleUrl;
   }
 
-  static Future<String> get zipBundleUrl async {
+  static Future<String> getZipBundleUrl() async {
     String zipBundleUrl;
     try {
       zipBundleUrl = await _channel.invokeMethod('getZipBundleUrl');

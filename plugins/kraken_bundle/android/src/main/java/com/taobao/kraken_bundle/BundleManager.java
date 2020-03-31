@@ -1,4 +1,4 @@
-package com.kraken.bundle.kraken_bundle;
+package com.taobao.kraken_bundle;
 
 public class BundleManager {
 
@@ -36,7 +36,7 @@ public class BundleManager {
   }
 
   public String getBundleUrl() {
-    return bundleUrl;
+    return "https://dev.g.alicdn.com/kraken/kraken-demos/long-list/build/kraken/index.js";
   }
 
   public String getZipBundleUrl() {

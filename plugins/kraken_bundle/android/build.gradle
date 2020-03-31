@@ -1,4 +1,4 @@
-group 'com.kraken.bundle.kraken_bundle'
+group 'com.taobao.kraken_bundle'
 version '1.0'
 
 buildscript {

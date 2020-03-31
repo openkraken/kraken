@@ -1,4 +1,4 @@
-package com.kraken.bundle.kraken_bundle;
+package com.taobao.kraken_bundle;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;

@@ -33,7 +33,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.kraken.bundle.kraken_bundle
+        package: com.taobao.kraken_bundle
         pluginClass: KrakenBundlePlugin
       ios:
         pluginClass: KrakenBundlePlugin
