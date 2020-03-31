@@ -19,8 +19,4 @@ public class KrakenBundlePlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
-  
-  public func reload() {
-    
-  }
 }
