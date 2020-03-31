@@ -438,28 +438,6 @@ void registerPlatformBrightness() {
   _registerPlatformBrightness(pointer);
 }
 
-// Register onPlatformBrightnessChanged
-typedef Native_OnPlatformBrightnessChanged = Void Function();
-typedef Native_RegisterOnPlatformBrightnessChanged = Void Function(
-    Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>>);
-typedef Dart_RegisterOnPlatformBrightnessChanged = void Function(
-    Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>>);
-
-final Dart_RegisterOnPlatformBrightnessChanged _registerOnPlatformBrightnessChanged = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterOnPlatformBrightnessChanged>>('registerOnPlatformBrightnessChanged')
-    .asFunction();
-
-void _onPlatformBrightnessChanged() {
-  // TODO: should avoid overwrite old event handler
-  window.onPlatformBrightnessChanged = invokeOnPlatformBrightnessChangedCallback;
-}
-
-void registerOnPlatformBrightnessChanged() {
-  Pointer<NativeFunction<Native_OnPlatformBrightnessChanged>> pointer =
-      Pointer.fromFunction(_onPlatformBrightnessChanged);
-  _registerOnPlatformBrightnessChanged(pointer);
-}
-
 // Register getScreen
 class ScreenSize extends Struct {}
 
@@ -581,7 +559,6 @@ void registerDartMethodsToCpp() {
   registerGetScreen();
   registerDevicePixelRatio();
   registerPlatformBrightness();
-  registerOnPlatformBrightnessChanged();
   registerStartFlushCallbacksInUIThread();
   registerStopFlushCallbacksInUIThread();
   registerToBlob();

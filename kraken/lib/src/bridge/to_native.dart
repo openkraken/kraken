@@ -1,6 +1,8 @@
 import 'dart:ffi';
-
+import 'dart:convert';
 import 'package:ffi/ffi.dart';
+import 'package:kraken/kraken.dart';
+import 'package:kraken/element.dart';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -56,7 +58,8 @@ final Dart_InvokeOnPlatformBrightnessChangedCallback _invokeOnPlatformBrightness
     .asFunction();
 
 void invokeOnPlatformBrightnessChangedCallback() {
-  _invokeOnPlatformBrightnessChangedCallback();
+  String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
+  emitUIEvent(json);
 }
 
 // Register createScreen
@@ -80,7 +83,11 @@ final Dart_EvaluateScripts _evaluateScripts =
 void evaluateScripts(String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
-  _evaluateScripts(_code, _url, line);
+  try {
+    _evaluateScripts(_code, _url, line);
+  } catch (e, stack) {
+    print('$e\n$stack');
+  }
 }
 
 // Register initJsEngine
