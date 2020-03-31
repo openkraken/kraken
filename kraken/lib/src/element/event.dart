@@ -9,8 +9,8 @@ class Event {
   String type;
   bool bubbles;
   bool cancelable;
-  Node currentTarget;
-  Node target;
+  EventTarget currentTarget;
+  EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
   dynamic detail;
@@ -44,6 +44,7 @@ class Event {
     bubbles = false;
   }
 
+  @override
   Map toJson() {
     return {
       'type': type,
@@ -94,7 +95,7 @@ class DisappearEvent extends Event {
 class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio): super('intersectionchange');
   double intersectionRatio;
-  
+
   Map toJson() {
     Map eventMap = super.toJson();
     eventMap['intersectionRatio'] = intersectionRatio;

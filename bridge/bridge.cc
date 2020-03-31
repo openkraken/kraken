@@ -361,24 +361,6 @@ JSBridge::~JSBridge() {
   krakenModuleListenerList.clear();
 }
 
-void JSBridge::invokeOnloadCallback() {
-  if (!context->isValid()) return;
-  try {
-    window_->invokeOnloadCallback(context);
-  } catch (JSError &error) {
-    handler_(error);
-  }
-}
-
-void JSBridge::invokeOnPlatformBrightnessChangedCallback() {
-  if (!context->isValid()) return;
-  try {
-    window_->invokeOnPlatformBrightnessChangedCallback(context);
-  } catch (JSError &error) {
-    handler_(error);
-  }
-}
-
 void JSBridge::flushUITask() {
   if (!context->isValid()) return;
   try {

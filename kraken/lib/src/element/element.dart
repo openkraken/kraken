@@ -1192,6 +1192,7 @@ abstract class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
 
+  @override
   void addEvent(String eventName) {
     if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.addEventListener(eventName, this._eventResponder);

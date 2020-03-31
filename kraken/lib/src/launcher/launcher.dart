@@ -144,9 +144,9 @@ void defaultAfterConnected() async {
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
-  // Invoke onload after scripts executed.
   requestAnimationFrame((_) {
-    invokeOnloadCallback();
+    String json = jsonEncode([WINDOW_ID, Event('load')]);
+    emitUIEvent(json);
   });
 }
 

@@ -4,6 +4,7 @@
  */
 
 import 'dart:core';
+import 'dart:developer';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -46,14 +47,17 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
 
 Map<int, dynamic> nodeMap = {};
 
+const int BODY_ID = -1;
+const int WINDOW_ID = -2;
+
 class ElementManagerActionDelegate {
-  final int BODY_ID = -1;
   Element rootElement;
 
   ElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
     _root = rootElement.renderObject;
     nodeMap[BODY_ID] = rootElement;
+    nodeMap[WINDOW_ID] = Window();
   }
 
   RenderBox _root;
@@ -177,7 +181,7 @@ class ElementManagerActionDelegate {
   void addEvent(int targetId, String eventName) {
     assert(nodeMap.containsKey(targetId));
 
-    Element target = nodeMap[targetId];
+    EventTarget target = nodeMap[targetId];
     assert(target != null);
 
     target.addEvent(eventName);

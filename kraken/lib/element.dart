@@ -24,3 +24,4 @@ export 'src/element/tags/video.dart';
 export 'src/element/tags/audio.dart';
 export 'src/element/tags/animation_player.dart';
 export 'src/element/tags/iframe.dart';
+export 'src/element/tags/window.dart';

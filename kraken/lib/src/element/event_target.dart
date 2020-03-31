@@ -9,8 +9,13 @@ import 'package:kraken/element.dart';
 typedef EventHandler = void Function(Event event);
 
 abstract class EventTarget {
+  EventTarget(@required this.nodeId);
+
+  int nodeId;
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
+
+  void addEvent(String eventName) {}
 
   void addEventListener(String eventName, EventHandler eventHandler) {
     if (!eventHandlers.containsKey(eventHandler)) {
@@ -36,13 +41,16 @@ abstract class EventTarget {
           event.currentTarget.getEventHandlers(event.type);
       cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
       if (!event.bubbles || cancelled) break;
-      event.currentTarget = event.currentTarget?.parentNode;
+      if (event.currentTarget is Node) {
+        Node currentTarget = event.currentTarget;
+        event.currentTarget = currentTarget?.parentNode;
+      }
     }
     return cancelled;
   }
 
   bool _dispatchEventToTarget(
-      Node node, List<EventHandler> handlers, Event event) {
+      EventTarget target, List<EventHandler> handlers, Event event) {
     if (handlers != null) {
       for (var handler in handlers) {
         handler(event);

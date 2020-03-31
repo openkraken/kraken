@@ -4,6 +4,8 @@ import { insertAdjacentNode, removeNode } from './UIManager';
 export type NodeList = Array<Node>;
 export enum NodeId {
   BODY = -1,
+  // Window is not inherit node but EventTarget, so we assume window is a node.
+  WINDOW = -2,
 }
 export enum NodeType {
   ELEMENT_NODE = 1,
