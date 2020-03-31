@@ -576,7 +576,7 @@ class RenderFlexLayout extends RenderBox
 
     double crossSize = 0.0;
     double allocatedSize =
-        0.0; // Sum of the sizes of the non-flexible children.
+        0.0; // Sum of the sizes of the children.
     RenderBox child = firstChild;
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
@@ -713,17 +713,19 @@ class RenderFlexLayout extends RenderBox
     final double freeSpace = maxMainSize == 0 ? 0 :
         (canFlex ? maxMainSize : 0.0) - allocatedSize;
     double maxBaselineDistance = 0.0;
-    bool isFlexFlow = freeSpace >= 0 &&  totalFlexGrow > 0;
+    bool isFlexGrow = freeSpace >= 0 &&  totalFlexGrow > 0;
     bool isFlexShrink = freeSpace < 0 && hasFlexShrink;
-    if (isFlexFlow || isFlexShrink ||
+    if (isFlexGrow || isFlexShrink ||
         crossAxisAlignment == CrossAxisAlignment.baseline) {
+      // Reset total children size to zero if need to shrink or grow
+      allocatedSize = 0;
       final double spacePerFlex =
           canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
       child = firstChild;
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
       while (child != null) {
-        if (isFlexFlow || isFlexShrink) {
+        if (isFlexGrow || isFlexShrink) {
           double maxChildExtent;
           double minChildExtent;
 
@@ -821,9 +823,11 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Align items along the main axis.
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max
+    final double idealSize = maxMainSize != 0
         ? maxMainSize
         : allocatedSize;
+
+    // final double idealSize = mainAxisSize;
     double actualSize;
     double actualSizeDelta;
 
