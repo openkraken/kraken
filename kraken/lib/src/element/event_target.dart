@@ -9,7 +9,7 @@ import 'package:kraken/element.dart';
 typedef EventHandler = void Function(Event event);
 
 abstract class EventTarget {
-  EventTarget(@required this.nodeId);
+  EventTarget(this.nodeId);
 
   int nodeId;
   @protected

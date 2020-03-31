@@ -44,7 +44,6 @@ class Event {
     bubbles = false;
   }
 
-  @override
   Map toJson() {
     return {
       'type': type,

@@ -1,7 +1,6 @@
 import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
-import 'package:kraken/kraken.dart';
 import 'package:kraken/element.dart';
 
 import 'from_native.dart';
@@ -47,15 +46,6 @@ final Dart_InvokeOnLoadCallback _invokeOnloadCallback =
 void invokeOnloadCallback() {
   _invokeOnloadCallback();
 }
-
-// Register invokeOnPlatformBrightnessChangedCallback
-typedef Native_InvokeOnPlatformBrightnessChangedCallback = Void Function();
-typedef Dart_InvokeOnPlatformBrightnessChangedCallback = void Function();
-
-final Dart_InvokeOnPlatformBrightnessChangedCallback _invokeOnPlatformBrightnessChangedCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeOnPlatformBrightnessChangedCallback>>(
-        'invokeOnPlatformBrightnessChangedCallback')
-    .asFunction();
 
 void invokeOnPlatformBrightnessChangedCallback() {
   String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
