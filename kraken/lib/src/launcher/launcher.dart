@@ -141,7 +141,7 @@ void _setTargetPlatformForDesktop() {
 
 void defaultAfterConnected() async {
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenBundle.getBundleUrl();
-  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
+  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv() ?? await KrakenBundle.getBundlePath();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenBundle.getZipBundleUrl();
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
