@@ -1089,6 +1089,7 @@ abstract class Element extends Node
     }
   }
 
+  @mustCallSuper
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
@@ -1131,8 +1132,6 @@ abstract class Element extends Node
         return scroll(args);
       case 'scrollBy':
         return scroll(args, isScrollBy: true);
-      default:
-        debugPrint('Unknown method call. name: $name, args: ${args}');
     }
   }
 

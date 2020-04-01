@@ -143,7 +143,6 @@ abstract class WebViewElement extends Element {
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(int nodeId, Map<String, dynamic> props, List<String> events, {
     String tagName = 'WEBVIEW',
-    this.onWebViewCreated,
     this.initialUrl,
     this.javascriptMode = JavascriptMode.unrestricted,
     this.javascriptChannels,
@@ -186,10 +185,18 @@ abstract class WebViewElement extends Element {
     super.setProperty(key, value);
 
     if (key == SRC) {
-      initialUrl = value;
-      renderLayoutBox.removeAll();
-      _buildPlatformRenderBox();
-      addChild(sizedBox);
+      String url = value;
+//      if (_controller.isCompleted) {
+//        // Reload url.
+//        _controller.future.then((WebViewController controller) {
+//          controller.loadUrl(url);
+//        });
+//      } else {
+        initialUrl = url;
+        renderLayoutBox.removeAll();
+        _buildPlatformRenderBox();
+        addChild(sizedBox);
+//      }
     } else if (key == WIDTH || key == HEIGHT) {
       setStyle(key, value);
     }
@@ -214,6 +221,7 @@ abstract class WebViewElement extends Element {
       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
       onWebViewPlatformCreated: _onWebViewPlatformCreated,
       gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
+      onFocus: this.onFocus,
     );
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(Size(width, height)),
@@ -283,7 +291,10 @@ abstract class WebViewElement extends Element {
   }
 
   /// If not null invoked once the web view is created.
-  final WebViewCreatedCallback onWebViewCreated;
+  void onWebViewCreated(WebViewController controller);
+
+  // While webview is focus.
+  void onFocus();
 
   /// Which gestures should be consumed by the web view.
   ///
@@ -425,9 +436,7 @@ abstract class WebViewElement extends Element {
     final WebViewController controller =
         WebViewController._(this, webViewPlatform, _platformCallbacksHandler);
     _controller.complete(controller);
-    if (onWebViewCreated != null) {
-      onWebViewCreated(controller);
-    }
+    onWebViewCreated(controller);
   }
 }
 

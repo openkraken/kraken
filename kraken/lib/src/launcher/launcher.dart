@@ -144,6 +144,7 @@ void defaultAfterConnected() async {
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenBundle.getZipBundleUrl();
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
+  print('content $content $bundleURL $bundlePath $DEFAULT_BUNDLE_PATH');
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
   // Invoke onload after scripts executed.

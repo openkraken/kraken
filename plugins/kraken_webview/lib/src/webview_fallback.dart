@@ -23,7 +23,8 @@ class FallbackWebView with TextStyleMixin implements WebViewPlatform {
   RenderBox buildRenderBox({
     CreationParams creationParams,
     WebViewPlatformCallbacksHandler webViewPlatformCallbacksHandler, onWebViewPlatformCreated,
-    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
+    Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    VoidCallback onFocus,
   }) {
     String description = _getWebViewDescriptionFromCreationParams(creationParams);
     TextStyle textStyle = getTextStyle(StyleDeclaration())

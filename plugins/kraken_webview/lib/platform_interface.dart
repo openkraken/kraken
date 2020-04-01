@@ -356,6 +356,7 @@ abstract class WebViewPlatform {
     @required WebViewPlatformCallbacksHandler webViewPlatformCallbacksHandler,
     WebViewPlatformCreatedCallback onWebViewPlatformCreated,
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    VoidCallback onFocus,
   });
 
   /// Clears all cookies for all [WebView] instances.

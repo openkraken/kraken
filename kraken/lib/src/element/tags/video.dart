@@ -215,7 +215,7 @@ class VideoElement extends Element {
   }
 
   @override
-  dynamic method(String name, List<dynamic> args) {
+  method(String name, List args) {
     if (controller == null) {
       return;
     }
@@ -227,6 +227,8 @@ class VideoElement extends Element {
       case 'pause':
         controller.pause();
         break;
+      default:
+        super.method(name, args);
     }
   }
 
