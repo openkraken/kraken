@@ -1,9 +1,7 @@
-//
-//  BundleManager.swift
-//  kraken_bundle
-//
-//  Created by lzl on 2020/3/27.
-//
+/*
+* Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+* Author: Kraken Team.
+*/
 
 import Cocoa
 import FlutterMacOS
@@ -12,12 +10,14 @@ public class KrakenBundleManager: NSObject {
   private static let instance:KrakenBundleManager = KrakenBundleManager()
   private var bundleUrl:String?
   private var zipBundleUrl:String?
-  private weak var krakenBundlePlugin:KrakenBundlePlugin?
-  private weak var channel:FlutterMethodChannel?
+  private var bundlePath:String?
+  private var krakenBundlePlugin:KrakenBundlePlugin?
+  private var channel:FlutterMethodChannel?
   
   private override init() {
     bundleUrl = nil
     zipBundleUrl = nil
+    bundlePath = nil
   }
   
   public static var shared: KrakenBundleManager {
@@ -29,9 +29,18 @@ public class KrakenBundleManager: NSObject {
    * @param bundleUrl
    * @param zipBundleUrl
    */
-  public func setUp(bundleUrl:String, zipBundleUrl:String) {
-    self.bundleUrl = bundleUrl;
-    self.zipBundleUrl = zipBundleUrl;
+  public func setUp(bundleUrl:String? = nil, zipBundleUrl:String? = nil, bundlePath:String? = nil) {
+    if (bundleUrl != nil) {
+      self.bundleUrl = bundleUrl;
+    }
+    
+    if (zipBundleUrl != nil) {
+     self.zipBundleUrl = zipBundleUrl;
+    }
+    
+    if (bundlePath != nil) {
+      self.bundlePath = bundlePath
+    }
   }
 
   public func getBundleUrl()->String? {
@@ -39,7 +48,11 @@ public class KrakenBundleManager: NSObject {
   }
 
   public func getZipBundleUrl()->String? {
-    return zipBundleUrl;
+    return zipBundleUrl
+  }
+  
+  public func getBundlePath()->String? {
+    return bundlePath
   }
 
   public func reload() {

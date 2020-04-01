@@ -15,6 +15,8 @@ public class KrakenBundlePlugin: NSObject, FlutterPlugin {
       result(KrakenBundleManager.shared.getBundleUrl())
     case "getZipBundleUrl":
       result(KrakenBundleManager.shared.getZipBundleUrl())
+    case "getBundlePath":
+      result(KrakenBundleManager.shared.getBundlePath())
     default:
       result(FlutterMethodNotImplemented)
     }
