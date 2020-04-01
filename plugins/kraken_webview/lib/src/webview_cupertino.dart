@@ -22,6 +22,10 @@ class CupertinoWebView implements WebViewPlatform {
   RenderUiKitView _renderUiKitView;
   int _id;
 
+  void dispose() {
+    _controller?.dispose();
+  }
+
   Future<UiKitViewController> getUiKitViewController(int id,
       CreationParams creationParams) async {
     return PlatformViewsService.initUiKitView(

@@ -28,6 +28,9 @@ abstract class WebViewPlatformCallbacksHandler {
 
   /// Invoked by [WebViewPlatformController] when a page has finished loading.
   void onPageFinished(String url);
+
+  /// Invoked by [WebViewPlatformController] when a page postMessage to kraken.
+  void onPostMessage(String message);
 }
 
 /// Interface for talking to the webview's platform implementation.
@@ -160,6 +163,17 @@ abstract class WebViewPlatformController {
   Future<void> removeJavascriptChannels(Set<String> javascriptChannelNames) {
     throw UnimplementedError(
         "WebView removeJavascriptChannels is not implemented on the current platform");
+  }
+
+  // Setup and teardown jsbridge from WebView to dart.
+  Future<void> setupJavascriptBridge() {
+    throw UnimplementedError(
+        "WebView setupJavascriptBridge is not implemented on the current platform");
+  }
+
+  Future<void> teardownJavascriptBridge() {
+    throw UnimplementedError(
+        "WebView teardownJavascriptBridge is not implemented on the current platform");
   }
 
   /// Returns the title of the currently loaded page.
@@ -358,6 +372,8 @@ abstract class WebViewPlatform {
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
     VoidCallback onFocus,
   });
+
+  void dispose();
 
   /// Clears all cookies for all [WebView] instances.
   ///

@@ -3,7 +3,9 @@
  * Author: Kraken Team.
  */
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:kraken/bridge.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 import 'package:kraken/element.dart';
 
@@ -63,6 +65,12 @@ class IFrameElement extends WebViewElement {
   void onPageFinished(String url) {
     _isFirstLoaded = true;
     dispatchEvent(Event('load'));
+  }
+
+  @override
+  void onPostMessage(String message) {
+    MessageEvent event = MessageEvent(message, origin: properties['url']);
+    dispatchEvent(event);
   }
 
   Future<String> _postMessage(String message) {

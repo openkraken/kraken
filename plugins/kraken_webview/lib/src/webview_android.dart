@@ -21,6 +21,10 @@ class AndroidWebView implements WebViewPlatform {
   AndroidViewController _controller;
   int _id;
 
+  void dispose() {
+    _controller?.dispose();
+  }
+
   @override
   RenderAndroidView buildRenderBox({
     CreationParams creationParams,

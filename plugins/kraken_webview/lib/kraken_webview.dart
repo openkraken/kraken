@@ -19,6 +19,23 @@ import 'src/webview_fallback.dart';
 /// the [WebViewController] for the created web view.
 typedef void WebViewCreatedCallback(WebViewController controller);
 
+class RenderWebViewBoundaryBox extends RenderConstrainedBox {
+  VoidCallback onDetach;
+
+  RenderWebViewBoundaryBox(this.onDetach, {
+    BoxConstraints additionalConstraints,
+    RenderBox child,
+  }) : super(additionalConstraints: additionalConstraints, child: child);
+
+  @override
+  void detach() {
+    super.detach();
+
+    if (onDetach != null) {
+      onDetach();
+    }
+  }
+}
 /// Describes the state of JavaScript support in a given web view.
 enum JavascriptMode {
   /// JavaScript execution is disabled.
@@ -217,10 +234,19 @@ abstract class WebViewElement extends Element {
       // On focus only works in android now.
       onFocus: this.onFocus,
     );
-    sizedBox = RenderConstrainedBox(
+    sizedBox = RenderWebViewBoundaryBox(
+      onDetach,
       additionalConstraints: BoxConstraints.tight(Size(width, height)),
       child: platformRenderBox
     );
+  }
+
+  // Dispose controller.
+  void onDetach() {
+    platform?.dispose();
+    _controller.future.then((WebViewController controller) {
+      controller.teardownJSBridge();
+    });
   }
 
   /// Element attribute width
@@ -287,8 +313,12 @@ abstract class WebViewElement extends Element {
   /// If not null invoked once the web view is created.
   void onWebViewCreated(WebViewController controller);
 
+  // Receive message from webview.
+  void onPostMessage(String message);
+
   // While webview is focus.
   void onFocus();
+
 
   /// Which gestures should be consumed by the web view.
   ///
@@ -430,6 +460,7 @@ abstract class WebViewElement extends Element {
     final WebViewController controller =
         WebViewController._(this, webViewPlatform, _platformCallbacksHandler);
     _controller.complete(controller);
+    controller.setupJSBridge();
     onWebViewCreated(controller);
   }
 }
@@ -540,6 +571,13 @@ class _PlatformCallbacksHandler implements WebViewPlatformCallbacksHandler {
     }
   }
 
+  @override
+  void onPostMessage(String message) {
+    if (_element.onPostMessage != null) {
+      _element.onPostMessage(message);
+    }
+  }
+
   void _updateJavascriptChannelsFromSet(Set<JavascriptChannel> channels) {
     _javascriptChannels.clear();
     if (channels == null) {
@@ -633,6 +671,14 @@ class WebViewController {
   /// Reloads the current URL.
   Future<void> reload() {
     return _webViewPlatformController.reload();
+  }
+
+  Future<void> setupJSBridge() {
+    return _webViewPlatformController.setupJavascriptBridge();
+  }
+
+  Future<void> teardownJSBridge() {
+    return _webViewPlatformController.teardownJavascriptBridge();
   }
 
   /// Clears all caches used by the [WebView].
