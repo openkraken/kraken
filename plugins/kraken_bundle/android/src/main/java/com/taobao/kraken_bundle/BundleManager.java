@@ -36,7 +36,7 @@ public class BundleManager {
   }
 
   public String getBundleUrl() {
-    return null;
+    return "https://dev.g.alicdn.com/kraken/kraken-demos/long-list/build/kraken/index.js";
   }
 
   public String getZipBundleUrl() {
