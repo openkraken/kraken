@@ -25,12 +25,11 @@ class KrakenScrollable
   ScrollListener scrollListener;
 
   KrakenScrollable({
-    axisDirection = AxisDirection.down,
-    dragStartBehavior = DragStartBehavior.start,
+    @required AxisDirection axisDirection = AxisDirection.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     this.scrollListener,
   }) {
     _axisDirection = axisDirection;
-    dragStartBehavior = dragStartBehavior;
     position = ScrollPositionWithSingleContext(
         physics: _physics, context: this, oldPosition: null);
   }

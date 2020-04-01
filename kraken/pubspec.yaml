@@ -1,6 +1,6 @@
 name: kraken
 description: Kraken Dart Framework
-version: 0.3.0+2
+version: 0.3.0+3
 homepage: http://rax.alibaba-inc.com/kraken
 
 environment:
@@ -20,14 +20,21 @@ dependencies:
   connectivity: ^0.4.8
   shared_preferences: ^0.5.6
   device_info: ^0.4.1 # Only support iOS and Android.
-  kraken_video_player: ^0.1.0
-  kraken_camera: ^0.1.0
-  kraken_webview: ^0.1.0
-  kraken_audioplayers: ^0.1.0
-  kraken_geolocation: ^0.1.0
+  kraken_video_player:
+    path: ../plugins/kraken_video_player
+  kraken_camera:
+    path: ../plugins/kraken_camera
+  kraken_webview:
+    path: ../plugins/kraken_webview
+  kraken_audioplayers:
+    path: ../plugins/kraken_audioplayers
+  kraken_geolocation:
+    path: ../plugins/kraken_geolocation
   path_provider: ^1.1.0
   dio: ^2.0.2
   vector_math: ^ 2.0.8
+  kraken_bundle:
+    path: ../plugins/kraken_bundle
 
 dev_dependencies:
   flutter_test:

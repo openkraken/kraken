@@ -27,21 +27,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-# Overrides local path for kraken deps.
-dependency_overrides:
-  kraken:
-    path: ../kraken
-  kraken_audioplayers:
-    path: ../plugins/kraken_audioplayers
-  kraken_camera:
-    path: ../plugins/kraken_camera
-  kraken_geolocation:
-    path: ../plugins/kraken_geolocation
-  kraken_video_player:
-    path: ../plugins/kraken_video_player
-  kraken_webview:
-    path: ../plugins/kraken_webview
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
