@@ -60,7 +60,6 @@ class CupertinoWebView implements WebViewPlatform {
           viewController: _controller,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
           gestureRecognizers: gestureRecognizers,
-//          onWebViewPlatformCreated: () {},
         );
       });
 

@@ -186,17 +186,10 @@ abstract class WebViewElement extends Element {
 
     if (key == SRC) {
       String url = value;
-//      if (_controller.isCompleted) {
-//        // Reload url.
-//        _controller.future.then((WebViewController controller) {
-//          controller.loadUrl(url);
-//        });
-//      } else {
-        initialUrl = url;
-        renderLayoutBox.removeAll();
-        _buildPlatformRenderBox();
-        addChild(sizedBox);
-//      }
+      initialUrl = url;
+      renderLayoutBox.removeAll();
+      _buildPlatformRenderBox();
+      addChild(sizedBox);
     } else if (key == WIDTH || key == HEIGHT) {
       setStyle(key, value);
     }
@@ -221,6 +214,7 @@ abstract class WebViewElement extends Element {
       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
       onWebViewPlatformCreated: _onWebViewPlatformCreated,
       gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
+      // On focus only works in android now.
       onFocus: this.onFocus,
     );
     sizedBox = RenderConstrainedBox(
