@@ -46,6 +46,7 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     displayListenerProxy.onPreWebViewInitialization(displayManager);
     webView = new InputAwareWebView(context, containerView);
+
     displayListenerProxy.onPostWebViewInitialization(displayManager);
 
     platformThreadHandler = new Handler(context.getMainLooper());
@@ -235,7 +236,6 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
 
   private void setupJavascriptBridge(Result result) {
     webView.addJavascriptInterface(this, "kraken");
-    webView.setWebContentsDebuggingEnabled(true);
     result.success(null);
   }
 
