@@ -3,9 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:kraken/bridge.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 import 'package:kraken/element.dart';
 
