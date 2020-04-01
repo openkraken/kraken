@@ -56,10 +56,12 @@ class CupertinoWebView implements WebViewPlatform {
     getUiKitViewController(_id, creationParams)
       .then((UiKitViewController controller) {
         _controller = controller;
+        MethodChannelWebViewPlatform methodChannelWebViewPlatform = MethodChannelWebViewPlatform(
+              _id, webViewPlatformCallbacksHandler);
         if (onWebViewPlatformCreated != null) {
-          onWebViewPlatformCreated(MethodChannelWebViewPlatform(
-              _id, webViewPlatformCallbacksHandler));
+          onWebViewPlatformCreated(methodChannelWebViewPlatform);
         }
+        _polyfillWebView(methodChannelWebViewPlatform);
         _expandHolder.child = RenderUiKitView(
           viewController: _controller,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -70,6 +72,19 @@ class CupertinoWebView implements WebViewPlatform {
     return _expandHolder;
   }
 
+  void _polyfillWebView(MethodChannelWebViewPlatform methodChannelWebViewPlatform) {
+    String invoker = '''
+      // Polyfill kraken env for iOS.
+      ;(function (){
+        var kraken = window.kraken = window.kraken || {};
+        kraken.postMessage = function(message) {
+          return webkit.messageHandlers.kraken.postMessage(message);
+        };
+      });
+    ''';
+    methodChannelWebViewPlatform.evaluateJavascript(invoker);
+  }
+  
   @override
   Future<bool> clearCookies() => MethodChannelWebViewPlatform.clearCookies();
 }

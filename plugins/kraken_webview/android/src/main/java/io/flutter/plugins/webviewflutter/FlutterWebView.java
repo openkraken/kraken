@@ -9,9 +9,11 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.webkit.WebStorage;
 import android.webkit.WebViewClient;
+import android.webkit.JavascriptInterface;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -21,6 +23,7 @@ import io.flutter.plugin.platform.PlatformView;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class FlutterWebView implements PlatformView, MethodCallHandler {
   private static final String JS_CHANNEL_NAMES_FIELD = "javascriptChannelNames";
@@ -152,6 +155,12 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
       case "removeJavascriptChannels":
         removeJavaScriptChannels(methodCall, result);
         break;
+      case "setupJavascriptBridge":
+        setupJavascriptBridge(result);
+        break;
+      case "teardownJavascriptBridge":
+        teardownJavascriptBridge(result);
+        break;
       case "clearCache":
         clearCache(result);
         break;
@@ -204,6 +213,35 @@ public class FlutterWebView implements PlatformView, MethodCallHandler {
 
   private void currentUrl(Result result) {
     result.success(webView.getUrl());
+  }
+
+  @JavascriptInterface
+  public void postMessage(final String message) {
+    Runnable postMessageRunnable =
+        new Runnable() {
+          @Override
+          public void run() {
+            HashMap<String, String> arguments = new HashMap<>();
+            arguments.put("message", message);
+            methodChannel.invokeMethod("onPostMessage", arguments);
+          }
+        };
+    if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+      postMessageRunnable.run();
+    } else {
+      platformThreadHandler.post(postMessageRunnable);
+    }
+  }
+
+  private void setupJavascriptBridge(Result result) {
+    webView.addJavascriptInterface(this, "kraken");
+    webView.setWebContentsDebuggingEnabled(true);
+    result.success(null);
+  }
+
+  private void teardownJavascriptBridge(Result result) {
+    webView.removeJavascriptInterface("kraken");
+    result.success(null);
   }
 
   @SuppressWarnings("unchecked")
