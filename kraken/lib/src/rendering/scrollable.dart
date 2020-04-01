@@ -25,7 +25,7 @@ class KrakenScrollable
   ScrollListener scrollListener;
 
   KrakenScrollable({
-    @required AxisDirection axisDirection = AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrollListener,
   }) {
