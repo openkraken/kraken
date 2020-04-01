@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { krakenWindow, KrakenLocation } from './kraken';
+import { krakenWindow, KrakenLocation } from './types';
 
 function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   events.forEach((event: string) => {

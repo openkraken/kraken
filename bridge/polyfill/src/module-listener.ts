@@ -1,7 +1,7 @@
-import { krakenModuleListener } from './kraken';
+import { krakenModuleListener } from './types';
 import { positionWatcherMap, onConnectivityChangeListener } from './navigator';
 import { dispatchMQTT } from './mqtt';
-import {dispatchMessageChannel} from "./message_channel";
+import {dispatchMethodChannel} from "./method_channel";
 
 krakenModuleListener(message => {
   let parsed = JSON.parse(message);
@@ -24,9 +24,9 @@ krakenModuleListener(message => {
     const clientId = parsed[1];
     const event = parsed[2];
     dispatchMQTT(clientId, event);
-  } else if (type === 'MessageChannel') {
-    const clientId = parsed[1];
-    const event = parsed[2];
-    dispatchMessageChannel(clientId, event);
+  } else if (type === 'PlatformChannel') {
+    const method = parsed[1];
+    const args = parsed[2];
+    dispatchMethodChannel(method, args);
   }
 });
