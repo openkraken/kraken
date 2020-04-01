@@ -8,8 +8,8 @@
 import Cocoa
 import FlutterMacOS
 
-public class BundleManager: NSObject {
-  private static let instance:BundleManager = BundleManager()
+public class KrakenBundleManager: NSObject {
+  private static let instance:KrakenBundleManager = KrakenBundleManager()
   private var bundleUrl:String?
   private var zipBundleUrl:String?
   private weak var krakenBundlePlugin:KrakenBundlePlugin?
@@ -20,7 +20,7 @@ public class BundleManager: NSObject {
     zipBundleUrl = nil
   }
   
-  public static var shared: BundleManager {
+  public static var shared: KrakenBundleManager {
       return self.instance
   }
   /**
