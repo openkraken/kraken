@@ -18,7 +18,7 @@ enum QoS {
 
 const mqttClientMap = {};
 
-export function dispatchEvent (clientId: string, event: object) {
+export function dispatchMQTT (clientId: string, event: object) {
   let client = mqttClientMap[clientId];
   if (client) {
     client.dispatchEvent(event); 

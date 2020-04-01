@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/src/module/message_channel.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -218,6 +220,17 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       List positionArgs = args[2];
       int id = positionArgs[0];
       Geolocation.clearWatch(id);
+    }
+  } else if (module == 'PlatformChannel') {
+    String action = args[1];
+    print(args);
+
+    if (action == 'init') {
+      return KrakenMessageChannel.init(args[2]);
+    } else if (action == 'method') {
+      KrakenMessageChannel.invokeMethod(args[2], args[3], args[4]).then((String result) {
+        callback(Utf8.toUtf8(result), context);
+      });
     }
   }
 
