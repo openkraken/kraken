@@ -32,7 +32,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.kraken_method_channel
+        package: com.taobao.kraken_method_channel
         pluginClass: KrakenMethodChannelPlugin
       ios:
         pluginClass: KrakenMethodChannelPlugin

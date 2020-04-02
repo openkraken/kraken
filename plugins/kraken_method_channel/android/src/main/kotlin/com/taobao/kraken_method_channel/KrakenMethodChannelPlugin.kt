@@ -1,6 +1,7 @@
 package com.example.kraken_method_channel
 
 import androidx.annotation.NonNull;
+import com.taobao.kraken_method_channel.KrakenMethodChannel
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -18,6 +19,7 @@ public class KrakenMethodChannelPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "kraken_method_channel")
+    KrakenMethodChannel.getInstance().onAttach(this, channel);
     channel.setMethodCallHandler(this);
   }
 
@@ -39,14 +41,11 @@ public class KrakenMethodChannelPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
-    }
+    KrakenMethodChannel.getInstance().handleMessageCall(call, result);
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
+    channel.setMethodCallHandler(null);
+    KrakenMethodChannel.getInstance().onDetach();
   }
 }
