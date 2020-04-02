@@ -16,12 +16,6 @@ DerivedData/
 
 .generated/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
 *.pbxuser
 *.mode1v3
 *.mode2v3
@@ -42,11 +36,10 @@ Icon?
 .tags*
 
 build/
+.android/
 .ios/
 .flutter-plugins
 .flutter-plugins-dependencies
 
-pubspec.lock
-assets/*
-!assets/.gitkeep
-.android/targets
+# Symbolication related
+app.*.symbols

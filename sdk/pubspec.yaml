@@ -1,6 +1,5 @@
-name: sdk_launcher
-description: SDK entry of kraken.
-
+name: sdk
+description: Kraken embed SDK
 version: 1.0.0+1
 
 environment:
@@ -9,17 +8,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   kraken:
-    path: ../../kraken
+    path: ../kraken
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
 flutter:
-  assets:
-    - assets/
   module:
     androidX: true
-    androidPackage: com.taobao.kraken.sdk_launcher
+    androidPackage: com.taobao.kraken
+    iosBundleIdentifier: com.taobao.kraken
