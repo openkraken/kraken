@@ -483,9 +483,9 @@ class RenderFlexLayout extends RenderBox
   }
 
   double _getBaseConstraints(RenderObject child) {
-    double minConstraints;
+    // set default value
+    double minConstraints = 0;
     if (child is RenderTextBox) {
-      minConstraints = 0;
       return minConstraints;
     } else if (child is RenderElementBoundary) {
       String flexBasis = _getFlexBasis(child);
