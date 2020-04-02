@@ -10,8 +10,8 @@ class KrakenMethodChannel {
     _channel.setMethodCallHandler(handler);
   }
 
-  static Future<String> invokeMethod(String method, dynamic args) async {
-    String result = await _channel.invokeMethod<String>(method, args);
+  static Future<dynamic> invokeMethod(String method, dynamic args) async {
+    dynamic result = await _channel.invokeMethod<dynamic>(method, args);
     return result;
   }
 }

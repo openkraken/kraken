@@ -31,7 +31,9 @@ public class KrakenMethodChannel: NSObject {
   
   public func invokeMethod(method: String, arguments: Any?) {
     if (self.krakenMethodChannelPlugin != nil) {
-      self.channel?.invokeMethod(method, arguments: ["args": arguments, "method": method])
+      DispatchQueue.main.async {
+        self.channel?.invokeMethod(method, arguments: arguments)
+      }
     }
   }
   
