@@ -87,11 +87,13 @@ class AnimationPlayerElement extends Element {
   }
 
   @override
-  method(String key, List args) {
-    switch (key) {
+  method(String name, List args) {
+    switch (name) {
       case 'play':
         _play(args);
         break;
+      default:
+        super.method(name, args);
     }
   }
 

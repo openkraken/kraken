@@ -37,25 +37,21 @@ class AudioElement extends Element {
   }
 
   @override
-  dynamic method(String name, List args) {
-    if (audioPlayer == null) {
-      return;
-    }
-
+  method(String name, List args) {
     switch (name) {
       case 'play':
-        audioPlayer.play(audioSrc);
+        audioPlayer?.play(audioSrc);
         break;
       case 'pause':
-        audioPlayer.pause();
+        audioPlayer?.pause();
         break;
       case 'fastSeek':
         int duration = args[0] * 1000;
-        audioPlayer.seek(Duration(milliseconds: duration));
+        audioPlayer?.seek(Duration(milliseconds: duration));
         break;
+      default:
+        super.method(name, args);
     }
-
-    return 'foo';
   }
 
   @override

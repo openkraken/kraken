@@ -35,7 +35,11 @@ export class Document extends Node {
 
 export const document = new Document();
 
-export function getNodeByNodeId(nodeId: number) : Node|null {
+export function getNodeByNodeId(nodeId: number) : Node|null|Window {
+  if (nodeId === NodeId.WINDOW) {
+    return window;
+  }
+
   let _node = null;
   traverseNode(document.body, (node: Node) : any => {
     if (node.nodeId === nodeId) {

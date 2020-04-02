@@ -1089,6 +1089,7 @@ abstract class Element extends Node
     }
   }
 
+  @mustCallSuper
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
@@ -1131,8 +1132,6 @@ abstract class Element extends Node
         return scroll(args);
       case 'scrollBy':
         return scroll(args, isScrollBy: true);
-      default:
-        debugPrint('Unknown method call. name: $name, args: ${args}');
     }
   }
 
@@ -1192,6 +1191,7 @@ abstract class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
 
+  @override
   void addEvent(String eventName) {
     if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.addEventListener(eventName, this._eventResponder);

@@ -120,7 +120,6 @@ mixin NodeLifeCycle on Node {
 }
 
 abstract class Node extends EventTarget {
-  int nodeId;
   List<Node> childNodes = [];
   Node parentNode;
   NodeType nodeType;
@@ -137,7 +136,7 @@ abstract class Node extends EventTarget {
     return _children;
   }
 
-  Node(this.nodeType, this.nodeId, this.nodeName) {
+  Node(this.nodeType, int nodeId, this.nodeName): super(nodeId) {
     assert(nodeType != null);
     assert(nodeId != null);
     nodeName = nodeName ?? '';

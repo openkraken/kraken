@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:convert';
+
 import 'package:kraken/element.dart';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
@@ -9,8 +11,8 @@ class Event {
   String type;
   bool bubbles;
   bool cancelable;
-  Node currentTarget;
-  Node target;
+  EventTarget currentTarget;
+  EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
   dynamic detail;
@@ -56,6 +58,10 @@ class Event {
       'detail': detail,
     };
   }
+
+  String toString() {
+    return '$runtimeType(${jsonEncode(toJson())})';
+  }
 }
 
 class EventInit {
@@ -91,10 +97,29 @@ class DisappearEvent extends Event {
   DisappearEvent() : super('disappear');
 }
 
+/// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
+class MessageEvent extends Event {
+  /// The data sent by the message emitter.
+  String data;
+
+  /// A USVString representing the origin of the message emitter.
+  String origin;
+
+  MessageEvent(this.data, { this.origin }) : super('message');
+
+  @override
+  Map toJson() {
+    Map json = super.toJson();
+    json['data'] = data;
+    json['origin'] = origin;
+    return json;
+  }
+}
+
 class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio): super('intersectionchange');
   double intersectionRatio;
-  
+
   Map toJson() {
     Map eventMap = super.toJson();
     eventMap['intersectionRatio'] = intersectionRatio;
