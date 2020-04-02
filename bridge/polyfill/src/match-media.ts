@@ -1,5 +1,5 @@
 
-import { krakenWindow } from './kraken';
+import { krakenWindow } from './types';
 // https://github.com/ericf/css-mediaquery
 const RE_MEDIA_QUERY = /^(?:(only|not)?\s*([_a-z][_a-z0-9-]*)|(\([^\)]+\)))(?:\s*and\s*(.*))?$/i;
 const RE_MQ_EXPRESSION = /^\(\s*([_a-z-][_a-z0-9-]*)\s*(?:\:\s*([^\)]+))?\s*\)$/;

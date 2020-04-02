@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken_method_channel/kraken_method_channel.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -219,6 +221,23 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       int id = positionArgs[0];
       Geolocation.clearWatch(id);
     }
+  } else if (module == 'PlatformChannel') {
+    KrakenMethodChannel.setMessageCallback((MethodCall call) async {
+      emitModuleEvent(jsonEncode(['PlatformChannel', call.method, call.arguments]));
+    });
+
+    KrakenMethodChannel.invokeMethod(args[2], args[3]).then((dynamic result) {
+      String ret;
+      if (result is String) {
+        ret = result;
+      } else {
+        ret = jsonEncode(result);
+      }
+
+      callback(Utf8.toUtf8(ret), context);
+    }).catchError((e, stack) {
+      callback(Utf8.toUtf8('Dart Error: $e\n$stack'), context);
+    });
   }
 
   return result;

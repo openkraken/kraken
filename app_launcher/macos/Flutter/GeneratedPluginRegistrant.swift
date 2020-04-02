@@ -9,6 +9,7 @@ import connectivity_macos
 import kraken_audioplayers
 import kraken_bundle
 import kraken_geolocation
+import kraken_method_channel
 import kraken_video_player
 import path_provider_macos
 import shared_preferences_macos
@@ -18,6 +19,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AudioplayersPlugin.register(with: registry.registrar(forPlugin: "AudioplayersPlugin"))
   KrakenBundlePlugin.register(with: registry.registrar(forPlugin: "KrakenBundlePlugin"))
   LocationPlugin.register(with: registry.registrar(forPlugin: "LocationPlugin"))
+  KrakenMethodChannelPlugin.register(with: registry.registrar(forPlugin: "KrakenMethodChannelPlugin"))
   FLTVideoPlayerPlugin.register(with: registry.registrar(forPlugin: "FLTVideoPlayerPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
