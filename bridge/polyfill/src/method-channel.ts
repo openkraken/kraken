@@ -1,34 +1,24 @@
-import {EventTarget} from 'event-target-shim';
 import {krakenInvokeModule} from "./types";
 
-export async function dispatchMethodChannel(method: string, args: any): Promise<string|undefined> {
+export function dispatchMethodChannel(method: string, args: any) {
   if (methodChannel) {
-    return await methodChannel._triggerHandler(method, args);
+    methodChannel._triggerHandler(method, args);
   }
-  return;
 }
 
-type MethodHandler = (method: string, args: any[]) => Promise<string>;
-export class MethodChannel extends EventTarget {
+type MethodHandler = (method: string, args: any[]) => void;
+export class MethodChannel {
   private _handler: MethodHandler = async (method: string, args: any) => '';
-  constructor() {
-    super();
-  }
 
-  public async _triggerHandler(method: string, args: any) {
-    try {
-      return await this._handler(method, args);
-    } catch (e) {
-      console.error(e);
-      return undefined;
-    }
+  public _triggerHandler(method: string, args: any) {
+    this._handler(method, args);
   }
 
   setMethodHandler(handler: MethodHandler) {
     this._handler = handler;
   }
 
-  invokeMethod(method: string, ...args: any[]): Promise<String> {
+  invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
       krakenInvokeModule(JSON.stringify([
         'PlatformChannel',
