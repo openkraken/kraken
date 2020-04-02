@@ -36,6 +36,8 @@ Icon?
 .tags*
 
 build/
+.symlinks
+Pods/
 .flutter-plugins
 .flutter-plugins-dependencies
 
