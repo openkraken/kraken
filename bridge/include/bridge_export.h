@@ -50,10 +50,6 @@ void invokeEventListener(int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 KRAKEN_EXPORT
-void invokeOnloadCallback();
-KRAKEN_EXPORT
-void invokeOnPlatformBrightnessChangedCallback();
-KRAKEN_EXPORT
 void flushUITask();
 
 KRAKEN_EXPORT

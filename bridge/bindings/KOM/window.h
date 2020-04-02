@@ -20,8 +20,6 @@ public:
   };
 
   ~JSWindow() {
-    _onLoadCallback = nullptr;
-    _onPlatformBrightnessChanged = nullptr;
     location_ = nullptr;
   };
 
@@ -32,16 +30,10 @@ public:
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
-  void invokeOnloadCallback(std::unique_ptr<JSContext> &context);
-  void invokeOnPlatformBrightnessChangedCallback(std::unique_ptr<JSContext> &context);
-
 private:
   std::shared_ptr<JSWindow> sharedSelf() {
     return shared_from_this();
   }
-  Value _onLoadCallback;
-  Value _onPlatformBrightnessChanged;
-  int _devicePixelRatio = 1;
   std::shared_ptr<kraken::binding::JSLocation> location_;
 };
 } // namespace binding

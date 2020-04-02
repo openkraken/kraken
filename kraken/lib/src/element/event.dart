@@ -11,8 +11,8 @@ class Event {
   String type;
   bool bubbles;
   bool cancelable;
-  Node currentTarget;
-  Node target;
+  EventTarget currentTarget;
+  EventTarget target;
   num timeStamp;
   bool defaultPrevented = false;
   dynamic detail;
