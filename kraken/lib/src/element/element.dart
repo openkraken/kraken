@@ -868,6 +868,10 @@ abstract class Element extends Node
     style.addStyleChangeListener('visibility', _styleOpacityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionTimingFunction', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDelay', _styleTransitionChangedListener);
   }
 
   void _styleDisplayChangedListener(String property, original, present) {
@@ -948,7 +952,7 @@ abstract class Element extends Node
   }
 
   void _styleTransitionChangedListener(String property, original, present) {
-    if (present != null) initTransition(style);
+    if (present != null) initTransition(style, property);
   }
 
   void _styleOverflowChangedListener(String property, original, present) {

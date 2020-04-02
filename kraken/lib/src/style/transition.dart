@@ -5,10 +5,8 @@ import 'package:kraken/style.dart';
 mixin TransitionStyleMixin {
   Map<String, Transition> transitionMap;
 
-  void initTransition(StyleDeclaration style) {
-    if (style.contains('transition')) {
-      transitionMap = Transition.parseTransitions(style);
-    }
+  void initTransition(StyleDeclaration style, String property) {
+    transitionMap = Transition.parseTransitions(style, property);
   }
 }
 
@@ -63,10 +61,30 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(StyleDeclaration style) {
+  static Map<String, Transition> parseTransitions(StyleDeclaration style, String property) {
+    String transition = style['transition'] ?? 'all 0s ease 0s';
     List<String> list = style['transition'].split(',');
-    Map<String, Transition> map = {};
+    String transitionProperty = style['transitionProperty'] ?? 'all';
+    String transitionDuration = style['transitionDuration'] ?? '0s';
+    String transitionTimingFunction = style['transitionTimingFunction'] ?? 'ease';
+    String transitionDelay = style['transitionDelay'] ?? '0s';
 
+    if (property == 'transitionProperty' ||
+      property == 'transitionDuration' ||
+      property == 'transitionTimingFunction' ||
+      property == 'transitionDelay'
+    ) {
+      List<String> properties = transitionProperty.split(',');
+      List<String> newList = [];
+      for (String prop in properties) {
+        newList.add(
+          prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay
+        );
+      }
+      list = newList;
+    }
+
+    Map<String, Transition> map = {};
     for (String transition in list) {
       parseTransition(transition, map);
     }
