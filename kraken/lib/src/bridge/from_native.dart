@@ -226,8 +226,15 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       emitModuleEvent(jsonEncode(['PlatformChannel', call.method, call.arguments]));
     });
 
-    KrakenMethodChannel.invokeMethod(args[2], args[3]).then((String result) {
-      callback(Utf8.toUtf8(result), context);
+    KrakenMethodChannel.invokeMethod(args[2], args[3]).then((dynamic result) {
+      String ret;
+      if (result is String) {
+        ret = result;
+      } else {
+        ret = jsonEncode(result);
+      }
+
+      callback(Utf8.toUtf8(ret), context);
     }).catchError((e, stack) {
       callback(Utf8.toUtf8('Dart Error: $e\n$stack'), context);
     });

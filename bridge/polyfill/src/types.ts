@@ -72,7 +72,7 @@ export const krakenUIListener = __kraken_ui_listener__;
 declare const __kraken_invoke_module__: (message: string, fn?: (message: string) => void) => string;
 export const krakenInvokeModule = __kraken_invoke_module__;
 
-declare const __kraken_module_listener__: (fn: (message: string) => void) => void;
+declare const __kraken_module_listener__: (fn: (message: string, done: (message?: string) => void) => void) => void;
 export const krakenModuleListener = __kraken_module_listener__;
 
 declare const __kraken_request_batch_update__: (fn: () => void) => void;

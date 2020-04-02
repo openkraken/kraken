@@ -1,5 +1,5 @@
 import {privateKraken} from './types';
-import {methodChannel} from './method_channel';
+import {methodChannel} from './method-channel';
 
 class Kraken {
   public methodChannel = methodChannel;
