@@ -39,6 +39,7 @@ dependencies:
     path: ../plugins/kraken_method_channel
 
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
