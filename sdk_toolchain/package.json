@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "scripts": {
+    "build:android": "cd sdk && cd .android && ./gradlew assembleRelease",
+    "upload:android": "cd sdk && cd .android && ./gradlew assembleRelease uploadArchives"
+  }
+}
