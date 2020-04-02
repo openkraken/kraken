@@ -176,7 +176,7 @@ packages:
       path: "../kraken"
       relative: true
     source: path
-    version: "0.3.0+3"
+    version: "0.3.1+0"
   kraken_audioplayers:
     dependency: transitive
     description:
@@ -205,6 +205,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  kraken_method_channel:
+    dependency: transitive
+    description:
+      path: "../plugins/kraken_method_channel"
+      relative: true
+    source: path
+    version: "0.0.1"
   kraken_video_player:
     dependency: transitive
     description:

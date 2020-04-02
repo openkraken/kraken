@@ -19,7 +19,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   kraken:
     path: ../kraken
 

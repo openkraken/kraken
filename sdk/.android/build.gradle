@@ -1,3 +1,5 @@
+// Generated file. Do not edit.
+
 buildscript {
     repositories {
         google()
@@ -9,61 +11,12 @@ buildscript {
     }
 }
 
-ext {
-    moduleVersion = "0.0.4-SNAPSHOT"
-}
-
 allprojects {
     repositories {
         google()
         jcenter()
     }
 }
-
-subprojects {
-    afterEvaluate {project ->
-        project.apply plugin: 'maven'
-
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    repository(url: "http://mvnrepo.alibaba-inc.com/nexus/content/repositories/snapshots") {
-                        authentication(userName: "snapshotsAdmin", password: "123456")
-                        pom.groupId = project.group
-                        pom.artifactId = project.name
-                        pom.version = rootProject.ext.moduleVersion
-                    }
-                    pom.whenConfigured { pom ->
-                        pom.dependencies.findAll { dep ->
-                            dep.version == null || dep.version == "unspecified"
-                        }.collect { dep ->
-                            println "ignore depend:" + dep.artifactId
-                            pom.dependencies.remove(dep)
-                        }
-                        pom.dependencies.forEach { dep ->
-                            rootProject.subprojects.forEach { pro ->
-                                if (pro.name == dep.artifactId) {
-                                    dep.version = rootProject.ext.moduleVersion
-                                }
-                            }
-                            println dep.scope + " " + dep.groupId + ":" + dep.artifactId + ":" + dep.version
-                        }
-                    }
-                }
-            }
-        }
-        if (project.hasProperty("android")) {
-            android {
-                buildTypes {
-                    release {
-                    }
-                }
-            }
-        }
-    }
-
-}
-
 
 task clean(type: Delete) {
     delete rootProject.buildDir

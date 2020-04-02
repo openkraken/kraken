@@ -11,15 +11,12 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.taobao.kraken.sdk_launcher.host"
-        minSdkVersion 21
+        applicationId "com.taobao.kraken.host"
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters "armeabi-v7a"
-        }
     }
 
     buildTypes {
@@ -34,6 +31,7 @@ android {
     }
 
 }
+buildDir = new File(rootProject.projectDir, "../build/host")
 dependencies {
     implementation project(':flutter')
     implementation fileTree(dir: 'libs', include: ['*.jar'])

@@ -1,5 +1,5 @@
-name: sdk
-description: Kraken embed SDK
+name: kraken_sdk
+description: Kraken SDK
 version: 1.0.0+1
 
 environment:
