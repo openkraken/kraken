@@ -1,0 +1,25 @@
+name: sdk_launcher
+description: SDK entry of kraken.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  kraken:
+    path: ../../kraken
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/
+  module:
+    androidX: true
+    androidPackage: com.taobao.kraken.sdk_launcher
