@@ -1,6 +1,7 @@
 import { AudioElement } from './elements/audio';
 import { VideoElement } from './elements/video';
 import { CanvasElement } from './elements/canvas';
+import { IframeElement } from './elements/iframe';
 import { AnimationPlayerElement } from './elements/animation-player';
 
 const ElementRegistryMap = {};
@@ -20,4 +21,5 @@ export const ElementRegistry = {
 ElementRegistry.define('audio', AudioElement);
 ElementRegistry.define('video', VideoElement);
 ElementRegistry.define('canvas', CanvasElement);
+ElementRegistry.define('iframe', IframeElement);
 ElementRegistry.define('animation-player', AnimationPlayerElement);

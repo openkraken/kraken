@@ -2,7 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:kraken_webview/kraken_webview.dart' show WebViewElement;
+import 'dart:async';
+import 'package:kraken_webview/kraken_webview.dart';
 import 'package:kraken/element.dart';
 
 const String IFRAME = 'IFRAME';
@@ -37,6 +38,18 @@ class IFrameElement extends WebViewElement {
   IFrameElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(nodeId, props, events, tagName: IFRAME);
 
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
+
+  @override
+  void onWebViewCreated(WebViewController controller) {
+    _controller.complete(controller);
+  }
+
+  @override
+  void onFocus() {
+    dispatchEvent(Event('focus'));
+  }
+
   bool _isFirstLoaded;
   @override
   void onPageStarted(String url) {
@@ -49,5 +62,37 @@ class IFrameElement extends WebViewElement {
   void onPageFinished(String url) {
     _isFirstLoaded = true;
     dispatchEvent(Event('load'));
+  }
+
+  @override
+  void onPostMessage(String message) {
+    MessageEvent event = MessageEvent(message, origin: properties['url']);
+    dispatchEvent(event);
+  }
+
+  Future<String> _postMessage(String message) {
+    String escapedMessage = message?.replaceAll(RegExp('\"', multiLine: true), '\\"');
+    String invoker = '''
+      window.dispatchEvent(Object.assign(new CustomEvent('message'), {
+        data: "${escapedMessage}",
+        origin: 'kraken',
+      }));
+    '''.trim();
+    // Wait until controller ready.
+    return _controller.future.then((WebViewController controller) {
+      return controller.evaluateJavascript(invoker);
+    });
+  }
+
+  @override
+  method(String name, List args) async {
+    switch (name) {
+      case 'postMessage':
+        var firstArg = args[0];
+        String message = firstArg?.toString();
+        return await _postMessage(message);
+      default:
+        super.method(name, args);
+    }
   }
 }

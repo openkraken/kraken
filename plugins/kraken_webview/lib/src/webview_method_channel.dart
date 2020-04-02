@@ -43,6 +43,9 @@ class MethodChannelWebViewPlatform implements WebViewPlatformController {
       case 'onPageStarted':
         _platformCallbacksHandler.onPageStarted(call.arguments['url']);
         return null;
+      case 'onPostMessage':
+        _platformCallbacksHandler.onPostMessage(call.arguments['message']);
+        return null;
     }
     throw MissingPluginException(
         '${call.method} was invoked but has no handler');
@@ -106,6 +109,16 @@ class MethodChannelWebViewPlatform implements WebViewPlatformController {
   Future<void> removeJavascriptChannels(Set<String> javascriptChannelNames) {
     return _channel.invokeMethod<void>(
         'removeJavascriptChannels', javascriptChannelNames.toList());
+  }
+
+  @override
+  Future<void> setupJavascriptBridge() {
+    return _channel.invokeMethod<void>('setupJavascriptBridge');
+  }
+
+  @override
+  Future<void> teardownJavascriptBridge() {
+    return _channel.invokeMethod<void>('teardownJavascriptBridge');
   }
 
   @override
