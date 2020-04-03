@@ -5,6 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/src/rendering/cached_network_image.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/rendering.dart';
 
@@ -33,7 +34,7 @@ class ImgElement extends Element {
     String url = _getFormattedSourceURL(properties['src']);
     if (url.isNotEmpty) {
       if (properties['caching'] == 'store' || properties['caching'] == 'auto') {
-        image = CacheImage(url);
+        image = CachedNetworkImage(url);
       } else {
         image = NetworkImage(url);
       }

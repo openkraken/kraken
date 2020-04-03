@@ -19,4 +19,4 @@ export 'src/rendering/video.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/flare.dart';
 export 'src/rendering/fallback.dart';
-export 'src/rendering/cache_image.dart';
+export 'src/rendering/cached_network_image.dart';
