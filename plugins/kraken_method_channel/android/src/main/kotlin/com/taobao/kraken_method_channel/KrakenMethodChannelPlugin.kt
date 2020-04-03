@@ -1,7 +1,6 @@
-package com.example.kraken_method_channel
+package com.taobao.kraken_method_channel
 
 import androidx.annotation.NonNull;
-import com.taobao.kraken_method_channel.KrakenMethodChannel
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

@@ -16,6 +16,12 @@ DerivedData/
 
 .generated/
 
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
 *.pbxuser
 *.mode1v3
 *.mode2v3
@@ -43,3 +49,8 @@ Pods/
 
 # Symbolication related
 app.*.symbols
+
+pubspec.lock
+assets/*
+!assets/.gitkeep
+.android/targets

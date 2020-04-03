@@ -3,10 +3,6 @@ package com.taobao.kraken_method_channel;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.example.kraken_method_channel.KrakenMethodChannelPlugin;
-
-import java.lang.reflect.Method;
-
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;

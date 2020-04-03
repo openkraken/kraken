@@ -4,3 +4,6 @@ include ':app'
 rootProject.name = 'android_generated'
 setBinding(new Binding([gradle: this]))
 evaluate(new File(settingsDir, 'include_flutter.groovy'))
+
+include ':sdk'
+project(':sdk').projectDir = new File('../../sdk')
