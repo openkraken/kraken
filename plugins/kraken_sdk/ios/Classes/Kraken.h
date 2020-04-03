@@ -4,7 +4,7 @@
 
 @interface Kraken : NSObject
 
-+ (Kraken*) get: (NSString*) isolateId;
++ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger;
 
 @property NSString* bundleUrl;
 @property FlutterEngine* flutterEngine;

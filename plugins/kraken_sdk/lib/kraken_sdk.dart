@@ -17,14 +17,6 @@ class KrakenSDKPlugin {
     return version;
   }
 
-  static Future<void> setIsolateId(String isolateId) async {
-    if (Platform.isIOS) {
-      await _channel.invokeMethod('setIsolateId', {
-        'isolateId': isolateId,
-      });
-    }
-  }
-
   static Future<String> getUrl() async {
     return await _channel.invokeMethod('getUrl');
   }

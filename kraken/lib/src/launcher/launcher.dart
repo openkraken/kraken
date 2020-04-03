@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:developer' show Service;
-import 'dart:isolate' show Isolate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -51,6 +49,7 @@ void runApp({
     /// Bootstrap binding
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
+
   if (afterConnected != null) _connectedCallback = afterConnected;
 
   await connect(showPerformanceOverlay);
@@ -141,8 +140,6 @@ void _setTargetPlatformForDesktop() {
 }
 
 void defaultAfterConnected() async {
-  String currentIsolateId = Service.getIsolateID(Isolate.current);
-  await KrakenSDKPlugin.setIsolateId(currentIsolateId);
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();

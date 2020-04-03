@@ -391,21 +391,21 @@ task('ios-clean', (done) => {
 
 ['Debug', 'Release'].forEach(mode => {
   task(`build-ios-kraken-lib-${mode.toLowerCase()}`, (done) => {
-    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk iphonesimulator13.2 -arch i386 -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/i386`, {
+    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk iphonesimulator13.2 -configuration ${mode} ONLY_ACTIVE_ARCH=NO TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/iossimulator`, {
       cwd: path.join(paths.bridge, 'ios'),
       stdio: 'inherit'
     });
-    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk iphoneos13.2 -arch arm64 -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/arm64`, {
+    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk iphoneos13.2 ONLY_ACTIVE_ARCH=NO -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/ios`, {
       cwd: path.join(paths.bridge, 'ios'),
       stdio: 'inherit'
     });
-    execSync(`codesign --remove-signature ${paths.sdk}/build/ios/libkraken/${mode.toLowerCase()}/arm64/kraken.framework`, {
+    execSync(`codesign --remove-signature ${paths.sdk}/build/ios/libkraken/${mode.toLowerCase()}/ios/kraken.framework`, {
       stdio: 'inherit'
     });
     let frameworkPath = `${paths.sdk}/build/ios/framework/${mode}/kraken.framework`;
     let plistPath = path.join(paths.scripts, 'support/kraken.plist');
     mkdirp.sync(frameworkPath);
-    execSync(`lipo -create ./${mode.toLowerCase()}/arm64/kraken.framework/kraken ./${mode.toLowerCase()}/i386/kraken.framework/kraken -output ${frameworkPath}/kraken`, {
+    execSync(`lipo -create ./${mode.toLowerCase()}/ios/kraken.framework/kraken ./${mode.toLowerCase()}/iossimulator/kraken.framework/kraken -output ${frameworkPath}/kraken`, {
       cwd: path.join(paths.sdk, 'build/ios/libkraken'),
       stdio: 'inherit'
     });

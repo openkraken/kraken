@@ -1,18 +1,34 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
 
+static NSMutableArray *engineList = nil;
+static NSMutableArray<Kraken*> *instanceList = nil;
+
 @implementation Kraken
 
-static NSMutableDictionary *sdkMap;
-
-+ (Kraken*) get: (NSString*) isolateId {
-  return [sdkMap objectForKey:isolateId];
++ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
+  for (int i = 0; i < engineList.count; i++) {
+    FlutterEngine *engine = engineList[i];
+    if (engine != nil && engine.viewController != nil && engine.viewController.binaryMessenger != nil) {
+      if (engine.viewController.binaryMessenger == messenger) {
+        return [instanceList objectAtIndex:i];
+      }
+    }
+  }
+  return nil;
 }
 
 - (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
   self.flutterEngine = engine;
-  NSLog(@"engine islateId %@", engine.isolateId);
-  [sdkMap setValue:self forKey:engine.isolateId];
+  if (engineList == nil) {
+    engineList = [[NSMutableArray alloc] initWithCapacity: 0];
+  }
+  [engineList addObject: engine];
+  
+  if (instanceList == nil) {
+    instanceList = [[NSMutableArray alloc] initWithCapacity: 0];
+  }
+  [instanceList addObject: self];
   return self;
 }
 
