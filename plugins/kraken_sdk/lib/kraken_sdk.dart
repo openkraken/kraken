@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -17,9 +18,11 @@ class KrakenSDKPlugin {
   }
 
   static Future<void> setIsolateId(String isolateId) async {
-    await _channel.invokeMethod('setIsolateId', {
-      'isolateId': isolateId,
-    });
+    if (Platform.isIOS) {
+      await _channel.invokeMethod('setIsolateId', {
+        'isolateId': isolateId,
+      });
+    }
   }
 
   static Future<String> getUrl() async {
