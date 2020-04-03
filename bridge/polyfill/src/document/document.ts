@@ -5,7 +5,10 @@ import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
 
 export class Document extends Node {
-  public body: Element = new Element('BODY', NodeId.BODY);
+  private bodyElement = new Element('BODY', NodeId.BODY);
+  public body: Element = this.bodyElement;
+  // @TODO Need to implement complete document tree model, equal to body temporary
+  public documentElement: Element = this.bodyElement;
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
 

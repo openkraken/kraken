@@ -32,17 +32,20 @@ mixin TransformStyleMixin {
       List<Method> methods = Method.parseMethod(style['transform']);
       newMatrix4 = combineTransform(methods);
     }
-    if (newMatrix4 != null) {
+    if (newMatrix4 != null && newMatrix4 != matrix4) {
       if (transitionMap != null) {
         Transition transition = transitionMap['transform'];
         Transition all = transitionMap['all'];
         Matrix4 oldMatrix4 = matrix4.clone();
         ProgressListener progressListener = (progress) {
-          transform.transform =
-              (newMatrix4 - oldMatrix4) * progress + oldMatrix4;
+          if (progress > 0.0) {
+            Matrix4 diffMatrix4 = newMatrix4 - oldMatrix4;
+            diffMatrix4.scale(Vector4.all(progress));
+            transform.transform = diffMatrix4 + oldMatrix4;
+          }
         };
         if (transition != null) {
-          transition.addProgressListener(progressListener);
+          transition.setProgressListener(progressListener);
         } else if (all != null) {
           all.addProgressListener(progressListener);
         } else {
