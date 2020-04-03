@@ -35,4 +35,12 @@ class KrakenBundle {
     }
     return zipBundleUrl;
   }
+
+  static Future<String> getBundlePath() async {
+    String bundlePath;
+    try {
+      bundlePath = await _channel.invokeMethod('getBundlePath');
+    } catch (e) {}
+    return bundlePath;
+  }
 }

@@ -1,4 +1,4 @@
-import {KrakenBlob, krakenBlob} from './kraken';
+import {KrakenBlob, krakenBlob} from './types';
 
 class Blob {
   public size: number;

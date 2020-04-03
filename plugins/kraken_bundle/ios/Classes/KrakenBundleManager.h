@@ -6,7 +6,8 @@
 //
 #import <Flutter/Flutter.h>
 #import "KrakenBundlePlugin.h"
-@interface BundleManager : NSObject<NSCopying,NSMutableCopying>
+
+@interface KrakenBundleManager : NSObject<NSCopying,NSMutableCopying>
 @property NSString* bundleUrl;
 @property NSString* zipBundleUrl;
 @property KrakenBundlePlugin* krakenBundlePlugin;

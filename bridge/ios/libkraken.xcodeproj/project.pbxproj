@@ -8,16 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		7D46BAF623FD6C220080E1B4 /* bridge.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D46BAEB23FD6C200080E1B4 /* bridge.h */; };
-		7D46BAF723FD6C220080E1B4 /* foundation in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAEC23FD6C200080E1B4 /* foundation */; };
 		7D46BAF823FD6C220080E1B4 /* dart_methods.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BAED23FD6C200080E1B4 /* dart_methods.cc */; };
 		7D46BAF923FD6C220080E1B4 /* dart_methods.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D46BAEE23FD6C200080E1B4 /* dart_methods.h */; };
-		7D46BAFA23FD6C220080E1B4 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAEF23FD6C200080E1B4 /* include */; };
-		7D46BAFB23FD6C220080E1B4 /* polyfill in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAF023FD6C210080E1B4 /* polyfill */; };
 		7D46BAFC23FD6C220080E1B4 /* bridge_export.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BAF123FD6C210080E1B4 /* bridge_export.cc */; };
 		7D46BAFD23FD6C220080E1B4 /* bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BAF223FD6C210080E1B4 /* bridge.cc */; };
 		7D46BAFE23FD6C220080E1B4 /* third_party in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAF323FD6C210080E1B4 /* third_party */; };
-		7D46BAFF23FD6C220080E1B4 /* bindings in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAF423FD6C210080E1B4 /* bindings */; };
-		7D46BB0023FD6C220080E1B4 /* jsa in Resources */ = {isa = PBXBuildFile; fileRef = 7D46BAF523FD6C210080E1B4 /* jsa */; };
 		7D46BB0523FD6EA00080E1B4 /* kraken.cc in Sources */ = {isa = PBXBuildFile; fileRef = 7D46BB0423FD6EA00080E1B4 /* kraken.cc */; };
 		7D46BB0723FD6F500080E1B4 /* kraken.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D46BB0623FD6F500080E1B4 /* kraken.h */; };
 		7D46BB0923FD6F740080E1B4 /* asio.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 7D46BB0823FD6F6A0080E1B4 /* asio.hpp */; };
@@ -70,16 +65,11 @@
 		7D46BAE023FD6A9B0080E1B4 /* libkraken_jsc.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libkraken_jsc.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D46BAE423FD6A9B0080E1B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D46BAEB23FD6C200080E1B4 /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bridge.h; path = ../../bridge.h; sourceTree = "<group>"; };
-		7D46BAEC23FD6C200080E1B4 /* foundation */ = {isa = PBXFileReference; lastKnownFileType = folder; name = foundation; path = ../../foundation; sourceTree = "<group>"; };
 		7D46BAED23FD6C200080E1B4 /* dart_methods.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dart_methods.cc; path = ../../dart_methods.cc; sourceTree = "<group>"; };
 		7D46BAEE23FD6C200080E1B4 /* dart_methods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dart_methods.h; path = ../../dart_methods.h; sourceTree = "<group>"; };
-		7D46BAEF23FD6C200080E1B4 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../../include; sourceTree = "<group>"; };
-		7D46BAF023FD6C210080E1B4 /* polyfill */ = {isa = PBXFileReference; lastKnownFileType = folder; name = polyfill; path = ../../polyfill; sourceTree = "<group>"; };
 		7D46BAF123FD6C210080E1B4 /* bridge_export.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bridge_export.cc; path = ../../bridge_export.cc; sourceTree = "<group>"; };
 		7D46BAF223FD6C210080E1B4 /* bridge.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bridge.cc; path = ../../bridge.cc; sourceTree = "<group>"; };
 		7D46BAF323FD6C210080E1B4 /* third_party */ = {isa = PBXFileReference; lastKnownFileType = folder; name = third_party; path = ../../third_party; sourceTree = "<group>"; };
-		7D46BAF423FD6C210080E1B4 /* bindings */ = {isa = PBXFileReference; lastKnownFileType = folder; name = bindings; path = ../../bindings; sourceTree = "<group>"; };
-		7D46BAF523FD6C210080E1B4 /* jsa */ = {isa = PBXFileReference; lastKnownFileType = folder; name = jsa; path = ../../jsa; sourceTree = "<group>"; };
 		7D46BB0423FD6EA00080E1B4 /* kraken.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = kraken.cc; path = ../bindings/kraken.cc; sourceTree = "<group>"; };
 		7D46BB0623FD6F500080E1B4 /* kraken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = kraken.h; path = ../bindings/kraken.h; sourceTree = "<group>"; };
 		7D46BB0823FD6F6A0080E1B4 /* asio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = asio.hpp; path = "../foundation/asio-1.12.1/include/asio.hpp"; sourceTree = "<group>"; };
@@ -141,22 +131,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7D46BAD623FD6A9B0080E1B4 = {
+		1BA34F58243596CD007EECA6 /* KOM */ = {
 			isa = PBXGroup;
 			children = (
+				7D46BB0F23FD702D0080E1B4 /* console.cc */,
+				7D46BB1323FD702E0080E1B4 /* location.cc */,
+				7D46BB1023FD702D0080E1B4 /* screen.cc */,
+				7D46BB1123FD702D0080E1B4 /* timer.cc */,
+				7D46BB1223FD702E0080E1B4 /* websocket.cc */,
+				7D46BB0E23FD702D0080E1B4 /* window.cc */,
 				7DC489C9241625E500C0D500 /* toBlob.cc */,
 				7DC489CA241625E500C0D500 /* toBlob.h */,
 				7DC489CE2416265600C0D500 /* blob.cc */,
 				7DC489CD2416265600C0D500 /* blob.h */,
-				7D46BB5723FD71560080E1B4 /* polyfill.cc */,
-				7D46BB2C23FD70E60080E1B4 /* colors.h */,
-				7D46BB2523FD70E40080E1B4 /* count_down_latch.cc */,
-				7D46BB3523FD70E80080E1B4 /* count_down_latch.h */,
-				7D46BB2723FD70E50080E1B4 /* flushUITask.cc */,
-				7D46BB2B23FD70E60080E1B4 /* flushUITask.h */,
-				7D46BB3623FD70E80080E1B4 /* logging.cc */,
-				7D46BB2A23FD70E50080E1B4 /* logging.h */,
-				7D46BB3723FD70E90080E1B4 /* macros.h */,
+			);
+			name = KOM;
+			sourceTree = "<group>";
+		};
+		1BA34F59243596DC007EECA6 /* bindings */ = {
+			isa = PBXGroup;
+			children = (
+				1BA34F58243596CD007EECA6 /* KOM */,
+			);
+			name = bindings;
+			sourceTree = "<group>";
+		};
+		1BA34F5A24359703007EECA6 /* foundation */ = {
+			isa = PBXGroup;
+			children = (
+				7D46BB0C23FD6FE80080E1B4 /* flushUITask.cc */,
+				7D46BB0823FD6F6A0080E1B4 /* asio.hpp */,
 				7D46BB2423FD70E40080E1B4 /* make_copyable.h */,
 				7D46BB2223FD70E40080E1B4 /* ref_counted_internal.h */,
 				7D46BB3023FD70E70080E1B4 /* ref_counted.h */,
@@ -176,21 +180,55 @@
 				7D46BB3C23FD70EA0080E1B4 /* websocket_client.cc */,
 				7D46BB3823FD70E90080E1B4 /* websocket_client.h */,
 				7D46BB3223FD70E70080E1B4 /* websocket_server.cc */,
+				7D46BB2C23FD70E60080E1B4 /* colors.h */,
+				7D46BB2523FD70E40080E1B4 /* count_down_latch.cc */,
+				7D46BB3523FD70E80080E1B4 /* count_down_latch.h */,
+				7D46BB2723FD70E50080E1B4 /* flushUITask.cc */,
+				7D46BB2B23FD70E60080E1B4 /* flushUITask.h */,
+				7D46BB3623FD70E80080E1B4 /* logging.cc */,
+				7D46BB2A23FD70E50080E1B4 /* logging.h */,
+				7D46BB3723FD70E90080E1B4 /* macros.h */,
+			);
+			name = foundation;
+			sourceTree = "<group>";
+		};
+		1BA34F5B24359739007EECA6 /* jsa */ = {
+			isa = PBXGroup;
+			children = (
+				1BA34F5F24359754007EECA6 /* implementation */,
+				1BA34F5E2435974D007EECA6 /* abstraction */,
+			);
+			name = jsa;
+			sourceTree = "<group>";
+		};
+		1BA34F5E2435974D007EECA6 /* abstraction */ = {
+			isa = PBXGroup;
+			children = (
 				7D46BB1A23FD70930080E1B4 /* js_context.cc */,
 				7D46BB1B23FD70930080E1B4 /* js_error.cc */,
 				7D46BB1D23FD70940080E1B4 /* js_type.cc */,
+			);
+			name = abstraction;
+			sourceTree = "<group>";
+		};
+		1BA34F5F24359754007EECA6 /* implementation */ = {
+			isa = PBXGroup;
+			children = (
 				7D46BB1C23FD70930080E1B4 /* jsc_implementation.cc */,
-				7D46BB0F23FD702D0080E1B4 /* console.cc */,
-				7D46BB1323FD702E0080E1B4 /* location.cc */,
-				7D46BB1023FD702D0080E1B4 /* screen.cc */,
-				7D46BB1123FD702D0080E1B4 /* timer.cc */,
-				7D46BB1223FD702E0080E1B4 /* websocket.cc */,
-				7D46BB0E23FD702D0080E1B4 /* window.cc */,
-				7D46BB0C23FD6FE80080E1B4 /* flushUITask.cc */,
-				7D46BB0823FD6F6A0080E1B4 /* asio.hpp */,
+			);
+			name = implementation;
+			sourceTree = "<group>";
+		};
+		7D46BAD623FD6A9B0080E1B4 = {
+			isa = PBXGroup;
+			children = (
+				1BA34F5B24359739007EECA6 /* jsa */,
+				1BA34F5A24359703007EECA6 /* foundation */,
+				7D46BAE223FD6A9B0080E1B4 /* libkraken */,
+				1BA34F59243596DC007EECA6 /* bindings */,
+				7D46BB5723FD71560080E1B4 /* polyfill.cc */,
 				7D46BB0623FD6F500080E1B4 /* kraken.h */,
 				7D46BB0423FD6EA00080E1B4 /* kraken.cc */,
-				7D46BAE223FD6A9B0080E1B4 /* libkraken */,
 				7D46BAE123FD6A9B0080E1B4 /* Products */,
 				7D46BB5923FD718E0080E1B4 /* Frameworks */,
 			);
@@ -207,16 +245,11 @@
 		7D46BAE223FD6A9B0080E1B4 /* libkraken */ = {
 			isa = PBXGroup;
 			children = (
-				7D46BAF423FD6C210080E1B4 /* bindings */,
 				7D46BAF123FD6C210080E1B4 /* bridge_export.cc */,
 				7D46BAF223FD6C210080E1B4 /* bridge.cc */,
 				7D46BAEB23FD6C200080E1B4 /* bridge.h */,
 				7D46BAED23FD6C200080E1B4 /* dart_methods.cc */,
 				7D46BAEE23FD6C200080E1B4 /* dart_methods.h */,
-				7D46BAEC23FD6C200080E1B4 /* foundation */,
-				7D46BAEF23FD6C200080E1B4 /* include */,
-				7D46BAF523FD6C210080E1B4 /* jsa */,
-				7D46BAF023FD6C210080E1B4 /* polyfill */,
 				7D46BAF323FD6C210080E1B4 /* third_party */,
 				7D46BAE423FD6A9B0080E1B4 /* Info.plist */,
 			);
@@ -305,12 +338,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D46BAFF23FD6C220080E1B4 /* bindings in Resources */,
-				7D46BAF723FD6C220080E1B4 /* foundation in Resources */,
 				7D46BAFE23FD6C220080E1B4 /* third_party in Resources */,
-				7D46BB0023FD6C220080E1B4 /* jsa in Resources */,
-				7D46BAFB23FD6C220080E1B4 /* polyfill in Resources */,
-				7D46BAFA23FD6C220080E1B4 /* include in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

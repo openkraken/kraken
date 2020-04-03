@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './kraken';
+import { krakenInvokeModule } from './types';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {

@@ -19,6 +19,18 @@
 // TypeScript Version: 2.8
 // For ddescribe / iit use : https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/karma-jasmine/karma-jasmine.d.ts
 
+type MethodHandler = (method: string, args: any[]) => void;
+interface MethodChannel {
+    setMethodHandler(handler: MethodHandler): void;
+    invokeMethod(method: string, ...args: any[]): Promise<string>
+}
+
+interface Kraken {
+    methodChannel: MethodChannel;
+}
+
+declare const kraken: Kraken;
+
 interface Connection {
   isConnected: boolean;
   type: string;

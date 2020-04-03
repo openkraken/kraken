@@ -868,6 +868,10 @@ abstract class Element extends Node
     style.addStyleChangeListener('visibility', _styleOpacityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionTimingFunction', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDelay', _styleTransitionChangedListener);
   }
 
   void _styleDisplayChangedListener(String property, original, present) {
@@ -948,7 +952,7 @@ abstract class Element extends Node
   }
 
   void _styleTransitionChangedListener(String property, original, present) {
-    if (present != null) initTransition(style);
+    if (present != null) initTransition(style, property);
   }
 
   void _styleOverflowChangedListener(String property, original, present) {
@@ -1089,6 +1093,7 @@ abstract class Element extends Node
     }
   }
 
+  @mustCallSuper
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
@@ -1131,8 +1136,6 @@ abstract class Element extends Node
         return scroll(args);
       case 'scrollBy':
         return scroll(args, isScrollBy: true);
-      default:
-        debugPrint('Unknown method call. name: $name, args: ${args}');
     }
   }
 
@@ -1192,6 +1195,7 @@ abstract class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
 
+  @override
   void addEvent(String eventName) {
     if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.addEventListener(eventName, this._eventResponder);

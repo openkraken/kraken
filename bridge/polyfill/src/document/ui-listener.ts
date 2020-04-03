@@ -1,4 +1,4 @@
-import { krakenUIListener } from '../kraken';
+import { krakenUIListener } from '../types';
 import { getNodeByNodeId } from './document';
 
 krakenUIListener((message) => {
@@ -17,6 +17,11 @@ krakenUIListener((message) => {
 
     if (currentTarget.dispatchEvent) {
       currentTarget.dispatchEvent(event);
+    }
+
+    const eventName = 'on' + event.type.toLowerCase();
+    if (typeof currentTarget[eventName] === 'function') {
+      currentTarget[eventName](event);
     }
   }
 });

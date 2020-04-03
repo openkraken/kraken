@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { krakenInvokeModule } from './kraken';
+import { krakenInvokeModule } from './types';
 
 enum ReadyState {
   CONNECTING = 0,
@@ -18,7 +18,7 @@ enum QoS {
 
 const mqttClientMap = {};
 
-export function dispatchEvent (clientId: string, event: object) {
+export function dispatchMQTT (clientId: string, event: object) {
   let client = mqttClientMap[clientId];
   if (client) {
     client.dispatchEvent(event); 

@@ -112,14 +112,6 @@ Screen *createScreen(double width, double height) {
   return &screen;
 }
 
-void invokeOnloadCallback() {
-  bridge->invokeOnloadCallback();
-}
-
-void invokeOnPlatformBrightnessChangedCallback() {
-  bridge->invokeOnPlatformBrightnessChangedCallback();
-}
-
 void flushUITask() {
   bridge->flushUITask();
 }

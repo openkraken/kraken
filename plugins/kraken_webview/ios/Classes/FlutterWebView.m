@@ -56,6 +56,7 @@
 
 @end
 
+
 @implementation FLTWebViewController {
   FLTWKWebView* _webView;
   int64_t _viewId;
@@ -150,6 +151,10 @@
     [self clearCache:result];
   } else if ([[call method] isEqualToString:@"getTitle"]) {
     [self onGetTitle:result];
+  } else if ([[call method] isEqualToString:@"setupJavascriptBridge"]) {
+    [self setupJavascriptBridge:result];
+  } else if ([[call method] isEqualToString:@"teardownJavascriptBridge"]) {
+    [self teardownJavascriptBridge:result];
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -273,6 +278,24 @@
 - (void)onGetTitle:(FlutterResult)result {
   NSString* title = _webView.title;
   result(title);
+}
+
+- (void)setupJavascriptBridge:(FlutterResult)result {
+  [_webView.configuration.userContentController addScriptMessageHandler:self name:@"kraken"];
+  result(nil);
+}
+
+-(void)teardownJavascriptBridge:(FlutterResult)result {
+  [_webView.configuration.userContentController removeScriptMessageHandlerForName:@"kraken"];
+  result(nil);
+}
+
+#pragma mark - WKScriptMessageHandler
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+{
+  if ([message.name isEqualToString:@"kraken"]) {
+    [_channel invokeMethod:@"onPostMessage" arguments:@{@"message" : message.body}];
+  }
 }
 
 // Returns nil when successful, or an error message when one or more keys are unknown.
