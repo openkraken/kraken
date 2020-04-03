@@ -38,5 +38,5 @@ class Seconds {
 class Milliseconds extends Seconds {
   Milliseconds(String millisecondValue) : super(millisecondValue);
 
-  int ValueOf() => _value.toInt();
+  int valueOf() => _value.toInt();
 }

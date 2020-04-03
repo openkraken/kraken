@@ -20,12 +20,17 @@ class Transition with CustomTickerProviderStateMixin {
 
   void apply() {
     if (progressListeners != null && progressListeners.length > 0) {
-      Future.delayed(delay, () {
-        controller?.forward();
-      });
       curvedAnimation.addListener(listener);
       curvedAnimation.addStatusListener(statusListener);
+      Future.delayed(delay, () {
+        controller.reset();
+        controller.forward();
+      });
     }
+  }
+
+  void setProgressListener(ProgressListener progressListener) {
+    progressListeners = [progressListener];
   }
 
   void addProgressListener(ProgressListener progressListener) {
@@ -52,12 +57,12 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   void dispose() {
-    if (controller?.isAnimating != null) {
-      controller?.dispose();
-      controller = null;
+    curvedAnimation.removeListener(listener);
+    curvedAnimation.removeStatusListener(statusListener);
+    controller.reset();
+    if (progressListeners != null) {
       progressListeners.clear();
       progressListeners = null;
-      curvedAnimation = null;
     }
   }
 
@@ -113,8 +118,8 @@ class Transition with CustomTickerProviderStateMixin {
         if (delay?.valueOf() == null) {
           delay = Time.zero;
         }
-        if (duration.valueOf() == null) {
-          duration = Time.zero;
+        if (duration.valueOf() == null || duration.valueOf() <= 0) {
+          return;
         }
         Curve curve = parseFunction(function);
         if (curve != null) {
