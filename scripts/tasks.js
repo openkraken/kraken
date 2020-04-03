@@ -2,7 +2,7 @@ const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const path = require('path');
-const { writeFileSync, mkdirSync } = require('fs');
+const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
@@ -402,14 +402,23 @@ task('ios-clean', (done) => {
     execSync(`codesign --remove-signature ${paths.sdk}/build/ios/libkraken/${mode.toLowerCase()}/ios/kraken.framework`, {
       stdio: 'inherit'
     });
-    let frameworkPath = `${paths.sdk}/build/ios/framework/${mode}/kraken.framework`;
-    let plistPath = path.join(paths.scripts, 'support/kraken.plist');
+    const targetPath = `${paths.sdk}/build/ios/framework/${mode}`;
+    const frameworkPath = `${targetPath}/kraken.framework`;
+    const plistPath = path.join(paths.scripts, 'support/kraken.plist');
     mkdirp.sync(frameworkPath);
     execSync(`lipo -create ./${mode.toLowerCase()}/ios/kraken.framework/kraken ./${mode.toLowerCase()}/iossimulator/kraken.framework/kraken -output ${frameworkPath}/kraken`, {
       cwd: path.join(paths.sdk, 'build/ios/libkraken'),
       stdio: 'inherit'
     });
     execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`);
+    const podspecContent = readFileSync(path.join(paths.scripts, 'support/KrakenSDK.podspec'), 'utf-8');
+    const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
+    writeFileSync(
+      `${targetPath}/KrakenSDK.podspec`,
+      podspecContent.replace('@VERSION@', `${pkgVersion}-${mode.toLowerCase()}`),
+      'utf-8'
+    );
+    execSync(`pod ipc spec KrakenSDK.podspec > KrakenSDK.podspec.json`, { cwd: targetPath });
     done();
   });
 });
