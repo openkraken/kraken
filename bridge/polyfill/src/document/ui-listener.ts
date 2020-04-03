@@ -1,4 +1,4 @@
-import { krakenUIListener } from '../kraken';
+import { krakenUIListener } from '../types';
 import { getNodeByNodeId } from './document';
 
 krakenUIListener((message) => {

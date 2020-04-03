@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { KrakenWebSocketToken, krakenWebSocket} from './kraken';
+import { KrakenWebSocketToken, krakenWebSocket} from './types';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));

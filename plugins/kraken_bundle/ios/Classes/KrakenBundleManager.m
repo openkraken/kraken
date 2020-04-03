@@ -5,10 +5,11 @@
 //  Created by lzl on 2020/3/30.
 //
 
-#import "BundleManager.h"
-@implementation BundleManager;
+#import "KrakenBundleManager.h"
 
-static BundleManager * _instance;
+@implementation KrakenBundleManager;
+
+static KrakenBundleManager * _instance;
 
 +(instancetype)shareBundleManager{
     return [[self alloc]init];
@@ -23,8 +24,12 @@ static BundleManager * _instance;
 }
 
 -(void)setUp:(NSString*)bundleUrl zipUrl:(NSString*)zipBundleUrl {
-  _instance->_bundleUrl = bundleUrl;
-  _instance->_zipBundleUrl = zipBundleUrl;
+  if (bundleUrl != nil) {
+    _instance->_bundleUrl = bundleUrl;
+  }
+  if (zipBundleUrl != nil) {
+    _instance->_zipBundleUrl = zipBundleUrl;
+  }
 }
 
 -(void)reload {

@@ -30,11 +30,13 @@ dependencies:
     path: ../plugins/kraken_audioplayers
   kraken_geolocation:
     path: ../plugins/kraken_geolocation
+  kraken_method_channel:
+    path: ../plugins/kraken_method_channel
+  kraken_bundle:
+    path: ../plugins/kraken_bundle
   path_provider: ^1.1.0
   dio: ^2.0.2
   vector_math: ^ 2.0.8
-  kraken_bundle:
-    path: ../plugins/kraken_bundle
 
 dev_dependencies:
   flutter_test:
