@@ -54,3 +54,4 @@ pubspec.lock
 assets/*
 !assets/.gitkeep
 .android/targets
+.ios/Flutter/engine

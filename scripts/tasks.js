@@ -2,7 +2,7 @@ const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const path = require('path');
-const { writeFileSync } = require('fs');
+const { writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
@@ -28,7 +28,8 @@ const paths = {
   polyfill: resolveKraken('bridge/polyfill'),
   thirdParty: resolveKraken('third_party'),
   devtools: resolveKraken('devtools'),
-  tests: resolveKraken('tests')
+  tests: resolveKraken('tests'),
+  sdk: resolveKraken('sdk')
 };
 
 function resolveKraken(submodule) {
@@ -383,3 +384,49 @@ task('build-embedded-assets', (done) => {
   done();
 });
 
+task('ios-clean', (done) => {
+  execSync(`rm -rf ${paths.sdk}/build`, { stdio: 'inherit' });
+  done();
+});
+
+['Debug', 'Release'].forEach(mode => {
+  task(`build-ios-kraken-lib-${mode.toLowerCase()}`, (done) => {
+    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk iphonesimulator13.2 -arch i386 -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/i386`, {
+      cwd: path.join(paths.bridge, 'ios'),
+      stdio: 'inherit'
+    });
+    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk iphoneos13.2 -arch arm64 -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/arm64`, {
+      cwd: path.join(paths.bridge, 'ios'),
+      stdio: 'inherit'
+    });
+    execSync(`codesign --remove-signature ${paths.sdk}/build/ios/libkraken/${mode.toLowerCase()}/arm64/kraken.framework`, {
+      stdio: 'inherit'
+    });
+    let frameworkPath = `${paths.sdk}/build/ios/framework/${mode}/kraken.framework`;
+    let plistPath = path.join(paths.scripts, 'support/kraken.plist');
+    mkdirp.sync(frameworkPath);
+    execSync(`lipo -create ./${mode.toLowerCase()}/arm64/kraken.framework/kraken ./${mode.toLowerCase()}/i386/kraken.framework/kraken -output ${frameworkPath}/kraken`, {
+      cwd: path.join(paths.sdk, 'build/ios/libkraken'),
+      stdio: 'inherit'
+    });
+    execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`);
+    done();
+  });
+});
+
+task(`build-ios-kraken-lib-profile`, done => {
+  let frameworkSource = `${paths.sdk}/build/ios/framework/Release/kraken.framework`;
+  let frameworkDest = `${paths.sdk}/build/ios/framework/Profile/kraken.framework`;
+  execSync(`cp -r ${frameworkSource} ${frameworkDest}`);
+  done();
+});
+
+task('build-ios-frameworks', (done) => {
+  let cmd = `flutter build ios-framework`;
+  execSync(cmd, {
+    env: process.env,
+    cwd: paths.sdk,
+    stdio: 'inherit'
+  });
+  done();
+});

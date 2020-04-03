@@ -7,7 +7,7 @@
     "start": "cd app_launcher && flutter run",
     "build:macos": "node scripts/build_darwin",
     "build:macos:release": "KRAKEN_BUILD=Release node scripts/build_darwin",
-    "build:android": "node scripts/build_android",
+    "build:sdk:ios": "node scripts/build_ios_sdk",
     "build:linux": "node scripts/build_linux",
     "upload": "node scripts/pack_and_upload",
     "pretest": "npm i && node scripts/build_darwin_dylib",
