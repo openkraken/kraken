@@ -67,26 +67,25 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   static Map<String, Transition> parseTransitions(StyleDeclaration style, String property) {
-    String transition = style['transition'] ?? 'all 0s ease 0s';
-    List<String> list = style['transition'].split(',');
-    String transitionProperty = style['transitionProperty'] ?? 'all';
-    String transitionDuration = style['transitionDuration'] ?? '0s';
-    String transitionTimingFunction = style['transitionTimingFunction'] ?? 'ease';
-    String transitionDelay = style['transitionDelay'] ?? '0s';
+    List<String> list = [];
 
     if (property == 'transitionProperty' ||
       property == 'transitionDuration' ||
       property == 'transitionTimingFunction' ||
       property == 'transitionDelay'
     ) {
+      String transitionProperty = style['transitionProperty'] != '' ? style['transitionProperty'] : 'all';
+      String transitionDuration = style['transitionDuration'] != '' ? style['transitionDuration'] : '0s';
+      String transitionTimingFunction = style['transitionTimingFunction']  != '' ? style['transitionTimingFunction'] : 'ease';
+      String transitionDelay = style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
       List<String> properties = transitionProperty.split(',');
-      List<String> newList = [];
       for (String prop in properties) {
-        newList.add(
+        list.add(
           prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay
         );
       }
-      list = newList;
+    } else {
+      list = style['transition'].split(',');
     }
 
     Map<String, Transition> map = {};
