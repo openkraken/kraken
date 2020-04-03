@@ -22,12 +22,6 @@
 @import kraken_audioplayers;
 #endif
 
-#if __has_include(<kraken_bundle/KrakenBundlePlugin.h>)
-#import <kraken_bundle/KrakenBundlePlugin.h>
-#else
-@import kraken_bundle;
-#endif
-
 #if __has_include(<kraken_camera/CameraPlugin.h>)
 #import <kraken_camera/CameraPlugin.h>
 #else
@@ -44,6 +38,12 @@
 #import <kraken_method_channel/KrakenMethodChannelPlugin.h>
 #else
 @import kraken_method_channel;
+#endif
+
+#if __has_include(<kraken_sdk/KrakenSDKPlugin.h>)
+#import <kraken_sdk/KrakenSDKPlugin.h>
+#else
+@import kraken_sdk;
 #endif
 
 #if __has_include(<kraken_video_player/FLTVideoPlayerPlugin.h>)
@@ -76,10 +76,10 @@
   [FLTConnectivityPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTConnectivityPlugin"]];
   [FLTDeviceInfoPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTDeviceInfoPlugin"]];
   [AudioplayersPlugin registerWithRegistrar:[registry registrarForPlugin:@"AudioplayersPlugin"]];
-  [KrakenBundlePlugin registerWithRegistrar:[registry registrarForPlugin:@"KrakenBundlePlugin"]];
   [CameraPlugin registerWithRegistrar:[registry registrarForPlugin:@"CameraPlugin"]];
   [LocationPlugin registerWithRegistrar:[registry registrarForPlugin:@"LocationPlugin"]];
   [KrakenMethodChannelPlugin registerWithRegistrar:[registry registrarForPlugin:@"KrakenMethodChannelPlugin"]];
+  [KrakenSDKPlugin registerWithRegistrar:[registry registrarForPlugin:@"KrakenSDKPlugin"]];
   [FLTVideoPlayerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTVideoPlayerPlugin"]];
   [FLTWebViewFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTWebViewFlutterPlugin"]];
   [FLTPathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTPathProviderPlugin"]];

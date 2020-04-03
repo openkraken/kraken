@@ -96,7 +96,7 @@ def install_flutter_application_pod(flutter_application_path)
   current_directory_pathname = Pathname.new __dir__
   project_directory_pathname = Pathname.new Dir.pwd
   relative = current_directory_pathname.relative_path_from project_directory_pathname
-  pod 'kraken_sdk', :path => relative.to_s, :inhibit_warnings => true
+  pod 'kraken_sdk_module', :path => relative.to_s, :inhibit_warnings => true
 
   flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh');
   script_phase :name => 'Run Flutter Build Script',

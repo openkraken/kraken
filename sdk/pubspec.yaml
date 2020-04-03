@@ -1,5 +1,5 @@
-name: kraken_sdk
-description: Kraken SDK
+name: kraken_sdk_module
+description: Module for build sdk frameworks.
 version: 1.0.0+1
 
 environment:

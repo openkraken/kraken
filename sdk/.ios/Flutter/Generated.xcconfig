@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/Users/andycall/work/flutter
-FLUTTER_APPLICATION_PATH=/Users/andycall/work/kraken/sdk
+FLUTTER_ROOT=/Users/zhuoling/workspace/flutter
+FLUTTER_APPLICATION_PATH=/Users/zhuoling/workspace/kraken_workspace/kraken/sdk
 FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
 SYMROOT=${SOURCE_ROOT}/../build/ios

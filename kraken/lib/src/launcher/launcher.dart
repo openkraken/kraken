@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer' show Service;
+import 'dart:isolate' show Isolate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -14,7 +16,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken_bundle/kraken_bundle.dart';
+import 'package:kraken_sdk/kraken_sdk.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
@@ -140,9 +142,11 @@ void _setTargetPlatformForDesktop() {
 }
 
 void defaultAfterConnected() async {
-  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenBundle.getBundleUrl();
-  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv() ?? await KrakenBundle.getBundlePath();
-  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenBundle.getZipBundleUrl();
+  String currentIsolateId = Service.getIsolateID(Isolate.current);
+  await KrakenSDKPlugin.setIsolateId(currentIsolateId);
+  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
+  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
+  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
@@ -166,7 +170,7 @@ void launch({
 
   initBridge();
   _setTargetPlatformForDesktop();
-  KrakenBundle.setReloadListener(reloadApp);
+  //KrakenBundle.setReloadListener(reloadApp);
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
