@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'dart:io';
+
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/rendering/cached_network_image.dart';
@@ -31,12 +33,19 @@ class ImgElement extends Element {
   }
 
   void addImgBox() {
-    String url = _getFormattedSourceURL(properties['src']);
-    if (url.isNotEmpty) {
-      if (properties['caching'] == 'store' || properties['caching'] == 'auto') {
-        image = CachedNetworkImage(url);
+    String src = _getFormattedSourceURL(properties['src']);
+    if (src.isNotEmpty) {
+      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')){
+        if (properties['caching'] == 'store' || properties['caching'] == 'auto') {
+          image = CachedNetworkImage(src);
+        } else {
+          image = NetworkImage(src);
+        }
+      } else if (src.startsWith('file://')) {
+        image = FileImage(File.fromUri(Uri.parse(src)));
       } else {
-        image = NetworkImage(url);
+        // Fallback to asset image
+        image = AssetImage(src);
       }
       _constructImageChild();
     }
