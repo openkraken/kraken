@@ -140,7 +140,6 @@ void _setTargetPlatformForDesktop() {
 }
 
 void defaultAfterConnected() async {
-  String currentIsolateId = Service.getIsolateID(Isolate.current);
   String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
