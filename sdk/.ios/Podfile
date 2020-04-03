@@ -1,6 +1,3 @@
-ali_source 'alibaba-specs'
-ali_source 'alibaba-specs-mirror'
-
 platform :ios, '8.0'
 
 flutter_application_path = '../'

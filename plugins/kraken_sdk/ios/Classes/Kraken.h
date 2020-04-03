@@ -10,6 +10,8 @@
 @property FlutterEngine* flutterEngine;
 @property FlutterMethodChannel* channel;
 
+- (instancetype)initWithFlutterEngine: (FlutterEngine*) engine;
+
 - (NSString*) getUrl;
 
 - (void) loadUrl:(NSString*)url;

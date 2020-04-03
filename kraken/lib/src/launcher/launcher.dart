@@ -21,7 +21,6 @@ import 'package:requests/requests.dart';
 
 import 'bundle.dart';
 
-
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
@@ -48,11 +47,11 @@ void runApp({
     debugPaintSizeEnabled = true;
   }
 
-  if (afterConnected != null) _connectedCallback = afterConnected;
   if (shouldInitializeBinding) {
     /// Bootstrap binding
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
+  if (afterConnected != null) _connectedCallback = afterConnected;
 
   await connect(showPerformanceOverlay);
 }
