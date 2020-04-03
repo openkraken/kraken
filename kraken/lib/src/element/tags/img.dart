@@ -6,6 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
@@ -31,7 +32,11 @@ class ImgElement extends Element {
   void addImgBox() {
     String url = _getFormattedSourceURL(properties['src']);
     if (url.isNotEmpty) {
-      image = NetworkImage(url);
+      if (properties['caching'] == 'store' || properties['caching'] == 'auto') {
+        image = CacheImage(url);
+      } else {
+        image = NetworkImage(url);
+      }
       _constructImageChild();
     }
   }
