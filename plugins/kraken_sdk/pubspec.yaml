@@ -32,7 +32,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.taobao.kraken.kraken_sdk
+        package: com.taobao.kraken
         pluginClass: KrakenSDKPlugin
       ios:
         pluginClass: KrakenSDKPlugin
