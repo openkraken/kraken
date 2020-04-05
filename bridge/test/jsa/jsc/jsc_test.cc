@@ -547,12 +547,92 @@ TEST(JSCContext, hostObject_getPropertyNames) {
   jsa::Object user = jsa::Object::createFromHostObject(*context, u);
   jsa::Array names = user.getPropertyNames(*context);
   EXPECT_EQ(names.size(*context), 3);
-  EXPECT_EQ(
-      names.getValueAtIndex(*context, 0).getString(*context).utf8(*context),
-      "connect");
-  EXPECT_EQ(
-      names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
-      "send");
+  EXPECT_EQ(names.getValueAtIndex(*context, 0).getString(*context).utf8(*context), "connect");
+  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context), "send");
+}
+
+TEST(JSCContext, createHostClass) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  context->global().setProperty(*context, "F", f);
+  jsa::Value result = context->evaluateJavaScript("new F()", "internal:://", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).getProperty(*context, "abc").getNumber(), 1234);
+}
+
+TEST(JSCContext, createHostClassWithInstanceof) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  context->global().setProperty(*context, "F", f);
+  jsa::Value result = context->evaluateJavaScript("new F();", "internal:://", 0);
+  EXPECT_EQ(result.getObject(*context).instanceOf(*context, f), true);
+  auto constructor = result.getObject(*context).getProperty(*context, "constructor");
+  EXPECT_EQ(constructor.isObject(), true);
+}
+
+TEST(JSCContext, isHostClass) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  EXPECT_EQ(f.isHostClass(*context), true);
+
+  context->global().setProperty(*context, "f", f);
+  jsa::Value f2 = context->evaluateJavaScript("f", "internal://", 0);
+  EXPECT_EQ(f2.getObject(*context).getFunction(*context).isHostClass(*context), true);
+}
+
+TEST(JSCContext, getHostClass) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  EXPECT_EQ(f.isHostClass(*context), true);
+  jsa::HostClassType F2 = f.getHostClass(*context);
+  jsa::Value args[2] = {jsa::Value(1), jsa::Value(2)};
+  jsa::Object constructor = jsa::Object(*context);
+  jsa::Object hostValue = F2(*context, constructor, args, 2);
+  EXPECT_EQ(hostValue.getProperty(*context, "abc").getNumber(), 1234);
+}
+
+TEST(JSCContext, prototypeChain) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::Object parentPrototype = jsa::Object(*context);
+  parentPrototype.setProperty(*context, "name", "helloworld");
+
+  jsa::HostClassType Parent = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                                 size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    EXPECT_EQ(constructor.getProperty(context, "name").getString(context).utf8(context), "helloworld");
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, Parent, parentPrototype);
+  jsa::Object instance = f.callAsConstructor(*context).getObject(*context);
+  jsa::Array names = instance.getPropertyNames(*context);
+  EXPECT_EQ(names.length(*context), 2);
+  EXPECT_EQ(instance.getProperty(*context, "name").getString(*context).utf8(*context), "helloworld");
+  EXPECT_EQ(instance.getProperty(*context, "abc").getNumber(), 1234);
 }
 
 TEST(JSCContext, createArrayBuffer) {
@@ -563,18 +643,16 @@ TEST(JSCContext, createArrayBuffer) {
     data[i] = i + 1;
   }
 
-  jsa::ArrayBuffer arrayBuffer = jsa::ArrayBuffer::createWithUnit8(
-      *context, data, len, [](uint8_t *bytes) { delete bytes; });
+  jsa::ArrayBuffer arrayBuffer =
+    jsa::ArrayBuffer::createWithUnit8(*context, data, len, [](uint8_t *bytes) { delete bytes; });
   uint8_t *other = arrayBuffer.data<uint8_t>(*context);
   EXPECT_EQ(*other, *data);
 
   context->global().setProperty(*context, "buffer", arrayBuffer);
 
-  jsa::Value toStringValue =
-      context->evaluateJavaScript("buffer.toString()", "", 0);
+  jsa::Value toStringValue = context->evaluateJavaScript("buffer.toString()", "", 0);
   EXPECT_EQ(toStringValue.isString(), true);
-  EXPECT_EQ(toStringValue.getString(*context).utf8(*context),
-            "[object ArrayBuffer]");
+  EXPECT_EQ(toStringValue.getString(*context).utf8(*context), "[object ArrayBuffer]");
 
   jsa::Value rawArray =
       context->evaluateJavaScript("Array.from(new Uint8Array(buffer))", "", 0);

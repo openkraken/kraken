@@ -514,6 +514,12 @@ public:
   static Function createFromHostFunction(JSContext &runtime, const jsa::PropNameID &name, unsigned int paramCount,
                                          jsa::HostFunctionType func);
 
+  /// Create a function which represent Javascript Class Function.
+  /// When invoked with `new` keyword, it will call C++ code and return an Object class.
+  /// If the function throws an exception, a JS Error will be created and thrown.
+  static Function createFromHostClass(JSContext &context, const jsa::PropNameID &name, unsigned int paramCount,
+                                      jsa::HostClassType classType, const jsa::Object &prototype);
+
   /// Calls the function with \c count \c args.  The \c this value of
   /// the JS function will be undefined.
   Value call(JSContext &runtime, const Value *args, size_t count) const;
@@ -562,6 +568,10 @@ public:
     return runtime.isHostFunction(*this);
   }
 
+  bool isHostClass(JSContext &context) const {
+    return context.isHostClass(*this);
+  }
+
   /// Returns the underlying HostFunctionType iff isHostFunction returns true
   /// and asserts otherwise. You can use this to use std::function<>::target
   /// to get the object that was passed to create the HostFunctionType.
@@ -572,6 +582,13 @@ public:
   HostFunctionType &getHostFunction(JSContext &runtime) const {
     assert(isHostFunction(runtime));
     return runtime.getHostFunction(*this);
+  }
+
+  /// Returns the underlying HostClassType if isHostClassType returns true
+  /// and asserts otherwise.
+  HostClassType &getHostClass(JSContext &context) const {
+    assert(isHostClass(context));
+    return context.getHostClass(*this);
   }
 
 private:
@@ -702,7 +719,6 @@ public:
 
   /// \return the boolean value, or asserts if not a boolean.
   bool getBool() const {
-    assert(isBool());
     return data_.boolean;
   }
 
@@ -1007,6 +1023,11 @@ inline Value Array::getValueAtIndex(JSContext &runtime, size_t i) const {
 inline Function Function::createFromHostFunction(JSContext &runtime, const jsa::PropNameID &name,
                                                  unsigned int paramCount, jsa::HostFunctionType func) {
   return runtime.createFunctionFromHostFunction(name, paramCount, std::move(func));
+}
+
+inline Function Function::createFromHostClass(JSContext &context, const jsa::PropNameID &name, unsigned int paramCount,
+                                              jsa::HostClassType classType, const jsa::Object &prototype) {
+  return context.createClassFromHostClass(name, paramCount, std::move(classType), prototype);
 }
 
 inline Value Function::call(JSContext &runtime, const Value *args, size_t count) const {

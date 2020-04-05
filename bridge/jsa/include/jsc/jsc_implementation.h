@@ -153,6 +153,7 @@ protected:
   jsa::Object createObject(std::shared_ptr<jsa::HostObject> ho) override;
   virtual std::shared_ptr<jsa::HostObject> getHostObject(const jsa::Object &) override;
   jsa::HostFunctionType &getHostFunction(const jsa::Function &) override;
+  jsa::HostClassType &getHostClass(const jsa::Function &) override;
 
   jsa::Value getProperty(const jsa::Object &, const jsa::String &name) override;
   jsa::Value getProperty(const jsa::Object &, const jsa::PropNameID &name) override;
@@ -166,6 +167,7 @@ protected:
   bool isFunction(const jsa::Object &) const override;
   bool isHostObject(const jsa::Object &) const override;
   bool isHostFunction(const jsa::Function &) const override;
+  bool isHostClass(const jsa::Function &) const override;
   jsa::Array getPropertyNames(const jsa::Object &) override;
 
   jsa::WeakObject createWeakObject(const jsa::Object &) override;
@@ -185,6 +187,8 @@ protected:
 
   jsa::Function createFunctionFromHostFunction(const jsa::PropNameID &name, unsigned int paramCount,
                                                jsa::HostFunctionType func) override;
+  jsa::Function createClassFromHostClass(const jsa::PropNameID &name, unsigned int paramCount,
+                                         jsa::HostClassType hostClassType, const jsa::Object &prototype) override;
   jsa::Value call(const jsa::Function &, const jsa::Value &jsThis, const jsa::Value *args, size_t count) override;
   jsa::Value callAsConstructor(const jsa::Function &, const jsa::Value *args, size_t count) override;
 
