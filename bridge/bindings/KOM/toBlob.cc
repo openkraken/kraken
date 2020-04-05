@@ -46,11 +46,11 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
 
       if (error != nullptr) {
         ctx->_callback->getObject(context).getFunction(context).call(context,
-                                                                     {String::createFromAscii(context, error)});
+                                                                     {Value(context, String::createFromAscii(context, error))});
       } else {
         std::vector<uint8_t> vec(bytes, bytes + length);
         ctx->_callback->getObject(context).getFunction(context).call(
-          context, {Value::null(), Object::createFromHostObject(context, std::make_shared<JSBlob>(vec))});
+          context, {Value::null(), Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(vec)))});
       }
 
       delete ctx;

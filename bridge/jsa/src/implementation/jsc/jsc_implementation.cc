@@ -906,12 +906,8 @@ jsa::Function JSCContext::createClassFromHostClass(const jsa::PropNameID &name, 
       JSObjectRef res;
       jsa::Object constructorVal(context.createObject(constructor));
       try {
-        jsa::Value returnValue = metadata->hostClass_(context, constructorVal, args, argumentCount);
-        if (!returnValue.isObject()) {
-          std::string name = JSStringToSTLString(metadata->name);
-          throw jsa::JSError(context, "internal JSError: HostClass[" + name + "]\'s  return type is not an object.");
-        }
-        res = context.objectRef(returnValue.getObject(context));
+        jsa::Object returnValue = metadata->hostClass_(context, constructorVal, args, argumentCount);
+        res = context.objectRef(returnValue);
       } catch (const jsa::JSError &error) {
         *exception = context.valueRef(error.value());
         res = JSObjectMake(ctx, NULL, nullptr);

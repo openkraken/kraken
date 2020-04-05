@@ -80,13 +80,13 @@ Value JSBlob::get(JSContext &context, const PropNameID &name) {
   if (_name == "size") {
     return Value((int)_size);
   } else if (_name == "type") {
-    return String::createFromUtf8(context, mimeType);
+    return Value(context, String::createFromUtf8(context, mimeType));
   } else if (_name == "slice") {
-    return Function::createFromHostFunction(context, PropNameID::forAscii(context, "slice"), 3, slice);
+    return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "slice"), 3, slice));
   } else if (_name == "text") {
-    return Function::createFromHostFunction(context, PropNameID::forAscii(context, "text"), 0, text);
+    return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "text"), 0, text));
   } else if (_name == "arrayBuffer") {
-    return Function::createFromHostFunction(context, PropNameID::forAscii(context, "arrayBuffer"), 0, arrayBuffer);
+    return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "arrayBuffer"), 0, arrayBuffer));
   }
 
   return Value::undefined();
@@ -113,7 +113,7 @@ Value JSBlob::constructor(JSContext &context, const Value &thisVal, const Value 
   BlobBuilder builder;
 
   if (count == 0) {
-    return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize()));
+    return Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize())));
   }
 
   const Value &array = args[0];
@@ -126,7 +126,7 @@ Value JSBlob::constructor(JSContext &context, const Value &thisVal, const Value 
   if (options.isUndefined()) {
     Value val = Value(context, array);
     builder.append(context, val);
-    return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize()));
+    return Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize())));
   }
 
   if (!options.isObject()) {
@@ -137,7 +137,7 @@ Value JSBlob::constructor(JSContext &context, const Value &thisVal, const Value 
   auto mimeType = args[1].getObject(context).getProperty(context, "type").getString(context).utf8(context);
   Value val = Value(context, args[0]);
   builder.append(context, val);
-  return Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize(), mimeType));
+  return Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(builder.finalize(), mimeType)));
 }
 
 Value JSBlob::slice(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -163,25 +163,25 @@ Value JSBlob::slice(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   if (start == 0 && end == blob->_data.size()) {
-    return Object::createFromHostObject(context, std::make_shared<JSBlob>(blob->_data, mimeType));
+    return Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(blob->_data, mimeType)));
   }
 
   std::vector<uint8_t> newData;
   newData.reserve(blob->_data.size() - (end - start));
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
-  return Object::createFromHostObject(context, std::make_shared<JSBlob>(newData, mimeType));
+  return Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(newData, mimeType)));
 }
 
 Value JSBlob::text(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   std::shared_ptr<JSBlob> blob = thisVal.getObject(context).getHostObject<JSBlob>(context);
-  return String::createFromUtf8(context, blob->_data.data(), blob->_data.size());
+  return Value(context, String::createFromUtf8(context, blob->_data.data(), blob->_data.size()));
 }
 
 Value JSBlob::arrayBuffer(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   std::shared_ptr<JSBlob> blob = thisVal.getObject(context).getHostObject<JSBlob>(context);
-  return ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
+  return Value(context, ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
     // there is no need to collect blob's memory
-  });
+  }));
 }
 
 uint8_t *JSBlob::bytes() {

@@ -17,7 +17,7 @@ namespace jsa {
 // Base class for pointer-storing types.
 class Pointer {
 protected:
-  explicit Pointer(Pointer &&other) : ptr_(other.ptr_) {
+  Pointer(Pointer &&other) noexcept : ptr_(other.ptr_) {
     other.ptr_ = nullptr;
   }
 
@@ -27,7 +27,7 @@ protected:
     }
   }
 
-  Pointer &operator=(Pointer &&other);
+  Pointer &operator=(Pointer &&other) noexcept;
 
   friend class JSContext;
   friend class Value;
@@ -192,7 +192,7 @@ public:
   Object &operator=(Object &&other) = default;
 
   /// Creates a new Object instance, like '{}' in JS.
-  Object(JSContext &runtime) : Object(runtime.createObject()) {}
+  explicit Object(JSContext &runtime) : Object(runtime.createObject()) {}
 
   static Object createFromHostObject(JSContext &runtime, std::shared_ptr<HostObject> ho) {
     return runtime.createObject(ho);
@@ -607,39 +607,39 @@ public:
   Value() : Value(UndefinedKind) {}
 
   /// Creates a \c null JS value.
-  /* implicit */ Value(std::nullptr_t) : kind_(NullKind) {}
+  /* implicit */ explicit Value(std::nullptr_t) : kind_(NullKind) {}
 
   /// Creates a boolean JS value.
-  /* implicit */ Value(bool b) : Value(BooleanKind) {
+  /* implicit */ explicit Value(bool b) : Value(BooleanKind) {
     data_.boolean = b;
   }
 
   /// Creates a number JS value.
-  /* implicit */ Value(double d) : Value(NumberKind) {
+  /* implicit */ explicit Value(double d) : Value(NumberKind) {
     data_.number = d;
   }
 
   /// Creates a number JS value.
-  /* implicit */ Value(int i) : Value(NumberKind) {
+  /* implicit */ explicit Value(int i) : Value(NumberKind) {
     data_.number = i;
   }
 
   /// Moves a Symbol, String, or Object rvalue into a new JS value.
   template <typename T>
-  /* implicit */ Value(T &&other) : Value(kindOf(other)) {
+  /* implicit */ explicit Value(T &&other) : Value(kindOf(other)) {
     static_assert(std::is_base_of<Symbol, T>::value || std::is_base_of<String, T>::value ||
                     std::is_base_of<Object, T>::value,
                   "Value cannot be implictly move-constructed from this type");
-    new (&data_.pointer) T(std::move(other));
+    new (&data_.pointer) T(std::forward<T>(other));
   }
 
   /// Value("foo") will treat foo as a bool.  This makes doing that a
   /// compile error.
-  template <typename T = void> Value(const char *) {
+  template <typename T = void> explicit Value(const char *) {
     static_assert(!std::is_same<void, T>::value, "Value cannot be constructed directly from const char*");
   }
 
-  Value(Value &&value);
+  Value(Value &&value) noexcept;
 
   /// Copies a Symbol lvalue into a new JS value.
   Value(JSContext &runtime, const Symbol &sym) : Value(SymbolKind) {
@@ -819,13 +819,13 @@ private:
     ~Data() {}
 
     // scalars
-    bool boolean;
+    bool boolean{};
     double number;
     // pointers
     Pointer pointer; // Symbol, String, Object, Array, Function
   };
 
-  Value(ValueKind kind) : kind_(kind) {}
+  explicit Value(ValueKind kind) : kind_(kind) {}
 
   constexpr static ValueKind kindOf(const Symbol &) {
     return SymbolKind;
@@ -861,10 +861,10 @@ inline Value toValue(JSContext &, int i) {
   return Value(i);
 }
 inline Value toValue(JSContext &runtime, const char *str) {
-  return String::createFromAscii(runtime, str);
+  return (Value)String::createFromAscii(runtime, str);
 }
 inline Value toValue(JSContext &runtime, const std::string &str) {
-  return String::createFromAscii(runtime, str);
+  return (Value)String::createFromAscii(runtime, str);
 }
 template <typename T> inline Value toValue(JSContext &runtime, const T &other) {
   static_assert(std::is_base_of<Pointer, T>::value, "This type cannot be converted to Value");

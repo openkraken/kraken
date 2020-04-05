@@ -88,7 +88,7 @@ TEST(JSCContext, evaluateStringObject) {
 
 TEST(JSCContext, createString) {
   auto context = std::make_unique<JSCContext>(normalPrint);
-  jsa::Value string = jsa::String::createFromAscii(*context, "helloworld");
+  jsa::Value string = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   EXPECT_EQ(string.isString(), true);
   auto result = string.getString(*context).utf8(*context);
   EXPECT_EQ(result, "helloworld");
@@ -201,7 +201,7 @@ TEST(JSCContext, symbolStrictEquals) {
 
 TEST(JSCContext, stringStrictEquals) {
   auto context = std::make_unique<JSCContext>(normalPrint);
-  jsa::Value left = jsa::String::createFromAscii(*context, "helloworld");
+  jsa::Value left = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
@@ -342,7 +342,7 @@ TEST(JSCContext, callAsConstructor) {
       "function F(name) { this.prop = name}; F;", "", 0);
   jsa::Function F = result.getObject(*context).getFunction(*context);
   auto f = F.callAsConstructor(
-      *context, {jsa::String::createFromAscii(*context, "helloworld")});
+      *context, {jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"))});
   std::string name = f.getObject(*context)
                          .getProperty(*context, "prop")
                          .getString(*context)
@@ -375,7 +375,7 @@ TEST(JSCContext, hostFunctionWithParams) {
     jsa::Object object = jsa::Object(context);
     const jsa::Value &number = args[0];
     object.setProperty(context, "abc", number.getNumber());
-    return object;
+    return jsa::Value(context, object);
   };
   jsa::Object object = jsa::Object(*context);
   JSA_BINDING_FUNCTION(*context, object, "getObj", 1, callback);
@@ -473,9 +473,9 @@ TEST(JSCContext, hostObject_get) {
                               size_t count) {
       const jsa::Value &name = args[0];
       if (name.getString(context).utf8(context) == "andycall") {
-        return jsa::String::createFromAscii(context, "chenghuai.dtc");
+        return jsa::Value(context, jsa::String::createFromAscii(context, "chenghuai.dtc"));
       } else if (name.getString(context).utf8(context) == "wssgcg1213") {
-        return jsa::String::createFromAscii(context, "zhuoling.lcl");
+        return jsa::Value(context, jsa::String::createFromAscii(context, "zhuoling.lcl"));
       }
       return jsa::Value::undefined();
     };
@@ -701,7 +701,7 @@ TEST(JSCContext, HostObjectAsArgs) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-      jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
+    jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
   });
 }
 
@@ -722,7 +722,7 @@ TEST(JSCContext, getHostObject) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-      jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
+      jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
   });
 }
 
