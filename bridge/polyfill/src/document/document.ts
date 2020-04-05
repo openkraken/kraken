@@ -2,10 +2,13 @@ import { Node, NodeType, NodeId, traverseNode } from './node';
 import { Element } from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
-import { ElementRegistry } from './elementRegistry';
+import { ElementRegistry } from './element-registry';
 
 export class Document extends Node {
-  public body: Element = new Element('BODY', NodeId.BODY);
+  private bodyElement = new Element('BODY', NodeId.BODY);
+  public body: Element = this.bodyElement;
+  // @TODO Need to implement complete document tree model, equal to body temporary
+  public documentElement: Element = this.bodyElement;
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
 
@@ -35,7 +38,11 @@ export class Document extends Node {
 
 export const document = new Document();
 
-export function getNodeByNodeId(nodeId: number) : Node|null {
+export function getNodeByNodeId(nodeId: number) : Node|null|Window {
+  if (nodeId === NodeId.WINDOW) {
+    return window;
+  }
+
   let _node = null;
   traverseNode(document.body, (node: Node) : any => {
     if (node.nodeId === nodeId) {

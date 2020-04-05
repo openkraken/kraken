@@ -21,12 +21,17 @@ class AndroidWebView implements WebViewPlatform {
   AndroidViewController _controller;
   int _id;
 
+  void dispose() {
+    _controller?.dispose();
+  }
+
   @override
   RenderAndroidView buildRenderBox({
     CreationParams creationParams,
     @required WebViewPlatformCallbacksHandler webViewPlatformCallbacksHandler,
     WebViewPlatformCreatedCallback onWebViewPlatformCreated,
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    VoidCallback onFocus,
   }) {
     assert(webViewPlatformCallbacksHandler != null);
     _id = platformViewsRegistry.getNextPlatformViewId();
@@ -39,11 +44,16 @@ class AndroidWebView implements WebViewPlatform {
       layoutDirection: TextDirection.rtl,
       creationParams: MethodChannelWebViewPlatform.creationParamsToMap(creationParams),
       creationParamsCodec: const StandardMessageCodec(),
-      onFocus: () {
-        // TODO: handle with onFocus
-        print('AndroidWebView(id: $_id) onFocus.');
-      },
+      onFocus: onFocus,
     );
+
+    _controller.addOnPlatformViewCreatedListener((int id) {
+      if (onWebViewPlatformCreated != null) {
+        onWebViewPlatformCreated(MethodChannelWebViewPlatform(
+            id, webViewPlatformCallbacksHandler));
+      }
+    });
+
     return RenderAndroidView(
       viewController: _controller,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,

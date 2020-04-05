@@ -5,10 +5,8 @@ import 'package:kraken/style.dart';
 mixin TransitionStyleMixin {
   Map<String, Transition> transitionMap;
 
-  void initTransition(StyleDeclaration style) {
-    if (style.contains('transition')) {
-      transitionMap = Transition.parseTransitions(style);
-    }
+  void initTransition(StyleDeclaration style, String property) {
+    transitionMap = Transition.parseTransitions(style, property);
   }
 }
 
@@ -22,12 +20,17 @@ class Transition with CustomTickerProviderStateMixin {
 
   void apply() {
     if (progressListeners != null && progressListeners.length > 0) {
-      Future.delayed(delay, () {
-        controller?.forward();
-      });
       curvedAnimation.addListener(listener);
       curvedAnimation.addStatusListener(statusListener);
+      Future.delayed(delay, () {
+        controller.reset();
+        controller.forward();
+      });
     }
+  }
+
+  void setProgressListener(ProgressListener progressListener) {
+    progressListeners = [progressListener];
   }
 
   void addProgressListener(ProgressListener progressListener) {
@@ -54,19 +57,38 @@ class Transition with CustomTickerProviderStateMixin {
   }
 
   void dispose() {
-    if (controller?.isAnimating != null) {
-      controller?.dispose();
-      controller = null;
+    curvedAnimation.removeListener(listener);
+    curvedAnimation.removeStatusListener(statusListener);
+    controller.reset();
+    if (progressListeners != null) {
       progressListeners.clear();
       progressListeners = null;
-      curvedAnimation = null;
     }
   }
 
-  static Map<String, Transition> parseTransitions(StyleDeclaration style) {
-    List<String> list = style['transition'].split(',');
-    Map<String, Transition> map = {};
+  static Map<String, Transition> parseTransitions(StyleDeclaration style, String property) {
+    List<String> list = [];
 
+    if (property == 'transitionProperty' ||
+      property == 'transitionDuration' ||
+      property == 'transitionTimingFunction' ||
+      property == 'transitionDelay'
+    ) {
+      String transitionProperty = style['transitionProperty'] != '' ? style['transitionProperty'] : 'all';
+      String transitionDuration = style['transitionDuration'] != '' ? style['transitionDuration'] : '0s';
+      String transitionTimingFunction = style['transitionTimingFunction']  != '' ? style['transitionTimingFunction'] : 'ease';
+      String transitionDelay = style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
+      List<String> properties = transitionProperty.split(',');
+      for (String prop in properties) {
+        list.add(
+          prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay
+        );
+      }
+    } else {
+      list = style['transition'].split(',');
+    }
+
+    Map<String, Transition> map = {};
     for (String transition in list) {
       parseTransition(transition, map);
     }
@@ -95,8 +117,8 @@ class Transition with CustomTickerProviderStateMixin {
         if (delay?.valueOf() == null) {
           delay = Time.zero;
         }
-        if (duration.valueOf() == null) {
-          duration = Time.zero;
+        if (duration.valueOf() == null || duration.valueOf() <= 0) {
+          return;
         }
         Curve curve = parseFunction(function);
         if (curve != null) {

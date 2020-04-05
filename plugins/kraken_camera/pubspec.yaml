@@ -8,7 +8,8 @@ homepage: http://rax.alibaba-inc.com/kraken
 dependencies:
   flutter:
     sdk: flutter
-  kraken: ^0.3.0
+  kraken:
+    path: ../../kraken
 
 dev_dependencies:
   path_provider: ^1.5.1

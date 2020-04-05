@@ -1,4 +1,4 @@
-import { krakenWindow } from './kraken';
+import { krakenWindow } from './types';
 const krakenLocation = krakenWindow.location;
 
 const location = {

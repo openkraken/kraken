@@ -45,6 +45,10 @@ dependency_overrides:
     path: ../plugins/kraken_video_player
   kraken_webview:
     path: ../plugins/kraken_webview
+  kraken_bundle:
+    path: ../plugins/kraken_bundle
+  kraken_method_channel:
+    path: ../plugins/kraken_method_channel
 
 
 # For information on the generic Dart part of this file, see the

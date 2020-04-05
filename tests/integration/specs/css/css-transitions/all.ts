@@ -1,4 +1,3 @@
-// @TODO: enable transition while it is fixed.
 describe('Transition all', () => {
   it('001', done => {
     const container1 = document.createElement('div');

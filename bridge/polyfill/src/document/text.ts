@@ -1,5 +1,5 @@
 import { Node, NodeType } from './node';
-import { createTextNode, setProperty } from './UIManager';
+import { createTextNode, setProperty } from './ui-manager';
 
 export class TextNode extends Node {
   public nodeName: string = '#text';

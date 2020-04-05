@@ -1,5 +1,5 @@
 import { Element } from '../element';
-import { method } from '../UIManager';
+import { method } from '../ui-manager';
 
 /**
  * Use the HTML <canvas> element with either the canvas

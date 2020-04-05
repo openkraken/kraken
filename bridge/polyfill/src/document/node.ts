@@ -1,9 +1,11 @@
 import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from './UIManager';
+import { insertAdjacentNode, removeNode } from './ui-manager';
 
 export type NodeList = Array<Node>;
 export enum NodeId {
   BODY = -1,
+  // Window is not inherit node but EventTarget, so we assume window is a node.
+  WINDOW = -2,
 }
 export enum NodeType {
   ELEMENT_NODE = 1,

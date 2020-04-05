@@ -69,4 +69,34 @@ describe('Display inline-block', () => {
     append(BODY, magenta);
     await matchElementImageSnapshot(magenta);
   });
+
+  xit('textNode only if have one space', async () => {
+    let containerStyle = {
+      backgroundColor: 'fuchsia',
+      color: 'black',
+      font: '20px',
+      margin: '10px'
+    };
+
+    let divStyle = {
+      display: 'inline-block'
+    };
+
+    let container = create('div', containerStyle, [
+      create('div', divStyle, createText('Several ')),
+      create('div', divStyle, createText(' inline elements')),
+      createText(' are '),
+      create('div', divStyle, createText('in this')),
+      createText(' sentence.')
+    ]);
+
+    let container2 = create('div', containerStyle, [
+      createText('Several inline elements are in this sentence.')
+    ]);
+
+    append(BODY, container);
+    append(BODY, container2);
+
+    await matchScreenshot();
+  });
 });

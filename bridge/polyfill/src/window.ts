@@ -1,5 +1,7 @@
 import { EventTarget } from 'event-target-shim';
-import { krakenWindow, KrakenLocation } from './kraken';
+import { krakenWindow, KrakenLocation } from './types';
+import { addEvent } from "./document/ui-manager";
+import { NodeId } from "./document/node";
 
 function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
   events.forEach((event: string) => {
@@ -20,30 +22,21 @@ function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
 
 
 class Window extends EventTarget {
+  private events: {
+    [eventName: string]: any;
+  } = {};
 
   constructor() {
     super();
     bindLegacyListeners(this, ['load', 'colorschemechange']);
+  }
 
-    // Bridge native event callback to EventTarget.
-    krakenWindow.onLoad = () => {
-      this.dispatchEvent({
-        type: 'load',
-        target: this,
-        currentTarget: this,
-        bubbles: false,
-        cancelable: false,
-      });
-    };
-    krakenWindow.onColorSchemeChange = () => {
-      this.dispatchEvent({
-        type: 'colorschemechange',
-        target: this,
-        currentTarget: this,
-        bubbles: false,
-        cancelable: false,
-      });
-    };
+  addEventListener(eventName: string, eventListener: EventListener) {
+    super.addEventListener(eventName, eventListener);
+    if (!this.events.hasOwnProperty(eventName)) {
+      addEvent(NodeId.WINDOW, eventName);
+      this.events[eventName] = eventListener;
+    }
   }
 
   public get colorScheme() : string {
