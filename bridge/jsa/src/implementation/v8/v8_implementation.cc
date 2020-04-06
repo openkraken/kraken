@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include <iostream>
 namespace alibaba {
 namespace jsa_v8 {
 
