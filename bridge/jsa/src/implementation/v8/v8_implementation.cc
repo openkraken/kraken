@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
 namespace alibaba {
 namespace jsa_v8 {
 
@@ -56,7 +57,7 @@ private:
 
 class HostFunctionProxy {
 public:
-  HostFunctionProxy(jsa::HostFunctionType hostFunction) : hostFunction_(hostFunction) {}
+  explicit HostFunctionProxy(jsa::HostFunctionType hostFunction) : hostFunction_(hostFunction) {}
 
   jsa::HostFunctionType &getHostFunction() {
     return hostFunction_;
@@ -66,7 +67,20 @@ protected:
   jsa::HostFunctionType hostFunction_;
 };
 
+class HostClassProxy {
+public:
+  explicit HostClassProxy(jsa::HostClassType hostClass) : hostClass_(hostClass) {}
+
+  jsa::HostClassType &getHostClass() {
+    return hostClass_;
+  }
+
+protected:
+  jsa::HostClassType hostClass_;
+};
+
 v8::Global<v8::ObjectTemplate> hostObjectTemplate;
+v8::Global<v8::ObjectTemplate> hostClassTemplate;
 
 struct HostObjectProxyBase {
   HostObjectProxyBase(V8Context *ctx, const std::shared_ptr<jsa::HostObject> &sho) : ctx_(ctx), hostObject(sho) {}
@@ -569,8 +583,12 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
 
       info.GetReturnValue().Set(v8::Undefined(p->isolate));
     }
-    static void namedQuery(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Integer> &info) {}
-    static void namedDeleter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean> &info) {}
+    static void namedQuery(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Integer> &info) {
+      info.GetReturnValue().Set(v8::PropertyAttribute::None);
+    }
+    static void namedDeleter(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean> &info) {
+      info.GetReturnValue().Set(false);
+    }
     static void namedEnumerator(const v8::PropertyCallbackInfo<v8::Array> &info) {
       HostObjectMetaData *p = unwrap(info.Holder());
       V8Context *ctx = p->ctx_;
@@ -600,7 +618,7 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
     rawTemplate->SetHandler(v8::NamedPropertyHandlerConfiguration(
       HostObjectMetaData::namedGetter, HostObjectMetaData::namedSetter, HostObjectMetaData::namedQuery,
       HostObjectMetaData::namedDeleter, HostObjectMetaData::namedEnumerator, v8::Local<v8::Value>(),
-      v8::PropertyHandlerFlags::kOnlyInterceptStrings));
+      v8::PropertyHandlerFlags::kAllCanRead));
     hostObjectTemplate.Reset(_isolate, rawTemplate);
   }
 
@@ -609,6 +627,7 @@ jsa::Object V8Context::createObject(std::shared_ptr<jsa::HostObject> ho) {
   v8::Local<v8::ObjectTemplate> temp = v8::Local<v8::ObjectTemplate>::New(_isolate, hostObjectTemplate);
   v8::Local<v8::Object> object = temp->NewInstance(context).ToLocalChecked();
   object->SetInternalField(0, external);
+  //  object->DefineProperty()
   return createObject(object, metaData);
 }
 
@@ -631,6 +650,18 @@ jsa::HostFunctionType &V8Context::getHostFunction(const jsa::Function &func) {
     function->Get(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToLocalChecked());
   HostFunctionProxy *proxy = static_cast<HostFunctionProxy *>(hostFunction->Value());
   return proxy->getHostFunction();
+}
+
+jsa::HostClassType &V8Context::getHostClass(const alibaba::jsa::Function &func) {
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Function> function = v8::Local<v8::Function>::Cast(pointer->obj_.Get(_isolate));
+  v8::Local<v8::External> hostClass = v8::Local<v8::External>::Cast(
+    function->Get(context, v8::String::NewFromUtf8(_isolate, "__hostClass__").ToLocalChecked()).ToLocalChecked());
+  HostClassProxy *proxy = static_cast<HostClassProxy *>(hostClass->Value());
+  return proxy->getHostClass();
 }
 
 jsa::Value V8Context::getProperty(const jsa::Object &obj, const jsa::String &name) {
@@ -739,6 +770,15 @@ bool V8Context::isHostFunction(const jsa::Function &func) const {
   return function->Has(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked()).ToChecked();
 }
 
+bool V8Context::isHostClass(const jsa::Function &func) const {
+  auto pointer = static_cast<const V8ObjectValue<void *> *>(getPointerValue(func));
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Function> function = v8::Local<v8::Function>::Cast(pointer->obj_.Get(_isolate));
+  return function->Has(context, v8::String::NewFromUtf8(_isolate, "__hostClass__").ToLocalChecked()).ToChecked();
+}
+
 jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
@@ -746,7 +786,7 @@ jsa::Array V8Context::getPropertyNames(const jsa::Object &obj) {
   v8::Local<v8::Object> object = objectRef(obj);
   v8::Local<v8::Array> names =
     object
-      ->GetPropertyNames(context, v8::KeyCollectionMode::kOwnOnly, v8::PropertyFilter::ALL_PROPERTIES,
+      ->GetPropertyNames(context, v8::KeyCollectionMode::kIncludePrototypes, v8::PropertyFilter::ONLY_ENUMERABLE,
                          v8::IndexFilter::kIncludeIndices)
       .ToLocalChecked();
   jsa::Array result = createArray(names->Length());
@@ -966,13 +1006,109 @@ jsa::Function V8Context::createFunctionFromHostFunction(const jsa::PropNameID &n
   };
 
   v8::Local<v8::Function> function =
-    v8::Function::New(context, callback, hostCallback, (int)paramCount).ToLocalChecked();
+    v8::Function::New(context, callback, hostCallback, (int)paramCount, v8::ConstructorBehavior::kThrow)
+      .ToLocalChecked();
 
   function->SetName(v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked());
   function->Set(context, v8::String::NewFromUtf8(_isolate, "__hostFunction__").ToLocalChecked(), hostCallback)
     .ToChecked();
   v8::Local<v8::Object> funcObject = v8::Local<v8::Object>::Cast(function);
   return createObject(funcObject, proxy).getFunction(*this);
+}
+
+jsa::Function V8Context::createClassFromHostClass(const jsa::PropNameID &name, unsigned int paramCount,
+                                                  jsa::HostClassType classType, const jsa::Object &prototype) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+
+  struct HostClassMetaData : public HostClassProxy {
+    HostClassMetaData(V8Context *ctx, v8::Isolate *isolate, v8::Local<v8::Context> v8Context, jsa::HostClassType f)
+      : HostClassProxy(std::move(f)), ctx(ctx), isolate(isolate) {
+      this->v8Context.Reset(isolate, v8Context);
+    }
+
+    v8::Local<v8::Value> call(const v8::FunctionCallbackInfo<v8::Value> &info) {
+      v8::EscapableHandleScope escapeScope(isolate);
+      v8::HandleScope handleScope(info.GetIsolate());
+      v8::Local<v8::Context> context = v8Context.Get(info.GetIsolate());
+      v8::Context::Scope contextScope(context);
+      const unsigned maxStackArgCount = 8;
+      jsa::Value stackArgs[maxStackArgCount];
+      std::unique_ptr<jsa::Value[]> heapArgs;
+      jsa::Value *args;
+      int argumentCount = info.Length();
+
+      if (argumentCount > maxStackArgCount) {
+        heapArgs = std::make_unique<jsa::Value[]>(argumentCount);
+        for (size_t i = 0; i < argumentCount; i++) {
+          v8::HandleScope scope(isolate);
+          v8::Local<v8::Value> v = info[i];
+          heapArgs[i] = ctx->createValue(v);
+        }
+        args = heapArgs.get();
+      } else {
+        for (size_t i = 0; i < argumentCount; i++) {
+          v8::HandleScope scope(isolate);
+          v8::Local<v8::Value> v = info[i];
+          stackArgs[i] = ctx->createValue(v);
+        }
+        args = stackArgs;
+      }
+
+      v8::Local<v8::Object> constructor = info.This();
+      jsa::Object constructorValue(ctx->createObject(constructor));
+      v8::Local<v8::Object> res;
+      try {
+        res = ctx->objectRef(hostClass_(*ctx, constructorValue, args, argumentCount));
+      } catch (const jsa::JSError &error) {
+        v8::Local<v8::Value> msg = ctx->valueRef(error.value());
+        isolate->ThrowException(msg);
+      } catch (const std::exception &exception) {
+        const char *what = exception.what();
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(isolate, what).ToLocalChecked();
+        isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
+      } catch (...) {
+        std::string exceptionString("Exception in HostFunction: <unknown>");
+        v8::Local<v8::String> msg = v8::String::NewFromUtf8(isolate, exceptionString.c_str()).ToLocalChecked();
+        isolate->ThrowException(v8::Local<v8::Value>::Cast(msg));
+      }
+      return escapeScope.Escape(res);
+    }
+
+    v8::Isolate *isolate;
+    V8Context *ctx;
+    v8::Persistent<v8::Context> v8Context;
+  };
+
+  auto proxy = new HostClassMetaData(this, _isolate, context, classType);
+  v8::Local<v8::External> hostCallback = v8::External::New(_isolate, proxy);
+
+  auto callback = [](const v8::FunctionCallbackInfo<v8::Value> &info) {
+    if (!info.IsConstructCall()) {
+      info.GetIsolate()->ThrowException(
+        v8::String::NewFromUtf8(info.GetIsolate(), "Constructor requires new").ToLocalChecked());
+      return;
+    }
+    v8::Local<v8::External> field = v8::Local<v8::External>::Cast(info.Data());
+    auto p = static_cast<HostClassMetaData *>(field->Value());
+    v8::Local<v8::Value> ret = p->call(info);
+    info.GetReturnValue().Set(ret);
+  };
+
+  if (hostClassTemplate.IsEmpty()) {
+    v8::Local<v8::ObjectTemplate> rawTemplate = v8::ObjectTemplate::New(_isolate);
+    rawTemplate->SetCallAsFunctionHandler(callback, hostCallback);
+    hostClassTemplate.Reset(_isolate, rawTemplate);
+  }
+
+  v8::Local<v8::Value> proto = v8::Local<v8::Value>::Cast(objectRef(prototype));
+  v8::Local<v8::Function> function = v8::Function::New(context, callback, hostCallback).ToLocalChecked();
+  function->Set(context, v8::String::NewFromUtf8(_isolate, "prototype").ToLocalChecked(), proto).ToChecked();
+  //  function->SetPrototype(context, proto).ToChecked();
+  function->Set(context, v8::String::NewFromUtf8(_isolate, "__hostClass__").ToLocalChecked(), hostCallback).ToChecked();
+  v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(function);
+  return createObject(object, proxy).getFunction(*this);
 }
 
 jsa::Value V8Context::call(const jsa::Function &function, const jsa::Value &jsThis, const jsa::Value *args,
@@ -1038,9 +1174,16 @@ bool V8Context::instanceOf(const jsa::Object &o, const jsa::Function &f) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
   v8::Context::Scope contextScope(context);
+  v8::TryCatch tryCatch(_isolate);
   v8::Local<v8::Object> obj = objectRef(o);
-  v8::Local<v8::Object> func = objectRef(f);
-  return obj->InstanceOf(context, func).ToChecked();
+  v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(objectRef(f));
+  bool result;
+
+  if (!obj->InstanceOf(context, func).To(&result)) {
+    reportException(tryCatch);
+    return false;
+  }
+  return result;
 }
 
 v8::Local<v8::Symbol> V8Context::symbolRef(const jsa::Symbol &sym) const {
