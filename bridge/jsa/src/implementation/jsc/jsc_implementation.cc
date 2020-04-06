@@ -8,8 +8,6 @@
 namespace alibaba {
 namespace jsc {
 
-/////////////////////////////////////////一些宏定义/////////////////////////////////////////////
-
 #ifndef __has_builtin
 #define __has_builtin(x) 0
 #endif
@@ -121,15 +119,12 @@ JSCContext::~JSCContext() {
 }
 
 jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) {
-
-  // step1: 构造JSC source以及sourceURL
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
   if (!sourceURL.empty()) {
     sourceURLRef = JSStringCreateWithUTF8CString(sourceURL.c_str());
   }
 
-  // step2: 调用 JSC evaluateScript
   JSValueRef exc = nullptr; // exception
   JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
 
@@ -138,7 +133,6 @@ jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &s
     JSStringRelease(sourceURLRef);
   }
 
-  // step3: 查看是否有异常
   if (hasException(res, exc)) return jsa::Value::null();
   return createValue(res);
 }
@@ -386,8 +380,6 @@ std::once_flag hostObjectClassOnceFlag;
 JSClassRef hostObjectClass{};
 } // namespace
 
-// 创建一个自定义对象
-// 内部会使用JSClassCreate以及JSObjectMake函数
 jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
   struct HostObjectProxy : public detail::HostObjectProxyBase {
     static JSValueRef getProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propName, JSValueRef *exception) {
@@ -489,7 +481,6 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
   return createObject(obj);
 }
 
-// 返回jsa::Object实际包含的HostObject
 std::shared_ptr<jsa::HostObject> JSCContext::getHostObject(const jsa::Object &obj) {
   // We are guarenteed at this point to have isHostObject(obj) == true
   // so the private data should be HostObjectMetadata
@@ -795,7 +786,6 @@ jsa::Function JSCContext::createFunctionFromHostFunction(const jsa::PropNameID &
       return context.valueRef(value);
     }
 
-    // JSC会调用此方法执行先前注入的JS Function
     static JSValueRef call(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef arguments[], JSValueRef *exception) {
       HostFunctionMetadata *metadata = static_cast<HostFunctionMetadata *>(JSObjectGetPrivate(function));
@@ -819,7 +809,6 @@ jsa::Function JSCContext::createFunctionFromHostFunction(const jsa::PropNameID &
       JSValueRef res;
       jsa::Value thisVal(context.createObject(thisObject));
       try {
-        // 执行lambda
         res = context.valueRef(metadata->hostFunction_(context, thisVal, args, argumentCount));
       } catch (const jsa::JSError &error) {
         *exception = context.valueRef(error.value());
@@ -882,7 +871,6 @@ jsa::Function JSCContext::createClassFromHostClass(const jsa::PropNameID &name, 
       return context.valueRef(value);
     }
 
-    // JSC会调用此方法执行先前注入的JS Function
     static JSObjectRef call(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                             const JSValueRef arguments[], JSValueRef *exception) {
       HostClassMetadata *metadata = static_cast<HostClassMetadata *>(JSObjectGetPrivate(constructor));
