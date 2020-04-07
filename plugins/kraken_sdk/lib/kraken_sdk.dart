@@ -3,9 +3,20 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
+typedef MethodCallback = Future<dynamic> Function(MethodCall call);
 class KrakenSDKPlugin {
   static VoidCallback reloadListener;
-  static const MethodChannel _channel = const MethodChannel('kraken_sdk');
+  static MethodChannel _channel = MethodChannel('kraken_sdk')
+    ..setMethodCallHandler((call) async {
+    if ('reload' == call.method && reloadListener != null) {
+      await reloadListener();
+    } else {
+      return _handler(call);
+    }
+    return Future<dynamic>.value(null);
+  });
+
+  static MethodCallback _handler;
 
   static void setReloadListener(VoidCallback reloadListener) {
     KrakenSDKPlugin.reloadListener = reloadListener;
@@ -21,7 +32,7 @@ class KrakenSDKPlugin {
   }
 
   static void setMethodCallback(Future<dynamic> handler(MethodCall call)) {
-    _channel.setMethodCallHandler(handler);
+    _handler = handler;
   }
 
   // Support for method channel

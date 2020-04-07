@@ -166,7 +166,7 @@ void launch({
 
   initBridge();
   _setTargetPlatformForDesktop();
-  //KrakenBundle.setReloadListener(reloadApp);
+  KrakenSDKPlugin.setReloadListener(reloadApp);
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
