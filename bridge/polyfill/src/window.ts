@@ -3,23 +3,6 @@ import { krakenWindow, KrakenLocation } from './types';
 import { addEvent } from "./document/ui-manager";
 import { NodeId } from "./document/node";
 
-function bindLegacyListeners(eventTarget: EventTarget, events: string[]) {
-  events.forEach((event: string) => {
-    Object.defineProperty(eventTarget, 'on' + event, {
-      enumerable: true,
-      configurable: false,
-      set(fn: any) {
-        if (this['_on' + event]) this.removeEventListener(event, this['_on' + event]);
-        this['_on' + event] = fn;
-        this.addEventListener(event, fn);
-      },
-      get() {
-        return this['_on' + event];
-      },
-    });
-  });
-}
-
 
 class Window extends EventTarget {
   private events: {
@@ -28,7 +11,6 @@ class Window extends EventTarget {
 
   constructor() {
     super();
-    bindLegacyListeners(this, ['load', 'colorschemechange']);
   }
 
   addEventListener(eventName: string, eventListener: EventListener) {
