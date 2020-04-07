@@ -6,7 +6,7 @@
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   NSObject<FlutterBinaryMessenger>* messager = [registrar messenger];
   FlutterMethodChannel* channel = [FlutterMethodChannel
-      methodChannelWithName:@"kraken_sdk"
+      methodChannelWithName:@"kraken"
             binaryMessenger:messager];
 
   KrakenSDKPlugin* instance = [[KrakenSDKPlugin alloc] initWithRegistrar: registrar];
