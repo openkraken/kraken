@@ -1,31 +1,56 @@
 describe('Appear Event', () => {
-  it('appear & disappear', () => {
-    return new Promise(async (resolve, reject) => {
-      const div = document.createElement('div');
-      div.style.width = '300px';
-      div.style.height = '300px';
-      div.style.backgroundColor = 'red';
+  it('trigger appear when appended', (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
 
-      let triggered = false;
-      div.addEventListener('disappear', async () => {
-        // Only trigger once, in case of test case error.
-        if (triggered) return;
-        triggered = true;
-        div.style.backgroundColor = 'green';
-        div.style.bottom = '0';
-        await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot('disappeared');
-        resolve();
-      });
-
-      setTimeout(reject, 500);
-      setTimeout(() => {
-        div.style.position = 'absolute';
-        div.style.bottom = '-600px';
-      }, 100);
-
-      document.body.appendChild(div);
-
-      await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot('original');
+    div.addEventListener('appear', () => {
+      done();
     });
+
+    document.body.appendChild(div);
+  });
+
+  it('trigger disappear', (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    div.style.top = '0';
+
+    div.addEventListener('disappear', () => {
+      done();
+    });
+
+    setTimeout(() => {
+      div.style.top = '-600px';
+    }, 100);
+
+    document.body.appendChild(div);
+  });
+
+  it('trigger appear when reappear', (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    div.style.top = '0';
+
+    div.addEventListener('appear', () => {
+      done();
+    });
+
+    setTimeout(() => {
+      div.style.top = '-600px';
+    }, 100);
+
+    setTimeout(() => {
+      div.style.top = '0';
+    }, 200);
+
+    document.body.appendChild(div);
   });
 });

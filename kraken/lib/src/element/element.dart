@@ -1197,23 +1197,24 @@ abstract class Element extends Node
 
   @override
   void addEvent(String eventName) {
-    if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
-    super.addEventListener(eventName, this._eventResponder);
+    if (eventHandlers.containsKey(eventName)) return; // Only listen once.
+    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
+    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
+    super.addEventListener(eventName, _eventResponder);
 
-    if (_isIntersectionObserverEvent(eventName)) {
-      renderIntersectionObserver.onIntersectionChange =
-          handleIntersectionChange;
+    // Only add listener once for all intersection related event
+    if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
+      renderIntersectionObserver.addListener(handleIntersectionChange);
     }
   }
 
   void removeEvent(String eventName) {
-    if (!this.eventHandlers.containsKey(eventName)) return; // Only listen once.
-    super.removeEventListener(eventName, this._eventResponder);
+    if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
+    super.removeEventListener(eventName, _eventResponder);
 
-    if (_isIntersectionObserverEvent(eventName)) {
-      if (!_hasIntersectionObserverEvent(this.eventHandlers)) {
-        renderIntersectionObserver.onIntersectionChange = null;
-      }
+    // Remove listener when no intersection related event
+    if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
+      renderIntersectionObserver.removeListener(handleIntersectionChange);
     }
   }
 

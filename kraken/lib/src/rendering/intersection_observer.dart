@@ -1,9 +1,9 @@
 import 'dart:math' show max;
 import 'dart:ui' as ui;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -53,31 +53,64 @@ class RenderIntersectionObserver extends RenderProxyBox {
     RenderBox child,
   }) : super(child);
 
-  IntersectionChangeCallback _onVisibilityChanged;
+  IntersectionChangeCallback _onIntersectionChange;
 
-  IntersectionChangeCallback get onIntersectionChange => _onVisibilityChanged;
+  /**
+   * A list of event handlers
+   */
+  List<IntersectionChangeCallback> _listeners;
 
-  set onIntersectionChange(IntersectionChangeCallback value) {
-    _onVisibilityChanged = value;
-    markNeedsCompositingBitsUpdate();
-    markNeedsPaint();
+  void addListener(IntersectionChangeCallback callback) {
+    // Init things
+    if (_listeners == null) {
+      _listeners = List();
+      _onIntersectionChange = _dispatchChange;
+    }
+    _listeners.add(callback);
+  }
+
+  void removeListener(IntersectionChangeCallback callback) {
+    for (int i = 0; i < _listeners.length; i += 1) {
+      if (_listeners[i] == callback) {
+        _listeners.removeAt(i);
+        break;
+      }
+    }
+    if (_listeners.isEmpty) {
+      _listeners = null;
+      _onIntersectionChange = null;
+    }
+  }
+
+  void _dispatchChange(IntersectionObserverEntry info) {
+    _listeners.forEach((IntersectionChangeCallback callback) {
+      callback(info);
+    });
   }
 
   // See [RenderProxyBox.alwaysNeedsCompositing].
   @override
-  bool get alwaysNeedsCompositing => onIntersectionChange != null;
+  bool get alwaysNeedsCompositing => _onIntersectionChange != null;
+
+  IntersectionObserverLayer _layer;
 
   /// See [RenderObject.paint].
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (onIntersectionChange == null) {
+    if (_onIntersectionChange == null) {
       super.paint(context, offset);
       return;
     }
 
-    final layer = IntersectionObserverLayer(
-        elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: onIntersectionChange);
-    context.pushLayer(layer, super.paint, offset);
+    if (_layer == null) {
+      _layer = IntersectionObserverLayer(
+        elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
+    } else {
+      _layer.elementSize = semanticBounds.size;
+      _layer.paintOffset = offset;
+    }
+
+    context.pushLayer(_layer, super.paint, offset);
   }
 }
 
@@ -90,19 +123,13 @@ class IntersectionObserverLayer extends ContainerLayer {
         _layerOffset = Offset.zero;
 
   /// The size of the corresponding element.
-  ///
-  /// Never null.
-  final Size elementSize;
+  Size elementSize;
+
+  Offset paintOffset;
 
   /// Last known layer offset supplied to [addToScene].  Never null.
   Offset _layerOffset;
 
-  /// The offset supplied to [RenderVisibilityDetector.paint] method.
-  final Offset paintOffset;
-
-  /// See [VisibilityDetector.onIntersectionChange].
-  ///
-  /// Do not invoke this directly; call [_fireCallback] instead.
   final IntersectionChangeCallback onIntersectionChange;
 
   /// Keeps track of the last known visibility state of a element.
@@ -110,7 +137,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// This is used to suppress extraneous callbacks when visibility hasn't
   /// changed.  Stores entries only for visible element objects;
   /// entries for non-visible ones are actively removed.
-  IntersectionObserverEntry _lastVisibility;
+  IntersectionObserverEntry _lastIntersectionInfo;
 
   /// See [Layer.addToScene].
   @override
@@ -131,7 +158,6 @@ class IntersectionObserverLayer extends ContainerLayer {
   @override
   void detach() {
     super.detach();
-
     // The Layer might no longer be visible.  We'll figure out whether it gets
     // re-attached later.
     _scheduleIntersectionObservationUpdate();
@@ -149,11 +175,12 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   bool _isScheduled = false;
   _scheduleIntersectionObservationUpdate() {
+
     if (!_isScheduled) {
       _isScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        _isScheduled = false;
+      scheduleMicrotask(() {
         _processCallbacks();
+        _isScheduled = false;
       });
     }
   }
@@ -201,22 +228,23 @@ class IntersectionObserverLayer extends ContainerLayer {
   void _fireCallback(IntersectionObserverEntry info) {
     assert(info != null);
 
-    final oldInfo = _lastVisibility;
-    final visible = !info.intersectionRect.isEmpty;
+    final oldInfo = _lastIntersectionInfo;
+    // If isIntersecting is true maybe not visible when element size is 0
+    final isIntersecting = info.isIntersecting;
 
     if (oldInfo == null) {
-      if (!visible) {
+      if (!isIntersecting) {
         return;
       }
-    } else if (info.matchesVisibility(oldInfo)) {
+    } else if (info.matchesIntersecting(oldInfo)) {
       return;
     }
 
-    if (visible) {
-      _lastVisibility = info;
+    if (isIntersecting) {
+      _lastIntersectionInfo = info;
     } else {
       // Track only visible items so that the maps don't grow unbounded.
-      _lastVisibility = null;
+      _lastIntersectionInfo = null;
     }
     // Notify visibility changed event
     onIntersectionChange(info);
@@ -225,47 +253,67 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Executes visibility callbacks for all updated.
   void _processCallbacks() {
     if (!attached) {
-      _fireCallback(IntersectionObserverEntry(size: _lastVisibility?.size));
+      _fireCallback(IntersectionObserverEntry(size: _lastIntersectionInfo?.size));
       return;
     }
 
     Rect elementBounds = _computeElementBounds();
 
-    final info = IntersectionObserverEntry.fromRects(elementBounds: elementBounds, clipRect: _computeClipRect());
+    final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: _computeClipRect());
     _fireCallback(info);
   }
 }
 
 @immutable
 class IntersectionObserverEntry {
-  /// If `size` or `visibleBounds` are omitted or null, the [IntersectionObserverEntry]
-  /// will be initialized to [Offset.zero] or [Rect.zero] respectively.  This
-  /// will indicate that the corresponding element is competely hidden.
-  const IntersectionObserverEntry({Size size, Rect intersectionRect})
-      : size = size ?? Size.zero,
-        intersectionRect = intersectionRect ?? Rect.zero;
+  const IntersectionObserverEntry({Rect boundingClientRect, Rect intersectionRect, Rect rootBounds, Size size})
+      : boundingClientRect = boundingClientRect ?? Rect.zero,
+        intersectionRect = intersectionRect ?? Rect.zero,
+        rootBounds = rootBounds ?? Rect.zero,
+        size = size ?? Size.zero;
 
   /// Constructs a [IntersectionObserverEntry] from element bounds and a corresponding
   /// clipping rectangle.
   ///
-  /// [elementBounds] and [clipRect] are expected to be in the same coordinate
+  /// [boundingClientRect] and [rootBounds] are expected to be in the same coordinate
   /// system.
   factory IntersectionObserverEntry.fromRects({
-    @required Rect elementBounds,
-    @required Rect clipRect,
+    @required Rect boundingClientRect,
+    @required Rect rootBounds,
   }) {
-    assert(elementBounds != null);
-    assert(clipRect != null);
+    assert(boundingClientRect != null);
+    assert(rootBounds  != null);
 
     // Compute the intersection in the element's local coordinates.
     final intersectionRect =
-        elementBounds.overlaps(clipRect) ? elementBounds.intersect(clipRect).shift(-elementBounds.topLeft) : Rect.zero;
+        boundingClientRect.overlaps(rootBounds) ? boundingClientRect.intersect(rootBounds).shift(-boundingClientRect.topLeft) : Rect.zero;
 
-    return IntersectionObserverEntry(size: elementBounds.size, intersectionRect: intersectionRect);
+    return IntersectionObserverEntry(
+      boundingClientRect: boundingClientRect,
+      intersectionRect: intersectionRect,
+      rootBounds: rootBounds,
+      size: boundingClientRect.size
+    );
+  }
+
+  // A Boolean value which is true if the target element intersects with the intersection observer's root.
+  // If this is true, then, the IntersectionObserverEntry describes a transition into a state of intersection; 
+  // if it's false, then you know the transition is from intersecting to not-intersecting.
+  bool get isIntersecting {
+    if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left)
+      return false;
+    if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top)
+      return false;
+    return true;
   }
 
   /// The size of the element.
   final Size size;
+
+  final Rect rootBounds;
+
+  /// Returns the bounds rectangle of the target element.
+  final Rect boundingClientRect;
 
   /// The visible portion of the element, in the element's local coordinates.
   ///
@@ -305,7 +353,7 @@ class IntersectionObserverEntry {
 
   /// Returns true if the specified [IntersectionObserverEntry] object has equivalent
   /// visibility to this one.
-  bool matchesVisibility(IntersectionObserverEntry info) {
+  bool matchesIntersecting(IntersectionObserverEntry info) {
     // We don't override `operator ==` so that object equality can be separate
     // from whether two [IntersectionObserverEntry] objects are sufficiently similar
     // that we don't need to fire callbacks for both.  This could be pertinent

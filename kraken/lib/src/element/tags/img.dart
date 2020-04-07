@@ -3,16 +3,19 @@
  * Author: Kraken Team.
  */
 
+import 'dart:io';
+
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/src/rendering/cached_network_image.dart';
 import 'package:kraken/style.dart';
+import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
 class ImgElement extends Element {
   ImageProvider image;
   RenderDecoratedBox imageBox;
-  RenderConstrainedBox imageConstrainedBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
@@ -25,29 +28,77 @@ class ImgElement extends Element {
             tagName: IMAGE,
             properties: props,
             events: events) {
-    addImgBox();
+    _renderImage();
   }
 
-  void addImgBox() {
-    String url = _getFormattedSourceURL(properties['src']);
-    if (url.isNotEmpty) {
-      image = NetworkImage(url);
+  bool get _hasWidthAndHeight {
+    return style.contains('width') && style.contains('height');
+  }
+
+  bool _hasLazyLoading = false;
+
+  void _renderImage() {
+    if (_hasLazyLoading) return;
+    String loading = properties['loading'];
+    // Image dimensions(width/height) should specified for performance when lazyload
+    if (loading == 'lazy') {
+      _hasLazyLoading = true;
+      renderIntersectionObserver.addListener(_handleIntersectionChange);
+    } else {
+      _setImageBox();
+    }
+  }
+
+  void _handleIntersectionChange(IntersectionObserverEntry entry) {
+    // When appear
+    if (entry.isIntersecting) {
+      _setImageBox();
+      // Once appear remove the listener
+      _resetLazyLoading();
+    }
+  }
+
+  void _resetLazyLoading() {
+    _hasLazyLoading = false;
+    renderIntersectionObserver.removeListener(_handleIntersectionChange);
+  }
+
+  void _setImageBox() {
+    String src = properties['src'];
+    if (src != null && src.isNotEmpty) {
+      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')){
+        src = src.startsWith('//') ? 'https:' + src : src;
+        // TOOD caching also works after image downloaded
+        String caching = properties['caching'];
+        if (caching == 'store' || caching == 'auto') {
+          image = CachedNetworkImage(src);
+        } else {
+          image = NetworkImage(src);
+        }
+      } else if (src.startsWith('file://')) {
+        image = FileImage(File.fromUri(Uri.parse(src)));
+      } else {
+        // Fallback to asset image
+        image = AssetImage(src);
+      }
       _constructImageChild();
     }
   }
 
-  void removeImgBox() {
+  void _removeImageBox() {
+    image = null;
+    imageBox = null;
     renderPadding.child = null;
   }
 
   void _constructImageChild() {
     imageBox = getRenderDecoratedBox(style, image);
 
-    if (!determinBothWidthAndHeight) {
+    if (!_hasWidthAndHeight) {
       imageStream = image.resolve(imageBox.configuration);
       imageListeners = [
-        ImageStreamListener(initImageInfo),
-        ImageStreamListener(handleEventAfterImageLoaded),
+        ImageStreamListener(_initImageInfo),
+        ImageStreamListener(_handleEventAfterImageLoaded),
       ];
       imageListeners.forEach((ImageStreamListener imageListener) {
         imageStream.addListener(imageListener);
@@ -59,21 +110,11 @@ class ImgElement extends Element {
     }
   }
 
-  bool get determinBothWidthAndHeight {
-    return style.contains('width') && style.contains('height');
-  }
-
-  String _getFormattedSourceURL(String url) {
-    if (url == null) url = '';
-    if (url.startsWith('//')) return 'https:' + url;
-    return url;
-  }
-
-  void handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
+  void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     dispatchEvent(Event('load'));
   }
 
-  void initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
+  void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
     _resize();
   }
@@ -168,24 +209,31 @@ class ImgElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      image = null;
-      imageBox = null;
-      imageConstrainedBox.child = null;
+      _removeImageBox();
+    } else if (key == 'loading' && _hasLazyLoading && image == null) {
+      _resetLazyLoading();
     }
   }
 
   @override
   void setProperty(String key, dynamic value) {
+    if (properties[key] == value) return; 
     super.setProperty(key, value);
+
     if (key == 'src') {
-      removeImgBox();
-      addImgBox();
+      _renderImage();
+    } else if (key == 'loading' && _hasLazyLoading) {
+      // Should reset lazy when value change
+      _resetLazyLoading();
+      _renderImage();
     }
   }
 
   @override
   void setStyle(String key, value) {
+    if (style[key] == value) return; 
     super.setStyle(key, value);
+
     _resize();
   }
 }
