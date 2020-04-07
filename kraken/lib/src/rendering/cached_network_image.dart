@@ -57,13 +57,13 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     if (bytes == null) {
       bytes = await fetchFile(key, chunkEvents);
       // Async store file
-      sotreFile(tempFile, bytes);
+      storeFile(tempFile, bytes);
     }
 
     return bytes;
   }
 
-  sotreFile(Uri tempFile, Uint8List bytes) async {
+  storeFile(Uri tempFile, Uint8List bytes) async {
     try {
       File file = await File(tempFile.path).create(recursive: true);
       file.writeAsBytes(bytes);
