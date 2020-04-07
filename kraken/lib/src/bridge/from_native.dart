@@ -10,7 +10,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken_method_channel/kraken_method_channel.dart';
+import 'package:kraken_sdk/kraken_sdk.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -222,11 +222,11 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       Geolocation.clearWatch(id);
     }
   } else if (module == 'PlatformChannel') {
-    KrakenMethodChannel.setMessageCallback((MethodCall call) async {
+    KrakenSDKPlugin.setMethodCallback((MethodCall call) async {
       emitModuleEvent(jsonEncode(['PlatformChannel', call.method, call.arguments]));
     });
 
-    KrakenMethodChannel.invokeMethod(args[2], args[3]).then((dynamic result) {
+    KrakenSDKPlugin.invokeMethod(args[2], args[3]).then((result) {
       String ret;
       if (result is String) {
         ret = result;
