@@ -31,26 +31,6 @@ dev_dependencies:
     sdk: flutter
   ansicolor: '^1.0.2'
 
-# Overrides local path for kraken deps.
-dependency_overrides:
-  kraken:
-    path: ../kraken
-  kraken_audioplayers:
-    path: ../plugins/kraken_audioplayers
-  kraken_camera:
-    path: ../plugins/kraken_camera
-  kraken_geolocation:
-    path: ../plugins/kraken_geolocation
-  kraken_video_player:
-    path: ../plugins/kraken_video_player
-  kraken_webview:
-    path: ../plugins/kraken_webview
-  kraken_bundle:
-    path: ../plugins/kraken_bundle
-  kraken_method_channel:
-    path: ../plugins/kraken_method_channel
-
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

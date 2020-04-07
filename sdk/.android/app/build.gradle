@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.taobao.kraken.sdk_launcher.host"
+        applicationId "com.taobao.kraken.host"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

@@ -1,6 +1,6 @@
 <!-- Generated file. Do not edit. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.taobao.kraken.sdk_launcher"
+    package="com.taobao.kraken"
     xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
   <application tools:node="merge">

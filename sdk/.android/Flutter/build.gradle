@@ -1,3 +1,5 @@
+// Generated file. Do not edit.
+
 def localProperties = new Properties()
 def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
 if (localPropertiesFile.exists()) {
@@ -24,7 +26,7 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.library'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-group 'com.taobao.kraken.sdk_launcher'
+group 'com.taobao.kraken'
 version '1.0'
 
 android {
