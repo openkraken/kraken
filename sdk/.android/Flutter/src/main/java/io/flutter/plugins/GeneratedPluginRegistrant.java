@@ -19,8 +19,7 @@ public final class GeneratedPluginRegistrant {
       xyz.luan.audioplayers.AudioplayersPlugin.registerWith(shimPluginRegistry.registrarFor("xyz.luan.audioplayers.AudioplayersPlugin"));
     flutterEngine.getPlugins().add(new io.flutter.plugins.camera.CameraPlugin());
     flutterEngine.getPlugins().add(new com.lyokone.location.LocationPlugin());
-    flutterEngine.getPlugins().add(new com.taobao.kraken_method_channel.KrakenMethodChannelPlugin());
-    flutterEngine.getPlugins().add(new com.taobao.kraken.kraken_sdk.KrakenSDKPlugin());
+    flutterEngine.getPlugins().add(new com.taobao.kraken.KrakenSDKPlugin());
     flutterEngine.getPlugins().add(new io.flutter.plugins.videoplayer.VideoPlayerPlugin());
     flutterEngine.getPlugins().add(new io.flutter.plugins.webviewflutter.WebViewFlutterPlugin());
     flutterEngine.getPlugins().add(new io.flutter.plugins.pathprovider.PathProviderPlugin());

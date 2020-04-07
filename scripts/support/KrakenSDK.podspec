@@ -17,7 +17,7 @@ New generation rendering framework.
   arr = Array.new
   p.each do |f|
     if f.end_with?('.framework')
-      arr.push('./' + f)
+      arr.push(f)
     end
   end
 

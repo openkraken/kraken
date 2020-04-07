@@ -34,12 +34,6 @@
 @import kraken_geolocation;
 #endif
 
-#if __has_include(<kraken_method_channel/KrakenMethodChannelPlugin.h>)
-#import <kraken_method_channel/KrakenMethodChannelPlugin.h>
-#else
-@import kraken_method_channel;
-#endif
-
 #if __has_include(<kraken_sdk/KrakenSDKPlugin.h>)
 #import <kraken_sdk/KrakenSDKPlugin.h>
 #else
@@ -78,7 +72,6 @@
   [AudioplayersPlugin registerWithRegistrar:[registry registrarForPlugin:@"AudioplayersPlugin"]];
   [CameraPlugin registerWithRegistrar:[registry registrarForPlugin:@"CameraPlugin"]];
   [LocationPlugin registerWithRegistrar:[registry registrarForPlugin:@"LocationPlugin"]];
-  [KrakenMethodChannelPlugin registerWithRegistrar:[registry registrarForPlugin:@"KrakenMethodChannelPlugin"]];
   [KrakenSDKPlugin registerWithRegistrar:[registry registrarForPlugin:@"KrakenSDKPlugin"]];
   [FLTVideoPlayerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTVideoPlayerPlugin"]];
   [FLTWebViewFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTWebViewFlutterPlugin"]];

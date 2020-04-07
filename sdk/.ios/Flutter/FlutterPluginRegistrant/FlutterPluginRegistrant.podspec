@@ -24,7 +24,6 @@ Depends on all your plugins, and provides a function to register them.
   s.dependency 'kraken_audioplayers'
   s.dependency 'kraken_camera'
   s.dependency 'kraken_geolocation'
-  s.dependency 'kraken_method_channel'
   s.dependency 'kraken_sdk'
   s.dependency 'kraken_video_player'
   s.dependency 'kraken_webview'
