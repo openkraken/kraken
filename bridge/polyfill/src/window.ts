@@ -13,6 +13,19 @@ class Window extends EventTarget {
     super();
   }
 
+  set onload(fn: EventListener) {
+    this.addEventListener('load', fn);
+  }
+  get onload() {
+    return this.events['onload'];
+  }
+  set oncolorschemachange(fn: EventListener) {
+    this.addEventListener('colorschemechange', fn);
+  }
+  get oncolorschemechange() {
+    return this.events['colorschemechange'];
+  }
+
   addEventListener(eventName: string, eventListener: EventListener) {
     super.addEventListener(eventName, eventListener);
     if (!this.events.hasOwnProperty(eventName)) {

@@ -24,6 +24,11 @@ class Window extends EventTarget {
     emitUIEvent(json);
   }
 
+  void _handleLoad(Event event) {
+    String json = jsonEncode([WINDOW_ID, event]);
+    emitUIEvent(json);
+  }
+
   @override
   void addEvent(String eventName) {
     super.addEvent(eventName);
@@ -32,6 +37,8 @@ class Window extends EventTarget {
     switch (eventName) {
       case 'colorschemechange':
         return super.addEventListener(eventName, this._handleColorSchemeChange);
+      case 'load':
+        return super.addEventListener(eventName, this._handleLoad);
     }
   }
 }

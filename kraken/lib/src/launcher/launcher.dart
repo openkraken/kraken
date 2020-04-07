@@ -147,8 +147,8 @@ void defaultAfterConnected() async {
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
   requestAnimationFrame((_) {
-    String json = jsonEncode([WINDOW_ID, Event('load')]);
-    emitUIEvent(json);
+    Window window = nodeMap[WINDOW_ID];
+    window.dispatchEvent(Event('load'));
   });
 }
 
