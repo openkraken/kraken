@@ -160,4 +160,136 @@ describe('Position absolute', () => {
     append(div1, div2);
     await matchScreenshot();
   });
+
+  it('works with dynamic change bottom property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.bottom = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.bottom = '-200px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
+
+  it('works with dynamic change width property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.width = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.width = '400px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
+
+  it('works with dynamic change height property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.height = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.height = '400px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
+
+  it('works with dynamic change top property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.top = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.top = '-50px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
+
+  it('works with dynamic change left property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.left = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.left = '-50px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
+
+  it('works with dynamic change right property', async (done) => {
+    const div = document.createElement('div');
+    div.style.width = '300px';
+    div.style.height = '300px';
+    div.style.backgroundColor = 'red';
+    div.style.position = 'absolute';
+    
+    setTimeout(async () => {
+      div.style.right = '100px';
+      await matchScreenshot();
+    }, 100);
+
+    setTimeout(async () => {
+      div.style.right = '-50px';
+      await matchScreenshot();
+      done();
+    }, 300);
+    
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
 });
