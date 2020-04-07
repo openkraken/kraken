@@ -25,11 +25,12 @@ class KrakenSDKPlugin {
   }
 
   // Support for method channel
-  static Future<dynamic> invokeMethod(String method, args) async {
-    Map<String, String> argsWrap = {
+  static Future<dynamic> invokeMethod(String method, List args) async {
+    Map<String, dynamic> argsWrap = {
       'method': method,
       'args': args,
     };
+
     return await _channel.invokeMethod('invokeMethod', argsWrap);
   }
 }

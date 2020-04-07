@@ -226,7 +226,9 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       emitModuleEvent(jsonEncode(['PlatformChannel', call.method, call.arguments]));
     });
 
-    KrakenSDKPlugin.invokeMethod(args[2], args[3]).then((result) {
+    String method = args[2];
+    List methodArguments = args[3];
+    KrakenSDKPlugin.invokeMethod(method, methodArguments).then((result) {
       String ret;
       if (result is String) {
         ret = result;
