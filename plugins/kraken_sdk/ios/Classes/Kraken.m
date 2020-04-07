@@ -29,6 +29,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
     instanceList = [[NSMutableArray alloc] initWithCapacity: 0];
   }
   [instanceList addObject: self];
+  
   return self;
 }
 
@@ -51,6 +52,18 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 
 - (NSString*) getUrl {
   return self.bundleUrl;
+}
+
+- (void) invokeMethod:(NSString *)method arguments:(nullable id) arguments {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self.channel invokeMethod:method arguments:arguments];
+  });
+}
+
+- (void) _handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (self.methodHandler != nil) {
+   self.methodHandler(call, result);
+  }
 }
 
 @end

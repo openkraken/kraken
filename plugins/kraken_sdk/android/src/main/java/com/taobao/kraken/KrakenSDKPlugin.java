@@ -39,6 +39,7 @@ public class KrakenSDKPlugin implements FlutterPlugin, MethodCallHandler {
     // in the same class.
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "kraken_sdk");
+
         KrakenSDKPlugin plugin = new KrakenSDKPlugin();
         channel.setMethodCallHandler(plugin);
     }
@@ -51,11 +52,15 @@ public class KrakenSDKPlugin implements FlutterPlugin, MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        KrakenSDK krakenSDK = KrakenSDK.get(flutterEngine);
+        Kraken kraken = Kraken.get(flutterEngine);
         if (call.method.equals("getUrl")) {
-            result.success(krakenSDK == null ? "" : krakenSDK.getUrl());
-        } else if (krakenSDK != null) {
-            krakenSDK.handleMessageCall(call, result);
+            result.success(kraken == null ? "" : kraken.getUrl());
+        } else if (call.method.equals("invokeMethod")) {
+            String method = call.argument("method");
+            Object args = call.argument("args");
+            assert method != null;
+            MethodCall callWrap = new MethodCall(method, args);
+            kraken._handleMethodCall(callWrap, result);
         } else {
             result.notImplemented();
         }
@@ -64,7 +69,7 @@ public class KrakenSDKPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
-        KrakenSDK.get(flutterEngine).destory();
+        Kraken.get(flutterEngine).destory();
         flutterEngine = null;
     }
 }

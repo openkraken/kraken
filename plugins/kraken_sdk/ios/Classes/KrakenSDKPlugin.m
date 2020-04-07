@@ -8,9 +8,9 @@
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"kraken_sdk"
             binaryMessenger:messager];
-  
+
   KrakenSDKPlugin* instance = [[KrakenSDKPlugin alloc] initWithRegistrar: registrar];
-  
+
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -28,6 +28,10 @@
     } else {
       result(nil);
     }
+  } else if ([@"invokeMethod" isEqualToString: call.method]) {
+    Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
+    FlutterMethodCall* callWrap = [FlutterMethodCall methodCallWithMethodName: call.arguments[@"method"] arguments: call.arguments[@"args"]];
+    [krakenInstance _handleMethodCall:callWrap result:result];
   } else {
     result(FlutterMethodNotImplemented);
   }

@@ -8,7 +8,6 @@ import Foundation
 import connectivity_macos
 import kraken_audioplayers
 import kraken_geolocation
-import kraken_method_channel
 import kraken_sdk
 import kraken_video_player
 import path_provider_macos
@@ -18,7 +17,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   ConnectivityPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlugin"))
   AudioplayersPlugin.register(with: registry.registrar(forPlugin: "AudioplayersPlugin"))
   LocationPlugin.register(with: registry.registrar(forPlugin: "LocationPlugin"))
-  KrakenMethodChannelPlugin.register(with: registry.registrar(forPlugin: "KrakenMethodChannelPlugin"))
   KrakenSDKPlugin.register(with: registry.registrar(forPlugin: "KrakenSDKPlugin"))
   FLTVideoPlayerPlugin.register(with: registry.registrar(forPlugin: "FLTVideoPlayerPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))

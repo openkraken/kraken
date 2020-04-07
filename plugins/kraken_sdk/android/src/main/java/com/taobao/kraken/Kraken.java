@@ -11,15 +11,15 @@ import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
-public class KrakenSDK {
+public class Kraken {
 
   private String url;
   private FlutterEngine flutterEngine;
 
   private MethodChannel.MethodCallHandler handler;
-  private static Map<FlutterEngine, KrakenSDK> sdkMap = new HashMap<>();
+  private static Map<FlutterEngine, Kraken> sdkMap = new HashMap<>();
 
-  public KrakenSDK(FlutterEngine flutterEngine) {
+  public Kraken(FlutterEngine flutterEngine) {
     if (flutterEngine != null) {
       this.flutterEngine = flutterEngine;
       sdkMap.put(flutterEngine, this);
@@ -28,7 +28,7 @@ public class KrakenSDK {
     }
   }
 
-  public static KrakenSDK get(FlutterEngine engine) {
+  public static Kraken get(FlutterEngine engine) {
     return sdkMap.get(engine);
   }
 
@@ -47,7 +47,7 @@ public class KrakenSDK {
     return url;
   }
 
-  public void handleMessageCall(MethodCall call, MethodChannel.Result result) {
+  public void _handleMethodCall(MethodCall call, MethodChannel.Result result) {
     if (this.handler != null) {
       this.handler.onMethodCall(call, result);
     }
