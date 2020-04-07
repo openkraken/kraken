@@ -1,0 +1,40 @@
+name: kraken_sdk
+description: Expose SDK API from kraken.
+version: 0.0.1
+author: KrakenTeam
+homepage: http://rax.alibaba-inc.com/kraken
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  #
+  # NOTE: This new plugin description format is not supported on Flutter's
+  # stable channel as of 1.9.1. A plugin published using this format will not
+  # work for most clients until the next major stable release.
+  # However, it is required in order to declare macOS support.
+  plugin:
+    platforms:
+      android:
+        package: com.taobao.kraken
+        pluginClass: KrakenSDKPlugin
+      ios:
+        pluginClass: KrakenSDKPlugin
+      macos:
+        pluginClass: KrakenSDKPlugin

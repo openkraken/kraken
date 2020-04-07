@@ -42,11 +42,18 @@ Icon?
 .tags*
 
 build/
-.ios/
+.symlinks
+Pods/
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Symbolication related
+app.*.symbols
 
 pubspec.lock
 assets/*
 !assets/.gitkeep
 .android/targets
+.ios/Flutter/engine
+.ios/Flutter/Generated.xcconfig
+.ios/Flutter/flutter_export_environment.sh

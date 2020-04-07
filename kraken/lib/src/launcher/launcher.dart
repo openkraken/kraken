@@ -14,11 +14,10 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken_bundle/kraken_bundle.dart';
+import 'package:kraken_sdk/kraken_sdk.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
-
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
@@ -46,11 +45,12 @@ void runApp({
     debugPaintSizeEnabled = true;
   }
 
-  if (afterConnected != null) _connectedCallback = afterConnected;
   if (shouldInitializeBinding) {
     /// Bootstrap binding
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
+
+  if (afterConnected != null) _connectedCallback = afterConnected;
 
   await connect(showPerformanceOverlay);
 }
@@ -140,9 +140,9 @@ void _setTargetPlatformForDesktop() {
 }
 
 void defaultAfterConnected() async {
-  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenBundle.getBundleUrl();
-  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv() ?? await KrakenBundle.getBundlePath();
-  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenBundle.getZipBundleUrl();
+  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
+  String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
+  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
@@ -166,7 +166,7 @@ void launch({
 
   initBridge();
   _setTargetPlatformForDesktop();
-  KrakenBundle.setReloadListener(reloadApp);
+  KrakenSDKPlugin.setReloadListener(reloadApp);
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
