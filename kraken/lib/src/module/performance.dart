@@ -1,8 +1,15 @@
-import 'package:flutter/scheduler.dart';
+import 'dart:developer';
 
 class Performance {
-  static now() {
-    Duration timeStamp = SchedulerBinding.instance.currentFrameTimeStamp;
-    return timeStamp.inMicroseconds / 1000;
+  static DateTime timeOrigin = DateTime.now();
+
+  // Use the same monotonic clock with dart vm.
+  static double now() {
+    int nowInMicroseconds = Timeline.now;
+    return nowInMicroseconds / 1000;
+  }
+
+  static double getTimeOrigin() {
+    return timeOrigin.microsecondsSinceEpoch / 1000;
   }
 }
