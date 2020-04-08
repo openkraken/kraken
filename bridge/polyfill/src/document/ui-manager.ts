@@ -1,4 +1,4 @@
-import { krakenUIManager, krakenRequestAnimationFrame, krakenRequestBatchUpdate, krakenToBlob } from '../types';
+import { krakenUIManager, krakenRequestAnimationFrame, krakenRequestBatchUpdate, krakenToBlob } from '../bridge';
 
 const updateMessageQueue: any[] = [];
 let updateRequested: boolean = false;

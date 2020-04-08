@@ -14,16 +14,16 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken_sdk/kraken_sdk.dart';
 import 'package:requests/requests.dart';
 
 import 'bundle.dart';
+
+const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
-const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 const String ZIP_BUNDLE_URL = "KRAKEN_ZIP_BUNDLE_URL";
 
 typedef ConnectedCallback = void Function();
@@ -140,13 +140,28 @@ void _setTargetPlatformForDesktop() {
 }
 
 void defaultAfterConnected() async {
-  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
+  String bundleURL = _bundleURLOverride ?? getBundleURLFromEnv();
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
-  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv() ?? await KrakenSDKPlugin.getUrl();
+  String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();
+
+  if (bundleURL ?? bundlePath ?? zipBundleURL == null) {
+    String urlFromChannel = await KrakenMethodChannel.getUrl();
+    if (urlFromChannel != null && urlFromChannel.isNotEmpty) {
+      // Maybe shold more strict to match
+      if (urlFromChannel.endsWith('.zip')) {
+        zipBundleURL = urlFromChannel;
+      } else if (urlFromChannel.startsWith('http')) {
+        bundleURL = urlFromChannel;
+      } else {
+        bundlePath = urlFromChannel;
+      }
+    }
+  }
+
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
-  requestAnimationFrame((_) {
+  requestAnimationFrame((timeStamp) {
     String json = jsonEncode([WINDOW_ID, Event('load')]);
     emitUIEvent(json);
   });
@@ -166,7 +181,7 @@ void launch({
 
   initBridge();
   _setTargetPlatformForDesktop();
-  KrakenSDKPlugin.setReloadListener(reloadApp);
+  KrakenMethodChannel.setReloadHandler(reloadApp);
   runApp(
       enableDebug: Platform.environment[ENABLE_DEBUG] != null,
       showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,

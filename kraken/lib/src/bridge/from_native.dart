@@ -10,7 +10,6 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken_sdk/kraken_sdk.dart';
 import 'package:requests/requests.dart';
 
 import 'platform.dart';
@@ -221,25 +220,33 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       int id = positionArgs[0];
       Geolocation.clearWatch(id);
     }
-  } else if (module == 'PlatformChannel') {
-    KrakenSDKPlugin.setMethodCallback((MethodCall call) async {
-      emitModuleEvent(jsonEncode(['PlatformChannel', call.method, call.arguments]));
-    });
-
-    String method = args[2];
-    List methodArguments = args[3];
-    KrakenSDKPlugin.invokeMethod(method, methodArguments).then((result) {
-      String ret;
-      if (result is String) {
-        ret = result;
-      } else {
-        ret = jsonEncode(result);
-      }
-
-      callback(Utf8.toUtf8(ret), context);
-    }).catchError((e, stack) {
-      callback(Utf8.toUtf8('Dart Error: $e\n$stack'), context);
-    });
+  } else if (module == 'Performance') {
+    String method = args[1];
+    if (method == 'now') {
+      return Performance.now().toString();
+    } else if (method == 'getTimeOrigin') {
+      return Performance.getTimeOrigin().toString();
+    }
+  } else if (module == 'MethodChannel') {
+    String method = args[1];
+    if (method == 'invokeMethod') {
+      List methodArgs = args[2];
+      KrakenMethodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
+        String ret;
+        if (result is String) {
+          ret = result;
+        } else {
+          ret = jsonEncode(result);
+        }
+        callback(Utf8.toUtf8(ret), context);
+      }).catchError((e, stack) {
+        callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+      });
+    } else if (method == 'setMethodCallHandler') {
+      KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
+        emitModuleEvent(jsonEncode(['MethodChannel', call.method, call.arguments]));
+      });
+    }
   }
 
   return result;

@@ -15,4 +15,8 @@ describe('Navigator', () => {
     expect(deviceInfo.isPhysicalDevice).toBeTrue();
     expect(deviceInfo.platformName).toBe('Mac OS');
   });
+
+  it('userAgent', () => {
+    expect(navigator.userAgent).toMatch(/Kraken/);
+  });
 });

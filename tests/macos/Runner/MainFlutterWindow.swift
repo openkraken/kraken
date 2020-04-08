@@ -1,6 +1,6 @@
 import Cocoa
 import FlutterMacOS
-import kraken_sdk
+import kraken
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {

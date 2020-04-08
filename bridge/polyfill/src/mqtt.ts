@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule } from './bridge';
 
 enum ReadyState {
   CONNECTING = 0,

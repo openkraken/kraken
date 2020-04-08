@@ -32,6 +32,7 @@ export interface PrivateKraken {
   platform: string;
   product: string;
   productSub: string;
+  comment: string;
 }
 
 declare const __kraken_window__: KrakenWindow;

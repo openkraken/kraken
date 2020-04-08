@@ -32,8 +32,8 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
       return VideoElement(id, props, events);
     case CAMERA:
     {
-      CameraElement.setDefaultPropsStyle(props);
-      return CameraElement(id, props, events);
+      CameraPreviewElement.setDefaultPropsStyle(props);
+      return CameraPreviewElement(id, props, events);
     }
     case IFRAME:
       return IFrameElement(id, props, events);

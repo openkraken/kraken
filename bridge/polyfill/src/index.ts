@@ -11,4 +11,5 @@ import './async-storage';
 import './url-search-params';
 import './url';
 import './module-listener'
+import './performance';
 import './kraken';
