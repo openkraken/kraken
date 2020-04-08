@@ -52,8 +52,8 @@ flutter:
     platforms:
       android:
         package: com.taobao.kraken
-        pluginClass: KrakenSDKPlugin
+        pluginClass: KrakenPlugin
       ios:
-        pluginClass: KrakenSDKPlugin
+        pluginClass: KrakenPlugin
       macos:
-        pluginClass: KrakenSDKPlugin
+        pluginClass: KrakenPlugin
