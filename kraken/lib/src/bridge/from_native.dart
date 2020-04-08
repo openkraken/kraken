@@ -144,6 +144,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     if (method == 'getItem') {
       List methodArgs = args[2];
       String key = methodArgs[0];
+      // @TODO: catch error case
       AsyncStorage.getItem(key).then((String value) {
         callback(Utf8.toUtf8(value ?? EMPTY_STRING), context);
       });
@@ -151,23 +152,24 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       List methodArgs = args[2];
       String key = methodArgs[0];
       String value = methodArgs[1];
-      AsyncStorage.setItem(key, value).then((bool o) {
-        callback(Utf8.toUtf8(value), context);
+      AsyncStorage.setItem(key, value).then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     } else if (method == 'removeItem') {
       List methodArgs = args[2];
       String key = methodArgs[0];
-      AsyncStorage.removeItem(key).then((bool value) {
-        callback(Utf8.toUtf8(value.toString()), context);
+      AsyncStorage.removeItem(key).then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     } else if (method == 'getAllKeys') {
+      // @TODO: catch error case
       AsyncStorage.getAllKeys().then((Set<String> set) {
         List<String> list = List.from(set);
         callback(Utf8.toUtf8(jsonEncode(list)), context);
       });
     } else if (method == 'clear') {
-      AsyncStorage.clear().then((bool value) {
-        callback(Utf8.toUtf8(value.toString()), context);
+      AsyncStorage.clear().then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     }
   }  else if(module == 'MQTT') {

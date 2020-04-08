@@ -20,7 +20,7 @@ describe('Navigator', () => {
     expect(navigator.userAgent).toMatch(/Kraken/);
   });
 
-  fit('clipboard', async () => {
+  it('clipboard', async () => {
     const text = String(new Date());
     await navigator.clipboard.writeText(text);
     const data = await navigator.clipboard.readText();
