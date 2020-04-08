@@ -8,16 +8,15 @@ class MainFlutterWindow: NSWindow {
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
-
+    
     RegisterGeneratedPlugins(registry: flutterViewController)
     
-    var kraken = Kraken.init(flutterEngine: flutterViewController.engine)
-
-    func handler(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      kraken?.invokeMethod(call.method, arguments: call.arguments)
-      result("method: " + call.method)
-    }
-    kraken?.setValue(handler, forKey: "methodHandler")
+    let kraken = Kraken.init(flutterEngine: flutterViewController.engine)
+    
+    kraken.registerMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) in
+      kraken.invokeMethod(call.method, arguments: call.arguments)
+    })
+    
     super.awakeFromNib()
   }
 }
