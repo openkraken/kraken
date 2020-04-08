@@ -3,5 +3,6 @@
 
 .packages
 .pub/
-
+macos/Flutter
+ios/Flutter
 build/

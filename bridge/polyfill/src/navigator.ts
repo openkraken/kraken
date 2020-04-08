@@ -1,9 +1,16 @@
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule, privateKraken } from './types';
 
 export const positionWatcherMap = new Map<string, any>();
 export let onConnectivityChangeListener: (data: Object) => any;
 
 const navigator = {
+  // UA is read-only.
+  get userAgent() {
+    // Rule: @product/@productSub (@platform) AliApp(@appName/@appVersion)
+    const app = `${privateKraken.appName}/${privateKraken.appVersion}`;
+    const product = `${privateKraken.product}/${privateKraken.productSub}`;
+    return `${product} (${privateKraken.platform}) AliApp(${app})`;
+  },
   connection: {
     getConnectivity() {
       return new Promise((resolve) => {
