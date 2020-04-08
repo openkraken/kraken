@@ -66,9 +66,9 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')){
+      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')) {
         src = src.startsWith('//') ? 'https:' + src : src;
-        // TOOD caching also works after image downloaded
+        // @TODO: caching also works after image downloaded
         String caching = properties['caching'];
         if (caching == 'store' || caching == 'auto') {
           image = CachedNetworkImage(src);
@@ -94,16 +94,15 @@ class ImgElement extends Element {
   void _constructImageChild() {
     imageBox = getRenderDecoratedBox(style, image);
 
-    if (!_hasWidthAndHeight) {
-      imageStream = image.resolve(imageBox.configuration);
-      imageListeners = [
-        ImageStreamListener(_initImageInfo),
-        ImageStreamListener(_handleEventAfterImageLoaded),
-      ];
-      imageListeners.forEach((ImageStreamListener imageListener) {
-        imageStream.addListener(imageListener);
-      });
-    }
+    imageStream = image.resolve(imageBox.configuration);
+    // Store listeners for remove listener.
+    imageListeners = [
+      ImageStreamListener(_initImageInfo),
+      ImageStreamListener(_handleEventAfterImageLoaded),
+    ];
+    imageListeners.forEach((ImageStreamListener imageListener) {
+      imageStream.addListener(imageListener);
+    });
 
     if (childNodes.isEmpty) {
       addChild(imageBox);
@@ -116,13 +115,16 @@ class ImgElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    _resize();
+
+    if (!_hasWidthAndHeight) {
+      _resize();
+    }
   }
 
   void _resize() {
-    if (_imageInfo == null) {
-      return;
-    }
+    // Not to resize while image is not loaded.
+    if (_imageInfo == null) return;
+
     imageListeners?.forEach((ImageStreamListener imageListener) {
       imageStream.removeListener(imageListener);
     });
@@ -192,13 +194,63 @@ class ImgElement extends Element {
     }
   }
 
+  Alignment _getAlignment(StyleDeclaration style) {
+    // Syntax: object-position: <position>
+    // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
+    // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
+    String objectPosition = style['objectPosition'];
+    List<String> splitted = baseGetShorttedProperties(objectPosition);
+    if (splitted.length == 1) {
+      double value = _getAlignmentValueFromString(splitted.first);
+      return Alignment(value, value);
+    } else if (splitted.length > 1) {
+      return Alignment(
+          _getAlignmentValueFromString(splitted[0]),
+          _getAlignmentValueFromString(splitted[1])
+      );
+    } else {
+      // The default value for object-position is 50% 50%
+      return Alignment.center;
+    }
+  }
+
+  double _getAlignmentValueFromString(String value) {
+    assert(value != null);
+
+    // Support percentage
+    if (value.endsWith('%')) {
+      // 0% equal to -1.0
+      // 50% equal to 0.0
+      // 100% equal to 1.0
+      return double.tryParse(value.substring(0, value.length - 1)) / 50 - 1;
+    }
+
+    switch (value) {
+      case 'top':
+      case 'left':
+        return -1;
+
+      case 'bottom':
+      case 'right':
+        return 1;
+
+      case 'center':
+      default:
+        return 0;
+    }
+  }
+
+
   RenderDecoratedBox getRenderDecoratedBox(StyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
+    Alignment alignment = _getAlignment(style);
+    print('${style["objectPositon"]} $alignment');
     return RenderDecoratedBox(
       decoration: BoxDecoration(
         image: DecorationImage(
           image: image,
           fit: fit,
+          alignment: alignment,
         ),
       ),
       position: DecorationPosition.foreground,
@@ -217,7 +269,7 @@ class ImgElement extends Element {
 
   @override
   void setProperty(String key, dynamic value) {
-    if (properties[key] == value) return; 
+    if (properties[key] == value) return;
     super.setProperty(key, value);
 
     if (key == 'src') {
@@ -231,7 +283,6 @@ class ImgElement extends Element {
 
   @override
   void setStyle(String key, value) {
-    if (style[key] == value) return; 
     super.setStyle(key, value);
 
     _resize();
