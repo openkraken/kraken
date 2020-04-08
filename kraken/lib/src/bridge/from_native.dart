@@ -224,6 +224,8 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     String method = args[1];
     if (method == 'now') {
       return Performance.now().toString();
+    } else if (method == 'getTimeOrigin') {
+      return Performance.getTimeOrigin().toString();
     }
   } else if (module == 'MethodChannel') {
     String method = args[1];

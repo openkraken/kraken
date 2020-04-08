@@ -45,5 +45,4 @@ class KrakenMethodChannel {
     // Maybe url of zip bundle or js bundle
     return await _channel.invokeMethod('getUrl');
   }
-
 }
