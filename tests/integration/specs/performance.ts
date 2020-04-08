@@ -1,4 +1,4 @@
-fdescribe('Performance', () => {
+describe('Performance', () => {
   it('timeOrigin', () => {
     expect(typeof performance.timeOrigin).toEqual('number');
   });
