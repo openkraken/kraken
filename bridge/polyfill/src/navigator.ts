@@ -6,10 +6,12 @@ export let onConnectivityChangeListener: (data: Object) => any;
 const navigator = {
   // UA is read-only.
   get userAgent() {
-    // Rule: @product/@productSub (@platform) AliApp(@appName/@appVersion)
-    const app = `${privateKraken.appName}/${privateKraken.appVersion}`;
+    // Rule: @product/@productSub (@platform; @appName/@appVersion)
     const product = `${privateKraken.product}/${privateKraken.productSub}`;
-    return `${product} (${privateKraken.platform}) AliApp(${app})`;
+
+    // comment is extra info injected by Shell.
+    const comment = privateKraken.comment;
+    return `${product} (${privateKraken.platform}; ${privateKraken.appName}/${privateKraken.appVersion})${comment ? ' ' + comment : ''}`;
   },
   connection: {
     getConnectivity() {
