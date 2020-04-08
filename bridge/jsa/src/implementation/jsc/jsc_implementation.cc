@@ -8,8 +8,6 @@
 namespace alibaba {
 namespace jsc {
 
-/////////////////////////////////////////一些宏定义/////////////////////////////////////////////
-
 #ifndef __has_builtin
 #define __has_builtin(x) 0
 #endif
@@ -121,15 +119,12 @@ JSCContext::~JSCContext() {
 }
 
 jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) {
-
-  // step1: 构造JSC source以及sourceURL
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
   if (!sourceURL.empty()) {
     sourceURLRef = JSStringCreateWithUTF8CString(sourceURL.c_str());
   }
 
-  // step2: 调用 JSC evaluateScript
   JSValueRef exc = nullptr; // exception
   JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
 
@@ -138,7 +133,6 @@ jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &s
     JSStringRelease(sourceURLRef);
   }
 
-  // step3: 查看是否有异常
   if (hasException(res, exc)) return jsa::Value::null();
   return createValue(res);
 }
@@ -386,8 +380,6 @@ std::once_flag hostObjectClassOnceFlag;
 JSClassRef hostObjectClass{};
 } // namespace
 
-// 创建一个自定义对象
-// 内部会使用JSClassCreate以及JSObjectMake函数
 jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
   struct HostObjectProxy : public detail::HostObjectProxyBase {
     static JSValueRef getProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propName, JSValueRef *exception) {
@@ -489,7 +481,6 @@ jsa::Object JSCContext::createObject(std::shared_ptr<jsa::HostObject> ho) {
   return createObject(obj);
 }
 
-// 返回jsa::Object实际包含的HostObject
 std::shared_ptr<jsa::HostObject> JSCContext::getHostObject(const jsa::Object &obj) {
   // We are guarenteed at this point to have isHostObject(obj) == true
   // so the private data should be HostObjectMetadata
@@ -634,7 +625,7 @@ jsa::ArrayBufferViewType JSCContext::arrayBufferViewType(const jsa::ArrayBufferV
 }
 
 bool JSCContext::isFunction(const jsa::Object &obj) const {
-  return JSObjectIsFunction(ctx_, objectRef(obj));
+  return JSObjectIsFunction(ctx_, objectRef(obj)) || JSObjectIsConstructor(ctx_, objectRef(obj));
 }
 
 bool JSCContext::isHostObject(const jsa::Object &obj) const {
@@ -715,7 +706,9 @@ void JSCContext::setValueAtIndexImpl(jsa::Array &arr, size_t i, const jsa::Value
 
 namespace {
 std::once_flag hostFunctionClassOnceFlag;
-JSClassRef hostFunctionClass{};
+std::once_flag hostClassOnceFlag;
+JSClassRef hostFunctionClass{nullptr};
+JSClassRef hostClass{nullptr};
 
 class HostFunctionProxy {
 public:
@@ -727,6 +720,18 @@ public:
 
 protected:
   jsa::HostFunctionType hostFunction_;
+};
+
+class HostClassProxy {
+public:
+  HostClassProxy(jsa::HostClassType hostClass) : hostClass_(hostClass) {}
+
+  jsa::HostClassType &getHostClass() {
+    return hostClass_;
+  }
+
+protected:
+  jsa::HostClassType hostClass_;
 };
 } // namespace
 
@@ -781,7 +786,6 @@ jsa::Function JSCContext::createFunctionFromHostFunction(const jsa::PropNameID &
       return context.valueRef(value);
     }
 
-    // JSC会调用此方法执行先前注入的JS Function
     static JSValueRef call(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                            const JSValueRef arguments[], JSValueRef *exception) {
       HostFunctionMetadata *metadata = static_cast<HostFunctionMetadata *>(JSObjectGetPrivate(function));
@@ -805,7 +809,6 @@ jsa::Function JSCContext::createFunctionFromHostFunction(const jsa::PropNameID &
       JSValueRef res;
       jsa::Value thisVal(context.createObject(thisObject));
       try {
-        // 执行lambda
         res = context.valueRef(metadata->hostFunction_(context, thisVal, args, argumentCount));
       } catch (const jsa::JSError &error) {
         *exception = context.valueRef(error.value());
@@ -853,6 +856,113 @@ jsa::Function JSCContext::createFunctionFromHostFunction(const jsa::PropNameID &
   return createObject(funcRef).getFunction(*this);
 }
 
+jsa::Function JSCContext::createClassFromHostClass(const jsa::PropNameID &name, unsigned int paramCount,
+                                                   jsa::HostClassType func, const jsa::Object &prototype) {
+  class HostClassMetadata : public HostClassProxy {
+  public:
+    static void initialize(JSContextRef ctx, JSObjectRef object) {
+      // We need to set up the prototype chain properly here.
+      HostClassMetadata *metadata = static_cast<HostClassMetadata *>(JSObjectGetPrivate(object));
+      JSObjectSetPrototype(ctx, object, metadata->prototype_);
+    }
+
+    static JSValueRef makeError(JSCContext &context, const std::string &desc) {
+      jsa::Value value = context.global().getPropertyAsFunction(context, "Error").call(context, desc);
+      return context.valueRef(value);
+    }
+
+    static JSObjectRef call(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                            const JSValueRef arguments[], JSValueRef *exception) {
+      HostClassMetadata *metadata = static_cast<HostClassMetadata *>(JSObjectGetPrivate(constructor));
+      JSCContext &context = *(metadata->context_);
+      const unsigned maxStackArgCount = 8;
+      jsa::Value stackArgs[maxStackArgCount];
+      std::unique_ptr<jsa::Value[]> heapArgs;
+      jsa::Value *args;
+      if (argumentCount > maxStackArgCount) {
+        heapArgs = std::make_unique<jsa::Value[]>(argumentCount);
+        for (size_t i = 0; i < argumentCount; i++) {
+          heapArgs[i] = context.createValue(arguments[i]);
+        }
+        args = heapArgs.get();
+      } else {
+        for (size_t i = 0; i < argumentCount; i++) {
+          stackArgs[i] = context.createValue(arguments[i]);
+        }
+        args = stackArgs;
+      }
+      JSObjectRef res;
+      jsa::Object constructorVal(context.createObject(constructor));
+      try {
+        jsa::Object returnValue = metadata->hostClass_(context, constructorVal, args, argumentCount);
+        res = context.objectRef(returnValue);
+      } catch (const jsa::JSError &error) {
+        *exception = context.valueRef(error.value());
+        res = JSObjectMake(ctx, NULL, nullptr);
+      } catch (const std::exception &ex) {
+        std::string exceptionString("Exception in HostClass: ");
+        exceptionString += ex.what();
+        *exception = makeError(context, exceptionString);
+        res = JSObjectMake(ctx, NULL, nullptr);
+      } catch (...) {
+        std::string exceptionString("Exception in HostClass: <unknown>");
+        *exception = makeError(context, exceptionString);
+        res = JSObjectMake(ctx, NULL, nullptr);
+      }
+
+      return res;
+    }
+
+    static void finalize(JSObjectRef object) {
+      HostClassMetadata *metadata = static_cast<HostClassMetadata *>(JSObjectGetPrivate(object));
+      JSObjectSetPrivate(object, nullptr);
+      delete metadata;
+    }
+
+    static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
+                            JSValueRef *exception) {
+      HostClassMetadata *metadata = static_cast<HostClassMetadata *>(JSObjectGetPrivate(constructor));
+      JSCContext &context = *(metadata->context_);
+      if (!JSValueIsObject(ctx, possibleInstance)) {
+        *exception = makeError(context, "Right-hand side of 'instanceof' is not an object");
+        return false;
+      }
+      JSObjectRef object = JSValueToObject(ctx, possibleInstance, nullptr);
+      if (!JSObjectIsFunction(ctx, object) && !JSObjectIsConstructor(ctx, object)) {
+        *exception = makeError(context, "Right-hand side of 'instanceof' is not callable");
+        return false;
+      }
+
+      return constructor == object;
+    }
+
+    HostClassMetadata(JSCContext *context, jsa::HostClassType classType, unsigned ac, JSStringRef n,
+                      JSObjectRef prototype)
+      : HostClassProxy(classType), context_(context), argCount(ac), name(JSStringRetain(n)), prototype_(prototype) {}
+
+    JSCContext *context_;
+    unsigned argCount;
+    JSStringRef name;
+    JSObjectRef prototype_;
+  };
+
+  std::call_once(hostClassOnceFlag, [&]() {
+    JSClassDefinition functionClass = kJSClassDefinitionEmpty;
+    functionClass.version = 0;
+    functionClass.attributes = kJSClassAttributeNoAutomaticPrototype;
+    functionClass.initialize = HostClassMetadata::initialize;
+    functionClass.finalize = HostClassMetadata::finalize;
+    functionClass.callAsConstructor = HostClassMetadata::call;
+    functionClass.className = name.utf8(*this).c_str();
+    functionClass.hasInstance = HostClassMetadata::hasInstance;
+    hostClass = JSClassCreate(&functionClass);
+  });
+
+  JSObjectRef funcRef =
+    JSObjectMake(ctx_, hostClass, new HostClassMetadata(this, func, paramCount, stringRef(name), objectRef(prototype)));
+  return createObject(funcRef).getFunction(*this);
+}
+
 namespace detail {
 
 // 参数转换。
@@ -887,10 +997,20 @@ bool JSCContext::isHostFunction(const jsa::Function &obj) const {
   return cls != nullptr && JSValueIsObjectOfClass(ctx_, objectRef(obj), cls);
 }
 
+bool JSCContext::isHostClass(const jsa::Function &obj) const {
+  auto cls = hostClass;
+  return cls != nullptr && JSValueIsObjectOfClass(ctx_, objectRef(obj), cls);
+}
+
 jsa::HostFunctionType &JSCContext::getHostFunction(const jsa::Function &obj) {
   // We know that isHostFunction(obj) is true here, so its safe to proceed
   auto proxy = static_cast<HostFunctionProxy *>(JSObjectGetPrivate(objectRef(obj)));
   return proxy->getHostFunction();
+}
+
+jsa::HostClassType &JSCContext::getHostClass(const jsa::Function &obj) {
+  auto proxy = static_cast<HostClassProxy *>(JSObjectGetPrivate(objectRef(obj)));
+  return proxy->getHostClass();
 }
 
 jsa::Value JSCContext::call(const jsa::Function &f, const jsa::Value &jsThis, const jsa::Value *args, size_t count) {

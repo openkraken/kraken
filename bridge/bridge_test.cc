@@ -120,7 +120,7 @@ Value environment(JSContext &context, const Value &thisVal, const Value *args, s
 
   const char* env = getDartMethod()->environment();
   return context.global().getPropertyAsObject(context, "JSON").getPropertyAsFunction(context, "parse").call(context, {
-    String::createFromAscii(context, env)
+    Value(context, String::createFromAscii(context, env))
   });
 }
 
@@ -147,7 +147,9 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   };
 
   executeTestCallback->getObject(*context).getFunction(*context).call(
-    *context, {Function::createFromHostFunction(*context, PropNameID::forUtf8(*context, "done"), 0, done)});
+    *context, {
+      Value(*context, Function::createFromHostFunction(*context, PropNameID::forUtf8(*context, "done"), 0, done))
+    });
   executeTestCallback.reset();
   executeTestCallback = nullptr;
 }

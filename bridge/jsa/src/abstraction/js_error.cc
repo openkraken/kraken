@@ -70,7 +70,7 @@ JSError::JSError(JSContext &context, std::string msg, std::string stack)
     Object e(context);
     e.setProperty(context, "message", String::createFromUtf8(context, message_));
     e.setProperty(context, "stack", String::createFromUtf8(context, stack_));
-    setValue(context, std::move(e));
+    setValue(context, std::move(jsa::Value(context, e)));
   } catch (...) {
     setValue(context, Value());
   }

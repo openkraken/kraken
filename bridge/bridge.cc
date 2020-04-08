@@ -69,7 +69,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
     return Value::null();
   }
 
-  return String::createFromUtf8(context, resultStr);
+  return Value(context, String::createFromUtf8(context, resultStr));
 }
 
 struct CallbackContext {
@@ -125,7 +125,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   if (result == nullptr) {
     return Value::null();
   }
-  return String::createFromUtf8(context, std::string(result));
+  return Value(context, String::createFromUtf8(context, std::string(result)));
 }
 
 /**
