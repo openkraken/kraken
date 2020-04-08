@@ -92,7 +92,7 @@ TEST(V8Context, V8StringValue_evaluateStringObject) {
 TEST(V8Context, V8StringValue_createString) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>(normalErrorHandler);
-  jsa::Value string = jsa::String::createFromAscii(*context, "helloworld");
+  jsa::Value string = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   EXPECT_EQ(string.isString(), true);
   auto result = string.getString(*context).utf8(*context);
   EXPECT_EQ(result, "helloworld");
@@ -224,7 +224,7 @@ TEST(V8Context, symbolStrictEquals) {
 TEST(V8Context, stringStrictEquals) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>(normalErrorHandler);
-  jsa::Value left = jsa::String::createFromAscii(*context, "helloworld");
+  jsa::Value left = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
@@ -375,12 +375,8 @@ TEST(V8Context, callAsConstructor) {
   jsa::Value result = context->evaluateJavaScript(
       "function F(name) { this.prop = name}; F;", "", 0);
   jsa::Function F = result.getObject(*context).getFunction(*context);
-  auto f = F.callAsConstructor(
-      *context, {jsa::String::createFromAscii(*context, "helloworld")});
-  std::string name = f.getObject(*context)
-                         .getProperty(*context, "prop")
-                         .getString(*context)
-                         .utf8(*context);
+  auto f = F.callAsConstructor(*context, {jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"))});
+  std::string name = f.getObject(*context).getProperty(*context, "prop").getString(*context).utf8(*context);
   EXPECT_EQ(name, "helloworld");
   jsa::Object global = context->global();
   EXPECT_EQ(global.hasProperty(*context, "prop"), false);
@@ -416,7 +412,7 @@ TEST(V8Context, hostFunctionWithParams) {
     jsa::Object object = jsa::Object(context);
     const jsa::Value &number = args[0];
     object.setProperty(context, "abc", number.getNumber());
-    return object;
+    return jsa::Value(context, object);
   };
   jsa::Object object = jsa::Object(*context);
   JSA_BINDING_FUNCTION(*context, object, "getObj", 1, callback);
@@ -520,9 +516,9 @@ TEST(V8Context, hostObject_get) {
                               size_t count) {
       const jsa::Value &name = args[0];
       if (name.getString(context).utf8(context) == "andycall") {
-        return jsa::String::createFromAscii(context, "chenghuai.dtc");
+        return jsa::Value(context, jsa::String::createFromAscii(context, "chenghuai.dtc"));
       } else if (name.getString(context).utf8(context) == "wssgcg1213") {
-        return jsa::String::createFromAscii(context, "zhuoling.lcl");
+        return jsa::Value(context, jsa::String::createFromAscii(context, "zhuoling.lcl"));
       }
       return jsa::Value::undefined();
     };
@@ -553,9 +549,8 @@ TEST(V8Context, hostObjectAsArgs) {
     return jsa::Value::undefined();
   };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
-  func.call(*context, {
-    jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
-  });
+  func.call(*context, {jsa::Value(*context, jsa::Object::createFromHostObject(
+                                              *context, std::make_shared<kraken::binding::JSBlob>(vector)))});
 }
 
 TEST(V8Context, hostObject_set) {
@@ -603,7 +598,7 @@ TEST(V8Context, hostObject_getPropertyNames) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>(normalErrorHandler);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
-    std::vector<jsa::PropNameID> getPropertyNames(jsa::JSContext &context) {
+    std::vector<jsa::PropNameID> getPropertyNames(jsa::JSContext &context) override {
       std::vector<jsa::PropNameID> propertyNames;
       propertyNames.emplace_back(jsa::PropNameID::forUtf8(context, "connect"));
       propertyNames.emplace_back(jsa::PropNameID::forUtf8(context, "send"));
@@ -615,12 +610,98 @@ TEST(V8Context, hostObject_getPropertyNames) {
   jsa::Object user = jsa::Object::createFromHostObject(*context, u);
   jsa::Array names = user.getPropertyNames(*context);
   EXPECT_EQ(names.size(*context), 3);
-  EXPECT_EQ(
-      names.getValueAtIndex(*context, 0).getString(*context).utf8(*context),
-      "connect");
-  EXPECT_EQ(
-      names.getValueAtIndex(*context, 1).getString(*context).utf8(*context),
-      "send");
+  EXPECT_EQ(names.getValueAtIndex(*context, 0).getString(*context).utf8(*context), "connect");
+  EXPECT_EQ(names.getValueAtIndex(*context, 1).getString(*context).utf8(*context), "send");
+}
+
+TEST(V8Context, createHostClass) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  context->global().setProperty(*context, "F", f);
+  jsa::Value result = context->evaluateJavaScript("new F()", "internal:://", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).getProperty(*context, "abc").getNumber(), 1234);
+}
+
+TEST(V8Context, createHostClassWithInstanceof) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  context->global().setProperty(*context, "F", f);
+  jsa::Value result = context->evaluateJavaScript("new F();", "internal:://", 0);
+  EXPECT_EQ(result.getObject(*context).getProperty(*context, "abc").getNumber(), 1234);
+  EXPECT_EQ(result.getObject(*context).instanceOf(*context, f), true);
+  auto constructor = result.getObject(*context).getProperty(*context, "constructor");
+  EXPECT_EQ(constructor.isObject(), true);
+}
+
+TEST(V8Context, isHostClass) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  EXPECT_EQ(f.isHostClass(*context), true);
+
+  context->global().setProperty(*context, "f", f);
+  jsa::Value f2 = context->evaluateJavaScript("f", "internal://", 0);
+  EXPECT_EQ(f2.getObject(*context).getFunction(*context).isHostClass(*context), true);
+}
+
+TEST(V8Context, getHostClass) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                            size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, F, jsa::Object(*context));
+  EXPECT_EQ(f.isHostClass(*context), true);
+  jsa::HostClassType F2 = f.getHostClass(*context);
+  jsa::Value args[2] = {jsa::Value(1), jsa::Value(2)};
+  jsa::Object constructor = jsa::Object(*context);
+  jsa::Object hostValue = F2(*context, constructor, args, 2);
+  EXPECT_EQ(hostValue.getProperty(*context, "abc").getNumber(), 1234);
+}
+
+TEST(V8Context, prototypeChain) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::Object parentPrototype = jsa::Object(*context);
+  parentPrototype.setProperty(*context, "name", "helloworld");
+
+  jsa::HostClassType Parent = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
+                                 size_t count) -> jsa::Object {
+    constructor.setProperty(context, "abc", jsa::Value(1234));
+    EXPECT_EQ(constructor.getProperty(context, "name").getString(context).utf8(context), "helloworld");
+    return jsa::Value(context, constructor).getObject(context);
+  };
+  jsa::Function f =
+    jsa::Function::createFromHostClass(*context, jsa::PropNameID::forAscii(*context, "F"), 1, Parent, parentPrototype);
+  jsa::Object instance = f.callAsConstructor(*context).getObject(*context);
+  jsa::Array names = instance.getPropertyNames(*context);
+  EXPECT_EQ(names.length(*context), 2);
+  EXPECT_EQ(instance.getProperty(*context, "name").getString(*context).utf8(*context), "helloworld");
+  EXPECT_EQ(instance.getProperty(*context, "abc").getNumber(), 1234);
 }
 
 TEST(V8Context, createArrayBuffer) {
@@ -701,9 +782,8 @@ TEST(V8Context, getHostObject) {
         return jsa::Value::undefined();
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
-  func.call(*context, {
-      jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector))
-  });
+  func.call(*context, {jsa::Value(*context, jsa::Object::createFromHostObject(
+                                              *context, std::make_shared<kraken::binding::JSBlob>(vector)))});
 }
 
 

@@ -79,6 +79,10 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {
+    // Only visible element will trigger intersection change event
+    Rect boundingClientRect = entry.boundingClientRect;
+    if (boundingClientRect.left == boundingClientRect.right || boundingClientRect.top == boundingClientRect.bottom) return;
+
     this.dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
     if (entry.intersectionRatio > 0) {
       handleAppear();
