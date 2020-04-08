@@ -1,9 +1,18 @@
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule, privateKraken } from './types';
 
 export const positionWatcherMap = new Map<string, any>();
 export let onConnectivityChangeListener: (data: Object) => any;
 
 const navigator = {
+  // UA is read-only.
+  get userAgent() {
+    // Rule: @product/@productSub (@platform; @appName/@appVersion)
+    const product = `${privateKraken.product}/${privateKraken.productSub}`;
+
+    // comment is extra info injected by Shell.
+    const comment = privateKraken.comment;
+    return `${product} (${privateKraken.platform}; ${privateKraken.appName}/${privateKraken.appVersion})${comment ? ' ' + comment : ''}`;
+  },
   connection: {
     getConnectivity() {
       return new Promise((resolve) => {
