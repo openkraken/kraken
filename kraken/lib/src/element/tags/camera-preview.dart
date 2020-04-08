@@ -10,7 +10,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken_camera/camera.dart';
 
-const String CAMERA = 'CAMERA';
+const String CAMERA = 'CAMERA-PREVIEW';
 
 bool camerasDetected = false;
 List<CameraDescription> cameras = [];
@@ -38,7 +38,7 @@ Future<CameraDescription> detectCamera(String lens) async {
   return null;
 }
 
-class CameraElement extends Element with CameraPreviewMixin {
+class CameraPreviewElement extends Element with CameraPreviewMixin {
   static const String DEFAULT_WIDTH = '300px';
   static const String DEFAULT_HEIGHT = '150px';
 
@@ -152,7 +152,7 @@ class CameraElement extends Element with CameraPreviewMixin {
     }
   }
 
-  CameraElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  CameraPreviewElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
