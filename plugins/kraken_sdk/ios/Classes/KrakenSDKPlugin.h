@@ -6,4 +6,6 @@
 
 - (instancetype) initWithRegistrar: (NSObject<FlutterPluginRegistrar>*)registrar;
 
++ (FlutterMethodChannel *) getMethodChannel;
+
 @end

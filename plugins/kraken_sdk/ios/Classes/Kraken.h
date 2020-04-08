@@ -2,30 +2,30 @@
 #import "Kraken.h"
 #import "KrakenSDKPlugin.h"
 
-typedef void(^MethodHandler)(FlutterMethodCall*, FlutterResult);
+typedef void(^MethodHandler)(FlutterMethodCall* _Nonnull , FlutterResult _Nonnull);
 
 @interface Kraken : NSObject
 
-+ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger;
++ (Kraken* _Nonnull) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>* _Nonnull) messenger;
 
-@property NSString* bundleUrl;
-@property FlutterEngine* flutterEngine;
-@property FlutterMethodChannel* channel;
-@property MethodHandler methodHandler;
+@property NSString* _Nullable bundleUrl;
+@property FlutterEngine* _Nonnull flutterEngine;
+@property FlutterMethodChannel* _Nullable channel;
+@property MethodHandler _Nullable methodHandler;
 
-- (instancetype)initWithFlutterEngine: (FlutterEngine*) engine;
+- (instancetype _Nonnull)initWithFlutterEngine: (FlutterEngine* _Nonnull) engine;
 
-- (NSString*) getUrl;
+- (NSString* _Nullable) getUrl;
 
-- (void) loadUrl: (NSString*)url;
+- (void) loadUrl: (NSString* _Nonnull)url;
 
 - (void) reload;
 
-- (void) reloadWithUrl: (NSString*) url;
+- (void) reloadWithUrl: (NSString* _Nonnull) url;
 
-- (void) setMethodHandler: (MethodHandler) handler;
+- (void) registerMethodCallHandler: (MethodHandler _Nonnull) handler;
 
-- (void) invokeMethod: (NSString *)method arguments:(nullable id) arguments;
+- (void) invokeMethod: (NSString* _Nonnull)method arguments:(nullable id) arguments;
 
 - (void) _handleMethodCall:(FlutterMethodCall* _Nonnull)call result:(FlutterResult _Nonnull )result;
 @end
