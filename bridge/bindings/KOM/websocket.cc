@@ -81,7 +81,9 @@ void CallbackImpl::onMessage(const std::string &message) {
   kraken::foundation::registerUITask(
     [](void *data) {
       auto c = reinterpret_cast<context *>(data);
-      c->_on_message.asFunction(c->_context).call(c->_context, {String::createFromUtf8(c->_context, c->message)});
+      c->_on_message.asFunction(c->_context).call(c->_context, {
+        Value(c->_context, String::createFromUtf8(c->_context, c->message))
+      });
     },
     reinterpret_cast<void *>(&context_));
 }
@@ -115,7 +117,7 @@ void CallbackImpl::onError(const std::string &error) {
   kraken::foundation::registerUITask(
     [](void *data) {
       auto c = reinterpret_cast<context *>(data);
-      c->_on_err.asFunction(c->_context).call(c->_context, {String::createFromUtf8(c->_context, c->error)});
+      c->_on_err.asFunction(c->_context).call(c->_context, {Value(c->_context, String::createFromUtf8(c->_context, c->error))});
     },
     reinterpret_cast<void *>(&context_));
 }

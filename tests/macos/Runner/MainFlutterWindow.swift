@@ -1,6 +1,6 @@
 import Cocoa
 import FlutterMacOS
-import kraken_method_channel
+import kraken_sdk
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
@@ -10,13 +10,14 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    
+    var kraken = Kraken.init(flutterEngine: flutterViewController.engine)
 
     func handler(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      KrakenMethodChannel.shared.invokeMethod(method: call.method, arguments: call.arguments)
+      kraken?.invokeMethod(call.method, arguments: call.arguments)
       result("method: " + call.method)
     }
-
-    KrakenMethodChannel.shared.setMessageHandler(handler)
+    kraken?.setValue(handler, forKey: "methodHandler")
     super.awakeFromNib()
   }
 }

@@ -40,7 +40,7 @@ void throwJSError(JSContext &context, const char *msg) {
 }
 } // namespace detail
 
-Pointer &Pointer::operator=(Pointer &&other) {
+Pointer &Pointer::operator=(Pointer &&other) noexcept {
   if (ptr_) {
     ptr_->invalidate();
   }
@@ -64,8 +64,8 @@ Function Object::getPropertyAsFunction(JSContext &runtime, const char *name) con
   Object obj = getPropertyAsObject(runtime, name);
   if (!obj.isFunction(runtime)) {
     throw JSError(runtime, std::string("getPropertyAsFunction: property '") + name + "' is " +
-                             kindToString(std::move(obj), &runtime) + ", expected a Function");
-  };
+                             kindToString(std::move(jsa::Value(runtime, obj)), &runtime) + ", expected a Function");
+  }
 
   JSContext::PointerValue *value = obj.ptr_;
   obj.ptr_ = nullptr;
@@ -100,7 +100,7 @@ Function Object::asFunction(JSContext &runtime) && {
   return std::move(*this).getFunction(runtime);
 }
 
-Value::Value(Value &&other) : Value(other.kind_) {
+Value::Value(Value &&other) noexcept : Value(other.kind_) {
   if (kind_ == BooleanKind) {
     data_.boolean = other.data_.boolean;
   } else if (kind_ == NumberKind) {

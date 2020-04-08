@@ -26,7 +26,7 @@ Value JSWindow::get(JSContext &context, const PropNameID &name) {
       throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
 
-    return String::createFromUtf8(context, getDartMethod()->platformBrightness());
+    return Value(context, String::createFromUtf8(context, getDartMethod()->platformBrightness()));
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }

@@ -42,21 +42,21 @@ Value JSLocation::get(JSContext &context, const PropNameID &name) {
                                          std::placeholders::_3, std::placeholders::_4));
     return Value(context, reloadFunc);
   } else if (propertyName == "origin") {
-    return String::createFromUtf8(context, origin);
+    return Value(context, String::createFromUtf8(context, origin));
   } else if (propertyName == "protocol") {
-    return String::createFromUtf8(context, protocol);
+    return Value(context, String::createFromUtf8(context, protocol));
   } else if (propertyName == "host") {
-    return String::createFromUtf8(context, host);
+    return Value(context, String::createFromUtf8(context, host));
   } else if (propertyName == "hostname") {
-    return String::createFromUtf8(context, hostname);
+    return Value(context, String::createFromUtf8(context, hostname));
   } else if (propertyName == "port") {
-    return String::createFromUtf8(context, port);
+    return Value(context, String::createFromUtf8(context, port));
   } else if (propertyName == "pathname") {
-    return String::createFromUtf8(context, pathname);
+    return Value(context, String::createFromUtf8(context, pathname));
   } else if (propertyName == "search") {
-    return String::createFromUtf8(context, search);
+    return Value(context, String::createFromUtf8(context, search));
   } else if (propertyName == "hash") {
-    return String::createFromUtf8(context, hash);
+    return Value(context, String::createFromUtf8(context, hash));
   }
 
   return Value::undefined();
