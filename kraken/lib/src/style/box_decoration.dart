@@ -210,8 +210,8 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     if (style['backgroundAttachment'] == ''
         || style['backgroundAttachment'] == 'scroll'
             && style.contains('backgroundImage')) {
-      List<Method> methods = Method.parseMethod(style['backgroundImage']);
-      for (Method method in methods) {
+      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
+      for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
