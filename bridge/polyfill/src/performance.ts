@@ -1,17 +1,11 @@
 import { krakenInvokeModule } from './bridge';
-import { EventTarget} from 'event-target-shim';
 
 // https://www.w3.org/TR/hr-time-2/#the-performance-interface
-class Performance extends EventTarget {
-  private _timeOrigin: number;
-
-  constructor() {
-    super();
-    this._timeOrigin = this.now();
-  }
-
+// @NOTE: Not extends EventTarget due to over design.
+class Performance {
   public get timeOrigin() : number {
-    return this._timeOrigin;
+    const timeStamp = krakenInvokeModule('["Performance","getTimeOrigin"]');
+    return parseFloat(timeStamp);
   }
 
   public now() : number {
@@ -21,7 +15,7 @@ class Performance extends EventTarget {
 
   public toJSON() {
     return {
-      timeOrigin: this._timeOrigin,
+      timeOrigin: this.timeOrigin,
     };
   }
 }
