@@ -53,8 +53,12 @@ list(APPEND BRIDGE_LINK_LIBS
         -pthread
 )
 
+list(APPEND PUBLIC_HEADER
+  ./include/bridge_export.h
+  )
+
 add_library(bridge STATIC ${BRIDGE_SOURCE})
-add_library(kraken SHARED bridge_export.cc)
+add_library(kraken SHARED bridge_export.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/bridge_export.h)
 
 ### bridge
 target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
@@ -94,14 +98,29 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
 endif()
 
-if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+
+  set_target_properties(kraken PROPERTIES
+    OUTPUT_NAME kraken_bridge
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION C
+    MACOSX_FRAMEWORK_IDENTIFIER com.taobao.kraken_bridge
+    PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/bridge_export.h
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
     )
 else ()
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
-    )
+  if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+    set_target_properties(kraken
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      )
+  else ()
+    set_target_properties(kraken
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
+      )
+  endif ()
 endif ()
