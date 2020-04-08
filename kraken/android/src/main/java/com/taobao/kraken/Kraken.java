@@ -32,7 +32,7 @@ public class Kraken {
     return sdkMap.get(engine);
   }
 
-  public void setHandler(MethodChannel.MethodCallHandler handler) {
+  public void registerMethodCallHandler(MethodChannel.MethodCallHandler handler) {
     this.handler = handler;
   }
   /**

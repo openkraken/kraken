@@ -1,13 +1,21 @@
 #import "Kraken.h"
 #import "KrakenSDKPlugin.h"
 
+static FlutterMethodChannel *methodChannel = nil;
+
 @implementation KrakenSDKPlugin
+
++ (FlutterMethodChannel *) getMethodChannel {
+  return methodChannel;
+}
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   NSObject<FlutterBinaryMessenger>* messager = [registrar messenger];
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"kraken"
             binaryMessenger:messager];
+  
+  methodChannel = channel;
 
   KrakenSDKPlugin* instance = [[KrakenSDKPlugin alloc] initWithRegistrar: registrar];
 

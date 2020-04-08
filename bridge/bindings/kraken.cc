@@ -44,6 +44,12 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
   JSA_SET_PROPERTY(*context, kraken, "product", PRODUCT);
   JSA_SET_PROPERTY(*context, kraken, "productSub", PRODUCT_SUB);
 
+  const char* userAgent = std::getenv("KRAKEN_USERAGENT_COMMENT");
+
+  if (userAgent != nullptr) {
+    JSA_SET_PROPERTY(*context, kraken, "comment", userAgent);
+  }
+
   JSA_SET_PROPERTY(*context, context->global(), "__kraken__", kraken);
 }
 

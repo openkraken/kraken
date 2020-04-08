@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
+#import "KrakenSDKPlugin.h"
 
 static NSMutableArray *engineList = nil;
 static NSMutableArray<Kraken*> *instanceList = nil;
@@ -16,6 +17,18 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 
 - (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
   self.flutterEngine = engine;
+  
+  FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
+
+  if (channel == nil) {
+    NSException* exception = [NSException
+                                exceptionWithName:@"InitError"
+                                reason:@"KrakenSDK should init after Flutter's plugin registered."
+                                userInfo:nil];
+    @throw exception;
+  }
+  self.channel = channel;
+  
   if (engineList == nil) {
     engineList = [[NSMutableArray alloc] initWithCapacity: 0];
   }
@@ -52,7 +65,9 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 
 - (void) invokeMethod:(NSString *)method arguments:(nullable id) arguments {
   dispatch_async(dispatch_get_main_queue(), ^{
-    [self.channel invokeMethod:method arguments:arguments];
+    if (self.channel != nil) {
+      [self.channel invokeMethod:method arguments:arguments];
+    }
   });
 }
 
@@ -60,6 +75,10 @@ static NSMutableArray<Kraken*> *instanceList = nil;
   if (self.methodHandler != nil) {
    self.methodHandler(call, result);
   }
+}
+
+- (void) registerMethodCallHandler: (MethodHandler) handler {
+  self.methodHandler = handler;
 }
 
 @end
