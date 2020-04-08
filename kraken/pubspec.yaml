@@ -37,3 +37,23 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  #
+  # NOTE: This new plugin description format is not supported on Flutter's
+  # stable channel as of 1.9.1. A plugin published using this format will not
+  # work for most clients until the next major stable release.
+  # However, it is required in order to declare macOS support.
+  plugin:
+    platforms:
+      android:
+        package: com.taobao.kraken
+        pluginClass: KrakenSDKPlugin
+      ios:
+        pluginClass: KrakenSDKPlugin
+      macos:
+        pluginClass: KrakenSDKPlugin

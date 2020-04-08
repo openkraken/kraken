@@ -7,4 +7,8 @@ version:
   revision: f36a35d20ac5dc2936cab6ccc60f5d9afa34466e
   channel: unknown
 
-project_type: package
+# Plugin packages is a specialized Dart package that contains an API written
+# in Dart code combined with one or more platform-specific implementations.
+# Plugin packages can be written for Android (using Kotlin or Java),
+# iOS (using Swift or Objective-C), web (using Dart), macos (using Dart), or any combination thereof. 
+project_type: plugin
