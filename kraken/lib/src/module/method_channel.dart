@@ -8,16 +8,16 @@ typedef MethodCallback = Future<dynamic> Function(MethodCall call);
 class KrakenMethodChannel {
   static VoidCallback _reloadHandler;
   static MethodCallback _methodCallHandler;
-//  static MethodChannel _channel = MethodChannel('kraken')
-//    ..setMethodCallHandler((call) async {
-//    if ('reload' == call.method && _reloadHandler != null) {
-//      await _reloadHandler();
-//    } else if (_methodCallHandler != null) {
-//      return _methodCallHandler(call);
-//    }
-//
-//    return Future<dynamic>.value(null);
-//  });
+  static MethodChannel _channel = MethodChannel('kraken')
+    ..setMethodCallHandler((call) async {
+    if ('reload' == call.method && _reloadHandler != null) {
+      await _reloadHandler();
+    } else if (_methodCallHandler != null) {
+      return _methodCallHandler(call);
+    }
+
+    return Future<dynamic>.value(null);
+  });
 
   static void setReloadHandler(VoidCallback reloadHandler) {
     _reloadHandler = reloadHandler;
@@ -34,16 +34,15 @@ class KrakenMethodChannel {
       'args': args,
     };
 
-//    return await _channel.invokeMethod('invokeMethod', argsWrap);
+    return await _channel.invokeMethod('invokeMethod', argsWrap);
   }
 
   static Future<String> getPlatformVersion() async {
-//    return await _channel.invokeMethod('getPlatformVersion');
+    return await _channel.invokeMethod('getPlatformVersion');
   }
 
   static Future<String> getUrl() async {
     // Maybe url of zip bundle or js bundle
-//    return await _channel.invokeMethod('getUrl');
+    return await _channel.invokeMethod('getUrl');
   }
-
 }
