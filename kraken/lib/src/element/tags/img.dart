@@ -269,7 +269,6 @@ class ImgElement extends Element {
 
   @override
   void setProperty(String key, dynamic value) {
-    if (properties[key] == value) return;
     super.setProperty(key, value);
 
     if (key == 'src') {
