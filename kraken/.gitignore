@@ -71,6 +71,9 @@ build/
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
+# Auto generated macos files.
+macos/Flutter
+
 # Dart related
 pubspec.lock
 *.generated.dart

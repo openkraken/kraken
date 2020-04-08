@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule } from './bridge';
 
 const asyncStorage = {
   getItem(key: string) {

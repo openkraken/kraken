@@ -38,7 +38,7 @@ public class KrakenSDKPlugin implements FlutterPlugin, MethodCallHandler {
     // depending on the user's project. onAttachedToEngine or registerWith must both be defined
     // in the same class.
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "kraken_sdk");
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "kraken");
 
         KrakenSDKPlugin plugin = new KrakenSDKPlugin();
         channel.setMethodCallHandler(plugin);

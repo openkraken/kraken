@@ -1,39 +1,34 @@
-import {krakenInvokeModule} from "./types";
+import {krakenInvokeModule} from "./bridge";
 
-export function dispatchMethodChannel(method: string, args: any) {
-  if (methodChannel) {
-    methodChannel._triggerHandler(method, args);
-  }
-}
+type MethodCallHandler = (method: string, args: any[]) => void;
 
-type MethodHandler = (method: string, args: any[]) => void;
-export class MethodChannel {
-  private _handler: MethodHandler = async (method: string, args: any) => '';
+let methodCallHandler: MethodCallHandler;
 
-  public _triggerHandler(method: string, args: any) {
-    this._handler(method, args);
-  }
-
-  setMethodHandler(handler: MethodHandler) {
-    this._handler = handler;
-  }
-
+// Like flutter platform channels
+export const methodChannel = {
+  setMethodCallHandler(handler: MethodCallHandler) {
+    methodCallHandler = handler;
+    krakenInvokeModule('["MethodChannel","setMethodCallHandler"]');
+  },
   invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
       krakenInvokeModule(JSON.stringify([
-        'PlatformChannel',
-        'method',
-        method,
-        args
+        'MethodChannel',
+        'invokeMethod',
+        [method, args]
       ]), (result) => {
-        if (result.indexOf('Dart Error') >= 0) {
+        if (result.indexOf('Error:') === 0) {
           reject(new Error(result));
         } else {
           resolve(result);
         }
       })
     });
+  },
+};
+
+export function dispatchMethodCallHandler(method: string, args: any) {
+  if (methodCallHandler) {
+    methodCallHandler(method, args);
   }
 }
-
-export const methodChannel = new MethodChannel();

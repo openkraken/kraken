@@ -1,4 +1,4 @@
-import { krakenInvokeModule, privateKraken } from './types';
+import { krakenInvokeModule, privateKraken } from './bridge';
 
 export const positionWatcherMap = new Map<string, any>();
 export let onConnectivityChangeListener: (data: Object) => any;

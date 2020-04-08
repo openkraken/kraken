@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule } from './bridge';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
@@ -263,7 +263,7 @@ function fetch(input: Request | string, init?: RequestInit) {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
 
-    krakenInvokeModule(`["fetch", ["${url}", ${JSON.stringify(init)}]]`, function(json) {
+    krakenInvokeModule(JSON.stringify(['fetch', [url, init]]), function(json) {
       var [err, statusCode, body] = JSON.parse(json);
       // network error didn't have statusCode
       if (err && !statusCode) {

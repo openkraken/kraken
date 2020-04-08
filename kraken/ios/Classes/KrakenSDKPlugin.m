@@ -12,15 +12,17 @@ static FlutterMethodChannel *methodChannel = nil;
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   NSObject<FlutterBinaryMessenger>* messager = [registrar messenger];
   FlutterMethodChannel* channel = [FlutterMethodChannel
-      methodChannelWithName:@"kraken_sdk"
+      methodChannelWithName:@"kraken"
             binaryMessenger:messager];
+  
   methodChannel = channel;
 
   KrakenSDKPlugin* instance = [[KrakenSDKPlugin alloc] initWithRegistrar: registrar];
+
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 
-- (instancetype) initWithRegistrar: (NSObject<FlutterPluginRegistrar>*)registrar{
+- (instancetype) initWithRegistrar: (NSObject<FlutterPluginRegistrar>*)registrar {
   self = [super init];
   self.registrar = registrar;
   return self;
