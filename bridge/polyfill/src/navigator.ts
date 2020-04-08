@@ -68,6 +68,21 @@ const navigator = {
         krakenInvokeModule(`["Geolocation","clearWatch"]`);
       }
     }
+  },
+  clipboard: {
+    readText() {
+      return new Promise((resolve) => {
+        krakenInvokeModule(`["Clipboard","readText"]`, resolve);
+      });
+    },
+    writeText(text: string) {
+      return new Promise((resolve) => {
+        krakenInvokeModule(JSON.stringify(['Clipboard', 'writeText', [String(text)]]), () => {
+          // Return undefined
+          resolve();
+        });
+      });
+    }
   }
 }
 

@@ -19,4 +19,11 @@ describe('Navigator', () => {
   it('userAgent', () => {
     expect(navigator.userAgent).toMatch(/Kraken/);
   });
+
+  fit('clipboard', async () => {
+    const text = String(new Date());
+    await navigator.clipboard.writeText(text);
+    const data = await navigator.clipboard.readText();
+    expect(data).toBe(text);
+  });
 });

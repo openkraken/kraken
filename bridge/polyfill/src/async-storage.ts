@@ -3,30 +3,22 @@ import { krakenInvokeModule } from './bridge';
 const asyncStorage = {
   getItem(key: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage","getItem",["${key}"]]`, (value) => {
-        resolve(value);
-      });
+      krakenInvokeModule(`["AsyncStorage","getItem",["${key}"]]`, resolve);
     });
   },
   setItem(key: string, value: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage","setItem",["${key}","${value}"]]`, () => {
-        resolve();
-      });
+      krakenInvokeModule(`["AsyncStorage","setItem",["${key}","${value}"]]`, resolve);
     });
   },
   removeItem(key: string) {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage","removeItem",["${key}"]]`, () => {
-        resolve();
-      });
+      krakenInvokeModule(`["AsyncStorage","removeItem",["${key}"]]`, resolve);
     });
   },
   clear() {
     return new Promise((resolve) => {
-      krakenInvokeModule(`["AsyncStorage","clear"]`, () => {
-        resolve();
-      });
+      krakenInvokeModule(`["AsyncStorage","clear"]`, resolve);
     });
   },
   getAllKeys() {

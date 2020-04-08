@@ -14,3 +14,4 @@ export 'src/module/geolocation.dart';
 export 'src/module/mqtt.dart';
 export 'src/module/method_channel.dart';
 export 'src/module/performance.dart';
+export 'src/module/clipboard.dart';
