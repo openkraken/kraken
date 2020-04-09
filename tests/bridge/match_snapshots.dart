@@ -97,12 +97,29 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
   return (diff * 10e7) < 10;
 }
 
+bool matchFile(List<int> left, List<int> right) {
+  if (left.length != right.length) {
+    return false;
+  }
+
+  for (int i = 0; i < left.length; i ++) {
+    if (left[i] != right[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
   List<int> screenPixels = bytes.toList();
   final snap = File(path.join(snapshots.path, '$filename.png'));
   if (snap.existsSync()) {
     Uint8List snapPixels = snap.readAsBytesSync();
-    bool match = matchImage(snapPixels, screenPixels, filename);
+    bool match = matchFile(snapPixels, screenPixels);
+    if (!match) {
+      match = matchImage(snapPixels, screenPixels, filename);
+    }
     if (!match) {
       final newSnap = File(path.join(snapshots.path, '$filename.current.png'));
       newSnap.writeAsBytes(screenPixels);

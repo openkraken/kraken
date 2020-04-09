@@ -24,21 +24,6 @@ describe('setTimeout', () => {
       }, 50);
     });
   });
-
-  it('first param not function will throw', () => {
-    expect(() => {
-      // @ts-ignore
-      setTimeout(null);
-    }).toThrowError();
-  });
-
-  it('second param not number will throw', () => {
-    expect(() => {
-      setTimeout(() => {
-        // @ts-ignore
-      }, []);
-    }).toThrowError();
-  });
 });
 
 describe('setInterval', function() {
@@ -56,20 +41,5 @@ describe('setInterval', function() {
         reject('setInterval execute time out!');
       }, 100);
     });
-  });
-
-  it('first param not function will throw', () => {
-    expect(() => {
-      // @ts-ignore
-      setInterval(null);
-    }).toThrowError();
-  });
-
-  it('second param not number will throw', () => {
-    expect(() => {
-      setInterval(() => {
-        // @ts-ignore
-      }, []);
-    }).toThrowError();
   });
 });

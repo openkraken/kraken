@@ -4052,7 +4052,7 @@ getJasmineRequireObj().toMatchImageSnapshot = function (j$) {
    */
   return function toMatchImageSnapshot(util, customEqualityTesters) {
     return {
-      compare: function (blob, snapshotName) {
+      compare: function (blobP, snapshotName) {
         const currentSpec = j$.getEnv().currentRunnable();
         const specId = currentSpec.id;
         if (_matchImageSnapshotCounter[specId] === undefined) _matchImageSnapshotCounter[specId] = 0;
@@ -4062,19 +4062,23 @@ getJasmineRequireObj().toMatchImageSnapshot = function (j$) {
           snapshotName = countWithinSameSpec;
         }
 
-        return Promise.resolve(blob).then(blob => {
+        if (!j$.isPromiseLike(blobP)) {
+          throw new Error('Expected blob to be a promise.');
+        }
+
+        return blobP.then(blob => {
           if (!(blob instanceof Blob)) {
             throw new Error('Expected toMatchImageSnapshot to have Blob as first parameter');
           }
           const name = `${this.description}.${snapshotName}`;
-          return new Promise((resolve) => {
+          return new Promise((resolve, reject) => {
             // @TODO: the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
             const privateBlob = blob.blob;
             __kraken_match_image_snapshot__(privateBlob, name, (status) => {
               // @NOTE: toMatchSnapshot should resolve before spec done.
               const _currentSpec = j$.getEnv().currentRunnable();
               if (_currentSpec.id !== specId) {
-                throw new Error(`Expected toMatchSnapshot to be resolved before spec(${name}) done.`);
+                reject(new Error(`Expected toMatchSnapshot to be resolved before spec(${name}) done.`));
               }
 
               if (status) {
