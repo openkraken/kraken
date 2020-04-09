@@ -6,7 +6,7 @@
 #ifndef KRAKEN_BRIDGE_TEST_EXPORT_H
 #define KRAKEN_BRIDGE_TEST_EXPORT_H
 
-#include "bridge_export.h"
+#include "kraken_bridge.h"
 #include <cstdint>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 

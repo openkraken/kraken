@@ -4,7 +4,7 @@
  */
 
 #include "dart_methods.h"
-#include "bridge_export.h"
+#include "kraken_bridge.h"
 #include <memory>
 
 namespace kraken {

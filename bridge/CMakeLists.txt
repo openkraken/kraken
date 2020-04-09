@@ -53,8 +53,12 @@ list(APPEND BRIDGE_LINK_LIBS
         -pthread
 )
 
+list(APPEND PUBLIC_HEADER
+  include/kraken_bridge.h
+  )
+
 add_library(bridge STATIC ${BRIDGE_SOURCE})
-add_library(kraken SHARED bridge_export.cc)
+add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h)
 
 ### bridge
 target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
@@ -93,6 +97,20 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
 endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
+
+  set_target_properties(kraken PROPERTIES
+    OUTPUT_NAME kraken_bridge
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION C
+    MACOSX_FRAMEWORK_IDENTIFIER com.taobao.kraken_bridge
+    PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+    )
+endif ()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   set_target_properties(kraken
