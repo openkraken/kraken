@@ -244,7 +244,6 @@ class ImgElement extends Element {
   RenderDecoratedBox getRenderDecoratedBox(StyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     Alignment alignment = _getAlignment(style);
-    print('${style["objectPositon"]} $alignment');
     return RenderDecoratedBox(
       decoration: BoxDecoration(
         image: DecorationImage(
