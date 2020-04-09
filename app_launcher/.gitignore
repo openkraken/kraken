@@ -37,6 +37,9 @@ lib/generated_plugin_registrant.dart
 
 .flutter-plugins-dependencies
 
+macos/Flutter
+ios/Flutter
+
 pubspec.lock
 assets/*
 !assets/.gitkeep
