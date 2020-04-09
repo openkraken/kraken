@@ -1,6 +1,6 @@
 add_library(kraken_test SHARED
-  bridge_test_export.cc
-  include/bridge_test_export.h
+  kraken_bridge_test.cc
+  include/kraken_bridge_test.h
   polyfill/dist/testframework.cc
   bridge_test.cc bridge_test.h)
 

@@ -1,1 +1,5 @@
 xcschememanagement.plist
+
+cmake-build-ios
+cmake-build-debug
+cmake-build-release
