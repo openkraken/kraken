@@ -6,6 +6,7 @@ import './match-media';
 import './location';
 import './navigator';
 import './window';
+import './promise';
 import './blob';
 import './async-storage';
 import './url-search-params';

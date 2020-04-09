@@ -2,6 +2,7 @@ import { EventTarget } from 'event-target-shim';
 import { krakenWindow, KrakenLocation } from './bridge';
 import { addEvent } from "./document/ui-manager";
 import { NodeId } from "./document/node";
+import { navigator } from './navigator';
 
 
 class Window extends EventTarget {
@@ -36,6 +37,18 @@ class Window extends EventTarget {
 
   public get window() {
     return this;
+  }
+
+  public get parent() {
+    return this;
+  }
+
+  public get navigator() {
+    return navigator;
+  }
+
+  public get Promise() {
+    return Promise;
   }
 }
 
