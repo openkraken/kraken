@@ -254,11 +254,11 @@ describe('flexbox align-items', () => {
 
     const child1 = document.createElement('div');
     setStyle(child1, {
-      width: '50px',
       height: '50px',
       backgroundColor: 'blue',
     });
     container.appendChild(child1);
+    child1.appendChild(document.createTextNode('block with no width'));
 
     const child2 = document.createElement('div');
     setStyle(child2, {
@@ -294,11 +294,11 @@ describe('flexbox align-items', () => {
 
     const child1 = document.createElement('div');
     setStyle(child1, {
-      width: '50px',
       height: '50px',
       backgroundColor: 'blue',
     });
     container.appendChild(child1);
+    child1.appendChild(document.createTextNode('block with no width'));
 
     const child2 = document.createElement('div');
     setStyle(child2, {
