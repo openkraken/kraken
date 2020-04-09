@@ -78,7 +78,7 @@ Pointer<Utf8> _invokeUIManager(Pointer<Utf8> json) {
     String result = invokeUIManager(Utf8.fromUtf8(json));
     return Utf8.toUtf8(result);
   } catch (e, stack) {
-    return Utf8.toUtf8('Dart Error: $e\n$stack');
+    return Utf8.toUtf8('Error: $e\n$stack');
   }
 }
 
@@ -124,9 +124,9 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       String errorMessage = e is HTTPException ? e.message : e.toString();
       String json;
       if (e is HTTPException) {
-        json = jsonEncode([errorMessage, e.response.statusCode, '']);
+        json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
       } else {
-        json = jsonEncode([errorMessage, null, '']);
+        json = jsonEncode([errorMessage, null, EMPTY_STRING]);
       }
       callback(Utf8.toUtf8(json), context);
     });
@@ -142,60 +142,62 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
   } else if (module == 'AsyncStorage') {
     String method = args[1];
     if (method == 'getItem') {
-      List getItemArgs = args[2];
-      String key = getItemArgs[0];
+      List methodArgs = args[2];
+      String key = methodArgs[0];
+      // @TODO: catch error case
       AsyncStorage.getItem(key).then((String value) {
-        callback(Utf8.toUtf8(value ?? ''), context);
+        callback(Utf8.toUtf8(value ?? EMPTY_STRING), context);
       });
     } else if (method == 'setItem') {
-      List setItemArgs = args[2];
-      String key = setItemArgs[0];
-      String value = setItemArgs[1];
-      AsyncStorage.setItem(key, value).then((bool o) {
-        callback(Utf8.toUtf8(value), context);
+      List methodArgs = args[2];
+      String key = methodArgs[0];
+      String value = methodArgs[1];
+      AsyncStorage.setItem(key, value).then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     } else if (method == 'removeItem') {
-      List removeItemArgs = args[2];
-      String key = removeItemArgs[0];
-      AsyncStorage.removeItem(key).then((bool value) {
-        callback(Utf8.toUtf8(value.toString()), context);
+      List methodArgs = args[2];
+      String key = methodArgs[0];
+      AsyncStorage.removeItem(key).then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     } else if (method == 'getAllKeys') {
+      // @TODO: catch error case
       AsyncStorage.getAllKeys().then((Set<String> set) {
         List<String> list = List.from(set);
         callback(Utf8.toUtf8(jsonEncode(list)), context);
       });
     } else if (method == 'clear') {
-      AsyncStorage.clear().then((bool value) {
-        callback(Utf8.toUtf8(value.toString()), context);
+      AsyncStorage.clear().then((bool isSuccess) {
+        callback(Utf8.toUtf8(isSuccess.toString()), context);
       });
     }
   }  else if(module == 'MQTT') {
     String method = args[1];
     if (method == 'init') {
-      List mqttArgs = args[2];
-      return MQTT.init(mqttArgs[0], mqttArgs[1]);
+      List methodArgs = args[2];
+      return MQTT.init(methodArgs[0], methodArgs[1]);
     } else if(method == 'open') {
-      List mqttArgs = args[2];
-      MQTT.open(mqttArgs[0], mqttArgs[1]);
+      List methodArgs = args[2];
+      MQTT.open(methodArgs[0], methodArgs[1]);
     } else if(method == 'close') {
-      List mqttArgs = args[2];
-      MQTT.close(mqttArgs[0]);
+      List methodArgs = args[2];
+      MQTT.close(methodArgs[0]);
     } else if(method == 'publish') {
-      List mqttArgs = args[2];
-      MQTT.publish(mqttArgs[0], mqttArgs[1], mqttArgs[2], mqttArgs[3], mqttArgs[4]);
+      List methodArgs = args[2];
+      MQTT.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
     } else if(method == 'subscribe') {
-      List mqttArgs = args[2];
-      MQTT.subscribe(mqttArgs[0], mqttArgs[1], mqttArgs[2]);
+      List methodArgs = args[2];
+      MQTT.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
     } else if(method == 'unsubscribe') {
-      List mqttArgs = args[2];
-      MQTT.unsubscribe(mqttArgs[0], mqttArgs[1]);
+      List methodArgs = args[2];
+      MQTT.unsubscribe(methodArgs[0], methodArgs[1]);
     } else if(method == 'getReadyState') {
-      List mqttArgs = args[2];
-      return MQTT.getReadyState(mqttArgs[0]);
+      List methodArgs = args[2];
+      return MQTT.getReadyState(methodArgs[0]);
     } else if(method == 'addEvent') {
-      List mqttArgs = args[2];
-      MQTT.addEvent(mqttArgs[0], mqttArgs[1]);
+      List methodArgs = args[2];
+      MQTT.addEvent(methodArgs[0], methodArgs[1]);
     }
   } else if (module == 'Geolocation') {
     String method = args[1];
@@ -245,6 +247,18 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
     } else if (method == 'setMethodCallHandler') {
       KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
         emitModuleEvent(jsonEncode(['MethodChannel', call.method, call.arguments]));
+      });
+    }
+  } else if (module == 'Clipboard') {
+    String method = args[1];
+    if (method == 'readText') {
+      KrakenClipboard.readText().then((String value) {
+        callback(Utf8.toUtf8(value ?? ''), context);
+      });
+    } else if (method == 'writeText') {
+      List methodArgs = args[2];
+      KrakenClipboard.writeText(methodArgs[0]).then((_) {
+        callback(Utf8.toUtf8(EMPTY_STRING), context);
       });
     }
   }
@@ -304,7 +318,7 @@ void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, 
     try {
       func(context, nullptr);
     } catch (e, stack) {
-      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(context, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -328,7 +342,7 @@ int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<V
     try {
       func(context, nullptr);
     } catch (e, stack) {
-      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(context, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -396,7 +410,7 @@ int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callb
     try {
       func(context, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(context, highResTimeStamp, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(context, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }

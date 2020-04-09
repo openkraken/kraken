@@ -1,5 +1,5 @@
 name: kraken
-description: Kraken Dart Framework
+description: Kraken Framework
 version: 0.3.1+0
 homepage: http://rax.alibaba-inc.com/kraken
 
@@ -52,8 +52,8 @@ flutter:
     platforms:
       android:
         package: com.taobao.kraken
-        pluginClass: KrakenPlugin
+        pluginClass: KrakenSDKPlugin
       ios:
-        pluginClass: KrakenPlugin
+        pluginClass: KrakenSDKPlugin
       macos:
-        pluginClass: KrakenPlugin
+        pluginClass: KrakenSDKPlugin
