@@ -244,7 +244,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# only works\nBRIDGE_DIR=${PROJECT_DIR}/../../bridge\nexport KRAKEN_JS_ENGINE=jsc\ncmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DCMAKE_TOOLCHAIN_FILE=$BRIDGE_DIR/cmake/ios.toolchain.cmake -DPLATFORM=$KRAKEN_BRIDGE_ARCH -G \"CodeBlocks - Unix Makefiles\" -B $BRIDGE_DIR/cmake-build-ios -S $BRIDGE_DIR\n";
+			shellScript = "# only works\n\nBRIDGE_DIR=${PROJECT_DIR}/../../bridge\nexport KRAKEN_JS_ENGINE=jsc\n\nif [[ $SDK_NAME == *\"simulator\"* ]]; then\n  export KRAKEN_BRIDGE_ARCH=SIMULATOR64\nelse\n  export KRAKEN_BRIDGE_ARCH=OS64\nfi\n\n\ncmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DCMAKE_TOOLCHAIN_FILE=$BRIDGE_DIR/cmake/ios.toolchain.cmake -DPLATFORM=$KRAKEN_BRIDGE_ARCH -G \"CodeBlocks - Unix Makefiles\" -B $BRIDGE_DIR/cmake-build-ios -S $BRIDGE_DIR\n";
 		};
 		1B7B06A4243EDD6A005F49EE /* Build Kraken Bridge */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -276,7 +276,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin\n";
 		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -408,10 +408,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s";
 			};
 			name = Profile;
 		};
@@ -494,6 +496,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s";
 			};
 			name = Debug;
 		};
@@ -541,10 +544,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s";
 			};
 			name = Release;
 		};
@@ -555,7 +560,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LIBRARY = "libc++";
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 4M8CE643H4;
+				DEVELOPMENT_TEAM = ANRD47DNBX;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
