@@ -100,7 +100,11 @@ JSCContext::JSCContext(jsa::JSExceptionHandler handler)
 
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef globalName = JSStringCreateWithUTF8CString("global");
+  JSStringRef windowName = JSStringCreateWithUTF8CString("window");
+  JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, globalName, global, kJSPropertyAttributeNone, nullptr);
+  JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
+  JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
 }
 
 JSCContext::~JSCContext() {

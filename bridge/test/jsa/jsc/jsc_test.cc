@@ -758,4 +758,14 @@ TEST(JSCContext, test) {
   context->evaluateJavaScript("setTimeout('12345');", "internal://", 0);
 }
 
+TEST(JSContext, window) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::Value result = context->evaluateJavaScript("window == global", "internal://", 0);
+  EXPECT_EQ(result.getBool(), true);
+  jsa::Object global = context->global();
+  global.setProperty(*context, "name", jsa::String::createFromUtf8(*context, "kraken"));
+  jsa::Value result2 = context->evaluateJavaScript("window.name === 'kraken'", "internal://", 0);
+  EXPECT_EQ(result2.getBool(), true);
+}
+
 #endif
