@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "kraken_bridge_export.h"
+#include "kraken_bridge_test.h"
 #include <flutter/flutter_window_controller.h>
 #include <memory>
 #include <string>

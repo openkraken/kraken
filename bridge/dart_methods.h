@@ -6,8 +6,8 @@
 #ifndef KRAKEN_DART_METHODS_H_
 #define KRAKEN_DART_METHODS_H_
 
-#include "bridge_export.h"
-#include "bridge_test_export.h"
+#include "kraken_bridge.h"
+#include "kraken_bridge_test.h"
 #include "thread_safe_map.h"
 #include <memory>
 
