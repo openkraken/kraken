@@ -45,7 +45,7 @@ global.setInterval = function (fn, timeout) {
     }
     fn();
   }, timeout);
-  index = timers.push(timer);
+  index = timers.push(timer) - 1;
   return timer;
 };
 

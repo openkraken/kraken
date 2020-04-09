@@ -31,9 +31,9 @@ mixin BackgroundImageMixin on Node {
     Gradient gradient;
 
     if (style.contains('backgroundImage')) {
-      List<Method> methods = Method.parseMethod(style['backgroundImage']);
+      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
       //FIXME flutter just support one property
-      for (Method method in methods) {
+      for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
@@ -64,9 +64,9 @@ mixin BackgroundImageMixin on Node {
     DecorationImage decorationImage;
     Gradient gradient;
     if (style.contains("backgroundImage")) {
-      List<Method> methods = Method.parseMethod(style['backgroundImage']);
+      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
       //FIXME flutter just support one property
-      for (Method method in methods) {
+      for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : "";
           if (url != null && url.isNotEmpty) {

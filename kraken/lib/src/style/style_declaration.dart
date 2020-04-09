@@ -76,7 +76,9 @@ class StyleDeclaration {
     if (value != null) {
       var prevValue = _cssProperties[propertyName];
       _cssProperties[propertyName] = value;
-      _invokeStyleKeyChanged(propertyName, prevValue, value);
+      if (value != prevValue) {
+        _invokeStyleKeyChanged(propertyName, prevValue, value);
+      }
     }
   }
 
