@@ -49,6 +49,10 @@ using HostFunctionType =
 
 using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
 
+/// A function which has this type can be registered as a class callable from
+/// Javascript using Function::createFromClassFunction().
+using HostClassType = std::function<Object(JSContext &context, Object &constructor, const Value *args, size_t count)>;
+
 /// An object which implements this interface can be registered as an
 /// Object with the JS runtime.
 class HostObject {
@@ -211,6 +215,7 @@ protected:
   virtual Object createObject(std::shared_ptr<HostObject> ho) = 0;
   virtual std::shared_ptr<HostObject> getHostObject(const jsa::Object &) = 0;
   virtual HostFunctionType &getHostFunction(const jsa::Function &) = 0;
+  virtual HostClassType &getHostClass(const jsa::Function &) = 0;
 
   virtual Value getProperty(const Object &, const PropNameID &name) = 0;
   virtual Value getProperty(const Object &, const String &name) = 0;
@@ -225,6 +230,7 @@ protected:
   virtual bool isFunction(const Object &) const = 0;
   virtual bool isHostObject(const jsa::Object &) const = 0;
   virtual bool isHostFunction(const jsa::Function &) const = 0;
+  virtual bool isHostClass(const jsa::Function &) const = 0;
   virtual Array getPropertyNames(const Object &) = 0;
 
   virtual WeakObject createWeakObject(const Object &) = 0;
@@ -244,6 +250,8 @@ protected:
 
   virtual Function createFunctionFromHostFunction(const PropNameID &name, unsigned int paramCount,
                                                   HostFunctionType func) = 0;
+  virtual Function createClassFromHostClass(const jsa::PropNameID &name, unsigned int paramCount,
+                                            jsa::HostClassType classType, const jsa::Object &prototype) = 0;
   virtual Value call(const Function &, const Value &jsThis, const Value *args, size_t count) = 0;
   virtual Value callAsConstructor(const Function &, const Value *args, size_t count) = 0;
 

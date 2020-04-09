@@ -1,9 +1,18 @@
-import { krakenInvokeModule } from './types';
+import { krakenInvokeModule, privateKraken } from './bridge';
 
 export const positionWatcherMap = new Map<string, any>();
 export let onConnectivityChangeListener: (data: Object) => any;
 
 const navigator = {
+  // UA is read-only.
+  get userAgent() {
+    // Rule: @product/@productSub (@platform; @appName/@appVersion)
+    const product = `${privateKraken.product}/${privateKraken.productSub}`;
+
+    // comment is extra info injected by Shell.
+    const comment = privateKraken.comment;
+    return `${product} (${privateKraken.platform}; ${privateKraken.appName}/${privateKraken.appVersion})${comment ? ' ' + comment : ''}`;
+  },
   connection: {
     getConnectivity() {
       return new Promise((resolve) => {
@@ -58,6 +67,21 @@ const navigator = {
       if (positionWatcherMap.size === 0) {
         krakenInvokeModule(`["Geolocation","clearWatch"]`);
       }
+    }
+  },
+  clipboard: {
+    readText() {
+      return new Promise((resolve) => {
+        krakenInvokeModule(`["Clipboard","readText"]`, resolve);
+      });
+    },
+    writeText(text: string) {
+      return new Promise((resolve) => {
+        krakenInvokeModule(JSON.stringify(['Clipboard', 'writeText', [String(text)]]), () => {
+          // Return undefined
+          resolve();
+        });
+      });
     }
   }
 }

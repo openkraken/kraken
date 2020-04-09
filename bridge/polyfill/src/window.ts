@@ -1,5 +1,5 @@
 import { EventTarget } from 'event-target-shim';
-import { krakenWindow, KrakenLocation } from './types';
+import { krakenWindow, KrakenLocation } from './bridge';
 import { addEvent } from "./document/ui-manager";
 import { NodeId } from "./document/node";
 

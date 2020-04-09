@@ -15,4 +15,15 @@ describe('Navigator', () => {
     expect(deviceInfo.isPhysicalDevice).toBeTrue();
     expect(deviceInfo.platformName).toBe('Mac OS');
   });
+
+  it('userAgent', () => {
+    expect(navigator.userAgent).toMatch(/Kraken/);
+  });
+
+  it('clipboard', async () => {
+    const text = String(new Date());
+    await navigator.clipboard.writeText(text);
+    const data = await navigator.clipboard.readText();
+    expect(data).toBe(text);
+  });
 });

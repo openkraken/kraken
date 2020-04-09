@@ -76,6 +76,7 @@ abstract class Element extends Node
   ContainerRenderObjectMixin renderLayoutBox;
   RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
+  // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow
@@ -460,13 +461,27 @@ abstract class Element extends Node
         definiteTransition?.addProgressListener(progressListener);
         allTransition?.addProgressListener(progressListener);
       } else {
-        zIndexParentData.zIndex = Length.toInt(style['zIndex']);;
-        zIndexParentData.top = Length.toDisplayPortValue(style['top']);
-        zIndexParentData.left = Length.toDisplayPortValue(style['left']);
-        zIndexParentData.right = Length.toDisplayPortValue(style['right']);
-        zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
-        zIndexParentData.width = Length.toDisplayPortValue(style['width']);
-        zIndexParentData.height = Length.toDisplayPortValue(style['height']);
+        if (style.contains('zIndex')) {
+          zIndexParentData.zIndex = Length.toInt(style['zIndex']);;
+        }
+        if (style.contains('top')) {
+          zIndexParentData.top = Length.toDisplayPortValue(style['top']);
+        }
+        if (style.contains('left')) {
+          zIndexParentData.left = Length.toDisplayPortValue(style['left']);
+        }
+        if (style.contains('right')) {
+          zIndexParentData.right = Length.toDisplayPortValue(style['right']);
+        }
+        if (style.contains('bottom')) {
+          zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
+        }
+        if (style.contains('width')) {
+          zIndexParentData.width = Length.toDisplayPortValue(style['width']);
+        }
+        if (style.contains('height')) {
+          zIndexParentData.height = Length.toDisplayPortValue(style['height']);
+        }
         renderObject.parentData = zIndexParentData;
         renderParent.markNeedsLayout();
       }
@@ -1063,7 +1078,7 @@ abstract class Element extends Node
     updateChildNodesStyle();
   }
 
-// Universal style property change callback.
+  // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
     // @NOTE: See [StyleDeclaration.setProperty], value change will trigger
