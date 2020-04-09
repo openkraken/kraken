@@ -144,10 +144,10 @@ void defaultAfterConnected() async {
   String bundlePath = _bundlePathOverride ?? getBundlePathFromEnv();
   String zipBundleURL = _zipBundleURLOverride ?? getZipBundleURLFromEnv();
 
-  if (bundleURL ?? bundlePath ?? zipBundleURL == null) {
+  if ((bundleURL ?? bundlePath ?? zipBundleURL) == null) {
     String urlFromChannel = await KrakenMethodChannel.getUrl();
     if (urlFromChannel != null && urlFromChannel.isNotEmpty) {
-      // Maybe shold more strict to match
+      // @TODO: Should be more strict to match
       if (urlFromChannel.endsWith('.zip')) {
         zipBundleURL = urlFromChannel;
       } else if (urlFromChannel.startsWith('http')) {
