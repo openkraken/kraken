@@ -12,6 +12,8 @@ import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
+import 'manifest.dart';
+
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
@@ -28,16 +30,6 @@ String getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
-class BundleManifest {
-  BundleManifest.parseFromJSON(String json) {
-
-  }
-
-  BundleManifest() {
-
-  }
-}
-
 abstract class KrakenBundle {
   KrakenBundle(this.url);
 
@@ -49,7 +41,7 @@ abstract class KrakenBundle {
   List<String> assets = [];
   int lineOffset = 0;
   // Kraken bundle manifest
-  BundleManifest manifest;
+  Manifest manifest;
 
   bool isResolved = false;
 
@@ -143,7 +135,7 @@ class ZipBundle extends KrakenBundle {
         if (filename == 'index.js') {
           content = file.content.toString();
         } else if (filename == 'manifest.json') {
-          manifest = jsonDecode(file.content.toString());
+          manifest = Manifest.fromJson(jsonDecode(file.content.toString()));
         } else {
           // Treat as assets.
           assets.add(filename);
@@ -166,7 +158,7 @@ class JSBundle extends KrakenBundle {
   @override
   Future<void> resolve() async {
     // JSBundle get default bundle manifest.
-    manifest = BundleManifest();
+    manifest = Manifest();
     if (isNetworkBundle) {
       Response response = await Dio().get(url);
       content = response.toString();
