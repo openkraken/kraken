@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_export.h"
+#include "kraken_bridge.h"
 #include "bridge.h"
 #include "dart_methods.h"
 #include "jsa.h"

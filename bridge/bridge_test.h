@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_BRIDGE_TEST_H
 
 #include "bridge.h"
-#include "bridge_test_export.h"
+#include "kraken_bridge_test.h"
 
 namespace kraken {
 
