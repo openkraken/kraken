@@ -1078,7 +1078,7 @@ abstract class Element extends Node
     updateChildNodesStyle();
   }
 
-// Universal style property change callback.
+  // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
     // @NOTE: See [StyleDeclaration.setProperty], value change will trigger

@@ -5,7 +5,8 @@ describe('Appear Event', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
 
-    div.addEventListener('appear', () => {
+    div.addEventListener('appear', function onAppear() {
+      div.removeEventListener('appear', onAppear);
       done();
     });
 
@@ -20,7 +21,8 @@ describe('Appear Event', () => {
     div.style.position = 'absolute';
     div.style.top = '0';
 
-    div.addEventListener('disappear', () => {
+    div.addEventListener('disappear', function onDisappear(){
+      div.removeEventListener('disappear', onDisappear);
       done();
     });
 
@@ -39,10 +41,6 @@ describe('Appear Event', () => {
     div.style.position = 'absolute';
     div.style.top = '0';
 
-    div.addEventListener('appear', () => {
-      done();
-    });
-
     setTimeout(() => {
       div.style.top = '-600px';
     }, 100);
@@ -52,5 +50,12 @@ describe('Appear Event', () => {
     }, 200);
 
     document.body.appendChild(div);
+
+    // should add eventListener after appendChild to 
+    // avoid first appear event when div has appended to document.body
+    div.addEventListener('appear', function onAppear() {
+      div.removeEventListener('appear', onAppear);
+      done();
+    });
   });
 });

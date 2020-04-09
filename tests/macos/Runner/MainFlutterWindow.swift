@@ -15,6 +15,7 @@ class MainFlutterWindow: NSWindow {
     
     kraken.registerMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) in
       kraken.invokeMethod(call.method, arguments: call.arguments)
+      result("method: " + call.method)
     })
     
     super.awakeFromNib()

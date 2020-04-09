@@ -1,18 +1,63 @@
-const { EventEmitter } = require('events');
+const {EventEmitter} = require('events');
 const jasmineCore = require('./jasmine.js');
 const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
-const env = jasmine.getEnv({ suppressLoadErrors: true });
+const env = jasmine.getEnv({suppressLoadErrors: true});
 const jasmineInterface = jasmineCore.interface(jasmine, env);
 
 const environment = __kraken_environment__();
 
+let timers = [];
+
+const oldSetTimeout = setTimeout;
+const oldSetInterval = setInterval;
+
+// when spec is done, all pending timer should force to stop and never invoke.
+function clearAllTimer() {
+  timers.forEach((timer, index) => {
+    if (timer != null) {
+      clearTimeout(timer);
+      timers[index] = null;
+    }
+  });
+}
+
+global.setTimeout = function (fn, timeout) {
+  let index;
+  let timer = oldSetTimeout(() => {
+    // if this timer is canceled, just return.
+    if (timers[index] == null) {
+      return;
+    }
+    timers[index] = null;
+    fn();
+  }, timeout);
+  index = timers.push(timer) - 1;
+  return timer;
+};
+
+global.setInterval = function (fn, timeout) {
+  let index;
+  let timer = oldSetInterval(() => {
+    // if this timer is canceled, just return.
+    if (timers[index] == null) {
+      return;
+    }
+    fn();
+  }, timeout);
+  index = timers.push(timer);
+  return timer;
+};
+
 class JasmineTracker extends EventEmitter {
   constructor() {
     super();
-    this.onJasmineStarted = () => { };
-    this.onJasmineDone = () => { };
-    this.onSpecStarted = () => { };
+    this.onJasmineStarted = () => {
+    };
+    this.onJasmineDone = () => {
+    };
+    this.onSpecDone = () => {
+    };
   }
 
   jasmineStarted(result) {
@@ -23,15 +68,9 @@ class JasmineTracker extends EventEmitter {
     return this.onJasmineDone(result);
   }
 
-  specStarted(result) {
-    return this.onSpecStarted(result);
-  }
-
   specDone(result) {
-    // Force update frames.
-    __request_update_frame__();
+    return this.onSpecDone(result);
   }
-
 }
 
 const consoleReporter = new ConsoleReporter();
@@ -94,16 +133,18 @@ env.addReporter(jasmineTracker);
 Object.assign(global, jasmineInterface);
 
 __kraken_executeTest__((done) => {
-  jasmineTracker.onSpecStarted = (result) => {
+  jasmineTracker.onSpecDone = (result) => {
     return new Promise((resolve, reject) => {
       try {
-        __request_update_frame__();
-        __kraken_refresh_paint__(function (e) {
-          if (e) {
-            reject(e);
-          } else {
-            resolve();
-          }
+        clearAllTimer();
+        requestAnimationFrame(() => {
+          __kraken_refresh_paint__(function (e) {
+            if (e) {
+              reject(e);
+            } else {
+              resolve();
+            }
+          });
         });
       } catch (e) {
         reject(e);

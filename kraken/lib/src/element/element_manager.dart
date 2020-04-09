@@ -92,7 +92,7 @@ class ElementManagerActionDelegate {
   }
 
   void removeNode(int targetId) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId');
 
     Node target = nodeMap[targetId];
     assert(target != null);
@@ -102,7 +102,7 @@ class ElementManagerActionDelegate {
   }
 
   void setProperty(int targetId, String key, value) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId key: $key value: $value');
     Node target = nodeMap[targetId];
     assert(target != null);
 
@@ -115,7 +115,7 @@ class ElementManagerActionDelegate {
   }
 
   void removeProperty(int targetId, String key) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId key: $key');
     Node target = nodeMap[targetId];
     assert(target != null);
 
@@ -127,7 +127,7 @@ class ElementManagerActionDelegate {
   }
 
   void setStyle(int targetId, String key, String value) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'id: $targetId key: $key value: $value');
     Node target = nodeMap[targetId];
     assert(target != null);
 
@@ -146,7 +146,7 @@ class ElementManagerActionDelegate {
   /// </p>
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int nodeId) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId position: $position nodeId: $nodeId');
     assert(nodeMap.containsKey(nodeId));
 
     Node target = nodeMap[targetId];
@@ -178,7 +178,7 @@ class ElementManagerActionDelegate {
   }
 
   void addEvent(int targetId, String eventName) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId event: $eventName');
 
     EventTarget target = nodeMap[targetId];
     assert(target != null);
@@ -187,7 +187,7 @@ class ElementManagerActionDelegate {
   }
 
   void removeEvent(int targetId, String eventName) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId event: $eventName');
 
     Element target = nodeMap[targetId];
     assert(target != null);
@@ -196,7 +196,7 @@ class ElementManagerActionDelegate {
   }
 
   method(int targetId, String method, args) {
-    assert(nodeMap.containsKey(targetId));
+    assert(nodeMap.containsKey(targetId), 'targetId: $targetId, method: $method, args: $args');
     Element target = nodeMap[targetId];
     List _args;
     try {
