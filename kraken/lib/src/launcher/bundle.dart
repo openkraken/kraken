@@ -133,9 +133,9 @@ class ZipBundle extends KrakenBundle {
       String filename = file.name;
       if (file.isFile) {
         if (filename == 'index.js') {
-          content = file.content.toString();
+          content = utf8.decode(file.content);
         } else if (filename == 'manifest.json') {
-          manifest = Manifest.fromJson(jsonDecode(file.content.toString()));
+          manifest = Manifest.fromJson(utf8.decode(file.content));
         } else {
           // Treat as assets.
           assets.add(filename);
