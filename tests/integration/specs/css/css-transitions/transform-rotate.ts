@@ -17,7 +17,7 @@ describe('Transition transform', () => {
     requestAnimationFrame(async () => {
       await matchScreenshot();
       setStyle(container1, {
-        transform: 'rotateZ(1turn)',
+        transform: 'rotateZ(0.6turn)',
       });
       setTimeout(async () => {
         await matchScreenshot();
@@ -46,7 +46,7 @@ describe('Transition transform', () => {
     requestAnimationFrame(async () => {
       await matchScreenshot();
       setStyle(container1, {
-        transform: 'rotate3d(10, 10, 10, 1turn)',
+        transform: 'rotate3d(10, 10, 10, 0.6turn)',
       });
       setTimeout(async () => {
         await matchScreenshot();
@@ -75,7 +75,7 @@ describe('Transition transform', () => {
     requestAnimationFrame(async () => {
       await matchScreenshot();
       setStyle(container1, {
-        transform: 'rotateX(1turn)',
+        transform: 'rotateX(0.6turn)',
       });
       setTimeout(async () => {
         await matchScreenshot();
@@ -104,7 +104,7 @@ describe('Transition transform', () => {
     requestAnimationFrame(async () => {
       await matchScreenshot();
       setStyle(container1, {
-        transform: 'rotateY(1turn)',
+        transform: 'rotateY(0.6turn)',
       });
       setTimeout(async () => {
         await matchScreenshot();
