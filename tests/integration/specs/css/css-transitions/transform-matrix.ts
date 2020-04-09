@@ -1,5 +1,5 @@
 describe('Transition transform', () => {
-  it('001', done => {
+  it('matrix', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setStyle(container1, {
@@ -14,11 +14,11 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      await matchScreenshot();
       setStyle(container1, {
-        transform: 'translate3d(200px, 0, 0)',
+        transform: 'matrix(0,1,1,1,10,10)',
       });
-
       // Wait for animation finished.
       setTimeout(async () => {
         await matchScreenshot();
@@ -29,7 +29,7 @@ describe('Transition transform', () => {
 });
 
 describe('Transition transform', () => {
-  it('rotateZ', done => {
+  it('matrix3d', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setStyle(container1, {
@@ -39,26 +39,20 @@ describe('Transition transform', () => {
       padding: '20px',
       backgroundColor: '#999',
       transitionProperty: 'transform',
-      transitionDuration: '2s',
+      transitionDuration: '1s',
       transitionTimingFunction: 'ease',
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      await matchScreenshot();
       setStyle(container1, {
-        transform: 'rotateZ(1turn)',
+        transform: 'matrix3d(0,1,1,1,10,10,1,0,0,1,1,1,1,1,0)',
       });
-
-
-      var count = 0;
-      // Wait for animation finished.
-      var id = setInterval(async () => {
+      setTimeout(async () => {
         await matchScreenshot();
-        if (++count > 4) {
-            clearInterval(id);
-            done();
-        }
-      }, 250);
+        done();
+      }, 1100);
     });
   });
 });

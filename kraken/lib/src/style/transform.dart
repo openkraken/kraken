@@ -87,7 +87,8 @@ mixin TransformStyleMixin {
         }
       }
     }
-    return matrix4;
+    // default return identity
+    return matrix4 ?? this.matrix4;
   }
 
   Matrix4 getTransform(Method method,
@@ -98,7 +99,7 @@ mixin TransformStyleMixin {
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {
-            List<double> args = [];
+            List<double> args = List(6);
             bool hasOldValue = oldMethod != null && oldMethod.args.length == 6;
             for (int i = 0; i < 6; i++) {
               args[i] = needDiff ? _getProgressValue(
@@ -128,7 +129,7 @@ mixin TransformStyleMixin {
         break;
       case 'matrix3d':
         if (method.args.length == 16) {
-            List<double> args = [];
+            List<double> args = List(16);;
             bool hasOldValue = oldMethod != null && oldMethod.args.length == 16;
             for (int i = 0; i < 16; i++) {
               args[i] = needDiff ? _getProgressValue(
@@ -393,12 +394,12 @@ mixin TransformStyleMixin {
           double alpha = Angle(method.args[0].trim()).angleValue;
           double beta = 0.0;
           if (method.args.length == 2) {
-            double beta = Angle(method.args[1].trim()).angleValue;
+            beta = Angle(method.args[1].trim()).angleValue;
           }
           if (needDiff) {
             double oldAlpha = 0.0;
             double oldBeta = 0.0;
-            if (oldMethod != null && oldMethod.args.length == 1 || oldMethod.args.length == 2) {
+            if (oldMethod != null && (oldMethod.args.length == 1 || oldMethod.args.length == 2)) {
               oldAlpha = Angle(oldMethod.args[0].trim()).angleValue;
               if (oldMethod.args.length == 2) {
                 oldBeta = Angle(oldMethod.args[1].trim()).angleValue;
