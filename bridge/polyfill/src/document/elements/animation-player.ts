@@ -3,7 +3,7 @@ import { method } from '../ui-manager';
 
 export class AnimationPlayerElement extends Element {
   constructor(tagName: string) {
-    super(tagName);
+    super(tagName, undefined, ['load']);
   }
 
   set src(value: string) {

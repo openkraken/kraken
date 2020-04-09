@@ -1,7 +1,7 @@
-import { Element } from '../element';
-import { method } from '../ui-manager';
+import {MediaElement} from './mediaElement';
+import {method} from '../ui-manager';
 
-export class AudioElement extends Element {
+export class AudioElement extends MediaElement {
   constructor(tagName: string) {
     super(tagName);
   }
