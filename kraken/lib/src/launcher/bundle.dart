@@ -79,8 +79,11 @@ abstract class KrakenBundle {
   }
 
   Future<Directory> _getLocalBundleDirectory() async {
+    // https://developer.apple.com/documentation/foundation/filemanager/searchpathdirectory/documentdirectory
+    // Each app will have it's unique document directory, if sandbox is off, app
+    // will share a common document(eg, ~/Documents in macOS).
     Directory document = await getApplicationDocumentsDirectory();
-    String localBundlePath = '${document.path}/kraken_bundle';
+    String localBundlePath = '${document.path}/Bundles';
 
     // Make sure directory exists.
     Directory localBundleDirectory = Directory(localBundlePath);
