@@ -1,6 +1,5 @@
-import { Node, NodeType, NodeId } from './node';
+import {Node, NodeType} from './node';
 import {
-  addEvent,
   createElement,
   setProperty,
   removeProperty,
@@ -46,25 +45,24 @@ function cached(fn: ICamelize) {
  */
 const camelize: ICamelize = (str: string) => {
   const camelizeRE = /-(\w)/g;
-  return str.replace(camelizeRE, function(_ : string, c : string) {
+  return str.replace(camelizeRE, function (_: string, c: string) {
     return c ? c.toUpperCase() : '';
   });
 }
 
 // Cached camelize utility
 const cachedCamelize = cached(camelize);
+// support event handlers using 'on' property prefix.
+const elementBuildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
 export class Element extends Node {
   public readonly tagName: string;
-  private events: {
-    [eventName: string]: any;
-  } = {};
   public style: object = {};
   // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   public attributes: Array<any> = [];
 
-  constructor(tagName: string, _nodeId?: number) {
-    super(NodeType.ELEMENT_NODE, _nodeId);
+  constructor(tagName: string, _nodeId?: number, buildInEvents?: Array<string>) {
+    super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(buildInEvents || []));
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {
@@ -95,20 +93,6 @@ export class Element extends Node {
     if (tagName != 'BODY') {
       createElement(this.tagName, nodeId, {}, []);
     }
-  }
-
-  addEventListener(eventName: string, eventListener: any) {
-    super.addEventListener(eventName, eventListener);
-    // Body will always exists, so can not merge body events.
-    if (!this.events.hasOwnProperty(eventName) || this.nodeId === NodeId.BODY) {
-      addEvent(this.nodeId, eventName);
-      this.events[eventName] = eventListener;
-    }
-  }
-
-  // Do not really emit remove event, due to performance consideration.
-  removeEventListener(eventName: string, eventListener: any) {
-    super.removeEventListener(eventName, eventListener);
   }
 
   getBoundingClientRect = () => {

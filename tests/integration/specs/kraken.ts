@@ -6,7 +6,7 @@ describe('Kraken API', () => {
   });
 
   it('methodChannel setMethodHandler', async (done) => {
-    kraken.methodChannel.setMethodHandler((method: string, args: any[]) => {
+    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc']);
       done();
@@ -16,7 +16,7 @@ describe('Kraken API', () => {
   });
 
   it('methodChannel multi params', async (done) => {
-    kraken.methodChannel.setMethodHandler((method: string, args: any[]) => {
+    kraken.methodChannel.setMethodCallHandler((method: string, args: any[]) => {
       expect(method).toBe('helloworld');
       expect(args).toEqual(['abc', 1234, null, /* undefined will be converted to */ null, [], true, false, {name: 1}]);
       done();
