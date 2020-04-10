@@ -53,7 +53,7 @@ const camelize: ICamelize = (str: string) => {
 // Cached camelize utility
 const cachedCamelize = cached(camelize);
 // support event handlers using 'on' property prefix.
-const _buildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
+const elementBuildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
 export class Element extends Node {
   public readonly tagName: string;
@@ -62,7 +62,7 @@ export class Element extends Node {
   public attributes: Array<any> = [];
 
   constructor(tagName: string, _nodeId?: number, buildInEvents?: Array<string>) {
-    super(NodeType.ELEMENT_NODE, _nodeId, _buildInEvents.concat(buildInEvents || []));
+    super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(buildInEvents || []));
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
     this.style = new Proxy(this.style, {

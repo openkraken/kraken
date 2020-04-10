@@ -36,7 +36,7 @@ export class Node extends EventTarget {
     let _isConnected = this.nodeId === NodeId.BODY;
     let parentNode = this.parentNode;
     while (parentNode) {
-      _isConnected = parentNode.nodeId === NodeId.BODY
+      _isConnected = parentNode.nodeId === NodeId.BODY;
       parentNode = parentNode.parentNode;
     }
     return _isConnected;
@@ -78,7 +78,7 @@ export class Node extends EventTarget {
   }
 
   /**
-   * The Node.removeChild() method rmoves a child node within the given (parent) node.
+   * The Node.removeChild() method remove a child node within the given (parent) node.
    * @param node {Node} The child node to remove.
    * @return The returned value is the rmoved node.
    */

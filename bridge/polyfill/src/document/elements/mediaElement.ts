@@ -1,34 +1,34 @@
 import {Element} from '../element';
 import {method} from "../ui-manager";
 
-const _buildInEvents = [
-  'abort', // not supported
+const mediaElementBuildInEvents = [
+  // 'abort', // not supported
   'canplay',
   'canplaythrough',
-  'durationchange', // not supported
-  'emptied', // not supported
-  'ended', // not supported
+  // 'durationchange', // not supported
+  // 'emptied', // not supported
+  // 'ended', // not supported
   'error',
-  'loadeddata', // not supported
-  'loadedmetadata', // not supported
-  'loadstart', // not supported
+  // 'loadeddata', // not supported
+  // 'loadedmetadata', // not supported
+  // 'loadstart', // not supported
   'pause',
   'play',
-  'playing', // not supported
-  'progress', // not supported
-  'ratechange', // not supported
+  // 'playing', // not supported
+  // 'progress', // not supported
+  // 'ratechange', // not supported
   'seeked',
   'seeking',
-  'stalled', // not supported
-  'suspend', // not supported
-  'timeupdate', // not supported
+  // 'stalled', // not supported
+  // 'suspend', // not supported
+  // 'timeupdate', // not supported
   'volumechange',
-  'waiting' // not supported
+  // 'waiting' // not supported
 ];
 
 export class MediaElement extends Element {
   constructor(tagName: string) {
-    super(tagName, undefined, _buildInEvents);
+    super(tagName, undefined, mediaElementBuildInEvents);
   }
 
   play = () => {
