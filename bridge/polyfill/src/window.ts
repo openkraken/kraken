@@ -27,11 +27,6 @@ class Window extends EventTarget {
   }
 }
 
-export const window = new Window();
-
-Object.defineProperty(global, 'window', {
-  enumerable: true,
-  writable: false,
-  configurable: false,
-  value: window,
-});
+// window is global object, which is created by JSEngine, assign some
+// window API from polyfill.
+Object.assign(window, new Window());

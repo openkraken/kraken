@@ -215,8 +215,11 @@ mixin ElementStyleMixin on RenderBox {
         // Display as inline-block if parent node is flex
         display = 'inline-block';
 
-        // Display as block if flex vertical layout children
-        if (style['flexDirection'] == 'column') {
+        // Display as block if flex vertical layout children and stretch children
+        if (style['flexDirection'] == 'column' &&
+          (!style.contains('alignItems') ||
+            (style.contains('alignItems') && style['alignItems'] == 'stretch'))
+        ) {
           display = 'block';
         }
       }
