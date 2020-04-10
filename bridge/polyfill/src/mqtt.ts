@@ -1,4 +1,4 @@
-import { EventTarget } from 'event-target-shim';
+import { EventTarget, Event } from './document/event-target';
 import { krakenInvokeModule } from './bridge';
 
 enum ReadyState {
@@ -18,7 +18,7 @@ enum QoS {
 
 const mqttClientMap = {};
 
-export function dispatchMQTT (clientId: string, event: object) {
+export function dispatchMQTT (clientId: string, event: Event) {
   let client = mqttClientMap[clientId];
   if (client) {
     client.dispatchEvent(event); 
@@ -35,7 +35,7 @@ class MQTT extends EventTarget {
   url: string;
 
   constructor(url: string, clientId: string = '') {
-    super();
+    super(NaN);
     this.url = url;
     this.id = krakenInvokeModule(`["MQTT","init",["${url}","${clientId}"]]`);
     mqttClientMap[this.id] = this;
