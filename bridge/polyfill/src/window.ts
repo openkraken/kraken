@@ -1,22 +1,16 @@
-import { EventTarget } from 'event-target-shim';
-import { krakenWindow, KrakenLocation } from './bridge';
-import { addEvent } from "./document/ui-manager";
-import { NodeId } from "./document/node";
+import {EventTarget} from './document/event-target';
+import {krakenWindow, KrakenLocation} from './bridge';
+import {NodeId} from "./document/node";
+
+
+const windowBuildInEvents = ['load', 'colorschemechange'];
 
 class Window extends EventTarget {
-  private events: {
-    [eventName: string]: any;
-  } = {};
-
-  addEventListener(eventName: string, eventListener: EventListener) {
-    super.addEventListener(eventName, eventListener);
-    if (!this.events.hasOwnProperty(eventName)) {
-      addEvent(NodeId.WINDOW, eventName);
-      this.events[eventName] = eventListener;
-    }
+  constructor() {
+    super(NodeId.WINDOW, windowBuildInEvents);
   }
 
-  public get colorScheme() : string {
+  public get colorScheme(): string {
     return krakenWindow.colorScheme;
   }
 
@@ -24,7 +18,7 @@ class Window extends EventTarget {
     return krakenWindow.devicePixelRatio;
   }
 
-  public get location() : KrakenLocation {
+  public get location(): KrakenLocation {
     return krakenWindow.location;
   }
 

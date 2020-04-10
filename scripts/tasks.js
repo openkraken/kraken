@@ -391,11 +391,29 @@ task('ios-clean', (done) => {
 
 ['Debug', 'Release'].forEach(mode => {
   task(`build-ios-kraken-lib-${mode.toLowerCase()}`, (done) => {
-    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk iphonesimulator13.2 -configuration ${mode} ONLY_ACTIVE_ARCH=NO TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/iossimulator`, {
+    let buildInSDKs = JSON.parse(execSync('xcodebuild -showsdks -json', {
+      encoding: 'utf-8'
+    }));
+    let iphoneSDK = buildInSDKs.find((info) => {
+      return info.platform === 'iphoneos';
+    });
+    let simulatorSDK = buildInSDKs.find((info) => {
+      return info.platform === 'iphonesimulator';
+    });
+
+    if (!iphoneSDK) {
+      throw new Error('No suitable iOS SDK found');
+    }
+
+    if (!simulatorSDK) {
+      throw new Error('No suitable iOS simulator found');
+    }
+
+    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk ${simulatorSDK.canonicalName} -configuration ${mode} ONLY_ACTIVE_ARCH=NO TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/iossimulator`, {
       cwd: path.join(paths.bridge, 'ios'),
       stdio: 'inherit'
     });
-    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk iphoneos13.2 ONLY_ACTIVE_ARCH=NO -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/ios`, {
+    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk ${iphoneSDK.canonicalName} ONLY_ACTIVE_ARCH=NO -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/ios`, {
       cwd: path.join(paths.bridge, 'ios'),
       stdio: 'inherit'
     });

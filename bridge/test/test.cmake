@@ -60,7 +60,6 @@ endif()
 
 add_executable(kom_test
   ./test/kom/blob.cc
-  ./test/kom/test_framework.cc
 )
 target_link_libraries(kom_test ${TEST_LINK_LIBRARY})
 target_include_directories(kom_test PUBLIC ${TEST_INCLUDE_DIR})

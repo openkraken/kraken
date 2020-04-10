@@ -1,12 +1,14 @@
-import { EventTarget } from 'event-target-shim';
-import { insertAdjacentNode, removeNode } from './ui-manager';
+import {EventTarget} from './event-target';
+import {insertAdjacentNode, removeNode} from './ui-manager';
 
 export type NodeList = Array<Node>;
+
 export enum NodeId {
   BODY = -1,
   // Window is not inherit node but EventTarget, so we assume window is a node.
   WINDOW = -2,
 }
+
 export enum NodeType {
   ELEMENT_NODE = 1,
   TEXT_NODE = 3,
@@ -21,14 +23,12 @@ let nodesCount = 1;
 export class Node extends EventTarget {
   public readonly nodeType: NodeType;
   public readonly childNodes: NodeList = [];
-  public readonly nodeId: number;
   public nodeValue: string | null;
   public textContent: string | null;
   public parentNode: Node | null;
 
-  constructor(type: NodeType, id?: number) {
-    super();
-    this.nodeId = id || nodesCount++;
+  constructor(type: NodeType, id?: number, buildInEvents?: Array<string>) {
+    super(id || nodesCount++, buildInEvents || []);
     this.nodeType = type;
   }
 
@@ -36,7 +36,7 @@ export class Node extends EventTarget {
     let _isConnected = this.nodeId === NodeId.BODY;
     let parentNode = this.parentNode;
     while (parentNode) {
-      _isConnected = parentNode.nodeId === NodeId.BODY
+      _isConnected = parentNode.nodeId === NodeId.BODY;
       parentNode = parentNode.parentNode;
     }
     return _isConnected;
@@ -78,7 +78,7 @@ export class Node extends EventTarget {
   }
 
   /**
-   * The Node.removeChild() method rmoves a child node within the given (parent) node.
+   * The Node.removeChild() method remove a child node within the given (parent) node.
    * @param node {Node} The child node to remove.
    * @return The returned value is the rmoved node.
    */

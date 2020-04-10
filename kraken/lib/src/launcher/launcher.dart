@@ -161,9 +161,9 @@ void defaultAfterConnected() async {
   String content = _bundleContentOverride ?? await getBundleContent(bundleURL: bundleURL, bundlePath: bundlePath, zipBundleURL: zipBundleURL);
   evaluateScripts(content, bundleURL ?? bundlePath ?? zipBundleURL ?? DEFAULT_BUNDLE_PATH, 0);
 
-  requestAnimationFrame((timeStamp) {
-    String json = jsonEncode([WINDOW_ID, Event('load')]);
-    emitUIEvent(json);
+  requestAnimationFrame((_) {
+    Window window = nodeMap[WINDOW_ID];
+    window.dispatchEvent(Event('load'));
   });
 }
 

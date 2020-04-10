@@ -1,9 +1,11 @@
 import { Element } from '../element';
 import { method } from '../ui-manager';
 
+const animationPlayerBuildInEvents = ['load'];
+
 export class AnimationPlayerElement extends Element {
   constructor(tagName: string) {
-    super(tagName);
+    super(tagName, undefined, animationPlayerBuildInEvents);
   }
 
   set src(value: string) {
