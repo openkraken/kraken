@@ -3,15 +3,10 @@ import { krakenWindow, KrakenLocation } from './bridge';
 import { addEvent } from "./document/ui-manager";
 import { NodeId } from "./document/node";
 
-
 class Window extends EventTarget {
   private events: {
     [eventName: string]: any;
   } = {};
-
-  constructor() {
-    super();
-  }
 
   addEventListener(eventName: string, eventListener: EventListener) {
     super.addEventListener(eventName, eventListener);
@@ -24,7 +19,6 @@ class Window extends EventTarget {
   public get colorScheme() : string {
     return krakenWindow.colorScheme;
   }
-
 
   public get devicePixelRatio() : number {
     return krakenWindow.devicePixelRatio;
@@ -39,11 +33,6 @@ class Window extends EventTarget {
   }
 }
 
-export const window = new Window();
-
-Object.defineProperty(global, 'window', {
-  enumerable: true,
-  writable: false,
-  configurable: false,
-  value: window,
-});
+// window is global object, which is created by JSEngine, assign some
+// window API from polyfill.
+Object.assign(window, new Window());

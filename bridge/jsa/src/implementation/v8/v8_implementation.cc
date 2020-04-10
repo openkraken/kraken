@@ -155,8 +155,10 @@ V8Context::V8Context(jsa::JSExceptionHandler handler)
   _context.Reset(_isolate, context);
   v8::Local<v8::Object> global = context->Global();
   v8::Local<v8::Value> globalValue = v8::Local<v8::Value>::Cast(global);
-  v8::Local<v8::String> globalKey = v8::String::NewFromUtf8(_isolate, "global").ToLocalChecked();
-  global->Set(context, globalKey, globalValue).ToChecked();
+  v8::Local<v8::String> windowKey = v8::String::NewFromUtf8(_isolate, "window").ToLocalChecked();
+  v8::Local<v8::String> globalThisKey = v8::String::NewFromUtf8(_isolate, "globalThis").ToLocalChecked();
+  global->Set(context, windowKey, globalValue).ToChecked();
+  global->Set(context, globalThisKey, globalValue).ToChecked();
   _global.Reset(_isolate, global);
 }
 
