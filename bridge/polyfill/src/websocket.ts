@@ -1,4 +1,4 @@
-import { EventTarget } from 'event-target-shim';
+import { EventTarget, Event } from './document/event-target';
 import { KrakenWebSocketToken, krakenWebSocket} from './bridge';
 
 function validateUrl(url: string) {
@@ -35,32 +35,31 @@ class WebSocket extends EventTarget {
   public binaryType: BinaryType = BinaryType.blob;
 
   private _onMessage = (message: string) => {
-    this.dispatchEvent({
-      type: 'message',
-      // @ts-ignore
+    const event = new Event('message');
+    Object.assign(event, {
       data: message,
       // lastEventId: '', // TODO add lastEventId support
       // origin?: string; // TODO add origin support
       // ports?: MessagePort[]; // TODO add ports support
       // source?: MessageEventSource | null; // TODO add source support
     });
+    this.dispatchEvent(event);
   };
 
   private _onOpen = () => {
     this.readyState = ReadyState.OPEN;
-    this.dispatchEvent({
-      type: 'open',
-    });
+    this.dispatchEvent(new Event('open'));
   };
 
   private _onClose = (code: number, reason: string) => {
     this.readyState = ReadyState.CLOSED;
-    this.dispatchEvent({
-      type: 'close',
+    const event = new Event('close');
+    Object.assign(event, {
       code: code,
       reason: reason,
       wasClean: true // is close really clean ??
     });
+    this.dispatchEvent(event);
   };
 
   private _onError = (error: string) => {
@@ -83,16 +82,14 @@ class WebSocket extends EventTarget {
 
     console.error('WebSocket connection to \'' + this.url + '\' failed: ' +
       'Error in connection ' + connectionStatus + ': ' + error);
-    this.dispatchEvent({
-      type: 'error'
-    });
+    this.dispatchEvent(new Event('error'));
     this.readyState = ReadyState.CLOSED;
   };
 
   public _onopen: any = null;
-  public _onmessage: any = null
-  public _onclose: any = null
-  public _onerror: any = null
+  public _onmessage: any = null;
+  public _onclose: any = null;
+  public _onerror: any = null;
 
   public set onopen(messageHandler: any) {
     if (this._onopen) {
