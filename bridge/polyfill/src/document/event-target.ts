@@ -16,18 +16,15 @@ export class Event {
   }
 }
 
-/// If won't want to send message to Dart side, use NaN to skip.
-function shouldSendToDart(nodeId: number) {
-  return Number.isNaN(nodeId);
-}
-
 export class EventTarget {
   public nodeId: number;
   __eventHandlers: Map<string, Array<EventHandler>> = new Map();
   __propertyEventHandler: Map<string, EventHandler> = new Map();
 
-  constructor(nodeId: number, buildInEvents: Array<string> = []) {
-    this.nodeId = nodeId;
+  constructor(nodeId?: number, buildInEvents: Array<string> = []) {
+    if (nodeId) {
+      this.nodeId = nodeId;
+    }
     buildInEvents.forEach(event => {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
@@ -49,7 +46,7 @@ export class EventTarget {
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
       // trigger event from dart side. this can led to significant performance improvement when using Front-End frameworks such as Rax, or cause some
       /// overhead performance issue when some event trigger more frequently.
-      if (shouldSendToDart(this.nodeId)) {
+      if (this.nodeId) {
         addEvent(this.nodeId, eventName);
       }
     }

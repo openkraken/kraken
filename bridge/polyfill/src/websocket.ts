@@ -140,7 +140,7 @@ class WebSocket extends EventTarget {
   }
 
   constructor(url: string, protocol: string | string[]) {
-    super(NaN, []);
+    super();
     // verify url schema
     validateUrl(url);
 

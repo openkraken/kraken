@@ -35,7 +35,7 @@ class MQTT extends EventTarget {
   url: string;
 
   constructor(url: string, clientId: string = '') {
-    super(NaN);
+    super();
     this.url = url;
     this.id = krakenInvokeModule(`["MQTT","init",["${url}","${clientId}"]]`);
     mqttClientMap[this.id] = this;
