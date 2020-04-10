@@ -579,7 +579,7 @@ abstract class Element extends Node
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
     if (child is NodeLifeCycle) {
-      removeElement(child);
+      removeChildNode(child);
     }
 
     super.removeChild(child);
@@ -649,27 +649,24 @@ abstract class Element extends Node
     return result;
   }
 
-  void removeElement(Node child) {
-    List<RenderObject> children = [];
-    RenderObjectVisitor visitor = (child) {
-      children.add(child);
-    };
-    renderLayoutBox..visitChildren(visitor);
-
-    if (children.isNotEmpty) {
-      int childIdx;
-      children.forEach((childNode) {
-        int childId;
-        if (childNode is RenderTextBox) {
-          childId = childNode.nodeId;
-        } else if (childNode is RenderElementBoundary) {
-          childId = childNode.nodeId;
+  void removeChildNode(Node child) {
+    if (child is TextNode) {
+      renderLayoutBox.remove(child.renderTextBox);
+    } else if (child is Element) {
+      AbstractNode childParentNode = child.renderElementBoundary.parent;
+      if (childParentNode == renderLayoutBox) {
+        renderLayoutBox.remove(child.renderElementBoundary);
+      } else if (childParentNode == renderStack) {
+        renderStack.remove(child.renderElementBoundary);
+      } else {
+        // Fixed or sticky.
+        final RenderStack rootRenderStack = ElementManager()
+            .getRootElement()
+            .renderStack;
+        if (childParentNode == rootRenderStack) {
+          rootRenderStack.remove(child.renderElementBoundary);
         }
-        if (childId == child.nodeId) {
-          childIdx = children.indexOf(childNode);
-        }
-      });
-      renderLayoutBox.remove(children[childIdx]);
+      }
     }
   }
 
