@@ -760,7 +760,7 @@ TEST(JSCContext, test) {
 
 TEST(JSContext, window) {
   auto context = std::make_unique<JSCContext>(normalPrint);
-  jsa::Value result = context->evaluateJavaScript("window == global", "internal://", 0);
+  jsa::Value result = context->evaluateJavaScript("window == globalThis", "internal://", 0);
   EXPECT_EQ(result.getBool(), true);
   jsa::Object global = context->global();
   global.setProperty(*context, "name", jsa::String::createFromUtf8(*context, "kraken"));
