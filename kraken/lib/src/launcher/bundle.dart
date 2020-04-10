@@ -19,6 +19,7 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle';
+const String EXTENSION_KAP = '.kap';
 const String EXTENSION_ZIP = '.zip';
 const String EXTENSION_JS = '.js';
 
@@ -41,7 +42,7 @@ abstract class KrakenBundle {
   List<String> assets = [];
   int lineOffset = 0;
   // Kraken bundle manifest
-  Manifest manifest;
+  AppManifest manifest;
 
   bool isResolved = false;
 
@@ -51,9 +52,9 @@ abstract class KrakenBundle {
     return url.startsWith('//') || url.startsWith('http');
   }
 
-  /// Check path is a zip bundle.
+  /// Check path is a kap(zip) bundle.
   static bool isZipBundle(String url) {
-    return url.endsWith(EXTENSION_ZIP);
+    return url.endsWith(EXTENSION_KAP) || url.endsWith(EXTENSION_ZIP);
   }
 
   /// Check path is a JS bundle.
@@ -135,7 +136,13 @@ class ZipBundle extends KrakenBundle {
         if (filename == 'index.js') {
           content = utf8.decode(file.content);
         } else if (filename == 'manifest.json') {
-          manifest = Manifest.fromJson(utf8.decode(file.content));
+          try {
+            Map<String, dynamic> manifestJson = jsonDecode(utf8.decode(file.content));
+            manifest = AppManifest.fromJson(manifestJson);
+          } catch(err, stack) {
+            print('Failed to parse manifest.json');
+            print('$err\n$stack');
+          }
         } else {
           // Treat as assets.
           assets.add(filename);
@@ -158,7 +165,7 @@ class JSBundle extends KrakenBundle {
   @override
   Future<void> resolve() async {
     // JSBundle get default bundle manifest.
-    manifest = Manifest();
+    manifest = AppManifest();
     if (isNetworkBundle) {
       Response response = await Dio().get(url);
       content = response.toString();
