@@ -826,11 +826,11 @@ abstract class Element extends Node
     style.addStyleChangeListener('paddingBottom', _stylePaddingChangedListener);
 
     style.addStyleChangeListener('width', _styleSizeChangedListener);
-    style.addStyleChangeListener('min-width', _styleSizeChangedListener);
-    style.addStyleChangeListener('max-width', _styleSizeChangedListener);
+    style.addStyleChangeListener('minWidth', _styleSizeChangedListener);
+    style.addStyleChangeListener('maxWidth', _styleSizeChangedListener);
     style.addStyleChangeListener('height', _styleSizeChangedListener);
-    style.addStyleChangeListener('min-height', _styleSizeChangedListener);
-    style.addStyleChangeListener('max-height', _styleSizeChangedListener);
+    style.addStyleChangeListener('minHeight', _styleSizeChangedListener);
+    style.addStyleChangeListener('maxHeight', _styleSizeChangedListener);
 
     style.addStyleChangeListener('overflow', _styleOverflowChangedListener);
     style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);

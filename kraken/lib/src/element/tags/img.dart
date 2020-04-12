@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/src/rendering/cached_network_image.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/rendering.dart';
 
