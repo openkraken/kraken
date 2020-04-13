@@ -38,7 +38,7 @@ describe('Transform origin', () => {
         height: '100px',
         backgroundColor: 'red',
         transformOrigin: 'top right',
-        transform: 'rotate(0.3turn)',
+        transform: 'rotate(0.1turn)',
       })
     );
 
