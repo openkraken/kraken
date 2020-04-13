@@ -268,8 +268,12 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
 
 Pointer<Utf8> _invokeModule(
     Pointer<Utf8> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback, Pointer<Void> context) {
-  String result = invokeModule(Utf8.fromUtf8(json), callback.asFunction(), context);
-  return Utf8.toUtf8(result);
+  try {
+    String result = invokeModule(Utf8.fromUtf8(json), callback.asFunction(), context);
+    return Utf8.toUtf8(result);
+  } catch (e, stack) {
+    print('Dart Error: $e\n$stack');
+  }
 }
 
 void registerInvokeModule() {
