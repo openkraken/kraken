@@ -3,11 +3,9 @@ import 'dart:core';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:convert';
 
 import 'package:kraken/bridge.dart';
 import 'package:crypto/crypto.dart';
-import 'package:kraken/module.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
 import 'package:archive/archive.dart';
@@ -143,7 +141,7 @@ class ZipBundle extends KrakenBundle {
 
     Uint8List dataList = data.buffer.asUint8List();
     bundleId = _md5(dataList);
-    
+
     Directory localBundleDirectory = await _getLocalBundleDirectory();
     await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
 
