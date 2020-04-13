@@ -79,7 +79,7 @@ task('copy-kraken-debug', (done) => {
   execSync(`mkdir -p ${targetDist}`);
   if (platform === 'darwin') {
     // There is a problem that `cp -r` will drop symbolic, which will make app fails.
-    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Debug/Kraken.app')} ${targetDist}`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Debug/app_launcher.app')} ${targetDist}`);
     return done();
   }
 
@@ -97,9 +97,9 @@ task('copy-kraken-release', (done) => {
   execSync(`mkdir -p ${targetDist}`);
 
   if (platform === 'darwin') {
-    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Release/Kraken.app')} ${targetDist}`);
+    execSync(`mv ${path.join(paths.app_launcher, 'build/macos/Build/Products/Release/app_launcher.app')} ${targetDist}`);
     // Add a empty file to keep flutter_assets folder, or flutter crashed.
-    writeFileSync(join(targetDist, 'Kraken.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
+    writeFileSync(join(targetDist, 'app_launcher.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
     return done();
   }
 
