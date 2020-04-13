@@ -142,9 +142,8 @@ class ZipBundle extends KrakenBundle {
     }
 
     Uint8List dataList = data.buffer.asUint8List();
-    double start = Performance.now();
     bundleId = _md5(dataList);
-    print('bundleId: $bundleId ${Performance.now() - start}ms');
+    
     Directory localBundleDirectory = await _getLocalBundleDirectory();
     await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
 
