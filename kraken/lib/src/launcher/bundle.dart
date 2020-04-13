@@ -19,7 +19,7 @@ const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
-const String DEFAULT_BUNDLE_PATH = 'assets/bundle';
+const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
 // `kap` is Kraken App Package.
 const String EXTENSION_KAP = '.kap';
 const String EXTENSION_ZIP = '.zip';
@@ -75,8 +75,10 @@ abstract class KrakenBundle {
       bundle = RawBundle(contentOverride, 'RawContent');
     }
 
-    if (path == null) return null;
-
+    if (path == null) {
+      path = DEFAULT_BUNDLE_PATH;
+    }
+    
     if (isZipBundle(path)) {
       bundle = ZipBundle(path);
     } else if (isJSBundle(path)) {
@@ -98,6 +100,7 @@ abstract class KrakenBundle {
     Directory support = await getApplicationSupportDirectory();
     String localBundlePath = '${support.path}/Kraken/Applications';
 
+    // Open org.kraken.foo://
     // Make sure directory exists.
     Directory localBundleDirectory = Directory(localBundlePath);
     if (!localBundleDirectory.existsSync()) {
