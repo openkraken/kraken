@@ -1,4 +1,4 @@
-import { EventTarget } from 'event-target-shim';
+import { EventTarget } from './document/event-target';
 import { krakenWindow, KrakenLocation } from './bridge';
 import { NodeId } from "./document/node";
 import { navigator } from './navigator';

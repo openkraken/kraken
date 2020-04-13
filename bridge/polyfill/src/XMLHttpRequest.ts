@@ -1,6 +1,6 @@
 var Url = require("url");
 
-var xhr = function() {
+var xhr = function(this: any) {
   "use strict";
 
   /**
@@ -9,11 +9,11 @@ var xhr = function() {
   var self = this;
 
   // Holds http.js objects
-  var request;
-  var response;
+  // var request;
+  var response: any;
 
   // Request settings
-  var settings = {};
+  var settings: any = {};
 
   // Disable header blacklist.
   // Not part of XHR specs.
@@ -25,8 +25,8 @@ var xhr = function() {
     "Accept": "*/*",
   };
 
-  var headers = {};
-  var headersCase = {};
+  var headers: any = {};
+  var headersCase: any = {};
 
   // These headers are not user setable.
   // The following are allowed but banned in the spec:
@@ -109,7 +109,7 @@ var xhr = function() {
    * @param string header Header to validate
    * @return boolean False if not allowed, otherwise true
    */
-  var isAllowedHttpHeader = function(header) {
+  var isAllowedHttpHeader = function(header: string) {
     return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
   };
 
@@ -119,7 +119,7 @@ var xhr = function() {
    * @param string method Request method to validate
    * @return boolean False if not allowed, otherwise true
    */
-  var isAllowedHttpMethod = function(method) {
+  var isAllowedHttpMethod = function(method: string) {
     return (method && forbiddenRequestMethods.indexOf(method) === -1);
   };
 
@@ -136,7 +136,13 @@ var xhr = function() {
    * @param string user Username for basic authentication (optional)
    * @param string password Password for basic authentication (optional)
    */
-  this.open = function(method, url, async, user, password) {
+  this.open = function(
+    method: string,
+    url: string,
+    async: boolean,
+    user: string,
+    password: string
+  ) {
     this.abort();
     errorFlag = false;
 
@@ -162,7 +168,7 @@ var xhr = function() {
    *
    * @param boolean state Enable or disable header checking.
    */
-  this.setDisableHeaderCheck = function(state) {
+  this.setDisableHeaderCheck = function(state: boolean) {
     disableHeaderCheck = state;
   };
 
@@ -172,7 +178,7 @@ var xhr = function() {
    * @param string header Header name
    * @param string value Header value
    */
-  this.setRequestHeader = function(header, value) {
+  this.setRequestHeader = function(header: string, value: string) {
     if (this.readyState !== this.OPENED) {
       throw new Error("INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN");
     }
@@ -194,7 +200,7 @@ var xhr = function() {
    * @param string header Name of header to get.
    * @return string Text of the header or null if it doesn't exist.
    */
-  this.getResponseHeader = function(header) {
+  this.getResponseHeader = function(header: string) {
     if (typeof header === "string"
       && this.readyState > this.OPENED
       && response
@@ -234,7 +240,7 @@ var xhr = function() {
    * @param string name Name of header to get
    * @return string Returns the request header or empty string if not set
    */
-  this.getRequestHeader = function(name) {
+  this.getRequestHeader = function(name: string) {
     if (typeof name === "string" && headersCase[name.toLowerCase()]) {
       return headers[headersCase[name.toLowerCase()]];
     }
@@ -247,7 +253,7 @@ var xhr = function() {
    *
    * @param string data Optional data to send as request body.
    */
-  this.send = function(data) {
+  this.send = function(data: string) {
     if (this.readyState !== this.OPENED) {
       throw new Error("INVALID_STATE_ERR: connection must be opened before send() is called");
     }
@@ -282,7 +288,7 @@ var xhr = function() {
     // to use http://localhost:port/path
     var port = url.port || (ssl ? 443 : 80);
     // Add query string if one is used
-    var uri = url.pathname + (url.search ? url.search : "");
+    // var uri = url.pathname + (url.search ? url.search : "");
 
     // Set the defaults if they haven't been set
     for (var name in defaultHeaders) {
@@ -312,7 +318,8 @@ var xhr = function() {
 
     // Set content length header
     if (settings.method === "GET" || settings.method === "HEAD") {
-      data = null;
+      // data = null;
+      data = '';
     } else if (data) {
       headers["Content-Length"] = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data);
 
@@ -325,15 +332,15 @@ var xhr = function() {
       headers["Content-Length"] = 0;
     }
 
-    var options = {
-      host: host,
-      port: port,
-      path: uri,
-      method: settings.method,
-      headers: headers,
-      agent: false,
-      withCredentials: self.withCredentials
-    };
+    // var options = {
+    //   host: host,
+    //   port: port,
+    //   path: uri,
+    //   method: settings.method,
+    //   headers: headers,
+    //   agent: false,
+    //   withCredentials: self.withCredentials
+    // };
 
     // Reset error flag
     errorFlag = false;
@@ -350,7 +357,7 @@ var xhr = function() {
       self.dispatchEvent("readystatechange");
 
       // Handler for the response
-      var responseHandler = function responseHandler(resp) {
+      var responseHandler = function responseHandler(resp: any) {
         // Set response var to the response we got back
         // This is so it remains accessable outside this scope
         response = resp;
@@ -395,7 +402,7 @@ var xhr = function() {
         setState(self.HEADERS_RECEIVED);
         self.status = response.statusCode;
 
-        response.on("data", function(chunk) {
+        response.on("data", function(chunk: string) {
           // Make sure there's some data
           if (chunk) {
             self.responseText += chunk;
@@ -414,13 +421,13 @@ var xhr = function() {
           }
         });
 
-        response.on("error", function(error) {
+        response.on("error", function(error: any) {
           self.handleError(error);
         });
       };
 
       // Error handler for the request
-      var errorHandler = function errorHandler(error) {
+      var errorHandler = function errorHandler(error: any) {
         self.handleError(error);
       };
 
@@ -451,7 +458,7 @@ var xhr = function() {
   /**
    * Called when an error is encountered to deal with it.
    */
-  this.handleError = function(error) {
+  this.handleError = function(error: any) {
     this.status = 0;
     this.statusText = error;
     this.responseText = error.stack;
@@ -464,10 +471,10 @@ var xhr = function() {
    * Aborts a request.
    */
   this.abort = function() {
-    if (request) {
-      request.abort();
-      request = null;
-    }
+    // if (request) {
+    //   request.abort();
+    //   request = null;
+    // }
 
     headers = defaultHeaders;
     this.status = 0;
@@ -489,7 +496,7 @@ var xhr = function() {
   /**
    * Adds an event listener. Preferred method of binding to events.
    */
-  this.addEventListener = function(event, callback) {
+  this.addEventListener = function(event: string, callback: any) {
     if (!(event in listeners)) {
       listeners[event] = [];
     }
@@ -501,10 +508,10 @@ var xhr = function() {
    * Remove an event callback that has already been bound.
    * Only works on the matching funciton, cannot be a copy.
    */
-  this.removeEventListener = function(event, callback) {
+  this.removeEventListener = function(event: string, callback: any) {
     if (event in listeners) {
       // Filter will return a new array with the callback removed
-      listeners[event] = listeners[event].filter(function(ev) {
+      listeners[event] = listeners[event].filter(function(ev: any) {
         return ev !== callback;
       });
     }
@@ -513,7 +520,7 @@ var xhr = function() {
   /**
    * Dispatch any events, including both "on" methods and events attached using addEventListener.
    */
-  this.dispatchEvent = function(event) {
+  this.dispatchEvent = function(event: string) {
     if (typeof self["on" + event] === "function") {
       self["on" + event]();
     }
@@ -529,7 +536,7 @@ var xhr = function() {
    *
    * @param int state New state
    */
-  var setState = function(state) {
+  var setState = function(state: number) {
     if (state == self.LOADING || self.readyState !== state) {
       self.readyState = state;
 
