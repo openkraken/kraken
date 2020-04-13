@@ -5,6 +5,7 @@ import './document';
 import './match-media';
 import './location';
 import './navigator';
+import './xmlHttpRequest';
 import './window';
 import './promise';
 import './blob';
