@@ -3,8 +3,11 @@ import 'dart:core';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:kraken/bridge.dart';
+import 'package:crypto/crypto.dart';
+import 'package:kraken/module.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
 import 'package:archive/archive.dart';
@@ -29,6 +32,11 @@ String getBundleURLFromEnv() {
 
 String getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
+}
+
+String _md5(Uint8List data) {
+  Digest digest = md5.convert(data);
+  return digest.toString();
 }
 
 abstract class KrakenBundle {
@@ -63,27 +71,33 @@ abstract class KrakenBundle {
   }
 
   static Future<KrakenBundle> getBundle(String path, { String contentOverride }) async {
+    KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      return RawBundle(contentOverride, 'RawContent');
+      bundle = RawBundle(contentOverride, 'RawContent');
     }
 
     if (path == null) return null;
 
     if (isZipBundle(path)) {
-      return await ZipBundle(path)..resolve();
+      bundle = ZipBundle(path);
     } else if (isJSBundle(path)) {
-      return await JSBundle(path)..resolve();
+      bundle = JSBundle(path);
     }
 
-    return null;
+    if (bundle != null) {
+      await bundle.resolve();
+      return bundle;
+    } else {
+      return null;
+    }
   }
 
   Future<Directory> _getLocalBundleDirectory() async {
-    // https://developer.apple.com/documentation/foundation/filemanager/searchpathdirectory/documentdirectory
-    // Each app will have it's unique document directory, if sandbox is off, app
-    // will share a common document(eg, ~/Documents in macOS).
-    Directory document = await getApplicationDocumentsDirectory();
-    String localBundlePath = '${document.path}/Bundles';
+    // https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html
+    // Each app will have it's unique support directory, if sandbox is off, app
+    // will share a common support directory(eg: /Library/Application support/${bundleId}/ in macOS).
+    Directory support = await getApplicationSupportDirectory();
+    String localBundlePath = '${support.path}/Bundles';
 
     // Make sure directory exists.
     Directory localBundleDirectory = Directory(localBundlePath);
@@ -93,7 +107,7 @@ abstract class KrakenBundle {
     return localBundleDirectory;
   }
 
-  void run() async {
+  Future<void> run() async {
     if (!isResolved) await resolve();
     evaluateScripts(content, url, lineOffset);
   }
@@ -111,6 +125,8 @@ class RawBundle extends KrakenBundle {
 }
 
 class ZipBundle extends KrakenBundle {
+  // Unique identifier.
+  String bundleId;
   ZipBundle(String url) : assert(url != null), super(url);
 
   @override
@@ -126,7 +142,11 @@ class ZipBundle extends KrakenBundle {
     }
 
     Uint8List dataList = data.buffer.asUint8List();
-    await _unArchive(dataList, await _getLocalBundleDirectory());
+    double start = Performance.now();
+    bundleId = _md5(dataList);
+    print('bundleId: $bundleId ${Performance.now() - start}ms');
+    Directory localBundleDirectory = await _getLocalBundleDirectory();
+    await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
 
     isResolved = true;
   }
