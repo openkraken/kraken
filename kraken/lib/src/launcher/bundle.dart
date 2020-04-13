@@ -100,7 +100,6 @@ abstract class KrakenBundle {
     Directory support = await getApplicationSupportDirectory();
     String localBundlePath = '${support.path}/Kraken/Applications';
 
-    // Open org.kraken.foo://
     // Make sure directory exists.
     Directory localBundleDirectory = Directory(localBundlePath);
     if (!localBundleDirectory.existsSync()) {
