@@ -96,7 +96,7 @@ abstract class KrakenBundle {
     // Each app will have it's unique support directory, if sandbox is off, app
     // will share a common support directory(eg: /Library/Application support/${bundleId}/ in macOS).
     Directory support = await getApplicationSupportDirectory();
-    String localBundlePath = '${support.path}/Bundles';
+    String localBundlePath = '${support.path}/Kraken/Applications';
 
     // Make sure directory exists.
     Directory localBundleDirectory = Directory(localBundlePath);
