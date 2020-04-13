@@ -102,7 +102,7 @@ function getShellPath(runtimeMode) {
   const appPath = join(__dirname, '../build', platform);
   if (platform === 'darwin') {
     // Runtime mode = release/debug
-    return join(appPath, runtimeMode, 'app_launcher.app/Contents/MacOS/Kraken');
+    return join(appPath, runtimeMode, 'app_launcher.app/Contents/MacOS/app_launcher');
   } else if (platform === 'linux') {
     return join(appPath, 'kraken');
   } else {

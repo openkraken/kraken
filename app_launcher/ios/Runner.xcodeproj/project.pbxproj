@@ -160,9 +160,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
+				C08B9D1C2A786FD4295F7B98 /* [CP] Check Pods Manifest.lock */,
 				1B7B06A3243ED92A005F49EE /* Generate Kraken Bridge Build Files */,
 				1B7B06A4243EDD6A005F49EE /* Build Kraken Bridge */,
-				C08B9D1C2A786FD4295F7B98 /* [CP] Check Pods Manifest.lock */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
@@ -437,7 +437,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken-app-launcher";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken.app-launcher";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -560,7 +560,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LIBRARY = "libc++";
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = ANRD47DNBX;
+				DEVELOPMENT_TEAM = 4M8CE643H4;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -573,7 +573,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken-app-launcher";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken.app-launcher";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -599,7 +599,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken-app-launcher";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.taobao.kraken.app-launcher";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
