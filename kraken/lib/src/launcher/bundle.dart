@@ -20,6 +20,7 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle';
+// `kap` is Kraken App Package.
 const String EXTENSION_KAP = '.kap';
 const String EXTENSION_ZIP = '.zip';
 const String EXTENSION_JS = '.js';
