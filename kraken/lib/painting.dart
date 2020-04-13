@@ -4,3 +4,4 @@
  */
 
 export 'src/painting/canvas.dart';
+export 'src/painting/cached_network_image.dart';

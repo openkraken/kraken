@@ -153,32 +153,34 @@ class Transition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    List<Method> methods = Method.parseMethod(function);
+    Map<String, Method> methods = Method.parseMethod(function);
     if (methods != null && methods.length > 0) {
-      Method method = methods[0];
-      if ("steps" == method.name) {
-        if (method.args.length >= 1) {
-          try {
-            int step = int.parse(method.args[0]);
-            bool isStart = false;
-            if (method.args.length == 2) {
-              isStart = method.args[1] == "start";
+      Method method = methods?.values?.first;
+      if (method != null) {
+        if ("steps" == method.name) {
+          if (method.args.length >= 1) {
+            try {
+              int step = int.parse(method.args[0]);
+              bool isStart = false;
+              if (method.args.length == 2) {
+                isStart = method.args[1] == "start";
+              }
+              return StepCurve(step, isStart);
+            } catch (e) {
+              return null;
             }
-            return StepCurve(step, isStart);
-          } catch (e) {
-            return null;
           }
-        }
-      } else if ("cubic-bezier" == method.name) {
-        if (method.args.length == 4) {
-          try {
-            double first = double.parse(method.args[0]);
-            double sec = double.parse(method.args[1]);
-            double third = double.parse(method.args[2]);
-            double forth = double.parse(method.args[3]);
-            return Cubic(first, sec, third, forth);
-          } catch (e) {
-            return null;
+        } else if ("cubic-bezier" == method.name) {
+          if (method.args.length == 4) {
+            try {
+              double first = double.parse(method.args[0]);
+              double sec = double.parse(method.args[1]);
+              double third = double.parse(method.args[2]);
+              double forth = double.parse(method.args[3]);
+              return Cubic(first, sec, third, forth);
+            } catch (e) {
+              return null;
+            }
           }
         }
       }
