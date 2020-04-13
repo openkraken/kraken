@@ -1,13 +1,12 @@
 import {EventTarget} from './document/event-target';
 import {krakenWindow, KrakenLocation} from './bridge';
-import {NodeId} from "./document/node";
-
+import {WINDOW} from "./document/event-target";
 
 const windowBuildInEvents = ['load', 'colorschemechange'];
 
 class Window extends EventTarget {
   constructor() {
-    super(NodeId.WINDOW, windowBuildInEvents);
+    super(WINDOW, windowBuildInEvents);
   }
 
   public get colorScheme(): string {

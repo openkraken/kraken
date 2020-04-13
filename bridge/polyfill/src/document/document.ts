@@ -1,11 +1,12 @@
-import { Node, NodeType, NodeId, traverseNode } from './node';
-import { Element } from './element';
+import {Node, NodeType, traverseNode} from './node';
+import {Element} from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
-import { ElementRegistry } from './element-registry';
+import {ElementRegistry} from './element-registry';
+import {BODY, WINDOW} from "./event-target";
 
 export class Document extends Node {
-  private bodyElement = new Element('BODY', NodeId.BODY);
+  private bodyElement = new Element('BODY', BODY);
   public body: Element = this.bodyElement;
   // @TODO Need to implement complete document tree model, equal to body temporary
   public documentElement: Element = this.bodyElement;
@@ -15,7 +16,7 @@ export class Document extends Node {
   constructor() {
     // Use the same nodeId with body, only used in event targets,
     // document events are triggered and received by body element.
-    super(NodeType.DOCUMENT_NODE, NodeId.BODY);
+    super(NodeType.DOCUMENT_NODE, BODY);
   }
 
   createElement(tagName: string) : Element {
@@ -39,7 +40,7 @@ export class Document extends Node {
 export const document = new Document();
 
 export function getNodeByNodeId(nodeId: number) : Node|null|Window {
-  if (nodeId === NodeId.WINDOW) {
+  if (nodeId === WINDOW) {
     return window;
   }
 

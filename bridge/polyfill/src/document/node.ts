@@ -1,13 +1,7 @@
-import {EventTarget} from './event-target';
+import {EventTarget, BODY} from './event-target';
 import {insertAdjacentNode, removeNode} from './ui-manager';
 
 export type NodeList = Array<Node>;
-
-export enum NodeId {
-  BODY = -1,
-  // Window is not inherit node but EventTarget, so we assume window is a node.
-  WINDOW = -2,
-}
 
 export enum NodeType {
   ELEMENT_NODE = 1,
@@ -33,10 +27,10 @@ export class Node extends EventTarget {
   }
 
   public get isConnected() {
-    let _isConnected = this.nodeId === NodeId.BODY;
+    let _isConnected = this.nodeId === BODY;
     let parentNode = this.parentNode;
     while (parentNode) {
-      _isConnected = parentNode.nodeId === NodeId.BODY;
+      _isConnected = parentNode.nodeId === BODY;
       parentNode = parentNode.parentNode;
     }
     return _isConnected;
@@ -68,7 +62,7 @@ export class Node extends EventTarget {
 
   public appendChild(child: Node) {
     // @TODO add logic to tell whether child to append contains the parent
-    if (child.nodeId === NodeId.BODY || child === this) {
+    if (child.nodeId === BODY || child === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
 

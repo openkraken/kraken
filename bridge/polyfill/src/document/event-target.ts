@@ -1,20 +1,10 @@
 import {addEvent} from "./ui-manager";
-import {NodeId} from "./node";
+
+export const BODY = -1;
+// Window is not inherit node but EventTarget, so we assume window is a node.
+export const WINDOW = -2;
 
 type EventHandler = EventListener;
-
-export class Event {
-  type: string;
-  cancelable: boolean;
-  currentTarget: EventTarget;
-  target: EventTarget;
-  defaultPrevented: boolean;
-  [key: string]: any;
-
-  constructor(type: string) {
-    this.type = type;
-  }
-}
 
 export class EventTarget {
   public nodeId: number;
@@ -40,7 +30,7 @@ export class EventTarget {
   }
 
   public addEventListener(eventName: string, handler: EventHandler) {
-    if (!this.__eventHandlers.has(eventName) || this.nodeId === NodeId.BODY) {
+    if (!this.__eventHandlers.has(eventName) || this.nodeId === BODY) {
       this.__eventHandlers.set(eventName, []);
 
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
@@ -74,5 +64,19 @@ export class EventTarget {
     }
 
     return !event.defaultPrevented;
+  }
+}
+
+export class Event {
+  type: string;
+  cancelable: boolean;
+  currentTarget: EventTarget;
+  target: EventTarget;
+  defaultPrevented: boolean;
+
+  [key: string]: any;
+
+  constructor(type: string) {
+    this.type = type;
   }
 }
