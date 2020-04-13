@@ -69,4 +69,10 @@ abstract class Length {
 
     return displayPortValue;
   }
+
+  static bool isLength(String value) {
+    return value != null &&
+        (value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) ||
+            value.endsWith(VW));
+  }
 }
