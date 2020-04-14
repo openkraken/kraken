@@ -43,6 +43,12 @@ class KrakenMethodChannel {
 
   static Future<String> getUrl() async {
     // Maybe url of zip bundle or js bundle
-    return await _channel.invokeMethod('getUrl');
+    String url = await _channel.invokeMethod('getUrl');
+
+    // @NOTE(zhuoling.lcl): Android plugin protocol cannot return `null` directly, which
+    // will case method channel invoke failed with exception, use empty
+    // string to represent null value.
+    if (url != null && url.isEmpty) url = null;
+    return url;
   }
 }
