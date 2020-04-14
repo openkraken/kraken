@@ -1,5 +1,5 @@
 describe('fixed-z-index', () => {
-  fit('blend', async () => {
+  it('blend', async () => {
     let container = create('div', {}, [
       create('div', {
         display: 'block',

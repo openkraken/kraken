@@ -73,12 +73,10 @@ abstract class KrakenBundle {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, 'RawContent');
-    }
-
-    if (path == null) {
+    } else if (path == null) {
       path = DEFAULT_BUNDLE_PATH;
     }
-    
+
     if (isZipBundle(path)) {
       bundle = ZipBundle(path);
     } else if (isJSBundle(path)) {
@@ -87,10 +85,9 @@ abstract class KrakenBundle {
 
     if (bundle != null) {
       await bundle.resolve();
-      return bundle;
-    } else {
-      return null;
     }
+
+    return bundle;
   }
 
   Future<Directory> _getLocalBundleDirectory() async {
