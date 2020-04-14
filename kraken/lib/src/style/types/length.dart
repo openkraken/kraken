@@ -11,6 +11,14 @@ abstract class Length {
   static const String VW = 'vw';
   static const String VH = 'vh';
 
+  static bool isValidateLength(String value) {
+    return value != null
+        && value.endsWith(RPX)
+        || value.endsWith(PX)
+        || value.endsWith(VW)
+        || value.endsWith(VH);
+  }
+
   static RegExp NUMBERIC_REGEXP = RegExp(r"^[+-]?(\d+)?(\.\d+)?$");
 
   static double toDouble(value) {

@@ -137,6 +137,7 @@ class ImgElement extends Element {
     double height = 0.0;
     bool containWidth = style.contains('width');
     bool containHeight = style.contains('height');
+
     if (!containWidth && !containHeight) {
       constraints = BoxConstraints.tightFor(
         width: realWidth,
@@ -282,7 +283,6 @@ class ImgElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-
     _resize();
   }
 }
