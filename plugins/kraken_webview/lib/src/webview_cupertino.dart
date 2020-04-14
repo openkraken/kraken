@@ -19,7 +19,6 @@ import 'webview_method_channel.dart';
 /// communicate with the platform code.
 class CupertinoWebView implements WebViewPlatform {
   UiKitViewController _controller;
-  RenderUiKitView _renderUiKitView;
   int _id;
 
   void dispose() {
@@ -84,7 +83,7 @@ class CupertinoWebView implements WebViewPlatform {
     ''';
     methodChannelWebViewPlatform.evaluateJavascript(invoker);
   }
-  
+
   @override
   Future<bool> clearCookies() => MethodChannelWebViewPlatform.clearCookies();
 }

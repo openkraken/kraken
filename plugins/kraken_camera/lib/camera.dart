@@ -140,11 +140,6 @@ class CameraException implements Exception {
   String toString() => '$runtimeType($code, $description)';
 }
 
-// Build the UI texture view of the video data with textureId.
-mixin CameraPreviewMixin on Element {
-
-}
-
 /// The state of a [CameraController].
 class CameraValue {
   const CameraValue({
