@@ -103,164 +103,182 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
-  if (module == 'Connection') {
-    String method = args[1];
-    if (method == 'getConnectivity') {
-      Connection.getConnectivity((String json) {
-        callback(Utf8.toUtf8(json), context);
-      });
-    } else if (method == 'onConnectivityChanged') {
-      Connection.onConnectivityChanged();
-    }
-  } else if (module == 'fetch') {
-    List fetchArgs = args[1];
-    String url = fetchArgs[0];
-    Map<String, dynamic> options = fetchArgs[1];
-    fetch(url, options).then((Response response) {
-      response.raiseForStatus();
-      String json = jsonEncode(['', response.statusCode, response.content()]);
-      callback(Utf8.toUtf8(json), context);
-    }).catchError((e) {
-      String errorMessage = e is HTTPException ? e.message : e.toString();
-      String json;
-      if (e is HTTPException) {
-        json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
-      } else {
-        json = jsonEncode([errorMessage, null, EMPTY_STRING]);
+  try {
+    if (module == 'Connection') {
+      String method = args[1];
+      if (method == 'getConnectivity') {
+        Connection.getConnectivity((String json) {
+          callback(Utf8.toUtf8(json), context);
+        });
+      } else if (method == 'onConnectivityChanged') {
+        Connection.onConnectivityChanged();
       }
-      callback(Utf8.toUtf8(json), context);
-    });
-  } else if (module == 'DeviceInfo') {
-    String method = args[1];
-    if (method == 'getDeviceInfo') {
-      DeviceInfo.getDeviceInfo().then((String json) {
+    } else if (module == 'fetch') {
+      List fetchArgs = args[1];
+      String url = fetchArgs[0];
+      Map<String, dynamic> options = fetchArgs[1];
+      fetch(url, options).then((Response response) {
+        response.raiseForStatus();
+        String json = jsonEncode(['', response.statusCode, response.content()]);
         callback(Utf8.toUtf8(json), context);
-      });
-    } else if (method == 'getHardwareConcurrency') {
-      result = DeviceInfo.getHardwareConcurrency().toString();
-    }
-  } else if (module == 'AsyncStorage') {
-    String method = args[1];
-    if (method == 'getItem') {
-      List methodArgs = args[2];
-      String key = methodArgs[0];
-      // @TODO: catch error case
-      AsyncStorage.getItem(key).then((String value) {
-        callback(Utf8.toUtf8(value ?? EMPTY_STRING), context);
-      });
-    } else if (method == 'setItem') {
-      List methodArgs = args[2];
-      String key = methodArgs[0];
-      String value = methodArgs[1];
-      AsyncStorage.setItem(key, value).then((bool isSuccess) {
-        callback(Utf8.toUtf8(isSuccess.toString()), context);
-      });
-    } else if (method == 'removeItem') {
-      List methodArgs = args[2];
-      String key = methodArgs[0];
-      AsyncStorage.removeItem(key).then((bool isSuccess) {
-        callback(Utf8.toUtf8(isSuccess.toString()), context);
-      });
-    } else if (method == 'getAllKeys') {
-      // @TODO: catch error case
-      AsyncStorage.getAllKeys().then((Set<String> set) {
-        List<String> list = List.from(set);
-        callback(Utf8.toUtf8(jsonEncode(list)), context);
-      });
-    } else if (method == 'clear') {
-      AsyncStorage.clear().then((bool isSuccess) {
-        callback(Utf8.toUtf8(isSuccess.toString()), context);
-      });
-    }
-  }  else if(module == 'MQTT') {
-    String method = args[1];
-    if (method == 'init') {
-      List methodArgs = args[2];
-      return MQTT.init(methodArgs[0], methodArgs[1]);
-    } else if(method == 'open') {
-      List methodArgs = args[2];
-      MQTT.open(methodArgs[0], methodArgs[1]);
-    } else if(method == 'close') {
-      List methodArgs = args[2];
-      MQTT.close(methodArgs[0]);
-    } else if(method == 'publish') {
-      List methodArgs = args[2];
-      MQTT.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
-    } else if(method == 'subscribe') {
-      List methodArgs = args[2];
-      MQTT.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
-    } else if(method == 'unsubscribe') {
-      List methodArgs = args[2];
-      MQTT.unsubscribe(methodArgs[0], methodArgs[1]);
-    } else if(method == 'getReadyState') {
-      List methodArgs = args[2];
-      return MQTT.getReadyState(methodArgs[0]);
-    } else if(method == 'addEvent') {
-      List methodArgs = args[2];
-      MQTT.addEvent(methodArgs[0], methodArgs[1]);
-    }
-  } else if (module == 'Geolocation') {
-    String method = args[1];
-    if (method == 'getCurrentPosition') {
-      List positionArgs = args[2];
-      Map<String, dynamic> options;
-      if (positionArgs.length > 0) {
-        options = positionArgs[0];
-      }
-      Geolocation.getCurrentPosition(options, (json) {
-        callback(Utf8.toUtf8(json), context);
-      });
-    } else if (method == 'watchPosition') {
-      List positionArgs = args[2];
-      Map<String, dynamic> options;
-      if (positionArgs.length > 0) {
-        options = positionArgs[0];
-      }
-      return Geolocation.watchPosition(options).toString();
-    } else if (method == 'clearWatch') {
-      List positionArgs = args[2];
-      int id = positionArgs[0];
-      Geolocation.clearWatch(id);
-    }
-  } else if (module == 'Performance') {
-    String method = args[1];
-    if (method == 'now') {
-      return Performance.now().toString();
-    } else if (method == 'getTimeOrigin') {
-      return Performance.getTimeOrigin().toString();
-    }
-  } else if (module == 'MethodChannel') {
-    String method = args[1];
-    if (method == 'invokeMethod') {
-      List methodArgs = args[2];
-      KrakenMethodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
-        String ret;
-        if (result is String) {
-          ret = result;
-        } else {
-          ret = jsonEncode(result);
-        }
-        callback(Utf8.toUtf8(ret), context);
       }).catchError((e, stack) {
-        callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        String errorMessage = e is HTTPException ? e.message : e.toString();
+        String json;
+        if (e is HTTPException) {
+          json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
+        } else {
+          json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
+        }
+        callback(Utf8.toUtf8(json), context);
       });
-    } else if (method == 'setMethodCallHandler') {
-      KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
-        emitModuleEvent(jsonEncode(['MethodChannel', call.method, call.arguments]));
-      });
+    } else if (module == 'DeviceInfo') {
+      String method = args[1];
+      if (method == 'getDeviceInfo') {
+        DeviceInfo.getDeviceInfo().then((String json) {
+          callback(Utf8.toUtf8(json), context);
+        });
+      } else if (method == 'getHardwareConcurrency') {
+        result = DeviceInfo.getHardwareConcurrency().toString();
+      }
+    } else if (module == 'AsyncStorage') {
+      String method = args[1];
+      if (method == 'getItem') {
+        List methodArgs = args[2];
+        String key = methodArgs[0];
+        // @TODO: catch error case
+        AsyncStorage.getItem(key).then((String value) {
+          callback(Utf8.toUtf8(value ?? EMPTY_STRING), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'setItem') {
+        List methodArgs = args[2];
+        String key = methodArgs[0];
+        String value = methodArgs[1];
+        AsyncStorage.setItem(key, value).then((bool isSuccess) {
+          callback(Utf8.toUtf8(isSuccess.toString()), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'removeItem') {
+        List methodArgs = args[2];
+        String key = methodArgs[0];
+        AsyncStorage.removeItem(key).then((bool isSuccess) {
+          callback(Utf8.toUtf8(isSuccess.toString()), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'getAllKeys') {
+        // @TODO: catch error case
+        AsyncStorage.getAllKeys().then((Set<String> set) {
+          List<String> list = List.from(set);
+          callback(Utf8.toUtf8(jsonEncode(list)), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'clear') {
+        AsyncStorage.clear().then((bool isSuccess) {
+          callback(Utf8.toUtf8(isSuccess.toString()), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      }
+    }  else if(module == 'MQTT') {
+      String method = args[1];
+      if (method == 'init') {
+        List methodArgs = args[2];
+        return MQTT.init(methodArgs[0], methodArgs[1]);
+      } else if(method == 'open') {
+        List methodArgs = args[2];
+        MQTT.open(methodArgs[0], methodArgs[1]);
+      } else if(method == 'close') {
+        List methodArgs = args[2];
+        MQTT.close(methodArgs[0]);
+      } else if(method == 'publish') {
+        List methodArgs = args[2];
+        MQTT.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+      } else if(method == 'subscribe') {
+        List methodArgs = args[2];
+        MQTT.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+      } else if(method == 'unsubscribe') {
+        List methodArgs = args[2];
+        MQTT.unsubscribe(methodArgs[0], methodArgs[1]);
+      } else if(method == 'getReadyState') {
+        List methodArgs = args[2];
+        return MQTT.getReadyState(methodArgs[0]);
+      } else if(method == 'addEvent') {
+        List methodArgs = args[2];
+        MQTT.addEvent(methodArgs[0], methodArgs[1]);
+      }
+    } else if (module == 'Geolocation') {
+      String method = args[1];
+      if (method == 'getCurrentPosition') {
+        List positionArgs = args[2];
+        Map<String, dynamic> options;
+        if (positionArgs.length > 0) {
+          options = positionArgs[0];
+        }
+        Geolocation.getCurrentPosition(options, (json) {
+          callback(Utf8.toUtf8(json), context);
+        });
+      } else if (method == 'watchPosition') {
+        List positionArgs = args[2];
+        Map<String, dynamic> options;
+        if (positionArgs.length > 0) {
+          options = positionArgs[0];
+        }
+        return Geolocation.watchPosition(options).toString();
+      } else if (method == 'clearWatch') {
+        List positionArgs = args[2];
+        int id = positionArgs[0];
+        Geolocation.clearWatch(id);
+      }
+    } else if (module == 'Performance') {
+      String method = args[1];
+      if (method == 'now') {
+        return Performance.now().toString();
+      } else if (method == 'getTimeOrigin') {
+        return Performance.getTimeOrigin().toString();
+      }
+    } else if (module == 'MethodChannel') {
+      String method = args[1];
+      if (method == 'invokeMethod') {
+        List methodArgs = args[2];
+        KrakenMethodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
+          String ret;
+          if (result is String) {
+            ret = result;
+          } else {
+            ret = jsonEncode(result);
+          }
+          callback(Utf8.toUtf8(ret), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'setMethodCallHandler') {
+        KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
+          emitModuleEvent(jsonEncode(['MethodChannel', call.method, call.arguments]));
+        });
+      }
+    } else if (module == 'Clipboard') {
+      String method = args[1];
+      if (method == 'readText') {
+        KrakenClipboard.readText().then((String value) {
+          callback(Utf8.toUtf8(value ?? ''), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      } else if (method == 'writeText') {
+        List methodArgs = args[2];
+        KrakenClipboard.writeText(methodArgs[0]).then((_) {
+          callback(Utf8.toUtf8(EMPTY_STRING), context);
+        }).catchError((e, stack) {
+          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+        });
+      }
     }
-  } else if (module == 'Clipboard') {
-    String method = args[1];
-    if (method == 'readText') {
-      KrakenClipboard.readText().then((String value) {
-        callback(Utf8.toUtf8(value ?? ''), context);
-      });
-    } else if (method == 'writeText') {
-      List methodArgs = args[2];
-      KrakenClipboard.writeText(methodArgs[0]).then((_) {
-        callback(Utf8.toUtf8(EMPTY_STRING), context);
-      });
-    }
+  } catch (e, stack) {
+    callback(Utf8.toUtf8('Error: $e$stack'), context);
   }
 
   return result;

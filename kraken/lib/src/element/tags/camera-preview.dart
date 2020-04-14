@@ -38,7 +38,7 @@ Future<CameraDescription> detectCamera(String lens) async {
   return null;
 }
 
-class CameraPreviewElement extends Element with CameraPreviewMixin {
+class CameraPreviewElement extends Element {
   static const String DEFAULT_WIDTH = '300px';
   static const String DEFAULT_HEIGHT = '150px';
 
@@ -46,6 +46,8 @@ class CameraPreviewElement extends Element with CameraPreviewMixin {
   bool isFallback = false;
   RenderConstrainedBox sizedBox;
   CameraDescription cameraDescription;
+  TextureBox renderTextureBox;
+  CameraController controller;
   List<VoidCallback> detectedFunc = [];
 
   void waitUntilReady(VoidCallback fn) {
@@ -170,6 +172,42 @@ class CameraPreviewElement extends Element with CameraPreviewMixin {
     _initCameraWithLens(props['lens']);
 
     addChild(sizedBox);
+  }
+
+  Future<TextureBox> createCameraTextureBox(CameraDescription cameraDescription) async{
+    this.cameraDescription = cameraDescription;
+    await _createCameraController();
+    return TextureBox(textureId: controller.textureId);
+  }
+
+  Future<void> _createCameraController({
+    ResolutionPreset resoluton = ResolutionPreset.medium,
+    bool enableAudio = false,
+  }) async {
+    if (controller != null) {
+      await controller.dispose();
+    }
+    controller = CameraController(
+      cameraDescription,
+      resoluton,
+      enableAudio: enableAudio,
+    );
+
+    // If the controller is updated then update the UI.
+    controller.addListener(() {
+      if (isConnected) {
+        renderLayoutBox.markNeedsPaint();
+      }
+      if (controller.value.hasError) {
+        print('Camera error ${controller.value.errorDescription}');
+      }
+    });
+
+    try {
+      await controller.initialize();
+    } on CameraException catch (err) {
+      print('Error while initializing camera controller: $err');
+    }
   }
 
   @override

@@ -33,11 +33,12 @@ abstract class Element extends Node
         BackgroundImageMixin,
         RenderDecoratedBoxMixin,
         DimensionMixin,
-        FlexMixin,
+        FlexStyleMixin,
         FlowMixin,
-        StyleOverflowMixin,
-        ColorMixin,
+        OverflowStyleMixin,
+        OpacityStyleMixin,
         TransformStyleMixin,
+        VisibilityStyleMixin,
         TransitionStyleMixin {
 
   Map<String, dynamic> properties;
@@ -106,6 +107,7 @@ abstract class Element extends Node
   })  : assert(nodeId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
+    this.nodeId = nodeId;
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
 
@@ -134,7 +136,6 @@ abstract class Element extends Node
     if (allowChildren) {
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
-
 
     // border
     renderObject = initRenderDecoratedBox(renderObject, style, nodeId);
@@ -169,6 +170,9 @@ abstract class Element extends Node
 
     // Opacity
     renderObject = initRenderOpacity(renderObject, style);
+
+    // Visibility
+    renderObject = initRenderVisibility(renderObject, style);
 
     // RenderRepaintBoundary to support toBlob.
     renderObject =
@@ -877,8 +881,9 @@ abstract class Element extends Node
     style.addStyleChangeListener('marginBottom', _styleMarginChangedListener);
 
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
-    style.addStyleChangeListener('visibility', _styleOpacityChangedListener);
+    style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
+    style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
     style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
     style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
@@ -1039,22 +1044,23 @@ abstract class Element extends Node
   }
 
   void _styleOpacityChangedListener(String property, original, present) {
-    // Update opacity and visibility.
-    double opacity = isEmptyStyleValue(style['opacity'])
-        ? 1.0
-        : Length.toDouble(style['opacity']);
-    if (property == 'visibility') {
-      switch (present) {
-        case 'hidden': opacity = 0; break;
-      }
-    }
+    // Update opacity.
+    updateRenderOpacity(present, parentRenderObject: renderRepaintBoundary,);
+  }
 
-    updateRenderOpacity(opacity, parentRenderObject: renderRepaintBoundary,);
+  void _styleVisibilityChangedListener(String property, original, present) {
+    // Update visibility.
+    updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary,);
   }
 
   void _styleTransformChangedListener(String property, original, present) {
     // Update transform.
-    updateTransform(style, transitionMap);
+    updateTransform(present, transitionMap);
+  }
+
+  void _styleTransformOriginChangedListener(String property, original, present) {
+    // Update transform.
+    updateTransformOrigin(present, transitionMap);
   }
 
   // Update textNode style when container style changed
