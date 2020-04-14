@@ -72,13 +72,17 @@ class StyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, { String value = '' }) {
-    if (value != null) {
-      var prevValue = _cssProperties[propertyName];
-      _cssProperties[propertyName] = value;
-      if (value != prevValue) {
-        _invokeStyleKeyChanged(propertyName, prevValue, value);
-      }
+  void setProperty(String propertyName, { value = '' }) {
+    // Null means with should be removed.
+    var prevValue = _cssProperties[propertyName];
+    if (value == null) {
+      _cssProperties.remove(propertyName);
+    } else {
+      _cssProperties[propertyName] = value.toString();
+    }
+
+    if (value != prevValue) {
+      _invokeStyleKeyChanged(propertyName, prevValue, value);
     }
   }
 

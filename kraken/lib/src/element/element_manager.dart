@@ -126,7 +126,7 @@ class ElementManagerActionDelegate {
     }
   }
 
-  void setStyle(int targetId, String key, String value) {
+  void setStyle(int targetId, String key, value) {
     assert(nodeMap.containsKey(targetId), 'id: $targetId key: $key value: $value');
     Node target = nodeMap[targetId];
     assert(target != null);
@@ -296,7 +296,7 @@ class ElementManager {
         _actionDelegate.removeNode(payload[0]);
         break;
       case 'setStyle':
-        _actionDelegate.setStyle(payload[0], payload[1], payload[2].toString());
+        _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
         break;
       case 'setProperty':
         _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
