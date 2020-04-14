@@ -33,10 +33,6 @@ class Window extends EventTarget {
   public get navigator() {
     return navigator;
   }
-
-  public get Promise() {
-    return Promise;
-  }
 }
 
 // window is global object, which is created by JSEngine, assign some

@@ -8,9 +8,8 @@ var xhr = function(this: any) {
    */
   var self = this;
 
-  // Holds http.js objects
-  // var request;
-  var response: any;
+  // Holds response object
+  var response: any = null;
 
   // Request settings
   var settings: any = {};
@@ -21,7 +20,7 @@ var xhr = function(this: any) {
 
   // Set some default headers
   var defaultHeaders = {
-    "User-Agent": "node-XMLHttpRequest",
+    "User-Agent": "kraken",
     "Accept": "*/*",
   };
 
@@ -128,7 +127,7 @@ var xhr = function(this: any) {
    */
 
   /**
-   * Open the connection. Currently supports local server requests.
+   * Open the connection.
    *
    * @param string method Connection method (eg GET, POST)
    * @param string url URL for the connection.
@@ -151,9 +150,14 @@ var xhr = function(this: any) {
       throw new Error("SecurityError: Request method not allowed");
     }
 
+    var url = url.toString();
+    if (!url.match(/^http/)) {
+      url = location.protocol + url;
+    }
+
     settings = {
       "method": method,
-      "url": url.toString(),
+      "url": url,
       "async": (typeof async !== "boolean" ? true : async),
       "user": user || null,
       "password": password || null
@@ -318,15 +322,9 @@ var xhr = function(this: any) {
     if (settings.method === "GET" || settings.method === "HEAD") {
       data = '';
     } else if (data) {
-      headers["Content-Length"] = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data);
-
       if (!this.getRequestHeader("Content-Type")) {
         headers["Content-Type"] = "text/plain;charset=UTF-8";
       }
-    } else if (settings.method === "POST") {
-      // For a post with no data set Content-Length: 0.
-      // This is required by buggy servers that don't meet the specs.
-      headers["Content-Length"] = 0;
     }
 
     // Reset error flag
@@ -356,8 +354,12 @@ var xhr = function(this: any) {
           fetch(settings.url, {
             method: response.status === 303 ? "GET" : settings.method,
             headers: headers,
-          }).then((response) => {
+            body: data,
+          }).then(function(response) {
             responseHandler(response);
+            return response.text();
+          }).then((text) => {
+            successHandler(text);
           }).catch(function(error) {
             errorHandler(error);
           });
@@ -368,11 +370,12 @@ var xhr = function(this: any) {
 
         setState(self.HEADERS_RECEIVED);
         self.status = response.status;
+      };
 
+      var successHandler = function successHandler(text: string) {
         if (sendFlag) {
+          self.responseText = text;
           setState(self.DONE);
-          self.responseText = response._bodyInit;
-          console.log('set responseText========', response._bodyInit);
           sendFlag = false;
         }
       };
@@ -383,15 +386,17 @@ var xhr = function(this: any) {
       };
 
       // Create the request
-      fetch('https:' + settings.url, {
+      fetch(settings.url, {
         method: settings.method,
-        // headers: {},
-      }).then((response) => {
+        headers: headers,
+        body: data,
+      }).then(function(response) {
         responseHandler(response);
-        console.log('success===========', response);
+        return response.text();
+      }).then((text) => {
+        successHandler(text);
       }).catch(function(error) {
         errorHandler(error);
-        console.log('errror===========', error);
       });
 
       self.dispatchEvent("loadstart");
@@ -476,7 +481,6 @@ var xhr = function(this: any) {
    * @param int state New state
    */
   var setState = function(state: number) {
-    console.log('state now is=================', state);
     if (state == self.LOADING || self.readyState !== state) {
       self.readyState = state;
 
