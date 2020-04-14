@@ -13,7 +13,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 
 part 'camera_image.dart';
 
@@ -143,45 +142,7 @@ class CameraException implements Exception {
 
 // Build the UI texture view of the video data with textureId.
 mixin CameraPreviewMixin on Element {
-  Future<TextureBox> createCameraTextureBox(CameraDescription cameraDescription) async{
-    this.cameraDescription = cameraDescription;
-    await _createCameraController();
-    return TextureBox(textureId: controller._textureId);
-  }
 
-  CameraDescription cameraDescription;
-  TextureBox renderTextureBox;
-  CameraController controller;
-
-  Future<void> _createCameraController({
-    ResolutionPreset resoluton = ResolutionPreset.medium,
-    bool enableAudio = false,
-  }) async {
-    if (controller != null) {
-      await controller.dispose();
-    }
-    controller = CameraController(
-      cameraDescription,
-      resoluton,
-      enableAudio: enableAudio,
-    );
-
-    // If the controller is updated then update the UI.
-    controller.addListener(() {
-      if (isConnected) {
-        renderLayoutBox.markNeedsPaint();
-      }
-      if (controller.value.hasError) {
-        print('Camera error ${controller.value.errorDescription}');
-      }
-    });
-
-    try {
-      await controller.initialize();
-    } on CameraException catch (err) {
-      print('Error while initializing camera controller: $err');
-    }
-  }
 }
 
 /// The state of a [CameraController].
@@ -295,7 +256,7 @@ class CameraController extends ValueNotifier<CameraValue> {
   Completer<void> _creatingCompleter;
 
   // Expose textureId for Kraken
-  int getTextureId() => _textureId;
+  int get textureId => _textureId;
 
   /// Initializes the camera on the device.
   ///
