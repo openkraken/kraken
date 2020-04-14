@@ -287,8 +287,6 @@ var xhr = function(this: any) {
     // Default to port 80. If accessing localhost on another port be sure
     // to use http://localhost:port/path
     var port = url.port || (ssl ? 443 : 80);
-    // Add query string if one is used
-    // var uri = url.pathname + (url.search ? url.search : "");
 
     // Set the defaults if they haven't been set
     for (var name in defaultHeaders) {
@@ -300,7 +298,7 @@ var xhr = function(this: any) {
     // Set the Host header or the server may reject the request
     headers.Host = host;
     // IPv6 addresses must be escaped with brackets
-    if (url.host[0] === "[") {
+    if (url.host && url.host[0] === "[") {
       headers.Host = "[" + headers.Host + "]";
     }
     if (!((ssl && port === 443) || port === 80)) {
@@ -318,7 +316,6 @@ var xhr = function(this: any) {
 
     // Set content length header
     if (settings.method === "GET" || settings.method === "HEAD") {
-      // data = null;
       data = '';
     } else if (data) {
       headers["Content-Length"] = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data);
@@ -332,23 +329,12 @@ var xhr = function(this: any) {
       headers["Content-Length"] = 0;
     }
 
-    // var options = {
-    //   host: host,
-    //   port: port,
-    //   path: uri,
-    //   method: settings.method,
-    //   headers: headers,
-    //   agent: false,
-    //   withCredentials: self.withCredentials
-    // };
-
     // Reset error flag
     errorFlag = false;
 
     // Handle async requests
     if (settings.async) {
       // Use the proper protocol
-      // var doRequest = ssl ? https.request : http.request;
 
       // Request is being sent, set send flag
       sendFlag = true;
@@ -363,29 +349,12 @@ var xhr = function(this: any) {
         response = resp;
         // Check for redirect
         // @TODO Prevent looped redirects
-        if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 303 || response.statusCode === 307) {
+        if (response.status === 301 || response.status === 302 || response.status === 303 || response.status === 307) {
           // Change URL to the redirect location
           settings.url = response.headers.location;
-          // var url = Url.parse(settings.url);
-          // // Set host var in case it's used later
-          // host = url.hostname;
-          // // Options for the new request
-          // var newOptions = {
-          //   hostname: url.hostname,
-          //   port: url.port,
-          //   path: url.path,
-          //   method: response.statusCode === 303 ? "GET" : settings.method,
-          //   headers: headers,
-          //   withCredentials: self.withCredentials
-          // };
-          //
-          // // Issue the new request
-          // request = doRequest(newOptions, responseHandler).on("error", errorHandler);
-          //
-          // request.end();
 
           fetch(settings.url, {
-            method: response.statusCode === 303 ? "GET" : settings.method,
+            method: response.status === 303 ? "GET" : settings.method,
             headers: headers,
           }).then((response) => {
             responseHandler(response);
@@ -397,33 +366,15 @@ var xhr = function(this: any) {
           return;
         }
 
-        response.setEncoding("utf8");
-
         setState(self.HEADERS_RECEIVED);
-        self.status = response.statusCode;
+        self.status = response.status;
 
-        response.on("data", function(chunk: string) {
-          // Make sure there's some data
-          if (chunk) {
-            self.responseText += chunk;
-          }
-          // Don't emit state changes if the connection has been aborted.
-          if (sendFlag) {
-            setState(self.LOADING);
-          }
-        });
-
-        response.on("end", function() {
-          if (sendFlag) {
-            // Discard the end event if the connection has been aborted
-            setState(self.DONE);
-            sendFlag = false;
-          }
-        });
-
-        response.on("error", function(error: any) {
-          self.handleError(error);
-        });
+        if (sendFlag) {
+          setState(self.DONE);
+          self.responseText = response._bodyInit;
+          console.log('set responseText========', response._bodyInit);
+          sendFlag = false;
+        }
       };
 
       // Error handler for the request
@@ -432,26 +383,19 @@ var xhr = function(this: any) {
       };
 
       // Create the request
-      // request = doRequest(options, responseHandler).on("error", errorHandler);
-
-      fetch(settings.url, {
+      fetch('https:' + settings.url, {
         method: settings.method,
-        headers: headers,
+        // headers: {},
       }).then((response) => {
         responseHandler(response);
+        console.log('success===========', response);
       }).catch(function(error) {
         errorHandler(error);
+        console.log('errror===========', error);
       });
 
-      // // Node 0.4 and later won't accept empty data. Make sure it's needed.
-      // if (data) {
-      //   request.write(data);
-      // }
-      //
-      // request.end();
-
       self.dispatchEvent("loadstart");
-    } else { // Synchronous
+    } else { // @TODO support synchronous
     }
   };
 
@@ -471,11 +415,6 @@ var xhr = function(this: any) {
    * Aborts a request.
    */
   this.abort = function() {
-    // if (request) {
-    //   request.abort();
-    //   request = null;
-    // }
-
     headers = defaultHeaders;
     this.status = 0;
     this.responseText = "";
@@ -537,6 +476,7 @@ var xhr = function(this: any) {
    * @param int state New state
    */
   var setState = function(state: number) {
+    console.log('state now is=================', state);
     if (state == self.LOADING || self.readyState !== state) {
       self.readyState = state;
 
