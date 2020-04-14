@@ -19,13 +19,13 @@ Map<String, String> _parseHeaders(Map<String, dynamic> map) {
   return headerMap;
 }
 
-Future<Response> fetch(String url, Map<String, dynamic> map) {
+Future<Response> fetch(String url, Map<String, dynamic> map) async {
   String method = map['method'];
   Map<String, String> headers = _parseHeaders(map['headers']);
   Future<Response> future;
   switch (method) {
     case 'GET':
-      future = Requests.get(url, headers: map['headers']);
+      future = Requests.get(url, headers: headers);
       break;
     case 'POST':
       future = Requests.post(url, headers: headers, body: map['body'], bodyEncoding: RequestBodyEncoding.JSON);

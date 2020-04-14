@@ -317,6 +317,10 @@ void JSBridge::handleModuleListener(const char *args) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': callback is not a function.");
     }
 
+    if (std::string(args).substr(0, 5) == "Error") {
+      throw JSError(*context, args);
+    }
+
     const String str = String::createFromAscii(*context, args);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
