@@ -1,39 +1,45 @@
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/style.dart';
+import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/rendering.dart';
 
 mixin TransformStyleMixin {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
   Map<String, Method> oldMethods;
-  Offset oldOrigin;
+
+  // transform origin impl by offset and alignment
+  Offset oldOffset = Offset.zero;
+  Alignment oldAlignment = Alignment.center;
+  int nodeId;
 
   RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId, bool shouldRender) {
+    this.nodeId = nodeId;
     if (style.contains('transform')) {
       oldMethods = Method.parseMethod(style['transform']);
       matrix4 = combineTransform(oldMethods) ?? matrix4;
+      TransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
+      if (transformOrigin != null) {
+        oldOffset = transformOrigin.offset;
+        oldAlignment = transformOrigin.alignment;
+      }
     }
-    oldOrigin = parseOrigin(style['transformOrigin']);
     transform = RenderElementBoundary(
         child: current,
         transform: matrix4,
         nodeId: nodeId,
         style: style,
-        origin: oldOrigin,
+        origin: oldOffset,
+        alignment: oldAlignment,
         shouldRender: shouldRender,
     );
     return transform;
   }
 
-  void updateTransform(StyleDeclaration style,
+  void updateTransform(String transformStr,
       [Map<String, Transition> transitionMap]) {
-    Offset offset = parseOrigin(style['transformOrigin']);
-    transform.origin = offset;
-    Map<String, Method> newMethods;
-    if (style.contains('transform')) {
-      newMethods = Method.parseMethod(style['transform']);
-    }
+    Map<String, Method> newMethods = Method.parseMethod(transformStr);
+    // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
         Transition transition = transitionMap['transform'];
@@ -59,18 +65,113 @@ mixin TransformStyleMixin {
     }
   }
 
-  Offset parseOrigin(String origin) {
-    Offset offset;
-    if (origin != null && origin.isNotEmpty) {
-      List<String> originList = origin.split(' ');
-      //FIXME need support percentage and value
-      //FIXME just support two value
-      if (originList.length == 2) {
-        offset = Offset(Length.toDisplayPortValue(originList[0]),
-            Length.toDisplayPortValue(originList[1]));
-      }
+  void updateTransformOrigin(String transformOriginStr,
+      [Map<String, Transition> transitionMap]) {
+    Offset offset = Offset.zero;
+    Alignment alignment = Alignment.center;
+    TransformOrigin transformOrigin = parseOrigin(transformOriginStr);
+    if (transformOrigin != null) {
+      offset = transformOrigin.offset;
+      alignment = transformOrigin.alignment;
     }
-    return offset;
+    // transform origin transition by offset
+    if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
+      if (transitionMap != null) {
+        Transition all = transitionMap['all'];
+        Transition transitionOrigin = transitionMap['transform-origin'];
+        Offset baseOffset = oldOffset;
+        Offset diffOffset = offset - baseOffset;
+        ProgressListener originProgressListener = (progress) {
+          if (progress > 0.0) {
+            transform.origin = diffOffset * progress + baseOffset;
+          }
+        };
+        if (transitionOrigin != null) {
+          transitionOrigin.addProgressListener(originProgressListener);
+        } else if (all != null) {
+          all.addProgressListener(originProgressListener);
+        } else {
+          transform.origin = offset;
+        }
+      } else {
+        transform.origin = offset;
+      }
+      oldOffset = offset;
+    }
+    // transform origin transition by alignment
+    if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
+      if (transitionMap != null) {
+        Transition all = transitionMap['all'];
+        Transition transitionOrigin = transitionMap['transform-origin'];
+        Alignment baseAlign = oldAlignment;
+        Alignment diffAlign = alignment - baseAlign;
+        ProgressListener originProgressListener = (progress) {
+          if (progress > 0.0) {
+            transform.alignment = diffAlign * progress + baseAlign;
+          }
+        };
+        if (transitionOrigin != null) {
+          transitionOrigin.addProgressListener(originProgressListener);
+        } else if (all != null) {
+          all.addProgressListener(originProgressListener);
+        } else {
+          transform.alignment = alignment;
+        }
+      } else {
+        transform.alignment = alignment;
+      }
+      oldAlignment = alignment;
+    }
+  }
+
+  TransformOrigin parseOrigin(String origin) {
+    if (origin != null && origin.isNotEmpty) {
+      List<String> originList = origin.trim().split(' ');
+      String x, y;
+      if (originList.length == 1) {
+        // default center
+        x = originList[0];
+        y = Position.CENTER;
+        // flutter just support two value x y
+        // FIXME when flutter support three value
+      } else if (originList.length == 2 || originList.length == 3) {
+        x = originList[0];
+        y = originList[1];
+      }
+      // when origin property is not null, default is not center
+      double offsetX = 0, offsetY = 0, alignX = -1, alignY = -1;
+      // y just can be left right center when x is top bottom, otherwise illegal
+      // switch to right place
+      if ((x == Position.TOP || x == Position.BOTTOM) &&
+          (y == Position.LEFT || y == Position.RIGHT || y == Position.CENTER)) {
+        String tmp = x;
+        x = y;
+        y = tmp;
+      }
+      // handle x
+      if (Length.isLength(x)) {
+        offsetX = Length.toDisplayPortValue(x);
+      } else if (Percentage.isPercentage(x)) {
+        alignX = Percentage(x).toDouble() * 2 - 1;
+      } else if (x == Position.LEFT) {
+        alignX = -1.0;
+      } else if (x == Position.RIGHT) {
+        alignX = 1.0;
+      }
+
+      // handle y
+      if (Length.isLength(y)) {
+        offsetY = Length.toDisplayPortValue(y);
+      } else if (Percentage.isPercentage(y)) {
+        alignY = Percentage(y).toDouble() * 2 - 1;
+      } else if (y == Position.TOP) {
+        alignY = -1.0;
+      } else if (y == Position.BOTTOM) {
+        alignY = 1.0;
+      }
+      return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
+    }
+    return null;
   }
 
   Matrix4 combineTransform(Map<String, Method> methods,
@@ -440,4 +541,11 @@ mixin TransformStyleMixin {
   double _getProgressValue(double newValue, double oldValue, double progress) {
     return oldValue + (newValue - oldValue) * progress;
   }
+}
+
+class TransformOrigin {
+  Offset offset;
+  Alignment alignment;
+
+  TransformOrigin(this.offset, this.alignment);
 }

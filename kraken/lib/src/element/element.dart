@@ -107,6 +107,7 @@ abstract class Element extends Node
   })  : assert(nodeId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
+    this.nodeId = nodeId;
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
 
@@ -882,6 +883,7 @@ abstract class Element extends Node
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
     style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
+    style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
     style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
     style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
@@ -1053,7 +1055,12 @@ abstract class Element extends Node
 
   void _styleTransformChangedListener(String property, original, present) {
     // Update transform.
-    updateTransform(style, transitionMap);
+    updateTransform(present, transitionMap);
+  }
+
+  void _styleTransformOriginChangedListener(String property, original, present) {
+    // Update transform.
+    updateTransformOrigin(present, transitionMap);
   }
 
   // Update textNode style when container style changed
