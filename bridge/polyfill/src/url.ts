@@ -52,7 +52,7 @@ const ALPHANUMERIC = /[a-zA-Z0-9\+\-\.]/;
 // Does not process domain names or IP addresses.
 // Does not handle encoding for the query parameter.
 
-class URLPolyfill {
+export class URLPolyfill {
   _url: string;
   _isInvalid: boolean;
   _isRelative: boolean;
@@ -122,7 +122,7 @@ class URLPolyfill {
   }
 
   private _parse(input: string, stateOverride: any, base?: any) {
-  
+
     var state = stateOverride || 'scheme start',
       cursor = 0,
       buffer = '',
@@ -133,7 +133,7 @@ class URLPolyfill {
     function err(message: string) {
       errors.push(message);
     }
-  
+
     loop: while ((input[cursor - 1] != EOF || cursor == 0) && !this._isInvalid) {
       var c = input[cursor];
       switch (state) {
@@ -150,7 +150,7 @@ class URLPolyfill {
             break loop;
           }
           break;
-  
+
         case 'scheme':
           if (c && ALPHANUMERIC.test(c)) {
             buffer += c.toLowerCase(); // ASCII-safe
@@ -184,7 +184,7 @@ class URLPolyfill {
             break loop;
           }
           break;
-  
+
         case 'scheme data':
           if ('?' == c) {
             state = 'query';
@@ -198,7 +198,7 @@ class URLPolyfill {
             }
           }
           break;
-  
+
         case 'no scheme':
           if (!base || !isRelativeScheme(base._scheme)) {
             err('Missing scheme.');
@@ -208,7 +208,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'relative or authority':
           if ('/' == c && '/' == input[cursor + 1]) {
             state = 'authority ignore slashes';
@@ -218,7 +218,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'relative':
           this._isRelative = true;
           if ('file' != this._scheme)
@@ -270,7 +270,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'relative slash':
           if ('/' == c || '\\' == c) {
             if ('\\' == c) {
@@ -292,7 +292,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'authority first slash':
           if ('/' == c) {
             state = 'authority second slash';
@@ -302,7 +302,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'authority second slash':
           state = 'authority ignore slashes';
           if ('/' != c) {
@@ -310,7 +310,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'authority ignore slashes':
           if ('/' != c && '\\' != c) {
             state = 'authority';
@@ -319,7 +319,7 @@ class URLPolyfill {
             err('Expected authority, got: ' + c);
           }
           break;
-  
+
         case 'authority':
           if ('@' == c) {
             if (seenAt) {
@@ -351,7 +351,7 @@ class URLPolyfill {
             buffer += c;
           }
           break;
-  
+
         case 'file host':
           if (EOF == c || '/' == c || '\\' == c || '?' == c || '#' == c) {
             if (buffer.length == 2 && ALPHA.test(buffer[0]) && (buffer[1] == ':' || buffer[1] == '|')) {
@@ -370,7 +370,7 @@ class URLPolyfill {
             buffer += c;
           }
           break;
-  
+
         case 'host':
         case 'hostname':
           if (':' == c && !seenBracket) {
@@ -400,7 +400,7 @@ class URLPolyfill {
             err('Invalid code point in host/hostname: ' + c);
           }
           break;
-  
+
         case 'port':
           if (/[0-9]/.test(c)) {
             buffer += c;
@@ -423,7 +423,7 @@ class URLPolyfill {
             this._invalid();
           }
           break;
-  
+
         case 'relative path start':
           if ('\\' == c)
             err("'\\' not allowed in path.");
@@ -432,7 +432,7 @@ class URLPolyfill {
             continue;
           }
           break;
-  
+
         case 'relative path':
           if (EOF == c || '/' == c || '\\' == c || !stateOverride && ('?' == c || '#' == c)) {
             if ('\\' == c) {
@@ -467,7 +467,7 @@ class URLPolyfill {
             buffer += percentEscape(c);
           }
           break;
-  
+
         case 'query':
           if (!stateOverride && '#' == c) {
             this._fragment = '#';
@@ -476,14 +476,14 @@ class URLPolyfill {
             this._query += percentEscapeQuery(c);
           }
           break;
-  
+
         case 'fragment':
           if (EOF != c && '\t' != c && '\n' != c && '\r' != c) {
             this._fragment += c;
           }
           break;
       }
-  
+
       cursor++;
     }
   }

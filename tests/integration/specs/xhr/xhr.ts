@@ -7,7 +7,9 @@ describe('XMLHttpRequest', () => {
         var status = xhr.status;
         expect(status).toBe(200);
         if ((status >= 200 && status < 300) || status == 304) {
-          expect(xhr.responseText).toBe('12345');
+          expect(xhr.responseText.replace(/\s+/g, '')).toBe(
+            '{"method":"GET","data":{"userName":"12345"}}'
+          );
         }
       }
     };
@@ -17,7 +19,7 @@ describe('XMLHttpRequest', () => {
     xhr.send();
   });
 
-  fit('Get method fail', function() {
+  it('Get method fail', function() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {

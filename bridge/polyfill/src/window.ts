@@ -1,7 +1,6 @@
 import {EventTarget} from './document/event-target';
 import {krakenWindow, KrakenLocation} from './bridge';
 import {WINDOW} from "./document/event-target";
-import { navigator } from './navigator';
 
 const windowBuildInEvents = ['load', 'colorschemechange'];
 
@@ -28,10 +27,6 @@ class Window extends EventTarget {
 
   public get parent() {
     return this;
-  }
-
-  public get navigator() {
-    return navigator;
   }
 }
 

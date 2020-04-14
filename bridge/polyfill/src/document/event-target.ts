@@ -19,11 +19,10 @@ export class EventTarget {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
         get() {
-          return this.__propertyEventHandler[event];
+          return this.__propertyEventHandler.get(event);
         },
         set(fn: EventHandler) {
-          this.__propertyEventHandler[event] = fn;
-          this.addEventListener(event, fn);
+          this.__propertyEventHandler.set(event, fn);
         }
       });
     });
@@ -53,6 +52,11 @@ export class EventTarget {
   }
 
   public dispatchEvent(event: Event) {
+    const handler = this.__propertyEventHandler.get(event.type);
+    if (typeof handler === 'function') {
+      handler.call(this, event);
+    }
+
     if (!this.__eventHandlers.has(event.type)) {
       return;
     }
