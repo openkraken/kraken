@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:async';
-import 'package:kraken_webview/kraken_webview.dart';
 import 'package:kraken/element.dart';
 
 const String IFRAME = 'IFRAME';

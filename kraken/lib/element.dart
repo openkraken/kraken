@@ -10,6 +10,7 @@ export 'src/element/event.dart';
 export 'src/element/event_target.dart';
 export 'src/element/node.dart';
 export 'src/element/window.dart';
+export 'src/element/web_view.dart';
 export 'src/element/tags/a.dart';
 export 'src/element/tags/body.dart';
 export 'src/element/tags/canvas.dart';
