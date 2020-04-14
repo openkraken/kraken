@@ -750,11 +750,11 @@ abstract class WebViewElement extends Element {
     assert(_extractChannelNames(javascriptChannels).length == javascriptChannels.length);
   }
 
-  void _onWebViewPlatformCreated(WebViewPlatformController webViewPlatform) {
+  void _onWebViewPlatformCreated(WebViewPlatformController webViewPlatform) async {
     final WebViewController controller =
-    WebViewController(this, webViewPlatform, _platformCallbacksHandler);
+      WebViewController(this, webViewPlatform, _platformCallbacksHandler);
+    await controller.setupJSBridge();
     _controller.complete(controller);
-    controller.setupJSBridge();
     onWebViewCreated(controller);
   }
 }
@@ -789,12 +789,8 @@ class IFrameElement extends WebViewElement {
   IFrameElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(nodeId, props, events, tagName: IFRAME);
 
-  final Completer<WebViewController> _controller = Completer<WebViewController>();
-
   @override
-  void onWebViewCreated(WebViewController controller) {
-    _controller.complete(controller);
-  }
+  void onWebViewCreated(WebViewController controller) {}
 
   @override
   void onFocus() {
