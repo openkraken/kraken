@@ -19,7 +19,6 @@ import 'webview_method_channel.dart';
 /// communicate with the platform code.
 class CupertinoWebView implements WebViewPlatform {
   UiKitViewController _controller;
-  RenderUiKitView _renderUiKitView;
   int _id;
 
   void dispose() {
@@ -75,16 +74,16 @@ class CupertinoWebView implements WebViewPlatform {
   void _polyfillWebView(MethodChannelWebViewPlatform methodChannelWebViewPlatform) {
     String invoker = '''
       // Polyfill kraken env for iOS.
-      ;(function (){
+      ;(function(){
         var kraken = window.kraken = window.kraken || {};
         kraken.postMessage = function(message) {
           return webkit.messageHandlers.kraken.postMessage(message);
         };
-      });
+      })();
     ''';
     methodChannelWebViewPlatform.evaluateJavascript(invoker);
   }
-  
+
   @override
   Future<bool> clearCookies() => MethodChannelWebViewPlatform.clearCookies();
 }
