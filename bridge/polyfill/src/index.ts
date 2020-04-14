@@ -7,7 +7,6 @@ import './location';
 import './navigator';
 import './xmlHttpRequest';
 import './window';
-import './promise';
 import './blob';
 import './async-storage';
 import './url-search-params';
