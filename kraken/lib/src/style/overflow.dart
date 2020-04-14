@@ -46,7 +46,7 @@ OverflowType _getOverflow(String definition) {
   return OverflowType.visible;
 }
 
-mixin StyleOverflowMixin {
+mixin OverflowStyleMixin {
   RenderObject _renderObjectX;
   RenderObject _child;
   RenderObject _renderObjectY;

@@ -21,7 +21,7 @@ class RenderFlexParentData extends RenderLayoutParentData {
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
 
-mixin FlexMixin {
+mixin FlexStyleMixin {
   static const String DIRECTION = 'flexDirection';
   static const String WRAP = 'flexWrap';
   static const String FLOW = 'flexFlow';

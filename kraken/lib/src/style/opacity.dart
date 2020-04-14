@@ -6,51 +6,40 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/style.dart';
 
-mixin ColorMixin on Node {
+mixin OpacityStyleMixin on Node {
   RenderOpacity renderOpacity;
 
   RenderObject initRenderOpacity(RenderObject renderObject, StyleDeclaration style) {
     bool existsOpacity = style.contains('opacity');
-    bool invisible = style['visibility'] == 'hidden';
-    if (existsOpacity || invisible) {
-      String opacityString = style['opacity'];
-      double opacity =
-          opacityString == null ? 1.0 : Number(opacityString).toDouble();
-      if (invisible) {
-        opacity = 0.0;
-      }
-
+    if (existsOpacity) {
+      double opacity = _convertStringToDouble(style['opacity']);
       renderOpacity = RenderOpacity(
         opacity: opacity,
         child: renderObject
       );
-      return invisible ?
-        RenderIgnorePointer(
-          child: renderOpacity,
-          ignoring: true,
-        ) : renderOpacity;
+      return renderOpacity;
     } else {
       return renderObject;
     }
   }
 
-  void updateRenderOpacity(double opacity, { RenderObjectWithChildMixin parentRenderObject }) {
+  double _convertStringToDouble(String str) {
+    return isEmptyStyleValue(str) ? 1.0 : Length.toDouble(str);
+  }
+
+  void updateRenderOpacity(String opacityString, { RenderObjectWithChildMixin parentRenderObject }) {
+    double opacity = _convertStringToDouble(opacityString);
     if (renderOpacity != null) {
       renderOpacity.opacity = opacity;
     } else {
       RenderObject child = parentRenderObject.child;
+      // Drop child by set null first.
       parentRenderObject.child = null;
-
       renderOpacity = RenderOpacity(
         opacity: opacity,
         child: child,
       );
-
-      parentRenderObject.child = opacity == 0 ?
-      RenderIgnorePointer(
-        child: renderOpacity,
-        ignoring: true,
-      ) : renderOpacity;
+      parentRenderObject.child = renderOpacity;
     }
   }
 }
