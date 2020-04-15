@@ -19,17 +19,24 @@ export class EventTarget {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
         get() {
-          return this.__propertyEventHandler[event];
+          return this.__propertyEventHandler.get(event);
         },
         set(fn: EventHandler) {
-          this.__propertyEventHandler[event] = fn;
-          this.addEventListener(event, fn);
+          const preHandler = this.__propertyEventHandler[event];
+          this.removeEventListener(event, preHandler);
+          this.__propertyEventHandler.set(event, fn);
+          if (typeof fn === 'function') {
+            this.addEventListener(event, fn);
+          }
         }
       });
     });
   }
 
   public addEventListener(eventName: string, handler: EventHandler) {
+    if (typeof handler !== 'function') {
+      return;
+    }
     if (!this.__eventHandlers.has(eventName) || this.nodeId === BODY) {
       this.__eventHandlers.set(eventName, []);
 
@@ -45,7 +52,7 @@ export class EventTarget {
 
   // Do not really emit remove event, due to performance consideration.
   public removeEventListener(eventName: string, handler: EventHandler) {
-    if (!this.__eventHandlers.has(eventName)) {
+    if (typeof handler !== 'function' || !this.__eventHandlers.has(eventName)) {
       return;
     }
     let newHandler = this.__eventHandlers.get(eventName)!.filter(fn => fn != handler);

@@ -5,6 +5,7 @@ import './document';
 import './match-media';
 import './location';
 import './navigator';
+import './xhr';
 import './window';
 import './blob';
 import './async-storage';

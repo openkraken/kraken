@@ -16,6 +16,7 @@ export interface KrakenWindow {
   devicePixelRatio: number;
   colorScheme: string;
   location: KrakenLocation;
+  parent: any;
 }
 
 export interface KrakenBlob {
