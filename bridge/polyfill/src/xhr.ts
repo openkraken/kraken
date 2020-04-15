@@ -155,6 +155,9 @@ class XMLHttpRequestPolyfill extends EventTarget {
     }
     header = this.headersCache[header.toLowerCase()] || header;
     this.headersCache[header.toLowerCase()] = header;
+    // Each time you call setRequestHeader() after the first time you
+    // call it, the specified text is appended to the end of the existing
+    // header's content.
     this.headers[header] = this.headers[header] ? this.headers[header] + ', ' + value : value;
   };
 
@@ -354,7 +357,8 @@ class XMLHttpRequestPolyfill extends EventTarget {
    * Aborts a request.
    */
   public abort() {
-    this.headers = defaultHeaders;
+    // Do not share the same global object.
+    this.headers = Object.assign({}, defaultHeaders);
     this.status = 0;
     this.responseText = "";
     this.responseXML = "";
