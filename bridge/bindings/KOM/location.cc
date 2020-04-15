@@ -24,7 +24,7 @@ void updateLocation(std::string url = "") {
   websocketpp::uri uri(url);
   if (uri.get_valid()) {
     origin = uri.get_host();
-    protocol = uri.get_scheme() + "://";
+    protocol = uri.get_scheme() + ":";
     hostname = uri.get_host();
     port = uri.get_port_str();
     host = hostname + ":" + port;

@@ -6,8 +6,8 @@ const String STYLE = 'style';
 
 typedef StyleChangeListener = void Function(
   String key,
-  dynamic original,
-  dynamic present,
+  String original,
+  String present,
 );
 
 /// The [StyleDeclaration] interface represents an object that is a CSS
@@ -74,15 +74,17 @@ class StyleDeclaration {
   /// the declaration block.
   void setProperty(String propertyName, { value = '' }) {
     // Null means with should be removed.
-    var prevValue = _cssProperties[propertyName];
+    String prevValue = _cssProperties[propertyName];
+    String stringifyValue;
     if (value == null) {
       _cssProperties.remove(propertyName);
     } else {
-      _cssProperties[propertyName] = value.toString();
+      stringifyValue = value.toString();
+      _cssProperties[propertyName] = stringifyValue;
     }
 
     if (value != prevValue) {
-      _invokeStyleKeyChanged(propertyName, prevValue, value);
+      _invokeStyleKeyChanged(propertyName, prevValue, stringifyValue);
     }
   }
 
@@ -108,12 +110,12 @@ class StyleDeclaration {
     if (key != null) {
       _styleChangeListeners[key] = [];
     } else {
-      // Remove all if no key spicified.
+      // Remove all if no key specified.
       _styleChangeListeners = {};
     }
   }
 
-  void _invokeStyleKeyChanged(String key, original, present) {
+  void _invokeStyleKeyChanged(String key, String original, String present) {
     assert(key != null);
     _styleChangeListeners[key]?.forEach((StyleChangeListener listener) {
       listener(key, original, present);

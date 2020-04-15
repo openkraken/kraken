@@ -24,6 +24,10 @@ class Window extends EventTarget {
   public get window() {
     return this;
   }
+
+  public get parent() {
+    return this;
+  }
 }
 
 // window is global object, which is created by JSEngine, assign some
