@@ -91,14 +91,18 @@ mixin ElementStyleMixin on RenderBox {
               StyleDeclaration style = child.style;
               String display = getElementTrueDisplay(child.nodeId);
               bool hasWidth = style.contains('width');
-              if (hasWidth) {
-                if (display == 'block' || display == 'inline-block') {
+
+              // Set width of element according to parent display
+              if (display != 'inline') { // Skip to find upper parent
+                if (style.contains('width')) { // Use style width
                   width = Length.toDisplayPortValue(style['width']);
+                  cropPaddingBorder(child);
+                  break;
+                } else if (display == 'inline-block' ||
+                    display == 'inline-flex') { // Collapse width to children
+                  width = null;
                   break;
                 }
-              } else {
-                width = null;
-                break;
               }
             }
           }
@@ -193,7 +197,7 @@ mixin ElementStyleMixin on RenderBox {
   bool isStretchChildrenHeight(Element element) {
     bool isStretch = false;
     StyleDeclaration style = element.style;
-    String display = getElementTrueDisplay(element.nodeId);
+    String display = style['display'];
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
       style['flexDirection'] == 'row' &&
