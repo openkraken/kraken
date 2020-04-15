@@ -76,13 +76,14 @@ describe('Height', () => {
 
   describe('element style has no height', () => {
     it('when parent is flex with height and align-items stretch', async () => {
+
       const container = document.createElement('div');
       setStyle(container, {
         width: '200px',
         height: '200px',
         display: 'flex',
         backgroundColor: '#666',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'stretch',
       });
 
@@ -90,16 +91,16 @@ describe('Height', () => {
 
       const child1 = document.createElement('div');
       setStyle(child1, {
-        height: '50px',
+        width: '50px',
         backgroundColor: 'blue',
       });
       container.appendChild(child1);
-      child1.appendChild(document.createTextNode('block with no width'));
+      child1.appendChild(document.createTextNode('block with no height'));
 
       const child2 = document.createElement('div');
       setStyle(child2, {
         width: '50px',
-        height: '50px',
+        height: '100px',
         backgroundColor: 'red',
       });
       container.appendChild(child2);
@@ -121,7 +122,7 @@ describe('Height', () => {
         width: '200px',
         display: 'flex',
         backgroundColor: '#666',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'stretch',
       });
 
@@ -129,16 +130,16 @@ describe('Height', () => {
 
       const child1 = document.createElement('div');
       setStyle(child1, {
-        height: '50px',
+        width: '50px',
         backgroundColor: 'blue',
       });
       container.appendChild(child1);
-      child1.appendChild(document.createTextNode('block with no width'));
+      child1.appendChild(document.createTextNode('block with no height'));
 
       const child2 = document.createElement('div');
       setStyle(child2, {
         width: '50px',
-        height: '50px',
+        height: '100px',
         backgroundColor: 'red',
       });
       container.appendChild(child2);
@@ -201,6 +202,8 @@ describe('Height', () => {
         backgroundColor: 'green',
       });
       container.appendChild(child3);
+
+      await matchScreenshot();
     });
   });
 });
