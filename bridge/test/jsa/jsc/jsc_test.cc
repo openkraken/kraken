@@ -171,7 +171,7 @@ TEST(JSCContext, global) {
   auto context = std::make_unique<JSCContext>(normalPrint);
   jsa::Object global = context->global();
   global.setProperty(*context, "helloworld", "12345");
-  jsa::Value result = context->evaluateJavaScript("global.helloworld", "", 0);
+  jsa::Value result = context->evaluateJavaScript("globalThis.helloworld", "", 0);
   EXPECT_EQ(result.isString(), true);
   EXPECT_EQ(result.getString(*context).utf8(*context), "12345");
 }
