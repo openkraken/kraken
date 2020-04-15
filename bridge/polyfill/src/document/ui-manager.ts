@@ -20,7 +20,6 @@ function appendMessage(message: any[]) {
 
 function sendMessage(message: any[]) {
   return krakenUIManager(JSON.stringify(message));
-
 }
 
 export function requestUpdateFrame() {
