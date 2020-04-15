@@ -831,6 +831,9 @@ class RenderFlexLayout extends RenderBox
     double actualSize;
     double actualSizeDelta;
 
+    elementWidth = getElementWidth(nodeId);
+    elementHeight = getElementHeight(nodeId);
+
     // Get layout width from children's width by flex axis
     double constraintWidth =
         _direction == Axis.horizontal ? idealSize : crossSize;

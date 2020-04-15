@@ -16,6 +16,7 @@ class CanvasElement extends Element {
       : super(
           nodeId: nodeId,
           defaultDisplay: 'inline-block',
+          allowChildren: false,
           tagName: CANVAS,
           properties: props,
           events: events,

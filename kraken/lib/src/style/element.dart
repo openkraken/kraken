@@ -90,9 +90,14 @@ mixin ElementStyleMixin on RenderBox {
             if (child is Element) {
               StyleDeclaration style = child.style;
               String display = getElementTrueDisplay(child.nodeId);
-              if (style.contains('width') && display != 'inline') {
-                width = Length.toDisplayPortValue(style['width']);
-                cropPaddingBorder(child);
+              bool hasWidth = style.contains('width');
+              if (hasWidth) {
+                if (display == 'block' || display == 'inline-block') {
+                  width = Length.toDisplayPortValue(style['width']);
+                  break;
+                }
+              } else {
+                width = null;
                 break;
               }
             }
@@ -104,6 +109,8 @@ mixin ElementStyleMixin on RenderBox {
         if (style.contains('width')) {
           width = Length.toDisplayPortValue(style['width']);
           cropPaddingBorder(child);
+        } else {
+          width = null;
         }
         break;
       case 'inline':
@@ -161,6 +168,12 @@ mixin ElementStyleMixin on RenderBox {
               height = Length.toDisplayPortValue(style['height']);
               cropPaddingBorder(child);
               break;
+            } else {
+              if (child.renderPadding.hasSize) {
+                height = child.renderPadding.size.height;
+                cropPaddingBorder(child);
+                break;
+              }
             }
           } else {
             break;
