@@ -22,13 +22,21 @@ export class EventTarget {
           return this.__propertyEventHandler.get(event);
         },
         set(fn: EventHandler) {
+          const preHandler = this.__propertyEventHandler[event];
+          this.removeEventListener(event, preHandler);
           this.__propertyEventHandler.set(event, fn);
+          if (typeof fn === 'function') {
+            this.addEventListener(event, fn);
+          }
         }
       });
     });
   }
 
   public addEventListener(eventName: string, handler: EventHandler) {
+    if (typeof handler !== 'function') {
+      return;
+    }
     if (!this.__eventHandlers.has(eventName) || this.nodeId === BODY) {
       this.__eventHandlers.set(eventName, []);
 
@@ -44,7 +52,7 @@ export class EventTarget {
 
   // Do not really emit remove event, due to performance consideration.
   public removeEventListener(eventName: string, handler: EventHandler) {
-    if (!this.__eventHandlers.has(eventName)) {
+    if (typeof handler !== 'function' || !this.__eventHandlers.has(eventName)) {
       return;
     }
     let newHandler = this.__eventHandlers.get(eventName)!.filter(fn => fn != handler);
@@ -52,11 +60,6 @@ export class EventTarget {
   }
 
   public dispatchEvent(event: Event) {
-    const handler = this.__propertyEventHandler.get(event.type);
-    if (typeof handler === 'function') {
-      handler.call(this, event);
-    }
-
     if (!this.__eventHandlers.has(event.type)) {
       return;
     }
