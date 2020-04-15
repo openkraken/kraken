@@ -13,8 +13,10 @@ mixin TransformStyleMixin {
   Alignment oldAlignment = Alignment.center;
   int nodeId;
 
-  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId, bool shouldRender) {
+  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId) {
+
     this.nodeId = nodeId;
+
     if (style.contains('transform')) {
       oldMethods = Method.parseMethod(style['transform']);
       matrix4 = combineTransform(oldMethods) ?? matrix4;
@@ -24,14 +26,16 @@ mixin TransformStyleMixin {
         oldAlignment = transformOrigin.alignment;
       }
     }
+
+    bool shouldRender = style['display'] != 'none';
     transform = RenderElementBoundary(
-        child: current,
-        transform: matrix4,
-        nodeId: nodeId,
-        style: style,
-        origin: oldOffset,
-        alignment: oldAlignment,
-        shouldRender: shouldRender,
+      child: current,
+      transform: matrix4,
+      nodeId: nodeId,
+      style: style,
+      origin: oldOffset,
+      alignment: oldAlignment,
+      shouldRender: shouldRender,
     );
     return transform;
   }

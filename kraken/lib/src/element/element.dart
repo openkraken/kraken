@@ -39,6 +39,7 @@ abstract class Element extends Node
         OpacityStyleMixin,
         TransformStyleMixin,
         VisibilityStyleMixin,
+        SubtreeVisibilityStyleMixin,
         TransitionStyleMixin {
 
   Map<String, dynamic> properties;
@@ -111,8 +112,6 @@ abstract class Element extends Node
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
 
-    String display = style['display'];
-
     _registerStyleChangedListeners();
 
     // Mark element needs to reposition according to position CSS.
@@ -124,27 +123,25 @@ abstract class Element extends Node
           renderLayoutBox = createRenderLayoutBox(style, null);
     }
 
-    // background image
-    if (shouldInitBackgroundImage(style)) {
-      renderObject = initBackgroundImage(renderObject, style, nodeId);
-    }
+    // Background image
+    renderObject = initBackgroundImage(renderObject, style, nodeId);
 
-    // BoxModel Padding.
+    // BoxModel Padding
     renderObject = renderPadding = initRenderPadding(renderObject, style);
 
-    // Overflow.
+    // Overflow
     if (allowChildren) {
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
 
-    // border
+    // BoxModel Border
     renderObject = initRenderDecoratedBox(renderObject, style, nodeId);
 
-    // constrained box
+    // Constrained box
     renderObject =
         renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
-    // Positioned boundary.
+    // Positioned boundary
     if (_isPositioned(style)) {
       renderObject = renderStack = RenderPosition(
         textDirection: TextDirection.ltr,
@@ -164,12 +161,17 @@ abstract class Element extends Node
       behavior: HitTestBehavior.translucent,
     );
 
+    // Opacity
+    renderObject = initRenderOpacity(renderObject, style);
+
+    // Subtree Visibility
+    renderObject = initRenderSubtreeVisibility(renderObject, style);
+
     // Intersection observer
     renderObject = renderIntersectionObserver =
         RenderIntersectionObserver(child: renderObject);
-
-    // Opacity
-    renderObject = initRenderOpacity(renderObject, style);
+    
+    setSubtreeVisibilityIntersectionObserver(renderIntersectionObserver, style['subtreeVisibility']);
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
@@ -181,9 +183,8 @@ abstract class Element extends Node
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
 
-    bool shouldRender = display != 'none';
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId, shouldRender);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
 
     // Add element event listener
     events?.forEach((String eventName) {
@@ -882,6 +883,7 @@ abstract class Element extends Node
 
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
     style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
+    style.addStyleChangeListener('subtreeVisibility', _styleSubtreeVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
     style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
@@ -895,8 +897,7 @@ abstract class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
-    String display = style['display'];
-    bool shouldRender = display != 'none';
+    bool shouldRender = present != 'none';
     renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
@@ -1038,19 +1039,23 @@ abstract class Element extends Node
   void _styleDecoratedChangedListener(String property, original, present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
-    if (shouldInitBackgroundImage(style)) {
-      updateBackgroundImage(style, renderPadding, nodeId);
-    }
+
+    updateBackgroundImage(style, renderPadding, nodeId);
   }
 
   void _styleOpacityChangedListener(String property, original, present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderRepaintBoundary,);
+    updateRenderOpacity(present, parentRenderObject: renderRepaintBoundary);
   }
 
   void _styleVisibilityChangedListener(String property, original, present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary,);
+    updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary);
+  }
+
+  void _styleSubtreeVisibilityChangedListener(String property, original, present) {
+    // Update subtree visibility.
+    updateRenderSubtreeVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
   }
 
   void _styleTransformChangedListener(String property, original, present) {

@@ -15,9 +15,6 @@ class RenderVisibility extends RenderProxyBox {
        _maintainSize = maintainSize,
        super(child);
 
-  /// Whether to maintain space when hidden.
-  final bool _maintainSize;
-
   /// Whether the child is hidden from the rest of the tree.
   ///
   /// If true, the child is laid out as if it was in the tree, but without
@@ -25,8 +22,8 @@ class RenderVisibility extends RenderProxyBox {
   /// without taking any room in the parent.
   ///
   /// If false, the child is included in the tree as normal.
-  bool get hidden => _hidden;
   bool _hidden;
+  bool get hidden => _hidden;
   set hidden(bool value) {
     assert(value != null);
     if (value == _hidden)
@@ -40,42 +37,62 @@ class RenderVisibility extends RenderProxyBox {
     }
   }
 
-  @override
-  bool get alwaysNeedsCompositing => false;
+  /// Whether to maintain space when hidden.
+  bool _maintainSize;
+  bool get maintainSize => _maintainSize;
+  set maintainSize(bool value) {
+    assert(value != null);
+    if (value == _maintainSize)
+      return;
+    _maintainSize = value;
+    
+    if (_maintainSize) {
+      markNeedsPaint();
+    } else {
+      markNeedsLayoutForSizedByParentChange();
+    }
+  }
+
+  double _minIntrinsicWidth = 0.0;
+  double _maxIntrinsicWidth = 0.0;
+  double _minIntrinsicHeight = 0.0;
+  double _maxIntrinsicHeight = 0.0;
+  double _distanceToActualBaseline = null;
 
   @override
   double computeMinIntrinsicWidth(double height) {
     if (hidden && !_maintainSize)
-      return 0.0;
-    return super.computeMinIntrinsicWidth(height);
+      return _minIntrinsicWidth;
+    return _minIntrinsicWidth = super.computeMinIntrinsicWidth(height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (hidden && !_maintainSize)
-      return 0.0;
-    return super.computeMaxIntrinsicWidth(height);
+      return _maxIntrinsicWidth;
+    return _maxIntrinsicWidth = super.computeMaxIntrinsicWidth(height);
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (hidden && !_maintainSize)
-      return 0.0;
-    return super.computeMinIntrinsicHeight(width);
+      return _minIntrinsicHeight;
+    return _minIntrinsicHeight = super.computeMinIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (hidden && !_maintainSize)
-      return 0.0;
-    return super.computeMaxIntrinsicHeight(width);
+      return _maxIntrinsicHeight;
+    return _maxIntrinsicHeight = super.computeMaxIntrinsicHeight(width);
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (hidden && !_maintainSize)
-      return null;
-    return super.computeDistanceToActualBaseline(baseline);
+      return _distanceToActualBaseline;
+
+    return _distanceToActualBaseline = super.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -84,19 +101,19 @@ class RenderVisibility extends RenderProxyBox {
   @override
   void performResize() {
     assert(hidden);
-    if (_maintainSize) {
-      super.performResize();
-    } else {
+    if (hidden && !_maintainSize) {
       size = constraints.smallest;
+    } else {
+      super.performResize();
     }
   }
 
   @override
   void performLayout() {
-    if (_maintainSize) {
-      super.performLayout();
-    } else {
+    if (hidden && !_maintainSize) {
       child?.layout(constraints);
+    } else {
+      super.performLayout();
     }
   }
 
