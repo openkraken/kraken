@@ -20,13 +20,20 @@ function appendMessage(message: any[]) {
 
 function sendMessage(message: any[]) {
   return krakenUIManager(JSON.stringify(message));
+
 }
 
 export function requestUpdateFrame() {
   updateRequested = false;
   if (updateMessageQueue.length > 0) {
-    sendMessage(['batchUpdate', updateMessageQueue]);
-    updateMessageQueue.length = 0;
+    // Make sure message queue is cleared, no matter that dart throws error or not.
+    try {
+      sendMessage(['batchUpdate', updateMessageQueue]);
+    } catch(err) {
+      console.error(err);
+    } finally {
+      updateMessageQueue.length = 0;
+    }
   }
 }
 
