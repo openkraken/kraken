@@ -45,6 +45,7 @@ describe('Subtree Visibility', () => {
       subtreeVisibility: 'auto',
     });
 
+    await sleep(0.1);
     await matchScreenshot();
   });
 
