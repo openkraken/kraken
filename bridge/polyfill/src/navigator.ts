@@ -3,7 +3,7 @@ import { krakenInvokeModule, privateKraken } from './bridge';
 export const positionWatcherMap = new Map<string, any>();
 export let onConnectivityChangeListener: (data: Object) => any;
 
-const navigator = {
+export const navigator = {
   // UA is read-only.
   get userAgent() {
     // Rule: @product/@productSub (@platform; @appName/@appVersion)

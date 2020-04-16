@@ -893,7 +893,7 @@ abstract class Element extends Node
     style.addStyleChangeListener('transitionDelay', _styleTransitionChangedListener);
   }
 
-  void _styleDisplayChangedListener(String property, original, present) {
+  void _styleDisplayChangedListener(String property, String original, String present) {
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
@@ -928,7 +928,7 @@ abstract class Element extends Node
     }
   }
 
-  void _stylePositionChangedListener(String property, original, present) {
+  void _stylePositionChangedListener(String property, String original, String present) {
     /// Update position.
     String prevPosition = isEmptyStyleValue(original) ? 'static' : original;
     String currentPosition = isEmptyStyleValue(present) ? 'static' : present;
@@ -942,7 +942,7 @@ abstract class Element extends Node
     }
   }
 
-  void _styleOffsetChangedListener(String property, original, present) {
+  void _styleOffsetChangedListener(String property, String original, String present) {
     double _original = Length.toDisplayPortValue(original);
 
     _updateOffset(
@@ -953,7 +953,7 @@ abstract class Element extends Node
     );
   }
 
-  void _styleTextAlignChangedListener(String property, original, present) {
+  void _styleTextAlignChangedListener(String property, String original, String present) {
     _updateDecorationRenderLayoutBox();
   }
 
@@ -969,19 +969,19 @@ abstract class Element extends Node
     }
   }
 
-  void _styleTransitionChangedListener(String property, original, present) {
+  void _styleTransitionChangedListener(String property, String original, String present) {
     if (present != null) initTransition(style, property);
   }
 
-  void _styleOverflowChangedListener(String property, original, present) {
+  void _styleOverflowChangedListener(String property, String original, String present) {
     updateOverFlowBox(style, _scrollListener);
   }
 
-  void _stylePaddingChangedListener(String property, original, present) {
+  void _stylePaddingChangedListener(String property, String original, String present) {
     updateRenderPadding(style, transitionMap);
   }
 
-  void _styleSizeChangedListener(String property, original, present) {
+  void _styleSizeChangedListener(String property, String original, String present) {
     // Update constrained box.
     updateConstraints(style, transitionMap);
 
@@ -996,12 +996,12 @@ abstract class Element extends Node
     }
   }
 
-  void _styleMarginChangedListener(String property, original, present) {
+  void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
     updateRenderMargin(style, transitionMap);
   }
 
-  void _styleFlexChangedListener(String property, original, present) {
+  void _styleFlexChangedListener(String property, String original, String present) {
     String display = isEmptyStyleValue(style['display'])
         ? defaultDisplay
         : style['display'];
@@ -1027,7 +1027,7 @@ abstract class Element extends Node
     _updateDecorationRenderLayoutBox();
   }
 
-  void _styleFlexItemChangedListener(String property, original, present) {
+  void _styleFlexItemChangedListener(String property, String original, String present) {
     String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       children.forEach((Element child) {
@@ -1036,19 +1036,19 @@ abstract class Element extends Node
     }
   }
 
-  void _styleDecoratedChangedListener(String property, original, present) {
+  void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
 
     updateBackgroundImage(style, renderPadding, nodeId);
   }
 
-  void _styleOpacityChangedListener(String property, original, present) {
+  void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
     updateRenderOpacity(present, parentRenderObject: renderRepaintBoundary);
   }
 
-  void _styleVisibilityChangedListener(String property, original, present) {
+  void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
     updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary);
   }
@@ -1058,12 +1058,12 @@ abstract class Element extends Node
     updateRenderSubtreeVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
   }
 
-  void _styleTransformChangedListener(String property, original, present) {
+  void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
     updateTransform(present, transitionMap);
   }
 
-  void _styleTransformOriginChangedListener(String property, original, present) {
+  void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
     updateTransformOrigin(present, transitionMap);
   }

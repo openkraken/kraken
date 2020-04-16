@@ -57,3 +57,6 @@ assets/*
 .ios/Flutter/engine
 .ios/Flutter/Generated.xcconfig
 .ios/Flutter/flutter_export_environment.sh
+.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m
+.ios/Flutter/FlutterPluginRegistrant/FlutterPluginRegistrant.podspec
+.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
