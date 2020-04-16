@@ -170,7 +170,7 @@ abstract class Element extends Node
     // Intersection observer
     renderObject = renderIntersectionObserver =
         RenderIntersectionObserver(child: renderObject);
-    
+
     setSubtreeVisibilityIntersectionObserver(renderIntersectionObserver, style['subtreeVisibility']);
 
     // Visibility
