@@ -90,10 +90,19 @@ mixin ElementStyleMixin on RenderBox {
             if (child is Element) {
               StyleDeclaration style = child.style;
               String display = getElementTrueDisplay(child.nodeId);
-              if (style.contains('width') && display != 'inline') {
-                width = Length.toDisplayPortValue(style['width']);
-                cropPaddingBorder(child);
-                break;
+              bool hasWidth = style.contains('width');
+
+              // Set width of element according to parent display
+              if (display != 'inline') { // Skip to find upper parent
+                if (style.contains('width')) { // Use style width
+                  width = Length.toDisplayPortValue(style['width']);
+                  cropPaddingBorder(child);
+                  break;
+                } else if (display == 'inline-block' ||
+                    display == 'inline-flex') { // Collapse width to children
+                  width = null;
+                  break;
+                }
               }
             }
           }
@@ -104,6 +113,8 @@ mixin ElementStyleMixin on RenderBox {
         if (style.contains('width')) {
           width = Length.toDisplayPortValue(style['width']);
           cropPaddingBorder(child);
+        } else {
+          width = null;
         }
         break;
       case 'inline':
@@ -161,6 +172,12 @@ mixin ElementStyleMixin on RenderBox {
               height = Length.toDisplayPortValue(style['height']);
               cropPaddingBorder(child);
               break;
+            } else {
+              if (child.renderPadding.hasSize) {
+                height = child.renderPadding.size.height;
+                cropPaddingBorder(child);
+                break;
+              }
             }
           } else {
             break;
@@ -180,7 +197,7 @@ mixin ElementStyleMixin on RenderBox {
   bool isStretchChildrenHeight(Element element) {
     bool isStretch = false;
     StyleDeclaration style = element.style;
-    String display = getElementTrueDisplay(element.nodeId);
+    String display = style['display'];
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
       style['flexDirection'] == 'row' &&
