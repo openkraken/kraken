@@ -112,14 +112,18 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
     )
 endif ()
 
-if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-    )
+if (IS_ANDROID)
+# DONOT set output dir for android gradle.
 else ()
-  set_target_properties(kraken
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
-    )
+  if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
+    set_target_properties(kraken
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
+      )
+  else ()
+    set_target_properties(kraken
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
+      )
+  endif ()
 endif ()
