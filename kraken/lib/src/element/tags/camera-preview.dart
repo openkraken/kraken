@@ -122,7 +122,6 @@ class CameraPreviewElement extends Element {
       _invokeReady();
       sizedBox.child = buildFallbackView('Camera Fallback View');
     } else {
-      this.cameraDescription = cameraDescription;
       await _initCamera();
     }
   }
@@ -223,16 +222,36 @@ class CameraPreviewElement extends Element {
     }
   }
 
+  @override
+  void setStyle(String key, value) {
+    if (key == 'width') {
+      width = Length.toDisplayPortValue(value.toString() + 'px');
+    } else if (key == 'height') {
+      height = Length.toDisplayPortValue(value.toString() + 'px');
+    }
+    super.setStyle(key, value);
+  }
+
   void _setProperty(String key, value) {
     if (key == 'resolution-preset') {
       resolutionPreset = getResolutionPreset(value);
-    } else if (key == 'width' || key == '.style.width') {
+    } else if (key == 'width') {
       width = Length.toDisplayPortValue(value);
-    } else if (key == 'height' || key == '.style.height') {
+    } else if (key == 'height') {
       height = Length.toDisplayPortValue(value);
     } else if (key == 'lens') {
       _initCameraWithLens(value);
+    } else if (key == 'sensor-orientation') {
+      _updateSensorOrientation(value);
     }
+  }
+
+  void _updateSensorOrientation(value) async {
+    int sensorOrientation = Number(value.toString()).toInt();
+    cameraDescription = cameraDescription.copyWith(
+      sensorOrientation: sensorOrientation
+    );
+    await _initCamera();
   }
 }
 
