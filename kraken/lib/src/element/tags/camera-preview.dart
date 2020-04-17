@@ -86,13 +86,19 @@ class CameraPreviewElement extends Element {
   }
 
   double get aspectRatio {
+    double _aspectRatio = 1.0;
     if (width != null && height != null) {
-      return width / height;
+      _aspectRatio = width / height;
     } else if (controller != null) {
-      return controller.value.aspectRatio;
-    } else {
-      return 1.0;
+      _aspectRatio = controller.value.aspectRatio;
     }
+
+    // sensorOrientation can be [0, 90, 180, 270],
+    // while 90 / 270 is reverted to width and height.
+    if ((cameraDescription.sensorOrientation / 90) % 2 == 1) {
+      _aspectRatio = 1 / _aspectRatio;
+    }
+    return _aspectRatio;
   }
 
   ResolutionPreset _resolutionPreset;
@@ -170,6 +176,8 @@ class CameraPreviewElement extends Element {
 
     _initCameraWithLens(props['lens']);
 
+    style.addStyleChangeListener('width', _widthChangedListener);
+    style.addStyleChangeListener('height', _heightChangedListener);
     addChild(sizedBox);
   }
 
@@ -222,22 +230,26 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  @override
-  void setStyle(String key, value) {
-    if (key == 'width') {
-      width = Length.toDisplayPortValue(value.toString() + 'px');
-    } else if (key == 'height') {
-      height = Length.toDisplayPortValue(value.toString() + 'px');
-    }
-    super.setStyle(key, value);
+  void _widthChangedListener(String key, String original, String present) {
+    // Trigger width setter to invoke rerender.
+    width = Length.toDisplayPortValue(present);
+  }
+
+  void _heightChangedListener(String key, String original, String present) {
+    // Trigger height setter to invoke rerender.
+    height = Length.toDisplayPortValue(present);
   }
 
   void _setProperty(String key, value) {
     if (key == 'resolution-preset') {
       resolutionPreset = getResolutionPreset(value);
     } else if (key == 'width') {
+      // <camera-preview width="300" />
+      // Width and height is united with pixel.
+      value = value.toString() + 'px';
       width = Length.toDisplayPortValue(value);
     } else if (key == 'height') {
+      value = value.toString() + 'px';
       height = Length.toDisplayPortValue(value);
     } else if (key == 'lens') {
       _initCameraWithLens(value);
