@@ -25,6 +25,8 @@ class Number {
   }
 
   double toDouble() => _value;
+
+  int toInt() => _value.toInt();
 }
 
 class Percentage {
