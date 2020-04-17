@@ -17,7 +17,7 @@ mixin BackgroundImageMixin on Node {
 
   double linearAngle;
 
-  bool shouldInitBackgroundImage(StyleDeclaration style) {
+  bool _shouldRenderBackgroundImage(StyleDeclaration style) {
     return style['backgroundAttachment'] == 'local' &&
         style.contains('backgroundImage');
   }
@@ -27,6 +27,8 @@ mixin BackgroundImageMixin on Node {
     StyleDeclaration style,
     int nodeId
   ) {
+    if (!_shouldRenderBackgroundImage(style)) return renderObject; 
+
     DecorationImage decorationImage;
     Gradient gradient;
 
@@ -61,14 +63,17 @@ mixin BackgroundImageMixin on Node {
   }
 
   void updateBackgroundImage(StyleDeclaration style, RenderObjectWithChildMixin parent, int nodeId) {
+
+    if (!_shouldRenderBackgroundImage(style)) return; 
+
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style.contains("backgroundImage")) {
+    if (style.contains('backgroundImage')) {
       Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
       //FIXME flutter just support one property
       for (Method method in methods?.values) {
         if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : "";
+          String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url, style);
             if (decorationImage != null) {

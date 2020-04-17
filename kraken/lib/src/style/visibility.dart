@@ -14,7 +14,7 @@ mixin VisibilityStyleMixin on Node {
     bool hidden = style['visibility'] == 'hidden';
     if (hidden) {
       renderVisibility = RenderVisibility(
-        hidden: hidden,
+        hidden: true,
         child: renderObject
       );
       return renderVisibility;

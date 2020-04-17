@@ -27,8 +27,8 @@ mixin OpacityStyleMixin on Node {
     return isEmptyStyleValue(str) ? 1.0 : Length.toDouble(str);
   }
 
-  void updateRenderOpacity(String opacityString, { RenderObjectWithChildMixin parentRenderObject }) {
-    double opacity = _convertStringToDouble(opacityString);
+  void updateRenderOpacity(String value, { RenderObjectWithChildMixin parentRenderObject }) {
+    double opacity = _convertStringToDouble(value);
     if (renderOpacity != null) {
       renderOpacity.opacity = opacity;
     } else {
