@@ -95,7 +95,7 @@ class CameraPreviewElement extends Element {
 
     // sensorOrientation can be [0, 90, 180, 270],
     // while 90 / 270 is reverted to width and height.
-    if ((cameraDescription.sensorOrientation / 90) % 2 == 1) {
+    if ((cameraDescription?.sensorOrientation ?? 0 / 90) % 2 == 1) {
       _aspectRatio = 1 / _aspectRatio;
     }
     return _aspectRatio;
