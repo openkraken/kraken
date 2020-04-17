@@ -1279,20 +1279,25 @@ abstract class Element extends Node
     }
   }
 
-  Future<Uint8List> toBlob({double devicePixelRatio}) {
+  Future<Uint8List> toBlob({ double devicePixelRatio }) {
     if (devicePixelRatio == null) {
       devicePixelRatio = window.devicePixelRatio;
     }
 
     Completer<Uint8List> completer = new Completer();
 
-    // need to make sure all renderObject had repainted.
+    // Make sure renderObjects has been repainted.
     renderObject.markNeedsPaint();
     RendererBinding.instance.addPostFrameCallback((_) async {
-      Image image =
-      await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
-      ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
-      completer.complete(byteData.buffer.asUint8List());
+      if (renderRepaintBoundary.size == Size.zero) {
+        // Return a blob with zero length.
+        completer.complete(Uint8List(0));
+      } else {
+        Image image = await renderRepaintBoundary
+            .toImage(pixelRatio: devicePixelRatio);
+        ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+        completer.complete(byteData.buffer.asUint8List());
+      }
     });
 
     return completer.future;

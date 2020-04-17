@@ -66,7 +66,9 @@ describe('Subtree Visibility', () => {
       top: '-1000px',
     });
 
-    await matchElementImageSnapshot(container1);
+    // Should be empty blob
+    const blob = await container1.toBlob(1.0);
+    expect(blob.size).toEqual(0);
   });
 
 });
