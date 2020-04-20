@@ -5,7 +5,7 @@
 
 #include "timer.h"
 #include "dart_methods.h"
-#include "foundation/callback_context.h"
+#include "foundation/bridge_callback.h"
 #include "jsa.h"
 #include "thread_safe_map.h"
 #include <atomic>
@@ -16,13 +16,8 @@ namespace binding {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-void destoryCallbackContext(void *data) {
-  auto *obj = static_cast<CallbackContext *>(data);
-  delete obj;
-}
-
-void handlePersistentCallback(void *data, const char* errmsg) {
-  auto *obj = static_cast<CallbackContext *>(data);
+void handlePersistentCallback(void *data, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
@@ -44,8 +39,8 @@ void handlePersistentCallback(void *data, const char* errmsg) {
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *data, double result, const char* errmsg) {
-  auto *obj = static_cast<CallbackContext *>(data);
+void handleRAFPersistentCallback(void *data, double result, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
@@ -67,14 +62,12 @@ void handleRAFPersistentCallback(void *data, double result, const char* errmsg) 
   callback.asFunction(_context).call(_context, Value(result), 0);
 }
 
-void handleTransientCallback(void *data, const char* errmsg) {
+void handleTransientCallback(void *data, const char *errmsg) {
   handlePersistentCallback(data, errmsg);
-  destoryCallbackContext(data);
 }
 
-void handleRAFTransientCallback(void *data, double result, const char* errmsg) {
+void handleRAFTransientCallback(void *data, double result, const char *errmsg) {
   handleRAFPersistentCallback(data, result, errmsg);
-  destoryCallbackContext(data);
 }
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -104,9 +97,11 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
     throw JSError(context, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
   }
 
-  auto *callbackContext = new CallbackContext(context, callbackValue);
-
-  int32_t timerId = getDartMethod()->setTimeout(handleTransientCallback, static_cast<void *>(callbackContext), timeout);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
+  auto timerId =
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *data) {
+      return getDartMethod()->setTimeout(handleTransientCallback, data, timeout);
+    });
 
   // `-1` represents ffi error occurred.
   if (timerId == -1) {
@@ -148,9 +143,12 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
   }
 
   // the context pointer which will be pass by pointer address to dart code.
-  auto *callbackContext = new CallbackContext(context, callbackValue);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
-  int32_t timerId = getDartMethod()->setInterval(handlePersistentCallback, static_cast<void *>(callbackContext), delay);
+  auto timerId =
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *data) {
+      return getDartMethod()->setInterval(handlePersistentCallback, data, delay);
+    });
 
   if (timerId == -1) {
     throw JSError(context, "Failed to execute 'setInterval': dart method (setInterval) got unexpected error.");
@@ -214,15 +212,16 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
   Object &&callbackFunction = callbackValue->getObject(context);
 
   // the context pointer which will be pass by pointer address to dart code.
-  auto *callbackContext = new CallbackContext(context, callbackValue);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
     throw JSError(context,
                   "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  int32_t requestId =
-    getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, static_cast<void *>(callbackContext));
+  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *data) {
+    return getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, data);
+  });
 
   // `-1` represents some error occurred.
   if (requestId == -1) {

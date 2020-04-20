@@ -179,6 +179,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '--target',
       'kraken',
       'kom_test',
+      'foundation_test',
       'jsa_test_' + jsEngine,
       '--',
       '-j',
@@ -311,6 +312,7 @@ task('bridge-test', (done) => {
     execSync(`${libOutputPath}/jsa_test_v8`, { stdio: 'inherit' });
   }
   execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
+  execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
   execSync(`${libOutputPath}/kom_test`, { stdio: 'inherit' });
   done();
 });
