@@ -5,8 +5,8 @@
 
 #include "bridge_test.h"
 #include "bindings/KOM/blob.h"
-#include "callback_context.h"
 #include "dart_methods.h"
+#include "foundation/bridge_callback.h"
 #include "testframework.h"
 #include <iostream>
 
@@ -47,10 +47,10 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
-  auto ctx = new CallbackContext(context, callbackValue);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   auto fn = [](void *data, const char *errmsg) {
-    auto ctx = static_cast<CallbackContext *>(data);
+    auto ctx = static_cast<BridgeCallback::Context *>(data);
     JSContext &context = ctx->_context;
 
     if (errmsg != nullptr) {
@@ -64,7 +64,8 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
     delete ctx;
   };
 
-  getDartMethod()->refreshPaint(static_cast<void *>(ctx), fn);
+  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext),
+                                                     [&fn](void *data) { getDartMethod()->refreshPaint(data, fn); });
 
   return Value::undefined();
 }
@@ -99,16 +100,18 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
 
   std::string &&name = screenShotName.getString(context).utf8(context);
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
-  auto ctx = new CallbackContext(context, callbackValue);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   auto fn = [](void *data, int8_t result) {
-    auto ctx = static_cast<CallbackContext *>(data);
+    auto ctx = static_cast<BridgeCallback::Context *>(data);
     JSContext &context = ctx->_context;
     ctx->_callback->getObject(context).getFunction(context).call(context, {Value(static_cast<bool>(result))});
     delete ctx;
   };
 
-  getDartMethod()->matchImageSnapshot(jsBlob->bytes(), jsBlob->size(), name.c_str(), static_cast<void *>(ctx), fn);
+  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext), [&jsBlob, &name, &fn](void *data) {
+    getDartMethod()->matchImageSnapshot(jsBlob->bytes(), jsBlob->size(), name.c_str(), data, fn);
+  });
 
   return Value::undefined();
 }
@@ -118,10 +121,11 @@ Value environment(JSContext &context, const Value &thisVal, const Value *args, s
     throw JSError(context, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
   }
 
-  const char* env = getDartMethod()->environment();
-  return context.global().getPropertyAsObject(context, "JSON").getPropertyAsFunction(context, "parse").call(context, {
-    Value(context, String::createFromAscii(context, env))
-  });
+  const char *env = getDartMethod()->environment();
+  return context.global()
+    .getPropertyAsObject(context, "JSON")
+    .getPropertyAsFunction(context, "parse")
+    .call(context, {Value(context, String::createFromAscii(context, env))});
 }
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
@@ -147,9 +151,8 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   };
 
   executeTestCallback->getObject(*context).getFunction(*context).call(
-    *context, {
-      Value(*context, Function::createFromHostFunction(*context, PropNameID::forUtf8(*context, "done"), 0, done))
-    });
+    *context,
+    {Value(*context, Function::createFromHostFunction(*context, PropNameID::forUtf8(*context, "done"), 0, done))});
   executeTestCallback.reset();
   executeTestCallback = nullptr;
 }

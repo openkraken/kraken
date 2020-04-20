@@ -11,18 +11,16 @@
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/toBlob.h"
 #include "bindings/KOM/window.h"
+#include "foundation/bridge_callback.h"
 #include "polyfill.h"
 #include "testframework.h"
-#include "callback_context.h"
 
 #include "dart_methods.h"
 #include "foundation/flushUITask.h"
 #include "jsa.h"
 #include "thread_safe_array.h"
 #include <atomic>
-#include <cassert>
 #include <cstdlib>
-#include <iostream>
 #include <memory>
 
 namespace kraken {
@@ -72,16 +70,8 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-struct CallbackContext {
-  CallbackContext(JSContext &context, std::shared_ptr<Value> callback)
-    : _context(context), _callback(std::move(callback)){};
-
-  JSContext &_context;
-  std::shared_ptr<Value> _callback;
-};
-
 void handleInvokeModuleTransientCallback(char *json, void *data) {
-  auto *obj = static_cast<CallbackContext *>(data);
+  auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
@@ -93,8 +83,6 @@ void handleInvokeModuleTransientCallback(char *json, void *data) {
 
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, String::createFromUtf8(_context, std::string(json)));
-
-  delete obj;
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -111,16 +99,18 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
                   "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
   }
 
-  CallbackContext *callbackContext = nullptr;
+  std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
 
   if (count == 2) {
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
-    callbackContext = new CallbackContext(context, callbackValue);
+    callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  const char *result = getDartMethod()->invokeModule(messageStr.c_str(), handleInvokeModuleTransientCallback,
-                                                     static_cast<void *>(callbackContext));
+  const char *result =
+    BridgeCallback::instance()->registerCallback<const char *>(std::move(callbackContext), [&messageStr](void *data) {
+      return getDartMethod()->invokeModule(messageStr.c_str(), handleInvokeModuleTransientCallback, data);
+    });
 
   if (result == nullptr) {
     return Value::null();
@@ -171,8 +161,8 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *data, const char* errmsg) {
-  auto *obj = static_cast<CallbackContext *>(data);
+void handleTransientCallback(void *data, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
   if (!_context.isValid()) return;
 
@@ -190,7 +180,6 @@ void handleTransientCallback(void *data, const char* errmsg) {
 
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
-  delete obj;
 }
 
 Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -208,7 +197,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   Object &&callbackFunction = callbackValue->getObject(context);
 
   // the context pointer which will be pass by pointer address to dart code.
-  auto *callbackContext = new CallbackContext(context, callbackValue);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   if (getDartMethod()->requestBatchUpdate == nullptr) {
     throw JSError(
@@ -216,7 +205,8 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
-  getDartMethod()->requestBatchUpdate(handleTransientCallback, static_cast<void *>(callbackContext));
+  BridgeCallback::instance()->registerCallback<void>(
+    std::move(callbackContext), [](void *data) { getDartMethod()->requestBatchUpdate(handleTransientCallback, data); });
 
   return Value::undefined();
 }
@@ -281,14 +271,10 @@ void JSBridge::detachDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::handleUIListener(const char *args) {
-
-  int length = krakenUIListenerList.length();
-
-  for (int i = 0; i < length; i++) {
-    std::shared_ptr<Value> callback;
-    krakenUIListenerList.get(i, callback);
-
-    if (callback.get() == nullptr) {
+  std::unique_lock<std::mutex> lock = krakenUIListenerList.getLock();
+  auto list = krakenUIListenerList.getVector();
+  for (const auto &callback : *list) {
+    if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
     }
 
@@ -302,13 +288,9 @@ void JSBridge::handleUIListener(const char *args) {
 }
 
 void JSBridge::handleModuleListener(const char *args) {
-
-  int length = krakenModuleListenerList.length();
-
-  for (int i = 0; i < length; i++) {
-    std::shared_ptr<Value> callback;
-    krakenModuleListenerList.get(i, callback);
-
+  std::unique_lock<std::mutex> lock = krakenModuleListenerList.getLock();
+  auto list = krakenModuleListenerList.getVector();
+  for (const auto &callback : *list) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
     }
@@ -363,6 +345,7 @@ JSBridge::~JSBridge() {
   websocket_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
+  BridgeCallback::instance()->disposeAllCallbacks();
 }
 
 void JSBridge::flushUITask() {

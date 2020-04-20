@@ -6,7 +6,7 @@
 #include "toBlob.h"
 #include "blob.h"
 #include "dart_methods.h"
-#include "foundation/callback_context.h"
+#include "foundation/bridge_callback.h"
 #include <vector>
 
 namespace kraken {
@@ -37,25 +37,25 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
 
   std::shared_ptr<Value> func = std::make_shared<Value>(Value(context, callback));
 
-  auto ctx = new CallbackContext(context, func);
+  auto callbackContext = std::make_unique<BridgeCallback::Context>(context, func);
 
-  getDartMethod()->toBlob(
-    [](void *ptr, const char *error, uint8_t *bytes, int32_t length) {
-      auto ctx = static_cast<CallbackContext *>(ptr);
-      JSContext &context = ctx->_context;
-
-      if (error != nullptr) {
-        ctx->_callback->getObject(context).getFunction(context).call(context,
-                                                                     {Value(context, String::createFromAscii(context, error))});
-      } else {
-        std::vector<uint8_t> vec(bytes, bytes + length);
-        ctx->_callback->getObject(context).getFunction(context).call(
-          context, {Value::null(), Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(vec)))});
-      }
-
-      delete ctx;
-    },
-    static_cast<void *>(ctx), id.getNumber(), devicePixelRatio.getNumber());
+  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext), [&id, &devicePixelRatio](void *data) {
+    getDartMethod()->toBlob(
+      [](void *ptr, const char *error, uint8_t *bytes, int32_t length) {
+        auto ctx = static_cast<BridgeCallback::Context *>(ptr);
+        JSContext &context = ctx->_context;
+        if (error != nullptr) {
+          ctx->_callback->getObject(context).getFunction(context).call(
+            context, {Value(context, String::createFromAscii(context, error))});
+        } else {
+          std::vector<uint8_t> vec(bytes, bytes + length);
+          ctx->_callback->getObject(context).getFunction(context).call(
+            context,
+            {Value::null(), Value(context, Object::createFromHostObject(context, std::make_shared<JSBlob>(vec)))});
+        }
+      },
+      data, id.getNumber(), devicePixelRatio.getNumber());
+  });
   return Value::undefined();
 }
 
