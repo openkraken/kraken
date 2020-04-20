@@ -56,13 +56,19 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   add_executable(jsa_test_v8 ./test/jsa/v8/v8_test.cc)
   target_link_libraries(jsa_test_v8 ${TEST_LINK_LIBRARY})
   target_include_directories(jsa_test_v8 PUBLIC ${TEST_INCLUDE_DIR})
-endif()
+endif ()
 
 add_executable(kom_test
   ./test/kom/blob.cc
-)
+  )
 target_link_libraries(kom_test ${TEST_LINK_LIBRARY})
 target_include_directories(kom_test PUBLIC ${TEST_INCLUDE_DIR})
+
+add_executable(foundation_test
+  ./test/foundation/bridge_callback_test.cc
+  )
+target_link_libraries(foundation_test ${TEST_LINK_LIBRARY})
+target_include_directories(foundation_test PUBLIC ${TEST_INCLUDE_DIR})
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
   if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
@@ -71,7 +77,7 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
       LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
       RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
       )
-  endif()
+  endif ()
 
   if ($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
     set_target_properties(jsa_test_v8
