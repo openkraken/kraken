@@ -17,6 +17,7 @@ public:
   ThreadSafeArray &operator=(ThreadSafeArray &) = delete;
 
   void push(const T &value) {
+    /// use unique_lock instead of lock_guard to
     std::unique_lock<std::mutex> lock(mutex);
     list.emplace_back(value);
   }
@@ -37,6 +38,7 @@ public:
     list.erase(index);
   }
 
+  // get lock outside of array. all operation will blocked until this lock has released.
   std::unique_lock<std::mutex> getLock() {
     std::unique_lock<std::mutex> lock(mutex);
     return lock;
@@ -47,6 +49,7 @@ public:
   }
 
   void clear() {
+    // clear also need to giant locks.
     std::lock_guard<std::mutex> lock(mutex);
     list.clear();
   }

@@ -17,6 +17,10 @@ namespace foundation {
 
 using namespace alibaba::jsa;
 
+/// An global standalone BridgeCallback register and collector used to register an callback which will call back from
+/// outside of bridge.
+/// This class can auto recycle callback context's memory when bridge are willing to unmount.
+/// This class is thread safe.
 class BridgeCallback {
 public:
   ~BridgeCallback() {
@@ -38,6 +42,7 @@ public:
     return fn(static_cast<void *>(p));
   }
 
+  // dispose all callbacks and recycle callback context's memory
   void disposeAllCallbacks();
 
 private:
