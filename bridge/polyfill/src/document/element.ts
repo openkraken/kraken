@@ -55,9 +55,32 @@ const cachedCamelize = cached(camelize);
 // support event handlers using 'on' property prefix.
 const elementBuildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
+class StyleDeclaration {
+  private nodeId: number;
+  constructor(nodeId: number) {
+    this.nodeId = nodeId;
+  }
+  setProperty(property: string, value: any) {
+    const camelizedProperty = cachedCamelize(property);
+    this[camelizedProperty] = value;
+    setStyle(this.nodeId, camelizedProperty, value);
+  }
+  removeProperty(property: string) {
+    const camelizedProperty = cachedCamelize(property);
+    setStyle(this.nodeId, camelizedProperty, '');
+    const originValue = this[camelizedProperty];
+    this[camelizedProperty] = '';
+    return originValue;
+  }
+  getPropertyValue(property: string) {
+    const camelizedProperty = cachedCamelize(property);
+    return this[camelizedProperty];
+  }
+}
+
 export class Element extends Node {
   public readonly tagName: string;
-  public style: object = {};
+  public style: StyleDeclaration;
   // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   public attributes: Array<any> = [];
 
@@ -65,16 +88,20 @@ export class Element extends Node {
     super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(buildInEvents || []));
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
-    this.style = new Proxy(this.style, {
+    const style = this.style = new StyleDeclaration(nodeId);
+    // FIXME: Proxy not support in iOS 9.x
+    // See: https://caniuse.com/#search=proxy
+    this.style = new Proxy(style, {
       set(target: any, key: string, value: any, receiver: any): boolean {
-        const cKey = cachedCamelize(key);
-        this[cKey] = value;
-        setStyle(nodeId, cKey, value);
+        style.setProperty(key, value);
         return true;
       },
       get(target: any, key: string, receiver) {
-        const cKey = cachedCamelize(key);
-        return this[cKey];
+        // Proxy to prototype method
+        if (key in target) {
+          return target[key];
+        }
+        return style.getPropertyValue(key);
       },
     });
 
@@ -90,7 +117,7 @@ export class Element extends Node {
       });
     }
 
-    if (tagName != 'BODY') {
+    if (this.tagName != 'BODY') {
       createElement(this.tagName, nodeId, {}, []);
     }
   }
@@ -169,7 +196,7 @@ export class Element extends Node {
   }
 
   public scrollTo(x: number | any, y?: number) {
-    if (typeof y === "number") {
+    if (typeof y === 'number') {
       scroll(x, y);
     } else {
       scroll(x, 0);
