@@ -43,7 +43,7 @@ public:
 
   void push(T &&v) {
     std::list<T> tmpList;
-    tmpList.push_back(v);
+    tmpList.push_back(std::move(v));
 
     {
       std::unique_lock<std::mutex> lock(mutex);
@@ -75,7 +75,7 @@ public:
       cvPush.notify_one();
     }
 
-    v = tmpList.front();
+    v = std::move(tmpList.front());
 
     return OK;
   }
