@@ -1,5 +1,5 @@
 import { EventTarget, Event } from './document/event-target';
-import { KrakenWebSocketToken, krakenWebSocket} from './bridge';
+import { KrakenWebSocketToken, krakenWebSocket } from './bridge';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -21,7 +21,7 @@ enum BinaryType {
   arraybuffer = 'arraybuffer'
 }
 
-class WebSocket extends EventTarget {
+export class WebSocket extends EventTarget {
   private token: KrakenWebSocketToken;
   public readyState: ReadyState;
   public CONNECTING = ReadyState.CONNECTING;
@@ -160,10 +160,3 @@ class WebSocket extends EventTarget {
     krakenWebSocket.close(this.token, code, reason);
   }
 }
-
-Object.defineProperty(global, 'WebSocket', {
-  enumerable: true,
-  writable: false,
-  value: WebSocket,
-  configurable: false
-});

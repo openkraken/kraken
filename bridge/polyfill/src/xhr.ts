@@ -1,6 +1,6 @@
 // Forked from https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 
-import { URLPolyfill as URL } from './url';
+import { URL } from './url';
 import { EventTarget, Event } from './document/event-target';
 import { navigator } from './navigator';
 
@@ -53,7 +53,7 @@ const forbiddenRequestMethods = [
   "CONNECT"
 ];
 
-class XMLHttpRequestPolyfill extends EventTarget {
+export class XMLHttpRequest extends EventTarget {
   /**
    * XHR readyState
    */
@@ -442,11 +442,3 @@ class XMLHttpRequestPolyfill extends EventTarget {
     }
   };
 }
-
-
-Object.defineProperty(global, 'XMLHttpRequest', {
-  enumerable: true,
-  writable: false,
-  value: XMLHttpRequestPolyfill,
-  configurable: false
-});

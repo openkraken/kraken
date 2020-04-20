@@ -1,4 +1,5 @@
-import {Node, NodeType} from './node';
+import { BODY } from './event-target';
+import { Node, NodeType } from './node';
 import {
   createElement,
   setProperty,
@@ -117,8 +118,9 @@ export class Element extends Node {
       });
     }
 
-    if (this.tagName != 'BODY') {
-      createElement(this.tagName, nodeId, {}, []);
+    // Body is created automaticlly.
+    if (this.nodeId != BODY) {
+      createElement(this.tagName, nodeId);
     }
   }
 

@@ -183,7 +183,7 @@ function logger(allArgs: any) {
   return result.join(SEPARATOR);
 }
 
-const console = {
+export const console = {
   log(...args: any) {
     printer(logger(arguments));
   },
@@ -382,10 +382,3 @@ const console = {
   },
   clear() { }
 }
-
-Object.defineProperty(global, 'console', {
-  enumerable: true,
-  writable: false,
-  value: console,
-  configurable: false
-});

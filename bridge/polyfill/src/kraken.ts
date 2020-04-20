@@ -1,10 +1,9 @@
-import {methodChannel} from './method-channel';
+import { krakenModuleListener } from './module-listener';
+import { addKrakenModuleListener } from './bridge';
+import { methodChannel } from './method-channel';
 
-Object.defineProperty(global, 'kraken', {
-  value: {
-    methodChannel,
-  },
-  configurable: false,
-  writable: false,
-  enumerable: true
-});
+addKrakenModuleListener(krakenModuleListener);
+
+export const kraken = {
+  methodChannel,
+};

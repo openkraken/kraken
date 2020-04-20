@@ -19,19 +19,19 @@ const DICT_KEY = '__URLSearchParams__';
 function encode(str: string) {
   return encodeURIComponent(str).replace(find, replacer);
 }
- 
+
 function decode(str: string) {
   return decodeURIComponent(str.replace(plus, ' '));
 }
 
-class URLSearchParamsPolyfill {
+export class URLSearchParams {
   constructor(query: any) {
     this._reset();
     if (!query) return;
 
     if (typeof query === 'string') {
       this._fromString(query);
-    } else if(query instanceof URLSearchParamsPolyfill) {
+    } else if(query instanceof URLSearchParams) {
       query.forEach((value, name) => {
         this.append(name, value);
       });
@@ -117,9 +117,9 @@ class URLSearchParamsPolyfill {
   /**
    * Allows iteration through all values contained in this object via a callback function.
    * @param callback A callback function that is executed against each parameter, with the param value provided as its parameter.
-   * @param thisArg 
+   * @param thisArg
    */
-  forEach(callback: (value: string, key: string, parent: URLSearchParamsPolyfill) => void, thisArg?: any) {
+  forEach(callback: (value: string, key: string, parent: URLSearchParams) => void, thisArg?: any) {
     var dict = this[DICT_KEY];
     var params = this;
     Object.getOwnPropertyNames(dict).forEach(function(name) {
@@ -142,10 +142,3 @@ class URLSearchParamsPolyfill {
     return query.join('&');
   }
 }
-
-Object.defineProperty(global, 'URLSearchParams', {
-  enumerable: true,
-  writable: false,
-  value: URLSearchParamsPolyfill,
-  configurable: false
-});

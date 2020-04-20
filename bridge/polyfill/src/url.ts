@@ -52,7 +52,7 @@ const ALPHANUMERIC = /[a-zA-Z0-9\+\-\.]/;
 // Does not process domain names or IP addresses.
 // Does not handle encoding for the query parameter.
 
-export class URLPolyfill {
+export class URL {
   _url: string;
   _isInvalid: boolean;
   _isRelative: boolean;
@@ -68,9 +68,9 @@ export class URLPolyfill {
   _searchParams: URLSearchParams;
   _shouldUpdateSearchParams = true;
 
-  constructor(url: string, base?: string | URLPolyfill) {
-    if (base !== undefined && !(base instanceof URLPolyfill))
-    base = new URLPolyfill(String(base));
+  constructor(url: string, base?: string | URL) {
+    if (base !== undefined && !(base instanceof URL))
+    base = new URL(String(base));
 
     this._url = url;
     this._clear();
@@ -629,10 +629,3 @@ export class URLPolyfill {
     return this.href;
   }
 }
-
-Object.defineProperty(global, 'URL', {
-  enumerable: true,
-  writable: false,
-  value: URLPolyfill,
-  configurable: false
-});

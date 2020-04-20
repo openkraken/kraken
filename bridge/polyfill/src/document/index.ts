@@ -1,10 +1,7 @@
 
-import './ui-listener';
-import { document } from './document';
+import { addKrakenUIListener } from '../bridge';
+import { krakenUIListener } from './ui-listener';
 
-Object.defineProperty(global, 'document', {
-  value: document,
-  enumerable: true,
-  writable: false,
-  configurable: false
-});
+addKrakenUIListener(krakenUIListener);
+
+export { document } from './document';

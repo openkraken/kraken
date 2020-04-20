@@ -1,6 +1,6 @@
 import {KrakenBlob, krakenBlob} from './bridge';
 
-class Blob {
+export class Blob {
   public size: number;
   public type: string;
   private blob: KrakenBlob;
@@ -40,10 +40,3 @@ class Blob {
     });
   }
 }
-
-Object.defineProperty(global, 'Blob', {
-  configurable: false,
-  enumerable: true,
-  value: Blob,
-  writable: false
-});

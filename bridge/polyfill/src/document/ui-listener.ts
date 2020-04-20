@@ -1,7 +1,7 @@
-import { krakenUIListener } from '../bridge';
+// import { krakenUIListener } from '../bridge';
 import { getNodeByNodeId } from './document';
 
-krakenUIListener((message) => {
+export function krakenUIListener(message: any) {
   const parsed = JSON.parse(message);
   const nodeId = parsed[0];
   const event = parsed[1];
@@ -19,4 +19,4 @@ krakenUIListener((message) => {
       currentTarget.dispatchEvent(event);
     }
   }
-});
+}

@@ -85,10 +85,3 @@ export const navigator = {
     }
   }
 }
-
-Object.defineProperty(global, 'navigator', {
-  enumerable: true,
-  writable: false,
-  value: navigator,
-  configurable: false
-});

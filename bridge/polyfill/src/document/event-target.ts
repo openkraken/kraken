@@ -1,4 +1,4 @@
-import {addEvent} from "./ui-manager";
+import { addEvent } from './ui-manager';
 
 export const BODY = -1;
 // Window is not inherit node but EventTarget, so we assume window is a node.
