@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+#ifdef KRAKEN_JSC_ENGINE
+
 #include "foundation/bridge_callback.h"
 #include "js_context.h"
 #include "jsc/jsc_implementation.h"
@@ -64,3 +66,5 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
 
   BridgeCallback::instance()->disposeAllCallbacks();
 }
+
+#endif
