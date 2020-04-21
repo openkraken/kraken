@@ -90,7 +90,6 @@ mixin ElementStyleMixin on RenderBox {
             if (child is Element) {
               StyleDeclaration style = child.style;
               String display = getElementTrueDisplay(child.nodeId);
-              bool hasWidth = style.contains('width');
 
               // Set width of element according to parent display
               if (display != 'inline') { // Skip to find upper parent
