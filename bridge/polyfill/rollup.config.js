@@ -2,6 +2,7 @@ const resolve = require('@rollup/plugin-node-resolve');
 const typescript = require('@rollup/plugin-typescript');
 const replace = require('@rollup/plugin-replace');
 const bundleSize = require('rollup-plugin-bundle-size');
+const commonjs = require('@rollup/plugin-commonjs');
 const { terser } = require('rollup-plugin-terser');
 
 const NODE_ENV = process.env['NODE_ENV'] || 'development';
@@ -23,11 +24,9 @@ const uglifyOptions = {
 };
 const plugins = [
   resolve(),
-  typescript(),
   replace({
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
   }),
-  NODE_ENV === 'development' ? null : terser(uglifyOptions),
   bundleSize(),
 ];
 
@@ -35,11 +34,23 @@ module.exports = [
   {
     input: 'src/index.ts',
     output: Object.assign({ file: 'dist/main.js' }, output),
-    plugins,
+    plugins: [
+      ...plugins,
+      typescript(),
+      NODE_ENV === 'development' ? null : terser(uglifyOptions),
+    ],
   },
   {
     input: 'src/test/index.js',
     output: Object.assign({ file: 'dist/test.js' }, output),
-    plugins,
+    plugins: [
+      ...plugins,
+      commonjs(),
+    ],
+    onwarn(warning, warn) {
+      // suppress eval warnings
+      if (warning.code === 'EVAL') return
+      warn(warning)
+    },
   }
 ];
