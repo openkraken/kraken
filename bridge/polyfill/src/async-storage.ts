@@ -1,7 +1,7 @@
 import { krakenInvokeModule } from './bridge';
 
 const TRUE = 'true';
-const asyncStorage = {
+export const asyncStorage = {
   getItem(key: string) {
     return new Promise((resolve, reject) => {
       krakenInvokeModule(JSON.stringify(['AsyncStorage', 'getItem', [key]]), resolve);
@@ -36,10 +36,3 @@ const asyncStorage = {
     });
   }
 }
-
-Object.defineProperty(global, 'asyncStorage', {
-  enumerable: true,
-  writable: false,
-  value: asyncStorage,
-  configurable: false
-});

@@ -2,7 +2,7 @@ import { krakenInvokeModule } from './bridge';
 
 // https://www.w3.org/TR/hr-time-2/#the-performance-interface
 // @NOTE: Not extends EventTarget due to over design.
-class Performance {
+export class Performance {
   public get timeOrigin() : number {
     const timeStamp = krakenInvokeModule('["Performance","getTimeOrigin"]');
     return parseFloat(timeStamp);
@@ -20,9 +20,4 @@ class Performance {
   }
 }
 
-Object.defineProperty(global, 'performance', {
-  enumerable: true,
-  writable: false,
-  value: new Performance(),
-  configurable: false
-});
+export const performance = new Performance();

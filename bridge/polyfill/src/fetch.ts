@@ -25,7 +25,7 @@ function consumed(body: Body) {
   return null;
 }
 
-class Headers implements Headers {
+export class Headers implements Headers {
   private map = {};
 
   constructor(headers?: HeadersInit) {
@@ -143,7 +143,7 @@ function normalizeMethod(method: string) {
   return methods.indexOf(upcased) > -1 ? upcased : method;
 }
 
-class Request extends Body {
+export class Request extends Body {
   constructor(input: Request | string, init?: RequestInit) {
     super();
     if (!init) {
@@ -205,7 +205,7 @@ class Request extends Body {
 }
 
 let redirectStatuses = [301, 302, 303, 307, 308];
-class Response extends Body {
+export class Response extends Body {
   static error(): Response {
     let response = new Response(null, {status: 0, statusText: ''});
     response.type = 'error';
@@ -258,7 +258,7 @@ class Response extends Body {
   }
 }
 
-function fetch(input: Request | string, init?: RequestInit) {
+export function fetch(input: Request | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
@@ -281,31 +281,3 @@ function fetch(input: Request | string, init?: RequestInit) {
     });
   });
 }
-
-Object.defineProperty(global, 'Request', {
-  value: Request,
-  enumerable: true,
-  writable: false,
-  configurable: false
-});
-
-Object.defineProperty(global, 'Headers', {
-  value: Headers,
-  enumerable: true,
-  writable: false,
-  configurable: false
-});
-
-Object.defineProperty(global, 'Response', {
-  value: Response,
-  enumerable: true,
-  writable: false,
-  configurable: false
-});
-
-Object.defineProperty(global, 'fetch', {
-  value: fetch,
-  enumerable: true,
-  writable: false,
-  configurable: false
-});

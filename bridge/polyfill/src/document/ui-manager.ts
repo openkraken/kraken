@@ -36,8 +36,8 @@ export function requestUpdateFrame() {
   }
 }
 
-export function createElement(type: string, id: number, props: any, events: any) {
-  appendMessage(['createElement', [id, type, props, events]]);
+export function createElement(type: string, id: number) {
+  appendMessage(['createElement', [id, type]]);
 }
 
 export function createTextNode(id: number, data: string) {

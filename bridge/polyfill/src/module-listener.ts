@@ -1,9 +1,8 @@
-import { krakenModuleListener } from './bridge';
 import { positionWatcherMap, onConnectivityChangeListener } from './navigator';
 import { dispatchMQTT } from './mqtt';
-import {dispatchMethodCallHandler} from "./method-channel";
+import { dispatchMethodCallHandler } from './method-channel';
 
-krakenModuleListener(message => {
+export function krakenModuleListener(message: any) {
   let parsed = JSON.parse(message);
   const type = parsed[0];
   if (type === 'onConnectivityChanged') {
@@ -29,4 +28,4 @@ krakenModuleListener(message => {
     const args = parsed[2];
     dispatchMethodCallHandler(method, args);
   }
-});
+}

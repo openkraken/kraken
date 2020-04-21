@@ -1,6 +1,6 @@
-import {EventTarget} from './document/event-target';
-import {krakenWindow, KrakenLocation} from './bridge';
-import {WINDOW} from "./document/event-target";
+import { EventTarget } from './document/event-target';
+import { krakenWindow, KrakenLocation } from './bridge';
+import { WINDOW } from "./document/event-target";
 
 const windowBuildInEvents = ['load', 'colorschemechange'];
 
@@ -32,4 +32,4 @@ class Window extends EventTarget {
 
 // window is global object, which is created by JSEngine, assign some
 // window API from polyfill.
-Object.assign(window, new Window());
+export const window = new Window();

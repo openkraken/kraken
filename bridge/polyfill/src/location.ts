@@ -1,7 +1,8 @@
 import { krakenWindow } from './bridge';
+
 const krakenLocation = krakenWindow.location;
 
-const location = {
+export const location = {
   get reload() {
     return krakenLocation.reload;
   },
@@ -30,10 +31,3 @@ const location = {
     return krakenLocation.hash;
   }
 }
-
-Object.defineProperty(global, 'location', {
-  enumerable: true,
-  writable: false,
-  value: location,
-  configurable: false
-});

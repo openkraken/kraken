@@ -82,8 +82,8 @@ function parseQuery(query: string): Query {
   return parsed;
 }
 
-function matchMedia(mediaQuery: string): MediaQueryList {
-  
+export function matchMedia(mediaQuery: string): MediaQueryList {
+
   let query = parseQuery(mediaQuery);
   // Not serialize the origin mediaquery
   let media = mediaQuery;
@@ -136,10 +136,4 @@ function matchMedia(mediaQuery: string): MediaQueryList {
   }
 }
 
-Object.defineProperty(global, 'matchMedia', {
-  enumerable: true,
-  writable: false,
-  value: matchMedia,
-  configurable: false
-});
 

@@ -2,8 +2,8 @@ import {Node, NodeType, traverseNode} from './node';
 import {Element} from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
-import {ElementRegistry} from './element-registry';
-import {BODY, WINDOW} from "./event-target";
+import { ElementRegistry } from './element-registry';
+import { BODY, WINDOW } from './event-target';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);

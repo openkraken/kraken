@@ -67,13 +67,14 @@ class ElementManagerActionDelegate {
     }());
   }
 
-  void createElement(int id, String type, Map<String, dynamic> props, List<dynamic> events) {
+  void createElement(int id, String type, Map<String, dynamic> props, List events) {
     if (nodeMap.containsKey(id)) {
-      throw Exception('ERROR: can not create element with same id "$id"');
+      throw Exception('ERROR: Can not create element with same id "$id"');
     }
 
-    List<String> eventList = [];
+    List<String> eventList;
     if (events != null) {
+      eventList = [];
       for (var eventName in events) {
         if (eventName is String) eventList.add(eventName);
       }
@@ -281,7 +282,12 @@ class ElementManager {
 
     switch (action) {
       case 'createElement':
-        _actionDelegate.createElement(payload[0], payload[1], payload[2], payload[3]);
+        var props, events;
+        if (payload.length > 2) {
+          props = payload[2];
+          if (payload.length > 3) events = payload[3];
+        }
+        _actionDelegate.createElement(payload[0], payload[1], props, events);
         break;
       case 'createTextNode':
         _actionDelegate.createTextNode(payload[0], payload[1]);
