@@ -1,4 +1,4 @@
-package com.taobao.kraken
+package com.taobao.kraken.app_launcher
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
