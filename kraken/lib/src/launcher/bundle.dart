@@ -42,7 +42,7 @@ abstract class KrakenBundle {
   KrakenBundle(this.url);
 
   // Unique resource locator.
-  final String url;
+  final Uri url;
   // JS Content
   String content;
   // JS line offset, default to 0.
@@ -56,31 +56,35 @@ abstract class KrakenBundle {
   Future<void> resolve();
 
   bool get isNetworkBundle {
-    return url.startsWith('//') || url.startsWith('http');
+    // A `null` or empty [scheme] string matches a URI with no scheme
+    bool isHTTPScheme = url.isScheme('HTTP') ?? true;
+    bool isHTTPSScheme = url.isScheme('HTTPS') ?? true;
+    return isHTTPScheme || isHTTPSScheme;
   }
 
   /// Check path is a kap(zip) bundle.
-  static bool isZipBundle(String url) {
-    return url.endsWith(EXTENSION_KAP) || url.endsWith(EXTENSION_ZIP);
+  static bool isZipBundle(Uri url) {
+    return url.path.endsWith(EXTENSION_KAP) || url.path.endsWith(EXTENSION_ZIP);
   }
 
   /// Check path is a JS bundle.
-  static bool isJSBundle(String url) {
-    return url.endsWith(EXTENSION_JS);
+  static bool isJSBundle(Uri url) {
+    return url.path.endsWith(EXTENSION_JS);
   }
 
   static Future<KrakenBundle> getBundle(String path, { String contentOverride }) async {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
-      bundle = RawBundle(contentOverride, 'RawContent');
+      bundle = RawBundle(contentOverride, null);
     } else if (path == null) {
       path = DEFAULT_BUNDLE_PATH;
     }
 
-    if (isZipBundle(path)) {
-      bundle = ZipBundle(path);
-    } else if (isJSBundle(path)) {
-      bundle = JSBundle(path);
+    Uri uri = Uri.parse(path);
+    if (isZipBundle(uri)) {
+      bundle = ZipBundle(uri);
+    } else if (isJSBundle(uri)) {
+      bundle = JSBundle(uri);
     }
 
     if (bundle != null) {
@@ -107,12 +111,12 @@ abstract class KrakenBundle {
 
   Future<void> run() async {
     if (!isResolved) await resolve();
-    evaluateScripts(content, url, lineOffset);
+    evaluateScripts(content, url.toString(), lineOffset);
   }
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle(String content, String url) : assert(content != null), super(url) {
+  RawBundle(String content, Uri url) : assert(content != null), super(url) {
     this.content = content;
   }
 
@@ -125,18 +129,17 @@ class RawBundle extends KrakenBundle {
 class ZipBundle extends KrakenBundle {
   // Unique identifier.
   String bundleId;
-  ZipBundle(String url) : assert(url != null), super(url);
+  ZipBundle(Uri url) : assert(url != null), super(url);
 
   @override
   Future<void> resolve() async {
     ByteData data;
     if (isNetworkBundle) {
-      Uri uri = Uri.parse(url);
-      NetworkAssetBundle bundle = NetworkAssetBundle(uri);
-      data = await bundle.load(uri.toString());
+      NetworkAssetBundle bundle = NetworkAssetBundle(url);
+      data = await bundle.load(url.toString());
     } else {
       // File Bundle.
-      data = await rootBundle.load(url);
+      data = await rootBundle.load(url.toString());
     }
 
     Uint8List dataList = data.buffer.asUint8List();
@@ -180,17 +183,17 @@ class ZipBundle extends KrakenBundle {
 }
 
 class JSBundle extends KrakenBundle {
-  JSBundle(String url) : assert(url != null), super(url);
+  JSBundle(Uri url) : assert(url != null), super(url);
 
   @override
   Future<void> resolve() async {
     // JSBundle get default bundle manifest.
     manifest = AppManifest();
     if (isNetworkBundle) {
-      Response response = await Dio().get(url);
+      Response response = await Dio().getUri(url);
       content = response.toString();
     } else {
-      content = await rootBundle.loadString(url);
+      content = await rootBundle.loadString(url.toString());
     }
 
     isResolved = true;
