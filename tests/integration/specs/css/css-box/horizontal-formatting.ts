@@ -1,5 +1,5 @@
 // https://www.w3.org/Style/CSS/Test/CSS1/current/sec412.htm
-describe('horizontal_formatting', () => {
+describe('Horizontal formatting', () => {
   it('basic', async () => {
     const rulerStyle = {
       padding: '0px',

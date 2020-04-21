@@ -5,7 +5,7 @@
 const String STYLE = 'style';
 
 typedef StyleChangeListener = void Function(
-  String key,
+  String property,
   String original,
   String present,
 );
@@ -25,13 +25,13 @@ typedef StyleChangeListener = void Function(
 class StyleDeclaration {
   StyleDeclaration({ Map<String, dynamic> style }) {
     if (style != null ) {
-      style.forEach((key, value) {
-        if (value != null) this.setProperty(key, value: value.toString());
+      style.forEach((property, value) {
+        if (value != null) this.setProperty(property, value: value.toString());
       });
     }
   }
 
-  /// When some key changed, corresponding [StyleChangeListener] will be
+  /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   Map<String, List<StyleChangeListener>> _styleChangeListeners = {};
 
@@ -41,9 +41,9 @@ class StyleDeclaration {
   /// Setting this attribute changes the style.
   String get cssText {
     String _cssText = '';
-    _cssProperties.forEach((key, value) {
+    _cssProperties.forEach((property, value) {
       if (_cssText.isNotEmpty) _cssText += ' ';
-      _cssText += '$key: $value;';
+      _cssText += '$property: $value;';
     });
     return _cssText;
   }
@@ -84,48 +84,47 @@ class StyleDeclaration {
     }
 
     if (value != prevValue) {
-      _invokeStyleKeyChanged(propertyName, prevValue, stringifyValue);
+      _invokePropertyChangedListener(propertyName, prevValue, stringifyValue);
     }
   }
 
   /// Override [] and []= operator to get/set style properties.
-  operator [](String key) => this.getPropertyValue(key);
-  operator []=(String key, value) {
-    this.setProperty(key, value: value);
+  operator [](String property) => this.getPropertyValue(property);
+  operator []=(String property, value) {
+    this.setProperty(property, value: value);
   }
 
-  /// Check a css key is valid.
-  bool contains(String key) {
-    String value = getPropertyValue(key);
+  /// Check a css property is valid.
+  bool contains(String property) {
+    String value = getPropertyValue(property);
     return !isEmptyStyleValue(value);
   }
 
-
-  void addStyleChangeListener(String key, StyleChangeListener listener) {
-    if (!_styleChangeListeners.containsKey(key)) _styleChangeListeners[key] = [];
-    _styleChangeListeners[key].add(listener);
+  void addStyleChangeListener(String property, StyleChangeListener listener) {
+    if (!_styleChangeListeners.containsKey(property)) _styleChangeListeners[property] = [];
+    _styleChangeListeners[property].add(listener);
   }
 
-  void removeStyleChangeListener({ String key }) {
-    if (key != null) {
-      _styleChangeListeners[key] = [];
+  void removeStyleChangeListener({ String property }) {
+    if (property != null) {
+      _styleChangeListeners[property] = [];
     } else {
-      // Remove all if no key specified.
+      // Remove all if no property specified.
       _styleChangeListeners = {};
     }
   }
 
-  void _invokeStyleKeyChanged(String key, String original, String present) {
-    assert(key != null);
-    _styleChangeListeners[key]?.forEach((StyleChangeListener listener) {
-      listener(key, original, present);
+  void _invokePropertyChangedListener(String property, String original, String present) {
+    assert(property != null);
+    _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
+      listener(property, original, present);
     });
   }
 
   StyleDeclaration copyWith(Map<String, String> override) {
     Map<String, dynamic> mergedProperties = {};
-    var copy = (key, value) {
-      mergedProperties[key] = value;
+    var copy = (property, value) {
+      mergedProperties[property] = value;
     };
     this._cssProperties.forEach(copy);
     override?.forEach(copy);

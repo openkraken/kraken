@@ -17,6 +17,7 @@ export 'src/style/text.dart';
 export 'src/style/transform.dart';
 export 'src/style/transition.dart';
 export 'src/style/visibility.dart';
+export 'src/style/subtree_visibility.dart';
 
 /// Types
 export 'src/style/types/angle.dart';

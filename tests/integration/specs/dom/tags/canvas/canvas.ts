@@ -1,4 +1,4 @@
-describe('Canvas element', () => {
+describe('Canvas Tag', () => {
   it('set backgroundColor', async () => {
     let canvas = create('canvas', {
       width: '200px',

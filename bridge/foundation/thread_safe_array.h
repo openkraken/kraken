@@ -16,39 +16,47 @@ public:
   ThreadSafeArray() {}
   ThreadSafeArray &operator=(ThreadSafeArray &) = delete;
 
-  void push(T value) {
-    std::lock_guard<std::mutex> lk(mut);
+  void push(const T &value) {
+    /// use unique_lock instead of lock_guard to
+    std::unique_lock<std::mutex> lock(mutex);
     list.emplace_back(value);
-    condition.notify_one();
   }
 
-  int length() {
-    std::lock_guard<std::mutex> lk(mut);
-    int len = list.size();
-    condition.notify_one();
-    return len;
+  void push(T &&value) {
+    std::unique_lock<std::mutex> lock(mutex);
+    list.emplace_back(std::move(value));
+  }
+
+  void pop(const T &value) {
+    std::unique_lock<std::mutex> lock(mutex);
+    value = list.back();
+    list.pop_back();
   }
 
   void removeAt(int index) {
-    std::lock_guard<std::mutex> lk(mut);
+    std::unique_lock<std::mutex> lock(mutex);
     list.erase(index);
-    condition.notify_one();
   }
 
-  void get(int index, T &value) {
-    std::unique_lock<std::mutex> lk(mut);
-    value = list[index];
-    lk.unlock();
+  // get lock outside of array. all operation will blocked until this lock has released.
+  std::unique_lock<std::mutex> getLock() {
+    std::unique_lock<std::mutex> lock(mutex);
+    return lock;
+  }
+
+  std::vector<T> *getVector() {
+    return &list;
   }
 
   void clear() {
+    // clear also need to giant locks.
+    std::lock_guard<std::mutex> lock(mutex);
     list.clear();
   }
 
 private:
-  std::mutex mut;
+  std::mutex mutex;
   std::vector<T> list;
-  std::condition_variable condition;
 };
 
 #endif // THREAD_SAFE_ARRAY_H

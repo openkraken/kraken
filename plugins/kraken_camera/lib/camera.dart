@@ -111,6 +111,18 @@ class CameraDescription {
   /// is from top to bottom in the sensor's coordinate system.
   final int sensorOrientation;
 
+  CameraDescription copyWith({
+    int sensorOrientation,
+    String name,
+    CameraLensDirection lensDirection
+  }) {
+    return CameraDescription(
+      sensorOrientation: sensorOrientation ?? this.sensorOrientation,
+      name: name ?? this.name,
+      lensDirection: lensDirection ?? this.lensDirection,
+    );
+  }
+
   @override
   bool operator ==(Object o) {
     return o is CameraDescription &&
