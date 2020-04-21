@@ -110,6 +110,8 @@ class ElementManagerActionDelegate {
     if (target is Element) {
       // Only Element has properties
       target.setProperty(key, value);
+    } else if (target is TextNode && key == 'data') {
+      target.data = value;
     } else {
       debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
     }
