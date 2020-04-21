@@ -258,14 +258,8 @@ class XMLHttpRequestPolyfill extends EventTarget {
       this.headers.Host += ":" + url.port;
     }
 
-    // Set Basic Auth if necessary
-    if (this.settings.user) {
-      if (typeof this.settings.password === "undefined") {
-        this.settings.password = "";
-      }
-      const authBuf = new Buffer(this.settings.user + ":" + this.settings.password);
-      this.headers.Authorization = "Basic " + authBuf.toString("base64");
-    }
+    // We did't going to support basic-auth for security reasons.
+    // No basic-auth implementation here.
 
     // Set content length header
     if (this.settings.method === "GET" || this.settings.method === "HEAD") {

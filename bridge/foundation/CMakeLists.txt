@@ -15,7 +15,8 @@ set(FOUNDATION_SOURCES
   thread_safe_stack.h
   flushUITask.h
   flushUITask.cc
-  callback_context.h)
+  bridge_callback.h
+  bridge_callback.cc)
 
 set(FOUNDATION_HEADERS
   logging.h

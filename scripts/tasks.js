@@ -179,6 +179,7 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       '--target',
       'kraken',
       'kom_test',
+      'foundation_test',
       'jsa_test_' + jsEngine,
       '--',
       '-j',
@@ -275,7 +276,7 @@ task('pub-get', (done) => {
   done()
 });
 
-task('pack', (done) => {
+task('macos-pack', (done) => {
   const { version } = require(join(paths.cli, 'package.json'));
   const filename = `kraken-${platform}-${version}.tar.gz`;
   const fileFullPath = join(paths.targets, filename);
@@ -295,7 +296,7 @@ task('pack', (done) => {
   }
 });
 
-task('upload', (done) => {
+task('macos-upload', (done) => {
   const { version } = require(join(paths.cli, 'package.json'));
   const filename = `kraken-${platform}-${version}.tar.gz`;
   const fileFullPath = join(paths.targets, filename);
@@ -311,6 +312,7 @@ task('bridge-test', (done) => {
     execSync(`${libOutputPath}/jsa_test_v8`, { stdio: 'inherit' });
   }
   execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
+  execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
   execSync(`${libOutputPath}/kom_test`, { stdio: 'inherit' });
   done();
 });
@@ -453,6 +455,48 @@ task('build-ios-frameworks', (done) => {
   execSync(cmd, {
     env: process.env,
     cwd: paths.sdk,
+    stdio: 'inherit'
+  });
+  done();
+});
+
+task('build-android-app', (done) => {
+  let cmd;
+  if (buildMode === 'Release') {
+    cmd = 'flutter build apk --release'
+  } else {
+    cmd = 'flutter build apk --debug'
+  }
+
+  execSync(cmd, {
+    eng: process.env,
+    cwd: paths.app_launcher,
+    stdio: 'inherit'
+  });
+  done();
+});
+
+task('build-android-sdk', (done) => {
+  let cmd;
+  if (buildMode === 'Release') {
+    cmd = './gradlew assembleRelease'
+  } else {
+    cmd = './gradlew assembleDebug'
+  }
+
+  execSync(cmd, {
+    eng: process.env,
+    cwd: path.join(paths.sdk, '.android'),
+    stdio: 'inherit'
+  });
+  done();
+});
+
+task('build-android-sdk-and-upload', (done) => {
+  let cmd = './gradlew assembleRelease uploadArchives';
+  execSync(cmd, {
+    eng: process.env,
+    cwd: path.join(paths.sdk, '.android'),
     stdio: 'inherit'
   });
   done();
