@@ -16,7 +16,7 @@
     "build:linux": "node scripts/build_linux",
     "upload": "node scripts/pack_and_upload",
     "pretest": "npm i && node scripts/build_darwin_dylib",
-    "test": "node scripts/run_test.js",
+    "test": "npm run lint && node scripts/run_test.js",
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
