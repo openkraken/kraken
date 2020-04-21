@@ -111,7 +111,8 @@ mixin BackgroundImageMixin on Node {
   DecorationImage getBackgroundImage(String url, StyleDeclaration style) {
     DecorationImage backgroundImage = null;
     if (style.contains('backgroundImage')) {
-      ImageRepeat imageRepeat = ImageRepeat.noRepeat;
+      // default repeat
+      ImageRepeat imageRepeat = ImageRepeat.repeat;
       if (style.contains('backgroundRepeat')) {
         switch (style['backgroundRepeat']) {
           case 'repeat-x':
@@ -120,13 +121,14 @@ mixin BackgroundImageMixin on Node {
           case 'repeat-y':
             imageRepeat = ImageRepeat.repeatY;
             break;
-          case 'repeat':
-            imageRepeat = ImageRepeat.repeat;
+          case 'no-repeat':
+            imageRepeat = ImageRepeat.noRepeat;
             break;
         }
       }
       Position position =
           Position(style['backgroundPosition'], window.physicalSize);
+      // size default auto equals none
       BoxFit boxFit = BoxFit.none;
       if (style.contains('backgroundSize')) {
         switch (style['backgroundSize']) {
@@ -139,13 +141,13 @@ mixin BackgroundImageMixin on Node {
           case 'fill':
             boxFit = BoxFit.fill;
             break;
-          case 'fitWidth':
+          case 'fit-width':
             boxFit = BoxFit.fitWidth;
             break;
-          case 'fitHeight':
+          case 'fit-height':
             boxFit = BoxFit.fitHeight;
             break;
-          case 'scaleDown':
+          case 'scale-down':
             boxFit = BoxFit.scaleDown;
             break;
         }

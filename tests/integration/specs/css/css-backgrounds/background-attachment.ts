@@ -44,6 +44,7 @@ describe('background-attachment', () => {
   it('scroll', async () => {
     let container = create('div', {
       'background-attachment': 'local',
+      backgroundRepeat: 'no-repeat',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
       border: '1px solid blue',
