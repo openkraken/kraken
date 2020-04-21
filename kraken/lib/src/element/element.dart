@@ -102,9 +102,9 @@ abstract class Element extends Node
     @required this.tagName,
     this.defaultDisplay = 'block',
     this.properties = const {},
+    this.events = const [],
     this.needsReposition = false,
     this.allowChildren = true,
-    this.events,
   })  : assert(nodeId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
