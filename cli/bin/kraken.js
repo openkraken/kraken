@@ -76,7 +76,7 @@ program
         env['KRAKEN_BUNDLE_URL'] = url;
       } else if (source) {
         let t = temp.track();
-        let tempdir = t.openSync('source');
+        let tempdir = t.openSync({suffix: '.js'});
         let tempPath = tempdir.path;
         fs.writeFileSync(tempPath, source, { encoding: 'utf-8' });
         env['KRAKEN_BUNDLE_PATH'] = tempPath;
