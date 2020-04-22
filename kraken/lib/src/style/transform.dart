@@ -161,6 +161,8 @@ mixin TransformStyleMixin {
         alignX = -1.0;
       } else if (x == Position.RIGHT) {
         alignX = 1.0;
+      } else if (x == Position.CENTER) {
+        alignX = 0.0;
       }
 
       // handle y
@@ -172,6 +174,8 @@ mixin TransformStyleMixin {
         alignY = -1.0;
       } else if (y == Position.BOTTOM) {
         alignY = 1.0;
+      } else if (y == Position.CENTER) {
+        alignY = 0.0;
       }
       return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
@@ -428,9 +432,9 @@ mixin TransformStyleMixin {
       case 'scale':
         if (method.args.length >= 1 && method.args.length <= 2) {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
-          double y = 1;
+          double y = x;
           if (method.args.length == 2) {
-            y = double.tryParse(method.args[1].trim()) ?? 1.0;
+            y = double.tryParse(method.args[1].trim()) ?? x;
           }
           if (needDiff) {
             double oldX = 1.0;
@@ -438,7 +442,9 @@ mixin TransformStyleMixin {
             if (oldMethod != null && oldMethod.args.length >= 1 && oldMethod.args.length <= 2) {
               oldX = double.tryParse(oldMethod.args[0].trim()) ?? 1.0;
               if (oldMethod.args.length == 2) {
-                oldY = double.tryParse(oldMethod.args[1].trim()) ?? 1.0;
+                oldY = double.tryParse(oldMethod.args[1].trim()) ?? oldX;
+              } else {
+                oldY = oldX;
               }
             }
             x = _getProgressValue(x, oldX, progress);
