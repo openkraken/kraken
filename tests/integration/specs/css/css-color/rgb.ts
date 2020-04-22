@@ -1,4 +1,4 @@
-fdescribe('Color RGB and RGBA', () => {
+describe('Color RGB and RGBA', () => {
 
   const COLORS = [
     'rgb(0,255,0)',
