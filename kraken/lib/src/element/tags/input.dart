@@ -109,23 +109,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (props['style']['width'] == null) {
       props['style']['width'] = DEFAULT_WIDTH;
     }
-
-    textInputConfiguration = TextInputConfiguration(
-      inputType: inputType,
-      obscureText: false,
-      autocorrect: false,
-      inputAction: TextInputAction.done, // newline to multilines
-      textCapitalization: TextCapitalization.none,
-      keyboardAppearance: Brightness.light,
-    );
-    textSpan = buildTextSpan();
-    placeholder = getPlaceholderText();
-    renderEditable = createRenderObject();
-    addChild(renderEditable);
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
-
-    _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
-    _cursorBlinkOpacityController.addListener(_onCursorColorTick);
   }
 
   InputElement(
@@ -143,7 +126,24 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     allowChildren: false,
     properties: properties,
     events: events
-  );
+  ) {
+    textInputConfiguration = TextInputConfiguration(
+      inputType: inputType,
+      obscureText: false,
+      autocorrect: false,
+      inputAction: TextInputAction.done, // newline to multilines
+      textCapitalization: TextCapitalization.none,
+      keyboardAppearance: Brightness.light,
+    );
+    textSpan = buildTextSpan();
+    placeholder = getPlaceholderText();
+    renderEditable = createRenderObject();
+    addChild(renderEditable);
+    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+
+    _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
+    _cursorBlinkOpacityController.addListener(_onCursorColorTick);
+  }
 
   TextSpan buildTextSpan({String text}) {
     text ??= properties['value'];
