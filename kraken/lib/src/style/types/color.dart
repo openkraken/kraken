@@ -54,21 +54,23 @@ class WebColor {
       return ret;
     }
 
-    int r = 0;
-    int g = 0;
-    int b = 0;
+    int red = 0;
+    int green = 0;
+    int blue = 0;
     double alpha = 1.0;
     Iterable<RegExpMatch> matches = RGBARexExp.allMatches(input);
     if (matches.length == 1) {
       RegExpMatch match = matches.first;
-      r = int.parse(match[1]);
-      g = int.parse(match[2]);
-      b = int.parse(match[3]);
+      red = int.tryParse(match[1]) ?? 0;
+      green = int.tryParse(match[2]) ?? 0;
+      blue = int.tryParse(match[3]) ?? 0;
       if (match[4] != null) {
-        alpha = double.parse(match[4]);
+        alpha = double.tryParse(match[4]) ?? 1.0;
+        if (alpha > 1.0) alpha = 1.0;
+        if (alpha < 0.0) alpha = 0.0;
       }
     }
-    return Color.fromRGBO(r, g, b, alpha);
+    return Color.fromRGBO(red, green, blue, alpha);
   }
 
   static Color generateHexColor(String hex) {
