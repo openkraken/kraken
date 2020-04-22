@@ -7,39 +7,37 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-mixin BackgroundImageMixin on Node {
+mixin BackgroundImageMixin on BackgroundMixin {
 
   RenderGradient _renderGradient;
 
   double linearAngle;
 
-  bool _shouldRenderBackgroundImage(StyleDeclaration style) {
-    return style['backgroundAttachment'] == 'local' &&
-        style.contains('backgroundImage');
+  bool _shouldRenderBackgroundImage() {
+    return background['backgroundAttachment'] == 'local' &&
+        background.containsKey(BACKGROUND_IMAGE);
   }
 
   RenderObject initBackgroundImage(
     RenderObject renderObject,
-    StyleDeclaration style,
     int targetId
   ) {
-    if (!_shouldRenderBackgroundImage(style)) return renderObject;
+    if (!_shouldRenderBackgroundImage()) return renderObject;
 
     DecorationImage decorationImage;
     Gradient gradient;
 
-    if (style.contains('backgroundImage')) {
-      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
+    if (background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, Method> methods = Method.parseMethod(background[BACKGROUND_IMAGE]);
       //FIXME flutter just support one property
       for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url, style);
+            decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
               return _renderGradient = RenderGradient(
                 targetId: targetId,
@@ -48,7 +46,7 @@ mixin BackgroundImageMixin on Node {
             }
           }
         } else {
-          gradient = getBackgroundGradient(method, style);
+          gradient = getBackgroundGradient(method);
           if (gradient != null) {
             return _renderGradient = RenderGradient(
               targetId: targetId,
@@ -62,27 +60,27 @@ mixin BackgroundImageMixin on Node {
     return renderObject;
   }
 
-  void updateBackgroundImage(StyleDeclaration style, RenderObjectWithChildMixin parent, int targetId) {
+  void updateBackgroundImage(RenderObjectWithChildMixin parent, int targetId) {
 
-    if (!_shouldRenderBackgroundImage(style)) return;
+    if (!_shouldRenderBackgroundImage()) return;
 
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style.contains('backgroundImage')) {
-      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
+    if (background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, Method> methods = Method.parseMethod(background[BACKGROUND_IMAGE]);
       //FIXME flutter just support one property
       for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url, style);
+            decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
               _updateRenderGradient(decorationImage, gradient, parent, targetId);
               return;
             }
           }
         } else {
-          gradient = getBackgroundGradient(method, style);
+          gradient = getBackgroundGradient(method);
           if (gradient != null) {
             _updateRenderGradient(decorationImage, gradient, parent, targetId);
             return;
@@ -108,13 +106,13 @@ mixin BackgroundImageMixin on Node {
     }
   }
 
-  DecorationImage getBackgroundImage(String url, StyleDeclaration style) {
+  DecorationImage getBackgroundImage(String url) {
     DecorationImage backgroundImage = null;
-    if (style.contains('backgroundImage')) {
+    if (background.containsKey(BACKGROUND_REPEAT)) {
       // default repeat
       ImageRepeat imageRepeat = ImageRepeat.repeat;
-      if (style.contains('backgroundRepeat')) {
-        switch (style['backgroundRepeat']) {
+      if (background.containsKey(BACKGROUND_REPEAT)) {
+        switch (background[BACKGROUND_REPEAT]) {
           case 'repeat-x':
             imageRepeat = ImageRepeat.repeatX;
             break;
@@ -127,11 +125,11 @@ mixin BackgroundImageMixin on Node {
         }
       }
       Position position =
-          Position(style['backgroundPosition'], window.physicalSize);
+          Position(background[BACKGROUND_POSITION], window.physicalSize);
       // size default auto equals none
       BoxFit boxFit = BoxFit.none;
-      if (style.contains('backgroundSize')) {
-        switch (style['backgroundSize']) {
+      if (background.containsKey(BACKGROUND_SIZE)) {
+        switch (background[BACKGROUND_SIZE]) {
           case 'cover':
             boxFit = BoxFit.cover;
             break;
@@ -161,7 +159,7 @@ mixin BackgroundImageMixin on Node {
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method, StyleDeclaration style) {
+  Gradient getBackgroundGradient(Method method) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];

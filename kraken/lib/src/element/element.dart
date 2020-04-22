@@ -30,6 +30,7 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         TextStyleMixin,
+        BackgroundMixin,
         BackgroundImageMixin,
         RenderDecoratedBoxMixin,
         DimensionMixin,
@@ -125,8 +126,9 @@ class Element extends Node
           renderLayoutBox = createRenderLayoutBox(style, null);
     }
 
+    initBackground(style);
     // Background image
-    renderObject = initBackgroundImage(renderObject, style, targetId);
+    renderObject = initBackgroundImage(renderObject, targetId);
 
     // BoxModel Padding
     renderObject = renderPadding = initRenderPadding(renderObject, style);
@@ -843,6 +845,7 @@ class Element extends Node
     style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);
     style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
 
+    style.addStyleChangeListener('background', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
     style.addStyleChangeListener('backgroundImage', _styleDecoratedChangedListener);
@@ -1039,10 +1042,11 @@ class Element extends Node
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
+    updateBackground(property, present);
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
 
-    updateBackgroundImage(style, renderPadding, targetId);
+    updateBackgroundImage(renderPadding, targetId);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
@@ -1062,12 +1066,16 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransform(present, transitionMap);
+    if (present != original) {
+      updateTransform(present, transitionMap);
+    }
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransformOrigin(present, transitionMap);
+    if (present != original) {
+      updateTransformOrigin(present, transitionMap);
+    }
   }
 
   // Update textNode style when container style changed
