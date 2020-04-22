@@ -49,22 +49,7 @@ class VideoElement extends Element {
   static const String DEFAULT_WIDTH = '300px';
   static const String DEFAULT_HEIGHT = '150px';
 
-  @override
-  void setDefaultProps(Map<String, dynamic> props) {
-    if (props['style'] == null) {
-      props['style'] = Map<String, dynamic>();
-    }
-
-    if (props['style']['width'] == null) {
-      props['style']['width'] = DEFAULT_WIDTH;
-    }
-
-    if (props['style']['height'] == null) {
-      props['style']['height'] = DEFAULT_HEIGHT;
-    }
-  }
-
-  VideoElement(this.nodeId, this.props, this.events)
+  VideoElement(int nodeId, Map<String, dynamic> props, List<String> events)
       : super(
           nodeId: nodeId,
           defaultDisplay: 'block',
@@ -74,17 +59,13 @@ class VideoElement extends Element {
           events: events,
         );
 
-  int nodeId;
-  Map<String, dynamic> props;
-  List<String> events;
-
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();
 
     controller = VideoPlayerController.network(src);
     _src = src;
 
-    controller.setLooping(props.containsKey('loop'));
+    controller.setLooping(properties.containsKey('loop'));
     controller.onCanPlay = onCanPlay;
     controller.onCanPlayThrough = onCanPlayThrough;
     controller.onPlay = onPlay;
@@ -94,7 +75,7 @@ class VideoElement extends Element {
     controller.onEnded = onEnded;
     controller.onError = onError;
     controller.initialize().then((int textureId) {
-      if (props.containsKey('muted')) {
+      if (properties.containsKey('muted')) {
         controller.setMuted(true);
       }
 
@@ -109,13 +90,13 @@ class VideoElement extends Element {
   void addVideoBox(int textureId) {
     RegExp exp = RegExp(r"^(http|https)://");
 
-    if (props['src'] == null) {
+    if (properties['src'] == null) {
       TextureBox box = TextureBox(textureId: 0);
       addChild(box);
       return;
     }
 
-    if (!exp.hasMatch(props['src'])) {
+    if (!exp.hasMatch(properties['src'])) {
       throw Exception('video url\'s prefix should be http:// or https://');
     }
 
@@ -123,7 +104,7 @@ class VideoElement extends Element {
 
     addChild(box);
 
-    if (props.containsKey('autoplay')) {
+    if (properties.containsKey('autoplay')) {
       controller.play();
     }
   }

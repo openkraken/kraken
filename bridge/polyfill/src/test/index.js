@@ -1,11 +1,10 @@
-const EventEmitter = require('event-emitter');
 const jasmineCore = require('./jasmine.js');
 const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
-
 const environment = __kraken_environment__();
+const global = globalThis;
 
 let timers = [];
 
@@ -49,16 +48,10 @@ global.setInterval = function (fn, timeout) {
   return timer;
 };
 
-class JasmineTracker extends EventEmitter {
-  constructor() {
-    super();
-    this.onJasmineStarted = () => {
-    };
-    this.onJasmineDone = () => {
-    };
-    this.onSpecDone = () => {
-    };
-  }
+class JasmineTracker {
+  onJasmineStarted() { }
+  onJasmineDone() { }
+  onSpecDone() { }
 
   jasmineStarted(result) {
     return this.onJasmineStarted(result);
@@ -110,7 +103,9 @@ function HtmlSpecFilter(options) {
 }
 
 var specFilter = new HtmlSpecFilter({
-  filterString: function () { return environment.KRAKEN_TEST_FILTER; }
+  filterString() {
+    return environment.KRAKEN_TEST_FILTER;
+  }
 });
 
 config.specFilter = function (spec) {

@@ -8,9 +8,9 @@ class AudioElement extends Element {
   String audioSrc;
 
   AudioElement(
-    this.nodeId,
-    this.props,
-    this.events
+    int nodeId,
+    Map<String, dynamic> props,
+    List<String> events
   ) : super(
     nodeId: nodeId,
     defaultDisplay: 'block',
@@ -22,18 +22,14 @@ class AudioElement extends Element {
     initAudioPlayer();
   }
 
-  int nodeId;
-  Map<String, dynamic> props;
-  List<String> events;
-
   void initAudioPlayer() {
     audioPlayer = AudioPlayer();
 
     RegExp exp = RegExp(r'^(http|https)://');
-    if (props['src'] != null && !exp.hasMatch(props['src'])) {
+    if (properties['src'] != null && !exp.hasMatch(properties['src'])) {
       throw Exception('audio url\'s prefix should be http:// or https://');
     }
-    audioSrc = props['src'];
+    audioSrc = properties['src'];
   }
 
   @override

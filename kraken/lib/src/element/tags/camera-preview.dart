@@ -145,7 +145,10 @@ class CameraPreviewElement extends Element {
     );
   }
 
-  static void setDefaultPropsStyle(Map<String, dynamic> props) {
+  void afterConstruct() {
+    var props = properties;
+    _initCameraWithLens(props['lens']);
+
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
     }
@@ -173,8 +176,6 @@ class CameraPreviewElement extends Element {
         Length.toDisplayPortValue(DEFAULT_HEIGHT),
       )),
     );
-
-    _initCameraWithLens(props['lens']);
 
     style.addStyleChangeListener('width', _widthChangedListener);
     style.addStyleChangeListener('height', _heightChangedListener);

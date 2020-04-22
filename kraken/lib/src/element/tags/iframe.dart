@@ -471,9 +471,11 @@ abstract class WebViewElement extends Element {
         tagName: tagName ?? WEBVIEW,
         properties: props,
         events: events,
-      ) {
-    if (props.containsKey('src')) {
-      initialUrl = props['src'];
+      );
+
+  void afterConstruct() {
+    if (properties.containsKey('src')) {
+      initialUrl = properties['src'];
       _buildPlatformRenderBox();
       addChild(sizedBox);
     }

@@ -100,7 +100,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static const String DEFAULT_WIDTH = '150px';
 
   @override
-  void setDefaultProps(Map<String, dynamic> props) {
+  void afterConstruct() {
+    var props = properties;
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
     }

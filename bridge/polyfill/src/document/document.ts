@@ -1,4 +1,4 @@
-import {Node, NodeType, traverseNode} from './node';
+import { Node, NodeType, traverseNode } from './node';
 import {Element} from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
