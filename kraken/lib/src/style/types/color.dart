@@ -7,7 +7,7 @@ import 'dart:ui' show Color;
 import 'package:meta/meta.dart';
 
 final RegExp RGBARexExp = RegExp(
-  r'rgba?\((\d+),(\d+),(\d+),?(\d*\.\d+)?\)',
+  r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
   caseSensitive: false,
   multiLine: false,
 );
@@ -57,7 +57,7 @@ class WebColor {
     int r = 0;
     int g = 0;
     int b = 0;
-    double opacity = 1.0;
+    double alpha = 1.0;
     Iterable<RegExpMatch> matches = RGBARexExp.allMatches(input);
     if (matches.length == 1) {
       RegExpMatch match = matches.first;
@@ -65,10 +65,10 @@ class WebColor {
       g = int.parse(match[2]);
       b = int.parse(match[3]);
       if (match[4] != null) {
-        opacity = double.parse(match[4]);
+        alpha = double.parse(match[4]);
       }
     }
-    return Color.fromRGBO(r, g, b, opacity);
+    return Color.fromRGBO(r, g, b, alpha);
   }
 
   static Color generateHexColor(String hex) {
