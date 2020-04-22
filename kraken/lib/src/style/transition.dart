@@ -1,22 +1,68 @@
 import 'package:flutter/animation.dart';
+import 'package:kraken/element.dart';
+import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/style.dart';
 
-mixin TransitionStyleMixin {
+mixin TransitionStyleMixin on Node {
+  Throttling throttler = Throttling();
   Map<String, Transition> transitionMap;
 
   void initTransition(StyleDeclaration style, String property) {
-    transitionMap = Transition.parseTransitions(style, property);
+    transitionMap = Transition.parseTransitions(style, property, this);
+  }
+
+  void initTransitionEvent(Transition transition) {
+    transition?.setStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed) {
+        // An Event fired when a CSS transition has been cancelled.
+        dispatchTransitionCancel();
+      } else if (status == AnimationStatus.forward) {
+        // An Event fired when a CSS transition is created,
+        // when it is added to a set of running transitions,
+        // though not nessarilty started.
+        dispatchTransitionStart();
+      } else if (status == AnimationStatus.completed) {
+        // An Event fired when a CSS transition has finished playing.
+        dispatchTransitionEnd();
+      }
+    });
+  }
+
+  void dispatchTransitionRun() {
+    dispatchEvent(Event('transitionrun'));
+  }
+
+  void dispatchTransitionStart() {
+    dispatchEvent(Event('transitionstart'));
+  }
+
+  void dispatchTransitionCancel() {
+    dispatchEvent(Event('transitioncancel'));
+  }
+
+  void _dispatchTransitionEnd() {
+    dispatchEvent(Event('transitionend'));
+  }
+
+  void dispatchTransitionEnd() {
+    throttler.throttle(_dispatchTransitionEnd);
   }
 }
 
 typedef ProgressListener = void Function(double progress);
+typedef StatusListener = void Function(AnimationStatus status);
 
 class Transition with CustomTickerProviderStateMixin {
   Duration delay = Duration(milliseconds: 0);
   CurvedAnimation curvedAnimation;
   AnimationController controller;
   List<ProgressListener> progressListeners;
+  StatusListener _statusListener;
+
+  void setStatusListener(StatusListener statusListener) {
+    _statusListener = statusListener;
+  }
 
   void apply() {
     if (progressListeners != null && progressListeners.length > 0) {
@@ -44,6 +90,9 @@ class Transition with CustomTickerProviderStateMixin {
 
   void listener() {
     if (progressListeners != null) {
+      if (curvedAnimation.value == 0.0) {
+        statusListener(AnimationStatus.forward);
+      }
       for (ProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
@@ -53,6 +102,9 @@ class Transition with CustomTickerProviderStateMixin {
   void statusListener(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       dispose();
+    }
+    if (_statusListener != null) {
+      _statusListener(status);
     }
   }
 
@@ -66,7 +118,7 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(StyleDeclaration style, String property) {
+  static Map<String, Transition> parseTransitions(StyleDeclaration style, String property, Element el) {
     List<String> list = [];
 
     if (property == 'transitionProperty' ||
@@ -90,14 +142,14 @@ class Transition with CustomTickerProviderStateMixin {
 
     Map<String, Transition> map = {};
     for (String transition in list) {
-      parseTransition(transition, map);
+      parseTransition(transition, map, el);
     }
     return map;
   }
 
-  static void parseTransition(String string, Map<String, Transition> map) {
+  static void parseTransition(String string, Map<String, Transition> map, Element el) {
     if (string != null && string.isNotEmpty) {
-      List<String> strs = string.trim().split(" ");
+      List<String> strs = string.trim().split(' ');
       if (strs.length > 1) {
         String property = strs[0];
         Time duration = Time(strs[1]);
@@ -123,6 +175,8 @@ class Transition with CustomTickerProviderStateMixin {
         Curve curve = parseFunction(function);
         if (curve != null) {
           Transition transition = Transition();
+          el?.dispatchTransitionRun();
+
           AnimationController controller = AnimationController(
               duration: Duration(milliseconds: duration.valueOf()),
               vsync: transition);

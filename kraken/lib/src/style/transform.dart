@@ -1,9 +1,10 @@
 import 'package:flutter/rendering.dart';
-import 'package:kraken/style.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:kraken/style.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 
-mixin TransformStyleMixin {
+mixin TransformStyleMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
   Map<String, Method> oldMethods;
@@ -56,7 +57,7 @@ mixin TransformStyleMixin {
           }
         };
         if (transition != null) {
-          transition.setProgressListener(progressListener);
+          transition.addProgressListener(progressListener);
         } else if (all != null) {
           all.addProgressListener(progressListener);
         } else {

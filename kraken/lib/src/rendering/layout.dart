@@ -723,9 +723,9 @@ class RenderFlowLayout extends RenderBox
 
         StyleDeclaration childStyle;
         if (child is RenderTextBox) {
-          childStyle = nodeMap[nodeId].style;
+          childStyle = getElementById(nodeId)?.style;
         } else if (child is RenderElementBoundary) {
-          childStyle = nodeMap[child.nodeId].style;
+          childStyle = getElementById(child.nodeId)?.style;
         }
         ///apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);

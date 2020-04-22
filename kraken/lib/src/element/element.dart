@@ -1082,6 +1082,7 @@ abstract class Element extends Node
   void _flushStyle() {
     if (transitionMap != null) {
       for (Transition transition in transitionMap.values) {
+        initTransitionEvent(transition);
         transition?.apply();
       }
     }

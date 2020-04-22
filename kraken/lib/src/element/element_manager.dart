@@ -41,7 +41,17 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
   }
 }
 
-Map<int, dynamic> nodeMap = {};
+Map<int, EventTarget> nodeMap = {};
+
+EventTarget getEventTargetById(int id) {
+  return nodeMap[id];
+}
+
+Element getElementById(int id) {
+  EventTarget el = getEventTargetById(id);
+  if (el is Element) return el;
+  else return null;
+}
 
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;

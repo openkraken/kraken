@@ -947,10 +947,10 @@ class RenderFlexLayout extends RenderBox
 
       StyleDeclaration childStyle;
       if (child is RenderTextBox) {
-        childStyle = nodeMap[nodeId].style;
+        childStyle = getElementById(nodeId)?.style;
       } else if (child is RenderElementBoundary) {
         int childNodeId = child.nodeId;
-        childStyle = nodeMap[childNodeId].style;
+        childStyle = getElementById(childNodeId)?.style;
       }
 
       ///apply position relative offset change
