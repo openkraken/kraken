@@ -109,6 +109,9 @@ abstract class Element extends Node
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, nodeId, tagName) {
     this.nodeId = nodeId;
+    if (properties == null) properties = {};
+    if (events == null) events = [];
+
     setDefaultProps(properties);
     style = StyleDeclaration(style: properties[STYLE]);
 
