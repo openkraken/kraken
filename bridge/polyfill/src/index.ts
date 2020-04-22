@@ -35,7 +35,7 @@ addGlobalObject('performance', performance);
 addGlobalObject('kraken', kraken);
 
 function addGlobalObject(key: string, value: any) {
-  Object.defineProperty(global, key, {
+  Object.defineProperty(globalThis, key, {
     value: value,
     enumerable: true,
     writable: false,
