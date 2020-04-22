@@ -18,14 +18,14 @@ enum QoS {
 
 const mqttClientMap = {};
 
-export function dispatchMQTT (clientId: string, event: Event) {
+export function dispatchMQTT(clientId: string, event: Event) {
   let client = mqttClientMap[clientId];
   if (client) {
-    client.dispatchEvent(event); 
+    client.dispatchEvent(event);
   }
 }
 
-class MQTT extends EventTarget {
+export class MQTT extends EventTarget {
   CONNECTING = ReadyState.CONNECTING;
   OPEN = ReadyState.OPEN;
   CLOSING = ReadyState.CLOSING;
@@ -178,11 +178,3 @@ class MQTT extends EventTarget {
     mqttClientMap[this.id] = null;
   }
 }
-
-Object.defineProperty(global, 'MQTT', {
-  enumerable: true,
-  writable: false,
-  value: MQTT,
-  configurable: false
-});
-

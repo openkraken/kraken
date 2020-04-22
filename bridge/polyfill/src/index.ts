@@ -1,5 +1,6 @@
 import { console } from './console';
 import { document } from './document';
+import { requestAnimationFrame } from './document/animation-frame';
 import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
 import { matchMedia } from './match-media';
@@ -13,8 +14,10 @@ import { URLSearchParams } from './url-search-params';
 import { URL } from './url';
 import { Performance, performance } from './performance';
 import { kraken } from './kraken';
+import { MQTT } from './mqtt';
 
 addGlobalObject('console', console);
+addGlobalObject('requestAnimationFrame', requestAnimationFrame);
 addGlobalObject('document', document);
 addGlobalObject('WebSocket', WebSocket);
 addGlobalObject('Request', Request);
@@ -33,6 +36,7 @@ addGlobalObject('URL', URL);
 addGlobalObject('Performance', Performance);
 addGlobalObject('performance', performance);
 addGlobalObject('kraken', kraken);
+addGlobalObject('MQTT', MQTT);
 
 function addGlobalObject(key: string, value: any) {
   Object.defineProperty(globalThis, key, {

@@ -4,8 +4,8 @@ const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
-
 const environment = __kraken_environment__();
+const global = globalThis;
 
 let timers = [];
 

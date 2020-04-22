@@ -1,14 +1,7 @@
-import { krakenUIManager, krakenRequestAnimationFrame, krakenRequestBatchUpdate, krakenToBlob } from '../bridge';
+import { krakenUIManager, krakenRequestBatchUpdate, krakenToBlob } from '../bridge';
 
 const updateMessageQueue: any[] = [];
 let updateRequested: boolean = false;
-
-
-// Clear all pending frames to keep execution order.
-function requestAnimationFrame(callback: any) {
-  requestUpdateFrame();
-  return krakenRequestAnimationFrame(callback);
-}
 
 function appendMessage(message: any[]) {
   updateMessageQueue.push(message);
@@ -95,10 +88,3 @@ export function toBlob(nodeId: number, devicePixelRatio: number) {
     });
   });
 }
-
-Object.defineProperty(global, 'requestAnimationFrame', {
-  enumerable: true,
-  writable: false,
-  configurable: false,
-  value: requestAnimationFrame,
-});
