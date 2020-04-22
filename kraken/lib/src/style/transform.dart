@@ -161,6 +161,8 @@ mixin TransformStyleMixin {
         alignX = -1.0;
       } else if (x == Position.RIGHT) {
         alignX = 1.0;
+      } else if (x == Position.CENTER) {
+        alignX = 0.0;
       }
 
       // handle y
@@ -172,6 +174,8 @@ mixin TransformStyleMixin {
         alignY = -1.0;
       } else if (y == Position.BOTTOM) {
         alignY = 1.0;
+      } else if (x == Position.CENTER) {
+        alignX = 0.0;
       }
       return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
