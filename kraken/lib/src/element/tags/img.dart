@@ -27,7 +27,9 @@ class ImgElement extends Element {
             allowChildren: false,
             tagName: IMAGE,
             properties: props,
-            events: events) {
+            events: events);
+
+  void afterConstruct() {
     _renderImage();
   }
 

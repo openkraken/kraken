@@ -18,7 +18,9 @@ class AudioElement extends Element {
     tagName: AUDIO,
     properties: props,
     events: events,
-  ) {
+  );
+
+  void afterConstruct() {
     initAudioPlayer();
   }
 

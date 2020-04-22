@@ -100,7 +100,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   static const String DEFAULT_WIDTH = '150px';
 
   @override
-  void setDefaultProps(Map<String, dynamic> props) {
+  void afterConstruct() {
+    var props = properties;
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
     }
@@ -108,24 +109,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (props['style']['width'] == null) {
       props['style']['width'] = DEFAULT_WIDTH;
     }
-  }
 
-  InputElement(
-    int nodeId,
-    Map<String, dynamic> properties,
-    List<String> events, {
-    this.textAlign = TextAlign.left,
-    this.textDirection = TextDirection.ltr,
-    this.minLines = 1,
-    this.maxLines = 1,
-  }) : super(
-    nodeId: nodeId,
-    tagName: INPUT,
-    defaultDisplay: 'inline-block',
-    allowChildren: false,
-    properties: properties,
-    events: events
-  ) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
@@ -143,6 +127,23 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
   }
+
+  InputElement(
+    int nodeId,
+    Map<String, dynamic> properties,
+    List<String> events, {
+    this.textAlign = TextAlign.left,
+    this.textDirection = TextDirection.ltr,
+    this.minLines = 1,
+    this.maxLines = 1,
+  }) : super(
+    nodeId: nodeId,
+    tagName: INPUT,
+    defaultDisplay: 'inline-block',
+    allowChildren: false,
+    properties: properties,
+    events: events
+  );
 
   TextSpan buildTextSpan({String text}) {
     text ??= properties['value'];

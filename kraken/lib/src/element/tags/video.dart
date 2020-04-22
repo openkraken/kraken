@@ -50,7 +50,8 @@ class VideoElement extends Element {
   static const String DEFAULT_HEIGHT = '150px';
 
   @override
-  void setDefaultProps(Map<String, dynamic> props) {
+  void afterConstruct() {
+    var props = properties;
     if (props['style'] == null) {
       props['style'] = Map<String, dynamic>();
     }

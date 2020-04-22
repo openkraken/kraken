@@ -62,8 +62,8 @@ abstract class Element extends Node
   /// The default display type of
   final String defaultDisplay;
 
-  // Set default properties, override this for individual element
-  void setDefaultProps(Map<String, dynamic> props) {}
+  // After `this` created, useful to set default properties, override this for individual element.
+  void afterConstruct() {}
 
   // Style declaration from user.
   StyleDeclaration style;
@@ -112,7 +112,7 @@ abstract class Element extends Node
     if (properties == null) properties = {};
     if (events == null) events = [];
 
-    setDefaultProps(properties);
+    afterConstruct();
     style = StyleDeclaration(style: properties[STYLE]);
 
     _registerStyleChangedListeners();

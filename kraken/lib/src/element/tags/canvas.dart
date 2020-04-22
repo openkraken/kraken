@@ -20,14 +20,9 @@ class CanvasElement extends Element {
           tagName: CANVAS,
           properties: props,
           events: events,
-        ) {
-    if (style.contains('width')) {
-      _width = Length.toDisplayPortValue(style['width']);
-    }
-    if (style.contains('height')) {
-      _height = Length.toDisplayPortValue(style['height']);
-    }
+        );
 
+  void afterConstruct() {
     size = Size(_width, _height);
     painter = CanvasPainter();
     renderCustomPaint = getRenderObject();
