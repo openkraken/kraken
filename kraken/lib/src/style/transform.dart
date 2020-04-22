@@ -174,8 +174,8 @@ mixin TransformStyleMixin {
         alignY = -1.0;
       } else if (y == Position.BOTTOM) {
         alignY = 1.0;
-      } else if (x == Position.CENTER) {
-        alignX = 0.0;
+      } else if (y == Position.CENTER) {
+        alignY = 0.0;
       }
       return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
