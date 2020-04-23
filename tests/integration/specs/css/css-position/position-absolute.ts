@@ -614,6 +614,7 @@ describe('position-absolute', () => {
     target = create(
       'div',
       {
+        'box-sizing': 'border-box',
         position: 'relative',
         'background-color': 'red',
         margin: '0px',
@@ -623,6 +624,7 @@ describe('position-absolute', () => {
       },
       [
         create('div', {
+          'box-sizing': 'border-box',
           position: 'absolute',
           top: '0',
           left: '0',
@@ -635,6 +637,7 @@ describe('position-absolute', () => {
     BODY.appendChild(target);
 
     await matchScreenshot();
+
     target.style.border = '25px solid green';
     target.style.margin = '0';
 
@@ -790,7 +793,7 @@ describe('position-absolute', () => {
         position: 'relative',
         'background-color': 'red',
         'box-sizing': 'border-box',
-        border: 'solid green 10px',
+        border: '10px solid green',
         width: '100px',
         height: '100px',
       },
@@ -800,8 +803,8 @@ describe('position-absolute', () => {
           'background-color': 'green',
           width: '80px',
           height: '80px',
-          top: 'initial',
-          left: 'initial',
+          top: '-10px',
+          left: '-10px',
         })),
       ]
     );
