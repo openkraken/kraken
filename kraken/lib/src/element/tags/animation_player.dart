@@ -16,9 +16,9 @@ class AnimationPlayerElement extends Element {
   FlareControls _animationController;
 
   AnimationPlayerElement(
-      int nodeId, Map<String, dynamic> properties, List<String> events)
+      int targetId, Map<String, dynamic> properties, List<String> events)
       : super(
-            nodeId: nodeId,
+            targetId: targetId,
             properties: properties,
             events: events,
             defaultDisplay: 'block',
@@ -127,7 +127,7 @@ class AnimationPlayerElement extends Element {
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();
 
-    return FlareRenderObject(nodeId)
+    return FlareRenderObject(targetId)
       ..assetProvider =
           AssetFlare(
             bundle: NetworkAssetBundle(Uri.parse(src)),

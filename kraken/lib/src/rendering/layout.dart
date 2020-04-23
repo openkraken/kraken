@@ -45,7 +45,7 @@ class RenderFlowLayout extends RenderBox
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
-    this.nodeId,
+    this.targetId,
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
@@ -67,7 +67,7 @@ class RenderFlowLayout extends RenderBox
   StyleDeclaration style;
 
   // id of current element
-  int nodeId;
+  final int targetId;
 
   /// The direction to use as the main axis.
   ///
@@ -507,8 +507,8 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double elementWidth = getElementWidth(nodeId);
-    double elementHeight = getElementHeight(nodeId);
+    double elementWidth = getElementWidth(targetId);
+    double elementHeight = getElementHeight(targetId);
 
     // If no child exists, stop layout.
     if (child == null) {
@@ -529,7 +529,7 @@ class RenderFlowLayout extends RenderBox
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
-          mainAxisLimit = ElementStyleMixin.getElementMaxWidth(nodeId);
+          mainAxisLimit = ElementStyleMixin.getElementMaxWidth(targetId);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -723,9 +723,9 @@ class RenderFlowLayout extends RenderBox
 
         StyleDeclaration childStyle;
         if (child is RenderTextBox) {
-          childStyle = getElementById(nodeId)?.style;
+          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
         } else if (child is RenderElementBoundary) {
-          childStyle = getElementById(child.nodeId)?.style;
+          childStyle = getEventTargetByTargetId<Element>(child.targetId)?.style;
         }
         ///apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
@@ -746,11 +746,11 @@ class RenderFlowLayout extends RenderBox
 
   String _getChildDisplayFromRenderBox(RenderBox child) {
     String display = 'inline'; // Default value.
-    int nodeId;
-    if (child is RenderFlowLayout) nodeId = child.nodeId;
-    if (child is RenderElementBoundary) nodeId = child.nodeId;
-    if (nodeId != null) {
-      Element element = nodeMap[nodeId];
+    int targetId;
+    if (child is RenderFlowLayout) targetId = child.targetId;
+    if (child is RenderElementBoundary) targetId = child.targetId;
+    if (targetId != null) {
+      Element element = getEventTargetByTargetId<Element>(targetId);
       if (element != null) {
         String elementDisplayDeclaration = element.style['display'];
         display = isEmptyStyleValue(elementDisplayDeclaration)
@@ -758,7 +758,7 @@ class RenderFlowLayout extends RenderBox
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
-        Element currentElement = nodeMap[this.nodeId];
+        Element currentElement = getEventTargetByTargetId<Element>(this.targetId);
         String currentElementDisplay = isEmptyStyleValue(style['display'])
           ? currentElement.defaultDisplay
           : style['display'];

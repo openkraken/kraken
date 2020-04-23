@@ -20,7 +20,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   Padding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
-      RenderObject renderObject, StyleDeclaration style, int nodeId) {
+      RenderObject renderObject, StyleDeclaration style, int targetId) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
     // Flutter Border width is inside the element
@@ -31,7 +31,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       child: renderObject,
     );
     return renderDecoratedBox = RenderGradient(
-      nodeId: nodeId,
+      targetId: targetId,
       decoration: oldDecoration.toBoxDecoration(),
       child: renderBorderHolder,
     );

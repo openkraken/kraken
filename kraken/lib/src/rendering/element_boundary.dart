@@ -17,7 +17,7 @@ class RenderElementBoundary extends RenderTransform
     this.style,
     Matrix4 transform,
     Offset origin,
-    this.nodeId,
+    this.targetId,
     bool shouldRender,
     Alignment alignment
   }) : assert(child != null),
@@ -34,7 +34,7 @@ class RenderElementBoundary extends RenderTransform
 
   RenderBox child;
 
-  int nodeId;
+  int targetId;
 
   StyleDeclaration style;
 
@@ -89,7 +89,7 @@ class RenderElementBoundary extends RenderTransform
 
   Matrix4 getEffectiveTransform() {
     Offset origin = this.origin;
-    Element element = nodeMap[nodeId];
+    Element element = getEventTargetByTargetId<Element>(targetId);
     // transform origin is apply to border in browser
     // so apply the margin child offset
     // percent or keyword apply by border size

@@ -25,9 +25,9 @@ mixin BackgroundImageMixin on Node {
   RenderObject initBackgroundImage(
     RenderObject renderObject,
     StyleDeclaration style,
-    int nodeId
+    int targetId
   ) {
-    if (!_shouldRenderBackgroundImage(style)) return renderObject; 
+    if (!_shouldRenderBackgroundImage(style)) return renderObject;
 
     DecorationImage decorationImage;
     Gradient gradient;
@@ -42,7 +42,7 @@ mixin BackgroundImageMixin on Node {
             decorationImage = getBackgroundImage(url, style);
             if (decorationImage != null) {
               return _renderGradient = RenderGradient(
-                nodeId: nodeId,
+                targetId: targetId,
                 decoration: BoxDecoration(image: decorationImage, gradient: gradient),
                 child: renderObject);
             }
@@ -51,7 +51,7 @@ mixin BackgroundImageMixin on Node {
           gradient = getBackgroundGradient(method, style);
           if (gradient != null) {
             return _renderGradient = RenderGradient(
-              nodeId: nodeId,
+              targetId: targetId,
               decoration: BoxDecoration(image: decorationImage, gradient: gradient),
               child: renderObject);
           }
@@ -62,9 +62,9 @@ mixin BackgroundImageMixin on Node {
     return renderObject;
   }
 
-  void updateBackgroundImage(StyleDeclaration style, RenderObjectWithChildMixin parent, int nodeId) {
+  void updateBackgroundImage(StyleDeclaration style, RenderObjectWithChildMixin parent, int targetId) {
 
-    if (!_shouldRenderBackgroundImage(style)) return; 
+    if (!_shouldRenderBackgroundImage(style)) return;
 
     DecorationImage decorationImage;
     Gradient gradient;
@@ -77,14 +77,14 @@ mixin BackgroundImageMixin on Node {
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url, style);
             if (decorationImage != null) {
-              _updateRenderGradient(decorationImage, gradient, parent, nodeId);
+              _updateRenderGradient(decorationImage, gradient, parent, targetId);
               return;
             }
           }
         } else {
           gradient = getBackgroundGradient(method, style);
           if (gradient != null) {
-            _updateRenderGradient(decorationImage, gradient, parent, nodeId);
+            _updateRenderGradient(decorationImage, gradient, parent, targetId);
             return;
           }
         }
@@ -93,7 +93,7 @@ mixin BackgroundImageMixin on Node {
   }
 
   void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
-    RenderObjectWithChildMixin parent, int nodeId) {
+    RenderObjectWithChildMixin parent, int targetId) {
     if (_renderGradient != null) {
       _renderGradient.decoration =
         BoxDecoration(image: decorationImage, gradient: gradient);
@@ -101,7 +101,7 @@ mixin BackgroundImageMixin on Node {
       RenderObject child = parent.child;
       parent.child = null;
       _renderGradient = RenderGradient(
-        nodeId: nodeId,
+        targetId: targetId,
         decoration: BoxDecoration(image: decorationImage, gradient: gradient),
         child: child);
       parent.child = _renderGradient;

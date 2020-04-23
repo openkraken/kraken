@@ -1,4 +1,4 @@
-fdescribe('Transition events', () => {
+describe('Transition events', () => {
   it('basic transitionrun', (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);

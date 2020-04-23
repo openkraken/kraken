@@ -20,7 +20,7 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int nodeId, this.data) : super(NodeType.COMMENT_NODE, nodeId, '#comment');
+  Comment(int targetId, this.data) : super(NodeType.COMMENT_NODE, targetId, '#comment');
 
   // The comment information.
   String data;
@@ -30,8 +30,8 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   static bool _isWhitespace(String ch) =>
       ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
 
-  TextNode(int nodeId, this._data)
-      : super(NodeType.TEXT_NODE, nodeId, '#text') {
+  TextNode(int targetId, this._data)
+      : super(NodeType.TEXT_NODE, targetId, '#text') {
     // Update text after connected.
     queueAfterConnected(_onTextNodeConnected);
   }
@@ -41,7 +41,7 @@ class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
   void _onTextNodeConnected() {
     Element parentElement = parentNode;
     renderTextBox = RenderTextBox(
-      nodeId: nodeId,
+      targetId: targetId,
       text: data,
       // inherit parent style
       style: parentElement.style,
@@ -119,7 +119,7 @@ mixin NodeLifeCycle on Node {
   }
 }
 
-abstract class Node extends EventTarget {
+class Node extends EventTarget {
   List<Node> childNodes = [];
   Node parentNode;
   NodeType nodeType;
@@ -136,9 +136,9 @@ abstract class Node extends EventTarget {
     return _children;
   }
 
-  Node(this.nodeType, int nodeId, this.nodeName): super(nodeId) {
+  Node(this.nodeType, int targetId, this.nodeName) : super(targetId) {
     assert(nodeType != null);
-    assert(nodeId != null);
+    assert(targetId != null);
     nodeName = nodeName ?? '';
   }
 
