@@ -53,8 +53,8 @@ class Event {
       'cancelable': cancelable,
       'timeStamp': timeStamp,
       'defaultPrevented': defaultPrevented,
-      'target': target?.nodeId,
-      'currentTarget': currentTarget?.nodeId,
+      'target': target?.targetId,
+      'currentTarget': currentTarget?.targetId,
       'detail': detail,
     };
   }

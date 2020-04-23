@@ -573,13 +573,13 @@ final Dart_RegisterToBlob _registerToBlob = nativeDynamicLibrary
 void _toBlob(Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
   try {
-    if (!nodeMap.containsKey(id)) {
+    if (!existsTarget(id)) {
       Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unknown node id: $id');
       func(context, msg, nullptr, -1);
       return;
     }
 
-    var node = nodeMap[id];
+    var node = getEventTargetByTargetId<EventTarget>(id);
     if (node is Element) {
       node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);

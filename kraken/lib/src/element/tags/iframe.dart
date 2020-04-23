@@ -452,7 +452,7 @@ abstract class WebViewElement extends Element {
   /// `onWebViewCreated` callback once the web view is created.
   ///
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
-  WebViewElement(int nodeId, Map<String, dynamic> props, List<String> events, {
+  WebViewElement(int targetId, Map<String, dynamic> props, List<String> events, {
     String tagName = 'WEBVIEW',
     this.initialUrl,
     this.javascriptMode = JavascriptMode.unrestricted,
@@ -466,7 +466,7 @@ abstract class WebViewElement extends Element {
         AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null), super(
-        nodeId: nodeId,
+        targetId: targetId,
         defaultDisplay: 'block',
         tagName: tagName ?? WEBVIEW,
         properties: props,
@@ -788,8 +788,8 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int nodeId, Map<String, dynamic> props, List<String> events)
-      : super(nodeId, props, events, tagName: IFRAME);
+  IFrameElement(int targetId, Map<String, dynamic> props, List<String> events)
+      : super(targetId, props, events, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}

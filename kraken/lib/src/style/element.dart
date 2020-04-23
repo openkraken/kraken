@@ -5,12 +5,12 @@ import 'package:kraken/style.dart';
 mixin ElementStyleMixin on RenderBox {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementMaxWidth(int nodeId) {
+  static double getElementMaxWidth(int targetId) {
     double width;
     double cropWidth = 0;
-    Element child = nodeMap[nodeId];
+    Element child = getEventTargetByTargetId<Element>(targetId);
     StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(nodeId);
+    String display = getElementTrueDisplay(targetId);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -37,7 +37,7 @@ mixin ElementStyleMixin on RenderBox {
         }
         if (child is Element) {
           StyleDeclaration style = child.style;
-          String display = getElementTrueDisplay(child.nodeId);
+          String display = getElementTrueDisplay(child.targetId);
           if (style.contains('width') && display != 'inline') {
             width = Length.toDisplayPortValue(style['width']);
             cropPaddingBorder(child);
@@ -55,12 +55,12 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementWidth(int nodeId) {
+  double getElementWidth(int targetId) {
     double width;
     double cropWidth = 0;
-    Element child = nodeMap[nodeId];
+    Element child = getEventTargetByTargetId<Element>(targetId);
     StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(nodeId);
+    String display = getElementTrueDisplay(targetId);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -89,7 +89,7 @@ mixin ElementStyleMixin on RenderBox {
             }
             if (child is Element) {
               StyleDeclaration style = child.style;
-              String display = getElementTrueDisplay(child.nodeId);
+              String display = getElementTrueDisplay(child.targetId);
 
               // Set width of element according to parent display
               if (display != 'inline') { // Skip to find upper parent
@@ -131,11 +131,11 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementHeight(int nodeId) {
+  double getElementHeight(int targetId) {
     double height;
-    Element child = nodeMap[nodeId];
+    Element child = getEventTargetByTargetId<Element>(targetId);
     StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(nodeId);
+    String display = getElementTrueDisplay(targetId);
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
@@ -211,8 +211,8 @@ mixin ElementStyleMixin on RenderBox {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String getElementTrueDisplay(int nodeId) {
-    Element element = nodeMap[nodeId];
+  static String getElementTrueDisplay(int targetId) {
+    Element element = getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
     String display = isEmptyStyleValue(element.style['display'])
         ? element.defaultDisplay

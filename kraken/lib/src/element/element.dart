@@ -25,7 +25,7 @@ import 'bounding_client_rect.dart';
 
 typedef TestElement = bool Function(Element element);
 
-abstract class Element extends Node
+class Element extends Node
     with
         NodeLifeCycle,
         EventHandlerMixin,
@@ -86,29 +86,28 @@ abstract class Element extends Node
 
   // Horizontal margin dimension (left + right)
   double get cropMarginWidth => renderMargin.margin.horizontal;
-  // Vertial margin dimension (top + bottom)
+  // Vertical margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
   // Horizontal padding dimension (left + right)
   double get cropPaddingWidth => renderPadding.padding.horizontal;
-  // Vertial padding dimension (top + bottom)
+  // Vertical padding dimension (top + bottom)
   double get cropPaddingHeight => renderPadding.padding.vertical;
   // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderBorderHolder.margin.horizontal;
-  // Vertial border dimension (top + bottom)
+  // Vertical border dimension (top + bottom)
   double get cropBorderHeight => renderBorderHolder.margin.vertical;
 
   Element({
-    @required int nodeId,
+    @required int targetId,
     @required this.tagName,
     this.defaultDisplay = 'block',
     this.properties = const {},
     this.events = const [],
     this.needsReposition = false,
     this.allowChildren = true,
-  })  : assert(nodeId != null),
+  })  : assert(targetId != null),
         assert(tagName != null),
-        super(NodeType.ELEMENT_NODE, nodeId, tagName) {
-    this.nodeId = nodeId;
+        super(NodeType.ELEMENT_NODE, targetId, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];
 
@@ -127,7 +126,7 @@ abstract class Element extends Node
     }
 
     // Background image
-    renderObject = initBackgroundImage(renderObject, style, nodeId);
+    renderObject = initBackgroundImage(renderObject, style, targetId);
 
     // BoxModel Padding
     renderObject = renderPadding = initRenderPadding(renderObject, style);
@@ -138,7 +137,7 @@ abstract class Element extends Node
     }
 
     // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, nodeId);
+    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
     // Constrained box
     renderObject =
@@ -187,7 +186,7 @@ abstract class Element extends Node
     renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, nodeId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
 
     // Add element event listener
     events?.forEach((String eventName) {
@@ -302,7 +301,7 @@ abstract class Element extends Node
         if (preNonPositionedElement != null) {
           parentElement.renderLayoutBox.visitChildren((child) {
             if (child is RenderElementBoundary &&
-                preNonPositionedElement.nodeId == child.nodeId) {
+                preNonPositionedElement.targetId == child.targetId) {
               preNonPositionedObject = child;
             }
           });
@@ -349,7 +348,7 @@ abstract class Element extends Node
       'height': renderMargin.size.height.toString() + 'px',
     });
     stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
-    stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, nodeId);
+    stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, targetId);
     (renderObject.parent as ContainerRenderObjectMixin)
         .insert(stickyPlaceholder, after: renderObject);
   }
@@ -358,9 +357,9 @@ abstract class Element extends Node
   void _repositionElement(Element el) {
     RenderObject renderObject = el.renderObject;
     StyleDeclaration style = el.style;
-    int nodeId = el.nodeId;
+    int targetId = el.targetId;
 
-    // new node not in the tree, wait for append in appenedElement
+    // new node not in the tree, wait for append in appendedElement
     if (renderObject.parent == null) {
       return;
     }
@@ -389,7 +388,7 @@ abstract class Element extends Node
     StackParentData stackParentData = getPositionParentDataFromStyle(style);
     renderObject.parentData = stackParentData;
 
-    Element currentElement = nodeMap[nodeId];
+    Element currentElement = getEventTargetByTargetId<Element>(targetId);
 
     // current element's zIndex
     int currentZIndex = Length.toInt(currentElement.style['zIndex']);
@@ -398,7 +397,7 @@ abstract class Element extends Node
   }
 
   void _updateZIndex() {
-    // new node not in the tree, wait for append in appenedElement
+    // new node not in the tree, wait for append in appendedElement
     if (renderObject.parent == null) {
       return;
     }
@@ -496,13 +495,13 @@ abstract class Element extends Node
     }
   }
 
-  Element getElementById(Element parentElement, int nodeId) {
+  Element getElementById(Element parentElement, int targetId) {
     Element result = null;
     List childNodes = parentElement.childNodes;
 
     for (int i = 0; i < childNodes.length; i++) {
       Element element = childNodes[i];
-      if (element.nodeId == nodeId) {
+      if (element.targetId == targetId) {
         result = element;
         break;
       }
@@ -532,7 +531,7 @@ abstract class Element extends Node
         mainAxisSize: MainAxisSize.min,
         children: children,
         style: style,
-        nodeId: nodeId,
+        targetId: targetId,
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
@@ -546,7 +545,7 @@ abstract class Element extends Node
       ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
         children: children,
         style: style,
-        nodeId: nodeId,
+        targetId: targetId,
       );
       if (isFlexWrap) {
         decorateRenderFlex(flowLayout, style);
@@ -1043,7 +1042,7 @@ abstract class Element extends Node
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
 
-    updateBackgroundImage(style, renderPadding, nodeId);
+    updateBackgroundImage(style, renderPadding, targetId);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
@@ -1082,6 +1081,7 @@ abstract class Element extends Node
   void _flushStyle() {
     if (transitionMap != null) {
       for (Transition transition in transitionMap.values) {
+        initTransitionEvent(transition);
         transition?.apply();
       }
     }
@@ -1245,7 +1245,7 @@ abstract class Element extends Node
   }
 
   void _eventResponder(Event event) {
-    String json = jsonEncode([nodeId, event]);
+    String json = jsonEncode([targetId, event]);
     emitUIEvent(json);
   }
 

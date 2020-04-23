@@ -1,9 +1,10 @@
 import 'package:flutter/rendering.dart';
-import 'package:kraken/style.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:kraken/style.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 
-mixin TransformStyleMixin {
+mixin TransformStyleMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
   Map<String, Method> oldMethods;
@@ -11,11 +12,11 @@ mixin TransformStyleMixin {
   // transform origin impl by offset and alignment
   Offset oldOffset = Offset.zero;
   Alignment oldAlignment = Alignment.center;
-  int nodeId;
+  int targetId;
 
-  RenderObject initTransform(RenderObject current, StyleDeclaration style, int nodeId) {
+  RenderObject initTransform(RenderObject current, StyleDeclaration style, int targetId) {
 
-    this.nodeId = nodeId;
+    this.targetId = targetId;
 
     if (style.contains('transform')) {
       oldMethods = Method.parseMethod(style['transform']);
@@ -31,7 +32,7 @@ mixin TransformStyleMixin {
     transform = RenderElementBoundary(
       child: current,
       transform: matrix4,
-      nodeId: nodeId,
+      targetId: targetId,
       style: style,
       origin: oldOffset,
       alignment: oldAlignment,
@@ -56,7 +57,7 @@ mixin TransformStyleMixin {
           }
         };
         if (transition != null) {
-          transition.setProgressListener(progressListener);
+          transition.addProgressListener(progressListener);
         } else if (all != null) {
           all.addProgressListener(progressListener);
         } else {

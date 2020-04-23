@@ -49,9 +49,9 @@ class VideoElement extends Element {
   static const String DEFAULT_WIDTH = '300px';
   static const String DEFAULT_HEIGHT = '150px';
 
-  VideoElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  VideoElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
-          nodeId: nodeId,
+          targetId: targetId,
           defaultDisplay: 'block',
           allowChildren: false,
           tagName: VIDEO,
