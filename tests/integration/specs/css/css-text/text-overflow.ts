@@ -51,7 +51,7 @@ describe('Text Overflow', () => {
         textOverflow: 'wrap',
       },
       [
-        createText('text is cliped'),
+        createText('text is not cliped'),
       ]
     );
 
@@ -93,7 +93,7 @@ describe('Text Overflow', () => {
         textOverflow: 'ellipsis',
       },
       [
-        createText('text is ellipsis'),
+        createText('text is not ellipsis'),
       ]
     );
 
@@ -114,7 +114,7 @@ describe('Text Overflow', () => {
         textOverflow: 'ellipsis',
       },
       [
-        createText('text is ellipsis'),
+        createText('text is not ellipsis'),
       ]
     );
 
