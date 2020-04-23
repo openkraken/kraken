@@ -1,41 +1,44 @@
-describe('ZIndex', () => {
-  it('basic', async () => {
-    const container1 = document.createElement('div');
-    setStyle(container1, {
-      width: '200px',
-      height: '200px',
-      backgroundColor: '#999',
+/*auto generated*/
+describe('z-index', () => {
+  it('blend-will-change-overlapping-layers', async () => {
+    let div;
+    let div_1;
+    div = create(
+      'div',
+      {
+        'box-sizing': 'border-box',
+        'z-index': '1',
+        position: 'relative',
+        height: '50vh',
+      },
+      [
+        create('div', {
+          'box-sizing': 'border-box',
+          'will-change': 'transform',
+          position: 'absolute',
+          bottom: '-100px',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+        }),
+      ]
+    );
+    div_1 = create('div', {
+      'box-sizing': 'border-box',
+      'z-index': '1',
       position: 'relative',
-    });
-    document.body.appendChild(container1);
-
-    const div1 = document.createElement('div');
-    setStyle(div1, {
-      width: '100px',
+      'background-color': 'green',
       height: '100px',
-      backgroundColor: 'red',
-      position: 'absolute',
-      top: '50px',
-      left: '50px',
-      zIndex: 2,
     });
-    div1.appendChild(document.createTextNode('z-index 2'));
+    BODY.appendChild(div);
+    BODY.appendChild(div_1);
 
-    container1.appendChild(div1);
-
-    const div2 = document.createElement('div');
-    setStyle(div2, {
-      width: '100px',
-      height: '100px',
-      backgroundColor: 'green',
-      position: 'absolute',
-      top: '100px',
-      left: '100px',
-      zIndex: 1,
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // window.scrollBy(0, 100);
+        // takeScreenshot();
+      });
     });
-    div2.appendChild(document.createTextNode('z-index 1'));
-
-    container1.appendChild(div2);
 
     await matchScreenshot();
   });
