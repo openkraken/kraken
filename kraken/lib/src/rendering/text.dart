@@ -64,14 +64,9 @@ class RenderTextBox extends RenderBox
     String overflowX = style['overflowX'] != '' ?
       style['overflowX'] : style['overflow'];
 
-    if (
-      overflowX != 'visible' &&
+    return overflowX != 'visible' &&
       style['whiteSpace'] == 'nowrap' &&
-      style['textOverflow'] == 'ellipsis'
-    ) {
-      return true;
-    }
-    return false;
+      style['textOverflow'] == 'ellipsis';
   }
 
   @override
