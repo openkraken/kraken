@@ -82,7 +82,7 @@ abstract class Element extends Node
   RenderElementBoundary renderElementBoundary;
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow
-  RenderPadding renderPositionedPlaceholder;
+  RenderObject renderPositionedPlaceholder;
 
   // Horizontal margin dimension (left + right)
   double get cropMarginWidth => renderMargin.margin.horizontal;
@@ -681,7 +681,20 @@ abstract class Element extends Node
   // Store placeholder renderObject reference to parentData of element boundary
   // to enable access from parent RenderStack
   RenderBox getStackedRenderBox(Element element) {
-    renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
+    // Positioned element in flex layout will reposition in new layer
+    if (renderLayoutBox is RenderFlexLayout) {
+      String width = element.style['width'] != '' ? element.style['width'] : '0';
+      String height = element.style['height'] != '' ? element.style['height'] : '0';
+      StyleDeclaration pStyle = StyleDeclaration(style: {
+        'width': width,
+        'height': height,
+      });
+      renderPositionedPlaceholder = initRenderConstrainedBox(null, pStyle);
+    } else {
+      // Positioned element in flow layout will position in old flow layer
+      renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
+    }
+
     ZIndexParentData stackParentData =
       getPositionParentDataFromStyle(element.style);
     RenderBox stackedRenderBox = element.renderObject as RenderBox;
