@@ -100,7 +100,7 @@ class RenderFlexLayout extends RenderBox
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline = TextBaseline.alphabetic,
-    this.nodeId,
+    this.targetId,
     this.style,
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
@@ -120,7 +120,7 @@ class RenderFlexLayout extends RenderBox
   StyleDeclaration style;
 
   // id of current element
-  int nodeId;
+  int targetId;
 
   /// The direction to use as the main axis.
   Axis get direction => _direction;
@@ -465,15 +465,15 @@ class RenderFlexLayout extends RenderBox
 
   double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
     double totalExtent = 0;
-    childSizeMap.forEach((nodeId, item) {
+    childSizeMap.forEach((targetId, item) {
       totalExtent += item['flexShrink'] * item['size'];
     });
 
     int childNodeId;
     if (child is RenderTextBox) {
-      childNodeId = child.nodeId;
+      childNodeId = child.targetId;
     } else if (child is RenderElementBoundary) {
-      childNodeId = child.nodeId;
+      childNodeId = child.targetId;
     }
     dynamic current = childSizeMap[childNodeId];
     double currentExtent = current['flexShrink'] * current['size'];
@@ -555,8 +555,8 @@ class RenderFlexLayout extends RenderBox
   void _layoutChildren(RenderConstrainedBox placeholderChild) {
     assert(_debugHasNecessaryDirections);
 
-    double elementWidth = getElementWidth(nodeId);
-    double elementHeight = getElementHeight(nodeId);
+    double elementWidth = getElementWidth(targetId);
+    double elementHeight = getElementHeight(targetId);
 
     // If no child exists, stop layout.
     if (firstChild == null) {
@@ -715,9 +715,9 @@ class RenderFlexLayout extends RenderBox
 
       int childNodeId;
       if (child is RenderTextBox) {
-        childNodeId = child.nodeId;
+        childNodeId = child.targetId;
       } else if (child is RenderElementBoundary) {
-        childNodeId = child.nodeId;
+        childNodeId = child.targetId;
       }
 
       childSizeMap[childNodeId] = {
@@ -772,9 +772,9 @@ class RenderFlexLayout extends RenderBox
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
             int childNodeId;
             if (child is RenderTextBox) {
-              childNodeId = child.nodeId;
+              childNodeId = child.targetId;
             } else if (child is RenderElementBoundary) {
-              childNodeId = child.nodeId;
+              childNodeId = child.targetId;
             }
             dynamic current = childSizeMap[childNodeId];
             minChildExtent = maxChildExtent = current['size'] + shrinkValue;
@@ -980,10 +980,10 @@ class RenderFlexLayout extends RenderBox
 
       StyleDeclaration childStyle;
       if (child is RenderTextBox) {
-        childStyle = nodeMap[nodeId].style;
+        childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
       } else if (child is RenderElementBoundary) {
-        int childNodeId = child.nodeId;
-        childStyle = nodeMap[childNodeId].style;
+        int childNodeId = child.targetId;
+        childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
       ///apply position relative offset change

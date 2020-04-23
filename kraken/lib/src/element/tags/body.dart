@@ -17,5 +17,5 @@ final Map<String, dynamic> bodyProps = {
 };
 
 class BodyElement extends DivElement {
-  BodyElement(int nodeId) : super(nodeId, bodyProps, null);
+  BodyElement(int targetId) : super(targetId, bodyProps, null);
 }

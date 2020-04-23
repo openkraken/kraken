@@ -12,9 +12,9 @@ const String CANVAS = 'CANVAS';
 final RegExp SpaceRegExp = RegExp(' ');
 
 class CanvasElement extends Element {
-  CanvasElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  CanvasElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
-          nodeId: nodeId,
+          targetId: targetId,
           defaultDisplay: 'inline-block',
           allowChildren: false,
           tagName: CANVAS,

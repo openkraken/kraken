@@ -20,9 +20,9 @@ class ImgElement extends Element {
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
-  ImgElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  ImgElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
-            nodeId: nodeId,
+            targetId: targetId,
             defaultDisplay: 'inline-block',
             allowChildren: false,
             tagName: IMAGE,

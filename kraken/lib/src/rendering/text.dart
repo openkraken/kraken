@@ -19,7 +19,7 @@ class RenderTextBox extends RenderBox
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
 
   RenderTextBox({
-    this.nodeId,
+    this.targetId,
     String text,
     StyleDeclaration style,
   }) : assert(text != null) {
@@ -45,7 +45,7 @@ class RenderTextBox extends RenderBox
   }
 
   RenderParagraph _renderParagraph;
-  int nodeId;
+  int targetId;
   String _text;
   String get text => _text;
   set text(String newText) {
@@ -80,10 +80,10 @@ class RenderTextBox extends RenderBox
   void performLayout() {
     RenderBox child = firstChild;
 
-    // @TODO when in flex-grow or flex-shrink width needs to be recalulated
-    Node currentNode = nodeMap[nodeId];
+    // @TODO when in flex-grow or flex-shrink width needs to be recalculated
+    Node currentNode = getEventTargetByTargetId<Node>(targetId);
     Element parentNode = currentNode.parentNode;
-    double elementWidth = getElementWidth(parentNode.nodeId);
+    double elementWidth = getElementWidth(parentNode.targetId);
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
 
