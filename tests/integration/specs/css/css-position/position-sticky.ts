@@ -2752,6 +2752,7 @@ describe('position-sticky', () => {
       requestAnimationFrame(async () => {
         bigItem.style.display = 'none';
         await matchScreenshot();
+        done();
       });
     });
 
