@@ -4,7 +4,6 @@
  */
 
 export 'src/style/backgroud.dart';
-export 'src/style/backgroud_image.dart';
 export 'src/style/box_decoration.dart';
 export 'src/style/opacity.dart';
 export 'src/style/style_declaration.dart';

@@ -13,7 +13,7 @@ import 'package:kraken/style.dart';
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
-mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
+mixin RenderDecoratedBoxMixin on BackgroundMixin {
   RenderDecoratedBox renderDecoratedBox;
   RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
@@ -299,14 +299,6 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       return Length.toDisplayPortValue(style['borderRadius']);
     }
     return 0.0;
-  }
-
-  Color getBackgroundColor(StyleDeclaration style) {
-    Color backgroundColor = WebColor.transparent;
-    if (background.containsKey(BACKGROUND_COLOR)) {
-      backgroundColor = WebColor.generate(background[BACKGROUND_COLOR]);
-    }
-    return backgroundColor;
   }
 
   static RegExp spaceRegExp = RegExp(r' ');

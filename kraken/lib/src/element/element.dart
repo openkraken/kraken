@@ -31,7 +31,6 @@ class Element extends Node
         EventHandlerMixin,
         TextStyleMixin,
         BackgroundMixin,
-        BackgroundImageMixin,
         RenderDecoratedBoxMixin,
         DimensionMixin,
         FlexStyleMixin,
@@ -126,9 +125,8 @@ class Element extends Node
           renderLayoutBox = createRenderLayoutBox(style, null);
     }
 
-    initBackground(style);
     // Background image
-    renderObject = initBackgroundImage(renderObject, targetId);
+    renderObject = initBackground(renderObject, style, targetId);
 
     // BoxModel Padding
     renderObject = renderPadding = initRenderPadding(renderObject, style);
@@ -1042,11 +1040,9 @@ class Element extends Node
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
-    updateBackground(property, present);
+    updateBackground(property, present, renderPadding, targetId);
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
-
-    updateBackgroundImage(renderPadding, targetId);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
