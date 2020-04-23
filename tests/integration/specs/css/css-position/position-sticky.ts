@@ -129,7 +129,7 @@ describe('position-sticky', () => {
     let child;
     let relative;
     let spacer;
-    let scroller;
+    let scroller: any;
     let div;
     scroller = create(
       'div',
@@ -205,7 +205,7 @@ describe('position-sticky', () => {
     let multicolumn;
     let sticky;
     let spacer;
-    let scroller;
+    let scroller: any;
     let div;
     scroller = create(
       'div',
@@ -445,13 +445,6 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller2);
     BODY.appendChild(scroller3);
     BODY.appendChild(p);
-
-    window.addEventListener('load', function () {
-      document.getElementById('scroller1').scrollLeft = 50;
-      document.getElementById('scroller2').scrollLeft = 150;
-      document.getElementById('scroller3').scrollLeft = 250;
-    });
-
     await matchScreenshot();
   });
   it('flexbox', async () => {
@@ -776,15 +769,6 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    test(() => {
-      // The sticky element is pushed to be stuck 150 pixels from the top.
-      assert_equals(sticky.offsetTop, 150);
-
-      // Neither 'before' or 'after' should be affected by the change in the sticky
-      // element's location.
-      assert_equals(before.offsetTop, 0);
-      assert_equals(after.offsetTop, before.clientHeight + sticky.clientHeight);
-    }, 'sticky offset should not affect the position of other elements.');
 
     await matchScreenshot();
   });
@@ -1204,16 +1188,6 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('input-box-gets-focused-after-scroll', async () => {
-    test(() => {
-      var input = document.getElementById('input');
-      window.scrollTo(0, 100);
-      input.focus();
-      assert_equals(window.scrollY, 100);
-    }, 'Focusing on visible sticky input box should not scroll the page.');
-
-    await matchScreenshot();
-  });
   xit('large-top-2-ref', async () => {
     let sticky;
     let sticky_1;
@@ -1390,10 +1364,6 @@ describe('position-sticky', () => {
     BODY.appendChild(scroll);
     BODY.appendChild(scroll2);
 
-    function runTest() {
-      document.getElementById('scroll2').scrollTop = 50;
-    }
-
     await matchScreenshot();
   });
   xit('large-top-ref', async () => {
@@ -1402,7 +1372,7 @@ describe('position-sticky', () => {
     let block;
     let block_1;
     let scroll;
-    let scroll2;
+    let scroll2: any;
     scroll = create(
       'div',
       {
@@ -1467,7 +1437,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroll2);
 
     function runTest() {
-      document.getElementById('scroll2').scrollTop = 50;
+      scroll2.scrollTop = 50;
     }
 
     await matchScreenshot();
@@ -1478,7 +1448,7 @@ describe('position-sticky', () => {
     let block;
     let block_1;
     let scroll;
-    let scroll2;
+    let scroll2: any;
     scroll = create(
       'div',
       {
@@ -1535,7 +1505,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroll2);
 
     function runTest() {
-      document.getElementById('scroll2').scrollTop = 50;
+      scroll2.scrollTop = 50;
     }
 
     await matchScreenshot();
@@ -2710,7 +2680,7 @@ describe('position-sticky', () => {
     await matchScreenshot();
   });
   it('scroll-reposition', async (done) => {
-    let sticky;
+    let sticky: any;
     let scroller;
     scroller = create(
       'div',
@@ -2751,7 +2721,7 @@ describe('position-sticky', () => {
     await matchScreenshot();
   });
   it('scrolled-remove-sibling', async (done) => {
-    let bigItem;
+    let bigItem: any;
     let container;
     container = create(
       'div',

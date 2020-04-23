@@ -234,7 +234,7 @@ describe('position-absolute', () => {
 
     await matchScreenshot();
   });
-  it('crash-chrome-003', async () => {
+  xit('crash-chrome-003', async () => {
     let fixed;
     let abs;
     let abs_1;

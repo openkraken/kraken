@@ -91,7 +91,7 @@ describe('DOM EventTarget', () => {
 
   it('event object should have type', done => {
     let div = create('div', {});
-    div.addEventListener('click', event => {
+    div.addEventListener('click', (event: any) => {
       expect(event.type).toBe('click');
       done();
     });
@@ -101,7 +101,7 @@ describe('DOM EventTarget', () => {
 
   it('event object target should equal to element itself', done => {
     let div = create('div', {});
-    div.addEventListener('click', event => {
+    div.addEventListener('click', (event: any) => {
       expect(div === event.target);
       done();
     });
@@ -111,7 +111,7 @@ describe('DOM EventTarget', () => {
 
   it('event object currentTarget should equal to element itself', done => {
     let div = create('div', {});
-    div.addEventListener('click', event => {
+    div.addEventListener('click', (event: any) => {
       expect(div === event.currentTarget);
       done();
     });
@@ -122,7 +122,7 @@ describe('DOM EventTarget', () => {
   it('trigger twice when onclick and bind addEventListener', () => {
     let div = create('div', {});
     let count = 0;
-    div.addEventListener('click', event => {
+    div.addEventListener('click', (event: any) => {
       count++;
     });
     div.onclick = () => {
