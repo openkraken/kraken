@@ -843,13 +843,13 @@ class Element extends Node
     style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);
     style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
 
-    style.addStyleChangeListener('background', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundImage', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundRepeat', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundSize', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundPosition', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('background', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundColor', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundAttachment', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundImage', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundRepeat', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundSize', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundPosition', _styleBackgroundChangedListener);
 
     style.addStyleChangeListener('border', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
@@ -1039,8 +1039,14 @@ class Element extends Node
     }
   }
 
-  void _styleDecoratedChangedListener(String property, String original, String present) {
+  // background may exist on the decoratedBox or single box, because the attachment
+  void _styleBackgroundChangedListener(String property, String original, String present) {
     updateBackground(property, present, renderPadding, targetId);
+    // decoratedBox may contains background and border
+    updateRenderDecoratedBox(style, transitionMap);
+  }
+
+  void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
   }
