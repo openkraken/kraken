@@ -684,11 +684,11 @@ class Element extends Node
     if (renderLayoutBox is RenderFlexLayout) {
       String width = element.style['width'] != '' ? element.style['width'] : '0';
       String height = element.style['height'] != '' ? element.style['height'] : '0';
-      StyleDeclaration pStyle = StyleDeclaration(style: {
+      StyleDeclaration placeholderStyle = StyleDeclaration(style: {
         'width': width,
         'height': height,
       });
-      renderPositionedPlaceholder = initRenderConstrainedBox(null, pStyle);
+      renderPositionedPlaceholder = initRenderConstrainedBox(null, placeholderStyle);
     } else {
       // Positioned element in flow layout will position in old flow layer
       renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
