@@ -12,7 +12,7 @@ describe('Text TextAlign', () => {
 
   TEXT_ALIGN.forEach(value => {
     it(`should work with ${value}`, () => {
-      const cont = create(
+      const cont = createElement(
         'div',
         {
           margin: '10px',

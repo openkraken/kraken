@@ -1,7 +1,7 @@
 describe('Transform matrix', () => {
   it('001', async function() {
     document.body.appendChild(
-      create('div', {
+      createElement('div', {
         width: '100px',
         height: '100px',
         backgroundColor: 'red',

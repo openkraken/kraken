@@ -29,15 +29,15 @@ describe('Display inline', () => {
       margin: '10px'
     };
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('Several ')),
-      create('span', {}, createText(' inline elements')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('Several ')),
+      createElement('span', {}, createText(' inline elements')),
       createText(' are '),
-      create('span', {}, createText('in this')),
+      createElement('span', {}, createText('in this')),
       createText(' sentence.')
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('Several inline elements are in this sentence.')
     ]);
 

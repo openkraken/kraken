@@ -1,7 +1,7 @@
 describe('Transform origin', () => {
   it('length', async function() {
     document.body.appendChild(
-      create('div', {
+      createElement('div', {
         width: '100px',
         height: '100px',
         backgroundColor: 'red',
@@ -14,7 +14,7 @@ describe('Transform origin', () => {
   });
   it('percent', async function() {
       document.body.appendChild(
-        create('div', {
+        createElement('div', {
           width: '100px',
           height: '100px',
           backgroundColor: 'red',
@@ -27,7 +27,7 @@ describe('Transform origin', () => {
     });
     it('keyword', async function() {
         document.body.appendChild(
-          create('div', {
+          createElement('div', {
             width: '100px',
             height: '100px',
             backgroundColor: 'red',
@@ -40,7 +40,7 @@ describe('Transform origin', () => {
       });
       it('keyword center', async function() {
               document.body.appendChild(
-                create('div', {
+                createElement('div', {
                   width: '100px',
                   height: '100px',
                   backgroundColor: 'red',

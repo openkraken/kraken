@@ -16,26 +16,26 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('1stInline'));
-    let container = create('div', containerStyle, [
+    let insertPoint = createElement('span', {}, createText('1stInline'));
+    let container = createElement('div', containerStyle, [
       insertPoint,
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
-      create('span', {}, createText('Eight8888Inline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('span', {}, createText('1stInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
-      create('span', {}, createText('Eight8888Inline')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('span', {}, createText('1stInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
     append(BODY, container);
@@ -43,7 +43,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.insertBefore(create('span', insertedStyle, createText('Inserted new inline')), insertPoint);
+    container.insertBefore(createElement('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
     await matchScreenshot();
   });
@@ -65,26 +65,26 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('ScndInline'));
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
+    let insertPoint = createElement('span', {}, createText('ScndInline'));
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
       insertPoint,
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
-      create('span', {}, createText('Eight8888Inline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline')
     ]);
@@ -94,7 +94,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.insertBefore(create('span', insertedStyle, createText('Inserted new inline')), insertPoint);
+    container.insertBefore(createElement('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
     await matchScreenshot();
   });
@@ -116,26 +116,26 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('div', innerDivStyle, createText('1stBlock'));
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
+    let insertPoint = createElement('div', innerDivStyle, createText('1stBlock'));
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
       insertPoint,
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
-      create('span', {}, createText('Eight8888Inline')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline')
     ]);
@@ -145,7 +145,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.insertBefore(create('span', insertedStyle, createText('Inserted new inline')), insertPoint);
+    container.insertBefore(createElement('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
     await matchScreenshot();
   });
@@ -167,26 +167,26 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('Seven777Inline'));
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
+    let insertPoint = createElement('span', {}, createText('Seven777Inline'));
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       insertPoint,
-      create('span', {}, createText('Eight8888Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
       createText('Seven777Inline'),
       createText('Eight8888Inline')
     ]);
@@ -196,7 +196,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.insertBefore(create('span', insertedStyle, createText('Inserted new inline')), insertPoint);
+    container.insertBefore(createElement('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
     await matchScreenshot();
   });
@@ -218,27 +218,27 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('Eight8888Inline'));
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
+    let insertPoint = createElement('span', {}, createText('Eight8888Inline'));
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
       insertPoint,
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
-      create('span', insertedStyle, createText('Inserted new inline')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
       createText('Eight8888Inline')
     ]);
 
@@ -247,7 +247,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.insertBefore(create('span', insertedStyle, createText('Inserted new inline')), insertPoint);
+    container.insertBefore(createElement('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
     await matchScreenshot();
   });
@@ -269,27 +269,27 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
-      create('span', {}, createText('Eight8888Inline')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Eight8888Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline'),
-      create('span', insertedStyle, createText('Inserted new inline'))
+      createElement('span', insertedStyle, createText('Inserted new inline'))
     ]);
 
     append(BODY, container);
@@ -297,7 +297,7 @@ describe('insert-inline-in-blocks-n-inlines', () => {
 
     await matchScreenshot();
 
-    container.appendChild(create('span', insertedStyle, createText('Inserted new inline')));
+    container.appendChild(createElement('span', insertedStyle, createText('Inserted new inline')));
 
     await matchScreenshot();
   });
@@ -319,27 +319,27 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('FourthInline'));
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertPoint = createElement('span', {}, createText('FourthInline'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       insertPoint,
-      create('span', {}, createText('Fifth55Inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Fifth55Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline'),
     ]);
@@ -371,27 +371,27 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('span', {}, createText('Fifth55Inline'));
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertPoint = createElement('span', {}, createText('Fifth55Inline'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
       insertPoint,
-      create('div', innerDivStyle, createText('SecondBlock')),
-      create('span', {}, createText('Seven777Inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', {}, createText('Seven777Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
-      create('span', insertedStyle, createText('Inserted new inline')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
       createText('Fifth55Inline'),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline'),
     ]);
@@ -423,27 +423,27 @@ describe('insert-inline-in-blocks-n-inlines', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('div', innerDivStyle, createText('SecondBlock'));
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertPoint = createElement('div', innerDivStyle, createText('SecondBlock'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('1stInline')),
-      create('span', {}, createText('ScndInline')),
-      create('div', innerDivStyle, createText('1stBlock')),
-      create('span', {}, createText('FourthInline')),
-      create('span', {}, createText('Fifth55Inline')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('1stInline')),
+      createElement('span', {}, createText('ScndInline')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
+      createElement('span', {}, createText('FourthInline')),
+      createElement('span', {}, createText('Fifth55Inline')),
       insertPoint,
-      create('span', {}, createText('Seven777Inline')),
+      createElement('span', {}, createText('Seven777Inline')),
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('1stInline '),
       createText('ScndInline'),
-      create('div', innerDivStyle, createText('1stBlock')),
+      createElement('div', innerDivStyle, createText('1stBlock')),
       createText('FourthInline'),
       createText('Fifth55Inline'),
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('div', innerDivStyle, createText('SecondBlock')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('SecondBlock')),
       createText('Seven777Inline'),
       createText('Eight8888Inline'),
     ]);

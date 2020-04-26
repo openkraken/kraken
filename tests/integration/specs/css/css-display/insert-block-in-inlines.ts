@@ -12,19 +12,19 @@ describe('insert-block-in-inlines', () => {
       margin: '10px 0'
     };
 
-    let insertBlock = create('div', insertedStyle, createText('Inserted new block'));
+    let insertBlock = createElement('div', insertedStyle, createText('Inserted new block'));
 
-    let insertPoint = create('span', {}, createText('Several '));
-    let container = create('div', containerStyle, [
+    let insertPoint = createElement('span', {}, createText('Several '));
+    let container = createElement('div', containerStyle, [
       insertPoint,
-      create('span', {}, createText(' inline elements')),
+      createElement('span', {}, createText(' inline elements')),
       createText(' are '),
-      create('span', {}, createText('in this')),
+      createElement('span', {}, createText('in this')),
       createText(' sentence.')
     ]);
 
-    let container2 = create('div', containerStyle, [
-      create('div', insertedStyle, createText('Inserted new block')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('div', insertedStyle, createText('Inserted new block')),
       createText('Several inline elements are in this sentence.')
     ]);
 
@@ -57,18 +57,18 @@ describe('insert-block-in-inlines', () => {
       margin: '10px 0'
     };
 
-    let insertBlock = create('div', insertedStyle, createText('Inserted new block'));
+    let insertBlock = createElement('div', insertedStyle, createText('Inserted new block'));
 
-    let container = create('div', containerStyle, [
-      create('span', {}, createText(' inline elements')),
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText(' inline elements')),
       createText(' are '),
-      create('span', {}, createText('in this')),
+      createElement('span', {}, createText('in this')),
       createText(' sentence.')
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('Several inline elements are in this sentence.'),
-      create('div', insertedStyle, createText('Inserted new block'))
+      createElement('div', insertedStyle, createText('Inserted new block'))
     ]);
 
     BODY.addEventListener('click', async function onClick() {
@@ -100,20 +100,20 @@ describe('insert-block-in-inlines', () => {
       margin: '10px 0'
     };
 
-    let insertBlock = create('div', insertedStyle, createText('Inserted new block'));
+    let insertBlock = createElement('div', insertedStyle, createText('Inserted new block'));
 
-    let insertPoint = create('span', {}, createText('are'));
-    let container = create('div', containerStyle, [
-      create('span', {}, createText('Several inline')),
-      create('span', {}, createText(' element ')),
+    let insertPoint = createElement('span', {}, createText('are'));
+    let container = createElement('div', containerStyle, [
+      createElement('span', {}, createText('Several inline')),
+      createElement('span', {}, createText(' element ')),
       insertPoint,
-      create('span', {}, createText('in this')),
+      createElement('span', {}, createText('in this')),
       createText(' sentence.')
     ]);
 
-    let container2 = create('div', containerStyle, [
+    let container2 = createElement('div', containerStyle, [
       createText('Several inline elements '),
-      create('div', insertedStyle, createText('Inserted new block')),
+      createElement('div', insertedStyle, createText('Inserted new block')),
       createText('are in this sentence.')
     ]);
 

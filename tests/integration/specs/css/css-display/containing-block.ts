@@ -1,12 +1,12 @@
 describe('containing-block', () => {
   it('001', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       backgroundColor: 'red',
       display: 'block',
       width: '100px',
       height: '100px',
     });
-    let child = create('div', {
+    let child = createElement('div', {
       backgroundColor: 'green',
       height: '100px',
       width: '100px',
@@ -18,14 +18,14 @@ describe('containing-block', () => {
   });
 
   it('003', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       width: '60px',
       height: '60px',
       padding: '20px',
       display: 'inline-block',
       backgroundColor: 'red',
     });
-    let child = create('div', {
+    let child = createElement('div', {
       backgroundColor: 'green',
       height: '100px',
       width: '100px',
@@ -39,13 +39,13 @@ describe('containing-block', () => {
   });
 
   xit('004', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       width: '100px',
       height: '100px',
       backgroundColor: 'red',
       display: 'block',
     });
-    let child = create('div', {
+    let child = createElement('div', {
       backgroundColor: 'green',
       height: '100%',
       width: '100%',
@@ -57,11 +57,11 @@ describe('containing-block', () => {
   });
 
   it('007', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       position: 'relative',
       bottom: 0,
     });
-    let child = create('div', {
+    let child = createElement('div', {
       backgroundColor: 'blue',
       height: '100px',
       position: 'fixed',
@@ -75,18 +75,18 @@ describe('containing-block', () => {
   });
 
   it('008', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       border: '1px solid black',
       margin: '50px',
       position: 'absolute',
       top: 0,
     });
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       margin: '50px',
       width: '100px',
       height: '100px',
     });
-    let div3 = create('div', {
+    let div3 = createElement('div', {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',
@@ -100,18 +100,18 @@ describe('containing-block', () => {
     await matchScreenshot();
   });
   xit('009', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       border: '1px solid black',
       margin: '50px',
       position: 'relative',
       top: 0,
     });
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       margin: '50px',
       width: '100px',
       height: '100px',
     });
-    let div3 = create('div', {
+    let div3 = createElement('div', {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',
@@ -125,18 +125,18 @@ describe('containing-block', () => {
     await matchElementImageSnapshot(BODY);
   });
   xit('010', async () => {
-    let div1 = create('div', {
+    let div1 = createElement('div', {
       border: '1px solid black',
       margin: '50px',
       position: 'fixed',
       top: 0,
     });
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       margin: '50px',
       width: '100px',
       height: '100px',
     });
-    let div3 = create('div', {
+    let div3 = createElement('div', {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',
@@ -150,13 +150,13 @@ describe('containing-block', () => {
     await matchElementImageSnapshot(BODY);
   });
   xit('011', async () => {
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       border: '1px solid black',
       padding: '100px',
       position: 'relative',
       width: 0,
     });
-    let span = create('span', {
+    let span = createElement('span', {
       backgroundColor: 'blue',
       height: '100px',
       position: 'absolute',
@@ -167,13 +167,13 @@ describe('containing-block', () => {
     await matchElementImageSnapshot(BODY);
   });
   xit('013', async () => {
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       border: '1px solid black',
       padding: '100px',
       position: 'absolute',
       width: 0,
     });
-    let span = create('span', {
+    let span = createElement('span', {
       backgroundColor: 'blue',
       height: '100px',
       width: '100px',
@@ -184,13 +184,13 @@ describe('containing-block', () => {
     await matchElementImageSnapshot(BODY);
   });
   xit('015', async () => {
-    let div2 = create('div', {
+    let div2 = createElement('div', {
       border: '1px solid black',
       padding: '100px',
       position: 'fixed',
       width: 0,
     });
-    let span = create('span', {
+    let span = createElement('span', {
       backgroundColor: 'blue',
       height: '100px',
       width: '100px',
@@ -208,25 +208,25 @@ describe('containing-block', () => {
       padding: '100px',
       width: '450px',
     };
-    let container = create('div', divStyle);
-    let test = create('span', {
+    let container = createElement('div', divStyle);
+    let test = createElement('span', {
       border: '5px solid silver',
       padding: '50px',
       position: 'relative',
     });
-    let firstBox = create('span', {
+    let firstBox = createElement('span', {
       color: 'silver',
     });
-    let lastBox = create('span', {
+    let lastBox = createElement('span', {
       color: 'silver',
     });
-    let tlControl = create('span', {
+    let tlControl = createElement('span', {
       borderTop: '30px solid red',
       marginLeft: '-50px',
       marginRight: '20px',
       padding: '20px 15px',
     });
-    let brControl = create('span', {
+    let brControl = createElement('span', {
       borderBottom: '30px solid red',
       marginLeft: '20px',
       marginRight: '-50px',
@@ -252,13 +252,13 @@ describe('containing-block', () => {
       firstBox,
       createText('Filler Text Filler Text Filler Text Filler Text')
     );
-    let BR = create('span', {
+    let BR = createElement('span', {
       ...positionStyle,
       ...bottomrightStyle,
     });
     append(BR, createText('BR'));
     append(test, BR);
-    let TL = create('span', {
+    let TL = createElement('span', {
       ...positionStyle,
       ...topLeftStyle,
     });
@@ -317,20 +317,20 @@ describe('containing-block', () => {
       bottom: 0,
       left: 0,
     };
-    let container = create('div', divStyle);
-    let test = create('span', testStyle);
-    let firstBox = create('span', boxStyle);
-    let trControl = create('span', trControlStyle);
-    let BL = create('span', {
+    let container = createElement('div', divStyle);
+    let test = createElement('span', testStyle);
+    let firstBox = createElement('span', boxStyle);
+    let trControl = createElement('span', trControlStyle);
+    let BL = createElement('span', {
       ...positionStyle,
       ...bottomLeftStyle,
     });
-    let TR = create('span', {
+    let TR = createElement('span', {
       ...positionStyle,
       ...topRightStyle,
     });
-    let lastBox = create('span', boxStyle);
-    let blControl = create('span', blControlStyle);
+    let lastBox = createElement('span', boxStyle);
+    let blControl = createElement('span', blControlStyle);
 
     append(firstBox, trControl);
     append(lastBox, blControl);
@@ -361,9 +361,9 @@ describe('containing-block', () => {
       top: 'auto',
       width: '100px',
     };
-    let div = create('div', divStyle);
-    let span = create('span', spanStyle);
-    let spanSpan = create('span', spanSpanStyle);
+    let div = createElement('div', divStyle);
+    let span = createElement('span', spanStyle);
+    let spanSpan = createElement('span', spanSpanStyle);
     append(span, spanSpan);
     append(div, span);
     append(BODY, div);
@@ -386,9 +386,9 @@ describe('containing-block', () => {
       position: 'absolute',
     };
     setStyle(BODY, bodyStyle);
-    let div1 = create('div', div1Anddiv2Style);
-    let div2 = create('div', div1Anddiv2Style);
-    let div3 = create('div', div3Style);
+    let div1 = createElement('div', div1Anddiv2Style);
+    let div2 = createElement('div', div1Anddiv2Style);
+    let div3 = createElement('div', div3Style);
     append(div2, div3);
     append(div1, div2);
     append(BODY, div1);
@@ -404,11 +404,11 @@ describe('containing-block', () => {
     let divDivStyle = {
       backgroundColor: 'green',
     };
-    let child = create('div', {
+    let child = createElement('div', {
       ...divStyle,
       ...divDivStyle,
     });
-    let wrapper = create('div', divStyle);
+    let wrapper = createElement('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchElementImageSnapshot(wrapper);
@@ -426,11 +426,11 @@ describe('containing-block', () => {
       height: '50px',
       width: '200px',
     };
-    let child = create('div', {
+    let child = createElement('div', {
       ...divStyle,
       ...divDivStyle,
     });
-    let wrapper = create('div', divStyle);
+    let wrapper = createElement('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchScreenshot();
@@ -450,11 +450,11 @@ describe('containing-block', () => {
       width: '25px',
       height: '25px',
     };
-    let child = create('div', {
+    let child = createElement('div', {
       ...divStyle,
       ...divDivStyle,
     });
-    let wrapper = create('div', divStyle);
+    let wrapper = createElement('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
     await matchScreenshot();
@@ -472,8 +472,8 @@ describe('containing-block', () => {
       height: '200px',
       width: '50px',
     };
-    let div = create('div', soleChildStyle);
-    let container = create('div', containingBlockStyle);
+    let div = createElement('div', soleChildStyle);
+    let container = createElement('div', containingBlockStyle);
     append(container, div);
     append(BODY, container);
     await matchScreenshot();

@@ -1,6 +1,6 @@
 describe('FontSize', () => {
   it('should work with english', () => {
-    const p1 = create(
+    const p1 = createElement(
       'p',
       {
         fontSize: '24px',
@@ -13,7 +13,7 @@ describe('FontSize', () => {
   });
 
   it('should work with chinese', () => {
-    const p1 = create(
+    const p1 = createElement(
       'p',
       {
         fontSize: '24px',
@@ -26,14 +26,14 @@ describe('FontSize', () => {
   });
 
   it('should work with less than 12px', () => {
-    const p1 = create(
+    const p1 = createElement(
       'p',
       {
         fontSize: '12px',
       },
       createText('These lines should with 12px text size.')
     );
-    const p2 = create(
+    const p2 = createElement(
       'p',
       {
         fontSize: '5px',

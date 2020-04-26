@@ -26,7 +26,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('addEventListener should work normally', (done) => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.addEventListener('click', () => {
       done();
     });
@@ -35,7 +35,7 @@ describe('DOM EventTarget', () => {
   });
 
   xit('addEventListener should work without connected into element tree', done => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.addEventListener('click', () => {
       done();
     });
@@ -44,8 +44,8 @@ describe('DOM EventTarget', () => {
 
   it('addEventListener should work with multi event handler', done => {
     let count = 0;
-    let div1 = create('div', {});
-    let div2 = create('div', {});
+    let div1 = createElement('div', {});
+    let div2 = createElement('div', {});
     div1.addEventListener('click', () => {
       count++;
     });
@@ -64,7 +64,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('addEventListener should work with removeEventListeners', () => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     let count = 0;
     function onClick() {
       count++;
@@ -81,7 +81,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('should work with build in property handler', (done) => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.onclick = () => {
       done();
     };
@@ -90,7 +90,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('event object should have type', done => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.addEventListener('click', (event: any) => {
       expect(event.type).toBe('click');
       done();
@@ -100,7 +100,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('event object target should equal to element itself', done => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.addEventListener('click', (event: any) => {
       expect(div === event.target);
       done();
@@ -110,7 +110,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('event object currentTarget should equal to element itself', done => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     div.addEventListener('click', (event: any) => {
       expect(div === event.currentTarget);
       done();
@@ -120,7 +120,7 @@ describe('DOM EventTarget', () => {
   });
 
   it('trigger twice when onclick and bind addEventListener', () => {
-    let div = create('div', {});
+    let div = createElement('div', {});
     let count = 0;
     div.addEventListener('click', (event: any) => {
       count++;

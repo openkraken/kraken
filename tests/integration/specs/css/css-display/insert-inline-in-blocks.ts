@@ -14,21 +14,21 @@ describe('insert-inline-in-blocks', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('div', innerDivStyle, createText('First block'));
+    let insertPoint = createElement('div', innerDivStyle, createText('First block'));
 
-    let container1 = create('div', containerStyle, [
+    let container1 = createElement('div', containerStyle, [
       insertPoint,
       createText('Anonymous second block'),
-      create('div', innerDivStyle, createText('Third block'))
+      createElement('div', innerDivStyle, createText('Third block'))
     ]);
 
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container2 = create('div', containerStyle, [
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('div', innerDivStyle, createText('First block')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('First block')),
       createText('Anonymous second block'),
-      create('div', innerDivStyle, createText('Third block'))
+      createElement('div', innerDivStyle, createText('Third block'))
     ]);
 
     BODY.addEventListener('click', async function onClick() {
@@ -63,19 +63,19 @@ describe('insert-inline-in-blocks', () => {
       borderRight: '5px solid yellow'
     };
 
-    let container1 = create('div', containerStyle, [
-      create('div', innerDivStyle, createText('First block')),
+    let container1 = createElement('div', containerStyle, [
+      createElement('div', innerDivStyle, createText('First block')),
       createText('Anonymous second block'),
-      create('div', innerDivStyle, createText('Third block'))
+      createElement('div', innerDivStyle, createText('Third block'))
     ]);
 
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container2 = create('div', containerStyle, [
-      create('div', innerDivStyle, createText('First block')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('div', innerDivStyle, createText('First block')),
       createText('Anonymous second block'),
-      create('div', innerDivStyle, createText('Third block')),
-      create('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('Third block')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
     ]);
 
     BODY.addEventListener('click', async function onClick() {
@@ -110,20 +110,20 @@ describe('insert-inline-in-blocks', () => {
       borderRight: '5px solid yellow'
     };
 
-    let insertPoint = create('div', innerDivStyle, createText('Second block'));
-    let container1 = create('div', containerStyle, [
-      create('div', innerDivStyle, createText('First block')),
+    let insertPoint = createElement('div', innerDivStyle, createText('Second block'));
+    let container1 = createElement('div', containerStyle, [
+      createElement('div', innerDivStyle, createText('First block')),
       insertPoint,
-      create('div', innerDivStyle, createText('Third block'))
+      createElement('div', innerDivStyle, createText('Third block'))
     ]);
 
-    let insertBlock = create('span', insertedStyle, createText('Inserted new inline'));
+    let insertBlock = createElement('span', insertedStyle, createText('Inserted new inline'));
 
-    let container2 = create('div', containerStyle, [
-      create('div', innerDivStyle, createText('First block')),
-      create('span', insertedStyle, createText('Inserted new inline')),
-      create('div', innerDivStyle, createText('Second block')),
-      create('div', innerDivStyle, createText('Third block')),
+    let container2 = createElement('div', containerStyle, [
+      createElement('div', innerDivStyle, createText('First block')),
+      createElement('span', insertedStyle, createText('Inserted new inline')),
+      createElement('div', innerDivStyle, createText('Second block')),
+      createElement('div', innerDivStyle, createText('Third block')),
     ]);
 
     BODY.addEventListener('click', async function onClick() {

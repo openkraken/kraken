@@ -1,6 +1,6 @@
 describe('Text Overflow', () => {
   it('should work with default value with overflow no visible', () => {
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',
@@ -20,7 +20,7 @@ describe('Text Overflow', () => {
 
   it('should work with clip with overflow no visible', () => {
 
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',
@@ -41,7 +41,7 @@ describe('Text Overflow', () => {
 
   it('should not work with clip with overflow visible', () => {
 
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',
@@ -62,7 +62,7 @@ describe('Text Overflow', () => {
 
   it('should work with ellipsis when overflow not visible and whiteSpace nowrap', () => {
 
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',
@@ -83,7 +83,7 @@ describe('Text Overflow', () => {
 
   it('should not work with ellipsis when overflow visible', () => {
 
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',
@@ -104,7 +104,7 @@ describe('Text Overflow', () => {
 
   it('should not work with ellipsis when whiteSpace normal', () => {
 
-    const cont = create(
+    const cont = createElement(
       'div',
       {
         width: '50px',

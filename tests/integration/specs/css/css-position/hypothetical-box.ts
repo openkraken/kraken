@@ -3,7 +3,7 @@ describe('hypothetical-box', () => {
   it('scroll-parent-ref', async () => {
     let div;
     let target;
-    div = create(
+    div = createElement(
       'div',
       {
         overflow: 'auto',
@@ -13,13 +13,13 @@ describe('hypothetical-box', () => {
         'background-image': 'linear-gradient(#e66465, #9198e5)',
       },
       [
-        create('div', {
+        createElement('div', {
           width: '400px',
           height: '10px',
         }),
       ]
     );
-    target = create('div', {}, [createText(`Modified text`)]);
+    target = createElement('div', {}, [createText(`Modified text`)]);
     BODY.appendChild(div);
     BODY.appendChild(target);
 
@@ -30,7 +30,7 @@ describe('hypothetical-box', () => {
   it('scroll-parent', async () => {
     let target;
     let div;
-    div = create(
+    div = createElement(
       'div',
       {
         overflow: 'auto',
@@ -39,14 +39,14 @@ describe('hypothetical-box', () => {
         'background-image': 'linear-gradient(#e66465, #9198e5)',
       },
       [
-        (target = create(
+        (target = createElement(
           'div',
           {
             position: 'absolute',
           },
           [createText(`Modified text`)]
         )),
-        create('div', {
+        createElement('div', {
           width: '400px',
           height: '10px',
         }),
@@ -65,14 +65,14 @@ describe('hypothetical-box', () => {
   xit('scroll-viewport', async () => {
     let div;
     let div_1;
-    div = create(
+    div = createElement(
       'div',
       {
         position: 'absolute',
       },
       [createText(`Modified text`)]
     );
-    div_1 = create('div', {
+    div_1 = createElement('div', {
       width: '200vw',
       height: '10px',
     });
@@ -90,8 +90,8 @@ describe('hypothetical-box', () => {
   xit('scroll-viewport-ref', async () => {
     let div;
     let div_1;
-    div = create('div', {}, [createText(`Modified text`)]);
-    div_1 = create('div', {
+    div = createElement('div', {}, [createText(`Modified text`)]);
+    div_1 = createElement('div', {
       width: '200vw',
       height: '10px',
     });

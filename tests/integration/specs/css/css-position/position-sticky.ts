@@ -7,7 +7,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -18,7 +18,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -26,13 +26,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -40,13 +40,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   background: 'yellow',
                 })),
-                (sticky = create('div', {
+                (sticky = createElement('div', {
                   'box-sizing': 'border-box',
                   bottom: '25px',
                   position: 'sticky',
@@ -69,7 +69,7 @@ describe('position-sticky', () => {
   it('change-top-ref', async () => {
     let box;
     let spacer;
-    box = create('div', {
+    box = createElement('div', {
       'backface-visibility': 'hidden',
       'background-color': 'green',
       position: 'sticky',
@@ -78,7 +78,7 @@ describe('position-sticky', () => {
       height: '100px',
       'box-sizing': 'border-box',
     });
-    spacer = create('div', {
+    spacer = createElement('div', {
       height: '200vh',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
@@ -94,7 +94,7 @@ describe('position-sticky', () => {
     let marker;
     let sticky;
     let spacer;
-    marker = create('div', {
+    marker = createElement('div', {
       'background-color': 'red',
       position: 'absolute',
       top: '200px',
@@ -102,7 +102,7 @@ describe('position-sticky', () => {
       width: '100px',
       'box-sizing': 'border-box',
     });
-    sticky = create('div', {
+    sticky = createElement('div', {
       'backface-visibility': 'hidden',
       'background-color': 'green',
       position: 'sticky',
@@ -111,7 +111,7 @@ describe('position-sticky', () => {
       height: '100px',
       'box-sizing': 'border-box',
     });
-    spacer = create('div', {
+    spacer = createElement('div', {
       height: '200vh',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
@@ -131,7 +131,7 @@ describe('position-sticky', () => {
     let spacer;
     let scroller: any;
     let div;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'overflow-y': 'scroll',
@@ -143,7 +143,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (relative = create(
+        (relative = createElement(
           'div',
           {
             position: 'relative',
@@ -152,7 +152,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (child = create(
+            (child = createElement(
               'div',
               {
                 width: '100px',
@@ -161,7 +161,7 @@ describe('position-sticky', () => {
                 'box-sizing': 'border-box',
               },
               [
-                (contents = create('div', {
+                (contents = createElement('div', {
                   position: 'relative',
                   top: '10px',
                   left: '10px',
@@ -174,13 +174,13 @@ describe('position-sticky', () => {
             )),
           ]
         )),
-        (spacer = create('div', {
+        (spacer = createElement('div', {
           height: '400px',
           'box-sizing': 'border-box',
         })),
       ]
     );
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -198,6 +198,9 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
+    // wait for image load
+    await sleep(1);
+
     await matchScreenshot();
   });
   it('child-multicolumn', async () => {
@@ -207,7 +210,7 @@ describe('position-sticky', () => {
     let spacer;
     let scroller: any;
     let div;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'overflow-y': 'scroll',
@@ -216,7 +219,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky = create(
+        (sticky = createElement(
           'div',
           {
             position: 'sticky',
@@ -226,7 +229,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (multicolumn = create(
+            (multicolumn = createElement(
               'div',
               {
                 width: '100px',
@@ -236,7 +239,7 @@ describe('position-sticky', () => {
                 'box-sizing': 'border-box',
               },
               [
-                (contents = create('div', {
+                (contents = createElement('div', {
                   width: '80px',
                   height: '80px',
                   'background-color': 'lightgreen',
@@ -246,7 +249,7 @@ describe('position-sticky', () => {
             )),
           ]
         )),
-        (spacer = create('div', {
+        (spacer = createElement('div', {
           height: '400px',
           'background-image':
             'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
@@ -255,7 +258,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -293,7 +296,7 @@ describe('position-sticky', () => {
     let scroller2;
     let scroller3;
     let p;
-    scroller1 = create(
+    scroller1 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -303,7 +306,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer = create(
+        (flexContainer = createElement(
           'div',
           {
             width: '600px',
@@ -313,20 +316,20 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (flexItem = create('div', {
+            (flexItem = createElement('div', {
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green = create('div', {
+            (green = createElement('div', {
               'background-color': 'green',
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_1 = create('div', {
+            (green_1 = createElement('div', {
               'background-color': 'green',
               height: '85px',
               width: '100px',
@@ -337,7 +340,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    scroller2 = create(
+    scroller2 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -347,7 +350,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer_1 = create(
+        (flexContainer_1 = createElement(
           'div',
           {
             width: '600px',
@@ -357,19 +360,19 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (flexItem_1 = create('div', {
+            (flexItem_1 = createElement('div', {
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (flexItem_2 = create('div', {
+            (flexItem_2 = createElement('div', {
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_2 = create('div', {
+            (green_2 = createElement('div', {
               'background-color': 'green',
               height: '85px',
               width: '100px',
@@ -380,7 +383,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    scroller3 = create(
+    scroller3 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -390,7 +393,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer_2 = create(
+        (flexContainer_2 = createElement(
           'div',
           {
             width: '600px',
@@ -400,26 +403,26 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (flexItem_3 = create('div', {
+            (flexItem_3 = createElement('div', {
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (flexItem_4 = create('div', {
+            (flexItem_4 = createElement('div', {
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_3 = create('div', {
+            (green_3 = createElement('div', {
               'background-color': 'green',
               height: '85px',
               width: '100px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_4 = create('div', {
+            (green_4 = createElement('div', {
               'background-color': 'green',
               height: '85px',
               width: '100px',
@@ -430,7 +433,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    p = create(
+    p = createElement(
       'p',
       {
         'box-sizing': 'border-box',
@@ -466,7 +469,7 @@ describe('position-sticky', () => {
     let scroller1;
     let scroller2;
     let scroller3;
-    scroller1 = create(
+    scroller1 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -476,7 +479,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer = create(
+        (flexContainer = createElement(
           'div',
           {
             width: '600px',
@@ -486,7 +489,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator = create('div', {
+            (indicator = createElement('div', {
               position: 'absolute',
               'background-color': 'red',
               width: '100px',
@@ -494,13 +497,13 @@ describe('position-sticky', () => {
               'box-sizing': 'border-box',
               left: '100px',
             })),
-            (flexItem = create('div', {
+            (flexItem = createElement('div', {
               width: '100px',
               height: '85px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (sticky = create('div', {
+            (sticky = createElement('div', {
               position: 'sticky',
               left: '50px',
               'background-color': 'green',
@@ -509,7 +512,7 @@ describe('position-sticky', () => {
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green = create('div', {
+            (green = createElement('div', {
               'background-color': 'green',
               width: '100px',
               height: '85px',
@@ -520,7 +523,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    scroller2 = create(
+    scroller2 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -530,7 +533,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer_1 = create(
+        (flexContainer_1 = createElement(
           'div',
           {
             width: '600px',
@@ -540,7 +543,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator_1 = create('div', {
+            (indicator_1 = createElement('div', {
               position: 'absolute',
               'background-color': 'red',
               width: '100px',
@@ -548,13 +551,13 @@ describe('position-sticky', () => {
               'box-sizing': 'border-box',
               left: '200px',
             })),
-            (flexItem_1 = create('div', {
+            (flexItem_1 = createElement('div', {
               width: '100px',
               height: '85px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (sticky_1 = create('div', {
+            (sticky_1 = createElement('div', {
               position: 'sticky',
               left: '50px',
               'background-color': 'green',
@@ -563,7 +566,7 @@ describe('position-sticky', () => {
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_1 = create('div', {
+            (green_1 = createElement('div', {
               'background-color': 'green',
               width: '100px',
               height: '85px',
@@ -574,7 +577,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    scroller3 = create(
+    scroller3 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -584,7 +587,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (flexContainer_2 = create(
+        (flexContainer_2 = createElement(
           'div',
           {
             width: '600px',
@@ -594,7 +597,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator_2 = create('div', {
+            (indicator_2 = createElement('div', {
               position: 'absolute',
               'background-color': 'red',
               width: '100px',
@@ -602,13 +605,13 @@ describe('position-sticky', () => {
               'box-sizing': 'border-box',
               left: '300px',
             })),
-            (flexItem_2 = create('div', {
+            (flexItem_2 = createElement('div', {
               width: '100px',
               height: '85px',
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (sticky_2 = create('div', {
+            (sticky_2 = createElement('div', {
               position: 'sticky',
               left: '50px',
               'background-color': 'green',
@@ -617,7 +620,7 @@ describe('position-sticky', () => {
               display: 'flex',
               'box-sizing': 'border-box',
             })),
-            (green_2 = create('div', {
+            (green_2 = createElement('div', {
               'background-color': 'green',
               width: '100px',
               height: '85px',
@@ -644,7 +647,7 @@ describe('position-sticky', () => {
     let scroller2;
     let sticky3;
     let scroller3;
-    scroller1 = create(
+    scroller1 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -653,7 +656,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky1 = create('div', {
+        (sticky1 = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',
@@ -662,14 +665,14 @@ describe('position-sticky', () => {
           left: '20px',
           'box-sizing': 'border-box',
         })),
-        (spacer = create('div', {
+        (spacer = createElement('div', {
           width: '2000px',
           height: '2000px',
           'box-sizing': 'border-box',
         })),
       ]
     );
-    scroller2 = create(
+    scroller2 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -678,7 +681,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky2 = create('div', {
+        (sticky2 = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',
@@ -687,14 +690,14 @@ describe('position-sticky', () => {
           left: '20px',
           'box-sizing': 'border-box',
         })),
-        (spacer_1 = create('div', {
+        (spacer_1 = createElement('div', {
           width: '2000px',
           height: '2000px',
           'box-sizing': 'border-box',
         })),
       ]
     );
-    scroller3 = create(
+    scroller3 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -703,7 +706,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky3 = create('div', {
+        (sticky3 = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',
@@ -712,7 +715,7 @@ describe('position-sticky', () => {
           left: '20px',
           'box-sizing': 'border-box',
         })),
-        (spacer_2 = create('div', {
+        (spacer_2 = createElement('div', {
           width: '2000px',
           height: '2000px',
           'box-sizing': 'border-box',
@@ -731,7 +734,7 @@ describe('position-sticky', () => {
     let after;
     let padding;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         position: 'relative',
@@ -741,13 +744,13 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (before = create('div', {
+        (before = createElement('div', {
           'background-color': 'fuchsia',
           height: '50px',
           width: '50px',
           'box-sizing': 'border-box',
         })),
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           'background-color': 'green',
           position: 'sticky',
           top: '150px',
@@ -755,13 +758,13 @@ describe('position-sticky', () => {
           width: '50px',
           'box-sizing': 'border-box',
         })),
-        (after = create('div', {
+        (after = createElement('div', {
           'background-color': 'orange',
           height: '50px',
           width: '50px',
           'box-sizing': 'border-box',
         })),
-        (padding = create('div', {
+        (padding = createElement('div', {
           height: '500px',
           'box-sizing': 'border-box',
         })),
@@ -785,7 +788,7 @@ describe('position-sticky', () => {
     let group_2;
     let scroller2;
     let scroller3;
-    group = create(
+    group = createElement(
       'div',
       {
         display: 'inline-block',
@@ -795,7 +798,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller1 = create(
+        (scroller1 = createElement(
           'div',
           {
             position: 'relative',
@@ -807,14 +810,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents = create(
+            (contents = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (indicator = create(
+                (indicator = createElement(
                   'div',
                   {
                     position: 'absolute',
@@ -832,7 +835,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_1 = create(
+    group_1 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -842,7 +845,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller2 = create(
+        (scroller2 = createElement(
           'div',
           {
             position: 'relative',
@@ -854,14 +857,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents_1 = create(
+            (contents_1 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (indicator_1 = create(
+                (indicator_1 = createElement(
                   'div',
                   {
                     position: 'absolute',
@@ -879,7 +882,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_2 = create(
+    group_2 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -889,7 +892,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller3 = create(
+        (scroller3 = createElement(
           'div',
           {
             position: 'relative',
@@ -901,14 +904,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents_2 = create(
+            (contents_2 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (indicator_2 = create(
+                (indicator_2 = createElement(
                   'div',
                   {
                     position: 'absolute',
@@ -957,7 +960,7 @@ describe('position-sticky', () => {
     let group_2;
     let scroller2;
     let scroller3;
-    group = create(
+    group = createElement(
       'div',
       {
         display: 'inline-block',
@@ -967,7 +970,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller1 = create(
+        (scroller1 = createElement(
           'div',
           {
             position: 'relative',
@@ -979,7 +982,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator = create(
+            (indicator = createElement(
               'div',
               {
                 position: 'absolute',
@@ -991,29 +994,29 @@ describe('position-sticky', () => {
               },
               [createText(`XXX`)]
             )),
-            (contents = create(
+            (contents = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding = create('div', {
+                (prepadding = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container = create(
+                (container = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding = create('div', {
+                    (innerpadding = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (sticky = create(
+                    (sticky = createElement(
                       'div',
                       {
                         position: 'sticky',
@@ -1032,7 +1035,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_1 = create(
+    group_1 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1042,7 +1045,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller2 = create(
+        (scroller2 = createElement(
           'div',
           {
             position: 'relative',
@@ -1054,7 +1057,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator_1 = create(
+            (indicator_1 = createElement(
               'div',
               {
                 position: 'absolute',
@@ -1066,29 +1069,29 @@ describe('position-sticky', () => {
               },
               [createText(`XXX`)]
             )),
-            (contents_1 = create(
+            (contents_1 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding_1 = create('div', {
+                (prepadding_1 = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container_1 = create(
+                (container_1 = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding_1 = create('div', {
+                    (innerpadding_1 = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (sticky_1 = create(
+                    (sticky_1 = createElement(
                       'div',
                       {
                         position: 'sticky',
@@ -1107,7 +1110,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_2 = create(
+    group_2 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1117,7 +1120,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller3 = create(
+        (scroller3 = createElement(
           'div',
           {
             position: 'relative',
@@ -1129,7 +1132,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (indicator_2 = create(
+            (indicator_2 = createElement(
               'div',
               {
                 position: 'absolute',
@@ -1141,29 +1144,29 @@ describe('position-sticky', () => {
               },
               [createText(`XXX`)]
             )),
-            (contents_2 = create(
+            (contents_2 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding_2 = create('div', {
+                (prepadding_2 = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container_2 = create(
+                (container_2 = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding_2 = create('div', {
+                    (innerpadding_2 = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (sticky_2 = create(
+                    (sticky_2 = createElement(
                       'div',
                       {
                         position: 'sticky',
@@ -1195,7 +1198,7 @@ describe('position-sticky', () => {
     let block_1;
     let scroll;
     let scroll2;
-    scroll = create(
+    scroll = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1207,13 +1210,13 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        create(
+        createElement(
           'span',
           {
             'box-sizing': 'border-box',
           },
           [
-            (sticky = create('div', {
+            (sticky = createElement('div', {
               position: 'absolute',
               'background-color': 'purple',
               width: '50px',
@@ -1224,7 +1227,7 @@ describe('position-sticky', () => {
             })),
           ]
         ),
-        (block = create('div', {
+        (block = createElement('div', {
           width: '150px',
           height: '200px',
           'background-color': 'yellow',
@@ -1234,7 +1237,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    scroll2 = create(
+    scroll2 = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1246,13 +1249,13 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        create(
+        createElement(
           'span',
           {
             'box-sizing': 'border-box',
           },
           [
-            (sticky_1 = create('div', {
+            (sticky_1 = createElement('div', {
               position: 'absolute',
               'background-color': 'purple',
               width: '50px',
@@ -1263,7 +1266,7 @@ describe('position-sticky', () => {
             })),
           ]
         ),
-        (block_1 = create('div', {
+        (block_1 = createElement('div', {
           width: '150px',
           height: '200px',
           'background-color': 'yellow',
@@ -1291,7 +1294,7 @@ describe('position-sticky', () => {
     let block_1;
     let scroll;
     let scroll2;
-    scroll = create(
+    scroll = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1302,13 +1305,13 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        create(
+        createElement(
           'span',
           {
             'box-sizing': 'border-box',
           },
           [
-            (sticky = create('div', {
+            (sticky = createElement('div', {
               position: 'sticky',
               background: 'purple',
               width: '50px',
@@ -1318,7 +1321,7 @@ describe('position-sticky', () => {
             })),
           ]
         ),
-        (block = create('div', {
+        (block = createElement('div', {
           width: '150px',
           height: '200px',
           background: 'yellow',
@@ -1326,7 +1329,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    scroll2 = create(
+    scroll2 = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1337,13 +1340,13 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        create(
+        createElement(
           'span',
           {
             'box-sizing': 'border-box',
           },
           [
-            (sticky_1 = create('div', {
+            (sticky_1 = createElement('div', {
               position: 'sticky',
               background: 'purple',
               width: '50px',
@@ -1353,7 +1356,7 @@ describe('position-sticky', () => {
             })),
           ]
         ),
-        (block_1 = create('div', {
+        (block_1 = createElement('div', {
           width: '150px',
           height: '200px',
           background: 'yellow',
@@ -1373,7 +1376,7 @@ describe('position-sticky', () => {
     let block_1;
     let scroll;
     let scroll2: any;
-    scroll = create(
+    scroll = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1384,7 +1387,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           position: 'absolute',
           background: 'purple',
           width: '50px',
@@ -1393,7 +1396,7 @@ describe('position-sticky', () => {
           'z-index': '1',
           'box-sizing': 'border-box',
         })),
-        (block = create('div', {
+        (block = createElement('div', {
           width: '100%',
           height: '200px',
           background: 'yellow',
@@ -1403,7 +1406,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    scroll2 = create(
+    scroll2 = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1414,7 +1417,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky_1 = create('div', {
+        (sticky_1 = createElement('div', {
           position: 'absolute',
           background: 'purple',
           width: '50px',
@@ -1423,7 +1426,7 @@ describe('position-sticky', () => {
           'z-index': '1',
           'box-sizing': 'border-box',
         })),
-        (block_1 = create('div', {
+        (block_1 = createElement('div', {
           width: '100%',
           height: '200px',
           background: 'yellow',
@@ -1449,7 +1452,7 @@ describe('position-sticky', () => {
     let block_1;
     let scroll;
     let scroll2: any;
-    scroll = create(
+    scroll = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1459,7 +1462,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           position: 'sticky',
           background: 'purple',
           width: '50px',
@@ -1467,7 +1470,7 @@ describe('position-sticky', () => {
           top: '200px',
           'box-sizing': 'border-box',
         })),
-        (block = create('div', {
+        (block = createElement('div', {
           width: '100%',
           height: '200px',
           background: 'yellow',
@@ -1475,7 +1478,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    scroll2 = create(
+    scroll2 = createElement(
       'div',
       {
         border: '5px solid blue',
@@ -1485,7 +1488,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky_1 = create('div', {
+        (sticky_1 = createElement('div', {
           position: 'sticky',
           background: 'purple',
           width: '50px',
@@ -1493,7 +1496,7 @@ describe('position-sticky', () => {
           top: '200px',
           'box-sizing': 'border-box',
         })),
-        (block_1 = create('div', {
+        (block_1 = createElement('div', {
           width: '100%',
           height: '200px',
           background: 'yellow',
@@ -1517,7 +1520,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -1528,7 +1531,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -1536,14 +1539,14 @@ describe('position-sticky', () => {
             width: '500px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '200px',
               width: '100px',
               'background-color': 'red',
               display: 'inline-block',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -1552,14 +1555,14 @@ describe('position-sticky', () => {
                 display: 'inline-block',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                   display: 'inline-block',
                 })),
-                (sticky = create('div', {
+                (sticky = createElement('div', {
                   'box-sizing': 'border-box',
                   left: '50px',
                   position: 'sticky',
@@ -1585,7 +1588,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -1596,7 +1599,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -1604,13 +1607,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -1618,13 +1621,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                 })),
-                (sticky = create('div', {
+                (sticky = createElement('div', {
                   'box-sizing': 'border-box',
                   top: '50px',
                   position: 'sticky',
@@ -1650,7 +1653,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -1661,7 +1664,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -1669,13 +1672,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -1683,13 +1686,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                 })),
-                (sticky = create(
+                (sticky = createElement(
                   'div',
                   {
                     'box-sizing': 'border-box',
@@ -1700,12 +1703,12 @@ describe('position-sticky', () => {
                     'background-color': 'green',
                   },
                   [
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       height: '50px',
                       width: '100%',
                     }),
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       bottom: '35px',
                       position: 'sticky',
@@ -1742,7 +1745,7 @@ describe('position-sticky', () => {
     let scroller2;
     let scroller3;
     let div;
-    group = create(
+    group = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1752,7 +1755,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller1 = create(
+        (scroller1 = createElement(
           'div',
           {
             position: 'relative',
@@ -1764,14 +1767,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents = create(
+            (contents = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (outerIndicator = create(
+                (outerIndicator = createElement(
                   'div',
                   {
                     color: 'green',
@@ -1782,7 +1785,7 @@ describe('position-sticky', () => {
                   },
                   [createText(`X`)]
                 )),
-                (innerIndicator = create(
+                (innerIndicator = createElement(
                   'div',
                   {
                     color: 'blue',
@@ -1799,7 +1802,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_1 = create(
+    group_1 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1809,7 +1812,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller2 = create(
+        (scroller2 = createElement(
           'div',
           {
             position: 'relative',
@@ -1821,14 +1824,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents_1 = create(
+            (contents_1 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (outerIndicator_1 = create(
+                (outerIndicator_1 = createElement(
                   'div',
                   {
                     color: 'green',
@@ -1839,7 +1842,7 @@ describe('position-sticky', () => {
                   },
                   [createText(`X`)]
                 )),
-                (innerIndicator_1 = create(
+                (innerIndicator_1 = createElement(
                   'div',
                   {
                     color: 'blue',
@@ -1856,7 +1859,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_2 = create(
+    group_2 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1866,7 +1869,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller3 = create(
+        (scroller3 = createElement(
           'div',
           {
             position: 'relative',
@@ -1878,14 +1881,14 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (contents_2 = create(
+            (contents_2 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (outerIndicator_2 = create(
+                (outerIndicator_2 = createElement(
                   'div',
                   {
                     color: 'green',
@@ -1896,7 +1899,7 @@ describe('position-sticky', () => {
                   },
                   [createText(`X`)]
                 )),
-                (innerIndicator_2 = create(
+                (innerIndicator_2 = createElement(
                   'div',
                   {
                     color: 'blue',
@@ -1913,7 +1916,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -1962,7 +1965,7 @@ describe('position-sticky', () => {
     let group_2;
     let scroller2;
     let scroller3;
-    group = create(
+    group = createElement(
       'div',
       {
         display: 'inline-block',
@@ -1972,7 +1975,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller1 = create(
+        (scroller1 = createElement(
           'div',
           {
             position: 'relative',
@@ -1984,7 +1987,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (outerIndicator = create(
+            (outerIndicator = createElement(
               'div',
               {
                 color: 'red',
@@ -1995,29 +1998,29 @@ describe('position-sticky', () => {
               },
               [createText(`X`)]
             )),
-            (contents = create(
+            (contents = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding = create('div', {
+                (prepadding = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container = create(
+                (container = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding = create('div', {
+                    (innerpadding = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (outerSticky = create(
+                    (outerSticky = createElement(
                       'div',
                       {
                         display: 'inline',
@@ -2028,7 +2031,7 @@ describe('position-sticky', () => {
                       },
                       [
                         createText(`X`),
-                        (innerIndicator = create(
+                        (innerIndicator = createElement(
                           'div',
                           {
                             color: 'red',
@@ -2039,7 +2042,7 @@ describe('position-sticky', () => {
                           },
                           [createText(`XX`)]
                         )),
-                        (innerSticky = create(
+                        (innerSticky = createElement(
                           'div',
                           {
                             display: 'inline',
@@ -2060,7 +2063,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_1 = create(
+    group_1 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -2070,7 +2073,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller2 = create(
+        (scroller2 = createElement(
           'div',
           {
             position: 'relative',
@@ -2082,7 +2085,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (outerIndicator_1 = create(
+            (outerIndicator_1 = createElement(
               'div',
               {
                 color: 'red',
@@ -2093,29 +2096,29 @@ describe('position-sticky', () => {
               },
               [createText(`X`)]
             )),
-            (contents_1 = create(
+            (contents_1 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding_1 = create('div', {
+                (prepadding_1 = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container_1 = create(
+                (container_1 = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding_1 = create('div', {
+                    (innerpadding_1 = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (outerSticky_1 = create(
+                    (outerSticky_1 = createElement(
                       'div',
                       {
                         display: 'inline',
@@ -2126,7 +2129,7 @@ describe('position-sticky', () => {
                       },
                       [
                         createText(`X`),
-                        (innerIndicator_1 = create(
+                        (innerIndicator_1 = createElement(
                           'div',
                           {
                             color: 'red',
@@ -2137,7 +2140,7 @@ describe('position-sticky', () => {
                           },
                           [createText(`XX`)]
                         )),
-                        (innerSticky_1 = create(
+                        (innerSticky_1 = createElement(
                           'div',
                           {
                             display: 'inline',
@@ -2158,7 +2161,7 @@ describe('position-sticky', () => {
         )),
       ]
     );
-    group_2 = create(
+    group_2 = createElement(
       'div',
       {
         display: 'inline-block',
@@ -2168,7 +2171,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (scroller3 = create(
+        (scroller3 = createElement(
           'div',
           {
             position: 'relative',
@@ -2180,7 +2183,7 @@ describe('position-sticky', () => {
             'box-sizing': 'border-box',
           },
           [
-            (outerIndicator_2 = create(
+            (outerIndicator_2 = createElement(
               'div',
               {
                 color: 'red',
@@ -2191,29 +2194,29 @@ describe('position-sticky', () => {
               },
               [createText(`X`)]
             )),
-            (contents_2 = create(
+            (contents_2 = createElement(
               'div',
               {
                 height: '500px',
                 'box-sizing': 'border-box',
               },
               [
-                (prepadding_2 = create('div', {
+                (prepadding_2 = createElement('div', {
                   height: '100px',
                   'box-sizing': 'border-box',
                 })),
-                (container_2 = create(
+                (container_2 = createElement(
                   'div',
                   {
                     height: '200px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (innerpadding_2 = create('div', {
+                    (innerpadding_2 = createElement('div', {
                       height: '50px',
                       'box-sizing': 'border-box',
                     })),
-                    (outerSticky_2 = create(
+                    (outerSticky_2 = createElement(
                       'div',
                       {
                         display: 'inline',
@@ -2224,7 +2227,7 @@ describe('position-sticky', () => {
                       },
                       [
                         createText(`X`),
-                        (innerIndicator_2 = create(
+                        (innerIndicator_2 = createElement(
                           'div',
                           {
                             color: 'red',
@@ -2235,7 +2238,7 @@ describe('position-sticky', () => {
                           },
                           [createText(`XX`)]
                         )),
-                        (innerSticky_2 = create(
+                        (innerSticky_2 = createElement(
                           'div',
                           {
                             display: 'inline',
@@ -2269,7 +2272,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2280,7 +2283,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2288,14 +2291,14 @@ describe('position-sticky', () => {
             width: '500px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '200px',
               width: '100px',
               'background-color': 'red',
               display: 'inline-block',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -2304,14 +2307,14 @@ describe('position-sticky', () => {
                 display: 'inline-block',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                   display: 'inline-block',
                 })),
-                (sticky = create(
+                (sticky = createElement(
                   'div',
                   {
                     'box-sizing': 'border-box',
@@ -2323,7 +2326,7 @@ describe('position-sticky', () => {
                     display: 'inline-block',
                   },
                   [
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       left: '60px',
                       position: 'sticky',
@@ -2353,7 +2356,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2364,7 +2367,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2372,14 +2375,14 @@ describe('position-sticky', () => {
             width: '500px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '200px',
               width: '100px',
               'background-color': 'red',
               display: 'inline-block',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -2388,14 +2391,14 @@ describe('position-sticky', () => {
                 display: 'inline-block',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                   display: 'inline-block',
                 })),
-                (sticky = create(
+                (sticky = createElement(
                   'div',
                   {
                     'box-sizing': 'border-box',
@@ -2407,13 +2410,13 @@ describe('position-sticky', () => {
                     display: 'inline-block',
                   },
                   [
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       height: '100%',
                       width: '50px',
                       display: 'inline-block',
                     }),
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       right: '35px',
                       position: 'sticky',
@@ -2443,7 +2446,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2454,7 +2457,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2462,13 +2465,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -2476,13 +2479,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                 })),
-                (sticky = create(
+                (sticky = createElement(
                   'div',
                   {
                     'box-sizing': 'border-box',
@@ -2493,7 +2496,7 @@ describe('position-sticky', () => {
                     'background-color': 'green',
                   },
                   [
-                    create('div', {
+                    createElement('div', {
                       'box-sizing': 'border-box',
                       top: '60px',
                       position: 'sticky',
@@ -2516,7 +2519,7 @@ describe('position-sticky', () => {
   xit('offset-overflow', async () => {
     let sticky;
     let scroller1;
-    scroller1 = create(
+    scroller1 = createElement(
       'div',
       {
         overflow: 'scroll',
@@ -2525,7 +2528,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           'background-color': 'green',
           height: '50px',
           width: '50px',
@@ -2543,7 +2546,7 @@ describe('position-sticky', () => {
     let sticky;
     let spacer;
     let scroller1;
-    scroller1 = create(
+    scroller1 = createElement(
       'div',
       {
         position: 'relative',
@@ -2553,7 +2556,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',
@@ -2562,7 +2565,7 @@ describe('position-sticky', () => {
           left: '20px',
           'box-sizing': 'border-box',
         })),
-        (spacer = create('div', {
+        (spacer = createElement('div', {
           width: '2000px',
           height: '2000px',
           'box-sizing': 'border-box',
@@ -2575,7 +2578,7 @@ describe('position-sticky', () => {
   });
   it('overflow-hidden', async () => {
     let div;
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2584,7 +2587,7 @@ describe('position-sticky', () => {
         overflow: 'scroll',
       },
       [
-        create(
+        createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2593,7 +2596,7 @@ describe('position-sticky', () => {
             overflow: 'hidden',
           },
           [
-            create('div', {
+            createElement('div', {
               'box-sizing': 'border-box',
               width: '20px',
               height: '20px',
@@ -2601,7 +2604,7 @@ describe('position-sticky', () => {
               top: '0px',
               'background-color': 'red',
             }),
-            create('div', {
+            createElement('div', {
               'box-sizing': 'border-box',
               height: '500px',
             }),
@@ -2619,7 +2622,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2631,7 +2634,7 @@ describe('position-sticky', () => {
         padding: '20px 0px',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2639,13 +2642,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -2653,13 +2656,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                 })),
-                (sticky = create('div', {
+                (sticky = createElement('div', {
                   'box-sizing': 'border-box',
                   top: '50px',
                   position: 'sticky',
@@ -2682,7 +2685,7 @@ describe('position-sticky', () => {
   it('scroll-reposition', async (done) => {
     let sticky: any;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2691,7 +2694,7 @@ describe('position-sticky', () => {
         'overflow-y': 'scroll',
       },
       [
-        (sticky = create('div', {
+        (sticky = createElement('div', {
           'box-sizing': 'border-box',
           width: '100px',
           height: '100px',
@@ -2701,7 +2704,7 @@ describe('position-sticky', () => {
           left: '50px',
           contain: 'strict',
         })),
-        create('div', {
+        createElement('div', {
           'box-sizing': 'border-box',
           width: '100px',
           height: '500px',
@@ -2723,7 +2726,7 @@ describe('position-sticky', () => {
   it('scrolled-remove-sibling', async (done) => {
     let bigItem: any;
     let container;
-    container = create(
+    container = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2733,14 +2736,14 @@ describe('position-sticky', () => {
         'background-color': 'red',
       },
       [
-        create('div', {
+        createElement('div', {
           'box-sizing': 'border-box',
           position: 'sticky',
           top: '0',
           height: '100px',
           'background-color': 'green',
         }),
-        (bigItem = create('div', {
+        (bigItem = createElement('div', {
           'box-sizing': 'border-box',
           height: '600px',
         })),
@@ -2761,13 +2764,13 @@ describe('position-sticky', () => {
   it('stacking-context-ref', async () => {
     let indicator;
     let div;
-    indicator = create('div', {
+    indicator = createElement('div', {
       'background-color': 'green',
       width: '200px',
       height: '200px',
       'box-sizing': 'border-box',
     });
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2788,7 +2791,7 @@ describe('position-sticky', () => {
     let child;
     let sticky;
     let div;
-    indicator = create('div', {
+    indicator = createElement('div', {
       position: 'absolute',
       'background-color': 'green',
       'z-index': '1',
@@ -2796,7 +2799,7 @@ describe('position-sticky', () => {
       height: '200px',
       'box-sizing': 'border-box',
     });
-    sticky = create(
+    sticky = createElement(
       'div',
       {
         position: 'sticky',
@@ -2806,7 +2809,7 @@ describe('position-sticky', () => {
         'box-sizing': 'border-box',
       },
       [
-        (child = create('div', {
+        (child = createElement('div', {
           position: 'relative',
           'background-color': 'red',
           'z-index': '2',
@@ -2816,7 +2819,7 @@ describe('position-sticky', () => {
         })),
       ]
     );
-    div = create(
+    div = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2840,7 +2843,7 @@ describe('position-sticky', () => {
     let container;
     let contents;
     let scroller;
-    scroller = create(
+    scroller = createElement(
       'div',
       {
         'box-sizing': 'border-box',
@@ -2851,7 +2854,7 @@ describe('position-sticky', () => {
         border: '1px solid rgb(0, 0, 0)',
       },
       [
-        (contents = create(
+        (contents = createElement(
           'div',
           {
             'box-sizing': 'border-box',
@@ -2859,13 +2862,13 @@ describe('position-sticky', () => {
             width: '100px',
           },
           [
-            (prepadding = create('div', {
+            (prepadding = createElement('div', {
               'box-sizing': 'border-box',
               height: '100px',
               width: '100px',
               'background-color': 'red',
             })),
-            (container = create(
+            (container = createElement(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -2873,13 +2876,13 @@ describe('position-sticky', () => {
                 width: '100px',
               },
               [
-                (filter = create('div', {
+                (filter = createElement('div', {
                   'box-sizing': 'border-box',
                   height: '100px',
                   width: '100px',
                   'background-color': 'yellow',
                 })),
-                (sticky = create('div', {
+                (sticky = createElement('div', {
                   'box-sizing': 'border-box',
                   top: '50px',
                   position: 'sticky',

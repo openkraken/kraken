@@ -1,14 +1,14 @@
 describe('Color text', () => {
   function testColor(name: string, rgba: [number, number, number, number]) {
     it(name, async () => {
-      let container = create('div', {});
-      let p1 = create('p', {
+      let container = createElement('div', {});
+      let p1 = createElement('p', {
         color: `rgb(${rgba[0]},${rgba[1]},${rgba[2]})`,
       });
-      let p2 = create('p', {
+      let p2 = createElement('p', {
         color: name,
       });
-      let p3 = create('p', {
+      let p3 = createElement('p', {
         color: `#${rgbToHex(rgba[0])}${rgbToHex(rgba[1])}${rgbToHex(rgba[2])}`,
       });
       let t1 = createText('helloworld');
@@ -189,12 +189,12 @@ describe('Color text', () => {
   }
 
   it('blue border', async () => {
-    let test = create('div', {
+    let test = createElement('div', {
       border: '5px solid blue',
       width: '100px',
       height: '100px',
     });
-    let div = create('div', {
+    let div = createElement('div', {
       borderBottomStyle: 'solid',
       borderBottomWidth: '1px',
       borderBottomColor: '#1000',

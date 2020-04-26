@@ -8,7 +8,7 @@ describe('Text TextDecoration', () => {
   TEXT_SHADOW.forEach(value => {
     // Merged property.
     it(`should work with text-shadow=${value}`, () => {
-      const cont = create(
+      const cont = createElement(
         'div',
         {
           margin: '10px',

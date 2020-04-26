@@ -11,7 +11,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -29,13 +29,13 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let firstBlock = create('div', childDivStyle, createText('1stBlock'));
+    let firstBlock = createElement('div', childDivStyle, createText('1stBlock'));
 
-    let element = create('div', containerStyle, [
+    let element = createElement('div', containerStyle, [
       firstBlock,
-      create('div', childDivStyle, createText('2stBlock')),
-      create('div', childDivStyle, createText('3stBlock')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('div', childDivStyle, createText('3stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -56,7 +56,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -74,13 +74,13 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('2stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('2stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
       insertPoint,
-      create('div', childDivStyle, createText('3stBlock')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('3stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -101,7 +101,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -119,14 +119,14 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('span', childDivStyle, createText('1stinline'));
+    let insertPoint = createElement('span', childDivStyle, createText('1stinline'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
       insertPoint,
-      create('div', childDivStyle, createText('3stBlock')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('3stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -147,7 +147,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -165,14 +165,14 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
-      create('span', {}, createText('1stInline')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('span', {}, createText('1stInline')),
       insertPoint,
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -193,7 +193,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -211,14 +211,14 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
-      create('div', {}, createText('1stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('div', {}, createText('1stBlock')),
       insertPoint,
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -239,7 +239,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -257,13 +257,13 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
-      create('div', {}, createText('1stBlock')),
-      create('div', childDivStyle, createText('4stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('div', {}, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
       insertPoint,
     ]);
 
@@ -285,7 +285,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -303,14 +303,14 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
       insertPoint,
-      create('div', childDivStyle, createText('3stBlock')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('3stBlock')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -331,7 +331,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -349,16 +349,16 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
-      create('span', {}, createText('1sit Inline')),
-      create('div', childDivStyle, createText('3stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('span', {}, createText('1sit Inline')),
+      createElement('div', childDivStyle, createText('3stBlock')),
       insertPoint,
-      create('span', {}, createText('second inline')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('span', {}, createText('second inline')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);
@@ -379,7 +379,7 @@ describe('insert-block-in-blocks-n-inlines', () => {
       margin: '10px 0',
     };
 
-    let inserted = create(
+    let inserted = createElement(
       'div',
       {
         borderLeft: '3px solid yellow',
@@ -397,16 +397,16 @@ describe('insert-block-in-blocks-n-inlines', () => {
       done();
     });
 
-    let insertPoint = create('div', childDivStyle, createText('3stBlock'));
+    let insertPoint = createElement('div', childDivStyle, createText('3stBlock'));
 
-    let element = create('div', containerStyle, [
-      create('div', childDivStyle, createText('1stBlock')),
-      create('div', childDivStyle, createText('2stBlock')),
-      create('span', {}, createText('1sit Inline')),
-      create('div', childDivStyle, createText('3stBlock')),
+    let element = createElement('div', containerStyle, [
+      createElement('div', childDivStyle, createText('1stBlock')),
+      createElement('div', childDivStyle, createText('2stBlock')),
+      createElement('span', {}, createText('1sit Inline')),
+      createElement('div', childDivStyle, createText('3stBlock')),
       insertPoint,
-      create('div', childDivStyle, createText('second inline')),
-      create('div', childDivStyle, createText('4stBlock')),
+      createElement('div', childDivStyle, createText('second inline')),
+      createElement('div', childDivStyle, createText('4stBlock')),
     ]);
 
     append(BODY, element);

@@ -2,7 +2,7 @@
 describe('hypothetical-dynamic', () => {
   it('change-001-ref', async () => {
     let ancestor;
-    ancestor = create('div', {
+    ancestor = createElement('div', {
       width: '100px',
       height: '100px',
       position: 'fixed',
@@ -17,7 +17,7 @@ describe('hypothetical-dynamic', () => {
   it('change-001', async () => {
     let child;
     let ancestor;
-    ancestor = create(
+    ancestor = createElement(
       'div',
       {
         position: 'fixed',
@@ -28,7 +28,7 @@ describe('hypothetical-dynamic', () => {
         top: '0',
       },
       [
-        (child = create('div', {
+        (child = createElement('div', {
           position: 'fixed',
           width: '100px',
           height: '100px',
@@ -47,7 +47,7 @@ describe('hypothetical-dynamic', () => {
   it('change-002', async () => {
     let child;
     let ancestor;
-    ancestor = create(
+    ancestor = createElement(
       'div',
       {
         width: '100px',
@@ -58,7 +58,7 @@ describe('hypothetical-dynamic', () => {
         top: '0',
       },
       [
-        (child = create('div', {
+        (child = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',
@@ -77,7 +77,7 @@ describe('hypothetical-dynamic', () => {
   xit('change-003', async () => {
     let child;
     let ancestor;
-    ancestor = create(
+    ancestor = createElement(
       'div',
       {
         width: '100px',
@@ -88,7 +88,7 @@ describe('hypothetical-dynamic', () => {
         top: '0',
       },
       [
-        (child = create('div', {
+        (child = createElement('div', {
           width: '100px',
           height: '100px',
           'background-color': 'green',

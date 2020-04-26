@@ -1,7 +1,7 @@
 describe('Transform scale3d', () => {
   it('001', async () => {
     document.body.appendChild(
-      create('div', {
+      createElement('div', {
         width: '100px',
         height: '100px',
         marginTop: '10px',

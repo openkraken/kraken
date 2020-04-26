@@ -3,9 +3,9 @@ describe('display', () => {
     let divStyle = {
       display: 'inline',
     };
-    let element = create('div', {}, [
-      create('div', divStyle, createText('Filter text')),
-      create('div', divStyle, createText('Filter text')),
+    let element = createElement('div', {}, [
+      createElement('div', divStyle, createText('Filter text')),
+      createElement('div', divStyle, createText('Filter text')),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -15,9 +15,9 @@ describe('display', () => {
     let divStyle = {
       display: 'block',
     };
-    let element = create('div', {}, [
-      create('div', divStyle, createText('Filter text')),
-      create('div', divStyle, createText('Filter text')),
+    let element = createElement('div', {}, [
+      createElement('div', divStyle, createText('Filter text')),
+      createElement('div', divStyle, createText('Filter text')),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -26,9 +26,9 @@ describe('display', () => {
     let divdivStyle = {
       display: 'inline-block',
     };
-    let element = create('div', {}, [
+    let element = createElement('div', {}, [
       createText('Filter text'),
-      create('div', divdivStyle, createText('Filter text')),
+      createElement('div', divdivStyle, createText('Filter text')),
     ]);
     append(BODY, element);
     await matchScreenshot();
@@ -38,7 +38,7 @@ describe('display', () => {
       color: 'red',
       display: 'none',
     };
-    let element = create('div', divStyle, createText('FAIL'));
+    let element = createElement('div', divStyle, createText('FAIL'));
     append(BODY, element);
     await matchScreenshot();
   });
@@ -46,9 +46,9 @@ describe('display', () => {
     let spanStyle = {
       display: 'inline',
     };
-    let element = create('div', {}, [
+    let element = createElement('div', {}, [
       createText('Filter text'),
-      create('span', spanStyle, createText('Filter Text')),
+      createElement('span', spanStyle, createText('Filter Text')),
       createText('Filter text'),
     ]);
     append(BODY, element);
@@ -60,7 +60,7 @@ describe('display', () => {
       display: 'none',
       position: 'absolute',
     };
-    let element = create('div', divStyle, createText('Filter Text'));
+    let element = createElement('div', divStyle, createText('Filter Text'));
     append(BODY, element);
     await matchScreenshot();
   });
@@ -70,7 +70,7 @@ describe('display', () => {
       display: 'none',
       position: 'fixed',
     };
-    let element = create('div', divStyle, createText('Filter Text'));
+    let element = createElement('div', divStyle, createText('Filter Text'));
     append(BODY, element);
     await matchScreenshot();
   });
