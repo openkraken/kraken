@@ -19,7 +19,6 @@ describe('background-shorthand', () => {
       background: 'center/contain repeat radial-gradient(crimson,skyblue)'
     });
     document.body.appendChild(div);
-    await sleep(1);
     await matchElementImageSnapshot(div);
   });
 
@@ -31,7 +30,6 @@ describe('background-shorthand', () => {
       background: 'red'
     });
     document.body.appendChild(div);
-    await sleep(1);
     await matchElementImageSnapshot(div);
   });
 });
