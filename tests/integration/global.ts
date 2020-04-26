@@ -31,9 +31,37 @@ function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
 }
 
-function createElementWithStyle(tag: string, style: {[key: string]: string|number}, child?: Node | Array<Node>): any {
+function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
   const el = document.createElement(tag);
   setStyle(el, style);
+  if (Array.isArray(child)) {
+    child.forEach(c => el.appendChild(c));
+  } else if (child) {
+    el.appendChild(child);
+  }
+  return el;
+}
+
+type ElementProps = {
+  style: {
+    [key: string]: any;
+  }
+};
+
+function setProps(el: HTMLElement, props: ElementProps) {
+  let keys = Object.keys(props);
+  for (let key of keys) {
+    if (key === 'style') {
+      setStyle(el, props[key]);
+    } else {
+      el[key] = props[key];
+    }
+  }
+}
+
+function createElement(tag: string, props: ElementProps, child?: Node | Array<Node>) {
+  const el = document.createElement(tag);
+  setProps(el, props);
   if (Array.isArray(child)) {
     child.forEach(c => el.appendChild(c));
   } else if (child) {
