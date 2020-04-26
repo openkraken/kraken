@@ -14,8 +14,9 @@ import { URL } from './url';
 import { Performance, performance } from './performance';
 import { kraken } from './kraken';
 import { MQTT } from './mqtt';
-import './window';
+import { windowMixin } from './window';
 
+Object.assign(window, windowMixin);
 addGlobalObject('console', console);
 addGlobalObject('requestAnimationFrame', requestAnimationFrame);
 addGlobalObject('document', document);
