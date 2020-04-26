@@ -14,30 +14,31 @@ import { URL } from './url';
 import { Performance, performance } from './performance';
 import { kraken } from './kraken';
 import { MQTT } from './mqtt';
-import './window';
+import { windowExtension } from './window';
 
-addGlobalObject('console', console);
-addGlobalObject('requestAnimationFrame', requestAnimationFrame);
-addGlobalObject('document', document);
-addGlobalObject('WebSocket', WebSocket);
-addGlobalObject('Request', Request);
-addGlobalObject('Response', Response);
-addGlobalObject('Headers', Headers);
-addGlobalObject('fetch', fetch);
-addGlobalObject('matchMedia', matchMedia);
-addGlobalObject('location', location);
-addGlobalObject('navigator', navigator);
-addGlobalObject('XMLHttpRequest', XMLHttpRequest);
-addGlobalObject('Blob', Blob);
-addGlobalObject('asyncStorage', asyncStorage);
-addGlobalObject('URLSearchParams', URLSearchParams);
-addGlobalObject('URL', URL);
-addGlobalObject('Performance', Performance);
-addGlobalObject('performance', performance);
-addGlobalObject('kraken', kraken);
-addGlobalObject('MQTT', MQTT);
+Object.assign(window, windowExtension);
+defineGlobalProperty('console', console);
+defineGlobalProperty('requestAnimationFrame', requestAnimationFrame);
+defineGlobalProperty('document', document);
+defineGlobalProperty('WebSocket', WebSocket);
+defineGlobalProperty('Request', Request);
+defineGlobalProperty('Response', Response);
+defineGlobalProperty('Headers', Headers);
+defineGlobalProperty('fetch', fetch);
+defineGlobalProperty('matchMedia', matchMedia);
+defineGlobalProperty('location', location);
+defineGlobalProperty('navigator', navigator);
+defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
+defineGlobalProperty('Blob', Blob);
+defineGlobalProperty('asyncStorage', asyncStorage);
+defineGlobalProperty('URLSearchParams', URLSearchParams);
+defineGlobalProperty('URL', URL);
+defineGlobalProperty('Performance', Performance);
+defineGlobalProperty('performance', performance);
+defineGlobalProperty('kraken', kraken);
+defineGlobalProperty('MQTT', MQTT);
 
-function addGlobalObject(key: string, value: any) {
+function defineGlobalProperty(key: string, value: any) {
   Object.defineProperty(globalThis, key, {
     value: value,
     enumerable: true,
