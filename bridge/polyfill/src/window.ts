@@ -6,7 +6,7 @@ const windowBuildInEvents = ['load', 'colorschemechange'];
 
 // window is global object, which is created by JSEngine,
 // This is an extension which add more methods to global window object.
-class WindowMixin extends EventTarget {
+class WindowExtension extends EventTarget {
   constructor() {
     super(WINDOW, windowBuildInEvents);
   }
@@ -32,4 +32,4 @@ class WindowMixin extends EventTarget {
   }
 }
 
-export const windowMixin = new WindowMixin();
+export const windowExtension = new WindowExtension();
