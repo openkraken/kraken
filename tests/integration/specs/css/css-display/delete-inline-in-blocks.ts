@@ -13,16 +13,16 @@ xdescribe('delete-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow',
     };
-    let nodeToDelete = createElement(
+    let nodeToDelete = createElementWithStyle(
       'span',
       nodeToDeleteStyle,
       createText('Span to remove')
     );
-    let container1 = createElement('div', containerStyle, [
+    let container1 = createElementWithStyle('div', containerStyle, [
       nodeToDelete,
-      createElement('div', innerDivStyle, createText('First block')),
+      createElementWithStyle('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
-      createElement('div', innerDivStyle, createText('Third block')),
+      createElementWithStyle('div', innerDivStyle, createText('Third block')),
     ]);
 
     async function onClick() {
@@ -54,15 +54,15 @@ xdescribe('delete-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow',
     };
-    let nodeToDelete = createElement(
+    let nodeToDelete = createElementWithStyle(
       'span',
       nodeToDeleteStyle,
       createText('Span to remove')
     );
-    let container1 = createElement('div', containerStyle, [
-      createElement('div', innerDivStyle, createText('First block')),
+    let container1 = createElementWithStyle('div', containerStyle, [
+      createElementWithStyle('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
-      createElement('div', innerDivStyle, createText('Third block')),
+      createElementWithStyle('div', innerDivStyle, createText('Third block')),
       nodeToDelete,
     ]);
 
@@ -95,16 +95,16 @@ xdescribe('delete-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow',
     };
-    let nodeToDelete = createElement(
+    let nodeToDelete = createElementWithStyle(
       'span',
       nodeToDeleteStyle,
       createText('Span to remove')
     );
-    let container1 = createElement('div', containerStyle, [
-      createElement('div', innerDivStyle, createText('First block')),
+    let container1 = createElementWithStyle('div', containerStyle, [
+      createElementWithStyle('div', innerDivStyle, createText('First block')),
       createText('\nAnonymous second block\n'),
       nodeToDelete,
-      createElement('div', innerDivStyle, createText('Third block')),
+      createElementWithStyle('div', innerDivStyle, createText('Third block')),
     ]);
 
     async function onClick() {
@@ -136,16 +136,16 @@ xdescribe('delete-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow',
     };
-    let nodeToDelete = createElement(
+    let nodeToDelete = createElementWithStyle(
       'span',
       nodeToDeleteStyle,
       createText('Span to remove')
     );
-    let container1 = createElement('div', containerStyle, [
-      createElement('div', innerDivStyle, createText('First block')),
+    let container1 = createElementWithStyle('div', containerStyle, [
+      createElementWithStyle('div', innerDivStyle, createText('First block')),
       nodeToDelete,
-      createElement('div', innerDivStyle, createText('Second block')),
-      createElement('div', innerDivStyle, createText('Third block')),
+      createElementWithStyle('div', innerDivStyle, createText('Second block')),
+      createElementWithStyle('div', innerDivStyle, createText('Third block')),
     ]);
 
     async function onClick() {
@@ -177,16 +177,16 @@ xdescribe('delete-inline-in-blocks', () => {
       borderLeft: '5px solid yellow',
       borderRight: '5px solid yellow',
     };
-    let nodeToDelete = createElement(
+    let nodeToDelete = createElementWithStyle(
       'span',
       nodeToDeleteStyle,
       createText('Span to remove')
     );
-    let container1 = createElement('div', containerStyle, [
-      createElement('div', innerDivStyle, createText('First block')),
-      createElement('div', innerDivStyle, createText('Second block')),
+    let container1 = createElementWithStyle('div', containerStyle, [
+      createElementWithStyle('div', innerDivStyle, createText('First block')),
+      createElementWithStyle('div', innerDivStyle, createText('Second block')),
       nodeToDelete,
-      createElement('div', innerDivStyle, createText('Third block')),
+      createElementWithStyle('div', innerDivStyle, createText('Third block')),
     ]);
 
     async function onClick() {

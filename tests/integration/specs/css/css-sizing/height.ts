@@ -14,7 +14,7 @@ describe('Height', () => {
 
   describe('element style has height', () => {
     it('element is inline', async () => {
-      let element = createElement('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline',
         height: '100px',
         backgroundColor: '#999',
@@ -26,7 +26,7 @@ describe('Height', () => {
     });
 
     it('element is inline-block', async () => {
-      let element = createElement('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         height: '100px',
         backgroundColor: '#999',
@@ -38,7 +38,7 @@ describe('Height', () => {
     });
 
     it('element is inline-flex', async () => {
-      let element = createElement('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         height: '100px',
         backgroundColor: '#999',
@@ -50,7 +50,7 @@ describe('Height', () => {
     });
 
     it('element is block', async () => {
-      let element = createElement('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         height: '100px',
         backgroundColor: '#999',
@@ -62,7 +62,7 @@ describe('Height', () => {
     });
 
     it('element is flex', async () => {
-      let element = createElement('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         height: '100px',
         backgroundColor: '#999',

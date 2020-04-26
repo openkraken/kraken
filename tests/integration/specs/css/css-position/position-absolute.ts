@@ -3,7 +3,7 @@ describe('position-absolute', () => {
   xit('center-001.tentative', async () => {
     let innerFlex;
     let containingBlock;
-    containingBlock = createElement(
+    containingBlock = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -15,7 +15,7 @@ describe('position-absolute', () => {
         'flex-direction': 'row',
       },
       [
-        (innerFlex = createElement(
+        (innerFlex = createElementWithStyle(
           'div',
           {
             'flex-grow': '1',
@@ -26,7 +26,7 @@ describe('position-absolute', () => {
             height: '100px',
           },
           [
-            createElement(
+            createElementWithStyle(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -36,12 +36,12 @@ describe('position-absolute', () => {
                 'background-color': 'green',
               },
               [
-                createElement('span', {
+                createElementWithStyle('span', {
                   display: 'inline-block',
                   width: '50px',
                   'box-sizing': 'border-box',
                 }),
-                createElement('span', {
+                createElementWithStyle('span', {
                   display: 'inline-block',
                   width: '50px',
                   'box-sizing': 'border-box',
@@ -50,7 +50,7 @@ describe('position-absolute', () => {
             ),
           ]
         )),
-        createElement('div', {
+        createElementWithStyle('div', {
           'flex-grow': '1',
           'box-sizing': 'border-box',
           height: '100px',
@@ -65,7 +65,7 @@ describe('position-absolute', () => {
   xit('center-002.tentative', async () => {
     let innerFlex;
     let containingBlock;
-    containingBlock = createElement(
+    containingBlock = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -77,7 +77,7 @@ describe('position-absolute', () => {
         'flex-direction': 'column',
       },
       [
-        (innerFlex = createElement(
+        (innerFlex = createElementWithStyle(
           'div',
           {
             'flex-grow': '1',
@@ -88,7 +88,7 @@ describe('position-absolute', () => {
             width: '100px',
           },
           [
-            createElement(
+            createElementWithStyle(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -98,13 +98,13 @@ describe('position-absolute', () => {
                 'background-color': 'green',
               },
               [
-                createElement('span', {
+                createElementWithStyle('span', {
                   display: 'inline-block',
                   height: '50px',
                   width: '50px',
                   'box-sizing': 'border-box',
                 }),
-                createElement('span', {
+                createElementWithStyle('span', {
                   display: 'inline-block',
                   height: '50px',
                   width: '50px',
@@ -114,7 +114,7 @@ describe('position-absolute', () => {
             ),
           ]
         )),
-        createElement('div', {
+        createElementWithStyle('div', {
           'flex-grow': '1',
           'box-sizing': 'border-box',
           width: '100px',
@@ -129,7 +129,7 @@ describe('position-absolute', () => {
   xit('chrome-bug-001', async () => {
     let target;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -139,7 +139,7 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (target = createElement('span', {
+        (target = createElementWithStyle('span', {
           'background-color': 'green',
           position: 'absolute',
           width: '50px',
@@ -161,14 +161,14 @@ describe('position-absolute', () => {
     let target;
     let intermediate;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
         'box-sizing': 'border-box',
       },
       [
-        (intermediate = createElement(
+        (intermediate = createElementWithStyle(
           'div',
           {
             overflow: 'hidden',
@@ -178,12 +178,12 @@ describe('position-absolute', () => {
             'box-sizing': 'border-box',
           },
           [
-            (block = createElement('div', {
+            (block = createElementWithStyle('div', {
               height: '200px',
               'background-color': 'green',
               'box-sizing': 'border-box',
             })),
-            (target = createElement('div', {
+            (target = createElementWithStyle('div', {
               position: 'absolute',
               width: '200px',
               height: '100px',
@@ -201,7 +201,7 @@ describe('position-absolute', () => {
   it('container-dynamic', async () => {
     let target;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -211,14 +211,14 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        createElement(
+        createElementWithStyle(
           'div',
           {
             'box-sizing': 'border-box',
             display: 'flex',
           },
           [
-            (target = createElement('div', {
+            (target = createElementWithStyle('div', {
               position: 'absolute',
               left: '0',
               width: '50px',
@@ -239,28 +239,28 @@ describe('position-absolute', () => {
     let abs;
     let abs_1;
     let flex;
-    abs_1 = createElement(
+    abs_1 = createElementWithStyle(
       'div',
       {
         position: 'absolute',
         'box-sizing': 'border-box',
       },
       [
-        (flex = createElement(
+        (flex = createElementWithStyle(
           'div',
           {
             display: 'flex',
             'box-sizing': 'border-box',
           },
           [
-            (abs = createElement(
+            (abs = createElementWithStyle(
               'div',
               {
                 position: 'absolute',
                 'box-sizing': 'border-box',
               },
               [
-                (fixed = createElement('div', {
+                (fixed = createElementWithStyle('div', {
                   position: 'fixed',
                   'box-sizing': 'border-box',
                 })),
@@ -282,42 +282,42 @@ describe('position-absolute', () => {
     let flex_1;
     let abs;
     let one;
-    one = createElement(
+    one = createElementWithStyle(
       'div',
       {
         position: 'relative',
         'box-sizing': 'border-box',
       },
       [
-        (flex_1 = createElement(
+        (flex_1 = createElementWithStyle(
           'div',
           {
             display: 'flex',
             'box-sizing': 'border-box',
           },
           [
-            (abs = createElement(
+            (abs = createElementWithStyle(
               'div',
               {
                 position: 'absolute',
                 'box-sizing': 'border-box',
               },
               [
-                (flex = createElement(
+                (flex = createElementWithStyle(
                   'div',
                   {
                     display: 'flex',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (fixed1 = createElement(
+                    (fixed1 = createElementWithStyle(
                       'div',
                       {
                         position: 'fixed',
                         'box-sizing': 'border-box',
                       },
                       [
-                        (fixed2 = createElement('div', {
+                        (fixed2 = createElementWithStyle('div', {
                           position: 'fixed',
                           'box-sizing': 'border-box',
                         })),
@@ -342,14 +342,14 @@ describe('position-absolute', () => {
     let boundary_1;
     let boundary_2;
     let one;
-    one = createElement(
+    one = createElementWithStyle(
       'div',
       {
         position: 'relative',
         'box-sizing': 'border-box',
       },
       [
-        (boundary_2 = createElement(
+        (boundary_2 = createElementWithStyle(
           'div',
           {
             overflow: 'hidden',
@@ -358,7 +358,7 @@ describe('position-absolute', () => {
             'box-sizing': 'border-box',
           },
           [
-            (boundary_1 = createElement(
+            (boundary_1 = createElementWithStyle(
               'div',
               {
                 overflow: 'hidden',
@@ -367,7 +367,7 @@ describe('position-absolute', () => {
                 'box-sizing': 'border-box',
               },
               [
-                (boundary = createElement(
+                (boundary = createElementWithStyle(
                   'div',
                   {
                     overflow: 'hidden',
@@ -376,14 +376,14 @@ describe('position-absolute', () => {
                     'box-sizing': 'border-box',
                   },
                   [
-                    (intermediate = createElement(
+                    (intermediate = createElementWithStyle(
                       'div',
                       {
                         animation: 'slidein 0.1s linear',
                         'box-sizing': 'border-box',
                       },
                       [
-                        (abs = createElement('div', {
+                        (abs = createElementWithStyle('div', {
                           position: 'absolute',
                           width: '50px',
                           height: '50px',
@@ -407,7 +407,7 @@ describe('position-absolute', () => {
   it('crash-chrome-006', async () => {
     let parent;
     let boundary;
-    boundary = createElement(
+    boundary = createElementWithStyle(
       'div',
       {
         overflow: 'hidden',
@@ -416,7 +416,7 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (parent = createElement('div', {
+        (parent = createElementWithStyle('div', {
           'box-sizing': 'border-box',
         })),
       ]
@@ -433,14 +433,14 @@ describe('position-absolute', () => {
     let anonymousSplit;
     let anonymousParent;
     let blockContainer;
-    blockContainer = createElement(
+    blockContainer = createElementWithStyle(
       'div',
       {
         position: 'relative',
         'box-sizing': 'border-box',
       },
       [
-        (anonymousParent = createElement(
+        (anonymousParent = createElementWithStyle(
           'span',
           {
             'background-color': '#FFFF7F',
@@ -448,7 +448,7 @@ describe('position-absolute', () => {
           },
           [
             createText(`parent start`),
-            (anonymousSplit = createElement(
+            (anonymousSplit = createElementWithStyle(
               'span',
               {
                 'background-color': '#FFD997',
@@ -456,7 +456,7 @@ describe('position-absolute', () => {
               },
               [
                 createText(`split start`),
-                (splitter = createElement(
+                (splitter = createElementWithStyle(
                   'div',
                   {
                     'box-sizing': 'border-box',
@@ -464,7 +464,7 @@ describe('position-absolute', () => {
                   [createText(`splitter`)]
                 )),
                 createText(`split middle`),
-                (cssContainer = createElement(
+                (cssContainer = createElementWithStyle(
                   'span',
                   {
                     position: 'relative',
@@ -474,7 +474,7 @@ describe('position-absolute', () => {
                   },
                   [
                     createText(`css-container start`),
-                    (abs = createElement(
+                    (abs = createElementWithStyle(
                       'div',
                       {
                         'background-color': 'rgba(0, 255, 0, 0.5)',
@@ -485,7 +485,7 @@ describe('position-absolute', () => {
                       },
                       [createText(`ABS`)]
                     )),
-                    (fullabs = createElement(
+                    (fullabs = createElementWithStyle(
                       'div',
                       {
                         'background-color': 'rgba(0, 255, 0, 0.5)',
@@ -515,7 +515,7 @@ describe('position-absolute', () => {
   });
   it('crash-chrome-008', async () => {
     let span;
-    span = createElement(
+    span = createElementWithStyle(
       'span',
       {
         'box-sizing': 'border-box',
@@ -523,7 +523,7 @@ describe('position-absolute', () => {
         filter: 'blur(2px)',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           position: 'absolute',
         }),
@@ -538,7 +538,7 @@ describe('position-absolute', () => {
     let fixedContainer;
     let inlineFixedContainer;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -548,21 +548,21 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (inlineFixedContainer = createElement(
+        (inlineFixedContainer = createElementWithStyle(
           'span',
           {
             filter: 'url("")',
             'box-sizing': 'border-box',
           },
           [
-            (fixedContainer = createElement(
+            (fixedContainer = createElementWithStyle(
               'div',
               {
                 position: 'fixed',
                 'box-sizing': 'border-box',
               },
               [
-                (target = createElement('div', {
+                (target = createElementWithStyle('div', {
                   position: 'fixed',
                   'box-sizing': 'border-box',
                 })),
@@ -581,7 +581,7 @@ describe('position-absolute', () => {
     let fixedContainer;
     let inlineFixedContainer;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -591,21 +591,21 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (inlineFixedContainer = createElement(
+        (inlineFixedContainer = createElementWithStyle(
           'span',
           {
             filter: 'url("")',
             'box-sizing': 'border-box',
           },
           [
-            (fixedContainer = createElement(
+            (fixedContainer = createElementWithStyle(
               'div',
               {
                 position: 'fixed',
                 'box-sizing': 'border-box',
               },
               [
-                (target = createElement('div', {
+                (target = createElementWithStyle('div', {
                   position: 'fixed',
                   'box-sizing': 'border-box',
                 })),
@@ -622,7 +622,7 @@ describe('position-absolute', () => {
   it('crash-chrome-012', async () => {
     let target;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         width: '600px',
@@ -630,7 +630,7 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           position: 'absolute',
           left: '0px',
           right: '33554000px',
@@ -652,7 +652,7 @@ describe('position-absolute', () => {
     let noLayout2;
     let intermediate;
     let outer;
-    outer = createElement(
+    outer = createElementWithStyle(
       'div',
       {
         width: '400px',
@@ -662,14 +662,14 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        createElement(
+        createElementWithStyle(
           'div',
           {
             padding: '5px',
             'box-sizing': 'border-box',
           },
           [
-            (intermediate = createElement(
+            (intermediate = createElementWithStyle(
               'div',
               {
                 width: '300px',
@@ -679,14 +679,14 @@ describe('position-absolute', () => {
                 'box-sizing': 'border-box',
               },
               [
-                createElement(
+                createElementWithStyle(
                   'div',
                   {
                     padding: '5px',
                     'box-sizing': 'border-box',
                   },
                   [
-                    (target = createElement(
+                    (target = createElementWithStyle(
                       'div',
                       {
                         'background-color': 'green',
@@ -695,13 +695,13 @@ describe('position-absolute', () => {
                       },
                       [createText(`TTT`)]
                     )),
-                    (noLayout1 = createElement('div', {
+                    (noLayout1 = createElementWithStyle('div', {
                       padding: '5px',
                       'box-sizing': 'border-box',
                     })),
                   ]
                 ),
-                (noLayout2 = createElement('div', {
+                (noLayout2 = createElementWithStyle('div', {
                   padding: '5px',
                   'box-sizing': 'border-box',
                 })),
@@ -719,14 +719,14 @@ describe('position-absolute', () => {
     let p;
     let target;
     let ul;
-    p = createElement(
+    p = createElementWithStyle(
       'p',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    ul = createElement(
+    ul = createElementWithStyle(
       'ul',
       {
         margin: '0',
@@ -737,18 +737,18 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        createElement(
+        createElementWithStyle(
           'li',
           {
             'box-sizing': 'border-box',
             position: 'relative',
           },
           [
-            createElement('div', {
+            createElementWithStyle('div', {
               'box-sizing': 'border-box',
               height: '50px',
             }),
-            (target = createElement('div', {
+            (target = createElementWithStyle('div', {
               position: 'absolute',
               width: '100px',
               height: '100px',
@@ -771,14 +771,14 @@ describe('position-absolute', () => {
     let div;
     let target;
     let container;
-    div = createElement(
+    div = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -789,13 +789,13 @@ describe('position-absolute', () => {
         overflow: 'auto',
       },
       [
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           position: 'absolute',
           width: '50px',
           height: '50px',
           'box-sizing': 'border-box',
         })),
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           height: '100px',
           'background-color': 'green',
@@ -816,14 +816,14 @@ describe('position-absolute', () => {
     let container;
     let scrollable;
     let green;
-    div = createElement(
+    div = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    scrollable = createElement(
+    scrollable = createElementWithStyle(
       'div',
       {
         width: '100px',
@@ -831,7 +831,7 @@ describe('position-absolute', () => {
         'box-sizing': 'border-box',
       },
       [
-        (container = createElement(
+        (container = createElementWithStyle(
           'div',
           {
             width: '100px',
@@ -841,7 +841,7 @@ describe('position-absolute', () => {
             'box-sizing': 'border-box',
           },
           [
-            (target = createElement('div', {
+            (target = createElementWithStyle('div', {
               position: 'absolute',
               width: '50px',
               height: '20px',
@@ -852,7 +852,7 @@ describe('position-absolute', () => {
         )),
       ]
     );
-    green = createElement('div', {
+    green = createElementWithStyle('div', {
       width: '100px',
       height: '50px',
       'background-color': 'green',
@@ -871,14 +871,14 @@ describe('position-absolute', () => {
     let target1;
     let target2;
     let div;
-    p = createElement(
+    p = createElementWithStyle(
       'p',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    div = createElement(
+    div = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
@@ -889,14 +889,14 @@ describe('position-absolute', () => {
         position: 'relative',
       },
       [
-        createElement(
+        createElementWithStyle(
           'div',
           {
             'box-sizing': 'border-box',
             position: 'relative',
           },
           [
-            createElement(
+            createElementWithStyle(
               'div',
               {
                 'box-sizing': 'border-box',
@@ -907,7 +907,7 @@ describe('position-absolute', () => {
                 overflow: 'hidden',
               },
               [
-                (target1 = createElement('div', {
+                (target1 = createElementWithStyle('div', {
                   'box-sizing': 'border-box',
                   position: 'absolute',
                   width: '100px',
@@ -916,7 +916,7 @@ describe('position-absolute', () => {
                 })),
               ]
             ),
-            (target2 = createElement('div', {
+            (target2 = createElementWithStyle('div', {
               'box-sizing': 'border-box',
               position: 'absolute',
               width: '100px',
@@ -937,7 +937,7 @@ describe('position-absolute', () => {
   });
   xit('dynamic-relayout-002', async () => {
     let target;
-    target = createElement(
+    target = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
@@ -949,7 +949,7 @@ describe('position-absolute', () => {
         border: '25px solid green',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           position: 'absolute',
           top: '0',
@@ -970,7 +970,7 @@ describe('position-absolute', () => {
   it('dynamic-static-position-inline', async () => {
     let target;
     let div;
-    div = createElement(
+    div = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
@@ -978,14 +978,14 @@ describe('position-absolute', () => {
         'line-height': '0',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           width: '100px',
           height: '50px',
           display: 'inline-block',
           'background-color': 'green',
         }),
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           'box-sizing': 'border-box',
           width: '100px',
           height: '50px',
@@ -1008,14 +1008,14 @@ describe('position-absolute', () => {
     let target;
     let cover;
     let container;
-    p = createElement(
+    p = createElementWithStyle(
       'p',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -1026,13 +1026,13 @@ describe('position-absolute', () => {
         height: '100px',
       },
       [
-        (block = createElement('div', {
+        (block = createElementWithStyle('div', {
           'background-color': 'green',
           height: '40px',
           'margin-bottom': '20px',
           'box-sizing': 'border-box',
         })),
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           position: 'absolute',
           'background-color': 'green',
           width: '80px',
@@ -1041,7 +1041,7 @@ describe('position-absolute', () => {
           left: 'initial',
           'box-sizing': 'border-box',
         })),
-        (cover = createElement('div', {
+        (cover = createElementWithStyle('div', {
           position: 'absolute',
           'background-color': 'green',
           width: '80px',
@@ -1066,14 +1066,14 @@ describe('position-absolute', () => {
     let target;
     let cover;
     let container;
-    p = createElement(
+    p = createElementWithStyle(
       'p',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -1084,13 +1084,13 @@ describe('position-absolute', () => {
         height: '100px',
       },
       [
-        createElement(
+        createElementWithStyle(
           'div',
           {
             'box-sizing': 'border-box',
           },
           [
-            (block = createElement('div', {
+            (block = createElementWithStyle('div', {
               'background-color': 'green',
               height: '40px',
               'margin-bottom': '20px',
@@ -1098,7 +1098,7 @@ describe('position-absolute', () => {
             })),
           ]
         ),
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           position: 'absolute',
           'background-color': 'green',
           width: '80px',
@@ -1107,7 +1107,7 @@ describe('position-absolute', () => {
           left: 'initial',
           'box-sizing': 'border-box',
         })),
-        (cover = createElement('div', {
+        (cover = createElementWithStyle('div', {
           position: 'absolute',
           'background-color': 'green',
           width: '80px',
@@ -1131,14 +1131,14 @@ describe('position-absolute', () => {
     let p;
     let target;
     let container;
-    p = createElement(
+    p = createElementWithStyle(
       'p',
       {
         'box-sizing': 'border-box',
       },
       [createText(`Test passes if there is a filled green square.`)]
     );
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -1149,7 +1149,7 @@ describe('position-absolute', () => {
         height: '100px',
       },
       [
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           position: 'absolute',
           'background-color': 'green',
           width: '80px',
@@ -1173,20 +1173,20 @@ describe('position-absolute', () => {
   it('in-inline-001', async () => {
     let target;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'span',
       {
         'box-sizing': 'border-box',
         position: 'relative',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           width: '100px',
           height: '100px',
           'background-color': 'red',
         }),
-        (target = createElement('div', {
+        (target = createElementWithStyle('div', {
           'box-sizing': 'border-box',
           position: 'absolute',
           left: '0',
@@ -1205,14 +1205,14 @@ describe('position-absolute', () => {
     let split;
     let containerSpan;
     let outerSpan;
-    outerSpan = createElement(
+    outerSpan = createElementWithStyle(
       'span',
       {
         'box-sizing': 'border-box',
       },
       [
         createText(`outer span`),
-        (containerSpan = createElement(
+        (containerSpan = createElementWithStyle(
           'span',
           {
             position: 'relative',
@@ -1221,7 +1221,7 @@ describe('position-absolute', () => {
           },
           [
             createText(`container span start`),
-            (split = createElement('div', {
+            (split = createElementWithStyle('div', {
               width: '10px',
               height: '10px',
               'box-sizing': 'border-box',
@@ -1240,13 +1240,13 @@ describe('position-absolute', () => {
     let target;
     let split;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
       },
       [
-        (split = createElement(
+        (split = createElementWithStyle(
           'span',
           {
             'box-sizing': 'border-box',
@@ -1255,20 +1255,20 @@ describe('position-absolute', () => {
           },
           [
             createText(`AAA`),
-            createElement(
+            createElementWithStyle(
               'div',
               {
                 'box-sizing': 'border-box',
                 display: 'flex',
               },
               [
-                createElement(
+                createElementWithStyle(
                   'span',
                   {
                     'box-sizing': 'border-box',
                   },
                   [
-                    (target = createElement(
+                    (target = createElementWithStyle(
                       'span',
                       {
                         'box-sizing': 'border-box',
@@ -1296,14 +1296,14 @@ describe('position-absolute', () => {
     let imageWrapper;
     let contentWrapper;
     let container;
-    container = createElement(
+    container = createElementWithStyle(
       'div',
       {
         position: 'relative',
         'box-sizing': 'border-box',
       },
       [
-        (imageWrapper = createElement(
+        (imageWrapper = createElementWithStyle(
           'div',
           {
             display: 'flex',
@@ -1313,7 +1313,7 @@ describe('position-absolute', () => {
             'box-sizing': 'border-box',
           },
           [
-            (target = createElement('img', {
+            (target = createElementWithStyle('img', {
               display: 'block',
               'min-height': '100%',
               opacity: '0.5',
@@ -1321,7 +1321,7 @@ describe('position-absolute', () => {
             })),
           ]
         )),
-        (contentWrapper = createElement(
+        (contentWrapper = createElementWithStyle(
           'div',
           {
             'margin-left': '30%',

@@ -14,7 +14,7 @@ describe('Box border', () => {
   });
 
   it('test pass if there is a hollow black square', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       border: '25px',
@@ -26,7 +26,7 @@ describe('Box border', () => {
   });
 
   xit('dashed border', async () => {
-    const div = createElement('div', {
+    const div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       border: '2px dashed red',
@@ -36,7 +36,7 @@ describe('Box border', () => {
   });
 
   xit('dashed with backgroundColor', async () => {
-    const div = createElement('div', {
+    const div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       border: '10px dashed red',
@@ -47,7 +47,7 @@ describe('Box border', () => {
   });
 
   it('border-bottom-left-radius', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       'border-bottom-left-radius': '100px',
@@ -58,7 +58,7 @@ describe('Box border', () => {
   });
 
   it('border-bottom-right-radius', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       'border-bottom-right-radius': '100px',
@@ -69,7 +69,7 @@ describe('Box border', () => {
   });
 
   it('border-top-left-radius', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       'border-top-left-radius': '100px',
@@ -80,7 +80,7 @@ describe('Box border', () => {
   });
 
   it('border-top-right-radius', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       'border-top-right-radius': '100px',
@@ -91,7 +91,7 @@ describe('Box border', () => {
   });
 
   it('border radius with absolute', async () => {
-    let red = createElement('div', {
+    let red = createElementWithStyle('div', {
       position: 'absolute',
       width: '100px',
       height: '100px',
@@ -99,7 +99,7 @@ describe('Box border', () => {
       left: '50px',
       backgroundColor: 'red',
     });
-    let green = createElement('div', {
+    let green = createElementWithStyle('div', {
       position: 'absolute',
       top: '50px',
       left: '50px',
@@ -108,7 +108,7 @@ describe('Box border', () => {
       borderRadius: '50px',
       backgroundColor: 'green',
     });
-    let container = createElement('div', {
+    let container = createElementWithStyle('div', {
       width: '200px',
       height: '200px',
       position: 'absolute',

@@ -3,7 +3,7 @@ describe('fixed-z', () => {
   it('index-blend', async () => {
     let background;
     let text;
-    background = createElement('div', {
+    background = createElementWithStyle('div', {
       position: 'fixed',
       'z-index': '1',
       top: '0',
@@ -12,7 +12,7 @@ describe('fixed-z', () => {
       right: '0',
       opacity: '1',
     });
-    text = createElement(
+    text = createElementWithStyle(
       'div',
       {
         position: 'relative',
@@ -23,11 +23,11 @@ describe('fixed-z', () => {
         'font-size': '50px',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           width: '100px',
           height: '50px',
         }),
-        createElement('div', {
+        createElementWithStyle('div', {
           'background-color': 'green',
           width: '100px',
           height: '100px',
@@ -49,11 +49,11 @@ describe('fixed-z', () => {
   it('index-blend-ref', async () => {
     let div;
     let div_1;
-    div = createElement('div', {
+    div = createElementWithStyle('div', {
       width: '100px',
       height: '400px',
     });
-    div_1 = createElement('div', {
+    div_1 = createElementWithStyle('div', {
       'background-color': 'green',
       width: '100px',
       height: '100px',

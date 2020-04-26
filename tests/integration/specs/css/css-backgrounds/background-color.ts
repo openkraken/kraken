@@ -12,7 +12,7 @@ describe('Background-color', () => {
   });
 
   xit('red with display none', async () => {
-    const div = createElement('div', {
+    const div = createElementWithStyle('div', {
       backgroundColor: 'red',
       display: 'none',
       width: '100px',
@@ -28,7 +28,7 @@ describe('Background-color', () => {
       await matchScreenshot();
       done();
     };
-    const div = createElement('div', {
+    const div = createElementWithStyle('div', {
       backgroundColor: 'red',
       width: '100px',
       height: '100px',
@@ -37,12 +37,12 @@ describe('Background-color', () => {
   });
 
   it('image overlay red', async () => {
-    let red = createElement('div', {
+    let red = createElementWithStyle('div', {
       width: '60px',
       height: '60px',
       backgroundColor: 'red',
     });
-    let green = createElement('div', {
+    let green = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       position: 'relative',

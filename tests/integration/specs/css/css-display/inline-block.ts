@@ -19,12 +19,12 @@ describe('Display inline-block', () => {
   });
 
   xit('inline-block box constraint is tight', async () => {
-    let magenta = createElement('div', {
+    let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
     });
     // append(wrapper, magenta);
-    let box = createElement('div', {
+    let box = createElementWithStyle('div', {
       border: '10px solid cyan',
       padding: '15px',
       margin: '20px 0px',
@@ -37,11 +37,11 @@ describe('Display inline-block', () => {
   });
 
   xit('inline-block nest inline-block should behavior like inline-block', async () => {
-    let magenta = createElement('div', {
+    let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
     });
-    let box = createElement('div', {
+    let box = createElementWithStyle('div', {
       border: '10px solid cyan',
       padding: '15px',
       margin: '20px 0px',
@@ -54,11 +54,11 @@ describe('Display inline-block', () => {
   });
 
   xit('inline-block nest block should behavior like inline-block', async () => {
-    let magenta = createElement('div', {
+    let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
     });
-    let box = createElement('div', {
+    let box = createElementWithStyle('div', {
       border: '10px solid cyan',
       padding: '15px',
       margin: '20px 0px',
@@ -82,15 +82,15 @@ describe('Display inline-block', () => {
       display: 'inline-block'
     };
 
-    let container = createElement('div', containerStyle, [
-      createElement('div', divStyle, createText('Several ')),
-      createElement('div', divStyle, createText(' inline elements')),
+    let container = createElementWithStyle('div', containerStyle, [
+      createElementWithStyle('div', divStyle, createText('Several ')),
+      createElementWithStyle('div', divStyle, createText(' inline elements')),
       createText(' are '),
-      createElement('div', divStyle, createText('in this')),
+      createElementWithStyle('div', divStyle, createText('in this')),
       createText(' sentence.')
     ]);
 
-    let container2 = createElement('div', containerStyle, [
+    let container2 = createElementWithStyle('div', containerStyle, [
       createText('Several inline elements are in this sentence.')
     ]);
 

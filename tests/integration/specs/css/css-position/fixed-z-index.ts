@@ -1,21 +1,21 @@
 describe('fixed-z-index', () => {
   it('blend', async () => {
-    let container = createElement('div', {}, [
-      createElement('div', {
+    let container = createElementWithStyle('div', {}, [
+      createElementWithStyle('div', {
         display: 'block',
         position: 'fixed',
         zIndex: 2,
         width: '100px',
         height: '100px'
       }),
-      createElement('div', {
+      createElementWithStyle('div', {
         position: 'fixed',
         zIndex: 1,
         width: '100px',
         height: '100px',
         opacity: 1
       }),
-      createElement('div', {
+      createElementWithStyle('div', {
         position: 'relative',
         zIndex: 3,
         overflow: 'hidden',
@@ -23,7 +23,7 @@ describe('fixed-z-index', () => {
         height: '100vh',
         fontSize: '50px'
       }, [
-        createElement('div', {
+        createElementWithStyle('div', {
           width: '10px',
           height: '10px',
           backgroundColor: 'red'

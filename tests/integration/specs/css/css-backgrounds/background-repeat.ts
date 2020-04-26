@@ -98,7 +98,7 @@ describe('background-repeat', () => {
   });
 
   xit('round', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '220px',
       height: '220px',
       backgroundColor: 'red',
@@ -112,7 +112,7 @@ describe('background-repeat', () => {
   });
 
   xit('no-repeat will stop round to repeat', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '220px',
       height: '220px',
       backgroundColor: 'red',

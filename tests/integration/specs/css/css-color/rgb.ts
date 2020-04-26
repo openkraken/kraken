@@ -11,7 +11,7 @@ describe('Color RGB and RGBA', () => {
 
   COLORS.forEach(value => {
     it(`should work with ${value}`, () => {
-      const div = createElement(
+      const div = createElementWithStyle(
         'div',
         {
           width: '100px',

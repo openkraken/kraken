@@ -3,7 +3,7 @@ describe('z-index', () => {
   it('blend-will-change-overlapping-layers', async () => {
     let div;
     let div_1;
-    div = createElement(
+    div = createElementWithStyle(
       'div',
       {
         'box-sizing': 'border-box',
@@ -12,7 +12,7 @@ describe('z-index', () => {
         height: '50vh',
       },
       [
-        createElement('div', {
+        createElementWithStyle('div', {
           'box-sizing': 'border-box',
           'will-change': 'transform',
           position: 'absolute',
@@ -23,7 +23,7 @@ describe('z-index', () => {
         }),
       ]
     );
-    div_1 = createElement('div', {
+    div_1 = createElementWithStyle('div', {
       'box-sizing': 'border-box',
       'z-index': '1',
       position: 'relative',

@@ -3,7 +3,7 @@ xdescribe('Text TextIndent', () => {
 
   TEXT_INDENT.forEach(value => {
     it(`should work with ${value}`, () => {
-      const cont = createElement(
+      const cont = createElementWithStyle(
         'div',
         {
           margin: '10px',

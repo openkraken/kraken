@@ -27,7 +27,7 @@ describe('FontWeight', () => {
 
   WEIGHTS.forEach(value => {
     it(`should work with ${value}`, () => {
-      const p1 = createElement(
+      const p1 = createElementWithStyle(
         'p',
         {
           fontSize: '24px',
@@ -35,7 +35,7 @@ describe('FontWeight', () => {
         },
         createText(`These text weight should be ${value}.`)
       );
-      const p2 = createElement(
+      const p2 = createElementWithStyle(
         'p',
         {
           fontSize: '24px',

@@ -28,12 +28,12 @@ describe('Position relative', () => {
   });
 
   xit('should be a green square below', async done => {
-    let parent = createElement('div', {
+    let parent = createElementWithStyle('div', {
       width: '150px',
       height: '150px',
       backgroundColor: 'green',
     });
-    let child = createElement('div', {
+    let child = createElementWithStyle('div', {
       width: '150px',
       height: '150px',
       backgroundColor: 'white',

@@ -3,7 +3,7 @@ describe('Text LetterSpacing', () => {
 
   LETTER_SPACING.forEach(value => {
     it(`should work with ${value}`, () => {
-      const cont = createElement(
+      const cont = createElementWithStyle(
         'div',
         {
           margin: '10px',

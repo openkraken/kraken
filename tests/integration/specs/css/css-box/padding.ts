@@ -24,7 +24,7 @@ describe('Box padding', () => {
   });
 
   it('should work with background-color', async () => {
-    let div = createElement('div', {
+    let div = createElementWithStyle('div', {
       width: '200px',
       height: '200px',
       backgroundColor: 'yellow',
@@ -32,7 +32,7 @@ describe('Box padding', () => {
       padding: '15px',
     });
     append(BODY, div);
-    let box = createElement('div', {
+    let box = createElementWithStyle('div', {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
