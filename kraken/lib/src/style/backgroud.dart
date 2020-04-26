@@ -380,7 +380,7 @@ mixin BackgroundMixin {
         }
       }
       backgroundImage = DecorationImage(
-        image: NetworkImage(url),
+        image: WebImage.generatorImage(url),
         repeat: imageRepeat,
         alignment: position.alignment,
         fit: boxFit);
