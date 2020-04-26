@@ -20,12 +20,12 @@ class Window extends EventTarget {
   }
 
   void _handleColorSchemeChange(Event event) {
-    String json = jsonEncode([WINDOW_ID, event]);
+    String json = jsonEncode([targetId, event]);
     emitUIEvent(json);
   }
 
   void _handleLoad(Event event) {
-    String json = jsonEncode([WINDOW_ID, event]);
+    String json = jsonEncode([targetId, event]);
     emitUIEvent(json);
   }
 

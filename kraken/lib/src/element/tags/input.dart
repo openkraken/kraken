@@ -112,7 +112,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   InputElement(
-    int nodeId,
+    int targetId,
     Map<String, dynamic> properties,
     List<String> events, {
     this.textAlign = TextAlign.left,
@@ -120,7 +120,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.minLines = 1,
     this.maxLines = 1,
   }) : super(
-    nodeId: nodeId,
+    targetId: targetId,
     tagName: INPUT,
     defaultDisplay: 'inline-block',
     allowChildren: false,

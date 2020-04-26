@@ -161,13 +161,146 @@ describe('Position absolute', () => {
     await matchScreenshot();
   });
 
+  it('with no left in flex layout', async () => {
+    const div = create('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '50px',
+        height: '50px',
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+        top: 0,
+      }),
+      create('div', {
+        width: '40px',
+        height: '40px',
+        backgroundColor: 'brown',
+        position: 'absolute',
+        border: '2px solid #000',
+        top: 0,
+      })
+    ]);
+
+    append(BODY, div);
+    await matchScreenshot();
+  });
+
+  it('with no top in flex layout', async () => {
+    const div = create('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '50px',
+        height: '50px',
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+        left: 0,
+      }),
+      create('div', {
+        width: '40px',
+        height: '40px',
+        backgroundColor: 'brown',
+        position: 'absolute',
+        border: '2px solid #000',
+        left: 0,
+      })
+    ]);
+
+    append(BODY, div);
+    await matchScreenshot();
+  });
+
+  it('with no left and top in flex layout', async () => {
+    const div = create('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '50px',
+        height: '50px',
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+      }),
+      create('div', {
+        width: '40px',
+        height: '40px',
+        backgroundColor: 'brown',
+        position: 'absolute',
+        border: '2px solid #000',
+      })
+    ]);
+
+    append(BODY, div);
+    await matchScreenshot();
+  });
+
   it('works with dynamic change bottom property', async (done) => {
     const div = document.createElement('div');
     div.style.width = '300px';
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.bottom = '100px';
       await matchScreenshot();
@@ -178,7 +311,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });
@@ -189,7 +322,7 @@ describe('Position absolute', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.width = '100px';
       await matchScreenshot();
@@ -200,7 +333,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });
@@ -211,7 +344,7 @@ describe('Position absolute', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.height = '100px';
       await matchScreenshot();
@@ -222,7 +355,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });
@@ -233,7 +366,7 @@ describe('Position absolute', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.top = '100px';
       await matchScreenshot();
@@ -244,7 +377,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });
@@ -255,7 +388,7 @@ describe('Position absolute', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.left = '100px';
       await matchScreenshot();
@@ -266,7 +399,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });
@@ -277,7 +410,7 @@ describe('Position absolute', () => {
     div.style.height = '300px';
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
-    
+
     setTimeout(async () => {
       div.style.right = '100px';
       await matchScreenshot();
@@ -288,7 +421,7 @@ describe('Position absolute', () => {
       await matchScreenshot();
       done();
     }, 300);
-    
+
     document.body.appendChild(div);
     await matchScreenshot();
   });

@@ -19,17 +19,21 @@ class RenderTextBox extends RenderBox
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
 
   RenderTextBox({
-    this.nodeId,
+    this.targetId,
     String text,
     StyleDeclaration style,
   }) : assert(text != null) {
     _text = text;
     _style = style;
 
+    TextOverflow overflow = _isTextOverflowEllipsis() ?
+        TextOverflow.ellipsis : TextOverflow.clip;
+
     _renderParagraph = RenderParagraph(
       createTextSpanWithStyle(text, style),
       textAlign: getTextAlignFromStyle(style),
       textDirection: TextDirection.ltr,
+      overflow: overflow,
     );
     add(_renderParagraph);
   }
@@ -41,7 +45,7 @@ class RenderTextBox extends RenderBox
   }
 
   RenderParagraph _renderParagraph;
-  int nodeId;
+  int targetId;
   String _text;
   String get text => _text;
   set text(String newText) {
@@ -56,6 +60,15 @@ class RenderTextBox extends RenderBox
     _rebuild();
   }
 
+  bool _isTextOverflowEllipsis() {
+    String overflowX = style['overflowX'] != '' ?
+      style['overflowX'] : style['overflow'];
+
+    return overflowX != 'visible' &&
+      style['whiteSpace'] == 'nowrap' &&
+      style['textOverflow'] == 'ellipsis';
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
@@ -67,13 +80,16 @@ class RenderTextBox extends RenderBox
   void performLayout() {
     RenderBox child = firstChild;
 
-    // @TODO when in flex-grow or flex-shrink width needs to be recalulated
-    Node currentNode = nodeMap[nodeId];
+    // @TODO when in flex-grow or flex-shrink width needs to be recalculated
+    Node currentNode = getEventTargetByTargetId<Node>(targetId);
     Element parentNode = currentNode.parentNode;
-    double elementWidth = getElementWidth(parentNode.nodeId);
+    double elementWidth = getElementWidth(parentNode.targetId);
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
-      if (elementWidth != null) {
+
+      if (_isTextOverflowEllipsis() ||
+          (style['whiteSpace'] != 'nowrap' && elementWidth != null)
+      ) {
         additionalConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: elementWidth,

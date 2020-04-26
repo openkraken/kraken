@@ -162,9 +162,9 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  CameraPreviewElement(int nodeId, Map<String, dynamic> props, List<String> events)
+  CameraPreviewElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
-          nodeId: nodeId,
+          targetId: targetId,
           defaultDisplay: 'block',
           tagName: CAMERA,
           properties: props,

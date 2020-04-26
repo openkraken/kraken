@@ -8,11 +8,11 @@ class AudioElement extends Element {
   String audioSrc;
 
   AudioElement(
-    int nodeId,
+    int targetId,
     Map<String, dynamic> props,
     List<String> events
   ) : super(
-    nodeId: nodeId,
+    targetId: targetId,
     defaultDisplay: 'block',
     allowChildren: false,
     tagName: AUDIO,

@@ -100,7 +100,7 @@ class RenderFlexLayout extends RenderBox
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline = TextBaseline.alphabetic,
-    this.nodeId,
+    this.targetId,
     this.style,
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
@@ -120,7 +120,7 @@ class RenderFlexLayout extends RenderBox
   StyleDeclaration style;
 
   // id of current element
-  int nodeId;
+  int targetId;
 
   /// The direction to use as the main axis.
   Axis get direction => _direction;
@@ -465,15 +465,15 @@ class RenderFlexLayout extends RenderBox
 
   double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
     double totalExtent = 0;
-    childSizeMap.forEach((nodeId, item) {
+    childSizeMap.forEach((targetId, item) {
       totalExtent += item['flexShrink'] * item['size'];
     });
 
     int childNodeId;
     if (child is RenderTextBox) {
-      childNodeId = child.nodeId;
+      childNodeId = child.targetId;
     } else if (child is RenderElementBoundary) {
-      childNodeId = child.nodeId;
+      childNodeId = child.targetId;
     }
     dynamic current = childSizeMap[childNodeId];
     double currentExtent = current['flexShrink'] * current['size'];
@@ -539,10 +539,24 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void performLayout() {
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderFlexParentData childParentData = child.parentData;
+      // Layout placeholder renderObject of positioned element(absolute/fixed) in new layer
+      if (child is RenderConstrainedBox) {
+        _layoutChildren(child);
+      }
+      child = childParentData.nextSibling;
+    }
+    // Layout non placeholder renderObject
+    _layoutChildren(null);
+  }
+
+  void _layoutChildren(RenderConstrainedBox placeholderChild) {
     assert(_debugHasNecessaryDirections);
 
-    double elementWidth = getElementWidth(nodeId);
-    double elementHeight = getElementHeight(nodeId);
+    double elementWidth = getElementWidth(targetId);
+    double elementHeight = getElementHeight(targetId);
 
     // If no child exists, stop layout.
     if (firstChild == null) {
@@ -577,10 +591,16 @@ class RenderFlexLayout extends RenderBox
     double crossSize = 0.0;
     double allocatedSize =
         0.0; // Sum of the sizes of the children.
-    RenderBox child = firstChild;
+    RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
+      // Exclude placeholder renderObject when layout non placeholder object
+      if (placeholderChild == null && child is RenderConstrainedBox) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
       totalChildren++;
       final int flexGrow = _getFlexGrow(child);
       final int flexShrink = _getFlexShrink(child);
@@ -695,9 +715,9 @@ class RenderFlexLayout extends RenderBox
 
       int childNodeId;
       if (child is RenderTextBox) {
-        childNodeId = child.nodeId;
+        childNodeId = child.targetId;
       } else if (child is RenderElementBoundary) {
-        childNodeId = child.nodeId;
+        childNodeId = child.targetId;
       }
 
       childSizeMap[childNodeId] = {
@@ -706,7 +726,9 @@ class RenderFlexLayout extends RenderBox
       };
 
       assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
+
+      // Only layout placeholder renderObject child
+      child = placeholderChild == null ? childParentData.nextSibling : null;
     }
 
     // Distribute free space to flexible children, and determine baseline.
@@ -721,10 +743,16 @@ class RenderFlexLayout extends RenderBox
       allocatedSize = 0;
       final double spacePerFlex =
           canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
-      child = firstChild;
+      child = placeholderChild != null ? placeholderChild : firstChild;
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
       while (child != null) {
+        final RenderFlexParentData childParentData = child.parentData;
+        // Exclude placeholder renderObject when layout non placeholder object
+        if (placeholderChild == null && child is RenderConstrainedBox) {
+          child = childParentData.nextSibling;
+          continue;
+        }
         if (isFlexGrow || isFlexShrink) {
           double maxChildExtent;
           double minChildExtent;
@@ -744,9 +772,9 @@ class RenderFlexLayout extends RenderBox
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
             int childNodeId;
             if (child is RenderTextBox) {
-              childNodeId = child.nodeId;
+              childNodeId = child.targetId;
             } else if (child is RenderElementBoundary) {
-              childNodeId = child.nodeId;
+              childNodeId = child.targetId;
             }
             dynamic current = childSizeMap[childNodeId];
             minChildExtent = maxChildExtent = current['size'] + shrinkValue;
@@ -817,8 +845,8 @@ class RenderFlexLayout extends RenderBox
             crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
           }
         }
-        final RenderFlexParentData childParentData = child.parentData;
-        child = childParentData.nextSibling;
+        // Only layout placeholder renderObject child
+        child = placeholderChild == null ? childParentData.nextSibling : null;
       }
     }
 
@@ -904,9 +932,14 @@ class RenderFlexLayout extends RenderBox
     // Position elements
     double childMainPosition =
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    child = firstChild;
+    child = placeholderChild != null ? placeholderChild : firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
+      // Exclude placeholder renderObject when layout non placeholder object
+      if (placeholderChild == null && child is RenderConstrainedBox) {
+        child = childParentData.nextSibling;
+        continue;
+      }
       double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -947,10 +980,10 @@ class RenderFlexLayout extends RenderBox
 
       StyleDeclaration childStyle;
       if (child is RenderTextBox) {
-        childStyle = nodeMap[nodeId].style;
+        childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
       } else if (child is RenderElementBoundary) {
-        int childNodeId = child.nodeId;
-        childStyle = nodeMap[childNodeId].style;
+        int childNodeId = child.targetId;
+        childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
       ///apply position relative offset change
@@ -961,7 +994,8 @@ class RenderFlexLayout extends RenderBox
       } else {
         childMainPosition += _getMainSize(child) + betweenSpace;
       }
-      child = childParentData.nextSibling;
+      // Only layout placeholder renderObject child
+      child = placeholderChild == null ? childParentData.nextSibling : null;
     }
   }
 
@@ -972,7 +1006,15 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderFlexParentData childParentData = child.parentData as RenderFlexParentData;
+      // Don't paint placeholder of positioned element
+      if (child is! RenderConstrainedBox) {
+        context.paintChild(child, childParentData.offset + offset);
+      }
+      child = childParentData.nextSibling;
+    }
   }
 
   @override

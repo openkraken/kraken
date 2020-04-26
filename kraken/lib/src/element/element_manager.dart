@@ -41,8 +41,6 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
   }
 }
 
-Map<int, dynamic> nodeMap = {};
-
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;
 
@@ -52,8 +50,8 @@ class ElementManagerActionDelegate {
   ElementManagerActionDelegate() {
     rootElement = BodyElement(BODY_ID);
     _root = rootElement.renderObject;
-    nodeMap[BODY_ID] = rootElement;
-    nodeMap[WINDOW_ID] = Window();
+    setEventTarget(rootElement);
+    setEventTarget(Window());
   }
 
   RenderBox _root;
@@ -65,9 +63,7 @@ class ElementManagerActionDelegate {
   }
 
   void createElement(int id, String type, Map<String, dynamic> props, List events) {
-    if (nodeMap.containsKey(id)) {
-      throw Exception('ERROR: Can not create element with same id "$id"');
-    }
+    assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
     if (events != null) {
@@ -77,31 +73,31 @@ class ElementManagerActionDelegate {
       }
     }
 
-    nodeMap[id] = _createElement(id, type, props, eventList);
+    setEventTarget(_createElement(id, type, props, eventList));
   }
 
   void createTextNode(int id, String data) {
     TextNode textNode = TextNode(id, data);
-    nodeMap[id] = textNode;
+    setEventTarget(textNode);
   }
 
   void createComment(int id, String data) {
-    nodeMap[id] = Comment(id, data);
+    setEventTarget(Comment(id, data));
   }
 
   void removeNode(int targetId) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId');
+    assert(existsTarget(targetId), 'targetId: $targetId');
 
-    Node target = nodeMap[targetId];
+    Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
     target?.parentNode?.removeChild(target);
-    nodeMap.remove(targetId);
+    removeTarget(targetId);
   }
 
   void setProperty(int targetId, String key, value) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId key: $key value: $value');
-    Node target = nodeMap[targetId];
+    assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
+    Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
     if (target is Element) {
@@ -115,8 +111,8 @@ class ElementManagerActionDelegate {
   }
 
   void removeProperty(int targetId, String key) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId key: $key');
-    Node target = nodeMap[targetId];
+    assert(existsTarget(targetId), 'targetId: $targetId key: $key');
+    Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
     if (target is Element) {
@@ -127,8 +123,8 @@ class ElementManagerActionDelegate {
   }
 
   void setStyle(int targetId, String key, value) {
-    assert(nodeMap.containsKey(targetId), 'id: $targetId key: $key value: $value');
-    Node target = nodeMap[targetId];
+    assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
+    Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
     if (target is Element) {
@@ -145,12 +141,11 @@ class ElementManagerActionDelegate {
   ///   <!-- beforeend -->
   /// </p>
   /// <!-- afterend -->
-  void insertAdjacentNode(int targetId, String position, int nodeId) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId position: $position nodeId: $nodeId');
-    assert(nodeMap.containsKey(nodeId));
+  void insertAdjacentNode(int targetId, String position, int newTargetId) {
+    assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
 
-    Node target = nodeMap[targetId];
-    Node newNode = nodeMap[nodeId];
+    Node target = getEventTargetByTargetId<Node>(targetId);
+    Node newNode = getEventTargetByTargetId<Node>(newTargetId);
 
     switch (position) {
       case 'beforebegin':
@@ -178,26 +173,26 @@ class ElementManagerActionDelegate {
   }
 
   void addEvent(int targetId, String eventName) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId event: $eventName');
+    assert(existsTarget(targetId), 'targetId: $targetId event: $eventName');
 
-    EventTarget target = nodeMap[targetId];
+    EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
 
     target.addEvent(eventName);
   }
 
   void removeEvent(int targetId, String eventName) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId event: $eventName');
+    assert(existsTarget(targetId), 'targetId: $targetId event: $eventName');
 
-    Element target = nodeMap[targetId];
+    Element target = getEventTargetByTargetId<Element>(targetId);
     assert(target != null);
 
     target.removeEvent(eventName);
   }
 
   method(int targetId, String method, args) {
-    assert(nodeMap.containsKey(targetId), 'targetId: $targetId, method: $method, args: $args');
-    Element target = nodeMap[targetId];
+    assert(existsTarget(targetId), 'targetId: $targetId, method: $method, args: $args');
+    Element target = getEventTargetByTargetId<Element>(targetId);
     List _args;
     try {
       _args = (args as List).cast();
@@ -271,7 +266,7 @@ class ElementManager {
 
   void disconnect() async {
     RendererBinding.instance.renderView.child = null;
-    nodeMap.clear();
+    clearTargets();
     await shutDownVideoPlayer();
     _managerSingleton = ElementManager._();
   }

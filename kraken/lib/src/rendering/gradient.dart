@@ -5,15 +5,15 @@ import 'package:kraken/element.dart';
 import 'package:meta/meta.dart';
 
 class RenderGradient extends RenderDecoratedBox {
-  int _nodeId;
+  int _targetId;
 
   RenderGradient({
-    @required int nodeId,
+    @required int targetId,
     @required Decoration decoration,
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
     RenderBox child,
-  }) : this._nodeId = nodeId,
+  }) : this._targetId = targetId,
         super(decoration: decoration,
           position: position,
           configuration: configuration,
@@ -30,8 +30,8 @@ class RenderGradient extends RenderDecoratedBox {
     if (box is BoxDecoration) {
       Gradient gradient = box.gradient;
       if (gradient is LinearGradient) {
-        dynamic el = nodeMap[_nodeId];
-        if (el is Element) {
+        Element el = getEventTargetByTargetId<Element>(_targetId);
+        if (el != null) {
           double angle = el.linearAngle;
           if (angle != null) {
             double sin = math.sin(angle);

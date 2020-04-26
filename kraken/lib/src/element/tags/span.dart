@@ -9,11 +9,11 @@ const String SPAN = 'SPAN';
 
 class SpanElement extends Element {
   SpanElement(
-    int nodeId,
+    int targetId,
     Map<String, dynamic> props,
     List<String> events,
   ) : super(
-            nodeId: nodeId,
+            targetId: targetId,
             tagName: SPAN,
             defaultDisplay: 'inline',
             properties: props,
