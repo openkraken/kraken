@@ -26,10 +26,10 @@ describe('Baseline-rules flexbox', () => {
   };
 
   xit('synthesized-baseline-flexbox-001', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let canvas = create('div', inlineBoxStyle);
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
       display: 'inline-flex',
     });
@@ -40,15 +40,15 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-002', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let canvas = create('div', inlineBoxStyle);
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'inline-block',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
       display: 'inline-flex',
     });
@@ -59,15 +59,15 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-003', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let canvas = create('div', inlineBoxStyle);
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'inline-block',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
       display: 'flex',
     });
@@ -77,15 +77,15 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-004', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let canvas = create('div', inlineBoxStyle);
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'inline-flex',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
     });
     append(magenta, box);
@@ -94,15 +94,15 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-005', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let canvas = create('div', inlineBoxStyle);
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'inline-block',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
       display: 'flex',
     });
@@ -112,19 +112,19 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-006', async () => {
-    let wrapper = create('div', {
+    let wrapper = createElementWithStyle('div', {
       ...wrapperStyle,
       display: 'flex',
       alignItems: 'baseline',
     });
-    let canvas = create('div', inlineBoxStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'inline-flex',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
     });
     append(magenta, box);
@@ -133,19 +133,19 @@ describe('Baseline-rules flexbox', () => {
   });
 
   xit('synthesized-baseline-flexbox-007', async () => {
-    let wrapper = create('div', {
+    let wrapper = createElementWithStyle('div', {
       ...wrapperStyle,
       display: 'flex',
       alignItems: 'baseline',
     });
-    let canvas = create('div', inlineBoxStyle);
+    let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
-    let magenta = create('div', {
+    let magenta = createElementWithStyle('div', {
       ...magentaDottedBorder,
       display: 'flex',
     });
     append(wrapper, magenta);
-    let box = create('div', {
+    let box = createElementWithStyle('div', {
       ...boxStyle,
     });
     append(magenta, box);

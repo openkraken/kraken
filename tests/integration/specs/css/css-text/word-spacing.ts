@@ -3,7 +3,7 @@ describe('Text WordSpacing', () => {
 
   WORD_SPACING.forEach(value => {
     it(`should work with ${value}`, () => {
-      const cont = create(
+      const cont = createElementWithStyle(
         'div',
         {
           margin: '10px',

@@ -1,6 +1,6 @@
 describe('FontStyle', () => {
   it('should works with normal', () => {
-    const p1 = create(
+    const p1 = createElementWithStyle(
       'p',
       {
         fontStyle: 'normal',
@@ -8,7 +8,7 @@ describe('FontStyle', () => {
       },
       createText('These text should in normal style.')
     );
-    const p2 = create(
+    const p2 = createElementWithStyle(
       'p',
       {
         fontStyle: 'normal',
@@ -23,7 +23,7 @@ describe('FontStyle', () => {
   });
 
   it('should works with italic', () => {
-    const p1 = create(
+    const p1 = createElementWithStyle(
       'p',
       {
         fontStyle: 'italic',
@@ -31,7 +31,7 @@ describe('FontStyle', () => {
       },
       createText('These text should in italic style.')
     );
-    const p2 = create(
+    const p2 = createElementWithStyle(
       'p',
       {
         fontStyle: 'italic',
@@ -46,7 +46,7 @@ describe('FontStyle', () => {
   });
 
   it('should works with oblique', () => {
-    const p1 = create(
+    const p1 = createElementWithStyle(
       'p',
       {
         fontStyle: 'oblique',
@@ -54,7 +54,7 @@ describe('FontStyle', () => {
       },
       createText('These text should in oblique style.')
     );
-    const p2 = create(
+    const p2 = createElementWithStyle(
       'p',
       {
         fontStyle: 'oblique',
