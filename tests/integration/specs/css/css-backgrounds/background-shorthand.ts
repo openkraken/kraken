@@ -1,5 +1,5 @@
 describe('background-shorthand', () => {
-  fit('background image', async () => {
+  it('background image', async () => {
     let div = document.createElement('div');
     setStyle(div, {
       width: '100vw',
