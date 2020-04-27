@@ -5,7 +5,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-// https://drafts.csswg.org/css-text-3/
+// CSS Text: https://drafts.csswg.org/css-text-3/
+// CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
+
 mixin CSSTextMixin {
   static const String COLOR = 'color';
   static const String HEIGHT = 'height';
@@ -255,7 +257,7 @@ mixin CSSTextMixin {
   }
 
   TextBaseline getTextBaseLine(CSSStyleDeclaration style) {
-    return TextBaseline.alphabetic; // TODO: impl vertical-align
+    return TextBaseline.alphabetic; // @TODO: impl vertical-align
   }
 
   static String BUILTIN_FONT_PACKAGE = null;

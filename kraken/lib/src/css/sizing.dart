@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
+
 final RegExp spaceRegExp = RegExp(r' ');
 
 double _getDisplayPortedLength(input) {
@@ -20,7 +22,7 @@ double _getDisplayPortedLength(input) {
   return CSSLength.toDisplayPortValue(input as String);
 }
 
-List<String> baseGetShorttedProperties(String input) {
+List<String> _getShorttedProperties(String input) {
   assert(input != null);
   return input.trim().split(spaceRegExp);
 }
@@ -38,7 +40,7 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
     double paddingRight;
     double paddingBottom;
     if (padding != null) {
-      List<String> splitedpadding = baseGetShorttedProperties(padding);
+      List<String> splitedpadding = _getShorttedProperties(padding);
       if (splitedpadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
             paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
@@ -81,7 +83,6 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
   return Padding(left, top, right, bottom);
 }
 
-/// https://drafts.csswg.org/css-sizing-3/
 /// - width
 /// - height
 /// - max-width
@@ -100,9 +101,9 @@ mixin CSSSizingMixin {
     return _getDisplayPortedLength(input);
   }
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
+  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     if (renderConstrainedBox != null) {
-      Transition allTransition,
+      CSSTransition allTransition,
           widthTransition,
           heightTransition,
           minWidthTransition,
@@ -263,8 +264,8 @@ mixin CSSSizingMixin {
     }
   }
 
-  List<String> getShorttedProperties(String input) {
-    return baseGetShorttedProperties(input);
+  static List<String> getShorttedProperties(String input) {
+    return _getShorttedProperties(input);
   }
 
   RenderObject initRenderMargin(
@@ -338,9 +339,9 @@ mixin CSSSizingMixin {
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     assert(renderMargin != null);
-    Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
+    CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
       margin = transitionMap["margin"];
@@ -461,9 +462,9 @@ mixin CSSSizingMixin {
   }
 
   void updateRenderPadding(CSSStyleDeclaration style,
-      [Map<String, Transition> transitionMap]) {
+      [Map<String, CSSTransition> transitionMap]) {
     assert(renderPadding != null);
-    Transition all,
+    CSSTransition all,
         padding,
         paddingLeft,
         paddingRight,

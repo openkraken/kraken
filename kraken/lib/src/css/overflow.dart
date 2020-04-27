@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Overflow: https://drafts.csswg.org/css-overflow-3/
+
 enum OverflowType {
   auto,
   visible,
@@ -46,7 +48,6 @@ OverflowType _getOverflow(String definition) {
   return OverflowType.visible;
 }
 
-// https://drafts.csswg.org/css-overflow-3/
 mixin CSSOverflowMixin {
   RenderObject _renderObjectX;
   RenderObject _child;

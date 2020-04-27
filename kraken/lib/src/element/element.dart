@@ -418,7 +418,7 @@ class Element extends Node
   }
 
   void _updateOffset({
-    Transition definiteTransition,
+    CSSTransition definiteTransition,
     String property,
     double diff,
     double original
@@ -430,7 +430,7 @@ class Element extends Node
       zIndexParentData = renderElementBoundary.parentData;
       ZIndexParentData progressParentData = zIndexParentData;
 
-      Transition allTransition;
+      CSSTransition allTransition;
       if (transitionMap != null) {
         allTransition = transitionMap['all'];
       }
@@ -439,7 +439,7 @@ class Element extends Node
         assert(diff != null);
         assert(original != null);
 
-        ProgressListener progressListener = (percent) {
+        CSSTransitionProgressListener progressListener = (percent) {
           double newValue = original + diff * percent;
           switch (property) {
             case 'top':
@@ -1099,7 +1099,7 @@ class Element extends Node
   // @TODO(refactor): Need to remove it.
   void _flushStyle() {
     if (transitionMap != null) {
-      for (Transition transition in transitionMap.values) {
+      for (CSSTransition transition in transitionMap.values) {
         initTransitionEvent(transition);
         transition?.apply();
       }
