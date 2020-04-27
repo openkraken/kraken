@@ -65,7 +65,7 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      image = WebImage.generatorImage(src, cache: properties['caching']);
+      image = getImageProviderByUrl(src, cache: properties['caching']);
       _constructImageChild();
     }
   }

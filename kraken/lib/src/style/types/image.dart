@@ -8,21 +8,21 @@ import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 
-class WebImage {
-  static ImageProvider generatorImage(String url, {String cache = 'auto'}) {
-    if (url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')) {
-      url = url.startsWith('//') ? 'https:' + url : url;
-      // @TODO: caching also works after image downloaded
-      if (cache == 'store' || cache == 'auto') {
-        return CachedNetworkImage(url);
-      } else {
-        return NetworkImage(url);
-      }
-    } else if (url.startsWith('file://')) {
-      return FileImage(File.fromUri(Uri.parse(url)));
+
+ImageProvider getImageProviderByUrl(String url, {String cache = 'auto'}) {
+  if (url.startsWith('//') || url.startsWith('http://') ||
+      url.startsWith('https://')) {
+    url = url.startsWith('//') ? 'https:' + url : url;
+    // @TODO: caching also works after image downloaded
+    if (cache == 'store' || cache == 'auto') {
+      return CachedNetworkImage(url);
     } else {
-      // Fallback to asset image
-      return AssetImage(url);
+      return NetworkImage(url);
     }
+  } else if (url.startsWith('file://')) {
+    return FileImage(File.fromUri(Uri.parse(url)));
+  } else {
+    // Fallback to asset image
+    return AssetImage(url);
   }
 }

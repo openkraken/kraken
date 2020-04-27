@@ -114,9 +114,11 @@ class StyleDeclaration {
 
   void _invokePropertyChangedListener(String property, String original, String present) {
     assert(property != null);
-    _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
-      listener(property, original, present);
-    });
+    if (original != present) {
+      _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
+        listener(property, original, present);
+      });
+    }
   }
 
   StyleDeclaration copyWith(Map<String, String> override) {

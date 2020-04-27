@@ -1068,16 +1068,12 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    if (present != original) {
-      updateTransform(present, transitionMap);
-    }
+    updateTransform(present, transitionMap);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
-    if (present != original) {
-      updateTransformOrigin(present, transitionMap);
-    }
+    updateTransformOrigin(present, transitionMap);
   }
 
   // Update textNode style when container style changed
