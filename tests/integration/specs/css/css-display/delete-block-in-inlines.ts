@@ -6,10 +6,10 @@ describe('delete-block-in-inlines', () => {
       font: '20px',
       margin: '10px',
     };
-    let container = create('div', containerStyle);
-    let container2 = create('div', containerStyle);
+    let container = createElementWithStyle('div', containerStyle);
+    let container2 = createElementWithStyle('div', containerStyle);
 
-    let nodeToDelete = create(
+    let nodeToDelete = createElementWithStyle(
       'div',
       {
         borderLeft: '5px solid yellow',
@@ -29,10 +29,10 @@ describe('delete-block-in-inlines', () => {
     BODY.addEventListener('click', onClick);
 
     append(container, nodeToDelete);
-    append(container, create('span', {}, createText('Several')));
-    append(container, create('span', {}, createText('inline elements')));
+    append(container, createElementWithStyle('span', {}, createText('Several')));
+    append(container, createElementWithStyle('span', {}, createText('inline elements')));
     append(container, createText(' are '));
-    append(container, create('span', {}, createText('in this')));
+    append(container, createElementWithStyle('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
     append(
@@ -54,10 +54,10 @@ describe('delete-block-in-inlines', () => {
       font: '20px',
       margin: '10px',
     };
-    let container = create('div', containerStyle);
-    let container2 = create('div', containerStyle);
+    let container = createElementWithStyle('div', containerStyle);
+    let container2 = createElementWithStyle('div', containerStyle);
 
-    let nodeToDelete = create(
+    let nodeToDelete = createElementWithStyle(
       'div',
       {
         borderLeft: '5px solid yellow',
@@ -76,10 +76,10 @@ describe('delete-block-in-inlines', () => {
 
     BODY.addEventListener('click', onClick);
 
-    append(container, create('span', {}, createText('Several')));
-    append(container, create('span', {}, createText('inline elements')));
+    append(container, createElementWithStyle('span', {}, createText('Several')));
+    append(container, createElementWithStyle('span', {}, createText('inline elements')));
     append(container, createText(' are '));
-    append(container, create('span', {}, createText('in this')));
+    append(container, createElementWithStyle('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
     append(
@@ -102,10 +102,10 @@ describe('delete-block-in-inlines', () => {
       font: '20px',
       margin: '10px',
     };
-    let container = create('div', containerStyle);
-    let container2 = create('div', containerStyle);
+    let container = createElementWithStyle('div', containerStyle);
+    let container2 = createElementWithStyle('div', containerStyle);
 
-    let nodeToDelete = create(
+    let nodeToDelete = createElementWithStyle(
       'div',
       {
         borderLeft: '5px solid yellow',
@@ -124,11 +124,11 @@ describe('delete-block-in-inlines', () => {
 
     BODY.addEventListener('click', onClick);
 
-    append(container, create('span', {}, createText('Several')));
-    append(container, create('span', {}, createText('inline elements')));
+    append(container, createElementWithStyle('span', {}, createText('Several')));
+    append(container, createElementWithStyle('span', {}, createText('inline elements')));
     append(container, createText(' are '));
     append(container, nodeToDelete);
-    append(container, create('span', {}, createText('in this')));
+    append(container, createElementWithStyle('span', {}, createText('in this')));
     append(container, createText(' sentence.'));
 
     append(

@@ -11,12 +11,12 @@ describe('Background-color-padding-box', function() {
     'background-color': 'black',
   };
   xit('basic', async () => {
-    let parent = create('div', {
+    let parent = createElementWithStyle('div', {
       ...divStyle,
       width: '290px',
       backgroundColor: 'green',
     });
-    let div = create('div', divStyle);
+    let div = createElementWithStyle('div', divStyle);
     append(parent, div);
     append(BODY, parent);
     await matchScreenshot();

@@ -19,7 +19,7 @@ describe('Text TextDecoration', () => {
       TEXT_DECORATION_COLOR.forEach(color => {
         // Seperated property.
         it(`should work with text-decoration-line=${line}, text-decoration-style=${style}, text-decoration-color=${color}`, () => {
-          const cont = create(
+          const cont = createElementWithStyle(
             'div',
             {
               margin: '10px',
@@ -40,7 +40,7 @@ describe('Text TextDecoration', () => {
 
         // Merged property.
         it(`should work with text-decoration=${line} ${style} ${color}`, () => {
-          const cont = create(
+          const cont = createElementWithStyle(
             'div',
             {
               margin: '10px',

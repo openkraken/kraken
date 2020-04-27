@@ -11,7 +11,7 @@ describe('Text WhiteSpace', () => {
 
   it('should work with default value', () => {
 
-    const cont = create(
+    const cont = createElementWithStyle(
       'div',
       {
         width: '100px',
@@ -29,7 +29,7 @@ describe('Text WhiteSpace', () => {
 
   it('should work with normal', () => {
 
-    const cont = create(
+    const cont = createElementWithStyle(
       'div',
       {
         width: '100px',
@@ -48,7 +48,7 @@ describe('Text WhiteSpace', () => {
 
   it('should work with no-wrap', () => {
 
-    const cont = create(
+    const cont = createElementWithStyle(
       'div',
       {
         width: '100px',

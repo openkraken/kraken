@@ -14,7 +14,7 @@ describe('Width', function() {
 
   describe('element style has width', () => {
     it('element is inline', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline',
         width: '100px',
         backgroundColor: '#999',
@@ -26,7 +26,7 @@ describe('Width', function() {
     });
 
     it('element is inline-block', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         width: '100px',
         backgroundColor: '#999',
@@ -38,7 +38,7 @@ describe('Width', function() {
     });
 
     it('element is inline-flex', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         width: '100px',
         backgroundColor: '#999',
@@ -50,7 +50,7 @@ describe('Width', function() {
     });
 
     it('element is block', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         width: '100px',
         backgroundColor: '#999',
@@ -62,7 +62,7 @@ describe('Width', function() {
     });
 
     it('element is flex', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         display: 'inline-block',
         width: '100px',
         backgroundColor: '#999',
@@ -76,18 +76,18 @@ describe('Width', function() {
 
   describe('element style has no width', () => {
     it('parent is inline and grand parent is block', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         backgroundColor: '#999',
       }, [
         createText('foobar'),
       ]);
 
-      let container = create('div', {
+      let container = createElementWithStyle('div', {
         display: 'block',
         width: '100px',
         backgroundColor: '#333',
       }, [
-        create('div', {
+        createElementWithStyle('div', {
           display: 'inline'
         }, [
           element,
@@ -99,13 +99,13 @@ describe('Width', function() {
     });
 
     it('parent is inline-block and has width', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         backgroundColor: '#999',
       }, [
         createText('foobar'),
       ]);
 
-      let container = create('div', {
+      let container = createElementWithStyle('div', {
         display: 'inline-block',
         width: '100px',
       }, [
@@ -117,13 +117,13 @@ describe('Width', function() {
     });
 
     it('parent is inline-block and has no width', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         backgroundColor: '#999',
       }, [
         createText('foobar'),
       ]);
 
-      let container = create('div', {
+      let container = createElementWithStyle('div', {
         display: 'inline-block',
       }, [
         element,
@@ -134,13 +134,13 @@ describe('Width', function() {
     });
 
     it('parent is block and has width', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         backgroundColor: '#999',
       }, [
         createText('foobar'),
       ]);
 
-      let container = create('div', {
+      let container = createElementWithStyle('div', {
         display: 'block',
         width: '100px',
       }, [
@@ -152,13 +152,13 @@ describe('Width', function() {
     });
 
     it('parent is block and has no width', async () => {
-      let element = create('div', {
+      let element = createElementWithStyle('div', {
         backgroundColor: '#999',
       }, [
         createText('foobar'),
       ]);
 
-      let container = create('div', {
+      let container = createElementWithStyle('div', {
         display: 'block',
       }, [
         element,

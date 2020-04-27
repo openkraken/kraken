@@ -8,8 +8,8 @@ describe('descendant-display', () => {
       width: '100px',
       height: '100px',
     };
-    let element = create('div', divStyle, [
-      create('div', {
+    let element = createElementWithStyle('div', divStyle, [
+      createElementWithStyle('div', {
         ...divStyle,
         ...divDivStyle,
       }),
@@ -28,8 +28,8 @@ describe('descendant-display', () => {
       width: '100px',
       height: '100px',
     };
-    let element = create('div', divStyle, [
-      create('div', {
+    let element = createElementWithStyle('div', divStyle, [
+      createElementWithStyle('div', {
         ...divStyle,
         ...divdivStyle,
       }),

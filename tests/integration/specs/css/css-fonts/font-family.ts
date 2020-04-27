@@ -1,6 +1,6 @@
 describe('FontFamily', () => {
   it('should works in english', () => {
-    const p1 = create(
+    const p1 = createElementWithStyle(
       'p',
       {
         fontFamily: 'Songti SC',
@@ -8,7 +8,7 @@ describe('FontFamily', () => {
       },
       createText('These two lines should use the same font.')
     );
-    const p2 = create(
+    const p2 = createElementWithStyle(
       'p',
       {
         fontFamily: 'Songti SC',
@@ -23,7 +23,7 @@ describe('FontFamily', () => {
   });
 
   it('should works in chinese', () => {
-    const p1 = create(
+    const p1 = createElementWithStyle(
       'p',
       {
         fontFamily: 'Songti SC',
@@ -31,7 +31,7 @@ describe('FontFamily', () => {
       },
       createText('字体文本测试。')
     );
-    const p2 = create(
+    const p2 = createElementWithStyle(
       'p',
       {
         fontFamily: 'Songti SC',

@@ -1,7 +1,7 @@
 describe('Transform translate', () => {
   it('001', async () => {
     document.body.appendChild(
-      create('div', {
+      createElementWithStyle('div', {
         width: '100px',
         height: '100px',
         backgroundColor: 'red',

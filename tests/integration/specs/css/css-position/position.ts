@@ -1,6 +1,6 @@
 describe('Position', () => {
   it('should work with flow', async () => {
-    const container1 = create('div', {
+    const container1 = createElementWithStyle('div', {
       width: '200px',
       height: '200px',
       backgroundColor: '#999',
@@ -9,7 +9,7 @@ describe('Position', () => {
 
     document.body.appendChild(container1);
 
-    const div1 = create('div', {
+    const div1 = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       backgroundColor: 'red',
@@ -21,14 +21,14 @@ describe('Position', () => {
 
     container1.appendChild(div1);
 
-    const container2 = create('div', {
+    const container2 = createElementWithStyle('div', {
       width: '200px',
       height: '200px',
       backgroundColor: '#666',
     });
     document.body.appendChild(container2);
 
-    const div2 = create('div', {
+    const div2 = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
       backgroundColor: 'blue',

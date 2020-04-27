@@ -4,7 +4,9 @@ import { WINDOW } from "./document/event-target";
 
 const windowBuildInEvents = ['load', 'colorschemechange'];
 
-class Window extends EventTarget {
+// window is global object, which is created by JSEngine,
+// This is an extension which add more methods to global window object.
+class WindowExtension extends EventTarget {
   constructor() {
     super(WINDOW, windowBuildInEvents);
   }
@@ -30,6 +32,4 @@ class Window extends EventTarget {
   }
 }
 
-// window is global object, which is created by JSEngine, assign some
-// window API from polyfill.
-export const window = new Window();
+export const windowExtension = new WindowExtension();

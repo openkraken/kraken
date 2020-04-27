@@ -119,16 +119,16 @@ describe('Display block in inline', () => {
   });
 
   it('there should be no red', async () => {
-    let block = create('div', {
+    let block = createElementWithStyle('div', {
       color: 'green',
       display: 'block',
     });
-    let inline = create('div', {
+    let inline = createElementWithStyle('div', {
       background: 'red',
       color: 'red',
       display: 'inline',
     });
-    let innerBlock = create('div', {
+    let innerBlock = createElementWithStyle('div', {
       color: 'green',
       display: 'block',
     });
@@ -144,10 +144,10 @@ describe('Display block in inline', () => {
     const inlineStyle = { display: 'inline' };
     const blockStyle = { display: 'block' };
 
-    let block = create('div', blockStyle);
-    let inline = create('div', inlineStyle);
+    let block = createElementWithStyle('div', blockStyle);
+    let inline = createElementWithStyle('div', inlineStyle);
     let text1 = createText('This text should all collapse');
-    let toggleBlock = create('div', blockStyle);
+    let toggleBlock = createElementWithStyle('div', blockStyle);
     let text2 = createText('into one line of text when');
     let text3 = createText('you click on the text');
 
@@ -174,10 +174,10 @@ describe('Display block in inline', () => {
     const inlineStyle = { display: 'inline' };
     const blockStyle = { display: 'block' };
 
-    let block = create('div', blockStyle);
-    let inline = create('div', inlineStyle);
+    let block = createElementWithStyle('div', blockStyle);
+    let inline = createElementWithStyle('div', inlineStyle);
     let text1 = createText('This text should split into');
-    let toggleBlock = create('div', inlineStyle);
+    let toggleBlock = createElementWithStyle('div', inlineStyle);
     let text2 = createText('three separate lines when');
     let text3 = createText('you click on the text');
 
@@ -216,10 +216,10 @@ describe('Display block in inline', () => {
       top: '-50px',
     };
 
-    let control = create('div', controlStyle);
-    let wrap = create('div', {});
-    let inline = create('div', inlineStyle);
-    let block = create('div', {
+    let control = createElementWithStyle('div', controlStyle);
+    let wrap = createElementWithStyle('div', {});
+    let inline = createElementWithStyle('div', inlineStyle);
+    let block = createElementWithStyle('div', {
       ...blockStyle,
       ...testStyle,
     });
@@ -249,14 +249,14 @@ describe('Display block in inline', () => {
     const bStyle = {
       color: 'yellow',
     };
-    let container = create('div', containerStyle);
+    let container = createElementWithStyle('div', containerStyle);
     let aText = createText(' A ');
-    let bControl = create('span', bStyle);
+    let bControl = createElementWithStyle('span', bStyle);
     let bText = createText('B');
-    let cControl = create('div', cStyle);
+    let cControl = createElementWithStyle('div', cStyle);
     let cText = createText('C');
     let aText2 = createText('  A');
-    let bControl2 = create('span', bStyle);
+    let bControl2 = createElementWithStyle('span', bStyle);
     let bText2 = createText('B');
 
     append(bControl, bText);

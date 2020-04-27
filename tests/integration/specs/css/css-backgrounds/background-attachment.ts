@@ -1,6 +1,6 @@
 describe('background-attachment', () => {
   xit('fixed', async () => {
-    let container = create('div', {
+    let container = createElementWithStyle('div', {
       'background-attachment': 'fixed',
       'background-position': '1em 5em',
       'background-image':
@@ -21,7 +21,7 @@ describe('background-attachment', () => {
   });
 
   it('local', async () => {
-    let container = create('div', {
+    let container = createElementWithStyle('div', {
       'background-attachment': 'local',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
@@ -42,7 +42,7 @@ describe('background-attachment', () => {
   });
 
   it('scroll', async () => {
-    let container = create('div', {
+    let container = createElementWithStyle('div', {
       'background-attachment': 'local',
       'background-image':
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
