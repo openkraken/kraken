@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
 final RegExp SpaceRegExp = RegExp(' ');
@@ -22,10 +22,10 @@ class CanvasElement extends Element {
           events: events,
         ) {
     if (style.contains('width')) {
-      _width = Length.toDisplayPortValue(style['width']);
+      _width = CSSLength.toDisplayPortValue(style['width']);
     }
     if (style.contains('height')) {
-      _height = Length.toDisplayPortValue(style['height']);
+      _height = CSSLength.toDisplayPortValue(style['height']);
     }
 
     size = Size(_width, _height);
@@ -70,36 +70,36 @@ class CanvasElement extends Element {
     String method = args[0];
     switch (method) {
       case 'fillRect':
-        double x = Length.toDouble(args[1]);
-        double y = Length.toDouble(args[2]);
-        double w = Length.toDouble(args[3]);
-        double h = Length.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]);
+        double y = CSSLength.toDouble(args[2]);
+        double w = CSSLength.toDouble(args[3]);
+        double h = CSSLength.toDouble(args[4]);
         painter.context.fillRect(x, y, w, h);
         break;
 
       case 'clearRect':
-        double x = Length.toDouble(args[1]);
-        double y = Length.toDouble(args[2]);
-        double w = Length.toDouble(args[3]);
-        double h = Length.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]);
+        double y = CSSLength.toDouble(args[2]);
+        double w = CSSLength.toDouble(args[3]);
+        double h = CSSLength.toDouble(args[4]);
         painter.context.clearRect(x, y, w, h);
         break;
 
       case 'strokeRect':
-        double x = Length.toDouble(args[1]);
-        double y = Length.toDouble(args[2]);
-        double w = Length.toDouble(args[3]);
-        double h = Length.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]);
+        double y = CSSLength.toDouble(args[2]);
+        double w = CSSLength.toDouble(args[3]);
+        double h = CSSLength.toDouble(args[4]);
         painter.context.strokeRect(x, y, w, h);
         break;
 
       case 'fillText':
         String text = args[1];
-        double x = Length.toDouble(args[2]);
-        double y = Length.toDouble(args[3]);
+        double x = CSSLength.toDouble(args[2]);
+        double y = CSSLength.toDouble(args[3]);
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = Length.toDouble(args[4]);
+          double maxWidth = CSSLength.toDouble(args[4]);
           painter.context.fillText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.fillText(text, x, y);
@@ -108,11 +108,11 @@ class CanvasElement extends Element {
 
       case 'strokeText':
         String text = args[1];
-        double x = Length.toDouble(args[2]);
-        double y = Length.toDouble(args[3]);
+        double x = CSSLength.toDouble(args[2]);
+        double y = CSSLength.toDouble(args[3]);
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = Length.toDouble(args[4]);
+          double maxWidth = CSSLength.toDouble(args[4]);
           painter.context.strokeText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.strokeText(text, x, y);
@@ -131,10 +131,10 @@ class CanvasElement extends Element {
     String property = args[0];
     switch (property) {
       case 'fillStyle':
-        painter.context.fillStyle = WebColor.generate(args[1]);
+        painter.context.fillStyle = CSSColor.generate(args[1]);
         break;
       case 'strokeStyle':
-        painter.context.strokeStyle = WebColor.generate(args[1]);
+        painter.context.strokeStyle = CSSColor.generate(args[1]);
         break;
       case 'font':
         painter.context.font = args[1];

@@ -5,17 +5,18 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin FlowMixin {
+// https://drafts.csswg.org/css-align/
+mixin CSSAlignMixin {
   static const String TEXT_ALIGN = 'textAlign';
   static const String JUSTIFY_CONTENT = 'justifyContent';
 
-  void decorateRenderFlow(RenderFlowLayout renderFlowLayout, StyleDeclaration style) {
+  void decorateRenderFlow(RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
     renderFlowLayout.mainAxisAlignment = _getJustifyContent(style);
   }
 
-  MainAxisAlignment _getJustifyContent(StyleDeclaration style) {
+  MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
     if (style.contains(TEXT_ALIGN)) {

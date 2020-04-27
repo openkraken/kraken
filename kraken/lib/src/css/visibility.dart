@@ -5,12 +5,12 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin VisibilityStyleMixin on Node {
+mixin CSSVisibilityMixin on Node {
   RenderVisibility renderVisibility;
 
-  RenderObject initRenderVisibility(RenderObject renderObject, StyleDeclaration style) {
+  RenderObject initRenderVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
     bool hidden = style['visibility'] == 'hidden';
     if (hidden) {
       renderVisibility = RenderVisibility(

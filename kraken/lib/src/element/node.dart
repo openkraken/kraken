@@ -5,7 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 import 'package:matcher/matcher.dart';
 
@@ -26,7 +26,7 @@ class Comment extends Node {
   String data;
 }
 
-class TextNode extends Node with NodeLifeCycle, TextStyleMixin {
+class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   static bool _isWhitespace(String ch) =>
       ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
 

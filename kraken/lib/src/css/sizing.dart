@@ -5,11 +5,11 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-RegExp spaceRegExp = RegExp(r' ');
+final RegExp spaceRegExp = RegExp(r' ');
 
-double baseGetDisplayPortedLength(input) {
+double _getDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {
     // Null is not equal with 0.0
     return null;
@@ -17,7 +17,7 @@ double baseGetDisplayPortedLength(input) {
   if (input is num) {
     input = input.toString();
   }
-  return Length.toDisplayPortValue(input as String);
+  return CSSLength.toDisplayPortValue(input as String);
 }
 
 List<String> baseGetShorttedProperties(String input) {
@@ -25,7 +25,7 @@ List<String> baseGetShorttedProperties(String input) {
   return input.trim().split(spaceRegExp);
 }
 
-Padding baseGetPaddingFromStyle(StyleDeclaration style) {
+Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -41,36 +41,36 @@ Padding baseGetPaddingFromStyle(StyleDeclaration style) {
       List<String> splitedpadding = baseGetShorttedProperties(padding);
       if (splitedpadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
-            paddingBottom = baseGetDisplayPortedLength(splitedpadding[0]);
+            paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
       } else if (splitedpadding.length == 2) {
         paddingTop =
-            paddingBottom = baseGetDisplayPortedLength(splitedpadding[0]);
+            paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
         paddingLeft =
-            paddingRight = baseGetDisplayPortedLength(splitedpadding[1]);
+            paddingRight = _getDisplayPortedLength(splitedpadding[1]);
       } else if (splitedpadding.length == 3) {
-        paddingTop = baseGetDisplayPortedLength(splitedpadding[0]);
+        paddingTop = _getDisplayPortedLength(splitedpadding[0]);
         paddingRight =
-            paddingLeft = baseGetDisplayPortedLength(splitedpadding[1]);
-        paddingBottom = baseGetDisplayPortedLength(splitedpadding[2]);
+            paddingLeft = _getDisplayPortedLength(splitedpadding[1]);
+        paddingBottom = _getDisplayPortedLength(splitedpadding[2]);
       } else if (splitedpadding.length == 4) {
-        paddingTop = baseGetDisplayPortedLength(splitedpadding[0]);
-        paddingRight = baseGetDisplayPortedLength(splitedpadding[1]);
-        paddingBottom = baseGetDisplayPortedLength(splitedpadding[2]);
-        paddingLeft = baseGetDisplayPortedLength(splitedpadding[3]);
+        paddingTop = _getDisplayPortedLength(splitedpadding[0]);
+        paddingRight = _getDisplayPortedLength(splitedpadding[1]);
+        paddingBottom = _getDisplayPortedLength(splitedpadding[2]);
+        paddingLeft = _getDisplayPortedLength(splitedpadding[3]);
       }
     }
 
     if (style.contains('paddingLeft'))
-      paddingLeft = baseGetDisplayPortedLength(style['paddingLeft']);
+      paddingLeft = _getDisplayPortedLength(style['paddingLeft']);
 
     if (style.contains('paddingTop'))
-      paddingTop = baseGetDisplayPortedLength(style['paddingTop']);
+      paddingTop = _getDisplayPortedLength(style['paddingTop']);
 
     if (style.contains('paddingRight'))
-      paddingRight = baseGetDisplayPortedLength(style['paddingRight']);
+      paddingRight = _getDisplayPortedLength(style['paddingRight']);
 
     if (style.contains('paddingBottom'))
-      paddingBottom = baseGetDisplayPortedLength(style['paddingBottom']);
+      paddingBottom = _getDisplayPortedLength(style['paddingBottom']);
 
     left = paddingLeft ?? left;
     top = paddingTop ?? top;
@@ -81,14 +81,14 @@ Padding baseGetPaddingFromStyle(StyleDeclaration style) {
   return Padding(left, top, right, bottom);
 }
 
-/// DimensionMixin impls RenderConstrainedBox to support
+/// https://drafts.csswg.org/css-sizing-3/
 /// - width
 /// - height
 /// - max-width
 /// - max-height
 /// - min-width
 /// - min-height
-mixin DimensionMixin {
+mixin CSSSizingMixin {
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   RenderPadding renderPadding;
@@ -96,11 +96,11 @@ mixin DimensionMixin {
   Padding oldMargin;
   SizedConstraints oldConstraints;
 
-  double getDisplayPortedLength(input) {
-    return baseGetDisplayPortedLength(input);
+  static double getDisplayPortedLength(input) {
+    return _getDisplayPortedLength(input);
   }
 
-  void updateConstraints(StyleDeclaration style, Map<String, Transition> transitionMap) {
+  void updateConstraints(CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
     if (renderConstrainedBox != null) {
       Transition allTransition,
           widthTransition,
@@ -236,7 +236,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderConstrainedBox(
-      RenderObject renderObject, StyleDeclaration style) {
+      RenderObject renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       oldConstraints = _getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
@@ -248,7 +248,7 @@ mixin DimensionMixin {
     }
   }
 
-  SizedConstraints _getConstraints(StyleDeclaration style) {
+  SizedConstraints _getConstraints(CSSStyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -268,7 +268,7 @@ mixin DimensionMixin {
   }
 
   RenderObject initRenderMargin(
-      RenderObject renderObject, StyleDeclaration style) {
+      RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     return renderMargin = RenderMargin(
       margin: edgeInsets,
@@ -276,7 +276,7 @@ mixin DimensionMixin {
     );
   }
 
-  Padding getMarginFromStyle(StyleDeclaration style) {
+  Padding getMarginFromStyle(CSSStyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double right = 0.0;
@@ -332,13 +332,13 @@ mixin DimensionMixin {
     return Padding(left, top, right, bottom);
   }
 
-  EdgeInsets getMarginInsetsFromStyle(StyleDeclaration style) {
+  EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
     oldMargin = getMarginFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(StyleDeclaration style, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
     assert(renderMargin != null);
     Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -444,23 +444,23 @@ mixin DimensionMixin {
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, StyleDeclaration style) {
+  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  Padding getPaddingFromStyle(StyleDeclaration style) {
-    return baseGetPaddingFromStyle(style);
+  Padding getPaddingFromStyle(CSSStyleDeclaration style) {
+    return _getPaddingFromStyle(style);
   }
 
-  EdgeInsets getPaddingInsetsFromStyle(StyleDeclaration style) {
+  EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
     oldPadding = getPaddingFromStyle(style);
     return EdgeInsets.fromLTRB(
         oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(StyleDeclaration style,
+  void updateRenderPadding(CSSStyleDeclaration style,
       [Map<String, Transition> transitionMap]) {
     assert(renderPadding != null);
     Transition all,

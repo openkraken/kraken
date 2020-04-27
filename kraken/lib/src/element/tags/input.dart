@@ -12,7 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -154,7 +154,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return properties['placeholder'] ?? '';
   }
 
-  get cursorColor => WebColor.black;
+  get cursorColor => CSSColor.black;
 
   @override
   void handleClick(Event event) {

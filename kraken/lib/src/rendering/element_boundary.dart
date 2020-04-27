@@ -4,7 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 class ElementBoundaryParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -36,7 +36,7 @@ class RenderElementBoundary extends RenderTransform
 
   int targetId;
 
-  StyleDeclaration style;
+  CSSStyleDeclaration style;
 
   Matrix4 _transform;
   Size layoutSize;

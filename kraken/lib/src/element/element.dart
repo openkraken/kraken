@@ -17,7 +17,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
 import 'event_handler.dart';
@@ -29,18 +29,18 @@ class Element extends Node
     with
         NodeLifeCycle,
         EventHandlerMixin,
-        TextStyleMixin,
-        BackgroundMixin,
-        RenderDecoratedBoxMixin,
-        DimensionMixin,
-        FlexStyleMixin,
-        FlowMixin,
-        OverflowStyleMixin,
-        OpacityStyleMixin,
-        TransformStyleMixin,
-        VisibilityStyleMixin,
-        SubtreeVisibilityStyleMixin,
-        TransitionStyleMixin {
+        CSSTextMixin,
+        CSSBackgroundMixin,
+        CSSDecoratedBoxMixin,
+        CSSSizingMixin,
+        CSSFlexboxMixin,
+        CSSAlignMixin,
+        CSSOverflowMixin,
+        CSSOpacityMixin,
+        CSSTransformMixin,
+        CSSVisibilityMixin,
+        CSSSubtreeVisibilityMixin,
+        CSSTransitionMixin {
 
   Map<String, dynamic> properties;
   List<String> events;
@@ -66,7 +66,7 @@ class Element extends Node
   void afterConstruct() {}
 
   // Style declaration from user.
-  StyleDeclaration style;
+  CSSStyleDeclaration style;
 
 
   // A point reference to treed renderObject.
@@ -112,7 +112,7 @@ class Element extends Node
     if (events == null) events = [];
 
     afterConstruct();
-    style = StyleDeclaration(style: properties[STYLE]);
+    style = CSSStyleDeclaration(style: properties[STYLE]);
 
     _registerStyleChangedListeners();
 
@@ -206,7 +206,7 @@ class Element extends Node
   void _updateStickyPosition(double scrollTop) {
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
-      StyleDeclaration elStyle = el.style;
+      CSSStyleDeclaration elStyle = el.style;
       bool isFixed;
 
       if (el.offsetTop == null) {
@@ -216,10 +216,10 @@ class Element extends Node
       }
 
       if (elStyle.contains('top')) {
-        double top = baseGetDisplayPortedLength(elStyle['top']);
+        double top = CSSSizingMixin.getDisplayPortedLength(elStyle['top']);
         isFixed = el.offsetTop - scrollTop <= top;
       } else if (elStyle.contains('bottom')) {
-        double bottom = baseGetDisplayPortedLength(elStyle['bottom']);
+        double bottom = CSSSizingMixin.getDisplayPortedLength(elStyle['bottom']);
         double viewPortHeight = renderMargin?.size?.height;
         double elViewPortTop = el.offsetTop - scrollTop;
         isFixed = viewPortHeight - elViewPortTop <= bottom;
@@ -343,7 +343,7 @@ class Element extends Node
       renderMargin.owner.flushLayout();
     }
 
-    StyleDeclaration pStyle = StyleDeclaration(style: {
+    CSSStyleDeclaration pStyle = CSSStyleDeclaration(style: {
       'width': renderMargin.size.width.toString() + 'px',
       'height': renderMargin.size.height.toString() + 'px',
     });
@@ -356,7 +356,7 @@ class Element extends Node
   // reposition element with position absolute/fixed
   void _repositionElement(Element el) {
     RenderObject renderObject = el.renderObject;
-    StyleDeclaration style = el.style;
+    CSSStyleDeclaration style = el.style;
     int targetId = el.targetId;
 
     // new node not in the tree, wait for append in appendedElement
@@ -391,7 +391,7 @@ class Element extends Node
     Element currentElement = getEventTargetByTargetId<Element>(targetId);
 
     // current element's zIndex
-    int currentZIndex = Length.toInt(currentElement.style['zIndex']);
+    int currentZIndex = CSSLength.toInt(currentElement.style['zIndex']);
     // add current element back to parent stack by zIndex
     insertByZIndex(parentStack, el, currentZIndex);
   }
@@ -412,7 +412,7 @@ class Element extends Node
     renderObject.parentData = stackParentData;
 
     // current element's zIndex
-    int currentZIndex = Length.toInt(style['zIndex']);
+    int currentZIndex = CSSLength.toInt(style['zIndex']);
     // add current element back to parent stack by zIndex
     insertByZIndex(parentStack, this, currentZIndex);
   }
@@ -469,25 +469,25 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains('zIndex')) {
-          zIndexParentData.zIndex = Length.toInt(style['zIndex']);;
+          zIndexParentData.zIndex = CSSLength.toInt(style['zIndex']);;
         }
         if (style.contains('top')) {
-          zIndexParentData.top = Length.toDisplayPortValue(style['top']);
+          zIndexParentData.top = CSSLength.toDisplayPortValue(style['top']);
         }
         if (style.contains('left')) {
-          zIndexParentData.left = Length.toDisplayPortValue(style['left']);
+          zIndexParentData.left = CSSLength.toDisplayPortValue(style['left']);
         }
         if (style.contains('right')) {
-          zIndexParentData.right = Length.toDisplayPortValue(style['right']);
+          zIndexParentData.right = CSSLength.toDisplayPortValue(style['right']);
         }
         if (style.contains('bottom')) {
-          zIndexParentData.bottom = Length.toDisplayPortValue(style['bottom']);
+          zIndexParentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
         }
         if (style.contains('width')) {
-          zIndexParentData.width = Length.toDisplayPortValue(style['width']);
+          zIndexParentData.width = CSSLength.toDisplayPortValue(style['width']);
         }
         if (style.contains('height')) {
-          zIndexParentData.height = Length.toDisplayPortValue(style['height']);
+          zIndexParentData.height = CSSLength.toDisplayPortValue(style['height']);
         }
         renderObject.parentData = zIndexParentData;
         renderParent.markNeedsLayout();
@@ -518,7 +518,7 @@ class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutBox(
-      StyleDeclaration style, List<RenderBox> children) {
+      CSSStyleDeclaration style, List<RenderBox> children) {
     String display = isEmptyStyleValue(style['display'])
         ? defaultDisplay
         : style['display'];
@@ -684,7 +684,7 @@ class Element extends Node
     if (renderLayoutBox is RenderFlexLayout) {
       String width = element.style['width'] != '' ? element.style['width'] : '0';
       String height = element.style['height'] != '' ? element.style['height'] : '0';
-      StyleDeclaration placeholderStyle = StyleDeclaration(style: {
+      CSSStyleDeclaration placeholderStyle = CSSStyleDeclaration(style: {
         'width': width,
         'height': height,
       });
@@ -715,7 +715,7 @@ class Element extends Node
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
-      StyleDeclaration childStyle = child.style;
+      CSSStyleDeclaration childStyle = child.style;
       String childPosition = childStyle['position'] == '' ? 'static' : childStyle['position'];
       String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
       bool isFlex = display.endsWith('flex');
@@ -733,7 +733,7 @@ class Element extends Node
           findParent(child, (element) => element.renderStack != null);
         if (parentStackedElement != null) {
           insertByZIndex(
-              parentStackedElement.renderStack, child, Length.toInt(childStyle['zIndex']));
+              parentStackedElement.renderStack, child, CSSLength.toInt(childStyle['zIndex']));
           return;
         }
       } else if (childPosition == 'fixed') {
@@ -741,7 +741,7 @@ class Element extends Node
             ElementManager().getRootElement().renderStack;
         if (rootRenderStack != null) {
           insertByZIndex(
-              rootRenderStack, child, Length.toInt(childStyle['zIndex']));
+              rootRenderStack, child, CSSLength.toInt(childStyle['zIndex']));
           return;
         }
 
@@ -959,13 +959,13 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    double _original = Length.toDisplayPortValue(original);
+    double _original = CSSLength.toDisplayPortValue(original);
 
     _updateOffset(
       definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
-      diff: Length.toDisplayPortValue(present) - _original,
+      diff: CSSLength.toDisplayPortValue(present) - _original,
     );
   }
 
@@ -1002,12 +1002,12 @@ class Element extends Node
     updateConstraints(style, transitionMap);
 
     if (property == 'width' || property == 'height') {
-      double _original = Length.toDisplayPortValue(original);
+      double _original = CSSLength.toDisplayPortValue(original);
       _updateOffset(
         definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
-        diff: Length.toDisplayPortValue(present) - _original,
+        diff: CSSLength.toDisplayPortValue(present) - _original,
       );
     }
   }
@@ -1111,7 +1111,7 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
-    // @NOTE: See [StyleDeclaration.setProperty], value change will trigger
+    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
     // [StyleChangeListener] to be invoked in sync.
     style[key] = value;
     _flushStyle();
@@ -1362,7 +1362,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
       eventHandlers.containsKey('intersectionchange');
 }
 
-bool _isPositioned(StyleDeclaration style) {
+bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
     return position != 'static' && position != 'relative';
@@ -1371,29 +1371,29 @@ bool _isPositioned(StyleDeclaration style) {
   }
 }
 
-bool _isSticky(StyleDeclaration style) {
+bool _isSticky(CSSStyleDeclaration style) {
   return style['position'] == 'sticky' && style.contains('top') ||
       style.contains('bottom');
 }
 
-ZIndexParentData getPositionParentDataFromStyle(StyleDeclaration style) {
+ZIndexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
   ZIndexParentData parentData = ZIndexParentData();
 
   if (style.contains('top')) {
-    parentData..top = Length.toDisplayPortValue(style['top']);
+    parentData..top = CSSLength.toDisplayPortValue(style['top']);
   }
   if (style.contains('left')) {
-    parentData..left = Length.toDisplayPortValue(style['left']);
+    parentData..left = CSSLength.toDisplayPortValue(style['left']);
   }
   if (style.contains('bottom')) {
-    parentData..bottom = Length.toDisplayPortValue(style['bottom']);
+    parentData..bottom = CSSLength.toDisplayPortValue(style['bottom']);
   }
   if (style.contains('right')) {
-    parentData..right = Length.toDisplayPortValue(style['right']);
+    parentData..right = CSSLength.toDisplayPortValue(style['right']);
   }
-  parentData.width = Length.toDisplayPortValue(style['width']);
-  parentData.height = Length.toDisplayPortValue(style['height']);
-  parentData.zIndex = Length.toInt(style['zIndex']);
+  parentData.width = CSSLength.toDisplayPortValue(style['width']);
+  parentData.height = CSSLength.toDisplayPortValue(style['height']);
+  parentData.zIndex = CSSLength.toInt(style['zIndex']);
   return parentData;
 }
 

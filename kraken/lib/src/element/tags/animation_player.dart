@@ -2,7 +2,7 @@ import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
@@ -55,10 +55,10 @@ class AnimationPlayerElement extends Element {
       assert(args[1] is Map);
       Map options = args[1];
       if (options.containsKey('mix')) {
-        mix = Length.toDouble(options['mix']);
+        mix = CSSLength.toDouble(options['mix']);
       }
       if (options.containsKey('mixSeconds')) {
-        mix = Length.toDouble(options['mixSeconds']);
+        mix = CSSLength.toDouble(options['mixSeconds']);
       }
     }
     _animationController?.play(name, mix: mix, mixSeconds: mixSeconds);

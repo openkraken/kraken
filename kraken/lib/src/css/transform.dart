@@ -1,25 +1,26 @@
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
-mixin TransformStyleMixin on Node {
+// https://drafts.csswg.org/css-transforms/
+mixin CSSTransformMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
-  Map<String, Method> oldMethods;
+  Map<String, CSSFunction> oldMethods;
 
   // transform origin impl by offset and alignment
   Offset oldOffset = Offset.zero;
   Alignment oldAlignment = Alignment.center;
   int targetId;
 
-  RenderObject initTransform(RenderObject current, StyleDeclaration style, int targetId) {
+  RenderObject initTransform(RenderObject current, CSSStyleDeclaration style, int targetId) {
 
     this.targetId = targetId;
 
     if (style.contains('transform')) {
-      oldMethods = Method.parseMethod(style['transform']);
+      oldMethods = CSSFunction.parseExpression(style['transform']);
       matrix4 = combineTransform(oldMethods) ?? matrix4;
       TransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
@@ -43,13 +44,13 @@ mixin TransformStyleMixin on Node {
 
   void updateTransform(String transformStr,
       [Map<String, Transition> transitionMap]) {
-    Map<String, Method> newMethods = Method.parseMethod(transformStr);
+    Map<String, CSSFunction> newMethods = CSSFunction.parseExpression(transformStr);
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
         Transition transition = transitionMap['transform'];
         Transition all = transitionMap['all'];
-        Map<String, Method> baseMethods = oldMethods;
+        Map<String, CSSFunction> baseMethods = oldMethods;
         ProgressListener progressListener = (progress) {
           if (progress > 0.0) {
             transform.transform = combineTransform(
@@ -136,7 +137,7 @@ mixin TransformStyleMixin on Node {
       if (originList.length == 1) {
         // default center
         x = originList[0];
-        y = Position.CENTER;
+        y = CSSPosition.CENTER;
         // flutter just support two value x y
         // FIXME when flutter support three value
       } else if (originList.length == 2 || originList.length == 3) {
@@ -147,35 +148,35 @@ mixin TransformStyleMixin on Node {
       double offsetX = 0, offsetY = 0, alignX = -1, alignY = -1;
       // y just can be left right center when x is top bottom, otherwise illegal
       // switch to right place
-      if ((x == Position.TOP || x == Position.BOTTOM) &&
-          (y == Position.LEFT || y == Position.RIGHT || y == Position.CENTER)) {
+      if ((x == CSSPosition.TOP || x == CSSPosition.BOTTOM) &&
+          (y == CSSPosition.LEFT || y == CSSPosition.RIGHT || y == CSSPosition.CENTER)) {
         String tmp = x;
         x = y;
         y = tmp;
       }
       // handle x
-      if (Length.isLength(x)) {
-        offsetX = Length.toDisplayPortValue(x);
-      } else if (Percentage.isPercentage(x)) {
-        alignX = Percentage(x).toDouble() * 2 - 1;
-      } else if (x == Position.LEFT) {
+      if (CSSLength.isLength(x)) {
+        offsetX = CSSLength.toDisplayPortValue(x);
+      } else if (CSSPercentage.isPercentage(x)) {
+        alignX = CSSPercentage(x).toDouble() * 2 - 1;
+      } else if (x == CSSPosition.LEFT) {
         alignX = -1.0;
-      } else if (x == Position.RIGHT) {
+      } else if (x == CSSPosition.RIGHT) {
         alignX = 1.0;
-      } else if (x == Position.CENTER) {
+      } else if (x == CSSPosition.CENTER) {
         alignX = 0.0;
       }
 
       // handle y
-      if (Length.isLength(y)) {
-        offsetY = Length.toDisplayPortValue(y);
-      } else if (Percentage.isPercentage(y)) {
-        alignY = Percentage(y).toDouble() * 2 - 1;
-      } else if (y == Position.TOP) {
+      if (CSSLength.isLength(y)) {
+        offsetY = CSSLength.toDisplayPortValue(y);
+      } else if (CSSPercentage.isPercentage(y)) {
+        alignY = CSSPercentage(y).toDouble() * 2 - 1;
+      } else if (y == CSSPosition.TOP) {
         alignY = -1.0;
-      } else if (y == Position.BOTTOM) {
+      } else if (y == CSSPosition.BOTTOM) {
         alignY = 1.0;
-      } else if (y == Position.CENTER) {
+      } else if (y == CSSPosition.CENTER) {
         alignY = 0.0;
       }
       return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
@@ -183,10 +184,10 @@ mixin TransformStyleMixin on Node {
     return null;
   }
 
-  Matrix4 combineTransform(Map<String, Method> methods,
-      {double progress = 1.0, Map<String, Method> oldMethods}) {
+  Matrix4 combineTransform(Map<String, CSSFunction> methods,
+      {double progress = 1.0, Map<String, CSSFunction> oldMethods}) {
     Matrix4 matrix4;
-    for (Method method in methods?.values) {
+    for (CSSFunction method in methods?.values) {
       Matrix4 cur = getTransform(
           method, progress: progress, oldMethods: oldMethods);
       if (cur != null) {
@@ -201,11 +202,11 @@ mixin TransformStyleMixin on Node {
     return matrix4 ?? this.matrix4;
   }
 
-  Matrix4 getTransform(Method method,
-      {double progress = 1.0, Map<String, Method> oldMethods}) {
+  Matrix4 getTransform(CSSFunction method,
+      {double progress = 1.0, Map<String, CSSFunction> oldMethods}) {
     Matrix4 matrix4;
     bool needDiff = progress != null;
-    Method oldMethod = oldMethods != null ? oldMethods[method.name] : null;
+    CSSFunction oldMethod = oldMethods != null ? oldMethods[method.name] : null;
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {
@@ -271,18 +272,18 @@ mixin TransformStyleMixin on Node {
         if (method.args.length >= 1 && method.args.length <= 2) {
             double y;
             if (method.args.length == 2) {
-              y = Length.toDisplayPortValue(method.args[1].trim());
+              y = CSSLength.toDisplayPortValue(method.args[1].trim());
             } else {
               y = 0;
             }
-            double x = Length.toDisplayPortValue(method.args[0].trim());
+            double x = CSSLength.toDisplayPortValue(method.args[0].trim());
             if (needDiff) {
               double oldX = 0.0, oldY = 0.0;
               if (oldMethod != null && oldMethod.args.length >= 1 &&
                   oldMethod.args.length <= 2) {
-                oldX = Length.toDisplayPortValue(oldMethod.args[0].trim());
+                oldX = CSSLength.toDisplayPortValue(oldMethod.args[0].trim());
                 if (oldMethod.args.length == 2) {
-                  oldY = Length.toDisplayPortValue(oldMethod.args[1].trim());
+                  oldY = CSSLength.toDisplayPortValue(oldMethod.args[1].trim());
                 }
               }
               x = _getProgressValue(x, oldX, progress);
@@ -296,24 +297,24 @@ mixin TransformStyleMixin on Node {
         if (method.args.length >= 1 && method.args.length <= 3) {
             double y = 0, z = 0;
             if (method.args.length == 2) {
-              y = Length.toDisplayPortValue(method.args[1].trim());
+              y = CSSLength.toDisplayPortValue(method.args[1].trim());
             }
             if (method.args.length == 3) {
-              y = Length.toDisplayPortValue(method.args[1].trim());
-              z = Length.toDisplayPortValue(method.args[2].trim());
+              y = CSSLength.toDisplayPortValue(method.args[1].trim());
+              z = CSSLength.toDisplayPortValue(method.args[2].trim());
             }
-            double x = Length.toDisplayPortValue(method.args[0].trim());
+            double x = CSSLength.toDisplayPortValue(method.args[0].trim());
             if (needDiff) {
               double oldX = 0.0, oldY = 0.0, oldZ = 0.0;
               if (oldMethod != null && oldMethod.args.length >= 1 &&
                   oldMethod.args.length <= 3) {
-                oldX = Length.toDisplayPortValue(oldMethod.args[0].trim());
+                oldX = CSSLength.toDisplayPortValue(oldMethod.args[0].trim());
                 if (oldMethod.args.length == 2) {
-                  oldY = Length.toDisplayPortValue(oldMethod.args[1].trim());
+                  oldY = CSSLength.toDisplayPortValue(oldMethod.args[1].trim());
                 }
                 if (oldMethod.args.length == 3) {
-                  oldY = Length.toDisplayPortValue(oldMethod.args[1].trim());
-                  oldZ = Length.toDisplayPortValue(oldMethod.args[2].trim());
+                  oldY = CSSLength.toDisplayPortValue(oldMethod.args[1].trim());
+                  oldZ = CSSLength.toDisplayPortValue(oldMethod.args[2].trim());
                 }
               }
               x = _getProgressValue(x, oldX, progress);
@@ -326,11 +327,11 @@ mixin TransformStyleMixin on Node {
         break;
       case 'translateX':
         if (method.args.length == 1) {
-          double x = Length.toDisplayPortValue(method.args[0].trim());
+          double x = CSSLength.toDisplayPortValue(method.args[0].trim());
           if (needDiff) {
             double oldX = 0.0;
             if (oldMethod != null && oldMethod.args.length == 1) {
-              oldX = Length.toDisplayPortValue(oldMethod.args[0].trim());
+              oldX = CSSLength.toDisplayPortValue(oldMethod.args[0].trim());
             }
             x = _getProgressValue(x, oldX, progress);
           }
@@ -340,11 +341,11 @@ mixin TransformStyleMixin on Node {
         break;
       case 'translateY':
         if (method.args.length == 1) {
-          double y = Length.toDisplayPortValue(method.args[0].trim());
+          double y = CSSLength.toDisplayPortValue(method.args[0].trim());
           if (needDiff) {
             double oldY = 0.0;
             if (oldMethod != null && oldMethod.args.length == 1) {
-              oldY = Length.toDisplayPortValue(oldMethod.args[0].trim());
+              oldY = CSSLength.toDisplayPortValue(oldMethod.args[0].trim());
             }
             y = _getProgressValue(y, oldY, progress);
           }
@@ -354,11 +355,11 @@ mixin TransformStyleMixin on Node {
         break;
       case 'translateZ':
         if (method.args.length == 1) {
-          double z = Length.toDisplayPortValue(method.args[0].trim());
+          double z = CSSLength.toDisplayPortValue(method.args[0].trim());
           if (needDiff) {
             double oldZ = 0.0;
             if(oldMethod != null && oldMethod.args.length == 1) {
-              oldZ = Length.toDisplayPortValue(oldMethod.args[0].trim());
+              oldZ = CSSLength.toDisplayPortValue(oldMethod.args[0].trim());
             }
             z = _getProgressValue(z, oldZ, progress);
           }
@@ -369,11 +370,11 @@ mixin TransformStyleMixin on Node {
       case 'rotate':
       case 'rotateZ':
         if (method.args.length == 1) {
-          double angle = Angle(method.args[0].trim()).angleValue;
+          double angle = CSSAngle(method.args[0].trim()).angleValue;
           if (needDiff) {
             double oldAngle = 0.0;
             if(oldMethod != null && oldMethod.args.length == 1) {
-              oldAngle = Angle(oldMethod.args[0].trim()).angleValue;
+              oldAngle = CSSAngle(oldMethod.args[0].trim()).angleValue;
             }
             angle = _getProgressValue(angle, oldAngle, progress);
           }
@@ -385,14 +386,14 @@ mixin TransformStyleMixin on Node {
           double x = double.tryParse(method.args[0].trim()) ?? 0.0;
           double y = double.tryParse(method.args[1].trim()) ?? 0.0;
           double z = double.tryParse(method.args[2].trim()) ?? 0.0;
-          double angle = Angle(method.args[3].trim()).angleValue;
+          double angle = CSSAngle(method.args[3].trim()).angleValue;
           if (needDiff) {
             double oldX = 0.0, oldY = 0.0, oldZ = 0.0, oldAngle = 0.0;
             if(oldMethod != null && oldMethod.args.length == 4) {
               oldX = double.tryParse(oldMethod.args[0].trim()) ?? 0.0;
               oldY = double.tryParse(oldMethod.args[1].trim()) ?? 0.0;
               oldZ = double.tryParse(oldMethod.args[2].trim()) ?? 0.0;
-              oldAngle = Angle(oldMethod.args[3].trim()).angleValue;
+              oldAngle = CSSAngle(oldMethod.args[3].trim()).angleValue;
             }
             x = _getProgressValue(x, oldX, progress);
             y = _getProgressValue(y, oldY, progress);
@@ -406,11 +407,11 @@ mixin TransformStyleMixin on Node {
         break;
       case 'rotateX':
         if (method.args.length == 1) {
-          double x = Angle(method.args[0].trim()).angleValue;
+          double x = CSSAngle(method.args[0].trim()).angleValue;
           if (needDiff) {
             double oldX = 0.0;
             if (oldMethod != null && oldMethod.args.length == 1) {
-              oldX = Angle(oldMethod.args[0].trim()).angleValue;
+              oldX = CSSAngle(oldMethod.args[0].trim()).angleValue;
             }
             x = _getProgressValue(x, oldX, progress);
           }
@@ -419,11 +420,11 @@ mixin TransformStyleMixin on Node {
         break;
       case 'rotateY':
         if (method.args.length == 1) {
-          double y = Angle(method.args[0].trim()).angleValue;
+          double y = CSSAngle(method.args[0].trim()).angleValue;
           if (needDiff) {
             double oldY = 0.0;
             if (oldMethod != null && oldMethod.args.length == 1) {
-              oldY = Angle(oldMethod.args[0].trim()).angleValue;
+              oldY = CSSAngle(oldMethod.args[0].trim()).angleValue;
             }
             y = _getProgressValue(y, oldY, progress);
           }
@@ -503,18 +504,18 @@ mixin TransformStyleMixin on Node {
         break;
       case 'skew':
         if (method.args.length == 1 || method.args.length == 2) {
-          double alpha = Angle(method.args[0].trim()).angleValue;
+          double alpha = CSSAngle(method.args[0].trim()).angleValue;
           double beta = 0.0;
           if (method.args.length == 2) {
-            beta = Angle(method.args[1].trim()).angleValue;
+            beta = CSSAngle(method.args[1].trim()).angleValue;
           }
           if (needDiff) {
             double oldAlpha = 0.0;
             double oldBeta = 0.0;
             if (oldMethod != null && (oldMethod.args.length == 1 || oldMethod.args.length == 2)) {
-              oldAlpha = Angle(oldMethod.args[0].trim()).angleValue;
+              oldAlpha = CSSAngle(oldMethod.args[0].trim()).angleValue;
               if (oldMethod.args.length == 2) {
-                oldBeta = Angle(oldMethod.args[1].trim()).angleValue;
+                oldBeta = CSSAngle(oldMethod.args[1].trim()).angleValue;
               }
             }
             alpha = _getProgressValue(alpha, oldAlpha, progress);
@@ -526,11 +527,11 @@ mixin TransformStyleMixin on Node {
       case 'skewX':
       case 'skewY':
         if (method.args.length == 1) {
-          double angle = Angle(method.args[0].trim()).angleValue;
+          double angle = CSSAngle(method.args[0].trim()).angleValue;
           if (needDiff) {
             double oldAngle = 0.0;
             if (oldMethod != null && oldMethod.args.length == 1) {
-              oldAngle = Angle(oldMethod.args[0].trim()).angleValue;
+              oldAngle = CSSAngle(oldMethod.args[0].trim()).angleValue;
             }
             angle = _getProgressValue(angle, oldAngle, progress);
           }

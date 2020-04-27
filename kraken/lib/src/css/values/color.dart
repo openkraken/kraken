@@ -12,12 +12,14 @@ final RegExp RGBARexExp = RegExp(
   multiLine: false,
 );
 
+/// https://drafts.csswg.org/css-values-3/#colors
+/// https://drafts.csswg.org/css-color-4/
 /// #123
 /// #123456
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
 @immutable
-class WebColor {
+class CSSColor {
   // Use a preprocessed color to cache.
   // Eg: input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
   // Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
@@ -106,306 +108,306 @@ class WebColor {
   }
 
   static Color generate(String color) {
-    if (color == null) return WebColor.transparent;
+    if (color == null) return CSSColor.transparent;
     color = color.trim();
 
     switch (color) {
       case 'black':
-        return WebColor.black;
+        return CSSColor.black;
       case 'silver':
-        return WebColor.silver;
+        return CSSColor.silver;
       case 'gray':
-        return WebColor.gray;
+        return CSSColor.gray;
       case 'white':
-        return WebColor.white;
+        return CSSColor.white;
       case 'maroon':
-        return WebColor.maroon;
+        return CSSColor.maroon;
       case 'red':
-        return WebColor.red;
+        return CSSColor.red;
       case 'purple':
-        return WebColor.purple;
+        return CSSColor.purple;
       case 'fuchsia':
-        return WebColor.fuchsia;
+        return CSSColor.fuchsia;
       case 'green':
-        return WebColor.green;
+        return CSSColor.green;
       case 'lime':
-        return WebColor.lime;
+        return CSSColor.lime;
       case 'olive':
-        return WebColor.olive;
+        return CSSColor.olive;
       case 'yellow':
-        return WebColor.yellow;
+        return CSSColor.yellow;
       case 'navy':
-        return WebColor.navy;
+        return CSSColor.navy;
       case 'blue':
-        return WebColor.blue;
+        return CSSColor.blue;
       case 'teal':
-        return WebColor.teal;
+        return CSSColor.teal;
       case 'aqua':
-        return WebColor.aqua;
+        return CSSColor.aqua;
       case 'aliceblue':
-        return WebColor.aliceblue;
+        return CSSColor.aliceblue;
       case 'antiquewhite':
-        return WebColor.antiquewhite;
+        return CSSColor.antiquewhite;
       case 'aquamarine':
-        return WebColor.aquamarine;
+        return CSSColor.aquamarine;
       case 'azure':
-        return WebColor.azure;
+        return CSSColor.azure;
       case 'beige':
-        return WebColor.beige;
+        return CSSColor.beige;
       case 'bisque':
-        return WebColor.bisque;
+        return CSSColor.bisque;
       case 'blanchedalmond':
-        return WebColor.blanchedalmond;
+        return CSSColor.blanchedalmond;
       case 'blueviolet':
-        return WebColor.blueviolet;
+        return CSSColor.blueviolet;
       case 'brown':
-        return WebColor.brown;
+        return CSSColor.brown;
       case 'burlywood':
-        return WebColor.burlywood;
+        return CSSColor.burlywood;
       case 'cadetblue':
-        return WebColor.cadetblue;
+        return CSSColor.cadetblue;
       case 'chartreuse':
-        return WebColor.chartreuse;
+        return CSSColor.chartreuse;
       case 'chocolate':
-        return WebColor.chocolate;
+        return CSSColor.chocolate;
       case 'coral':
-        return WebColor.coral;
+        return CSSColor.coral;
       case 'cornflowerblue':
-        return WebColor.cornflowerblue;
+        return CSSColor.cornflowerblue;
       case 'cornsilk':
-        return WebColor.cornsilk;
+        return CSSColor.cornsilk;
       case 'crimson':
-        return WebColor.crimson;
+        return CSSColor.crimson;
       case 'cyan':
-        return WebColor.cyan;
+        return CSSColor.cyan;
       case 'darkblue':
-        return WebColor.darkblue;
+        return CSSColor.darkblue;
       case 'darkcyan':
-        return WebColor.darkcyan;
+        return CSSColor.darkcyan;
       case 'darkgoldenrod':
-        return WebColor.darkgoldenrod;
+        return CSSColor.darkgoldenrod;
       case 'darkgray':
-        return WebColor.darkgray;
+        return CSSColor.darkgray;
       case 'darkgreen':
-        return WebColor.darkgreen;
+        return CSSColor.darkgreen;
       case 'darkgrey':
-        return WebColor.darkgrey;
+        return CSSColor.darkgrey;
       case 'darkkhaki':
-        return WebColor.darkkhaki;
+        return CSSColor.darkkhaki;
       case 'darkmagenta':
-        return WebColor.darkmagenta;
+        return CSSColor.darkmagenta;
       case 'darkolivegreen':
-        return WebColor.darkolivegreen;
+        return CSSColor.darkolivegreen;
       case 'darkorange':
-        return WebColor.darkorange;
+        return CSSColor.darkorange;
       case 'darkorchid':
-        return WebColor.darkorchid;
+        return CSSColor.darkorchid;
       case 'darkred':
-        return WebColor.darkred;
+        return CSSColor.darkred;
       case 'darksalmon':
-        return WebColor.darksalmon;
+        return CSSColor.darksalmon;
       case 'darkseagreen':
-        return WebColor.darkseagreen;
+        return CSSColor.darkseagreen;
       case 'darkslateblue':
-        return WebColor.darkslateblue;
+        return CSSColor.darkslateblue;
       case 'darkslategray':
-        return WebColor.darkslategray;
+        return CSSColor.darkslategray;
       case 'darkslategrey':
-        return WebColor.darkslategrey;
+        return CSSColor.darkslategrey;
       case 'darkturquoise':
-        return WebColor.darkturquoise;
+        return CSSColor.darkturquoise;
       case 'darkviolet':
-        return WebColor.darkviolet;
+        return CSSColor.darkviolet;
       case 'deeppink':
-        return WebColor.deeppink;
+        return CSSColor.deeppink;
       case 'deepskyblue':
-        return WebColor.deepskyblue;
+        return CSSColor.deepskyblue;
       case 'dimgray':
-        return WebColor.dimgray;
+        return CSSColor.dimgray;
       case 'dimgrey':
-        return WebColor.dimgrey;
+        return CSSColor.dimgrey;
       case 'dodgerblue':
-        return WebColor.dodgerblue;
+        return CSSColor.dodgerblue;
       case 'firebrick':
-        return WebColor.firebrick;
+        return CSSColor.firebrick;
       case 'floralwhite':
-        return WebColor.floralwhite;
+        return CSSColor.floralwhite;
       case 'forestgreen':
-        return WebColor.forestgreen;
+        return CSSColor.forestgreen;
       case 'gainsboro':
-        return WebColor.gainsboro;
+        return CSSColor.gainsboro;
       case 'ghostwhite':
-        return WebColor.ghostwhite;
+        return CSSColor.ghostwhite;
       case 'gold':
-        return WebColor.gold;
+        return CSSColor.gold;
       case 'goldenrod':
-        return WebColor.goldenrod;
+        return CSSColor.goldenrod;
       case 'greenyellow':
-        return WebColor.greenyellow;
+        return CSSColor.greenyellow;
       case 'grey':
-        return WebColor.grey;
+        return CSSColor.grey;
       case 'honeydew':
-        return WebColor.honeydew;
+        return CSSColor.honeydew;
       case 'hotpink':
-        return WebColor.hotpink;
+        return CSSColor.hotpink;
       case 'indianred':
-        return WebColor.indianred;
+        return CSSColor.indianred;
       case 'indigo':
-        return WebColor.indigo;
+        return CSSColor.indigo;
       case 'ivory':
-        return WebColor.ivory;
+        return CSSColor.ivory;
       case 'khaki':
-        return WebColor.khaki;
+        return CSSColor.khaki;
       case 'lavender':
-        return WebColor.lavender;
+        return CSSColor.lavender;
       case 'lavenderblush':
-        return WebColor.lavenderblush;
+        return CSSColor.lavenderblush;
       case 'lawngreen':
-        return WebColor.lawngreen;
+        return CSSColor.lawngreen;
       case 'lemonchiffon':
-        return WebColor.lemonchiffon;
+        return CSSColor.lemonchiffon;
       case 'lightblue':
-        return WebColor.lightblue;
+        return CSSColor.lightblue;
       case 'lightcoral':
-        return WebColor.lightcoral;
+        return CSSColor.lightcoral;
       case 'lightcyan':
-        return WebColor.lightcyan;
+        return CSSColor.lightcyan;
       case 'lightgoldenrodyellow':
-        return WebColor.lightgoldenrodyellow;
+        return CSSColor.lightgoldenrodyellow;
       case 'lightgray':
-        return WebColor.lightgray;
+        return CSSColor.lightgray;
       case 'lightgreen':
-        return WebColor.lightgreen;
+        return CSSColor.lightgreen;
       case 'lightgrey':
-        return WebColor.lightgrey;
+        return CSSColor.lightgrey;
       case 'lightpink':
-        return WebColor.lightpink;
+        return CSSColor.lightpink;
       case 'lightsalmon':
-        return WebColor.lightsalmon;
+        return CSSColor.lightsalmon;
       case 'lightseagreen':
-        return WebColor.lightseagreen;
+        return CSSColor.lightseagreen;
       case 'lightskyblue':
-        return WebColor.lightskyblue;
+        return CSSColor.lightskyblue;
       case 'lightslategray':
-        return WebColor.lightslategray;
+        return CSSColor.lightslategray;
       case 'lightslategrey':
-        return WebColor.lightslategrey;
+        return CSSColor.lightslategrey;
       case 'lightsteelblue':
-        return WebColor.lightsteelblue;
+        return CSSColor.lightsteelblue;
       case 'lightyellow':
-        return WebColor.lightyellow;
+        return CSSColor.lightyellow;
       case 'limegreen':
-        return WebColor.limegreen;
+        return CSSColor.limegreen;
       case 'linen':
-        return WebColor.linen;
+        return CSSColor.linen;
       case 'magenta':
-        return WebColor.magenta;
+        return CSSColor.magenta;
       case 'mediumaquamarine':
-        return WebColor.mediumaquamarine;
+        return CSSColor.mediumaquamarine;
       case 'mediumblue':
-        return WebColor.mediumblue;
+        return CSSColor.mediumblue;
       case 'mediumorchid':
-        return WebColor.mediumorchid;
+        return CSSColor.mediumorchid;
       case 'mediumpurple':
-        return WebColor.mediumpurple;
+        return CSSColor.mediumpurple;
       case 'mediumseagreen':
-        return WebColor.mediumseagreen;
+        return CSSColor.mediumseagreen;
       case 'mediumslateblue':
-        return WebColor.mediumslateblue;
+        return CSSColor.mediumslateblue;
       case 'mediumspringgreen':
-        return WebColor.mediumspringgreen;
+        return CSSColor.mediumspringgreen;
       case 'mediumturquoise':
-        return WebColor.mediumturquoise;
+        return CSSColor.mediumturquoise;
       case 'mediumvioletred':
-        return WebColor.mediumvioletred;
+        return CSSColor.mediumvioletred;
       case 'midnightblue':
-        return WebColor.midnightblue;
+        return CSSColor.midnightblue;
       case 'mintcream':
-        return WebColor.mintcream;
+        return CSSColor.mintcream;
       case 'mistyrose':
-        return WebColor.mistyrose;
+        return CSSColor.mistyrose;
       case 'moccasin':
-        return WebColor.moccasin;
+        return CSSColor.moccasin;
       case 'navajowhite':
-        return WebColor.navajowhite;
+        return CSSColor.navajowhite;
       case 'oldlace':
-        return WebColor.oldlace;
+        return CSSColor.oldlace;
       case 'olivedrab':
-        return WebColor.olivedrab;
+        return CSSColor.olivedrab;
       case 'orange':
-        return WebColor.orange;
+        return CSSColor.orange;
       case 'orangered':
-        return WebColor.orangered;
+        return CSSColor.orangered;
       case 'orchid':
-        return WebColor.orchid;
+        return CSSColor.orchid;
       case 'palegoldenrod':
-        return WebColor.palegoldenrod;
+        return CSSColor.palegoldenrod;
       case 'palegreen':
-        return WebColor.palegreen;
+        return CSSColor.palegreen;
       case 'paleturquoise':
-        return WebColor.paleturquoise;
+        return CSSColor.paleturquoise;
       case 'palevioletred':
-        return WebColor.palevioletred;
+        return CSSColor.palevioletred;
       case 'papayawhip':
-        return WebColor.papayawhip;
+        return CSSColor.papayawhip;
       case 'peachpuff':
-        return WebColor.peachpuff;
+        return CSSColor.peachpuff;
       case 'peru':
-        return WebColor.peru;
+        return CSSColor.peru;
       case 'pink':
-        return WebColor.pink;
+        return CSSColor.pink;
       case 'plum':
-        return WebColor.plum;
+        return CSSColor.plum;
       case 'powderblue':
-        return WebColor.powderblue;
+        return CSSColor.powderblue;
       case 'rosybrown':
-        return WebColor.rosybrown;
+        return CSSColor.rosybrown;
       case 'royalblue':
-        return WebColor.royalblue;
+        return CSSColor.royalblue;
       case 'saddlebrown':
-        return WebColor.saddlebrown;
+        return CSSColor.saddlebrown;
       case 'salmon':
-        return WebColor.salmon;
+        return CSSColor.salmon;
       case 'sandybrown':
-        return WebColor.sandybrown;
+        return CSSColor.sandybrown;
       case 'seagreen':
-        return WebColor.seagreen;
+        return CSSColor.seagreen;
       case 'seashell':
-        return WebColor.seashell;
+        return CSSColor.seashell;
       case 'sienna':
-        return WebColor.sienna;
+        return CSSColor.sienna;
       case 'skyblue':
-        return WebColor.skyblue;
+        return CSSColor.skyblue;
       case 'slateblue':
-        return WebColor.slateblue;
+        return CSSColor.slateblue;
       case 'slategray':
-        return WebColor.slategray;
+        return CSSColor.slategray;
       case 'slategrey':
-        return WebColor.slategrey;
+        return CSSColor.slategrey;
       case 'snow':
-        return WebColor.snow;
+        return CSSColor.snow;
       case 'springgreen':
-        return WebColor.springgreen;
+        return CSSColor.springgreen;
       case 'steelblue':
-        return WebColor.steelblue;
+        return CSSColor.steelblue;
       case 'tan':
-        return WebColor.tan;
+        return CSSColor.tan;
       case 'thistle':
-        return WebColor.thistle;
+        return CSSColor.thistle;
       case 'tomato':
-        return WebColor.tomato;
+        return CSSColor.tomato;
       case 'turquoise':
-        return WebColor.turquoise;
+        return CSSColor.turquoise;
       case 'violet':
-        return WebColor.violet;
+        return CSSColor.violet;
       case 'wheat':
-        return WebColor.wheat;
+        return CSSColor.wheat;
       case 'whitesmoke':
-        return WebColor.whitesmoke;
+        return CSSColor.whitesmoke;
       case 'yellowgreen':
-        return WebColor.yellowgreen;
+        return CSSColor.yellowgreen;
       case 'transparent':
-        return WebColor.transparent;
+        return CSSColor.transparent;
     }
 
     if (color.startsWith('#')) {
@@ -413,7 +415,7 @@ class WebColor {
     } else if (color.startsWith('rgb')) {
       return generateRGBAColor(color);
     } else {
-      return WebColor.transparent;
+      return CSSColor.transparent;
     }
   }
 

@@ -5,7 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex grow
@@ -21,7 +21,7 @@ class RenderFlexParentData extends RenderLayoutParentData {
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
 
-mixin FlexStyleMixin {
+mixin CSSFlexboxMixin {
   static const String DIRECTION = 'flexDirection';
   static const String WRAP = 'flexWrap';
   static const String FLOW = 'flexFlow';
@@ -30,7 +30,7 @@ mixin FlexStyleMixin {
   static const String ALIGN_ITEMS = 'alignItems';
   static const String ALIGN_CONTENT = 'alignContent';
 
-  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, StyleDeclaration style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -81,7 +81,7 @@ mixin FlexStyleMixin {
     }
   }
 
-  MainAxisAlignment _getAlignContent(StyleDeclaration style, Axis axis) {
+  MainAxisAlignment _getAlignContent(CSSStyleDeclaration style, Axis axis) {
     // @TODO: add flex-direction column support
     String flexProperty = style['alignContent'];
     MainAxisAlignment runAlignment = MainAxisAlignment.start;
@@ -105,7 +105,7 @@ mixin FlexStyleMixin {
     return runAlignment;
   }
 
-  MainAxisAlignment _getJustifyContent(StyleDeclaration style, Axis axis) {
+  MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style, Axis axis) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
     if (style.contains(TEXT_ALIGN) && axis == Axis.horizontal) {
@@ -140,7 +140,7 @@ mixin FlexStyleMixin {
     return mainAxisAlignment;
   }
 
-  CrossAxisAlignment _getAlignItems(StyleDeclaration style, Axis axis) {
+  CrossAxisAlignment _getAlignItems(CSSStyleDeclaration style, Axis axis) {
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch;
     if (style.contains(TEXT_ALIGN) && axis == Axis.vertical) {
       String textAlign = style[TEXT_ALIGN];
@@ -180,19 +180,19 @@ class FlexItem {
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
 
-  static RenderFlexParentData getParentData(StyleDeclaration style) {
+  static RenderFlexParentData getParentData(CSSStyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
 
     String grow = style[GROW];
     parentData.flexGrow =
         isEmptyStyleValue(grow)
         ? 0 // Grow default to 0.
-        : Length.toInt(grow);
+        : CSSLength.toInt(grow);
 
     String shrink = style[SHRINK];
     parentData.flexShrink = isEmptyStyleValue(shrink)
         ? 1  // Shrink default to 1.
-        : Length.toInt(shrink);
+        : CSSLength.toInt(shrink);
 
     String basis = style[BASIS];
     parentData.flexBasis = isEmptyStyleValue(basis)

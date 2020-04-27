@@ -1,8 +1,9 @@
 import 'package:flutter/painting.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'length.dart';
 
-class Position {
+// https://drafts.csswg.org/css-values-3/#position
+class CSSPosition {
   static const String LEFT = 'left';
   static const String RIGHT = 'right';
   static const String CENTER = 'center';
@@ -16,7 +17,7 @@ class Position {
     return 'Posotion(alignment: $alignment, size: $size)';
   }
 
-  Position(String position, this.size) {
+  CSSPosition(String position, this.size) {
     if (isEmptyStyleValue(position)) return;
 
     List<String> items = position.split(' ');
@@ -186,6 +187,6 @@ class Position {
       return (currentValue - 50) / 50;
     }
     double dividend = isHorizontal ? size.width : size.height;
-    return -Length.toDisplayPortValue(value) / dividend;
+    return -CSSLength.toDisplayPortValue(value) / dividend;
   }
 }
