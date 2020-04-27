@@ -385,7 +385,7 @@ describe('containing-block', () => {
       bottom: 0,
       position: 'absolute',
     };
-    setStyle(BODY, bodyStyle);
+    setElementStyle(BODY, bodyStyle);
     let div1 = createElementWithStyle('div', div1Anddiv2Style);
     let div2 = createElementWithStyle('div', div1Anddiv2Style);
     let div3 = createElementWithStyle('div', div3Style);
@@ -489,7 +489,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       backgroundColor: 'red',
       display: 'block',
       height: '100px',
@@ -498,7 +498,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: 'green',
       width: '100px',
       height: '100px',
@@ -519,7 +519,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       backgroundColor: 'red',
       display: 'inline-block',
       height: '60px',
@@ -529,7 +529,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: 'green',
       height: '100px',
       left: '-20px',
@@ -552,7 +552,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       backgroundColor: 'red',
       display: 'block',
       height: '100px',
@@ -561,7 +561,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: 'green',
       height: '100px',
       position: 'static',
@@ -582,7 +582,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       backgroundColor: 'red',
       display: 'inline-block',
       height: '100px',
@@ -591,7 +591,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: 'green',
       height: '100px',
       position: 'static',
@@ -612,14 +612,14 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       position: 'relative',
       bottom: 0,
     });
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: 'blue',
       height: '100px',
       position: 'fixed',
@@ -642,7 +642,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       border: '1px solid black',
       margin: '50px',
       position: 'absolute',
@@ -651,7 +651,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       margin: '50px',
       width: '50px',
       height: '50px',
@@ -659,7 +659,7 @@ describe('containing-block', () => {
     div1.appendChild(div2);
 
     var div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',
@@ -680,7 +680,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       border: '1px solid black',
       margin: '50px',
       position: 'relative',
@@ -689,7 +689,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       margin: '50px',
       width: '50px',
       height: '50px',
@@ -697,7 +697,7 @@ describe('containing-block', () => {
     div1.appendChild(div2);
 
     var div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',
@@ -718,7 +718,7 @@ describe('containing-block', () => {
     );
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       border: '1px solid black',
       margin: '50px',
       position: 'fixed',
@@ -727,7 +727,7 @@ describe('containing-block', () => {
     document.body.appendChild(div1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       margin: '50px',
       width: '50px',
       height: '50px',
@@ -735,7 +735,7 @@ describe('containing-block', () => {
     div1.appendChild(div2);
 
     var div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       backgroundColor: 'blue',
       right: 0,
       position: 'absolute',

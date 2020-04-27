@@ -1,7 +1,7 @@
 describe('border_radius', () => {
   it('all_direction', async () => {
     let container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -11,7 +11,7 @@ describe('border_radius', () => {
 
     for (let i = 0; i < 5; i++) {
       let dotEl = document.createElement('div');
-      setStyle(dotEl, {
+      setElementStyle(dotEl, {
         display: 'inline-block',
         marginLeft: '5px',
         width: '40px',

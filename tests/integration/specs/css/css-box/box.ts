@@ -1,7 +1,7 @@
 describe('Box', () => {
   it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       padding: '20rpx',
       backgroundColor: '#999',
       margin: '40rpx',
@@ -9,7 +9,7 @@ describe('Box', () => {
     });
 
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       padding: '20rpx',
       backgroundColor: '#666',
       margin: '40rpx',
@@ -17,7 +17,7 @@ describe('Box', () => {
     });
 
     const container3 = document.createElement('div');
-    setStyle(container3, {
+    setElementStyle(container3, {
       padding: '20rpx',
       height: '100rpx',
       backgroundColor: '#f40',
