@@ -3,7 +3,8 @@
  * Author: Kraken Team.
  */
 
-// https://drafts.csswg.org/css-values-3/#time
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#time
+
 class CSSTime {
   static const String MILLISECONDS = 'ms';
   static const String SECOND = 's';

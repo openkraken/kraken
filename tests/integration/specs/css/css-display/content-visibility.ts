@@ -1,9 +1,9 @@
-describe('Subtree Visibility', () => {
+describe('Content Visibility', () => {
   it('should visible', async () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      subtreeVisibility: 'visible',
+      contentVisibility: 'visible',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',
@@ -18,7 +18,7 @@ describe('Subtree Visibility', () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      subtreeVisibility: 'hidden',
+      contentVisibility: 'hidden',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',
@@ -33,7 +33,7 @@ describe('Subtree Visibility', () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      subtreeVisibility: 'hidden',
+      contentVisibility: 'hidden',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',
@@ -42,7 +42,7 @@ describe('Subtree Visibility', () => {
     document.body.appendChild(container1);
 
     setElementStyle(container1, {
-      subtreeVisibility: 'auto',
+      contentVisibility: 'auto',
     });
 
     await sleep(0.1);
@@ -53,7 +53,7 @@ describe('Subtree Visibility', () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      subtreeVisibility: 'auto',
+      contentVisibility: 'auto',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',

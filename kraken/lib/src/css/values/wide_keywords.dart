@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
-/// https://drafts.csswg.org/css-values-3/#common-keywords
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#common-keywords
+
 /// All of these keywords are normatively defined in the Cascade module.
-/// [CSS3CASCADE]
 enum CSSWideKeywords {
   /// The initial keyword represents the value specified as the property’s
   /// initial value.

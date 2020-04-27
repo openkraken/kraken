@@ -1,5 +1,5 @@
 describe('Display block in inline', () => {
-  it('simple', async () => {
+  xit('simple', async () => {
     var div1 = document.createElement('div');
     setElementStyle(div1, {
       color: 'green',
@@ -118,7 +118,7 @@ describe('Display block in inline', () => {
     await matchScreenshot();
   });
 
-  it('there should be no red', async () => {
+  xit('there should be no red', async () => {
     let block = createElementWithStyle('div', {
       color: 'green',
       display: 'block',

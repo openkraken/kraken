@@ -2,7 +2,9 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-enum PositionType {
+// CSS Positioned Layout: https://drafts.csswg.org/css-position/
+
+enum CSSPositionType {
   static,
   relative,
   absolute,
@@ -10,17 +12,16 @@ enum PositionType {
   sticky,
 }
 
-PositionType getPositionFromStyle(CSSStyleDeclaration style) {
+CSSPositionType getPositionFromStyle(CSSStyleDeclaration style) {
   switch (style['position']) {
-    case 'relative': return PositionType.relative;
-    case 'absolute': return PositionType.absolute;
-    case 'fixed': return PositionType.fixed;
-    case 'sticky': return PositionType.sticky;
+    case 'relative': return CSSPositionType.relative;
+    case 'absolute': return CSSPositionType.absolute;
+    case 'fixed': return CSSPositionType.fixed;
+    case 'sticky': return CSSPositionType.sticky;
   }
-  return PositionType.static;
+  return CSSPositionType.static;
 }
 
-// https://drafts.csswg.org/css-position/
 mixin CSSPositionMixin on RenderBox {
   void applyRelativeOffset(
       Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
@@ -40,8 +41,8 @@ mixin CSSPositionMixin on RenderBox {
   }
 
   Offset getRelativeOffset(CSSStyleDeclaration style) {
-    PositionType postion = getPositionFromStyle(style);
-    if (postion == PositionType.relative) {
+    CSSPositionType postion = getPositionFromStyle(style);
+    if (postion == CSSPositionType.relative) {
       double dx;
       double dy;
       if (style.contains('left')) {

@@ -10,6 +10,9 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
+// CSS Images: https://drafts.csswg.org/css-images-3/
+
 typedef ConsumeProperty = bool Function(String src);
 const String BACKGROUND = 'background';
 const String BACKGROUND_ATTACHMENT = 'backgroundAttachment';
@@ -21,8 +24,6 @@ const String BACKGROUND_COLOR = 'backgroundColor';
 
 const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
 
-
-/// https://drafts.csswg.org/css-backgrounds/
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
 mixin CSSBackgroundMixin {
@@ -249,7 +250,7 @@ mixin CSSBackgroundMixin {
   }
 
   bool _shouldRenderBackgroundImage() {
-    return background['backgroundAttachment'] == 'local' &&
+    return background[BACKGROUND_ATTACHMENT] == 'local' &&
       background.containsKey(BACKGROUND_IMAGE);
   }
 
@@ -575,15 +576,15 @@ mixin CSSBackgroundMixin {
     int start, List<String> args, List<Color> colors, List<double> stops) {
     double grow = 1.0 / (args.length - 1);
     for (int i = start; i < args.length; i++) {
-      ColorGradient colorGradient = parseColorAndStop(args[i], i * grow);
+      CSSColorStop colorGradient = parseColorAndStop(args[i], i * grow);
       colors.add(colorGradient.color);
       stops.add(colorGradient.stop);
     }
   }
 
-  ColorGradient parseColorAndStop(String src, [double defaultStop]) {
+  CSSColorStop parseColorAndStop(String src, [double defaultStop]) {
     List<String> strings = src?.trim()?.split(" ");
-    ColorGradient colorGradient;
+    CSSColorStop colorGradient;
     if (strings != null && strings.length >= 1) {
       double stop = defaultStop;
       if (strings.length == 2) {
@@ -595,14 +596,14 @@ mixin CSSBackgroundMixin {
           }
         } catch (e) {}
       }
-      colorGradient = ColorGradient(CSSColor.generate(strings[0]), stop);
+      colorGradient = CSSColorStop(CSSColor.generate(strings[0]), stop);
     }
     return colorGradient;
   }
 }
 
-class ColorGradient {
+class CSSColorStop {
   Color color;
   double stop;
-  ColorGradient(this.color, this.stop);
+  CSSColorStop(this.color, this.stop);
 }
