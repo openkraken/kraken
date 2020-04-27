@@ -83,7 +83,9 @@ class StyleDeclaration {
       _cssProperties[propertyName] = stringifyValue;
     }
 
-    _invokePropertyChangedListener(propertyName, prevValue, stringifyValue);
+    if (value != prevValue) {
+      _invokePropertyChangedListener(propertyName, prevValue, stringifyValue);
+    }
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -114,11 +116,9 @@ class StyleDeclaration {
 
   void _invokePropertyChangedListener(String property, String original, String present) {
     assert(property != null);
-    if (original != present) {
-      _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
-        listener(property, original, present);
-      });
-    }
+    _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
+      listener(property, original, present);
+    });
   }
 
   StyleDeclaration copyWith(Map<String, String> override) {
