@@ -259,7 +259,7 @@ describe('anonymous-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    spanRemove.remove();
+    spanRemove.parentNode.removeChild(spanRemove);
 
     await matchScreenshot();
   });
