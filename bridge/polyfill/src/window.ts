@@ -33,3 +33,20 @@ class WindowExtension extends EventTarget {
 }
 
 export const windowExtension = new WindowExtension();
+Object.defineProperties(window, {
+  addEventListener: {
+    get() {
+      return windowExtension.addEventListener.bind(windowExtension);
+    }
+  },
+  removeEventListener: {
+    get() {
+      return windowExtension.removeEventListener.bind(windowExtension);
+    }
+  },
+  dispatchEvent: {
+    get() {
+      return windowExtension.dispatchEvent.bind(windowExtension);
+    }
+  }
+});
