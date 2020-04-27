@@ -5,7 +5,8 @@
 
 import 'dart:ui';
 
-abstract class Length {
+// https://drafts.csswg.org/css-values-3/#lengths
+class CSSLength {
   static const String RPX = 'rpx';
   static const String PX = 'px';
   static const String VW = 'vw';

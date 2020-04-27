@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken_webview/kraken_webview.dart';
 
 const String IFRAME = 'IFRAME';
@@ -512,9 +512,9 @@ abstract class WebViewElement extends Element {
   void setStyle(String key, value) {
     super.setStyle(key, value);
     if (key == WIDTH) {
-      width = Length.toDisplayPortValue(value);
+      width = CSSLength.toDisplayPortValue(value);
     } else if (key == HEIGHT) {
-      height = Length.toDisplayPortValue(value);
+      height = CSSLength.toDisplayPortValue(value);
     }
   }
 
@@ -546,7 +546,7 @@ abstract class WebViewElement extends Element {
   }
 
   /// Element attribute width
-  double _width = Length.toDisplayPortValue(DEFAULT_WIDTH);
+  double _width = CSSLength.toDisplayPortValue(DEFAULT_WIDTH);
   double get width => _width;
   set width(double newValue) {
     if (newValue != null) {
@@ -556,7 +556,7 @@ abstract class WebViewElement extends Element {
   }
 
   /// Element attribute height
-  double _height = Length.toDisplayPortValue(DEFAULT_HEIGHT);
+  double _height = CSSLength.toDisplayPortValue(DEFAULT_HEIGHT);
   double get height => _height;
   set height(double newValue) {
     if (newValue != null) {

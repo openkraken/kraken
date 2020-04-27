@@ -5,7 +5,7 @@
 import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/painting.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'canvas_context.dart';
 
 final RegExp SpaceRegExp = RegExp(' ');
@@ -87,10 +87,10 @@ class CanvasPathDrawingStyles2D implements CanvasPathDrawingStyles {
 
 class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   @override
-  Color strokeStyle = WebColor.black;
+  Color strokeStyle = CSSColor.black;
 
   @override
-  Color fillStyle = WebColor.black;
+  Color fillStyle = CSSColor.black;
 
   @override
   CanvasGradient createLinearGradient(
@@ -253,7 +253,7 @@ class CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
   set font(String newValue) {
     List<String> splitVal = newValue.split(SpaceRegExp);
     if (splitVal.length == 2) {
-      fontSize = Length.toDisplayPortValue(splitVal[0]);
+      fontSize = CSSLength.toDisplayPortValue(splitVal[0]);
       fontFamily = splitVal[1];
     }
   }

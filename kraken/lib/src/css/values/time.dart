@@ -3,19 +3,20 @@
  * Author: Kraken Team.
  */
 
-class Time {
+// https://drafts.csswg.org/css-values-3/#time
+class CSSTime {
   static const String MILLISECONDS = 'ms';
   static const String SECOND = 's';
-  static Time zero = Time("0s");
+  static CSSTime zero = CSSTime('0s');
 
-  Seconds _value;
+  CSSSeconds _value;
 
-  Time(String value) {
+  CSSTime(String value) {
     if (value != null) {
       if (value.endsWith(MILLISECONDS)) {
-        _value = Milliseconds(value.split(MILLISECONDS)[0]);
+        _value = CSSMilliseconds(value.split(MILLISECONDS)[0]);
       } else if (value.endsWith(SECOND)) {
-        _value = Seconds(value.split(SECOND)[0]);
+        _value = CSSSeconds(value.split(SECOND)[0]);
       }
     }
   }
@@ -23,10 +24,10 @@ class Time {
   int valueOf() => _value?.valueOf();
 }
 
-class Seconds {
+class CSSSeconds {
   double _value = 0;
 
-  Seconds(String secondValue) {
+  CSSSeconds(String secondValue) {
     if (secondValue != null) {
       _value = double.parse(secondValue);
     }
@@ -35,8 +36,8 @@ class Seconds {
   int valueOf() => _value == null ? 0 : (_value * 1000).toInt();
 }
 
-class Milliseconds extends Seconds {
-  Milliseconds(String millisecondValue) : super(millisecondValue);
+class CSSMilliseconds extends CSSSeconds {
+  CSSMilliseconds(String millisecondValue) : super(millisecondValue);
 
   int valueOf() => _value.toInt();
 }

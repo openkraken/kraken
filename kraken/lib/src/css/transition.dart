@@ -2,13 +2,13 @@ import 'package:flutter/animation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin TransitionStyleMixin on Node {
+mixin CSSTransitionMixin on Node {
   Throttling throttler = Throttling();
   Map<String, Transition> transitionMap;
 
-  void initTransition(StyleDeclaration style, String property) {
+  void initTransition(CSSStyleDeclaration style, String property) {
     transitionMap = Transition.parseTransitions(style, property, this);
   }
 
@@ -118,7 +118,7 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(StyleDeclaration style, String property, Element el) {
+  static Map<String, Transition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
     List<String> list = [];
 
     if (property == 'transitionProperty' ||
@@ -152,22 +152,22 @@ class Transition with CustomTickerProviderStateMixin {
       List<String> strs = string.trim().split(' ');
       if (strs.length > 1) {
         String property = strs[0];
-        Time duration = Time(strs[1]);
-        Time delay;
+        CSSTime duration = CSSTime(strs[1]);
+        CSSTime delay;
         String function;
         if (strs.length == 3) {
           String third = strs[2];
           if (third.endsWith('s')) {
-            delay = Time(third);
+            delay = CSSTime(third);
           } else {
             function = third;
           }
         } else if (strs.length == 4) {
-          delay = Time(strs[3]);
+          delay = CSSTime(strs[3]);
           function = strs[2];
         }
         if (delay?.valueOf() == null) {
-          delay = Time.zero;
+          delay = CSSTime.zero;
         }
         if (duration.valueOf() == null || duration.valueOf() <= 0) {
           return;
@@ -207,9 +207,9 @@ class Transition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    Map<String, Method> methods = Method.parseMethod(function);
+    Map<String, CSSFunction> methods = CSSFunction.parseExpression(function);
     if (methods != null && methods.length > 0) {
-      Method method = methods?.values?.first;
+      CSSFunction method = methods?.values?.first;
       if (method != null) {
         if ("steps" == method.name) {
           if (method.args.length >= 1) {

@@ -3,9 +3,10 @@
  * Author: Kraken Team.
  */
 
+/// https://drafts.csswg.org/css-values-3/#common-keywords
 /// All of these keywords are normatively defined in the Cascade module.
 /// [CSS3CASCADE]
-enum PreDefinedTextualKeywords {
+enum CSSWideKeywords {
   /// The initial keyword represents the value specified as the property’s
   /// initial value.
   initial,
@@ -17,24 +18,4 @@ enum PreDefinedTextualKeywords {
   /// The unset keyword acts as either inherit or initial, depending on whether
   /// the property is inherited or not.
   unset,
-}
-
-class TextualString {
-  String _value;
-
-  TextualString(String value) {
-    if (value != null) {
-      _value = value;
-    }
-  }
-
-  String valueOf() => _value;
-}
-
-class URL extends TextualString {
-  URL(String value) : super(value);
-
-  String valueOf() {
-    return 'url(' + _value + ')';
-  }
 }

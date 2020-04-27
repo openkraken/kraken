@@ -1,6 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 enum PositionType {
   static,
@@ -10,7 +10,7 @@ enum PositionType {
   sticky,
 }
 
-PositionType getPositionFromStyle(StyleDeclaration style) {
+PositionType getPositionFromStyle(CSSStyleDeclaration style) {
   switch (style['position']) {
     case 'relative': return PositionType.relative;
     case 'absolute': return PositionType.absolute;
@@ -20,9 +20,10 @@ PositionType getPositionFromStyle(StyleDeclaration style) {
   return PositionType.static;
 }
 
-mixin RelativeStyleMixin on RenderBox {
+// https://drafts.csswg.org/css-position/
+mixin CSSPositionMixin on RenderBox {
   void applyRelativeOffset(
-      Offset relativeOffset, RenderBox renderBox, StyleDeclaration style) {
+      Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
     BoxParentData boxParentData = renderBox?.parentData;
     if (boxParentData != null) {
       Offset styleOffset;
@@ -38,21 +39,21 @@ mixin RelativeStyleMixin on RenderBox {
     }
   }
 
-  Offset getRelativeOffset(StyleDeclaration style) {
+  Offset getRelativeOffset(CSSStyleDeclaration style) {
     PositionType postion = getPositionFromStyle(style);
     if (postion == PositionType.relative) {
       double dx;
       double dy;
       if (style.contains('left')) {
-        dx = Length.toDisplayPortValue(style['left']);
+        dx = CSSLength.toDisplayPortValue(style['left']);
       } else if (style.contains('right')) {
-        dx = -Length.toDisplayPortValue(style['right']);
+        dx = -CSSLength.toDisplayPortValue(style['right']);
       }
 
       if (style.contains('top')) {
-        dy = Length.toDisplayPortValue(style['top']);
+        dy = CSSLength.toDisplayPortValue(style['top']);
       } else if (style.contains('bottom')) {
-        dy = -Length.toDisplayPortValue(style['bottom']);
+        dy = -CSSLength.toDisplayPortValue(style['bottom']);
       }
 
       if (dx != null || dy != null) {

@@ -1,16 +1,16 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin ElementStyleMixin on RenderBox {
+mixin CSSComputedMixin on RenderBox {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementMaxWidth(int targetId) {
+  static double getElementComputedMaxWidth(int targetId) {
     double width;
     double cropWidth = 0;
     Element child = getEventTargetByTargetId<Element>(targetId);
-    StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(targetId);
+    CSSStyleDeclaration style = child.style;
+    String display = _getElementRealDisplayValue(targetId);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -23,7 +23,7 @@ mixin ElementStyleMixin on RenderBox {
 
     // Get width of element if it's not inline
     if (display != 'inline' && style.contains('width')) {
-      width = Length.toDisplayPortValue(style['width']);
+      width = CSSLength.toDisplayPortValue(style['width']);
       cropPaddingBorder(child);
     } else {
       // Get the nearest width of ancestor with width
@@ -36,10 +36,10 @@ mixin ElementStyleMixin on RenderBox {
           break;
         }
         if (child is Element) {
-          StyleDeclaration style = child.style;
-          String display = getElementTrueDisplay(child.targetId);
+          CSSStyleDeclaration style = child.style;
+          String display = _getElementRealDisplayValue(child.targetId);
           if (style.contains('width') && display != 'inline') {
-            width = Length.toDisplayPortValue(style['width']);
+            width = CSSLength.toDisplayPortValue(style['width']);
             cropPaddingBorder(child);
             break;
           }
@@ -55,12 +55,12 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementWidth(int targetId) {
+  double getElementComputedWidth(int targetId) {
     double width;
     double cropWidth = 0;
     Element child = getEventTargetByTargetId<Element>(targetId);
-    StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(targetId);
+    CSSStyleDeclaration style = child.style;
+    String display = _getElementRealDisplayValue(targetId);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -76,7 +76,7 @@ mixin ElementStyleMixin on RenderBox {
       case 'flex':
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains('width')) {
-          width = Length.toDisplayPortValue(style['width']);
+          width = CSSLength.toDisplayPortValue(style['width']);
           cropPaddingBorder(child);
         } else {
           while (true) {
@@ -88,13 +88,13 @@ mixin ElementStyleMixin on RenderBox {
               break;
             }
             if (child is Element) {
-              StyleDeclaration style = child.style;
-              String display = getElementTrueDisplay(child.targetId);
+              CSSStyleDeclaration style = child.style;
+              String display = _getElementRealDisplayValue(child.targetId);
 
               // Set width of element according to parent display
               if (display != 'inline') { // Skip to find upper parent
                 if (style.contains('width')) { // Use style width
-                  width = Length.toDisplayPortValue(style['width']);
+                  width = CSSLength.toDisplayPortValue(style['width']);
                   cropPaddingBorder(child);
                   break;
                 } else if (display == 'inline-block' ||
@@ -110,7 +110,7 @@ mixin ElementStyleMixin on RenderBox {
       case 'inline-block':
       case 'inline-flex':
         if (style.contains('width')) {
-          width = Length.toDisplayPortValue(style['width']);
+          width = CSSLength.toDisplayPortValue(style['width']);
           cropPaddingBorder(child);
         } else {
           width = null;
@@ -131,11 +131,11 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementHeight(int targetId) {
+  double getElementComputedHeight(int targetId) {
     double height;
     Element child = getEventTargetByTargetId<Element>(targetId);
-    StyleDeclaration style = child.style;
-    String display = getElementTrueDisplay(targetId);
+    CSSStyleDeclaration style = child.style;
+    String display = _getElementRealDisplayValue(targetId);
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
@@ -152,7 +152,7 @@ mixin ElementStyleMixin on RenderBox {
       return null;
     } else if (style.contains('height')) {
       if (child is Element) {
-        height = Length.toDisplayPortValue(style['height']);
+        height = CSSLength.toDisplayPortValue(style['height']);
         cropPaddingBorder(child);
       }
     } else {
@@ -165,10 +165,10 @@ mixin ElementStyleMixin on RenderBox {
           break;
         }
         if (child is Element) {
-          StyleDeclaration style = child.style;
-          if (isStretchChildrenHeight(child)) {
+          CSSStyleDeclaration style = child.style;
+          if (_isStretchChildrenHeight(child)) {
             if (style.contains('height')) {
-              height = Length.toDisplayPortValue(style['height']);
+              height = CSSLength.toDisplayPortValue(style['height']);
               cropPaddingBorder(child);
               break;
             } else {
@@ -193,9 +193,9 @@ mixin ElementStyleMixin on RenderBox {
   }
 
   // Whether current node should stretch children's height
-  bool isStretchChildrenHeight(Element element) {
+  static bool _isStretchChildrenHeight(Element element) {
     bool isStretch = false;
-    StyleDeclaration style = element.style;
+    CSSStyleDeclaration style = element.style;
     String display = style['display'];
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
@@ -211,7 +211,7 @@ mixin ElementStyleMixin on RenderBox {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String getElementTrueDisplay(int targetId) {
+  static String _getElementRealDisplayValue(int targetId) {
     Element element = getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
     String display = isEmptyStyleValue(element.style['display'])
@@ -225,7 +225,7 @@ mixin ElementStyleMixin on RenderBox {
       ) {
       display = 'inline-block';
     } else if (parentNode != null) {
-      StyleDeclaration style = parentNode.style;
+      CSSStyleDeclaration style = parentNode.style;
 
       if (style['display'].endsWith('flex')) {
         // Display as inline-block if parent node is flex

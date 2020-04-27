@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 enum OverflowType {
   auto,
@@ -12,7 +12,7 @@ enum OverflowType {
   scroll,
 }
 
-List<OverflowType> getOverflowFromStyle(StyleDeclaration style) {
+List<OverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
   OverflowType overflowX, overflowY;
   overflowX = overflowY = _getOverflow(style['overflow']);
 
@@ -46,14 +46,15 @@ OverflowType _getOverflow(String definition) {
   return OverflowType.visible;
 }
 
-mixin OverflowStyleMixin {
+// https://drafts.csswg.org/css-overflow-3/
+mixin CSSOverflowMixin {
   RenderObject _renderObjectX;
   RenderObject _child;
   RenderObject _renderObjectY;
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  RenderObject initOverflowBox(RenderObject current, StyleDeclaration style, void scrollListener(double scrollTop)) {
+  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     assert(style != null);
     _child = current;
     List<OverflowType> overflow = getOverflowFromStyle(style);
@@ -65,7 +66,7 @@ mixin OverflowStyleMixin {
   }
 
 
-  void updateOverFlowBox(StyleDeclaration style, void scrollListener(double scrollTop)) {
+  void updateOverFlowBox(CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     if (style != null) {
       List<OverflowType> overflow = getOverflowFromStyle(style);
 

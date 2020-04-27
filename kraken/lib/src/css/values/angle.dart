@@ -4,7 +4,8 @@
  */
 import 'dart:math' as math;
 
-class Angle {
+// https://drafts.csswg.org/css-values-3/#angles
+class CSSAngle {
   static const String DEG = 'deg';
   static const String GRAD = 'grad';
   static const String RAD = 'rad';
@@ -13,7 +14,7 @@ class Angle {
   String angleType = DEG;
   double angleValue = 0.0;
 
-  Angle(String angleValue) {
+  CSSAngle(String angleValue) {
     if (angleValue != null) {
       if (angleValue.endsWith(DEG)) {
         angleType = DEG;
