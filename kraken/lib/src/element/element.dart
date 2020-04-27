@@ -775,7 +775,7 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = FlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;

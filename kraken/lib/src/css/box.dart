@@ -20,7 +20,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   RenderDecoratedBox renderDecoratedBox;
   RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
-  Padding oldBorderPadding;
+  CSSPadding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
       RenderObject renderObject, CSSStyleDeclaration style, int targetId) {

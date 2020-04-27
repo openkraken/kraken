@@ -23,7 +23,7 @@ mixin CSSTransformMixin on Node {
     if (style.contains('transform')) {
       oldMethods = CSSFunction.parseExpression(style['transform']);
       matrix4 = combineTransform(oldMethods) ?? matrix4;
-      TransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
+      CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
         oldAlignment = transformOrigin.alignment;
@@ -76,7 +76,7 @@ mixin CSSTransformMixin on Node {
       [Map<String, CSSTransition> transitionMap]) {
     Offset offset = Offset.zero;
     Alignment alignment = Alignment.center;
-    TransformOrigin transformOrigin = parseOrigin(transformOriginStr);
+    CSSTransformOrigin transformOrigin = parseOrigin(transformOriginStr);
     if (transformOrigin != null) {
       offset = transformOrigin.offset;
       alignment = transformOrigin.alignment;
@@ -131,7 +131,7 @@ mixin CSSTransformMixin on Node {
     }
   }
 
-  TransformOrigin parseOrigin(String origin) {
+  CSSTransformOrigin parseOrigin(String origin) {
     if (origin != null && origin.isNotEmpty) {
       List<String> originList = origin.trim().split(' ');
       String x, y;
@@ -180,7 +180,7 @@ mixin CSSTransformMixin on Node {
       } else if (y == CSSPosition.CENTER) {
         alignY = 0.0;
       }
-      return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
+      return CSSTransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
     return null;
   }
@@ -545,7 +545,7 @@ mixin CSSTransformMixin on Node {
         break;
       case 'perspective':
         if (method.args.length == 1) {
-          //TODO perspective
+          // @TODO perspective
         }
     }
     return matrix4;
@@ -556,9 +556,9 @@ mixin CSSTransformMixin on Node {
   }
 }
 
-class TransformOrigin {
+class CSSTransformOrigin {
   Offset offset;
   Alignment alignment;
 
-  TransformOrigin(this.offset, this.alignment);
+  CSSTransformOrigin(this.offset, this.alignment);
 }

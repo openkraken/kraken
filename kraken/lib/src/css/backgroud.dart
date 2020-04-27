@@ -10,6 +10,9 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
+// CSS Images: https://drafts.csswg.org/css-images-3/
+
 typedef ConsumeProperty = bool Function(String src);
 const String BACKGROUND = 'background';
 const String BACKGROUND_ATTACHMENT = 'backgroundAttachment';
@@ -20,10 +23,6 @@ const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';
 
 const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
-
-
-// CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
-// CSS Images: https://drafts.csswg.org/css-images-3/
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
