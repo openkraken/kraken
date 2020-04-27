@@ -1,0 +1,603 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+import 'dart:ui';
+import 'dart:math' as math;
+
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
+import 'package:kraken/style.dart';
+
+
+typedef ConsumeProperty = bool Function(String src);
+const String BACKGROUND_ATTACHMENT = 'backgroundAttachment';
+const String BACKGROUND_REPEAT = 'backgroundRepeat';
+const String BACKGROUND_POSITION = 'backgroundPosition';
+const String BACKGROUND_IMAGE = 'backgroundImage';
+const String BACKGROUND_SIZE = 'backgroundSize';
+const String BACKGROUND_COLOR = 'backgroundColor';
+/// The [BackgroundMixin] mixin used to handle background shorthand and compute
+/// to single value of background
+mixin BackgroundMixin {
+
+  // default property
+  Map<String, String> background = {
+    BACKGROUND_REPEAT: 'repeat',
+    BACKGROUND_ATTACHMENT: 'scroll',
+    BACKGROUND_POSITION: 'left top',
+    BACKGROUND_IMAGE: '',
+    BACKGROUND_SIZE: 'auto',
+    BACKGROUND_COLOR: 'transparent'
+  };
+
+  RenderGradient _renderGradient;
+
+  double linearAngle;
+
+  void _parseBackground(StyleDeclaration style) {
+    if (style.contains('background')) {
+      List<String> shorthand = style['background'].split(' ');
+      background = _consumeBackground(shorthand);
+    }
+    if (style.contains(BACKGROUND_ATTACHMENT)) {
+      background[BACKGROUND_ATTACHMENT] = style[BACKGROUND_ATTACHMENT];
+    }
+    if (style.contains(BACKGROUND_REPEAT)) {
+      background[BACKGROUND_REPEAT] = style[BACKGROUND_REPEAT];
+    }
+    if (style.contains(BACKGROUND_SIZE)) {
+      background[BACKGROUND_SIZE] = style[BACKGROUND_SIZE];
+    }
+    if (style.contains(BACKGROUND_POSITION)) {
+      background[BACKGROUND_POSITION] = style[BACKGROUND_POSITION];
+    }
+    if (style.contains(BACKGROUND_COLOR)) {
+      background[BACKGROUND_COLOR] = style[BACKGROUND_COLOR];
+    }
+    if (style.contains(BACKGROUND_IMAGE)) {
+      background[BACKGROUND_IMAGE] = style[BACKGROUND_IMAGE];
+    }
+  }
+
+  void _setBackgroundProperty(String property, String value) {
+    if (property == 'background') {
+      List<String> shorthand = value.split(' ');
+      background = _consumeBackground(shorthand);
+    } else {
+      background[property] = value;
+    }
+  }
+
+  Map<String, String> _consumeBackground(List<String> shorthand) {
+    int longhandCount = shorthand.length;
+    Map<String, ConsumeProperty> propertyMap = {
+      BACKGROUND_IMAGE: _consumeBackgroundImage,
+      BACKGROUND_REPEAT: _consumeBackgroundRepeat,
+      BACKGROUND_ATTACHMENT: _consumeBackgroundAttachment,
+      'backgroundPositionAndSize': _consumeBackgroundPosition
+    };
+    // default property
+    Map<String, String> background = {
+      BACKGROUND_REPEAT: 'repeat',
+      BACKGROUND_ATTACHMENT: 'scroll',
+      BACKGROUND_POSITION: 'left top',
+      BACKGROUND_IMAGE: '',
+      BACKGROUND_SIZE: 'auto',
+      BACKGROUND_COLOR: 'transparent'
+    };
+    bool broken = false;
+    for (int i = 0; i < longhandCount; i++) {
+      if (broken) {
+        break;
+      }
+      String property = shorthand[i].trim();
+      Iterable<String> keys = propertyMap.keys;
+      // record the consumed property
+      String consumedKey;
+      for (String key in keys) {
+        // position may be more than one(at most four), should special handle
+        // size is follow position and split by /
+        if (key == 'backgroundPositionAndSize') {
+          if (property != '/' && property.contains('/')) {
+            int index = property.indexOf('/');
+            String position = property.substring(0, index);
+            if (_consumeBackgroundPosition(position)) {
+              background[BACKGROUND_POSITION] = position;
+              String size = property.substring(index + 1);
+              if (_consumeBackgroundSize(size)) {
+                // size at most two value
+                if (i + 1 < longhandCount &&
+                  _consumeBackgroundSize(shorthand[i + 1].trim())) {
+                  size = size + ' ' + shorthand[i + 1].trim();
+                  i++;
+                }
+                background[BACKGROUND_SIZE] = size;
+              } else {
+                broken = true;
+                break;
+              }
+              consumedKey = key;
+            } else {
+              broken = true;
+              break;
+            }
+          } else if (_consumeBackgroundPosition(property)) {
+            String position = property;
+            String size;
+            bool hasSize = false;
+            // position at most four value
+            for (int j = 1; j <= 4; j ++) {
+              if (i + j < longhandCount) {
+                String temp = shorthand[i + j].trim();
+                if (temp == '/') {
+                  i = i + j;
+                  hasSize = true;
+                  break;
+                } else if (temp.contains('/')) {
+                  i = i + j;
+                  hasSize = true;
+                  int index = temp.indexOf('/');
+                  String positionTemp = temp.substring(0, index);
+                  if (_consumeBackgroundPosition(positionTemp)) {
+                    background[BACKGROUND_POSITION] = position;
+                    size = property.substring(index + 1);
+                    if (!_consumeBackgroundSize(size)) {
+                      broken = true;
+                    }
+                  } else {
+                    broken = true;
+                  }
+                  break;
+                } else if (_consumeBackgroundPosition(temp)) {
+                  position = position + ' ' + temp;
+                } else {
+                  i = i + j - 1;
+                  break;
+                }
+              } else {
+                break;
+              }
+            }
+            // handle size when / follow, at most two value
+            if (hasSize) {
+              if (i + 1 < longhandCount) {
+                String nextSize = shorthand[i + 1].trim();
+                if (size == null) {
+                  size = nextSize;
+                  if (_consumeBackgroundSize(size)) {
+                    i++;
+                    if (i + 1 < longhandCount) {
+                      if (_consumeBackgroundSize(shorthand[i + 1].trim())) {
+                        size = size + ' ' + shorthand[i + 1].trim();
+                        i++;
+                      }
+                    }
+                    background[BACKGROUND_SIZE] = size;
+                  } else {
+                    broken = true;
+                    break;
+                  }
+                } else if (_consumeBackgroundSize(nextSize)) {
+                  size = size + ' ' + nextSize;
+                  background[BACKGROUND_SIZE] = size;
+                } else {
+                  broken = true;
+                  break;
+                }
+              } else {
+                broken = true;
+                break;
+              }
+            }
+            consumedKey = key;
+            break;
+          }
+        } else if (propertyMap[key](property)) {
+          background[key] = property;
+          consumedKey = key;
+          break;
+        }
+      }
+      // consumed the property when find
+      if (consumedKey != null) {
+        propertyMap.remove(consumedKey);
+      } else if (i == longhandCount - 1) {
+        background[BACKGROUND_COLOR] = property;
+      }
+    }
+    // shorthand error don not set value
+    if (!broken) {
+      return background;
+    }
+    return null;
+  }
+
+  bool _consumeBackgroundRepeat(String src) {
+    return 'repeat-x' == src || 'repeat-y' == src || 'repeat' == src ||
+      'no-repeat' == src;
+  }
+
+  bool _consumeBackgroundAttachment(String src) {
+    return 'fixed' == src || 'scroll' == src || 'local' == src;
+  }
+
+  bool _consumeBackgroundImage(String src) {
+    return src.startsWith('url(') || src.startsWith('linear-gradient(') ||
+      src.startsWith('repeating-linear-gradient(') ||
+      src.startsWith('radial-gradient(') ||
+      src.startsWith('repeating-radial-gradient(') ||
+      src.startsWith('conic-gradient(');
+  }
+
+  bool _consumeBackgroundPosition(String src) {
+    return src == 'center' || src == 'left' || src == 'right' ||
+      Length.isLength(src) || Percentage.isPercentage(src) || src == 'top' ||
+      src == 'bottom';
+  }
+
+  bool _consumeBackgroundSize(String src) {
+    return src == 'auto' || src == 'contain' || src == 'cover' ||
+      src == 'fit-width' || src == 'fit-height' || src == 'scale-down' ||
+      src == 'fill' || Length.isLength(src) || Percentage.isPercentage(src);
+  }
+
+  bool _shouldRenderBackgroundImage() {
+    return background['backgroundAttachment'] == 'local' &&
+      background.containsKey(BACKGROUND_IMAGE);
+  }
+
+  RenderObject initBackground(
+    RenderObject renderObject,
+    StyleDeclaration style,
+    int targetId
+    ) {
+    _parseBackground(style);
+    if (!_shouldRenderBackgroundImage()) return renderObject;
+    DecorationImage decorationImage;
+    Gradient gradient;
+
+    if (background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, Method> methods = Method.parseMethod(background[BACKGROUND_IMAGE]);
+      //FIXME flutter just support one property
+      for (Method method in methods?.values) {
+        if (method.name == 'url') {
+          String url = method.args.length > 0 ? method.args[0] : '';
+          if (url != null && url.isNotEmpty) {
+            decorationImage = getBackgroundImage(url);
+            if (decorationImage != null) {
+              return _renderGradient = RenderGradient(
+                targetId: targetId,
+                decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+                child: renderObject);
+            }
+          }
+        } else {
+          gradient = getBackgroundGradient(method);
+          if (gradient != null) {
+            return _renderGradient = RenderGradient(
+              targetId: targetId,
+              decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+              child: renderObject);
+          }
+        }
+      }
+    }
+
+    return renderObject;
+  }
+
+  void updateBackground(String property, String value,
+    RenderObjectWithChildMixin parent, int targetId) {
+    _setBackgroundProperty(property, value);
+    if (!_shouldRenderBackgroundImage()) return;
+
+    DecorationImage decorationImage;
+    Gradient gradient;
+    if (background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, Method> methods = Method.parseMethod(background[BACKGROUND_IMAGE]);
+      //FIXME flutter just support one property
+      for (Method method in methods?.values) {
+        if (method.name == 'url') {
+          String url = method.args.length > 0 ? method.args[0] : '';
+          if (url != null && url.isNotEmpty) {
+            decorationImage = getBackgroundImage(url);
+            if (decorationImage != null) {
+              _updateRenderGradient(decorationImage, gradient, parent, targetId);
+              return;
+            }
+          }
+        } else {
+          gradient = getBackgroundGradient(method);
+          if (gradient != null) {
+            _updateRenderGradient(decorationImage, gradient, parent, targetId);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
+    RenderObjectWithChildMixin parent, int targetId) {
+    if (_renderGradient != null) {
+      _renderGradient.decoration =
+        BoxDecoration(image: decorationImage, gradient: gradient);
+    } else {
+      RenderObject child = parent.child;
+      parent.child = null;
+      _renderGradient = RenderGradient(
+        targetId: targetId,
+        decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+        child: child);
+      parent.child = _renderGradient;
+    }
+  }
+
+  DecorationImage getBackgroundImage(String url) {
+    DecorationImage backgroundImage = null;
+    if (background.containsKey(BACKGROUND_REPEAT)) {
+      // default repeat
+      ImageRepeat imageRepeat = ImageRepeat.repeat;
+      if (background.containsKey(BACKGROUND_REPEAT)) {
+        switch (background[BACKGROUND_REPEAT]) {
+          case 'repeat-x':
+            imageRepeat = ImageRepeat.repeatX;
+            break;
+          case 'repeat-y':
+            imageRepeat = ImageRepeat.repeatY;
+            break;
+          case 'no-repeat':
+            imageRepeat = ImageRepeat.noRepeat;
+            break;
+        }
+      }
+      Position position =
+      Position(background[BACKGROUND_POSITION], window.physicalSize);
+      // size default auto equals none
+      BoxFit boxFit = BoxFit.none;
+      if (background.containsKey(BACKGROUND_SIZE)) {
+        switch (background[BACKGROUND_SIZE]) {
+          case 'cover':
+            boxFit = BoxFit.cover;
+            break;
+          case 'contain':
+            boxFit = BoxFit.contain;
+            break;
+          case 'fill':
+            boxFit = BoxFit.fill;
+            break;
+          case 'fit-width':
+            boxFit = BoxFit.fitWidth;
+            break;
+          case 'fit-height':
+            boxFit = BoxFit.fitHeight;
+            break;
+          case 'scale-down':
+            boxFit = BoxFit.scaleDown;
+            break;
+        }
+      }
+      backgroundImage = DecorationImage(
+        image: getImageProviderByUrl(url),
+        repeat: imageRepeat,
+        alignment: position.alignment,
+        fit: boxFit);
+    }
+    return backgroundImage;
+  }
+
+  Gradient getBackgroundGradient(Method method) {
+    Gradient gradient;
+    if (method.args.length > 1) {
+      List<Color> colors = [];
+      List<double> stops = [];
+      int start = 0;
+      switch (method.name) {
+        case 'linear-gradient':
+        case 'repeating-linear-gradient':
+          Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
+          if (method.args[0].startsWith('to ')) {
+            List<String> toString = method.args[0].trim().split(' ');
+            if (toString.length >= 2) {
+              switch (toString[1]) {
+                case 'left':
+                  if (toString.length == 3) {
+                    if (toString[2] == 'top') {
+                      begin = Alignment.bottomRight;
+                      end = Alignment.topLeft;
+                    } else if (toString[2] == 'bottom') {
+                      begin = Alignment.topRight;
+                      end = Alignment.bottomLeft;
+                    }
+                  } else {
+                    begin = Alignment.centerRight;
+                    end = Alignment.centerLeft;
+                  }
+                  break;
+                case 'top':
+                  if (toString.length == 3) {
+                    if (toString[2] == 'left') {
+                      begin = Alignment.bottomRight;
+                      end = Alignment.topLeft;
+                    } else if (toString[2] == 'right') {
+                      begin = Alignment.bottomLeft;
+                      end = Alignment.topRight;
+                    }
+                  } else {
+                    begin = Alignment.bottomCenter;
+                    end = Alignment.topCenter;
+                  }
+                  break;
+                case 'right':
+                  if (toString.length == 3) {
+                    if (toString[2] == 'top') {
+                      begin = Alignment.bottomLeft;
+                      end = Alignment.topRight;
+                    } else if (toString[2] == 'bottom') {
+                      begin = Alignment.topLeft;
+                      end = Alignment.bottomRight;
+                    }
+                  } else {
+                    begin = Alignment.centerLeft;
+                    end = Alignment.centerRight;
+                  }
+                  break;
+                case 'bottom':
+                  if (toString.length == 3) {
+                    if (toString[2] == 'left') {
+                      begin = Alignment.topRight;
+                      end = Alignment.bottomLeft;
+                    } else if (toString[2] == 'right') {
+                      begin = Alignment.topLeft;
+                      end = Alignment.bottomRight;
+                    }
+                  } else {
+                    begin = Alignment.topCenter;
+                    end = Alignment.bottomCenter;
+                  }
+                  break;
+              }
+            }
+            start = 1;
+          } else if (Angle.isAngle(method.args[0])) {
+            Angle angle = Angle(method.args[0]);
+            linearAngle = angle.angleValue;
+            start = 1;
+          }
+          applyColorAndStops(start, method.args, colors, stops);
+          if (colors.length >= 2) {
+            gradient = LinearGradient(
+              begin: begin,
+              end: end,
+              colors: colors,
+              stops: stops,
+              tileMode: method.name == 'linear-gradient'
+                ? TileMode.clamp
+                : TileMode.repeated);
+          }
+          break;
+      //TODO just support circle radial
+        case 'radial-gradient':
+        case 'repeating-radial-gradient':
+          double atX = 0.5;
+          double atY = 0.5;
+          double radius = 0.5;
+
+          if (method.args[0].contains(PERCENTAGE)) {
+            List<String> positionAndRadius = method.args[0].trim().split(' ');
+            if (positionAndRadius.length >= 1) {
+              if (Percentage.isPercentage(positionAndRadius[0])) {
+                radius = Percentage(positionAndRadius[0]).toDouble() * 0.5;
+                start = 1;
+              }
+              if (positionAndRadius.length > 2 &&
+                positionAndRadius[1] == 'at') {
+                start = 1;
+                if (Percentage.isPercentage(positionAndRadius[2])) {
+                  atX = Percentage(positionAndRadius[2]).toDouble();
+                }
+                if (positionAndRadius.length == 4 &&
+                  Percentage.isPercentage(positionAndRadius[3])) {
+                  atY = Percentage(positionAndRadius[3]).toDouble();
+                }
+              }
+            }
+          }
+          applyColorAndStops(start, method.args, colors, stops);
+          if (colors.length >= 2) {
+            gradient = RadialGradient(
+              center: FractionalOffset(atX, atY),
+              radius: radius,
+              colors: colors,
+              stops: stops,
+              tileMode: method.name == 'radial-gradient'
+                ? TileMode.clamp
+                : TileMode.repeated,
+            );
+          }
+          break;
+        case 'conic-gradient':
+          double from = 0.0;
+          double atX = 0.5;
+          double atY = 0.5;
+          if (method.args[0].contains('from ') ||
+            method.args[0].contains('at ')) {
+            List<String> fromAt = method.args[0].trim().split(' ');
+            int fromIndex = fromAt.indexOf('from');
+            int atIndex = fromAt.indexOf('at');
+            if (fromIndex != -1 && fromIndex + 1 < fromAt.length) {
+              from = Angle(fromAt[fromIndex + 1]).angleValue;
+            }
+            if (atIndex != -1) {
+              if (atIndex + 1 < fromAt.length &&
+                Percentage.isPercentage(fromAt[atIndex + 1])) {
+                atX = Percentage(fromAt[atIndex + 1]).toDouble();
+              }
+              if (atIndex + 2 < fromAt.length &&
+                Percentage.isPercentage(fromAt[atIndex + 2])) {
+                atY = Percentage(fromAt[atIndex + 2]).toDouble();
+              }
+            }
+            start = 1;
+          }
+          applyColorAndStops(start, method.args, colors, stops);
+          if (colors.length >= 2) {
+            gradient = SweepGradient(
+              center: FractionalOffset(atX, atY),
+              colors: colors,
+              stops: stops,
+              transform: GradientRotation(-math.pi / 2 + from));
+          }
+          break;
+      }
+    }
+
+    return gradient;
+  }
+
+
+  Color getBackgroundColor(StyleDeclaration style) {
+    Color backgroundColor = WebColor.transparent;
+    if (background.containsKey(BACKGROUND_COLOR)) {
+      backgroundColor = WebColor.generate(background[BACKGROUND_COLOR]);
+    }
+    return backgroundColor;
+  }
+
+  void applyColorAndStops(
+    int start, List<String> args, List<Color> colors, List<double> stops) {
+    double grow = 1.0 / (args.length - 1);
+    for (int i = start; i < args.length; i++) {
+      ColorGradient colorGradient = parseColorAndStop(args[i], i * grow);
+      colors.add(colorGradient.color);
+      stops.add(colorGradient.stop);
+    }
+  }
+
+  ColorGradient parseColorAndStop(String src, [double defaultStop]) {
+    List<String> strings = src?.trim()?.split(" ");
+    ColorGradient colorGradient;
+    if (strings != null && strings.length >= 1) {
+      double stop = defaultStop;
+      if (strings.length == 2) {
+        try {
+          if (Percentage.isPercentage(strings[1])) {
+            stop = Percentage(strings[1]).toDouble();
+          } else if (Angle.isAngle(strings[1])) {
+            stop = Angle(strings[1]).angleValue / (math.pi * 2);
+          }
+        } catch (e) {}
+      }
+      colorGradient = ColorGradient(WebColor.generate(strings[0]), stop);
+    }
+    return colorGradient;
+  }
+}
+
+class ColorGradient {
+  Color color;
+  double stop;
+  ColorGradient(this.color, this.stop);
+}

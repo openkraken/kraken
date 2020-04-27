@@ -30,7 +30,7 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         TextStyleMixin,
-        BackgroundImageMixin,
+        BackgroundMixin,
         RenderDecoratedBoxMixin,
         DimensionMixin,
         FlexStyleMixin,
@@ -126,7 +126,7 @@ class Element extends Node
     }
 
     // Background image
-    renderObject = initBackgroundImage(renderObject, style, targetId);
+    renderObject = initBackground(renderObject, style, targetId);
 
     // BoxModel Padding
     renderObject = renderPadding = initRenderPadding(renderObject, style);
@@ -856,12 +856,13 @@ class Element extends Node
     style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);
     style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
 
-    style.addStyleChangeListener('backgroundColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundAttachment', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundImage', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundRepeat', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundSize', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('backgroundPosition', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('background', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundColor', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundAttachment', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundImage', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundRepeat', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundSize', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundPosition', _styleBackgroundChangedListener);
 
     style.addStyleChangeListener('border', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
@@ -1051,11 +1052,16 @@ class Element extends Node
     }
   }
 
+  // background may exist on the decoratedBox or single box, because the attachment
+  void _styleBackgroundChangedListener(String property, String original, String present) {
+    updateBackground(property, present, renderPadding, targetId);
+    // decoratedBox may contains background and border
+    updateRenderDecoratedBox(style, transitionMap);
+  }
+
   void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
-
-    updateBackgroundImage(style, renderPadding, targetId);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {

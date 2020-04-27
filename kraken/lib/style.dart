@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-export 'src/style/backgroud_image.dart';
+export 'src/style/backgroud.dart';
 export 'src/style/box_decoration.dart';
 export 'src/style/opacity.dart';
 export 'src/style/style_declaration.dart';
@@ -28,3 +28,4 @@ export 'src/style/types/numeric.dart';
 export 'src/style/types/position.dart';
 export 'src/style/types/textual.dart';
 export 'src/style/types/time.dart';
+export 'src/style/types/image.dart';

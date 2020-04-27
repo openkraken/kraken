@@ -13,7 +13,7 @@ import 'package:kraken/style.dart';
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
-mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
+mixin RenderDecoratedBoxMixin on BackgroundMixin {
   RenderDecoratedBox renderDecoratedBox;
   RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
@@ -42,7 +42,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition backgroundColorTransition = getTransition(
-          transitionMap, 'background-color');
+          transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
       List<Transition> borderColorTransitionsLTRB = [
         getTransition(transitionMap, 'border-left-color',
@@ -207,18 +207,18 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   TransitionDecoration getTransitionDecoration(StyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style['backgroundAttachment'] == ''
-        || style['backgroundAttachment'] == 'scroll'
-            && style.contains('backgroundImage')) {
-      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
+    if (background[BACKGROUND_ATTACHMENT] == ''
+        || background[BACKGROUND_ATTACHMENT] == 'scroll'
+            && background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, Method> methods = Method.parseMethod(background[BACKGROUND_IMAGE]);
       for (Method method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url, style);
+            decorationImage = getBackgroundImage(url);
           }
         } else {
-          gradient = getBackgroundGradient(method, style);
+          gradient = getBackgroundGradient(method);
         }
       }
     }
@@ -299,14 +299,6 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       return Length.toDisplayPortValue(style['borderRadius']);
     }
     return 0.0;
-  }
-
-  Color getBackgroundColor(StyleDeclaration style) {
-    Color backgroundColor = WebColor.transparent;
-    if (style.contains('backgroundColor')) {
-      backgroundColor = WebColor.generate(style['backgroundColor']);
-    }
-    return backgroundColor;
   }
 
   static RegExp spaceRegExp = RegExp(r' ');

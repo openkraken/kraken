@@ -3,11 +3,8 @@
  * Author: Kraken Team.
  */
 
-import 'dart:io';
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/painting.dart';
 import 'package:kraken/style.dart';
 import 'package:kraken/rendering.dart';
 
@@ -68,21 +65,7 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')) {
-        src = src.startsWith('//') ? 'https:' + src : src;
-        // @TODO: caching also works after image downloaded
-        String caching = properties['caching'];
-        if (caching == 'store' || caching == 'auto') {
-          image = CachedNetworkImage(src);
-        } else {
-          image = NetworkImage(src);
-        }
-      } else if (src.startsWith('file://')) {
-        image = FileImage(File.fromUri(Uri.parse(src)));
-      } else {
-        // Fallback to asset image
-        image = AssetImage(src);
-      }
+      image = getImageProviderByUrl(src, cache: properties['caching']);
       _constructImageChild();
     }
   }
