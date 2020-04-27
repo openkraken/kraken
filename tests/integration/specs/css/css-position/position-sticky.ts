@@ -66,7 +66,7 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('change-top-ref', async () => {
+  xit('change-top-ref', async () => {
     let box;
     let spacer;
     box = createElementWithStyle('div', {
@@ -114,7 +114,7 @@ describe('position-sticky', () => {
     spacer = createElementWithStyle('div', {
       height: '200vh',
       'background-image':
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
+        'url(assets/ruler-v-50px.png)',
       'background-repeat': 'repeat',
       'box-sizing': 'border-box',
     });
@@ -124,7 +124,7 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('child-multicolumn-ref', async () => {
+  xit('child-multicolumn-ref', async () => {
     let contents;
     let child;
     let relative;
@@ -138,7 +138,7 @@ describe('position-sticky', () => {
         width: '200px',
         height: '200px',
         'background-image':
-          'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
+          'url(assets/ruler-v-50px.png)',
         'background-repeat': 'repeat',
         'box-sizing': 'border-box',
       },
@@ -203,7 +203,7 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('child-multicolumn', async () => {
+  xit('child-multicolumn', async () => {
     let contents;
     let multicolumn;
     let sticky;
@@ -252,7 +252,7 @@ describe('position-sticky', () => {
         (spacer = createElementWithStyle('div', {
           height: '400px',
           'background-image':
-            'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
+            'url(assets/ruler-v-50px.png)',
           'background-repeat': 'repeat',
           'box-sizing': 'border-box',
         })),
@@ -728,7 +728,7 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('inflow-position', async () => {
+  xit('inflow-position', async () => {
     let before;
     let sticky;
     let after;
@@ -2542,7 +2542,7 @@ describe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('offset-top-left', async () => {
+  xit('offset-top-left', async () => {
     let sticky;
     let spacer;
     let scroller1;
