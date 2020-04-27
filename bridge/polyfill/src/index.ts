@@ -17,6 +17,7 @@ import { MQTT } from './mqtt';
 import { windowExtension } from './window';
 
 Object.assign(window, windowExtension);
+
 defineGlobalProperty('console', console);
 defineGlobalProperty('requestAnimationFrame', requestAnimationFrame);
 defineGlobalProperty('document', document);
