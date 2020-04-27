@@ -4,7 +4,7 @@
  */
 const String PERCENTAGE = '%';
 
-// https://drafts.csswg.org/css-values-3/#integers
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#integers
 class CSSInteger {
   int _value = 0;
   CSSInteger(String intValue) {
@@ -14,7 +14,7 @@ class CSSInteger {
   int valueOf() => _value;
 }
 
-// https://drafts.csswg.org/css-values-3/#numbers
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
 class CSSNumber {
   double _value;
 
@@ -31,7 +31,7 @@ class CSSNumber {
   int toInt() => _value.toInt();
 }
 
-// https://drafts.csswg.org/css-values-3/#percentages
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 class CSSPercentage {
   double _value = 0.0;
 

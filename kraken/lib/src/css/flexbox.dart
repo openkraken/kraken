@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
+
 mixin CSSFlexboxMixin {
   static const String DIRECTION = 'flexDirection';
   static const String WRAP = 'flexWrap';

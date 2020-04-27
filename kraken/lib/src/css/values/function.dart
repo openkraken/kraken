@@ -1,4 +1,5 @@
-// https://drafts.csswg.org/css-values-3/#functional-notations
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
+
 class CSSFunction {
   String name;
   List<String> args;

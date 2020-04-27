@@ -39,7 +39,7 @@ class Element extends Node
         CSSOpacityMixin,
         CSSTransformMixin,
         CSSVisibilityMixin,
-        CSSSubtreeVisibilityMixin,
+        CSSContentVisibilityMixin,
         CSSTransitionMixin {
 
   Map<String, dynamic> properties;
@@ -166,14 +166,14 @@ class Element extends Node
     // Opacity
     renderObject = initRenderOpacity(renderObject, style);
 
-    // Subtree Visibility
-    renderObject = initRenderSubtreeVisibility(renderObject, style);
+    // Content Visibility
+    renderObject = initRenderContentVisibility(renderObject, style);
 
     // Intersection observer
     renderObject = renderIntersectionObserver =
         RenderIntersectionObserver(child: renderObject);
 
-    setSubtreeVisibilityIntersectionObserver(renderIntersectionObserver, style['subtreeVisibility']);
+    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style['contentVisibility']);
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
@@ -899,7 +899,7 @@ class Element extends Node
 
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
     style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
-    style.addStyleChangeListener('subtreeVisibility', _styleSubtreeVisibilityChangedListener);
+    style.addStyleChangeListener('contentVisibility', _styleContentVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
     style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
@@ -1074,9 +1074,9 @@ class Element extends Node
     updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary);
   }
 
-  void _styleSubtreeVisibilityChangedListener(String property, original, present) {
-    // Update subtree visibility.
-    updateRenderSubtreeVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
+  void _styleContentVisibilityChangedListener(String property, original, present) {
+    // Update content visibility.
+    updateRenderContentVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {

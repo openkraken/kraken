@@ -6,14 +6,16 @@
 import 'dart:ui' show Color;
 import 'package:meta/meta.dart';
 
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
+// CSS Color: https://drafts.csswg.org/css-color-4/
+
 final RegExp RGBARexExp = RegExp(
   r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
   caseSensitive: false,
   multiLine: false,
 );
 
-/// https://drafts.csswg.org/css-values-3/#colors
-/// https://drafts.csswg.org/css-color-4/
+/// 
 /// #123
 /// #123456
 /// rgb(r,g,b)
