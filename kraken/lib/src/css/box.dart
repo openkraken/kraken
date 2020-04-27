@@ -8,19 +8,22 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
+
+// https://drafts.csswg.org/css-box-4/
+// https://drafts.csswg.org/css-backgrounds/
 
 /// RenderDecoratedBox impls styles of
 /// - background
 /// - border
-mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
+mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   RenderDecoratedBox renderDecoratedBox;
   RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
   Padding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
-      RenderObject renderObject, StyleDeclaration style, int targetId) {
+      RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     oldDecoration = getTransitionDecoration(style);
     EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
     // Flutter Border width is inside the element
@@ -38,11 +41,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   void updateRenderDecoratedBox(
-      StyleDeclaration style, Map<String, Transition> transitionMap) {
+      CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
       Transition backgroundColorTransition = getTransition(
-          transitionMap, 'background-color');
+          transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
       List<Transition> borderColorTransitionsLTRB = [
         getTransition(transitionMap, 'border-left-color',
@@ -204,21 +207,21 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
   ///     (PS. Only support solid now.)
   ///   borderColor: <color>
-  TransitionDecoration getTransitionDecoration(StyleDeclaration style) {
+  TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (style['backgroundAttachment'] == ''
-        || style['backgroundAttachment'] == 'scroll'
-            && style.contains('backgroundImage')) {
-      Map<String, Method> methods = Method.parseMethod(style['backgroundImage']);
-      for (Method method in methods?.values) {
+    if (background[BACKGROUND_ATTACHMENT] == ''
+        || background[BACKGROUND_ATTACHMENT] == 'scroll'
+            && background.containsKey(BACKGROUND_IMAGE)) {
+      Map<String, CSSFunction> methods = CSSFunction.parseExpression(background[BACKGROUND_IMAGE]);
+      for (CSSFunction method in methods?.values) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url, style);
+            decorationImage = getBackgroundImage(url);
           }
         } else {
-          gradient = getBackgroundGradient(method, style);
+          gradient = getBackgroundGradient(method);
         }
       }
     }
@@ -253,25 +256,25 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
 
   /// Tip: inset not supported.
   static RegExp commaRegExp = RegExp(r',');
-  List<BoxShadow> getBoxShadow(StyleDeclaration style) {
+  List<BoxShadow> getBoxShadow(CSSStyleDeclaration style) {
     List<BoxShadow> boxShadow = [];
     if (style.contains('boxShadow')) {
       String processedValue =
-          WebColor.preprocessCSSPropertyWithRGBAColor(style['boxShadow']);
+          CSSColor.preprocessCSSPropertyWithRGBAColor(style['boxShadow']);
       List<String> rawShadows = processedValue.split(commaRegExp);
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = Length.toDisplayPortValue(shadowDefinitions[0]);
-          double offsetY = Length.toDisplayPortValue(shadowDefinitions[1]);
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
           double blurRadius = shadowDefinitions.length > 3
-              ? Length.toDisplayPortValue(shadowDefinitions[2])
+              ? CSSLength.toDisplayPortValue(shadowDefinitions[2])
               : 0.0;
           double spreadRadius = shadowDefinitions.length > 4
-              ? Length.toDisplayPortValue(shadowDefinitions[3])
+              ? CSSLength.toDisplayPortValue(shadowDefinitions[3])
               : 0.0;
 
-          Color color = WebColor.generate(shadowDefinitions.last);
+          Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {
             boxShadow.add(BoxShadow(
               offset: Offset(offsetX, offsetY),
@@ -292,21 +295,13 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     return boxShadow;
   }
 
-  double getBorderRadius(StyleDeclaration style, String side) {
+  double getBorderRadius(CSSStyleDeclaration style, String side) {
     if (style.contains(side)) {
-      return Length.toDisplayPortValue(style[side]);
+      return CSSLength.toDisplayPortValue(style[side]);
     } else if (style.contains('borderRadius')) {
-      return Length.toDisplayPortValue(style['borderRadius']);
+      return CSSLength.toDisplayPortValue(style['borderRadius']);
     }
     return 0.0;
-  }
-
-  Color getBackgroundColor(StyleDeclaration style) {
-    Color backgroundColor = WebColor.transparent;
-    if (style.contains('backgroundColor')) {
-      backgroundColor = WebColor.generate(style['backgroundColor']);
-    }
-    return backgroundColor;
   }
 
   static RegExp spaceRegExp = RegExp(r' ');
@@ -318,7 +313,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   // border default width 3.0
   static double defaultBorderLineWidth = 3.0;
   static BorderStyle defaultBorderStyle = BorderStyle.none;
-  static Color defaultBorderColor = WebColor.transparent;
+  static Color defaultBorderColor = CSSColor.transparent;
 
   BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
@@ -337,7 +332,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     List<String> splittedBorder = getShorttedProperties(input);
 
     double width = splittedBorder.length > 0
-      ? Length.toDisplayPortValue(splittedBorder[0])
+      ? CSSLength.toDisplayPortValue(splittedBorder[0])
       : null;
 
     BorderStyle style = splittedBorder.length > 1
@@ -345,7 +340,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       : null;
 
     Color color = splittedBorder.length > 2
-      ? WebColor.generate(splittedBorder[2])
+      ? CSSColor.generate(splittedBorder[2])
       : null;
 
     return {
@@ -356,7 +351,7 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
-  TransitionBorderSide getBorderSideByStyle(StyleDeclaration style, String side) {
+  TransitionBorderSide getBorderSideByStyle(CSSStyleDeclaration style, String side) {
     TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);
     final String borderName = 'border';
     final String borderSideName = borderName + side; // eg. borderLeft/borderRight
@@ -396,11 +391,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
       final String borderWidthName = borderName + widthName; // borderWidth
       if (style.contains(borderSideWidthName) &&
           (style[borderSideWidthName] as String).isNotEmpty) {
-        borderSide.borderWidth = Length.toDisplayPortValue(style[borderSideWidthName]);
+        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]);
       } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) { // eg. borderLeft: 'solid 1px black'
         borderSide.borderWidth = borderSideShorttedInfo[widthName];
       } else if (style.contains(borderWidthName)) {
-        borderSide.borderWidth = Length.toDisplayPortValue(style[borderWidthName]);
+        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]);
       } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) { // eg. border: 'solid 2px red'
         borderSide.borderWidth = borderShorttedInfo[widthName];
       }
@@ -411,11 +406,11 @@ mixin RenderDecoratedBoxMixin on BackgroundImageMixin {
     final String borderSideColorName = borderSideName + colorName; // eg. borderLeftColor/borderRightColor
     final String borderColorName = borderName + colorName; // borderColor
     if (style.contains(borderSideColorName)) {
-      borderColor = WebColor.generate(style[borderSideColorName]);
+      borderColor = CSSColor.generate(style[borderSideColorName]);
     } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[colorName] != null) {
       borderColor = borderSideShorttedInfo[colorName];
     } else if (style.contains(borderColorName)) {
-      borderColor = WebColor.generate(style[borderColorName]);
+      borderColor = CSSColor.generate(style[borderColorName]);
     } else if (borderShorttedInfo != null && borderShorttedInfo[colorName] != null) {
       borderColor = borderShorttedInfo[colorName];
     }

@@ -4,19 +4,21 @@
  */
 const String PERCENTAGE = '%';
 
-class Integer {
+// https://drafts.csswg.org/css-values-3/#integers
+class CSSInteger {
   int _value = 0;
-  Integer(String intValue) {
+  CSSInteger(String intValue) {
     _value = int.parse(intValue);
   }
 
   int valueOf() => _value;
 }
 
-class Number {
+// https://drafts.csswg.org/css-values-3/#numbers
+class CSSNumber {
   double _value;
 
-  Number(String numericValue) {
+  CSSNumber(String numericValue) {
     try {
       _value = double.parse(numericValue);
     } catch (exception) {
@@ -29,10 +31,11 @@ class Number {
   int toInt() => _value.toInt();
 }
 
-class Percentage {
+// https://drafts.csswg.org/css-values-3/#percentages
+class CSSPercentage {
   double _value = 0.0;
 
-  Percentage(String percentageValue) {
+  CSSPercentage(String percentageValue) {
     if (percentageValue.endsWith(PERCENTAGE)) {
       try {
         _value = double.parse(percentageValue.split(PERCENTAGE)[0]) / 100;

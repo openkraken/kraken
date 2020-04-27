@@ -4,12 +4,12 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin OpacityStyleMixin on Node {
+mixin CSSOpacityMixin on Node {
   RenderOpacity renderOpacity;
 
-  RenderObject initRenderOpacity(RenderObject renderObject, StyleDeclaration style) {
+  RenderObject initRenderOpacity(RenderObject renderObject, CSSStyleDeclaration style) {
     bool existsOpacity = style.contains('opacity');
     if (existsOpacity) {
       double opacity = _convertStringToDouble(style['opacity']);
@@ -24,7 +24,7 @@ mixin OpacityStyleMixin on Node {
   }
 
   double _convertStringToDouble(String str) {
-    return isEmptyStyleValue(str) ? 1.0 : Length.toDouble(str);
+    return isEmptyStyleValue(str) ? 1.0 : CSSLength.toDouble(str);
   }
 
   void updateRenderOpacity(String value, { RenderObjectWithChildMixin parentRenderObject }) {

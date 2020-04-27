@@ -4,7 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {
@@ -12,16 +12,16 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 
 class RenderTextBox extends RenderBox
   with
-    ElementStyleMixin,
-    TextStyleMixin,
-    DimensionMixin,
+    CSSComputedMixin,
+    CSSTextMixin,
+    CSSSizingMixin,
     ContainerRenderObjectMixin<RenderBox, TextParentData>,
     RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
 
   RenderTextBox({
     this.targetId,
     String text,
-    StyleDeclaration style,
+    CSSStyleDeclaration style,
   }) : assert(text != null) {
     _text = text;
     _style = style;
@@ -53,9 +53,9 @@ class RenderTextBox extends RenderBox
     _rebuild();
   }
 
-  StyleDeclaration _style;
-  StyleDeclaration get style => _style;
-  set style(StyleDeclaration newStyle) {
+  CSSStyleDeclaration _style;
+  CSSStyleDeclaration get style => _style;
+  set style(CSSStyleDeclaration newStyle) {
     _style = newStyle;
     _rebuild();
   }
@@ -83,7 +83,7 @@ class RenderTextBox extends RenderBox
     // @TODO when in flex-grow or flex-shrink width needs to be recalculated
     Node currentNode = getEventTargetByTargetId<Node>(targetId);
     Element parentNode = currentNode.parentNode;
-    double elementWidth = getElementWidth(parentNode.targetId);
+    double elementWidth = getElementComputedWidth(parentNode.targetId);
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
 

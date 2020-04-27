@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import '../bridge/from_native.dart';
@@ -18,7 +18,7 @@ void main() {
   });
 
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
-  TextStyleMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
+  CSSTextMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {

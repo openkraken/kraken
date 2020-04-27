@@ -5,13 +5,13 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
-mixin SubtreeVisibilityStyleMixin on Node {
+mixin CSSSubtreeVisibilityMixin on Node {
   RenderVisibility renderVisibility;
   bool _hasIntersectionObserver = false;
 
-  RenderObject initRenderSubtreeVisibility(RenderObject renderObject, StyleDeclaration style) {
+  RenderObject initRenderSubtreeVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
     String subtreeVisibility = style['subtreeVisibility'];
     if (subtreeVisibility == 'hidden' || subtreeVisibility == 'auto') {
       // @TODO:  containIntrinsicSize

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken_camera/camera.dart';
 
 const String CAMERA = 'CAMERA-PREVIEW';
@@ -136,7 +136,7 @@ class CameraPreviewElement extends Element {
   RenderBox buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(StyleDeclaration()).copyWith(backgroundColor: WebColor.white);
+    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: CSSColor.white);
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),
@@ -172,8 +172,8 @@ class CameraPreviewElement extends Element {
         ) {
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
-        Length.toDisplayPortValue(DEFAULT_WIDTH),
-        Length.toDisplayPortValue(DEFAULT_HEIGHT),
+        CSSLength.toDisplayPortValue(DEFAULT_WIDTH),
+        CSSLength.toDisplayPortValue(DEFAULT_HEIGHT),
       )),
     );
 
@@ -233,12 +233,12 @@ class CameraPreviewElement extends Element {
 
   void _widthChangedListener(String key, String original, String present) {
     // Trigger width setter to invoke rerender.
-    width = Length.toDisplayPortValue(present);
+    width = CSSLength.toDisplayPortValue(present);
   }
 
   void _heightChangedListener(String key, String original, String present) {
     // Trigger height setter to invoke rerender.
-    height = Length.toDisplayPortValue(present);
+    height = CSSLength.toDisplayPortValue(present);
   }
 
   void _setProperty(String key, value) {
@@ -248,10 +248,10 @@ class CameraPreviewElement extends Element {
       // <camera-preview width="300" />
       // Width and height is united with pixel.
       value = value.toString() + 'px';
-      width = Length.toDisplayPortValue(value);
+      width = CSSLength.toDisplayPortValue(value);
     } else if (key == 'height') {
       value = value.toString() + 'px';
-      height = Length.toDisplayPortValue(value);
+      height = CSSLength.toDisplayPortValue(value);
     } else if (key == 'lens') {
       _initCameraWithLens(value);
     } else if (key == 'sensor-orientation') {
@@ -260,7 +260,7 @@ class CameraPreviewElement extends Element {
   }
 
   void _updateSensorOrientation(value) async {
-    int sensorOrientation = Number(value.toString()).toInt();
+    int sensorOrientation = CSSNumber(value.toString()).toInt();
     cameraDescription = cameraDescription.copyWith(
       sensorOrientation: sensorOrientation
     );

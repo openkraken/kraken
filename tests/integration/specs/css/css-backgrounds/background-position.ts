@@ -17,6 +17,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
       backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position1);
     append(BODY, position);
@@ -42,6 +43,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'left',
+      backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position2);
 
@@ -68,6 +70,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'top',
+      backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position3);
 
@@ -94,6 +97,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'right',
+      backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position4);
 
@@ -119,6 +123,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'bottom',
+      backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position5);
     append(BODY, position);
@@ -142,6 +147,7 @@ describe('Background-position', () => {
       backgroundImage:
         'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
       backgroundPosition: 'right center',
+      backgroundRepeat: 'no-repeat',
     });
     append(position, div);
     append(BODY, position);

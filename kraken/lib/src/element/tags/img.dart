@@ -3,12 +3,9 @@
  * Author: Kraken Team.
  */
 
-import 'dart:io';
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/painting.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
@@ -68,21 +65,7 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')) {
-        src = src.startsWith('//') ? 'https:' + src : src;
-        // @TODO: caching also works after image downloaded
-        String caching = properties['caching'];
-        if (caching == 'store' || caching == 'auto') {
-          image = CachedNetworkImage(src);
-        } else {
-          image = NetworkImage(src);
-        }
-      } else if (src.startsWith('file://')) {
-        image = FileImage(File.fromUri(Uri.parse(src)));
-      } else {
-        // Fallback to asset image
-        image = AssetImage(src);
-      }
+      image = CSSUrl.getImageProviderByUrl(src, cache: properties['caching']);
       _constructImageChild();
     }
   }
@@ -147,10 +130,10 @@ class ImgElement extends Element {
       );
     } else {
       if (containWidth) {
-        width = getDisplayPortedLength(style['width']);
+        width = CSSSizingMixin.getDisplayPortedLength(style['width']);
         height = width * realHeight / realWidth;
       } else if (containHeight) {
-        height = getDisplayPortedLength(style['height']);
+        height = CSSSizingMixin.getDisplayPortedLength(style['height']);
         width = height * realWidth / realHeight;
       }
       constraints = BoxConstraints.tightFor(
@@ -161,13 +144,13 @@ class ImgElement extends Element {
     renderConstrainedBox.additionalConstraints = constraints;
   }
 
-  BoxConstraints getBoxConstraintsFromStyle(StyleDeclaration style) {
-    double width = getDisplayPortedLength(style['width']);
-    double height = getDisplayPortedLength(style['height']);
+  BoxConstraints getBoxConstraintsFromStyle(CSSStyleDeclaration style) {
+    double width = CSSSizingMixin.getDisplayPortedLength(style['width']);
+    double height = CSSSizingMixin.getDisplayPortedLength(style['height']);
     return BoxConstraints.tightFor(width: width, height: height);
   }
 
-  BoxFit _getBoxFit(StyleDeclaration style) {
+  BoxFit _getBoxFit(CSSStyleDeclaration style) {
     String fit = style['objectFit'];
     switch (fit) {
       case 'contain':
@@ -197,7 +180,7 @@ class ImgElement extends Element {
     }
   }
 
-  Alignment _getAlignment(StyleDeclaration style) {
+  Alignment _getAlignment(CSSStyleDeclaration style) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
@@ -244,7 +227,7 @@ class ImgElement extends Element {
   }
 
 
-  RenderDecoratedBox getRenderDecoratedBox(StyleDeclaration style, ImageProvider image) {
+  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     Alignment alignment = _getAlignment(style);
     return RenderDecoratedBox(

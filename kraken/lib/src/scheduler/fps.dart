@@ -6,7 +6,7 @@
 import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/src/style/types/color.dart';
+import 'package:kraken/css.dart';
 
 /// Fps callback.
 typedef FpsCallback = void Function(List<FpsInfo> fps);
@@ -122,7 +122,7 @@ class RenderFpsOverlay extends RenderBox {
     Canvas canvas = context.canvas;
     if (_fpsInfo != null) {
       TextPainter textPainter =
-          _getTextPainter(_fpsInfo.toString(), WebColor.red);
+          _getTextPainter(_fpsInfo.toString(), CSSColor.red);
       textPainter.layout();
       textPainter.paint(canvas, Offset(0, 0));
     }

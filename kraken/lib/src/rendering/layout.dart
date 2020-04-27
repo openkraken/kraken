@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 class _RunMetrics {
   _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.childCount);
@@ -32,8 +32,8 @@ class RenderFlowLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
-        ElementStyleMixin,
-        RelativeStyleMixin {
+        CSSComputedMixin,
+        CSSPositionMixin {
   RenderFlowLayout({
     List<RenderBox> children,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
@@ -64,7 +64,7 @@ class RenderFlowLayout extends RenderBox
   }
 
   // Element style;
-  StyleDeclaration style;
+  CSSStyleDeclaration style;
 
   // id of current element
   final int targetId;
@@ -507,8 +507,8 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double elementWidth = getElementWidth(targetId);
-    double elementHeight = getElementHeight(targetId);
+    double elementWidth = getElementComputedWidth(targetId);
+    double elementHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
     if (child == null) {
@@ -529,7 +529,7 @@ class RenderFlowLayout extends RenderBox
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
-          mainAxisLimit = ElementStyleMixin.getElementMaxWidth(targetId);
+          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -613,7 +613,7 @@ class RenderFlowLayout extends RenderBox
 
     // get container height
     double containerHeight = crossAxisExtent;
-    double containerParentHeight = Length.toDisplayPortValue(style['height']);
+    double containerParentHeight = CSSLength.toDisplayPortValue(style['height']);
     if (containerParentHeight != null) {
       containerHeight = containerParentHeight;
     }
@@ -721,7 +721,7 @@ class RenderFlowLayout extends RenderBox
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
-        StyleDeclaration childStyle;
+        CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
           childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
         } else if (child is RenderElementBoundary) {

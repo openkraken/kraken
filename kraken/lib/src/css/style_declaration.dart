@@ -10,20 +10,22 @@ typedef StyleChangeListener = void Function(
   String present,
 );
 
-/// The [StyleDeclaration] interface represents an object that is a CSS
+// https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
+
+/// The [CSSStyleDeclaration] interface represents an object that is a CSS
 /// declaration block, and exposes style information and various style-related
 /// methods and properties.
 ///
-/// A [StyleDeclaration] object can be exposed using three different APIs:
+/// A [CSSStyleDeclaration] object can be exposed using three different APIs:
 /// 1. Via [HTMLElement.style], which deals with the inline styles of a single
 ///    element (e.g., <div style="...">).
 /// 2. Via the [CSSStyleSheet] API. For example,
-///    document.styleSheets[0].cssRules[0].style returns a [StyleDeclaration]
+///    document.styleSheets[0].cssRules[0].style returns a [CSSStyleDeclaration]
 ///    object on the first CSS rule in the document's first stylesheet.
-/// 3. Via [Window.getComputedStyle()], which exposes the [StyleDeclaration]
+/// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
 ///    object as a read-only interface.
-class StyleDeclaration {
-  StyleDeclaration({ Map<String, dynamic> style }) {
+class CSSStyleDeclaration {
+  CSSStyleDeclaration({ Map<String, dynamic> style }) {
     if (style != null ) {
       style.forEach((property, value) {
         if (value != null) this.setProperty(property, value: value.toString());
@@ -121,18 +123,18 @@ class StyleDeclaration {
     });
   }
 
-  StyleDeclaration copyWith(Map<String, String> override) {
+  CSSStyleDeclaration copyWith(Map<String, String> override) {
     Map<String, dynamic> mergedProperties = {};
     var copy = (property, value) {
       mergedProperties[property] = value;
     };
     this._cssProperties.forEach(copy);
     override?.forEach(copy);
-    return StyleDeclaration(style: mergedProperties);
+    return CSSStyleDeclaration(style: mergedProperties);
   }
 
   @override
-  String toString() => 'StyleDeclaration($cssText)';
+  String toString() => 'CSSStyleDeclaration($cssText)';
 }
 
 bool isEmptyStyleValue(String value) {

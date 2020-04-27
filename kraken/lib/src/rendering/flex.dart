@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/style.dart';
+import 'package:kraken/css.dart';
 
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
     VerticalDirection verticalDirection) {
@@ -85,8 +85,8 @@ class RenderFlexLayout extends RenderBox
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
-        ElementStyleMixin,
-        RelativeStyleMixin {
+        CSSComputedMixin,
+        CSSPositionMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -117,7 +117,7 @@ class RenderFlexLayout extends RenderBox
   }
 
   // Element style;
-  StyleDeclaration style;
+  CSSStyleDeclaration style;
 
   // id of current element
   int targetId;
@@ -494,23 +494,23 @@ class RenderFlexLayout extends RenderBox
         String width = child.style['width'];
         if (flexBasis == 'auto') {
           if (width != null) {
-            minConstraints = Length.toDisplayPortValue(width);
+            minConstraints = CSSLength.toDisplayPortValue(width);
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = Length.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
         }
       } else {
         String height = child.style['height'];
         if (flexBasis == 'auto') {
           if (height != null) {
-            minConstraints = Length.toDisplayPortValue(height);
+            minConstraints = CSSLength.toDisplayPortValue(height);
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = Length.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
         }
       }
     }
@@ -555,8 +555,8 @@ class RenderFlexLayout extends RenderBox
   void _layoutChildren(RenderConstrainedBox placeholderChild) {
     assert(_debugHasNecessaryDirections);
 
-    double elementWidth = getElementWidth(targetId);
-    double elementHeight = getElementHeight(targetId);
+    double elementWidth = getElementComputedWidth(targetId);
+    double elementHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
     if (firstChild == null) {
@@ -978,7 +978,7 @@ class RenderFlexLayout extends RenderBox
           break;
       }
 
-      StyleDeclaration childStyle;
+      CSSStyleDeclaration childStyle;
       if (child is RenderTextBox) {
         childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
       } else if (child is RenderElementBoundary) {
@@ -1052,7 +1052,7 @@ class RenderFlexItem extends RenderBox
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
-        RelativeStyleMixin {
+        CSSPositionMixin {
   RenderFlexItem({RenderBox child}) {
     add(child);
   }
