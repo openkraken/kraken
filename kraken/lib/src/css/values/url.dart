@@ -8,7 +8,8 @@ import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 
-// https://drafts.csswg.org/css-values-3/#urls
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
+
 class CSSUrl {
   static ImageProvider getImageProviderByUrl(String url, {String cache = 'auto'}) {
     if (url.startsWith('//') || url.startsWith('http://') ||

@@ -39,7 +39,7 @@ class Element extends Node
         CSSOpacityMixin,
         CSSTransformMixin,
         CSSVisibilityMixin,
-        CSSSubtreeVisibilityMixin,
+        CSSContentVisibilityMixin,
         CSSTransitionMixin {
 
   Map<String, dynamic> properties;
@@ -166,14 +166,14 @@ class Element extends Node
     // Opacity
     renderObject = initRenderOpacity(renderObject, style);
 
-    // Subtree Visibility
-    renderObject = initRenderSubtreeVisibility(renderObject, style);
+    // Content Visibility
+    renderObject = initRenderContentVisibility(renderObject, style);
 
     // Intersection observer
     renderObject = renderIntersectionObserver =
         RenderIntersectionObserver(child: renderObject);
 
-    setSubtreeVisibilityIntersectionObserver(renderIntersectionObserver, style['subtreeVisibility']);
+    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style['contentVisibility']);
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
@@ -418,7 +418,7 @@ class Element extends Node
   }
 
   void _updateOffset({
-    Transition definiteTransition,
+    CSSTransition definiteTransition,
     String property,
     double diff,
     double original
@@ -430,7 +430,7 @@ class Element extends Node
       zIndexParentData = renderElementBoundary.parentData;
       ZIndexParentData progressParentData = zIndexParentData;
 
-      Transition allTransition;
+      CSSTransition allTransition;
       if (transitionMap != null) {
         allTransition = transitionMap['all'];
       }
@@ -439,7 +439,7 @@ class Element extends Node
         assert(diff != null);
         assert(original != null);
 
-        ProgressListener progressListener = (percent) {
+        CSSTransitionProgressListener progressListener = (percent) {
           double newValue = original + diff * percent;
           switch (property) {
             case 'top':
@@ -775,7 +775,7 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = FlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
@@ -899,7 +899,7 @@ class Element extends Node
 
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
     style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
-    style.addStyleChangeListener('subtreeVisibility', _styleSubtreeVisibilityChangedListener);
+    style.addStyleChangeListener('contentVisibility', _styleContentVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
     style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
@@ -1074,9 +1074,9 @@ class Element extends Node
     updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary);
   }
 
-  void _styleSubtreeVisibilityChangedListener(String property, original, present) {
-    // Update subtree visibility.
-    updateRenderSubtreeVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
+  void _styleContentVisibilityChangedListener(String property, original, present) {
+    // Update content visibility.
+    updateRenderContentVisibility(present, parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
@@ -1099,7 +1099,7 @@ class Element extends Node
   // @TODO(refactor): Need to remove it.
   void _flushStyle() {
     if (transitionMap != null) {
-      for (Transition transition in transitionMap.values) {
+      for (CSSTransition transition in transitionMap.values) {
         initTransitionEvent(transition);
         transition?.apply();
       }

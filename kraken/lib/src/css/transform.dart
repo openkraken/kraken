@@ -4,7 +4,8 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
-// https://drafts.csswg.org/css-transforms/
+// CSS Transforms: https://drafts.csswg.org/css-transforms/
+
 mixin CSSTransformMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
@@ -22,7 +23,7 @@ mixin CSSTransformMixin on Node {
     if (style.contains('transform')) {
       oldMethods = CSSFunction.parseExpression(style['transform']);
       matrix4 = combineTransform(oldMethods) ?? matrix4;
-      TransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
+      CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
         oldAlignment = transformOrigin.alignment;
@@ -43,15 +44,15 @@ mixin CSSTransformMixin on Node {
   }
 
   void updateTransform(String transformStr,
-      [Map<String, Transition> transitionMap]) {
+      [Map<String, CSSTransition> transitionMap]) {
     Map<String, CSSFunction> newMethods = CSSFunction.parseExpression(transformStr);
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
-        Transition transition = transitionMap['transform'];
-        Transition all = transitionMap['all'];
+        CSSTransition transition = transitionMap['transform'];
+        CSSTransition all = transitionMap['all'];
         Map<String, CSSFunction> baseMethods = oldMethods;
-        ProgressListener progressListener = (progress) {
+        CSSTransitionProgressListener progressListener = (progress) {
           if (progress > 0.0) {
             transform.transform = combineTransform(
                 newMethods, oldMethods: baseMethods, progress: progress);
@@ -72,10 +73,10 @@ mixin CSSTransformMixin on Node {
   }
 
   void updateTransformOrigin(String transformOriginStr,
-      [Map<String, Transition> transitionMap]) {
+      [Map<String, CSSTransition> transitionMap]) {
     Offset offset = Offset.zero;
     Alignment alignment = Alignment.center;
-    TransformOrigin transformOrigin = parseOrigin(transformOriginStr);
+    CSSTransformOrigin transformOrigin = parseOrigin(transformOriginStr);
     if (transformOrigin != null) {
       offset = transformOrigin.offset;
       alignment = transformOrigin.alignment;
@@ -83,11 +84,11 @@ mixin CSSTransformMixin on Node {
     // transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       if (transitionMap != null) {
-        Transition all = transitionMap['all'];
-        Transition transitionOrigin = transitionMap['transform-origin'];
+        CSSTransition all = transitionMap['all'];
+        CSSTransition transitionOrigin = transitionMap['transform-origin'];
         Offset baseOffset = oldOffset;
         Offset diffOffset = offset - baseOffset;
-        ProgressListener originProgressListener = (progress) {
+        CSSTransitionProgressListener originProgressListener = (progress) {
           if (progress > 0.0) {
             transform.origin = diffOffset * progress + baseOffset;
           }
@@ -107,11 +108,11 @@ mixin CSSTransformMixin on Node {
     // transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
       if (transitionMap != null) {
-        Transition all = transitionMap['all'];
-        Transition transitionOrigin = transitionMap['transform-origin'];
+        CSSTransition all = transitionMap['all'];
+        CSSTransition transitionOrigin = transitionMap['transform-origin'];
         Alignment baseAlign = oldAlignment;
         Alignment diffAlign = alignment - baseAlign;
-        ProgressListener originProgressListener = (progress) {
+        CSSTransitionProgressListener originProgressListener = (progress) {
           if (progress > 0.0) {
             transform.alignment = diffAlign * progress + baseAlign;
           }
@@ -130,7 +131,7 @@ mixin CSSTransformMixin on Node {
     }
   }
 
-  TransformOrigin parseOrigin(String origin) {
+  CSSTransformOrigin parseOrigin(String origin) {
     if (origin != null && origin.isNotEmpty) {
       List<String> originList = origin.trim().split(' ');
       String x, y;
@@ -179,7 +180,7 @@ mixin CSSTransformMixin on Node {
       } else if (y == CSSPosition.CENTER) {
         alignY = 0.0;
       }
-      return TransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
+      return CSSTransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
     return null;
   }
@@ -544,7 +545,7 @@ mixin CSSTransformMixin on Node {
         break;
       case 'perspective':
         if (method.args.length == 1) {
-          //TODO perspective
+          // @TODO perspective
         }
     }
     return matrix4;
@@ -555,9 +556,9 @@ mixin CSSTransformMixin on Node {
   }
 }
 
-class TransformOrigin {
+class CSSTransformOrigin {
   Offset offset;
   Alignment alignment;
 
-  TransformOrigin(this.offset, this.alignment);
+  CSSTransformOrigin(this.offset, this.alignment);
 }

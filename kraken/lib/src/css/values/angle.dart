@@ -4,7 +4,8 @@
  */
 import 'dart:math' as math;
 
-// https://drafts.csswg.org/css-values-3/#angles
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#angles
+
 class CSSAngle {
   static const String DEG = 'deg';
   static const String GRAD = 'grad';

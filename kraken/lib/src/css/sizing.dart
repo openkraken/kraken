@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
+
 final RegExp spaceRegExp = RegExp(r' ');
 
 double _getDisplayPortedLength(input) {
@@ -20,12 +22,12 @@ double _getDisplayPortedLength(input) {
   return CSSLength.toDisplayPortValue(input as String);
 }
 
-List<String> baseGetShorttedProperties(String input) {
+List<String> _getShorttedProperties(String input) {
   assert(input != null);
   return input.trim().split(spaceRegExp);
 }
 
-Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
+CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -38,7 +40,7 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
     double paddingRight;
     double paddingBottom;
     if (padding != null) {
-      List<String> splitedpadding = baseGetShorttedProperties(padding);
+      List<String> splitedpadding = _getShorttedProperties(padding);
       if (splitedpadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
             paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
@@ -78,10 +80,9 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
     bottom = paddingBottom ?? bottom;
   }
 
-  return Padding(left, top, right, bottom);
+  return CSSPadding(left, top, right, bottom);
 }
 
-/// https://drafts.csswg.org/css-sizing-3/
 /// - width
 /// - height
 /// - max-width
@@ -92,17 +93,17 @@ mixin CSSSizingMixin {
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   RenderPadding renderPadding;
-  Padding oldPadding;
-  Padding oldMargin;
-  SizedConstraints oldConstraints;
+  CSSPadding oldPadding;
+  CSSPadding oldMargin;
+  CSSSizedConstraints oldConstraints;
 
   static double getDisplayPortedLength(input) {
     return _getDisplayPortedLength(input);
   }
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
+  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     if (renderConstrainedBox != null) {
-      Transition allTransition,
+      CSSTransition allTransition,
           widthTransition,
           heightTransition,
           minWidthTransition,
@@ -119,7 +120,7 @@ mixin CSSSizingMixin {
         maxHeightTransition = transitionMap['max-height'];
       }
 
-      SizedConstraints newConstraints = _getConstraints(style);
+      CSSSizedConstraints newConstraints = _getConstraints(style);
 
       if (allTransition != null ||
           widthTransition != null ||
@@ -141,7 +142,7 @@ mixin CSSSizingMixin {
         double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) -
             (oldConstraints.maxHeight ?? 0.0);
 
-        SizedConstraints progressConstraints = SizedConstraints(
+        CSSSizedConstraints progressConstraints = CSSSizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -149,7 +150,7 @@ mixin CSSSizingMixin {
             oldConstraints.minHeight,
             oldConstraints.maxHeight);
 
-        SizedConstraints baseConstraints = SizedConstraints(
+        CSSSizedConstraints baseConstraints = CSSSizedConstraints(
             oldConstraints.width,
             oldConstraints.height,
             oldConstraints.minWidth,
@@ -248,7 +249,7 @@ mixin CSSSizingMixin {
     }
   }
 
-  SizedConstraints _getConstraints(CSSStyleDeclaration style) {
+  CSSSizedConstraints _getConstraints(CSSStyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -256,15 +257,15 @@ mixin CSSSizingMixin {
       double maxWidth = getDisplayPortedLength(style['maxWidth']);
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
-      return SizedConstraints(
+      return CSSSizedConstraints(
         width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
       return null;
     }
   }
 
-  List<String> getShorttedProperties(String input) {
-    return baseGetShorttedProperties(input);
+  static List<String> getShorttedProperties(String input) {
+    return _getShorttedProperties(input);
   }
 
   RenderObject initRenderMargin(
@@ -276,7 +277,7 @@ mixin CSSSizingMixin {
     );
   }
 
-  Padding getMarginFromStyle(CSSStyleDeclaration style) {
+  CSSPadding getMarginFromStyle(CSSStyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double right = 0.0;
@@ -329,7 +330,7 @@ mixin CSSSizingMixin {
       right = marginRight ?? right;
       bottom = marginBottom ?? bottom;
     }
-    return Padding(left, top, right, bottom);
+    return CSSPadding(left, top, right, bottom);
   }
 
   EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
@@ -338,9 +339,9 @@ mixin CSSSizingMixin {
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, Transition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     assert(renderMargin != null);
-    Transition all, margin, marginLeft, marginRight, marginBottom, marginTop;
+    CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
       margin = transitionMap["margin"];
@@ -355,16 +356,16 @@ mixin CSSSizingMixin {
         marginLeft != null ||
         marginRight != null ||
         marginTop != null) {
-      Padding newMargin = getMarginFromStyle(style);
+      CSSPadding newMargin = getMarginFromStyle(style);
 
       double marginLeftInterval = newMargin.left - oldMargin.left;
       double marginRightInterval = newMargin.right - oldMargin.right;
       double marginTopInterval = newMargin.top - oldMargin.top;
       double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
 
-      Padding progressMargin = Padding(
+      CSSPadding progressMargin = CSSPadding(
           oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-      Padding baseMargin = Padding(
+      CSSPadding baseMargin = CSSPadding(
           oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
 
       all?.addProgressListener((progress) {
@@ -450,7 +451,7 @@ mixin CSSSizingMixin {
         RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  Padding getPaddingFromStyle(CSSStyleDeclaration style) {
+  CSSPadding getPaddingFromStyle(CSSStyleDeclaration style) {
     return _getPaddingFromStyle(style);
   }
 
@@ -461,9 +462,9 @@ mixin CSSSizingMixin {
   }
 
   void updateRenderPadding(CSSStyleDeclaration style,
-      [Map<String, Transition> transitionMap]) {
+      [Map<String, CSSTransition> transitionMap]) {
     assert(renderPadding != null);
-    Transition all,
+    CSSTransition all,
         padding,
         paddingLeft,
         paddingRight,
@@ -483,16 +484,16 @@ mixin CSSSizingMixin {
         paddingLeft != null ||
         paddingRight != null ||
         paddingTop != null) {
-      Padding newPadding = getPaddingFromStyle(style);
+      CSSPadding newPadding = getPaddingFromStyle(style);
 
       double paddingLeftInterval = newPadding.left - oldPadding.left;
       double paddingRightInterval = newPadding.right - oldPadding.right;
       double paddingTopInterval = newPadding.top - oldPadding.top;
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-      Padding progressPadding = Padding(
+      CSSPadding progressPadding = CSSPadding(
           oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
-      Padding basePadding = Padding(
+      CSSPadding basePadding = CSSPadding(
           oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
 
       all?.addProgressListener((progress) {
@@ -574,16 +575,16 @@ mixin CSSSizingMixin {
   }
 }
 
-class Padding {
+class CSSPadding {
   double left;
   double top;
   double right;
   double bottom;
 
-  Padding(this.left, this.top, this.right, this.bottom);
+  CSSPadding(this.left, this.top, this.right, this.bottom);
 }
 
-class SizedConstraints {
+class CSSSizedConstraints {
   double width;
   double height;
   double minWidth;
@@ -591,7 +592,7 @@ class SizedConstraints {
   double minHeight;
   double maxHeight;
 
-  SizedConstraints(this.width, this.height, this.minWidth, this.maxWidth,
+  CSSSizedConstraints(this.width, this.height, this.minWidth, this.maxWidth,
       this.minHeight, this.maxHeight);
 
   BoxConstraints toBoxConstraints() {
@@ -605,6 +606,6 @@ class SizedConstraints {
 
   @override
   String toString() {
-    return 'SizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
+    return 'CSSSizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
   }
 }
