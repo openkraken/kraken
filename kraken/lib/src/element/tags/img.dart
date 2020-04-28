@@ -65,7 +65,7 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      image = CSSUrl.getImageProviderByUrl(src, cache: properties['caching']);
+      image = CSSUrl(src, cache: properties['caching']).computedValue;
       _constructImageChild();
     }
   }
@@ -185,11 +185,7 @@ class ImgElement extends Element {
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
     String objectPosition = style['objectPosition'];
-<<<<<<< HEAD
-    List<String> splitted = getShorttedProperties(objectPosition);
-=======
-    List<String> splitted = CSSSizingMixin.getShorttedProperties(objectPosition);
->>>>>>> master
+    List<String> splitted = CSSSizingMixin.getShortedProperties(objectPosition);
     if (splitted.length == 1) {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);

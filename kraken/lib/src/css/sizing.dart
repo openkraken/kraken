@@ -34,25 +34,25 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
     double paddingRight;
     double paddingBottom;
     if (padding != null) {
-      List<String> splitedpadding = getShorttedProperties(padding);
-      if (splitedpadding.length == 1) {
+      List<String> splitPadding = CSSSizingMixin.getShortedProperties(padding);
+      if (splitPadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
-            paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
-      } else if (splitedpadding.length == 2) {
+            paddingBottom = _getDisplayPortedLength(splitPadding[0]);
+      } else if (splitPadding.length == 2) {
         paddingTop =
-            paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
+            paddingBottom = _getDisplayPortedLength(splitPadding[0]);
         paddingLeft =
-            paddingRight = _getDisplayPortedLength(splitedpadding[1]);
-      } else if (splitedpadding.length == 3) {
-        paddingTop = _getDisplayPortedLength(splitedpadding[0]);
+            paddingRight = _getDisplayPortedLength(splitPadding[1]);
+      } else if (splitPadding.length == 3) {
+        paddingTop = _getDisplayPortedLength(splitPadding[0]);
         paddingRight =
-            paddingLeft = _getDisplayPortedLength(splitedpadding[1]);
-        paddingBottom = _getDisplayPortedLength(splitedpadding[2]);
-      } else if (splitedpadding.length == 4) {
-        paddingTop = _getDisplayPortedLength(splitedpadding[0]);
-        paddingRight = _getDisplayPortedLength(splitedpadding[1]);
-        paddingBottom = _getDisplayPortedLength(splitedpadding[2]);
-        paddingLeft = _getDisplayPortedLength(splitedpadding[3]);
+            paddingLeft = _getDisplayPortedLength(splitPadding[1]);
+        paddingBottom = _getDisplayPortedLength(splitPadding[2]);
+      } else if (splitPadding.length == 4) {
+        paddingTop = _getDisplayPortedLength(splitPadding[0]);
+        paddingRight = _getDisplayPortedLength(splitPadding[1]);
+        paddingBottom = _getDisplayPortedLength(splitPadding[2]);
+        paddingLeft = _getDisplayPortedLength(splitPadding[3]);
       }
     }
 
@@ -77,11 +77,6 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
   return CSSPadding(left, top, right, bottom);
 }
 
-List<String> getShorttedProperties(String input) {
-  assert(input != null);
-  return input.trim().split(spaceRegExp);
-}
-
 /// - width
 /// - height
 /// - max-width
@@ -89,6 +84,11 @@ List<String> getShorttedProperties(String input) {
 /// - min-width
 /// - min-height
 mixin CSSSizingMixin {
+  static List<String> getShortedProperties(String input) {
+    assert(input != null);
+    return input.trim().split(spaceRegExp);
+  }
+
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   RenderPadding renderPadding;
@@ -289,22 +289,22 @@ mixin CSSSizingMixin {
       double marginRight;
       double marginBottom;
       if (margin != null) {
-        List<String> splitedMargin = getShorttedProperties(margin);
-        if (splitedMargin.length == 1) {
+        List<String> splitMargin = CSSSizingMixin.getShortedProperties(margin);
+        if (splitMargin.length == 1) {
           marginLeft = marginRight = marginTop =
-              marginBottom = getDisplayPortedLength(splitedMargin[0]);
-        } else if (splitedMargin.length == 2) {
-          marginTop = marginBottom = getDisplayPortedLength(splitedMargin[0]);
-          marginLeft = marginRight = getDisplayPortedLength(splitedMargin[1]);
-        } else if (splitedMargin.length == 3) {
-          marginTop = getDisplayPortedLength(splitedMargin[0]);
-          marginRight = marginLeft = getDisplayPortedLength(splitedMargin[1]);
-          marginBottom = getDisplayPortedLength(splitedMargin[2]);
-        } else if (splitedMargin.length == 4) {
-          marginTop = getDisplayPortedLength(splitedMargin[0]);
-          marginRight = getDisplayPortedLength(splitedMargin[1]);
-          marginBottom = getDisplayPortedLength(splitedMargin[2]);
-          marginLeft = getDisplayPortedLength(splitedMargin[3]);
+              marginBottom = getDisplayPortedLength(splitMargin[0]);
+        } else if (splitMargin.length == 2) {
+          marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
+          marginLeft = marginRight = getDisplayPortedLength(splitMargin[1]);
+        } else if (splitMargin.length == 3) {
+          marginTop = getDisplayPortedLength(splitMargin[0]);
+          marginRight = marginLeft = getDisplayPortedLength(splitMargin[1]);
+          marginBottom = getDisplayPortedLength(splitMargin[2]);
+        } else if (splitMargin.length == 4) {
+          marginTop = getDisplayPortedLength(splitMargin[0]);
+          marginRight = getDisplayPortedLength(splitMargin[1]);
+          marginBottom = getDisplayPortedLength(splitMargin[2]);
+          marginLeft = getDisplayPortedLength(splitMargin[3]);
         }
       }
 

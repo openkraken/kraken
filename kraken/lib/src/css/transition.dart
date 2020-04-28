@@ -209,28 +209,16 @@ class CSSTransition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    Map<String, CSSFunction> methods = CSSFunction.parseExpression(function);
+    Map<String, CSSFunctionValue> methods = CSSFunctionValue.parseExpression(function);
     if (methods != null && methods.length > 0) {
-      CSSFunction method = methods?.values?.first;
+      CSSFunctionValue method = methods?.values?.first;
       if (method != null) {
         if ("steps" == method.name) {
           if (method.args.length >= 1) {
-<<<<<<< HEAD
             var step = int.tryParse(method.args[0]);
             var isStart = false;
             if (method.args.length == 2) {
               isStart = method.args[1] == "start";
-=======
-            try {
-              int step = int.parse(method.args[0]);
-              bool isStart = false;
-              if (method.args.length == 2) {
-                isStart = method.args[1] == "start";
-              }
-              return CSSStepCurve(step, isStart);
-            } catch (e) {
-              return null;
->>>>>>> master
             }
             return StepCurve(step, isStart);
           }

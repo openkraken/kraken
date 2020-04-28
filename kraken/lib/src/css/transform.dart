@@ -9,7 +9,7 @@ import 'package:kraken/element.dart';
 mixin CSSTransformMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
-  Map<String, CSSFunction> oldMethods;
+  Map<String, CSSFunctionValue> prevMethods;
 
   // transform origin impl by offset and alignment
   Offset oldOffset = Offset.zero;
@@ -21,8 +21,8 @@ mixin CSSTransformMixin on Node {
     this.targetId = targetId;
 
     if (style.contains('transform')) {
-      oldMethods = CSSFunction.parseExpression(style['transform']);
-      matrix4 = combineTransform(oldMethods) ?? matrix4;
+      prevMethods = CSSFunctionValue.parseExpression(style['transform']);
+      matrix4 = combineTransform(prevMethods) ?? matrix4;
       CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
@@ -45,17 +45,17 @@ mixin CSSTransformMixin on Node {
 
   void updateTransform(String transformStr,
       [Map<String, CSSTransition> transitionMap]) {
-    Map<String, CSSFunction> newMethods = CSSFunction.parseExpression(transformStr);
+    Map<String, CSSFunctionValue> newMethods = CSSFunctionValue.parseExpression(transformStr);
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
         CSSTransition transition = transitionMap['transform'];
         CSSTransition all = transitionMap['all'];
-        Map<String, CSSFunction> baseMethods = oldMethods;
+        Map<String, CSSFunctionValue> baseMethods = prevMethods;
         CSSTransitionProgressListener progressListener = (progress) {
           if (progress > 0.0) {
             transform.transform = combineTransform(
-                newMethods, oldMethods: baseMethods, progress: progress);
+                newMethods, prevMethods: baseMethods, progress: progress);
           }
         };
         if (transition != null) {
@@ -68,7 +68,7 @@ mixin CSSTransformMixin on Node {
       } else {
         transform.transform = combineTransform(newMethods);
       }
-      oldMethods = newMethods;
+      prevMethods = newMethods;
     }
   }
 
@@ -185,12 +185,12 @@ mixin CSSTransformMixin on Node {
     return null;
   }
 
-  Matrix4 combineTransform(Map<String, CSSFunction> methods,
-      {double progress = 1.0, Map<String, CSSFunction> oldMethods}) {
+  Matrix4 combineTransform(Map<String, CSSFunctionValue> methods,
+      {double progress = 1.0, Map<String, CSSFunctionValue> prevMethods}) {
     Matrix4 matrix4;
-    for (CSSFunction method in methods?.values) {
+    for (CSSFunctionValue method in methods?.values) {
       Matrix4 cur = getTransform(
-          method, progress: progress, oldMethods: oldMethods);
+          method, progress: progress, prevMethods: prevMethods);
       if (cur != null) {
         if (matrix4 == null) {
           matrix4 = cur;
@@ -203,11 +203,11 @@ mixin CSSTransformMixin on Node {
     return matrix4 ?? this.matrix4;
   }
 
-  Matrix4 getTransform(CSSFunction method,
-      {double progress = 1.0, Map<String, CSSFunction> oldMethods}) {
+  Matrix4 getTransform(CSSFunctionValue method,
+      {double progress = 1.0, Map<String, CSSFunctionValue> prevMethods}) {
     Matrix4 matrix4;
     bool needDiff = progress != null;
-    CSSFunction oldMethod = oldMethods != null ? oldMethods[method.name] : null;
+    CSSFunctionValue oldMethod = prevMethods != null ? prevMethods[method.name] : null;
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {
