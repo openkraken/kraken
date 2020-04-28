@@ -2,21 +2,22 @@
 
 import 'value.dart';
 
-class Method {
+/// https://drafts.csswg.org/css-values-3/#functional-notations
+class CSSFunctionalNotation {
   final String name;
   final List<String> args;
 
-  Method(this.name, this.args);
+  CSSFunctionalNotation(this.name, this.args);
 }
 
 // ignore: public_member_api_docs
-class CSSFunctionValue implements CSSValue<List<Method>> {
+class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
 
   final String _rawInput;
-  List<Method> _value;
+  List<CSSFunctionalNotation> _value;
 
-  /// Returns a CSSFunctionValue.
-  CSSFunctionValue(this._rawInput) {
+  /// Returns a CSSFunction.
+  CSSFunction(this._rawInput) {
     parse();
   }
 
@@ -31,7 +32,7 @@ class CSSFunctionValue implements CSSValue<List<Method>> {
       var args = _rawInput.substring(left + 1, right).trim();
       var argList = args.split(',');
       var fn = _rawInput.substring(start, left);
-      _value.add(Method(fn.trim(), argList));
+      _value.add(CSSFunctionalNotation(fn.trim(), argList));
       start = right + 1;
       left = _rawInput.indexOf('(', start);
       right = _rawInput.indexOf(')', start);
@@ -39,7 +40,7 @@ class CSSFunctionValue implements CSSValue<List<Method>> {
   }
 
   @override
-  List<Method> get computedValue => _value;
+  List<CSSFunctionalNotation> get computedValue => _value;
 
   @override
   String get serializedValue => _rawInput;

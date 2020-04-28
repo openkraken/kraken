@@ -255,9 +255,9 @@ mixin CSSBackgroundMixin {
     Gradient gradient;
 
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<Method> methods = CSSFunctionValue(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       // FIXME flutter just support one property
-      for (Method method in methods) {
+      for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
@@ -292,9 +292,9 @@ mixin CSSBackgroundMixin {
     DecorationImage decorationImage;
     Gradient gradient;
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<Method> methods = CSSFunctionValue(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       //FIXME flutter just support one property
-      for (Method method in methods) {
+      for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
@@ -383,7 +383,7 @@ mixin CSSBackgroundMixin {
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(Method method) {
+  Gradient getBackgroundGradient(CSSFunctionalNotation method) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];

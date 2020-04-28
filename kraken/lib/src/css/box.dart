@@ -212,8 +212,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     if (background[BACKGROUND_ATTACHMENT] == ''
         || background[BACKGROUND_ATTACHMENT] == 'scroll'
             && background.containsKey(BACKGROUND_IMAGE)) {
-      List<Method> methods = CSSFunctionValue(background[BACKGROUND_IMAGE]).computedValue;
-      for (Method method in methods) {
+      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+      for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {

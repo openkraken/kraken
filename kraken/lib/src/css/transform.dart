@@ -8,7 +8,7 @@ import 'package:kraken/element.dart';
 mixin CSSTransformMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
-  List<Method> prevMethods;
+  List<CSSFunctionalNotation> prevMethods;
 
   // transform origin impl by offset and alignment
   Offset oldOffset = Offset.zero;
@@ -20,7 +20,7 @@ mixin CSSTransformMixin on Node {
     this.targetId = targetId;
 
     if (style.contains('transform')) {
-      prevMethods = CSSFunctionValue(style['transform']).computedValue;
+      prevMethods = CSSFunction(style['transform']).computedValue;
       matrix4 = combineTransform(prevMethods) ?? matrix4;
       CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
@@ -44,13 +44,13 @@ mixin CSSTransformMixin on Node {
 
   void updateTransform(String transformStr,
       [Map<String, CSSTransition> transitionMap]) {
-    List<Method> newMethods = CSSFunctionValue(transformStr).computedValue;
+    List<CSSFunctionalNotation> newMethods = CSSFunction(transformStr).computedValue;
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
         CSSTransition transition = transitionMap['transform'];
         CSSTransition all = transitionMap['all'];
-        List<Method> baseMethods = prevMethods;
+        List<CSSFunctionalNotation> baseMethods = prevMethods;
         CSSTransitionProgressListener progressListener = (progress) {
           if (progress > 0.0) {
             transform.transform = combineTransform(
@@ -184,10 +184,10 @@ mixin CSSTransformMixin on Node {
     return null;
   }
 
-  Matrix4 combineTransform(List<Method> methods,
-      {double progress = 1.0, List<Method> prevMethods}) {
+  Matrix4 combineTransform(List<CSSFunctionalNotation> methods,
+      {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
     Matrix4 matrix4;
-    for (Method method in methods) {
+    for (CSSFunctionalNotation method in methods) {
       Matrix4 cur = getTransform(
           method, progress: progress, prevMethods: prevMethods);
       if (cur != null) {
@@ -202,11 +202,11 @@ mixin CSSTransformMixin on Node {
     return matrix4 ?? this.matrix4;
   }
 
-  Matrix4 getTransform(Method method,
-      {double progress = 1.0, List<Method> prevMethods}) {
+  Matrix4 getTransform(CSSFunctionalNotation method,
+      {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
     Matrix4 matrix4;
     bool needDiff = progress != null;
-    Method prevMethod = prevMethods ?? prevMethods.firstWhere((element) => element.name == method.name);
+    CSSFunctionalNotation prevMethod = prevMethods ?? prevMethods.firstWhere((element) => element.name == method.name);
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {

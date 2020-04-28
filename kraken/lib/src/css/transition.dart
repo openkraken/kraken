@@ -209,9 +209,9 @@ class CSSTransition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    List<Method> methods = CSSFunctionValue(function).computedValue;
+    List<CSSFunctionalNotation> methods = CSSFunction(function).computedValue;
     if (methods != null && methods.length > 0) {
-      Method method = methods.first;
+      CSSFunctionalNotation method = methods.first;
       if (method != null) {
         if (method.name == 'steps') {
           if (method.args.length >= 1) {
