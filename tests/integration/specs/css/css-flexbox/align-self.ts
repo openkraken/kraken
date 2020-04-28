@@ -198,15 +198,7 @@ describe('align-self', () => {
       },
       [
         createText(`Test passes if there is a filled green square and`),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
+
         createText(`.`),
       ]
     );
@@ -446,15 +438,6 @@ describe('align-self', () => {
       },
       [
         createText(`Test passes if there is a filled green square and`),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
         createText(`.`),
       ]
     );
@@ -538,15 +521,6 @@ describe('align-self', () => {
       },
       [
         createText(`Test passes if there is a filled green square and`),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
         createText(`.`),
       ]
     );
@@ -768,15 +742,6 @@ describe('align-self', () => {
       },
       [
         createText(`Test passes if there is a filled green square and`),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
         createText(`.`),
       ]
     );
@@ -846,15 +811,6 @@ describe('align-self', () => {
       },
       [
         createText(`Test passes if there is a filled green square and`),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
         createText(`.`),
       ]
     );

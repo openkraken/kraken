@@ -14,15 +14,6 @@ describe('flex-aspect', () => {
       },
       [
         createText(`Test passes if there is a filled green square and `),
-        createElement(
-          'strong',
-          {
-            style: {
-              'box-sizing': 'border-box',
-            },
-          },
-          [createText(`no red`)]
-        ),
         createText(`.`),
       ]
     );
