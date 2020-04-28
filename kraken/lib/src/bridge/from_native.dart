@@ -6,18 +6,19 @@ import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/element.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/module.dart';
 import 'package:requests/requests.dart';
 
+import '../../bridge.dart';
+import '../../element.dart';
+import '../../launcher.dart';
+import '../../module.dart';
 import 'platform.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
 // 1. Import dart:ffi.
 // 2. Create a typedef with the FFI type signature of the Dart function.
-// 3. Create a typedef for the variable that you’ll use when calling the Dart function.
+// 3. Create a typedef for the variable that you’ll use when calling the
+//    Dart function.
 // 4. Open the dynamic library that register in the C.
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.

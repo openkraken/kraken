@@ -3,5 +3,5 @@
  * Author: Kraken Team.
  */
 
-export 'src/painting/canvas.dart';
 export 'src/painting/cached_network_image.dart';
+export 'src/painting/canvas.dart';
