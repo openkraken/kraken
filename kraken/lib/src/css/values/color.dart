@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:math';
 import 'dart:ui' show Color;
 import 'package:meta/meta.dart';
 
@@ -14,6 +15,127 @@ final RegExp RGBARexExp = RegExp(
   caseSensitive: false,
   multiLine: false,
 );
+
+/// A color in the CIELAB color space.
+///
+/// The CIELAB color space contains channels for lightness [l],
+/// [a] (red and green opponent values), and [b] (blue and
+/// yellow opponent values.)
+class LabColor {
+  /// Lightness represents the black to white value.
+  ///
+  /// The value ranges from black at `0` to white at `100`.
+  final num l;
+  /// The red to green opponent color value.
+  ///
+  /// Green is represented in the negative value range (`-128` to `0`)
+  ///
+  /// Red is represented in the positive value range (`0` to `127`)
+  final num a;
+  /// The yellow to blue opponent color value.
+  ///
+  /// Yellow is represented int he negative value range (`-128` to `0`)
+  ///
+  /// Blue is represented in the positive value range (`0` to `127`)
+  final num b;
+
+  /// A color in the CIELAB color space.
+  ///
+  /// [l] must be `>= 0` and `<= 100`.
+  ///
+  /// [a] and [b] must both be `>= -128` and `<= 127`.
+  const LabColor(num this.l, num this.a, num this.b);
+
+  num _toXyz(num value, num referenceWhiteValue) {
+    num cube = pow(value, 3);
+    if (cube > 0.008856) {
+      value = cube;
+    } else {
+      value = (value - 16 / 116) / 7.787;
+    }
+    return value *= referenceWhiteValue;
+  }
+
+  num _toRgb(value) {
+    if (value > 0.0031308) {
+      value = 1.055 * pow(value, 1 / 2.4) - 0.055;
+    } else {
+      value = value * 12.92;
+    }
+    return value *= 255;
+  }
+
+  RgbColor toRgbColor() {
+    // To xyz color
+    num x = _toXyz(a / 500 + (l + 16) / 116, 95.047) / 100;
+    num y = _toXyz((l + 16) / 116, 100) / 100;
+    num z = _toXyz((l + 16) / 116 - b / 200, 108.883) / 100;
+
+    // To rgb color
+    num rgbR = _toRgb(x * 3.2406 + y * -1.5372 + z * -0.4986);
+    num rgbG = _toRgb(x * -0.9689 + y * 1.8758 + z * 0.0415);
+    num rgbB = _toRgb(x * 0.0557 + y * -0.2040 + z * 1.0570);
+
+    return RgbColor(rgbR, rgbG, rgbB);
+  }
+}
+
+class RgbColor {
+  final int r;
+  final int g;
+  final int b;
+
+  /**
+   * Creates a [Color] using a vector describing its red, green, and blue
+   * values.
+   *
+   * The value for [r], [g], and [b] should be in the range between 0 and
+   * 255 (inclusive).  Values above this range will be assumed to be a value
+   * of 255, and values below this range will be assumed to be a value of 0.
+   */
+  const RgbColor(int this.r, int this.g, int this.b);
+
+  num _toLab(num value, num referenceWhiteValue) {
+    value /= referenceWhiteValue;
+    if (value > 0.008856) {
+      value = pow(value, 1 / 3);
+    } else {
+      value = (7.787 * value) + 16 / 116;
+    }
+    return value;
+  }
+
+  num _toXyz(value) {
+    if (value > 0.04045) {
+      value = pow((value + 0.055) / 1.055, 2.4);
+    } else {
+      value = value / 12.92;
+    }
+    return value *= 100;
+  }
+
+  LabColor toLabColor() {
+    // To xyz color
+    num xyzR = _toXyz(r / 255);
+    num xyzG = _toXyz(g / 255);
+    num xyzB = _toXyz(b / 255);
+
+    num x = xyzR * 0.4124 + xyzG * 0.3576 + xyzB * 0.1805;
+    num y = xyzR * 0.2126 + xyzG * 0.7152 + xyzB * 0.0722;
+    num z = xyzR * 0.0193 + xyzG * 0.1192 + xyzB * 0.9505;
+
+    // To lab color
+    num labX = _toLab(x, 95.047);
+    num labY = _toLab(y, 100);
+    num labZ = _toLab(z, 108.883);
+
+    num labL = (116 * labY) - 16;
+    num labA = 500 * (labX - labY);
+    num labB = 200 * (labY - labZ);
+
+    return LabColor(labL, labA, labB);
+  }
+}
 
 /// 
 /// #123
@@ -49,6 +171,30 @@ class CSSColor {
     String green = color.green.toRadixString(16).padLeft(2);
     String blue = color.blue.toRadixString(16).padLeft(2);
     return '#${red}${green}${blue}';
+  }
+
+  static Color tranformToDarkColor(Color color) {
+    // Convert to lab color
+    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
+    num invertedL = min(110 - lab.l, 100);
+    if (invertedL < lab.l) {
+      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
+      return Color.fromARGB(color.alpha, rgb.r, rgb.g, rgb.b);
+    } else {
+      return color;
+    }
+  }
+
+  static Color transformToLightColor(Color color) {
+    // Convert to lab color
+    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
+    num invertedL = min(110 - lab.l, 100);
+    if (invertedL > lab.l) {
+      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
+      return Color.fromARGB(color.alpha, rgb.r, rgb.g, rgb.b);
+    } else {
+      return color;
+    }
   }
 
   static Color generateRGBAColor(String input) {
