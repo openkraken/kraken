@@ -4,40 +4,59 @@
  */
 
 // https://drafts.csswg.org/css-values-3/#time
-class CSSTime {
+import 'value.dart';
+
+class CSSTime implements CSSValue<double> {
   static const String MILLISECONDS = 'ms';
   static const String SECOND = 's';
   static CSSTime zero = CSSTime('0s');
 
   CSSSeconds _value;
 
-  CSSTime(String value) {
-    if (value != null) {
-      if (value.endsWith(MILLISECONDS)) {
-        _value = CSSMilliseconds(value.split(MILLISECONDS)[0]);
-      } else if (value.endsWith(SECOND)) {
-        _value = CSSSeconds(value.split(SECOND)[0]);
-      }
+  final String _rawInput;
+  CSSTime(this._rawInput) {
+    parse();
+  }
+
+  @override
+  double get computedValue => _value?.computedValue;
+
+  @override
+  void parse() {
+    if (_rawInput.endsWith(MILLISECONDS)) {
+      _value = CSSMilliseconds(_rawInput.split(MILLISECONDS)[0]);
+    } else if (_rawInput.endsWith(SECOND)) {
+      _value = CSSSeconds(_rawInput.split(SECOND)[0]);
     }
   }
 
-  int valueOf() => _value?.valueOf();
+  @override
+  String get serializedValue => computedValue?.toString();
 }
 
-class CSSSeconds {
+class CSSSeconds implements CSSValue<double> {
   double _value = 0;
 
-  CSSSeconds(String secondValue) {
-    if (secondValue != null) {
-      _value = double.parse(secondValue);
-    }
+  final String _rawInput;
+  CSSSeconds(this._rawInput) {
+    parse();
   }
 
-  int valueOf() => _value == null ? 0 : (_value * 1000).toInt();
+  @override
+  double get computedValue => _value == null ? 0 : _value * 1000;
+
+  @override
+  void parse() {
+    _value = double.tryParse(_rawInput);
+  }
+
+  @override
+  String get serializedValue => computedValue.toString();
 }
 
 class CSSMilliseconds extends CSSSeconds {
   CSSMilliseconds(String millisecondValue) : super(millisecondValue);
 
-  int valueOf() => _value.toInt();
+  @override
+  double get computedValue => _value ?? 0;
 }

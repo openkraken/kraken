@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+export 'src/css/properties.dart';
 export 'src/css/backgroud.dart';
 export 'src/css/box.dart';
 export 'src/css/opacity.dart';

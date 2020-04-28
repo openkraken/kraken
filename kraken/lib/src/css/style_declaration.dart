@@ -2,7 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-const String STYLE = 'style';
+import 'package:kraken/css.dart';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -138,5 +138,17 @@ class CSSStyleDeclaration {
 }
 
 bool isEmptyStyleValue(String value) {
+
   return value == null || value.isEmpty;
+}
+
+
+// Returns the computed property value.
+T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {
+  assert(style != null);
+  String rawPropertyValue = style.getPropertyValue(propertyName);
+
+  switch (propertyName) {
+
+  }
 }

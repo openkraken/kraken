@@ -213,28 +213,20 @@ class Transition with CustomTickerProviderStateMixin {
       if (method != null) {
         if ("steps" == method.name) {
           if (method.args.length >= 1) {
-            try {
-              int step = int.parse(method.args[0]);
-              bool isStart = false;
-              if (method.args.length == 2) {
-                isStart = method.args[1] == "start";
-              }
-              return StepCurve(step, isStart);
-            } catch (e) {
-              return null;
+            var step = int.tryParse(method.args[0]);
+            var isStart = false;
+            if (method.args.length == 2) {
+              isStart = method.args[1] == "start";
             }
+            return StepCurve(step, isStart);
           }
         } else if ("cubic-bezier" == method.name) {
           if (method.args.length == 4) {
-            try {
-              double first = double.parse(method.args[0]);
-              double sec = double.parse(method.args[1]);
-              double third = double.parse(method.args[2]);
-              double forth = double.parse(method.args[3]);
-              return Cubic(first, sec, third, forth);
-            } catch (e) {
-              return null;
-            }
+            var first = double.tryParse(method.args[0]);
+            var sec = double.tryParse(method.args[1]);
+            var third = double.tryParse(method.args[2]);
+            var forth = double.tryParse(method.args[3]);
+            return Cubic(first, sec, third, forth);
           }
         }
       }

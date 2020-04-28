@@ -11,23 +11,15 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 typedef ConsumeProperty = bool Function(String src);
-const String BACKGROUND = 'background';
-const String BACKGROUND_ATTACHMENT = 'backgroundAttachment';
-const String BACKGROUND_REPEAT = 'backgroundRepeat';
-const String BACKGROUND_POSITION = 'backgroundPosition';
-const String BACKGROUND_IMAGE = 'backgroundImage';
-const String BACKGROUND_SIZE = 'backgroundSize';
-const String BACKGROUND_COLOR = 'backgroundColor';
 
-const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
 
 
 /// https://drafts.csswg.org/css-backgrounds/
-/// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
-/// to single value of background
+/// The [CSSBackgroundMixin] mixin used to handle background shorthand and
+/// compute to single value of background.
 mixin CSSBackgroundMixin {
 
-  // default property
+  // Default property.
   Map<String, String> background = {
     BACKGROUND_REPEAT: 'repeat',
     BACKGROUND_ATTACHMENT: 'scroll',

@@ -4,9 +4,10 @@
  */
 
 import 'dart:ui';
+import 'value.dart';
 
 // https://drafts.csswg.org/css-values-3/#lengths
-class CSSLength {
+class CSSLength implements CSSValue<double> {
   static const String RPX = 'rpx';
   static const String PX = 'px';
   static const String VW = 'vw';
@@ -84,4 +85,21 @@ class CSSLength {
         (value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) ||
             value.endsWith(VW));
   }
+
+  final String _rawInput;
+  double _value;
+  CSSLength(this._rawInput) {
+    parse();
+  }
+
+  @override
+  double get computedValue => _value;
+
+  @override
+  void parse() {
+    _value = CSSLength.toDisplayPortValue(_rawInput);
+  }
+
+  @override
+  String get serializedValue => _rawInput;
 }

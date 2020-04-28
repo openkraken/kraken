@@ -22,14 +22,6 @@ class RenderFlexParentData extends RenderLayoutParentData {
 }
 
 mixin CSSFlexboxMixin {
-  static const String DIRECTION = 'flexDirection';
-  static const String WRAP = 'flexWrap';
-  static const String FLOW = 'flexFlow';
-  static const String JUSTIFY_CONTENT = 'justifyContent';
-  static const String TEXT_ALIGN = 'textAlign';
-  static const String ALIGN_ITEMS = 'alignItems';
-  static const String ALIGN_CONTENT = 'alignContent';
-
   void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       Axis axis;

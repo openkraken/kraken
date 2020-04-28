@@ -4,9 +4,10 @@
  */
 
 import 'dart:ui' show Color;
-import 'package:meta/meta.dart';
+import 'value.dart';
 
-final RegExp RGBARexExp = RegExp(
+// ignore: public_member_api_docs
+final RegExp rgbaRexExp = RegExp(
   r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
   caseSensitive: false,
   multiLine: false,
@@ -18,26 +19,28 @@ final RegExp RGBARexExp = RegExp(
 /// #123456
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
-@immutable
-class CSSColor {
+class CSSColor implements CSSValue<Color> {
   // Use a preprocessed color to cache.
-  // Eg: input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
-  // Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
-  // 'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
+  // Example:
+  //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
+  //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
+  //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
   // Cache will be terminated after used once.
-  static Map<String, Color> _cachedColor = {};
+  static final Map<String, Color> _cachedColor = {};
   static int _cacheCount = 0;
+
+  // ignore: public_member_api_docs
   static String preprocessCSSPropertyWithRGBAColor(String input) {
-    String ret = input;
-    RegExpMatch match = RGBARexExp.firstMatch(ret);
+    var ret = input;
+    var match = rgbaRexExp.firstMatch(ret);
     while (match != null) {
-      String cacheId = 'rgba' + _cacheCount.toString();
+      var cacheId = 'rgba$_cacheCount';
       _cachedColor[cacheId] =
           generateRGBAColor(ret.substring(match.start, match.end));
       ret = ret.replaceRange(match.start, match.end, cacheId);
       _cacheCount++;
 
-      match = RGBARexExp.firstMatch(ret);
+      match = rgbaRexExp.firstMatch(ret);
     }
     return ret;
   }
@@ -60,7 +63,7 @@ class CSSColor {
     int green = 0;
     int blue = 0;
     double alpha = 1.0;
-    Iterable<RegExpMatch> matches = RGBARexExp.allMatches(input);
+    Iterable<RegExpMatch> matches = rgbaRexExp.allMatches(input);
     if (matches.length == 1) {
       RegExpMatch match = matches.first;
       red = int.tryParse(match[1]) ?? 0;
@@ -419,8 +422,13 @@ class CSSColor {
     }
   }
 
+  final String rawInput;
+  Color value;
+
+  CSSColor(this.rawInput);
+
   /// Only support Basic color keywords and Extended color keywords,
-  /// for CSS system colors is not recommanded for use after CSS3
+  /// for CSS system colors is not recommended for use after CSS3
   /// https://www.w3.org/TR/css-color-3/#html4
   /// https://www.w3.org/TR/css-color-3/#css-system
   /// https://www.w3.org/TR/css-color-3/#svg-color
@@ -577,4 +585,33 @@ class CSSColor {
   static const Color yellowgreen = Color(0xFF9ACD32);
 
   static const Color transparent = Color(0x00000000);
+
+  bool _parsed = false;
+  @override
+  void parse() {
+    if (!_parsed) value = CSSColor.generate(rawInput);
+    _parsed = true;
+  }
+
+  @override
+  Color get computedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    return value;
+  }
+
+  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
+  @override
+  String get serializedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    var rgb = '${value.red}, ${value.green}, ${value.blue}';
+    if (value.alpha == 255) {
+      return 'rgb($rgb)';
+    } else {
+      return 'rgba($rgb, ${value.opacity})';
+    }
+  }
 }

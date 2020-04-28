@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-final RegExp spaceRegExp = RegExp(r' ');
+final RegExp spaceRegExp = RegExp(r'\s+');
 
 double _getDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {
@@ -18,11 +18,6 @@ double _getDisplayPortedLength(input) {
     input = input.toString();
   }
   return CSSLength.toDisplayPortValue(input as String);
-}
-
-List<String> baseGetShorttedProperties(String input) {
-  assert(input != null);
-  return input.trim().split(spaceRegExp);
 }
 
 Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
@@ -38,7 +33,7 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
     double paddingRight;
     double paddingBottom;
     if (padding != null) {
-      List<String> splitedpadding = baseGetShorttedProperties(padding);
+      List<String> splitedpadding = getShorttedProperties(padding);
       if (splitedpadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
             paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
@@ -79,6 +74,11 @@ Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
   }
 
   return Padding(left, top, right, bottom);
+}
+
+List<String> getShorttedProperties(String input) {
+  assert(input != null);
+  return input.trim().split(spaceRegExp);
 }
 
 /// https://drafts.csswg.org/css-sizing-3/
@@ -261,10 +261,6 @@ mixin CSSSizingMixin {
     } else {
       return null;
     }
-  }
-
-  List<String> getShorttedProperties(String input) {
-    return baseGetShorttedProperties(input);
   }
 
   RenderObject initRenderMargin(
