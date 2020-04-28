@@ -1,4 +1,28 @@
 describe('background-repeat', () => {
+  fit('default should be repeat', async () => {
+    // repeat
+    const repeat = document.createElement('div');
+    setElementStyle(repeat, {
+      width: '100vw',
+      height: '200px',
+      marginTop: '10px',
+      display: 'flex',
+      flexDirection: 'row',
+    });
+
+    const div1 = document.createElement('div');
+    setElementStyle(div1, {
+      width: '100vw',
+      height: '200px',
+      backgroundImage:
+        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+    });
+    repeat.appendChild(div1);
+    document.body.appendChild(repeat);
+    await sleep(1);
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+  });
+
   it('none-repeat', async () => {
     // repeat
     const repeat = document.createElement('div');
