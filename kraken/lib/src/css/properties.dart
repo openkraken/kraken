@@ -11,7 +11,6 @@ const String BACKGROUND_POSITION = 'backgroundPosition';
 const String BACKGROUND_IMAGE = 'backgroundImage';
 const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';
-const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
 
 const String DIRECTION = 'flexDirection';
 const String WRAP = 'flexWrap';

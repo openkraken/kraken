@@ -14,6 +14,8 @@ import 'package:kraken/css.dart';
 // CSS Images: https://drafts.csswg.org/css-images-3/
 typedef ConsumeProperty = bool Function(String src);
 
+const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
+
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
 mixin CSSBackgroundMixin {
