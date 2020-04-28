@@ -2,7 +2,7 @@ describe('Transition transform', () => {
   it('matrix', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -16,7 +16,7 @@ describe('Transition transform', () => {
 
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'matrix(0,1,1,1,10,10)',
       });
       // Wait for animation finished.
@@ -32,7 +32,7 @@ describe('Transition transform', () => {
   it('matrix3d', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -46,7 +46,7 @@ describe('Transition transform', () => {
 
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'matrix3d(0,1,1,1,10,10,1,0,0,1,1,1,1,1,0)',
       });
       setTimeout(async () => {

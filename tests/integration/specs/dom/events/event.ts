@@ -2,7 +2,7 @@ describe('Event', () => {
   it('should work with order', async () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       padding: '20px',
       backgroundColor: '#999',
       margin: '40px',
@@ -10,7 +10,7 @@ describe('Event', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       padding: '20px',
       height: '100px',
       backgroundColor: '#f40',

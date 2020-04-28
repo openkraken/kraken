@@ -2,7 +2,7 @@ describe('background-repeat', () => {
   it('none-repeat', async () => {
     // repeat
     const repeat = document.createElement('div');
-    setStyle(repeat, {
+    setElementStyle(repeat, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -11,7 +11,7 @@ describe('background-repeat', () => {
     });
 
     const div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -26,7 +26,7 @@ describe('background-repeat', () => {
 
   it('repeat-x', async () => {
     const repeat = document.createElement('div');
-    setStyle(repeat, {
+    setElementStyle(repeat, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -35,7 +35,7 @@ describe('background-repeat', () => {
     });
 
     const div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -51,7 +51,7 @@ describe('background-repeat', () => {
 
   it('repeat-y', async () => {
     const repeat = document.createElement('div');
-    setStyle(repeat, {
+    setElementStyle(repeat, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -60,7 +60,7 @@ describe('background-repeat', () => {
     });
 
     const div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -75,7 +75,7 @@ describe('background-repeat', () => {
 
   it('repeat', async () => {
     const repeat = document.createElement('div');
-    setStyle(repeat, {
+    setElementStyle(repeat, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -84,7 +84,7 @@ describe('background-repeat', () => {
     });
 
     const div4 = document.createElement('div');
-    setStyle(div4, {
+    setElementStyle(div4, {
       width: '100vw',
       height: '200px',
       backgroundImage:

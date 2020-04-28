@@ -1,7 +1,7 @@
 describe('flexbox flex-grow', () => {
   it('should work when flex-direction is row', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       display: 'flex',
       flexDirection: 'row',
       width: '500rpx',
@@ -12,14 +12,14 @@ describe('flexbox flex-grow', () => {
     document.body.appendChild(container1);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       backgroundColor: '#999',
     });
     child1.appendChild(document.createTextNode('flex-grow: 0'));
     container1.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       flexGrow: 2,
       backgroundColor: '#f40',
     });
@@ -27,7 +27,7 @@ describe('flexbox flex-grow', () => {
     container1.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       flexGrow: 1,
       backgroundColor: 'green',
     });
@@ -39,7 +39,7 @@ describe('flexbox flex-grow', () => {
 
   it('should work when flex-direction is column', async () => {
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       display: 'flex',
       flexDirection: 'column',
       width: '500rpx',
@@ -50,14 +50,14 @@ describe('flexbox flex-grow', () => {
     document.body.appendChild(container2);
 
     const child4 = document.createElement('div');
-    setStyle(child4, {
+    setElementStyle(child4, {
       backgroundColor: '#999',
     });
     child4.appendChild(document.createTextNode('flex-grow: 0'));
     container2.appendChild(child4);
 
     const child5 = document.createElement('div');
-    setStyle(child5, {
+    setElementStyle(child5, {
       flexGrow: 2,
       backgroundColor: '#f40',
     });
@@ -65,7 +65,7 @@ describe('flexbox flex-grow', () => {
     container2.appendChild(child5);
 
     const child6 = document.createElement('div');
-    setStyle(child6, {
+    setElementStyle(child6, {
       flexGrow: 1,
       backgroundColor: 'green',
     });

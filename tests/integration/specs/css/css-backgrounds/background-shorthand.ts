@@ -1,7 +1,7 @@
 describe('background-shorthand', () => {
   it('background image', async () => {
     let div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100vw',
       height: '200px',
       background: 'left top / contain repeat url(assets/rabbit.png)'
@@ -13,7 +13,7 @@ describe('background-shorthand', () => {
 
   it('background gradient', async () => {
     let div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100vw',
       height: '200px',
       background: 'center/contain repeat radial-gradient(crimson,skyblue)'
@@ -24,7 +24,7 @@ describe('background-shorthand', () => {
 
   it('background color', async () => {
     let div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100vw',
       height: '200px',
       background: 'red'

@@ -2,7 +2,7 @@ describe('Background-position', () => {
   it('center', async () => {
     // position
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -11,7 +11,7 @@ describe('Background-position', () => {
     });
 
     const position1 = document.createElement('div');
-    setStyle(position1, {
+    setElementStyle(position1, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -28,7 +28,7 @@ describe('Background-position', () => {
   it('left', async () => {
     // position
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -37,7 +37,7 @@ describe('Background-position', () => {
     });
 
     const position2 = document.createElement('div');
-    setStyle(position2, {
+    setElementStyle(position2, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -55,7 +55,7 @@ describe('Background-position', () => {
   it('top', async () => {
     // position
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -64,7 +64,7 @@ describe('Background-position', () => {
     });
 
     const position3 = document.createElement('div');
-    setStyle(position3, {
+    setElementStyle(position3, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -82,7 +82,7 @@ describe('Background-position', () => {
   it('right', async () => {
     // position
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -91,7 +91,7 @@ describe('Background-position', () => {
     });
 
     const position4 = document.createElement('div');
-    setStyle(position4, {
+    setElementStyle(position4, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -109,7 +109,7 @@ describe('Background-position', () => {
   it('bottom', async () => {
     // position
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -117,7 +117,7 @@ describe('Background-position', () => {
       flexDirection: 'row',
     });
     const position5 = document.createElement('div');
-    setStyle(position5, {
+    setElementStyle(position5, {
       width: '100vw',
       height: '200px',
       backgroundImage:
@@ -133,7 +133,7 @@ describe('Background-position', () => {
 
   it('right center', async () => {
     const position = document.createElement('div');
-    setStyle(position, {
+    setElementStyle(position, {
       width: '100vw',
       height: '200px',
       marginTop: '10px',
@@ -141,7 +141,7 @@ describe('Background-position', () => {
       flexDirection: 'row',
     });
     const div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100vw',
       height: '200px',
       backgroundImage:

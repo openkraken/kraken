@@ -41,6 +41,5 @@ macos/Flutter
 ios/Flutter
 
 pubspec.lock
-assets/*
 !assets/.gitkeep
 android/targets

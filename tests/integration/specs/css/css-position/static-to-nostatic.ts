@@ -1,7 +1,7 @@
 describe('Position static', () => {
   it('to non-static', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '400px',
       height: '400px',
       backgroundColor: '#999',
@@ -10,7 +10,7 @@ describe('Position static', () => {
     document.body.appendChild(container);
 
     const div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       width: '100px',
       height: '100px',
       backgroundColor: 'red',
@@ -21,7 +21,7 @@ describe('Position static', () => {
     container.appendChild(div1);
 
     const div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       width: '100px',
       height: '100px',
       backgroundColor: 'blue',
@@ -32,7 +32,7 @@ describe('Position static', () => {
     container.appendChild(div2);
 
     const div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       width: '100px',
       height: '100px',
       backgroundColor: 'green',
@@ -43,7 +43,7 @@ describe('Position static', () => {
     container.appendChild(div3);
 
     const div4 = document.createElement('div');
-    setStyle(div4, {
+    setElementStyle(div4, {
       width: '100px',
       height: '100px',
       backgroundColor: 'yellow',

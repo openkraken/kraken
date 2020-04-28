@@ -2,14 +2,14 @@ describe('Remove child', () => {
   it('basic', async () => {
     const block1 = document.createElement('p');
     block1.appendChild(document.createTextNode('text 1'));
-    setStyle(block1, {
+    setElementStyle(block1, {
       backgroundColor: '#999',
       textAlign: 'center',
     });
 
     const block2 = document.createElement('div');
     block2.appendChild(document.createTextNode('text 2'));
-    setStyle(block2, {
+    setElementStyle(block2, {
       backgroundColor: '#f40',
       textAlign: 'center',
     });

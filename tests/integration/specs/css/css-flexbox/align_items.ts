@@ -1,7 +1,7 @@
 describe('flexbox align-items', () => {
   it('should work with flex-start when flex-direction is row', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -13,7 +13,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -21,7 +21,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -29,7 +29,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -41,7 +41,7 @@ describe('flexbox align-items', () => {
 
   it('should work with flex-end when flex-direction is row', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -53,7 +53,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -61,7 +61,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -69,7 +69,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -81,7 +81,7 @@ describe('flexbox align-items', () => {
 
   it('should work with center when flex-direction is row', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -93,7 +93,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       backgroundColor: 'blue',
     });
@@ -101,7 +101,7 @@ describe('flexbox align-items', () => {
     child1.appendChild(document.createTextNode('block with no height'));
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -109,7 +109,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -121,7 +121,7 @@ describe('flexbox align-items', () => {
 
   it('should work with stretch when flex-direction is row', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -133,7 +133,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       backgroundColor: 'blue',
     });
@@ -141,7 +141,7 @@ describe('flexbox align-items', () => {
     child1.appendChild(document.createTextNode('block with no height'));
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -149,7 +149,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -161,7 +161,7 @@ describe('flexbox align-items', () => {
 
   it('should work with flex-start when flex-direction is column', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '200px',
       display: 'flex',
@@ -173,7 +173,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -181,7 +181,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -189,7 +189,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -201,7 +201,7 @@ describe('flexbox align-items', () => {
 
   it('should work with flex-end when flex-direction is column', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '200px',
       display: 'flex',
@@ -213,7 +213,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -221,7 +221,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -229,7 +229,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -241,7 +241,7 @@ describe('flexbox align-items', () => {
 
   it('should work with center when flex-direction is column', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '200px',
       display: 'flex',
@@ -253,7 +253,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       height: '50px',
       backgroundColor: 'blue',
     });
@@ -261,7 +261,7 @@ describe('flexbox align-items', () => {
     child1.appendChild(document.createTextNode('block with no width'));
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -269,7 +269,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',
@@ -281,7 +281,7 @@ describe('flexbox align-items', () => {
 
   it('should work with stretch when flex-direction is column', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '200px',
       display: 'flex',
@@ -293,7 +293,7 @@ describe('flexbox align-items', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       height: '50px',
       backgroundColor: 'blue',
     });
@@ -301,7 +301,7 @@ describe('flexbox align-items', () => {
     child1.appendChild(document.createTextNode('block with no width'));
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -309,7 +309,7 @@ describe('flexbox align-items', () => {
     container.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'green',

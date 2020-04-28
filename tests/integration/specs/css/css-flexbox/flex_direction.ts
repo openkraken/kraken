@@ -1,7 +1,7 @@
 describe('flexbox flex-direction', () => {
   it('should work with row', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -12,7 +12,7 @@ describe('flexbox flex-direction', () => {
     document.body.appendChild(container);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -20,7 +20,7 @@ describe('flexbox flex-direction', () => {
     container.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
@@ -31,7 +31,7 @@ describe('flexbox flex-direction', () => {
 
   it('should work with column', async () => {
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       width: '200px',
       height: '100px',
       display: 'flex',
@@ -42,7 +42,7 @@ describe('flexbox flex-direction', () => {
     document.body.appendChild(container2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       width: '50px',
       height: '50px',
       backgroundColor: 'blue',
@@ -50,7 +50,7 @@ describe('flexbox flex-direction', () => {
     container2.appendChild(child3);
 
     const child4 = document.createElement('div');
-    setStyle(child4, {
+    setElementStyle(child4, {
       width: '50px',
       height: '50px',
       backgroundColor: 'red',
