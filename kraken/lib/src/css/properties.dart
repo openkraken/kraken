@@ -21,6 +21,7 @@ const String ALIGN_ITEMS = 'alignItems';
 const String ALIGN_CONTENT = 'alignContent';
 
 const String COLOR = 'color';
+const String WIDTH = 'width';
 const String HEIGHT = 'height';
 const String LINE_HEIGHT = 'lineHeight';
 const String TEXT_DECORATION = 'textDecoration';
