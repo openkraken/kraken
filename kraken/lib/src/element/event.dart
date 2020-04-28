@@ -68,12 +68,12 @@ class EventInit {
   bool bubbles;
   bool cancelable;
 
-  static final Map<String, EventInit> _cache =
-      <String, EventInit>{};
+  static final Map<String, EventInit> _cache = <String, EventInit>{};
 
   factory EventInit({bubbles = false, cancelable = false}) {
     String key = bubbles.toString() + cancelable.toString();
-    return _cache.putIfAbsent(key, () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
+    return _cache.putIfAbsent(key,
+        () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
   }
 
   EventInit._internal({this.bubbles, this.cancelable});
@@ -105,7 +105,7 @@ class MessageEvent extends Event {
   /// A USVString representing the origin of the message emitter.
   String origin;
 
-  MessageEvent(this.data, { this.origin }) : super('message');
+  MessageEvent(this.data, {this.origin}) : super('message');
 
   @override
   Map toJson() {
@@ -117,7 +117,7 @@ class MessageEvent extends Event {
 }
 
 class IntersectionChangeEvent extends Event {
-  IntersectionChangeEvent(this.intersectionRatio): super('intersectionchange');
+  IntersectionChangeEvent(this.intersectionRatio) : super('intersectionchange');
   double intersectionRatio;
 
   Map toJson() {

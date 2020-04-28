@@ -144,7 +144,8 @@ class CanvasElement extends Element {
 
   void _assertPainterExists() {
     if (painter == null) {
-      throw new FlutterError('Canvas painter not exists, get canvas context first.');
+      throw new FlutterError(
+          'Canvas painter not exists, get canvas context first.');
     }
   }
 

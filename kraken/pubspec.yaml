@@ -35,6 +35,7 @@ dependencies:
     path: ../plugins/kraken_geolocation
 
 dev_dependencies:
+  effective_dart: ^1.2.1
   flutter_test:
     sdk: flutter
 

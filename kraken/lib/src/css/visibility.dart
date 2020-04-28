@@ -10,20 +10,19 @@ import 'package:kraken/css.dart';
 mixin CSSVisibilityMixin on Node {
   RenderVisibility renderVisibility;
 
-  RenderObject initRenderVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderVisibility(
+      RenderObject renderObject, CSSStyleDeclaration style) {
     bool hidden = style['visibility'] == 'hidden';
     if (hidden) {
-      renderVisibility = RenderVisibility(
-        hidden: true,
-        child: renderObject
-      );
+      renderVisibility = RenderVisibility(hidden: true, child: renderObject);
       return renderVisibility;
     } else {
       return renderObject;
     }
   }
 
-  void updateRenderVisibility(String visibility, { RenderObjectWithChildMixin parentRenderObject }) {
+  void updateRenderVisibility(String visibility,
+      {RenderObjectWithChildMixin parentRenderObject}) {
     bool hidden = visibility == 'hidden';
     if (renderVisibility != null) {
       renderVisibility.hidden = hidden;

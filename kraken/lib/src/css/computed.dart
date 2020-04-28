@@ -92,13 +92,16 @@ mixin CSSComputedMixin on RenderBox {
               String display = _getElementRealDisplayValue(child.targetId);
 
               // Set width of element according to parent display
-              if (display != 'inline') { // Skip to find upper parent
-                if (style.contains('width')) { // Use style width
+              if (display != 'inline') {
+                // Skip to find upper parent
+                if (style.contains('width')) {
+                  // Use style width
                   width = CSSLength.toDisplayPortValue(style['width']);
                   cropPaddingBorder(child);
                   break;
                 } else if (display == 'inline-block' ||
-                    display == 'inline-flex') { // Collapse width to children
+                    display == 'inline-flex') {
+                  // Collapse width to children
                   width = null;
                   break;
                 }
@@ -199,10 +202,10 @@ mixin CSSComputedMixin on RenderBox {
     String display = style['display'];
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
-      style['flexDirection'] == 'row' &&
-      (!style.contains('alignItems') ||
-        (style.contains('alignItems') && style['alignItems'] == 'stretch'))
-    ) {
+        style['flexDirection'] == 'row' &&
+        (!style.contains('alignItems') ||
+            (style.contains('alignItems') &&
+                style['alignItems'] == 'stretch'))) {
       isStretch = true;
     }
 
@@ -220,9 +223,7 @@ mixin CSSComputedMixin on RenderBox {
     String position = element.style['position'];
 
     // Display as inline-block when element is positioned
-    if (position == 'absolute' ||
-      position == 'fixed'
-      ) {
+    if (position == 'absolute' || position == 'fixed') {
       display = 'inline-block';
     } else if (parentNode != null) {
       CSSStyleDeclaration style = parentNode.style;
@@ -233,9 +234,9 @@ mixin CSSComputedMixin on RenderBox {
 
         // Display as block if flex vertical layout children and stretch children
         if (style['flexDirection'] == 'column' &&
-          (!style.contains('alignItems') ||
-            (style.contains('alignItems') && style['alignItems'] == 'stretch'))
-        ) {
+            (!style.contains('alignItems') ||
+                (style.contains('alignItems') &&
+                    style['alignItems'] == 'stretch'))) {
           display = 'block';
         }
       }

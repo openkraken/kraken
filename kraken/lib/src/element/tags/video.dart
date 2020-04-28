@@ -17,7 +17,7 @@ List<VideoPlayerController> videoControllers = [];
 
 // dispose all video player when Dart VM is going to shutdown
 Future<void> shutDownVideoPlayer() async {
-  for (int i = 0; i < videoControllers.length; i ++) {
+  for (int i = 0; i < videoControllers.length; i++) {
     await videoControllers[i].dispose();
   }
   videoControllers.clear();
@@ -120,7 +120,8 @@ class VideoElement extends Element {
   }
 
   Future<Map<String, dynamic>> getVideoDetail() async {
-    final Completer<Map<String, dynamic>> detailCompleter = Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> detailCompleter =
+        Completer<Map<String, dynamic>>();
     RendererBinding.instance.addPostFrameCallback((Duration timeout) {
       var value = controller.value;
       var duration = value.duration;

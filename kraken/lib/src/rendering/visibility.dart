@@ -10,10 +10,10 @@ class RenderVisibility extends RenderProxyBox {
     bool hidden = false,
     bool maintainSize = true,
     RenderBox child,
-  }) : assert(hidden != null),
-       _hidden = hidden,
-       _maintainSize = maintainSize,
-       super(child);
+  })  : assert(hidden != null),
+        _hidden = hidden,
+        _maintainSize = maintainSize,
+        super(child);
 
   /// Whether the child is hidden from the rest of the tree.
   ///
@@ -26,10 +26,9 @@ class RenderVisibility extends RenderProxyBox {
   bool get hidden => _hidden;
   set hidden(bool value) {
     assert(value != null);
-    if (value == _hidden)
-      return;
+    if (value == _hidden) return;
     _hidden = value;
-    
+
     if (_maintainSize) {
       markNeedsPaint();
     } else {
@@ -42,10 +41,9 @@ class RenderVisibility extends RenderProxyBox {
   bool get maintainSize => _maintainSize;
   set maintainSize(bool value) {
     assert(value != null);
-    if (value == _maintainSize)
-      return;
+    if (value == _maintainSize) return;
     _maintainSize = value;
-    
+
     if (_maintainSize) {
       markNeedsPaint();
     } else {
@@ -61,38 +59,34 @@ class RenderVisibility extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (hidden && !_maintainSize)
-      return _minIntrinsicWidth;
+    if (hidden && !_maintainSize) return _minIntrinsicWidth;
     return _minIntrinsicWidth = super.computeMinIntrinsicWidth(height);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (hidden && !_maintainSize)
-      return _maxIntrinsicWidth;
+    if (hidden && !_maintainSize) return _maxIntrinsicWidth;
     return _maxIntrinsicWidth = super.computeMaxIntrinsicWidth(height);
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (hidden && !_maintainSize)
-      return _minIntrinsicHeight;
+    if (hidden && !_maintainSize) return _minIntrinsicHeight;
     return _minIntrinsicHeight = super.computeMinIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (hidden && !_maintainSize)
-      return _maxIntrinsicHeight;
+    if (hidden && !_maintainSize) return _maxIntrinsicHeight;
     return _maxIntrinsicHeight = super.computeMaxIntrinsicHeight(width);
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (hidden && !_maintainSize)
-      return _distanceToActualBaseline;
+    if (hidden && !_maintainSize) return _distanceToActualBaseline;
 
-    return _distanceToActualBaseline = super.computeDistanceToActualBaseline(baseline);
+    return _distanceToActualBaseline =
+        super.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -118,14 +112,13 @@ class RenderVisibility extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, {Offset position}) {
     return !hidden && super.hitTest(result, position: position);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (hidden && !_maintainSize)
-      return;
+    if (hidden && !_maintainSize) return;
 
     if (child != null) {
       // No need to keep the layer. We'll create a new one if necessary.
@@ -140,8 +133,7 @@ class RenderVisibility extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (hidden)
-      return;
+    if (hidden) return;
     super.visitChildrenForSemantics(visitor);
   }
 
@@ -153,12 +145,13 @@ class RenderVisibility extends RenderProxyBox {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (child == null)
-      return <DiagnosticsNode>[];
+    if (child == null) return <DiagnosticsNode>[];
     return <DiagnosticsNode>[
       child.toDiagnosticsNode(
         name: 'child',
-        style: hidden ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
+        style: hidden
+            ? DiagnosticsTreeStyle.offstage
+            : DiagnosticsTreeStyle.sparse,
       ),
     ];
   }

@@ -65,7 +65,7 @@ class ImgElement extends Element {
   void _setImageBox() {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
-      image = CSSUrl.getImageProviderByUrl(src, cache: properties['caching']);
+      image = CSSUrl(src, cache: properties['caching']).computedValue;
       _constructImageChild();
     }
   }
@@ -185,15 +185,13 @@ class ImgElement extends Element {
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
     String objectPosition = style['objectPosition'];
-    List<String> splitted = CSSSizingMixin.getShorttedProperties(objectPosition);
+    List<String> splitted = CSSSizingMixin.getShortedProperties(objectPosition);
     if (splitted.length == 1) {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);
     } else if (splitted.length > 1) {
-      return Alignment(
-          _getAlignmentValueFromString(splitted[0]),
-          _getAlignmentValueFromString(splitted[1])
-      );
+      return Alignment(_getAlignmentValueFromString(splitted[0]),
+          _getAlignmentValueFromString(splitted[1]));
     } else {
       // The default value for object-position is 50% 50%
       return Alignment.center;
@@ -226,8 +224,8 @@ class ImgElement extends Element {
     }
   }
 
-
-  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
+  RenderDecoratedBox getRenderDecoratedBox(
+      CSSStyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     Alignment alignment = _getAlignment(style);
     return RenderDecoratedBox(

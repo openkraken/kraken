@@ -9,14 +9,12 @@ import 'package:kraken/css.dart';
 mixin CSSOpacityMixin on Node {
   RenderOpacity renderOpacity;
 
-  RenderObject initRenderOpacity(RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderOpacity(
+      RenderObject renderObject, CSSStyleDeclaration style) {
     bool existsOpacity = style.contains('opacity');
     if (existsOpacity) {
       double opacity = _convertStringToDouble(style['opacity']);
-      renderOpacity = RenderOpacity(
-        opacity: opacity,
-        child: renderObject
-      );
+      renderOpacity = RenderOpacity(opacity: opacity, child: renderObject);
       return renderOpacity;
     } else {
       return renderObject;
@@ -27,7 +25,8 @@ mixin CSSOpacityMixin on Node {
     return isEmptyStyleValue(str) ? 1.0 : CSSLength.toDouble(str);
   }
 
-  void updateRenderOpacity(String value, { RenderObjectWithChildMixin parentRenderObject }) {
+  void updateRenderOpacity(String value,
+      {RenderObjectWithChildMixin parentRenderObject}) {
     double opacity = _convertStringToDouble(value);
     if (renderOpacity != null) {
       renderOpacity.opacity = opacity;

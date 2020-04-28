@@ -72,7 +72,8 @@ abstract class KrakenBundle {
     return url.path.endsWith(EXTENSION_JS);
   }
 
-  static Future<KrakenBundle> getBundle(String path, { String contentOverride }) async {
+  static Future<KrakenBundle> getBundle(String path,
+      {String contentOverride}) async {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, null);
@@ -116,7 +117,9 @@ abstract class KrakenBundle {
 }
 
 class RawBundle extends KrakenBundle {
-  RawBundle(String content, Uri url) : assert(content != null), super(url) {
+  RawBundle(String content, Uri url)
+      : assert(content != null),
+        super(url) {
     this.content = content;
   }
 
@@ -129,7 +132,9 @@ class RawBundle extends KrakenBundle {
 class ZipBundle extends KrakenBundle {
   // Unique identifier.
   String bundleId;
-  ZipBundle(Uri url) : assert(url != null), super(url);
+  ZipBundle(Uri url)
+      : assert(url != null),
+        super(url);
 
   @override
   Future<void> resolve() async {
@@ -146,7 +151,8 @@ class ZipBundle extends KrakenBundle {
     bundleId = _md5(dataList);
 
     Directory localBundleDirectory = await _getLocalBundleDirectory();
-    await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
+    await _unArchive(
+        dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
 
     isResolved = true;
   }
@@ -160,9 +166,10 @@ class ZipBundle extends KrakenBundle {
           content = utf8.decode(file.content);
         } else if (filename == 'manifest.json') {
           try {
-            Map<String, dynamic> manifestJson = jsonDecode(utf8.decode(file.content));
+            Map<String, dynamic> manifestJson =
+                jsonDecode(utf8.decode(file.content));
             manifest = AppManifest.fromJson(manifestJson);
-          } catch(err, stack) {
+          } catch (err, stack) {
             print('Failed to parse manifest.json');
             print('$err\n$stack');
           }
@@ -183,7 +190,9 @@ class ZipBundle extends KrakenBundle {
 }
 
 class JSBundle extends KrakenBundle {
-  JSBundle(Uri url) : assert(url != null), super(url);
+  JSBundle(Uri url)
+      : assert(url != null),
+        super(url);
 
   @override
   Future<void> resolve() async {

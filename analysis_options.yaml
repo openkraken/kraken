@@ -2,3 +2,6 @@
 analyzer:
   exclude:
     - build/**
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false

@@ -12,23 +12,22 @@ class RenderElementBoundary extends RenderTransform
     with
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
-  RenderElementBoundary({
-    this.child,
-    this.style,
-    Matrix4 transform,
-    Offset origin,
-    this.targetId,
-    bool shouldRender,
-    Alignment alignment
-  }) : assert(child != null),
-    _shouldRender = shouldRender,
-    _transform = transform,
-    super(
-      child: child,
-      transform: transform,
-      origin: origin,
-      alignment: alignment
-  ) {
+  RenderElementBoundary(
+      {this.child,
+      this.style,
+      Matrix4 transform,
+      Offset origin,
+      this.targetId,
+      bool shouldRender,
+      Alignment alignment})
+      : assert(child != null),
+        _shouldRender = shouldRender,
+        _transform = transform,
+        super(
+            child: child,
+            transform: transform,
+            origin: origin,
+            alignment: alignment) {
     add(child);
   }
 
@@ -52,7 +51,7 @@ class RenderElementBoundary extends RenderTransform
     assert(value != null);
     if (_shouldRender != value) {
       markNeedsLayout();
-     _shouldRender = value;
+      _shouldRender = value;
     }
   }
 
@@ -100,19 +99,17 @@ class RenderElementBoundary extends RenderTransform
         origin += boxParentData.offset;
       }
     }
-    if (origin == null)
-      return _transform;
+    if (origin == null) return _transform;
     final Matrix4 result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin.dx, origin.dy);
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      double width = (layoutSize?.width ?? 0.0) -
-          (element?.cropBorderWidth ?? 0.0);
-      double height = (layoutSize?.height ?? 0.0) -
-          (element?.cropBorderHeight ?? 0.0);
-
+      double width =
+          (layoutSize?.width ?? 0.0) - (element?.cropBorderWidth ?? 0.0);
+      double height =
+          (layoutSize?.height ?? 0.0) - (element?.cropBorderHeight ?? 0.0);
 
       translation = (alignment as Alignment).alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);
@@ -120,8 +117,7 @@ class RenderElementBoundary extends RenderTransform
     result.multiply(_transform);
     if (alignment != null && alignment != Alignment.topLeft)
       result.translate(-translation.dx, -translation.dy);
-    if (origin != null)
-      result.translate(-origin.dx, -origin.dy);
+    if (origin != null) result.translate(-origin.dx, -origin.dy);
     return result;
   }
 
@@ -154,8 +150,7 @@ class RenderElementBoundary extends RenderTransform
 
   // FIXME when super class RenderTransform paint change
   void superPaint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset);
+    if (child != null) context.paintChild(child, offset);
   }
 
   // FIXME when super class RenderTransform applyPaintTransform change
@@ -166,7 +161,7 @@ class RenderElementBoundary extends RenderTransform
 
   // FIXME when super class RenderTransform hitTestChildren change
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     assert(!transformHitTests || getEffectiveTransform() != null);
     return result.addWithPaintTransform(
       transform: transformHitTests ? getEffectiveTransform() : null,

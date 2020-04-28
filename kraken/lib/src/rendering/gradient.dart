@@ -13,11 +13,12 @@ class RenderGradient extends RenderDecoratedBox {
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
     RenderBox child,
-  }) : this._targetId = targetId,
-        super(decoration: decoration,
-          position: position,
-          configuration: configuration,
-          child: child);
+  })  : this._targetId = targetId,
+        super(
+            decoration: decoration,
+            position: position,
+            configuration: configuration,
+            child: child);
 
   @override
   void performLayout() {
@@ -37,7 +38,8 @@ class RenderGradient extends RenderDecoratedBox {
             double sin = math.sin(angle);
             double cos = math.cos(angle);
 
-            double length = (sin * size.width).abs() + (cos * size.height).abs();
+            double length =
+                (sin * size.width).abs() + (cos * size.height).abs();
             double x = sin * length / size.width;
             double y = cos * length / size.height;
 
@@ -47,7 +49,8 @@ class RenderGradient extends RenderDecoratedBox {
                 colors: gradient.colors,
                 stops: gradient.stops,
                 tileMode: gradient.tileMode);
-            decoration = BoxDecoration(gradient: linearGradient,
+            decoration = BoxDecoration(
+                gradient: linearGradient,
                 border: box.border,
                 borderRadius: box.borderRadius,
                 color: box.color,
@@ -56,6 +59,5 @@ class RenderGradient extends RenderDecoratedBox {
         }
       }
     }
-
   }
 }

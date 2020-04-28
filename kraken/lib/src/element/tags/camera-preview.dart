@@ -110,14 +110,12 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  void _initCamera () async {
+  void _initCamera() async {
     if (cameraDescription != null) {
       TextureBox textureBox = await createCameraTextureBox(cameraDescription);
       _invokeReady();
-      sizedBox.child = RenderAspectRatio(
-        aspectRatio: aspectRatio,
-        child: textureBox
-      );
+      sizedBox.child =
+          RenderAspectRatio(aspectRatio: aspectRatio, child: textureBox);
     }
   }
 
@@ -132,11 +130,11 @@ class CameraPreviewElement extends Element {
     }
   }
 
-
   RenderBox buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: CSSColor.white);
+    TextStyle style = getTextStyle(CSSStyleDeclaration())
+        .copyWith(backgroundColor: CSSColor.white);
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),
@@ -162,7 +160,8 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  CameraPreviewElement(int targetId, Map<String, dynamic> props, List<String> events)
+  CameraPreviewElement(
+      int targetId, Map<String, dynamic> props, List<String> events)
       : super(
           targetId: targetId,
           defaultDisplay: 'block',
@@ -182,7 +181,8 @@ class CameraPreviewElement extends Element {
     addChild(sizedBox);
   }
 
-  Future<TextureBox> createCameraTextureBox(CameraDescription cameraDescription) async{
+  Future<TextureBox> createCameraTextureBox(
+      CameraDescription cameraDescription) async {
     this.cameraDescription = cameraDescription;
     await _createCameraController();
     return TextureBox(textureId: controller.textureId);
@@ -261,9 +261,8 @@ class CameraPreviewElement extends Element {
 
   void _updateSensorOrientation(value) async {
     int sensorOrientation = CSSNumber(value.toString()).toInt();
-    cameraDescription = cameraDescription.copyWith(
-      sensorOrientation: sensorOrientation
-    );
+    cameraDescription =
+        cameraDescription.copyWith(sensorOrientation: sensorOrientation);
     await _initCamera();
   }
 }

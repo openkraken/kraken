@@ -20,20 +20,20 @@ class DeviceInfo {
       deviceData = _readAndroidBuildData(await _deviceInfoPlugin.androidInfo);
     } else if (Platform.isIOS) {
       deviceData = _readIosDeviceInfo(await _deviceInfoPlugin.iosInfo);
-    } else if (Platform.isMacOS){
+    } else if (Platform.isMacOS) {
       deviceData = {
         'brand': 'Apple',
         'platformName': 'Mac OS',
         'name': Platform.localeName ?? Platform.localHostname,
         'isPhysicalDevice': true,
       };
-    } else if (Platform.isLinux){
+    } else if (Platform.isLinux) {
       deviceData = {
         'platformName': 'Linux',
         'name': Platform.localeName ?? Platform.localHostname,
         'isPhysicalDevice': true,
       };
-    } else if (Platform.isWindows){
+    } else if (Platform.isWindows) {
       deviceData = {
         'platformName': 'Windows',
         'name': Platform.localeName ?? Platform.localHostname,
@@ -45,6 +45,7 @@ class DeviceInfo {
 
     return jsonEncode(deviceData);
   }
+
   static int getHardwareConcurrency() {
     return Platform.numberOfProcessors;
   }
@@ -69,9 +70,10 @@ Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
   return <String, dynamic>{
     'id': id, // For example: iPhone12,1
     'brand': 'Apple',
-    'model': data.model, // For example: iPhone or iPod, not the detail model name like 'iPhone 8'
-    // The value of this property is an arbitrary alphanumeric string 
-    // that is associated with the device as an identifier. 
+    'model': data
+        .model, // For example: iPhone or iPod, not the detail model name like 'iPhone 8'
+    // The value of this property is an arbitrary alphanumeric string
+    // that is associated with the device as an identifier.
     // For example, you can find the name of an iOS device in the General > About settings.
     'name': data.name,
     'platformName': data.systemName, // iPhone OS

@@ -12,7 +12,8 @@ import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 
-Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
+Element _createElement(
+    int id, String type, Map<String, dynamic> props, List<String> events) {
   switch (type) {
     case DIV:
       return DivElement(id, props, events);
@@ -62,8 +63,10 @@ class ElementManagerActionDelegate {
     }());
   }
 
-  void createElement(int id, String type, Map<String, dynamic> props, List events) {
-    assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
+  void createElement(
+      int id, String type, Map<String, dynamic> props, List events) {
+    assert(
+        !existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
     if (events != null) {
@@ -96,7 +99,8 @@ class ElementManagerActionDelegate {
   }
 
   void setProperty(int targetId, String key, value) {
-    assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
+    assert(
+        existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
@@ -106,7 +110,8 @@ class ElementManagerActionDelegate {
     } else if (target is TextNode && key == 'data') {
       target.data = value;
     } else {
-      debugPrint('Only element has properties, try setting $key to Node(#$targetId).');
+      debugPrint(
+          'Only element has properties, try setting $key to Node(#$targetId).');
     }
   }
 
@@ -118,7 +123,8 @@ class ElementManagerActionDelegate {
     if (target is Element) {
       target.removeProperty(key);
     } else {
-      debugPrint('Only element has properties, try removing $key from Node(#$targetId).');
+      debugPrint(
+          'Only element has properties, try removing $key from Node(#$targetId).');
     }
   }
 
@@ -130,7 +136,8 @@ class ElementManagerActionDelegate {
     if (target is Element) {
       target.setStyle(key, value);
     } else {
-      debugPrint('Only element has style, try setting style.$key from Node(#$targetId).');
+      debugPrint(
+          'Only element has style, try setting style.$key from Node(#$targetId).');
     }
   }
 
@@ -142,7 +149,8 @@ class ElementManagerActionDelegate {
   /// </p>
   /// <!-- afterend -->
   void insertAdjacentNode(int targetId, String position, int newTargetId) {
-    assert(existsTarget(targetId), 'targetId: $targetId position: $position newTargetId: $newTargetId');
+    assert(existsTarget(targetId),
+        'targetId: $targetId position: $position newTargetId: $newTargetId');
 
     Node target = getEventTargetByTargetId<Node>(targetId);
     Node newNode = getEventTargetByTargetId<Node>(newTargetId);
@@ -163,7 +171,8 @@ class ElementManagerActionDelegate {
         } else {
           target.parentNode.insertBefore(
             newNode,
-            target.parentNode.childNodes[target.parentNode.childNodes.indexOf(target) + 1],
+            target.parentNode
+                .childNodes[target.parentNode.childNodes.indexOf(target) + 1],
           );
         }
 
@@ -191,12 +200,13 @@ class ElementManagerActionDelegate {
   }
 
   method(int targetId, String method, args) {
-    assert(existsTarget(targetId), 'targetId: $targetId, method: $method, args: $args');
+    assert(existsTarget(targetId),
+        'targetId: $targetId, method: $method, args: $args');
     Element target = getEventTargetByTargetId<Element>(targetId);
     List _args;
     try {
       _args = (args as List).cast();
-    } catch(e, stack) {
+    } catch (e, stack) {
       if (!PRODUCTION) {
         print('Method parse error: $e\n$stack');
       }
@@ -237,12 +247,14 @@ class ElementManager {
     RenderBox result = getRootRenderObject();
 
     // We need to add PerformanceOverlay of it's needed.
-    if (showPerformanceOverlayOverride != null) showPerformanceOverlay = showPerformanceOverlayOverride;
+    if (showPerformanceOverlayOverride != null)
+      showPerformanceOverlay = showPerformanceOverlayOverride;
 
     if (showPerformanceOverlay) {
       RenderPerformanceOverlay renderPerformanceOverlay =
           RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
-      RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
+      RenderConstrainedBox renderConstrainedPerformanceOverlayBox =
+          RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(
           math.min(350.0, window.physicalSize.width),
@@ -311,7 +323,8 @@ class ElementManager {
         _actionDelegate.removeEvent(payload[0], payload[1]);
         break;
       case 'method':
-        returnValue = _actionDelegate.method(payload[0], payload[1], payload[2]);
+        returnValue =
+            _actionDelegate.method(payload[0], payload[1], payload[2]);
         break;
     }
 

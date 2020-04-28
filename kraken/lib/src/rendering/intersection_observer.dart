@@ -45,7 +45,8 @@ Rect _localRectToGlobal(Layer layer, Rect localRect) {
   return MatrixUtils.transformRect(transform, localRect);
 }
 
-typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
+typedef IntersectionChangeCallback = void Function(
+    IntersectionObserverEntry info);
 
 // The [RenderObject] corresponding to the element.
 class RenderIntersectionObserver extends RenderProxyBox {
@@ -104,7 +105,9 @@ class RenderIntersectionObserver extends RenderProxyBox {
 
     if (_layer == null) {
       _layer = IntersectionObserverLayer(
-        elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
+          elementSize: semanticBounds.size,
+          paintOffset: offset,
+          onIntersectionChange: _onIntersectionChange);
     } else {
       _layer.elementSize = semanticBounds.size;
       _layer.paintOffset = offset;
@@ -116,7 +119,9 @@ class RenderIntersectionObserver extends RenderProxyBox {
 
 class IntersectionObserverLayer extends ContainerLayer {
   IntersectionObserverLayer(
-      {@required this.elementSize, @required this.paintOffset, @required this.onIntersectionChange})
+      {@required this.elementSize,
+      @required this.paintOffset,
+      @required this.onIntersectionChange})
       : assert(paintOffset != null),
         assert(elementSize != null),
         assert(onIntersectionChange != null),
@@ -175,7 +180,6 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   bool _isScheduled = false;
   _scheduleIntersectionObservationUpdate() {
-
     if (!_isScheduled) {
       _isScheduled = true;
       scheduleMicrotask(() {
@@ -253,20 +257,26 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// Executes visibility callbacks for all updated.
   void _processCallbacks() {
     if (!attached) {
-      _fireCallback(IntersectionObserverEntry(size: _lastIntersectionInfo?.size));
+      _fireCallback(
+          IntersectionObserverEntry(size: _lastIntersectionInfo?.size));
       return;
     }
 
     Rect elementBounds = _computeElementBounds();
 
-    final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: _computeClipRect());
+    final info = IntersectionObserverEntry.fromRects(
+        boundingClientRect: elementBounds, rootBounds: _computeClipRect());
     _fireCallback(info);
   }
 }
 
 @immutable
 class IntersectionObserverEntry {
-  const IntersectionObserverEntry({Rect boundingClientRect, Rect intersectionRect, Rect rootBounds, Size size})
+  const IntersectionObserverEntry(
+      {Rect boundingClientRect,
+      Rect intersectionRect,
+      Rect rootBounds,
+      Size size})
       : boundingClientRect = boundingClientRect ?? Rect.zero,
         intersectionRect = intersectionRect ?? Rect.zero,
         rootBounds = rootBounds ?? Rect.zero,
@@ -282,28 +292,30 @@ class IntersectionObserverEntry {
     @required Rect rootBounds,
   }) {
     assert(boundingClientRect != null);
-    assert(rootBounds  != null);
+    assert(rootBounds != null);
 
     // Compute the intersection in the element's local coordinates.
-    final intersectionRect =
-        boundingClientRect.overlaps(rootBounds) ? boundingClientRect.intersect(rootBounds).shift(-boundingClientRect.topLeft) : Rect.zero;
+    final intersectionRect = boundingClientRect.overlaps(rootBounds)
+        ? boundingClientRect
+            .intersect(rootBounds)
+            .shift(-boundingClientRect.topLeft)
+        : Rect.zero;
 
     return IntersectionObserverEntry(
-      boundingClientRect: boundingClientRect,
-      intersectionRect: intersectionRect,
-      rootBounds: rootBounds,
-      size: boundingClientRect.size
-    );
+        boundingClientRect: boundingClientRect,
+        intersectionRect: intersectionRect,
+        rootBounds: rootBounds,
+        size: boundingClientRect.size);
   }
 
   // A Boolean value which is true if the target element intersects with the intersection observer's root.
-  // If this is true, then, the IntersectionObserverEntry describes a transition into a state of intersection; 
+  // If this is true, then, the IntersectionObserverEntry describes a transition into a state of intersection;
   // if it's false, then you know the transition is from intersecting to not-intersecting.
   bool get isIntersecting {
-    if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left)
-      return false;
-    if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top)
-      return false;
+    if (boundingClientRect.right < rootBounds.left ||
+        rootBounds.right < boundingClientRect.left) return false;
+    if (boundingClientRect.bottom < rootBounds.top ||
+        rootBounds.bottom < boundingClientRect.top) return false;
     return true;
   }
 
@@ -378,5 +390,6 @@ double _area(Size size) {
 /// Returns whether two floating-point values are approximately equal.
 bool _floatNear(double f1, double f2) {
   final absDiff = (f1 - f2).abs();
-  return absDiff <= _kDefaultTolerance || (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
+  return absDiff <= _kDefaultTolerance ||
+      (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
 }

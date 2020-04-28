@@ -95,7 +95,8 @@ class CSSTransition with CustomTickerProviderStateMixin {
       if (curvedAnimation.value == 0.0) {
         statusListener(AnimationStatus.forward);
       }
-      for (CSSTransitionProgressListener progressListener in progressListeners) {
+      for (CSSTransitionProgressListener progressListener
+          in progressListeners) {
         progressListener(curvedAnimation.value);
       }
     }
@@ -120,23 +121,34 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
+  static Map<String, CSSTransition> parseTransitions(
+      CSSStyleDeclaration style, String property, Element el) {
     List<String> list = [];
 
     if (property == 'transitionProperty' ||
-      property == 'transitionDuration' ||
-      property == 'transitionTimingFunction' ||
-      property == 'transitionDelay'
-    ) {
-      String transitionProperty = style['transitionProperty'] != '' ? style['transitionProperty'] : 'all';
-      String transitionDuration = style['transitionDuration'] != '' ? style['transitionDuration'] : '0s';
-      String transitionTimingFunction = style['transitionTimingFunction']  != '' ? style['transitionTimingFunction'] : 'ease';
-      String transitionDelay = style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
+        property == 'transitionDuration' ||
+        property == 'transitionTimingFunction' ||
+        property == 'transitionDelay') {
+      String transitionProperty = style['transitionProperty'] != ''
+          ? style['transitionProperty']
+          : 'all';
+      String transitionDuration = style['transitionDuration'] != ''
+          ? style['transitionDuration']
+          : '0s';
+      String transitionTimingFunction = style['transitionTimingFunction'] != ''
+          ? style['transitionTimingFunction']
+          : 'ease';
+      String transitionDelay =
+          style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
       List<String> properties = transitionProperty.split(',');
       for (String prop in properties) {
-        list.add(
-          prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay
-        );
+        list.add(prop +
+            ' ' +
+            transitionDuration +
+            ' ' +
+            transitionTimingFunction +
+            ' ' +
+            transitionDelay);
       }
     } else {
       list = style['transition'].split(',');
@@ -149,7 +161,8 @@ class CSSTransition with CustomTickerProviderStateMixin {
     return map;
   }
 
-  static void parseTransition(String string, Map<String, CSSTransition> map, Element el) {
+  static void parseTransition(
+      String string, Map<String, CSSTransition> map, Element el) {
     if (string != null && string.isNotEmpty) {
       List<String> strs = string.trim().split(' ');
       if (strs.length > 1) {
@@ -168,10 +181,10 @@ class CSSTransition with CustomTickerProviderStateMixin {
           delay = CSSTime(strs[3]);
           function = strs[2];
         }
-        if (delay?.valueOf() == null) {
+        if (delay?.computedValue == null) {
           delay = CSSTime.zero;
         }
-        if (duration.valueOf() == null || duration.valueOf() <= 0) {
+        if (duration.computedValue == null || duration.computedValue <= 0) {
           return;
         }
         Curve curve = parseFunction(function);
@@ -180,12 +193,13 @@ class CSSTransition with CustomTickerProviderStateMixin {
           el?.dispatchTransitionRun();
 
           AnimationController controller = AnimationController(
-              duration: Duration(milliseconds: duration.valueOf()),
+              duration: Duration(milliseconds: duration.computedValue?.toInt()),
               vsync: transition);
           transition.curvedAnimation =
               CurvedAnimation(curve: curve, parent: controller);
           transition.controller = controller;
-          transition.delay = Duration(milliseconds: delay.valueOf());
+          transition.delay =
+              Duration(milliseconds: delay.computedValue?.toInt());
           map[property] = transition;
         }
       }
@@ -209,34 +223,26 @@ class CSSTransition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    Map<String, CSSFunction> methods = CSSFunction.parseExpression(function);
+    List<CSSFunctionalNotation> methods = CSSFunction(function).computedValue;
     if (methods != null && methods.length > 0) {
-      CSSFunction method = methods?.values?.first;
+      CSSFunctionalNotation method = methods.first;
       if (method != null) {
-        if ("steps" == method.name) {
+        if (method.name == 'steps') {
           if (method.args.length >= 1) {
-            try {
-              int step = int.parse(method.args[0]);
-              bool isStart = false;
-              if (method.args.length == 2) {
-                isStart = method.args[1] == "start";
-              }
-              return CSSStepCurve(step, isStart);
-            } catch (e) {
-              return null;
+            var step = int.tryParse(method.args[0]);
+            var isStart = false;
+            if (method.args.length == 2) {
+              isStart = method.args[1] == 'start';
             }
+            return CSSStepCurve(step, isStart);
           }
         } else if ("cubic-bezier" == method.name) {
           if (method.args.length == 4) {
-            try {
-              double first = double.parse(method.args[0]);
-              double sec = double.parse(method.args[1]);
-              double third = double.parse(method.args[2]);
-              double forth = double.parse(method.args[3]);
-              return Cubic(first, sec, third, forth);
-            } catch (e) {
-              return null;
-            }
+            var first = double.tryParse(method.args[0]);
+            var sec = double.tryParse(method.args[1]);
+            var third = double.tryParse(method.args[2]);
+            var forth = double.tryParse(method.args[3]);
+            return Cubic(first, sec, third, forth);
           }
         }
       }

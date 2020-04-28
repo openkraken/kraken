@@ -59,7 +59,8 @@ class EditableTextDelegate implements TextSelectionDelegate {
 class InputElement extends Element implements TextInputClient, TickerProvider {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
-  final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _cursorVisibilityNotifier =
+      ValueNotifier<bool>(true);
   AnimationController _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
 
@@ -120,13 +121,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.minLines = 1,
     this.maxLines = 1,
   }) : super(
-    targetId: targetId,
-    tagName: INPUT,
-    defaultDisplay: 'inline-block',
-    allowChildren: false,
-    properties: properties,
-    events: events
-  ) {
+            targetId: targetId,
+            tagName: INPUT,
+            defaultDisplay: 'inline-block',
+            allowChildren: false,
+            properties: properties,
+            events: events) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
@@ -139,9 +139,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     placeholder = getPlaceholderText();
     renderEditable = createRenderObject();
     addChild(renderEditable);
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+    textSelectionDelegate.textEditingValue =
+        TextEditingValue(text: textSpan.text);
 
-    _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
+    _cursorBlinkOpacityController =
+        AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
   }
 
@@ -164,7 +166,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   void activeTextInput() {
     if (textInputConnection == null) {
-      final TextEditingValue localValue = textSelectionDelegate.textEditingValue;
+      final TextEditingValue localValue =
+          textSelectionDelegate.textEditingValue;
       _lastKnownRemoteTextEditingValue = localValue;
 
       textInputConnection = TextInput.attach(this, textInputConfiguration);
@@ -173,14 +176,19 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     textInputConnection.show();
   }
 
-  void onSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+  void onSelectionChanged(TextSelection selection, RenderEditable renderObject,
+      SelectionChangedCause cause) {
     TextEditingValue value = textSelectionDelegate.textEditingValue.copyWith(
-        selection: renderObject.text == placeholderTextSpan ? blurSelection : selection, composing: TextRange.empty);
+        selection: renderObject.text == placeholderTextSpan
+            ? blurSelection
+            : selection,
+        composing: TextRange.empty);
     updateEditingValue(value);
   }
 
   RenderEditable createRenderObject() {
-    TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
+    TextSpan text =
+        textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
     return RenderEditable(
       text: text,
       cursorColor: cursorColor,
@@ -220,7 +228,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // todo: selection overlay.
   }
 
-  bool get _hasInputConnection => textInputConnection != null && textInputConnection.attached;
+  bool get _hasInputConnection =>
+      textInputConnection != null && textInputConnection.attached;
   TextEditingValue _lastKnownRemoteTextEditingValue;
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -232,7 +241,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    final bool textChanged = textSelectionDelegate.textEditingValue?.text != value?.text;
+    final bool textChanged =
+        textSelectionDelegate.textEditingValue?.text != value?.text;
     textSelectionDelegate.textEditingValue = value;
 
     if (textChanged) {
@@ -284,7 +294,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (key == 'value' && value is String) {
       String text = value ?? '';
 
-      TextEditingValue newTextEditingValue = textSelectionDelegate.textEditingValue.copyWith(
+      TextEditingValue newTextEditingValue =
+          textSelectionDelegate.textEditingValue.copyWith(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       );
@@ -348,7 +359,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _startCursorTimer() {
     _targetCursorVisibility = true;
     _cursorBlinkOpacityController.value = 1.0;
-    _cursorTimer = Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
+    _cursorTimer =
+        Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
   }
 
   void _cursorWaitForStart(Timer timer) {
@@ -367,7 +379,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     //
     // These values and curves have been obtained through eyeballing, so are
     // likely not exactly the same as the values for native iOS.
-    _cursorBlinkOpacityController.animateTo(targetOpacity, curve: Curves.easeOut);
+    _cursorBlinkOpacityController.animateTo(targetOpacity,
+        curve: Curves.easeOut);
 
     if (_obscureShowCharTicksPending > 0) {
       _obscureShowCharTicksPending--;
@@ -377,12 +390,15 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     final TextPosition currentTextPosition = TextPosition(offset: 1);
-    Rect _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-    renderEditable.setFloatingCursor(point.state, _startCaretRect.center, currentTextPosition);
+    Rect _startCaretRect =
+        renderEditable.getLocalRectForCaret(currentTextPosition);
+    renderEditable.setFloatingCursor(
+        point.state, _startCaretRect.center, currentTextPosition);
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+    renderEditable.cursorColor =
+        cursorColor.withOpacity(_cursorBlinkOpacityController.value);
     _cursorVisibilityNotifier.value = _cursorBlinkOpacityController.value > 0;
   }
 
@@ -404,5 +420,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   // Abstract class method added after flutter@1.15
   @override
-  TextEditingValue get currentTextEditingValue => textSelectionDelegate.textEditingValue;
+  TextEditingValue get currentTextEditingValue =>
+      textSelectionDelegate.textEditingValue;
 }

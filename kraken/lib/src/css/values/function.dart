@@ -1,26 +1,46 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
-class CSSFunction {
-  String name;
-  List<String> args;
+import 'value.dart';
 
-  CSSFunction(this.name, this.args);
+/// https://drafts.csswg.org/css-values-3/#functional-notations
+class CSSFunctionalNotation {
+  final String name;
+  final List<String> args;
 
-  static Map<String, CSSFunction> parseExpression(String src) {
-    int start = 0;
-    int left = src.indexOf('(', start);
-    int right = src.indexOf(')', start);
-    Map<String, CSSFunction> functions = {};
-    while (left != -1 && right != -1 && right > left + 1) {
-      String args = src.substring(left + 1, right).trim();
-      List<String> argList = args.split(',');
-      String fn = src.substring(start, left);
-      CSSFunction fnMap = CSSFunction(fn.trim(), argList);
-      functions[fn] = fnMap;
-      start = right + 1;
-      left = src.indexOf('(', start);
-      right = src.indexOf(')', start);
-    }
-    return functions;
+  CSSFunctionalNotation(this.name, this.args);
+}
+
+// ignore: public_member_api_docs
+class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
+  final String _rawInput;
+  List<CSSFunctionalNotation> _value;
+
+  /// Returns a CSSFunction.
+  CSSFunction(this._rawInput) {
+    parse();
   }
+
+  @override
+  void parse() {
+    var start = 0;
+    var left = _rawInput.indexOf('(', start);
+    var right = _rawInput.indexOf(')', start);
+    _value = [];
+
+    while (left != -1 && right != -1 && right > left + 1) {
+      var args = _rawInput.substring(left + 1, right).trim();
+      var argList = args.split(',');
+      var fn = _rawInput.substring(start, left);
+      _value.add(CSSFunctionalNotation(fn.trim(), argList));
+      start = right + 1;
+      left = _rawInput.indexOf('(', start);
+      right = _rawInput.indexOf(')', start);
+    }
+  }
+
+  @override
+  List<CSSFunctionalNotation> get computedValue => _value;
+
+  @override
+  String get serializedValue => _rawInput;
 }

@@ -10,14 +10,14 @@ class KrakenMethodChannel {
   static MethodCallback _methodCallHandler;
   static MethodChannel _channel = MethodChannel('kraken')
     ..setMethodCallHandler((call) async {
-    if ('reload' == call.method && _reloadHandler != null) {
-      await _reloadHandler();
-    } else if (_methodCallHandler != null) {
-      return _methodCallHandler(call);
-    }
+      if ('reload' == call.method && _reloadHandler != null) {
+        await _reloadHandler();
+      } else if (_methodCallHandler != null) {
+        return _methodCallHandler(call);
+      }
 
-    return Future<dynamic>.value(null);
-  });
+      return Future<dynamic>.value(null);
+    });
 
   static void setReloadHandler(VoidCallback reloadHandler) {
     _reloadHandler = reloadHandler;
