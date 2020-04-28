@@ -255,9 +255,9 @@ mixin CSSBackgroundMixin {
     Gradient gradient;
 
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      Map<String, CSSFunction> methods = CSSFunction.parseExpression(background[BACKGROUND_IMAGE]);
-      //FIXME flutter just support one property
-      for (CSSFunction method in methods?.values) {
+      List<Method> methods = CSSFunctionValue(background[BACKGROUND_IMAGE]).computedValue;
+      // FIXME flutter just support one property
+      for (Method method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
@@ -292,9 +292,9 @@ mixin CSSBackgroundMixin {
     DecorationImage decorationImage;
     Gradient gradient;
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      Map<String, CSSFunction> methods = CSSFunction.parseExpression(background[BACKGROUND_IMAGE]);
+      List<Method> methods = CSSFunctionValue(background[BACKGROUND_IMAGE]).computedValue;
       //FIXME flutter just support one property
-      for (CSSFunction method in methods?.values) {
+      for (Method method in methods) {
         if (method.name == 'url') {
           String url = method.args.length > 0 ? method.args[0] : '';
           if (url != null && url.isNotEmpty) {
@@ -349,8 +349,7 @@ mixin CSSBackgroundMixin {
             break;
         }
       }
-      CSSPosition position =
-      CSSPosition(background[BACKGROUND_POSITION], window.physicalSize);
+      CSSPosition position = CSSPosition(background[BACKGROUND_POSITION]);
       // size default auto equals none
       BoxFit boxFit = BoxFit.none;
       if (background.containsKey(BACKGROUND_SIZE)) {
@@ -376,15 +375,15 @@ mixin CSSBackgroundMixin {
         }
       }
       backgroundImage = DecorationImage(
-        image: CSSUrl.getImageProviderByUrl(url),
+        image: CSSUrl(url).computedValue,
         repeat: imageRepeat,
-        alignment: position.alignment,
+        alignment: position.computedValue,
         fit: boxFit);
     }
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(CSSFunction method) {
+  Gradient getBackgroundGradient(Method method) {
     Gradient gradient;
     if (method.args.length > 1) {
       List<Color> colors = [];

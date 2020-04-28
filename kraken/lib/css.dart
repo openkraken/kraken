@@ -30,3 +30,4 @@ export 'src/css/values/position.dart';
 export 'src/css/values/wide_keywords.dart';
 export 'src/css/values/time.dart';
 export 'src/css/values/url.dart';
+export 'src/css/values/value.dart';

@@ -168,10 +168,10 @@ class CSSTransition with CustomTickerProviderStateMixin {
           delay = CSSTime(strs[3]);
           function = strs[2];
         }
-        if (delay?.valueOf() == null) {
+        if (delay?.computedValue == null) {
           delay = CSSTime.zero;
         }
-        if (duration.valueOf() == null || duration.valueOf() <= 0) {
+        if (duration.computedValue == null || duration.computedValue <= 0) {
           return;
         }
         Curve curve = parseFunction(function);
@@ -180,12 +180,12 @@ class CSSTransition with CustomTickerProviderStateMixin {
           el?.dispatchTransitionRun();
 
           AnimationController controller = AnimationController(
-              duration: Duration(milliseconds: duration.valueOf()),
+              duration: Duration(milliseconds: duration.computedValue?.toInt()),
               vsync: transition);
           transition.curvedAnimation =
               CurvedAnimation(curve: curve, parent: controller);
           transition.controller = controller;
-          transition.delay = Duration(milliseconds: delay.valueOf());
+          transition.delay = Duration(milliseconds: delay.computedValue?.toInt());
           map[property] = transition;
         }
       }
@@ -209,18 +209,18 @@ class CSSTransition with CustomTickerProviderStateMixin {
       case "step-end":
         return Threshold(1);
     }
-    Map<String, CSSFunctionValue> methods = CSSFunctionValue.parseExpression(function);
+    List<Method> methods = CSSFunctionValue(function).computedValue;
     if (methods != null && methods.length > 0) {
-      CSSFunctionValue method = methods?.values?.first;
+      Method method = methods.first;
       if (method != null) {
-        if ("steps" == method.name) {
+        if (method.name == 'steps') {
           if (method.args.length >= 1) {
             var step = int.tryParse(method.args[0]);
             var isStart = false;
             if (method.args.length == 2) {
-              isStart = method.args[1] == "start";
+              isStart = method.args[1] == 'start';
             }
-            return StepCurve(step, isStart);
+            return CSSStepCurve(step, isStart);
           }
         } else if ("cubic-bezier" == method.name) {
           if (method.args.length == 4) {
