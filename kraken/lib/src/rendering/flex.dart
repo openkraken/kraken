@@ -6,6 +6,21 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 
+class RenderFlexParentData extends RenderLayoutParentData {
+  /// Flex grow
+  int flexGrow;
+
+  /// Flex shrink
+  int flexShrink;
+
+  /// Flex basis
+  String flexBasis;
+
+  @override
+  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
+}
+
+
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
     VerticalDirection verticalDirection) {
   assert(direction != null);

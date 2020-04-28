@@ -6,7 +6,7 @@ describe('Transition events', () => {
       await sleep(0.1);
       done();
     });
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -25,7 +25,7 @@ describe('Transition events', () => {
       done();
     });
 
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -35,7 +35,7 @@ describe('Transition events', () => {
     });
 
     requestAnimationFrame(async () => {
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
     });
@@ -44,7 +44,7 @@ describe('Transition events', () => {
   it('basic transitionend', (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -62,7 +62,7 @@ describe('Transition events', () => {
     requestAnimationFrame(async () => {
       await sleep(0.1);
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
     });
@@ -71,7 +71,7 @@ describe('Transition events', () => {
   it('mutiple transitionend', (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -86,7 +86,7 @@ describe('Transition events', () => {
       sleep(0.1)
         .then(() => {
           container1.addEventListener('transitionend', second);
-          setStyle(container1, {
+          setElementStyle(container1, {
             transform: 'translate(250px,250px)',
           });
         });
@@ -100,7 +100,7 @@ describe('Transition events', () => {
     container1.addEventListener('transitionend', first);
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'translate(30px,30px)',
       });
     });

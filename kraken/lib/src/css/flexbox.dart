@@ -7,19 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-class RenderFlexParentData extends RenderLayoutParentData {
-  /// Flex grow
-  int flexGrow;
-
-  /// Flex shrink
-  int flexShrink;
-
-  /// Flex basis
-  String flexBasis;
-
-  @override
-  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
-}
+// CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 
 mixin CSSFlexboxMixin {
   void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
@@ -166,7 +154,7 @@ mixin CSSFlexboxMixin {
   }
 }
 
-class FlexItem {
+class CSSFlexItem {
   static const String GROW = 'flexGrow';
   static const String SHRINK = 'flexShrink';
   static const String BASIS = 'flexBasis';

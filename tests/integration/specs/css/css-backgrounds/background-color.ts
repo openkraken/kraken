@@ -1,7 +1,7 @@
 describe('Background-color', () => {
   it('red', async () => {
     const div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '200px',
       height: '200px',
       backgroundColor: 'red',

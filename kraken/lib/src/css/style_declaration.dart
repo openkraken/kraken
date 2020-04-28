@@ -10,7 +10,7 @@ typedef StyleChangeListener = void Function(
   String present,
 );
 
-// https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
+// CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
 
 /// The [CSSStyleDeclaration] interface represents an object that is a CSS
 /// declaration block, and exposes style information and various style-related

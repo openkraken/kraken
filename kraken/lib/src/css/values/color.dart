@@ -6,6 +6,8 @@
 import 'dart:ui' show Color;
 import 'value.dart';
 
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
+// CSS Color: https://drafts.csswg.org/css-color-4/
 // ignore: public_member_api_docs
 final RegExp rgbaRexExp = RegExp(
   r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
@@ -13,8 +15,6 @@ final RegExp rgbaRexExp = RegExp(
   multiLine: false,
 );
 
-/// https://drafts.csswg.org/css-values-3/#colors
-/// https://drafts.csswg.org/css-color-4/
 /// #123
 /// #123456
 /// rgb(r,g,b)

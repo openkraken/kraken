@@ -2,7 +2,7 @@ describe('Transition transform origin', () => {
   it('length', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -16,7 +16,7 @@ describe('Transition transform origin', () => {
 
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'rotateZ(0.6turn)',
         transformOrigin: '10px 10px',
       });
@@ -32,7 +32,7 @@ describe('Transition transform origin', () => {
   it('percent', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -46,7 +46,7 @@ describe('Transition transform origin', () => {
 
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'rotateZ(0.6turn)',
         transformOrigin: '80% 80%',
       });
@@ -62,7 +62,7 @@ describe('Transition transform origin', () => {
   it('keyword', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -76,7 +76,7 @@ describe('Transition transform origin', () => {
 
     requestAnimationFrame(async () => {
       await matchScreenshot();
-      setStyle(container1, {
+      setElementStyle(container1, {
         transform: 'rotateZ(0.1turn)',
         transformOrigin: 'top left',
       });

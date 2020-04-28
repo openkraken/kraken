@@ -2,7 +2,7 @@ describe('Transition all', () => {
   it('001', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    setStyle(container1, {
+    setElementStyle(container1, {
       position: 'absolute',
       top: '100px',
       left: 0,
@@ -13,7 +13,7 @@ describe('Transition all', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(() => {
-      setStyle(container1, {
+      setElementStyle(container1, {
         top: 0,
       });
 

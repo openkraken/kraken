@@ -1,7 +1,7 @@
 describe('Height', () => {
   it('basic example', async () => {
     const div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
@@ -78,7 +78,7 @@ describe('Height', () => {
     it('when parent is flex with height and align-items stretch', async () => {
 
       const container = document.createElement('div');
-      setStyle(container, {
+      setElementStyle(container, {
         width: '200px',
         height: '200px',
         display: 'flex',
@@ -90,7 +90,7 @@ describe('Height', () => {
       document.body.appendChild(container);
 
       const child1 = document.createElement('div');
-      setStyle(child1, {
+      setElementStyle(child1, {
         width: '50px',
         backgroundColor: 'blue',
       });
@@ -98,7 +98,7 @@ describe('Height', () => {
       child1.appendChild(document.createTextNode('block with no height'));
 
       const child2 = document.createElement('div');
-      setStyle(child2, {
+      setElementStyle(child2, {
         width: '50px',
         height: '100px',
         backgroundColor: 'red',
@@ -106,7 +106,7 @@ describe('Height', () => {
       container.appendChild(child2);
 
       const child3 = document.createElement('div');
-      setStyle(child3, {
+      setElementStyle(child3, {
         width: '50px',
         height: '50px',
         backgroundColor: 'green',
@@ -118,7 +118,7 @@ describe('Height', () => {
 
     it('when parent is flex with no height and align-items stretch', async () => {
       const container = document.createElement('div');
-      setStyle(container, {
+      setElementStyle(container, {
         width: '200px',
         display: 'flex',
         backgroundColor: '#666',
@@ -129,7 +129,7 @@ describe('Height', () => {
       document.body.appendChild(container);
 
       const child1 = document.createElement('div');
-      setStyle(child1, {
+      setElementStyle(child1, {
         width: '50px',
         backgroundColor: 'blue',
       });
@@ -137,7 +137,7 @@ describe('Height', () => {
       child1.appendChild(document.createTextNode('block with no height'));
 
       const child2 = document.createElement('div');
-      setStyle(child2, {
+      setElementStyle(child2, {
         width: '50px',
         height: '100px',
         backgroundColor: 'red',
@@ -145,7 +145,7 @@ describe('Height', () => {
       container.appendChild(child2);
 
       const child3 = document.createElement('div');
-      setStyle(child3, {
+      setElementStyle(child3, {
         width: '50px',
         height: '50px',
         backgroundColor: 'green',
@@ -157,7 +157,7 @@ describe('Height', () => {
 
     it('when nested in flex parents with align-items stretch', async () => {
       const container0 = document.createElement('div');
-      setStyle(container0, {
+      setElementStyle(container0, {
         width: '300px',
         height: '300px',
         display: 'flex',
@@ -169,7 +169,7 @@ describe('Height', () => {
       document.body.appendChild(container0);
 
       const container = document.createElement('div');
-      setStyle(container, {
+      setElementStyle(container, {
         width: '200px',
         display: 'flex',
         backgroundColor: '#666',
@@ -180,7 +180,7 @@ describe('Height', () => {
       container0.appendChild(container);
 
       const child1 = document.createElement('div');
-      setStyle(child1, {
+      setElementStyle(child1, {
         width: '50px',
         backgroundColor: 'blue',
       });
@@ -188,7 +188,7 @@ describe('Height', () => {
       child1.appendChild(document.createTextNode('block with no height'));
 
       const child2 = document.createElement('div');
-      setStyle(child2, {
+      setElementStyle(child2, {
         width: '50px',
         height: '100px',
         backgroundColor: 'red',
@@ -196,7 +196,7 @@ describe('Height', () => {
       container.appendChild(child2);
 
       const child3 = document.createElement('div');
-      setStyle(child3, {
+      setElementStyle(child3, {
         width: '50px',
         height: '50px',
         backgroundColor: 'green',

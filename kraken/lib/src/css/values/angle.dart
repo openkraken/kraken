@@ -3,11 +3,10 @@
  * Author: Kraken Team.
  */
 import 'dart:math' as math;
-
 import 'value.dart';
 
-/// https://drafts.csswg.org/css-values-3/#angles
-class CSSAngle implements CSSValue {
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#angles
+class CSSAngle implements CSSValue<double> {
   static const String DEG = 'deg';
   static const String GRAD = 'grad';
   static const String RAD = 'rad';

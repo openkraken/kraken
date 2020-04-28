@@ -1,14 +1,14 @@
 describe('Tags audio', () => {
   it('basic', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       height: '500rpx',
     });
 
     document.body.appendChild(container1);
 
     const audio = document.createElement('audio');
-    setStyle(audio, {
+    setElementStyle(audio, {
       width: '300px',
       height: '45px',
     });
@@ -21,7 +21,7 @@ describe('Tags audio', () => {
     container1.appendChild(audio);
 
     const playBtn = document.createElement('div');
-    setStyle(playBtn, {
+    setElementStyle(playBtn, {
       display: 'inline-block',
       width: '80px',
       height: '30px',
@@ -35,7 +35,7 @@ describe('Tags audio', () => {
     container1.appendChild(playBtn);
 
     const pauseBtn = document.createElement('div');
-    setStyle(pauseBtn, {
+    setElementStyle(pauseBtn, {
       display: 'inline-block',
       width: '80px',
       height: '30px',
@@ -49,7 +49,7 @@ describe('Tags audio', () => {
     container1.appendChild(pauseBtn);
 
     const seekBtn = document.createElement('div');
-    setStyle(seekBtn, {
+    setElementStyle(seekBtn, {
       display: 'inline-block',
       width: '80px',
       height: '30px',

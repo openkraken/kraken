@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'value.dart';
 
-// https://drafts.csswg.org/css-values-3/#urls
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
 class CSSUrl implements CSSValue<ImageProvider> {
   String cache;
   ImageProvider _value;

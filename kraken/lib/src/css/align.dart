@@ -7,7 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-// https://drafts.csswg.org/css-align/
+// CSS Box Alignment: https://drafts.csswg.org/css-align/
+
 mixin CSSAlignMixin {
   void decorateRenderFlow(RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
     renderFlowLayout.mainAxisAlignment = _getJustifyContent(style);

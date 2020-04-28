@@ -2,10 +2,9 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-// https://drafts.csswg.org/css-values-3/#time
 import 'value.dart';
 
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#time
 class CSSTime implements CSSValue<double> {
   static const String MILLISECONDS = 'ms';
   static const String SECOND = 's';

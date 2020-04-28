@@ -6,8 +6,9 @@ import 'value.dart';
 
 const String PERCENTAGE = '%';
 
-// https://drafts.csswg.org/css-values-3/#integers
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#integers
 class CSSInteger implements CSSValue<int> {
+
   int _value = 0;
 
   final String _rawInput;
@@ -29,7 +30,7 @@ class CSSInteger implements CSSValue<int> {
   String get serializedValue => _value.toString();
 }
 
-// https://drafts.csswg.org/css-values-3/#numbers
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
 class CSSNumber implements CSSValue<double>  {
   double _value = 0.0;
 
@@ -54,7 +55,7 @@ class CSSNumber implements CSSValue<double>  {
   String get serializedValue => _value.toString();
 }
 
-// https://drafts.csswg.org/css-values-3/#percentages
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 class CSSPercentage implements CSSValue<double> {
   static bool isPercentage(String percentageValue) {
     return percentageValue != null && percentageValue.endsWith(PERCENTAGE);

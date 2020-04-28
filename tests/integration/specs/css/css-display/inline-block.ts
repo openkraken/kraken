@@ -1,7 +1,7 @@
 describe('Display inline-block', () => {
   it('should work with basic samples', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '100px',
       height: '100px',
       display: 'inline-block',

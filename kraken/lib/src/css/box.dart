@@ -10,17 +10,16 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-// https://drafts.csswg.org/css-box-4/
-// https://drafts.csswg.org/css-backgrounds/
+// CSS Box Model: https://drafts.csswg.org/css-box-4/
+// CSS Backgrounds and Borders: https://drafts.csswg.org/css-backgrounds/
 
-/// RenderDecoratedBox impls styles of
 /// - background
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   RenderDecoratedBox renderDecoratedBox;
   RenderMargin renderBorderHolder;
   TransitionDecoration oldDecoration;
-  Padding oldBorderPadding;
+  CSSPadding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
       RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
@@ -41,13 +40,13 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   void updateRenderDecoratedBox(
-      CSSStyleDeclaration style, Map<String, Transition> transitionMap) {
+      CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
     if (transitionMap != null) {
-      Transition backgroundColorTransition = getTransition(
+      CSSTransition backgroundColorTransition = getTransition(
           transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
-      List<Transition> borderColorTransitionsLTRB = [
+      List<CSSTransition> borderColorTransitionsLTRB = [
         getTransition(transitionMap, 'border-left-color',
             parentProperty: 'border-color'),
         getTransition(transitionMap, 'border-top-color',
@@ -57,7 +56,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         getTransition(transitionMap, 'border-bottom-color',
             parentProperty: 'border-color')
       ];
-      List<Transition> borderWidthTransitionsLTRB = [
+      List<CSSTransition> borderWidthTransitionsLTRB = [
         getTransition(transitionMap, 'border-left-width',
             parentProperty: 'border-width'),
         getTransition(transitionMap, 'border-top-width',
@@ -70,7 +69,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
       // border radius transition add inorder topLeft topRight bottomLeft
       // bottomRight
-      List<Transition> borderRadiusTransitionTLTRBLBR = [
+      List<CSSTransition> borderRadiusTransitionTLTRBLBR = [
         getTransition(transitionMap, 'border-top-left-radius',
             parentProperty: 'border-radius'),
         getTransition(transitionMap, 'border-top-right-radius',
@@ -129,7 +128,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // add color relate transition listener
-  void addColorProcessListener(Transition transition,
+  void addColorProcessListener(CSSTransition transition,
       TransitionColorMixin newColor, TransitionColorMixin oldColor,
       TransitionColorMixin processColor, TransitionColorMixin baseColor,
       TransitionDecoration processDecoration) {
@@ -153,8 +152,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // add width and radius relate transition listener
-  void addWidthAndRadiusProcessListener(Transition widthTransition,
-      Transition radiusTransition, int index,
+  void addWidthAndRadiusProcessListener(CSSTransition widthTransition,
+      CSSTransition radiusTransition, int index,
       TransitionDecoration newDecoration, TransitionDecoration oldDecoration,
       TransitionDecoration baseDecoration,
       TransitionDecoration processDecoration) {
@@ -182,7 +181,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     }
   }
 
-  Transition getTransition(Map<String, Transition> transitionMap,
+  CSSTransition getTransition(Map<String, CSSTransition> transitionMap,
       String property, {String parentProperty}) {
     if (transitionMap.containsKey(property)) {
       return transitionMap[property];

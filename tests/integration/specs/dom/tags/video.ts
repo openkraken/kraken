@@ -1,14 +1,14 @@
 describe('Tags video', () => {
   it('basic', done => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       height: '500rpx',
     });
 
     document.body.appendChild(container1);
 
     const video = document.createElement('video');
-    setStyle(video, {
+    setElementStyle(video, {
       width: '750rpx',
       height: '400rpx',
     });

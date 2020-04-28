@@ -8,7 +8,7 @@ enum CSSPositionValue {
   bottom,
 }
 
-// https://drafts.csswg.org/css-values-3/#position
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 class CSSPosition implements CSSValue<CSSPositionValue> {
   static const String LEFT = 'left';
   static const String RIGHT = 'right';

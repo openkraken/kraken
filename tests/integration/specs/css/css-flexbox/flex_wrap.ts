@@ -1,7 +1,7 @@
 describe('flexbox flex-wrap', () => {
   it('should work with wrap', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       display: 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -15,7 +15,7 @@ describe('flexbox flex-wrap', () => {
     document.body.appendChild(container1);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       display: 'inline-block',
       backgroundColor: '#f40',
       width: '100rpx',
@@ -25,7 +25,7 @@ describe('flexbox flex-wrap', () => {
     container1.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       display: 'inline-block',
       backgroundColor: '#f40',
       width: '100rpx',
@@ -35,7 +35,7 @@ describe('flexbox flex-wrap', () => {
     container1.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       display: 'inline-block',
       backgroundColor: '#f40',
       width: '100rpx',

@@ -15,13 +15,13 @@ describe('Horizontal formatting', () => {
       'https://img.alicdn.com/tfs/TB1xF94zxn1gK0jSZKPXXXvUXXa-640-20.gif'
     );
 
-    setStyle(ruleImg, {
+    setElementStyle(ruleImg, {
       width: '641px',
       height: '20px',
     });
 
-    setStyle(topRuler, rulerStyle);
-    setStyle(ruleImg, rulerStyle);
+    setElementStyle(topRuler, rulerStyle);
+    setElementStyle(ruleImg, rulerStyle);
     topRuler.appendChild(ruleImg);
 
     const p = document.createElement('p');
@@ -30,7 +30,7 @@ describe('Horizontal formatting', () => {
     );
     p.appendChild(text);
 
-    setStyle(p, {
+    setElementStyle(p, {
       backgroundColor: 'aqua',
       width: '400px',
       borderStyle: 'solid',
@@ -54,13 +54,13 @@ describe('Horizontal formatting', () => {
       'src',
       'https://img.alicdn.com/tfs/TB1GV14zxn1gK0jSZKPXXXvUXXa-640-64.gif'
     );
-    setStyle(ruleImg2, {
+    setElementStyle(ruleImg2, {
       width: '640px',
       height: '64px',
     });
 
-    setStyle(bottomRuler, rulerStyle);
-    setStyle(ruleImg2, rulerStyle);
+    setElementStyle(bottomRuler, rulerStyle);
+    setElementStyle(ruleImg2, rulerStyle);
 
     bottomRuler.appendChild(ruleImg2);
 

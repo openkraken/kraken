@@ -5,15 +5,17 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-enum OverflowType {
+// CSS Overflow: https://drafts.csswg.org/css-overflow-3/
+
+enum CSSOverflowType {
   auto,
   visible,
   hidden,
   scroll,
 }
 
-List<OverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
-  OverflowType overflowX, overflowY;
+List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
+  CSSOverflowType overflowX, overflowY;
   overflowX = overflowY = _getOverflow(style['overflow']);
 
   if (style.contains('overflowX')) {
@@ -25,28 +27,27 @@ List<OverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
   }
 
   // Apply overflow special rules from w3c.
-  if (overflowX == OverflowType.visible && overflowY != OverflowType.visible) {
-    overflowX = OverflowType.auto;
+  if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
+    overflowX = CSSOverflowType.auto;
   }
 
-  if (overflowY == OverflowType.visible && overflowX != OverflowType.visible) {
-    overflowY = OverflowType.auto;
+  if (overflowY == CSSOverflowType.visible && overflowX != CSSOverflowType.visible) {
+    overflowY = CSSOverflowType.auto;
   }
 
   return [overflowX, overflowY];
 }
 
-OverflowType _getOverflow(String definition) {
+CSSOverflowType _getOverflow(String definition) {
   switch (definition) {
-    case 'hidden': return OverflowType.hidden;
-    case 'scroll': return OverflowType.scroll;
-    case 'auto': return OverflowType.auto;
-    case 'visible': return OverflowType.visible;
+    case 'hidden': return CSSOverflowType.hidden;
+    case 'scroll': return CSSOverflowType.scroll;
+    case 'auto': return CSSOverflowType.auto;
+    case 'visible': return CSSOverflowType.visible;
   }
-  return OverflowType.visible;
+  return CSSOverflowType.visible;
 }
 
-// https://drafts.csswg.org/css-overflow-3/
 mixin CSSOverflowMixin {
   RenderObject _renderObjectX;
   RenderObject _child;
@@ -57,7 +58,7 @@ mixin CSSOverflowMixin {
   RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     assert(style != null);
     _child = current;
-    List<OverflowType> overflow = getOverflowFromStyle(style);
+    List<CSSOverflowType> overflow = getOverflowFromStyle(style);
     // X direction overflow
     _renderObjectX = _getRenderObjectByOverflow(overflow[0], current, AxisDirection.right, scrollListener);
     // Y direction overflow
@@ -68,26 +69,26 @@ mixin CSSOverflowMixin {
 
   void updateOverFlowBox(CSSStyleDeclaration style, void scrollListener(double scrollTop)) {
     if (style != null) {
-      List<OverflowType> overflow = getOverflowFromStyle(style);
+      List<CSSOverflowType> overflow = getOverflowFromStyle(style);
 
       if (_renderObjectY != null) {
         AbstractNode parent = _renderObjectY.parent;
         AbstractNode childParent = _renderObjectX.parent;
         AxisDirection axisDirection = AxisDirection.down;
         switch (overflow[1]) {
-          case OverflowType.visible:
+          case CSSOverflowType.visible:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
-              OverflowDirectionBox overflowCustomBox = OverflowDirectionBox(
+              CSSOverflowDirectionBox overflowCustomBox = CSSOverflowDirectionBox(
                   child: _renderObjectX, textDirection: TextDirection.ltr, axisDirection: axisDirection);
               parent.child = _renderObjectY = overflowCustomBox;
               _scrollableY = null;
             }
             break;
-          case OverflowType.auto:
-          case OverflowType.scroll:
+          case CSSOverflowType.auto:
+          case CSSOverflowType.scroll:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -96,7 +97,7 @@ mixin CSSOverflowMixin {
               parent.child = _renderObjectY = _scrollableY.getScrollableRenderObject(_renderObjectX);
             }
             break;
-          case OverflowType.hidden:
+          case CSSOverflowType.hidden:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -114,18 +115,18 @@ mixin CSSOverflowMixin {
         AbstractNode childParent = _child.parent;
         AxisDirection axisDirection = AxisDirection.right;
         switch (overflow[0]) {
-          case OverflowType.visible:
+          case CSSOverflowType.visible:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
               childParent.child = null;
               parent.child = _renderObjectX =
-                  OverflowDirectionBox(child: _child, textDirection: TextDirection.ltr, axisDirection: axisDirection);
+                  CSSOverflowDirectionBox(child: _child, textDirection: TextDirection.ltr, axisDirection: axisDirection);
               _scrollableX = null;
             }
             break;
-          case OverflowType.auto:
-          case OverflowType.scroll:
+          case CSSOverflowType.auto:
+          case CSSOverflowType.scroll:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -134,7 +135,7 @@ mixin CSSOverflowMixin {
               parent.child = _renderObjectX = _scrollableX.getScrollableRenderObject(_child);
             }
             break;
-          case OverflowType.hidden:
+          case CSSOverflowType.hidden:
             assert(parent is RenderObjectWithChildMixin);
             assert(childParent is RenderObjectWithChildMixin);
             if (parent is RenderObjectWithChildMixin && childParent is RenderObjectWithChildMixin) {
@@ -150,22 +151,22 @@ mixin CSSOverflowMixin {
   }
 
   RenderObject _getRenderObjectByOverflow(
-      OverflowType overflow, RenderObject current, AxisDirection axisDirection, void scrollListener(double scrollTop)) {
+      CSSOverflowType overflow, RenderObject current, AxisDirection axisDirection, void scrollListener(double scrollTop)) {
     switch (overflow) {
-      case OverflowType.visible:
+      case CSSOverflowType.visible:
         if (axisDirection == AxisDirection.right) {
           _scrollableX = null;
         } else {
           _scrollableY = null;
         }
-        current = OverflowDirectionBox(
+        current = CSSOverflowDirectionBox(
           child: current,
           textDirection: TextDirection.ltr,
           axisDirection: axisDirection,
         );
         break;
-      case OverflowType.auto:
-      case OverflowType.scroll:
+      case CSSOverflowType.auto:
+      case CSSOverflowType.scroll:
         KrakenScrollable scrollable = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
         if (axisDirection == AxisDirection.right) {
           _scrollableX = scrollable;
@@ -174,7 +175,7 @@ mixin CSSOverflowMixin {
         }
         current = scrollable.getScrollableRenderObject(current);
         break;
-      case OverflowType.hidden:
+      case CSSOverflowType.hidden:
         if (axisDirection == AxisDirection.right) {
           _scrollableX = null;
         } else {
@@ -263,10 +264,10 @@ mixin CSSOverflowMixin {
   }
 }
 
-class OverflowDirectionBox extends RenderSizedOverflowBox {
+class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
   AxisDirection axisDirection;
 
-  OverflowDirectionBox(
+  CSSOverflowDirectionBox(
       {RenderBox child,
       Size requestedSize = Size.zero,
       AlignmentGeometry alignment = Alignment.topLeft,

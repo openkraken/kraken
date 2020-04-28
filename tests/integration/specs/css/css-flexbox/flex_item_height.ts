@@ -4,7 +4,7 @@ describe('flexbox flex-item', () => {
     document.body.appendChild(container);
 
     var flex1 = document.createElement('div');
-    setStyle(flex1, {
+    setElementStyle(flex1, {
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -13,7 +13,7 @@ describe('flexbox flex-item', () => {
     });
 
     var div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       backgroundColor: '#999',
       height: '50px',
     });
@@ -21,14 +21,14 @@ describe('flexbox flex-item', () => {
     div1.appendChild(text1);
 
     var div2 = document.createElement('div');
-    setStyle(div2, {
+    setElementStyle(div2, {
       backgroundColor: '#999',
     });
     var text2 = document.createTextNode('2222');
     div2.appendChild(text2);
 
     var div3 = document.createElement('div');
-    setStyle(div3, {
+    setElementStyle(div3, {
       display: 'flex',
       backgroundColor: '#999',
       height: '50px',
@@ -37,7 +37,7 @@ describe('flexbox flex-item', () => {
     div3.appendChild(text3);
 
     var div4 = document.createElement('div');
-    setStyle(div4, {
+    setElementStyle(div4, {
       display: 'flex',
       backgroundColor: '#999',
     });

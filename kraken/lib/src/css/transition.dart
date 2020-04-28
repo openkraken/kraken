@@ -4,15 +4,17 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
+// CSS Transitions: https://drafts.csswg.org/css-transitions/
+
 mixin CSSTransitionMixin on Node {
   Throttling throttler = Throttling();
-  Map<String, Transition> transitionMap;
+  Map<String, CSSTransition> transitionMap;
 
   void initTransition(CSSStyleDeclaration style, String property) {
-    transitionMap = Transition.parseTransitions(style, property, this);
+    transitionMap = CSSTransition.parseTransitions(style, property, this);
   }
 
-  void initTransitionEvent(Transition transition) {
+  void initTransitionEvent(CSSTransition transition) {
     transition?.setStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         // An Event fired when a CSS transition has been cancelled.
@@ -50,17 +52,17 @@ mixin CSSTransitionMixin on Node {
   }
 }
 
-typedef ProgressListener = void Function(double progress);
-typedef StatusListener = void Function(AnimationStatus status);
+typedef CSSTransitionProgressListener = void Function(double progress);
+typedef CSSTransitionStatusListener = void Function(AnimationStatus status);
 
-class Transition with CustomTickerProviderStateMixin {
+class CSSTransition with CustomTickerProviderStateMixin {
   Duration delay = Duration(milliseconds: 0);
   CurvedAnimation curvedAnimation;
   AnimationController controller;
-  List<ProgressListener> progressListeners;
-  StatusListener _statusListener;
+  List<CSSTransitionProgressListener> progressListeners;
+  CSSTransitionStatusListener _statusListener;
 
-  void setStatusListener(StatusListener statusListener) {
+  void setStatusListener(CSSTransitionStatusListener statusListener) {
     _statusListener = statusListener;
   }
 
@@ -75,11 +77,11 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  void setProgressListener(ProgressListener progressListener) {
+  void setProgressListener(CSSTransitionProgressListener progressListener) {
     progressListeners = [progressListener];
   }
 
-  void addProgressListener(ProgressListener progressListener) {
+  void addProgressListener(CSSTransitionProgressListener progressListener) {
     if (progressListeners == null) {
       progressListeners = [];
     }
@@ -93,7 +95,7 @@ class Transition with CustomTickerProviderStateMixin {
       if (curvedAnimation.value == 0.0) {
         statusListener(AnimationStatus.forward);
       }
-      for (ProgressListener progressListener in progressListeners) {
+      for (CSSTransitionProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
     }
@@ -118,7 +120,7 @@ class Transition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, Transition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
+  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
     List<String> list = [];
 
     if (property == 'transitionProperty' ||
@@ -140,14 +142,14 @@ class Transition with CustomTickerProviderStateMixin {
       list = style['transition'].split(',');
     }
 
-    Map<String, Transition> map = {};
+    Map<String, CSSTransition> map = {};
     for (String transition in list) {
       parseTransition(transition, map, el);
     }
     return map;
   }
 
-  static void parseTransition(String string, Map<String, Transition> map, Element el) {
+  static void parseTransition(String string, Map<String, CSSTransition> map, Element el) {
     if (string != null && string.isNotEmpty) {
       List<String> strs = string.trim().split(' ');
       if (strs.length > 1) {
@@ -174,7 +176,7 @@ class Transition with CustomTickerProviderStateMixin {
         }
         Curve curve = parseFunction(function);
         if (curve != null) {
-          Transition transition = Transition();
+          CSSTransition transition = CSSTransition();
           el?.dispatchTransitionRun();
 
           AnimationController controller = AnimationController(
@@ -213,10 +215,22 @@ class Transition with CustomTickerProviderStateMixin {
       if (method != null) {
         if ("steps" == method.name) {
           if (method.args.length >= 1) {
+<<<<<<< HEAD
             var step = int.tryParse(method.args[0]);
             var isStart = false;
             if (method.args.length == 2) {
               isStart = method.args[1] == "start";
+=======
+            try {
+              int step = int.parse(method.args[0]);
+              bool isStart = false;
+              if (method.args.length == 2) {
+                isStart = method.args[1] == "start";
+              }
+              return CSSStepCurve(step, isStart);
+            } catch (e) {
+              return null;
+>>>>>>> master
             }
             return StepCurve(step, isStart);
           }
@@ -235,11 +249,11 @@ class Transition with CustomTickerProviderStateMixin {
   }
 }
 
-class StepCurve extends Curve {
+class CSSStepCurve extends Curve {
   final int step;
   final bool isStart;
 
-  StepCurve(this.step, this.isStart);
+  CSSStepCurve(this.step, this.isStart);
 
   @override
   double transformInternal(double t) {

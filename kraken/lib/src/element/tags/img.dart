@@ -185,7 +185,11 @@ class ImgElement extends Element {
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
     String objectPosition = style['objectPosition'];
+<<<<<<< HEAD
     List<String> splitted = getShorttedProperties(objectPosition);
+=======
+    List<String> splitted = CSSSizingMixin.getShorttedProperties(objectPosition);
+>>>>>>> master
     if (splitted.length == 1) {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);

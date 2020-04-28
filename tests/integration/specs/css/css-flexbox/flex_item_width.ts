@@ -3,7 +3,7 @@ describe('flexbox flex-item', () => {
     var container = document.createElement('div');
     document.body.appendChild(container);
     var flex2 = document.createElement('div');
-    setStyle(flex2, {
+    setElementStyle(flex2, {
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'blue',
@@ -12,7 +12,7 @@ describe('flexbox flex-item', () => {
     });
 
     var div5 = document.createElement('div');
-    setStyle(div5, {
+    setElementStyle(div5, {
       backgroundColor: '#999',
       width: '100px',
     });
@@ -20,7 +20,7 @@ describe('flexbox flex-item', () => {
     div5.appendChild(text5);
 
     var div6 = document.createElement('div');
-    setStyle(div6, {
+    setElementStyle(div6, {
       backgroundColor: '#999',
     });
     var text6 = document.createTextNode('6666');

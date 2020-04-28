@@ -3,7 +3,7 @@ describe('Visibility', () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
 
-    setStyle(container1, {
+    setElementStyle(container1, {
       backgroundColor: '#f40',
       width: '200px',
       height: '200px',
@@ -13,7 +13,7 @@ describe('Visibility', () => {
 
     const container2 = document.createElement('div');
     container2.appendChild(document.createTextNode('visibility test'));
-    setStyle(container2, {
+    setElementStyle(container2, {
       backgroundColor: '#999',
       width: '100px',
       height: '100px',
@@ -30,7 +30,7 @@ describe('Visibility', () => {
       console.log('inner clicked');
     });
 
-    setStyle(container2, {
+    setElementStyle(container2, {
       visibility: 'hidden',
     });
 

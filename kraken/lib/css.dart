@@ -18,7 +18,7 @@ export 'src/css/text.dart';
 export 'src/css/transform.dart';
 export 'src/css/transition.dart';
 export 'src/css/visibility.dart';
-export 'src/css/subtree_visibility.dart';
+export 'src/css/content_visibility.dart';
 
 /// CSS Values
 export 'src/css/values/angle.dart';

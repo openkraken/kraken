@@ -7,13 +7,15 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-mixin CSSSubtreeVisibilityMixin on Node {
+// CSS Content Visibility: https://wicg.github.io/display-locking/
+
+mixin CSSContentVisibilityMixin on Node {
   RenderVisibility renderVisibility;
   bool _hasIntersectionObserver = false;
 
-  RenderObject initRenderSubtreeVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
-    String subtreeVisibility = style['subtreeVisibility'];
-    if (subtreeVisibility == 'hidden' || subtreeVisibility == 'auto') {
+  RenderObject initRenderContentVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
+    String contentVisibility = style['contentVisibility'];
+    if (contentVisibility == 'hidden' || contentVisibility == 'auto') {
       // @TODO:  containIntrinsicSize
       renderVisibility = RenderVisibility(
         hidden: true,
@@ -26,8 +28,8 @@ mixin CSSSubtreeVisibilityMixin on Node {
     }
   }
 
-  void setSubtreeVisibilityIntersectionObserver(RenderIntersectionObserver renderIntersectionObserver, String subtreeVisibility) {
-    if (subtreeVisibility == 'auto' && !_hasIntersectionObserver) {
+  void setContentVisibilityIntersectionObserver(RenderIntersectionObserver renderIntersectionObserver, String contentVisibility) {
+    if (contentVisibility == 'auto' && !_hasIntersectionObserver) {
       renderIntersectionObserver.addListener(_handleIntersectionChange);
       // Call needs paint make sure intersection observer works immediately
       renderIntersectionObserver.markNeedsPaint();
@@ -39,15 +41,15 @@ mixin CSSSubtreeVisibilityMixin on Node {
     renderVisibility.hidden = !entry.isIntersecting;
   }
 
-  void updateRenderSubtreeVisibility(String subtreeVisibility, { RenderObjectWithChildMixin parentRenderObject, RenderIntersectionObserver renderIntersectionObserver }) {
+  void updateRenderContentVisibility(String contentVisibility, { RenderObjectWithChildMixin parentRenderObject, RenderIntersectionObserver renderIntersectionObserver }) {
 
     if (renderVisibility != null) {
-      renderVisibility.hidden = (subtreeVisibility == 'hidden' || subtreeVisibility == 'auto');
-      if (subtreeVisibility != 'auto' && _hasIntersectionObserver) {
+      renderVisibility.hidden = (contentVisibility == 'hidden' || contentVisibility == 'auto');
+      if (contentVisibility != 'auto' && _hasIntersectionObserver) {
         renderIntersectionObserver.removeListener(_handleIntersectionChange);
         _hasIntersectionObserver = false;
       }
-    } else if (subtreeVisibility == 'hidden' || subtreeVisibility == 'auto') {
+    } else if (contentVisibility == 'hidden' || contentVisibility == 'auto') {
       RenderObject child = parentRenderObject.child;
       // Drop child by set null first.
       parentRenderObject.child = null;
@@ -59,6 +61,6 @@ mixin CSSSubtreeVisibilityMixin on Node {
       parentRenderObject.child = renderVisibility;
     }
 
-    setSubtreeVisibilityIntersectionObserver(renderIntersectionObserver, subtreeVisibility);
+    setContentVisibilityIntersectionObserver(renderIntersectionObserver, contentVisibility);
   }
 }
