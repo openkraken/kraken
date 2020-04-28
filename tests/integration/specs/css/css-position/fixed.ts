@@ -1,7 +1,7 @@
 describe('Position fixed', () => {
   it('001', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       width: '200px',
       height: '200px',
       backgroundColor: '#999',
@@ -12,7 +12,7 @@ describe('Position fixed', () => {
     document.body.appendChild(container1);
 
     const div1 = document.createElement('div');
-    setStyle(div1, {
+    setElementStyle(div1, {
       width: '100px',
       height: '100px',
       backgroundColor: 'red',

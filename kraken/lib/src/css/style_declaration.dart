@@ -2,7 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-const String STYLE = 'style';
+import 'package:kraken/css.dart';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -25,9 +25,9 @@ typedef StyleChangeListener = void Function(
 /// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
-  CSSStyleDeclaration({ Map<String, dynamic> style }) {
-    if (style != null ) {
-      style.forEach((property, value) {
+  CSSStyleDeclaration({Map<String, dynamic> style}) {
+    if (style != null) {
+      style.forEach((property, dynamic value) {
         if (value != null) this.setProperty(property, value: value.toString());
       });
     }
@@ -62,6 +62,27 @@ class CSSStyleDeclaration {
     return _cssProperties[propertyName] ?? '';
   }
 
+  CSSValue _getCSSValue(String propertyName) {
+    var stringValue = getPropertyValue(propertyName);
+
+    switch (propertyName) {
+      case WIDTH:
+      case HEIGHT:
+        return CSSLength(stringValue);
+
+      // TODO: Add more css properties.
+    }
+
+    return null;
+  }
+
+  /// Returns a computed value.
+  T getComputedValue<T>(String propertyName) {
+    CSSValue cssValue = getComputedValue(propertyName);
+    T computedValue = cssValue.computedValue;
+    return computedValue;
+  }
+
   /// Returns a property name.
   String item(int index) {
     return _cssProperties.keys.elementAt(index);
@@ -74,7 +95,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, { value = '' }) {
+  void setProperty(String propertyName, {value = ''}) {
     // Null means with should be removed.
     String prevValue = _cssProperties[propertyName];
     String stringifyValue;
@@ -103,11 +124,12 @@ class CSSStyleDeclaration {
   }
 
   void addStyleChangeListener(String property, StyleChangeListener listener) {
-    if (!_styleChangeListeners.containsKey(property)) _styleChangeListeners[property] = [];
+    if (!_styleChangeListeners.containsKey(property))
+      _styleChangeListeners[property] = [];
     _styleChangeListeners[property].add(listener);
   }
 
-  void removeStyleChangeListener({ String property }) {
+  void removeStyleChangeListener({String property}) {
     if (property != null) {
       _styleChangeListeners[property] = [];
     } else {
@@ -116,7 +138,8 @@ class CSSStyleDeclaration {
     }
   }
 
-  void _invokePropertyChangedListener(String property, String original, String present) {
+  void _invokePropertyChangedListener(
+      String property, String original, String present) {
     assert(property != null);
     _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
       listener(property, original, present);
@@ -139,4 +162,11 @@ class CSSStyleDeclaration {
 
 bool isEmptyStyleValue(String value) {
   return value == null || value.isEmpty;
+}
+
+// Returns the computed property value.
+T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {
+  assert(style != null);
+  CSSValue cssValue = style._getCSSValue(propertyName);
+  return cssValue?.computedValue;
 }

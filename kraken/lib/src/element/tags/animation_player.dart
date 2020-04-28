@@ -24,7 +24,6 @@ class AnimationPlayerElement extends Element {
             defaultDisplay: 'block',
             tagName: ANIMATION_PLAYER);
 
-
   String get objectFit => style['objectFit'];
 
   String get type {
@@ -98,7 +97,7 @@ class AnimationPlayerElement extends Element {
   }
 
   BoxFit _getObjectFit() {
-    switch(objectFit) {
+    switch (objectFit) {
       case 'fill':
         return BoxFit.fill;
         break;
@@ -120,8 +119,7 @@ class AnimationPlayerElement extends Element {
     }
   }
 
-  FlareRenderObject _createFlareRenderObject(
-      Map<String, dynamic> properties) {
+  FlareRenderObject _createFlareRenderObject(Map<String, dynamic> properties) {
     assert(properties.containsKey('src'));
 
     BoxFit boxFit = _getObjectFit();
@@ -129,10 +127,7 @@ class AnimationPlayerElement extends Element {
 
     return FlareRenderObject(targetId)
       ..assetProvider =
-          AssetFlare(
-            bundle: NetworkAssetBundle(Uri.parse(src)),
-            name: ''
-          )
+          AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center
       ..animationName = properties['name']

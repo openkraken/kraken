@@ -14,10 +14,14 @@ enum CSSPositionType {
 
 CSSPositionType getPositionFromStyle(CSSStyleDeclaration style) {
   switch (style['position']) {
-    case 'relative': return CSSPositionType.relative;
-    case 'absolute': return CSSPositionType.absolute;
-    case 'fixed': return CSSPositionType.fixed;
-    case 'sticky': return CSSPositionType.sticky;
+    case 'relative':
+      return CSSPositionType.relative;
+    case 'absolute':
+      return CSSPositionType.absolute;
+    case 'fixed':
+      return CSSPositionType.fixed;
+    case 'sticky':
+      return CSSPositionType.sticky;
   }
   return CSSPositionType.static;
 }

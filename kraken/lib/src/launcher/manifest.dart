@@ -95,7 +95,8 @@ mixin KrakenManifest {
     }
 
     var _resizeable = json['resizeable'];
-    if (_resizeable is String) resizeable = _resizeable == 'true';
+    if (_resizeable is String)
+      resizeable = _resizeable == 'true';
     else if (_resizeable is bool) resizeable = _resizeable;
   }
 

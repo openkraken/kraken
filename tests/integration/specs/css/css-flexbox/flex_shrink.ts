@@ -1,7 +1,7 @@
 describe('flexbox flex-shrink', () => {
   it('should work when flex-direction is row', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       display: 'flex',
       flexDirection: 'row',
       width: '500rpx',
@@ -12,7 +12,7 @@ describe('flexbox flex-shrink', () => {
     document.body.appendChild(container1);
 
     const child1 = document.createElement('div');
-    setStyle(child1, {
+    setElementStyle(child1, {
       backgroundColor: '#999',
       width: '300rpx',
     });
@@ -20,7 +20,7 @@ describe('flexbox flex-shrink', () => {
     container1.appendChild(child1);
 
     const child2 = document.createElement('div');
-    setStyle(child2, {
+    setElementStyle(child2, {
       flexShrink: 2,
       backgroundColor: '#f40',
       width: '200rpx',
@@ -29,7 +29,7 @@ describe('flexbox flex-shrink', () => {
     container1.appendChild(child2);
 
     const child3 = document.createElement('div');
-    setStyle(child3, {
+    setElementStyle(child3, {
       flexShrink: 1,
       backgroundColor: 'green',
       width: '200rpx',
@@ -42,7 +42,7 @@ describe('flexbox flex-shrink', () => {
 
   it('should work when flex-direction is column', async () => {
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       display: 'flex',
       flexDirection: 'column',
       width: '500rpx',
@@ -53,7 +53,7 @@ describe('flexbox flex-shrink', () => {
     document.body.appendChild(container2);
 
     const child4 = document.createElement('div');
-    setStyle(child4, {
+    setElementStyle(child4, {
       backgroundColor: '#999',
       height: '300rpx',
     });
@@ -61,7 +61,7 @@ describe('flexbox flex-shrink', () => {
     container2.appendChild(child4);
 
     const child5 = document.createElement('div');
-    setStyle(child5, {
+    setElementStyle(child5, {
       flexShrink: 2,
       backgroundColor: '#f40',
       height: '200rpx',
@@ -70,7 +70,7 @@ describe('flexbox flex-shrink', () => {
     container2.appendChild(child5);
 
     const child6 = document.createElement('div');
-    setStyle(child6, {
+    setElementStyle(child6, {
       flexShrink: 1,
       backgroundColor: 'green',
       height: '200rpx',

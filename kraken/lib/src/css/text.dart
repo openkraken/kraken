@@ -5,29 +5,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
+const double DEFAULT_FONT_SIZE = 14.0;
+const double DEFAULT_LETTER_SPACING = 0.0;
+const double DEFAULT_WORD_SPACING = 0.0;
+const double DEFAULT_FONT_WEIGHT = 400.0;
+
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
-
 mixin CSSTextMixin {
-  static const String COLOR = 'color';
-  static const String HEIGHT = 'height';
-  static const String LINE_HEIGHT = 'lineHeight';
-  static const String TEXT_DECORATION = 'textDecoration';
-  static const String TEXT_DECORATION_LINE = 'textDecorationLine';
-  static const String TEXT_DECORATION_COLOR = 'textDecorationColor';
-  static const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
-  static const String LETTER_SPACING = 'letterSpacing';
-  static const String WORD_SPACING = 'wordSpacing';
-  static const String FONT_SIZE = 'fontSize';
-  static const String FONT_FAMILY = 'fontFamily';
-  static const String FONT_WEIGHT = 'fontWeight';
-  static const String FONT_STYLE = 'fontStyle';
-  static const String NORMAL = 'normal';
-  static const double DEFAULT_FONT_SIZE = 14.0;
-  static const double DEFAULT_LETTER_SPACING = 0.0;
-  static const double DEFAULT_WORD_SPACING = 0.0;
-  static const double DEFAULT_FONT_WEIGHT = 400.0;
-
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
     return TextSpan(
       text: text,
@@ -143,7 +128,8 @@ mixin CSSTextMixin {
       return TextDecoration.overline;
     else if (type == 'underline')
       return TextDecoration.underline;
-    else return TextDecoration.none;
+    else
+      return TextDecoration.none;
   }
 
   Color getDecorationColor(CSSStyleDeclaration style) {
@@ -268,8 +254,8 @@ mixin CSSTextMixin {
   static String DEFAULT_FONT_FAMILY = '';
   String getFontFamily(CSSStyleDeclaration style) {
     return style.contains(FONT_FAMILY)
-      ? style[FONT_FAMILY]
-      : DEFAULT_FONT_FAMILY;
+        ? style[FONT_FAMILY]
+        : DEFAULT_FONT_FAMILY;
   }
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
@@ -309,7 +295,8 @@ mixin CSSTextMixin {
 
   double getHeight(CSSStyleDeclaration style) {
     if (style.contains(LINE_HEIGHT)) {
-      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
+      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) /
+          getFontSize(style);
     } else {
       return null;
     }

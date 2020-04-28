@@ -1,7 +1,7 @@
 describe('Display flex', () => {
   it('001', async () => {
     const container = document.createElement('div');
-    setStyle(container, {
+    setElementStyle(container, {
       width: '100px',
       height: '100px',
       display: 'flex',

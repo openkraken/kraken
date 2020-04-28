@@ -10,15 +10,8 @@ import 'package:kraken/css.dart';
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 
 mixin CSSFlexboxMixin {
-  static const String DIRECTION = 'flexDirection';
-  static const String WRAP = 'flexWrap';
-  static const String FLOW = 'flexFlow';
-  static const String JUSTIFY_CONTENT = 'justifyContent';
-  static const String TEXT_ALIGN = 'textAlign';
-  static const String ALIGN_ITEMS = 'alignItems';
-  static const String ALIGN_CONTENT = 'alignContent';
-
-  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
+  void decorateRenderFlex(
+      ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;
@@ -172,14 +165,13 @@ class CSSFlexItem {
     RenderFlexParentData parentData = RenderFlexParentData();
 
     String grow = style[GROW];
-    parentData.flexGrow =
-        isEmptyStyleValue(grow)
+    parentData.flexGrow = isEmptyStyleValue(grow)
         ? 0 // Grow default to 0.
         : CSSLength.toInt(grow);
 
     String shrink = style[SHRINK];
     parentData.flexShrink = isEmptyStyleValue(shrink)
-        ? 1  // Shrink default to 1.
+        ? 1 // Shrink default to 1.
         : CSSLength.toInt(shrink);
 
     String basis = style[BASIS];

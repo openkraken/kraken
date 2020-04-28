@@ -10,23 +10,23 @@ import 'package:kraken/bridge.dart';
 Map<String, MqttClient> _clientMap = {};
 int _clientId = 0;
 
-enum ReadyState {
-  CONNECTING,
-  OPEN,
-  CLOSING,
-  CLOSED
-}
+enum ReadyState { CONNECTING, OPEN, CLOSING, CLOSED }
 
 class MQTT {
   static String init(String url, String clientId) {
     // The client identifier can be a maximum length of 23 characters
-    clientId = clientId.isEmpty ? '${DateTime.now().millisecondsSinceEpoch}:${Random().nextInt(999999999)}' : clientId;
+    clientId = clientId.isEmpty
+        ? '${DateTime.now().millisecondsSinceEpoch}:${Random().nextInt(999999999)}'
+        : clientId;
     Uri uri = Uri.parse(url);
     int port = uri.port == 0 ? MqttClientConstants.defaultMqttPort : uri.port;
-    final MqttServerClient client = MqttServerClient.withPort(uri.host, clientId, port);
+    final MqttServerClient client =
+        MqttServerClient.withPort(uri.host, clientId, port);
 
-    if (uri.isScheme('mqtts')) client.secure = true;
-    else if(uri.isScheme('ws') || uri.isScheme('wss')) client.useWebSocket = true;
+    if (uri.isScheme('mqtts'))
+      client.secure = true;
+    else if (uri.isScheme('ws') || uri.isScheme('wss'))
+      client.useWebSocket = true;
 
     var id = (_clientId++).toString();
     _clientMap[id] = client;
@@ -75,23 +75,24 @@ class MQTT {
     client.unsubscribe(topic);
   }
 
-  static int publish(String id, String topic, String message, int QoS, bool retain) {
+  static int publish(
+      String id, String topic, String message, int QoS, bool retain) {
     MqttClient client = _clientMap[id];
 
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
 
-    return client.publishMessage(topic, MqttQos.values[QoS], builder.payload, retain: retain);
+    return client.publishMessage(topic, MqttQos.values[QoS], builder.payload,
+        retain: retain);
   }
 
   static void close(String id) {
     MqttClient client = _clientMap[id];
     client.disconnect();
-     _clientMap.remove(id);
+    _clientMap.remove(id);
   }
 
   static String getReadyState(String id) {
-
     MqttClient client = _clientMap[id];
     ReadyState state = ReadyState.CLOSED;
 
@@ -125,29 +126,23 @@ class MQTT {
       client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final String topic = c[0].topic;
         final MqttPublishMessage recMess = c[0].payload;
-        final String message = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final String message =
+            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         String event = jsonEncode({
           'type': 'message',
-          'data': {
-            'topic': topic,
-            'message': message
-          },
+          'data': {'topic': topic, 'message': message},
           'origin': client.server
         });
         emitModuleEvent('["MQTT", $id, $event]');
       });
     } else if (type == 'open') {
       client.onConnected = () {
-        String event = jsonEncode({
-          'type': 'open'
-        });
+        String event = jsonEncode({'type': 'open'});
         emitModuleEvent('["MQTT", $id, $event]');
       };
     } else if (type == 'close') {
       client.onDisconnected = () {
-        String event = jsonEncode({
-          'type': 'close'
-        });
+        String event = jsonEncode({'type': 'close'});
         emitModuleEvent('["MQTT", $id, $event]');
       };
     } else if (type == 'publish') {
@@ -158,7 +153,8 @@ class MQTT {
         String event = jsonEncode({
           'type': 'publish',
           'topic': message.variableHeader.topicName,
-          'message': MqttPublishPayload.bytesToStringAsString(message.payload.message),
+          'message':
+              MqttPublishPayload.bytesToStringAsString(message.payload.message),
           'code': message.variableHeader.returnCode,
         });
         emitModuleEvent('["MQTT", $id, $event]');
@@ -170,26 +166,17 @@ class MQTT {
       /// can fail either because you have tried to subscribe to an invalid topic or the broker
       /// rejects the subscribe request.
       client.onSubscribed = (String topic) {
-        String event = jsonEncode({
-          'type': 'subscribe',
-          'topic': topic
-        });
+        String event = jsonEncode({'type': 'subscribe', 'topic': topic});
         emitModuleEvent('["MQTT", $id, $event]');
       };
     } else if (type == 'subscribeerror') {
-        client.onSubscribeFail = (String topic) {
-        String event = jsonEncode({
-          'type': 'subscribeerror',
-          'topic': topic
-        });
+      client.onSubscribeFail = (String topic) {
+        String event = jsonEncode({'type': 'subscribeerror', 'topic': topic});
         emitModuleEvent('["MQTT", $id, $event]');
       };
     } else if (type == 'unsubscribe') {
       client.onUnsubscribed = (String topic) {
-        String event = jsonEncode({
-          'type': 'unsubscribe',
-          'topic': topic
-        });
+        String event = jsonEncode({'type': 'unsubscribe', 'topic': topic});
         emitModuleEvent('["MQTT", $id, $event]');
       };
     }

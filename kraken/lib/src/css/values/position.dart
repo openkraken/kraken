@@ -1,193 +1,105 @@
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
-import 'length.dart';
 
-// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
-
-class CSSPosition {
+/// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
+/// The <position> value specifies the position of a object area
+/// (e.g. background image) inside a positioning area (e.g. background
+/// positioning area). It is interpreted as specified for background-position.
+/// [CSS3-BACKGROUND]
+class CSSPosition implements CSSValue<Alignment> {
   static const String LEFT = 'left';
   static const String RIGHT = 'right';
-  static const String CENTER = 'center';
   static const String TOP = 'top';
   static const String BOTTOM = 'bottom';
-  Alignment alignment = Alignment.topLeft;
-  Size size;
+  static const String CENTER = 'center';
+
+  // [0, 1]
+  Alignment _value = Alignment.topLeft; // default value.
+
+  final String _rawInput;
+  CSSPosition(this._rawInput);
+
+  bool _parsed = false;
+  @override
+  void parse() {
+    if (!_parsed) _parse();
+    _parsed = true;
+  }
+
+  void _parse() {
+    var normalized = _rawInput.trim();
+    List<String> split = normalized.split(spaceRegExp);
+
+    if (split.length == 1) {
+      // If one value is set, another value should be center(0).
+      var dx = _getValueX(split.first, initial: 0);
+      var dy = _getValueY(split.first, initial: 0);
+      _value = Alignment(dx, dy);
+    } else if (split.length == 2) {
+      _value = Alignment(_getValueX(split.first), _getValueY(split.last));
+    }
+    // Silently failed.
+  }
+
+  static double _gatValuePercentage(String input) {
+    if (input.endsWith('%')) {
+      var percentageValue = input.substring(0, input.length - 1);
+      return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
+    } else {
+      return null;
+    }
+  }
+
+  static double _getValueX(String input, {double initial = -1}) {
+    switch (input) {
+      case LEFT:
+        return -1;
+      case RIGHT:
+        return 1;
+      case CENTER:
+        return 0;
+    }
+    return _gatValuePercentage(input) ?? initial;
+  }
+
+  static double _getValueY(String input, {double initial = 1}) {
+    switch (input) {
+      case TOP:
+        return -1;
+      case BOTTOM:
+        return 1;
+      case CENTER:
+        return 0;
+    }
+    return _gatValuePercentage(input) ?? initial;
+  }
+
+  @override
+  Alignment get computedValue {
+    parse();
+    return _value;
+  }
+
+  @override
+  String get serializedValue {
+    parse();
+    var x = _value.x;
+    var y = _value.y;
+
+    if (x == -1.0 && y == -1.0) return 'top left';
+    if (x == 0.0 && y == -1.0) return 'top center';
+    if (x == 1.0 && y == -1.0) return 'top right';
+    if (x == -1.0 && y == 0.0) return 'center left';
+    if (x == 0.0 && y == 0.0) return 'center';
+    if (x == 1.0 && y == 0.0) return 'center right';
+    if (x == -1.0 && y == 1.0) return 'bottom left';
+    if (x == 0.0 && y == 1.0) return 'bottom center';
+    if (x == 1.0 && y == 1.0) return 'bottom right';
+    return '${x * 100}%, ${y * 100}%';
+  }
 
   @override
   String toString() {
-    return 'Posotion(alignment: $alignment, size: $size)';
-  }
-
-  CSSPosition(String position, this.size) {
-    if (isEmptyStyleValue(position)) return;
-
-    List<String> items = position.split(' ');
-    if (items.length == 1) {
-      switch(items[0]) {
-        case RIGHT:
-          alignment = Alignment(1.0, 0.0);
-          break;
-        case LEFT:
-          alignment = Alignment(-1.0, 0.0);
-          break;
-        case TOP:
-          alignment = Alignment(0.0, -1.0);
-          break;
-        case BOTTOM:
-          alignment = Alignment(0.0, 1.0);
-          break;
-        case CENTER:
-          alignment = Alignment(0.0, 0.0);
-          break;
-        default:
-          alignment = Alignment(getValue(items[0], true), 0.0);
-      }
-    } else if (items.length == 2) {
-      alignment =
-          Alignment(getValue(items[0], true), getValue(items[1], false));
-    } else if (items.length == 3) {
-      String first = items[0];
-      String second = items[1];
-      String third = items[2];
-      double dx;
-      double dy;
-      if (first == LEFT || first == RIGHT) {
-        if (second == TOP) {
-          dx = -1.0;
-          dy = getLengthValue(third, false);
-        } else if (second == BOTTOM) {
-          dx = -1.0;
-          dy = -getLengthValue(third, false);
-        } else if (third == TOP) {
-          dx = getLengthValue(second, true);
-          dy = -1.0;
-        } else if (third == BOTTOM) {
-          dx = getLengthValue(second, true);
-          dy = 1.0;
-        } else if (third == CENTER) {
-          dx = getLengthValue(second, true);
-          dy = 0.0;
-        } else {
-          ///error arguments
-          return;
-        }
-        if (first == RIGHT) {
-          dx = -dx;
-        }
-      } else if (first == TOP || first == BOTTOM) {
-        if (second == LEFT) {
-          dx = getLengthValue(third, true);
-          dy = -1.0;
-        } else if (second == RIGHT) {
-          dx = -getLengthValue(third, true);
-          dy = -1.0;
-        } else if (third == LEFT) {
-          dy = getLengthValue(second, false);
-          dx = -1.0;
-        } else if (third == RIGHT) {
-          dy = getLengthValue(second, false);
-          dx = 1.0;
-        } else if (third == CENTER) {
-          dy = getLengthValue(second, false);
-          dx = 0.0;
-        } else {
-          /// error arguments
-          return;
-        }
-        if (first == BOTTOM) {
-          dy = -dy;
-        }
-      } else if (first == CENTER) {
-        if (second == LEFT) {
-          dx = getLengthValue(third, true);
-          dy = 0.0;
-        } else if (second == RIGHT) {
-          dx = -getLengthValue(third, true);
-          dy = 0.0;
-        } else if (second == TOP) {
-          dy = getLengthValue(third, false);
-          dx = 0.0;
-        } else if (second == BOTTOM) {
-          dy = -getLengthValue(third, false);
-          dx = 0.0;
-        } else {
-          /// error arguments
-          return;
-        }
-      } else {
-        /// error arguments
-        return;
-      }
-      alignment = Alignment(dx, dy);
-    } else if (items.length == 4) {
-      String first = items[0];
-      String second = items[1];
-      String third = items[2];
-      String fourth = items[3];
-      double dx;
-      double dy;
-      if (first == LEFT || first == RIGHT) {
-        dx = getLengthValue(second, true);
-        if (third == TOP) {
-          dy = getLengthValue(fourth, false);
-        } else if (third == BOTTOM) {
-          dy = -getLengthValue(fourth, false);
-        } else {
-          ///error arguments
-          return;
-        }
-        if (first == RIGHT) {
-          dx = -dx;
-        }
-      } else if (first == TOP || first == BOTTOM) {
-        dy = getLengthValue(second, false);
-        if (third == LEFT) {
-          dx = getLengthValue(fourth, true);
-        } else if (third == RIGHT) {
-          dx = -getLengthValue(fourth, true);
-        } else {
-          /// error arguments
-          return;
-        }
-        if (first == BOTTOM) {
-          dy = -dy;
-        }
-      } else {
-        /// error arguments
-        return;
-      }
-      alignment = Alignment(dx, dy);
-    }
-  }
-
-  double getValue(String value, bool isHorizontal) {
-    if (isHorizontal) {
-      switch (value) {
-        case RIGHT:
-          return 1.0;
-        case LEFT:
-          return -1.0;
-      }
-    } else {
-      switch (value) {
-        case BOTTOM:
-          return 1.0;
-        case TOP:
-          return -1.0;
-      }
-    }
-    if (value == CENTER) {
-      return 0.0;
-    }
-    return getLengthValue(value, isHorizontal);
-  }
-
-  double getLengthValue(String value, bool isHorizontal) {
-    if (value.endsWith('%')) {
-      double currentValue = double.parse(value.split('%')[0]);
-      return (currentValue - 50) / 50;
-    }
-    double dividend = isHorizontal ? size.width : size.height;
-    return -CSSLength.toDisplayPortValue(value) / dividend;
+    return 'CSSPosition($serializedValue)';
   }
 }

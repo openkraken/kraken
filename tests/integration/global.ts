@@ -1,8 +1,8 @@
 /**
  * This file will expose global functions for specs to use.
  *
- * - setStyle: Apply style object to a specfic DOM.
- * - setStyle: Apply attrs object to a specfic DOM.
+ * - setElementStyle: Apply style object to a specfic DOM.
+ * - setElementProps: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
  * - matchScreenshot: match snapshot of body's image.
@@ -10,7 +10,7 @@
 
 let BODY = document.body;
 
-function setStyle(dom: HTMLElement, object: any) {
+function setElementStyle(dom: HTMLElement, object: any) {
   if (object == null) return;
   for (let key in object) {
     if (object.hasOwnProperty(key)) {
@@ -31,9 +31,38 @@ function sleep(second: number) {
   return new Promise(done => setTimeout(done, second * 1000));
 }
 
-function createElementWithStyle(tag: string, style: {[key: string]: string|number}, child?: Node | Array<Node>): any {
+function createElementWithStyle(tag: string, style: { [key: string]: string | number }, child?: Node | Array<Node>): any {
   const el = document.createElement(tag);
-  setStyle(el, style);
+  setElementStyle(el, style);
+  if (Array.isArray(child)) {
+    child.forEach(c => el.appendChild(c));
+  } else if (child) {
+    el.appendChild(child);
+  }
+  return el;
+}
+
+type ElementProps = {
+  [key: string]: any;
+  style: {
+    [key: string]: any;
+  }
+};
+
+function setElementProps(el: HTMLElement, props: ElementProps) {
+  let keys = Object.keys(props);
+  for (let key of keys) {
+    if (key === 'style') {
+      setElementStyle(el, props[key]);
+    } else {
+      el[key] = props[key];
+    }
+  }
+}
+
+function createElement(tag: string, props: ElementProps, child?: Node | Array<Node>) {
+  const el = document.createElement(tag);
+  setElementProps(el, props);
   if (Array.isArray(child)) {
     child.forEach(c => el.appendChild(c));
   } else if (child) {

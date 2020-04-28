@@ -5,16 +5,7 @@
 
 import 'dart:math';
 import 'dart:ui' show Color;
-import 'package:meta/meta.dart';
-
-// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
-// CSS Color: https://drafts.csswg.org/css-color-4/
-
-final RegExp RGBARexExp = RegExp(
-  r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
-  caseSensitive: false,
-  multiLine: false,
-);
+import 'value.dart';
 
 /// A color in the CIELAB color space.
 ///
@@ -56,7 +47,7 @@ class LabColor {
     return value *= referenceWhiteValue;
   }
 
-  num _toRgb(value) {
+  num _toRgb(num value) {
     if (value > 0.0031308) {
       value = 1.055 * pow(value, 1 / 2.4) - 0.055;
     } else {
@@ -81,9 +72,9 @@ class LabColor {
 }
 
 class RgbColor {
-  final int r;
-  final int g;
-  final int b;
+  final num r;
+  final num g;
+  final num b;
 
   /**
    * Creates a [Color] using a vector describing its red, green, and blue
@@ -93,7 +84,7 @@ class RgbColor {
    * 255 (inclusive).  Values above this range will be assumed to be a value
    * of 255, and values below this range will be assumed to be a value of 0.
    */
-  const RgbColor(int this.r, int this.g, int this.b);
+  const RgbColor(num this.r, num this.g, num this.b);
 
   num _toLab(num value, num referenceWhiteValue) {
     value /= referenceWhiteValue;
@@ -105,7 +96,7 @@ class RgbColor {
     return value;
   }
 
-  num _toXyz(value) {
+  num _toXyz(num value) {
     if (value > 0.04045) {
       value = pow((value + 0.055) / 1.055, 2.4);
     } else {
@@ -137,31 +128,41 @@ class RgbColor {
   }
 }
 
-/// 
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
+// CSS Color: https://drafts.csswg.org/css-color-4/
+// ignore: public_member_api_docs
+final RegExp rgbaRexExp = RegExp(
+  r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
+  caseSensitive: false,
+  multiLine: false,
+);
+
 /// #123
 /// #123456
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
-@immutable
-class CSSColor {
+class CSSColor implements CSSValue<Color> {
   // Use a preprocessed color to cache.
-  // Eg: input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
-  // Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
-  // 'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
+  // Example:
+  //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
+  //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
+  //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
   // Cache will be terminated after used once.
-  static Map<String, Color> _cachedColor = {};
+  static final Map<String, Color> _cachedColor = {};
   static int _cacheCount = 0;
+
+  // ignore: public_member_api_docs
   static String preprocessCSSPropertyWithRGBAColor(String input) {
-    String ret = input;
-    RegExpMatch match = RGBARexExp.firstMatch(ret);
+    var ret = input;
+    var match = rgbaRexExp.firstMatch(ret);
     while (match != null) {
-      String cacheId = 'rgba' + _cacheCount.toString();
+      var cacheId = 'rgba$_cacheCount';
       _cachedColor[cacheId] =
-          generateRGBAColor(ret.substring(match.start, match.end));
+          _generateColorFromRGBA(ret.substring(match.start, match.end));
       ret = ret.replaceRange(match.start, match.end, cacheId);
       _cacheCount++;
 
-      match = RGBARexExp.firstMatch(ret);
+      match = rgbaRexExp.firstMatch(ret);
     }
     return ret;
   }
@@ -179,7 +180,7 @@ class CSSColor {
     num invertedL = min(110 - lab.l, 100);
     if (invertedL < lab.l) {
       RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
-      return Color.fromARGB(color.alpha, rgb.r, rgb.g, rgb.b);
+      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
     } else {
       return color;
     }
@@ -191,13 +192,13 @@ class CSSColor {
     num invertedL = min(110 - lab.l, 100);
     if (invertedL > lab.l) {
       RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
-      return Color.fromARGB(color.alpha, rgb.r, rgb.g, rgb.b);
+      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
     } else {
       return color;
     }
   }
 
-  static Color generateRGBAColor(String input) {
+  static Color _generateColorFromRGBA(String input) {
     if (_cachedColor.containsKey(input)) {
       Color ret = _cachedColor[input];
       _cachedColor.remove(input);
@@ -208,7 +209,7 @@ class CSSColor {
     int green = 0;
     int blue = 0;
     double alpha = 1.0;
-    Iterable<RegExpMatch> matches = RGBARexExp.allMatches(input);
+    Iterable<RegExpMatch> matches = rgbaRexExp.allMatches(input);
     if (matches.length == 1) {
       RegExpMatch match = matches.first;
       red = int.tryParse(match[1]) ?? 0;
@@ -223,7 +224,7 @@ class CSSColor {
     return Color.fromRGBO(red, green, blue, alpha);
   }
 
-  static Color generateHexColor(String hex) {
+  static Color _generateColorFromHex(String hex) {
     int _r = 0;
     int _g = 0;
     int _b = 0;
@@ -559,16 +560,21 @@ class CSSColor {
     }
 
     if (color.startsWith('#')) {
-      return generateHexColor(color);
+      return _generateColorFromHex(color);
     } else if (color.startsWith('rgb')) {
-      return generateRGBAColor(color);
+      return _generateColorFromRGBA(color);
     } else {
       return CSSColor.transparent;
     }
   }
 
+  final String rawInput;
+  Color value;
+
+  CSSColor(this.rawInput);
+
   /// Only support Basic color keywords and Extended color keywords,
-  /// for CSS system colors is not recommanded for use after CSS3
+  /// for CSS system colors is not recommended for use after CSS3
   /// https://www.w3.org/TR/css-color-3/#html4
   /// https://www.w3.org/TR/css-color-3/#css-system
   /// https://www.w3.org/TR/css-color-3/#svg-color
@@ -725,4 +731,33 @@ class CSSColor {
   static const Color yellowgreen = Color(0xFF9ACD32);
 
   static const Color transparent = Color(0x00000000);
+
+  bool _parsed = false;
+  @override
+  void parse() {
+    if (!_parsed) value = CSSColor.generate(rawInput);
+    _parsed = true;
+  }
+
+  @override
+  Color get computedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    return value;
+  }
+
+  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
+  @override
+  String get serializedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    var rgb = '${value.red}, ${value.green}, ${value.blue}';
+    if (value.alpha == 255) {
+      return 'rgb($rgb)';
+    } else {
+      return 'rgba($rgb, ${value.opacity})';
+    }
+  }
 }

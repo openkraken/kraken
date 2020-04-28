@@ -23,40 +23,51 @@ LocationData _watchCachedLocation;
 typedef Callback = void Function(String json);
 
 class Geolocation {
-  static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
+  static void getCurrentPosition(
+      Map<String, dynamic> options, Callback callback) async {
     Location location = await _getLocation();
     if (location == null) {
-      String result = jsonEncode({'code': ERROR_CODE_PERMISSION_DENIED, "message": 'permission denied'});
+      String result = jsonEncode({
+        'code': ERROR_CODE_PERMISSION_DENIED,
+        "message": 'permission denied'
+      });
       callback(result);
       return;
     }
     // TODO: options is only for current call, not set to global
     _changeOptions(options, false);
-    location.changeSettings(accuracy: enableHighAccuracy ? LocationAccuracy.HIGH : LocationAccuracy.LOW);
+    location.changeSettings(
+        accuracy:
+            enableHighAccuracy ? LocationAccuracy.HIGH : LocationAccuracy.LOW);
     try {
       LocationData locationData;
       if (maximumAge > 0 &&
           _cachedLocation != null &&
-          (DateTime.now().microsecondsSinceEpoch - _cachedLocation.time) < maximumAge) {
+          (DateTime.now().microsecondsSinceEpoch - _cachedLocation.time) <
+              maximumAge) {
         callback(_getLocationResult(_cachedLocation));
         return;
       }
       if (timeout > 0) {
-        locationData = await location.getLocation().timeout(Duration(milliseconds: timeout), onTimeout: () {
+        locationData = await location
+            .getLocation()
+            .timeout(Duration(milliseconds: timeout), onTimeout: () {
           return null;
         });
       } else {
         locationData = await location.getLocation();
       }
       if (locationData == null) {
-        String result = jsonEncode({'code': ERROR_CODE_TIMEOUT, "message": 'timeout'});
+        String result =
+            jsonEncode({'code': ERROR_CODE_TIMEOUT, "message": 'timeout'});
         callback(result);
       } else {
         _cachedLocation = locationData;
         callback(_getLocationResult(locationData));
       }
     } catch (e) {
-      String result = jsonEncode({'code': ERROR_CODE_POSITION_UNAVAILABLE, "message": e.toString()});
+      String result = jsonEncode(
+          {'code': ERROR_CODE_POSITION_UNAVAILABLE, "message": e.toString()});
       callback(result);
     }
   }
@@ -65,7 +76,10 @@ class Geolocation {
     _changeOptions(options, true);
     _getLocation().then((location) {
       if (location == null) {
-        String result = jsonEncode({'code': ERROR_CODE_PERMISSION_DENIED, 'message': 'permission denied'});
+        String result = jsonEncode({
+          'code': ERROR_CODE_PERMISSION_DENIED,
+          'message': 'permission denied'
+        });
         emitModuleEvent('["watchPosition", $result]');
         if (_streamSubscription != null) {
           _streamSubscription.cancel();
@@ -73,10 +87,14 @@ class Geolocation {
         }
         return;
       }
-      location.changeSettings(accuracy: watchEnableHighAccuracy ? LocationAccuracy.HIGH : LocationAccuracy.LOW);
+      location.changeSettings(
+          accuracy: watchEnableHighAccuracy
+              ? LocationAccuracy.HIGH
+              : LocationAccuracy.LOW);
       if (watchMaximumAge > 0 &&
           _watchCachedLocation != null &&
-          (DateTime.now().microsecondsSinceEpoch - _watchCachedLocation.time) < watchMaximumAge) {
+          (DateTime.now().microsecondsSinceEpoch - _watchCachedLocation.time) <
+              watchMaximumAge) {
         String result = _getLocationResult(_watchCachedLocation);
         emitModuleEvent('["watchPosition", $result]');
       }
@@ -84,13 +102,17 @@ class Geolocation {
       if (_streamSubscription == null) {
         stream.listen((locationData) {
           if (_watchCachedLocation == null ||
-              (_watchCachedLocation != null && !_compareLocation(_watchCachedLocation, locationData))) {
+              (_watchCachedLocation != null &&
+                  !_compareLocation(_watchCachedLocation, locationData))) {
             _watchCachedLocation = locationData;
             String result = _getLocationResult(_watchCachedLocation);
             emitModuleEvent('["watchPosition", $result]');
           }
         }, onError: (e) {
-          String result = jsonEncode({'code': ERROR_CODE_POSITION_UNAVAILABLE, 'message': e?.toString()});
+          String result = jsonEncode({
+            'code': ERROR_CODE_POSITION_UNAVAILABLE,
+            'message': e?.toString()
+          });
           emitModuleEvent('["watchPosition", $result]');
         }, cancelOnError: false);
       }
@@ -108,7 +130,8 @@ class Geolocation {
 
 void _changeOptions(Map<String, dynamic> options, bool isWatched) {
   if (options != null) {
-    if (options.containsKey('enableHighAccuracy') && options['enableHighAccuracy'] == true) {
+    if (options.containsKey('enableHighAccuracy') &&
+        options['enableHighAccuracy'] == true) {
       if (isWatched) {
         watchEnableHighAccuracy = true;
       } else {

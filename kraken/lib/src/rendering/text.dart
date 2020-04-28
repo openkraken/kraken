@@ -7,17 +7,15 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 
-class TextParentData extends ContainerBoxParentData<RenderBox> {
-}
+class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
 class RenderTextBox extends RenderBox
-  with
-    CSSComputedMixin,
-    CSSTextMixin,
-    CSSSizingMixin,
-    ContainerRenderObjectMixin<RenderBox, TextParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
-
+    with
+        CSSComputedMixin,
+        CSSTextMixin,
+        CSSSizingMixin,
+        ContainerRenderObjectMixin<RenderBox, TextParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
   RenderTextBox({
     this.targetId,
     String text,
@@ -26,8 +24,8 @@ class RenderTextBox extends RenderBox
     _text = text;
     _style = style;
 
-    TextOverflow overflow = _isTextOverflowEllipsis() ?
-        TextOverflow.ellipsis : TextOverflow.clip;
+    TextOverflow overflow =
+        _isTextOverflowEllipsis() ? TextOverflow.ellipsis : TextOverflow.clip;
 
     _renderParagraph = RenderParagraph(
       createTextSpanWithStyle(text, style),
@@ -61,12 +59,12 @@ class RenderTextBox extends RenderBox
   }
 
   bool _isTextOverflowEllipsis() {
-    String overflowX = style['overflowX'] != '' ?
-      style['overflowX'] : style['overflow'];
+    String overflowX =
+        style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
 
     return overflowX != 'visible' &&
-      style['whiteSpace'] == 'nowrap' &&
-      style['textOverflow'] == 'ellipsis';
+        style['whiteSpace'] == 'nowrap' &&
+        style['textOverflow'] == 'ellipsis';
   }
 
   @override
@@ -88,8 +86,7 @@ class RenderTextBox extends RenderBox
       BoxConstraints additionalConstraints = constraints;
 
       if (_isTextOverflowEllipsis() ||
-          (style['whiteSpace'] != 'nowrap' && elementWidth != null)
-      ) {
+          (style['whiteSpace'] != 'nowrap' && elementWidth != null)) {
         additionalConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: elementWidth,
@@ -117,4 +114,3 @@ class RenderTextBox extends RenderBox
     return defaultHitTestChildren(result, position: position);
   }
 }
-

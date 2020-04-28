@@ -1,7 +1,7 @@
 describe('Width', function() {
   it('basic example', async () => {
     const div = document.createElement('div');
-    setStyle(div, {
+    setElementStyle(div, {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',

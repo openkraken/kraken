@@ -1,7 +1,7 @@
 describe('Box padding', () => {
   it('should work with basic samples', async () => {
     const container1 = document.createElement('div');
-    setStyle(container1, {
+    setElementStyle(container1, {
       width: '100px',
       height: '100px',
       backgroundColor: '#666',
@@ -11,7 +11,7 @@ describe('Box padding', () => {
     document.body.appendChild(container1);
 
     const container2 = document.createElement('div');
-    setStyle(container2, {
+    setElementStyle(container2, {
       width: '50px',
       height: '50px',
       backgroundColor: '#f40',

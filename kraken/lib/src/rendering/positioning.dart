@@ -14,7 +14,8 @@ class RenderPosition extends RenderStack {
     TextDirection textDirection = TextDirection.ltr,
     StackFit fit = StackFit.passthrough,
     Overflow overflow = Overflow.visible,
-  }) : super( children: children,
+  }) : super(
+            children: children,
             alignment: alignment,
             textDirection: textDirection,
             fit: fit,
@@ -73,7 +74,8 @@ class RenderPosition extends RenderStack {
         // Offset to global coordinate system of parent
         Offset parentOffset = this.localToGlobal(Offset.zero);
         // Access placeholder renderObject from the reference of parent data
-        RenderBox renderBox = (childParentData as ZIndexParentData).hookRenderObject;
+        RenderBox renderBox =
+            (childParentData as ZIndexParentData).hookRenderObject;
 
         // Offset to global coordinate system of original element in document flow
         Offset originalOffset = renderBox.localToGlobal(Offset.zero);
