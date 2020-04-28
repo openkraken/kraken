@@ -5,18 +5,13 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 
-<<<<<<< HEAD
 const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
 const double DEFAULT_FONT_WEIGHT = 400.0;
 
-// https://drafts.csswg.org/css-text-3/
-=======
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
-
->>>>>>> master
 mixin CSSTextMixin {
 
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {

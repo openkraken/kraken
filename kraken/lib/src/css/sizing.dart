@@ -7,13 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
-<<<<<<< HEAD
-final RegExp spaceRegExp = RegExp(r'\s+');
-=======
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
-
-final RegExp spaceRegExp = RegExp(r' ');
->>>>>>> master
+final RegExp spaceRegExp = RegExp(r'\s+');
 
 double _getDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {
@@ -26,16 +21,7 @@ double _getDisplayPortedLength(input) {
   return CSSLength.toDisplayPortValue(input as String);
 }
 
-<<<<<<< HEAD
-Padding _getPaddingFromStyle(CSSStyleDeclaration style) {
-=======
-List<String> _getShorttedProperties(String input) {
-  assert(input != null);
-  return input.trim().split(spaceRegExp);
-}
-
 CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
->>>>>>> master
   double left = 0.0;
   double top = 0.0;
   double right = 0.0;
@@ -48,11 +34,7 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
     double paddingRight;
     double paddingBottom;
     if (padding != null) {
-<<<<<<< HEAD
       List<String> splitedpadding = getShorttedProperties(padding);
-=======
-      List<String> splitedpadding = _getShorttedProperties(padding);
->>>>>>> master
       if (splitedpadding.length == 1) {
         paddingLeft = paddingRight = paddingTop =
             paddingBottom = _getDisplayPortedLength(splitedpadding[0]);
@@ -95,15 +77,11 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
   return CSSPadding(left, top, right, bottom);
 }
 
-<<<<<<< HEAD
 List<String> getShorttedProperties(String input) {
   assert(input != null);
   return input.trim().split(spaceRegExp);
 }
 
-/// https://drafts.csswg.org/css-sizing-3/
-=======
->>>>>>> master
 /// - width
 /// - height
 /// - max-width
@@ -285,13 +263,6 @@ mixin CSSSizingMixin {
     }
   }
 
-<<<<<<< HEAD
-=======
-  static List<String> getShorttedProperties(String input) {
-    return _getShorttedProperties(input);
-  }
-
->>>>>>> master
   RenderObject initRenderMargin(
       RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
