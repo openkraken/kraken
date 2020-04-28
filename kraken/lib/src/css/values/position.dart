@@ -31,28 +31,41 @@ class CSSPosition implements CSSValue<Alignment> {
     List<String> split = normalized.split(spaceRegExp);
 
     if (split.length == 1) {
-      var v = _getValue(split.first);
-      _value = Alignment(v, v);
+      // If one value is set, another value should be center(0).
+      var dx = _getValueX(split.first, initial: 0);
+      var dy = _getValueY(split.first, initial: 0);
+      _value = Alignment(dx, dy);
     } else if (split.length == 2) {
-      _value = Alignment(_getValue(split.first), _getValue(split.last));
+      _value = Alignment(_getValueX(split.first), _getValueY(split.last));
     }
     // Silently failed.
   }
 
-  static double _getValue(String input) {
+  static double _gatValuePercentage(String input) {
+    if (input.endsWith('%')) {
+      var percentageValue = input.substring(0, input.length - 1);
+      return (double.tryParse(percentageValue) ?? 0) / 50 - 1;
+    } else {
+      return null;
+    }
+  }
+
+  static double _getValueX(String input, { double initial = -1 }) {
     switch (input) {
-      case TOP:
       case LEFT: return -1;
-      case BOTTOM:
       case RIGHT: return 1;
       case CENTER: return 0;
     }
+    return _gatValuePercentage(input) ?? initial;
+  }
 
-    if (input.endsWith('%')) {
-      var percentageValue = input.substring(0, input.length - 1);
-      return (double.tryParse(percentageValue) ?? 0) / 100;
+  static double _getValueY(String input, { double initial = 1 }) {
+    switch (input) {
+      case TOP: return -1;
+      case BOTTOM: return 1;
+      case CENTER: return 0;
     }
-    return 0;
+    return _gatValuePercentage(input) ?? initial;
   }
 
   @override

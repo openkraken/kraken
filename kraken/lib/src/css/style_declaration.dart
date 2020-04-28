@@ -69,7 +69,7 @@ class CSSStyleDeclaration {
       case WIDTH:
       case HEIGHT:
         return CSSLength(stringValue);
-        
+
       // TODO: Add more css properties.
     }
 

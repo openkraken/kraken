@@ -206,7 +206,7 @@ mixin CSSTransformMixin on Node {
       {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
     Matrix4 matrix4;
     bool needDiff = progress != null;
-    CSSFunctionalNotation prevMethod = prevMethods ?? prevMethods.firstWhere((element) => element.name == method.name);
+    CSSFunctionalNotation prevMethod = prevMethods?.firstWhere((element) => element.name == method.name);
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {
