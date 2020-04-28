@@ -17,9 +17,9 @@ class RenderFlexParentData extends RenderLayoutParentData {
   String flexBasis;
 
   @override
-  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
+  String toString() =>
+      '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
-
 
 bool _startIsTopLeft(Axis direction, TextDirection textDirection,
     VerticalDirection verticalDirection) {
@@ -478,7 +478,8 @@ class RenderFlexLayout extends RenderBox
     return childParentData.flexBasis ?? 'auto';
   }
 
-  double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
+  double _getShrinkConstraints(
+      RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
     double totalExtent = 0;
     childSizeMap.forEach((targetId, item) {
       totalExtent += item['flexShrink'] * item['size'];
@@ -598,14 +599,12 @@ class RenderFlexLayout extends RenderBox
       maxHeight = elementHeight;
     }
 
-    final double maxMainSize = _direction == Axis.horizontal
-        ? maxWidth
-        : maxHeight;
+    final double maxMainSize =
+        _direction == Axis.horizontal ? maxWidth : maxHeight;
     final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
-    double allocatedSize =
-        0.0; // Sum of the sizes of the children.
+    double allocatedSize = 0.0; // Sum of the sizes of the children.
     RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
@@ -712,15 +711,11 @@ class RenderFlexLayout extends RenderBox
         switch (_direction) {
           case Axis.horizontal:
             innerConstraints = BoxConstraints(
-                minWidth: baseConstraints,
-                maxHeight: constraints.maxHeight
-            );
+                minWidth: baseConstraints, maxHeight: constraints.maxHeight);
             break;
           case Axis.vertical:
             innerConstraints = BoxConstraints(
-                minHeight: baseConstraints,
-                maxWidth: constraints.maxWidth
-            );
+                minHeight: baseConstraints, maxWidth: constraints.maxWidth);
             break;
         }
       }
@@ -747,17 +742,19 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeSpace = maxMainSize == 0 ? 0 :
-        (canFlex ? maxMainSize : 0.0) - allocatedSize;
+    final double freeSpace =
+        maxMainSize == 0 ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedSize;
     double maxBaselineDistance = 0.0;
-    bool isFlexGrow = freeSpace >= 0 &&  totalFlexGrow > 0;
+    bool isFlexGrow = freeSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = freeSpace < 0 && hasFlexShrink;
-    if (isFlexGrow || isFlexShrink ||
+    if (isFlexGrow ||
+        isFlexShrink ||
         crossAxisAlignment == CrossAxisAlignment.baseline) {
       // Reset total children size to zero if need to shrink or grow
       allocatedSize = 0;
-      final double spacePerFlex =
-          canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
+      final double spacePerFlex = canFlex && totalFlexGrow > 0
+          ? (freeSpace / totalFlexGrow)
+          : double.nan;
       child = placeholderChild != null ? placeholderChild : firstChild;
       double maxSizeAboveBaseline = 0;
       double maxSizeBelowBaseline = 0;
@@ -775,8 +772,8 @@ class RenderFlexLayout extends RenderBox
           if (freeSpace >= 0) {
             final int flexGrow = _getFlexGrow(child);
             final double mainSize = _getMainSize(child);
-            maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
-              : double.infinity;
+            maxChildExtent =
+                canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
 
             double baseConstraints = _getBaseConstraints(child);
             if (baseConstraints != 0) {
@@ -784,7 +781,8 @@ class RenderFlexLayout extends RenderBox
             }
             minChildExtent = maxChildExtent;
           } else {
-            double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
+            double shrinkValue =
+                _getShrinkConstraints(child, childSizeMap, freeSpace);
             int childNodeId;
             if (child is RenderTextBox) {
               childNodeId = child.targetId;
@@ -866,9 +864,7 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Align items along the main axis.
-    final double idealSize = maxMainSize != 0
-        ? maxMainSize
-        : allocatedSize;
+    final double idealSize = maxMainSize != 0 ? maxMainSize : allocatedSize;
 
     // final double idealSize = mainAxisSize;
     double actualSize;
@@ -1023,7 +1019,8 @@ class RenderFlexLayout extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData as RenderFlexParentData;
+      final RenderFlexParentData childParentData =
+          child.parentData as RenderFlexParentData;
       // Don't paint placeholder of positioned element
       if (child is! RenderConstrainedBox) {
         context.paintChild(child, childParentData.offset + offset);

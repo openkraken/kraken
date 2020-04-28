@@ -20,7 +20,8 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int targetId, this.data) : super(NodeType.COMMENT_NODE, targetId, '#comment');
+  Comment(int targetId, this.data)
+      : super(NodeType.COMMENT_NODE, targetId, '#comment');
 
   // The comment information.
   String data;
@@ -70,6 +71,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     }
     return collapsedData;
   }
+
   set data(String newData) {
     assert(newData != null);
     _data = newData;
@@ -160,6 +162,7 @@ class Node extends EventTarget {
     if (index - 1 < 0) return null;
     return parentNode.childNodes[index - 1];
   }
+
   Node get nextSibling {
     if (parentNode == null) return null;
     int index = parentNode.childNodes?.indexOf(this);

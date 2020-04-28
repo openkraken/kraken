@@ -39,14 +39,11 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
         paddingLeft = paddingRight = paddingTop =
             paddingBottom = _getDisplayPortedLength(splitPadding[0]);
       } else if (splitPadding.length == 2) {
-        paddingTop =
-            paddingBottom = _getDisplayPortedLength(splitPadding[0]);
-        paddingLeft =
-            paddingRight = _getDisplayPortedLength(splitPadding[1]);
+        paddingTop = paddingBottom = _getDisplayPortedLength(splitPadding[0]);
+        paddingLeft = paddingRight = _getDisplayPortedLength(splitPadding[1]);
       } else if (splitPadding.length == 3) {
         paddingTop = _getDisplayPortedLength(splitPadding[0]);
-        paddingRight =
-            paddingLeft = _getDisplayPortedLength(splitPadding[1]);
+        paddingRight = paddingLeft = _getDisplayPortedLength(splitPadding[1]);
         paddingBottom = _getDisplayPortedLength(splitPadding[2]);
       } else if (splitPadding.length == 4) {
         paddingTop = _getDisplayPortedLength(splitPadding[0]);
@@ -100,7 +97,8 @@ mixin CSSSizingMixin {
     return _getDisplayPortedLength(input);
   }
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+  void updateConstraints(
+      CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     if (renderConstrainedBox != null) {
       CSSTransition allTransition,
           widthTransition,
@@ -257,7 +255,7 @@ mixin CSSSizingMixin {
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
       return CSSSizedConstraints(
-        width, height, minWidth, maxWidth, minHeight, maxHeight);
+          width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
       return null;
     }
@@ -291,8 +289,8 @@ mixin CSSSizingMixin {
       if (margin != null) {
         List<String> splitMargin = CSSSizingMixin.getShortedProperties(margin);
         if (splitMargin.length == 1) {
-          marginLeft = marginRight = marginTop =
-              marginBottom = getDisplayPortedLength(splitMargin[0]);
+          marginLeft = marginRight =
+              marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
         } else if (splitMargin.length == 2) {
           marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
           marginLeft = marginRight = getDisplayPortedLength(splitMargin[1]);
@@ -334,7 +332,8 @@ mixin CSSSizingMixin {
         oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style,
+      [Map<String, CSSTransition> transitionMap]) {
     assert(renderMargin != null);
     CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -380,9 +379,8 @@ mixin CSSSizingMixin {
             progressMargin.right =
                 progress * marginRightInterval + baseMargin.right;
           }
-          _updateMargin(
-              EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                  progressMargin.right, progressMargin.bottom));
+          _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
+              progressMargin.top, progressMargin.right, progressMargin.bottom));
         }
       });
 
@@ -401,9 +399,8 @@ mixin CSSSizingMixin {
           progressMargin.right =
               progress * marginRightInterval + baseMargin.right;
         }
-        _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom));
+        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
+            progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top = progress * marginTopInterval + baseMargin.top;
@@ -413,22 +410,19 @@ mixin CSSSizingMixin {
       marginBottom?.addProgressListener((progress) {
         progressMargin.bottom =
             progress * marginBottomInterval + baseMargin.bottom;
-        _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom));
+        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
+            progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left = progress * marginLeftInterval + baseMargin.left;
-        _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom));
+        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
+            progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right =
             progress * marginRightInterval + baseMargin.right;
-        _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top,
-                progressMargin.right, progressMargin.bottom));
+        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
+            progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       oldMargin = newMargin;
     } else {
@@ -440,7 +434,8 @@ mixin CSSSizingMixin {
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderPadding(
+      RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
     return renderPadding =
         RenderPadding(padding: edgeInsets, child: renderObject);

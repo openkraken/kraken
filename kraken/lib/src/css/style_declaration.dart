@@ -25,8 +25,8 @@ typedef StyleChangeListener = void Function(
 /// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
-  CSSStyleDeclaration({ Map<String, dynamic> style }) {
-    if (style != null ) {
+  CSSStyleDeclaration({Map<String, dynamic> style}) {
+    if (style != null) {
       style.forEach((property, value) {
         if (value != null) this.setProperty(property, value: value.toString());
       });
@@ -95,7 +95,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, { value = '' }) {
+  void setProperty(String propertyName, {value = ''}) {
     // Null means with should be removed.
     String prevValue = _cssProperties[propertyName];
     String stringifyValue;
@@ -124,11 +124,12 @@ class CSSStyleDeclaration {
   }
 
   void addStyleChangeListener(String property, StyleChangeListener listener) {
-    if (!_styleChangeListeners.containsKey(property)) _styleChangeListeners[property] = [];
+    if (!_styleChangeListeners.containsKey(property))
+      _styleChangeListeners[property] = [];
     _styleChangeListeners[property].add(listener);
   }
 
-  void removeStyleChangeListener({ String property }) {
+  void removeStyleChangeListener({String property}) {
     if (property != null) {
       _styleChangeListeners[property] = [];
     } else {
@@ -137,7 +138,8 @@ class CSSStyleDeclaration {
     }
   }
 
-  void _invokePropertyChangedListener(String property, String original, String present) {
+  void _invokePropertyChangedListener(
+      String property, String original, String present) {
     assert(property != null);
     _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
       listener(property, original, present);
@@ -159,10 +161,8 @@ class CSSStyleDeclaration {
 }
 
 bool isEmptyStyleValue(String value) {
-
   return value == null || value.isEmpty;
 }
-
 
 // Returns the computed property value.
 T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {

@@ -15,7 +15,7 @@ class CSSUrl implements CSSValue<ImageProvider> {
   ImageProvider _value;
   String _url;
   final String _rawInput;
-  CSSUrl(this._rawInput, { this.cache = 'auto' } ) {
+  CSSUrl(this._rawInput, {this.cache = 'auto'}) {
     parse();
   }
 
@@ -24,7 +24,8 @@ class CSSUrl implements CSSValue<ImageProvider> {
 
   @override
   void parse() {
-    if (_rawInput.startsWith('//') || _rawInput.startsWith('http://') ||
+    if (_rawInput.startsWith('//') ||
+        _rawInput.startsWith('http://') ||
         _rawInput.startsWith('https://')) {
       var url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
       _url = url;

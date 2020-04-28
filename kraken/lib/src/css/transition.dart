@@ -95,7 +95,8 @@ class CSSTransition with CustomTickerProviderStateMixin {
       if (curvedAnimation.value == 0.0) {
         statusListener(AnimationStatus.forward);
       }
-      for (CSSTransitionProgressListener progressListener in progressListeners) {
+      for (CSSTransitionProgressListener progressListener
+          in progressListeners) {
         progressListener(curvedAnimation.value);
       }
     }
@@ -120,23 +121,34 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
+  static Map<String, CSSTransition> parseTransitions(
+      CSSStyleDeclaration style, String property, Element el) {
     List<String> list = [];
 
     if (property == 'transitionProperty' ||
-      property == 'transitionDuration' ||
-      property == 'transitionTimingFunction' ||
-      property == 'transitionDelay'
-    ) {
-      String transitionProperty = style['transitionProperty'] != '' ? style['transitionProperty'] : 'all';
-      String transitionDuration = style['transitionDuration'] != '' ? style['transitionDuration'] : '0s';
-      String transitionTimingFunction = style['transitionTimingFunction']  != '' ? style['transitionTimingFunction'] : 'ease';
-      String transitionDelay = style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
+        property == 'transitionDuration' ||
+        property == 'transitionTimingFunction' ||
+        property == 'transitionDelay') {
+      String transitionProperty = style['transitionProperty'] != ''
+          ? style['transitionProperty']
+          : 'all';
+      String transitionDuration = style['transitionDuration'] != ''
+          ? style['transitionDuration']
+          : '0s';
+      String transitionTimingFunction = style['transitionTimingFunction'] != ''
+          ? style['transitionTimingFunction']
+          : 'ease';
+      String transitionDelay =
+          style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
       List<String> properties = transitionProperty.split(',');
       for (String prop in properties) {
-        list.add(
-          prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay
-        );
+        list.add(prop +
+            ' ' +
+            transitionDuration +
+            ' ' +
+            transitionTimingFunction +
+            ' ' +
+            transitionDelay);
       }
     } else {
       list = style['transition'].split(',');
@@ -149,7 +161,8 @@ class CSSTransition with CustomTickerProviderStateMixin {
     return map;
   }
 
-  static void parseTransition(String string, Map<String, CSSTransition> map, Element el) {
+  static void parseTransition(
+      String string, Map<String, CSSTransition> map, Element el) {
     if (string != null && string.isNotEmpty) {
       List<String> strs = string.trim().split(' ');
       if (strs.length > 1) {
@@ -185,7 +198,8 @@ class CSSTransition with CustomTickerProviderStateMixin {
           transition.curvedAnimation =
               CurvedAnimation(curve: curve, parent: controller);
           transition.controller = controller;
-          transition.delay = Duration(milliseconds: delay.computedValue?.toInt());
+          transition.delay =
+              Duration(milliseconds: delay.computedValue?.toInt());
           map[property] = transition;
         }
       }

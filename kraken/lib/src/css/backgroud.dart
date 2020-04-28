@@ -19,7 +19,6 @@ const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
 mixin CSSBackgroundMixin {
-
   // Default property.
   Map<String, String> background = {
     BACKGROUND_REPEAT: 'repeat',
@@ -107,7 +106,7 @@ mixin CSSBackgroundMixin {
               if (_consumeBackgroundSize(size)) {
                 // size at most two value
                 if (i + 1 < longhandCount &&
-                  _consumeBackgroundSize(shorthand[i + 1].trim())) {
+                    _consumeBackgroundSize(shorthand[i + 1].trim())) {
                   size = size + ' ' + shorthand[i + 1].trim();
                   i++;
                 }
@@ -126,7 +125,7 @@ mixin CSSBackgroundMixin {
             String size;
             bool hasSize = false;
             // position at most four value
-            for (int j = 1; j <= 4; j ++) {
+            for (int j = 1; j <= 4; j++) {
               if (i + j < longhandCount) {
                 String temp = shorthand[i + j].trim();
                 if (temp == '/') {
@@ -213,8 +212,10 @@ mixin CSSBackgroundMixin {
   }
 
   bool _consumeBackgroundRepeat(String src) {
-    return 'repeat-x' == src || 'repeat-y' == src || 'repeat' == src ||
-      'no-repeat' == src;
+    return 'repeat-x' == src ||
+        'repeat-y' == src ||
+        'repeat' == src ||
+        'no-repeat' == src;
   }
 
   bool _consumeBackgroundAttachment(String src) {
@@ -222,42 +223,51 @@ mixin CSSBackgroundMixin {
   }
 
   bool _consumeBackgroundImage(String src) {
-    return src.startsWith('url(') || src.startsWith('linear-gradient(') ||
-      src.startsWith('repeating-linear-gradient(') ||
-      src.startsWith('radial-gradient(') ||
-      src.startsWith('repeating-radial-gradient(') ||
-      src.startsWith('conic-gradient(');
+    return src.startsWith('url(') ||
+        src.startsWith('linear-gradient(') ||
+        src.startsWith('repeating-linear-gradient(') ||
+        src.startsWith('radial-gradient(') ||
+        src.startsWith('repeating-radial-gradient(') ||
+        src.startsWith('conic-gradient(');
   }
 
   bool _consumeBackgroundPosition(String src) {
-    return src == 'center' || src == 'left' || src == 'right' ||
-      CSSLength.isLength(src) || CSSPercentage.isPercentage(src) || src == 'top' ||
-      src == 'bottom';
+    return src == 'center' ||
+        src == 'left' ||
+        src == 'right' ||
+        CSSLength.isLength(src) ||
+        CSSPercentage.isPercentage(src) ||
+        src == 'top' ||
+        src == 'bottom';
   }
 
   bool _consumeBackgroundSize(String src) {
-    return src == 'auto' || src == 'contain' || src == 'cover' ||
-      src == 'fit-width' || src == 'fit-height' || src == 'scale-down' ||
-      src == 'fill' || CSSLength.isLength(src) || CSSPercentage.isPercentage(src);
+    return src == 'auto' ||
+        src == 'contain' ||
+        src == 'cover' ||
+        src == 'fit-width' ||
+        src == 'fit-height' ||
+        src == 'scale-down' ||
+        src == 'fill' ||
+        CSSLength.isLength(src) ||
+        CSSPercentage.isPercentage(src);
   }
 
   bool _shouldRenderBackgroundImage() {
     return background[BACKGROUND_ATTACHMENT] == 'local' &&
-      background.containsKey(BACKGROUND_IMAGE);
+        background.containsKey(BACKGROUND_IMAGE);
   }
 
   RenderObject initBackground(
-    RenderObject renderObject,
-    CSSStyleDeclaration style,
-    int targetId
-    ) {
+      RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     _parseBackground(style);
     if (!_shouldRenderBackgroundImage()) return renderObject;
     DecorationImage decorationImage;
     Gradient gradient;
 
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods =
+          CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       // FIXME flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
@@ -266,18 +276,20 @@ mixin CSSBackgroundMixin {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
               return _renderGradient = RenderGradient(
-                targetId: targetId,
-                decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-                child: renderObject);
+                  targetId: targetId,
+                  decoration:
+                      BoxDecoration(image: decorationImage, gradient: gradient),
+                  child: renderObject);
             }
           }
         } else {
           gradient = getBackgroundGradient(method);
           if (gradient != null) {
             return _renderGradient = RenderGradient(
-              targetId: targetId,
-              decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-              child: renderObject);
+                targetId: targetId,
+                decoration:
+                    BoxDecoration(image: decorationImage, gradient: gradient),
+                child: renderObject);
           }
         }
       }
@@ -287,14 +299,15 @@ mixin CSSBackgroundMixin {
   }
 
   void updateBackground(String property, String value,
-    RenderObjectWithChildMixin parent, int targetId) {
+      RenderObjectWithChildMixin parent, int targetId) {
     _setBackgroundProperty(property, value);
     if (!_shouldRenderBackgroundImage()) return;
 
     DecorationImage decorationImage;
     Gradient gradient;
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods =
+          CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       //FIXME flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
@@ -302,7 +315,8 @@ mixin CSSBackgroundMixin {
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
-              _updateRenderGradient(decorationImage, gradient, parent, targetId);
+              _updateRenderGradient(
+                  decorationImage, gradient, parent, targetId);
               return;
             }
           }
@@ -318,17 +332,17 @@ mixin CSSBackgroundMixin {
   }
 
   void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
-    RenderObjectWithChildMixin parent, int targetId) {
+      RenderObjectWithChildMixin parent, int targetId) {
     if (_renderGradient != null) {
       _renderGradient.decoration =
-        BoxDecoration(image: decorationImage, gradient: gradient);
+          BoxDecoration(image: decorationImage, gradient: gradient);
     } else {
       RenderObject child = parent.child;
       parent.child = null;
       _renderGradient = RenderGradient(
-        targetId: targetId,
-        decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-        child: child);
+          targetId: targetId,
+          decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+          child: child);
       parent.child = _renderGradient;
     }
   }
@@ -377,10 +391,10 @@ mixin CSSBackgroundMixin {
         }
       }
       backgroundImage = DecorationImage(
-        image: CSSUrl(url).computedValue,
-        repeat: imageRepeat,
-        alignment: position.computedValue,
-        fit: boxFit);
+          image: CSSUrl(url).computedValue,
+          repeat: imageRepeat,
+          alignment: position.computedValue,
+          fit: boxFit);
     }
     return backgroundImage;
   }
@@ -466,13 +480,13 @@ mixin CSSBackgroundMixin {
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = LinearGradient(
-              begin: begin,
-              end: end,
-              colors: colors,
-              stops: stops,
-              tileMode: method.name == 'linear-gradient'
-                ? TileMode.clamp
-                : TileMode.repeated);
+                begin: begin,
+                end: end,
+                colors: colors,
+                stops: stops,
+                tileMode: method.name == 'linear-gradient'
+                    ? TileMode.clamp
+                    : TileMode.repeated);
           }
           break;
         // @TODO just support circle radial
@@ -490,13 +504,13 @@ mixin CSSBackgroundMixin {
                 start = 1;
               }
               if (positionAndRadius.length > 2 &&
-                positionAndRadius[1] == 'at') {
+                  positionAndRadius[1] == 'at') {
                 start = 1;
                 if (CSSPercentage.isPercentage(positionAndRadius[2])) {
                   atX = CSSPercentage(positionAndRadius[2]).toDouble();
                 }
                 if (positionAndRadius.length == 4 &&
-                  CSSPercentage.isPercentage(positionAndRadius[3])) {
+                    CSSPercentage.isPercentage(positionAndRadius[3])) {
                   atY = CSSPercentage(positionAndRadius[3]).toDouble();
                 }
               }
@@ -510,8 +524,8 @@ mixin CSSBackgroundMixin {
               colors: colors,
               stops: stops,
               tileMode: method.name == 'radial-gradient'
-                ? TileMode.clamp
-                : TileMode.repeated,
+                  ? TileMode.clamp
+                  : TileMode.repeated,
             );
           }
           break;
@@ -520,7 +534,7 @@ mixin CSSBackgroundMixin {
           double atX = 0.5;
           double atY = 0.5;
           if (method.args[0].contains('from ') ||
-            method.args[0].contains('at ')) {
+              method.args[0].contains('at ')) {
             List<String> fromAt = method.args[0].trim().split(' ');
             int fromIndex = fromAt.indexOf('from');
             int atIndex = fromAt.indexOf('at');
@@ -529,11 +543,11 @@ mixin CSSBackgroundMixin {
             }
             if (atIndex != -1) {
               if (atIndex + 1 < fromAt.length &&
-                CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
+                  CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
                 atX = CSSPercentage(fromAt[atIndex + 1]).toDouble();
               }
               if (atIndex + 2 < fromAt.length &&
-                CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
+                  CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
                 atY = CSSPercentage(fromAt[atIndex + 2]).toDouble();
               }
             }
@@ -542,10 +556,10 @@ mixin CSSBackgroundMixin {
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = SweepGradient(
-              center: FractionalOffset(atX, atY),
-              colors: colors,
-              stops: stops,
-              transform: GradientRotation(-math.pi / 2 + from));
+                center: FractionalOffset(atX, atY),
+                colors: colors,
+                stops: stops,
+                transform: GradientRotation(-math.pi / 2 + from));
           }
           break;
       }
@@ -553,7 +567,6 @@ mixin CSSBackgroundMixin {
 
     return gradient;
   }
-
 
   Color getBackgroundColor(CSSStyleDeclaration style) {
     Color backgroundColor = CSSColor.transparent;
@@ -564,7 +577,7 @@ mixin CSSBackgroundMixin {
   }
 
   void applyColorAndStops(
-    int start, List<String> args, List<Color> colors, List<double> stops) {
+      int start, List<String> args, List<Color> colors, List<double> stops) {
     double grow = 1.0 / (args.length - 1);
     for (int i = start; i < args.length; i++) {
       CSSColorStop colorGradient = parseColorAndStop(args[i], i * grow);

@@ -3,6 +3,4 @@
  * Author: Kraken Team.
  */
 
-mixin CSSFilterMixin {
-  
-}
+mixin CSSFilterMixin {}

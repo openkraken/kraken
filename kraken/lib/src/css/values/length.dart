@@ -14,11 +14,10 @@ class CSSLength implements CSSValue<double> {
   static const String VH = 'vh';
 
   static bool isValidateLength(String value) {
-    return value != null
-        && value.endsWith(RPX)
-        || value.endsWith(PX)
-        || value.endsWith(VW)
-        || value.endsWith(VH);
+    return value != null && value.endsWith(RPX) ||
+        value.endsWith(PX) ||
+        value.endsWith(VW) ||
+        value.endsWith(VH);
   }
 
   static RegExp NUMBERIC_REGEXP = RegExp(r"^[+-]?(\d+)?(\.\d+)?$");
@@ -82,7 +81,9 @@ class CSSLength implements CSSValue<double> {
 
   static bool isLength(String value) {
     return value != null &&
-        (value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) ||
+        (value.endsWith(RPX) ||
+            value.endsWith(PX) ||
+            value.endsWith(VH) ||
             value.endsWith(VW));
   }
 

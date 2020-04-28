@@ -8,7 +8,6 @@ const String PERCENTAGE = '%';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#integers
 class CSSInteger implements CSSValue<int> {
-
   int _value = 0;
 
   final String _rawInput;
@@ -31,7 +30,7 @@ class CSSInteger implements CSSValue<int> {
 }
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
-class CSSNumber implements CSSValue<double>  {
+class CSSNumber implements CSSValue<double> {
   double _value = 0.0;
 
   final String _rawInput;

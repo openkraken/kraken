@@ -12,7 +12,6 @@ class CSSFunctionalNotation {
 
 // ignore: public_member_api_docs
 class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
-
   final String _rawInput;
   List<CSSFunctionalNotation> _value;
 

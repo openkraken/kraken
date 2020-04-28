@@ -37,12 +37,12 @@ class KrakenScrollable
   RenderObject getScrollableRenderObject(RenderBox child) {
     RenderSingleChildViewport renderSingleChildViewport =
         RenderSingleChildViewport(
-            axisDirection: _axisDirection,
-            offset: position,
-            child: child,
-            scrollListener: scrollListener,
-            shouldClip: true,
-        );
+      axisDirection: _axisDirection,
+      offset: position,
+      child: child,
+      scrollListener: scrollListener,
+      shouldClip: true,
+    );
 
     _renderBox = child;
     RenderPointerListener renderPointerListener = RenderPointerListener(

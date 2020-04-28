@@ -190,10 +190,8 @@ class ImgElement extends Element {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);
     } else if (splitted.length > 1) {
-      return Alignment(
-          _getAlignmentValueFromString(splitted[0]),
-          _getAlignmentValueFromString(splitted[1])
-      );
+      return Alignment(_getAlignmentValueFromString(splitted[0]),
+          _getAlignmentValueFromString(splitted[1]));
     } else {
       // The default value for object-position is 50% 50%
       return Alignment.center;
@@ -226,8 +224,8 @@ class ImgElement extends Element {
     }
   }
 
-
-  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
+  RenderDecoratedBox getRenderDecoratedBox(
+      CSSStyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     Alignment alignment = _getAlignment(style);
     return RenderDecoratedBox(

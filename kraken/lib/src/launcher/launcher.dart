@@ -54,7 +54,8 @@ Future<void> unmountApp() async {
 
 // refresh flutter paint and reload js context
 void reloadApp() async {
-  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  bool prevShowPerformanceOverlay =
+      elementManager?.showPerformanceOverlay ?? false;
   await unmountApp();
   await reloadJSContext();
   await connect(prevShowPerformanceOverlay);
@@ -62,7 +63,8 @@ void reloadApp() async {
 
 // refresh flutter paint only
 Future<void> refreshPaint() async {
-  bool prevShowPerformanceOverlay = elementManager?.showPerformanceOverlay ?? false;
+  bool prevShowPerformanceOverlay =
+      elementManager?.showPerformanceOverlay ?? false;
   await unmountApp();
   await connect(prevShowPerformanceOverlay);
 }
@@ -94,15 +96,15 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-
 void defaultAfterConnected() async {
   // The bundleURL is a mix of local asset and remote resource in http.
-  String bundleURL = _bundleURLOverride
-      ?? _bundlePathOverride
-      ?? getBundleURLFromEnv()
-      ?? getBundlePathFromEnv()
-      ?? await KrakenMethodChannel.getUrl();
-  KrakenBundle bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContentOverride);
+  String bundleURL = _bundleURLOverride ??
+      _bundlePathOverride ??
+      getBundleURLFromEnv() ??
+      getBundlePathFromEnv() ??
+      await KrakenMethodChannel.getUrl();
+  KrakenBundle bundle = await KrakenBundle.getBundle(bundleURL,
+      contentOverride: _bundleContentOverride);
   if (bundle != null) {
     await bundle.run();
 
@@ -123,14 +125,16 @@ void launch({
 }) {
   if (bundleURLOverride != null) _bundleURLOverride = bundleURLOverride;
   if (bundlePathOverride != null) _bundlePathOverride = bundlePathOverride;
-  if (bundleContentOverride != null) _bundleContentOverride = bundleContentOverride;
+  if (bundleContentOverride != null)
+    _bundleContentOverride = bundleContentOverride;
 
   initBridge();
   _setTargetPlatformForDesktop();
   KrakenMethodChannel.setReloadHandler(reloadApp);
   runApp(
     enableDebug: Platform.environment[ENABLE_DEBUG] != null,
-    showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+    showPerformanceOverlay:
+        Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
     afterConnected: defaultAfterConnected,
   );
 }

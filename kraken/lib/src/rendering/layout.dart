@@ -273,7 +273,8 @@ class RenderFlowLayout extends RenderBox
           break;
       }
     }
-    if (mainAxisAlignment == MainAxisAlignment.start || mainAxisAlignment == MainAxisAlignment.end) {
+    if (mainAxisAlignment == MainAxisAlignment.start ||
+        mainAxisAlignment == MainAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null,
@@ -501,7 +502,6 @@ class RenderFlowLayout extends RenderBox
     return 0.0;
   }
 
-
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
@@ -613,7 +613,8 @@ class RenderFlowLayout extends RenderBox
 
     // get container height
     double containerHeight = crossAxisExtent;
-    double containerParentHeight = CSSLength.toDisplayPortValue(style['height']);
+    double containerParentHeight =
+        CSSLength.toDisplayPortValue(style['height']);
     if (containerParentHeight != null) {
       containerHeight = containerParentHeight;
     }
@@ -630,7 +631,6 @@ class RenderFlowLayout extends RenderBox
         containerCrossAxisExtent = constraintWidth;
         break;
     }
-
 
     final double crossAxisFreeSpace =
         math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
@@ -714,9 +714,10 @@ class RenderFlowLayout extends RenderBox
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
         // Always align to the top of run when positioning positioned element placeholder
-        final double childCrossAxisOffset = isPositionPlaceholder ? 0 :
-            _getChildCrossAxisOffset(
-              flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
+        final double childCrossAxisOffset = isPositionPlaceholder
+            ? 0
+            : _getChildCrossAxisOffset(
+                flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
@@ -727,6 +728,7 @@ class RenderFlowLayout extends RenderBox
         } else if (child is RenderElementBoundary) {
           childStyle = getEventTargetByTargetId<Element>(child.targetId)?.style;
         }
+
         ///apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
 
@@ -758,12 +760,13 @@ class RenderFlowLayout extends RenderBox
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
-        Element currentElement = getEventTargetByTargetId<Element>(this.targetId);
+        Element currentElement =
+            getEventTargetByTargetId<Element>(this.targetId);
         String currentElementDisplay = isEmptyStyleValue(style['display'])
-          ? currentElement.defaultDisplay
-          : style['display'];
-        if (currentElementDisplay.endsWith('flex')
-          && style['flexWrap'] == 'wrap') {
+            ? currentElement.defaultDisplay
+            : style['display'];
+        if (currentElementDisplay.endsWith('flex') &&
+            style['flexWrap'] == 'wrap') {
           display = 'inline';
         }
       }
@@ -796,9 +799,11 @@ class RenderFlowLayout extends RenderBox
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    properties.add(EnumProperty<MainAxisAlignment>(
+        'mainAxisAlignment', mainAxisAlignment));
     properties.add(DoubleProperty('spacing', spacing));
-    properties.add(EnumProperty<MainAxisAlignment>('runAlignment', runAlignment));
+    properties
+        .add(EnumProperty<MainAxisAlignment>('runAlignment', runAlignment));
     properties.add(DoubleProperty('runSpacing', runSpacing));
     properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection,

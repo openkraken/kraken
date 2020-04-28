@@ -50,20 +50,26 @@ class CSSPosition implements CSSValue<Alignment> {
     }
   }
 
-  static double _getValueX(String input, { double initial = -1 }) {
+  static double _getValueX(String input, {double initial = -1}) {
     switch (input) {
-      case LEFT: return -1;
-      case RIGHT: return 1;
-      case CENTER: return 0;
+      case LEFT:
+        return -1;
+      case RIGHT:
+        return 1;
+      case CENTER:
+        return 0;
     }
     return _gatValuePercentage(input) ?? initial;
   }
 
-  static double _getValueY(String input, { double initial = 1 }) {
+  static double _getValueY(String input, {double initial = 1}) {
     switch (input) {
-      case TOP: return -1;
-      case BOTTOM: return 1;
-      case CENTER: return 0;
+      case TOP:
+        return -1;
+      case BOTTOM:
+        return 1;
+      case CENTER:
+        return 0;
     }
     return _gatValuePercentage(input) ?? initial;
   }
@@ -80,24 +86,15 @@ class CSSPosition implements CSSValue<Alignment> {
     var x = _value.x;
     var y = _value.y;
 
-    if (x == -1.0 && y == -1.0)
-      return 'top left';
-    if (x == 0.0 && y == -1.0)
-      return 'top center';
-    if (x == 1.0 && y == -1.0)
-      return 'top right';
-    if (x == -1.0 && y == 0.0)
-      return 'center left';
-    if (x == 0.0 && y == 0.0)
-      return 'center';
-    if (x == 1.0 && y == 0.0)
-      return 'center right';
-    if (x == -1.0 && y == 1.0)
-      return 'bottom left';
-    if (x == 0.0 && y == 1.0)
-      return 'bottom center';
-    if (x == 1.0 && y == 1.0)
-      return 'bottom right';
+    if (x == -1.0 && y == -1.0) return 'top left';
+    if (x == 0.0 && y == -1.0) return 'top center';
+    if (x == 1.0 && y == -1.0) return 'top right';
+    if (x == -1.0 && y == 0.0) return 'center left';
+    if (x == 0.0 && y == 0.0) return 'center';
+    if (x == 1.0 && y == 0.0) return 'center right';
+    if (x == -1.0 && y == 1.0) return 'bottom left';
+    if (x == 0.0 && y == 1.0) return 'bottom center';
+    if (x == 1.0 && y == 1.0) return 'bottom right';
     return '${x * 100}%, ${y * 100}%';
   }
 

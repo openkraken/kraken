@@ -13,7 +13,6 @@ const double DEFAULT_FONT_WEIGHT = 400.0;
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin {
-
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
     return TextSpan(
       text: text,
@@ -129,7 +128,8 @@ mixin CSSTextMixin {
       return TextDecoration.overline;
     else if (type == 'underline')
       return TextDecoration.underline;
-    else return TextDecoration.none;
+    else
+      return TextDecoration.none;
   }
 
   Color getDecorationColor(CSSStyleDeclaration style) {
@@ -254,8 +254,8 @@ mixin CSSTextMixin {
   static String DEFAULT_FONT_FAMILY = '';
   String getFontFamily(CSSStyleDeclaration style) {
     return style.contains(FONT_FAMILY)
-      ? style[FONT_FAMILY]
-      : DEFAULT_FONT_FAMILY;
+        ? style[FONT_FAMILY]
+        : DEFAULT_FONT_FAMILY;
   }
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
@@ -295,7 +295,8 @@ mixin CSSTextMixin {
 
   double getHeight(CSSStyleDeclaration style) {
     if (style.contains(LINE_HEIGHT)) {
-      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
+      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) /
+          getFontSize(style);
     } else {
       return null;
     }

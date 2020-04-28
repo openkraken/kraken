@@ -58,11 +58,16 @@ class CSSAngle implements CSSValue<double> {
   double get computedValue {
     parse();
     switch (angleType) {
-      case DEG: return angleValue;
-      case GRAD: return angleValue * 0.9;
-      case RAD: return angleValue * 45 / math.pi;
-      case TURN: return angleValue * 360;
-      default: return null;
+      case DEG:
+        return angleValue;
+      case GRAD:
+        return angleValue * 0.9;
+      case RAD:
+        return angleValue * 45 / math.pi;
+      case TURN:
+        return angleValue * 360;
+      default:
+        return null;
     }
   }
 
