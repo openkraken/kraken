@@ -27,7 +27,7 @@ typedef StyleChangeListener = void Function(
 class CSSStyleDeclaration {
   CSSStyleDeclaration({Map<String, dynamic> style}) {
     if (style != null) {
-      style.forEach((property, value) {
+      style.forEach((property, dynamic value) {
         if (value != null) this.setProperty(property, value: value.toString());
       });
     }

@@ -36,7 +36,7 @@ class Debouncing {
     VoidCallback _whenFinish = () {
       _isReady = true;
       _stateSC.sink.add(true);
-      _resultSC.sink.add(Function.apply(func, []));
+      _resultSC.sink.add(Function.apply(func, List<dynamic>()));
     };
     if (_duration == null) {
       _scheduleRunned = false;
@@ -53,7 +53,7 @@ class Debouncing {
   StreamSubscription<bool> listen(Function(bool) onData) =>
       _stateSC.stream.listen(onData);
 
-  dispose() {
+  void dispose() {
     _resultSC.close();
     _stateSC.close();
     if (_duration == null)
