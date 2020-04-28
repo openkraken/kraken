@@ -1,5 +1,5 @@
 describe('background-repeat', () => {
-  fit('default should be repeat', async () => {
+  it('default should be repeat', async () => {
     // repeat
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
