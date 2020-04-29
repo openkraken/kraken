@@ -54,6 +54,9 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   // The text string.
   String _data;
   String get data {
+    if (_data.isEmpty) {
+      return _data;
+    }
     // @TODO(zl): Need to judge style white-spacing.
     String collapsedData = collapseWhitespace(_data);
     // Append space while prev is element.

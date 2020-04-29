@@ -12,8 +12,9 @@ export class TextNode extends Node {
   }
 
   public set data(data: string) {
-    this._data = String(data);
-    setProperty(this.nodeId, 'data', data);
+    const value = String(data);
+    this._data = value;
+    setProperty(this.nodeId, 'data', value);
   }
 
   public get data() {
@@ -21,7 +22,7 @@ export class TextNode extends Node {
   }
 
   public set nodeValue(data: string) {
-    this.data = data;
+    this._data = String(data);
   }
 
   public get nodeValue() {
@@ -29,7 +30,7 @@ export class TextNode extends Node {
   }
 
   public set textContent(data: string) {
-    this.data = data;
+    this._data = String(data);
   }
 
   public get textContent() {
