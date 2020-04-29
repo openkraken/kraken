@@ -264,6 +264,20 @@ class ImgElement extends Element {
   }
 
   @override
+  dynamic getProperty(String key) {
+    switch(key) {
+      case 'width': {
+        return this._imageInfo.image.width;
+      }
+      case 'height': {
+        return this._imageInfo.image.height;
+      }
+    }
+
+    return super.getProperty(key);
+  }
+
+  @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
     _resize();

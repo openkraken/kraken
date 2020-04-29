@@ -6,7 +6,8 @@ import {
   removeProperty,
   setStyle,
   method,
-  toBlob
+  toBlob,
+  getProperty
 } from './ui-manager';
 
 const RECT_PROPERTIES = [
@@ -85,7 +86,7 @@ export class Element extends Node {
   // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   public attributes: Array<any> = [];
 
-  constructor(tagName: string, _nodeId?: number, buildInEvents?: Array<string>) {
+  constructor(tagName: string, _nodeId?: number, buildInEvents?: Array<string>, buildInProperty?: Array<string>) {
     super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(buildInEvents || []));
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
@@ -115,6 +116,19 @@ export class Element extends Node {
         get() {
           return Number(method(nodeId, prop));
         },
+      });
+    }
+
+    if (Array.isArray(buildInProperty)) {
+      buildInProperty.forEach(property => {
+        Object.defineProperty(this, property, {
+          get() {
+            return this.getAttribute(property);
+          },
+          set(value) {
+            this.setAttribute(property, value);
+          }
+        });
       });
     }
 
@@ -158,6 +172,7 @@ export class Element extends Node {
     if (this.attributes[name]) {
       return this.attributes[name].value;
     }
+    return getProperty(this.nodeId, name);
   }
 
   public hasAttribute(name: string) {
