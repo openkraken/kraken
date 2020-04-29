@@ -14,7 +14,7 @@
     "build:sdk:android:release": "KRAKEN_BUILD=Release node scripts/build_android_sdk",
     "upload:sdk:android": "KRAKEN_BUILD=Release node scripts/build_android_sdk_and_upload",
     "build:linux": "node scripts/build_linux",
-    "upload": "node scripts/pack_and_upload",
+    "upload": "node scripts/macos_pack_and_upload",
     "pretest": "npm i && npm run lint && node scripts/build_darwin_dylib",
     "test": "node scripts/run_test.js",
     "test:unit": "cd tests && npm run unit",
