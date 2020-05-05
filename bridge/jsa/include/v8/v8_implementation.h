@@ -133,6 +133,8 @@ protected:
   jsa::Value getProperty(const jsa::Object &, const jsa::PropNameID &name) override;
   bool hasProperty(const jsa::Object &, const jsa::String &name) override;
   bool hasProperty(const jsa::Object &, const jsa::PropNameID &name) override;
+  void removeProperty(const jsa::Object &obj, const jsa::String &name) override;
+  void removeProperty(const jsa::Object &obj, const jsa::PropNameID &name) override;
   void setPropertyValue(jsa::Object &, const jsa::String &name, const jsa::Value &value) override;
   void setPropertyValue(jsa::Object &, const jsa::PropNameID &name, const jsa::Value &value) override;
   bool isArray(const jsa::Object &) const override;
