@@ -54,7 +54,7 @@ using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
 using HostClassType = std::function<Object(JSContext &context, Object &constructor, const Value *args, size_t count)>;
 
 /// An object which implements this interface can be registered as an
-/// Object with the JS runtime.
+/// Object with the JS context.
 class HostObject {
 public:
   // The C++ object's dtor will be called when the GC finalizes this
@@ -99,7 +99,7 @@ typedef enum {
   none
 } ArrayBufferViewType;
 
-/// Represents a JS runtime.  Movable, but not copyable.  Note that
+/// Represents a JS context.  Movable, but not copyable.  Note that
 /// this object may not be thread-aware, but cannot be used safely from
 /// multiple threads at once.  The application is responsible for
 /// ensuring that it is used safely.  This could mean using the
@@ -141,11 +141,11 @@ public:
   /// developer-facing callers.
   virtual std::string description() = 0;
 
-  /// \return whether or not the underlying runtime supports debugging via the
+  /// \return whether or not the underlying context supports debugging via the
   /// Chrome remote debugging protocol.
   ///
-  /// NOTE: the API for determining whether a runtime is debuggable and
-  /// registering a runtime with the debugger is still in flux, so please don't
+  /// NOTE: the API for determining whether a context is debuggable and
+  /// registering a context with the debugger is still in flux, so please don't
   /// use this API unless you know what you're doing.
   virtual bool isInspectable() = 0;
 

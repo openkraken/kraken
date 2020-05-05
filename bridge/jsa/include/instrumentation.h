@@ -28,7 +28,7 @@ public:
   /// format.
   ///
   /// \pre This call can only be made on the instrumentation instance of a
-  ///   runtime initialised to collect GC statistics.
+  ///   context initialised to collect GC statistics.
   ///
   /// \post All cumulative measurements mentioned in the output are accumulated
   ///   across the entire lifetime of the Runtime.
@@ -36,11 +36,11 @@ public:
   /// \return the GC statistics collected so far, as a JSON-encoded string.
   virtual std::string getRecordedGCStats() = 0;
 
-  /// Request statistics about the current state of the runtime's heap. This
+  /// Request statistics about the current state of the context's heap. This
   /// function can be called at any time, and should produce information that is
   /// correct at the instant it is called (i.e, not stale).
   ///
-  /// \return a jsa Value containing whichever statistics the runtime supports
+  /// \return a jsa Value containing whichever statistics the context supports
   ///   for its heap.
   virtual Value getHeapInfo(bool includeExpensive) = 0;
 
