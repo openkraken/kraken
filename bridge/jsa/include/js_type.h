@@ -223,6 +223,15 @@ public:
   /// undefined value.
   Value getProperty(JSContext &context, const PropNameID &name) const;
 
+  /// remove the property of the object with the given ascii name.
+  void removeProperty(JSContext &context, const char* name) const;
+
+  /// remove the property of the object with the String name.
+  void removeProperty(JSContext &context, const String &name) const;
+
+  /// remove the property of the object with the given JS PropNameID
+  void removeProperty(JSContext &context, const PropNameID &name) const;
+
   /// \return true if and only if the object has a property with the
   /// given ascii name.
   bool hasProperty(JSContext &context, const char *name) const;
@@ -893,6 +902,18 @@ void throwJSError(JSContext &, const char *msg);
 
 inline Value Object::getProperty(JSContext &context, const char *name) const {
   return getProperty(context, String::createFromAscii(context, name));
+}
+
+inline void Object::removeProperty(JSContext &context, const char *name) const {
+  context.removeProperty(*this, String::createFromAscii(context, name));
+}
+
+inline void Object::removeProperty(JSContext &context, const String &name) const {
+  context.removeProperty(*this, name);
+}
+
+inline void Object::removeProperty(JSContext &context, const PropNameID &name) const {
+  context.removeProperty(*this, name);
 }
 
 inline Value Object::getProperty(JSContext &context, const String &name) const {

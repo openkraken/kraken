@@ -508,6 +508,20 @@ jsa::Value JSCContext::getProperty(const jsa::Object &obj, const jsa::PropNameID
   return createValue(res);
 }
 
+void JSCContext::removeProperty(const jsa::Object &obj, const jsa::String &name) {
+  JSObjectRef objRef = objectRef(obj);
+  JSValueRef exc = nullptr;
+  JSObjectDeleteProperty(ctx_, objRef, stringRef(name), &exc);
+  hasException(exc);
+}
+
+void JSCContext::removeProperty(const jsa::Object &obj, const jsa::PropNameID &name) {
+  JSObjectRef objRef = objectRef(obj);
+  JSValueRef exc = nullptr;
+  JSObjectDeleteProperty(ctx_, objRef, stringRef(name), &exc);
+  hasException(exc);
+}
+
 bool JSCContext::hasProperty(const jsa::Object &obj, const jsa::String &name) {
   JSObjectRef objRef = objectRef(obj);
   return JSObjectHasProperty(ctx_, objRef, stringRef(name));
