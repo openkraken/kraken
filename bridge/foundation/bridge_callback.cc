@@ -15,13 +15,7 @@ std::shared_ptr<BridgeCallback> BridgeCallback::instance() {
 void BridgeCallback::disposeAllCallbacks() {
   auto lock = contextList.getLock();
   auto list = contextList.getVector();
-
-  for (int i = 0; i < list->size(); i++) {
-    std::unique_ptr<Context> context = std::move(list->back());
-    context.reset();
-    list->pop_back();
-  }
-
+  list->clear();
   callbackCount = 0;
 }
 
