@@ -117,7 +117,7 @@ mixin CSSSizingMixin {
         maxHeightTransition = transitionMap['max-height'];
       }
 
-      CSSSizedConstraints newConstraints = _getConstraints(style);
+      CSSSizedConstraints newConstraints = getConstraints(style);
 
       if (allTransition != null ||
           widthTransition != null ||
@@ -236,7 +236,7 @@ mixin CSSSizingMixin {
   RenderObject initRenderConstrainedBox(
       RenderObject renderObject, CSSStyleDeclaration style) {
     if (style != null) {
-      oldConstraints = _getConstraints(style);
+      oldConstraints = getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
         additionalConstraints: oldConstraints.toBoxConstraints(),
         child: renderObject,
@@ -246,7 +246,7 @@ mixin CSSSizingMixin {
     }
   }
 
-  CSSSizedConstraints _getConstraints(CSSStyleDeclaration style) {
+  static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
     if (style != null) {
       double width = getDisplayPortedLength(style['width']);
       double height = getDisplayPortedLength(style['height']);
@@ -254,6 +254,23 @@ mixin CSSSizingMixin {
       double maxWidth = getDisplayPortedLength(style['maxWidth']);
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
+
+      if (width != null) {
+        if (maxWidth != null && width > maxWidth) {
+          width = maxWidth;
+        } else if (minWidth != null && width < minWidth) {
+          width = minWidth;
+        }
+      }
+
+      if (height != null) {
+        if (minHeight != null && height < minHeight) {
+          height = minHeight;
+        } else if (maxHeight != null && height > maxHeight) {
+          height = maxHeight;
+        }
+      }
+
       return CSSSizedConstraints(
           width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
