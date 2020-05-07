@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -32,6 +33,11 @@ void main() {
       String code = spec['code'];
       evaluateTestScripts(code, url: filename);
     }
+
+    // Start warm-up frame, make frameEnabled equals true.
+    try {
+      WidgetsBinding.instance.attachRootWidget(null);
+    } catch(err) {} // Ignore throwing errors.
 
     runApp(
       shouldInitializeBinding: false,
