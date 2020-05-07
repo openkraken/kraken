@@ -417,7 +417,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'support/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             width: '100px',
           },

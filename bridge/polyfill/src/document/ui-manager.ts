@@ -15,17 +15,28 @@ function sendMessage(message: any[]) {
   return krakenUIManager(JSON.stringify(message));
 }
 
+enum BatchUpdateStatus {
+  pending,
+  end
+}
+
+let batchUpdateStatus: BatchUpdateStatus = BatchUpdateStatus.end;
+
 export function requestUpdateFrame() {
   updateRequested = false;
   if (updateMessageQueue.length > 0) {
     // Make sure message queue is cleared, no matter that dart throws error or not.
     try {
+      // the prevent endless recursion call (if someone call this function under event handler). batchUpdate operation should only called only.
+      if (batchUpdateStatus === BatchUpdateStatus.pending) return;
+      batchUpdateStatus = BatchUpdateStatus.pending;
       sendMessage(['batchUpdate', updateMessageQueue]);
     } catch(err) {
       console.error(err);
     } finally {
       updateMessageQueue.length = 0;
     }
+    batchUpdateStatus = BatchUpdateStatus.end;
   }
 }
 

@@ -27,7 +27,9 @@ class ImgElement extends Element {
             events: events);
 
   void afterConstruct() {
-    _renderImage();
+    if (properties.containsKey('src')) {
+      _renderImage();
+    }
   }
 
   bool get _hasWidthAndHeight {
@@ -83,7 +85,6 @@ class ImgElement extends Element {
     // Store listeners for remove listener.
     imageListeners = [
       ImageStreamListener(_initImageInfo),
-      ImageStreamListener(_handleEventAfterImageLoaded),
     ];
     imageListeners.forEach((ImageStreamListener imageListener) {
       imageStream.addListener(imageListener);
@@ -100,6 +101,7 @@ class ImgElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
+    _handleEventAfterImageLoaded(imageInfo, synchronousCall);
 
     if (!_hasWidthAndHeight) {
       _resize();
@@ -267,10 +269,10 @@ class ImgElement extends Element {
   dynamic getProperty(String key) {
     switch(key) {
       case 'width': {
-        return this._imageInfo.image.width;
+        return this._imageInfo != null ? this._imageInfo.image.width : 0;
       }
       case 'height': {
-        return this._imageInfo.image.height;
+        return this._imageInfo != null ? this._imageInfo.image.height : 0;
       }
     }
 
