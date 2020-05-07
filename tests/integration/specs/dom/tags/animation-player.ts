@@ -21,7 +21,7 @@ describe('AnimationPlayer', () => {
       animationPlayer.play('hands_up');
       // Wait for animation end.
       // Need to impl animation_end event.
-      await sleep(2);
+      await sleep(1);
 
       await matchScreenshot();
     });
