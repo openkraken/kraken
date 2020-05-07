@@ -16,7 +16,8 @@
     "@types/raf": "^3.4.0",
     "event-emitter": "^0.3.5",
     "expect": "^25.1.0",
-    "ts-jest": "^24.3.0"
+    "ts-jest": "^24.3.0",
+    "tslib": "^1.11.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.1.0",
