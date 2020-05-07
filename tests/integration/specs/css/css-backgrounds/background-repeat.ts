@@ -15,7 +15,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url("https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png")',
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
