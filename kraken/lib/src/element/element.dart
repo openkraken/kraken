@@ -1192,6 +1192,11 @@ class Element extends Node
   }
 
   @mustCallSuper
+  dynamic getProperty(String key) {
+    return properties[key];
+  }
+
+  @mustCallSuper
   void removeProperty(String key) {
     properties.remove(key);
 

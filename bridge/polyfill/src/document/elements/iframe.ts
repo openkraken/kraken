@@ -1,20 +1,14 @@
 import { Element } from '../element';
 import { method } from '../ui-manager';
 
+const iframeBuildInProperties = ['src'];
+
 export class IframeElement extends Element {
   static DEFAULT_WIDTH = 300;
   static DEFAULT_HEIGHT = 150;
 
   constructor(tagName: string) {
-    super(tagName);
-  }
-
-  set src(value: string) {
-    this.setAttribute('src', value);
-  }
-
-  get src() {
-    return this.getAttribute('src');
+    super(tagName, undefined, [], iframeBuildInProperties);
   }
 
   set width(value: number) {

@@ -44,7 +44,7 @@ function createElementWithStyle(tag: string, style: { [key: string]: string | nu
 
 type ElementProps = {
   [key: string]: any;
-  style: {
+  style?: {
     [key: string]: any;
   }
 };

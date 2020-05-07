@@ -26,9 +26,16 @@ const mediaElementBuildInEvents = [
   // 'waiting' // not supported
 ];
 
+const mediaElementBuildInProperties = [
+  'src',
+  'autoplay',
+  'loop',
+  'poster'
+];
+
 export class MediaElement extends Element {
   constructor(tagName: string) {
-    super(tagName, undefined, mediaElementBuildInEvents);
+    super(tagName, undefined, mediaElementBuildInEvents, mediaElementBuildInProperties);
   }
 
   play = () => {
@@ -42,36 +49,4 @@ export class MediaElement extends Element {
   fastSeek = (duration: number) => {
     method(this.nodeId, 'fastSeek', [duration]);
   };
-
-  set src(value: string) {
-    this.setAttribute('src', value);
-  }
-
-  get src() {
-    return this.getAttribute('src');
-  }
-
-  set autoplay(value: any) {
-    this.setAttribute('autoplay', value);
-  }
-
-  get autoplay() {
-    return this.getAttribute('autoplay');
-  }
-
-  set loop(value: any) {
-    this.setAttribute('loop', value);
-  }
-
-  get loop() {
-    return this.getAttribute('loop');
-  }
-
-  set poster(value: any) {
-    this.setAttribute('poster', value);
-  }
-
-  get poster() {
-    return this.getAttribute('poster');
-  }
 }

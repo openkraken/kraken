@@ -73,4 +73,43 @@ describe('Tags img', () => {
       });
     });
   });
+
+  it('set src property setter', async () => {
+    const img = createElement('img', {
+      src: 'assets/rabbit.png'
+    }) as HTMLImageElement;
+    BODY.appendChild(img);
+    let src = img.src;
+    expect(src).toBe('assets/rabbit.png');
+    // have to wait for asset load?
+    await sleep(0.1);
+    await matchScreenshot();
+    img.src = 'assets/solidblue.png';
+    await matchScreenshot();
+    src = img.src;
+    expect(src).toBe('assets/solidblue.png');
+  });
+
+  it('read image size through property', async (done) => {
+    const img = createElement('img', {
+      src: 'assets/rabbit.png'
+    }) as HTMLImageElement;
+    img.onload = async () => {
+      expect(img.width).toBe(70);
+      expect(img.height).toBe(72);
+      await matchScreenshot();
+      done();
+    };
+    BODY.appendChild(img);
+  });
+
+  it('change image src dynamically', async () => {
+    const img = createElement('img', {
+      src: 'assets/rabbit.png'
+    }) as HTMLImageElement;
+    BODY.appendChild(img);
+    await matchScreenshot();
+    img.src = 'assets/300x150-green.png';
+    await matchScreenshot();
+  });
 });
