@@ -55,6 +55,18 @@ class RenderPosition extends RenderStack {
 
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints.tightFor();
+        // if child has not width, should be caculate width by left and right
+        if (childParentData.width == 0.0 && childParentData.left != null &&
+          childParentData.right != null) {
+          childConstraints = childConstraints.tighten(
+            width: size.width - childParentData.left - childParentData.right);
+        }
+        // if child has not height, should be caculate height by top and bottom
+        if (childParentData.height == 0.0 && childParentData.top != null &&
+          childParentData.bottom != null) {
+          childConstraints = childConstraints.tighten(
+            height: size.height - childParentData.top - childParentData.bottom);
+        }
         child.layout(childConstraints, parentUsesSize: true);
 
         double x;
