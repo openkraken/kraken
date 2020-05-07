@@ -115,6 +115,18 @@ class ElementManagerActionDelegate {
     }
   }
 
+  dynamic getProperty(int targetId, String key) {
+    assert(existsTarget(targetId), 'targetId: $targetId key: $key');
+    Node target = getEventTargetByTargetId<Node>(targetId);
+    assert(target != null);
+
+    if (target is Element) {
+      // Only Element has properties
+      return target.getProperty(key);
+    }
+    return null;
+  }
+
   void removeProperty(int targetId, String key) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key');
     Node target = getEventTargetByTargetId<Node>(targetId);
@@ -312,6 +324,9 @@ class ElementManager {
         break;
       case 'setProperty':
         _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
+        break;
+      case 'getProperty':
+        returnValue = _actionDelegate.getProperty(payload[0], payload[1]);
         break;
       case 'removeProperty':
         _actionDelegate.removeProperty(payload[0], payload[1]);

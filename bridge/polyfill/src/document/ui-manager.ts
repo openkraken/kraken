@@ -53,6 +53,12 @@ export function setProperty(id: number, key: string, value: any) {
   appendMessage(['setProperty', [id, key, value]]);
 }
 
+export function getProperty(id: number, key: string) {
+  // Must flush batch update before get
+  requestUpdateFrame();
+  return sendMessage(['getProperty', [id, key]]);
+}
+
 export function removeProperty(id: number, key: string) {
   appendMessage(['removeProperty', [id, key]]);
 }

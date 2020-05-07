@@ -45,8 +45,8 @@ mixin CSSPositionMixin on RenderBox {
   }
 
   Offset getRelativeOffset(CSSStyleDeclaration style) {
-    CSSPositionType postion = getPositionFromStyle(style);
-    if (postion == CSSPositionType.relative) {
+    CSSPositionType position = getPositionFromStyle(style);
+    if (position == CSSPositionType.relative) {
       double dx;
       double dy;
       if (style.contains('left')) {

@@ -11,11 +11,11 @@ export class EventTarget {
   __eventHandlers: Map<string, Array<EventHandler>> = new Map();
   __propertyEventHandler: Map<string, EventHandler> = new Map();
 
-  constructor(nodeId?: number, buildInEvents: Array<string> = []) {
+  constructor(nodeId?: number, builtInEvents: Array<string> = []) {
     if (nodeId) {
       this.nodeId = nodeId;
     }
-    buildInEvents.forEach(event => {
+    builtInEvents.forEach(event => {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
         get() {
