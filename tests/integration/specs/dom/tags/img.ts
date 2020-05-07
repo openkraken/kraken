@@ -92,7 +92,7 @@ describe('Tags img', () => {
 
   it('read image size through property', async (done) => {
     const img = createElement('img', {
-      src: 'assets/rabbit.png'
+      src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/rabbit.png'
     }) as HTMLImageElement;
     img.onload = async () => {
       expect(img.width).toBe(70);
