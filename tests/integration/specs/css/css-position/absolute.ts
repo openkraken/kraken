@@ -427,29 +427,29 @@ describe('Position absolute', () => {
   });
 
   it('with no width and height', async () => {
-      let BODY = document.body;
-      const div = createElementWithStyle('div', {
-                  width: '200px',
-                  display: 'flex',
-                  height: '200px',
-                  border: '1px solid #000',
-                  position: 'relative',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'space-around',
-                }, [
-                  createElementWithStyle('div', {
-                    backgroundColor: 'brown',
-                    position: 'absolute',
-                    border: '1px solid #000',
-                    top: '30px',
-                    left: '30px',
-                    right: '30px',
-                    bottom: '30px',
-                  })
-                ]);
+    let BODY = document.body;
+    const div = createElementWithStyle('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      createElementWithStyle('div', {
+        backgroundColor: 'brown',
+        position: 'absolute',
+        border: '1px solid #000',
+        top: '30px',
+        left: '30px',
+        right: '30px',
+        bottom: '30px',
+      })
+    ]);
 
-       append(BODY, div);
-       await matchScreenshot();
-    });
+    append(BODY, div);
+    await matchScreenshot();
+  });
 });

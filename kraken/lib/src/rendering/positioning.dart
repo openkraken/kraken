@@ -61,7 +61,7 @@ class RenderPosition extends RenderStack {
           childConstraints = childConstraints.tighten(
             width: size.width - childParentData.left - childParentData.right);
         }
-        // if child has not width, should be caculate width by left and right
+        // if child has not height, should be caculate height by top and bottom
         if (childParentData.height == 0.0 && childParentData.top != null &&
           childParentData.bottom != null) {
           childConstraints = childConstraints.tighten(
