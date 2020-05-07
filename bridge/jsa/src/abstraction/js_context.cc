@@ -69,12 +69,6 @@ Instrumentation &JSContext::instrumentation() {
   return sharedInstance;
 }
 
-JSContext::ScopeState *JSContext::pushScope() {
-  return nullptr;
-}
-
-void JSContext::popScope(ScopeState *) {}
-
 const JSContext::PointerValue *JSContext::getPointerValue(const jsa::Pointer &pointer) {
   return pointer.ptr_;
 }

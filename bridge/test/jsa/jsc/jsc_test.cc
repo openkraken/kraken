@@ -103,6 +103,24 @@ TEST(JSCContext, getProperty) {
   EXPECT_EQ(name.isNumber(), true);
 }
 
+TEST(JSCContext, removeProperty) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, "name"), true);
+  result.getObject(*context).removeProperty(*context, "name");
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, "name"), false);
+}
+
+TEST(JSCContext, removePropertyPropName) {
+  auto context = std::make_unique<JSCContext>(normalPrint);
+  jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), true);
+  result.getObject(*context).removeProperty(*context, jsa::PropNameID::forAscii(*context, "name"));
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), false);
+}
+
 TEST(JSCContext, getGlobalProperty) {
   auto context = std::make_unique<JSCContext>(normalPrint);
   jsa::Object global = context->global();

@@ -706,6 +706,24 @@ bool V8Context::hasProperty(const jsa::Object &obj, const jsa::PropNameID &name)
   return object->Has(context, key).ToChecked();
 }
 
+void V8Context::removeProperty(const jsa::Object &obj, const jsa::String &name) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Object> object = objectRef(obj);
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
+  object->Delete(context, key).ToChecked();
+}
+
+void V8Context::removeProperty(const jsa::Object &obj, const jsa::PropNameID &name) {
+  v8::HandleScope handleScope(_isolate);
+  v8::Local<v8::Context> context = _context.Get(_isolate);
+  v8::Context::Scope contextScope(context);
+  v8::Local<v8::Object> object = objectRef(obj);
+  v8::Local<v8::String> key = v8::String::NewFromUtf8(_isolate, name.utf8(*this).c_str()).ToLocalChecked();
+  object->Delete(context, key).ToChecked();
+}
+
 void V8Context::setPropertyValue(jsa::Object &obj, const jsa::String &name, const jsa::Value &val) {
   v8::HandleScope handleScope(_isolate);
   v8::Local<v8::Context> context = _context.Get(_isolate);
