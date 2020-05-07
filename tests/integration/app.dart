@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:kraken/kraken.dart';
 import 'package:kraken/css.dart';
@@ -36,7 +37,7 @@ void main() {
 
     // Start warm-up frame, make frameEnabled equals true.
     try {
-      WidgetsBinding.instance.attachRootWidget(null);
+      WidgetsBinding.instance.attachRootWidget(MaterialApp(home: Scaffold()));
     } catch(err) {} // Ignore throwing errors.
 
     runApp(

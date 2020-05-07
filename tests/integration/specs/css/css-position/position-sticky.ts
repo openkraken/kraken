@@ -2713,15 +2713,14 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    requestAnimationFrame(() =>
-      requestAnimationFrame(async () => {
-        sticky.style.top = '5px';
-        await matchScreenshot();
-        done();
-      })
-    );
-
     await matchScreenshot();
+
+    requestAnimationFrame(async () => {
+      sticky.style.top = '5px';
+      await matchScreenshot();
+      done();
+    });
+
   });
   it('scrolled-remove-sibling', async (done) => {
     let bigItem: any;
@@ -2751,15 +2750,13 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(container);
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(async () => {
-        bigItem.style.display = 'none';
-        await matchScreenshot();
-        done();
-      });
-    });
-
     await matchScreenshot();
+
+    requestAnimationFrame(async () => {
+      bigItem.style.display = 'none';
+      await matchScreenshot();
+      done();
+    });
   });
   it('stacking-context-ref', async () => {
     let indicator;
