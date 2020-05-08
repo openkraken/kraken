@@ -1,7 +1,7 @@
 import {Element} from '../element';
 import {method} from "../ui-manager";
 
-const mediaElementBuildInEvents = [
+const mediaElementBuiltInEvents = [
   // 'abort', // not supported
   'canplay',
   'canplaythrough',
@@ -26,7 +26,7 @@ const mediaElementBuildInEvents = [
   // 'waiting' // not supported
 ];
 
-const mediaElementBuildInProperties = [
+const mediaElementBuiltInProperties = [
   'src',
   'autoplay',
   'loop',
@@ -35,7 +35,7 @@ const mediaElementBuildInProperties = [
 
 export class MediaElement extends Element {
   constructor(tagName: string) {
-    super(tagName, undefined, mediaElementBuildInEvents, mediaElementBuildInProperties);
+    super(tagName, undefined, mediaElementBuiltInEvents, mediaElementBuiltInProperties);
   }
 
   play = () => {

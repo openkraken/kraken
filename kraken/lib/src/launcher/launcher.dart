@@ -36,7 +36,7 @@ void runApp({
   }
 
   if (shouldInitializeBinding) {
-    /// Bootstrap binding
+    // Bootstrap binding.
     ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
   }
 

@@ -86,8 +86,8 @@ export class Element extends Node {
   // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   public attributes: Array<any> = [];
 
-  constructor(tagName: string, _nodeId?: number, buildInEvents?: Array<string>, buildInProperty?: Array<string>) {
-    super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(buildInEvents || []));
+  constructor(tagName: string, _nodeId?: number, builtInEvents?: Array<string>, builtInProperties?: Array<string>) {
+    super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(builtInEvents || []));
     this.tagName = tagName.toUpperCase();
     const nodeId = this.nodeId;
     const style = this.style = new StyleDeclaration(nodeId);
@@ -119,8 +119,8 @@ export class Element extends Node {
       });
     }
 
-    if (Array.isArray(buildInProperty)) {
-      buildInProperty.forEach(property => {
+    if (Array.isArray(builtInProperties)) {
+      builtInProperties.forEach(property => {
         Object.defineProperty(this, property, {
           get() {
             return this.getAttribute(property);

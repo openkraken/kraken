@@ -27,7 +27,6 @@ class ArrayBufferView;
 class Function;
 class Value;
 class Instrumentation;
-class Scope;
 class JSAException;
 class JSError;
 
@@ -54,7 +53,7 @@ using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
 using HostClassType = std::function<Object(JSContext &context, Object &constructor, const Value *args, size_t count)>;
 
 /// An object which implements this interface can be registered as an
-/// Object with the JS runtime.
+/// Object with the JS context.
 class HostObject {
 public:
   // The C++ object's dtor will be called when the GC finalizes this
@@ -99,7 +98,7 @@ typedef enum {
   none
 } ArrayBufferViewType;
 
-/// Represents a JS runtime.  Movable, but not copyable.  Note that
+/// Represents a JS context.  Movable, but not copyable.  Note that
 /// this object may not be thread-aware, but cannot be used safely from
 /// multiple threads at once.  The application is responsible for
 /// ensuring that it is used safely.  This could mean using the
@@ -141,11 +140,11 @@ public:
   /// developer-facing callers.
   virtual std::string description() = 0;
 
-  /// \return whether or not the underlying runtime supports debugging via the
+  /// \return whether or not the underlying context supports debugging via the
   /// Chrome remote debugging protocol.
   ///
-  /// NOTE: the API for determining whether a runtime is debuggable and
-  /// registering a runtime with the debugger is still in flux, so please don't
+  /// NOTE: the API for determining whether a context is debuggable and
+  /// registering a context with the debugger is still in flux, so please don't
   /// use this API unless you know what you're doing.
   virtual bool isInspectable() = 0;
 
@@ -183,7 +182,6 @@ protected:
   // in practice they are trivially copyable.  Sufficient use of
   // rvalue arguments/methods would also reduce the number of clones.
 
-  // 代表具体JS运行时实际的类型(String|Object|Symbol)接口。
   struct PointerValue {
 
     // 释放
@@ -221,6 +219,8 @@ protected:
   virtual Value getProperty(const Object &, const String &name) = 0;
   virtual bool hasProperty(const Object &, const PropNameID &name) = 0;
   virtual bool hasProperty(const Object &, const String &name) = 0;
+  virtual void removeProperty(const Object &, const String &name) = 0;
+  virtual void removeProperty(const Object &, const PropNameID &name) = 0;
   virtual void setPropertyValue(Object &, const PropNameID &name, const Value &value) = 0;
   virtual void setPropertyValue(Object &, const String &name, const Value &value) = 0;
 
@@ -255,11 +255,6 @@ protected:
   virtual Value call(const Function &, const Value &jsThis, const Value *args, size_t count) = 0;
   virtual Value callAsConstructor(const Function &, const Value *args, size_t count) = 0;
 
-  // Private data for managing scopes.
-  struct ScopeState;
-  virtual ScopeState *pushScope();
-  virtual void popScope(ScopeState *);
-
   virtual bool strictEquals(const Symbol &a, const Symbol &b) const = 0;
   virtual bool strictEquals(const String &a, const String &b) const = 0;
   virtual bool strictEquals(const Object &a, const Object &b) const = 0;
@@ -273,49 +268,6 @@ protected:
   }
   static const PointerValue *getPointerValue(const Pointer &pointer);
   static const PointerValue *getPointerValue(const Value &value);
-
-  template <typename Plain, typename Base> friend class RuntimeDecorator;
-};
-
-/// Not movable and not copyable RAII marker advising the underlying
-/// JavaScript VM to track resources allocated since creation until
-/// destruction so that they can be recycled eagerly when the Scope
-/// goes out of scope instead of floating in the air until the next
-/// garbage collection or any other delayed release occurs.
-///
-/// This API should be treated only as advice, implementations can
-/// choose to ignore the fact that Scopes are created or destroyed.
-///
-/// This class is an exception to the rule allowing destructors to be
-/// called without proper synchronization (see Runtime documentation).
-/// The whole point of this class is to enable all sorts of clean ups
-/// when the destructor is called and this proper synchronization is
-/// required at that time.
-///
-/// Instances of this class are intended to be created as automatic stack
-/// variables in which case destructor calls don't require any additional
-/// locking, provided that the lock (if any) is managed with RAII helpers.
-class Scope {
-public:
-  explicit Scope(JSContext &context) : rt_(context), prv_(context.pushScope()) {}
-  ~Scope() {
-    rt_.popScope(prv_);
-  };
-
-  Scope(const Scope &) = delete;
-  Scope(Scope &&) = delete;
-
-  Scope &operator=(const Scope &) = delete;
-  Scope &operator=(Scope &&) = delete;
-
-  template <typename F> static auto callInNewScope(JSContext &context, F f) -> decltype(f()) {
-    Scope s(context);
-    return f();
-  }
-
-private:
-  JSContext &rt_;
-  JSContext::ScopeState *prv_;
 };
 
 } // namespace jsa

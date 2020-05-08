@@ -21,8 +21,8 @@ export class Node extends EventTarget {
   public textContent: string | null;
   public parentNode: Node | null;
 
-  constructor(type: NodeType, id?: number, buildInEvents?: Array<string>) {
-    super(id || nodesCount++, buildInEvents || []);
+  constructor(type: NodeType, id?: number, builtInEvents?: Array<string>) {
+    super(id || nodesCount++, builtInEvents || []);
     this.nodeType = type;
   }
 

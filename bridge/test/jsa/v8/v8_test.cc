@@ -117,6 +117,26 @@ TEST(V8Context, V8ObjectValue_getProperty) {
   EXPECT_EQ(name.isNumber(), true);
 }
 
+TEST(V8Context, removeProperty) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, "name"), true);
+  result.getObject(*context).removeProperty(*context, "name");
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, "name"), false);
+}
+
+TEST(V8Context, removePropertyPropName) {
+  initV8Engine("");
+  auto context = std::make_unique<V8Context>(normalErrorHandler);
+  jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
+  EXPECT_EQ(result.isObject(), true);
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), true);
+  result.getObject(*context).removeProperty(*context, jsa::PropNameID::forAscii(*context, "name"));
+  EXPECT_EQ(result.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), false);
+}
+
 TEST(V8Context, V8ObjectValue_GetGlobalProperty) {
   initV8Engine("");
   auto context = std::make_unique<V8Context>(normalErrorHandler);
