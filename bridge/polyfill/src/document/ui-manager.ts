@@ -42,8 +42,8 @@ export function createComment(id: number, data: string) {
   appendMessage(['createComment', [id, data]]);
 }
 
-export function insertAdjacentNode(parentNodeId: number, position: string, nodeId: number) {
-  appendMessage(['insertAdjacentNode', [parentNodeId, position, nodeId]]);
+export function insertAdjacentNode(parentNodeId: number, position: string, targetId: number) {
+  appendMessage(['insertAdjacentNode', [parentNodeId, position, targetId]]);
 }
 
 export function removeNode(id: number) {
@@ -82,11 +82,11 @@ export function method(id: number, methodName: string, params: any[] = []) {
   return sendMessage(['method', [id, methodName, params]]);
 }
 
-export function toBlob(nodeId: number, devicePixelRatio: number) {
+export function toBlob(targetId: number, devicePixelRatio: number) {
   // need to flush all pending frame messages
   requestUpdateFrame();
   return new Promise((resolve, reject) => {
-    krakenToBlob(nodeId, devicePixelRatio, (err, blob) => {
+    krakenToBlob(targetId, devicePixelRatio, (err, blob) => {
       if (err) {
         return reject(new Error(err));
       }

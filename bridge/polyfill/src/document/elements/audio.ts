@@ -1,5 +1,5 @@
-import {MediaElement} from './mediaElement';
-import {method} from '../ui-manager';
+import { MediaElement } from '../media-element';
+import { method } from '../ui-manager';
 
 export class AudioElement extends MediaElement {
   constructor(tagName: string) {
@@ -7,14 +7,14 @@ export class AudioElement extends MediaElement {
   }
 
   play = () => {
-    method(this.nodeId, 'play');
+    method(this.targetId, 'play');
   };
 
   pause = () => {
-    method(this.nodeId, 'pause');
+    method(this.targetId, 'pause');
   };
 
   fastSeek = (duration: number) => {
-    method(this.nodeId, 'fastSeek', [duration]);
+    method(this.targetId, 'fastSeek', [duration]);
   };
 }

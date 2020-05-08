@@ -8,6 +8,6 @@ export class Comment extends Node {
   constructor(data: string) {
     super(NodeType.COMMENT_NODE);
     this.textContent = this.nodeValue = this.data = data;
-    createComment(this.nodeId, data);
+    createComment(this.targetId, data);
   }
 }

@@ -1,4 +1,4 @@
-import { EventTarget, BODY} from './event-target';
+import { EventTarget, BODY } from './event-target';
 import { insertAdjacentNode, removeNode } from './ui-manager';
 
 export type NodeList = Array<Node>;
@@ -27,10 +27,10 @@ export class Node extends EventTarget {
   }
 
   public get isConnected() {
-    let _isConnected = this.nodeId === BODY;
+    let _isConnected = this.targetId === BODY;
     let parentNode = this.parentNode;
     while (parentNode) {
-      _isConnected = parentNode.nodeId === BODY;
+      _isConnected = parentNode.targetId === BODY;
       parentNode = parentNode.parentNode;
     }
     return _isConnected;
@@ -62,13 +62,23 @@ export class Node extends EventTarget {
 
   public appendChild(child: Node) {
     // @TODO add logic to tell whether child to append contains the parent
-    if (child.nodeId === BODY || child === this) {
+    if (child.targetId === BODY || child === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
 
     this.childNodes.push(child);
     child.parentNode = this;
-    insertAdjacentNode(this.nodeId, 'beforeend', child.nodeId);
+    insertAdjacentNode(this.targetId, 'beforeend', child.targetId);
+  }
+
+  /**
+   * The ChildNode.remove() method removes the object
+   * from the tree it belongs to.
+   * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
+   */
+  public remove() {
+    if (this.parentNode == null) return;
+    this.parentNode.removeChild(this);
   }
 
   /**
@@ -81,7 +91,7 @@ export class Node extends EventTarget {
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
       child.parentNode = null;
-      removeNode(child.nodeId);
+      removeNode(child.targetId);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
@@ -95,7 +105,7 @@ export class Node extends EventTarget {
     const nextIndex = parentChildNodes.indexOf(referenceNode);
     parentChildNodes.splice(nextIndex - 1, 0, newChild);
     newChild.parentNode = parentNode;
-    insertAdjacentNode(referenceNode.nodeId, 'beforebegin', newChild.nodeId);
+    insertAdjacentNode(referenceNode.targetId, 'beforebegin', newChild.targetId);
   }
 
   /**
@@ -116,8 +126,8 @@ export class Node extends EventTarget {
     newChild.parentNode = parentNode;
     parentNode.childNodes.splice(childIndex, 1, newChild);
 
-    insertAdjacentNode(oldChild.nodeId, 'afterend', newChild.nodeId);
-    removeNode(oldChild.nodeId);
+    insertAdjacentNode(oldChild.targetId, 'afterend', newChild.targetId);
+    removeNode(oldChild.targetId);
 
     return oldChild;
   }

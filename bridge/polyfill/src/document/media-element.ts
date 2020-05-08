@@ -1,5 +1,5 @@
-import {Element} from '../element';
-import {method} from "../ui-manager";
+import { Element } from './element';
+import { method } from "./ui-manager";
 
 const mediaElementBuiltInEvents = [
   // 'abort', // not supported
@@ -39,14 +39,14 @@ export class MediaElement extends Element {
   }
 
   play = () => {
-    method(this.nodeId, 'play');
+    method(this.targetId, 'play');
   };
 
   pause = () => {
-    method(this.nodeId, 'pause');
+    method(this.targetId, 'pause');
   };
 
   fastSeek = (duration: number) => {
-    method(this.nodeId, 'fastSeek', [duration]);
+    method(this.targetId, 'fastSeek', [duration]);
   };
 }

@@ -64,7 +64,7 @@ class CanvasRenderingContext2D {
   constructor(canvas: CanvasElement) {
     this.canvas = canvas;
     // Sync to dart, retain a conext2d instance.
-    method(canvas.nodeId, GET_CANVAS_CONTEXT, ['2d']);
+    method(canvas.targetId, GET_CANVAS_CONTEXT, ['2d']);
 
     // Define context2d properties.
     PROPERTIES.forEach((property) => {
@@ -74,7 +74,7 @@ class CanvasRenderingContext2D {
         enumerable: true,
         get: () => this[shaowPropertyKey],
         set(value: string) {
-          method(this.canvas.nodeId, UPDATE_CANVAS_CONTEXT_2D_PROPERTY, [
+          method(this.canvas.targetId, UPDATE_CANVAS_CONTEXT_2D_PROPERTY, [
             property, value
           ]);
           this[shaowPropertyKey] = value;
@@ -85,7 +85,7 @@ class CanvasRenderingContext2D {
     // Define context2d methods.
     METHODS.forEach((methodName) => {
       this[methodName] = function(...args: Array<any>) {
-        return method(this.canvas.nodeId, APPLY_CANVAS_CONTEXT_2D_METHOD, [
+        return method(this.canvas.targetId, APPLY_CANVAS_CONTEXT_2D_METHOD, [
           methodName, ...args
         ]);
       };

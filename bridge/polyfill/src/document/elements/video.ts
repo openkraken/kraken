@@ -1,5 +1,5 @@
-import {MediaElement} from './mediaElement';
-import {method} from '../ui-manager';
+import { MediaElement } from '../media-element';
+import { method } from '../ui-manager';
 
 export class VideoElement extends MediaElement {
   constructor(tagName: string) {
@@ -7,10 +7,10 @@ export class VideoElement extends MediaElement {
   }
 
   get videoHeight() {
-    return method(this.nodeId, 'videoHeight');
+    return method(this.targetId, 'videoHeight');
   }
 
   get videoWidth() {
-    return method(this.nodeId, 'videoWidth');
+    return method(this.targetId, 'videoWidth');
   }
 }
