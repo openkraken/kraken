@@ -85,6 +85,7 @@ describe('Tags img', () => {
     await sleep(0.1);
     await matchScreenshot();
     img.src = 'assets/solidblue.png';
+    await sleep(0.1);
     await matchScreenshot();
     src = img.src;
     expect(src).toBe('assets/solidblue.png');

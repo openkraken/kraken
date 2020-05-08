@@ -32,10 +32,6 @@ class ImgElement extends Element {
     }
   }
 
-  bool get _hasWidthAndHeight {
-    return style.contains('width') && style.contains('height');
-  }
-
   bool _hasLazyLoading = false;
 
   void _renderImage() {
@@ -103,9 +99,7 @@ class ImgElement extends Element {
     _imageInfo = imageInfo;
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
 
-    if (!_hasWidthAndHeight) {
-      _resize();
-    }
+    _resize();
   }
 
   void _resize() {
@@ -132,14 +126,17 @@ class ImgElement extends Element {
       );
     } else {
       CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
-      if (containWidth) {
+      if (containWidth && containHeight) {
+        width = sizedConstraints.width;
+        height = sizedConstraints.height;
+      } else if (containWidth) {
         width = sizedConstraints.width;
         height = width * realHeight / realWidth;
       } else if (containHeight) {
         height = sizedConstraints.height;
         width = height * realWidth / realHeight;
       }
-      constraints = BoxConstraints.tightFor(
+      constraints = BoxConstraints.expand(
         width: width,
         height: height,
       );
