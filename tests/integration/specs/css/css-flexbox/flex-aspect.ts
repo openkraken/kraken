@@ -1,22 +1,9 @@
 /*auto generated*/
 describe('flex-aspect', () => {
   it('ratio-img-column-001', async () => {
-    let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
     let constrainedFlex;
-    p = createElement(
-      'p',
-      {
-        style: {
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createText(`Test passes if there is a filled green square and `),
-        createText(`.`),
-      ]
-    );
     referenceOverlappedRed = createElement('div', {
       id: 'reference-overlapped-red',
       style: {
@@ -46,14 +33,12 @@ describe('flex-aspect', () => {
           style: {
             'min-width': '0',
             'min-height': '0',
-            flex: 'none',
             width: '100px',
             'box-sizing': 'border-box',
           },
         })),
       ]
     );
-    BODY.appendChild(p);
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
