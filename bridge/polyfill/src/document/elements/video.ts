@@ -7,10 +7,10 @@ export class VideoElement extends MediaElement {
   }
 
   get videoHeight() {
-    return method(this.nodeId, 'videoHeight');
+    return method(this.targetId, 'videoHeight');
   }
 
   get videoWidth() {
-    return method(this.nodeId, 'videoWidth');
+    return method(this.targetId, 'videoWidth');
   }
 }

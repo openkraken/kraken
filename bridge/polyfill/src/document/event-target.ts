@@ -7,13 +7,13 @@ export const WINDOW = -2;
 type EventHandler = EventListener;
 
 export class EventTarget {
-  public nodeId: number;
+  public targetId: number;
   __eventHandlers: Map<string, Array<EventHandler>> = new Map();
   __propertyEventHandler: Map<string, EventHandler> = new Map();
 
-  constructor(nodeId?: number, builtInEvents: Array<string> = []) {
-    if (nodeId) {
-      this.nodeId = nodeId;
+  constructor(targetId?: number, builtInEvents: Array<string> = []) {
+    if (targetId) {
+      this.targetId = targetId;
     }
     builtInEvents.forEach(event => {
       let eventName = 'on' + event.toLowerCase();
@@ -37,14 +37,14 @@ export class EventTarget {
     if (typeof handler !== 'function') {
       return;
     }
-    if (!this.__eventHandlers.has(eventName) || this.nodeId === BODY) {
+    if (!this.__eventHandlers.has(eventName) || this.targetId === BODY) {
       this.__eventHandlers.set(eventName, []);
 
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
       // trigger event from dart side. this can led to significant performance improvement when using Front-End frameworks such as Rax, or cause some
       /// overhead performance issue when some event trigger more frequently.
-      if (this.nodeId) {
-        addEvent(this.nodeId, eventName);
+      if (this.targetId) {
+        addEvent(this.targetId, eventName);
       }
     }
     this.__eventHandlers.get(eventName)!.push(handler);

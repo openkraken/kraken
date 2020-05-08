@@ -8,13 +8,13 @@ export class TextNode extends Node {
   constructor(data: string) {
     super(NodeType.TEXT_NODE);
     this._data = data;
-    createTextNode(this.nodeId, data);
+    createTextNode(this.targetId, data);
   }
 
   public set data(data: string) {
     const value = String(data);
     this._data = value;
-    setProperty(this.nodeId, 'data', value);
+    setProperty(this.targetId, 'data', value);
   }
 
   public get data() {
