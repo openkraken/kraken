@@ -94,7 +94,8 @@ mixin CSSBackgroundMixin {
       // record the consumed property
       String consumedKey;
       for (String key in keys) {
-        // background image is method, should contains（ ）
+        // the value of background image is function,  may be contain space
+        // should begin with left parenthesis and end with right parenthesis
         if (key == BACKGROUND_IMAGE && _consumeBackgroundImage(property)) {
           consumedKey = key;
           String backgroundImage = property;

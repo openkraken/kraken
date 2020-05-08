@@ -24,7 +24,7 @@ class CSSUrl implements CSSValue<ImageProvider> {
 
   @override
   void parse() {
-    // support input with ' " cover
+    // support input string enclosed in quotation marks
     if ((_rawInput.startsWith('\'') && _rawInput.endsWith('\'')) ||
       (_rawInput.startsWith('\"') && _rawInput.endsWith('\"'))) {
       _rawInput = _rawInput.substring(1, _rawInput.length - 1);
