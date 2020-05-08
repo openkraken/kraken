@@ -16,7 +16,7 @@ function sendMessage(message: any[]) {
 }
 
 enum BatchUpdateStatus {
-  pending,
+  updating,
   end
 }
 
@@ -28,8 +28,8 @@ export function requestUpdateFrame() {
     // Make sure message queue is cleared, no matter that dart throws error or not.
     try {
       // the prevent endless recursion call (if someone call this function under event handler). batchUpdate operation should only called only.
-      if (batchUpdateStatus === BatchUpdateStatus.pending) return;
-      batchUpdateStatus = BatchUpdateStatus.pending;
+      if (batchUpdateStatus === BatchUpdateStatus.updating) return;
+      batchUpdateStatus = BatchUpdateStatus.updating;
       sendMessage(['batchUpdate', updateMessageQueue]);
     } catch(err) {
       console.error(err);
