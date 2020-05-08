@@ -91,15 +91,14 @@ describe('Tags img', () => {
   });
 
   it('read image size through property', async (done) => {
-    const img = createElement('img', {
-      src: 'assets/rabbit.png'
-    }) as HTMLImageElement;
+    const img = document.createElement('img');
     img.onload = async () => {
       expect(img.width).toBe(70);
       expect(img.height).toBe(72);
       await matchScreenshot();
       done();
     };
+    img.src = 'assets/rabbit.png';
     BODY.appendChild(img);
   });
 

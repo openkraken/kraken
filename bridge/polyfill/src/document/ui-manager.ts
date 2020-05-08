@@ -20,11 +20,12 @@ export function requestUpdateFrame() {
   if (updateMessageQueue.length > 0) {
     // Make sure message queue is cleared, no matter that dart throws error or not.
     try {
-      sendMessage(['batchUpdate', updateMessageQueue]);
+      let message = JSON.stringify(['batchUpdate', updateMessageQueue]);
+      // Clear updateMessageQueue before send BatchUpdate into Flutter to prevent duplicate messages.
+      updateMessageQueue.length = 0;
+      krakenUIManager(message);
     } catch(err) {
       console.error(err);
-    } finally {
-      updateMessageQueue.length = 0;
     }
   }
 }
