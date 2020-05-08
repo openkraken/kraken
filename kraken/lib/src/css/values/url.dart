@@ -14,7 +14,7 @@ class CSSUrl implements CSSValue<ImageProvider> {
   String cache;
   ImageProvider _value;
   String _url;
-  final String _rawInput;
+  String _rawInput;
   CSSUrl(this._rawInput, {this.cache = 'auto'}) {
     parse();
   }
@@ -24,6 +24,11 @@ class CSSUrl implements CSSValue<ImageProvider> {
 
   @override
   void parse() {
+    // support input string enclosed in quotation marks
+    if ((_rawInput.startsWith('\'') && _rawInput.endsWith('\'')) ||
+      (_rawInput.startsWith('\"') && _rawInput.endsWith('\"'))) {
+      _rawInput = _rawInput.substring(1, _rawInput.length - 1);
+    }
     if (_rawInput.startsWith('//') ||
         _rawInput.startsWith('http://') ||
         _rawInput.startsWith('https://')) {
