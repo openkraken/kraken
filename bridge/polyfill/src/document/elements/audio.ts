@@ -1,5 +1,5 @@
-import {MediaElement} from './mediaElement';
-import {method} from '../ui-manager';
+import { MediaElement } from '../media-element';
+import { method } from '../ui-manager';
 
 export class AudioElement extends MediaElement {
   constructor(tagName: string) {

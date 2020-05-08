@@ -1,5 +1,5 @@
-import {Element} from '../element';
-import {method} from "../ui-manager";
+import { Element } from './element';
+import { method } from "./ui-manager";
 
 const mediaElementBuiltInEvents = [
   // 'abort', // not supported
