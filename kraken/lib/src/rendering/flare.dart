@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flare_flutter/flare_actor.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 
 class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
@@ -15,6 +16,14 @@ class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
       double height = getElementComputedHeight(_targetId);
       size = Size(width, height);
     }
+  }
+
+  @override
+  void dispose() {
+    // Lazy dispose, due to dynamic render-box arrangement.
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!attached) super.dispose();
+    });
   }
 
   @override
