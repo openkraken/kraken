@@ -131,11 +131,12 @@ class ImgElement extends Element {
         height: realHeight,
       );
     } else {
+      CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
       if (containWidth) {
-        width = CSSSizingMixin.getDisplayPortedLength(style['width']);
+        width = sizedConstraints.width;
         height = width * realHeight / realWidth;
       } else if (containHeight) {
-        height = CSSSizingMixin.getDisplayPortedLength(style['height']);
+        height = sizedConstraints.height;
         width = height * realWidth / realHeight;
       }
       constraints = BoxConstraints.tightFor(
@@ -144,12 +145,6 @@ class ImgElement extends Element {
       );
     }
     renderConstrainedBox.additionalConstraints = constraints;
-  }
-
-  BoxConstraints getBoxConstraintsFromStyle(CSSStyleDeclaration style) {
-    double width = CSSSizingMixin.getDisplayPortedLength(style['width']);
-    double height = CSSSizingMixin.getDisplayPortedLength(style['height']);
-    return BoxConstraints.tightFor(width: width, height: height);
   }
 
   BoxFit _getBoxFit(CSSStyleDeclaration style) {
