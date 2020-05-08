@@ -132,13 +132,6 @@ class Element extends Node
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
 
-    // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
-
-    // Constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-
     // Positioned boundary
     if (_isPositioned(style)) {
       renderObject = renderStack = RenderPosition(
@@ -148,6 +141,13 @@ class Element extends Node
         children: [renderObject],
       );
     }
+
+    // BoxModel Border
+    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
+
+    // Constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Pointer event listener boundary.
     renderObject = RenderPointerListener(
@@ -807,6 +807,10 @@ class Element extends Node
         return;
       } else if (zIndex >= 0) {
         renderStack.insert(renderObject, after: child);
+        addPositionPlaceholder();
+        return;
+      } else if (zIndex < 0) {
+        renderStack.insert(renderObject, after: null);
         addPositionPlaceholder();
         return;
       }
