@@ -1,4 +1,4 @@
-import { EventTarget, BODY} from './event-target';
+import { EventTarget, BODY } from './event-target';
 import { insertAdjacentNode, removeNode } from './ui-manager';
 
 export type NodeList = Array<Node>;
@@ -69,6 +69,16 @@ export class Node extends EventTarget {
     this.childNodes.push(child);
     child.parentNode = this;
     insertAdjacentNode(this.targetId, 'beforeend', child.targetId);
+  }
+
+  /**
+   * The ChildNode.remove() method removes the object
+   * from the tree it belongs to.
+   * reference: https://dom.spec.whatwg.org/#dom-childnode-remove
+   */
+  public remove() {
+    if (this.parentNode == null) return;
+    this.parentNode.removeChild(this);
   }
 
   /**
