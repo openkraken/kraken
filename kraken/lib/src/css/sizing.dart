@@ -604,8 +604,8 @@ class CSSSizedConstraints {
 
   BoxConstraints toBoxConstraints() {
     return BoxConstraints(
-      minWidth: minWidth ?? width ?? 0.0,
-      minHeight: minHeight ?? height ?? 0.0,
+      minWidth: minWidth ?? 0.0,
+      minHeight: minHeight ?? 0.0,
       maxWidth: maxWidth ?? width ?? double.infinity,
       maxHeight: maxHeight ?? height ?? double.infinity,
     );

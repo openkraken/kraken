@@ -519,13 +519,14 @@ class RenderFlowLayout extends RenderBox
       return;
     }
 
-    BoxConstraints childConstraints;
+    // @NOTE: Child size could be larger than parent's content, give
+    // an infinite box constraint to flow layout children.
+    final BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
     switch (direction) {
       case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
@@ -535,7 +536,6 @@ class RenderFlowLayout extends RenderBox
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
@@ -611,24 +611,17 @@ class RenderFlowLayout extends RenderBox
       constraintHeight = math.max(constraintHeight, elementHeight);
     }
 
-    // get container height
-    double containerHeight = crossAxisExtent;
-    double containerParentHeight =
-        CSSLength.toDisplayPortValue(style['height']);
-    if (containerParentHeight != null) {
-      containerHeight = containerParentHeight;
-    }
-
     switch (direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(constraintWidth, constraintHeight));
-        containerMainAxisExtent = constraintWidth;
-        containerCrossAxisExtent = containerHeight;
+        // AxisExtent should be size.
+        containerMainAxisExtent = elementWidth ?? size.width;
+        containerCrossAxisExtent = elementHeight ?? size.height;
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-        containerMainAxisExtent = containerHeight;
-        containerCrossAxisExtent = constraintWidth;
+        containerMainAxisExtent = elementHeight ?? size.height;
+        containerCrossAxisExtent = elementWidth ?? size.width;
         break;
     }
 

@@ -319,18 +319,13 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
 
   @override
   void performLayout() {
-    assert(child != null);
-    BoxConstraints childConstraints;
-    if (axisDirection == AxisDirection.down) {
-      childConstraints =
-          constraints.copyWith(minHeight: 0, maxHeight: double.infinity);
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      alignChild();
     } else {
-      childConstraints =
-          constraints.copyWith(minWidth: 0, maxWidth: double.infinity);
+      size = Size.zero;
     }
-    child.layout(childConstraints, parentUsesSize: true);
-    size = constraints.constrain(child.size);
-    alignChild();
   }
 
   @override

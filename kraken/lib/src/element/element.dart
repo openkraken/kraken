@@ -1049,7 +1049,7 @@ class Element extends Node
     // Update constrained box.
     updateConstraints(style, transitionMap);
 
-    if (property == 'width' || property == 'height') {
+    if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original);
       _updateOffset(
         definiteTransition:

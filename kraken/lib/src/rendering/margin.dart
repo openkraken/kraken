@@ -31,7 +31,7 @@ class RenderMargin extends RenderShiftedBox {
   void _markNeedResolution() {
     _resolvedMargin = null;
     markNeedsLayout();
-    // force child relayout
+    // force child re-layout
     RenderBox childBox = child;
     child = null;
     child = childBox;
@@ -130,6 +130,7 @@ class RenderMargin extends RenderShiftedBox {
       ));
       return;
     }
+
     child.layout(constraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = Offset(_resolvedMargin.left, _resolvedMargin.top);
