@@ -33,8 +33,6 @@ typedef void (*InvokeFetch)(int32_t, const char *, const char *);
 typedef double (*DevicePixelRatio)();
 typedef const char *(*PlatformBrightness)();
 typedef void (*OnPlatformBrightnessChanged)();
-typedef void (*StartFlushCallbacksInUIThread)();
-typedef void (*StopFlushCallbacksInUIThread)();
 typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t, double);
 typedef void (*OnJSError)(const char *);
 
@@ -49,8 +47,6 @@ KRAKEN_EXPORT
 void invokeEventListener(int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
-KRAKEN_EXPORT
-void flushUITask();
 
 KRAKEN_EXPORT
 void registerInvokeUIManager(InvokeUIManager invokeUIManager);
@@ -78,10 +74,6 @@ KRAKEN_EXPORT
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
-KRAKEN_EXPORT
-void registerStartFlushCallbacksInUIThread(StartFlushCallbacksInUIThread startFlushCallbacksInUIThread);
-KRAKEN_EXPORT
-void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 

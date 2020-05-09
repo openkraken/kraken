@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include "macros.h"
-#include <string.h>
+#include <string>
 
 namespace foundation {
 

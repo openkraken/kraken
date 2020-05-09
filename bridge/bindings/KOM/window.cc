@@ -5,7 +5,6 @@
 
 #include "window.h"
 #include "dart_methods.h"
-#include <cassert>
 
 namespace kraken {
 namespace binding {

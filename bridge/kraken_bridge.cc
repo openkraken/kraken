@@ -6,13 +6,11 @@
 #include "kraken_bridge.h"
 #include "bridge.h"
 #include "dart_methods.h"
+#include "foundation/logging.h"
 #include "jsa.h"
 
 #include <atomic>
-#include <iostream>
-#include <string>
 
-kraken::DartMethodPointer funcPointer;
 // this is not thread safe
 std::atomic<bool> inited{false};
 kraken::JSBridge *bridge;
@@ -25,7 +23,7 @@ void printError(const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(error.what());
   } else {
-    std::cerr << error.what() << std::endl;
+    KRAKEN_LOG(ERROR) << error.what() << std::endl;
   }
 }
 
@@ -110,18 +108,6 @@ Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
   return &screen;
-}
-
-void flushUITask() {
-  bridge->flushUITask();
-}
-
-void registerStartFlushCallbacksInUIThread(StartFlushCallbacksInUIThread startFlushCallbacksInUIThread) {
-  kraken::registerStartFlushUILoop(startFlushCallbacksInUIThread);
-}
-
-void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushCallbacksInUiThread) {
-  kraken::registerStopFlushCallbacksInUIThread(stopFlushCallbacksInUiThread);
 }
 
 void registerToBlob(ToBlob toBlob) {

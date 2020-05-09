@@ -5,7 +5,7 @@
 
 #include "location.h"
 #include "dart_methods.h"
-#include "websocketpp/uri.hpp"
+#include "foundation/uri.hpp"
 
 namespace kraken {
 namespace binding {
@@ -21,16 +21,14 @@ std::string search = "";
 std::string hash = "";
 
 void updateLocation(std::string url = "") {
-  websocketpp::uri uri(url);
-  if (uri.get_valid()) {
-    origin = uri.get_host();
-    protocol = uri.get_scheme() + ":";
-    hostname = uri.get_host();
-    port = uri.get_port_str();
-    host = hostname + ":" + port;
-    search = uri.get_query();
-    pathname = uri.get_resource();
-  }
+  foundation::uri uri(url);
+  origin = uri.get_host();
+  protocol = uri.get_scheme() + ":";
+  hostname = uri.get_host();
+  port = uri.get_port_str();
+  host = hostname + ":" + port;
+  search = uri.get_query();
+  pathname = uri.get_resource();
 }
 
 Value JSLocation::get(JSContext &context, const PropNameID &name) {

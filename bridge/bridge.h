@@ -7,7 +7,6 @@
 #define KRAKEN_JS_BRIDGE_H_
 
 #include "bindings/KOM/screen.h"
-#include "bindings/KOM/websocket.h"
 #include "bindings/KOM/window.h"
 
 #include "bindings/kraken.h"
@@ -21,7 +20,6 @@ namespace kraken {
 class JSBridge final {
 private:
   std::unique_ptr<alibaba::jsa::JSContext> context;
-  std::shared_ptr<kraken::binding::JSWebSocket> websocket_;
   std::shared_ptr<kraken::binding::JSScreen> screen_;
   std::shared_ptr<kraken::binding::JSWindow> window_;
   alibaba::jsa::JSExceptionHandler handler_;
@@ -45,7 +43,6 @@ public:
   void invokeEventListener(int32_t type, const char *args);
   void handleUIListener(const char *args);
   void handleModuleListener(const char *args);
-  void flushUITask();
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER

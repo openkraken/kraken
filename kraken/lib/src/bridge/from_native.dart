@@ -594,50 +594,6 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
-typedef Native_StartFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterFlushCallbacksInUIThread = Void Function(
-    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
-typedef Dart_RegisterFlushCallbacksInUIThread = void Function(
-    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
-
-final Dart_RegisterFlushCallbacksInUIThread
-    _registerStartFlushCallbacksInUIThread = nativeDynamicLibrary
-        .lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>(
-            'registerStartFlushCallbacksInUIThread')
-        .asFunction();
-
-void _startFlushCallbacksInUIThread() {
-  startFlushCallbacksInUIThread();
-}
-
-void registerStartFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
-      Pointer.fromFunction(_startFlushCallbacksInUIThread);
-  _registerStartFlushCallbacksInUIThread(pointer);
-}
-
-typedef Native_StopFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(
-    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
-typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(
-    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
-
-final Dart_RegisterFlushCallbacksInUIThread
-    _registerStopFlushCallbacksInUIThread = nativeDynamicLibrary
-        .lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>(
-            'registerStopFlushCallbacksInUIThread')
-        .asFunction();
-
-void _stopFlushCallbacksInUIThread() {
-  stopFlushCallbacksInUIThread();
-}
-
-void registerStopFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
-      Pointer.fromFunction(_stopFlushCallbacksInUIThread);
-  _registerStopFlushCallbacksInUIThread(pointer);
-}
-
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
@@ -709,7 +665,5 @@ void registerDartMethodsToCpp() {
   registerGetScreen();
   registerDevicePixelRatio();
   registerPlatformBrightness();
-  registerStartFlushCallbacksInUIThread();
-  registerStopFlushCallbacksInUIThread();
   registerToBlob();
 }

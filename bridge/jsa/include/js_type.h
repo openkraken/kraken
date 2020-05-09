@@ -8,7 +8,6 @@
 
 #include "js_context.h"
 #include <cassert>
-#include <cstring>
 #include <string>
 #include <vector>
 

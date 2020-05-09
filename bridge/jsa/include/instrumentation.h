@@ -6,7 +6,6 @@
 #ifndef JSA_INSTRUMENTATION_H_
 #define JSA_INSTRUMENTATION_H_
 
-#include <iosfwd>
 #include <string>
 
 #include "js_type.h"
