@@ -116,10 +116,8 @@ class Element extends Node
     // Mark element needs to reposition according to position CSS.
     if (_isPositioned(style)) needsReposition = true;
 
-    if (allowChildren) {
-      // Content children layout, BoxModel content.
-      renderObject = renderLayoutBox = createRenderLayoutBox(style, null);
-    }
+    // Content children layout, BoxModel content.
+    renderObject = renderLayoutBox = createRenderLayoutBox(style, null);
 
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
@@ -128,9 +126,7 @@ class Element extends Node
     renderObject = renderPadding = initRenderPadding(renderObject, style);
 
     // Overflow
-    if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, style, _scrollListener);
-    }
+    renderObject = initOverflowBox(renderObject, style, _scrollListener);
 
     // Positioned boundary
     if (_isPositioned(style)) {
@@ -557,6 +553,7 @@ class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
+    assert(allowChildren, 'The element($this) does not support child.');
     super.appendChild(child);
 
     VoidCallback doAppendChild = () {
@@ -592,6 +589,7 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
+    assert(allowChildren, 'The element($this) does not support child.');
     int referenceIndex = childNodes.indexOf(referenceNode);
 
     // Node.insertBefore will change element tree structure,

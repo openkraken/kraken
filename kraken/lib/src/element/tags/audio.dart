@@ -10,7 +10,7 @@ class AudioElement extends Element {
   AudioElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
           targetId: targetId,
-          defaultDisplay: 'block',
+          defaultDisplay: 'inline-block',
           allowChildren: false,
           tagName: AUDIO,
           properties: props,
