@@ -562,12 +562,21 @@ class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
+    // Remove child from its parent first
+    if (child.parent != null) {
+      child.parent.removeChild(child);
+    }
+
     super.appendChild(child);
 
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
-        appendElement(child);
+        // Only append child's renderObject when it has no parent
+        RenderObject childNodeParent = (child as Element).renderObject.parent;
+        if (childNodeParent == null) {
+          appendChildNode(child);
+        }
         child.fireAfterConnected();
       }
     };
@@ -586,7 +595,9 @@ class Element extends Node
   Node removeChild(Node child) {
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
-    if (child is NodeLifeCycle) {
+    // Only remove child's renderObject when it has parent
+    RenderObject childNodeParent = (child as Element).renderObject.parent;
+    if (child is NodeLifeCycle && childNodeParent != null) {
       removeChildNode(child);
     }
 
@@ -617,7 +628,7 @@ class Element extends Node
             afterRenderObject = after?.renderObject;
           }
         }
-        appendElement(child,
+        appendChildNode(child,
             afterRenderObject: afterRenderObject, isAppend: false);
         if (child is NodeLifeCycle) child.fireAfterConnected();
       }
@@ -715,7 +726,7 @@ class Element extends Node
     }
   }
 
-  void appendElement(Node child,
+  void appendChildNode(Node child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
