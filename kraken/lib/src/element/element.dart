@@ -567,9 +567,9 @@ class Element extends Node
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
-        // Only append child's renderObject when it has no parent
-        RenderObject childNodeParent = (child as Element).renderObject.parent;
-        if (childNodeParent == null) {
+        RenderObject childRenderObject = getRenderObjectOfNode(child);
+        // Only append childNode when it has no parent
+        if (childRenderObject != null && childRenderObject.parent == null) {
           appendChildNode(child);
         }
         child.fireAfterConnected();
@@ -590,9 +590,9 @@ class Element extends Node
   Node removeChild(Node child) {
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
-    // Only remove child's renderObject when it has parent
-    RenderObject childNodeParent = (child as Element).renderObject.parent;
-    if (child is NodeLifeCycle && childNodeParent != null) {
+    // Only remove childNode when it has parent
+    RenderObject childRenderObject = getRenderObjectOfNode(child);
+    if (child is NodeLifeCycle && childRenderObject != null && childRenderObject.parent != null) {
       removeChildNode(child);
     }
 
@@ -603,6 +603,11 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
+    // Remove child from its parent first
+    if (child.parent != null) {
+      child.parent.removeChild(child);
+    }
+
     int referenceIndex = childNodes.indexOf(referenceNode);
 
     // Node.insertBefore will change element tree structure,
@@ -611,20 +616,25 @@ class Element extends Node
 
     VoidCallback doInsertBefore = () {
       if (referenceIndex != -1) {
-        Node after;
-        RenderObject afterRenderObject;
-        if (referenceIndex == 0) {
-          after = null;
-        } else {
-          do {
-            after = childNodes[--referenceIndex];
-          } while (after is! Element && referenceIndex > 0);
-          if (after is Element) {
-            afterRenderObject = after?.renderObject;
+
+        RenderObject childRenderObject = getRenderObjectOfNode(child);
+        // Only insert childNode when it has no parent
+        if (childRenderObject != null && childRenderObject.parent == null) {
+          Node after;
+          RenderObject afterRenderObject;
+          if (referenceIndex == 0) {
+            after = null;
+          } else {
+            do {
+              after = childNodes[--referenceIndex];
+            } while (after is! Element && referenceIndex > 0);
+            if (after is Element) {
+              afterRenderObject = after?.renderObject;
+            }
           }
+          appendChildNode(child,
+              afterRenderObject: afterRenderObject, isAppend: false);
         }
-        appendChildNode(child,
-            afterRenderObject: afterRenderObject, isAppend: false);
         if (child is NodeLifeCycle) child.fireAfterConnected();
       }
     };
@@ -635,6 +645,17 @@ class Element extends Node
       queueAfterConnected(doInsertBefore);
     }
     return node;
+  }
+
+  // Get container renderObject of node
+  RenderObject getRenderObjectOfNode(Node node) {
+    RenderObject renderObject;
+    if (node is Element) {
+      renderObject = node.renderObject;
+    } else if (node is TextNode) {
+      renderObject = node.renderTextBox;
+    }
+    return renderObject;
   }
 
   // Loop element's children to find elements need to reposition
@@ -723,7 +744,16 @@ class Element extends Node
 
   void appendChildNode(Node child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
-    if (child is Element) {
+    if (child is TextNode) {
+      RenderObject childRenderObject = child.renderTextBox;
+      // TextNode's style is inherited from parent style
+      (childRenderObject as RenderTextBox).style = style;
+      if (isAppend) {
+        addChild(childRenderObject);
+      } else {
+        renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
+      }
+    } else if (child is Element) {
       RenderObject childRenderObject = child.renderObject;
       CSSStyleDeclaration childStyle = child.style;
       String childPosition =

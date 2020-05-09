@@ -98,14 +98,19 @@ export class Node extends EventTarget {
     return child;
   }
 
-  public insertBefore(newChild: Node, referenceNode: Node) {
-    if (!referenceNode.parentNode) return;
-    const parentNode = referenceNode.parentNode;
-    const parentChildNodes = parentNode.childNodes;
-    const nextIndex = parentChildNodes.indexOf(referenceNode);
-    parentChildNodes.splice(nextIndex - 1, 0, newChild);
-    newChild.parentNode = parentNode;
-    insertAdjacentNode(referenceNode.targetId, 'beforebegin', newChild.targetId);
+  public insertBefore(newChild: Node, referenceNode: Node | null) {
+    if (referenceNode === null) {
+      this.appendChild(newChild);
+    } else {
+      const parentNode = referenceNode.parentNode;
+      if (parentNode != null) {
+        const parentChildNodes = parentNode.childNodes;
+        const nextIndex = parentChildNodes.indexOf(referenceNode);
+        parentChildNodes.splice(nextIndex - 1, 0, newChild);
+        newChild.parentNode = parentNode;
+        insertAdjacentNode(referenceNode.targetId, 'beforebegin', newChild.targetId);
+      }
+    }
   }
 
   /**

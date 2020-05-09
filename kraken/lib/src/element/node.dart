@@ -33,22 +33,15 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
 
   TextNode(int targetId, this._data)
       : super(NodeType.TEXT_NODE, targetId, '#text') {
-    // Update text after connected.
-    queueAfterConnected(_onTextNodeConnected);
-  }
-
-  RenderTextBox renderTextBox;
-
-  void _onTextNodeConnected() {
-    Element parentElement = parentNode;
+    CSSStyleDeclaration defaultStyle = CSSStyleDeclaration(style: {});
     renderTextBox = RenderTextBox(
       targetId: targetId,
       text: data,
-      // inherit parent style
-      style: parentElement.style,
+      style: defaultStyle,
     );
-    parentElement.renderLayoutBox.add(renderTextBox);
   }
+
+  RenderTextBox renderTextBox;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.

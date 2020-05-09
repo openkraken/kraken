@@ -1,7 +1,7 @@
 describe('Append child', () => {
-  it('with orphan child', async () => {
+  it('with orphan element', async () => {
     let n1;
-    n1 = create(
+    n1 = createElementWithStyle(
       'div',
       {
         width: '300px',
@@ -9,15 +9,23 @@ describe('Append child', () => {
         backgroundColor: 'gray',
       }
     );
-    BODY.appendChild(n4);
+    BODY.appendChild(n1);
 
     await matchScreenshot();
   });
 
-  it('with child which has parent and connected', async () => {
+  it('with orphan textNode', async () => {
+    let n1;
+    n1 = createText('foobar');
+    BODY.appendChild(n1);
+
+    await matchScreenshot();
+  });
+
+  it('with element which has parent and connected', async () => {
     let n1;
     let n2;
-    n1 = create(
+    n1 = createElementWithStyle(
       'div',
       {
         width: '300px',
@@ -26,7 +34,7 @@ describe('Append child', () => {
       },
     );
 
-    n2 = create(
+    n2 = createElementWithStyle(
       'div',
       {
         width: '200px',
@@ -42,10 +50,31 @@ describe('Append child', () => {
     await matchScreenshot();
   });
 
-  it('with child which has parent but not connected', async () => {
+  it('with textNode which has parent and connected', async () => {
     let n1;
     let n2;
-    n1 = create(
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      },
+    );
+
+    n2 = createText('foobar');
+
+    BODY.appendChild(n1);
+    BODY.appendChild(n2);
+    n1.appendChild(n2);
+
+    await matchScreenshot();
+  });
+
+  it('with element which has parent but not connected', async () => {
+    let n1;
+    let n2;
+    n1 = createElementWithStyle(
       'div',
       {
         width: '300px',
@@ -53,7 +82,7 @@ describe('Append child', () => {
         backgroundColor: 'gray',
       },
       [
-        (n2 = create(
+        (n2 = createElementWithStyle(
           'div',
           {
             width: '200px',
@@ -68,13 +97,32 @@ describe('Append child', () => {
     await matchScreenshot();
   });
 
+  it('with textNode which has parent but not connected', async () => {
+    let n1;
+    let n2;
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      },
+      [
+        (n2 = createText('foobar'))
+      ]
+    );
+    BODY.appendChild(n2);
+
+    await matchScreenshot();
+  });
+
   it('with connected and not connected children which has parent', async () => {
     let n1;
     let n2;
     let n3;
     let n4;
 
-    n4 = create(
+    n4 = createElementWithStyle(
       'div',
       {
         width: '375px',
@@ -82,7 +130,7 @@ describe('Append child', () => {
         backgroundColor: 'gray',
       },
       [
-        (n3 = create(
+        (n3 = createElementWithStyle(
           'div',
           {
             width: '300px',
@@ -90,7 +138,7 @@ describe('Append child', () => {
             backgroundColor: 'blue',
           },
           [
-            (n2 = create(
+            (n2 = createElementWithStyle(
               'div',
               {
                 width: '200px',
@@ -98,7 +146,7 @@ describe('Append child', () => {
                 backgroundColor: 'yellow',
               },
               [
-                (n1 = create('div', {
+                (n1 = createElementWithStyle('div', {
                   width: '100px',
                   height: '100px',
                   backgroundColor: 'red',
