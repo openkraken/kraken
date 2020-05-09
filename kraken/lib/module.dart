@@ -8,7 +8,6 @@ export 'src/module/clipboard.dart';
 export 'src/module/connection.dart';
 export 'src/module/device_info.dart';
 export 'src/module/fetch.dart';
-export 'src/module/flush_callbacks.dart';
 export 'src/module/geolocation.dart';
 export 'src/module/method_channel.dart';
 export 'src/module/mqtt.dart';

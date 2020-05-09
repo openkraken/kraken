@@ -3,10 +3,10 @@ import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
-import 'package:requests/requests.dart';
 
 import '../../bridge.dart';
 import '../../element.dart';
@@ -129,13 +129,12 @@ String invokeModule(
       String url = fetchArgs[0];
       Map<String, dynamic> options = fetchArgs[1];
       fetch(url, options).then((Response response) {
-        response.raiseForStatus();
-        String json = jsonEncode(['', response.statusCode, response.content()]);
+        String json = jsonEncode(['', response.statusCode, response.data]);
         callback(Utf8.toUtf8(json), context);
       }).catchError((e, stack) {
-        String errorMessage = e is HTTPException ? e.message : e.toString();
+        String errorMessage = e.message;
         String json;
-        if (e is HTTPException) {
+        if (e.type == DioErrorType.RESPONSE) {
           json =
               jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
         } else {
