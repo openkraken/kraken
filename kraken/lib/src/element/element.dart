@@ -118,7 +118,7 @@ class Element extends Node
 
     if (allowChildren) {
       // Content children layout, BoxModel content.
-      renderObject = renderLayoutBox = createRenderLayoutBox(style, null);
+      renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
     // Background image
@@ -517,7 +517,7 @@ class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutBox(
-      CSSStyleDeclaration style, List<RenderBox> children) {
+      CSSStyleDeclaration style, { List<RenderBox> children }) {
     String display =
         isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
     String flexWrap = style['flexWrap'];
@@ -557,6 +557,7 @@ class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
+    assert(allowChildren, 'The element($this) does not support child.');
     super.appendChild(child);
 
     VoidCallback doAppendChild = () {
@@ -592,6 +593,7 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
+    assert(allowChildren, 'The element($this) does not support child.');
     int referenceIndex = childNodes.indexOf(referenceNode);
 
     // Node.insertBefore will change element tree structure,
@@ -970,7 +972,7 @@ class Element extends Node
           ..removeAll();
 
         renderPadding.child = null;
-        renderLayoutBox = createRenderLayoutBox(style, children);
+        renderLayoutBox = createRenderLayoutBox(style, children: children);
         renderPadding.child = renderLayoutBox as RenderBox;
       }
 
@@ -1082,7 +1084,7 @@ class Element extends Node
         ..removeAll();
 
       renderPadding.child = null;
-      renderLayoutBox = createRenderLayoutBox(style, children);
+      renderLayoutBox = createRenderLayoutBox(style, children: children);
       renderPadding.child = renderLayoutBox as RenderBox;
 
       this.children.forEach((Element child) {
