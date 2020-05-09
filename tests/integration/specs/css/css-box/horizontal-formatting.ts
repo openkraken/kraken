@@ -68,6 +68,7 @@ describe('Horizontal formatting', () => {
     document.body.appendChild(p);
     document.body.appendChild(bottomRuler);
 
+    await sleep(1); // Wait for image load.
     await matchScreenshot();
   });
 });
