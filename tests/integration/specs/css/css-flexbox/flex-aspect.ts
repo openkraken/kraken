@@ -225,7 +225,7 @@ describe('flex-aspect', () => {
       },
       [
         createElement('img', {
-          src: 'support/20x50-green.png',
+          src: 'assets/20x50-green.png',
           style: {
             'padding-left': '5%',
             'min-width': '40px',
