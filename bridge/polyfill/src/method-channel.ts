@@ -27,7 +27,7 @@ export const methodChannel = {
   },
 };
 
-export function dispatchMethodCallHandler(method: string, args: any) {
+export function triggerMethodCallHandler(method: string, args: any) {
   if (methodCallHandler) {
     methodCallHandler(method, args);
   }

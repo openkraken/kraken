@@ -231,8 +231,6 @@ JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
   kraken::binding::bindBlob(context);
   kraken::binding::bindToBlob(context);
 
-  websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
-  websocket_->bind(context);
   window_ = std::make_shared<kraken::binding::JSWindow>();
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::JSScreen>();
@@ -342,7 +340,6 @@ JSBridge::~JSBridge() {
   if (!context->isValid()) return;
   window_->unbind(context);
   screen_->unbind(context);
-  websocket_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
   BridgeCallback::instance()->disposeAllCallbacks();

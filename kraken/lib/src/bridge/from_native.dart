@@ -291,6 +291,21 @@ String invokeModule(
           callback(Utf8.toUtf8('Error: $e\n$stack'), context);
         });
       }
+    } else if (module == 'WebSocket') {
+      String method = args[1];
+      if (method == 'init') {
+        List methodArgs = args[2];
+        return KrakenWebSocket.init(methodArgs[0]);
+      } else if (method == 'addEvent') {
+        List methodArgs = args[2];
+        KrakenWebSocket.addEvent(methodArgs[0], methodArgs[1]);
+      } else if (method == 'send') {
+        List methodArgs = args[2];
+        KrakenWebSocket.send(methodArgs[0], methodArgs[1]);
+      } else if (method == 'close') {
+        List methodArgs = args[2];
+        KrakenWebSocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
+      }
     }
   } catch (e, stack) {
     callback(Utf8.toUtf8('Error: $e$stack'), context);

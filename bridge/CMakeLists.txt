@@ -17,8 +17,6 @@ list(APPEND BRIDGE_SOURCE
     bindings/KOM/console.cc
     bindings/KOM/screen.cc
     bindings/KOM/timer.cc
-    bindings/KOM/websocket.cc
-    bindings/KOM/websocket.h
     bindings/KOM/window.cc
     bindings/KOM/window.h
     bindings/KOM/location.cc
@@ -41,7 +39,6 @@ list(APPEND BRIDGE_INCLUDE
     ./
     ./include
     ./polyfill/dist
-    ./foundation/websockettpp-0.8.1
     ${ADDITIONAL_INCLUDE_DIRS}
     ${JSA_INCLUDE_DIRS}
 )
