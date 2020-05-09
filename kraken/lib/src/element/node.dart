@@ -36,7 +36,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     CSSStyleDeclaration defaultStyle = CSSStyleDeclaration(style: {});
     renderTextBox = RenderTextBox(
       targetId: targetId,
-      text: data,
+      text: '',
       style: defaultStyle,
     );
   }

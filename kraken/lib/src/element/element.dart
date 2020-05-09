@@ -746,8 +746,12 @@ class Element extends Node
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is TextNode) {
       RenderObject childRenderObject = child.renderTextBox;
+      RenderTextBox textBox = childRenderObject as RenderTextBox;
+      // Text node whitespace collapse relate to siblings,
+      // so text should update when appending
+      textBox.text = child.data;
       // TextNode's style is inherited from parent style
-      (childRenderObject as RenderTextBox).style = style;
+      textBox.style = style;
       if (isAppend) {
         addChild(childRenderObject);
       } else {
