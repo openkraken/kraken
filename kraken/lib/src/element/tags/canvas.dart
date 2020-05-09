@@ -149,6 +149,26 @@ class CanvasElement extends Element {
     }
   }
 
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+    switch (key) {
+      case WIDTH:
+        _width = CSSLength.toDisplayPortValue(value);
+        _updateSize();
+        break;
+      case HEIGHT:
+        _height = CSSLength.toDisplayPortValue(value);
+        _updateSize();
+        break;
+    }
+  }
+
+  void _updateSize() {
+    size =  Size(_width, _height);
+    renderCustomPaint?.preferredSize = size;
+  }
+
   RenderCustomPaint renderCustomPaint;
   RenderCustomPaint getRenderObject() {
     return RenderCustomPaint(

@@ -7,7 +7,7 @@ import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
 const String AUDIO = 'AUDIO';
 
-class AudioElement extends Element with StandaloneElementSizedMixin {
+class AudioElement extends Element {
   AudioPlayer audioPlayer;
   String audioSrc;
   RenderConstrainedBox _sizedBox;
