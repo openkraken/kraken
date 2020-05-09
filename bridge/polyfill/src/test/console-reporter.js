@@ -46,6 +46,14 @@ function ConsoleReporter() {
   this.jasmineDone = function (result) {
     printNewline();
     printNewline();
+
+    if (pendingSpecs.length > 0) {
+      print("Pending:");
+    }
+    for (i = 0; i < pendingSpecs.length; i++) {
+      pendingSpecDetails(pendingSpecs[i], i + 1);
+    }
+
     if (failedSpecs.length > 0) {
       printError('Failures:');
     }
@@ -59,13 +67,6 @@ function ConsoleReporter() {
 
     if (result && result.failedExpectations && result.failedExpectations.length > 0) {
       suiteFailureDetails(result);
-    }
-
-    if (pendingSpecs.length > 0) {
-      print("Pending:");
-    }
-    for (i = 0; i < pendingSpecs.length; i++) {
-      pendingSpecDetails(pendingSpecs[i], i + 1);
     }
 
     if (specCount > 0) {
@@ -217,7 +218,6 @@ function ConsoleReporter() {
   }
 
   function pendingSpecDetails(result, pendingSpecNumber) {
-    printNewline();
     printNewline();
     print(pendingSpecNumber + ') ');
     print(result.fullName);

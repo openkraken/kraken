@@ -94,9 +94,25 @@ mixin CSSBackgroundMixin {
       // record the consumed property
       String consumedKey;
       for (String key in keys) {
+        // The value of background image is function, may be contain space,
+        // should begin with left parenthesis and end with right parenthesis.
+        if (key == BACKGROUND_IMAGE && _consumeBackgroundImage(property)) {
+          consumedKey = key;
+          String backgroundImage = property;
+          while (i + 1 < longhandCount &&
+            !_consumeBackgroundImageEnd(shorthand[i + 1])) {
+            backgroundImage = backgroundImage + ' ' + shorthand[++i];
+          }
+          if (i + 1 < longhandCount &&
+            _consumeBackgroundImageEnd(shorthand[i + 1])) {
+            backgroundImage =
+              backgroundImage + ' ' + shorthand[++i];
+          }
+          background[BACKGROUND_IMAGE] = backgroundImage;
+
         // position may be more than one(at most four), should special handle
         // size is follow position and split by /
-        if (key == BACKGROUND_POSITION_AND_SIZE) {
+        } else if (key == BACKGROUND_POSITION_AND_SIZE) {
           if (property != '/' && property.contains('/')) {
             int index = property.indexOf('/');
             String position = property.substring(0, index);
@@ -204,11 +220,7 @@ mixin CSSBackgroundMixin {
         background[BACKGROUND_COLOR] = property;
       }
     }
-    // shorthand error don not set value
-    if (!broken) {
-      return background;
-    }
-    return null;
+    return background;
   }
 
   bool _consumeBackgroundRepeat(String src) {
@@ -229,6 +241,10 @@ mixin CSSBackgroundMixin {
         src.startsWith('radial-gradient(') ||
         src.startsWith('repeating-radial-gradient(') ||
         src.startsWith('conic-gradient(');
+  }
+
+  bool _consumeBackgroundImageEnd(String src) {
+    return src.endsWith(')');
   }
 
   bool _consumeBackgroundPosition(String src) {

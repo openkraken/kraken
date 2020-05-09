@@ -27,7 +27,7 @@ export class IframeElement extends Element {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
   postMessage = (message: string, targetOrigin: string) => {
-    method(this.nodeId, 'postMessage', [message, targetOrigin]);
+    method(this.targetId, 'postMessage', [message, targetOrigin]);
   }
 
   // Compatible to `iframe.contentWindow.postMessage()`

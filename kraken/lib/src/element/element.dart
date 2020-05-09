@@ -71,7 +71,6 @@ class Element extends Node
   RenderObject renderObject;
   RenderConstrainedBox renderConstrainedBox;
   RenderObject stickyPlaceholder;
-  RenderRepaintBoundary renderRepaintBoundary;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutBox;
   RenderPadding renderPadding;
@@ -133,13 +132,6 @@ class Element extends Node
       renderObject = initOverflowBox(renderObject, style, _scrollListener);
     }
 
-    // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
-
-    // Constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-
     // Positioned boundary
     if (_isPositioned(style)) {
       renderObject = renderStack = RenderPosition(
@@ -149,6 +141,13 @@ class Element extends Node
         children: [renderObject],
       );
     }
+
+    // BoxModel Border
+    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
+
+    // Constrained box
+    renderObject =
+        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Pointer event listener boundary.
     renderObject = RenderPointerListener(
@@ -175,10 +174,6 @@ class Element extends Node
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
-
-    // RenderRepaintBoundary to support toBlob.
-    renderObject =
-        renderRepaintBoundary = RenderRepaintBoundary(child: renderObject);
 
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
@@ -825,6 +820,10 @@ class Element extends Node
         renderStack.insert(renderObject, after: child);
         addPositionPlaceholder();
         return;
+      } else if (zIndex < 0) {
+        renderStack.insert(renderObject, after: null);
+        addPositionPlaceholder();
+        return;
       }
       final ContainerParentDataMixin childParentData = child.parentData;
       child = childParentData.previousSibling;
@@ -1133,13 +1132,13 @@ class Element extends Node
   void _styleOpacityChangedListener(
       String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderRepaintBoundary);
+    updateRenderOpacity(present, parentRenderObject: renderMargin);
   }
 
   void _styleVisibilityChangedListener(
       String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderRepaintBoundary);
+    updateRenderVisibility(present, parentRenderObject: renderMargin);
   }
 
   void _styleContentVisibilityChangedListener(
@@ -1386,19 +1385,29 @@ class Element extends Node
     }
 
     Completer<Uint8List> completer = new Completer();
-
-    // Make sure renderObjects has been repainted.
-    renderObject.markNeedsPaint();
-    RendererBinding.instance.addPostFrameCallback((_) async {
+    // Only capture
+    var originalChild = renderMargin.child;
+    // Make sure child is detached.
+    renderMargin.child = null;
+    var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
+    renderMargin.child = renderRepaintBoundary;
+    renderRepaintBoundary.markNeedsLayout();
+    renderRepaintBoundary.markNeedsPaint();
+    requestAnimationFrame((_) async {
+      Uint8List captured;
       if (renderRepaintBoundary.size == Size.zero) {
         // Return a blob with zero length.
-        completer.complete(Uint8List(0));
+        captured = Uint8List(0);
       } else {
         Image image =
             await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
         ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
-        completer.complete(byteData.buffer.asUint8List());
+        captured = byteData.buffer.asUint8List();
       }
+      renderRepaintBoundary.child = null;
+      renderMargin.child = originalChild;
+
+      completer.complete(captured);
     });
 
     return completer.future;

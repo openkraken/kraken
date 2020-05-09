@@ -14,7 +14,7 @@ export class Document extends Node {
   public nodeType = NodeType.DOCUMENT_NODE;
 
   constructor() {
-    // Use the same nodeId with body, only used in event targets,
+    // Use the same targetId with body, only used in event targets,
     // document events are triggered and received by body element.
     super(NodeType.DOCUMENT_NODE, BODY);
   }
@@ -39,14 +39,14 @@ export class Document extends Node {
 
 export const document = new Document();
 
-export function getNodeByNodeId(nodeId: number) : Node|null|Window {
-  if (nodeId === WINDOW) {
+export function getNodeByNodeId(targetId: number) : Node|null|Window {
+  if (targetId === WINDOW) {
     return window;
   }
 
   let _node = null;
   traverseNode(document.body, (node: Node) : any => {
-    if (node.nodeId === nodeId) {
+    if (node.targetId === targetId) {
       _node = node;
       return true; // Return true to stop traversing
     }

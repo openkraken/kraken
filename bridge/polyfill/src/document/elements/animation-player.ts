@@ -13,6 +13,6 @@ export class AnimationPlayerElement extends Element {
     const args = [name];
     if (options) args.push(options);
 
-    method(this.nodeId, 'play', args);
+    method(this.targetId, 'play', args);
   };
 }

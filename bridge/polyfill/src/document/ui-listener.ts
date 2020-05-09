@@ -3,9 +3,9 @@ import { getNodeByNodeId } from './document';
 
 export function krakenUIListener(message: any) {
   const parsed = JSON.parse(message);
-  const nodeId = parsed[0];
+  const targetId = parsed[0];
   const event = parsed[1];
-  const currentTarget = getNodeByNodeId(nodeId);
+  const currentTarget = getNodeByNodeId(targetId);
 
   if (currentTarget !== null) {
     const target = getNodeByNodeId(event.target);

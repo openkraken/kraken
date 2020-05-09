@@ -32,4 +32,35 @@ describe('background-shorthand', () => {
     document.body.appendChild(div);
     await matchElementImageSnapshot(div);
   });
+
+  it("background gradient with space", async () => {
+    let p;
+    let flexbox;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`Test passes if there is no red visible on the page.`)]
+    );
+    flexbox = createElement('div', {
+      style: {
+        background:
+          'linear-gradient(to bottom, green 0%, green 25%, red 25%, red 75%, green 75% green 100%)',
+        'align-content': 'center',
+        display: 'flex',
+        'flex-flow': 'wrap',
+        height: '100px',
+        width: '300px',
+        'box-sizing': 'border-box',
+      },
+    });
+    document.body.appendChild(p);
+    document.body.appendChild(flexbox);
+
+
+    await matchScreenshot();
+  })
 });

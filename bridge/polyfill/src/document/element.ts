@@ -58,18 +58,18 @@ const cachedCamelize = cached(camelize);
 const elementBuildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
 class StyleDeclaration {
-  private nodeId: number;
-  constructor(nodeId: number) {
-    this.nodeId = nodeId;
+  private targetId: number;
+  constructor(targetId: number) {
+    this.targetId = targetId;
   }
   setProperty(property: string, value: any) {
     const camelizedProperty = cachedCamelize(property);
     this[camelizedProperty] = value;
-    setStyle(this.nodeId, camelizedProperty, value);
+    setStyle(this.targetId, camelizedProperty, value);
   }
   removeProperty(property: string) {
     const camelizedProperty = cachedCamelize(property);
-    setStyle(this.nodeId, camelizedProperty, '');
+    setStyle(this.targetId, camelizedProperty, '');
     const originValue = this[camelizedProperty];
     this[camelizedProperty] = '';
     return originValue;
@@ -86,11 +86,11 @@ export class Element extends Node {
   // TODO use NamedNodeMap: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   public attributes: Array<any> = [];
 
-  constructor(tagName: string, _nodeId?: number, builtInEvents?: Array<string>, builtInProperties?: Array<string>) {
-    super(NodeType.ELEMENT_NODE, _nodeId, elementBuildInEvents.concat(builtInEvents || []));
+  constructor(tagName: string, _targetId?: number, builtInEvents?: Array<string>, builtInProperties?: Array<string>) {
+    super(NodeType.ELEMENT_NODE, _targetId, elementBuildInEvents.concat(builtInEvents || []));
     this.tagName = tagName.toUpperCase();
-    const nodeId = this.nodeId;
-    const style = this.style = new StyleDeclaration(nodeId);
+    const targetId = this.targetId;
+    const style = this.style = new StyleDeclaration(targetId);
     // FIXME: Proxy not support in iOS 9.x
     // See: https://caniuse.com/#search=proxy
     this.style = new Proxy(style, {
@@ -114,7 +114,7 @@ export class Element extends Node {
         configurable: false,
         enumerable: true,
         get() {
-          return Number(method(nodeId, prop));
+          return Number(method(targetId, prop));
         },
       });
     }
@@ -133,13 +133,13 @@ export class Element extends Node {
     }
 
     // Body is created automaticlly.
-    if (this.nodeId != BODY) {
-      createElement(this.tagName, nodeId);
+    if (this.targetId != BODY) {
+      createElement(this.tagName, targetId);
     }
   }
 
   getBoundingClientRect = () => {
-    const rectInformation = method(this.nodeId, 'getBoundingClientRect');
+    const rectInformation = method(this.targetId, 'getBoundingClientRect');
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {
@@ -164,7 +164,7 @@ export class Element extends Node {
       this.attributes.push(attr);
     }
 
-    setProperty(this.nodeId, name, value);
+    setProperty(this.targetId, name, value);
   }
 
   public getAttribute(name: string) {
@@ -172,7 +172,7 @@ export class Element extends Node {
     if (this.attributes[name]) {
       return this.attributes[name].value;
     }
-    return getProperty(this.nodeId, name);
+    return getProperty(this.targetId, name);
   }
 
   public hasAttribute(name: string) {
@@ -188,17 +188,17 @@ export class Element extends Node {
         this.attributes.splice(idx, 1);
       }
 
-      removeProperty(this.nodeId, name);
+      removeProperty(this.targetId, name);
       delete this.attributes[name];
     }
   }
 
   public click() {
-    method(this.nodeId, 'click');
+    method(this.targetId, 'click');
   }
 
   async toBlob(devicePixelRatio: number = window.devicePixelRatio) {
-    return toBlob(this.nodeId, devicePixelRatio);
+    return toBlob(this.targetId, devicePixelRatio);
   }
 
   public scroll(x: number | any, y?: number) {
@@ -209,7 +209,7 @@ export class Element extends Node {
         'left': x
       };
     }
-    method(this.nodeId, 'scroll', [option]);
+    method(this.targetId, 'scroll', [option]);
   }
 
   public scrollTo(x: number | any, y?: number) {
@@ -228,6 +228,6 @@ export class Element extends Node {
         'left': x
       };
     }
-    method(this.nodeId, 'scrollBy', [option]);
+    method(this.targetId, 'scrollBy', [option]);
   }
 }

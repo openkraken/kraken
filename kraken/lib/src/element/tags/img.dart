@@ -27,11 +27,9 @@ class ImgElement extends Element {
             events: events);
 
   void afterConstruct() {
-    _renderImage();
-  }
-
-  bool get _hasWidthAndHeight {
-    return style.contains('width') && style.contains('height');
+    if (properties.containsKey('src')) {
+      _renderImage();
+    }
   }
 
   bool _hasLazyLoading = false;
@@ -83,7 +81,6 @@ class ImgElement extends Element {
     // Store listeners for remove listener.
     imageListeners = [
       ImageStreamListener(_initImageInfo),
-      ImageStreamListener(_handleEventAfterImageLoaded),
     ];
     imageListeners.forEach((ImageStreamListener imageListener) {
       imageStream.addListener(imageListener);
@@ -100,10 +97,9 @@ class ImgElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
+    _handleEventAfterImageLoaded(imageInfo, synchronousCall);
 
-    if (!_hasWidthAndHeight) {
-      _resize();
-    }
+    _resize();
   }
 
   void _resize() {
@@ -129,25 +125,23 @@ class ImgElement extends Element {
         height: realHeight,
       );
     } else {
-      if (containWidth) {
-        width = CSSSizingMixin.getDisplayPortedLength(style['width']);
+      CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
+      if (containWidth && containHeight) {
+        width = sizedConstraints.width;
+        height = sizedConstraints.height;
+      } else if (containWidth) {
+        width = sizedConstraints.width;
         height = width * realHeight / realWidth;
       } else if (containHeight) {
-        height = CSSSizingMixin.getDisplayPortedLength(style['height']);
+        height = sizedConstraints.height;
         width = height * realWidth / realHeight;
       }
-      constraints = BoxConstraints.tightFor(
+      constraints = BoxConstraints.expand(
         width: width,
         height: height,
       );
     }
     renderConstrainedBox.additionalConstraints = constraints;
-  }
-
-  BoxConstraints getBoxConstraintsFromStyle(CSSStyleDeclaration style) {
-    double width = CSSSizingMixin.getDisplayPortedLength(style['width']);
-    double height = CSSSizingMixin.getDisplayPortedLength(style['height']);
-    return BoxConstraints.tightFor(width: width, height: height);
   }
 
   BoxFit _getBoxFit(CSSStyleDeclaration style) {
@@ -267,10 +261,10 @@ class ImgElement extends Element {
   dynamic getProperty(String key) {
     switch(key) {
       case 'width': {
-        return this._imageInfo.image.width;
+        return this._imageInfo != null ? this._imageInfo.image.width : 0;
       }
       case 'height': {
-        return this._imageInfo.image.height;
+        return this._imageInfo != null ? this._imageInfo.image.height : 0;
       }
     }
 

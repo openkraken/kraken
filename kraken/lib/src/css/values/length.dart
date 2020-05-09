@@ -81,7 +81,8 @@ class CSSLength implements CSSValue<double> {
 
   static bool isLength(String value) {
     return value != null &&
-        (value.endsWith(RPX) ||
+        (value == '0' ||
+            value.endsWith(RPX) ||
             value.endsWith(PX) ||
             value.endsWith(VH) ||
             value.endsWith(VW));
