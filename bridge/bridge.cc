@@ -13,10 +13,8 @@
 #include "bindings/KOM/window.h"
 #include "foundation/bridge_callback.h"
 #include "polyfill.h"
-#include "testframework.h"
 
 #include "dart_methods.h"
-#include "foundation/flushUITask.h"
 #include "jsa.h"
 #include "thread_safe_array.h"
 #include <atomic>
@@ -231,8 +229,6 @@ JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
   kraken::binding::bindBlob(context);
   kraken::binding::bindToBlob(context);
 
-  websocket_ = std::make_shared<kraken::binding::JSWebSocket>();
-  websocket_->bind(context);
   window_ = std::make_shared<kraken::binding::JSWindow>();
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::JSScreen>();
@@ -342,19 +338,9 @@ JSBridge::~JSBridge() {
   if (!context->isValid()) return;
   window_->unbind(context);
   screen_->unbind(context);
-  websocket_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
   BridgeCallback::instance()->disposeAllCallbacks();
-}
-
-void JSBridge::flushUITask() {
-  if (!context->isValid()) return;
-  try {
-    kraken::foundation::flushUITask();
-  } catch (JSError &error) {
-    handler_(error);
-  }
 }
 
 } // namespace kraken

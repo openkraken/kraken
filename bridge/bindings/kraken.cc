@@ -4,8 +4,8 @@
  */
 
 #include "kraken.h"
+#include "js_context.h"
 #include <cassert>
-#include <js_context.h>
 
 namespace kraken {
 namespace binding {

@@ -4,8 +4,6 @@
  */
 
 #include <algorithm>
-#include <iostream>
-
 #include "colors.h"
 #include "logging.h"
 
@@ -13,6 +11,8 @@
 #include <android/log.h>
 #elif defined(IS_IOS)
 #include <syslog.h>
+#else
+#include <iostream>
 #endif
 
 namespace foundation {

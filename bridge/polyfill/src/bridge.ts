@@ -1,13 +1,6 @@
 export interface KrakenLocation {
   reload: () => void;
-  origin: string;
-  protocol: string;
-  host: string;
-  hostname: string;
-  port: string;
-  pathname: string;
-  search: string;
-  hash: string;
+  href: string;
 }
 
 export interface KrakenWindow {
@@ -46,24 +39,6 @@ export const krakenBlob = __kraken_blob__;
 export const krakenToBlob = __kraken_to_blob__;
 export const krakenRequestAnimationFrame = __kraken_request_animation_frame__;
 export const privateKraken = __kraken__;
-
-export type KrakenWebSocketToken = number;
-
-// this interface is a description of the C++ Websocket API (bridge/bindings/websocket.cc)
-export interface KrakenWebSocket {
-  connect: (
-    url: string,
-    onMessage: (message: string) => void,
-    onOpen: () => void,
-    onClose: (code: number, reason: string) => void,
-    onError: (error: string) => void
-  ) => KrakenWebSocketToken;
-  send: (token: KrakenWebSocketToken, message: string | ArrayBuffer | ArrayBufferView) => void;
-  close: (token: KrakenWebSocketToken, code: number, reason: string) => void;
-}
-
-declare const __kraken_websocket__: KrakenWebSocket;
-export const krakenWebSocket = __kraken_websocket__;
 
 declare const __kraken_ui_manager__: (message: string) => void|string;
 export const krakenUIManager = __kraken_ui_manager__;

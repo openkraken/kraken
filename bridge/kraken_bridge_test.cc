@@ -6,10 +6,7 @@
 #include "kraken_bridge_test.h"
 #include "bridge_test.h"
 #include "dart_methods.h"
-#include "jsa.h"
-#include "testframework.h"
 #include <atomic>
-#include <iostream>
 
 std::unique_ptr<kraken::JSBridgeTest> bridgeTest;
 std::atomic<bool> inited{false};
