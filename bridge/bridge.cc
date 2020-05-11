@@ -13,10 +13,8 @@
 #include "bindings/KOM/window.h"
 #include "foundation/bridge_callback.h"
 #include "polyfill.h"
-#include "testframework.h"
 
 #include "dart_methods.h"
-#include "foundation/flushUITask.h"
 #include "jsa.h"
 #include "thread_safe_array.h"
 #include <atomic>
@@ -343,15 +341,6 @@ JSBridge::~JSBridge() {
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
   BridgeCallback::instance()->disposeAllCallbacks();
-}
-
-void JSBridge::flushUITask() {
-  if (!context->isValid()) return;
-  try {
-    kraken::foundation::flushUITask();
-  } catch (JSError &error) {
-    handler_(error);
-  }
 }
 
 } // namespace kraken

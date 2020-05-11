@@ -5,15 +5,30 @@
 
 #include "location.h"
 #include "dart_methods.h"
+#include "foundation/uri.hpp"
 
 namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
-std::string href = "";
+std::string origin = "";
+std::string protocol = "";
+std::string host = "";
+std::string hostname = "";
+std::string port = "";
+std::string pathname = "";
+std::string search = "";
+std::string hash = "";
 
 void updateLocation(std::string url = "") {
-  href = url;
+  foundation::uri uri(url);
+  origin = uri.get_host();
+  protocol = uri.get_scheme() + ":";
+  hostname = uri.get_host();
+  port = uri.get_port_str();
+  host = hostname + ":" + port;
+  search = uri.get_query();
+  pathname = uri.get_resource();
 }
 
 Value JSLocation::get(JSContext &context, const PropNameID &name) {
@@ -24,8 +39,22 @@ Value JSLocation::get(JSContext &context, const PropNameID &name) {
                                std::bind(&JSLocation::reload, this, std::placeholders::_1, std::placeholders::_2,
                                          std::placeholders::_3, std::placeholders::_4));
     return Value(context, reloadFunc);
-  } else if (propertyName == "href") {
-    return Value(context, String::createFromUtf8(context, href));
+  } else if (propertyName == "origin") {
+    return Value(context, String::createFromUtf8(context, origin));
+  } else if (propertyName == "protocol") {
+    return Value(context, String::createFromUtf8(context, protocol));
+  } else if (propertyName == "host") {
+    return Value(context, String::createFromUtf8(context, host));
+  } else if (propertyName == "hostname") {
+    return Value(context, String::createFromUtf8(context, hostname));
+  } else if (propertyName == "port") {
+    return Value(context, String::createFromUtf8(context, port));
+  } else if (propertyName == "pathname") {
+    return Value(context, String::createFromUtf8(context, pathname));
+  } else if (propertyName == "search") {
+    return Value(context, String::createFromUtf8(context, search));
+  } else if (propertyName == "hash") {
+    return Value(context, String::createFromUtf8(context, hash));
   }
 
   return Value::undefined();
@@ -52,7 +81,15 @@ void JSLocation::unbind(std::unique_ptr<JSContext> &context, Object &window) {
 
 std::vector<PropNameID> JSLocation::getPropertyNames(JSContext &context) {
   std::vector<PropNameID> names;
-  names.emplace_back(PropNameID::forAscii(context, "href"));
+  names.emplace_back(PropNameID::forAscii(context, "origin"));
+  names.emplace_back(PropNameID::forAscii(context, "protocol"));
+  names.emplace_back(PropNameID::forAscii(context, "host"));
+  names.emplace_back(PropNameID::forAscii(context, "hostname"));
+  names.emplace_back(PropNameID::forAscii(context, "port"));
+  names.emplace_back(PropNameID::forAscii(context, "pathname"));
+  names.emplace_back(PropNameID::forAscii(context, "search"));
+  names.emplace_back(PropNameID::forAscii(context, "hash"));
+  names.emplace_back(PropNameID::forAscii(context, "reload"));
   return names;
 }
 
