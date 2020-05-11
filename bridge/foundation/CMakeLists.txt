@@ -5,7 +5,6 @@ set(FOUNDATION_SOURCES
   logging.cc
   logging.h
   colors.h
-  uri.hpp
   bridge_callback.h
   bridge_callback.cc)
 

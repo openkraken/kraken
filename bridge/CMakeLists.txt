@@ -95,22 +95,8 @@ elseif($ENV{KRAKEN_JS_ENGINE} MATCHES "v8")
   set_target_properties(kraken PROPERTIES OUTPUT_NAME kraken_v8)
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
-  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
-  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
-  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-
-  set_target_properties(kraken PROPERTIES
-    OUTPUT_NAME kraken_bridge
-    FRAMEWORK TRUE
-    FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER com.taobao.kraken_bridge
-    PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-    )
-endif ()
-
 if (IS_ANDROID)
-# DONOT set output dir for android gradle.
+  # DONOT set output dir for android gradle.
 else ()
   if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
     set_target_properties(kraken
@@ -120,7 +106,33 @@ else ()
   else ()
     set_target_properties(kraken
       PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
       )
   endif ()
 endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "ios")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+
+  set_target_properties(kraken PROPERTIES
+    OUTPUT_NAME kraken_bridge
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION C
+    MACOSX_FRAMEWORK_IDENTIFIER com.taobao.kraken_bridge
+    PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+    )
+
+  if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+    get_target_property(OUTPUT_DIRECTORY kraken LIBRARY_OUTPUT_DIRECTORY)
+    add_custom_command(TARGET kraken POST_BUILD
+      COMMAND ${CMAKE_STRIP} -x -X -S ${OUTPUT_DIRECTORY}/kraken_bridge.framework/kraken_bridge)
+  endif ()
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "darwin")
+  if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+    get_target_property(OUTPUT_DIRECTORY kraken LIBRARY_OUTPUT_DIRECTORY)
+    get_target_property(OUTPUT_NAME kraken OUTPUT_NAME)
+    add_custom_command(TARGET kraken POST_BUILD
+      COMMAND ${CMAKE_STRIP} -x -X -S ${OUTPUT_DIRECTORY}/lib${OUTPUT_NAME}.dylib)
+  endif ()
+endif()
