@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <memory>
 #include <mutex>
-#include <queue>
 #include <sstream>
 
 namespace alibaba {

@@ -1,3 +1,5 @@
+import { URLSearchParams } from './url-search-params';
+
 // https://github.com/Polymer/URL
 var relative = Object.create(null);
 relative.ftp = 21;

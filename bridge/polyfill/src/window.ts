@@ -1,6 +1,6 @@
 import { EventTarget } from './document/event-target';
-import { krakenWindow, KrakenLocation } from './bridge';
-import { WINDOW } from "./document/event-target";
+import { krakenWindow } from './bridge';
+import { WINDOW } from './document/event-target';
 
 const windowBuildInEvents = ['load', 'colorschemechange'];
 
@@ -17,10 +17,6 @@ class WindowExtension extends EventTarget {
 
   public get devicePixelRatio() : number {
     return krakenWindow.devicePixelRatio;
-  }
-
-  public get location(): KrakenLocation {
-    return krakenWindow.location;
   }
 
   public get window() {

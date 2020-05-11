@@ -4,8 +4,8 @@
  */
 
 #include <cassert>
-#include <js_error.h>
-#include <js_type.h>
+#include "js_error.h"
+#include "js_type.h"
 
 namespace alibaba {
 namespace jsa {

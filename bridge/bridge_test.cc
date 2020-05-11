@@ -8,7 +8,6 @@
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "testframework.h"
-#include <iostream>
 
 namespace kraken {
 using namespace alibaba::jsa;

@@ -3,50 +3,36 @@
  * Author: Kraken Team.
  */
 
-import 'package:requests/requests.dart';
-
-Map<String, String> _parseHeaders(Map<String, dynamic> map) {
-  Map<String, String> headerMap = {};
-
-  if (map == null) {
-    map = Map<String, dynamic>();
-  }
-
-  map.forEach((k, v) {
-    headerMap[k] = v.toString();
-  });
-
-  return headerMap;
-}
+import 'package:dio/dio.dart';
 
 Future<Response> fetch(String url, Map<String, dynamic> map) async {
-  String method = map['method'];
-  Map<String, String> headers = _parseHeaders(map['headers']);
   Future<Response> future;
-  switch (method) {
+
+  BaseOptions options = BaseOptions(
+    headers: map['headers'],
+    method: map['method'],
+    contentType: 'application/json',
+    responseType: ResponseType.plain
+  );
+
+  switch (map['method']) {
     case 'GET':
-      future = Requests.get(url, headers: headers);
+      future = Dio(options).get(url);
       break;
     case 'POST':
-      future = Requests.post(url,
-          headers: headers,
-          body: map['body'],
-          bodyEncoding: RequestBodyEncoding.JSON);
+      future = Dio(options).post(url, data: map['body']);
       break;
     case 'PUT':
-      future = Requests.put(url,
-          headers: headers,
-          body: map['body'],
-          bodyEncoding: RequestBodyEncoding.JSON);
+      future = Dio(options).put(url, data: map['body']);
       break;
     case 'PATCH':
-      future = Requests.patch(url, headers: headers);
+      future = Dio(options).patch(url, data: map['body']);
       break;
     case 'DELETE':
-      future = Requests.delete(url, headers: headers);
+      future = Dio(options).delete(url, data: map['body']);
       break;
     case 'HEAD':
-      future = Requests.head(url, headers: headers);
+      future = Dio(options).head(url);
       break;
   }
 

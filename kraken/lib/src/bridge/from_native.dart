@@ -3,10 +3,10 @@ import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
-import 'package:requests/requests.dart';
 
 import '../../bridge.dart';
 import '../../element.dart';
@@ -129,13 +129,12 @@ String invokeModule(
       String url = fetchArgs[0];
       Map<String, dynamic> options = fetchArgs[1];
       fetch(url, options).then((Response response) {
-        response.raiseForStatus();
-        String json = jsonEncode(['', response.statusCode, response.content()]);
+        String json = jsonEncode(['', response.statusCode, response.data]);
         callback(Utf8.toUtf8(json), context);
       }).catchError((e, stack) {
-        String errorMessage = e is HTTPException ? e.message : e.toString();
+        String errorMessage = e.message;
         String json;
-        if (e is HTTPException) {
+        if (e.type == DioErrorType.RESPONSE) {
           json =
               jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
         } else {
@@ -290,6 +289,21 @@ String invokeModule(
         }).catchError((e, stack) {
           callback(Utf8.toUtf8('Error: $e\n$stack'), context);
         });
+      }
+    } else if (module == 'WebSocket') {
+      String method = args[1];
+      if (method == 'init') {
+        List methodArgs = args[2];
+        return KrakenWebSocket.init(methodArgs[0]);
+      } else if (method == 'addEvent') {
+        List methodArgs = args[2];
+        KrakenWebSocket.addEvent(methodArgs[0], methodArgs[1]);
+      } else if (method == 'send') {
+        List methodArgs = args[2];
+        KrakenWebSocket.send(methodArgs[0], methodArgs[1]);
+      } else if (method == 'close') {
+        List methodArgs = args[2];
+        KrakenWebSocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
       }
     }
   } catch (e, stack) {
@@ -594,50 +608,6 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
-typedef Native_StartFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterFlushCallbacksInUIThread = Void Function(
-    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
-typedef Dart_RegisterFlushCallbacksInUIThread = void Function(
-    Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>>);
-
-final Dart_RegisterFlushCallbacksInUIThread
-    _registerStartFlushCallbacksInUIThread = nativeDynamicLibrary
-        .lookup<NativeFunction<Native_RegisterFlushCallbacksInUIThread>>(
-            'registerStartFlushCallbacksInUIThread')
-        .asFunction();
-
-void _startFlushCallbacksInUIThread() {
-  startFlushCallbacksInUIThread();
-}
-
-void registerStartFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
-      Pointer.fromFunction(_startFlushCallbacksInUIThread);
-  _registerStartFlushCallbacksInUIThread(pointer);
-}
-
-typedef Native_StopFlushCallbacksInUIThread = Void Function();
-typedef Native_RegisterStopFlushCallbacksInUIThread = Void Function(
-    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
-typedef Dart_RegisterStopFlushCallbacksInUIThread = void Function(
-    Pointer<NativeFunction<Native_StopFlushCallbacksInUIThread>>);
-
-final Dart_RegisterFlushCallbacksInUIThread
-    _registerStopFlushCallbacksInUIThread = nativeDynamicLibrary
-        .lookup<NativeFunction<Native_RegisterStopFlushCallbacksInUIThread>>(
-            'registerStopFlushCallbacksInUIThread')
-        .asFunction();
-
-void _stopFlushCallbacksInUIThread() {
-  stopFlushCallbacksInUIThread();
-}
-
-void registerStopFlushCallbacksInUIThread() {
-  Pointer<NativeFunction<Native_StartFlushCallbacksInUIThread>> pointer =
-      Pointer.fromFunction(_stopFlushCallbacksInUIThread);
-  _registerStopFlushCallbacksInUIThread(pointer);
-}
-
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
@@ -709,7 +679,5 @@ void registerDartMethodsToCpp() {
   registerGetScreen();
   registerDevicePixelRatio();
   registerPlatformBrightness();
-  registerStartFlushCallbacksInUIThread();
-  registerStopFlushCallbacksInUIThread();
   registerToBlob();
 }

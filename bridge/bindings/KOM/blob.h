@@ -7,7 +7,6 @@
 
 #include "jsa.h"
 #include <memory>
-#include <utility>
 #include <vector>
 
 namespace kraken {
