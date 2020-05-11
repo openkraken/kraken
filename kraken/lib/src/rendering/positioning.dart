@@ -120,7 +120,6 @@ class RenderPosition extends RenderStack {
           y = originalOffset.dy - parentOffset.dy;
         }
 
-        print('$x $y');
         childParentData.offset = Offset(x, y);
       }
 
