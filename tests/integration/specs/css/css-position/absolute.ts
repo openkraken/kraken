@@ -251,7 +251,7 @@ describe('Position absolute', () => {
     await matchScreenshot();
   });
 
-  it('with no left and top in flex layout', async () => {
+  fit('with no left and top in flex layout', async () => {
     const div = createElementWithStyle('div', {
       width: '200px',
       display: 'flex',

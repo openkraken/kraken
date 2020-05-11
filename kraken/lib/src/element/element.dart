@@ -70,7 +70,7 @@ class Element extends Node
   // A point reference to treed renderObject.
   RenderObject renderObject;
   RenderConstrainedBox renderConstrainedBox;
-  RenderObject stickyPlaceholder;
+  RenderDecoratedBox stickyPlaceholder;
   RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutBox;
   RenderPadding renderPadding;
@@ -90,9 +90,9 @@ class Element extends Node
   // Vertical padding dimension (top + bottom)
   double get cropPaddingHeight => renderPadding.padding.vertical;
   // Horizontal border dimension (left + right)
-  double get cropBorderWidth => renderBorderHolder.margin.horizontal;
+  double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
   // Vertical border dimension (top + bottom)
-  double get cropBorderHeight => renderBorderHolder.margin.vertical;
+  double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
   Element({
     @required int targetId,
@@ -1255,15 +1255,16 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
 
+    RenderBox sizedBox = renderConstrainedBox.child;
     if (isConnected) {
       // Force flush layout.
-      if (!renderBorderHolder.hasSize) {
-        renderBorderHolder.markNeedsLayout();
-        renderBorderHolder.owner.flushLayout();
+      if (!sizedBox.hasSize) {
+        sizedBox.markNeedsLayout();
+        sizedBox.owner.flushLayout();
       }
 
-      Offset offset = getOffset(renderBorderHolder);
-      Size size = renderBorderHolder.size;
+      Offset offset = getOffset(sizedBox);
+      Size size = sizedBox.size;
       boundingClientRect = BoundingClientRect(
         x: offset.dx,
         y: offset.dy,

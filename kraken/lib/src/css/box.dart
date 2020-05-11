@@ -16,26 +16,20 @@ import 'package:kraken/css.dart';
 /// - background
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
-  RenderDecoratedBox renderDecoratedBox;
-  RenderMargin renderBorderHolder;
+  RenderDecorateElementBox renderDecoratedBox;
   TransitionDecoration oldDecoration;
   CSSPadding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
       RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     oldDecoration = getTransitionDecoration(style);
-    EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
-    // Flutter Border width is inside the element
-    // but w3c border is outside the element
-    // so use margin to fix it.
-    renderBorderHolder = RenderMargin(
-      margin: margin,
-      child: renderObject,
-    );
-    return renderDecoratedBox = RenderGradient(
+    EdgeInsets borderEdge = oldDecoration.getBorderEdgeInsets();
+
+    return renderDecoratedBox = RenderDecorateElementBox(
       targetId: targetId,
+      borderEdge: borderEdge,
       decoration: oldDecoration.toBoxDecoration(),
-      child: renderBorderHolder,
+      child: renderObject,
     );
   }
 
@@ -207,7 +201,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   void _updateBorderInsets(EdgeInsets insets) {
-    renderBorderHolder.margin = insets;
+    renderDecoratedBox.borderEdge = insets;
   }
 
   /// Shorted border property:
