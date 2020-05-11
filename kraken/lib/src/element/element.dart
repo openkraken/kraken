@@ -128,9 +128,7 @@ class Element extends Node
     renderObject = renderPadding = initRenderPadding(renderObject, style);
 
     // Overflow
-    if (allowChildren) {
-      renderObject = initOverflowBox(renderObject, style, _scrollListener);
-    }
+    renderObject = initOverflowBox(renderObject, style, _scrollListener);
 
     // Positioned boundary
     if (_isPositioned(style)) {
