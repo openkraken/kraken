@@ -366,7 +366,7 @@ class Element extends Node
     } else {
       parentElementWithStack = ElementManager().getRootElement();
     }
-    // not found positioned parent element, wait for append in appenedElement
+    // not found positioned parent element, wait for append in appendedElement
     if (parentElementWithStack == null) return;
 
     // add placeholder for sticky element before moved
@@ -379,7 +379,7 @@ class Element extends Node
     (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
     RenderStack parentStack = parentElementWithStack.renderStack;
 
-    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
     renderObject.parentData = stackParentData;
 
     Element currentElement = getEventTargetByTargetId<Element>(targetId);
@@ -403,7 +403,7 @@ class Element extends Node
     // remove current element from parent stack
     parentStack.remove(renderObject);
 
-    StackParentData stackParentData = getPositionParentDataFromStyle(style);
+    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
     renderObject.parentData = stackParentData;
 
     // current element's zIndex
@@ -417,12 +417,12 @@ class Element extends Node
       String property,
       double diff,
       double original}) {
-    ZIndexParentData zIndexParentData;
+    PositionParentData positionParentData;
     RenderBox renderParent = renderElementBoundary.parent;
     if (renderParent is RenderPosition &&
-        renderElementBoundary.parentData is ZIndexParentData) {
-      zIndexParentData = renderElementBoundary.parentData;
-      ZIndexParentData progressParentData = zIndexParentData;
+        renderElementBoundary.parentData is PositionParentData) {
+      positionParentData = renderElementBoundary.parentData;
+      PositionParentData progressParentData = positionParentData;
 
       CSSTransition allTransition;
       if (transitionMap != null) {
@@ -463,30 +463,30 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains('zIndex')) {
-          zIndexParentData.zIndex = CSSLength.toInt(style['zIndex']);
+          positionParentData.zIndex = CSSLength.toInt(style['zIndex']);
           ;
         }
         if (style.contains('top')) {
-          zIndexParentData.top = CSSLength.toDisplayPortValue(style['top']);
+          positionParentData.top = CSSLength.toDisplayPortValue(style['top']);
         }
         if (style.contains('left')) {
-          zIndexParentData.left = CSSLength.toDisplayPortValue(style['left']);
+          positionParentData.left = CSSLength.toDisplayPortValue(style['left']);
         }
         if (style.contains('right')) {
-          zIndexParentData.right = CSSLength.toDisplayPortValue(style['right']);
+          positionParentData.right = CSSLength.toDisplayPortValue(style['right']);
         }
         if (style.contains('bottom')) {
-          zIndexParentData.bottom =
+          positionParentData.bottom =
               CSSLength.toDisplayPortValue(style['bottom']);
         }
         if (style.contains('width')) {
-          zIndexParentData.width = CSSLength.toDisplayPortValue(style['width']);
+          positionParentData.width = CSSLength.toDisplayPortValue(style['width']);
         }
         if (style.contains('height')) {
-          zIndexParentData.height =
+          positionParentData.height =
               CSSLength.toDisplayPortValue(style['height']);
         }
-        renderObject.parentData = zIndexParentData;
+        renderObject.parentData = positionParentData;
         renderParent.markNeedsLayout();
       }
     }
@@ -678,25 +678,19 @@ class Element extends Node
   RenderBox getStackedRenderBox(Element element) {
     // Positioned element in flex layout will reposition in new layer
     if (renderLayoutBox is RenderFlexLayout) {
-      String width =
-          element.style['width'] != '' ? element.style['width'] : '0';
-      String height =
-          element.style['height'] != '' ? element.style['height'] : '0';
-      CSSStyleDeclaration placeholderStyle = CSSStyleDeclaration(style: {
-        'width': width,
-        'height': height,
-      });
-      renderPositionedPlaceholder =
-          initRenderConstrainedBox(null, placeholderStyle);
+      renderPositionedPlaceholder = RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tightFor(
+          width: CSSLength.toDisplayPortValue(element.style[WIDTH]),
+          height: CSSLength.toDisplayPortValue(element.style[HEIGHT]))
+      );
     } else {
       // Positioned element in flow layout will position in old flow layer
       renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
     }
 
-    ZIndexParentData stackParentData =
-        getPositionParentDataFromStyle(element.style);
+    PositionParentData stackParentData =
+        getPositionParentDataFromStyle(element.style, renderPositionedPlaceholder);
     RenderBox stackedRenderBox = element.renderObject as RenderBox;
-    stackParentData.hookRenderObject = renderPositionedPlaceholder;
     stackedRenderBox.parentData = stackParentData;
     return stackedRenderBox;
   }
@@ -795,7 +789,7 @@ class Element extends Node
     RenderBox child = renderStack.lastChild;
     while (child != null) {
       ParentData parentData = child.parentData;
-      if (parentData is ZIndexParentData) {
+      if (parentData is PositionParentData) {
         final ContainerParentDataMixin childParentData = child.parentData;
         if (parentData.zIndex <= zIndex) {
           renderStack.insert(renderObject, after: child);
@@ -1454,20 +1448,21 @@ bool _isSticky(CSSStyleDeclaration style) {
       style.contains('bottom');
 }
 
-ZIndexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-  ZIndexParentData parentData = ZIndexParentData();
+PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderBox placeholder) {
+  PositionParentData parentData = PositionParentData();
+  parentData.originalRenderBoxRef = placeholder;
 
   if (style.contains('top')) {
-    parentData..top = CSSLength.toDisplayPortValue(style['top']);
+    parentData.top = CSSLength.toDisplayPortValue(style['top']);
   }
   if (style.contains('left')) {
-    parentData..left = CSSLength.toDisplayPortValue(style['left']);
+    parentData.left = CSSLength.toDisplayPortValue(style['left']);
   }
   if (style.contains('bottom')) {
-    parentData..bottom = CSSLength.toDisplayPortValue(style['bottom']);
+    parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
   }
   if (style.contains('right')) {
-    parentData..right = CSSLength.toDisplayPortValue(style['right']);
+    parentData.right = CSSLength.toDisplayPortValue(style['right']);
   }
   parentData.width = CSSLength.toDisplayPortValue(style['width']);
   parentData.height = CSSLength.toDisplayPortValue(style['height']);

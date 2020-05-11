@@ -997,7 +997,7 @@ class RenderFlexLayout extends RenderBox
         childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
-      ///apply position relative offset change
+      /// Apply position relative offset change
       applyRelativeOffset(relativeOffset, child, childStyle);
 
       if (flipMainAxis) {
