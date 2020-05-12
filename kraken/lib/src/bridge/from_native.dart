@@ -307,7 +307,7 @@ String invokeModule(
       }
     }
   } catch (e, stack) {
-    callback(Utf8.toUtf8('Error: $e$stack'), context);
+    print('$e\n$stack');
   }
 
   return result;
