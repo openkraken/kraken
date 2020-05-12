@@ -307,6 +307,7 @@ String invokeModule(
       }
     }
   } catch (e, stack) {
+    // Dart side internal error should print it directly.
     print('$e\n$stack');
   }
 
