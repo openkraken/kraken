@@ -312,7 +312,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   static RegExp spaceRegExp = RegExp(r' ');
-  List<String> getShorttedProperties(String input) {
+  static List<String> getShorttedProperties(String input) {
     assert(input != null);
     return input.trim().split(spaceRegExp);
   }
@@ -322,7 +322,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = CSSColor.transparent;
 
-  BorderStyle getBorderStyle(String input) {
+  static BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
     switch (input) {
       case 'solid':
@@ -336,7 +336,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // TODO: Shortted order in web not keep in same order
-  Map _getShorttedInfoFromString(String input) {
+  static Map _getShorttedInfoFromString(String input) {
     List<String> splittedBorder = getShorttedProperties(input);
 
     double width = splittedBorder.length > 0
@@ -353,7 +353,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
-  TransitionBorderSide getBorderSideByStyle(
+  static TransitionBorderSide getBorderSideByStyle(
       CSSStyleDeclaration style, String side) {
     TransitionBorderSide borderSide = TransitionBorderSide(
         0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);
