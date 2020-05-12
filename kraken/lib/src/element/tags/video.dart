@@ -11,9 +11,6 @@ import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
 
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
-
 const Map<String, dynamic> _defaultStyle = {
   'width': DEFAULT_WIDTH,
   'height': DEFAULT_HEIGHT,

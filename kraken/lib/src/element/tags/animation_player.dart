@@ -8,9 +8,6 @@ import 'package:kraken/rendering.dart';
 
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
-
 final Map<String, dynamic> _defaultStyle = {
   'width': DEFAULT_WIDTH,
   'height': DEFAULT_HEIGHT,

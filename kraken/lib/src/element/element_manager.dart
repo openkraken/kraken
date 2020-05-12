@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
+import 'package:kraken/src/element/tags/pre.dart';
 
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events) {
@@ -30,6 +31,9 @@ Element _createElement(
       break;
     case INPUT:
       element = InputElement(id);
+      break;
+    case PRE:
+      element = PreElement(id);
       break;
     case CANVAS:
       element = CanvasElement(id);

@@ -12,9 +12,6 @@ import 'package:kraken_camera/camera.dart';
 
 const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
 
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
-
 final Map<String, dynamic> _defaultStyle = {
   'width': DEFAULT_WIDTH,
   'height': DEFAULT_HEIGHT,

@@ -13,11 +13,6 @@ import 'package:kraken_webview/kraken_webview.dart';
 
 const String IFRAME = 'IFRAME';
 
-/// Default width is 300 in pixel, height is 150 in pixel,
-/// defined by HTML Standard.
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
-
 const Map<String, dynamic> _defaultStyle = {
   'width': DEFAULT_WIDTH,
   'height': DEFAULT_HEIGHT,

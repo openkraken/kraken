@@ -4,7 +4,7 @@
  */
 import 'package:kraken/element.dart';
 
-const String PREFORMATTED = 'PRE';
+const String PRE = 'PRE';
 
 const Map<String, dynamic> _defaultStyle = {
   'whiteSpace': 'pre'
@@ -15,7 +15,7 @@ class PreElement extends Element {
     int targetId
   ) : super(
         targetId: targetId,
-        tagName: PREFORMATTED,
+        tagName: PRE,
         defaultStyle: _defaultStyle
       );
 }

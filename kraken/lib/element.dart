@@ -12,7 +12,6 @@ export 'src/element/node.dart';
 export 'src/element/window.dart';
 
 // Tags
-// ignore: directives_ordering
 export 'src/element/tags/a.dart';
 export 'src/element/tags/animation_player.dart';
 export 'src/element/tags/audio.dart';
@@ -26,3 +25,4 @@ export 'src/element/tags/input.dart';
 export 'src/element/tags/p.dart';
 export 'src/element/tags/span.dart';
 export 'src/element/tags/video.dart';
+export 'src/element/tags/pre.dart';

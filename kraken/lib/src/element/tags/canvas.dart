@@ -10,9 +10,6 @@ import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
 
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
-
 const Map<String, dynamic> _defaultStyle = {
   'display': 'inline-block',
   'width': DEFAULT_WIDTH,
