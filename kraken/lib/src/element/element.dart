@@ -642,7 +642,7 @@ class Element extends Node
       renderPositionedPlaceholder = RenderPreferredSize(preferredSize: preferredSize);
     } else {
       // Positioned element in flow layout will position in old flow layer
-      renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
+      renderPositionedPlaceholder = RenderPreferredSize(preferredSize: Size.zero);
     }
 
     RenderBox stackedRenderBox = element.renderObject as RenderBox;
@@ -680,13 +680,15 @@ class Element extends Node
     }
     Size preferredSize = Size.zero;
     String childDisplay = child.style['display'];
-    if (!childDisplay.isEmpty && childDisplay != 'inline') {
+    if ((!childDisplay.isEmpty && childDisplay != 'inline')
+    || (position != CSSPositionType.static && position != CSSPositionType.relative)) {
       preferredSize = Size(
         CSSLength.toDisplayPortValue(child.style[WIDTH]),
         CSSLength.toDisplayPortValue(child.style[HEIGHT]),
       );
     }
-    RenderBox positionedBoxHolder = RenderPreferredSize(
+
+    RenderPreferredSize positionedBoxHolder = RenderPreferredSize(
       preferredSize: preferredSize
     );
     addChild(positionedBoxHolder);
@@ -1425,7 +1427,7 @@ bool _isSticky(CSSStyleDeclaration style) {
       style.contains('bottom');
 }
 
-PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderBox placeholder) {
+PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPreferredSize placeholder) {
   PositionParentData parentData = PositionParentData();
   parentData.originalRenderBoxRef = placeholder;
   parentData.position = resolvePositionFromStyle(style);

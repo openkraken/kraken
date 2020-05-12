@@ -28,4 +28,10 @@ class RenderPreferredSize extends RenderProxyBox {
     size = constraints.constrain(preferredSize);
     markNeedsSemanticsUpdate();
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Size>('preferredSize', _preferredSize, missingIfNull: true));
+  }
 }

@@ -22,7 +22,7 @@ class PositionParentData extends StackParentData {
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; ${super.toString()}';
+    return 'zIndex=$zIndex; position=$position; originalRenderBoxRef=$originalRenderBoxRef; ${super.toString()}';
   }
 }
 
@@ -75,7 +75,7 @@ class RenderPosition extends RenderStack {
         childParentData.offset = childParentData.stackedChildOriginalOffset;
       } else {
         // Default to no constraints. (0 - infinite)
-        BoxConstraints childConstraints = const BoxConstraints.tightFor();
+        BoxConstraints childConstraints = const BoxConstraints();
         // if child has not width, should be calculate width by left and right
         if (childParentData.width == 0.0 && childParentData.left != null &&
           childParentData.right != null) {
@@ -91,25 +91,19 @@ class RenderPosition extends RenderStack {
 
         child.layout(childConstraints, parentUsesSize: true);
 
-        double x = size.width - child.size.width
-          + (childParentData.left ?? 0)
-          - (childParentData.right ?? 0);
-        double y = size.height - child.size.height
-          + (childParentData.top ?? 0)
-          - (childParentData.bottom ?? 0);
-
-        // Offset to global coordinate system of original element in document flow
-        Offset originalOffset = childParentData.stackedChildOriginalOffset;
+        // Calc x,y by parentData.
+        double x, y;
 
         // Offset to global coordinate system of base
-        if (childParentData.position == CSSPositionType.absolute) {
+        if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
+          Offset baseOffset = childParentData.stackedChildOriginalOffset;
           // Use parent box offset as base.
           Offset parentOffset = localToGlobal(Offset.zero);
 
-          double top = childParentData.top ?? 0;
+          double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
             top = size.height - child.size.height - (childParentData.bottom ?? 0);
-          double left = childParentData.left ?? 0;
+          double left = childParentData.left ?? baseOffset.dx;
           if (childParentData.left == null && childParentData.right != null)
             left = size.width - child.size.width - (childParentData.right ?? 0);
 
@@ -119,12 +113,12 @@ class RenderPosition extends RenderStack {
           Offset baseOffset = (childParentData.originalRenderBoxRef.parentData as BoxParentData).offset;
           double top = childParentData.top ?? -(childParentData.bottom ?? 0);
           double left = childParentData.left ?? -(childParentData.right ?? 0);
-          
+
           x = baseOffset.dx + left;
           y = baseOffset.dy + top;
         }
 
-        childParentData.offset = Offset(x, y);
+        childParentData.offset = Offset(x ?? 0, y ?? 0);
       }
 
       child = childParentData.nextSibling;
