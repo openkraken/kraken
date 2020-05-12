@@ -20,7 +20,7 @@ Element _createElement(
     case SPAN:
       return SpanElement(id, props, events);
     case IMAGE:
-      return ImgElement(id, props, events);
+      return ImageElement(id, props, events);
     case PARAGRAPH:
       return ParagraphElement(id, props, events);
     case INPUT:
@@ -291,7 +291,7 @@ class ElementManager {
   void disconnect() async {
     RendererBinding.instance.renderView.child = null;
     clearTargets();
-    await shutDownVideoPlayer();
+    await VideoElement.disposeVideos();
     _managerSingleton = ElementManager._();
   }
 

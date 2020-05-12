@@ -11,17 +11,7 @@ import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
 
-class VideoParentData extends ContainerBoxParentData<RenderBox> {}
-
-List<VideoPlayerController> videoControllers = [];
-
-// dispose all video player when Dart VM is going to shutdown
-Future<void> shutDownVideoPlayer() async {
-  for (int i = 0; i < videoControllers.length; i++) {
-    await videoControllers[i].dispose();
-  }
-  videoControllers.clear();
-}
+List<VideoPlayerController> _videoControllers = [];
 
 class VideoElement extends Element {
   VideoPlayerController controller;
@@ -35,7 +25,7 @@ class VideoElement extends Element {
 
       if (needDispose) {
         controller.dispose().then((_) {
-          videoControllers.remove(controller);
+          _videoControllers.remove(controller);
           _removeVideoBox();
 
           _createVideoBox();
@@ -62,7 +52,17 @@ class VideoElement extends Element {
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();
 
-    controller = VideoPlayerController.network(src);
+    if (src.startsWith('//') ||
+        src.startsWith('http://') ||
+        src.startsWith('https://')) {
+      controller = VideoPlayerController.network(src.startsWith('//') ? 'https:' + src : src);
+    } else if (src.startsWith('file://')) {
+      controller = VideoPlayerController.file(src);
+    } else {
+      // Fallback to asset video
+      controller = VideoPlayerController.asset(src);
+    }
+
     _src = src;
 
     controller.setLooping(properties.containsKey('loop'));
@@ -82,22 +82,16 @@ class VideoElement extends Element {
       completer.complete(textureId);
     });
 
-    videoControllers.add(controller);
+    _videoControllers.add(controller);
 
     return completer.future;
   }
 
   void addVideoBox(int textureId) {
-    RegExp exp = RegExp(r"^(http|https)://");
-
     if (properties['src'] == null) {
       TextureBox box = TextureBox(textureId: 0);
       addChild(box);
       return;
-    }
-
-    if (!exp.hasMatch(properties['src'])) {
-      throw Exception('video url\'s prefix should be http:// or https://');
     }
 
     TextureBox box = TextureBox(textureId: textureId);
@@ -220,5 +214,13 @@ class VideoElement extends Element {
     if (key == 'src') {
       src = value.toString();
     }
+  }
+
+  // dispose all video player when Dart VM is going to shutdown
+  static Future<void> disposeVideos() async {
+    for (int i = 0; i < _videoControllers.length; i++) {
+      await _videoControllers[i].dispose();
+    }
+    _videoControllers.clear();
   }
 }
