@@ -6,7 +6,7 @@
     "compile:ts": "cd integration && tsc --outDir ./.specs",
     "test": "flutter pub get && flutter clean && npm run integration",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./integration/specs/{.,**,**/**}/*.ts",
-    "integration": "npm run clean && npm run compile:ts && KRAKEN_LIBRARY_PATH=`pwd`/../targets/darwin/lib/ flutter drive --target=integration/app.dart --driver=integration/app_test.dart -d macos"
+    "integration": "npm run clean && npm run compile:ts && node scripts/integration_starter.js"
   },
   "devDependencies": {
     "chalk": "^3.0.0",

@@ -307,7 +307,8 @@ String invokeModule(
       }
     }
   } catch (e, stack) {
-    callback(Utf8.toUtf8('Error: $e$stack'), context);
+    // Dart side internal error should print it directly.
+    print('$e\n$stack');
   }
 
   return result;
