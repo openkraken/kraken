@@ -343,7 +343,7 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
     super.debugFillProperties(properties);
     properties.add(
         DiagnosticsProperty<AxisDirection>('axisDirection', axisDirection));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection,
         defaultValue: null));
   }
 }

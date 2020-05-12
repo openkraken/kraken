@@ -784,17 +784,16 @@ class RenderFlowLayout extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>(
+    properties.add(DiagnosticsProperty<Axis>('direction', direction));
+    properties.add(DiagnosticsProperty<MainAxisAlignment>(
         'mainAxisAlignment', mainAxisAlignment));
-    properties.add(DoubleProperty('spacing', spacing));
+    properties.add(DiagnosticsProperty('spacing', spacing));
     properties
-        .add(EnumProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DoubleProperty('runSpacing', runSpacing));
-    properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties.add(EnumProperty<VerticalDirection>(
+        .add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
+    properties.add(DiagnosticsProperty('runSpacing', runSpacing));
+    properties.add(DiagnosticsProperty('crossAxisAlignment', runSpacing));
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<VerticalDirection>(
         'verticalDirection', verticalDirection,
         defaultValue: VerticalDirection.down));
   }

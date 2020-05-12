@@ -1043,18 +1043,18 @@ class RenderFlexLayout extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>(
+    properties.add(DiagnosticsProperty<Axis>('direction', direction));
+    properties.add(DiagnosticsProperty<MainAxisAlignment>(
         'mainAxisAlignment', mainAxisAlignment));
-    properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
-    properties.add(EnumProperty<CrossAxisAlignment>(
+    properties.add(DiagnosticsProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    properties.add(DiagnosticsProperty<CrossAxisAlignment>(
         'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection,
         defaultValue: null));
-    properties.add(EnumProperty<VerticalDirection>(
+    properties.add(DiagnosticsProperty<VerticalDirection>(
         'verticalDirection', verticalDirection,
         defaultValue: null));
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
+    properties.add(DiagnosticsProperty<TextBaseline>('textBaseline', textBaseline,
         defaultValue: null));
   }
 }
