@@ -8,11 +8,9 @@ let unstableServer;
 // used to test failed connection
 setInterval(() => {
   if (!unstableServer) {
-    console.log('start server at 8400');
     unstableServer = new WebSocket.Server({ port: 8400 });
   } else {
     // trigger server close and notify all clients.
-    console.log('trigger server close');
     unstableServer.close();
     unstableServer = null;
   }
@@ -24,7 +22,6 @@ simpleServer.on('connection', function connection(ws) {
   });
 
   ws.on('close', () => {
-    console.log('connection closed');
   });
 
   ws.send('something');
