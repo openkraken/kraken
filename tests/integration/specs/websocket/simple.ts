@@ -28,6 +28,31 @@ describe('simple websocket usage', () => {
       }
       index++;
     }
-    ws.close();
   });
+
+  it('trigger on error when failed connection', (done) => {
+    let ws = new WebSocket('ws://127.0.0.1');
+    ws.onerror = () => {
+      done();
+    };
+    ws.onmessage = () => {
+      throw new Error('should not connected');
+    };
+    ws.onopen = () => {
+      throw new Error('should not be opened');
+    };
+  });
+
+  // it('trigger on close when server shutdown', (done) => {
+  //   let ws = new WebSocket('ws://127.0.0.1:8400');
+  //   ws.onclose = () => {
+  //     done();
+  //   };
+  //   ws.onopen = () => {
+  //     console.log('connected');
+  //   };
+  //   ws.onerror = () => {
+  //     console.log('');
+  //   };
+  // });
 });

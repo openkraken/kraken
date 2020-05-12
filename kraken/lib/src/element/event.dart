@@ -116,6 +116,29 @@ class MessageEvent extends Event {
   }
 }
 
+/// reference: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
+class CloseEvent extends Event {
+  /// An unsigned short containing the close code sent by the server
+  int code;
+
+  /// Indicating the reason the server closed the connection.
+  String reason;
+
+  /// Indicates whether or not the connection was cleanly closed
+  bool wasClean;
+
+  CloseEvent(this.code, this.reason, this.wasClean): super('close');
+
+  @override
+  Map toJson() {
+    Map json = super.toJson();
+    json['code'] = code;
+    json['reason'] = reason;
+    json['wasClean'] = wasClean;
+    return json;
+  }
+}
+
 class IntersectionChangeEvent extends Event {
   IntersectionChangeEvent(this.intersectionRatio) : super('intersectionchange');
   double intersectionRatio;
