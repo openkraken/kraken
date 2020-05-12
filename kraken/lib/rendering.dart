@@ -12,6 +12,7 @@ export 'src/rendering/flex.dart';
 export 'src/rendering/gradient.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/layout.dart';
+export 'src/rendering/preferred_size.dart';
 export 'src/rendering/margin.dart';
 export 'src/rendering/positioning.dart';
 export 'src/rendering/scrollable.dart';

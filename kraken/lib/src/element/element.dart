@@ -130,16 +130,6 @@ class Element extends Node
     // Overflow
     renderObject = initOverflowBox(renderObject, style, _scrollListener);
 
-    // Positioned boundary
-    if (_isPositioned(style)) {
-      renderObject = renderStack = RenderPosition(
-        textDirection: TextDirection.ltr,
-        fit: StackFit.passthrough,
-        overflow: Overflow.visible,
-        children: [renderObject],
-      );
-    }
-
     // BoxModel Border
     renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
@@ -181,9 +171,12 @@ class Element extends Node
         renderElementBoundary = initTransform(renderObject, style, targetId);
 
     // Add element event listener
-    events?.forEach((String eventName) {
-      addEvent(eventName);
-    });
+    events?.forEach(addEvent);
+
+    // Build root render stack.
+    if (targetId == BODY_ID) {
+      _buildRenderStack();
+    }
   }
 
   void _scrollListener(double scrollTop) {
@@ -221,105 +214,64 @@ class Element extends Node
         // change to fixed behavior
         if (!el.stickyFixed) {
           el.stickyFixed = true;
-          el._doUpdatePosition(el.style['position'], 'fixed');
+          el._updatePosition(resolvePositionFromStyle(el.style), CSSPositionType.fixed);
         }
       } else {
         // change to relative behavior
         if (el.stickyFixed) {
           el.stickyFixed = false;
-          el._doUpdatePosition(el.style['position'], 'sticky');
+          el._updatePosition(resolvePositionFromStyle(el.style), CSSPositionType.sticky);
         }
       }
     });
   }
 
-  void _doUpdatePosition(String prevPosition, String currentPosition) {
-    if (isEmptyStyleValue(prevPosition)) prevPosition = 'static';
-    if (isEmptyStyleValue(currentPosition)) currentPosition = 'static';
 
+  void _buildRenderStack() {
+    List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
+    renderDecoratedBox.child = null;
+
+    children.forEach((element) {
+      if (_isPositioned(element.style)) {
+        RenderBox child = element.renderElementBoundary;
+        child.detach();
+        shouldStackedChildren.add(child);
+      }
+    });
+
+    renderStack = RenderPosition(
+      textDirection: TextDirection.ltr,
+      fit: StackFit.passthrough,
+      overflow: Overflow.visible,
+      children: shouldStackedChildren,
+    );
+    renderDecoratedBox.child = renderStack;
+  }
+
+  void _dropRenderStack() {
+    RenderBox originalChild = renderStack.firstChild;
+    renderStack.remove(originalChild);
+    (renderStack.parent as RenderObjectWithChildMixin).child = originalChild;
+
+    if (renderStack.childCount > 0) {
+      Element parentPositionedElement = findParent(this, (el) => el.renderStack != null);
+      List<RenderBox> stackedChildren = renderStack.getChildrenAsList();
+      for (var stackedChild in stackedChildren) {
+        renderStack.dropChild(stackedChild);
+        parentPositionedElement.renderStack?.add(stackedChild);
+      }
+    }
+
+    renderStack = null;
+  }
+
+  void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     // Remove stack node when change to non positioned.
-    if (currentPosition == 'static') {
-      RenderObject child = renderStack.firstChild;
-      renderStack.remove(child);
-      (renderStack.parent as RenderDecoratedBox).child = child;
-      renderStack = null;
+    if (currentPosition == CSSPositionType.static) {
+      _dropRenderStack();
     } else {
       // Add stack node when change to positioned.
-      if (renderStack == null) {
-        RenderObject child = renderDecoratedBox.child;
-        renderDecoratedBox.child = null;
-        RenderStack renderNewStack = RenderPosition(
-          textDirection: TextDirection.ltr,
-          fit: StackFit.passthrough,
-          overflow: Overflow.visible,
-          children: [child],
-        );
-
-        renderStack = renderDecoratedBox.child = renderNewStack;
-      }
-    }
-
-    // move element back to document flow
-    if (currentPosition == 'static' ||
-        currentPosition == 'relative' ||
-        (currentPosition == 'sticky' && !stickyFixed)) {
-      // move element back to document flow
-      if (prevPosition == 'absolute' ||
-          prevPosition == 'fixed' ||
-          (prevPosition == 'sticky')) {
-        // Find positioned element to remove
-        ContainerRenderObjectMixin parentRenderObject =
-            renderElementBoundary.parent;
-        parentRenderObject.remove(renderElementBoundary);
-
-        // Remove sticky placeholder
-        if (prevPosition == 'sticky') {
-          removeStickyPlaceholder();
-        }
-
-        // Find pre non positioned element
-        Element preNonPositionedElement = null;
-        int currentChildIndex = parent.children.indexOf(this);
-        for (int i = currentChildIndex - 1; i > -1; i--) {
-          Element childElement = parent.children[i];
-          String childPosition = childElement.style['position'];
-          if (childPosition == 'static') {
-            preNonPositionedElement = childElement;
-            break;
-          }
-        }
-
-        // find pre non positioned renderObject
-        RenderElementBoundary preNonPositionedObject = null;
-        if (preNonPositionedElement != null) {
-          parentElement.renderLayoutBox.visitChildren((child) {
-            if (child is RenderElementBoundary &&
-                preNonPositionedElement.targetId == child.targetId) {
-              preNonPositionedObject = child;
-            }
-          });
-        }
-
-        // Insert non positioned renderObject to parent element in the
-        // order of original element tree
-        parentElement.renderLayoutBox
-            .insert(renderElementBoundary, after: preNonPositionedObject);
-
-        needsReposition = false;
-      }
-    } else {
-      // move element out of document flow
-
-      // append element to positioned parent
-      _repositionElement(this);
-    }
-
-    // loop positioned children to reposition
-    List<Element> targets = findPositionedChildren(this);
-    if (targets != null) {
-      targets.forEach((target) {
-        _repositionElement(target);
-      });
+      _buildRenderStack();
     }
   }
 
@@ -678,20 +630,18 @@ class Element extends Node
   RenderBox getStackedRenderBox(Element element) {
     // Positioned element in flex layout will reposition in new layer
     if (renderLayoutBox is RenderFlexLayout) {
-      renderPositionedPlaceholder = RenderConstrainedBox(
-        additionalConstraints: BoxConstraints.tightFor(
-          width: CSSLength.toDisplayPortValue(element.style[WIDTH]),
-          height: CSSLength.toDisplayPortValue(element.style[HEIGHT]))
+      Size preferredSize = Size(
+          CSSLength.toDisplayPortValue(element.style[WIDTH]),
+          CSSLength.toDisplayPortValue(element.style[HEIGHT])
       );
+      renderPositionedPlaceholder = RenderPreferredSize(preferredSize: preferredSize);
     } else {
       // Positioned element in flow layout will position in old flow layer
       renderPositionedPlaceholder = RenderPadding(padding: EdgeInsets.zero);
     }
 
-    PositionParentData stackParentData =
-        getPositionParentDataFromStyle(element.style, renderPositionedPlaceholder);
     RenderBox stackedRenderBox = element.renderObject as RenderBox;
-    stackedRenderBox.parentData = stackParentData;
+    stackedRenderBox.parentData = getPositionParentDataFromStyle(element.style, renderPositionedPlaceholder);
     return stackedRenderBox;
   }
 
@@ -704,13 +654,49 @@ class Element extends Node
     }
   }
 
+  void _addPositionedChild(Element child, CSSPositionType position) {
+    RenderPosition parentRenderPosition;
+    switch (position) {
+      case CSSPositionType.relative:
+      case CSSPositionType.absolute:
+        Element parentStackedElement = findParent(child, (element) => element.renderStack != null);
+        parentRenderPosition = parentStackedElement.renderStack;
+        break;
+
+      case CSSPositionType.fixed:
+        final Element rootEl = ElementManager().getRootElement();
+        parentRenderPosition = rootEl.renderStack;
+        break;
+
+      case CSSPositionType.static:
+      case CSSPositionType.sticky:
+      default:
+        return;
+    }
+    Size preferredSize = Size.zero;
+    String childDisplay = child.style['display'];
+    if (!childDisplay.isEmpty && childDisplay != 'inline') {
+      preferredSize = Size(
+        CSSLength.toDisplayPortValue(child.style[WIDTH]),
+        CSSLength.toDisplayPortValue(child.style[HEIGHT]),
+      );
+    }
+    RenderBox positionedBoxHolder = RenderPreferredSize(
+      preferredSize: preferredSize
+    );
+    addChild(positionedBoxHolder);
+    child.renderObject.parentData = getPositionParentDataFromStyle(child.style, positionedBoxHolder);
+    parentRenderPosition.add(child.renderObject);
+  }
+  void _addStickyChild(Element child, CSSPositionType position) {
+
+  }
+
   void appendElement(Node child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is Element) {
-      RenderObject childRenderObject = child.renderObject;
       CSSStyleDeclaration childStyle = child.style;
-      String childPosition =
-          childStyle['position'] == '' ? 'static' : childStyle['position'];
+      CSSPositionType childPositionType = resolvePositionFromStyle(childStyle);
       String display = isEmptyStyleValue(style['display'])
           ? defaultDisplay
           : style['display'];
@@ -724,46 +710,36 @@ class Element extends Node
               RenderFlexItem(child: child.renderLayoutBox as RenderBox);
         }
       }
-      if (childPosition == 'absolute') {
-        Element parentStackedElement =
-            findParent(child, (element) => element.renderStack != null);
-        if (parentStackedElement != null) {
-          insertByZIndex(parentStackedElement.renderStack, child,
-              CSSLength.toInt(childStyle['zIndex']));
-          return;
-        }
-      } else if (childPosition == 'fixed') {
-        final RenderPosition rootRenderStack =
-            ElementManager().getRootElement().renderStack;
-        if (rootRenderStack != null) {
-          insertByZIndex(
-              rootRenderStack, child, CSSLength.toInt(childStyle['zIndex']));
-          return;
-        }
 
-        if (isFlex) return;
+      switch (childPositionType) {
+        case CSSPositionType.relative:
+        case CSSPositionType.absolute:
+        case CSSPositionType.fixed:
+          _addPositionedChild(child, childPositionType);
+          break;
+        case CSSPositionType.sticky:
+          _addStickyChild(child, childPositionType);
+          break;
+        case CSSPositionType.static:
+          addChild(child.renderObject);
+          break;
       }
-
-      if (isAppend) {
-        addChild(childRenderObject);
-      } else {
-        renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
-      }
-
-      if (isFlex) {
-        children.forEach((Element child) {
-          _updateFlexItemStyle(child);
-        });
-      }
-
-      // Trigger sticky update logic after node is connected
-      if (childPosition == 'sticky') {
-        // Force flush layout of child
-        if (!child.renderMargin.hasSize) {
-          child.renderMargin.owner.flushLayout();
-        }
-        _updateStickyPosition(0);
-      }
+      
+//      if (isFlex) {
+//        children.forEach((Element child) {
+//          _updateFlexItemStyle(child);
+//        });
+//      }
+//
+//      // Trigger sticky update logic after node is connected
+//      if (childPosition == 'sticky') {
+//        // Force flush layout of child
+//        if (!child.renderMargin.hasSize) {
+//          child.renderMargin.owner.flushLayout();
+//        }
+//        _updateStickyPosition(0);
+//      }
+//    }
     }
   }
 
@@ -785,7 +761,6 @@ class Element extends Node
 
   void insertByZIndex(RenderStack renderStack, Element el, int zIndex) {
     RenderObject renderObject = getStackedRenderBox(el);
-    el.needsReposition = false;
     RenderBox child = renderStack.lastChild;
     while (child != null) {
       ParentData parentData = child.parentData;
@@ -811,7 +786,7 @@ class Element extends Node
       final ContainerParentDataMixin childParentData = child.parentData;
       child = childParentData.previousSibling;
     }
-    renderStack.insert(renderObject, after: null);
+    renderStack.add(renderObject);
     addPositionPlaceholder();
   }
 
@@ -981,15 +956,12 @@ class Element extends Node
   void _stylePositionChangedListener(
       String property, String original, String present) {
     /// Update position.
-    String prevPosition = isEmptyStyleValue(original) ? 'static' : original;
-    String currentPosition = isEmptyStyleValue(present) ? 'static' : present;
+    CSSPositionType prevPosition = resolveCSSPosition(original);
+    CSSPositionType currentPosition = resolveCSSPosition(present);
 
     // Position changed.
     if (prevPosition != currentPosition) {
-      needsReposition = true;
-      _doUpdatePosition(prevPosition, currentPosition);
-    } else if (currentPosition != 'static') {
-      _updateZIndex();
+      _updatePosition(prevPosition, currentPosition);
     }
   }
 
@@ -1437,7 +1409,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
-    return position != 'static' && position != 'relative';
+    return position != 'static';
   } else {
     return false;
   }

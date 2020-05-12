@@ -9,7 +9,7 @@ class PositionParentData extends StackParentData {
   /// Get element original position offset to global should be.
   Offset get stackedChildOriginalOffset {
     if (originalRenderBoxRef == null) return Offset.zero;
-    return (originalRenderBoxRef.parentData as BoxParentData).offset;
+    return originalRenderBoxRef.localToGlobal(Offset.zero);
   }
 
   @override
@@ -64,8 +64,7 @@ class RenderPosition extends RenderStack {
       if (!childParentData.isPositioned) {
         // Should be in it's original position.
         hasNonPositionedChildren = true;
-
-        child.layout(constraints, parentUsesSize: true);
+        child.layout(constraints.loosen(), parentUsesSize: true);
 
         final Size childSize = child.size;
         width = math.max(width, childSize.width);
@@ -131,6 +130,7 @@ class RenderPosition extends RenderStack {
     }
   }
 
+  /// Paint and order with z-index.
   @override
   void paint(PaintingContext context, Offset offset) {
     List<RenderObject> children =  getChildrenAsList();

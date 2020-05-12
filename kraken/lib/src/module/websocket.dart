@@ -18,7 +18,6 @@ class KrakenWebSocket {
       // Emit open event
       String type = 'open';
       if (_hasListener(id, type)) {
-        print(456);
         String event = jsonEncode({
           'type': type,
         });

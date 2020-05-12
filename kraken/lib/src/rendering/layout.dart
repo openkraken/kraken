@@ -703,10 +703,11 @@ class RenderFlowLayout extends RenderBox
         final RenderLayoutParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
-        bool isPositionPlaceholder = child is RenderPadding;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
         // Always align to the top of run when positioning positioned element placeholder
+        // @HACK(kraken): Judge positioned holder to impl top align.
+        bool isPositionPlaceholder = child is RenderPreferredSize;
         final double childCrossAxisOffset = isPositionPlaceholder
             ? 0
             : _getChildCrossAxisOffset(

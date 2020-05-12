@@ -12,8 +12,12 @@ enum CSSPositionType {
   sticky,
 }
 
-CSSPositionType getPositionFromStyle(CSSStyleDeclaration style) {
-  switch (style['position']) {
+CSSPositionType resolvePositionFromStyle(CSSStyleDeclaration style) {
+  return resolveCSSPosition(style['position']);
+}
+
+CSSPositionType resolveCSSPosition(String input) {
+  switch (input) {
     case 'relative':
       return CSSPositionType.relative;
     case 'absolute':
@@ -45,7 +49,7 @@ mixin CSSPositionMixin on RenderBox {
   }
 
   Offset getRelativeOffset(CSSStyleDeclaration style) {
-    CSSPositionType position = getPositionFromStyle(style);
+    CSSPositionType position = resolvePositionFromStyle(style);
     if (position == CSSPositionType.relative) {
       double dx;
       double dy;
