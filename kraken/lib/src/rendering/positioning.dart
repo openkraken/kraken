@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:kraken/css.dart';
 
 class PositionParentData extends StackParentData {
   RenderBox originalRenderBoxRef;
   int zIndex = 0;
+  CSSPositionType position = CSSPositionType.static;
 
   /// Get element original position offset to global should be.
   Offset get stackedChildOriginalOffset {
@@ -20,7 +22,7 @@ class PositionParentData extends StackParentData {
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; ${super.toString()}';
+    return 'zIndex=$zIndex; position=$position; ${super.toString()}';
   }
 }
 
@@ -69,11 +71,9 @@ class RenderPosition extends RenderStack {
         final Size childSize = child.size;
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
+
         childParentData.offset = childParentData.stackedChildOriginalOffset;
       } else {
-        RenderBox onlyChild = children[0];
-        Size size = onlyChild.size;
-
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints.tightFor();
         // if child has not width, should be calculate width by left and right
@@ -88,35 +88,40 @@ class RenderPosition extends RenderStack {
           childConstraints = childConstraints.tighten(
             height: size.height - childParentData.top - childParentData.bottom);
         }
+
         child.layout(childConstraints, parentUsesSize: true);
 
-        double x;
-        if (childParentData.left != null) {
-          x = childParentData.left;
-        } else if (childParentData.right != null) {
-          x = size.width - childParentData.right - child.size.width;
-        }
-
-        double y;
-        if (childParentData.top != null) {
-          y = childParentData.top;
-        } else if (childParentData.bottom != null) {
-          y = size.height - childParentData.bottom - child.size.height;
-        }
-
-        // Offset to global coordinate system of parent
-        Offset parentOffset = localToGlobal(Offset.zero);
+        double x = size.width - child.size.width
+          + (childParentData.left ?? 0)
+          - (childParentData.right ?? 0);
+        double y = size.height - child.size.height
+          + (childParentData.top ?? 0)
+          - (childParentData.bottom ?? 0);
 
         // Offset to global coordinate system of original element in document flow
         Offset originalOffset = childParentData.stackedChildOriginalOffset;
 
-        // Following web standard, if top or left of positioned element do not exists,
-        // use the original position before moved away from document flow
-        if (x == null) {
-          x = originalOffset.dx - parentOffset.dx;
-        }
-        if (y == null) {
-          y = originalOffset.dy - parentOffset.dy;
+        // Offset to global coordinate system of base
+        if (childParentData.position == CSSPositionType.absolute) {
+          // Use parent box offset as base.
+          Offset parentOffset = localToGlobal(Offset.zero);
+
+          double top = childParentData.top ?? 0;
+          if (childParentData.top == null && childParentData.bottom != null)
+            top = size.height - child.size.height - (childParentData.bottom ?? 0);
+          double left = childParentData.left ?? 0;
+          if (childParentData.left == null && childParentData.right != null)
+            left = size.width - child.size.width - (childParentData.right ?? 0);
+
+          x = parentOffset.dx + left;
+          y = parentOffset.dy + top;
+        } else if (childParentData.position == CSSPositionType.relative) {
+          Offset baseOffset = (childParentData.originalRenderBoxRef.parentData as BoxParentData).offset;
+          double top = childParentData.top ?? -(childParentData.bottom ?? 0);
+          double left = childParentData.left ?? -(childParentData.right ?? 0);
+          
+          x = baseOffset.dx + left;
+          y = baseOffset.dy + top;
         }
 
         childParentData.offset = Offset(x, y);

@@ -266,6 +266,11 @@ class Element extends Node
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
+    if (renderElementBoundary.parentData is PositionParentData) {
+      (renderElementBoundary.parentData as PositionParentData).position = currentPosition;
+      renderElementBoundary.markNeedsLayout();
+    }
+
     // Remove stack node when change to non positioned.
     if (currentPosition == CSSPositionType.static) {
       _dropRenderStack();
@@ -724,7 +729,7 @@ class Element extends Node
           addChild(child.renderObject);
           break;
       }
-      
+
 //      if (isFlex) {
 //        children.forEach((Element child) {
 //          _updateFlexItemStyle(child);
@@ -1423,6 +1428,7 @@ bool _isSticky(CSSStyleDeclaration style) {
 PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderBox placeholder) {
   PositionParentData parentData = PositionParentData();
   parentData.originalRenderBoxRef = placeholder;
+  parentData.position = resolvePositionFromStyle(style);
 
   if (style.contains('top')) {
     parentData.top = CSSLength.toDisplayPortValue(style['top']);
