@@ -58,8 +58,9 @@ class Element extends Node
 
   final String tagName;
 
+  final Map<String, dynamic> defaultStyle;
   /// The default display type of
-  final String defaultDisplay;
+  String defaultDisplay;
 
   // After `this` created, useful to set default properties, override this for individual element.
   void afterConstruct() {}
@@ -97,8 +98,7 @@ class Element extends Node
   Element({
     @required int targetId,
     @required this.tagName,
-    this.defaultDisplay = 'block',
-    this.properties = const {},
+    this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
     this.allowChildren = true,
@@ -108,8 +108,8 @@ class Element extends Node
     if (properties == null) properties = {};
     if (events == null) events = [];
 
-    afterConstruct();
-    style = CSSStyleDeclaration(style: properties[STYLE]);
+    defaultDisplay = defaultStyle.containsKey('display') ? defaultStyle['display'] : 'block';
+    style = CSSStyleDeclaration(style: defaultStyle);
 
     _registerStyleChangedListeners();
 
@@ -181,11 +181,6 @@ class Element extends Node
     // The layout boundary of element.
     renderObject =
         renderElementBoundary = initTransform(renderObject, style, targetId);
-
-    // Add element event listener
-    events?.forEach((String eventName) {
-      addEvent(eventName);
-    });
   }
 
   void _scrollListener(double scrollTop) {

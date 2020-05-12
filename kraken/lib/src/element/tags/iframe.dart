@@ -13,6 +13,16 @@ import 'package:kraken_webview/kraken_webview.dart';
 
 const String IFRAME = 'IFRAME';
 
+/// Default width is 300 in pixel, height is 150 in pixel,
+/// defined by HTML Standard.
+const String DEFAULT_WIDTH = '300px';
+const String DEFAULT_HEIGHT = '150px';
+
+const Map<String, dynamic> _defaultStyle = {
+  'width': DEFAULT_WIDTH,
+  'height': DEFAULT_HEIGHT,
+};
+
 /// Optional callback invoked when a web view is first created. [controller] is
 /// the [WebViewController] for the created web view.
 typedef void WebViewCreatedCallback(WebViewController controller);
@@ -444,8 +454,6 @@ Set<String> _extractChannelNames(Set<JavascriptChannel> channels) {
 
 /// A web view widget for showing html content.
 abstract class WebViewElement extends Element {
-  static const String WEBVIEW = 'WEBVIEW';
-
   /// Creates a new web view.
   ///
   /// The web view can be controlled using a `WebViewController` that is passed to the
@@ -453,10 +461,8 @@ abstract class WebViewElement extends Element {
   ///
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(
-    int targetId,
-    Map<String, dynamic> props,
-    List<String> events, {
-    String tagName = 'WEBVIEW',
+    int targetId, {
+    String tagName,
     this.initialUrl,
     this.javascriptMode = JavascriptMode.unrestricted,
     this.javascriptChannels,
@@ -471,19 +477,9 @@ abstract class WebViewElement extends Element {
         assert(initialMediaPlaybackPolicy != null),
         super(
           targetId: targetId,
-          defaultDisplay: 'block',
-          tagName: tagName ?? WEBVIEW,
-          properties: props,
-          events: events,
+          tagName: tagName,
+          defaultStyle: _defaultStyle
         );
-
-  void afterConstruct() {
-    if (properties.containsKey('src')) {
-      initialUrl = properties['src'];
-      _buildPlatformRenderBox();
-      addChild(sizedBox);
-    }
-  }
 
   /// The url that WebView loaded at first time.
   String initialUrl;
@@ -570,11 +566,6 @@ abstract class WebViewElement extends Element {
           BoxConstraints.tight(Size(width, height));
     }
   }
-
-  /// Default width is 300 in pixel, height is 150 in pixel,
-  /// defined by HTML Standard.
-  static const String DEFAULT_WIDTH = '300px';
-  static const String DEFAULT_HEIGHT = '150px';
 
   /// Default userAgent for kraken.
   static const String DEFAULT_USER_AGENT =
@@ -797,8 +788,8 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId, Map<String, dynamic> props, List<String> events)
-      : super(targetId, props, events, tagName: IFRAME);
+  IFrameElement(int targetId)
+      : super(targetId, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}
