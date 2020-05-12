@@ -32,8 +32,7 @@ class RenderFlowLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
-        CSSComputedMixin,
-        CSSPositionMixin {
+        CSSComputedMixin {
   RenderFlowLayout({
     List<RenderBox> children,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
@@ -511,7 +510,7 @@ class RenderFlowLayout extends RenderBox
     double elementHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
-    if (child == null) {
+    if (childCount == 0) {
       size = constraints.constrain(Size(
         elementWidth ?? 0,
         elementHeight ?? 0,
@@ -521,7 +520,7 @@ class RenderFlowLayout extends RenderBox
 
     // @NOTE: Child size could be larger than parent's content, give
     // an infinite box constraint to flow layout children.
-    final BoxConstraints childConstraints = BoxConstraints();
+    BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -550,16 +549,19 @@ class RenderFlowLayout extends RenderBox
     double crossAxisExtent = 0.0;
     double runMainAxisExtent = 0.0;
     double runCrossAxisExtent = 0.0;
-    int childCount = 0;
+    int _effectiveChildCount = 0;
 
     RenderBox preChild = null;
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       final RenderLayoutParentData childParentData = child.parentData;
-      final double childMainAxisExtent = _getMainAxisExtent(child);
-      final double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (childCount > 0 &&
+      double childMainAxisExtent = _getMainAxisExtent(child);
+      double childCrossAxisExtent = _getCrossAxisExtent(child);
+      if (isPositionHolder(child)) {
+        childMainAxisExtent = childCrossAxisExtent = 0;
+      }
+      if (_effectiveChildCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
               (runMainAxisExtent + spacing + childMainAxisExtent >
@@ -568,21 +570,21 @@ class RenderFlowLayout extends RenderBox
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
         runMetrics.add(
-            _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
+            _RunMetrics(runMainAxisExtent, runCrossAxisExtent, _effectiveChildCount));
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
-        childCount = 0;
+        _effectiveChildCount = 0;
       }
       runMainAxisExtent += childMainAxisExtent;
-      if (childCount > 0) runMainAxisExtent += spacing;
+      if (_effectiveChildCount > 0) runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      childCount += 1;
+      _effectiveChildCount += 1;
       childParentData.runIndex = runMetrics.length;
       preChild = child;
       child = childParentData.nextSibling;
     }
 
-    if (childCount > 0) {
+    if (_effectiveChildCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
       if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
@@ -592,7 +594,7 @@ class RenderFlowLayout extends RenderBox
 
     final int runCount = runMetrics.length;
 
-    assert(runCount > 0);
+    assert(_effectiveChildCount > 0);
 
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
@@ -662,7 +664,7 @@ class RenderFlowLayout extends RenderBox
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
-      final int childCount = metrics.childCount;
+      final int metricChildCount = metrics.childCount;
 
       final double mainAxisFreeSpace =
           math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
@@ -680,14 +682,14 @@ class RenderFlowLayout extends RenderBox
           break;
         case MainAxisAlignment.spaceBetween:
           childBetweenSpace =
-              childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
+          metricChildCount > 1 ? mainAxisFreeSpace / (metricChildCount - 1) : 0.0;
           break;
         case MainAxisAlignment.spaceAround:
-          childBetweenSpace = mainAxisFreeSpace / childCount;
+          childBetweenSpace = mainAxisFreeSpace / metricChildCount;
           childLeadingSpace = childBetweenSpace / 2.0;
           break;
         case MainAxisAlignment.spaceEvenly:
-          childBetweenSpace = mainAxisFreeSpace / (childCount + 1);
+          childBetweenSpace = mainAxisFreeSpace / (metricChildCount + 1);
           childLeadingSpace = childBetweenSpace;
           break;
       }
@@ -698,7 +700,6 @@ class RenderFlowLayout extends RenderBox
           : childLeadingSpace;
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
-
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
@@ -707,8 +708,7 @@ class RenderFlowLayout extends RenderBox
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
-        bool isPositionPlaceholder = child is RenderPreferredSize;
-        final double childCrossAxisOffset = isPositionPlaceholder
+        final double childCrossAxisOffset = isPositionHolder(child)
             ? 0
             : _getChildCrossAxisOffset(
                 flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
@@ -716,20 +716,14 @@ class RenderFlowLayout extends RenderBox
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
-        CSSStyleDeclaration childStyle;
-        if (child is RenderTextBox) {
-          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
-        } else if (child is RenderElementBoundary) {
-          childStyle = getEventTargetByTargetId<Element>(child.targetId)?.style;
-        }
-
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
+        /// Apply position relative offset change.
+        childParentData.offset = relativeOffset;
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else
           childMainPosition += childMainAxisExtent + childBetweenSpace;
+
         child = childParentData.nextSibling;
       }
 
@@ -784,8 +778,6 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // TODO(ianh): move the debug flex overflow paint logic somewhere common so
-    // it can be reused here
     defaultPaint(context, offset);
   }
 

@@ -35,3 +35,15 @@ class RenderPreferredSize extends RenderProxyBox {
     properties.add(DiagnosticsProperty<Size>('preferredSize', _preferredSize, missingIfNull: true));
   }
 }
+
+/// An alias to [RenderPreferredSize]
+class RenderPositionHolder extends RenderPreferredSize {
+  RenderPositionHolder({
+    @required Size preferredSize,
+    RenderBox child = null,
+  }) : super(preferredSize: preferredSize, child: child);
+}
+
+bool isPositionHolder(RenderBox box) {
+  return box is RenderPositionHolder;
+}

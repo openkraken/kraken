@@ -4,7 +4,6 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -287,11 +286,15 @@ mixin CSSSizingMixin {
       }
 
       double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
-      if (height == null || internalHeight > height) height = internalHeight;
+      if (height == null) minHeight = internalHeight;
+      else if (internalHeight > height) height = internalHeight;
+
       if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
 
       double internalWidth = padding.left + padding.right + border.left + border.right;
-      if (width == null || internalWidth > width) width = internalWidth;
+      if (width == null) minWidth = internalWidth;
+      else if (internalWidth > width) width = internalWidth;
+
       if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
 
       return CSSSizedConstraints(

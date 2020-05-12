@@ -304,70 +304,70 @@ class Element extends Node
         .insert(stickyPlaceholder, after: renderObject);
   }
 
-  // reposition element with position absolute/fixed
-  void _repositionElement(Element el) {
-    RenderObject renderObject = el.renderObject;
-    CSSStyleDeclaration style = el.style;
-    int targetId = el.targetId;
-
-    // new node not in the tree, wait for append in appendedElement
-    if (renderObject.parent == null) {
-      return;
-    }
-
-    // find positioned element to attach
-    Element parentElementWithStack;
-    if (style['position'] == 'absolute') {
-      parentElementWithStack =
-          findParent(el, (element) => element.renderStack != null);
-    } else {
-      parentElementWithStack = ElementManager().getRootElement();
-    }
-    // not found positioned parent element, wait for append in appendedElement
-    if (parentElementWithStack == null) return;
-
-    // add placeholder for sticky element before moved
-    if (style['position'] == 'sticky') {
-      insertStickyPlaceholder();
-    }
-
-    // remove non positioned element from parent element
-    // TODO(refactor): remove as cast.
-    (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
-    RenderStack parentStack = parentElementWithStack.renderStack;
-
-    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
-    renderObject.parentData = stackParentData;
-
-    Element currentElement = getEventTargetByTargetId<Element>(targetId);
-
-    // current element's zIndex
-    int currentZIndex = CSSLength.toInt(currentElement.style['zIndex']);
-    // add current element back to parent stack by zIndex
-    insertByZIndex(parentStack, el, currentZIndex);
-  }
-
-  void _updateZIndex() {
-    // new node not in the tree, wait for append in appendedElement
-    if (renderObject.parent == null) {
-      return;
-    }
-
-    Element parentElementWithStack =
-        findParent(this, (element) => element.renderStack != null);
-    RenderStack parentStack = parentElementWithStack.renderStack;
-
-    // remove current element from parent stack
-    parentStack.remove(renderObject);
-
-    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
-    renderObject.parentData = stackParentData;
-
-    // current element's zIndex
-    int currentZIndex = CSSLength.toInt(style['zIndex']);
-    // add current element back to parent stack by zIndex
-    insertByZIndex(parentStack, this, currentZIndex);
-  }
+//  // reposition element with position absolute/fixed
+//  void _repositionElement(Element el) {
+//    RenderObject renderObject = el.renderObject;
+//    CSSStyleDeclaration style = el.style;
+//    int targetId = el.targetId;
+//
+//    // new node not in the tree, wait for append in appendedElement
+//    if (renderObject.parent == null) {
+//      return;
+//    }
+//
+//    // find positioned element to attach
+//    Element parentElementWithStack;
+//    if (style['position'] == 'absolute') {
+//      parentElementWithStack =
+//          findParent(el, (element) => element.renderStack != null);
+//    } else {
+//      parentElementWithStack = ElementManager().getRootElement();
+//    }
+//    // not found positioned parent element, wait for append in appendedElement
+//    if (parentElementWithStack == null) return;
+//
+//    // add placeholder for sticky element before moved
+//    if (style['position'] == 'sticky') {
+//      insertStickyPlaceholder();
+//    }
+//
+//    // remove non positioned element from parent element
+//    // TODO(refactor): remove as cast.
+//    (renderObject.parent as ContainerRenderObjectMixin).remove(renderObject);
+//    RenderStack parentStack = parentElementWithStack.renderStack;
+//
+//    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
+//    renderObject.parentData = stackParentData;
+//
+//    Element currentElement = getEventTargetByTargetId<Element>(targetId);
+//
+//    // current element's zIndex
+//    int currentZIndex = CSSLength.toInt(currentElement.style['zIndex']);
+//    // add current element back to parent stack by zIndex
+//    insertByZIndex(parentStack, el, currentZIndex);
+//  }
+//
+//  void _updateZIndex() {
+//    // new node not in the tree, wait for append in appendedElement
+//    if (renderObject.parent == null) {
+//      return;
+//    }
+//
+//    Element parentElementWithStack =
+//        findParent(this, (element) => element.renderStack != null);
+//    RenderStack parentStack = parentElementWithStack.renderStack;
+//
+//    // remove current element from parent stack
+//    parentStack.remove(renderObject);
+//
+//    PositionParentData stackParentData = getPositionParentDataFromStyle(style, renderObject);
+//    renderObject.parentData = stackParentData;
+//
+//    // current element's zIndex
+//    int currentZIndex = CSSLength.toInt(style['zIndex']);
+//    // add current element back to parent stack by zIndex
+//    insertByZIndex(parentStack, this, currentZIndex);
+//  }
 
   void _updateOffset(
       {CSSTransition definiteTransition,
@@ -518,7 +518,7 @@ class Element extends Node
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
-        appendElement(child);
+        _append(child, after: renderLayoutBox.lastChild);
         child.fireAfterConnected();
       }
     };
@@ -554,7 +554,6 @@ class Element extends Node
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
-
     VoidCallback doInsertBefore = () {
       if (referenceIndex != -1) {
         Node after;
@@ -569,8 +568,7 @@ class Element extends Node
             afterRenderObject = after?.renderObject;
           }
         }
-        appendElement(child,
-            afterRenderObject: afterRenderObject, isAppend: false);
+        _append(child, after: afterRenderObject);
         if (child is NodeLifeCycle) child.fireAfterConnected();
       }
     };
@@ -639,10 +637,10 @@ class Element extends Node
           CSSLength.toDisplayPortValue(element.style[WIDTH]),
           CSSLength.toDisplayPortValue(element.style[HEIGHT])
       );
-      renderPositionedPlaceholder = RenderPreferredSize(preferredSize: preferredSize);
+      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: preferredSize);
     } else {
       // Positioned element in flow layout will position in old flow layer
-      renderPositionedPlaceholder = RenderPreferredSize(preferredSize: Size.zero);
+      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: Size.zero);
     }
 
     RenderBox stackedRenderBox = element.renderObject as RenderBox;
@@ -688,7 +686,7 @@ class Element extends Node
       );
     }
 
-    RenderPreferredSize positionedBoxHolder = RenderPreferredSize(
+    RenderPositionHolder positionedBoxHolder = RenderPositionHolder(
       preferredSize: preferredSize
     );
     addChild(positionedBoxHolder);
@@ -699,8 +697,8 @@ class Element extends Node
 
   }
 
-  void appendElement(Node child,
-      {RenderObject afterRenderObject, bool isAppend = true}) {
+  /// Append a child to childList, if after is null, insert into first.
+  void _append(Node child, { RenderBox after }) {
     if (child is Element) {
       CSSStyleDeclaration childStyle = child.style;
       CSSPositionType childPositionType = resolvePositionFromStyle(childStyle);
@@ -728,7 +726,7 @@ class Element extends Node
           _addStickyChild(child, childPositionType);
           break;
         case CSSPositionType.static:
-          addChild(child.renderObject);
+          renderLayoutBox.insert(child.renderObject, after: after);
           break;
       }
 
@@ -1427,7 +1425,7 @@ bool _isSticky(CSSStyleDeclaration style) {
       style.contains('bottom');
 }
 
-PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPreferredSize placeholder) {
+PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
   PositionParentData parentData = PositionParentData();
   parentData.originalRenderBoxRef = placeholder;
   parentData.position = resolvePositionFromStyle(style);

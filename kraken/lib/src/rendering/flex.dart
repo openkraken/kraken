@@ -100,8 +100,7 @@ class RenderFlexLayout extends RenderBox
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
-        CSSComputedMixin,
-        CSSPositionMixin {
+        CSSComputedMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -559,7 +558,7 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Layout placeholder renderObject of positioned element(absolute/fixed) in new layer
-      if (child is RenderPreferredSize) {
+      if (child is RenderPositionHolder) {
         _layoutChildren(child);
       }
       child = childParentData.nextSibling;
@@ -568,7 +567,7 @@ class RenderFlexLayout extends RenderBox
     _layoutChildren(null);
   }
 
-  void _layoutChildren(RenderPreferredSize placeholderChild) {
+  void _layoutChildren(RenderPositionHolder placeholderChild) {
     assert(_debugHasNecessaryDirections);
 
     double elementWidth = getElementComputedWidth(targetId);
@@ -611,7 +610,7 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderPreferredSize) {
+      if (placeholderChild == null && child is RenderPositionHolder) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -762,7 +761,7 @@ class RenderFlexLayout extends RenderBox
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude placeholder renderObject when layout non placeholder object
-        if (placeholderChild == null && child is RenderPreferredSize) {
+        if (placeholderChild == null && child is RenderPositionHolder) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -948,7 +947,7 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderPreferredSize) {
+      if (placeholderChild == null && child is RenderPositionHolder) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -1064,8 +1063,7 @@ class RenderFlexItem extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
-        DebugOverflowIndicatorMixin,
-        CSSPositionMixin {
+        DebugOverflowIndicatorMixin {
   RenderFlexItem({RenderBox child}) {
     add(child);
   }
