@@ -431,6 +431,9 @@ class RenderFlowLayout extends RenderBox
     return null;
   }
 
+  /// Get current offset.
+  Offset get offset => (parentData as BoxParentData).offset;
+
   @override
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {

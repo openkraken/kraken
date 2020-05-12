@@ -14,7 +14,7 @@ describe('containing-block', () => {
     });
     append(div1, child);
     append(BODY, div1);
-    await matchElementImageSnapshot(div1);
+    await matchScreenshot();
   });
 
   it('003', async () => {
@@ -371,9 +371,7 @@ describe('containing-block', () => {
   });
 
   it('023', async () => {
-    let bodyStyle = {
-      margin: '8px',
-    };
+    let bodyStyle = {};
     let div1Anddiv2Style = {
       margin: '100px',
     };
