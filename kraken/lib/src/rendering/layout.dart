@@ -567,8 +567,8 @@ class RenderFlowLayout extends RenderBox
         RenderElementBoundary childElementBoundary = positionHolder.realDisplayedBox;
         if (childElementBoundary != null) {
           PositionParentData positionParentData = childElementBoundary.parentData as PositionParentData;
-          if (positionParentData != CSSPositionType.static
-              && positionParentData != CSSPositionType.relative)
+          if (positionParentData.position != CSSPositionType.static
+              && positionParentData.position != CSSPositionType.relative)
             childMainAxisExtent = childCrossAxisExtent = 0;
         }
       }
