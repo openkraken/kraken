@@ -24,17 +24,50 @@ class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
   void parse() {
     var start = 0;
     var left = _rawInput.indexOf('(', start);
-    var right = _rawInput.indexOf(')', start);
     _value = [];
 
-    while (left != -1 && right != -1 && right > left + 1) {
-      var args = _rawInput.substring(left + 1, right).trim();
-      var argList = args.split(',');
-      var fn = _rawInput.substring(start, left);
-      _value.add(CSSFunctionalNotation(fn.trim(), argList));
-      start = right + 1;
+    // function may contain function, should handle this situation
+    while (left != -1 && start < left) {
+      String fn = _rawInput.substring(start, left);
+      int argsBeginIndex = left + 1;
+      List<String> argList = [];
+      int argBeginIndex = argsBeginIndex;
+      // contains function count
+      int containLeftCount = 0;
+      bool match = false;
+      // find all args in this function
+      while (argsBeginIndex < _rawInput.length) {
+        if (_rawInput[argsBeginIndex] == ',') {
+          if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
+            argList.add(_rawInput.substring(argBeginIndex, argsBeginIndex));
+            argBeginIndex = argsBeginIndex + 1;
+          }
+        } else if (_rawInput[argsBeginIndex] == '(') {
+          containLeftCount++;
+        } else if (_rawInput[argsBeginIndex] == ')') {
+          if (containLeftCount > 0) {
+            containLeftCount--;
+          } else {
+            if (argBeginIndex < argsBeginIndex) {
+              argList.add(_rawInput.substring(argBeginIndex, argsBeginIndex));
+              argBeginIndex = argsBeginIndex + 1;
+            }
+            // function parse success when find the matched right parenthesis
+            match = true;
+            break;
+          }
+        }
+        argsBeginIndex++;
+      }
+      if (match) {
+        // only add the right function
+        _value.add(CSSFunctionalNotation(fn.trim(), argList));
+      }
+      start = argsBeginIndex + 1;
+      if (start >= _rawInput.length) {
+        break;
+      }
       left = _rawInput.indexOf('(', start);
-      right = _rawInput.indexOf(')', start);
     }
   }
 

@@ -11,7 +11,8 @@ final Map<String, dynamic> _defaultStyle = {
   'position': 'absolute',
   'width': '100vw',
   'height': '100vh',
-  'overflow': 'auto'
+  'overflow': 'auto',
+  'backgroundColor': 'white'
 };
 
 class BodyElement extends Element {
