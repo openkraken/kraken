@@ -16,7 +16,7 @@ class RenderPreferredSize extends RenderProxyBox {
   Size get preferredSize => _preferredSize;
   set preferredSize(Size value) {
     assert(value != null);
-    if (preferredSize == value)
+    if (_preferredSize == value)
       return;
 
     _preferredSize = value;
@@ -36,7 +36,7 @@ class RenderPreferredSize extends RenderProxyBox {
   }
 }
 
-/// An alias to [RenderPreferredSize]
+/// A placeholder for positioned RenderBox
 class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
     @required Size preferredSize,

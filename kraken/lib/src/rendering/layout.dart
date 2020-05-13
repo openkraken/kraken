@@ -561,9 +561,7 @@ class RenderFlowLayout extends RenderBox
       final RenderLayoutParentData childParentData = child.parentData;
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (isPositionHolder(child)) {
-        childMainAxisExtent = childCrossAxisExtent = 0;
-      }
+
       if (_effectiveChildCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||

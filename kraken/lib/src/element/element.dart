@@ -689,9 +689,15 @@ class Element extends Node
     RenderPositionHolder positionedBoxHolder = RenderPositionHolder(
       preferredSize: preferredSize
     );
+
+    var childRenderElementBoundary = child.renderElementBoundary;
+    if (position == CSSPositionType.relative) {
+      childRenderElementBoundary.positionedHolder = positionedBoxHolder;
+    }
+
     addChild(positionedBoxHolder);
-    child.renderObject.parentData = getPositionParentDataFromStyle(child.style, positionedBoxHolder);
-    parentRenderPosition.add(child.renderObject);
+    childRenderElementBoundary.parentData = getPositionParentDataFromStyle(child.style, positionedBoxHolder);
+    parentRenderPosition.add(childRenderElementBoundary);
   }
   void _addStickyChild(Element child, CSSPositionType position) {
 
