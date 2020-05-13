@@ -23,7 +23,7 @@ Element _createElement(
       element = SpanElement(id);
       break;
     case IMAGE:
-      element = ImgElement(id);
+      element = ImageElement(id);
       break;
     case PARAGRAPH:
       element = ParagraphElement(id);
@@ -318,7 +318,7 @@ class ElementManager {
   void disconnect() async {
     RendererBinding.instance.renderView.child = null;
     clearTargets();
-    await shutDownVideoPlayer();
+    await VideoElement.disposeVideos();
     _managerSingleton = ElementManager._();
   }
 

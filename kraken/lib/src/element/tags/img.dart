@@ -14,14 +14,14 @@ const Map<String, dynamic> _defaultStyle = {
   'display': 'inline-block'
 };
 
-class ImgElement extends Element {
+class ImageElement extends Element {
   ImageProvider image;
   RenderDecoratedBox imageBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
-  ImgElement(int targetId)
+  ImageElement(int targetId)
       : super(
             targetId: targetId,
             defaultStyle: _defaultStyle,
