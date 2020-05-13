@@ -93,9 +93,7 @@ class RenderElementBoundary extends RenderTransform
 
     if (positionedHolder != null) {
       // Make position holder preferred size equal to current element boundary size.
-      Timer.run(() {
-        positionedHolder.preferredSize = Size.copy(size);
-      });
+      positionedHolder.preferredSize = Size.copy(size);
     }
   }
 

@@ -1,5 +1,6 @@
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:meta/meta.dart';
 
 /// [RenderPreferredSize] Render a box with preferred size,
 /// if no child provided, size is exactly what preferred size
@@ -20,7 +21,9 @@ class RenderPreferredSize extends RenderProxyBox {
       return;
 
     _preferredSize = value;
-    markNeedsLayout();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      markNeedsLayout();
+    });
   }
 
   @override
