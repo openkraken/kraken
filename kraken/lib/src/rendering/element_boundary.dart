@@ -2,8 +2,6 @@
  * Copyright (C) 2019 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
