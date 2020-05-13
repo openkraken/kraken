@@ -139,6 +139,16 @@ jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &s
   return createValue(res);
 }
 
+void JSCContext::setUnhandledPromiseRejectHandler(jsa::Object &handler) {
+#if __APPLE__
+  JSValueRef exception = nullptr;
+  if (__builtin_available(macOS 10.15, iOS 10.13, *)) {
+    JSGlobalContextSetUnhandledRejectionCallback(ctx_, objectRef(handler), &exception);
+  }
+  hasException(exception);
+#endif
+}
+
 jsa::Object JSCContext::global() {
   return createObject(JSContextGetGlobalObject(ctx_));
 }
