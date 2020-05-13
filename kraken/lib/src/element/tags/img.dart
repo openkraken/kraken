@@ -10,14 +10,14 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-class ImgElement extends Element {
+class ImageElement extends Element {
   ImageProvider image;
   RenderDecoratedBox imageBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
-  ImgElement(int targetId, Map<String, dynamic> props, List<String> events)
+  ImageElement(int targetId, Map<String, dynamic> props, List<String> events)
       : super(
             targetId: targetId,
             defaultDisplay: 'inline-block',
