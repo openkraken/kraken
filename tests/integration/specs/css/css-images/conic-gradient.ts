@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('conic-gradient', () => {
-  xit('angle-negative', async () => {
+  it('angle-negative', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',

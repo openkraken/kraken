@@ -49,7 +49,7 @@ describe('gradients-with', () => {
 
     await matchScreenshot();
   });
-  xit('transparent-ref', async () => {
+  it('transparent-ref', async () => {
     let p;
     let gradient1;
     p = createElement(

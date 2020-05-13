@@ -221,8 +221,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (background[BACKGROUND_ATTACHMENT] == '' ||
-        background[BACKGROUND_ATTACHMENT] == 'scroll' &&
+    if ((background[BACKGROUND_ATTACHMENT] == '' ||
+        background[BACKGROUND_ATTACHMENT] == 'scroll') &&
             background.containsKey(BACKGROUND_IMAGE)) {
       List<CSSFunctionalNotation> methods =
           CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
