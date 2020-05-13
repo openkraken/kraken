@@ -59,6 +59,9 @@ class RenderTextBox extends RenderBox
   }
 
   bool _isTextOverflowEllipsis() {
+    if (style == null) {
+      return false;
+    }
     String overflowX =
         style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
 

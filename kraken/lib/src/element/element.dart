@@ -693,11 +693,11 @@ class Element extends Node
     }
   }
 
-  void removeTextNodeChildRenderObject(Node child) {
+  void removeTextNodeChildRenderObject(TextNode child) {
     renderLayoutBox.remove(child.renderTextBox);
   }
 
-  void removeElementChildRenderObject(Node child) {
+  void removeElementChildRenderObject(Element child) {
     AbstractNode childParentNode = child.renderElementBoundary.parent;
     if (childParentNode == renderLayoutBox) {
       renderLayoutBox.remove(child.renderElementBoundary);
@@ -759,7 +759,7 @@ class Element extends Node
     }
   }
 
-  void appendTextNodeChildRenderObject(Node child,
+  void appendTextNodeChildRenderObject(TextNode child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     RenderObject childRenderObject = child.renderTextBox;
     RenderTextBox textBox = childRenderObject as RenderTextBox;
@@ -775,7 +775,7 @@ class Element extends Node
     }
   }
 
-  void appendElementChildRenderObject(Node child,
+  void appendElementChildRenderObject(Element child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     RenderObject childRenderObject = child.renderObject;
     CSSStyleDeclaration childStyle = child.style;
