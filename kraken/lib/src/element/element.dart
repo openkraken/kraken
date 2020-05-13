@@ -570,7 +570,7 @@ class Element extends Node
         RenderObject childRenderObject = getRenderObjectOfNode(child);
         // Only append childNode when it has no parent
         if (childRenderObject != null && childRenderObject.parent == null) {
-          appendChildNode(child);
+          appendChildRenderObject(child);
         }
         child.fireAfterConnected();
       }
@@ -593,7 +593,7 @@ class Element extends Node
     // Only remove childNode when it has parent
     RenderObject childRenderObject = getRenderObjectOfNode(child);
     if (child is NodeLifeCycle && childRenderObject != null && childRenderObject.parent != null) {
-      removeChildNode(child);
+      removeChildRenderObject(child);
     }
 
     super.removeChild(child);
@@ -632,7 +632,7 @@ class Element extends Node
               afterRenderObject = after?.renderObject;
             }
           }
-          appendChildNode(child,
+          appendChildRenderObject(child,
               afterRenderObject: afterRenderObject, isAppend: false);
         }
         if (child is NodeLifeCycle) child.fireAfterConnected();
@@ -685,22 +685,30 @@ class Element extends Node
     return result;
   }
 
-  void removeChildNode(Node child) {
+  void removeChildRenderObject(Node child) {
     if (child is TextNode) {
-      renderLayoutBox.remove(child.renderTextBox);
+      removeTextNodeChildRenderObject(child);
     } else if (child is Element) {
-      AbstractNode childParentNode = child.renderElementBoundary.parent;
-      if (childParentNode == renderLayoutBox) {
-        renderLayoutBox.remove(child.renderElementBoundary);
-      } else if (childParentNode == renderStack) {
-        renderStack.remove(child.renderElementBoundary);
-      } else {
-        // Fixed or sticky.
-        final RenderStack rootRenderStack =
-            ElementManager().getRootElement().renderStack;
-        if (childParentNode == rootRenderStack) {
-          rootRenderStack.remove(child.renderElementBoundary);
-        }
+      removeElementChildRenderObject(child);
+    }
+  }
+
+  void removeTextNodeChildRenderObject(Node child) {
+    renderLayoutBox.remove(child.renderTextBox);
+  }
+
+  void removeElementChildRenderObject(Node child) {
+    AbstractNode childParentNode = child.renderElementBoundary.parent;
+    if (childParentNode == renderLayoutBox) {
+      renderLayoutBox.remove(child.renderElementBoundary);
+    } else if (childParentNode == renderStack) {
+      renderStack.remove(child.renderElementBoundary);
+    } else {
+      // Fixed or sticky.
+      final RenderStack rootRenderStack =
+          ElementManager().getRootElement().renderStack;
+      if (childParentNode == rootRenderStack) {
+        rootRenderStack.remove(child.renderElementBoundary);
       }
     }
   }
@@ -742,79 +750,89 @@ class Element extends Node
     }
   }
 
-  void appendChildNode(Node child,
+  void appendChildRenderObject(Node child,
       {RenderObject afterRenderObject, bool isAppend = true}) {
     if (child is TextNode) {
-      RenderObject childRenderObject = child.renderTextBox;
-      RenderTextBox textBox = childRenderObject as RenderTextBox;
-      // Text node whitespace collapse relate to siblings,
-      // so text should update when appending
-      textBox.text = child.data;
-      // TextNode's style is inherited from parent style
-      textBox.style = style;
-      if (isAppend) {
-        addChild(childRenderObject);
-      } else {
-        renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
-      }
+      appendTextNodeChildRenderObject(child);
     } else if (child is Element) {
-      RenderObject childRenderObject = child.renderObject;
-      CSSStyleDeclaration childStyle = child.style;
-      String childPosition =
-          childStyle['position'] == '' ? 'static' : childStyle['position'];
-      String display = isEmptyStyleValue(style['display'])
-          ? defaultDisplay
-          : style['display'];
-      bool isFlex = display.endsWith('flex');
+      appendElementChildRenderObject(child);
+    }
+  }
 
-      if (isFlex) {
-        // Add FlexItem wrap for flex child node.
-        if (child.renderLayoutBox != null) {
-          child.renderPadding.child = null;
-          child.renderPadding.child =
-              RenderFlexItem(child: child.renderLayoutBox as RenderBox);
-        }
-      }
-      if (childPosition == 'absolute') {
-        Element parentStackedElement =
-            findParent(child, (element) => element.renderStack != null);
-        if (parentStackedElement != null) {
-          insertByZIndex(parentStackedElement.renderStack, child,
-              CSSLength.toInt(childStyle['zIndex']));
-          return;
-        }
-      } else if (childPosition == 'fixed') {
-        final RenderPosition rootRenderStack =
-            ElementManager().getRootElement().renderStack;
-        if (rootRenderStack != null) {
-          insertByZIndex(
-              rootRenderStack, child, CSSLength.toInt(childStyle['zIndex']));
-          return;
-        }
+  void appendTextNodeChildRenderObject(Node child,
+      {RenderObject afterRenderObject, bool isAppend = true}) {
+    RenderObject childRenderObject = child.renderTextBox;
+    RenderTextBox textBox = childRenderObject as RenderTextBox;
+    // Text node whitespace collapse relate to siblings,
+    // so text should update when appending
+    textBox.text = child.data;
+    // TextNode's style is inherited from parent style
+    textBox.style = style;
+    if (isAppend) {
+      addChild(childRenderObject);
+    } else {
+      renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
+    }
+  }
 
-        if (isFlex) return;
+  void appendElementChildRenderObject(Node child,
+      {RenderObject afterRenderObject, bool isAppend = true}) {
+    RenderObject childRenderObject = child.renderObject;
+    CSSStyleDeclaration childStyle = child.style;
+    String childPosition =
+        childStyle['position'] == '' ? 'static' : childStyle['position'];
+    String display = isEmptyStyleValue(style['display'])
+        ? defaultDisplay
+        : style['display'];
+    bool isFlex = display.endsWith('flex');
+
+    if (isFlex) {
+      // Add FlexItem wrap for flex child node.
+      if (child.renderLayoutBox != null) {
+        child.renderPadding.child = null;
+        child.renderPadding.child =
+            RenderFlexItem(child: child.renderLayoutBox as RenderBox);
+      }
+    }
+    if (childPosition == 'absolute') {
+      Element parentStackedElement =
+          findParent(child, (element) => element.renderStack != null);
+      if (parentStackedElement != null) {
+        insertByZIndex(parentStackedElement.renderStack, child,
+            CSSLength.toInt(childStyle['zIndex']));
+        return;
+      }
+    } else if (childPosition == 'fixed') {
+      final RenderPosition rootRenderStack =
+          ElementManager().getRootElement().renderStack;
+      if (rootRenderStack != null) {
+        insertByZIndex(
+            rootRenderStack, child, CSSLength.toInt(childStyle['zIndex']));
+        return;
       }
 
-      if (isAppend) {
-        addChild(childRenderObject);
-      } else {
-        renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
-      }
+      if (isFlex) return;
+    }
 
-      if (isFlex) {
-        children.forEach((Element child) {
-          _updateFlexItemStyle(child);
-        });
-      }
+    if (isAppend) {
+      addChild(childRenderObject);
+    } else {
+      renderLayoutBox.insert(childRenderObject, after: afterRenderObject);
+    }
 
-      // Trigger sticky update logic after node is connected
-      if (childPosition == 'sticky') {
-        // Force flush layout of child
-        if (!child.renderMargin.hasSize) {
-          child.renderMargin.owner.flushLayout();
-        }
-        _updateStickyPosition(0);
+    if (isFlex) {
+      children.forEach((Element child) {
+        _updateFlexItemStyle(child);
+      });
+    }
+
+    // Trigger sticky update logic after node is connected
+    if (childPosition == 'sticky') {
+      // Force flush layout of child
+      if (!child.renderMargin.hasSize) {
+        child.renderMargin.owner.flushLayout();
       }
+      _updateStickyPosition(0);
     }
   }
 
