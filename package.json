@@ -41,5 +41,8 @@
     "mkdirp": "^0.5.1",
     "rimraf": "^3.0.2"
   },
-  "author": "Kraken Team"
+  "author": "Kraken Team",
+  "dependencies": {
+    "ws": "^7.3.0"
+  }
 }

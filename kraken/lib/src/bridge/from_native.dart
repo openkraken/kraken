@@ -8,10 +8,10 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 
-import '../../bridge.dart';
-import '../../element.dart';
-import '../../launcher.dart';
-import '../../module.dart';
+import 'package:kraken/launcher.dart';
+import 'package:kraken/element.dart';
+import 'package:kraken/bridge.dart';
+import 'package:kraken/module.dart';
 import 'platform.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
@@ -307,7 +307,8 @@ String invokeModule(
       }
     }
   } catch (e, stack) {
-    callback(Utf8.toUtf8('Error: $e$stack'), context);
+    // Dart side internal error should print it directly.
+    print('$e\n$stack');
   }
 
   return result;
