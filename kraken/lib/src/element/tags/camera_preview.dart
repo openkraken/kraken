@@ -10,7 +10,12 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_camera/camera.dart';
 
-const String CAMERA = 'CAMERA-PREVIEW';
+const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
+
+final Map<String, dynamic> _defaultStyle = {
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
+};
 
 bool camerasDetected = false;
 List<CameraDescription> cameras = [];
@@ -39,8 +44,24 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-  static const String DEFAULT_WIDTH = '300px';
-  static const String DEFAULT_HEIGHT = '150px';
+
+  CameraPreviewElement(int targetId)
+      : super(
+          targetId: targetId,
+          tagName: CAMERA_PREVIEW,
+          defaultStyle: _defaultStyle
+        ) {
+    sizedBox = RenderConstrainedBox(
+      additionalConstraints: BoxConstraints.loose(Size(
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
+      )),
+    );
+
+    style.addStyleChangeListener('width', _widthChangedListener);
+    style.addStyleChangeListener('height', _heightChangedListener);
+    addChild(sizedBox);
+  }
 
   bool enableAudio = false;
   bool isFallback = false;
@@ -141,44 +162,6 @@ class CameraPreviewElement extends Element {
         textDirection: TextDirection.ltr,
       ),
     );
-  }
-
-  void afterConstruct() {
-    var props = properties;
-    _initCameraWithLens(props['lens']);
-
-    if (props['style'] == null) {
-      props['style'] = Map<String, dynamic>();
-    }
-
-    if (props['style']['width'] == null) {
-      props['style']['width'] = DEFAULT_WIDTH;
-    }
-
-    if (props['style']['height'] == null) {
-      props['style']['height'] = DEFAULT_HEIGHT;
-    }
-  }
-
-  CameraPreviewElement(
-      int targetId, Map<String, dynamic> props, List<String> events)
-      : super(
-          targetId: targetId,
-          defaultDisplay: 'block',
-          tagName: CAMERA,
-          properties: props,
-          events: events,
-        ) {
-    sizedBox = RenderConstrainedBox(
-      additionalConstraints: BoxConstraints.loose(Size(
-        CSSLength.toDisplayPortValue(DEFAULT_WIDTH),
-        CSSLength.toDisplayPortValue(DEFAULT_HEIGHT),
-      )),
-    );
-
-    style.addStyleChangeListener('width', _widthChangedListener);
-    style.addStyleChangeListener('height', _heightChangedListener);
-    addChild(sizedBox);
   }
 
   Future<TextureBox> createCameraTextureBox(

@@ -4,7 +4,7 @@ export class Blob {
   public size: number;
   public type: string;
   private blob: KrakenBlob;
-  constructor(blobParts?: BlobPart[], options?: BlobPropertyBag) {
+  constructor(blobParts?: KrakenBlob[], options?: BlobPropertyBag) {
     if (Array.isArray(blobParts)) {
       // extract internal hostObject from polyfill wrapper.
       blobParts = blobParts.map(item => {

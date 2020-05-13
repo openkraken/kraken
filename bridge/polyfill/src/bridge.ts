@@ -30,7 +30,7 @@ export interface PrivateKraken {
 }
 
 declare const __kraken_window__: KrakenWindow;
-declare const __kraken_blob__: (blobParts?: BlobPart[], options?: BlobPropertyBag) => KrakenBlob;
+declare const __kraken_blob__: (blobParts?: KrakenBlob[], options?: BlobPropertyBag) => KrakenBlob;
 declare const __kraken_request_animation_frame__: (callback: (timeStamp: DOMHighResTimeStamp) => void) => number;
 declare const __kraken_to_blob__: (targetId: number, devicePixelRatio: number, callback: (err: string, blob: Blob) => void) => KrakenBlob;
 declare const __kraken__: PrivateKraken;

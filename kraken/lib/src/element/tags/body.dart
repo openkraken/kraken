@@ -6,15 +6,19 @@
 import 'package:kraken/element.dart';
 
 const String BODY = 'BODY';
-final Map<String, dynamic> bodyProps = {
-  'style': {
-    'width': '100vw',
-    'height': '100vh',
-    'overflow': 'auto',
-    'backgroundColor': 'white',
-  },
+
+final Map<String, dynamic> _defaultStyle = {
+  'width': '100vw',
+  'height': '100vh',
+  'overflow': 'auto',
+  'backgroundColor': 'white'
 };
 
-class BodyElement extends DivElement {
-  BodyElement(int targetId) : super(targetId, bodyProps, null);
+class BodyElement extends Element {
+  BodyElement(int targetId)
+      : super(
+          targetId: targetId,
+          tagName: BODY,
+          defaultStyle: _defaultStyle
+        );
 }

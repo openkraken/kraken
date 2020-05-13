@@ -4,13 +4,18 @@
  */
 import 'package:kraken/element.dart';
 
-const String PARAGRAPH = 'P';
+const String PRE = 'PRE';
 
-class ParagraphElement extends Element {
-  ParagraphElement(
+const Map<String, dynamic> _defaultStyle = {
+  'whiteSpace': 'pre'
+};
+
+class PreElement extends Element {
+  PreElement(
     int targetId
   ) : super(
         targetId: targetId,
-        tagName: PARAGRAPH
+        tagName: PRE,
+        defaultStyle: _defaultStyle
       );
 }

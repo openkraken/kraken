@@ -1,6 +1,8 @@
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
 
+final RegExp _splitRegExp = RegExp(r'\s+');
+
 /// CSS Values and Units: https://drafts.csswg.org/css-values-3/#position
 /// The <position> value specifies the position of a object area
 /// (e.g. background image) inside a positioning area (e.g. background
@@ -28,7 +30,7 @@ class CSSPosition implements CSSValue<Alignment> {
 
   void _parse() {
     var normalized = _rawInput.trim();
-    List<String> split = normalized.split(spaceRegExp);
+    List<String> split = normalized.split(_splitRegExp);
 
     if (split.length == 1) {
       // If one value is set, another value should be center(0).

@@ -8,7 +8,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
-final RegExp spaceRegExp = RegExp(r'\s+');
+final RegExp _splitRegExp = RegExp(r'\s+');
 
 double _getDisplayPortedLength(input) {
   if (isEmptyStyleValue(input)) {
@@ -85,7 +85,7 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
 mixin CSSSizingMixin {
   static List<String> getShortedProperties(String input) {
     assert(input != null);
-    return input.trim().split(spaceRegExp);
+    return input.trim().split(_splitRegExp);
   }
 
   RenderConstrainedBox renderConstrainedBox;

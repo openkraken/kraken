@@ -15,14 +15,11 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId, Map<String, dynamic> props, List<String> events)
+  AudioElement(int targetId)
       : super(
           targetId: targetId,
-          defaultDisplay: 'inline-block',
           allowChildren: false,
-          tagName: AUDIO,
-          properties: props,
-          events: events,
+          tagName: AUDIO
         ) {
     initAudioPlayer();
     initSizedBox();
