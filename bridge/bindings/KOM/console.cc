@@ -4,7 +4,6 @@
  */
 
 #include "console.h"
-#include <algorithm>
 #include <sstream>
 
 #ifdef ENABLE_DEBUGGER

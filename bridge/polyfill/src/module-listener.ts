@@ -1,31 +1,29 @@
-import { positionWatcherMap, onConnectivityChangeListener } from './navigator';
-import { dispatchMQTT } from './mqtt';
-import { dispatchMethodCallHandler } from './method-channel';
+import { dispatchConnectivityChangeEvent } from './connection';
+import { dispatchMQTTEvent } from './mqtt';
+import { dispatchPositionEvent } from './geolocation';
+import { triggerMethodCallHandler } from './method-channel';
+import { dispatchWebSocketEvent } from './websocket';
 
 export function krakenModuleListener(message: any) {
   let parsed = JSON.parse(message);
   const type = parsed[0];
   if (type === 'onConnectivityChanged') {
-    if (onConnectivityChangeListener) {
-      const event = parsed[1];
-      onConnectivityChangeListener(event);
-    }
+    const event = parsed[1];
+    dispatchConnectivityChangeEvent(event);
   } else if (type === 'watchPosition') {
     const event = parsed[1];
-    positionWatcherMap.forEach((value) => {
-      if (event.coords != null) {
-        value.success(event);
-      } else if (value.error != null) {
-        value.error(event);
-      }
-    });
+    dispatchPositionEvent(event);
   } else if (type === 'MQTT') {
     const clientId = parsed[1];
     const event = parsed[2];
-    dispatchMQTT(clientId, event);
+    dispatchMQTTEvent(clientId, event);
   } else if (type === 'MethodChannel') {
     const method = parsed[1];
     const args = parsed[2];
-    dispatchMethodCallHandler(method, args);
+    triggerMethodCallHandler(method, args);
+  } else if (type === 'WebSocket') {
+    const clientId = parsed[1];
+    const event = parsed[2];
+    dispatchWebSocketEvent(clientId, event);
   }
 }

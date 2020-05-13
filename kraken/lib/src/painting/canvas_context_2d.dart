@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
 import 'canvas_context.dart';
 
-final RegExp SpaceRegExp = RegExp(' ');
+final RegExp _splitRegExp = RegExp(' ');
 
 class CanvasRenderingContext2DSettings {
   bool alpha = true;
@@ -251,7 +251,7 @@ class CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
 
   @override
   set font(String newValue) {
-    List<String> splitVal = newValue.split(SpaceRegExp);
+    List<String> splitVal = newValue.split(_splitRegExp);
     if (splitVal.length == 2) {
       fontSize = CSSLength.toDisplayPortValue(splitVal[0]);
       fontFamily = splitVal[1];

@@ -177,9 +177,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
-  VideoPlayerController.file(File file)
-    : dataSource = 'file://${file.path}',
-      dataSourceType = DataSourceType.file,
+  VideoPlayerController.file(this.dataSource)
+    : dataSourceType = DataSourceType.file,
       package = null,
       formatHint = null,
       super(VideoPlayerValue(duration: null));

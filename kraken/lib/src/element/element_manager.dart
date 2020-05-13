@@ -14,32 +14,59 @@ import 'package:kraken/scheduler.dart';
 
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events) {
+  Element element;
   switch (type) {
     case DIV:
-      return DivElement(id, props, events);
+      element = DivElement(id);
+      break;
     case SPAN:
-      return SpanElement(id, props, events);
+      element = SpanElement(id);
+      break;
     case IMAGE:
-      return ImgElement(id, props, events);
+      element = ImageElement(id);
+      break;
     case PARAGRAPH:
-      return ParagraphElement(id, props, events);
+      element = ParagraphElement(id);
+      break;
     case INPUT:
-      return InputElement(id, props, events);
+      element = InputElement(id);
+      break;
+    case PRE:
+      element = PreElement(id);
+      break;
     case CANVAS:
-      return CanvasElement(id, props, events);
+      element = CanvasElement(id);
+      break;
     case ANIMATION_PLAYER:
-      return AnimationPlayerElement(id, props, events);
+      element = AnimationPlayerElement(id);
+      break;
     case VIDEO:
-      return VideoElement(id, props, events);
-    case CAMERA:
-      return CameraPreviewElement(id, props, events);
+      element = VideoElement(id);
+      break;
+    case CAMERA_PREVIEW:
+      element = CameraPreviewElement(id);
+      break;
     case IFRAME:
-      return IFrameElement(id, props, events);
+      element = IFrameElement(id);
+      break;
     case AUDIO:
-      return AudioElement(id, props, events);
+      element = AudioElement(id);
+      break;
     default:
-      throw Exception('ERROR: unexpected element type "$type"');
+      element = DivElement(id);
+      print('ERROR: unexpected element type "$type"');
   }
+
+  props?.forEach((String key, value) {
+    element.setProperty(key, value);
+  });
+
+  // Add element event listener
+  events?.forEach((String eventName) {
+    element.addEvent(eventName);
+  });
+
+  return element;
 }
 
 const int BODY_ID = -1;
@@ -291,7 +318,7 @@ class ElementManager {
   void disconnect() async {
     RendererBinding.instance.renderView.child = null;
     clearTargets();
-    await shutDownVideoPlayer();
+    await VideoElement.disposeVideos();
     _managerSingleton = ElementManager._();
   }
 

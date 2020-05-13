@@ -8,7 +8,6 @@
 
 #include "kraken_bridge.h"
 #include "kraken_bridge_test.h"
-#include "thread_safe_map.h"
 #include <memory>
 
 namespace kraken {
@@ -28,8 +27,6 @@ struct DartMethodPointer {
   DevicePixelRatio devicePixelRatio{nullptr};
   PlatformBrightness platformBrightness{nullptr};
   OnPlatformBrightnessChanged onPlatformBrightnessChanged{nullptr};
-  StartFlushCallbacksInUIThread startFlushCallbacksInUIThread{nullptr};
-  StopFlushCallbacksInUIThread stopFlushCallbacksInUIThread{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
   RefreshPaint refreshPaint{nullptr};
@@ -50,8 +47,6 @@ void registerGetScreen(GetScreen callback);
 void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
-void registerStartFlushUILoop(StartFlushCallbacksInUIThread startFlushUiLoop);
-void registerStopFlushCallbacksInUIThread(StopFlushCallbacksInUIThread stopFlushUiLoop);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
 

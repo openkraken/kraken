@@ -221,8 +221,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (background[BACKGROUND_ATTACHMENT] == '' ||
-        background[BACKGROUND_ATTACHMENT] == 'scroll' &&
+    if ((background[BACKGROUND_ATTACHMENT] == '' ||
+        background[BACKGROUND_ATTACHMENT] == 'scroll') &&
             background.containsKey(BACKGROUND_IMAGE)) {
       List<CSSFunctionalNotation> methods =
           CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
@@ -275,7 +275,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
           CSSColor.preprocessCSSPropertyWithRGBAColor(style['boxShadow']);
       List<String> rawShadows = processedValue.split(commaRegExp);
       for (String rawShadow in rawShadows) {
-        List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
+        List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
@@ -317,10 +317,11 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     return 0.0;
   }
 
-  static RegExp spaceRegExp = RegExp(r' ');
+  static RegExp _splitRegExp = RegExp(r' ');
+
   List<String> getShorttedProperties(String input) {
     assert(input != null);
-    return input.trim().split(spaceRegExp);
+    return input.trim().split(_splitRegExp);
   }
 
   // border default width 3.0

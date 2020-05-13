@@ -596,29 +596,50 @@ mixin CSSBackgroundMixin {
       int start, List<String> args, List<Color> colors, List<double> stops) {
     double grow = 1.0 / (args.length - 1);
     for (int i = start; i < args.length; i++) {
-      CSSColorStop colorGradient = parseColorAndStop(args[i], i * grow);
-      colors.add(colorGradient.color);
-      stops.add(colorGradient.stop);
+      List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), i * grow);
+      colorGradients.forEach((element) {
+        colors.add(element.color);
+        stops.add(element.stop);
+      });
     }
   }
 
-  CSSColorStop parseColorAndStop(String src, [double defaultStop]) {
-    List<String> strings = src?.trim()?.split(" ");
-    CSSColorStop colorGradient;
+  List<CSSColorStop> parseColorAndStop(String src, [double defaultStop]) {
+    List<String> strings = [];
+    List<CSSColorStop> colorGradients = [];
+    // rgba may contain space, color should handle special
+    if (src.startsWith('rgba(')) {
+      int indexOfRgbaEnd = src.indexOf(')') ;
+      if (indexOfRgbaEnd == -1) {
+        // rgba parse error
+        return colorGradients;
+      }
+      strings.add(src.substring(0, indexOfRgbaEnd + 1));
+      if (indexOfRgbaEnd + 1 < src.length) {
+        strings.addAll(src.substring(indexOfRgbaEnd + 1)?.trim()?.split(' '));
+      }
+    } else {
+      strings = src.split(' ');
+    }
+
     if (strings != null && strings.length >= 1) {
       double stop = defaultStop;
-      if (strings.length == 2) {
+      if (strings.length >= 2) {
         try {
-          if (CSSPercentage.isPercentage(strings[1])) {
-            stop = CSSPercentage(strings[1]).toDouble();
-          } else if (CSSAngle.isAngle(strings[1])) {
-            stop = CSSAngle(strings[1]).angleValue / (math.pi * 2);
+          for (int i = 1; i < strings.length; i++) {
+            if (CSSPercentage.isPercentage(strings[i])) {
+              stop = CSSPercentage(strings[i]).toDouble();
+            } else if (CSSAngle.isAngle(strings[i])) {
+              stop = CSSAngle(strings[i]).angleValue / (math.pi * 2);
+            }
+            colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
           }
         } catch (e) {}
+      } else {
+        colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
       }
-      colorGradient = CSSColorStop(CSSColor.generate(strings[0]), stop);
     }
-    return colorGradient;
+    return colorGradients;
   }
 }
 

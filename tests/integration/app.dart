@@ -42,7 +42,7 @@ void main() {
 
     runApp(
       shouldInitializeBinding: false,
-      enableDebug: true,
+      enableDebug: false,
       afterConnected: () async {
         String status = await executeTest();
         if (status == 'failed') {

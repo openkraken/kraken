@@ -18,7 +18,7 @@ enum QoS {
 
 const mqttClientMap = {};
 
-export function dispatchMQTT(clientId: string, event: Event) {
+export function dispatchMQTTEvent(clientId: string, event: Event) {
   let client = mqttClientMap[clientId];
   if (client) {
     client.dispatchEvent(event);
@@ -35,115 +35,10 @@ export class MQTT extends EventTarget {
   url: string;
 
   constructor(url: string, clientId: string = '') {
-    super();
+    super(undefined, ['open', 'message', 'close', 'error', 'publish', 'subscribe', 'unsubscribe', 'subscribeerror']);
     this.url = url;
-    this.id = krakenInvokeModule(`["MQTT","init",["${url}","${clientId}"]]`);
+    this.id = krakenInvokeModule(JSON.stringify(['MQTT', 'init', [url, clientId]]));
     mqttClientMap[this.id] = this;
-  }
-
-  private _onopen: any = null;
-  private _onmessage: any = null;
-  private _onclose: any = null;
-  private _onerror: any = null;
-  private _onpublish: any = null;
-  private _onsubscribe: any = null;
-  private _onunsubscribe: any = null;
-  private _onsubscribeerror: any = null;
-
-  set onopen(messageHandler: any) {
-    if (this._onopen) {
-      this.removeEventListener('open', this._onopen);
-    }
-    this._onopen = messageHandler;
-    this.addEventListener('open', messageHandler);
-  }
-
-  get onopen() {
-    return this._onopen;
-  }
-
-  set onclose(messageHandler: any) {
-    if (this._onclose) {
-      this.removeEventListener('close', this._onclose);
-    }
-    this._onclose = messageHandler;
-    this.addEventListener('close', messageHandler);
-  }
-
-  get onclose() {
-    return this._onclose;
-  }
-
-  set onmessage(messageHandler: any) {
-    if (this._onmessage) {
-      this.removeEventListener('message', this._onmessage);
-    }
-    this._onmessage = messageHandler;
-    this.addEventListener('message', messageHandler);
-  }
-
-  get onmessage() {
-    return this._onmessage;
-  }
-
-  set onerror(messageHandler: any) {
-    if (this._onerror) {
-      this.removeEventListener('error', this._onerror);
-    }
-    this._onerror = messageHandler;
-    this.addEventListener('error', messageHandler);
-  }
-
-  get onerror() {
-    return this._onerror;
-  }
-
-  set onpublish(messageHandler: any) {
-    if (this._onpublish) {
-      this.removeEventListener('publish', this._onpublish);
-    }
-    this._onpublish = messageHandler;
-    this.addEventListener('publish', messageHandler);
-  }
-
-  get onpublish() {
-    return this._onpublish;
-  }
-
-  set onsubscribe(messageHandler: any) {
-    if (this._onsubscribe) {
-      this.removeEventListener('subscribe', this._onsubscribe);
-    }
-    this._onsubscribe = messageHandler;
-    this.addEventListener('subscribe', messageHandler);
-  }
-
-  get onsubscribe() {
-    return this._onsubscribe;
-  }
-
-  set onunsubscribe(messageHandler: any) {
-    if (this._onunsubscribe) {
-      this.removeEventListener('unsubscribe', this._onunsubscribe);
-    }
-    this._onunsubscribe = messageHandler;
-    this.addEventListener('unsubscribe', messageHandler);
-  }
-
-  get onunsubscribe() {
-    return this._onunsubscribe;
-  }
-
-  set onsubscribeerror(messageHandler: any) {
-    if (this._onsubscribeerror) {
-      this.removeEventListener('subscribeerror', this._onsubscribeerror);
-    }
-    this._onsubscribeerror = messageHandler;
-    this.addEventListener('subscribeerror', messageHandler);
-  }
-
-  get onsubscribeerror() {
-    return this._onsubscribeerror;
   }
 
   addEventListener(type: string, callback: any) {
@@ -162,15 +57,15 @@ export class MQTT extends EventTarget {
   }
   // Subscribe to topics
   subscribe(topic: string, options: { QoS?: QoS} = {}) {
-    krakenInvokeModule(`["MQTT","subscribe",["${this.id}","${topic}",${options.QoS || QoS.AT_MOST_ONCE}]]`);
+    krakenInvokeModule(JSON.stringify(['MQTT', 'subscribe', [this.id, topic, options.QoS || QoS.AT_MOST_ONCE]]));
   }
   // Unsubscribe from topics
   unsubscribe(topic: string) {
-    krakenInvokeModule(`["MQTT","unsubscribe",["${this.id}","${topic}"]]`);
+    krakenInvokeModule(JSON.stringify(['MQTT', 'unsubscribe', [this.id, topic]]));
   }
   // Publish message
   publish(topic: string, message: string, options: { QoS?: QoS, retain?: boolean} = {}) {
-    krakenInvokeModule(`["MQTT","publish",["${this.id}","${topic}","${message}",${options.QoS || QoS.AT_MOST_ONCE},${options.retain || false}]]`);
+    krakenInvokeModule(JSON.stringify(['MQTT', 'publish', [this.id, topic, message, options.QoS || QoS.AT_MOST_ONCE, options.retain || false]]));
   }
   // Disconnect notification
   close() {

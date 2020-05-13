@@ -64,7 +64,7 @@ describe('multiple-position', () => {
 
     await matchScreenshot();
   });
-  xit('color-stop-linear-2', async () => {
+  it('color-stop-linear-2', async () => {
     let div;
     div = createElement('div', {
       style: {

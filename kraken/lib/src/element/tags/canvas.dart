@@ -9,34 +9,32 @@ import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
 
 const String CANVAS = 'CANVAS';
-final RegExp SpaceRegExp = RegExp(' ');
+
+const Map<String, dynamic> _defaultStyle = {
+  'display': 'inline-block',
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
+};
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId, Map<String, dynamic> props, List<String> events)
+  CanvasElement(int targetId)
       : super(
           targetId: targetId,
-          defaultDisplay: 'inline-block',
+          defaultStyle: _defaultStyle,
           allowChildren: false,
           tagName: CANVAS,
-          properties: props,
-          events: events,
         ) {
-    if (style.contains('width')) {
-      _width = CSSLength.toDisplayPortValue(style['width']);
-    }
-    if (style.contains('height')) {
-      _height = CSSLength.toDisplayPortValue(style['height']);
-    }
 
-    size = Size(_width, _height);
     painter = CanvasPainter();
-    renderCustomPaint = getRenderObject();
+    renderCustomPaint = RenderCustomPaint(
+      painter: painter,
+      foregroundPainter: null, // Ignore foreground painter
+      preferredSize: Size(300.0, 150.0), // Default size
+    );
+    style.addStyleChangeListener('width', _widthChangedListener);
+    style.addStyleChangeListener('height', _heightChangedListener);
     addChild(renderCustomPaint);
   }
-
-  /// Default width to 300.0, default height to 150.0
-  double _width = 300.0;
-  double _height = 150.0;
 
   /// The painter that paints before the children.
   CanvasPainter painter;
@@ -47,6 +45,8 @@ class CanvasElement extends Element {
   /// If there's a child, this is ignored, and the size of the child is used
   /// instead.
   Size size;
+
+  RenderCustomPaint renderCustomPaint;
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
   CanvasRenderingContext getContext(String contextId,
@@ -60,6 +60,36 @@ class CanvasElement extends Element {
       default:
         throw FlutterError('CanvasRenderingContext $contextId not supported!');
     }
+  }
+
+  /// Element attribute width
+  double _width;
+  double get width => _width;
+  set width(double newValue) {
+    if (newValue != null) {
+      _width = newValue;
+      renderCustomPaint.preferredSize = Size(_width, _height);
+    }
+  }
+
+  /// Element attribute height
+  double _height;
+  double get height => _height;
+  set height(double newValue) {
+    if (newValue != null) {
+      _height = newValue;
+      renderCustomPaint.preferredSize = Size(_width, _height);
+    }
+  }
+
+  void _widthChangedListener(String key, String original, String present) {
+    // Trigger width setter to invoke rerender.
+    width = CSSLength.toDisplayPortValue(present);
+  }
+
+  void _heightChangedListener(String key, String original, String present) {
+    // Trigger height setter to invoke rerender.
+    height = CSSLength.toDisplayPortValue(present);
   }
 
   void _applyContext2DMethod(List args) {
@@ -147,15 +177,6 @@ class CanvasElement extends Element {
       throw new FlutterError(
           'Canvas painter not exists, get canvas context first.');
     }
-  }
-
-  RenderCustomPaint renderCustomPaint;
-  RenderCustomPaint getRenderObject() {
-    return RenderCustomPaint(
-      painter: painter,
-      foregroundPainter: null, // Ignore foreground painter
-      preferredSize: size,
-    );
   }
 
   @override

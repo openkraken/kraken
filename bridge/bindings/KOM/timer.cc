@@ -7,8 +7,6 @@
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "jsa.h"
-#include "thread_safe_map.h"
-#include <atomic>
 
 namespace kraken {
 namespace binding {

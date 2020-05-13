@@ -106,7 +106,7 @@ mixin CSSTextMixin {
     }
   }
 
-  static RegExp spaceRegExp = RegExp(r' ');
+  static RegExp _splitRegExp = RegExp(r' ');
 
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
@@ -115,7 +115,7 @@ mixin CSSTextMixin {
       return _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splittedTextDecoration = textDecoration.split(spaceRegExp);
+      List<String> splittedTextDecoration = textDecoration.split(_splitRegExp);
       // Compatible with CSS 2.1: text-decoration = text-decoration-line.
       if (splittedTextDecoration.length >= 1) {
         return _getTextDecorationLine(splittedTextDecoration[0]);
@@ -140,7 +140,7 @@ mixin CSSTextMixin {
       return CSSColor.generate(style[TEXT_DECORATION_COLOR]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(spaceRegExp);
+      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
       if (splitedDecoration.length >= 2) {
         return CSSColor.generate(splitedDecoration.last);
       }
@@ -153,7 +153,7 @@ mixin CSSTextMixin {
       return _getDecorationStyle(style[TEXT_DECORATION_STYLE]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(spaceRegExp);
+      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
       if (splitedDecoration.length >= 2) {
         return _getDecorationStyle(splitedDecoration[1]);
       }
@@ -328,7 +328,7 @@ mixin CSSTextMixin {
           CSSColor.preprocessCSSPropertyWithRGBAColor(style['textShadow']);
       List<String> rawShadows = processedValue.split(commaRegExp);
       for (String rawShadow in rawShadows) {
-        List<String> shadowDefinitions = rawShadow.trim().split(spaceRegExp);
+        List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);

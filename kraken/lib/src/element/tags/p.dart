@@ -8,13 +8,9 @@ const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
   ParagraphElement(
-    int targetId,
-    Map<String, dynamic> props,
-    List<String> events,
+    int targetId
   ) : super(
-            targetId: targetId,
-            tagName: PARAGRAPH,
-            defaultDisplay: 'block',
-            properties: props,
-            events: events);
+        targetId: targetId,
+        tagName: PARAGRAPH
+      );
 }
