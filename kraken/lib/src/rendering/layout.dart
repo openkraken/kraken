@@ -562,6 +562,17 @@ class RenderFlowLayout extends RenderBox
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
+      if (isPositionHolder(child)) {
+        RenderPositionHolder positionHolder = child;
+        RenderElementBoundary childElementBoundary = positionHolder.realDisplayedBox;
+        if (childElementBoundary != null) {
+          PositionParentData positionParentData = childElementBoundary.parentData as PositionParentData;
+          if (positionParentData != CSSPositionType.static
+              && positionParentData != CSSPositionType.relative)
+            childMainAxisExtent = childCrossAxisExtent = 0;
+        }
+      }
+
       if (_effectiveChildCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
@@ -740,6 +751,8 @@ class RenderFlowLayout extends RenderBox
     int targetId;
     if (child is RenderFlowLayout) targetId = child.targetId;
     if (child is RenderElementBoundary) targetId = child.targetId;
+    if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
+
     if (targetId != null) {
       Element element = getEventTargetByTargetId<Element>(targetId);
       if (element != null) {

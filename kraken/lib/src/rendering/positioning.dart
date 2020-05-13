@@ -11,7 +11,7 @@ class PositionParentData extends StackParentData {
   /// Get element original position offset to global should be.
   Offset get stackedChildOriginalOffset {
     if (originalRenderBoxRef == null) return Offset.zero;
-    return originalRenderBoxRef.localToGlobal(Offset.zero);
+    return (originalRenderBoxRef.parentData as BoxParentData).offset;
   }
 
   @override
@@ -76,7 +76,9 @@ class RenderPosition extends RenderStack {
       } else {
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints();
-        // if child has not width, should be calculate width by left and right
+        size = constraints.biggest;
+
+        // if child has no width, calculate width by left and right.
         if (childParentData.width == 0.0 && childParentData.left != null &&
           childParentData.right != null) {
           childConstraints = childConstraints.tighten(
@@ -96,9 +98,7 @@ class RenderPosition extends RenderStack {
 
         // Offset to global coordinate system of base
         if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
-          Offset baseOffset = childParentData.stackedChildOriginalOffset;
-          // Use parent box offset as base.
-          Offset parentOffset = localToGlobal(Offset.zero);
+          Offset baseOffset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
 
           double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
@@ -107,10 +107,10 @@ class RenderPosition extends RenderStack {
           if (childParentData.left == null && childParentData.right != null)
             left = size.width - child.size.width - (childParentData.right ?? 0);
 
-          x = parentOffset.dx + left;
-          y = parentOffset.dy + top;
+          x = left;
+          y = top;
         } else if (childParentData.position == CSSPositionType.relative) {
-          Offset baseOffset = (childParentData.originalRenderBoxRef.parentData as BoxParentData).offset;
+          Offset baseOffset = childParentData.stackedChildOriginalOffset;
           double top = childParentData.top ?? -(childParentData.bottom ?? 0);
           double left = childParentData.left ?? -(childParentData.right ?? 0);
 

@@ -236,8 +236,10 @@ class Element extends Node
 
     children.forEach((element) {
       if (_isPositioned(element.style)) {
-        RenderBox child = element.renderElementBoundary;
-        child.detach();
+        RenderElementBoundary child = element.renderElementBoundary;
+        // Parent should be one of RenderFlowLayout or RenderFlexLayout,
+        // @TODO: can be optimized by common abstract class.
+        (child.parent as ContainerRenderObjectMixin).remove(child);
         shouldStackedChildren.add(child);
       }
     });
@@ -700,6 +702,7 @@ class Element extends Node
 
     addChild(positionedBoxHolder);
     childRenderElementBoundary.parentData = getPositionParentDataFromStyle(child.style, positionedBoxHolder);
+    positionedBoxHolder.realDisplayedBox = childRenderElementBoundary;
     parentRenderPosition.add(childRenderElementBoundary);
   }
   void _addStickyChild(Element child, CSSPositionType position) {

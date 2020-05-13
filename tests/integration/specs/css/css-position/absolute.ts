@@ -1,12 +1,8 @@
-describe('Position absolute', () => {
+fdescribe('Position absolute', () => {
   it('001', async () => {
     var container = document.createElement('div');
     var div1 = document.createElement('div');
     var div2 = document.createElement('span');
-
-    container.appendChild(div1);
-    container.appendChild(div2);
-    document.body.appendChild(container);
 
     container.style.width = '300px';
     container.style.height = '800px';
@@ -26,6 +22,10 @@ describe('Position absolute', () => {
     container.style.marginLeft = '50px';
     container.style.position = 'relative';
     container.style.top = '100px';
+
+    container.appendChild(div1);
+    container.appendChild(div2);
+    document.body.appendChild(container);
 
     await matchScreenshot();
   });

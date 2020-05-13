@@ -167,7 +167,7 @@ describe('Position', () => {
     await matchScreenshot();
   });
 
-  it('peroperty sticky', async () => {
+  xit('peroperty sticky', async () => {
     const sticky1 = document.createElement('div');
     sticky1.appendChild(document.createTextNode('sticky top 1'));
     setElementStyle(sticky1, {
