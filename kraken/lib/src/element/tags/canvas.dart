@@ -26,11 +26,15 @@ class CanvasElement extends Element {
         ) {
 
     painter = CanvasPainter();
+    _width = CSSLength(ELEMENT_DEFAULT_WIDTH).computedValue;
+    _height = CSSLength(ELEMENT_DEFAULT_HEIGHT).computedValue;
+
     renderCustomPaint = RenderCustomPaint(
       painter: painter,
       foregroundPainter: null, // Ignore foreground painter
-      preferredSize: Size(300.0, 150.0), // Default size
+      preferredSize: Size(_width, _height), // Default size
     );
+
     style.addStyleChangeListener('width', _widthChangedListener);
     style.addStyleChangeListener('height', _heightChangedListener);
     addChild(renderCustomPaint);
