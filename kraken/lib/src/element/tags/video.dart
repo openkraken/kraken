@@ -11,9 +11,22 @@ import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
 
+const Map<String, dynamic> _defaultStyle = {
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
+};
+
 List<VideoPlayerController> _videoControllers = [];
 
 class VideoElement extends Element {
+  VideoElement(int targetId)
+    : super(
+        targetId: targetId,
+        defaultStyle: _defaultStyle,
+        allowChildren: false,
+        tagName: VIDEO,
+      );
+  
   VideoPlayerController controller;
 
   String _src;
@@ -35,19 +48,6 @@ class VideoElement extends Element {
       }
     }
   }
-
-  static const String DEFAULT_WIDTH = '300px';
-  static const String DEFAULT_HEIGHT = '150px';
-
-  VideoElement(int targetId, Map<String, dynamic> props, List<String> events)
-      : super(
-          targetId: targetId,
-          defaultDisplay: 'block',
-          allowChildren: false,
-          tagName: VIDEO,
-          properties: props,
-          events: events,
-        );
 
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();

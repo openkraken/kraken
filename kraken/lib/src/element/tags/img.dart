@@ -10,6 +10,10 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
+const Map<String, dynamic> _defaultStyle = {
+  'display': 'inline-block'
+};
+
 class ImageElement extends Element {
   ImageProvider image;
   RenderDecoratedBox imageBox;
@@ -17,20 +21,12 @@ class ImageElement extends Element {
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
-  ImageElement(int targetId, Map<String, dynamic> props, List<String> events)
+  ImageElement(int targetId)
       : super(
             targetId: targetId,
-            defaultDisplay: 'inline-block',
+            defaultStyle: _defaultStyle,
             allowChildren: false,
-            tagName: IMAGE,
-            properties: props,
-            events: events);
-
-  void afterConstruct() {
-    if (properties.containsKey('src')) {
-      _renderImage();
-    }
-  }
+            tagName: IMAGE);
 
   bool _hasLazyLoading = false;
 

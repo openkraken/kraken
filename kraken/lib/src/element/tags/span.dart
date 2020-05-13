@@ -7,15 +7,16 @@ import 'package:kraken/element.dart';
 
 const String SPAN = 'SPAN';
 
+const Map<String, dynamic> _defaultStyle = {
+  'display': 'inline'
+};
+
 class SpanElement extends Element {
   SpanElement(
-    int targetId,
-    Map<String, dynamic> props,
-    List<String> events,
+    int targetId
   ) : super(
-            targetId: targetId,
-            tagName: SPAN,
-            defaultDisplay: 'inline',
-            properties: props,
-            events: events);
+        targetId: targetId,
+        tagName: SPAN,
+        defaultStyle: _defaultStyle
+      );
 }

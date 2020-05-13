@@ -14,6 +14,13 @@ import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 
+const String INPUT = 'INPUT';
+
+const Map<String, dynamic> _defaultStyle = {
+  'display': 'inline-block',
+  'width': '150px',
+};
+
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
@@ -24,7 +31,6 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // transparent.
 const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 
-const String INPUT = 'INPUT';
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
 class EditableTextDelegate implements TextSelectionDelegate {
@@ -98,24 +104,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration textInputConfiguration;
 
-  static const String DEFAULT_WIDTH = '150px';
-
-  @override
-  void afterConstruct() {
-    var props = properties;
-    if (props['style'] == null) {
-      props['style'] = Map<String, dynamic>();
-    }
-
-    if (props['style']['width'] == null) {
-      props['style']['width'] = DEFAULT_WIDTH;
-    }
-  }
-
   InputElement(
-    int targetId,
-    Map<String, dynamic> properties,
-    List<String> events, {
+    int targetId, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
@@ -123,10 +113,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }) : super(
             targetId: targetId,
             tagName: INPUT,
-            defaultDisplay: 'inline-block',
-            allowChildren: false,
-            properties: properties,
-            events: events) {
+            defaultStyle: _defaultStyle,
+            allowChildren: false) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,

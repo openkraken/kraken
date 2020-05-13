@@ -7,14 +7,11 @@ class AudioElement extends Element {
   AudioPlayer audioPlayer;
   String audioSrc;
 
-  AudioElement(int targetId, Map<String, dynamic> props, List<String> events)
+  AudioElement(int targetId)
       : super(
           targetId: targetId,
-          defaultDisplay: 'block',
           allowChildren: false,
-          tagName: AUDIO,
-          properties: props,
-          events: events,
+          tagName: AUDIO
         ) {
     initAudioPlayer();
   }
