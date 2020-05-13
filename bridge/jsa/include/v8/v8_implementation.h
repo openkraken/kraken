@@ -25,6 +25,7 @@ public:
   ~V8Context() override;
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
+  void setUnhandledPromiseRejectHandler(jsa::Object &handler) override;
 
   jsa::Object global() override;
 
