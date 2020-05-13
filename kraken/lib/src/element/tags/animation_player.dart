@@ -9,8 +9,8 @@ import 'package:kraken/rendering.dart';
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 
 final Map<String, dynamic> _defaultStyle = {
-  'width': DEFAULT_WIDTH,
-  'height': DEFAULT_HEIGHT,
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
 // Ref: https://github.com/LottieFiles/lottie-player

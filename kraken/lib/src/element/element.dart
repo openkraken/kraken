@@ -23,10 +23,11 @@ import 'package:meta/meta.dart';
 import 'event_handler.dart';
 import 'bounding_client_rect.dart';
 
-/// Default width is 300 in pixel, height is 150 in pixel,
-/// defined by HTML Standard.
-const String DEFAULT_WIDTH = '300px';
-const String DEFAULT_HEIGHT = '150px';
+/// Defined by W3C Standard, 
+/// Most elements's default width is 300 in pixel,
+/// height is 150 in pixel.
+const String ELEMENT_DEFAULT_WIDTH = '300px';
+const String ELEMENT_DEFAULT_HEIGHT = '150px';
 
 typedef TestElement = bool Function(Element element);
 

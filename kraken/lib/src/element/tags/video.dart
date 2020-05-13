@@ -12,8 +12,8 @@ import 'package:kraken_video_player/kraken_video_player.dart';
 const String VIDEO = 'VIDEO';
 
 const Map<String, dynamic> _defaultStyle = {
-  'width': DEFAULT_WIDTH,
-  'height': DEFAULT_HEIGHT,
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
 class VideoParentData extends ContainerBoxParentData<RenderBox> {}

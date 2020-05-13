@@ -12,8 +12,8 @@ const String CANVAS = 'CANVAS';
 
 const Map<String, dynamic> _defaultStyle = {
   'display': 'inline-block',
-  'width': DEFAULT_WIDTH,
-  'height': DEFAULT_HEIGHT,
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
 class CanvasElement extends Element {

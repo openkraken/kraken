@@ -13,8 +13,8 @@ import 'package:kraken_camera/camera.dart';
 const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
 
 final Map<String, dynamic> _defaultStyle = {
-  'width': DEFAULT_WIDTH,
-  'height': DEFAULT_HEIGHT,
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
 bool camerasDetected = false;
@@ -53,8 +53,8 @@ class CameraPreviewElement extends Element {
         ) {
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
-        CSSLength.toDisplayPortValue(DEFAULT_WIDTH),
-        CSSLength.toDisplayPortValue(DEFAULT_HEIGHT),
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
+        CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
       )),
     );
 

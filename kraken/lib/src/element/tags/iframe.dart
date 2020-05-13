@@ -14,8 +14,8 @@ import 'package:kraken_webview/kraken_webview.dart';
 const String IFRAME = 'IFRAME';
 
 const Map<String, dynamic> _defaultStyle = {
-  'width': DEFAULT_WIDTH,
-  'height': DEFAULT_HEIGHT,
+  'width': ELEMENT_DEFAULT_WIDTH,
+  'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
 /// Optional callback invoked when a web view is first created. [controller] is
@@ -541,7 +541,7 @@ abstract class WebViewElement extends Element {
   }
 
   /// Element attribute width
-  double _width = CSSLength.toDisplayPortValue(DEFAULT_WIDTH);
+  double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
   double get width => _width;
   set width(double newValue) {
     if (newValue != null) {
@@ -552,7 +552,7 @@ abstract class WebViewElement extends Element {
   }
 
   /// Element attribute height
-  double _height = CSSLength.toDisplayPortValue(DEFAULT_HEIGHT);
+  double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
   double get height => _height;
   set height(double newValue) {
     if (newValue != null) {
