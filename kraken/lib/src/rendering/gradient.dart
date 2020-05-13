@@ -35,7 +35,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
 
   int _targetId;
   BoxPainter _painter;
-
+  
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;
   EdgeInsets get borderEdge => _borderEdge;

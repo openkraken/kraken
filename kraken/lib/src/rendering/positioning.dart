@@ -8,8 +8,8 @@ class PositionParentData extends StackParentData {
   int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
 
-  /// Get element original position offset to global should be.
-  Offset get stackedChildOriginalOffset {
+  /// Get element original position offset to parent(layoutBox) should be.
+  Offset get stackedChildOriginalRelativeOffset {
     if (originalRenderBoxRef == null) return Offset.zero;
     return (originalRenderBoxRef.parentData as BoxParentData).offset;
   }
@@ -72,7 +72,7 @@ class RenderPosition extends RenderStack {
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
 
-        childParentData.offset = childParentData.stackedChildOriginalOffset;
+        childParentData.offset = childParentData.stackedChildOriginalRelativeOffset;
       } else {
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints();
@@ -110,12 +110,15 @@ class RenderPosition extends RenderStack {
           x = left;
           y = top;
         } else if (childParentData.position == CSSPositionType.relative) {
-          Offset baseOffset = childParentData.stackedChildOriginalOffset;
+          Offset baseOffset = childParentData.stackedChildOriginalRelativeOffset;
           double top = childParentData.top ?? -(childParentData.bottom ?? 0);
           double left = childParentData.left ?? -(childParentData.right ?? 0);
 
-          x = baseOffset.dx + left;
-          y = baseOffset.dy + top;
+          RenderBox renderLayoutBox = childParentData.originalRenderBoxRef.parent as RenderBox;
+          RenderBox renderPadding = childParentData.originalRenderBoxRef.parent.parent as RenderBox;
+          Offset paddingOffset = renderLayoutBox.localToGlobal(Offset.zero) - renderPadding.localToGlobal(Offset.zero);
+          x = baseOffset.dx + paddingOffset.dx + left;
+          y = baseOffset.dy + paddingOffset.dy + top;
         }
 
         childParentData.offset = Offset(x ?? 0, y ?? 0);

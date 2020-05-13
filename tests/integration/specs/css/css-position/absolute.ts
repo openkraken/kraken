@@ -1,4 +1,4 @@
-fdescribe('Position absolute', () => {
+describe('Position absolute', () => {
   it('001', async () => {
     var container = document.createElement('div');
     var div1 = document.createElement('div');
