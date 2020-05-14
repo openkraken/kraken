@@ -81,12 +81,6 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
       )
   endif ()
 
-  set_target_properties(kom_test
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
-    )
-
   set_target_properties(foundation_test
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
