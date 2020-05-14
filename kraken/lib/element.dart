@@ -9,6 +9,7 @@ export 'src/element/element_manager.dart';
 export 'src/element/event.dart';
 export 'src/element/event_target.dart';
 export 'src/element/node.dart';
+export 'src/element/textNode.dart';
 export 'src/element/window.dart';
 
 // Tags
