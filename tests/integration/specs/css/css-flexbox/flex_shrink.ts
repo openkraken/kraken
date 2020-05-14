@@ -1,12 +1,12 @@
-describe('flexbox flex-shrink', () => {
+fdescribe('flexbox flex-shrink', () => {
   it('should work when flex-direction is row', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
       display: 'flex',
       flexDirection: 'row',
-      width: '500rpx',
-      height: '100rpx',
-      marginBottom: '10rpx',
+      width: '500px',
+      height: '100px',
+      marginBottom: '10px',
     });
 
     document.body.appendChild(container1);
@@ -14,7 +14,7 @@ describe('flexbox flex-shrink', () => {
     const child1 = document.createElement('div');
     setElementStyle(child1, {
       backgroundColor: '#999',
-      width: '300rpx',
+      width: '300px',
     });
     child1.appendChild(document.createTextNode('flex-shrink: 1'));
     container1.appendChild(child1);
@@ -23,7 +23,7 @@ describe('flexbox flex-shrink', () => {
     setElementStyle(child2, {
       flexShrink: 2,
       backgroundColor: '#f40',
-      width: '200rpx',
+      width: '200px',
     });
     child2.appendChild(document.createTextNode('flex-shrink: 2'));
     container1.appendChild(child2);
@@ -32,7 +32,7 @@ describe('flexbox flex-shrink', () => {
     setElementStyle(child3, {
       flexShrink: 1,
       backgroundColor: 'green',
-      width: '200rpx',
+      width: '200px',
     });
     child3.appendChild(document.createTextNode('flex-shrink: 1'));
     container1.appendChild(child3);
@@ -45,9 +45,9 @@ describe('flexbox flex-shrink', () => {
     setElementStyle(container2, {
       display: 'flex',
       flexDirection: 'column',
-      width: '500rpx',
-      height: '400rpx',
-      marginBottom: '10rpx',
+      width: '500px',
+      height: '400px',
+      marginBottom: '10px',
     });
 
     document.body.appendChild(container2);
@@ -55,7 +55,7 @@ describe('flexbox flex-shrink', () => {
     const child4 = document.createElement('div');
     setElementStyle(child4, {
       backgroundColor: '#999',
-      height: '300rpx',
+      height: '300px',
     });
     child4.appendChild(document.createTextNode('flex-shrink: 1'));
     container2.appendChild(child4);
@@ -64,7 +64,7 @@ describe('flexbox flex-shrink', () => {
     setElementStyle(child5, {
       flexShrink: 2,
       backgroundColor: '#f40',
-      height: '200rpx',
+      height: '200px',
     });
     child5.appendChild(document.createTextNode('flex-shrink: 2'));
     container2.appendChild(child5);
@@ -73,7 +73,7 @@ describe('flexbox flex-shrink', () => {
     setElementStyle(child6, {
       flexShrink: 1,
       backgroundColor: 'green',
-      height: '200rpx',
+      height: '200px',
     });
     child6.appendChild(document.createTextNode('flex-shrink: 1'));
     container2.appendChild(child6);

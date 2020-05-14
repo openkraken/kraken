@@ -116,10 +116,12 @@ class RenderPosition extends RenderStack {
 
           double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
-            top = size.height - child.size.height - (childParentData.bottom ?? 0);
+            top = height - child.size.height - (childParentData.bottom ?? 0);
           double left = childParentData.left ?? baseOffset.dx;
-          if (childParentData.left == null && childParentData.right != null)
-            left = size.width - child.size.width - (childParentData.right ?? 0);
+          if (childParentData.left == null && childParentData.right != null) {
+            left = width - child.size.width - (childParentData.right ?? 0);
+          }
+
 
           x = left;
           y = top;
