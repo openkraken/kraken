@@ -11,8 +11,8 @@ function startIntegrationTest() {
     cwd: process.cwd(),
     stdio: 'inherit'
   });
-  tester.on('close', () => {
-    process.exit(0);
+  tester.on('close', (code) => {
+    process.exit(code);
   });
   tester.on('error', (error) => {
     console.error(error);
