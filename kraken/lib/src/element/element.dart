@@ -575,7 +575,7 @@ class Element extends Node
       Element parentStackedElement =
           findParent(this, (element) => element.renderStack != null);
       if (parentStackedElement != null) {
-        insertByZIndex(parentStackedElement.renderStack, this,
+        parent.insertByZIndex(parentStackedElement.renderStack, this,
             CSSLength.toInt(style['zIndex']));
         return;
       }
@@ -583,7 +583,7 @@ class Element extends Node
       final RenderPosition rootRenderStack =
           ElementManager().getRootElement().renderStack;
       if (rootRenderStack != null) {
-        insertByZIndex(
+        parent.insertByZIndex(
             rootRenderStack, this, CSSLength.toInt(style['zIndex']));
         return;
       }
@@ -595,8 +595,16 @@ class Element extends Node
 
     if (isParentFlex) {
       parent.children.forEach((Element child) {
-        _updateFlexItemStyle(child);
+        parent._updateFlexItemStyle(child);
       });
+    }
+    // Trigger sticky update logic after node is connected
+    if (position == 'sticky') {
+      // Force flush layout of child
+      if (!renderMargin.hasSize) {
+        renderMargin.owner.flushLayout();
+      }
+      parent._updateStickyPosition(0);
     }
   }
 
