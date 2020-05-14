@@ -1,4 +1,4 @@
-fdescribe('flexbox flex-shrink', () => {
+describe('flexbox flex-shrink', () => {
   it('should work when flex-direction is row', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
