@@ -231,6 +231,8 @@ class Element extends Node
 
 
   void _buildRenderStack() {
+    if (renderStack != null) return;
+
     List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
     renderDecoratedBox.child = null;
 
@@ -238,9 +240,12 @@ class Element extends Node
       if (_isPositioned(element.style)) {
         RenderElementBoundary child = element.renderElementBoundary;
         // Parent should be one of RenderFlowLayout or RenderFlexLayout,
+        // Only move attached child.
         // @TODO: can be optimized by common abstract class.
-        (child.parent as ContainerRenderObjectMixin).remove(child);
-        shouldStackedChildren.add(child);
+        if (child.attached) {
+          (child.parent as ContainerRenderObjectMixin).remove(child);
+          shouldStackedChildren.add(child);
+        }
       }
     });
 
@@ -254,6 +259,8 @@ class Element extends Node
   }
 
   void _dropRenderStack() {
+    if (renderStack == null) return;
+
     RenderBox originalChild = renderStack.firstChild;
     renderStack.remove(originalChild);
     (renderStack.parent as RenderObjectWithChildMixin).child = originalChild;
@@ -666,6 +673,11 @@ class Element extends Node
     RenderPosition parentRenderPosition;
     switch (position) {
       case CSSPositionType.relative:
+        // Ensure renderStack exists.
+        _buildRenderStack();
+        parentRenderPosition = renderStack;
+        break;
+
       case CSSPositionType.absolute:
         Element parentStackedElement = findParent(child, (element) => element.renderStack != null);
         parentRenderPosition = parentStackedElement.renderStack;
@@ -678,6 +690,7 @@ class Element extends Node
 
       case CSSPositionType.static:
       case CSSPositionType.sticky:
+        // @TODO: sticky.
       default:
         return;
     }

@@ -58,7 +58,7 @@ describe('Transition transform origin', () => {
   });
 });
 
-describe('Transition transform origin', () => {
+describe('Transition transform', () => {
   it('keyword', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
@@ -68,7 +68,7 @@ describe('Transition transform origin', () => {
       left: 0,
       padding: '20px',
       backgroundColor: '#999',
-      transitionProperty: 'transform-origin',
+      transitionProperty: 'transform',
       transitionDuration: '1s',
       transitionTimingFunction: 'ease',
     });

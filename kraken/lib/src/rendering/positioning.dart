@@ -72,6 +72,11 @@ class RenderPosition extends RenderStack {
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
 
+        // Calc relative offset between RenderPosition and RenderPositionHolder.
+        RenderBox positionHolder = childParentData.originalRenderBoxRef;
+        Offset positionHolderGlobalOffset = positionHolder?.localToGlobal(Offset.zero) ?? Offset.zero;
+        Offset positionHolderRelativeToPositionOffset = positionHolderGlobalOffset - localToGlobal(Offset.zero);
+
         childParentData.offset = childParentData.stackedChildOriginalRelativeOffset;
       } else {
         // Default to no constraints. (0 - infinite)
