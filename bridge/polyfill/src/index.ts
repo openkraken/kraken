@@ -16,7 +16,7 @@ import { Performance, performance } from './performance';
 import { kraken } from './kraken';
 import { MQTT } from './mqtt';
 import { windowExtension } from './window';
-import {traverseNode} from "./document/node";
+import { traverseNode } from "./document/node";
 
 Object.assign(window, windowExtension);
 

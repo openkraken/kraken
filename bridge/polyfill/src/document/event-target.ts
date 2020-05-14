@@ -8,8 +8,8 @@ type EventHandler = EventListener;
 
 export class EventTarget {
   public targetId: number;
-  __eventHandlers: Map<string, Array<EventHandler>> = new Map();
-  __propertyEventHandler: Map<string, EventHandler> = new Map();
+  _eventHandlers: Map<string, Array<EventHandler>> = new Map();
+  _propertyEventHandler: Map<string, EventHandler> = new Map();
 
   constructor(targetId?: number, builtInEvents: Array<string> = []) {
     if (targetId) {
@@ -19,12 +19,12 @@ export class EventTarget {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
         get() {
-          return this.__propertyEventHandler.get(event);
+          return this._propertyEventHandler.get(event);
         },
         set(fn: EventHandler) {
-          const preHandler = this.__propertyEventHandler[event];
+          const preHandler = this._propertyEventHandler[event];
           this.removeEventListener(event, preHandler);
-          this.__propertyEventHandler.set(event, fn);
+          this._propertyEventHandler.set(event, fn);
           if (typeof fn === 'function') {
             this.addEventListener(event, fn);
           }
@@ -36,8 +36,8 @@ export class EventTarget {
   // internal functions used by integration test
   public __clearListeners__() {
     if (process.env.NODE_ENV !== 'production') {
-      this.__eventHandlers.clear();
-      this.__propertyEventHandler.clear();
+      this._eventHandlers.clear();
+      this._propertyEventHandler.clear();
     }
   }
 
@@ -45,8 +45,8 @@ export class EventTarget {
     if (typeof handler !== 'function') {
       return;
     }
-    if (!this.__eventHandlers.has(eventName) || this.targetId === BODY) {
-      this.__eventHandlers.set(eventName, []);
+    if (!this._eventHandlers.has(eventName) || this.targetId === BODY) {
+      this._eventHandlers.set(eventName, []);
 
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
       // trigger event from dart side. this can led to significant performance improvement when using Front-End frameworks such as Rax, or cause some
@@ -55,24 +55,24 @@ export class EventTarget {
         addEvent(this.targetId, eventName);
       }
     }
-    this.__eventHandlers.get(eventName)!.push(handler);
+    this._eventHandlers.get(eventName)!.push(handler);
   }
 
   // Do not really emit remove event, due to performance consideration.
   public removeEventListener(eventName: string, handler: EventHandler) {
-    if (typeof handler !== 'function' || !this.__eventHandlers.has(eventName)) {
+    if (typeof handler !== 'function' || !this._eventHandlers.has(eventName)) {
       return;
     }
-    let newHandler = this.__eventHandlers.get(eventName)!.filter(fn => fn != handler);
-    this.__eventHandlers.set(eventName, newHandler);
+    let newHandler = this._eventHandlers.get(eventName)!.filter(fn => fn != handler);
+    this._eventHandlers.set(eventName, newHandler);
   }
 
   public dispatchEvent(event: Event) {
-    if (!this.__eventHandlers.has(event.type)) {
+    if (!this._eventHandlers.has(event.type)) {
       return;
     }
     event.currentTarget = event.target = this;
-    let stack = this.__eventHandlers.get(event.type)!.slice();
+    let stack = this._eventHandlers.get(event.type)!.slice();
 
     for (let i = 0; i < stack.length; i++) {
       stack[i].call(this, event);
