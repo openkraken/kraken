@@ -108,7 +108,7 @@ class Node extends EventTarget {
 
   void detach() {}
 
-  void ensureDetached() {
+  void _ensureDetached() {
     if (parent != null) {
       parent.removeChild(this);
     }
@@ -116,7 +116,7 @@ class Node extends EventTarget {
 
   @mustCallSuper
   Node appendChild(Node child) {
-    child.ensureDetached();
+    child._ensureDetached();
     child.parentNode = this;
     this.childNodes.add(child);
 
@@ -137,7 +137,7 @@ class Node extends EventTarget {
 
   @mustCallSuper
   Node insertBefore(Node newNode, Node referenceNode) {
-    newNode.ensureDetached();
+    newNode._ensureDetached();
     int referenceIndex = childNodes.indexOf(referenceNode);
     if (referenceIndex == -1) {
       return appendChild(newNode);
