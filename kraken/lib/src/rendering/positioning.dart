@@ -81,7 +81,11 @@ class RenderPosition extends RenderStack {
       } else {
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints();
-        size = constraints.biggest;
+
+        Size trySize = constraints.biggest;
+        size = trySize.isInfinite
+          ? constraints.smallest
+          : trySize;
 
         // if child has no width, calculate width by left and right.
         if (childParentData.width == 0.0 && childParentData.left != null &&
