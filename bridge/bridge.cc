@@ -216,14 +216,13 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
  */
 JSBridge::JSBridge(const alibaba::jsa::JSExceptionHandler& handler) {
   auto errorHandler = [handler, this](const alibaba::jsa::JSError &error) {
+    handler(error);
     // trigger window.onerror handler.
     const alibaba::jsa::Value &errorObject = error.value();
     context->global()
       .getPropertyAsObject(*context, "__global_onerror_handler__")
       .getFunction(*context)
       .call(*context, Value(*context, errorObject));
-
-    handler(error);
   };
 #ifdef KRAKEN_JSC_ENGINE
   context = alibaba::jsc::createJSContext(errorHandler);
