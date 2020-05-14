@@ -33,6 +33,14 @@ export class EventTarget {
     });
   }
 
+  // internal functions used by integration test
+  public __clearListeners__() {
+    if (process.env.NODE_ENV !== 'production') {
+      this.__eventHandlers.clear();
+      this.__propertyEventHandler.clear();
+    }
+  }
+
   public addEventListener(eventName: string, handler: EventHandler) {
     if (typeof handler !== 'function') {
       return;
@@ -97,6 +105,21 @@ export class PromiseRejectionEvent extends Event {
     if (eventInit) {
       this.promise = eventInit.promise;
       this.reason = eventInit.reason;
+    }
+  }
+}
+
+export class ErrorEvent extends Event {
+  colno: number;
+  error: any;
+  filename: string;
+  lineno: number;
+  message: string;
+
+  constructor(init?: ErrorEventInit) {
+    super('error');
+    if (init) {
+      Object.assign(this, init);
     }
   }
 }

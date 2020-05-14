@@ -143,3 +143,16 @@ export function traverseNode(node: Node, handle: Function) {
     }
   }
 }
+
+if (process.env.NODE_ENV !== 'production') {
+  function clearAllEventsListeners() {
+    // @ts-ignore
+    window.__clearListeners__();
+    // @ts-ignore
+    traverseNode(document.body, (node) => {
+      node.__clearListeners__();
+    });
+  }
+  // @ts-ignore
+  window.clearAllEventListeners = clearAllEventsListeners;
+}
