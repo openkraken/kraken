@@ -2,13 +2,14 @@ import { EventTarget } from './document/event-target';
 import { krakenWindow } from './bridge';
 import { WINDOW } from './document/event-target';
 
-const windowBuildInEvents = ['load', 'colorschemechange', 'unhandledrejection', 'error'];
+const windowBuiltInEvents = ['load', 'colorschemechange'];
+const windowJsOnlyEvents = ['unhandledrejection', 'error'];
 
 // window is global object, which is created by JSEngine,
 // This is an extension which add more methods to global window object.
 class WindowExtension extends EventTarget {
   constructor() {
-    super(WINDOW, windowBuildInEvents);
+    super(WINDOW, windowBuiltInEvents, windowJsOnlyEvents);
   }
 
   public get colorScheme(): string {
@@ -30,7 +31,7 @@ class WindowExtension extends EventTarget {
 
 export const windowExtension = new WindowExtension();
 let propertyEvents = {};
-windowBuildInEvents.forEach(event => {
+windowBuiltInEvents.forEach(event => {
   let eventName = 'on' + event.toLowerCase();
   propertyEvents[eventName] = {
     get() {

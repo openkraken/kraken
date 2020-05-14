@@ -8,13 +8,16 @@ type EventHandler = EventListener;
 
 export class EventTarget {
   public targetId: number;
+  // built-in events which no need to notify dart side.
+  private _jsOnlyEvents: Array<string>;
   _eventHandlers: Map<string, Array<EventHandler>> = new Map();
   _propertyEventHandler: Map<string, EventHandler> = new Map();
 
-  constructor(targetId?: number, builtInEvents: Array<string> = []) {
+  constructor(targetId?: number, builtInEvents: Array<string> = [], jsOnlyEvents: Array<string> = []) {
     if (targetId) {
       this.targetId = targetId;
     }
+    this._jsOnlyEvents = jsOnlyEvents;
     builtInEvents.forEach(event => {
       let eventName = 'on' + event.toLowerCase();
       Object.defineProperty(this, eventName, {
@@ -51,7 +54,7 @@ export class EventTarget {
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
       // trigger event from dart side. this can led to significant performance improvement when using Front-End frameworks such as Rax, or cause some
       /// overhead performance issue when some event trigger more frequently.
-      if (this.targetId) {
+      if (this.targetId && !this._jsOnlyEvents.includes(eventName)) {
         addEvent(this.targetId, eventName);
       }
     }
