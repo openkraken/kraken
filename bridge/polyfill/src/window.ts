@@ -58,5 +58,8 @@ Object.defineProperties(window, {
     get() {
       return windowExtension.dispatchEvent.bind(windowExtension);
     }
+  },
+  __clearListeners__: {
+    get() { return windowExtension.__clearListeners__.bind(windowExtension); }
   }
 });

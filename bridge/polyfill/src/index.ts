@@ -16,6 +16,7 @@ import { Performance, performance } from './performance';
 import { kraken } from './kraken';
 import { MQTT } from './mqtt';
 import { windowExtension } from './window';
+import {traverseNode} from "./document/node";
 
 Object.assign(window, windowExtension);
 
@@ -83,3 +84,16 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled Promise Rejection: ' + event.reason);
 });
 
+if (process.env.NODE_ENV !== 'production') {
+  function clearAllEventsListeners() {
+    // @ts-ignore
+    window.__clearListeners__();
+    // @ts-ignore
+    traverseNode(document.body, (node) => {
+      node.__clearListeners__();
+    });
+  }
+
+  // @ts-ignore
+  window.clearAllEventsListeners = clearAllEventsListeners;
+}
