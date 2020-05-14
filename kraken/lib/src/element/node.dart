@@ -137,7 +137,7 @@ class Node extends EventTarget {
 
   @mustCallSuper
   Node insertBefore(Node newNode, Node referenceNode) {
-    child.ensureDetached();
+    newNode.ensureDetached();
     int referenceIndex = childNodes.indexOf(referenceNode);
     if (referenceIndex == -1) {
       return appendChild(newNode);
