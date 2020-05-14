@@ -602,9 +602,10 @@ class Element extends Node
 
   // Detach renderObject of current node from parent
   void detach() {
-    if (parent == renderLayoutBox) {
+    AbstractNode parentRenderObject = renderObject.parent;
+    if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parent == renderStack) {
+    } else if (parentRenderObject == parent.renderStack) {
       parent.renderStack.remove(renderElementBoundary);
     } else {
       // Fixed or sticky.
@@ -619,11 +620,6 @@ class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
-    // Remove child from its parent first
-    if (child.parent != null) {
-      child.parent.removeChild(child);
-    }
-
     super.appendChild(child);
 
     VoidCallback doAppendChild = () {
@@ -665,11 +661,6 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    // Remove child from its parent first
-    if (child.parent != null) {
-      child.parent.removeChild(child);
-    }
-
     int referenceIndex = childNodes.indexOf(referenceNode);
 
     // Node.insertBefore will change element tree structure,
