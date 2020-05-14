@@ -7,12 +7,31 @@
 #define JSA_IMPLEMENTATION_JSC_CONTEXT_H_
 
 #include "JavaScriptCore/JavaScript.h"
+#include "macros.h"
 #include "jsa.h"
 #include <atomic>
 #include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <sstream>
+
+
+// JSC support unhandled promise rejection handler in private API which is not permitted by AppleStore.
+// only enabled for macOS, Android and iOS(debug)
+
+// iOS in debug mode
+#ifdef IS_IOS
+#ifndef NDEBUG
+#define ENABLE_UNHANDLED_PROMISE_REJECTION 1
+#endif
+#elif IS_MACOSX
+// macOS
+#define ENABLE_UNHANDLED_PROMISE_REJECTION 1
+#endif
+
+#ifdef ENABLE_UNHANDLED_PROMISE_REJECTION
+#include "JSContextRefPrivate.h"
+#endif
 
 namespace alibaba {
 namespace jsc {
@@ -33,6 +52,8 @@ public:
   ~JSCContext();
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
+  void setUnhandledPromiseRejectionHandler(jsa::Object &handler) override;
+
   jsa::Object global() override;
 
   std::string description() override;

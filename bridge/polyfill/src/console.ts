@@ -129,7 +129,13 @@ function inspect(obj: any, within?: boolean): string {
     default:
       if (typeof obj === 'object') {
         var prefix;
-        if (kind == 'Object') {
+        if (kind == 'Map') {
+          let mapList = Array.from(obj.entries()).map((item: any) => item[0] + ' => ' + inspect(item[1], true)).join(', ');
+          return 'Map {' + mapList + '}';
+          // return JSON.stringify(Array.from(obj.entries()));
+        } else if (kind == 'Set') {
+          return 'Set { ' + Array.from(obj).map((item: any) => inspect(item, true)).join(', ') + '}'
+        } else if (kind == 'Object') {
           prefix = '';
         } else {
           prefix = kind + ' ';

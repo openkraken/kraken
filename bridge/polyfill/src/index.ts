@@ -1,5 +1,6 @@
 import { console } from './console';
 import { document } from './document';
+import { PromiseRejectionEvent, ErrorEvent } from './document/event-target';
 import { requestAnimationFrame } from './document/animation-frame';
 import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
@@ -15,6 +16,7 @@ import { Performance, performance } from './performance';
 import { kraken } from './kraken';
 import { MQTT } from './mqtt';
 import { windowExtension } from './window';
+import { traverseNode } from "./document/node";
 
 Object.assign(window, windowExtension);
 
@@ -48,4 +50,50 @@ function defineGlobalProperty(key: string, value: any) {
   });
 }
 
+// Unhandled global promise handler used by JS Engine.
+// @ts-ignore
+window.__global_unhandled_promise_handler__ = function(promise, reason) {
+  const errorEvent = new ErrorEvent({
+    message: reason.message,
+    error: reason
+  });
+  const rejectionEvent = new PromiseRejectionEvent({
+    promise,
+    reason
+  });
+  // @ts-ignore
+  window.dispatchEvent(rejectionEvent);
+  // @ts-ignore
+  window.dispatchEvent(errorEvent);
+};
 
+// Global error handler used by JS Engine
+// @ts-ignore
+window.__global_onerror_handler__ = function(error) {
+  const event = new ErrorEvent({
+    error: error,
+    message: error.message,
+    lineno: error.line
+  });
+  // @ts-ignore
+  window.dispatchEvent(event);
+};
+
+// default unhandled project handler
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled Promise Rejection: ' + event.reason);
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  function clearAllEventsListeners() {
+    // @ts-ignore
+    window.__clearListeners__();
+    // @ts-ignore
+    traverseNode(document.body, (node) => {
+      node.__clearListeners__();
+    });
+  }
+
+  // @ts-ignore
+  window.clearAllEventsListeners = clearAllEventsListeners;
+}
