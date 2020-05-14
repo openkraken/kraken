@@ -133,7 +133,7 @@ public:
   virtual Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) = 0;
 
   /// Sets the unhandled promise rejection callback for a context.
-  virtual void setUnhandledPromiseRejectHandler(Object &handler) = 0;
+  virtual void setUnhandledPromiseRejectionHandler(Object &handler) = 0;
 
   /// \return the global object
   virtual Object global() = 0;
