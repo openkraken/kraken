@@ -22,10 +22,14 @@
 // iOS in debug mode
 #ifdef IS_IOS
 #ifndef NDEBUG
-#include "JSContextRefPrivate.h"
+#define ENABLE_UNHANDLED_PROMISE_REJECTION 1
 #endif
 #elif IS_MACOSX
 // macOS
+#define ENABLE_UNHANDLED_PROMISE_REJECTION 1
+#endif
+
+#ifdef ENABLE_UNHANDLED_PROMISE_REJECTION
 #include "JSContextRefPrivate.h"
 #endif
 
@@ -48,7 +52,7 @@ public:
   ~JSCContext();
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
-  void setUnhandledPromiseRejectHandler(jsa::Object &handler) override;
+  void setUnhandledPromiseRejectionHandler(jsa::Object &handler) override;
 
   jsa::Object global() override;
 
