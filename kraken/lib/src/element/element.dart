@@ -280,7 +280,6 @@ class Element extends Node
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     if (renderElementBoundary.parentData is PositionParentData) {
       (renderElementBoundary.parentData as PositionParentData).position = currentPosition;
-      renderElementBoundary.markNeedsLayout();
     }
 
     // Remove stack node when change to non positioned.

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 class PositionParentData extends StackParentData {
   RenderBox originalRenderBoxRef;
@@ -44,8 +45,12 @@ class RenderPosition extends RenderStack {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! PositionParentData)
-      child.parentData = PositionParentData();
+    if (child.parentData is! PositionParentData) {
+      var childParentData = child.parentData = PositionParentData();
+      if (child is RenderElementBoundary) {
+        childParentData.position = resolvePositionFromStyle(child.style);
+      }
+    }
   }
 
   @override
@@ -72,12 +77,12 @@ class RenderPosition extends RenderStack {
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
 
-        // Calc relative offset between RenderPosition and RenderPositionHolder.
-        RenderBox positionHolder = childParentData.originalRenderBoxRef;
-        Offset positionHolderGlobalOffset = positionHolder?.localToGlobal(Offset.zero) ?? Offset.zero;
-        Offset positionHolderRelativeToPositionOffset = positionHolderGlobalOffset - localToGlobal(Offset.zero);
-
-        childParentData.offset = childParentData.stackedChildOriginalRelativeOffset;
+        if (childParentData.position == CSSPositionType.fixed) {
+          if (childParentData.originalRenderBoxRef != null)
+            childParentData.offset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero);
+        } else {
+          childParentData.offset = childParentData.stackedChildOriginalRelativeOffset;
+        }
       } else {
         // Default to no constraints. (0 - infinite)
         BoxConstraints childConstraints = const BoxConstraints();
