@@ -132,6 +132,9 @@ public:
   /// property from the global object and then calling it explicitly.
   virtual Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) = 0;
 
+  /// Sets the unhandled promise rejection callback for a context.
+  virtual void setUnhandledPromiseRejectionHandler(Object &handler) = 0;
+
   /// \return the global object
   virtual Object global() = 0;
 

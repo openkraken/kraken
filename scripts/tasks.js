@@ -178,7 +178,6 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       resolve(paths.bridge, 'cmake-build-' + buildMode.toLowerCase()),
       '--target',
       'kraken',
-      'kom_test',
       'foundation_test',
       'jsa_test_' + jsEngine,
       '--',
@@ -313,7 +312,6 @@ task('bridge-test', (done) => {
   }
   execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
   execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
-  execSync(`${libOutputPath}/kom_test`, { stdio: 'inherit' });
   done();
 });
 

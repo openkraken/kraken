@@ -135,6 +135,8 @@ jsa::Value V8Context::evaluateJavaScript(const char *code, const std::string &so
   return createValue(result);
 }
 
+void V8Context::setUnhandledPromiseRejectionHandler(jsa::Object &handler) {}
+
 V8Context::V8Context(jsa::JSExceptionHandler handler)
   : ctxInvalid_(false), handler_(handler)
 #ifndef NDEBUG

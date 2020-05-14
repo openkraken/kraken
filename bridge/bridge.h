@@ -26,7 +26,7 @@ private:
 
 public:
   JSBridge() = delete;
-  JSBridge(alibaba::jsa::JSExceptionHandler handler);
+  JSBridge(const alibaba::jsa::JSExceptionHandler& handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();

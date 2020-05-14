@@ -1,12 +1,6 @@
 const {spawn, fork} = require('child_process');
 const path = require('path');
-
-function startWebSocketServer() {
-  const file = path.join(__dirname, 'ws_server.js');
-  fork(file, [], {
-    stdio: 'inherit'
-  });
-}
+const {startWsServer} = require('./ws_server');
 
 function startIntegrationTest() {
   const tester = spawn('flutter', ['driver', '--target=integration/app.dart', '--driver=integration/app_test.dart', '-d', 'macos'], {
@@ -27,4 +21,4 @@ function startIntegrationTest() {
 }
 
 startIntegrationTest();
-startWebSocketServer();
+startWsServer();

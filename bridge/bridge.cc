@@ -214,12 +214,21 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
 /**
  * JSRuntime
  */
-JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
+JSBridge::JSBridge(const alibaba::jsa::JSExceptionHandler& handler) {
+  auto errorHandler = [handler, this](const alibaba::jsa::JSError &error) {
+    handler(error);
+    // trigger window.onerror handler.
+    const alibaba::jsa::Value &errorObject = error.value();
+    context->global()
+      .getPropertyAsObject(*context, "__global_onerror_handler__")
+      .getFunction(*context)
+      .call(*context, Value(*context, errorObject));
+  };
 #ifdef KRAKEN_JSC_ENGINE
-  context = alibaba::jsc::createJSContext(handler);
+  context = alibaba::jsc::createJSContext(errorHandler);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
-  context = alibaba::jsa_v8::createJSContext(handler);
+  context = alibaba::jsa_v8::createJSContext(errorHandler);
 #endif
 
   // Inject JSC global objects
@@ -241,6 +250,9 @@ JSBridge::JSBridge(alibaba::jsa::JSExceptionHandler handler) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_request_batch_update__", 0, requestBatchUpdate);
 
   initKrakenPolyFill(context.get());
+
+  Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
+  context->setUnhandledPromiseRejectionHandler(promiseHandler);
 }
 
 #ifdef ENABLE_DEBUGGER
