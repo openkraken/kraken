@@ -742,13 +742,13 @@ class Element extends Node
           break;
       }
 
-//      if (isFlex) {
-//        children.forEach((Element child) {
-//          _updateFlexItemStyle(child);
-//        });
-//      }
-//
-//      // Trigger sticky update logic after node is connected
+      if (isFlex) {
+        children.forEach((Element child) {
+          _updateFlexItemStyle(child);
+        });
+      }
+
+      // Trigger sticky update logic after node is connected
 //      if (childPosition == 'sticky') {
 //        // Force flush layout of child
 //        if (!child.renderMargin.hasSize) {
