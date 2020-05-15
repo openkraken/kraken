@@ -4,12 +4,12 @@
  */
 
 export 'src/rendering/box.dart';
+export 'src/rendering/box_decoration.dart';
 export 'src/rendering/canvas.dart';
 export 'src/rendering/element_boundary.dart';
 export 'src/rendering/fallback_view.dart';
 export 'src/rendering/flare.dart';
 export 'src/rendering/flex.dart';
-export 'src/rendering/gradient.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/layout.dart';
 export 'src/rendering/preferred_size.dart';
