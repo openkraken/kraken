@@ -31,7 +31,7 @@ class RenderTextBox extends RenderBox
       createTextSpanWithStyle(text, style),
       textAlign: getTextAlignFromStyle(style),
       textDirection: TextDirection.ltr,
-      overflow: overflow,
+      overflow: _getOverflow(),
     );
     add(_renderParagraph);
   }
@@ -39,6 +39,7 @@ class RenderTextBox extends RenderBox
   void _rebuild() {
     _renderParagraph.text = createTextSpanWithStyle(text, style);
     _renderParagraph.textAlign = getTextAlignFromStyle(style);
+    _renderParagraph.overflow = _getOverflow();
     _renderParagraph.markNeedsLayout();
   }
 
@@ -59,12 +60,20 @@ class RenderTextBox extends RenderBox
   }
 
   bool _isTextOverflowEllipsis() {
+    if (style == null) {
+      return false;
+    }
     String overflowX =
         style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
 
     return overflowX != 'visible' &&
         style['whiteSpace'] == 'nowrap' &&
         style['textOverflow'] == 'ellipsis';
+  }
+
+  TextOverflow _getOverflow() {
+    return _isTextOverflowEllipsis() ?
+        TextOverflow.ellipsis : TextOverflow.clip;
   }
 
   @override
