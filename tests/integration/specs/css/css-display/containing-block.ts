@@ -99,7 +99,7 @@ describe('containing-block', () => {
     append(BODY, div1);
     await matchScreenshot();
   });
-  xit('009', async () => {
+  it('009', async () => {
     let div1 = createElementWithStyle('div', {
       border: '1px solid black',
       margin: '50px',
@@ -124,7 +124,7 @@ describe('containing-block', () => {
     append(BODY, div1);
     await matchElementImageSnapshot(BODY);
   });
-  xit('010', async () => {
+  it('010', async () => {
     let div1 = createElementWithStyle('div', {
       border: '1px solid black',
       margin: '50px',

@@ -38,7 +38,7 @@ describe('image-fit', () => {
 
     await matchScreenshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let div;
     let div_1;
     div = createElement(

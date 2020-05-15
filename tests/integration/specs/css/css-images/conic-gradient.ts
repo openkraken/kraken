@@ -16,7 +16,7 @@ describe('conic-gradient', () => {
 
     await matchScreenshot();
   });
-  xit('angle', async () => {
+  it('angle', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',

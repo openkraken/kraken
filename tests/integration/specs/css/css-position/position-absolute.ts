@@ -715,7 +715,7 @@ describe('position-absolute', () => {
 
     await matchScreenshot();
   });
-  xit('dynamic-list-marker', async () => {
+  it('dynamic-list-marker', async () => {
     let p;
     let target;
     let ul;
@@ -767,7 +767,7 @@ describe('position-absolute', () => {
 
     await matchScreenshot();
   });
-  xit('dynamic-overflow-001', async () => {
+  it('dynamic-overflow-001', async () => {
     let div;
     let target;
     let container;
@@ -935,7 +935,7 @@ describe('position-absolute', () => {
 
     await matchScreenshot();
   });
-  xit('dynamic-relayout-002', async () => {
+  it('dynamic-relayout-002', async () => {
     let target;
     target = createElementWithStyle(
       'div',

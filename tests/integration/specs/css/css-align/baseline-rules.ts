@@ -25,7 +25,7 @@ describe('Baseline-rules flexbox', () => {
     border: '5px solid magenta',
   };
 
-  xit('synthesized-baseline-flexbox-001', async () => {
+  it('synthesized-baseline-flexbox-001', async () => {
     let wrapper = createElementWithStyle('div', wrapperStyle);
     let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
@@ -39,7 +39,7 @@ describe('Baseline-rules flexbox', () => {
     await matchElementImageSnapshot(wrapper);
   });
 
-  xit('synthesized-baseline-flexbox-002', async () => {
+  it('synthesized-baseline-flexbox-002', async () => {
     let wrapper = createElementWithStyle('div', wrapperStyle);
     let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
@@ -54,11 +54,10 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await sleep(10);
     await matchScreenshot();
   });
 
-  xit('synthesized-baseline-flexbox-003', async () => {
+  it('synthesized-baseline-flexbox-003', async () => {
     let wrapper = createElementWithStyle('div', wrapperStyle);
     let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
@@ -76,7 +75,7 @@ describe('Baseline-rules flexbox', () => {
     await matchElementImageSnapshot(wrapper);
   });
 
-  xit('synthesized-baseline-flexbox-004', async () => {
+  it('synthesized-baseline-flexbox-004', async () => {
     let wrapper = createElementWithStyle('div', wrapperStyle);
     let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
@@ -93,7 +92,7 @@ describe('Baseline-rules flexbox', () => {
     await matchElementImageSnapshot(wrapper);
   });
 
-  xit('synthesized-baseline-flexbox-005', async () => {
+  it('synthesized-baseline-flexbox-005', async () => {
     let wrapper = createElementWithStyle('div', wrapperStyle);
     let canvas = createElementWithStyle('div', inlineBoxStyle);
     append(wrapper, canvas);
@@ -111,7 +110,7 @@ describe('Baseline-rules flexbox', () => {
     await matchElementImageSnapshot(wrapper);
   });
 
-  xit('synthesized-baseline-flexbox-006', async () => {
+  it('synthesized-baseline-flexbox-006', async () => {
     let wrapper = createElementWithStyle('div', {
       ...wrapperStyle,
       display: 'flex',
@@ -132,7 +131,7 @@ describe('Baseline-rules flexbox', () => {
     await matchElementImageSnapshot(wrapper);
   });
 
-  xit('synthesized-baseline-flexbox-007', async () => {
+  it('synthesized-baseline-flexbox-007', async () => {
     let wrapper = createElementWithStyle('div', {
       ...wrapperStyle,
       display: 'flex',
