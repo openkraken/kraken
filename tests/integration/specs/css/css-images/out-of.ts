@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('out-of', () => {
-  xit('range-color-stop-conic', async () => {
+  it('range-color-stop-conic', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',

@@ -16,26 +16,20 @@ import 'package:kraken/css.dart';
 /// - background
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
-  RenderDecoratedBox renderDecoratedBox;
-  RenderMargin renderBorderHolder;
+  RenderDecorateElementBox renderDecoratedBox;
   TransitionDecoration oldDecoration;
   CSSPadding oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(
       RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     oldDecoration = getTransitionDecoration(style);
-    EdgeInsets margin = oldDecoration.getBorderEdgeInsets();
-    // Flutter Border width is inside the element
-    // but w3c border is outside the element
-    // so use margin to fix it.
-    renderBorderHolder = RenderMargin(
-      margin: margin,
-      child: renderObject,
-    );
-    return renderDecoratedBox = RenderGradient(
+    EdgeInsets borderEdge = oldDecoration.getBorderEdgeInsets();
+
+    return renderDecoratedBox = RenderDecorateElementBox(
       targetId: targetId,
+      borderEdge: borderEdge,
       decoration: oldDecoration.toBoxDecoration(),
-      child: renderBorderHolder,
+      child: renderObject,
     );
   }
 
@@ -207,7 +201,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   void _updateBorderInsets(EdgeInsets insets) {
-    renderBorderHolder.margin = insets;
+    renderDecoratedBox.borderEdge = insets;
   }
 
   /// Shorted border property:
@@ -319,7 +313,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
   static RegExp _splitRegExp = RegExp(r' ');
 
-  List<String> getShorttedProperties(String input) {
+  static List<String> getShorttedProperties(String input) {
     assert(input != null);
     return input.trim().split(_splitRegExp);
   }
@@ -329,7 +323,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = CSSColor.transparent;
 
-  BorderStyle getBorderStyle(String input) {
+  static BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
     switch (input) {
       case 'solid':
@@ -343,7 +337,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // TODO: Shortted order in web not keep in same order
-  Map _getShorttedInfoFromString(String input) {
+  static Map _getShorttedInfoFromString(String input) {
     List<String> splittedBorder = getShorttedProperties(input);
 
     double width = splittedBorder.length > 0
@@ -360,7 +354,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
-  TransitionBorderSide getBorderSideByStyle(
+  static TransitionBorderSide getBorderSideByStyle(
       CSSStyleDeclaration style, String side) {
     TransitionBorderSide borderSide = TransitionBorderSide(
         0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);

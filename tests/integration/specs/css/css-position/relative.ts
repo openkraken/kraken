@@ -27,7 +27,7 @@ describe('Position relative', () => {
     await matchScreenshot();
   });
 
-  xit('should be a green square below', async done => {
+  it('should be a green square below', async done => {
     let parent = createElementWithStyle('div', {
       width: '150px',
       height: '150px',

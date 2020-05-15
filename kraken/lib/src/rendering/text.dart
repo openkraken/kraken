@@ -24,9 +24,6 @@ class RenderTextBox extends RenderBox
     _text = text;
     _style = style;
 
-    TextOverflow overflow =
-        _isTextOverflowEllipsis() ? TextOverflow.ellipsis : TextOverflow.clip;
-
     _renderParagraph = RenderParagraph(
       createTextSpanWithStyle(text, style),
       textAlign: getTextAlignFromStyle(style),

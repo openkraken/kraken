@@ -5,8 +5,8 @@ exports.startWsServer = function() {
 
   let unstableServer;
 
-// auto closed and recreate ws server.
-// used to test failed connection
+  // auto closed and recreate ws server.
+  // used to test failed connection
   setInterval(() => {
     if (!unstableServer) {
       unstableServer = new WebSocket.Server({ port: 8400 });

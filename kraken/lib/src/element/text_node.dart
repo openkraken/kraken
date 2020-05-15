@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:meta/meta.dart';
 import 'package:matcher/matcher.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
@@ -70,8 +69,11 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     renderTextBox.style = parentElement.style;
   }
 
+  @override
+  bool get attached => renderTextBox.attached;
 
   // Attach renderObject of current node to parent
+  @override
   void attachTo(Element parent, { RenderObject after }) {
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
@@ -82,6 +84,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   // Detach renderObject of current node from parent
+  @override
   void detach() {
     parent.renderLayoutBox.remove(renderTextBox);
   }

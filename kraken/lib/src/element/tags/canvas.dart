@@ -67,7 +67,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute width
-  double _width;
+  double _width = 0;
   double get width => _width;
   set width(double newValue) {
     if (newValue != null) {
@@ -77,7 +77,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute height
-  double _height;
+  double _height = 0;
   double get height => _height;
   set height(double newValue) {
     if (newValue != null) {
@@ -181,6 +181,14 @@ class CanvasElement extends Element {
       throw new FlutterError(
           'Canvas painter not exists, get canvas context first.');
     }
+  }
+
+  RenderCustomPaint getRenderObject() {
+    return RenderCustomPaint(
+      painter: painter,
+      foregroundPainter: null, // Ignore foreground painter
+      preferredSize: size,
+    );
   }
 
   @override

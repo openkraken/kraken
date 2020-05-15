@@ -100,8 +100,7 @@ class RenderFlexLayout extends RenderBox
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
         DebugOverflowIndicatorMixin,
-        CSSComputedMixin,
-        CSSPositionMixin {
+        CSSComputedMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -559,7 +558,7 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Layout placeholder renderObject of positioned element(absolute/fixed) in new layer
-      if (child is RenderConstrainedBox) {
+      if (child is RenderPositionHolder) {
         _layoutChildren(child);
       }
       child = childParentData.nextSibling;
@@ -568,18 +567,19 @@ class RenderFlexLayout extends RenderBox
     _layoutChildren(null);
   }
 
-  void _layoutChildren(RenderConstrainedBox placeholderChild) {
+  void _layoutChildren(RenderPositionHolder placeholderChild) {
     assert(_debugHasNecessaryDirections);
 
     double elementWidth = getElementComputedWidth(targetId);
     double elementHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
-    if (firstChild == null) {
-      size = constraints.constrain(Size(
+    if (childCount == 0) {
+      Size preferredSize = Size(
         elementWidth ?? 0,
         elementHeight ?? 0,
-      ));
+      );
+      size = constraints.constrain(preferredSize);
       return;
     }
 
@@ -605,12 +605,12 @@ class RenderFlexLayout extends RenderBox
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the children.
-    RenderBox child = placeholderChild != null ? placeholderChild : firstChild;
+    RenderBox child = placeholderChild ?? firstChild;
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderConstrainedBox) {
+      if (placeholderChild == null && child is RenderPositionHolder) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -761,7 +761,7 @@ class RenderFlexLayout extends RenderBox
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude placeholder renderObject when layout non placeholder object
-        if (placeholderChild == null && child is RenderConstrainedBox) {
+        if (placeholderChild == null && child is RenderPositionHolder) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -947,7 +947,7 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderConstrainedBox) {
+      if (placeholderChild == null && child is RenderPositionHolder) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -997,7 +997,7 @@ class RenderFlexLayout extends RenderBox
         childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
-      ///apply position relative offset change
+      /// Apply position relative offset change
       applyRelativeOffset(relativeOffset, child, childStyle);
 
       if (flipMainAxis) {
@@ -1043,18 +1043,18 @@ class RenderFlexLayout extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>(
+    properties.add(DiagnosticsProperty<Axis>('direction', direction));
+    properties.add(DiagnosticsProperty<MainAxisAlignment>(
         'mainAxisAlignment', mainAxisAlignment));
-    properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
-    properties.add(EnumProperty<CrossAxisAlignment>(
+    properties.add(DiagnosticsProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    properties.add(DiagnosticsProperty<CrossAxisAlignment>(
         'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection,
         defaultValue: null));
-    properties.add(EnumProperty<VerticalDirection>(
+    properties.add(DiagnosticsProperty<VerticalDirection>(
         'verticalDirection', verticalDirection,
         defaultValue: null));
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
+    properties.add(DiagnosticsProperty<TextBaseline>('textBaseline', textBaseline,
         defaultValue: null));
   }
 }
@@ -1063,8 +1063,7 @@ class RenderFlexItem extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
-        DebugOverflowIndicatorMixin,
-        CSSPositionMixin {
+        DebugOverflowIndicatorMixin {
   RenderFlexItem({RenderBox child}) {
     add(child);
   }

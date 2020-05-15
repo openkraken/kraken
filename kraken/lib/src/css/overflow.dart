@@ -86,46 +86,31 @@ mixin CSSOverflowMixin {
         AxisDirection axisDirection = AxisDirection.down;
         switch (overflow[1]) {
           case CSSOverflowType.visible:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              CSSOverflowDirectionBox overflowCustomBox =
-                  CSSOverflowDirectionBox(
-                      child: _renderObjectX,
-                      textDirection: TextDirection.ltr,
-                      axisDirection: axisDirection);
-              parent.child = _renderObjectY = overflowCustomBox;
-              _scrollableY = null;
-            }
+            setChild(childParent, null);
+            CSSOverflowDirectionBox overflowCustomBox =
+            CSSOverflowDirectionBox(
+              child: _renderObjectX,
+              textDirection: TextDirection.ltr,
+              axisDirection: axisDirection);
+            setChild(parent, _renderObjectY = overflowCustomBox);
+            _scrollableY = null;
             break;
           case CSSOverflowType.auto:
           case CSSOverflowType.scroll:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              _scrollableY = KrakenScrollable(
-                  axisDirection: axisDirection, scrollListener: scrollListener);
-              parent.child = _renderObjectY =
-                  _scrollableY.getScrollableRenderObject(_renderObjectX);
-            }
+            setChild(childParent, null);
+            _scrollableY = KrakenScrollable(
+              axisDirection: axisDirection, scrollListener: scrollListener);
+            setChild(parent,  _renderObjectY =
+              _scrollableY.getScrollableRenderObject(_renderObjectX));
             break;
           case CSSOverflowType.hidden:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              parent.child = _renderObjectY = RenderSingleChildViewport(
-                  axisDirection: axisDirection,
-                  offset: ViewportOffset.zero(),
-                  child: _renderObjectX,
-                  shouldClip: true);
-              _scrollableY = null;
-            }
+            setChild(childParent, null);
+            setChild(parent, _renderObjectY = RenderSingleChildViewport(
+              axisDirection: axisDirection,
+              offset: ViewportOffset.zero(),
+              child: _renderObjectX,
+              shouldClip: true));
+            _scrollableY = null;
             break;
         }
       }
@@ -136,44 +121,29 @@ mixin CSSOverflowMixin {
         AxisDirection axisDirection = AxisDirection.right;
         switch (overflow[0]) {
           case CSSOverflowType.visible:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              parent.child = _renderObjectX = CSSOverflowDirectionBox(
-                  child: _child,
-                  textDirection: TextDirection.ltr,
-                  axisDirection: axisDirection);
-              _scrollableX = null;
-            }
+            setChild(childParent, null);
+            setChild(parent, _renderObjectX = CSSOverflowDirectionBox(
+              child: _child,
+              textDirection: TextDirection.ltr,
+              axisDirection: axisDirection));
+            _scrollableX = null;
             break;
           case CSSOverflowType.auto:
           case CSSOverflowType.scroll:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              _scrollableX = KrakenScrollable(
-                  axisDirection: axisDirection, scrollListener: scrollListener);
-              parent.child = _renderObjectX =
-                  _scrollableX.getScrollableRenderObject(_child);
-            }
+            setChild(childParent, null);
+            _scrollableX = KrakenScrollable(
+              axisDirection: axisDirection, scrollListener: scrollListener);
+            setChild(parent, _renderObjectX =
+              _scrollableX.getScrollableRenderObject(_child));
             break;
           case CSSOverflowType.hidden:
-            assert(parent is RenderObjectWithChildMixin);
-            assert(childParent is RenderObjectWithChildMixin);
-            if (parent is RenderObjectWithChildMixin &&
-                childParent is RenderObjectWithChildMixin) {
-              childParent.child = null;
-              parent.child = _renderObjectX = RenderSingleChildViewport(
-                  axisDirection: axisDirection,
-                  offset: ViewportOffset.zero(),
-                  child: _child,
-                  shouldClip: true);
-              _scrollableX = null;
-            }
+            setChild(childParent, null);
+            setChild(parent, _renderObjectX = RenderSingleChildViewport(
+              axisDirection: axisDirection,
+              offset: ViewportOffset.zero(),
+              child: _child,
+              shouldClip: true));
+            _scrollableX = null;
             break;
         }
       }
@@ -319,18 +289,13 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
 
   @override
   void performLayout() {
-    assert(child != null);
-    BoxConstraints childConstraints;
-    if (axisDirection == AxisDirection.down) {
-      childConstraints =
-          constraints.copyWith(minHeight: 0, maxHeight: double.infinity);
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      alignChild();
     } else {
-      childConstraints =
-          constraints.copyWith(minWidth: 0, maxWidth: double.infinity);
+      size = Size.zero;
     }
-    child.layout(childConstraints, parentUsesSize: true);
-    size = constraints.constrain(child.size);
-    alignChild();
   }
 
   @override
@@ -348,7 +313,14 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
     super.debugFillProperties(properties);
     properties.add(
         DiagnosticsProperty<AxisDirection>('axisDirection', axisDirection));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection,
         defaultValue: null));
   }
+}
+
+void setChild(RenderBox renderBox, RenderBox child) {
+  if (renderBox is RenderObjectWithChildMixin)
+    (renderBox as RenderObjectWithChildMixin)?.child = child;
+  else if (renderBox is ContainerRenderObjectMixin)
+    (renderBox as ContainerRenderObjectMixin)?.add(child);
 }

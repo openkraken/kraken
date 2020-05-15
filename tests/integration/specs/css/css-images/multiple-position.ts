@@ -17,7 +17,7 @@ describe('multiple-position', () => {
 
     await matchScreenshot();
   });
-  xit('color-stop-conic-2', async () => {
+  it('color-stop-conic-2', async () => {
     let div;
     div = createElement('div', {
       style: {
@@ -33,7 +33,7 @@ describe('multiple-position', () => {
 
     await matchScreenshot();
   });
-  xit('color-stop-conic', async () => {
+  it('color-stop-conic', async () => {
     let target;
     target = createElement('div', {
       id: 'target',

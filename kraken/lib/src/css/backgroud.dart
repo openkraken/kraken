@@ -29,7 +29,7 @@ mixin CSSBackgroundMixin {
     BACKGROUND_COLOR: 'transparent'
   };
 
-  RenderGradient _renderGradient;
+  RenderDecorateElementBox _renderDecorateElementBox;
 
   double linearAngle;
 
@@ -291,7 +291,7 @@ mixin CSSBackgroundMixin {
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
-              return _renderGradient = RenderGradient(
+              return _renderDecorateElementBox = RenderDecorateElementBox(
                   targetId: targetId,
                   decoration:
                       BoxDecoration(image: decorationImage, gradient: gradient),
@@ -301,7 +301,7 @@ mixin CSSBackgroundMixin {
         } else {
           gradient = getBackgroundGradient(method);
           if (gradient != null) {
-            return _renderGradient = RenderGradient(
+            return _renderDecorateElementBox = RenderDecorateElementBox(
                 targetId: targetId,
                 decoration:
                     BoxDecoration(image: decorationImage, gradient: gradient),
@@ -349,17 +349,17 @@ mixin CSSBackgroundMixin {
 
   void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
       RenderObjectWithChildMixin parent, int targetId) {
-    if (_renderGradient != null) {
-      _renderGradient.decoration =
+    if (_renderDecorateElementBox != null) {
+      _renderDecorateElementBox.decoration =
           BoxDecoration(image: decorationImage, gradient: gradient);
     } else {
       RenderObject child = parent.child;
       parent.child = null;
-      _renderGradient = RenderGradient(
+      _renderDecorateElementBox = RenderDecorateElementBox(
           targetId: targetId,
           decoration: BoxDecoration(image: decorationImage, gradient: gradient),
           child: child);
-      parent.child = _renderGradient;
+      parent.child = _renderDecorateElementBox;
     }
   }
 

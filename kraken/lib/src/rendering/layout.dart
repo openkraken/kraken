@@ -32,8 +32,7 @@ class RenderFlowLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
-        CSSComputedMixin,
-        CSSPositionMixin {
+        CSSComputedMixin {
   RenderFlowLayout({
     List<RenderBox> children,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
@@ -432,6 +431,9 @@ class RenderFlowLayout extends RenderBox
     return null;
   }
 
+  /// Get current offset.
+  Offset get offset => (parentData as BoxParentData).offset;
+
   @override
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {
@@ -511,7 +513,7 @@ class RenderFlowLayout extends RenderBox
     double elementHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
-    if (child == null) {
+    if (childCount == 0) {
       size = constraints.constrain(Size(
         elementWidth ?? 0,
         elementHeight ?? 0,
@@ -519,13 +521,14 @@ class RenderFlowLayout extends RenderBox
       return;
     }
 
-    BoxConstraints childConstraints;
+    // @NOTE: Child size could be larger than parent's content, give
+    // an infinite box constraint to flow layout children.
+    BoxConstraints childConstraints = BoxConstraints();
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
     switch (direction) {
       case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
@@ -535,7 +538,6 @@ class RenderFlowLayout extends RenderBox
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
@@ -550,16 +552,28 @@ class RenderFlowLayout extends RenderBox
     double crossAxisExtent = 0.0;
     double runMainAxisExtent = 0.0;
     double runCrossAxisExtent = 0.0;
-    int childCount = 0;
+    int _effectiveChildCount = 0;
 
     RenderBox preChild = null;
 
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       final RenderLayoutParentData childParentData = child.parentData;
-      final double childMainAxisExtent = _getMainAxisExtent(child);
-      final double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (childCount > 0 &&
+      double childMainAxisExtent = _getMainAxisExtent(child);
+      double childCrossAxisExtent = _getCrossAxisExtent(child);
+
+      if (isPositionHolder(child)) {
+        RenderPositionHolder positionHolder = child;
+        RenderElementBoundary childElementBoundary = positionHolder.realDisplayedBox;
+        if (childElementBoundary != null) {
+          PositionParentData positionParentData = childElementBoundary.parentData as PositionParentData;
+          if (positionParentData.position != CSSPositionType.static
+              && positionParentData.position != CSSPositionType.relative)
+            childMainAxisExtent = childCrossAxisExtent = 0;
+        }
+      }
+
+      if (_effectiveChildCount > 0 &&
           (_isBlockElement(child) ||
               _isBlockElement(preChild) ||
               (runMainAxisExtent + spacing + childMainAxisExtent >
@@ -568,21 +582,21 @@ class RenderFlowLayout extends RenderBox
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
         runMetrics.add(
-            _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
+            _RunMetrics(runMainAxisExtent, runCrossAxisExtent, _effectiveChildCount));
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
-        childCount = 0;
+        _effectiveChildCount = 0;
       }
       runMainAxisExtent += childMainAxisExtent;
-      if (childCount > 0) runMainAxisExtent += spacing;
+      if (_effectiveChildCount > 0) runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      childCount += 1;
+      _effectiveChildCount += 1;
       childParentData.runIndex = runMetrics.length;
       preChild = child;
       child = childParentData.nextSibling;
     }
 
-    if (childCount > 0) {
+    if (_effectiveChildCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
       if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
@@ -592,7 +606,7 @@ class RenderFlowLayout extends RenderBox
 
     final int runCount = runMetrics.length;
 
-    assert(runCount > 0);
+    assert(_effectiveChildCount > 0);
 
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
@@ -611,24 +625,17 @@ class RenderFlowLayout extends RenderBox
       constraintHeight = math.max(constraintHeight, elementHeight);
     }
 
-    // get container height
-    double containerHeight = crossAxisExtent;
-    double containerParentHeight =
-        CSSLength.toDisplayPortValue(style['height']);
-    if (containerParentHeight != null) {
-      containerHeight = containerParentHeight;
-    }
-
     switch (direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(constraintWidth, constraintHeight));
-        containerMainAxisExtent = constraintWidth;
-        containerCrossAxisExtent = containerHeight;
+        // AxisExtent should be size.
+        containerMainAxisExtent = elementWidth ?? size.width;
+        containerCrossAxisExtent = elementHeight ?? size.height;
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-        containerMainAxisExtent = containerHeight;
-        containerCrossAxisExtent = constraintWidth;
+        containerMainAxisExtent = elementHeight ?? size.height;
+        containerCrossAxisExtent = elementWidth ?? size.width;
         break;
     }
 
@@ -669,7 +676,7 @@ class RenderFlowLayout extends RenderBox
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
-      final int childCount = metrics.childCount;
+      final int metricChildCount = metrics.childCount;
 
       final double mainAxisFreeSpace =
           math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
@@ -687,14 +694,14 @@ class RenderFlowLayout extends RenderBox
           break;
         case MainAxisAlignment.spaceBetween:
           childBetweenSpace =
-              childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
+          metricChildCount > 1 ? mainAxisFreeSpace / (metricChildCount - 1) : 0.0;
           break;
         case MainAxisAlignment.spaceAround:
-          childBetweenSpace = mainAxisFreeSpace / childCount;
+          childBetweenSpace = mainAxisFreeSpace / metricChildCount;
           childLeadingSpace = childBetweenSpace / 2.0;
           break;
         case MainAxisAlignment.spaceEvenly:
-          childBetweenSpace = mainAxisFreeSpace / (childCount + 1);
+          childBetweenSpace = mainAxisFreeSpace / (metricChildCount + 1);
           childLeadingSpace = childBetweenSpace;
           break;
       }
@@ -705,16 +712,15 @@ class RenderFlowLayout extends RenderBox
           : childLeadingSpace;
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
-
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
         if (childParentData.runIndex != i) break;
-        bool isPositionPlaceholder = child is RenderPadding;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
         // Always align to the top of run when positioning positioned element placeholder
-        final double childCrossAxisOffset = isPositionPlaceholder
+        // @HACK(kraken): Judge positioned holder to impl top align.
+        final double childCrossAxisOffset = isPositionHolder(child)
             ? 0
             : _getChildCrossAxisOffset(
                 flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
@@ -722,20 +728,14 @@ class RenderFlowLayout extends RenderBox
         Offset relativeOffset = _getOffset(
             childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
-        CSSStyleDeclaration childStyle;
-        if (child is RenderTextBox) {
-          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
-        } else if (child is RenderElementBoundary) {
-          childStyle = getEventTargetByTargetId<Element>(child.targetId)?.style;
-        }
-
-        ///apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
+        /// Apply position relative offset change.
+        childParentData.offset = relativeOffset;
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
         else
           childMainPosition += childMainAxisExtent + childBetweenSpace;
+
         child = childParentData.nextSibling;
       }
 
@@ -751,6 +751,8 @@ class RenderFlowLayout extends RenderBox
     int targetId;
     if (child is RenderFlowLayout) targetId = child.targetId;
     if (child is RenderElementBoundary) targetId = child.targetId;
+    if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
+
     if (targetId != null) {
       Element element = getEventTargetByTargetId<Element>(targetId);
       if (element != null) {
@@ -790,25 +792,22 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // TODO(ianh): move the debug flex overflow paint logic somewhere common so
-    // it can be reused here
     defaultPaint(context, offset);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>(
+    properties.add(DiagnosticsProperty<Axis>('direction', direction));
+    properties.add(DiagnosticsProperty<MainAxisAlignment>(
         'mainAxisAlignment', mainAxisAlignment));
-    properties.add(DoubleProperty('spacing', spacing));
+    properties.add(DiagnosticsProperty('spacing', spacing));
     properties
-        .add(EnumProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DoubleProperty('runSpacing', runSpacing));
-    properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties.add(EnumProperty<VerticalDirection>(
+        .add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
+    properties.add(DiagnosticsProperty('runSpacing', runSpacing));
+    properties.add(DiagnosticsProperty('crossAxisAlignment', runSpacing));
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<VerticalDirection>(
         'verticalDirection', verticalDirection,
         defaultValue: VerticalDirection.down));
   }

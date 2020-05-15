@@ -74,6 +74,8 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
   return CSSPadding(left, top, right, bottom);
 }
 
+
+
 /// - width
 /// - height
 /// - max-width
@@ -95,6 +97,15 @@ mixin CSSSizingMixin {
 
   static double getDisplayPortedLength(input) {
     return _getDisplayPortedLength(input);
+  }
+
+  static EdgeInsets _getBorderEdgeFromStyle(CSSStyleDeclaration style) {
+    TransitionBorderSide leftSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Left');
+    TransitionBorderSide topSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Top');
+    TransitionBorderSide rightSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Right');
+    TransitionBorderSide bottomSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Bottom');
+
+    return EdgeInsets.fromLTRB(leftSide.borderWidth, topSide.borderWidth, rightSide.borderWidth, bottomSide.borderWidth);
   }
 
   void updateConstraints(
@@ -255,6 +266,9 @@ mixin CSSSizingMixin {
       double maxHeight = getDisplayPortedLength(style['maxHeight']);
       double minWidth = getDisplayPortedLength(style['minWidth']);
 
+      CSSPadding padding = _getPaddingFromStyle(style);
+      EdgeInsets border = _getBorderEdgeFromStyle(style);
+
       if (width != null) {
         if (maxWidth != null && width > maxWidth) {
           width = maxWidth;
@@ -270,6 +284,18 @@ mixin CSSSizingMixin {
           height = maxHeight;
         }
       }
+
+      double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
+      if (height == null) minHeight = internalHeight;
+      else if (internalHeight > height) height = internalHeight;
+
+      if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
+
+      double internalWidth = padding.left + padding.right + border.left + border.right;
+      if (width == null) minWidth = internalWidth;
+      else if (internalWidth > width) width = internalWidth;
+
+      if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
 
       return CSSSizedConstraints(
           width, height, minWidth, maxWidth, minHeight, maxHeight);
@@ -604,8 +630,8 @@ class CSSSizedConstraints {
 
   BoxConstraints toBoxConstraints() {
     return BoxConstraints(
-      minWidth: minWidth ?? width ?? 0.0,
-      minHeight: minHeight ?? height ?? 0.0,
+      minWidth: minWidth ?? 0.0,
+      minHeight: minHeight ?? 0.0,
       maxWidth: maxWidth ?? width ?? double.infinity,
       maxHeight: maxHeight ?? height ?? double.infinity,
     );

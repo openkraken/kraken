@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('anonymous-flex', () => {
-  xit('item-001', async () => {
+  it('item-001', async () => {
     let p;
     let spanRemove;
     let div;
@@ -76,7 +76,7 @@ describe('anonymous-flex', () => {
 
     await matchScreenshot();
   });
-  xit('item-003', async () => {
+  it('item-003', async () => {
     let p;
     let noneSpan;
     let div;
@@ -155,7 +155,7 @@ describe('anonymous-flex', () => {
 
     await matchScreenshot();
   });
-  xit('item-005', async () => {
+  it('item-005', async () => {
     let p;
     let absSpan;
     let div;

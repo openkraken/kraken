@@ -4,10 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
-import 'package:matcher/matcher.dart';
 
 const String DATA = 'data';
 
@@ -54,7 +51,7 @@ mixin NodeLifeCycle on Node {
   }
 }
 
-class Node extends EventTarget {
+abstract class Node extends EventTarget {
   List<Node> childNodes = [];
   Node parentNode;
   NodeType nodeType;
@@ -104,8 +101,13 @@ class Node extends EventTarget {
     return parentNode.childNodes[index + 1];
   }
 
+  // Is child renderObject attached.
+  bool get attached => false;
+
+  /// Attach a renderObject to parent.
   void attachTo(Element parent, { RenderObject after }) {}
 
+  /// Detach renderObject from parent.
   void detach() {}
 
   void _ensureDetached() {

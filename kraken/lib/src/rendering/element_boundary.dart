@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 class ElementBoundaryParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -32,6 +33,9 @@ class RenderElementBoundary extends RenderTransform
   }
 
   RenderBox child;
+
+  // Positioned holder box ref.
+  RenderPositionHolder positionedHolder;
 
   int targetId;
 
@@ -83,6 +87,11 @@ class RenderElementBoundary extends RenderTransform
     // default transform origin center
     if (origin == null) {
       origin = Offset(size.width / 2, size.height / 2);
+    }
+
+    if (positionedHolder != null) {
+      // Make position holder preferred size equal to current element boundary size.
+      positionedHolder.preferredSize = Size.copy(size);
     }
   }
 
