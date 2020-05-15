@@ -456,6 +456,63 @@ class Element extends Node
   }
 
   @override
+  bool get attached => renderElementBoundary.attached;
+
+  // Attach renderObject of current node to parent
+  @override
+  void attachTo(Element parent, { RenderObject after }) {
+    CSSPositionType positionType = resolvePositionFromStyle(style);
+    CSSStyleDeclaration parentStyle = parent.style;
+    String parentDisplay = isEmptyStyleValue(parentStyle['display'])
+        ? parent.defaultDisplay
+        : parentStyle['display'];
+    bool isParentFlex = parentDisplay.endsWith('flex');
+
+      // Add FlexItem wrap for flex child node.
+    if (isParentFlex && renderLayoutBox != null) {
+      renderPadding.child = null;
+      renderPadding.child =
+          RenderFlexItem(child: renderLayoutBox as RenderBox);
+    }
+
+    switch (positionType) {
+      case CSSPositionType.relative:
+      case CSSPositionType.absolute:
+      case CSSPositionType.fixed:
+        parent._addPositionedChild(this, positionType);
+        break;
+      case CSSPositionType.sticky:
+        parent._addStickyChild(this, positionType);
+        break;
+      case CSSPositionType.static:
+        parent.renderLayoutBox
+            .insert(renderElementBoundary, after: after);
+        break;
+    }
+
+    /// Update flex siblings.
+    if (isParentFlex) parent.children.forEach(_updateFlexItemStyle);
+  }
+
+  // Detach renderObject of current node from parent
+  @override
+  void detach() {
+    AbstractNode parentRenderObject = renderObject.parent;
+    if (parentRenderObject == parent.renderLayoutBox) {
+      parent.renderLayoutBox.remove(renderElementBoundary);
+    } else if (parentRenderObject == parent.renderStack) {
+      parent.renderStack.remove(renderElementBoundary);
+    } else {
+      // Fixed or sticky.
+      final RenderStack rootRenderStack =
+          ElementManager().getRootElement().renderStack;
+      if (parent == rootRenderStack) {
+        rootRenderStack.remove(renderElementBoundary);
+      }
+    }
+  }
+
+  @override
   @mustCallSuper
   Node appendChild(Node child) {
     assert(allowChildren, 'The element($this) does not support child.');
@@ -483,8 +540,9 @@ class Element extends Node
   Node removeChild(Node child) {
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
-    if (child is NodeLifeCycle) {
-      removeChildNode(child);
+    // Only remove childNode when it has parent
+    if (child is NodeLifeCycle && child.attached) {
+      child.detach();
     }
 
     super.removeChild(child);
@@ -525,53 +583,6 @@ class Element extends Node
       queueAfterConnected(doInsertBefore);
     }
     return node;
-  }
-
-  // Loop element's children to find elements need to reposition
-  List<Element> findPositionedChildren(Element element,
-      {bool needsReposition = false}) {
-    assert(element != null);
-    List<Element> result = [];
-
-    element.children.forEach((Element child) {
-      if (_isPositioned(child.style)) {
-        if (needsReposition) {
-          if (child.needsReposition) result.add(child);
-        } else {
-          result.add(child);
-        }
-      }
-
-      List<Element> mergeChildren =
-          findPositionedChildren(child, needsReposition: needsReposition);
-      if (mergeChildren != null) {
-        mergeChildren.forEach((Element child) {
-          result.add(child);
-        });
-      }
-    });
-
-    return result;
-  }
-
-  void removeChildNode(Node child) {
-    if (child is TextNode) {
-      renderLayoutBox.remove(child.renderTextBox);
-    } else if (child is Element) {
-      AbstractNode childParentNode = child.renderElementBoundary.parent;
-      if (childParentNode == renderLayoutBox) {
-        renderLayoutBox.remove(child.renderElementBoundary);
-      } else if (childParentNode == renderStack) {
-        renderStack.remove(child.renderElementBoundary);
-      } else {
-        // Fixed or sticky.
-        final RenderStack rootRenderStack =
-            ElementManager().getRootElement().renderStack;
-        if (childParentNode == rootRenderStack) {
-          rootRenderStack.remove(child.renderElementBoundary);
-        }
-      }
-    }
   }
 
   // Store placeholder renderObject reference to parentData of element boundary
@@ -658,53 +669,9 @@ class Element extends Node
 
   /// Append a child to childList, if after is null, insert into first.
   void _append(Node child, { RenderBox after }) {
-    if (child is Element) {
-      CSSStyleDeclaration childStyle = child.style;
-      CSSPositionType childPositionType = resolvePositionFromStyle(childStyle);
-      String display = isEmptyStyleValue(style['display'])
-          ? defaultDisplay
-          : style['display'];
-      bool isFlex = display.endsWith('flex');
-
-      if (isFlex) {
-        // Add FlexItem wrap for flex child node.
-        if (child.renderLayoutBox != null) {
-          child.renderPadding.child = null;
-          child.renderPadding.child =
-              RenderFlexItem(child: child.renderLayoutBox as RenderBox);
-        }
-      }
-
-      switch (childPositionType) {
-        case CSSPositionType.relative:
-        case CSSPositionType.absolute:
-        case CSSPositionType.fixed:
-          _addPositionedChild(child, childPositionType);
-          break;
-        case CSSPositionType.sticky:
-          _addStickyChild(child, childPositionType);
-          break;
-        case CSSPositionType.static:
-          renderLayoutBox.insert(child.renderObject, after: after);
-          break;
-      }
-
-      if (isFlex) {
-        children.forEach((Element child) {
-          _updateFlexItemStyle(child);
-        });
-      }
-
-      // Trigger sticky update logic after node is connected
-//      if (childPosition == 'sticky') {
-//        // Force flush layout of child
-//        if (!child.renderMargin.hasSize) {
-//          child.renderMargin.owner.flushLayout();
-//        }
-//        _updateStickyPosition(0);
-//      }
-//    }
-    }
+    // Only append childNode when it is not attached.
+    if (!child.attached)
+      child.attachTo(this, after: after);
   }
 
   void _updateFlexItemStyle(Element element) {
@@ -721,37 +688,6 @@ class Element extends Node
       element.updateRenderMargin(element.style);
       element.renderObject.markNeedsLayout();
     }
-  }
-
-  void insertByZIndex(RenderStack renderStack, Element el, int zIndex) {
-    RenderObject renderObject = getStackedRenderBox(el);
-    RenderBox child = renderStack.lastChild;
-    while (child != null) {
-      ParentData parentData = child.parentData;
-      if (parentData is PositionParentData) {
-        final ContainerParentDataMixin childParentData = child.parentData;
-        if (parentData.zIndex <= zIndex) {
-          renderStack.insert(renderObject, after: child);
-        } else {
-          renderStack.insert(renderObject,
-              after: childParentData.previousSibling);
-        }
-        addPositionPlaceholder();
-        return;
-      } else if (zIndex >= 0) {
-        renderStack.insert(renderObject, after: child);
-        addPositionPlaceholder();
-        return;
-      } else if (zIndex < 0) {
-        renderStack.insert(renderObject, after: null);
-        addPositionPlaceholder();
-        return;
-      }
-      final ContainerParentDataMixin childParentData = child.parentData;
-      child = childParentData.previousSibling;
-    }
-    renderStack.add(renderObject);
-    addPositionPlaceholder();
   }
 
   void _registerStyleChangedListeners() {

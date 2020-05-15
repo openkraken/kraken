@@ -16,12 +16,15 @@ mixin CSSTextMixin {
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
     return TextSpan(
       text: text,
-      style: getTextStyle(style),
+      style: style != null ? getTextStyle(style) : null,
     );
   }
 
   TextAlign getTextAlignFromStyle(CSSStyleDeclaration style) {
     TextAlign textAlign = TextAlign.left;
+    if (style == null) {
+      return textAlign;
+    }
     switch (style['textAlign']) {
       case 'center':
         textAlign = TextAlign.center;

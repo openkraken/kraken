@@ -4,9 +4,9 @@ describe('flexbox flex-grow', () => {
     setElementStyle(container1, {
       display: 'flex',
       flexDirection: 'row',
-      width: '500rpx',
-      height: '100rpx',
-      marginBottom: '10rpx',
+      width: '500px',
+      height: '100px',
+      marginBottom: '10px',
     });
 
     document.body.appendChild(container1);
@@ -42,9 +42,9 @@ describe('flexbox flex-grow', () => {
     setElementStyle(container2, {
       display: 'flex',
       flexDirection: 'column',
-      width: '500rpx',
-      height: '200rpx',
-      marginBottom: '10rpx',
+      width: '500px',
+      height: '200px',
+      marginBottom: '10px',
     });
 
     document.body.appendChild(container2);

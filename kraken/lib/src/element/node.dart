@@ -4,10 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
-import 'package:matcher/matcher.dart';
 
 const String DATA = 'data';
 
@@ -25,76 +22,6 @@ class Comment extends Node {
 
   // The comment information.
   String data;
-}
-
-class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  static bool _isWhitespace(String ch) =>
-      ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
-
-  TextNode(int targetId, this._data)
-      : super(NodeType.TEXT_NODE, targetId, '#text') {
-    // Update text after connected.
-    queueAfterConnected(_onTextNodeConnected);
-  }
-
-  RenderTextBox renderTextBox;
-
-  void _onTextNodeConnected() {
-    Element parentElement = parentNode;
-    renderTextBox = RenderTextBox(
-      targetId: targetId,
-      text: data,
-      // inherit parent style
-      style: parentElement.style,
-    );
-    parentElement.renderLayoutBox.add(renderTextBox);
-  }
-
-  static const String NORMAL_SPACE = '\u0020';
-  // The text string.
-  String _data;
-  String get data {
-    if (_data.isEmpty) {
-      return _data;
-    }
-    // @TODO(zl): Need to judge style white-spacing.
-    String collapsedData = collapseWhitespace(_data);
-    // Append space while prev is element.
-    //   Consider:
-    //        <ltr><span>foo</span>bar</ltr>
-    // Append space while next is node(including textNode).
-    //   Consider: (PS: ` is text node seperater.)
-    //        <ltr><span>foo</span>`bar``hello`</ltr>
-    if (previousSibling is Element && _isWhitespace(_data[0])) {
-      collapsedData = NORMAL_SPACE + collapsedData;
-    }
-
-    if (nextSibling is Node && _isWhitespace(_data[_data.length - 1])) {
-      collapsedData = collapsedData + NORMAL_SPACE;
-    }
-    return collapsedData;
-  }
-
-  set data(String newData) {
-    assert(newData != null);
-    _data = newData;
-    updateTextStyle();
-  }
-
-  void updateTextStyle() {
-    if (isConnected) {
-      _doUpdateTextStyle();
-    } else {
-      queueAfterConnected(_doUpdateTextStyle);
-    }
-  }
-
-  void _doUpdateTextStyle() {
-    // parentNode must be an element.
-    Element parentElement = parentNode;
-    renderTextBox.text = data;
-    renderTextBox.style = parentElement.style;
-  }
 }
 
 mixin NodeLifeCycle on Node {
@@ -124,7 +51,7 @@ mixin NodeLifeCycle on Node {
   }
 }
 
-class Node extends EventTarget {
+abstract class Node extends EventTarget {
   List<Node> childNodes = [];
   Node parentNode;
   NodeType nodeType;
@@ -174,10 +101,27 @@ class Node extends EventTarget {
     return parentNode.childNodes[index + 1];
   }
 
+  // Is child renderObject attached.
+  bool get attached => false;
+
+  /// Attach a renderObject to parent.
+  void attachTo(Element parent, { RenderObject after }) {}
+
+  /// Detach renderObject from parent.
+  void detach() {}
+
+  void _ensureDetached() {
+    if (parent != null) {
+      parent.removeChild(this);
+    }
+  }
+
   @mustCallSuper
   Node appendChild(Node child) {
+    child._ensureDetached();
     child.parentNode = this;
     this.childNodes.add(child);
+
     return child;
   }
 
@@ -195,6 +139,7 @@ class Node extends EventTarget {
 
   @mustCallSuper
   Node insertBefore(Node newNode, Node referenceNode) {
+    newNode._ensureDetached();
     int referenceIndex = childNodes.indexOf(referenceNode);
     if (referenceIndex == -1) {
       return appendChild(newNode);

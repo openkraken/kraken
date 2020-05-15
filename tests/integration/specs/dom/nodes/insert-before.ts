@@ -14,4 +14,100 @@ describe('Insert before', () => {
 
     await matchScreenshot();
   });
+
+  it('referenceNode is null', async () => {
+    let n1;
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      }
+    );
+    BODY.insertBefore(n1, null);
+
+    await matchScreenshot();
+  });
+
+  it('with orphan element', async () => {
+    let n1;
+    let n2;
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      }
+    );
+    n2 = createElementWithStyle(
+      'div',
+      {
+        width: '200px',
+        height: '200px',
+        backgroundColor: 'blue',
+      },
+    );
+    BODY.appendChild(n1);
+    BODY.insertBefore(n2, n1);
+
+    await matchScreenshot();
+  });
+
+  it('with element which has parent and connected', async () => {
+    let n1;
+    let n2;
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      },
+    );
+
+    n2 = createElementWithStyle(
+      'div',
+      {
+        width: '200px',
+        height: '200px',
+        backgroundColor: 'blue',
+      },
+    );
+
+    BODY.appendChild(n1);
+    BODY.appendChild(n2);
+    n1.insertBefore(n2, null);
+
+    await matchScreenshot();
+  });
+
+  it('with element which has parent but not connected', async () => {
+    let n1;
+    let n2;
+    n1 = createElementWithStyle(
+      'div',
+      {
+        width: '300px',
+        height: '300px',
+        backgroundColor: 'gray',
+      },
+      [
+        (n2 = createElementWithStyle(
+          'div',
+          {
+            width: '200px',
+            height: '200px',
+            backgroundColor: 'blue',
+          },
+        ))
+      ]
+    );
+    BODY.appendChild(n1);
+    BODY.insertBefore(n2, n1);
+
+    await matchScreenshot();
+  });
+
 });
