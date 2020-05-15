@@ -57,13 +57,13 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
 
   void updateTextStyle() {
     if (isConnected) {
-      _doUpdateTextStyle();
+      _updateTextStyle();
     } else {
-      queueAfterConnected(_doUpdateTextStyle);
+      queueAfterConnected(_updateTextStyle);
     }
   }
 
-  void _doUpdateTextStyle() {
+  void _updateTextStyle() {
     // parentNode must be an element.
     Element parentElement = parentNode;
     renderTextBox.text = data;
