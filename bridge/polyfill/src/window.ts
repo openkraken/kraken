@@ -23,10 +23,6 @@ class WindowExtension extends EventTarget {
   public get window() {
     return this;
   }
-
-  public get parent() {
-    return this;
-  }
 }
 
 export const windowExtension = new WindowExtension();
@@ -45,6 +41,11 @@ windowBuiltInEvents.forEach(event => {
 
 Object.defineProperties(window, {
   ...propertyEvents,
+  parent: {
+    get() {
+      return window;
+    }
+  },
   addEventListener: {
     get() {
       return windowExtension.addEventListener.bind(windowExtension);
