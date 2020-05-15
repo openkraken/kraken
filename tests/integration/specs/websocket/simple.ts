@@ -46,10 +46,7 @@ describe('simple websocket usage', () => {
   it('trigger on onerror when server shutdown', (done) => {
     let ws = new WebSocket('ws://127.0.0.1:8400');
     ws.onclose = () => {
-      throw new Error('should not close');
-    };
-    ws.onopen = () => {
-      throw new Error('should not open');
+      done();
     };
     ws.onerror = () => {
       done();
