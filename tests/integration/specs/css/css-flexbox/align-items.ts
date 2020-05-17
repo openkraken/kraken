@@ -328,7 +328,7 @@ describe('align-items', () => {
 
     await matchScreenshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let block;
     let flexbox;
