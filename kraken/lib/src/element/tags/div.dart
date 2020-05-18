@@ -8,9 +8,5 @@ import 'package:kraken/element.dart';
 const String DIV = 'DIV';
 
 class DivElement extends Element {
-  DivElement(int targetId)
-      : super(
-          targetId: targetId,
-          tagName: DIV
-        );
+  DivElement(int targetId) : super(targetId: targetId, tagName: DIV);
 }

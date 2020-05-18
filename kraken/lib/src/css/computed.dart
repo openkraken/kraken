@@ -99,8 +99,7 @@ mixin CSSComputedMixin on RenderBox {
                   width = CSSLength.toDisplayPortValue(style['width']);
                   cropPaddingBorder(child);
                   break;
-                } else if (display == 'inline-block' ||
-                    display == 'inline-flex') {
+                } else if (display == 'inline-block' || display == 'inline-flex') {
                   // Collapse width to children
                   width = null;
                   break;
@@ -203,9 +202,7 @@ mixin CSSComputedMixin on RenderBox {
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
         style['flexDirection'] == 'row' &&
-        (!style.contains('alignItems') ||
-            (style.contains('alignItems') &&
-                style['alignItems'] == 'stretch'))) {
+        (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
       isStretch = true;
     }
 
@@ -217,9 +214,7 @@ mixin CSSComputedMixin on RenderBox {
   static String _getElementRealDisplayValue(int targetId) {
     Element element = getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
-    String display = isEmptyStyleValue(element.style['display'])
-        ? element.defaultDisplay
-        : element.style['display'];
+    String display = isEmptyStyleValue(element.style['display']) ? element.defaultDisplay : element.style['display'];
     String position = element.style['position'];
 
     // Display as inline-block when element is positioned
@@ -234,9 +229,7 @@ mixin CSSComputedMixin on RenderBox {
 
         // Display as block if flex vertical layout children and stretch children
         if (style['flexDirection'] == 'column' &&
-            (!style.contains('alignItems') ||
-                (style.contains('alignItems') &&
-                    style['alignItems'] == 'stretch'))) {
+            (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
           display = 'block';
         }
       }

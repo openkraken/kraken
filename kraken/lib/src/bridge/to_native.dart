@@ -18,9 +18,8 @@ import 'platform.dart';
 typedef Native_InvokeEventListener = Void Function(Int32, Pointer<Utf8>);
 typedef Dart_InvokeEventListener = void Function(int, Pointer<Utf8>);
 
-final Dart_InvokeEventListener _invokeEventListener = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener')
-    .asFunction();
+final Dart_InvokeEventListener _invokeEventListener =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int type, String data) {
   _invokeEventListener(type, Utf8.toUtf8(data));
@@ -41,9 +40,8 @@ void emitModuleEvent(String data) {
 typedef Native_InvokeOnloadCallback = Void Function();
 typedef Dart_InvokeOnLoadCallback = void Function();
 
-final Dart_InvokeOnLoadCallback _invokeOnloadCallback = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InvokeOnloadCallback>>('invokeOnloadCallback')
-    .asFunction();
+final Dart_InvokeOnLoadCallback _invokeOnloadCallback =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeOnloadCallback>>('invokeOnloadCallback').asFunction();
 
 void invokeOnloadCallback() {
   _invokeOnloadCallback();
@@ -58,22 +56,19 @@ void invokeOnPlatformBrightnessChangedCallback() {
 typedef Native_CreateScreen = Pointer<ScreenSize> Function(Double, Double);
 typedef Dart_CreateScreen = Pointer<ScreenSize> Function(double, double);
 
-final Dart_CreateScreen _createScreen = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_CreateScreen>>('createScreen')
-    .asFunction();
+final Dart_CreateScreen _createScreen =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_CreateScreen>>('createScreen').asFunction();
 
 Pointer<ScreenSize> createScreen(double width, double height) {
   return _createScreen(width, height);
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(
-    Pointer<Utf8>, Pointer<Utf8>, Int32);
+typedef Native_EvaluateScripts = Void Function(Pointer<Utf8>, Pointer<Utf8>, Int32);
 typedef Dart_EvaluateScripts = void Function(Pointer<Utf8>, Pointer<Utf8>, int);
 
-final Dart_EvaluateScripts _evaluateScripts = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts')
-    .asFunction();
+final Dart_EvaluateScripts _evaluateScripts =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
 void evaluateScripts(String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
@@ -89,9 +84,8 @@ void evaluateScripts(String code, String url, int line) {
 typedef Native_InitJSEngine = Void Function();
 typedef Dart_InitJSEngine = void Function();
 
-final Dart_InitJSEngine _initJsEngine = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_InitJSEngine>>('initJsEngine')
-    .asFunction();
+final Dart_InitJSEngine _initJsEngine =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSEngine>>('initJsEngine').asFunction();
 
 void initJSEngine() {
   _initJsEngine();
@@ -101,9 +95,8 @@ void initJSEngine() {
 typedef Native_ReloadJSContext = Void Function();
 typedef Dart_ReloadJSContext = void Function();
 
-final Dart_ReloadJSContext _reloadJSContext = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext')
-    .asFunction();
+final Dart_ReloadJSContext _reloadJSContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
 Future<void> reloadJSContext() async {
   return Future.microtask(() {
@@ -115,9 +108,8 @@ Future<void> reloadJSContext() async {
 typedef Native_FlushUITask = Void Function();
 typedef Dart_FlushUITask = void Function();
 
-final Dart_FlushUITask _flushUITask = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_FlushUITask>>('flushUITask')
-    .asFunction();
+final Dart_FlushUITask _flushUITask =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUITask>>('flushUITask').asFunction();
 
 void flushUITask() {
   _flushUITask();

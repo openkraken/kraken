@@ -10,8 +10,7 @@ import 'package:kraken/css.dart';
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 
 mixin CSSFlexboxMixin {
-  void decorateRenderFlex(
-      ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
+  void decorateRenderFlex(ContainerRenderObjectMixin renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       Axis axis;
       TextDirection textDirection;

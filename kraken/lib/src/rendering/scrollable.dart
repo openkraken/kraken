@@ -14,9 +14,7 @@ import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollTop);
 
-class KrakenScrollable
-    with CustomTickerProviderStateMixin
-    implements ScrollContext {
+class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
@@ -30,13 +28,11 @@ class KrakenScrollable
     this.scrollListener,
   }) {
     _axisDirection = axisDirection;
-    position = ScrollPositionWithSingleContext(
-        physics: _physics, context: this, oldPosition: null);
+    position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
 
   RenderObject getScrollableRenderObject(RenderBox child) {
-    RenderSingleChildViewport renderSingleChildViewport =
-        RenderSingleChildViewport(
+    RenderSingleChildViewport renderSingleChildViewport = RenderSingleChildViewport(
       axisDirection: _axisDirection,
       offset: position,
       child: child,
@@ -45,8 +41,8 @@ class KrakenScrollable
     );
 
     _renderBox = child;
-    RenderPointerListener renderPointerListener = RenderPointerListener(
-        onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
+    RenderPointerListener renderPointerListener =
+        RenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
@@ -69,24 +65,21 @@ class KrakenScrollable
   AxisDirection get axisDirection => _axisDirection;
 
   // This field is set during layout, and then reused until the next time it is set.
-  Map<Type, GestureRecognizerFactory> _gestureRecognizers =
-      const <Type, GestureRecognizerFactory>{};
+  Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
   bool _lastCanDrag;
   Axis _lastAxisDirection;
 
   @override
   void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || axis == _lastAxisDirection))
-      return;
+    if (canDrag == _lastCanDrag && (!canDrag || axis == _lastAxisDirection)) return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
       switch (axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                VerticalDragGestureRecognizer>(
+            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
               () => VerticalDragGestureRecognizer(),
               (VerticalDragGestureRecognizer instance) {
                 instance
@@ -105,9 +98,7 @@ class KrakenScrollable
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer:
-                GestureRecognizerFactoryWithHandlers<
-                    HorizontalDragGestureRecognizer>(
+            HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
               () => HorizontalDragGestureRecognizer(),
               (HorizontalDragGestureRecognizer instance) {
                 instance
@@ -387,8 +378,7 @@ class RenderSingleChildViewport extends RenderBox
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return paintOffset < Offset.zero ||
-        !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
+    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
   }
 
   @override
@@ -401,8 +391,7 @@ class RenderSingleChildViewport extends RenderBox
       }
 
       if (shouldClip && _shouldClipAtPaintOffset(paintOffset)) {
-        context.pushClipRect(
-            needsCompositing, offset, Offset.zero & size, paintContents);
+        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents);
       } else {
         paintContents(context, offset);
       }
@@ -417,8 +406,7 @@ class RenderSingleChildViewport extends RenderBox
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffset))
-      return Offset.zero & size;
+    if (child != null && _shouldClipAtPaintOffset(_paintOffset)) return Offset.zero & size;
     return null;
   }
 
@@ -438,11 +426,9 @@ class RenderSingleChildViewport extends RenderBox
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment,
-      {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
     rect ??= target.paintBounds;
-    if (target is! RenderBox)
-      return RevealedOffset(offset: offset.pixels, rect: rect);
+    if (target is! RenderBox) return RevealedOffset(offset: offset.pixels, rect: rect);
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(this);
@@ -477,8 +463,7 @@ class RenderSingleChildViewport extends RenderBox
         break;
     }
 
-    final double targetOffset = leadingScrollOffset -
-        (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
     final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));
     return RevealedOffset(offset: targetOffset, rect: targetRect);
   }

@@ -215,18 +215,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If there is any overscroll, it is reported using [didOverscrollBy].
   double setPixels(double newPixels) {
     assert(_pixels != null);
-    assert(SchedulerBinding.instance.schedulerPhase.index <=
-        SchedulerPhase.transientCallbacks.index);
+    assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
     if (newPixels != pixels) {
       final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-                '$runtimeType.applyBoundaryConditions returned invalid overscroll value.'),
-            ErrorDescription(
-                'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
+            ErrorSummary('$runtimeType.applyBoundaryConditions returned invalid overscroll value.'),
+            ErrorDescription('setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
                 'That is a delta of $delta units.\n'
                 '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.')
           ]);
@@ -353,10 +350,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-              '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.'),
-          ErrorDescription(
-              'The method was called to consider a change from $pixels to $value, which is a '
+          ErrorSummary('${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.'),
+          ErrorDescription('The method was called to consider a change from $pixels to $value, which is a '
               'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
               '${result.toStringAsFixed(1)} units, which has a greater magnitude than the delta. '
               'The applyBoundaryConditions method is only supposed to reduce the possible range '
@@ -426,10 +421,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     assert(minScrollExtent != null);
     assert(maxScrollExtent != null);
-    if (!nearEqual(_minScrollExtent, minScrollExtent,
-            Tolerance.defaultTolerance.distance) ||
-        !nearEqual(_maxScrollExtent, maxScrollExtent,
-            Tolerance.defaultTolerance.distance) ||
+    if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
+        !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
@@ -482,8 +475,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
-    ScrollPositionAlignmentPolicy alignmentPolicy =
-        ScrollPositionAlignmentPolicy.explicit,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
     assert(alignmentPolicy != null);
     assert(object.attached);
@@ -493,25 +485,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport
-            .getOffsetToReveal(object, alignment)
-            .offset
-            .clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport
-            .getOffsetToReveal(object, 1.0)
-            .offset
-            .clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport
-            .getOffsetToReveal(object, 0.0)
-            .offset
-            .clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
         }
@@ -651,8 +634,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   void dispose() {
-    activity
-        ?.dispose(); // it will be null if it got absorbed by another ScrollPosition
+    activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();
   }
@@ -667,8 +649,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void debugFillDescription(List<String> description) {
     if (debugLabel != null) description.add(debugLabel);
     super.debugFillDescription(description);
-    description.add(
-        'range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
+    description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
     description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
   }
 }

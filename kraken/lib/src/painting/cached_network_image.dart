@@ -21,14 +21,12 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-CSSLength` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
     assert(() {
-      if (debugNetworkImageHttpClientProvider != null)
-        client = debugNetworkImageHttpClientProvider();
+      if (debugNetworkImageHttpClientProvider != null) client = debugNetworkImageHttpClientProvider();
       return true;
     }());
     return client;
@@ -39,12 +37,10 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return Uri.parse(temp.path);
   }
 
-  Future<Uint8List> loadFile(CachedNetworkImage key,
-      StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Uint8List> loadFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents) async {
     // Cached file path
     var tempDir = await _getTempDir();
-    var tempFile = Uri.parse(
-        tempDir.path + '/kraken/' + Uri.parse(url).hashCode.toString());
+    var tempFile = Uri.parse(tempDir.path + '/kraken/' + Uri.parse(url).hashCode.toString());
     final File file = File(tempFile.path);
     Uint8List bytes;
     bool fileExisted = await file.exists();
@@ -72,8 +68,8 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     } catch (e) {}
   }
 
-  Future<Codec> _loadImage(CachedNetworkImage key, DecoderCallback decode,
-      StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Codec> _loadImage(
+      CachedNetworkImage key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
     Uint8List bytes = await loadFile(key, chunkEvents);
 
     if (bytes != null && bytes.length > 0) {
@@ -82,8 +78,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return null;
   }
 
-  Future<Uint8List> fetchFile(CachedNetworkImage key,
-      StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Uint8List> fetchFile(CachedNetworkImage key, StreamController<ImageChunkEvent> chunkEvents) async {
     try {
       final Uri resolved = Uri.base.resolve(key.url);
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
@@ -93,8 +88,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
       });
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok)
-        throw NetworkImageLoadException(
-            statusCode: response.statusCode, uri: resolved);
+        throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
@@ -105,8 +99,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
           ));
         },
       );
-      if (bytes.lengthInBytes == 0)
-        throw Exception('Image from network is an empty file: $resolved');
+      if (bytes.lengthInBytes == 0) throw Exception('Image from network is an empty file: $resolved');
 
       return bytes;
     } finally {
@@ -124,8 +117,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents =
-        StreamController<ImageChunkEvent>();
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
         codec: _loadImage(key, decode, chunkEvents),

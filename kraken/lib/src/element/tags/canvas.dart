@@ -24,7 +24,6 @@ class CanvasElement extends Element {
           allowChildren: false,
           tagName: CANVAS,
         ) {
-
     painter = CanvasPainter();
     _width = CSSLength(ELEMENT_DEFAULT_WIDTH).computedValue;
     _height = CSSLength(ELEMENT_DEFAULT_HEIGHT).computedValue;
@@ -53,8 +52,7 @@ class CanvasElement extends Element {
   RenderCustomPaint renderCustomPaint;
 
   // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext getContext(String contextId,
-      {dynamic options = null}) {
+  CanvasRenderingContext getContext(String contextId, {dynamic options = null}) {
     switch (contextId) {
       case '2d':
         if (painter.context == null) {
@@ -178,8 +176,7 @@ class CanvasElement extends Element {
 
   void _assertPainterExists() {
     if (painter == null) {
-      throw new FlutterError(
-          'Canvas painter not exists, get canvas context first.');
+      throw new FlutterError('Canvas painter not exists, get canvas context first.');
     }
   }
 

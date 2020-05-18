@@ -9,11 +9,9 @@ import 'package:kraken/css.dart';
 import 'package:matcher/matcher.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  static bool _isWhitespace(String ch) =>
-      ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
+  static bool _isWhitespace(String ch) => ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
 
-  TextNode(int targetId, this._data)
-      : super(NodeType.TEXT_NODE, targetId, '#text') {
+  TextNode(int targetId, this._data) : super(NodeType.TEXT_NODE, targetId, '#text') {
     renderTextBox = RenderTextBox(
       targetId: targetId,
       text: '',
@@ -74,7 +72,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, { RenderObject after }) {
+  void attachTo(Element parent, {RenderObject after}) {
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
     renderTextBox.text = data;
@@ -89,4 +87,3 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     parent.renderLayoutBox.remove(renderTextBox);
   }
 }
-

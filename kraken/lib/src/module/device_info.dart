@@ -70,8 +70,7 @@ Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
   return <String, dynamic>{
     'id': id, // For example: iPhone12,1
     'brand': 'Apple',
-    'model': data
-        .model, // For example: iPhone or iPod, not the detail model name like 'iPhone 8'
+    'model': data.model, // For example: iPhone or iPod, not the detail model name like 'iPhone 8'
     // The value of this property is an arbitrary alphanumeric string
     // that is associated with the device as an identifier.
     // For example, you can find the name of an iOS device in the General > About settings.

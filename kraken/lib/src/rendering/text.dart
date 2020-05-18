@@ -60,17 +60,13 @@ class RenderTextBox extends RenderBox
     if (style == null) {
       return false;
     }
-    String overflowX =
-        style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
+    String overflowX = style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
 
-    return overflowX != 'visible' &&
-        style['whiteSpace'] == 'nowrap' &&
-        style['textOverflow'] == 'ellipsis';
+    return overflowX != 'visible' && style['whiteSpace'] == 'nowrap' && style['textOverflow'] == 'ellipsis';
   }
 
   TextOverflow _getOverflow() {
-    return _isTextOverflowEllipsis() ?
-        TextOverflow.ellipsis : TextOverflow.clip;
+    return _isTextOverflowEllipsis() ? TextOverflow.ellipsis : TextOverflow.clip;
   }
 
   @override
@@ -91,8 +87,7 @@ class RenderTextBox extends RenderBox
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
 
-      if (_isTextOverflowEllipsis() ||
-          (style['whiteSpace'] != 'nowrap' && elementWidth != null)) {
+      if (_isTextOverflowEllipsis() || (style['whiteSpace'] != 'nowrap' && elementWidth != null)) {
         additionalConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: elementWidth,

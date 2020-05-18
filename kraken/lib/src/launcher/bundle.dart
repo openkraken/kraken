@@ -72,8 +72,7 @@ abstract class KrakenBundle {
     return url.path.endsWith(EXTENSION_JS);
   }
 
-  static Future<KrakenBundle> getBundle(String path,
-      {String contentOverride}) async {
+  static Future<KrakenBundle> getBundle(String path, {String contentOverride}) async {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, null);
@@ -151,8 +150,7 @@ class ZipBundle extends KrakenBundle {
     bundleId = _md5(dataList);
 
     Directory localBundleDirectory = await _getLocalBundleDirectory();
-    await _unArchive(
-        dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
+    await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
 
     isResolved = true;
   }
@@ -166,8 +164,7 @@ class ZipBundle extends KrakenBundle {
           content = utf8.decode(file.content);
         } else if (filename == 'manifest.json') {
           try {
-            Map<String, dynamic> manifestJson =
-                jsonDecode(utf8.decode(file.content));
+            Map<String, dynamic> manifestJson = jsonDecode(utf8.decode(file.content));
             manifest = AppManifest.fromJson(manifestJson);
           } catch (err, stack) {
             print('Failed to parse manifest.json');

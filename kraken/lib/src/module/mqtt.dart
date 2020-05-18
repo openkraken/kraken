@@ -15,18 +15,14 @@ enum ReadyState { CONNECTING, OPEN, CLOSING, CLOSED }
 class MQTT {
   static String init(String url, String clientId) {
     // The client identifier can be a maximum length of 23 characters
-    clientId = clientId.isEmpty
-        ? '${DateTime.now().millisecondsSinceEpoch}:${Random().nextInt(999999999)}'
-        : clientId;
+    clientId = clientId.isEmpty ? '${DateTime.now().millisecondsSinceEpoch}:${Random().nextInt(999999999)}' : clientId;
     Uri uri = Uri.parse(url);
     int port = uri.port == 0 ? MqttClientConstants.defaultMqttPort : uri.port;
-    final MqttServerClient client =
-        MqttServerClient.withPort(uri.host, clientId, port);
+    final MqttServerClient client = MqttServerClient.withPort(uri.host, clientId, port);
 
     if (uri.isScheme('mqtts'))
       client.secure = true;
-    else if (uri.isScheme('ws') || uri.isScheme('wss'))
-      client.useWebSocket = true;
+    else if (uri.isScheme('ws') || uri.isScheme('wss')) client.useWebSocket = true;
 
     var id = (_clientId++).toString();
     _clientMap[id] = client;
@@ -75,15 +71,13 @@ class MQTT {
     client.unsubscribe(topic);
   }
 
-  static int publish(
-      String id, String topic, String message, int QoS, bool retain) {
+  static int publish(String id, String topic, String message, int QoS, bool retain) {
     MqttClient client = _clientMap[id];
 
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
 
-    return client.publishMessage(topic, MqttQos.values[QoS], builder.payload,
-        retain: retain);
+    return client.publishMessage(topic, MqttQos.values[QoS], builder.payload, retain: retain);
   }
 
   static void close(String id) {
@@ -126,8 +120,7 @@ class MQTT {
       client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final String topic = c[0].topic;
         final MqttPublishMessage recMess = c[0].payload;
-        final String message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final String message = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         String event = jsonEncode({
           'type': 'message',
           'data': {'topic': topic, 'message': message},
@@ -153,8 +146,7 @@ class MQTT {
         String event = jsonEncode({
           'type': 'publish',
           'topic': message.variableHeader.topicName,
-          'message':
-              MqttPublishPayload.bytesToStringAsString(message.payload.message),
+          'message': MqttPublishPayload.bytesToStringAsString(message.payload.message),
           'code': message.variableHeader.returnCode,
         });
         emitModuleEvent('["MQTT", $id, $event]');

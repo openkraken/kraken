@@ -50,7 +50,7 @@ describe('Position relative', () => {
     });
   });
 
-  fit('relative text', async () => {
+  it('relative text', async () => {
     var parent = document.createElement('div');
     Object.assign(parent.style, { position: 'absolute', width: '300px', height: '300px'});
 

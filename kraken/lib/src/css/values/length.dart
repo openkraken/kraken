@@ -14,10 +14,7 @@ class CSSLength implements CSSValue<double> {
   static const String VH = 'vh';
 
   static bool isValidateLength(String value) {
-    return value != null && value.endsWith(RPX) ||
-        value.endsWith(PX) ||
-        value.endsWith(VW) ||
-        value.endsWith(VH);
+    return value != null && value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VW) || value.endsWith(VH);
   }
 
   static RegExp NUMBERIC_REGEXP = RegExp(r"^[+-]?(\d+)?(\.\d+)?$");
@@ -54,25 +51,16 @@ class CSSLength implements CSSValue<double> {
 
     if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
-      displayPortValue = currentValue /
-          750.0 *
-          window.physicalSize.width /
-          window.devicePixelRatio;
+      displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(PX)) {
       double currentValue = double.parse(unitedValue.split(PX)[0]);
       displayPortValue = currentValue;
     } else if (unitedValue.endsWith(VW)) {
       double currentValue = double.parse(unitedValue.split(VW)[0]);
-      displayPortValue = currentValue /
-          100.0 *
-          window.physicalSize.width /
-          window.devicePixelRatio;
+      displayPortValue = currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(VH)) {
       double currentValue = double.parse(unitedValue.split(VH)[0]);
-      displayPortValue = currentValue /
-          100.0 *
-          window.physicalSize.height /
-          window.devicePixelRatio;
+      displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
     }
     // Failed silently
 
@@ -81,11 +69,7 @@ class CSSLength implements CSSValue<double> {
 
   static bool isLength(String value) {
     return value != null &&
-        (value == '0' ||
-            value.endsWith(RPX) ||
-            value.endsWith(PX) ||
-            value.endsWith(VH) ||
-            value.endsWith(VW));
+        (value == '0' || value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) || value.endsWith(VW));
   }
 
   final String _rawInput;

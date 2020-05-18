@@ -15,15 +15,13 @@ mixin CSSTransformMixin on Node {
   Alignment oldAlignment = Alignment.center;
   int targetId;
 
-  RenderObject initTransform(
-      RenderObject current, CSSStyleDeclaration style, int targetId) {
+  RenderObject initTransform(RenderObject current, CSSStyleDeclaration style, int targetId) {
     this.targetId = targetId;
 
     if (style.contains('transform')) {
       prevMethods = CSSFunction(style['transform']).computedValue;
       matrix4 = combineTransform(prevMethods) ?? matrix4;
-      CSSTransformOrigin transformOrigin =
-          parseOrigin(style['transformOrigin']);
+      CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
         oldAlignment = transformOrigin.alignment;
@@ -43,10 +41,8 @@ mixin CSSTransformMixin on Node {
     return transform;
   }
 
-  void updateTransform(String transformStr,
-      [Map<String, CSSTransition> transitionMap]) {
-    List<CSSFunctionalNotation> newMethods =
-        CSSFunction(transformStr).computedValue;
+  void updateTransform(String transformStr, [Map<String, CSSTransition> transitionMap]) {
+    List<CSSFunctionalNotation> newMethods = CSSFunction(transformStr).computedValue;
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
@@ -55,8 +51,7 @@ mixin CSSTransformMixin on Node {
         List<CSSFunctionalNotation> baseMethods = prevMethods;
         CSSTransitionProgressListener progressListener = (progress) {
           if (progress > 0.0) {
-            transform.transform = combineTransform(newMethods,
-                prevMethods: baseMethods, progress: progress);
+            transform.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
           }
         };
         if (transition != null) {
@@ -73,8 +68,7 @@ mixin CSSTransformMixin on Node {
     }
   }
 
-  void updateTransformOrigin(String transformOriginStr,
-      [Map<String, CSSTransition> transitionMap]) {
+  void updateTransformOrigin(String transformOriginStr, [Map<String, CSSTransition> transitionMap]) {
     Offset offset = Offset.zero;
     Alignment alignment = Alignment.center;
     CSSTransformOrigin transformOrigin = parseOrigin(transformOriginStr);
@@ -151,9 +145,7 @@ mixin CSSTransformMixin on Node {
       // y just can be left right center when x is top bottom, otherwise illegal
       // switch to right place
       if ((x == CSSPosition.TOP || x == CSSPosition.BOTTOM) &&
-          (y == CSSPosition.LEFT ||
-              y == CSSPosition.RIGHT ||
-              y == CSSPosition.CENTER)) {
+          (y == CSSPosition.LEFT || y == CSSPosition.RIGHT || y == CSSPosition.CENTER)) {
         String tmp = x;
         x = y;
         y = tmp;
@@ -183,8 +175,7 @@ mixin CSSTransformMixin on Node {
       } else if (y == CSSPosition.CENTER) {
         alignY = 0.0;
       }
-      return CSSTransformOrigin(
-          Offset(offsetX, offsetY), Alignment(alignX, alignY));
+      return CSSTransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
     return null;
   }
@@ -193,8 +184,7 @@ mixin CSSTransformMixin on Node {
       {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
     Matrix4 matrix4;
     for (CSSFunctionalNotation method in methods) {
-      Matrix4 cur =
-          getTransform(method, progress: progress, prevMethods: prevMethods);
+      Matrix4 cur = getTransform(method, progress: progress, prevMethods: prevMethods);
       if (cur != null) {
         if (matrix4 == null) {
           matrix4 = cur;
@@ -207,12 +197,10 @@ mixin CSSTransformMixin on Node {
     return matrix4 ?? this.matrix4;
   }
 
-  Matrix4 getTransform(CSSFunctionalNotation method,
-      {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
+  Matrix4 getTransform(CSSFunctionalNotation method, {double progress = 1.0, List<CSSFunctionalNotation> prevMethods}) {
     Matrix4 matrix4;
     bool needDiff = progress != null;
-    CSSFunctionalNotation prevMethod =
-        prevMethods?.firstWhere((element) => element.name == method.name);
+    CSSFunctionalNotation prevMethod = prevMethods?.firstWhere((element) => element.name == method.name);
     switch (method.name) {
       case 'matrix':
         if (method.args.length == 6) {
@@ -220,16 +208,11 @@ mixin CSSTransformMixin on Node {
           bool hasOldValue = prevMethod != null && prevMethod.args.length == 6;
           for (int i = 0; i < 6; i++) {
             args[i] = needDiff
-                ? _getProgressValue(
-                    double.tryParse(method.args[i].trim()) ?? 1.0,
-                    hasOldValue
-                        ? double.tryParse(prevMethod.args[i].trim()) ?? 1.0
-                        : 1.0,
-                    progress)
+                ? _getProgressValue(double.tryParse(method.args[i].trim()) ?? 1.0,
+                    hasOldValue ? double.tryParse(prevMethod.args[i].trim()) ?? 1.0 : 1.0, progress)
                 : double.tryParse(method.args[i].trim()) ?? 1.0;
           }
-          matrix4 = Matrix4(args[0], args[1], 0, 0, args[2], args[3], 0, 0, 0,
-              0, 1, 0, args[4], args[5], 0, 1);
+          matrix4 = Matrix4(args[0], args[1], 0, 0, args[2], args[3], 0, 0, 0, 0, 1, 0, args[4], args[5], 0, 1);
         }
         break;
       case 'matrix3d':
@@ -239,31 +222,12 @@ mixin CSSTransformMixin on Node {
           bool hasOldValue = prevMethod != null && prevMethod.args.length == 16;
           for (int i = 0; i < 16; i++) {
             args[i] = needDiff
-                ? _getProgressValue(
-                    double.tryParse(method.args[i].trim()) ?? 1.0,
-                    hasOldValue
-                        ? double.tryParse(prevMethod.args[i].trim()) ?? 1.0
-                        : 1.0,
-                    progress)
+                ? _getProgressValue(double.tryParse(method.args[i].trim()) ?? 1.0,
+                    hasOldValue ? double.tryParse(prevMethod.args[i].trim()) ?? 1.0 : 1.0, progress)
                 : double.tryParse(method.args[i].trim()) ?? 1.0;
           }
-          matrix4 = Matrix4(
-              args[0],
-              args[1],
-              args[2],
-              args[3],
-              args[4],
-              args[5],
-              args[6],
-              args[7],
-              args[8],
-              args[9],
-              args[10],
-              args[11],
-              args[12],
-              args[13],
-              args[14],
-              args[15]);
+          matrix4 = Matrix4(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9],
+              args[10], args[11], args[12], args[13], args[14], args[15]);
         }
         break;
       case 'translate':
@@ -277,9 +241,7 @@ mixin CSSTransformMixin on Node {
           double x = CSSLength.toDisplayPortValue(method.args[0].trim());
           if (needDiff) {
             double oldX = 0.0, oldY = 0.0;
-            if (prevMethod != null &&
-                prevMethod.args.length >= 1 &&
-                prevMethod.args.length <= 2) {
+            if (prevMethod != null && prevMethod.args.length >= 1 && prevMethod.args.length <= 2) {
               oldX = CSSLength.toDisplayPortValue(prevMethod.args[0].trim());
               if (prevMethod.args.length == 2) {
                 oldY = CSSLength.toDisplayPortValue(prevMethod.args[1].trim());
@@ -304,9 +266,7 @@ mixin CSSTransformMixin on Node {
           double x = CSSLength.toDisplayPortValue(method.args[0].trim());
           if (needDiff) {
             double oldX = 0.0, oldY = 0.0, oldZ = 0.0;
-            if (prevMethod != null &&
-                prevMethod.args.length >= 1 &&
-                prevMethod.args.length <= 3) {
+            if (prevMethod != null && prevMethod.args.length >= 1 && prevMethod.args.length <= 3) {
               oldX = CSSLength.toDisplayPortValue(prevMethod.args[0].trim());
               if (prevMethod.args.length == 2) {
                 oldY = CSSLength.toDisplayPortValue(prevMethod.args[1].trim());
@@ -435,9 +395,7 @@ mixin CSSTransformMixin on Node {
           if (needDiff) {
             double oldX = 1.0;
             double oldY = 1.0;
-            if (prevMethod != null &&
-                prevMethod.args.length >= 1 &&
-                prevMethod.args.length <= 2) {
+            if (prevMethod != null && prevMethod.args.length >= 1 && prevMethod.args.length <= 2) {
               oldX = double.tryParse(prevMethod.args[0].trim()) ?? 1.0;
               if (prevMethod.args.length == 2) {
                 oldY = double.tryParse(prevMethod.args[1].trim()) ?? oldX;
@@ -505,8 +463,7 @@ mixin CSSTransformMixin on Node {
           if (needDiff) {
             double oldAlpha = 0.0;
             double oldBeta = 0.0;
-            if (prevMethod != null &&
-                (prevMethod.args.length == 1 || prevMethod.args.length == 2)) {
+            if (prevMethod != null && (prevMethod.args.length == 1 || prevMethod.args.length == 2)) {
               oldAlpha = CSSAngle(prevMethod.args[0].trim()).angleValue;
               if (prevMethod.args.length == 2) {
                 oldBeta = CSSAngle(prevMethod.args[1].trim()).angleValue;
