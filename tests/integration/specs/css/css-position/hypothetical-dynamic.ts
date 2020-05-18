@@ -74,7 +74,7 @@ describe('hypothetical-dynamic', () => {
 
     await matchScreenshot();
   });
-  xit('change-003', async () => {
+  it('change-003', async () => {
     let child;
     let ancestor;
     ancestor = createElementWithStyle(

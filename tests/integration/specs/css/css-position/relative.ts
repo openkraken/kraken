@@ -49,4 +49,31 @@ describe('Position relative', () => {
       done();
     });
   });
+
+  fit('relative text', async () => {
+    var parent = document.createElement('div');
+    Object.assign(parent.style, { position: 'absolute', width: '300px', height: '300px'});
+
+    var son1 = document.createElement('div');
+    var son2 = document.createElement('div');
+
+    parent.appendChild(son1);
+    parent.appendChild(son2);
+
+    Object.assign(son1.style, {
+      position: 'absolute',
+      width: '100px',
+      height: '100px',
+      backgroundColor: 'red',
+    });
+    Object.assign(son2.style, {
+      position: 'relative', // 需要定位, 效果应该跟 absolute 一样
+    });
+    son2.appendChild(document.createTextNode('HelloWorld'));
+
+
+    document.body.appendChild(parent);
+
+    await matchScreenshot();
+  });
 });
