@@ -25,25 +25,28 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   // The text string.
   String _data;
   String get data {
-    if (_data.isEmpty) {
+    if (_data == null || _data.isEmpty) return '';
+
+    String whiteSpace = parent?.style['whiteSpace'];
+    if (whiteSpace == null || whiteSpace == '' || whiteSpace == 'normal') {
+      String collapsedData = collapseWhitespace(_data);
+      // Append space while prev is element.
+      //   Consider:
+      //        <ltr><span>foo</span>bar</ltr>
+      // Append space while next is node(including textNode).
+      //   Consider: (PS: ` is text node seperater.)
+      //        <ltr><span>foo</span>`bar``hello`</ltr>
+      if (previousSibling is Element && _isWhitespace(_data[0])) {
+        collapsedData = NORMAL_SPACE + collapsedData;
+      }
+
+      if (nextSibling is Node && _isWhitespace(_data[_data.length - 1])) {
+        collapsedData = collapsedData + NORMAL_SPACE;
+      }
+      return collapsedData;
+    } else {
       return _data;
     }
-    // @TODO(zl): Need to judge style white-spacing.
-    String collapsedData = collapseWhitespace(_data);
-    // Append space while prev is element.
-    //   Consider:
-    //        <ltr><span>foo</span>bar</ltr>
-    // Append space while next is node(including textNode).
-    //   Consider: (PS: ` is text node seperater.)
-    //        <ltr><span>foo</span>`bar``hello`</ltr>
-    if (previousSibling is Element && _isWhitespace(_data[0])) {
-      collapsedData = NORMAL_SPACE + collapsedData;
-    }
-
-    if (nextSibling is Node && _isWhitespace(_data[_data.length - 1])) {
-      collapsedData = collapsedData + NORMAL_SPACE;
-    }
-    return collapsedData;
   }
 
   set data(String newData) {
