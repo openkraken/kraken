@@ -30,8 +30,7 @@ CSSPositionType resolveCSSPosition(String input) {
   return CSSPositionType.static;
 }
 
-void applyRelativeOffset(
-    Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
+void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
   BoxParentData boxParentData = renderBox?.parentData;
   if (boxParentData != null) {
     Offset styleOffset;
@@ -41,9 +40,7 @@ void applyRelativeOffset(
     }
     boxParentData.offset = relativeOffset == null
         ? styleOffset
-        : styleOffset == null
-        ? relativeOffset
-        : relativeOffset.translate(styleOffset.dx, styleOffset.dy);
+        : styleOffset == null ? relativeOffset : relativeOffset.translate(styleOffset.dx, styleOffset.dy);
   }
 }
 

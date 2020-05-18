@@ -65,8 +65,7 @@ class AppManifest with KrakenManifest {
       data['icons'] = this.icons.map((v) => v.toJson()).toList();
     }
     if (this.relatedApplications != null) {
-      data['related_applications'] =
-          this.relatedApplications.map((v) => v.toJson()).toList();
+      data['related_applications'] = this.relatedApplications.map((v) => v.toJson()).toList();
     }
 
     _appendKrakenJson(data);

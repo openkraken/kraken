@@ -6,8 +6,7 @@ import 'package:kraken/bridge.dart';
 Connectivity _connectivity;
 
 String _toString(ConnectivityResult connectivityResult) {
-  String isConnected =
-      jsonEncode(ConnectivityResult.none != connectivityResult);
+  String isConnected = jsonEncode(ConnectivityResult.none != connectivityResult);
   String type = _parseConnectivityResult(connectivityResult);
 
   return '{"isConnected": $isConnected, "type": "$type"}';
@@ -34,17 +33,14 @@ class Connection {
 
   static void getConnectivity(callback) {
     _initConnectivity();
-    _connectivity
-        .checkConnectivity()
-        .then((ConnectivityResult connectivityResult) {
+    _connectivity.checkConnectivity().then((ConnectivityResult connectivityResult) {
       callback(_toString(connectivityResult));
     });
   }
 
   static void onConnectivityChanged() {
     _initConnectivity();
-    _connectivity.onConnectivityChanged
-        .listen((ConnectivityResult connectivityResul) {
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
       String json = _toString(connectivityResul);
       emitModuleEvent('["onConnectivityChanged", $json]');
     });

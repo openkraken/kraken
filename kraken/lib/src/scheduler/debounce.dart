@@ -11,11 +11,9 @@ class Debouncing {
   bool get isReady => _isReady;
   bool _scheduleRunned = false;
   // ignore: close_sinks
-  StreamController<dynamic> _resultSC =
-      new StreamController<dynamic>.broadcast();
+  StreamController<dynamic> _resultSC = new StreamController<dynamic>.broadcast();
   // ignore: close_sinks
-  final StreamController<bool> _stateSC =
-      new StreamController<bool>.broadcast();
+  final StreamController<bool> _stateSC = new StreamController<bool>.broadcast();
 
   /// If duration is null, use frame callback;
   Debouncing({Duration duration}) {
@@ -50,8 +48,7 @@ class Debouncing {
     return _resultSC.stream.first;
   }
 
-  StreamSubscription<bool> listen(Function(bool) onData) =>
-      _stateSC.stream.listen(onData);
+  StreamSubscription<bool> listen(Function(bool) onData) => _stateSC.stream.listen(onData);
 
   void dispose() {
     _resultSC.close();

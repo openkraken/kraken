@@ -10,8 +10,7 @@ import 'package:kraken/css.dart';
 // CSS Box Alignment: https://drafts.csswg.org/css-align/
 
 mixin CSSAlignMixin {
-  void decorateRenderFlow(
-      RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
+  void decorateRenderFlow(RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
     renderFlowLayout.mainAxisAlignment = _getJustifyContent(style);
   }
 

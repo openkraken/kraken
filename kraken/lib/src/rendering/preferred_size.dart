@@ -10,7 +10,7 @@ class RenderPreferredSize extends RenderProxyBox {
   RenderPreferredSize({
     @required Size preferredSize,
     RenderBox child = null,
-  }) : assert(preferredSize != null),
+  })  : assert(preferredSize != null),
         _preferredSize = preferredSize,
         super(child);
 
@@ -18,8 +18,7 @@ class RenderPreferredSize extends RenderProxyBox {
   Size get preferredSize => _preferredSize;
   set preferredSize(Size value) {
     assert(value != null);
-    if (_preferredSize == value)
-      return;
+    if (_preferredSize == value) return;
 
     _preferredSize = value;
     SchedulerBinding.instance.addPostFrameCallback((_) {

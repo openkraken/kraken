@@ -66,56 +66,40 @@ class RenderMargin extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     _resolve();
-    final double totalHorizontalPadding =
-        _resolvedMargin.left + _resolvedMargin.right;
-    final double totalVerticalPadding =
-        _resolvedMargin.top + _resolvedMargin.bottom;
+    final double totalHorizontalPadding = _resolvedMargin.left + _resolvedMargin.right;
+    final double totalVerticalPadding = _resolvedMargin.top + _resolvedMargin.bottom;
     if (child != null) // next line relies on double.infinity absorption
-      return child.getMinIntrinsicWidth(
-              math.max(0.0, height - totalVerticalPadding)) +
-          totalHorizontalPadding;
+      return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     _resolve();
-    final double totalHorizontalPadding =
-        _resolvedMargin.left + _resolvedMargin.right;
-    final double totalVerticalPadding =
-        _resolvedMargin.top + _resolvedMargin.bottom;
+    final double totalHorizontalPadding = _resolvedMargin.left + _resolvedMargin.right;
+    final double totalVerticalPadding = _resolvedMargin.top + _resolvedMargin.bottom;
     if (child != null) // next line relies on double.infinity absorption
-      return child.getMaxIntrinsicWidth(
-              math.max(0.0, height - totalVerticalPadding)) +
-          totalHorizontalPadding;
+      return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     _resolve();
-    final double totalHorizontalPadding =
-        _resolvedMargin.left + _resolvedMargin.right;
-    final double totalVerticalPadding =
-        _resolvedMargin.top + _resolvedMargin.bottom;
+    final double totalHorizontalPadding = _resolvedMargin.left + _resolvedMargin.right;
+    final double totalVerticalPadding = _resolvedMargin.top + _resolvedMargin.bottom;
     if (child != null) // next line relies on double.infinity absorption
-      return child.getMinIntrinsicHeight(
-              math.max(0.0, width - totalHorizontalPadding)) +
-          totalVerticalPadding;
+      return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     _resolve();
-    final double totalHorizontalPadding =
-        _resolvedMargin.left + _resolvedMargin.right;
-    final double totalVerticalPadding =
-        _resolvedMargin.top + _resolvedMargin.bottom;
+    final double totalHorizontalPadding = _resolvedMargin.left + _resolvedMargin.right;
+    final double totalVerticalPadding = _resolvedMargin.top + _resolvedMargin.bottom;
     if (child != null) // next line relies on double.infinity absorption
-      return child.getMaxIntrinsicHeight(
-              math.max(0.0, width - totalHorizontalPadding)) +
-          totalVerticalPadding;
+      return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
 

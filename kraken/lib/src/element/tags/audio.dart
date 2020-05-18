@@ -15,12 +15,7 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId)
-      : super(
-          targetId: targetId,
-          allowChildren: false,
-          tagName: AUDIO
-        ) {
+  AudioElement(int targetId) : super(targetId: targetId, allowChildren: false, tagName: AUDIO) {
     initAudioPlayer();
     initSizedBox();
   }
@@ -56,9 +51,7 @@ class AudioElement extends Element {
   void _updateSizedBox() {
     double w = style.contains(WIDTH) ? CSSLength.toDisplayPortValue(style[WIDTH]) : null;
     double h = style.contains(HEIGHT) ? CSSLength.toDisplayPortValue(style[HEIGHT]) : null;
-    _sizedBox.additionalConstraints = BoxConstraints.tight(
-      Size(w ?? defaultWidth, h ?? defaultHeight)
-    );
+    _sizedBox.additionalConstraints = BoxConstraints.tight(Size(w ?? defaultWidth, h ?? defaultHeight));
   }
 
   @override

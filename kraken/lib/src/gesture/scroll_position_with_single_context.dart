@@ -34,8 +34,7 @@ import 'scroll_position.dart';
 ///  * [ScrollController], which can manipulate one or more [ScrollPosition]s,
 ///    and which uses [ScrollPositionWithSingleContext] as its default class for
 ///    scroll positions.
-class ScrollPositionWithSingleContext extends ScrollPosition
-    implements ScrollActivityDelegate {
+class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollActivityDelegate {
   /// Create a [ScrollPosition] object that manages its behavior using
   /// [ScrollActivity] objects.
   ///
@@ -137,8 +136,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition
   @override
   void goBallistic(double velocity) {
     assert(pixels != null);
-    final Simulation simulation =
-        physics.createBallisticSimulation(this, velocity);
+    final Simulation simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
     } else {

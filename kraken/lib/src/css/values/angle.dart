@@ -15,10 +15,7 @@ class CSSAngle implements CSSValue<double> {
   /// Judge a string is an angle.
   static bool isAngle(String angle) {
     return angle != null &&
-        (angle.endsWith(DEG) ||
-            angle.endsWith(GRAD) ||
-            angle.endsWith(RAD) ||
-            angle.endsWith(TURN));
+        (angle.endsWith(DEG) || angle.endsWith(GRAD) || angle.endsWith(RAD) || angle.endsWith(TURN));
   }
 
   String angleType = DEG;
@@ -36,19 +33,16 @@ class CSSAngle implements CSSValue<double> {
     if (rawAngleValue != null) {
       if (rawAngleValue.endsWith(DEG)) {
         angleType = DEG;
-        angleValue =
-            double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi / 360;
+        angleValue = double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi / 360;
       } else if (rawAngleValue.endsWith(GRAD)) {
         angleType = GRAD;
-        angleValue =
-            double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi / 400;
+        angleValue = double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi / 400;
       } else if (rawAngleValue.endsWith(RAD)) {
         angleType = RAD;
         angleValue = double.parse(rawAngleValue.split(angleType)[0]);
       } else if (rawAngleValue.endsWith(TURN)) {
         angleType = TURN;
-        angleValue =
-            double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi;
+        angleValue = double.parse(rawAngleValue.split(angleType)[0]) * 2 * math.pi;
       }
     }
     _parsed = true;

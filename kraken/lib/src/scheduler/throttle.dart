@@ -34,8 +34,7 @@ class Throttling {
     return Function.apply(func, List<dynamic>());
   }
 
-  StreamSubscription<bool> listen(Function(bool) onData) =>
-      this._stateSC.stream.listen(onData);
+  StreamSubscription<bool> listen(Function(bool) onData) => this._stateSC.stream.listen(onData);
 
   dispose() {
     this._stateSC.close();

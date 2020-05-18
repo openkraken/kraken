@@ -9,11 +9,10 @@ Future<Response> fetch(String url, Map<String, dynamic> map) async {
   Future<Response> future;
 
   BaseOptions options = BaseOptions(
-    headers: map['headers'],
-    method: map['method'],
-    contentType: 'application/json',
-    responseType: ResponseType.plain
-  );
+      headers: map['headers'],
+      method: map['method'],
+      contentType: 'application/json',
+      responseType: ResponseType.plain);
 
   switch (map['method']) {
     case 'GET':

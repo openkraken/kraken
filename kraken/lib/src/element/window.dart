@@ -14,8 +14,7 @@ class Window extends EventTarget {
   Window() : super(WINDOW_ID) {
     window.onPlatformBrightnessChanged = () {
       Event event = Event('colorschemechange');
-      event.detail =
-          (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
+      event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
       this.dispatchEvent(event);
     };
   }

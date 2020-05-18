@@ -156,8 +156,7 @@ abstract class ScrollHoldController {
 /// scrolling, and does not prevent the user from interacting with the contents
 /// of the [Scrollable] (unlike when a drag has begun or there is a scroll
 /// animation underway).
-class HoldScrollActivity extends ScrollActivity
-    implements ScrollHoldController {
+class HoldScrollActivity extends ScrollActivity implements ScrollHoldController {
   /// Creates a scroll activity that does nothing.
   HoldScrollActivity({
     @required ScrollActivityDelegate delegate,
@@ -207,16 +206,13 @@ class ScrollDragController implements Drag {
     this.motionStartDistanceThreshold,
   })  : assert(delegate != null),
         assert(details != null),
-        assert(
-            motionStartDistanceThreshold == null ||
-                motionStartDistanceThreshold > 0.0,
+        assert(motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
             'motionStartDistanceThreshold must be a positive number or null'),
         _delegate = delegate,
         _lastDetails = details,
         _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
         _lastNonStationaryTimestamp = details.sourceTimeStamp,
-        _offsetSinceLastStop =
-            motionStartDistanceThreshold == null ? null : 0.0;
+        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -242,14 +238,12 @@ class ScrollDragController implements Drag {
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before losing the momentum carried from a previous
   /// scroll activity.
-  static const Duration momentumRetainStationaryDurationThreshold =
-      Duration(milliseconds: 20);
+  static const Duration momentumRetainStationaryDurationThreshold = Duration(milliseconds: 20);
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before needing to break the
   /// [motionStartDistanceThreshold] to start motion again.
-  static const Duration motionStoppedDurationThreshold =
-      Duration(milliseconds: 50);
+  static const Duration motionStoppedDurationThreshold = Duration(milliseconds: 50);
 
   /// The drag distance past which, a [motionStartDistanceThreshold] breaking
   /// drag is considered a deliberate fling.
@@ -271,10 +265,8 @@ class ScrollDragController implements Drag {
   void _maybeLoseMomentum(double offset, Duration timestamp) {
     if (_retainMomentum &&
         offset == 0.0 &&
-        (timestamp ==
-                null || // If drag event has no timestamp, we lose momentum.
-            timestamp - _lastNonStationaryTimestamp >
-                momentumRetainStationaryDurationThreshold)) {
+        (timestamp == null || // If drag event has no timestamp, we lose momentum.
+            timestamp - _lastNonStationaryTimestamp > momentumRetainStationaryDurationThreshold)) {
       // If pointer is stationary for too long, we lose momentum.
       _retainMomentum = false;
     }
@@ -295,8 +287,7 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       if (motionStartDistanceThreshold != null &&
           _offsetSinceLastStop == null &&
-          timestamp - _lastNonStationaryTimestamp >
-              motionStoppedDurationThreshold) {
+          timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
         // Enforce a new threshold.
         _offsetSinceLastStop = 0.0;
       }
@@ -366,8 +357,7 @@ class ScrollDragController implements Drag {
     _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
-    if (_retainMomentum && velocity.sign == carriedVelocity.sign)
-      velocity += carriedVelocity;
+    if (_retainMomentum && velocity.sign == carriedVelocity.sign) velocity += carriedVelocity;
     delegate.goBallistic(velocity);
   }
 
@@ -460,8 +450,7 @@ class BallisticScrollActivity extends ScrollActivity {
       vsync: vsync,
     )
       ..addListener(_tick)
-      ..animateWith(simulation)
-          .whenComplete(_end); // won't trigger if we dispose _controller first
+      ..animateWith(simulation).whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override

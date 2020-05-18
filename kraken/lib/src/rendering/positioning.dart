@@ -16,10 +16,7 @@ class PositionParentData extends StackParentData {
   }
 
   @override
-  bool get isPositioned => top != null
-      || right != null
-      || bottom != null
-      || left != null;
+  bool get isPositioned => top != null || right != null || bottom != null || left != null;
 
   @override
   String toString() {
@@ -34,12 +31,7 @@ class RenderPosition extends RenderStack {
     TextDirection textDirection = TextDirection.ltr,
     StackFit fit = StackFit.passthrough,
     Overflow overflow = Overflow.visible,
-  }) : super(
-            children: children,
-            alignment: alignment,
-            textDirection: textDirection,
-            fit: fit,
-            overflow: overflow);
+  }) : super(children: children, alignment: alignment, textDirection: textDirection, fit: fit, overflow: overflow);
 
   List<RenderBox> children;
 
@@ -88,21 +80,16 @@ class RenderPosition extends RenderStack {
         BoxConstraints childConstraints = const BoxConstraints();
 
         Size trySize = constraints.biggest;
-        size = trySize.isInfinite
-          ? constraints.smallest
-          : trySize;
+        size = trySize.isInfinite ? constraints.smallest : trySize;
 
         // if child has no width, calculate width by left and right.
-        if (childParentData.width == 0.0 && childParentData.left != null &&
-          childParentData.right != null) {
-          childConstraints = childConstraints.tighten(
-            width: size.width - childParentData.left - childParentData.right);
+        if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
+          childConstraints = childConstraints.tighten(width: size.width - childParentData.left - childParentData.right);
         }
         // if child has not height, should be calculate height by top and bottom
-        if (childParentData.height == 0.0 && childParentData.top != null &&
-          childParentData.bottom != null) {
-          childConstraints = childConstraints.tighten(
-            height: size.height - childParentData.top - childParentData.bottom);
+        if (childParentData.height == 0.0 && childParentData.top != null && childParentData.bottom != null) {
+          childConstraints =
+              childConstraints.tighten(height: size.height - childParentData.top - childParentData.bottom);
         }
 
         child.layout(childConstraints, parentUsesSize: true);
@@ -112,7 +99,8 @@ class RenderPosition extends RenderStack {
 
         // Offset to global coordinate system of base
         if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
-          Offset baseOffset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
+          Offset baseOffset =
+              childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
 
           double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
@@ -121,7 +109,6 @@ class RenderPosition extends RenderStack {
           if (childParentData.left == null && childParentData.right != null) {
             left = width - child.size.width - (childParentData.right ?? 0);
           }
-
 
           x = left;
           y = top;
@@ -151,7 +138,7 @@ class RenderPosition extends RenderStack {
   /// Paint and order with z-index.
   @override
   void paint(PaintingContext context, Offset offset) {
-    List<RenderObject> children =  getChildrenAsList();
+    List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
       PositionParentData prevParentData = prev.parentData as PositionParentData;
       PositionParentData nextParentData = next.parentData as PositionParentData;

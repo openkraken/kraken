@@ -24,14 +24,7 @@ enum CanvasLineJoin { round, bevel, miter }
 
 enum CanvasTextAlign { start, end, left, right, center }
 
-enum CanvasTextBaseline {
-  top,
-  hanging,
-  middle,
-  alphabetic,
-  ideographic,
-  bottom
-}
+enum CanvasTextBaseline { top, hanging, middle, alphabetic, ideographic, bottom }
 
 enum CanvasDirection { ltr, rtl, inherit }
 
@@ -142,10 +135,8 @@ abstract class CanvasFillStrokeStyles {
   // colors and styles (see also the CanvasPathDrawingStyles and CanvasTextDrawingStyles
   Color strokeStyle; // (default black)
   Color fillStyle; // (default black)
-  CanvasGradient createLinearGradient(
-      double x0, double y0, double x1, double y1);
-  CanvasGradient createRadialGradient(
-      double x0, double y0, double r0, double x1, double y1, double r1);
+  CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1);
+  CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
   CanvasPattern createPattern(CanvasImageSource image, String repetition);
 }
 
@@ -175,8 +166,7 @@ abstract class CanvasDrawPath {
   void fill(CanvasFillRule fillRule, {Path2D path});
   void stroke({Path2D path});
   void clip(CanvasFillRule fillRule, {Path2D path});
-  bool isPointInPath(double x, double y, CanvasFillRule fillRule,
-      {Path2D path});
+  bool isPointInPath(double x, double y, CanvasFillRule fillRule, {Path2D path});
   bool isPointInStroke(double x, double y, {Path2D path});
 }
 
@@ -258,19 +248,15 @@ abstract class CanvasPath {
 
   void quadraticCurveTo(double cpx, double cpy, double x, double y);
 
-  void bezierCurveTo(
-      double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
+  void bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
 
   void arcTo(double x1, double y1, double x2, double y2, double radius);
 
   void rect(double x, double y, double w, double h);
 
-  void arc(
-      double x, double y, double radius, double startAngle, double endAngle,
-      {bool anticlockwise = false});
+  void arc(double x, double y, double radius, double startAngle, double endAngle, {bool anticlockwise = false});
 
-  void ellipse(double x, double y, double radiusX, double radiusY,
-      double rotation, double startAngle, double endAngle,
+  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle,
       {bool anticlockwise = false});
 }
 

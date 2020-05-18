@@ -14,21 +14,11 @@ class RenderElementBoundary extends RenderTransform
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary(
-      {this.child,
-      this.style,
-      Matrix4 transform,
-      Offset origin,
-      this.targetId,
-      bool shouldRender,
-      Alignment alignment})
+      {this.child, this.style, Matrix4 transform, Offset origin, this.targetId, bool shouldRender, Alignment alignment})
       : assert(child != null),
         _shouldRender = shouldRender,
         _transform = transform,
-        super(
-            child: child,
-            transform: transform,
-            origin: origin,
-            alignment: alignment) {
+        super(child: child, transform: transform, origin: origin, alignment: alignment) {
     add(child);
   }
 
@@ -115,17 +105,14 @@ class RenderElementBoundary extends RenderTransform
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      double width =
-          (layoutSize?.width ?? 0.0) - (element?.cropBorderWidth ?? 0.0);
-      double height =
-          (layoutSize?.height ?? 0.0) - (element?.cropBorderHeight ?? 0.0);
+      double width = (layoutSize?.width ?? 0.0) - (element?.cropBorderWidth ?? 0.0);
+      double height = (layoutSize?.height ?? 0.0) - (element?.cropBorderHeight ?? 0.0);
 
       translation = (alignment as Alignment).alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);
     }
     result.multiply(_transform);
-    if (alignment != null && alignment != Alignment.topLeft)
-      result.translate(-translation.dx, -translation.dy);
+    if (alignment != null && alignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
     if (origin != null) result.translate(-origin.dx, -origin.dy);
     return result;
   }
@@ -135,8 +122,7 @@ class RenderElementBoundary extends RenderTransform
     void painter(PaintingContext context, Offset offset) {}
 
     if (!shouldRender) {
-      context.pushClipRect(
-          needsCompositing, offset, Offset.zero & size, painter);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, painter);
     } else {
       if (child != null) {
         final Matrix4 transform = getEffectiveTransform();

@@ -44,13 +44,7 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-
-  CameraPreviewElement(int targetId)
-      : super(
-          targetId: targetId,
-          tagName: CAMERA_PREVIEW,
-          defaultStyle: _defaultStyle
-        ) {
+  CameraPreviewElement(int targetId) : super(targetId: targetId, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle) {
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
         CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
@@ -135,8 +129,7 @@ class CameraPreviewElement extends Element {
     if (cameraDescription != null) {
       TextureBox textureBox = await createCameraTextureBox(cameraDescription);
       _invokeReady();
-      sizedBox.child =
-          RenderAspectRatio(aspectRatio: aspectRatio, child: textureBox);
+      sizedBox.child = RenderAspectRatio(aspectRatio: aspectRatio, child: textureBox);
     }
   }
 
@@ -154,8 +147,7 @@ class CameraPreviewElement extends Element {
   RenderBox buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(CSSStyleDeclaration())
-        .copyWith(backgroundColor: CSSColor.white);
+    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: CSSColor.white);
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),
@@ -164,8 +156,7 @@ class CameraPreviewElement extends Element {
     );
   }
 
-  Future<TextureBox> createCameraTextureBox(
-      CameraDescription cameraDescription) async {
+  Future<TextureBox> createCameraTextureBox(CameraDescription cameraDescription) async {
     this.cameraDescription = cameraDescription;
     await _createCameraController();
     return TextureBox(textureId: controller.textureId);
@@ -244,8 +235,7 @@ class CameraPreviewElement extends Element {
 
   void _updateSensorOrientation(value) async {
     int sensorOrientation = CSSNumber(value.toString()).toInt();
-    cameraDescription =
-        cameraDescription.copyWith(sensorOrientation: sensorOrientation);
+    cameraDescription = cameraDescription.copyWith(sensorOrientation: sensorOrientation);
     await _initCamera();
   }
 }
