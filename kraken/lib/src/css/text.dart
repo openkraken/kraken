@@ -14,9 +14,10 @@ const double DEFAULT_FONT_WEIGHT = 400.0;
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin {
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
+    TextStyle textStyle = style != null ? getTextStyle(style) : null;
     return TextSpan(
       text: text,
-      style: style != null ? getTextStyle(style) : null,
+      style: textStyle,
     );
   }
 
