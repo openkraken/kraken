@@ -1,17 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:kraken/bridge.dart';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
 
 import 'manifest.dart';
 
@@ -20,10 +20,7 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_BUNDLE_PATH = 'assets/bundle.js';
-// `kap` is Kraken App Package.
-const String EXTENSION_KAP = '.kap';
-const String EXTENSION_ZIP = '.zip';
-const String EXTENSION_JS = '.js';
+const int ZIP_FILE_MAGIC_NUMBER = 0x04034b50;
 
 String getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -55,23 +52,6 @@ abstract class KrakenBundle {
 
   Future<void> resolve();
 
-  bool get isNetworkBundle {
-    // A `null` or empty [scheme] string matches a URI with no scheme
-    bool isHTTPScheme = url.isScheme('HTTP') ?? true;
-    bool isHTTPSScheme = url.isScheme('HTTPS') ?? true;
-    return isHTTPScheme || isHTTPSScheme;
-  }
-
-  /// Check path is a kap(zip) bundle.
-  static bool isZipBundle(Uri url) {
-    return url.path.endsWith(EXTENSION_KAP) || url.path.endsWith(EXTENSION_ZIP);
-  }
-
-  /// Check path is a JS bundle.
-  static bool isJSBundle(Uri url) {
-    return url.path.endsWith(EXTENSION_JS);
-  }
-
   static Future<KrakenBundle> getBundle(String path, {String contentOverride}) async {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
@@ -81,10 +61,10 @@ abstract class KrakenBundle {
     }
 
     Uri uri = Uri.parse(path);
-    if (isZipBundle(uri)) {
-      bundle = ZipBundle(uri);
-    } else if (isJSBundle(uri)) {
-      bundle = JSBundle(uri);
+    if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
+      bundle = NetworkBundle(uri);
+    } else {
+      bundle = AssetsBundle(uri);
     }
 
     if (bundle != null) {
@@ -111,7 +91,12 @@ abstract class KrakenBundle {
 
   Future<void> run() async {
     if (!isResolved) await resolve();
-    evaluateScripts(content, url.toString(), lineOffset);
+    try {
+      evaluateScripts(content, url.toString(), lineOffset);
+    } catch(err, stack) {
+      print('$content $url $lineOffset');
+      print('$err$stack');
+    }
   }
 }
 
@@ -128,31 +113,69 @@ class RawBundle extends KrakenBundle {
   }
 }
 
-class ZipBundle extends KrakenBundle {
+class NetworkBundle extends KrakenBundle with BundleMixin {
   // Unique identifier.
   String bundleId;
-  ZipBundle(Uri url)
+  NetworkBundle(Uri url)
       : assert(url != null),
         super(url);
 
   @override
   Future<void> resolve() async {
-    ByteData data;
-    if (isNetworkBundle) {
-      NetworkAssetBundle bundle = NetworkAssetBundle(url);
-      data = await bundle.load(url.toString());
+    NetworkAssetBundle bundle = NetworkAssetBundle(url);
+    String absoluteURL = url.toString();
+    ByteData data = await bundle.load(absoluteURL);
+    Uint8List dataList = data.buffer.asUint8List();
+    // Test is zip file.
+    if (isZipFile(dataList)) {
+      bundleId = _md5(dataList);
+      Directory localBundleDirectory = await _getLocalBundleDirectory();
+      await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
     } else {
-      // File Bundle.
-      data = await rootBundle.load(url.toString());
+      content = await _resolveStringFromData(data, absoluteURL);
     }
 
-    Uint8List dataList = data.buffer.asUint8List();
-    bundleId = _md5(dataList);
+    isResolved = true;
+  }
+}
 
-    Directory localBundleDirectory = await _getLocalBundleDirectory();
-    await _unArchive(dataList, Directory(path.join(localBundleDirectory.path, bundleId)));
+class AssetsBundle extends KrakenBundle with BundleMixin {
+  AssetsBundle(Uri url)
+      : assert(url != null),
+        super(url);
+
+  @override
+  Future<void> resolve() async {
+    // JSBundle get default bundle manifest.
+    manifest = AppManifest();
+    String localPath = url.toString();
+    ByteData data = await rootBundle.load(localPath);
+    Uint8List buffer = data.buffer.asUint8List();
+    if (isZipFile(buffer)) {
+      Directory localBundleDirectory = await _getLocalBundleDirectory();
+      await _unArchive(buffer, Directory(path.join(localBundleDirectory.path, _md5(buffer))));
+    } else {
+      content = await _resolveStringFromData(data, localPath);
+    }
 
     isResolved = true;
+  }
+}
+
+mixin BundleMixin on KrakenBundle {
+  static String _utf8decode(ByteData data) {
+    return utf8.decode(data.buffer.asUint8List());
+  }
+
+  Future<String> _resolveStringFromData(ByteData data, String key) async {
+    if (data == null)
+      throw FlutterError('Unable to load asset: $key');
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
+      // See: https://github.com/dart-lang/sdk/issues/31954
+      return utf8.decode(data.buffer.asUint8List());
+    }
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
   Future<void> _unArchive(Uint8List data, Directory dest) async {
@@ -178,30 +201,27 @@ class ZipBundle extends KrakenBundle {
             ..writeAsBytesSync(file.content);
         }
       } else {
-        // @TODO: Recursive files.
         final dir = Directory(path.join(dest.path, filename));
         dir.create(recursive: true);
       }
     }
-  }
-}
 
-class JSBundle extends KrakenBundle {
-  JSBundle(Uri url)
-      : assert(url != null),
-        super(url);
-
-  @override
-  Future<void> resolve() async {
-    // JSBundle get default bundle manifest.
-    manifest = AppManifest();
-    if (isNetworkBundle) {
-      Response response = await Dio().getUri(url);
-      content = response.toString();
-    } else {
-      content = await rootBundle.loadString(url.toString());
+    if (content == null) {
+      if (kReleaseMode) {
+        content = '';
+      } else {
+        throw FlutterError('ZipBundle have no JS bundle.');
+      }
     }
+  }
 
-    isResolved = true;
+  bool isZipFile(Uint8List buffer) {
+    /// Read a 32-bit word from the stream.
+    final b1 = buffer[0] & 0xff;
+    final b2 = buffer[1] & 0xff;
+    final b3 = buffer[2] & 0xff;
+    final b4 = buffer[3] & 0xff;
+    int signature = (b4 << 24) | (b3 << 16) | (b2 << 8) | b1;
+    return signature == ZIP_FILE_MAGIC_NUMBER;
   }
 }
