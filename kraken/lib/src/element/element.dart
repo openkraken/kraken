@@ -479,13 +479,12 @@ class Element extends Node
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parentRenderObject == parent.renderStack) {
-      parent.renderStack.remove(renderElementBoundary);
-    } else {
-      // Fixed or sticky.
-      final RenderStack rootRenderStack = ElementManager().getRootElement().renderStack;
-      if (parent == rootRenderStack) {
-        rootRenderStack.remove(renderElementBoundary);
+    } else if (parentRenderObject is RenderStack) {
+      PositionParentData parentData = renderElementBoundary.parentData;
+      if (parentData.renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
+        parent.remove(parentData.renderPositionHolder);
+        parentRenderObject.remove(renderElementBoundary);
       }
     }
   }
@@ -1221,7 +1220,7 @@ bool _isSticky(CSSStyleDeclaration style) {
 
 PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
   PositionParentData parentData = PositionParentData();
-  parentData.originalRenderBoxRef = placeholder;
+  parentData.renderPositionHolder = placeholder;
   parentData.position = resolvePositionFromStyle(style);
 
   if (style.contains('top')) {

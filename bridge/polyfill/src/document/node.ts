@@ -78,6 +78,12 @@ export class Node extends EventTarget {
    */
   public remove() {
     if (this.parentNode == null) return;
+    if (this.childNodes.length > 0) {
+      while (this.firstChild) {
+        this.firstChild.remove();
+      }
+    }
+
     this.parentNode.removeChild(this);
   }
 
