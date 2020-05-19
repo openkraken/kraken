@@ -216,7 +216,7 @@ mixin BundleMixin on KrakenBundle {
   }
 
   bool isZipFile(Uint8List buffer) {
-    /// Read a 32-bit word from the stream.
+    /// Read a 32-bit word from the buffer.
     final b1 = buffer[0] & 0xff;
     final b2 = buffer[1] & 0xff;
     final b3 = buffer[2] & 0xff;
