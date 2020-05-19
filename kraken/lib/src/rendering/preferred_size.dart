@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
 /// [RenderPreferredSize] Render a box with preferred size,
@@ -44,7 +45,10 @@ class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
     @required Size preferredSize,
     RenderBox child = null,
+    this.positionType,
   }) : super(preferredSize: preferredSize, child: child);
+
+  CSSPositionType positionType;
 
   RenderElementBoundary realDisplayedBox;
 }
