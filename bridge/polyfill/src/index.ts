@@ -94,6 +94,12 @@ if (process.env.NODE_ENV !== 'production') {
     });
   }
 
+  function clearAllNodes() {
+    document.body.childNodes.length = 0;
+  }
+
   // @ts-ignore
   window.clearAllEventsListeners = clearAllEventsListeners;
+  // @ts-ignore
+  window.clearAllNodes = clearAllNodes;
 }
