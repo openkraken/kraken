@@ -4,6 +4,7 @@ import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
 import { BODY, WINDOW } from './event-target';
+import { cookieGetterSetter } from '../cookie';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -38,6 +39,8 @@ export class Document extends Node {
 }
 
 export const document = new Document();
+
+Object.defineProperties(document, cookieGetterSetter);
 
 export function getNodeByNodeId(targetId: number) : Node|null|Window {
   if (targetId === WINDOW) {

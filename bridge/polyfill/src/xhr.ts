@@ -37,7 +37,6 @@ const forbiddenRequestHeaders = [
   "expect",
   "host",
   "keep-alive",
-  "origin",
   "referer",
   "te",
   "trailer",
