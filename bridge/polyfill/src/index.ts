@@ -95,7 +95,9 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   function clearAllNodes() {
-    document.body.childNodes.length = 0;
+    while (document.body.firstChild) {
+      document.body.firstChild.remove();
+    }
   }
 
   // @ts-ignore
