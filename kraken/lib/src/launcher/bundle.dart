@@ -60,9 +60,10 @@ abstract class KrakenBundle {
       path = DEFAULT_BUNDLE_PATH;
     }
 
-    Uri uri = Uri.parse(path);
     // Treat empty scheme as https.
-    if (uri.scheme.isEmpty) uri = Uri.parse('https' + uri.toString());
+    if (path.startsWith('//')) path = 'https' + path;
+
+    Uri uri = Uri.parse(path);
 
     if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
       bundle = NetworkBundle(uri);
