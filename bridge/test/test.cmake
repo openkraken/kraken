@@ -24,7 +24,7 @@ if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
 else ()
   set_target_properties(kraken_test
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/../targets/${CMAKE_SYSTEM_NAME}/lib"
     )
 endif ()
 

@@ -231,13 +231,14 @@ class Element extends Node
     List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
     renderDecoratedBox.child = null;
 
+    // Stack children that is attached but not
     children.forEach((element) {
       if (_isPositioned(element.style)) {
         RenderElementBoundary child = element.renderElementBoundary;
         // Parent should be one of RenderFlowLayout or RenderFlexLayout,
         // Only move attached child.
         // @TODO: can be optimized by common abstract class.
-        if (child.attached) {
+        if (child.attached && child.parent is! RenderStack) {
           (child.parent as ContainerRenderObjectMixin).remove(child);
           shouldStackedChildren.add(child);
         }
@@ -479,13 +480,12 @@ class Element extends Node
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parentRenderObject == parent.renderStack) {
-      parent.renderStack.remove(renderElementBoundary);
-    } else {
-      // Fixed or sticky.
-      final RenderStack rootRenderStack = ElementManager().getRootElement().renderStack;
-      if (parent == rootRenderStack) {
-        rootRenderStack.remove(renderElementBoundary);
+    } else if (parentRenderObject is RenderStack) {
+      PositionParentData parentData = renderElementBoundary.parentData;
+      if (parentData.renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
+        parent.remove(parentData.renderPositionHolder);
+        parentRenderObject.remove(renderElementBoundary);
       }
     }
   }
@@ -1209,7 +1209,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
-    return position != 'static';
+    return position != '' && position != 'static';
   } else {
     return false;
   }
@@ -1221,7 +1221,7 @@ bool _isSticky(CSSStyleDeclaration style) {
 
 PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
   PositionParentData parentData = PositionParentData();
-  parentData.originalRenderBoxRef = placeholder;
+  parentData.renderPositionHolder = placeholder;
   parentData.position = resolvePositionFromStyle(style);
 
   if (style.contains('top')) {
