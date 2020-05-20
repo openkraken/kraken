@@ -167,11 +167,11 @@ class Element extends Node
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
 
-    // BoxModel Margin
-    renderObject = initRenderMargin(renderObject, style);
+    // Transform
+    renderObject = initTransform(renderObject, style, targetId);
 
-    // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
+    // BoxModel Margin
+    renderObject = renderElementBoundary = initRenderMargin(renderObject, style, targetId);
 
     // Build root render stack.
     if (targetId == BODY_ID) {
