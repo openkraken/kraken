@@ -61,6 +61,9 @@ abstract class KrakenBundle {
     }
 
     Uri uri = Uri.parse(path);
+    // Treat empty scheme as https.
+    if (uri.scheme.isEmpty) uri = Uri.parse('https' + uri.toString());
+
     if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
       bundle = NetworkBundle(uri);
     } else {
@@ -91,12 +94,7 @@ abstract class KrakenBundle {
 
   Future<void> run() async {
     if (!isResolved) await resolve();
-    try {
-      evaluateScripts(content, url.toString(), lineOffset);
-    } catch(err, stack) {
-      print('$content $url $lineOffset');
-      print('$err$stack');
-    }
+    evaluateScripts(content, url.toString(), lineOffset);
   }
 }
 
@@ -168,8 +166,7 @@ mixin BundleMixin on KrakenBundle {
   }
 
   Future<String> _resolveStringFromData(ByteData data, String key) async {
-    if (data == null)
-      throw FlutterError('Unable to load asset: $key');
+    if (data == null) throw FlutterError('Unable to load asset: $key');
     if (data.lengthInBytes < 10 * 1024) {
       // 10KB takes about 3ms to parse on a Pixel 2 XL.
       // See: https://github.com/dart-lang/sdk/issues/31954
@@ -216,6 +213,8 @@ mixin BundleMixin on KrakenBundle {
   }
 
   bool isZipFile(Uint8List buffer) {
+    if (buffer.length < 4) return false;
+
     /// Read a 32-bit word from the buffer.
     final b1 = buffer[0] & 0xff;
     final b2 = buffer[1] & 0xff;
