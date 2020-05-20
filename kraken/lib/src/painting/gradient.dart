@@ -4,6 +4,7 @@ import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
 
@@ -35,7 +36,7 @@ class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
       angle = _angle;
     } else {
       Alignment point = end as Alignment;
-      angle =  math.atan2(point.x * rect.height, -point.y * rect.width) - math.pi *2;
+      angle = math.atan2(point.x * rect.height, -point.y * rect.width) - math.pi * 2;
     }
     // https://drafts.csswg.org/css-images-3/#linear-gradient-syntax
     double sin = math.sin(angle);
@@ -54,28 +55,12 @@ class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
     );
     Offset endOffset = Offset(
       rect.left + halfWidth + x * halfWidth,
-      rect.top + halfHeight + -y * halfHeight,
+      rect.top + halfHeight - y * halfHeight,
     );
     return ui.Gradient.linear(
       beginOffset, endOffset, colors, _impliedStops(), tileMode,
       _resolveTransform(rect, textDirection)
     );
-  }
-
-  List<double> _impliedStops() {
-    if (stops != null)
-      return stops;
-    assert(colors.length >= 2, 'colors list must have at least two colors');
-    final double separation = 1.0 / (colors.length - 1);
-    return List<double>.generate(
-      colors.length,
-        (int index) => index * separation,
-      growable: false,
-    );
-  }
-
-  Float64List _resolveTransform(Rect bounds, TextDirection textDirection) {
-    return transform?.transform(bounds, textDirection: textDirection)?.storage;
   }
 }
 
@@ -87,7 +72,7 @@ class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
   /// have the same length as [colors].
   CustomRadialGradient({
     AlignmentGeometry center = Alignment.center,
-    double radius,
+    double radius = 1.0,
     @required List<Color> colors,
     List<double> stops,
     TileMode tileMode = TileMode.clamp,
@@ -97,9 +82,39 @@ class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
   @override
   Shader createShader(Rect rect, {TextDirection textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left - borderEdge.left, rect.top - borderEdge.top, rect.right - borderEdge.right, rect.bottom - borderEdge.bottom);
+      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top,
+        rect.right - borderEdge.right, rect.bottom - borderEdge.bottom);
     }
-    return super.createShader(rect, textDirection: textDirection);
+    Offset centerOffset = center.resolve(textDirection).withinRect(rect);
+    // calculate the longest distance from center to cornor
+    double centerX, centerY;
+    if (centerOffset.dx < rect.left) {
+      centerX = rect.left;
+    } else if (centerOffset.dx < rect.right) {
+      centerX = centerOffset.dx;
+    } else {
+      centerX = rect.right;
+    }
+
+    if (centerOffset.dy < rect.top) {
+      centerY = rect.top;
+    } else if (centerOffset.dy < rect.bottom) {
+      centerY = centerOffset.dy;
+    } else {
+      centerY = rect.bottom;
+    }
+    double width = math.max((centerX - rect.left), (rect.right - centerX));
+    double height = math.max((centerY - rect.top), (rect.bottom - centerY));
+    double radiusValue = radius * 2 * math.sqrt(width * width + height * height);
+
+    return ui.Gradient.radial(
+      centerOffset,
+      radiusValue,
+      colors, _impliedStops(), tileMode,
+      _resolveTransform(rect, textDirection),
+      focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
+      focalRadius * rect.shortestSide,
+    );
   }
 }
 
@@ -125,12 +140,28 @@ class CustomSweepGradient extends SweepGradient with CustomGradientMixin {
   }
 }
 
-mixin CustomGradientMixin {
+mixin CustomGradientMixin on Gradient {
 
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;
   EdgeInsets get borderEdge => _borderEdge;
   set borderEdge(EdgeInsets newValue) {
     _borderEdge = newValue;
+  }
+
+  List<double> _impliedStops() {
+    if (stops != null)
+      return stops;
+    assert(colors.length >= 2, 'colors list must have at least two colors');
+    final double separation = 1.0 / (colors.length - 1);
+    return List<double>.generate(
+      colors.length,
+        (int index) => index * separation,
+      growable: false,
+    );
+  }
+
+  Float64List _resolveTransform(Rect bounds, TextDirection textDirection) {
+    return transform?.transform(bounds, textDirection: textDirection)?.storage;
   }
 }
