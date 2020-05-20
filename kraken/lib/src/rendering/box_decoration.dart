@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/painting.dart';
 import 'package:meta/meta.dart';
 
 /// Paints a [Decoration] either before or after its child paints.
@@ -16,24 +16,20 @@ class RenderDecorateElementBox extends RenderProxyBox {
   /// The [ImageConfiguration] will be passed to the decoration (with the size
   /// filled in) to let it resolve images.
   RenderDecorateElementBox({
-    @required int targetId,
     @required Decoration decoration,
     EdgeInsets borderEdge = EdgeInsets.zero,
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
     RenderBox child,
-  })  : assert(targetId != null),
-        assert(decoration != null),
+  }) : assert(decoration != null),
         assert(position != null),
         assert(configuration != null),
-        _targetId = targetId,
         _decoration = decoration,
         _borderEdge = borderEdge,
         _position = position,
         _configuration = configuration,
         super(child);
 
-  int _targetId;
   BoxPainter _painter;
 
   /// BorderSize to deflate.
@@ -41,6 +37,12 @@ class RenderDecorateElementBox extends RenderProxyBox {
   EdgeInsets get borderEdge => _borderEdge;
   set borderEdge(EdgeInsets newValue) {
     _borderEdge = newValue;
+    if (_decoration != null && _decoration is BoxDecoration) {
+      Gradient gradient = (_decoration as BoxDecoration).gradient;
+      if (gradient is CustomGradientMixin) {
+        (gradient as CustomGradientMixin).borderEdge = newValue;
+      }
+    }
     markNeedsLayout();
   }
 
@@ -92,42 +94,6 @@ class RenderDecorateElementBox extends RenderProxyBox {
       size = borderEdge.inflateSize(child.size);
     } else {
       performResize();
-    }
-    _applyGradient();
-  }
-
-  // @TODO(kraken): Remove dependency of Element!
-  void _applyGradient() {
-    Decoration box = decoration;
-    if (box is BoxDecoration) {
-      Gradient gradient = box.gradient;
-      if (gradient is LinearGradient) {
-        Element el = getEventTargetByTargetId<Element>(_targetId);
-        if (el != null) {
-          double angle = el.linearAngle;
-          if (angle != null) {
-            double sin = math.sin(angle);
-            double cos = math.cos(angle);
-
-            double length = (sin * size.width).abs() + (cos * size.height).abs();
-            double x = sin * length / size.width;
-            double y = cos * length / size.height;
-
-            LinearGradient linearGradient = LinearGradient(
-                begin: Alignment(-x, y),
-                end: Alignment(x, -y),
-                colors: gradient.colors,
-                stops: gradient.stops,
-                tileMode: gradient.tileMode);
-            decoration = BoxDecoration(
-                gradient: linearGradient,
-                border: box.border,
-                borderRadius: box.borderRadius,
-                color: box.color,
-                boxShadow: box.boxShadow);
-          }
-        }
-      }
     }
   }
 
