@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
@@ -40,7 +38,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
     if (_decoration != null && _decoration is BoxDecoration) {
       Gradient gradient = (_decoration as BoxDecoration).gradient;
       if (gradient is CustomGradientMixin) {
-        (gradient as CustomGradientMixin).borderEdge = newValue;
+        gradient.borderEdge = newValue;
       }
     }
     markNeedsLayout();

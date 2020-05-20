@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' as ui show Gradient, lerpDouble;
+import 'dart:ui' as ui show Gradient;
 
 import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
-import 'package:vector_math/vector_math_64.dart';
 
+// ignore: must_be_immutable
 class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
 
   /// Creates a linear gradient.
@@ -23,7 +23,7 @@ class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
   }) : _angle = angle,
       super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
-  double _angle;
+  final double _angle;
 
   @override
   Shader createShader(Rect rect, {TextDirection textDirection}) {
@@ -64,6 +64,7 @@ class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
   }
 }
 
+// ignore: must_be_immutable
 class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
 
   /// Creates a linear gradient.
@@ -118,6 +119,7 @@ class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
   }
 }
 
+// ignore: must_be_immutable
 class CustomSweepGradient extends SweepGradient with CustomGradientMixin {
 
   /// Creates a linear gradient.
