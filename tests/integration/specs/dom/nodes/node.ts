@@ -41,8 +41,11 @@ describe('Node API', () => {
   it('ChildNode.prototype.remove', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
+
+    expect(el.isConnected).toEqual(true);
+
     el.remove();
 
-    expect(document.body.childNodes.length).toEqual(0);
+    expect(el.isConnected).toEqual(false);
   });
 });
