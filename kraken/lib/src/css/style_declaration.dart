@@ -28,7 +28,7 @@ class CSSStyleDeclaration {
   CSSStyleDeclaration({Map<String, dynamic> style}) {
     if (style != null) {
       style.forEach((property, dynamic value) {
-        if (value != null) this.setProperty(property, value: value.toString());
+        if (value != null) setProperty(property, value: value.toString());
       });
     }
   }
@@ -42,12 +42,12 @@ class CSSStyleDeclaration {
   /// Textual representation of the declaration block.
   /// Setting this attribute changes the style.
   String get cssText {
-    String _cssText = '';
+    String css = '';
     _cssProperties.forEach((property, value) {
-      if (_cssText.isNotEmpty) _cssText += ' ';
-      _cssText += '$property: $value;';
+      if (css.isNotEmpty) css += ' ';
+      css += '$property: $value;';
     });
-    return _cssText;
+    return css;
   }
 
   // @TODO: Impl the cssText setter.
@@ -125,9 +125,9 @@ class CSSStyleDeclaration {
   }
 
   /// Override [] and []= operator to get/set style properties.
-  operator [](String property) => this.getPropertyValue(property);
+  operator [](String property) => getPropertyValue(property);
   operator []=(String property, value) {
-    this.setProperty(property, value: value);
+    setProperty(property, value: value);
   }
 
   /// Check a css property is valid.
