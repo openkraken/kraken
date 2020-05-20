@@ -95,7 +95,7 @@ describe('multiple-position', () => {
 
     await matchScreenshot();
   });
-  xit('color-stop-radial-2-ref', async () => {
+  it('color-stop-radial-2-ref', async () => {
     let div;
     div = createElement('div', {
       style: {
