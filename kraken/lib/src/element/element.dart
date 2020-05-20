@@ -231,13 +231,14 @@ class Element extends Node
     List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
     renderDecoratedBox.child = null;
 
+    // Stack children that is attached but not
     children.forEach((element) {
       if (_isPositioned(element.style)) {
         RenderElementBoundary child = element.renderElementBoundary;
         // Parent should be one of RenderFlowLayout or RenderFlexLayout,
         // Only move attached child.
         // @TODO: can be optimized by common abstract class.
-        if (child.attached) {
+        if (child.attached && child.parent is! RenderStack) {
           (child.parent as ContainerRenderObjectMixin).remove(child);
           shouldStackedChildren.add(child);
         }
@@ -1208,7 +1209,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
-    return position != 'static';
+    return position != '' && position != 'static';
   } else {
     return false;
   }
