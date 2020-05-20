@@ -11,7 +11,7 @@ import 'package:kraken/css.dart';
 final RegExp _splitRegExp = RegExp(r'\s+');
 
 double _getDisplayPortedLength(input) {
-  if (isEmptyStyleValue(input)) {
+  if (CSSStyleDeclaration.isNullOrEmptyValue(input)) {
     // Null is not equal with 0.0
     return null;
   }

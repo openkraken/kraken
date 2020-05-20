@@ -217,7 +217,7 @@ mixin CSSComputedMixin on RenderBox {
   static String _getElementRealDisplayValue(int targetId) {
     Element element = getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
-    String display = isEmptyStyleValue(element.style['display'])
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style['display'])
         ? element.defaultDisplay
         : element.style['display'];
     String position = element.style['position'];

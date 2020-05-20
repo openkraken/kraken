@@ -22,7 +22,7 @@ mixin CSSOpacityMixin on Node {
   }
 
   double _convertStringToDouble(String str) {
-    return isEmptyStyleValue(str) ? 1.0 : CSSLength.toDouble(str);
+    return CSSStyleDeclaration.isNullOrEmptyValue(str) ? 1.0 : CSSLength.toDouble(str);
   }
 
   void updateRenderOpacity(String value,

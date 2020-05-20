@@ -757,14 +757,14 @@ class RenderFlowLayout extends RenderBox
       Element element = getEventTargetByTargetId<Element>(targetId);
       if (element != null) {
         String elementDisplayDeclaration = element.style['display'];
-        display = isEmptyStyleValue(elementDisplayDeclaration)
+        display = CSSStyleDeclaration.isNullOrEmptyValue(elementDisplayDeclaration)
             ? element.defaultDisplay
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
         Element currentElement =
             getEventTargetByTargetId<Element>(this.targetId);
-        String currentElementDisplay = isEmptyStyleValue(style['display'])
+        String currentElementDisplay = CSSStyleDeclaration.isNullOrEmptyValue(style['display'])
             ? currentElement.defaultDisplay
             : style['display'];
         if (currentElementDisplay.endsWith('flex') &&

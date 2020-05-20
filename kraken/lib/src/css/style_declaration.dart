@@ -89,25 +89,38 @@ class CSSStyleDeclaration {
   }
 
   /// Removes a property from the CSS declaration block.
-  String removeProperty(String property) {
-    return _cssProperties.remove(property);
+  String removeProperty(String propertyName) {
+    String prevValue = getPropertyValue(propertyName);
+
+    if (!isNullOrEmptyValue(prevValue)) {
+      _cssProperties.remove(propertyName);
+      _invokePropertyChangedListener(propertyName, prevValue, '');
+    }
+
+    return prevValue;
   }
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, {value = ''}) {
-    // Null means with should be removed.
-    String prevValue = _cssProperties[propertyName];
-    String stringifyValue;
-    if (value == null) {
-      _cssProperties.remove(propertyName);
-    } else {
-      stringifyValue = value.toString();
-      _cssProperties[propertyName] = stringifyValue;
+    // Null or empty value means should be removed.
+    if (isNullOrEmptyValue(value)) {
+      removeProperty(propertyName);
+      return;
     }
 
-    if (value != prevValue) {
-      _invokePropertyChangedListener(propertyName, prevValue, stringifyValue);
+    String normalizedValue = value.toString().trim();
+
+    // Illegal value like '   ' after trim is '' shoud do nothing.
+    if (normalizedValue == '') {
+      return;
+    }
+
+    String prevValue = _cssProperties[propertyName];
+
+    if (normalizedValue != prevValue) {
+      _cssProperties[propertyName] = normalizedValue;
+      _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
     }
   }
 
@@ -120,7 +133,7 @@ class CSSStyleDeclaration {
   /// Check a css property is valid.
   bool contains(String property) {
     String value = getPropertyValue(property);
-    return !isEmptyStyleValue(value);
+    return !CSSStyleDeclaration.isNullOrEmptyValue(value);
   }
 
   void addStyleChangeListener(String property, StyleChangeListener listener) {
@@ -151,17 +164,17 @@ class CSSStyleDeclaration {
     var copy = (property, value) {
       mergedProperties[property] = value;
     };
-    this._cssProperties.forEach(copy);
+    _cssProperties.forEach(copy);
     override?.forEach(copy);
     return CSSStyleDeclaration(style: mergedProperties);
   }
 
+  static bool isNullOrEmptyValue(value) {
+    return value == null || value == '';
+  }
+
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
-}
-
-bool isEmptyStyleValue(String value) {
-  return value == null || value.isEmpty;
 }
 
 // Returns the computed property value.
