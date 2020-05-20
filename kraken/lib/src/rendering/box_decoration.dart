@@ -22,7 +22,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
     RenderBox child,
-  }) : assert(targetId != null),
+  })  : assert(targetId != null),
         assert(decoration != null),
         assert(position != null),
         assert(configuration != null),
@@ -51,8 +51,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
   Decoration _decoration;
   set decoration(Decoration value) {
     assert(value != null);
-    if (value == _decoration)
-      return;
+    if (value == _decoration) return;
     _painter?.dispose();
     _painter = null;
     _decoration = value;
@@ -64,8 +63,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
   DecorationPosition _position;
   set position(DecorationPosition value) {
     assert(value != null);
-    if (value == _position)
-      return;
+    if (value == _position) return;
     _position = value;
     markNeedsPaint();
   }
@@ -80,12 +78,10 @@ class RenderDecorateElementBox extends RenderProxyBox {
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
-      return;
+    if (value == _configuration) return;
     _configuration = value;
     markNeedsPaint();
   }
-
 
   @override
   void performLayout() {
@@ -113,8 +109,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
             double sin = math.sin(angle);
             double cos = math.cos(angle);
 
-            double length =
-                (sin * size.width).abs() + (cos * size.height).abs();
+            double length = (sin * size.width).abs() + (cos * size.height).abs();
             double x = sin * length / size.width;
             double y = cos * length / size.height;
 
@@ -171,26 +166,23 @@ class RenderDecorateElementBox extends RenderProxyBox {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('${_decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription(
-                'Before painting the decoration, the canvas save count was $debugSaveCount. '
-                    'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-                    'Every call to save() or saveLayer() must be matched by a call to restore().'
-            ),
-            DiagnosticsProperty<Decoration>('The decoration was', decoration, style: DiagnosticsTreeStyle.errorProperty),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
+                'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+                'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration,
+                style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
         return true;
       }());
-      if (decoration.isComplex)
-        context.setIsComplexHint();
+      if (decoration.isComplex) context.setIsComplexHint();
     }
     Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
     super.paint(context, contentOffset);
     if (position == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
-      if (decoration.isComplex)
-        context.setIsComplexHint();
+      if (decoration.isComplex) context.setIsComplexHint();
     }
   }
 

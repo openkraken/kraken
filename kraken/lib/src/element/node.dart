@@ -17,8 +17,7 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int targetId, this.data)
-      : super(NodeType.COMMENT_NODE, targetId, '#comment');
+  Comment(int targetId, this.data) : super(NodeType.COMMENT_NODE, targetId, '#comment');
 
   // The comment information.
   String data;
@@ -105,7 +104,7 @@ abstract class Node extends EventTarget {
   bool get attached => false;
 
   /// Attach a renderObject to parent.
-  void attachTo(Element parent, { RenderObject after }) {}
+  void attachTo(Element parent, {RenderObject after}) {}
 
   /// Detach renderObject from parent.
   void detach() {}

@@ -137,8 +137,7 @@ class CSSStyleDeclaration {
   }
 
   void addStyleChangeListener(String property, StyleChangeListener listener) {
-    if (!_styleChangeListeners.containsKey(property))
-      _styleChangeListeners[property] = [];
+    if (!_styleChangeListeners.containsKey(property)) _styleChangeListeners[property] = [];
     _styleChangeListeners[property].add(listener);
   }
 
@@ -151,8 +150,7 @@ class CSSStyleDeclaration {
     }
   }
 
-  void _invokePropertyChangedListener(
-      String property, String original, String present) {
+  void _invokePropertyChangedListener(String property, String original, String present) {
     assert(property != null);
     _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
       listener(property, original, present);

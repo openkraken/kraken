@@ -71,23 +71,19 @@ abstract class GestureRecognizerFactory<T extends GestureRecognizer> {
 }
 
 /// Signature for closures that implement [GestureRecognizerFactory.constructor].
-typedef GestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T
-    Function();
+typedef GestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T Function();
 
 /// Signature for closures that implement [GestureRecognizerFactory.initializer].
-typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void
-    Function(T instance);
+typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void Function(T instance);
 
 /// Factory for creating gesture recognizers that delegates to callbacks.
 ///
 /// Used by [RawGestureDetector.gestures].
-class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer>
-    extends GestureRecognizerFactory<T> {
+class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends GestureRecognizerFactory<T> {
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(
-      this._constructor, this._initializer)
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
       : assert(_constructor != null),
         assert(_initializer != null);
 

@@ -20,7 +20,7 @@
     "test:unit": "cd tests && npm run unit",
     "test:integration": "cd tests && npm run integration",
     "lint": "cd kraken && flutter analyze",
-    "format": "cd kraken && flutter format",
+    "format": "cd kraken && flutter format . --line-length=120",
     "ci": "npm i && npm run lint"
   },
   "repository": {

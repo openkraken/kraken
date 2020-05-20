@@ -133,6 +133,7 @@ __kraken_executeTest__((done) => {
       try {
         clearAllTimer();
         window.clearAllEventsListeners();
+        window.clearAllNodes();
         requestAnimationFrame(() => {
           __kraken_refresh_paint__(function (e) {
             if (e) {

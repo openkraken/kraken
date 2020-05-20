@@ -5,25 +5,22 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 class PositionParentData extends StackParentData {
-  RenderBox originalRenderBoxRef;
+  RenderPositionHolder renderPositionHolder;
   int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
 
   /// Get element original position offset to parent(layoutBox) should be.
   Offset get stackedChildOriginalRelativeOffset {
-    if (originalRenderBoxRef == null) return Offset.zero;
-    return (originalRenderBoxRef.parentData as BoxParentData).offset;
+    if (renderPositionHolder == null) return Offset.zero;
+    return (renderPositionHolder.parentData as BoxParentData).offset;
   }
 
   @override
-  bool get isPositioned => top != null
-      || right != null
-      || bottom != null
-      || left != null;
+  bool get isPositioned => top != null || right != null || bottom != null || left != null;
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; originalRenderBoxRef=$originalRenderBoxRef; ${super.toString()}';
+    return 'zIndex=$zIndex; position=$position; renderPositionHolder=$renderPositionHolder; ${super.toString()}';
   }
 }
 
@@ -34,12 +31,7 @@ class RenderPosition extends RenderStack {
     TextDirection textDirection = TextDirection.ltr,
     StackFit fit = StackFit.passthrough,
     Overflow overflow = Overflow.visible,
-  }) : super(
-            children: children,
-            alignment: alignment,
-            textDirection: textDirection,
-            fit: fit,
-            overflow: overflow);
+  }) : super(children: children, alignment: alignment, textDirection: textDirection, fit: fit, overflow: overflow);
 
   List<RenderBox> children;
 
@@ -78,8 +70,8 @@ class RenderPosition extends RenderStack {
         height = math.max(height, childSize.height);
 
         if (childParentData.position == CSSPositionType.fixed) {
-          if (childParentData.originalRenderBoxRef != null)
-            childParentData.offset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero);
+          if (childParentData.renderPositionHolder != null)
+            childParentData.offset = childParentData.renderPositionHolder.localToGlobal(Offset.zero);
         } else {
           childParentData.offset = childParentData.stackedChildOriginalRelativeOffset;
         }
@@ -88,21 +80,16 @@ class RenderPosition extends RenderStack {
         BoxConstraints childConstraints = const BoxConstraints();
 
         Size trySize = constraints.biggest;
-        size = trySize.isInfinite
-          ? constraints.smallest
-          : trySize;
+        size = trySize.isInfinite ? constraints.smallest : trySize;
 
         // if child has no width, calculate width by left and right.
-        if (childParentData.width == 0.0 && childParentData.left != null &&
-          childParentData.right != null) {
-          childConstraints = childConstraints.tighten(
-            width: size.width - childParentData.left - childParentData.right);
+        if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
+          childConstraints = childConstraints.tighten(width: size.width - childParentData.left - childParentData.right);
         }
         // if child has not height, should be calculate height by top and bottom
-        if (childParentData.height == 0.0 && childParentData.top != null &&
-          childParentData.bottom != null) {
-          childConstraints = childConstraints.tighten(
-            height: size.height - childParentData.top - childParentData.bottom);
+        if (childParentData.height == 0.0 && childParentData.top != null && childParentData.bottom != null) {
+          childConstraints =
+              childConstraints.tighten(height: size.height - childParentData.top - childParentData.bottom);
         }
 
         child.layout(childConstraints, parentUsesSize: true);
@@ -112,7 +99,8 @@ class RenderPosition extends RenderStack {
 
         // Offset to global coordinate system of base
         if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
-          Offset baseOffset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
+          Offset baseOffset =
+              childParentData.renderPositionHolder.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
 
           double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
@@ -122,7 +110,6 @@ class RenderPosition extends RenderStack {
             left = width - child.size.width - (childParentData.right ?? 0);
           }
 
-
           x = left;
           y = top;
         } else if (childParentData.position == CSSPositionType.relative) {
@@ -130,8 +117,8 @@ class RenderPosition extends RenderStack {
           double top = childParentData.top ?? -(childParentData.bottom ?? 0);
           double left = childParentData.left ?? -(childParentData.right ?? 0);
 
-          RenderBox renderLayoutBox = childParentData.originalRenderBoxRef.parent as RenderBox;
-          RenderBox renderPadding = childParentData.originalRenderBoxRef.parent.parent as RenderBox;
+          RenderBox renderLayoutBox = childParentData.renderPositionHolder.parent as RenderBox;
+          RenderBox renderPadding = childParentData.renderPositionHolder.parent.parent as RenderBox;
           Offset paddingOffset = renderLayoutBox.localToGlobal(Offset.zero) - renderPadding.localToGlobal(Offset.zero);
           x = baseOffset.dx + paddingOffset.dx + left;
           y = baseOffset.dy + paddingOffset.dy + top;
@@ -151,7 +138,7 @@ class RenderPosition extends RenderStack {
   /// Paint and order with z-index.
   @override
   void paint(PaintingContext context, Offset offset) {
-    List<RenderObject> children =  getChildrenAsList();
+    List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
       PositionParentData prevParentData = prev.parentData as PositionParentData;
       PositionParentData nextParentData = next.parentData as PositionParentData;

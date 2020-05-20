@@ -85,8 +85,7 @@ class RenderVisibility extends RenderProxyBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (hidden && !_maintainSize) return _distanceToActualBaseline;
 
-    return _distanceToActualBaseline =
-        super.computeDistanceToActualBaseline(baseline);
+    return _distanceToActualBaseline = super.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -149,9 +148,7 @@ class RenderVisibility extends RenderProxyBox {
     return <DiagnosticsNode>[
       child.toDiagnosticsNode(
         name: 'child',
-        style: hidden
-            ? DiagnosticsTreeStyle.offstage
-            : DiagnosticsTreeStyle.sparse,
+        style: hidden ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
       ),
     ];
   }

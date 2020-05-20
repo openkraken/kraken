@@ -65,6 +65,7 @@ class Element extends Node
   final String tagName;
 
   final Map<String, dynamic> defaultStyle;
+
   /// The default display type of
   String defaultDisplay;
 
@@ -140,8 +141,7 @@ class Element extends Node
     renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
     // Constrained box
-    renderObject =
-        renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
+    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Pointer event listener boundary.
     renderObject = RenderPointerListener(
@@ -160,11 +160,9 @@ class Element extends Node
     renderObject = initRenderContentVisibility(renderObject, style);
 
     // Intersection observer
-    renderObject = renderIntersectionObserver =
-        RenderIntersectionObserver(child: renderObject);
+    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
-    setContentVisibilityIntersectionObserver(
-        renderIntersectionObserver, style['contentVisibility']);
+    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style['contentVisibility']);
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
@@ -173,8 +171,7 @@ class Element extends Node
     renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
-    renderObject =
-        renderElementBoundary = initTransform(renderObject, style, targetId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
 
     // Build root render stack.
     if (targetId == BODY_ID) {
@@ -207,8 +204,7 @@ class Element extends Node
         double top = CSSSizingMixin.getDisplayPortedLength(elStyle['top']);
         isFixed = el.offsetTop - scrollTop <= top;
       } else if (elStyle.contains('bottom')) {
-        double bottom =
-            CSSSizingMixin.getDisplayPortedLength(elStyle['bottom']);
+        double bottom = CSSSizingMixin.getDisplayPortedLength(elStyle['bottom']);
         double viewPortHeight = renderMargin?.size?.height;
         double elViewPortTop = el.offsetTop - scrollTop;
         isFixed = viewPortHeight - elViewPortTop <= bottom;
@@ -229,20 +225,20 @@ class Element extends Node
     });
   }
 
-
   void _buildRenderStack() {
     if (renderStack != null) return;
 
     List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
     renderDecoratedBox.child = null;
 
+    // Stack children that is attached but not
     children.forEach((element) {
       if (_isPositioned(element.style)) {
         RenderElementBoundary child = element.renderElementBoundary;
         // Parent should be one of RenderFlowLayout or RenderFlexLayout,
         // Only move attached child.
         // @TODO: can be optimized by common abstract class.
-        if (child.attached) {
+        if (child.attached && child.parent is! RenderStack) {
           (child.parent as ContainerRenderObjectMixin).remove(child);
           shouldStackedChildren.add(child);
         }
@@ -293,8 +289,7 @@ class Element extends Node
 
   void removeStickyPlaceholder() {
     if (stickyPlaceholder != null) {
-      ContainerRenderObjectMixin stickyPlaceholderParent =
-          stickyPlaceholder.parent;
+      ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder.parent;
       stickyPlaceholderParent.remove(stickyPlaceholder);
     }
   }
@@ -309,21 +304,14 @@ class Element extends Node
       'height': renderMargin.size.height.toString() + 'px',
     });
     stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
-    stickyPlaceholder =
-        initRenderDecoratedBox(stickyPlaceholder, pStyle, targetId);
-    (renderObject.parent as ContainerRenderObjectMixin)
-        .insert(stickyPlaceholder, after: renderObject);
+    stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, targetId);
+    (renderObject.parent as ContainerRenderObjectMixin).insert(stickyPlaceholder, after: renderObject);
   }
 
-  void _updateOffset(
-      {CSSTransition definiteTransition,
-      String property,
-      double diff,
-      double original}) {
+  void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
     PositionParentData positionParentData;
     RenderBox renderParent = renderElementBoundary.parent;
-    if (renderParent is RenderPosition &&
-        renderElementBoundary.parentData is PositionParentData) {
+    if (renderParent is RenderPosition && renderElementBoundary.parentData is PositionParentData) {
       positionParentData = renderElementBoundary.parentData;
       PositionParentData progressParentData = positionParentData;
 
@@ -379,15 +367,13 @@ class Element extends Node
           positionParentData.right = CSSLength.toDisplayPortValue(style['right']);
         }
         if (style.contains('bottom')) {
-          positionParentData.bottom =
-              CSSLength.toDisplayPortValue(style['bottom']);
+          positionParentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
         }
         if (style.contains('width')) {
           positionParentData.width = CSSLength.toDisplayPortValue(style['width']);
         }
         if (style.contains('height')) {
-          positionParentData.height =
-              CSSLength.toDisplayPortValue(style['height']);
+          positionParentData.height = CSSLength.toDisplayPortValue(style['height']);
         }
         renderObject.parentData = positionParentData;
         renderParent.markNeedsLayout();
@@ -417,10 +403,8 @@ class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutBox(
-      CSSStyleDeclaration style, { List<RenderBox> children }) {
-    String display =
-        CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
+  ContainerRenderObjectMixin createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     String flexWrap = style['flexWrap'];
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
@@ -460,9 +444,11 @@ class Element extends Node
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, { RenderObject after }) {
+  void attachTo(Element parent, {RenderObject after}) {
     CSSStyleDeclaration parentStyle = parent.style;
-    String parentDisplayValue = CSSStyleDeclaration.isNullOrEmptyValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
+    String parentDisplayValue =
+        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
+    // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue.endsWith('flex');
 
     // Add FlexItem wrap for flex child node.
@@ -496,14 +482,12 @@ class Element extends Node
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parentRenderObject == parent.renderStack) {
-      parent.renderStack.remove(renderElementBoundary);
-    } else {
-      // Fixed or sticky.
-      final RenderStack rootRenderStack =
-          ElementManager().getRootElement().renderStack;
-      if (parent == rootRenderStack) {
-        rootRenderStack.remove(renderElementBoundary);
+    } else if (parentRenderObject is RenderStack) {
+      PositionParentData parentData = renderElementBoundary.parentData;
+      if (parentData.renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
+        parent.remove(parentData.renderPositionHolder);
+        parentRenderObject.remove(renderElementBoundary);
       }
     }
   }
@@ -586,10 +570,8 @@ class Element extends Node
   RenderBox getStackedRenderBox(Element element) {
     // Positioned element in flex layout will reposition in new layer
     if (renderLayoutBox is RenderFlexLayout) {
-      Size preferredSize = Size(
-          CSSLength.toDisplayPortValue(element.style[WIDTH]),
-          CSSLength.toDisplayPortValue(element.style[HEIGHT])
-      );
+      Size preferredSize =
+          Size(CSSLength.toDisplayPortValue(element.style[WIDTH]), CSSLength.toDisplayPortValue(element.style[HEIGHT]));
       renderPositionedPlaceholder = RenderPositionHolder(preferredSize: preferredSize);
     } else {
       // Positioned element in flow layout will position in old flow layer
@@ -604,8 +586,7 @@ class Element extends Node
   // Add placeholder to positioned element for calculate original
   // coordinate before moved away
   void addPositionPlaceholder() {
-    if (renderPositionedPlaceholder == null ||
-        !renderPositionedPlaceholder.attached) {
+    if (renderPositionedPlaceholder == null || !renderPositionedPlaceholder.attached) {
       addChild(renderPositionedPlaceholder);
     }
   }
@@ -631,23 +612,21 @@ class Element extends Node
 
       case CSSPositionType.static:
       case CSSPositionType.sticky:
-        // @TODO: sticky.
+      // @TODO: sticky.
       default:
         return;
     }
     Size preferredSize = Size.zero;
     String childDisplay = child.style['display'];
-    if ((!childDisplay.isEmpty && childDisplay != 'inline')
-    || (position != CSSPositionType.static && position != CSSPositionType.relative)) {
+    if ((!childDisplay.isEmpty && childDisplay != 'inline') ||
+        (position != CSSPositionType.static && position != CSSPositionType.relative)) {
       preferredSize = Size(
         CSSLength.toDisplayPortValue(child.style[WIDTH]),
         CSSLength.toDisplayPortValue(child.style[HEIGHT]),
       );
     }
 
-    RenderPositionHolder positionedBoxHolder = RenderPositionHolder(
-      preferredSize: preferredSize
-    );
+    RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     var childRenderElementBoundary = child.renderElementBoundary;
     if (position == CSSPositionType.relative) {
@@ -659,23 +638,20 @@ class Element extends Node
     positionedBoxHolder.realDisplayedBox = childRenderElementBoundary;
     parentRenderPosition.add(childRenderElementBoundary);
   }
-  void _addStickyChild(Element child, CSSPositionType position) {
 
-  }
+  void _addStickyChild(Element child, CSSPositionType position) {}
 
   /// Append a child to childList, if after is null, insert into first.
-  void _append(Node child, { RenderBox after }) {
+  void _append(Node child, {RenderBox after}) {
     // Only append childNode when it is not attached.
-    if (!child.attached)
-      child.attachTo(this, after: after);
+    if (!child.attached) child.attachTo(this, after: after);
   }
 
   void _updateFlexItemStyle(Element element) {
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData =
-          CSSFlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
@@ -729,62 +705,38 @@ class Element extends Node
     style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
 
     style.addStyleChangeListener('background', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundColor', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundAttachment', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundImage', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundRepeat', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundSize', _styleBackgroundChangedListener);
-    style.addStyleChangeListener(
-        'backgroundPosition', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundColor', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundAttachment', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundImage', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundRepeat', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundSize', _styleBackgroundChangedListener);
+    style.addStyleChangeListener('backgroundPosition', _styleBackgroundChangedListener);
 
     style.addStyleChangeListener('border', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderLeft', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderRight', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottom', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottom', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderLeftWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderTopWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderRightWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottomWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderTopLeftRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderTopRightRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottomLeftRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottomRightRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomWidth', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopRightRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomLeftRadius', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomRightRadius', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderLeftStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderTopStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderRightStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottomStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightStyle', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomStyle', _styleDecoratedChangedListener);
     style.addStyleChangeListener('borderColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderLeftColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderTopColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderRightColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener(
-        'borderBottomColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderLeftColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderTopColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderRightColor', _styleDecoratedChangedListener);
+    style.addStyleChangeListener('borderBottomColor', _styleDecoratedChangedListener);
     style.addStyleChangeListener('boxShadow', _styleDecoratedChangedListener);
 
     style.addStyleChangeListener('margin', _styleMarginChangedListener);
@@ -795,24 +747,17 @@ class Element extends Node
 
     style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
     style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
-    style.addStyleChangeListener(
-        'contentVisibility', _styleContentVisibilityChangedListener);
+    style.addStyleChangeListener('contentVisibility', _styleContentVisibilityChangedListener);
     style.addStyleChangeListener('transform', _styleTransformChangedListener);
-    style.addStyleChangeListener(
-        'transformOrigin', _styleTransformOriginChangedListener);
+    style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
     style.addStyleChangeListener('transition', _styleTransitionChangedListener);
-    style.addStyleChangeListener(
-        'transitionProperty', _styleTransitionChangedListener);
-    style.addStyleChangeListener(
-        'transitionDuration', _styleTransitionChangedListener);
-    style.addStyleChangeListener(
-        'transitionTimingFunction', _styleTransitionChangedListener);
-    style.addStyleChangeListener(
-        'transitionDelay', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionTimingFunction', _styleTransitionChangedListener);
+    style.addStyleChangeListener('transitionDelay', _styleTransitionChangedListener);
   }
 
-  void _styleDisplayChangedListener(
-      String property, String original, String present) {
+  void _styleDisplayChangedListener(String property, String original, String present) {
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
@@ -820,10 +765,8 @@ class Element extends Node
     renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
-      String prevDisplay =
-          CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
-      String currentDisplay =
-          CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
+      String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
+      String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
       if (prevDisplay != currentDisplay) {
         ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
         // Collect children of renderLayoutBox and remove their relationship.
@@ -849,8 +792,7 @@ class Element extends Node
     }
   }
 
-  void _stylePositionChangedListener(
-      String property, String original, String present) {
+  void _stylePositionChangedListener(String property, String original, String present) {
     /// Update position.
     CSSPositionType prevPosition = resolveCSSPosition(original);
     CSSPositionType currentPosition = resolveCSSPosition(present);
@@ -861,21 +803,18 @@ class Element extends Node
     }
   }
 
-  void _styleOffsetChangedListener(
-      String property, String original, String present) {
+  void _styleOffsetChangedListener(String property, String original, String present) {
     double _original = CSSLength.toDisplayPortValue(original);
 
     _updateOffset(
-      definiteTransition:
-          transitionMap != null ? transitionMap[property] : null,
+      definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
       diff: CSSLength.toDisplayPortValue(present) - _original,
     );
   }
 
-  void _styleTextAlignChangedListener(
-      String property, String original, String present) {
+  void _styleTextAlignChangedListener(String property, String original, String present) {
     _updateDecorationRenderLayoutBox();
   }
 
@@ -891,31 +830,26 @@ class Element extends Node
     }
   }
 
-  void _styleTransitionChangedListener(
-      String property, String original, String present) {
+  void _styleTransitionChangedListener(String property, String original, String present) {
     if (present != null) initTransition(style, property);
   }
 
-  void _styleOverflowChangedListener(
-      String property, String original, String present) {
+  void _styleOverflowChangedListener(String property, String original, String present) {
     updateOverFlowBox(style, _scrollListener);
   }
 
-  void _stylePaddingChangedListener(
-      String property, String original, String present) {
+  void _stylePaddingChangedListener(String property, String original, String present) {
     updateRenderPadding(style, transitionMap);
   }
 
-  void _styleSizeChangedListener(
-      String property, String original, String present) {
+  void _styleSizeChangedListener(String property, String original, String present) {
     // Update constrained box.
     updateConstraints(style, transitionMap);
 
     if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original);
       _updateOffset(
-        definiteTransition:
-            transitionMap != null ? transitionMap[property] : null,
+        definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
         diff: CSSLength.toDisplayPortValue(present) - _original,
@@ -923,16 +857,13 @@ class Element extends Node
     }
   }
 
-  void _styleMarginChangedListener(
-      String property, String original, String present) {
+  void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
     updateRenderMargin(style, transitionMap);
   }
 
-  void _styleFlexChangedListener(
-      String property, String original, String present) {
-    String display =
-        CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
+  void _styleFlexChangedListener(String property, String original, String present) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
       // Collect children of renderLayoutBox and remove their relationship.
@@ -955,10 +886,8 @@ class Element extends Node
     _updateDecorationRenderLayoutBox();
   }
 
-  void _styleFlexItemChangedListener(
-      String property, String original, String present) {
-    String display =
-        CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
+  void _styleFlexItemChangedListener(String property, String original, String present) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -967,47 +896,39 @@ class Element extends Node
   }
 
   // background may exist on the decoratedBox or single box, because the attachment
-  void _styleBackgroundChangedListener(
-      String property, String original, String present) {
+  void _styleBackgroundChangedListener(String property, String original, String present) {
     updateBackground(property, present, renderPadding, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }
 
-  void _styleDecoratedChangedListener(
-      String property, String original, String present) {
+  void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
     updateRenderDecoratedBox(style, transitionMap);
   }
 
-  void _styleOpacityChangedListener(
-      String property, String original, String present) {
+  void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
     updateRenderOpacity(present, parentRenderObject: renderMargin);
   }
 
-  void _styleVisibilityChangedListener(
-      String property, String original, String present) {
+  void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
     updateRenderVisibility(present, parentRenderObject: renderMargin);
   }
 
-  void _styleContentVisibilityChangedListener(
-      String property, original, present) {
+  void _styleContentVisibilityChangedListener(String property, original, present) {
     // Update content visibility.
     updateRenderContentVisibility(present,
-        parentRenderObject: renderIntersectionObserver,
-        renderIntersectionObserver: renderIntersectionObserver);
+        parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
   }
 
-  void _styleTransformChangedListener(
-      String property, String original, String present) {
+  void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
     updateTransform(present, transitionMap);
   }
 
-  void _styleTransformOriginChangedListener(
-      String property, String original, String present) {
+  void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
     updateTransformOrigin(present, transitionMap);
   }
@@ -1082,17 +1003,9 @@ class Element extends Node
       case 'clientHeight':
         return renderPadding.hasSize ? renderPadding.size.height : 0;
       case 'clientLeft':
-        return renderPadding.hasSize
-            ? renderPadding
-                .localToGlobal(Offset.zero, ancestor: renderMargin)
-                .dx
-            : 0;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
       case 'clientTop':
-        return renderPadding.hasSize
-            ? renderPadding
-                .localToGlobal(Offset.zero, ancestor: renderMargin)
-                .dy
-            : 0;
+        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
@@ -1161,8 +1074,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    Element element =
-        findParent(this, (element) => element.renderStack != null);
+    Element element = findParent(this, (element) => element.renderStack != null);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1173,8 +1085,7 @@ class Element extends Node
   void addEvent(String eventName) {
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
     bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
-    bool hasIntersectionObserverEvent = isIntersectionObserverEvent &&
-        _hasIntersectionObserverEvent(eventHandlers);
+    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
     super.addEventListener(eventName, _eventResponder);
 
     // Only add listener once for all intersection related event
@@ -1188,8 +1099,7 @@ class Element extends Node
     super.removeEventListener(eventName, _eventResponder);
 
     // Remove listener when no intersection related event
-    if (_isIntersectionObserverEvent(eventName) &&
-        !_hasIntersectionObserverEvent(eventHandlers)) {
+    if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
       renderIntersectionObserver.removeListener(handleIntersectionChange);
     }
   }
@@ -1219,8 +1129,7 @@ class Element extends Node
         currentElement.handleClick(clickEvent);
         if (currentElement.parent != null) {
           currentElement = currentElement.parent;
-          hitTest = currentElement.renderElementBoundary
-              .hitTest(boxHitTestResult, position: position);
+          hitTest = currentElement.renderElementBoundary.hitTest(boxHitTestResult, position: position);
         } else {
           hitTest = false;
         }
@@ -1251,8 +1160,7 @@ class Element extends Node
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image =
-            await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
+        Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
         ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData.buffer.asUint8List();
       }
@@ -1291,9 +1199,7 @@ List<Element> findStickyChildren(Element element) {
 }
 
 bool _isIntersectionObserverEvent(String eventName) {
-  return eventName == 'appear' ||
-      eventName == 'disappear' ||
-      eventName == 'intersectionchange';
+  return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
 }
 
 bool _hasIntersectionObserverEvent(eventHandlers) {
@@ -1305,20 +1211,19 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
-    return position != 'static';
+    return position != '' && position != 'static';
   } else {
     return false;
   }
 }
 
 bool _isSticky(CSSStyleDeclaration style) {
-  return style['position'] == 'sticky' && style.contains('top') ||
-      style.contains('bottom');
+  return style['position'] == 'sticky' && style.contains('top') || style.contains('bottom');
 }
 
 PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
   PositionParentData parentData = PositionParentData();
-  parentData.originalRenderBoxRef = placeholder;
+  parentData.renderPositionHolder = placeholder;
   parentData.position = resolvePositionFromStyle(style);
 
   if (style.contains('top')) {

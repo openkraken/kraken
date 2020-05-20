@@ -26,12 +26,10 @@ class CSSUrl implements CSSValue<ImageProvider> {
   void parse() {
     // support input string enclosed in quotation marks
     if ((_rawInput.startsWith('\'') && _rawInput.endsWith('\'')) ||
-      (_rawInput.startsWith('\"') && _rawInput.endsWith('\"'))) {
+        (_rawInput.startsWith('\"') && _rawInput.endsWith('\"'))) {
       _rawInput = _rawInput.substring(1, _rawInput.length - 1);
     }
-    if (_rawInput.startsWith('//') ||
-        _rawInput.startsWith('http://') ||
-        _rawInput.startsWith('https://')) {
+    if (_rawInput.startsWith('//') || _rawInput.startsWith('http://') || _rawInput.startsWith('https://')) {
       var url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
       _url = url;
       // @TODO: caching also works after image downloaded

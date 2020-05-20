@@ -142,11 +142,9 @@ jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &s
 void JSCContext::setUnhandledPromiseRejectionHandler(jsa::Object &handler) {
 #if ENABLE_UNHANDLED_PROMISE_REJECTION
   JSValueRef exception = nullptr;
-#if __APPLE__
-  // dynamic check current os is higher than macOS 10.15 and iOS 13
-  if (__builtin_available(macOS 10.15.4, iOS 13.4, *)) {
-    JSGlobalContextSetUnhandledRejectionCallback(ctx_, objectRef(handler), &exception);
-  }
+// dynamic check current os is higher than macOS 10.15 and iOS 13.4
+#if __APPLE__ && __OSX_AVAILABLE_STARTING(101504, 130400)
+  JSGlobalContextSetUnhandledRejectionCallback(ctx_, objectRef(handler), &exception);
 #endif
   hasException(exception);
 #endif

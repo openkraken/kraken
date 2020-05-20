@@ -73,8 +73,7 @@ class EventTarget {
     bool cancelled = true;
     event.currentTarget = event.target = this;
     while (event.currentTarget != null) {
-      List<EventHandler> handlers =
-          event.currentTarget.getEventHandlers(event.type);
+      List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
       cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
       if (!event.bubbles || cancelled) break;
       if (event.currentTarget is Node) {
@@ -85,8 +84,7 @@ class EventTarget {
     return cancelled;
   }
 
-  bool _dispatchEventToTarget(
-      EventTarget target, List<EventHandler> handlers, Event event) {
+  bool _dispatchEventToTarget(EventTarget target, List<EventHandler> handlers, Event event) {
     if (handlers != null) {
       for (var handler in handlers) {
         handler(event);

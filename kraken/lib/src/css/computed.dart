@@ -99,8 +99,7 @@ mixin CSSComputedMixin on RenderBox {
                   width = CSSLength.toDisplayPortValue(style['width']);
                   cropPaddingBorder(child);
                   break;
-                } else if (display == 'inline-block' ||
-                    display == 'inline-flex') {
+                } else if (display == 'inline-block' || display == 'inline-flex') {
                   // Collapse width to children
                   width = null;
                   break;
@@ -203,9 +202,7 @@ mixin CSSComputedMixin on RenderBox {
     bool isFlex = display == 'flex' || display == 'inline-flex';
     if (isFlex &&
         style['flexDirection'] == 'row' &&
-        (!style.contains('alignItems') ||
-            (style.contains('alignItems') &&
-                style['alignItems'] == 'stretch'))) {
+        (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
       isStretch = true;
     }
 
@@ -234,9 +231,7 @@ mixin CSSComputedMixin on RenderBox {
 
         // Display as block if flex vertical layout children and stretch children
         if (style['flexDirection'] == 'column' &&
-            (!style.contains('alignItems') ||
-                (style.contains('alignItems') &&
-                    style['alignItems'] == 'stretch'))) {
+            (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
           display = 'block';
         }
       }

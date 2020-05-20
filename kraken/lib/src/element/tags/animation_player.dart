@@ -20,12 +20,8 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(
-      int targetId)
-      : super(
-            targetId: targetId,
-            tagName: ANIMATION_PLAYER,
-            defaultStyle: _defaultStyle);
+  AnimationPlayerElement(int targetId)
+      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle);
 
   String get objectFit => style['objectFit'];
 
@@ -129,8 +125,7 @@ class AnimationPlayerElement extends Element {
     _animationController = FlareControls();
 
     return FlareRenderObject(targetId)
-      ..assetProvider =
-          AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
+      ..assetProvider = AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center
       ..animationName = properties['name']

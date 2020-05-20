@@ -36,8 +36,7 @@ class Fps {
 
       ElementsBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
         if (_fpsCallbacks.isNotEmpty) {
-          List<FpsInfo> fps =
-              timings.map<FpsInfo>((timing) => FpsInfo(timing)).toList();
+          List<FpsInfo> fps = timings.map<FpsInfo>((timing) => FpsInfo(timing)).toList();
           _fpsCallbacks.forEach((callback) {
             callback(fps);
           });
@@ -121,8 +120,7 @@ class RenderFpsOverlay extends RenderBox {
     assert(needsCompositing);
     Canvas canvas = context.canvas;
     if (_fpsInfo != null) {
-      TextPainter textPainter =
-          _getTextPainter(_fpsInfo.toString(), CSSColor.red);
+      TextPainter textPainter = _getTextPainter(_fpsInfo.toString(), CSSColor.red);
       textPainter.layout();
       textPainter.paint(canvas, Offset(0, 0));
     }

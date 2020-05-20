@@ -17,12 +17,14 @@ class LabColor {
   ///
   /// The value ranges from black at `0` to white at `100`.
   final num l;
+
   /// The red to green opponent color value.
   ///
   /// Green is represented in the negative value range (`-128` to `0`)
   ///
   /// Red is represented in the positive value range (`0` to `127`)
   final num a;
+
   /// The yellow to blue opponent color value.
   ///
   /// Yellow is represented int he negative value range (`-128` to `0`)
@@ -157,8 +159,7 @@ class CSSColor implements CSSValue<Color> {
     var match = rgbaRexExp.firstMatch(ret);
     while (match != null) {
       var cacheId = 'rgba$_cacheCount';
-      _cachedColor[cacheId] =
-          _generateColorFromRGBA(ret.substring(match.start, match.end));
+      _cachedColor[cacheId] = _generateColorFromRGBA(ret.substring(match.start, match.end));
       ret = ret.replaceRange(match.start, match.end, cacheId);
       _cacheCount++;
 

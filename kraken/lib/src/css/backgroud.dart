@@ -99,19 +99,16 @@ mixin CSSBackgroundMixin {
         if (key == BACKGROUND_IMAGE && _consumeBackgroundImage(property)) {
           consumedKey = key;
           String backgroundImage = property;
-          while (i + 1 < longhandCount &&
-            !_consumeBackgroundImageEnd(shorthand[i + 1])) {
+          while (i + 1 < longhandCount && !_consumeBackgroundImageEnd(shorthand[i + 1])) {
             backgroundImage = backgroundImage + ' ' + shorthand[++i];
           }
-          if (i + 1 < longhandCount &&
-            _consumeBackgroundImageEnd(shorthand[i + 1])) {
-            backgroundImage =
-              backgroundImage + ' ' + shorthand[++i];
+          if (i + 1 < longhandCount && _consumeBackgroundImageEnd(shorthand[i + 1])) {
+            backgroundImage = backgroundImage + ' ' + shorthand[++i];
           }
           background[BACKGROUND_IMAGE] = backgroundImage;
 
-        // position may be more than one(at most four), should special handle
-        // size is follow position and split by /
+          // position may be more than one(at most four), should special handle
+          // size is follow position and split by /
         } else if (key == BACKGROUND_POSITION_AND_SIZE) {
           if (property != '/' && property.contains('/')) {
             int index = property.indexOf('/');
@@ -121,8 +118,7 @@ mixin CSSBackgroundMixin {
               String size = property.substring(index + 1);
               if (_consumeBackgroundSize(size)) {
                 // size at most two value
-                if (i + 1 < longhandCount &&
-                    _consumeBackgroundSize(shorthand[i + 1].trim())) {
+                if (i + 1 < longhandCount && _consumeBackgroundSize(shorthand[i + 1].trim())) {
                   size = size + ' ' + shorthand[i + 1].trim();
                   i++;
                 }
@@ -224,10 +220,7 @@ mixin CSSBackgroundMixin {
   }
 
   bool _consumeBackgroundRepeat(String src) {
-    return 'repeat-x' == src ||
-        'repeat-y' == src ||
-        'repeat' == src ||
-        'no-repeat' == src;
+    return 'repeat-x' == src || 'repeat-y' == src || 'repeat' == src || 'no-repeat' == src;
   }
 
   bool _consumeBackgroundAttachment(String src) {
@@ -270,20 +263,17 @@ mixin CSSBackgroundMixin {
   }
 
   bool _shouldRenderBackgroundImage() {
-    return background[BACKGROUND_ATTACHMENT] == 'local' &&
-        background.containsKey(BACKGROUND_IMAGE);
+    return background[BACKGROUND_ATTACHMENT] == 'local' && background.containsKey(BACKGROUND_IMAGE);
   }
 
-  RenderObject initBackground(
-      RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
+  RenderObject initBackground(RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     _parseBackground(style);
     if (!_shouldRenderBackgroundImage()) return renderObject;
     DecorationImage decorationImage;
     Gradient gradient;
 
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods =
-          CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       // FIXME flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
@@ -293,8 +283,7 @@ mixin CSSBackgroundMixin {
             if (decorationImage != null) {
               return _renderDecorateElementBox = RenderDecorateElementBox(
                   targetId: targetId,
-                  decoration:
-                      BoxDecoration(image: decorationImage, gradient: gradient),
+                  decoration: BoxDecoration(image: decorationImage, gradient: gradient),
                   child: renderObject);
             }
           }
@@ -303,8 +292,7 @@ mixin CSSBackgroundMixin {
           if (gradient != null) {
             return _renderDecorateElementBox = RenderDecorateElementBox(
                 targetId: targetId,
-                decoration:
-                    BoxDecoration(image: decorationImage, gradient: gradient),
+                decoration: BoxDecoration(image: decorationImage, gradient: gradient),
                 child: renderObject);
           }
         }
@@ -314,16 +302,14 @@ mixin CSSBackgroundMixin {
     return renderObject;
   }
 
-  void updateBackground(String property, String value,
-      RenderObjectWithChildMixin parent, int targetId) {
+  void updateBackground(String property, String value, RenderObjectWithChildMixin parent, int targetId) {
     _setBackgroundProperty(property, value);
     if (!_shouldRenderBackgroundImage()) return;
 
     DecorationImage decorationImage;
     Gradient gradient;
     if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods =
-          CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
       //FIXME flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
@@ -331,8 +317,7 @@ mixin CSSBackgroundMixin {
           if (url != null && url.isNotEmpty) {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
-              _updateRenderGradient(
-                  decorationImage, gradient, parent, targetId);
+              _updateRenderGradient(decorationImage, gradient, parent, targetId);
               return;
             }
           }
@@ -347,18 +332,15 @@ mixin CSSBackgroundMixin {
     }
   }
 
-  void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient,
-      RenderObjectWithChildMixin parent, int targetId) {
+  void _updateRenderGradient(
+      DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
     if (_renderDecorateElementBox != null) {
-      _renderDecorateElementBox.decoration =
-          BoxDecoration(image: decorationImage, gradient: gradient);
+      _renderDecorateElementBox.decoration = BoxDecoration(image: decorationImage, gradient: gradient);
     } else {
       RenderObject child = parent.child;
       parent.child = null;
       _renderDecorateElementBox = RenderDecorateElementBox(
-          targetId: targetId,
-          decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-          child: child);
+          targetId: targetId, decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
       parent.child = _renderDecorateElementBox;
     }
   }
@@ -407,10 +389,7 @@ mixin CSSBackgroundMixin {
         }
       }
       backgroundImage = DecorationImage(
-          image: CSSUrl(url).computedValue,
-          repeat: imageRepeat,
-          alignment: position.computedValue,
-          fit: boxFit);
+          image: CSSUrl(url).computedValue, repeat: imageRepeat, alignment: position.computedValue, fit: boxFit);
     }
     return backgroundImage;
   }
@@ -500,9 +479,7 @@ mixin CSSBackgroundMixin {
                 end: end,
                 colors: colors,
                 stops: stops,
-                tileMode: method.name == 'linear-gradient'
-                    ? TileMode.clamp
-                    : TileMode.repeated);
+                tileMode: method.name == 'linear-gradient' ? TileMode.clamp : TileMode.repeated);
           }
           break;
         // @TODO just support circle radial
@@ -519,14 +496,12 @@ mixin CSSBackgroundMixin {
                 radius = CSSPercentage(positionAndRadius[0]).toDouble() * 0.5;
                 start = 1;
               }
-              if (positionAndRadius.length > 2 &&
-                  positionAndRadius[1] == 'at') {
+              if (positionAndRadius.length > 2 && positionAndRadius[1] == 'at') {
                 start = 1;
                 if (CSSPercentage.isPercentage(positionAndRadius[2])) {
                   atX = CSSPercentage(positionAndRadius[2]).toDouble();
                 }
-                if (positionAndRadius.length == 4 &&
-                    CSSPercentage.isPercentage(positionAndRadius[3])) {
+                if (positionAndRadius.length == 4 && CSSPercentage.isPercentage(positionAndRadius[3])) {
                   atY = CSSPercentage(positionAndRadius[3]).toDouble();
                 }
               }
@@ -539,9 +514,7 @@ mixin CSSBackgroundMixin {
               radius: radius,
               colors: colors,
               stops: stops,
-              tileMode: method.name == 'radial-gradient'
-                  ? TileMode.clamp
-                  : TileMode.repeated,
+              tileMode: method.name == 'radial-gradient' ? TileMode.clamp : TileMode.repeated,
             );
           }
           break;
@@ -549,8 +522,7 @@ mixin CSSBackgroundMixin {
           double from = 0.0;
           double atX = 0.5;
           double atY = 0.5;
-          if (method.args[0].contains('from ') ||
-              method.args[0].contains('at ')) {
+          if (method.args[0].contains('from ') || method.args[0].contains('at ')) {
             List<String> fromAt = method.args[0].trim().split(' ');
             int fromIndex = fromAt.indexOf('from');
             int atIndex = fromAt.indexOf('at');
@@ -558,12 +530,10 @@ mixin CSSBackgroundMixin {
               from = CSSAngle(fromAt[fromIndex + 1]).angleValue;
             }
             if (atIndex != -1) {
-              if (atIndex + 1 < fromAt.length &&
-                  CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
+              if (atIndex + 1 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
                 atX = CSSPercentage(fromAt[atIndex + 1]).toDouble();
               }
-              if (atIndex + 2 < fromAt.length &&
-                  CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
+              if (atIndex + 2 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
                 atY = CSSPercentage(fromAt[atIndex + 2]).toDouble();
               }
             }
@@ -592,8 +562,7 @@ mixin CSSBackgroundMixin {
     return backgroundColor;
   }
 
-  void applyColorAndStops(
-      int start, List<String> args, List<Color> colors, List<double> stops) {
+  void applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
     double grow = 1.0 / (args.length - 1);
     for (int i = start; i < args.length; i++) {
       List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), i * grow);
@@ -609,7 +578,7 @@ mixin CSSBackgroundMixin {
     List<CSSColorStop> colorGradients = [];
     // rgba may contain space, color should handle special
     if (src.startsWith('rgba(')) {
-      int indexOfRgbaEnd = src.indexOf(')') ;
+      int indexOfRgbaEnd = src.indexOf(')');
       if (indexOfRgbaEnd == -1) {
         // rgba parse error
         return colorGradients;

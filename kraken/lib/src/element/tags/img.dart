@@ -10,9 +10,7 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-const Map<String, dynamic> _defaultStyle = {
-  'display': 'inline-block'
-};
+const Map<String, dynamic> _defaultStyle = {'display': 'inline-block'};
 
 class ImageElement extends Element {
   ImageProvider image;
@@ -22,11 +20,7 @@ class ImageElement extends Element {
   ImageInfo _imageInfo;
 
   ImageElement(int targetId)
-      : super(
-            targetId: targetId,
-            defaultStyle: _defaultStyle,
-            allowChildren: false,
-            tagName: IMAGE);
+      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE);
 
   bool _hasLazyLoading = false;
 
@@ -180,8 +174,7 @@ class ImageElement extends Element {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);
     } else if (splitted.length > 1) {
-      return Alignment(_getAlignmentValueFromString(splitted[0]),
-          _getAlignmentValueFromString(splitted[1]));
+      return Alignment(_getAlignmentValueFromString(splitted[0]), _getAlignmentValueFromString(splitted[1]));
     } else {
       // The default value for object-position is 50% 50%
       return Alignment.center;
@@ -214,8 +207,7 @@ class ImageElement extends Element {
     }
   }
 
-  RenderDecoratedBox getRenderDecoratedBox(
-      CSSStyleDeclaration style, ImageProvider image) {
+  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
     BoxFit fit = _getBoxFit(style);
     Alignment alignment = _getAlignment(style);
     return RenderDecoratedBox(
@@ -255,13 +247,15 @@ class ImageElement extends Element {
 
   @override
   dynamic getProperty(String key) {
-    switch(key) {
-      case 'width': {
-        return this._imageInfo != null ? this._imageInfo.image.width : 0;
-      }
-      case 'height': {
-        return this._imageInfo != null ? this._imageInfo.image.height : 0;
-      }
+    switch (key) {
+      case 'width':
+        {
+          return this._imageInfo != null ? this._imageInfo.image.width : 0;
+        }
+      case 'height':
+        {
+          return this._imageInfo != null ? this._imageInfo.image.height : 0;
+        }
     }
 
     return super.getProperty(key);

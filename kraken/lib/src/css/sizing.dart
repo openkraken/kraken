@@ -36,8 +36,7 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
     if (padding != null) {
       List<String> splitPadding = CSSSizingMixin.getShortedProperties(padding);
       if (splitPadding.length == 1) {
-        paddingLeft = paddingRight = paddingTop =
-            paddingBottom = _getDisplayPortedLength(splitPadding[0]);
+        paddingLeft = paddingRight = paddingTop = paddingBottom = _getDisplayPortedLength(splitPadding[0]);
       } else if (splitPadding.length == 2) {
         paddingTop = paddingBottom = _getDisplayPortedLength(splitPadding[0]);
         paddingLeft = paddingRight = _getDisplayPortedLength(splitPadding[1]);
@@ -53,17 +52,13 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
       }
     }
 
-    if (style.contains('paddingLeft'))
-      paddingLeft = _getDisplayPortedLength(style['paddingLeft']);
+    if (style.contains('paddingLeft')) paddingLeft = _getDisplayPortedLength(style['paddingLeft']);
 
-    if (style.contains('paddingTop'))
-      paddingTop = _getDisplayPortedLength(style['paddingTop']);
+    if (style.contains('paddingTop')) paddingTop = _getDisplayPortedLength(style['paddingTop']);
 
-    if (style.contains('paddingRight'))
-      paddingRight = _getDisplayPortedLength(style['paddingRight']);
+    if (style.contains('paddingRight')) paddingRight = _getDisplayPortedLength(style['paddingRight']);
 
-    if (style.contains('paddingBottom'))
-      paddingBottom = _getDisplayPortedLength(style['paddingBottom']);
+    if (style.contains('paddingBottom')) paddingBottom = _getDisplayPortedLength(style['paddingBottom']);
 
     left = paddingLeft ?? left;
     top = paddingTop ?? top;
@@ -73,8 +68,6 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
 
   return CSSPadding(left, top, right, bottom);
 }
-
-
 
 /// - width
 /// - height
@@ -105,11 +98,11 @@ mixin CSSSizingMixin {
     TransitionBorderSide rightSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Right');
     TransitionBorderSide bottomSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Bottom');
 
-    return EdgeInsets.fromLTRB(leftSide.borderWidth, topSide.borderWidth, rightSide.borderWidth, bottomSide.borderWidth);
+    return EdgeInsets.fromLTRB(
+        leftSide.borderWidth, topSide.borderWidth, rightSide.borderWidth, bottomSide.borderWidth);
   }
 
-  void updateConstraints(
-      CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     if (renderConstrainedBox != null) {
       CSSTransition allTransition,
           widthTransition,
@@ -137,102 +130,66 @@ mixin CSSSizingMixin {
           maxWidthTransition != null ||
           minHeightTransition != null ||
           maxHeightTransition != null) {
-        double diffWidth =
-            (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
-        double diffHeight =
-            (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
-        double diffMinWidth =
-            (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
-        double diffMaxWidth =
-            (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
-        double diffMinHeight = (newConstraints.minHeight ?? 0.0) -
-            (oldConstraints.minHeight ?? 0.0);
-        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) -
-            (oldConstraints.maxHeight ?? 0.0);
+        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
+        double diffHeight = (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
+        double diffMinWidth = (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
+        double diffMaxWidth = (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
+        double diffMinHeight = (newConstraints.minHeight ?? 0.0) - (oldConstraints.minHeight ?? 0.0);
+        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) - (oldConstraints.maxHeight ?? 0.0);
 
-        CSSSizedConstraints progressConstraints = CSSSizedConstraints(
-            oldConstraints.width,
-            oldConstraints.height,
-            oldConstraints.minWidth,
-            oldConstraints.maxWidth,
-            oldConstraints.minHeight,
-            oldConstraints.maxHeight);
+        CSSSizedConstraints progressConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
+            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
 
-        CSSSizedConstraints baseConstraints = CSSSizedConstraints(
-            oldConstraints.width,
-            oldConstraints.height,
-            oldConstraints.minWidth,
-            oldConstraints.maxWidth,
-            oldConstraints.minHeight,
-            oldConstraints.maxHeight);
+        CSSSizedConstraints baseConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
+            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
 
         allTransition?.addProgressListener((progress) {
           if (widthTransition == null) {
-            progressConstraints.width =
-                diffWidth * progress + (baseConstraints.width ?? 0.0);
+            progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
           }
           if (heightTransition == null) {
-            progressConstraints.height =
-                diffHeight * progress + (baseConstraints.height ?? 0.0);
+            progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
           }
           if (minWidthTransition == null) {
-            progressConstraints.minWidth =
-                diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
+            progressConstraints.minWidth = diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
           }
           if (maxWidthTransition == null) {
-            progressConstraints.maxWidth = diffMaxWidth * progress +
-                (baseConstraints.maxWidth ?? double.infinity);
+            progressConstraints.maxWidth = diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
           }
           if (minHeightTransition == null) {
-            progressConstraints.minHeight =
-                diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
+            progressConstraints.minHeight = diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
           }
           if (maxHeightTransition == null) {
-            progressConstraints.maxHeight = diffMaxHeight * progress +
-                (baseConstraints.maxHeight ?? double.infinity);
+            progressConstraints.maxHeight = diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
           }
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         widthTransition?.addProgressListener((progress) {
-          progressConstraints.width =
-              diffWidth * progress + (baseConstraints.width ?? 0.0);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         heightTransition?.addProgressListener((progress) {
-          progressConstraints.height =
-              diffHeight * progress + (baseConstraints.height ?? 0.0);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         minHeightTransition?.addProgressListener((progress) {
-          progressConstraints.minHeight =
-              diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.minHeight = diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         minWidthTransition?.addProgressListener((progress) {
-          progressConstraints.minWidth =
-              diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.minWidth = diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         maxHeightTransition?.addProgressListener((progress) {
-          progressConstraints.maxHeight = diffWidth * progress +
-              (baseConstraints.maxHeight ?? double.infinity);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.maxHeight = diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
         maxWidthTransition?.addProgressListener((progress) {
-          progressConstraints.maxWidth = diffWidth * progress +
-              (baseConstraints.maxWidth ?? double.infinity);
-          renderConstrainedBox.additionalConstraints =
-              progressConstraints.toBoxConstraints();
+          progressConstraints.maxWidth = diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
         });
       } else {
-        renderConstrainedBox.additionalConstraints =
-            newConstraints.toBoxConstraints();
+        renderConstrainedBox.additionalConstraints = newConstraints.toBoxConstraints();
       }
 
       // Remove inline element dimension
@@ -244,8 +201,7 @@ mixin CSSSizingMixin {
     }
   }
 
-  RenderObject initRenderConstrainedBox(
-      RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
     if (style != null) {
       oldConstraints = getConstraints(style);
       return renderConstrainedBox = RenderConstrainedBox(
@@ -286,26 +242,26 @@ mixin CSSSizingMixin {
       }
 
       double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
-      if (height == null) minHeight = internalHeight;
+      if (height == null)
+        minHeight = internalHeight;
       else if (internalHeight > height) height = internalHeight;
 
       if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
 
       double internalWidth = padding.left + padding.right + border.left + border.right;
-      if (width == null) minWidth = internalWidth;
+      if (width == null)
+        minWidth = internalWidth;
       else if (internalWidth > width) width = internalWidth;
 
       if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
 
-      return CSSSizedConstraints(
-          width, height, minWidth, maxWidth, minHeight, maxHeight);
+      return CSSSizedConstraints(width, height, minWidth, maxWidth, minHeight, maxHeight);
     } else {
       return null;
     }
   }
 
-  RenderObject initRenderMargin(
-      RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
     return renderMargin = RenderMargin(
       margin: edgeInsets,
@@ -332,8 +288,7 @@ mixin CSSSizingMixin {
       if (margin != null) {
         List<String> splitMargin = CSSSizingMixin.getShortedProperties(margin);
         if (splitMargin.length == 1) {
-          marginLeft = marginRight =
-              marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
+          marginLeft = marginRight = marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
         } else if (splitMargin.length == 2) {
           marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
           marginLeft = marginRight = getDisplayPortedLength(splitMargin[1]);
@@ -349,17 +304,13 @@ mixin CSSSizingMixin {
         }
       }
 
-      if (style.contains('marginLeft'))
-        marginLeft = getDisplayPortedLength(style['marginLeft']);
+      if (style.contains('marginLeft')) marginLeft = getDisplayPortedLength(style['marginLeft']);
 
-      if (style.contains('marginTop'))
-        marginTop = getDisplayPortedLength(style['marginTop']);
+      if (style.contains('marginTop')) marginTop = getDisplayPortedLength(style['marginTop']);
 
-      if (style.contains('marginRight'))
-        marginRight = getDisplayPortedLength(style['marginRight']);
+      if (style.contains('marginRight')) marginRight = getDisplayPortedLength(style['marginRight']);
 
-      if (style.contains('marginBottom'))
-        marginBottom = getDisplayPortedLength(style['marginBottom']);
+      if (style.contains('marginBottom')) marginBottom = getDisplayPortedLength(style['marginBottom']);
 
       left = marginLeft ?? left;
       top = marginTop ?? top;
@@ -371,12 +322,10 @@ mixin CSSSizingMixin {
 
   EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
     oldMargin = getMarginFromStyle(style);
-    return EdgeInsets.fromLTRB(
-        oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+    return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style,
-      [Map<String, CSSTransition> transitionMap]) {
+  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     assert(renderMargin != null);
     CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
@@ -400,10 +349,8 @@ mixin CSSSizingMixin {
       double marginTopInterval = newMargin.top - oldMargin.top;
       double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
 
-      CSSPadding progressMargin = CSSPadding(
-          oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-      CSSPadding baseMargin = CSSPadding(
-          oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+      CSSPadding progressMargin = CSSPadding(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+      CSSPadding baseMargin = CSSPadding(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
 
       all?.addProgressListener((progress) {
         if (margin == null) {
@@ -411,19 +358,16 @@ mixin CSSSizingMixin {
             progressMargin.top = progress * marginTopInterval + baseMargin.top;
           }
           if (marginBottom == null) {
-            progressMargin.bottom =
-                progress * marginBottomInterval + baseMargin.bottom;
+            progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
           }
           if (marginLeft == null) {
-            progressMargin.left =
-                progress * marginLeftInterval + baseMargin.left;
+            progressMargin.left = progress * marginLeftInterval + baseMargin.left;
           }
           if (marginRight == null) {
-            progressMargin.right =
-                progress * marginRightInterval + baseMargin.right;
+            progressMargin.right = progress * marginRightInterval + baseMargin.right;
           }
-          _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
-              progressMargin.top, progressMargin.right, progressMargin.bottom));
+          _updateMargin(EdgeInsets.fromLTRB(
+              progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
         }
       });
 
@@ -432,40 +376,36 @@ mixin CSSSizingMixin {
           progressMargin.top = progress * marginTopInterval + baseMargin.top;
         }
         if (marginBottom == null) {
-          progressMargin.bottom =
-              progress * marginBottomInterval + baseMargin.bottom;
+          progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
         }
         if (marginLeft == null) {
           progressMargin.left = progress * marginLeftInterval + baseMargin.left;
         }
         if (marginRight == null) {
-          progressMargin.right =
-              progress * marginRightInterval + baseMargin.right;
+          progressMargin.right = progress * marginRightInterval + baseMargin.right;
         }
-        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
-            progressMargin.top, progressMargin.right, progressMargin.bottom));
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top = progress * marginTopInterval + baseMargin.top;
-        renderMargin.margin = EdgeInsets.fromLTRB(progressMargin.left,
-            progressMargin.top, progressMargin.right, progressMargin.bottom);
+        renderMargin.margin =
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom);
       });
       marginBottom?.addProgressListener((progress) {
-        progressMargin.bottom =
-            progress * marginBottomInterval + baseMargin.bottom;
-        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
-            progressMargin.top, progressMargin.right, progressMargin.bottom));
+        progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left = progress * marginLeftInterval + baseMargin.left;
-        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
-            progressMargin.top, progressMargin.right, progressMargin.bottom));
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       marginRight?.addProgressListener((progress) {
-        progressMargin.right =
-            progress * marginRightInterval + baseMargin.right;
-        _updateMargin(EdgeInsets.fromLTRB(progressMargin.left,
-            progressMargin.top, progressMargin.right, progressMargin.bottom));
+        progressMargin.right = progress * marginRightInterval + baseMargin.right;
+        _updateMargin(
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
       });
       oldMargin = newMargin;
     } else {
@@ -477,11 +417,9 @@ mixin CSSSizingMixin {
     renderMargin.margin = margin;
   }
 
-  RenderObject initRenderPadding(
-      RenderObject renderObject, CSSStyleDeclaration style) {
+  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-    return renderPadding =
-        RenderPadding(padding: edgeInsets, child: renderObject);
+    return renderPadding = RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   CSSPadding getPaddingFromStyle(CSSStyleDeclaration style) {
@@ -490,19 +428,12 @@ mixin CSSSizingMixin {
 
   EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
     oldPadding = getPaddingFromStyle(style);
-    return EdgeInsets.fromLTRB(
-        oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
+    return EdgeInsets.fromLTRB(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(CSSStyleDeclaration style,
-      [Map<String, CSSTransition> transitionMap]) {
+  void updateRenderPadding(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     assert(renderPadding != null);
-    CSSTransition all,
-        padding,
-        paddingLeft,
-        paddingRight,
-        paddingBottom,
-        paddingTop;
+    CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
       padding = transitionMap["padding"];
@@ -524,35 +455,26 @@ mixin CSSSizingMixin {
       double paddingTopInterval = newPadding.top - oldPadding.top;
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-      CSSPadding progressPadding = CSSPadding(
-          oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
-      CSSPadding basePadding = CSSPadding(
-          oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
+      CSSPadding progressPadding = CSSPadding(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
+      CSSPadding basePadding = CSSPadding(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
 
       all?.addProgressListener((progress) {
         if (padding == null) {
           if (paddingTop == null) {
-            progressPadding.top =
-                progress * paddingTopInterval + basePadding.top;
+            progressPadding.top = progress * paddingTopInterval + basePadding.top;
           }
           if (paddingBottom == null) {
-            progressPadding.bottom =
-                progress * paddingBottomInterval + basePadding.bottom;
+            progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
           }
           if (paddingLeft == null) {
-            progressPadding.left =
-                progress * paddingLeftInterval + basePadding.left;
+            progressPadding.left = progress * paddingLeftInterval + basePadding.left;
           }
           if (paddingRight == null) {
-            progressPadding.right =
-                progress * paddingRightInterval + basePadding.right;
+            progressPadding.right = progress * paddingRightInterval + basePadding.right;
           }
 
           renderPadding.padding = EdgeInsets.fromLTRB(
-              progressPadding.left,
-              progressPadding.top,
-              progressPadding.right,
-              progressPadding.bottom);
+              progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
         }
       });
       padding?.addProgressListener((progress) {
@@ -560,43 +482,37 @@ mixin CSSSizingMixin {
           progressPadding.top = progress * paddingTopInterval + basePadding.top;
         }
         if (paddingBottom == null) {
-          progressPadding.bottom =
-              progress * paddingBottomInterval + basePadding.bottom;
+          progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
         }
         if (paddingLeft == null) {
-          progressPadding.left =
-              progress * paddingLeftInterval + basePadding.left;
+          progressPadding.left = progress * paddingLeftInterval + basePadding.left;
         }
         if (paddingRight == null) {
-          progressPadding.right =
-              progress * paddingRightInterval + basePadding.right;
+          progressPadding.right = progress * paddingRightInterval + basePadding.right;
         }
 
-        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
-            progressPadding.top, progressPadding.right, progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingTop?.addProgressListener((progress) {
         progressPadding.top = progress * paddingTopInterval + basePadding.top;
-        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
-            progressPadding.top, progressPadding.right, progressPadding.bottom);
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingBottom?.addProgressListener((progress) {
-        progressPadding.bottom =
-            progress * paddingBottomInterval + basePadding.bottom;
-        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
-            progressPadding.top, progressPadding.right, progressPadding.bottom);
+        progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingLeft?.addProgressListener((progress) {
-        progressPadding.left =
-            progress * paddingLeftInterval + basePadding.left;
-        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
-            progressPadding.top, progressPadding.right, progressPadding.bottom);
+        progressPadding.left = progress * paddingLeftInterval + basePadding.left;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingRight?.addProgressListener((progress) {
-        progressPadding.right =
-            progress * paddingRightInterval + basePadding.right;
-        renderPadding.padding = EdgeInsets.fromLTRB(progressPadding.left,
-            progressPadding.top, progressPadding.right, progressPadding.bottom);
+        progressPadding.right = progress * paddingRightInterval + basePadding.right;
+        renderPadding.padding = EdgeInsets.fromLTRB(
+            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
     }
@@ -625,8 +541,7 @@ class CSSSizedConstraints {
   double minHeight;
   double maxHeight;
 
-  CSSSizedConstraints(this.width, this.height, this.minWidth, this.maxWidth,
-      this.minHeight, this.maxHeight);
+  CSSSizedConstraints(this.width, this.height, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight);
 
   BoxConstraints toBoxConstraints() {
     return BoxConstraints(

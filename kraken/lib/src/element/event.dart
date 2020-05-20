@@ -72,8 +72,7 @@ class EventInit {
 
   factory EventInit({bubbles = false, cancelable = false}) {
     String key = bubbles.toString() + cancelable.toString();
-    return _cache.putIfAbsent(key,
-        () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
+    return _cache.putIfAbsent(key, () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
   }
 
   EventInit._internal({this.bubbles, this.cancelable});
@@ -127,7 +126,7 @@ class CloseEvent extends Event {
   /// Indicates whether or not the connection was cleanly closed
   bool wasClean;
 
-  CloseEvent(this.code, this.reason, this.wasClean): super('close');
+  CloseEvent(this.code, this.reason, this.wasClean) : super('close');
 
   @override
   Map toJson() {
@@ -152,8 +151,7 @@ class IntersectionChangeEvent extends Event {
 
 /// reference: https://w3c.github.io/touch-events/#touchevent-interface
 class TouchEvent extends Event {
-  TouchEvent(String type)
-      : super(type, EventInit(bubbles: true, cancelable: true));
+  TouchEvent(String type) : super(type, EventInit(bubbles: true, cancelable: true));
 
   TouchList touches = TouchList();
   TouchList targetTouches = TouchList();

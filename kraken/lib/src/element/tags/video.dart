@@ -20,13 +20,13 @@ List<VideoPlayerController> _videoControllers = [];
 
 class VideoElement extends Element {
   VideoElement(int targetId)
-    : super(
-        targetId: targetId,
-        defaultStyle: _defaultStyle,
-        allowChildren: false,
-        tagName: VIDEO,
-      );
-  
+      : super(
+          targetId: targetId,
+          defaultStyle: _defaultStyle,
+          allowChildren: false,
+          tagName: VIDEO,
+        );
+
   VideoPlayerController controller;
 
   String _src;
@@ -52,9 +52,7 @@ class VideoElement extends Element {
   Future<int> createVideoPlayer(String src) {
     Completer<int> completer = new Completer();
 
-    if (src.startsWith('//') ||
-        src.startsWith('http://') ||
-        src.startsWith('https://')) {
+    if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')) {
       controller = VideoPlayerController.network(src.startsWith('//') ? 'https:' + src : src);
     } else if (src.startsWith('file://')) {
       controller = VideoPlayerController.file(src);
@@ -114,8 +112,7 @@ class VideoElement extends Element {
   }
 
   Future<Map<String, dynamic>> getVideoDetail() async {
-    final Completer<Map<String, dynamic>> detailCompleter =
-        Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> detailCompleter = Completer<Map<String, dynamic>>();
     RendererBinding.instance.addPostFrameCallback((Duration timeout) {
       var value = controller.value;
       var duration = value.duration;

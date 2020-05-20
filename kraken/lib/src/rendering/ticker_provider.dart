@@ -11,8 +11,7 @@ mixin CustomTickerProviderStateMixin implements TickerProvider {
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= <_CustomTicker>{};
-    final _CustomTicker result =
-        _CustomTicker(onTick, this, debugLabel: 'created by $this');
+    final _CustomTicker result = _CustomTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;
   }
@@ -29,8 +28,7 @@ mixin CustomTickerProviderStateMixin implements TickerProvider {
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _CustomTicker extends Ticker {
-  _CustomTicker(TickerCallback onTick, this._creator, {String debugLabel})
-      : super(onTick, debugLabel: debugLabel);
+  _CustomTicker(TickerCallback onTick, this._creator, {String debugLabel}) : super(onTick, debugLabel: debugLabel);
 
   final CustomTickerProviderStateMixin _creator;
 

@@ -394,38 +394,53 @@ task('ios-clean', (done) => {
     let buildInSDKs = JSON.parse(execSync('xcodebuild -showsdks -json', {
       encoding: 'utf-8'
     }));
-    let iphoneSDK = buildInSDKs.find((info) => {
-      return info.platform === 'iphoneos';
-    });
-    let simulatorSDK = buildInSDKs.find((info) => {
-      return info.platform === 'iphonesimulator';
+
+    // generate build scripts for simulator
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
+      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+      -DPLATFORM=SIMULATOR64 \
+      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
+      cwd: paths.bridge,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        KRAKEN_JS_ENGINE: 'jsc',
+        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/x86_64')
+      }
     });
 
-    if (!iphoneSDK) {
-      throw new Error('No suitable iOS SDK found');
-    }
+    // build for simulator
+    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken -- -j 4`, {
+      stdio: 'inherit'
+    });
 
-    if (!simulatorSDK) {
-      throw new Error('No suitable iOS simulator found');
-    }
+    // geneate builds scripts for ARM64
+    execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
+      -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
+      -DPLATFORM=OS64 \
+      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+      cwd: paths.bridge,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        KRAKEN_JS_ENGINE: 'jsc',
+        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm64')
+      }
+    });
 
-    execSync(`xcodebuild -scheme libkraken build -target kraken -sdk ${simulatorSDK.canonicalName} -configuration ${mode} ONLY_ACTIVE_ARCH=NO TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/iossimulator`, {
-      cwd: path.join(paths.bridge, 'ios'),
+    // build for simulator
+    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken -- -j 4`, {
       stdio: 'inherit'
     });
-    execSync(`xcodebuild -scheme libkraken build -target libkraken -sdk ${iphoneSDK.canonicalName} ONLY_ACTIVE_ARCH=NO -configuration ${mode} TARGET_BUILD_DIR=../../sdk/build/ios/libkraken/${mode.toLowerCase()}/ios`, {
-      cwd: path.join(paths.bridge, 'ios'),
-      stdio: 'inherit'
-    });
-    execSync(`codesign --remove-signature ${paths.sdk}/build/ios/libkraken/${mode.toLowerCase()}/ios/kraken.framework`, {
-      stdio: 'inherit'
-    });
+
+    const arm64SDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
+    const x64SDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
+
     const targetPath = `${paths.sdk}/build/ios/framework/${mode}`;
-    const frameworkPath = `${targetPath}/kraken.framework`;
-    const plistPath = path.join(paths.scripts, 'support/kraken.plist');
+    const frameworkPath = `${targetPath}/kraken_bridge.framework`;
+    const plistPath = path.join(paths.scripts, 'support/kraken_bridge.plist');
     mkdirp.sync(frameworkPath);
-    execSync(`lipo -create ./${mode.toLowerCase()}/ios/kraken.framework/kraken ./${mode.toLowerCase()}/iossimulator/kraken.framework/kraken -output ${frameworkPath}/kraken`, {
-      cwd: path.join(paths.sdk, 'build/ios/libkraken'),
+    execSync(`lipo -create ${arm64SDKPath} ${x64SDKPath} -output ${frameworkPath}/kraken_bridge`, {
       stdio: 'inherit'
     });
     execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`);

@@ -16,12 +16,7 @@ class CanvasRenderingContext2DSettings {
 }
 
 class CanvasRenderingContext2D extends _CanvasRenderingContext2D
-    with
-        CanvasFillStrokeStyles2D,
-        CanvasPathDrawingStyles2D,
-        CanvasRect2D,
-        CanvasTextDrawingStyles2D,
-        CanvasText2D {
+    with CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D, CanvasRect2D, CanvasTextDrawingStyles2D, CanvasText2D {
   @override
   String type = 'CanvasRenderingContext2D';
 
@@ -93,8 +88,7 @@ class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   Color fillStyle = CSSColor.black;
 
   @override
-  CanvasGradient createLinearGradient(
-      double x0, double y0, double x1, double y1) {
+  CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1) {
     // TODO: implement createLinearGradient
     throw UnimplementedError();
   }
@@ -106,18 +100,14 @@ class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   }
 
   @override
-  CanvasGradient createRadialGradient(
-      double x0, double y0, double r0, double x1, double y1, double r1) {
+  CanvasGradient createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1) {
     // TODO: implement createRadialGradient
     throw UnimplementedError();
   }
 }
 
 mixin CanvasRect2D
-    on
-        _CanvasRenderingContext2D,
-        CanvasFillStrokeStyles2D,
-        CanvasPathDrawingStyles2D
+    on _CanvasRenderingContext2D, CanvasFillStrokeStyles2D, CanvasPathDrawingStyles2D
     implements CanvasRect {
   @override
   void clearRect(double x, double y, double w, double h) {
@@ -154,10 +144,7 @@ mixin CanvasRect2D
 }
 
 mixin CanvasText2D
-    on
-        _CanvasRenderingContext2D,
-        CanvasTextDrawingStyles2D,
-        CanvasFillStrokeStyles2D
+    on _CanvasRenderingContext2D, CanvasTextDrawingStyles2D, CanvasFillStrokeStyles2D
     implements CanvasText {
   TextStyle _getTextStyle(Color color) {
     return TextStyle(

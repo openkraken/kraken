@@ -8,8 +8,7 @@ mixin EventHandlerMixin on Node {
   num _touchEndTime = 0;
 
   static const int MAX_STEP_MS = 10;
-  final Throttling _throttler =
-      Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
   void handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);
@@ -30,9 +29,7 @@ mixin EventHandlerMixin on Node {
     this.dispatchEvent(event);
 
     // <300ms to trigger click
-    if (_touchStartTime > 0 &&
-        _touchEndTime > 0 &&
-        _touchEndTime - _touchStartTime < 300) {
+    if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
       handleClick(Event('click', EventInit()));
     }
   }
@@ -84,8 +81,8 @@ mixin EventHandlerMixin on Node {
   void handleIntersectionChange(IntersectionObserverEntry entry) {
     // Only visible element will trigger intersection change event
     Rect boundingClientRect = entry.boundingClientRect;
-    if (boundingClientRect.left == boundingClientRect.right ||
-        boundingClientRect.top == boundingClientRect.bottom) return;
+    if (boundingClientRect.left == boundingClientRect.right || boundingClientRect.top == boundingClientRect.bottom)
+      return;
 
     this.dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
     if (entry.intersectionRatio > 0) {

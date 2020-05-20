@@ -14,9 +14,10 @@ const double DEFAULT_FONT_WEIGHT = 400.0;
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin {
   TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
+    TextStyle textStyle = style != null ? getTextStyle(style) : null;
     return TextSpan(
       text: text,
-      style: style != null ? getTextStyle(style) : null,
+      style: textStyle,
     );
   }
 
@@ -203,8 +204,7 @@ mixin CSSTextMixin {
             fontWeightValue = 900;
             break;
           default:
-            fontWeightValue =
-                double.tryParse(fontWeight) ?? DEFAULT_FONT_WEIGHT;
+            fontWeightValue = double.tryParse(fontWeight) ?? DEFAULT_FONT_WEIGHT;
             break;
         }
       }
@@ -256,9 +256,7 @@ mixin CSSTextMixin {
 
   static String DEFAULT_FONT_FAMILY = '';
   String getFontFamily(CSSStyleDeclaration style) {
-    return style.contains(FONT_FAMILY)
-        ? style[FONT_FAMILY]
-        : DEFAULT_FONT_FAMILY;
+    return style.contains(FONT_FAMILY) ? style[FONT_FAMILY] : DEFAULT_FONT_FAMILY;
   }
 
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
@@ -298,8 +296,7 @@ mixin CSSTextMixin {
 
   double getHeight(CSSStyleDeclaration style) {
     if (style.contains(LINE_HEIGHT)) {
-      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) /
-          getFontSize(style);
+      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
     } else {
       return null;
     }
@@ -324,17 +321,14 @@ mixin CSSTextMixin {
   List<Shadow> getShadows(CSSStyleDeclaration style) {
     List<Shadow> textShadows = [];
     if (style.contains('textShadow')) {
-      String processedValue =
-          CSSColor.preprocessCSSPropertyWithRGBAColor(style['textShadow']);
+      String processedValue = CSSColor.preprocessCSSPropertyWithRGBAColor(style['textShadow']);
       List<String> rawShadows = processedValue.split(commaRegExp);
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
-          double blurRadius = shadowDefinitions.length > 3
-              ? CSSLength.toDisplayPortValue(shadowDefinitions[2])
-              : 0.0;
+          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) : 0.0;
           Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {
             textShadows.add(Shadow(
