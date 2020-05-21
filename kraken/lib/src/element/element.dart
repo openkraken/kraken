@@ -915,13 +915,16 @@ class Element extends Node
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
+    RenderObjectWithChildMixin parentRenderObject = renderVisibility != null ? renderVisibility : renderIntersectionObserver;
+
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderMargin);
+    updateRenderOpacity(present, parentRenderObject: parentRenderObject);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
+
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderMargin);
+    updateRenderVisibility(present, parentRenderObject: transform);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
