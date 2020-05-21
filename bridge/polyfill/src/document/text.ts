@@ -22,18 +22,18 @@ export class TextNode extends Node {
   }
 
   public set nodeValue(data: string) {
-    this._data = String(data);
+    this.data = String(data);
   }
 
   public get nodeValue() {
-    return this._data;
+    return this.data;
   }
 
   public set textContent(data: string) {
-    this._data = String(data);
+    this.data = String(data);
   }
 
   public get textContent() {
-    return this._data;
+    return this.data;
   }
 }
