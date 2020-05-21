@@ -36,9 +36,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // pre-line	Preserve	Collapse	Wrap	Remove
     // break-spaces	Preserve	Preserve	Wrap	Wrap
     if (whiteSpace.startsWith('pre') || whiteSpace == 'break-spaces') {
-      return whiteSpace == 'pre-line'
-          ? collapseWhitespace(_data, collapseSpace: true)
-          : _data;
+      return whiteSpace == 'pre-line' ? collapseWhitespace(_data, collapseSpace: true) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
       // Append space while prev is element.
@@ -105,10 +103,7 @@ bool isLineBreaker(String ch) => ch == '\n' || ch == '\r' || ch == '\t';
 
 /// Utility function to collapse whitespace runs to single spaces
 /// and strip leading/trailing whitespace.
-String collapseWhitespace(String string, {
-  bool collapseSpace = true,
-  bool collapseLineBreaker = true
-}) {
+String collapseWhitespace(String string, {bool collapseSpace = true, bool collapseLineBreaker = true}) {
   var result = StringBuffer();
   var _skip = true;
   for (var i = 0; i < string.length; i++) {

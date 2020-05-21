@@ -5,14 +5,14 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 class PositionParentData extends StackParentData {
-  RenderBox originalRenderBoxRef;
+  RenderPositionHolder renderPositionHolder;
   int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
 
   /// Get element original position offset to parent(layoutBox) should be.
   Offset get stackedChildOriginalRelativeOffset {
-    if (originalRenderBoxRef == null) return Offset.zero;
-    return (originalRenderBoxRef.parentData as BoxParentData).offset;
+    if (renderPositionHolder == null) return Offset.zero;
+    return (renderPositionHolder.parentData as BoxParentData).offset;
   }
 
   @override
@@ -20,7 +20,7 @@ class PositionParentData extends StackParentData {
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; originalRenderBoxRef=$originalRenderBoxRef; ${super.toString()}';
+    return 'zIndex=$zIndex; position=$position; renderPositionHolder=$renderPositionHolder; ${super.toString()}';
   }
 }
 
@@ -70,8 +70,8 @@ class RenderPosition extends RenderStack {
         height = math.max(height, childSize.height);
 
         if (childParentData.position == CSSPositionType.fixed) {
-          if (childParentData.originalRenderBoxRef != null)
-            childParentData.offset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero);
+          if (childParentData.renderPositionHolder != null)
+            childParentData.offset = childParentData.renderPositionHolder.localToGlobal(Offset.zero);
         } else {
           if (childParentData.originalRenderBoxRef != null) {
             childParentData.offset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) -
@@ -103,7 +103,7 @@ class RenderPosition extends RenderStack {
         // Offset to global coordinate system of base
         if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
           Offset baseOffset =
-              childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
+              childParentData.renderPositionHolder.localToGlobal(Offset.zero) - localToGlobal(Offset.zero);
 
           double top = childParentData.top ?? baseOffset.dy;
           if (childParentData.top == null && childParentData.bottom != null)
@@ -120,8 +120,8 @@ class RenderPosition extends RenderStack {
           double top = childParentData.top ?? -(childParentData.bottom ?? 0);
           double left = childParentData.left ?? -(childParentData.right ?? 0);
 
-          RenderBox renderLayoutBox = childParentData.originalRenderBoxRef.parent as RenderBox;
-          RenderBox renderPadding = childParentData.originalRenderBoxRef.parent.parent as RenderBox;
+          RenderBox renderLayoutBox = childParentData.renderPositionHolder.parent as RenderBox;
+          RenderBox renderPadding = childParentData.renderPositionHolder.parent.parent as RenderBox;
           Offset paddingOffset = renderLayoutBox.localToGlobal(Offset.zero) - renderPadding.localToGlobal(Offset.zero);
           x = baseOffset.dx + paddingOffset.dx + left;
           y = baseOffset.dy + paddingOffset.dy + top;

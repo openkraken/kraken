@@ -114,6 +114,10 @@ function inspect(obj: any, within?: boolean): string {
 
   var kind = Object.prototype.toString.call(obj).slice(8, -1);
   switch (kind) {
+    case 'Null':
+      return 'null';
+    case 'Undefined':
+      return 'undefined';
     case 'String':
       return within ? `'${obj}'` : obj;
     case 'Function':

@@ -2,3 +2,4 @@
 analyzer:
   exclude:
     - build/**
+    - plugins/**

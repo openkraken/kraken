@@ -1,6 +1,7 @@
 const {spawn, fork} = require('child_process');
 const path = require('path');
 const {startWsServer} = require('./ws_server');
+const isPortReachable = require('is-port-reachable');
 
 function startIntegrationTest() {
   const tester = spawn('flutter', ['driver', '--target=integration/app.dart', '--driver=integration/app_test.dart', '-d', 'macos'], {
@@ -20,5 +21,10 @@ function startIntegrationTest() {
   });
 }
 
-startIntegrationTest();
-startWsServer();
+(async () => {
+  startIntegrationTest();
+  const PORT = 8399;
+  if (!await isPortReachable(PORT)) {
+    startWsServer(PORT);
+  }
+})();

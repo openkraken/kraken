@@ -231,13 +231,14 @@ class Element extends Node
     List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
     renderDecoratedBox.child = null;
 
+    // Stack children that is attached but not
     children.forEach((element) {
       if (_isPositioned(element.style)) {
         RenderElementBoundary child = element.renderElementBoundary;
         // Parent should be one of RenderFlowLayout or RenderFlexLayout,
         // Only move attached child.
         // @TODO: can be optimized by common abstract class.
-        if (child.attached) {
+        if (child.attached && child.parent is! RenderStack) {
           (child.parent as ContainerRenderObjectMixin).remove(child);
           shouldStackedChildren.add(child);
         }
@@ -403,7 +404,7 @@ class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     String flexWrap = style['flexWrap'];
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
@@ -444,17 +445,19 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    CSSPositionType positionType = resolvePositionFromStyle(style);
     CSSStyleDeclaration parentStyle = parent.style;
-    String parentDisplay = isEmptyStyleValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
-    bool isParentFlex = parentDisplay.endsWith('flex');
+    String parentDisplayValue =
+        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
+    // InlineFlex or Flex
+    bool isParentFlexDisplayType = parentDisplayValue.endsWith('flex');
 
     // Add FlexItem wrap for flex child node.
-    if (isParentFlex && renderLayoutBox != null) {
+    if (isParentFlexDisplayType && renderLayoutBox != null) {
       renderPadding.child = null;
       renderPadding.child = RenderFlexItem(child: renderLayoutBox as RenderBox);
     }
 
+    CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
       case CSSPositionType.relative:
       case CSSPositionType.absolute:
@@ -470,7 +473,7 @@ class Element extends Node
     }
 
     /// Update flex siblings.
-    if (isParentFlex) parent.children.forEach(_updateFlexItemStyle);
+    if (isParentFlexDisplayType) parent.children.forEach(_updateFlexItemStyle);
   }
 
   // Detach renderObject of current node from parent
@@ -486,13 +489,12 @@ class Element extends Node
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parentRenderObject == parent.renderStack) {
-      parent.renderStack.remove(renderElementBoundary);
-    } else {
-      // Fixed or sticky.
-      final RenderStack rootRenderStack = ElementManager().getRootElement().renderStack;
-      if (parent == rootRenderStack) {
-        rootRenderStack.remove(renderElementBoundary);
+    } else if (parentRenderObject is RenderStack) {
+      PositionParentData parentData = renderElementBoundary.parentData;
+      if (parentData.renderPositionHolder != null) {
+        ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
+        parent.remove(parentData.renderPositionHolder);
+        parentRenderObject.remove(renderElementBoundary);
       }
     }
   }
@@ -772,8 +774,8 @@ class Element extends Node
     renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
-      String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
-      String currentDisplay = isEmptyStyleValue(present) ? defaultDisplay : present;
+      String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
+      String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
       if (prevDisplay != currentDisplay) {
         ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
         // Collect children of renderLayoutBox and remove their relationship.
@@ -870,7 +872,7 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
       // Collect children of renderLayoutBox and remove their relationship.
@@ -894,7 +896,7 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -1227,7 +1229,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains('position')) {
     String position = style['position'];
-    return position != 'static';
+    return position != '' && position != 'static';
   } else {
     return false;
   }
@@ -1239,7 +1241,7 @@ bool _isSticky(CSSStyleDeclaration style) {
 
 PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
   PositionParentData parentData = PositionParentData();
-  parentData.originalRenderBoxRef = placeholder;
+  parentData.renderPositionHolder = placeholder;
   parentData.position = resolvePositionFromStyle(style);
 
   if (style.contains('top')) {
