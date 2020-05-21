@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('gradients-with', () => {
-  xit('border', async () => {
+  it('border', async () => {
     let gradient1;
     let gradient2;
     let gradient3;
@@ -39,7 +39,7 @@ describe('gradients-with', () => {
         border: '10px solid blue',
         'border-left-width': '100px',
         'background-image':
-          'radial-gradient(ellipse at 30% 30%, black 49%, white 50%)',
+          'radial-gradient(circle at 30% 30%, black 49%, white 50%)',
         'box-sizing': 'border-box',
       },
     });
