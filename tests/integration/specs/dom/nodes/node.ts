@@ -9,6 +9,7 @@
  * - Node.prototype.removeChild
  * - Node.prototype.insertBefore
  * - Node.prototype.replaceChild
+ * - ChildNode.prototype.remove
  */
 describe('Node API', () => {
   it('should work', async () => {
@@ -35,5 +36,13 @@ describe('Node API', () => {
     el.replaceChild(child_3, child_1);
 
     await matchScreenshot();
+  });
+
+  it('ChildNode.prototype.remove', () => {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    el.remove();
+
+    expect(document.body.childNodes.length).toEqual(0);
   });
 });
