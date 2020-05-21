@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 
-exports.startWsServer = function() {
-  const simpleServer = new WebSocket.Server({ port: 8399 });
+exports.startWsServer = function(port) {
+  const simpleServer = new WebSocket.Server({ port: port });
 
   let unstableServer;
 
@@ -9,7 +9,7 @@ exports.startWsServer = function() {
   // used to test failed connection
   setInterval(() => {
     if (!unstableServer) {
-      unstableServer = new WebSocket.Server({ port: 8400 });
+      unstableServer = new WebSocket.Server({ port: port + 1 });
     } else {
       // trigger server close and notify all clients.
       unstableServer.close();
