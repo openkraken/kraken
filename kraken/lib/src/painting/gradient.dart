@@ -6,13 +6,13 @@ import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 
 // ignore: must_be_immutable
-class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
+class WebLinearGradient extends LinearGradient with BorderGradientMixin {
 
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  CustomLinearGradient({
+  WebLinearGradient({
     Alignment begin = Alignment.centerLeft,
     Alignment end = Alignment.centerRight,
     double angle,
@@ -65,13 +65,13 @@ class CustomLinearGradient extends LinearGradient with CustomGradientMixin {
 }
 
 // ignore: must_be_immutable
-class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
+class WebRadialGradient extends RadialGradient with BorderGradientMixin {
 
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  CustomRadialGradient({
+  WebRadialGradient({
     AlignmentGeometry center = Alignment.center,
     double radius = 1.0,
     @required List<Color> colors,
@@ -120,13 +120,13 @@ class CustomRadialGradient extends RadialGradient with CustomGradientMixin {
 }
 
 // ignore: must_be_immutable
-class CustomSweepGradient extends SweepGradient with CustomGradientMixin {
+class WebConicGradient extends SweepGradient with BorderGradientMixin {
 
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  CustomSweepGradient({
+  WebConicGradient({
     AlignmentGeometry center = Alignment.center,
     @required List<Color> colors,
     List<double> stops,
@@ -142,7 +142,7 @@ class CustomSweepGradient extends SweepGradient with CustomGradientMixin {
   }
 }
 
-mixin CustomGradientMixin on Gradient {
+mixin BorderGradientMixin on Gradient {
 
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;

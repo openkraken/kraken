@@ -474,7 +474,7 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = CustomLinearGradient(
+            gradient = WebLinearGradient(
                 begin: begin,
                 end: end,
                 angle: linearAngle,
@@ -510,7 +510,7 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = CustomRadialGradient(
+            gradient = WebRadialGradient(
               center: FractionalOffset(atX, atY),
               radius: radius,
               colors: colors,
@@ -542,7 +542,7 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = CustomSweepGradient(
+            gradient = WebConicGradient(
                 center: FractionalOffset(atX, atY),
                 colors: colors,
                 stops: stops,

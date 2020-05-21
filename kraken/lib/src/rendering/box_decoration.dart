@@ -37,7 +37,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
     _borderEdge = newValue;
     if (_decoration != null && _decoration is BoxDecoration) {
       Gradient gradient = (_decoration as BoxDecoration).gradient;
-      if (gradient is CustomGradientMixin) {
+      if (gradient is BorderGradientMixin) {
         gradient.borderEdge = newValue;
       }
     }
