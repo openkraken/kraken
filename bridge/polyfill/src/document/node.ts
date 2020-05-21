@@ -60,11 +60,23 @@ export class Node extends EventTarget {
     return parentChildNodes[parentChildNodes.indexOf(this) + 1];
   }
 
+  private _ensureDetached(child: Node) {
+    if (child.isConnected) {
+      const idx = child.parentNode!.childNodes.indexOf(child);
+      if (idx !== -1) {
+        child.parentNode!.childNodes.splice(idx, 1);
+        child.parentNode = null;
+      }
+    }
+  }
+
   public appendChild(child: Node) {
     // @TODO add logic to tell whether child to append contains the parent
     if (child.targetId === BODY || child === this) {
       throw new Error(`Failed to execute 'appendChild' on 'Node': The new child element contains the parent.`);
     }
+
+    this._ensureDetached(child);
 
     this.childNodes.push(child);
     child.parentNode = this;
@@ -108,6 +120,7 @@ export class Node extends EventTarget {
     if (referenceNode === null) {
       this.appendChild(newChild);
     } else {
+      this._ensureDetached(newChild);
       const parentNode = referenceNode.parentNode;
       if (parentNode != null) {
         const parentChildNodes = parentNode.childNodes;
@@ -129,6 +142,8 @@ export class Node extends EventTarget {
     const argLength = arguments.length;
     if (argLength < 2) throw new Error(`Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required, but only ${argLength} present.`);
     if (!oldChild.parentNode) throw new Error(`Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.`);
+
+    this._ensureDetached(newChild);
 
     const parentNode = oldChild.parentNode;
     oldChild.parentNode = null;
