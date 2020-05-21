@@ -73,8 +73,8 @@ class RenderPosition extends RenderStack {
           if (childParentData.renderPositionHolder != null)
             childParentData.offset = childParentData.renderPositionHolder.localToGlobal(Offset.zero);
         } else {
-          if (childParentData.originalRenderBoxRef != null) {
-            childParentData.offset = childParentData.originalRenderBoxRef.localToGlobal(Offset.zero) -
+          if (childParentData.renderPositionHolder != null) {
+            childParentData.offset = childParentData.renderPositionHolder.localToGlobal(Offset.zero) -
                 this.localToGlobal(Offset.zero);
           }
         }
