@@ -4,10 +4,11 @@
  */
 
 import 'dart:async';
-
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
+
+import '../element.dart';
+import '../event.dart';
 
 const String VIDEO = 'VIDEO';
 
@@ -111,79 +112,48 @@ class VideoElement extends Element {
     renderPadding.child = null;
   }
 
-  Future<Map<String, dynamic>> getVideoDetail() async {
-    final Completer<Map<String, dynamic>> detailCompleter = Completer<Map<String, dynamic>>();
-    RendererBinding.instance.addPostFrameCallback((Duration timeout) {
-      var value = controller.value;
-      var duration = value.duration;
-
-      if (renderPadding.child != null) {
-        Size size = renderPadding.size;
-        detailCompleter.complete({
-          'videoWidth': size.width,
-          'videoHeight': size.height,
-          'src': _src,
-          'duration': '${duration.inSeconds}',
-          'volume': value.volume,
-          'position': value.position.inSeconds,
-          'paused': !value.isPlaying,
-        });
-      }
-    });
-    return detailCompleter.future;
-  }
-
   onCanPlay() async {
     Event event = Event('canplay', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onCanPlayThrough() async {
     Event event = Event('canplaythrough', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onEnded() async {
     Event event = Event('ended', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onError(int code, String error) {
-    Event event = Event('error', EventInit());
-    event.detail = {'code': code, 'message': error};
+    Event event = MediaError(code, error);
     dispatchEvent(event);
   }
 
   onPause() async {
     Event event = Event('pause', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onPlay() async {
     Event event = Event('play', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onSeeked() async {
     Event event = Event('seeked', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onSeeking() async {
     Event event = Event('seeking', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
   onVolumeChange() async {
     Event event = Event('volumechange', EventInit());
-    event.detail = await getVideoDetail();
     dispatchEvent(event);
   }
 
@@ -210,6 +180,42 @@ class VideoElement extends Element {
     super.setProperty(key, value);
     if (key == 'src') {
       src = value.toString();
+    } else if (key == 'loop') {
+      controller.setLooping(value == 'true' ? true : false);
+    } else if (key == 'currentTime') {
+      controller.seekTo(Duration(seconds: int.parse(value)));
+    }
+  }
+
+  @override
+  dynamic getProperty(String key) {
+    print('getProperty $key');
+    switch (key) {
+      case 'loop':
+        return controller.value.isLooping;
+      case 'currentTime':
+        return controller.value.position.inSeconds;
+      case 'src':
+        return _src;
+      case 'videoWidth':
+        return controller.value.size.width;
+      case 'videoHeight':
+        return controller.value.size.height;
+    }
+
+    return super.getProperty(key);
+  }
+
+  @override
+  void removeProperty(String key) {
+    super.removeProperty(key);
+    switch(key) {
+      case 'loop':
+        controller.setLooping(false);
+        break;
+      case 'muted':
+        controller.setMuted(false);
+        break;
     }
   }
 
