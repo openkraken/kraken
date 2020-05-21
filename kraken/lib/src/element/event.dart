@@ -96,6 +96,30 @@ class DisappearEvent extends Event {
   DisappearEvent() : super('disappear');
 }
 
+class MediaErrorCode {
+  // The fetching of the associated resource was aborted by the user's request.
+  static const double MEDIA_ERR_ABORTED = 1;
+  // Some kind of network error occurred which prevented the media from being successfully fetched, despite having previously been available.
+  static const double MEDIA_ERR_NETWORK = 2;
+  // Despite having previously been determined to be usable, an error occurred while trying to decode the media resource, resulting in an error.
+  static const double MEDIA_ERR_DECODE = 3;
+  // The associated resource or media provider object (such as a MediaStream) has been found to be unsuitable.
+  static const double MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
+}
+
+class MediaError extends Event {
+  /// A number which represents the general type of error that occurred, as follow
+  int code;
+
+  /// a human-readable string which provides specific diagnostic information to help the reader understand the error condition which occurred;
+  /// specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong.
+  /// This text and its format is not defined by the specification and will vary from one user agent to another.
+  /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
+  String message;
+
+  MediaError(this.code, this.message): super('error');
+}
+
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
 class MessageEvent extends Event {
   /// The data sent by the message emitter.
