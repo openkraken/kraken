@@ -61,7 +61,7 @@ export class Node extends EventTarget {
   }
 
   private _ensureDetached(child: Node) {
-    if (child.isConnected) {
+    if (child.parentNode) {
       const idx = child.parentNode!.childNodes.indexOf(child);
       if (idx !== -1) {
         child.parentNode!.childNodes.splice(idx, 1);
