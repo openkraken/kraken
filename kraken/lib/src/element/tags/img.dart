@@ -14,13 +14,13 @@ const Map<String, dynamic> _defaultStyle = {'display': 'inline-block'};
 
 class ImageElement extends Element {
   ImageProvider image;
-  RenderDecoratedBox imageBox;
+  RenderImage imageBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
 
   ImageElement(int targetId)
-      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE);
+      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: true, tagName: IMAGE);
 
   bool _hasLazyLoading = false;
 
@@ -65,9 +65,7 @@ class ImageElement extends Element {
   }
 
   void _constructImageChild() {
-    imageBox = getRenderDecoratedBox(style, image);
-
-    imageStream = image.resolve(imageBox.configuration);
+    imageStream = image.resolve(ImageConfiguration.empty);
     // Store listeners for remove listener.
     imageListeners = [
       ImageStreamListener(_initImageInfo),
@@ -75,6 +73,7 @@ class ImageElement extends Element {
     imageListeners.forEach((ImageStreamListener imageListener) {
       imageStream.addListener(imageListener);
     });
+    imageBox = getRenderImageBox(style, image);
 
     if (childNodes.isEmpty) {
       addChild(imageBox);
@@ -87,6 +86,7 @@ class ImageElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
+    imageBox.image = _imageInfo?.image;
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
 
     _resize();
@@ -101,19 +101,15 @@ class ImageElement extends Element {
     });
     imageListeners = null;
 
-    BoxConstraints constraints;
     double realWidth = _imageInfo.image.width + 0.0;
     double realHeight = _imageInfo.image.height + 0.0;
     double width = 0.0;
     double height = 0.0;
     bool containWidth = style.contains('width');
     bool containHeight = style.contains('height');
-
     if (!containWidth && !containHeight) {
-      constraints = BoxConstraints.tightFor(
-        width: realWidth,
-        height: realHeight,
-      );
+      width = realWidth;
+      height = realHeight;
     } else {
       CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
       if (containWidth && containHeight) {
@@ -126,12 +122,9 @@ class ImageElement extends Element {
         height = sizedConstraints.height;
         width = height * realWidth / realHeight;
       }
-      constraints = BoxConstraints.expand(
-        width: width,
-        height: height,
-      );
     }
-    renderConstrainedBox.additionalConstraints = constraints;
+    imageBox.width = width;
+    imageBox.height = height;
   }
 
   BoxFit _getBoxFit(CSSStyleDeclaration style) {
@@ -207,19 +200,22 @@ class ImageElement extends Element {
     }
   }
 
-  RenderDecoratedBox getRenderDecoratedBox(CSSStyleDeclaration style, ImageProvider image) {
-    BoxFit fit = _getBoxFit(style);
-    Alignment alignment = _getAlignment(style);
-    return RenderDecoratedBox(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: image,
-          fit: fit,
-          alignment: alignment,
-        ),
-      ),
-      position: DecorationPosition.foreground,
+  RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
+    return RenderImage(
+      image: _imageInfo?.image ,
     );
+//    BoxFit fit = _getBoxFit(style);
+//    Alignment alignment = _getAlignment(style);
+//    return RenderDecoratedBox(
+//      decoration: BoxDecoration(
+//        image: DecorationImage(
+//          image: image,
+//          fit: fit,
+//          alignment: alignment,
+//        ),
+//      ),
+//      position: DecorationPosition.foreground,
+//    );
   }
 
   @override

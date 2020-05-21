@@ -167,11 +167,11 @@ class Element extends Node
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
 
-    // BoxModel Margin
-    renderObject = initRenderMargin(renderObject, style);
+    // Transform
+    renderObject = initTransform(renderObject, style, targetId);
 
-    // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
+    // BoxModel Margin
+    renderObject = renderElementBoundary = initRenderMargin(renderObject, style, targetId);
 
     // Build root render stack.
     if (targetId == BODY_ID) {
@@ -476,6 +476,13 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
+    // Remove element's placeholder RenderObject if exists
+    PositionParentData parentData = renderElementBoundary.parentData;
+    if (parentData.originalRenderBoxRef != null) {
+      ContainerRenderObjectMixin placeholderParent = parentData.originalRenderBoxRef.parent;
+      placeholderParent.remove(parentData.originalRenderBoxRef);
+    }
+
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);

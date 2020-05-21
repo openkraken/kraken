@@ -28,15 +28,12 @@ mixin CSSTransformMixin on Node {
       }
     }
 
-    bool shouldRender = style['display'] != 'none';
-    transform = RenderElementBoundary(
+    transform = RenderElementTransform(
       child: current,
       transform: matrix4,
       targetId: targetId,
-      style: style,
       origin: oldOffset,
       alignment: oldAlignment,
-      shouldRender: shouldRender,
     );
     return transform;
   }
