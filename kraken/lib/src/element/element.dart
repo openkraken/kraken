@@ -261,7 +261,7 @@ class Element extends Node
     (renderStack.parent as RenderObjectWithChildMixin).child = originalChild;
 
     if (renderStack.childCount > 0) {
-      Element parentPositionedElement = findParent(this, (el) => el.renderStack != null);
+      Element parentPositionedElement = findPositionedParent(this, (el) => el.renderStack != null);
       List<RenderBox> stackedChildren = renderStack.getChildrenAsList();
       for (var stackedChild in stackedChildren) {
         renderStack.dropChild(stackedChild);
@@ -608,7 +608,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.absolute:
-        Element parentStackedElement = findParent(child, (element) => element.renderStack != null);
+        Element parentStackedElement = findPositionedParent(child, (element) => element.renderStack != null);
         parentRenderPosition = parentStackedElement.renderStack;
         break;
 
@@ -1084,7 +1084,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    Element element = findParent(this, (element) => element.renderStack != null);
+    Element element = findPositionedParent(this, (element) => element.renderStack != null);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1184,9 +1184,15 @@ class Element extends Node
   }
 }
 
-Element findParent(Element element, TestElement testElement) {
+Element findPositionedParent(Element element, TestElement testElement) {
   Element _el = element?.parent;
-  while (_el != null && !testElement(_el)) {
+
+  while (_el != null) {
+    bool isElementNonStatic = _el.style['position'] != 'static' &&
+      _el.style['position'] != '';
+    if (testElement(_el) && isElementNonStatic) {
+      break;
+    }
     _el = _el.parent;
   }
   return _el;

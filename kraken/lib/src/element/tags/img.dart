@@ -202,20 +202,8 @@ class ImageElement extends Element {
 
   RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
     return RenderImage(
-      image: _imageInfo?.image ,
+      image: _imageInfo?.image,
     );
-//    BoxFit fit = _getBoxFit(style);
-//    Alignment alignment = _getAlignment(style);
-//    return RenderDecoratedBox(
-//      decoration: BoxDecoration(
-//        image: DecorationImage(
-//          image: image,
-//          fit: fit,
-//          alignment: alignment,
-//        ),
-//      ),
-//      position: DecorationPosition.foreground,
-//    );
   }
 
   @override
