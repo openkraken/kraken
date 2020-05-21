@@ -404,7 +404,7 @@ class Element extends Node
   }
 
   ContainerRenderObjectMixin createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     String flexWrap = style['flexWrap'];
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
@@ -445,17 +445,19 @@ class Element extends Node
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    CSSPositionType positionType = resolvePositionFromStyle(style);
     CSSStyleDeclaration parentStyle = parent.style;
-    String parentDisplay = isEmptyStyleValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
-    bool isParentFlex = parentDisplay.endsWith('flex');
+    String parentDisplayValue =
+        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
+    // InlineFlex or Flex
+    bool isParentFlexDisplayType = parentDisplayValue.endsWith('flex');
 
     // Add FlexItem wrap for flex child node.
-    if (isParentFlex && renderLayoutBox != null) {
+    if (isParentFlexDisplayType && renderLayoutBox != null) {
       renderPadding.child = null;
       renderPadding.child = RenderFlexItem(child: renderLayoutBox as RenderBox);
     }
 
+    CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
       case CSSPositionType.relative:
       case CSSPositionType.absolute:
@@ -471,7 +473,7 @@ class Element extends Node
     }
 
     /// Update flex siblings.
-    if (isParentFlex) parent.children.forEach(_updateFlexItemStyle);
+    if (isParentFlexDisplayType) parent.children.forEach(_updateFlexItemStyle);
   }
 
   // Detach renderObject of current node from parent
@@ -763,8 +765,8 @@ class Element extends Node
     renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
-      String prevDisplay = isEmptyStyleValue(original) ? defaultDisplay : original;
-      String currentDisplay = isEmptyStyleValue(present) ? defaultDisplay : present;
+      String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
+      String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
       if (prevDisplay != currentDisplay) {
         ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
         // Collect children of renderLayoutBox and remove their relationship.
@@ -861,7 +863,7 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
       // Collect children of renderLayoutBox and remove their relationship.
@@ -885,7 +887,7 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    String display = isEmptyStyleValue(style['display']) ? defaultDisplay : style['display'];
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
       children.forEach((Element child) {
         _updateFlexItemStyle(child);

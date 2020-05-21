@@ -164,17 +164,17 @@ class CSSFlexItem {
     RenderFlexParentData parentData = RenderFlexParentData();
 
     String grow = style[GROW];
-    parentData.flexGrow = isEmptyStyleValue(grow)
+    parentData.flexGrow = CSSStyleDeclaration.isNullOrEmptyValue(grow)
         ? 0 // Grow default to 0.
         : CSSLength.toInt(grow);
 
     String shrink = style[SHRINK];
-    parentData.flexShrink = isEmptyStyleValue(shrink)
+    parentData.flexShrink = CSSStyleDeclaration.isNullOrEmptyValue(shrink)
         ? 1 // Shrink default to 1.
         : CSSLength.toInt(shrink);
 
     String basis = style[BASIS];
-    parentData.flexBasis = isEmptyStyleValue(basis)
+    parentData.flexBasis = CSSStyleDeclaration.isNullOrEmptyValue(basis)
         ? 'auto' // flexBasis default to auto.
         : basis;
 
