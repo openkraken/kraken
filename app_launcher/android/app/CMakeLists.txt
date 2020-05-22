@@ -4,4 +4,6 @@ set(IS_ANDROID true)
 
 set(ENV{KRAKEN_JS_ENGINE} jsc)
 
+add_definitions(-DIS_ANDROID)
+
 add_subdirectory(./bridge)
