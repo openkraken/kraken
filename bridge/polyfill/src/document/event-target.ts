@@ -126,3 +126,9 @@ export class ErrorEvent extends Event {
     }
   }
 }
+
+export class CustomEvent extends Event {
+  constructor(type: string) {
+    super(type);
+  }
+}
