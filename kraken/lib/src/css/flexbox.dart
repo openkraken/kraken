@@ -63,9 +63,10 @@ mixin CSSFlexboxMixin {
 
   MainAxisAlignment _getAlignContent(CSSStyleDeclaration style, Axis axis) {
     // @TODO: add flex-direction column support
-    String flexProperty = style['alignContent'];
+    String flexProperty = style[ALIGN_CONTENT];
     MainAxisAlignment runAlignment = MainAxisAlignment.start;
     switch (flexProperty) {
+      case 'flex-end':
       case 'end':
         runAlignment = MainAxisAlignment.end;
         break;
