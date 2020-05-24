@@ -30,7 +30,7 @@ describe('Background linear-gradient', () => {
     Object.assign(div3.style, {
       width: '200px',
       height: '200px',
-      backgroundImage: 'radial-gradient(50%, red 0%, yellow 20%, blue 80%)',
+      backgroundImage: 'radial-gradient(circle at 50% 50%, red 0%, yellow 20%, blue 80%)',
     });
 
     append(BODY, div3);

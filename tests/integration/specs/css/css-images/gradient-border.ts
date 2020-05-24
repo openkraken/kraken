@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('gradient-border', () => {
-  xit('box-ref', async () => {
+  it('box-ref', async () => {
     let x;
     x = createElement('div', {
       id: 'x',

@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('normalization-radial', () => {
-  xit('2', async () => {
+  it('2', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',

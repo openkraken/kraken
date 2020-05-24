@@ -25,7 +25,6 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     EdgeInsets borderEdge = oldDecoration.getBorderEdgeInsets();
 
     return renderDecoratedBox = RenderDecorateElementBox(
-      targetId: targetId,
       borderEdge: borderEdge,
       decoration: oldDecoration.toBoxDecoration(),
       child: renderObject,
@@ -90,12 +89,6 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       }
     } else {
       renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-      // Update can not trigger performlayout.
-      // Gradient need trigger performlayout to recaculate the alignment
-      // when linearAngle not null (other situation doesn't need).
-      if (linearAngle != null) {
-        renderDecoratedBox.markNeedsLayout();
-      }
       _updateBorderInsets(newDecoration.getBorderEdgeInsets());
     }
     oldDecoration = newDecoration;

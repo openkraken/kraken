@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -282,7 +283,6 @@ mixin CSSBackgroundMixin {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
               return _renderDecorateElementBox = RenderDecorateElementBox(
-                  targetId: targetId,
                   decoration: BoxDecoration(image: decorationImage, gradient: gradient),
                   child: renderObject);
             }
@@ -291,7 +291,6 @@ mixin CSSBackgroundMixin {
           gradient = getBackgroundGradient(method);
           if (gradient != null) {
             return _renderDecorateElementBox = RenderDecorateElementBox(
-                targetId: targetId,
                 decoration: BoxDecoration(image: decorationImage, gradient: gradient),
                 child: renderObject);
           }
@@ -340,7 +339,7 @@ mixin CSSBackgroundMixin {
       RenderObject child = parent.child;
       parent.child = null;
       _renderDecorateElementBox = RenderDecorateElementBox(
-          targetId: targetId, decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
+          decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
       parent.child = _renderDecorateElementBox;
     }
   }
@@ -466,6 +465,7 @@ mixin CSSBackgroundMixin {
                   break;
               }
             }
+            linearAngle = null;
             start = 1;
           } else if (CSSAngle.isAngle(method.args[0])) {
             CSSAngle angle = CSSAngle(method.args[0]);
@@ -474,9 +474,10 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = LinearGradient(
+            gradient = WebLinearGradient(
                 begin: begin,
                 end: end,
+                angle: linearAngle,
                 colors: colors,
                 stops: stops,
                 tileMode: method.name == 'linear-gradient' ? TileMode.clamp : TileMode.repeated);
@@ -509,7 +510,7 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = RadialGradient(
+            gradient = WebRadialGradient(
               center: FractionalOffset(atX, atY),
               radius: radius,
               colors: colors,
@@ -541,7 +542,7 @@ mixin CSSBackgroundMixin {
           }
           applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = SweepGradient(
+            gradient = WebConicGradient(
                 center: FractionalOffset(atX, atY),
                 colors: colors,
                 stops: stops,
@@ -563,13 +564,16 @@ mixin CSSBackgroundMixin {
   }
 
   void applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
-    double grow = 1.0 / (args.length - 1);
-    for (int i = start; i < args.length; i++) {
-      List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), i * grow);
-      colorGradients.forEach((element) {
-        colors.add(element.color);
-        stops.add(element.stop);
-      });
+    // colors should more than one, otherwise invalid
+    if (args.length - start - 1 > 0) {
+      double grow = 1.0 / (args.length - start - 1);
+      for (int i = start; i < args.length; i++) {
+        List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), (i - start)* grow);
+        colorGradients.forEach((element) {
+          colors.add(element.color);
+          stops.add(element.stop);
+        });
+      }
     }
   }
 
