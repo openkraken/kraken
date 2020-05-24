@@ -737,7 +737,7 @@ class RenderFlexLayout extends RenderBox
             maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
 
             double baseConstraints = _getBaseConstraints(child);
-            if (baseConstraints != 0) {
+            if (baseConstraints != 0 && baseConstraints > maxChildExtent) {
               maxChildExtent = baseConstraints;
             }
             minChildExtent = maxChildExtent;
