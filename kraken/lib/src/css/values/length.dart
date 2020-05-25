@@ -62,8 +62,10 @@ class CSSLength implements CSSValue<double> {
     } else if (unitedValue.endsWith(VH)) {
       double currentValue = double.parse(unitedValue.split(VH)[0]);
       displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
+    } else {
+      // Failed silently
+      return null;
     }
-    // Failed silently
 
     return displayPortValue;
   }
