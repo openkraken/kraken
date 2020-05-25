@@ -365,7 +365,7 @@ describe('align-content', () => {
 
     await matchScreenshot();
   });
-  xit('wrap-001', async () => {
+  it('wrap-001', async () => {
     let log;
     let box;
     let box_1;
