@@ -20,6 +20,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
+import '../css/flow.dart';
 import 'event_handler.dart';
 import 'bounding_client_rect.dart';
 
@@ -40,7 +41,7 @@ class Element extends Node
         CSSDecoratedBoxMixin,
         CSSSizingMixin,
         CSSFlexboxMixin,
-        CSSAlignMixin,
+        CSSFlowMixin,
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
@@ -423,16 +424,12 @@ class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
+      RenderFlowLayout flowLayout = RenderFlowLayout(
         children: children,
         style: style,
         targetId: targetId,
       );
-      if (isFlexWrap) {
-        decorateRenderFlex(flowLayout, style);
-      } else {
-        decorateRenderFlow(flowLayout, style);
-      }
+      decorateAlignment(flowLayout, style);
       return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');
@@ -820,11 +817,7 @@ class Element extends Node
 
   void _updateDecorationRenderLayoutBox() {
     if (renderLayoutBox is RenderFlexLayout) {
-      if (style['flexWrap'] == 'wrap') {
-        decorateRenderFlow(renderLayoutBox, style);
-      } else {
-        decorateRenderFlex(renderLayoutBox, style);
-      }
+      decorateRenderFlex(renderLayoutBox, style);
     } else if (renderLayoutBox is RenderFlowLayout) {
       decorateRenderFlow(renderLayoutBox, style);
     }

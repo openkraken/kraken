@@ -15,7 +15,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url("https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png")',
+        'url("assets/rax.png")',
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
@@ -39,7 +39,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundRepeat: 'no-repeat',
     });
     repeat.appendChild(div1);
@@ -63,7 +63,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundRepeat: 'repeat-x',
     });
     repeat.appendChild(div2);
@@ -88,7 +88,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundRepeat: 'repeat-y',
     });
     repeat.appendChild(div3);
@@ -112,7 +112,7 @@ describe('background-repeat', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundRepeat: 'repeat',
     });
     repeat.appendChild(div4);
