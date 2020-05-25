@@ -621,8 +621,8 @@ class Element extends Node
     if ((!childDisplay.isEmpty && childDisplay != 'inline') ||
         (position != CSSPositionType.static && position != CSSPositionType.relative)) {
       preferredSize = Size(
-        CSSLength.toDisplayPortValue(child.style[WIDTH]),
-        CSSLength.toDisplayPortValue(child.style[HEIGHT]),
+        CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
+        CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
       );
     }
 
@@ -848,11 +848,12 @@ class Element extends Node
 
     if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+      double current = CSSLength.toDisplayPortValue(present) ?? 0;
       _updateOffset(
         definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
-        diff: CSSLength.toDisplayPortValue(present) - _original,
+        diff: current - _original,
       );
     }
   }

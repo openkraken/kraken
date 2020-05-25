@@ -326,9 +326,9 @@ mixin CSSTextMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
-          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) : 0.0;
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+          double blurRadius = shadowDefinitions.length > 3 ? (CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0) : 0.0;
           Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {
             textShadows.add(Shadow(
