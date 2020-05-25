@@ -128,7 +128,16 @@ export class ErrorEvent extends Event {
 }
 
 export class CustomEvent extends Event {
-  constructor(type: string) {
+  private _detail: any;
+
+  constructor(type: string, eventInit?: CustomEventInit) {
     super(type);
+    if (eventInit) {
+      this._detail = eventInit.detail;
+    }
+  }
+
+  get detail(): any {
+    return this._detail;
   }
 }

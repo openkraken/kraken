@@ -1,6 +1,6 @@
 import { console } from './console';
 import { document } from './document';
-import { PromiseRejectionEvent, ErrorEvent } from './document/event-target';
+import { PromiseRejectionEvent, ErrorEvent, CustomEvent } from './document/event-target';
 import { requestAnimationFrame } from './document/animation-frame';
 import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
@@ -40,6 +40,7 @@ defineGlobalProperty('Performance', Performance);
 defineGlobalProperty('performance', performance);
 defineGlobalProperty('kraken', kraken);
 defineGlobalProperty('MQTT', MQTT);
+defineGlobalProperty('CustomEvent', CustomEvent);
 
 function defineGlobalProperty(key: string, value: any) {
   Object.defineProperty(globalThis, key, {
