@@ -4,7 +4,6 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 class TransformParentData extends ContainerBoxParentData<RenderBox> {}
@@ -85,7 +84,6 @@ class RenderElementTransform extends RenderTransform {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    void painter(PaintingContext context, Offset offset) {}
 
     if (child != null) {
       final Matrix4 transform = getEffectiveTransform();
