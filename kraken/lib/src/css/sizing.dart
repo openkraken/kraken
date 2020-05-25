@@ -15,7 +15,7 @@ double _getDisplayPortedLength(input) {
     // Null is not equal with 0.0
     return null;
   }
-  if (input is num) {
+  if (input is! String) {
     input = input.toString();
   }
   return CSSLength.toDisplayPortValue(input as String);

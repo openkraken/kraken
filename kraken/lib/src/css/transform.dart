@@ -152,7 +152,7 @@ mixin CSSTransformMixin on Node {
       }
       // handle x
       if (CSSLength.isLength(x)) {
-        offsetX = CSSLength.toDisplayPortValue(x);
+        offsetX = CSSLength.toDisplayPortValue(x) ?? offsetX;
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage(x).toDouble() * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
@@ -165,7 +165,7 @@ mixin CSSTransformMixin on Node {
 
       // handle y
       if (CSSLength.isLength(y)) {
-        offsetY = CSSLength.toDisplayPortValue(y);
+        offsetY = CSSLength.toDisplayPortValue(y) ?? offsetY;
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage(y).toDouble() * 2 - 1;
       } else if (y == CSSPosition.TOP) {
@@ -234,7 +234,7 @@ mixin CSSTransformMixin on Node {
         if (method.args.length >= 1 && method.args.length <= 2) {
           double y;
           if (method.args.length == 2) {
-            y = CSSLength.toDisplayPortValue(method.args[1].trim());
+            y = CSSLength.toDisplayPortValue(method.args[1].trim()) ?? 0;
           } else {
             y = 0;
           }
