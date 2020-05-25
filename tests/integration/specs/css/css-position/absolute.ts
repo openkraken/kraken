@@ -452,4 +452,45 @@ describe('Position absolute', () => {
     append(BODY, div);
     await matchScreenshot();
   });
+
+  it('works with nested children' , async (done) => {
+    let n1;
+    n1 = createElementWithStyle(
+       'div',
+       {
+         display: 'flex',
+         position: 'relative',
+         flexDirection: 'column',
+         justifyContent: 'center',
+         alignItems: 'center',
+         width: '300px',
+         height: '300px',
+         backgroundColor: 'gray',
+       },
+       [
+        (createElementWithStyle(
+          'div',
+           {
+             backgroundColor: 'blue',
+             width: '200px',
+             height: '200px',
+           },
+        )),
+        (createElementWithStyle(
+          'div',
+           {
+             position: 'absolute',
+             top: '20px',
+             left: '20px',
+             width: '100px',
+             height: '100px',
+             backgroundColor: 'green',
+           },
+        ))
+       ]
+     );
+    BODY.appendChild(n1);
+
+    await matchScreenshot();
+  });
 });
