@@ -804,13 +804,13 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    double _original = CSSLength.toDisplayPortValue(original);
-
+    double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+    double current = CSSLength.toDisplayPortValue(present) ?? 0;
     _updateOffset(
       definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
-      diff: CSSLength.toDisplayPortValue(present) - _original,
+      diff: current - _original,
     );
   }
 
@@ -847,7 +847,7 @@ class Element extends Node
     updateConstraints(style, transitionMap);
 
     if (property == WIDTH || property == HEIGHT) {
-      double _original = CSSLength.toDisplayPortValue(original);
+      double _original = CSSLength.toDisplayPortValue(original) ?? 0;
       _updateOffset(
         definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
