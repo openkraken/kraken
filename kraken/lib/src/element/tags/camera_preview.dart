@@ -207,12 +207,12 @@ class CameraPreviewElement extends Element {
 
   void _widthChangedListener(String key, String original, String present) {
     // Trigger width setter to invoke rerender.
-    width = CSSLength.toDisplayPortValue(present);
+    width = CSSLength.toDisplayPortValue(present) ?? width;
   }
 
   void _heightChangedListener(String key, String original, String present) {
     // Trigger height setter to invoke rerender.
-    height = CSSLength.toDisplayPortValue(present);
+    height = CSSLength.toDisplayPortValue(present) ?? height;
   }
 
   void _setProperty(String key, value) {
@@ -222,10 +222,10 @@ class CameraPreviewElement extends Element {
       // <camera-preview width="300" />
       // Width and height is united with pixel.
       value = value.toString() + 'px';
-      width = CSSLength.toDisplayPortValue(value);
+      width = CSSLength.toDisplayPortValue(value) ?? width;
     } else if (key == 'height') {
       value = value.toString() + 'px';
-      height = CSSLength.toDisplayPortValue(value);
+      height = CSSLength.toDisplayPortValue(value) ?? height;
     } else if (key == 'lens') {
       _initCameraWithLens(value);
     } else if (key == 'sensor-orientation') {

@@ -492,9 +492,9 @@ abstract class WebViewElement extends Element {
   void setStyle(String key, value) {
     super.setStyle(key, value);
     if (key == WIDTH) {
-      width = CSSLength.toDisplayPortValue(value);
+      width = CSSLength.toDisplayPortValue(value) ?? width;
     } else if (key == HEIGHT) {
-      height = CSSLength.toDisplayPortValue(value);
+      height = CSSLength.toDisplayPortValue(value) ?? height;
     }
   }
 

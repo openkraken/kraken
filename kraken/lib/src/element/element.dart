@@ -1239,8 +1239,8 @@ PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, Ren
   if (style.contains('right')) {
     parentData.right = CSSLength.toDisplayPortValue(style['right']);
   }
-  parentData.width = CSSLength.toDisplayPortValue(style['width']);
-  parentData.height = CSSLength.toDisplayPortValue(style['height']);
+  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
+  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
   return parentData;
 }
