@@ -1152,11 +1152,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = renderMargin.child;
+    var originalChild = transform.child;
     // Make sure child is detached.
-    renderMargin.child = null;
+    transform.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderMargin.child = renderRepaintBoundary;
+    transform.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
     requestAnimationFrame((_) async {
@@ -1170,7 +1170,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderMargin.child = originalChild;
+      transform.child = originalChild;
 
       completer.complete(captured);
     });

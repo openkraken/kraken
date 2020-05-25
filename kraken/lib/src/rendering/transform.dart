@@ -9,19 +9,12 @@ import 'package:kraken/rendering.dart';
 
 class TransformParentData extends ContainerBoxParentData<RenderBox> {}
 
-class RenderElementTransform extends RenderTransform
-    with
-        ContainerRenderObjectMixin<RenderBox, TransformParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, TransformParentData> {
+class RenderElementTransform extends RenderTransform {
   RenderElementTransform(
-      {this.child, Matrix4 transform, Offset origin, this.targetId, Alignment alignment})
+      {RenderBox child, Matrix4 transform, Offset origin, this.targetId, Alignment alignment})
       : assert(child != null),
         _transform = transform,
-        super(child: child, transform: transform, origin: origin, alignment: alignment) {
-    add(child);
-  }
-
-  RenderBox child;
+        super(child: child, transform: transform, origin: origin, alignment: alignment);
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
