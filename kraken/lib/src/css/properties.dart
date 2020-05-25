@@ -12,9 +12,9 @@ const String BACKGROUND_IMAGE = 'backgroundImage';
 const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';
 
-const String DIRECTION = 'flexDirection';
-const String WRAP = 'flexWrap';
-const String FLOW = 'flexFlow';
+const String FLEX_DIRECTION = 'flexDirection';
+const String FLEX_WRAP = 'flexWrap';
+const String FLEX_FLOW = 'flexFlow';
 const String JUSTIFY_CONTENT = 'justifyContent';
 const String TEXT_ALIGN = 'textAlign';
 const String ALIGN_ITEMS = 'alignItems';

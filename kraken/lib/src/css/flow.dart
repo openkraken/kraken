@@ -11,37 +11,9 @@ import 'package:kraken/css.dart';
 
 mixin CSSFlowMixin {
   void decorateRenderFlow(RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
-    Axis axis;
-    TextDirection textDirection;
-    VerticalDirection verticalDirection;
-    String direction = style[DIRECTION];
-    switch (direction) {
-      case 'row':
-        axis = Axis.horizontal;
-        textDirection = TextDirection.ltr;
-        verticalDirection = VerticalDirection.down;
-        break;
-      case 'row-reverse':
-        axis = Axis.horizontal;
-        verticalDirection = VerticalDirection.down;
-        textDirection = TextDirection.rtl;
-        break;
-      case 'column':
-        axis = Axis.vertical;
-        textDirection = TextDirection.ltr;
-        verticalDirection = VerticalDirection.down;
-        break;
-      case 'column-reverse':
-        axis = Axis.vertical;
-        verticalDirection = VerticalDirection.up;
-        textDirection = TextDirection.ltr;
-        break;
-      default:
-        axis = Axis.horizontal;
-        textDirection = TextDirection.ltr;
-        verticalDirection = VerticalDirection.down;
-        break;
-    }
+    Axis axis = Axis.horizontal;
+    TextDirection textDirection = TextDirection.ltr;
+    VerticalDirection verticalDirection = VerticalDirection.down;
 
     renderFlowLayout.verticalDirection = verticalDirection;
     renderFlowLayout.direction = axis;
@@ -111,23 +83,6 @@ mixin CSSFlowMixin {
           break;
         case 'center':
           crossAxisAlignment = CrossAxisAlignment.center;
-          break;
-      }
-    }
-    if (style.contains(ALIGN_ITEMS)) {
-      String justifyContent = style[ALIGN_ITEMS];
-      switch (justifyContent) {
-        case 'flex-start':
-          crossAxisAlignment = CrossAxisAlignment.start;
-          break;
-        case 'center':
-          crossAxisAlignment = CrossAxisAlignment.center;
-          break;
-        case 'baseline':
-          crossAxisAlignment = CrossAxisAlignment.baseline;
-          break;
-        case 'flex-end':
-          crossAxisAlignment = CrossAxisAlignment.end;
           break;
       }
     }

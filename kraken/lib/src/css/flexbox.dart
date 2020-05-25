@@ -15,7 +15,7 @@ mixin CSSFlexboxMixin {
       Axis axis;
       TextDirection textDirection;
       VerticalDirection verticalDirection;
-      String direction = style[DIRECTION];
+      String direction = style[FLEX_DIRECTION];
       switch (direction) {
         case 'row':
           axis = Axis.horizontal;
