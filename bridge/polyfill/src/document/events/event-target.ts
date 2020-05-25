@@ -1,4 +1,5 @@
-import { addEvent } from './ui-manager';
+import { addEvent } from '../ui-manager';
+import { Event } from './event';
 
 export const BODY = -1;
 // Window is not inherit node but EventTarget, so we assume window is a node.
@@ -74,70 +75,15 @@ export class EventTarget {
     if (!this._eventHandlers.has(event.type)) {
       return;
     }
+    event._dispatchFlag = true;
     event.currentTarget = event.target = this;
     let stack = this._eventHandlers.get(event.type)!.slice();
 
     for (let i = 0; i < stack.length; i++) {
       stack[i].call(this, event);
     }
+    event._dispatchFlag = false;
 
     return !event.defaultPrevented;
-  }
-}
-
-export class Event {
-  type: string;
-  cancelable: boolean;
-  currentTarget: EventTarget;
-  target: EventTarget;
-  defaultPrevented: boolean;
-
-  [key: string]: any;
-
-  constructor(type: string) {
-    this.type = type;
-  }
-}
-
-export class PromiseRejectionEvent extends Event {
-  promise: Promise<any>;
-  reason?: any;
-  constructor(eventInit?: PromiseRejectionEventInit) {
-    super('unhandledrejection');
-
-    if (eventInit) {
-      this.promise = eventInit.promise;
-      this.reason = eventInit.reason;
-    }
-  }
-}
-
-export class ErrorEvent extends Event {
-  colno: number;
-  error: any;
-  filename: string;
-  lineno: number;
-  message: string;
-
-  constructor(init?: ErrorEventInit) {
-    super('error');
-    if (init) {
-      Object.assign(this, init);
-    }
-  }
-}
-
-export class CustomEvent extends Event {
-  private _detail: any;
-
-  constructor(type: string, eventInit?: CustomEventInit) {
-    super(type);
-    if (eventInit) {
-      this._detail = eventInit.detail;
-    }
-  }
-
-  get detail(): any {
-    return this._detail;
   }
 }

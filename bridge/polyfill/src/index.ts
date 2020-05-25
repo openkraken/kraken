@@ -1,6 +1,8 @@
 import { console } from './console';
 import { document } from './document';
-import { PromiseRejectionEvent, ErrorEvent, CustomEvent } from './document/event-target';
+import { PromiseRejectionEvent } from './document/events/promise-rejection-event';
+import { ErrorEvent } from './document/events/error-event';
+import { CustomEvent } from './document/events/custom-event';
 import { requestAnimationFrame } from './document/animation-frame';
 import { WebSocket } from './websocket';
 import { fetch, Request, Response, Headers } from './fetch';
