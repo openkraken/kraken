@@ -77,7 +77,7 @@ describe('Position relative', () => {
     await matchScreenshot();
   });
 
-  it('works with child remove' , async (done) => {
+  it('works with child remove' , async () => {
     let n1, n2;
     n1 = createElementWithStyle(
        'div',

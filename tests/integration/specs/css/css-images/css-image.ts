@@ -170,7 +170,7 @@ describe('css-image', () => {
     await matchScreenshot();
   });
 
-  it('size works width position absolute' , async (done) => {
+  it('size works width position absolute' , async () => {
     let n1, n2;
     n1 = createElementWithStyle(
        'div',

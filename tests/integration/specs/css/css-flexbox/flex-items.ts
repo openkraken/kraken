@@ -83,7 +83,7 @@ describe('flex-items', () => {
     await matchScreenshot();
   });
 
-  it('works with multiple relative item', async (done) => {
+  it('works with multiple relative item', async () => {
     const n1 = createElementWithStyle(
        'div',
        {

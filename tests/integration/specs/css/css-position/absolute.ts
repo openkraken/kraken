@@ -453,7 +453,7 @@ describe('Position absolute', () => {
     await matchScreenshot();
   });
 
-  it('works with nested children' , async (done) => {
+  it('works with nested children' , async () => {
     let n1;
     n1 = createElementWithStyle(
        'div',
