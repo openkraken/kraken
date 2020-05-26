@@ -126,8 +126,8 @@ mixin CSSFlexboxMixin {
       }
     }
     if (style.contains(ALIGN_ITEMS)) {
-      String justifyContent = style[ALIGN_ITEMS];
-      switch (justifyContent) {
+      String alignItems = style[ALIGN_ITEMS];
+      switch (alignItems) {
         case 'flex-start':
           crossAxisAlignment = CrossAxisAlignment.start;
           break;
@@ -140,6 +140,8 @@ mixin CSSFlexboxMixin {
         case 'flex-end':
           crossAxisAlignment = CrossAxisAlignment.end;
           break;
+        default:
+          crossAxisAlignment = CrossAxisAlignment.stretch;
       }
     }
     return crossAxisAlignment;

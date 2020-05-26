@@ -456,6 +456,17 @@ class RenderFlexLayout extends RenderBox
     return childParentData.flexShrink ?? 1;
   }
 
+  bool _hasLimitedCrossSize(RenderObject child) {
+    if (child is RenderElementBoundary) {
+      if (_direction == Axis.horizontal) {
+        return !child.style.contains('height');
+      } else {
+        return !child.style.contains('width');
+      }
+    }
+    return false;
+  }
+
   String _getFlexBasis(RenderBox child) {
     final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexBasis ?? 'auto';
@@ -569,6 +580,7 @@ class RenderFlexLayout extends RenderBox
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlexGrow = 0;
     bool hasFlexShrink = false;
+    bool hasLimitedCrossSize = false;
     int totalChildren = 0;
     assert(constraints != null);
 
@@ -663,6 +675,12 @@ class RenderFlexLayout extends RenderBox
         totalFlexGrow += childParentData.flexGrow;
       }
 
+      bool limitedCrossSize = _hasLimitedCrossSize(child);
+
+      if (limitedCrossSize) {
+        hasLimitedCrossSize = true;
+      }
+
       double baseConstraints = _getBaseConstraints(child);
       BoxConstraints innerConstraints;
       if (crossAxisAlignment == CrossAxisAlignment.stretch) {
@@ -700,6 +718,7 @@ class RenderFlexLayout extends RenderBox
       childSizeMap[childNodeId] = {
         'size': _getMainSize(child),
         'flexShrink': _getFlexShrink(child),
+        'limitedCrossSize': limitedCrossSize
       };
 
       assert(child.parentData == childParentData);
@@ -713,7 +732,7 @@ class RenderFlexLayout extends RenderBox
     double maxBaselineDistance = 0.0;
     bool isFlexGrow = freeSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = freeSpace < 0 && hasFlexShrink;
-    if (isFlexGrow || isFlexShrink || crossAxisAlignment == CrossAxisAlignment.baseline) {
+    if (isFlexGrow || isFlexShrink || hasLimitedCrossSize || crossAxisAlignment == CrossAxisAlignment.baseline) {
       // Reset total children size to zero if need to shrink or grow
       allocatedSize = 0;
       final double spacePerFlex = canFlex && totalFlexGrow > 0 ? (freeSpace / totalFlexGrow) : double.nan;
@@ -727,11 +746,21 @@ class RenderFlexLayout extends RenderBox
           child = childParentData.nextSibling;
           continue;
         }
-        if (isFlexGrow || isFlexShrink) {
+        int childNodeId;
+        if (child is RenderTextBox) {
+          childNodeId = child.targetId;
+        } else if (child is RenderElementBoundary) {
+          childNodeId = child.targetId;
+        }
+
+        assert(childNodeId != null);
+
+        bool limitedCrossSize = childSizeMap[childNodeId]['limitedCrossSize'];
+        if (isFlexGrow || isFlexShrink || limitedCrossSize) {
           double maxChildExtent;
           double minChildExtent;
 
-          if (freeSpace >= 0) {
+          if (isFlexGrow && freeSpace >= 0) {
             final int flexGrow = _getFlexGrow(child);
             final double mainSize = _getMainSize(child);
             maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
@@ -740,36 +769,42 @@ class RenderFlexLayout extends RenderBox
             // get the maximum child size between baseConstraints and maxChildExtent.
             maxChildExtent = math.max(baseConstraints, maxChildExtent);
             minChildExtent = maxChildExtent;
-          } else {
+          } else if (isFlexShrink) {
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
-            int childNodeId;
-            if (child is RenderTextBox) {
-              childNodeId = child.targetId;
-            } else if (child is RenderElementBoundary) {
-              childNodeId = child.targetId;
-            }
+
             dynamic current = childSizeMap[childNodeId];
             minChildExtent = maxChildExtent = current['size'] + shrinkValue;
+          } else if (limitedCrossSize) {
+            maxChildExtent = _getMainSize(child);
+            minChildExtent = maxChildExtent;
           }
 
-          assert(minChildExtent != null);
           BoxConstraints innerConstraints;
           // @TODO: minChildExtent.isNegative
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
-                innerConstraints = BoxConstraints(
+                if (!limitedCrossSize) {
+                  innerConstraints = BoxConstraints(
                     minWidth: minChildExtent,
                     maxWidth: maxChildExtent,
                     minHeight: constraints.minHeight,
                     maxHeight: constraints.maxHeight);
+                } else {
+                  innerConstraints = BoxConstraints.expand(width: maxChildExtent, height: constraints.maxHeight);
+                }
+
                 break;
               case Axis.vertical:
-                innerConstraints = BoxConstraints(
-                    minWidth: constraints.minWidth,
-                    maxWidth: constraints.maxWidth,
-                    minHeight: minChildExtent,
-                    maxHeight: maxChildExtent);
+                if (!limitedCrossSize) {
+                  innerConstraints = BoxConstraints(
+                      minWidth: constraints.minWidth,
+                      maxWidth: constraints.maxWidth,
+                      minHeight: minChildExtent,
+                      maxHeight: maxChildExtent);
+                } else {
+                  innerConstraints = BoxConstraints.expand(width: constraints.maxWidth, height: maxChildExtent);
+                }
                 break;
             }
           } else {
@@ -1002,6 +1037,8 @@ class RenderFlexItem extends RenderBox
   RenderFlexItem({RenderBox child}) {
     add(child);
   }
+
+  Size contentSize;
 
   @override
   void setupParentData(RenderBox child) {
