@@ -167,11 +167,11 @@ class Element extends Node
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
 
-    // Transform
-    renderObject = initTransform(renderObject, style, targetId);
-
     // BoxModel Margin
-    renderObject = renderElementBoundary = initRenderMargin(renderObject, style, targetId);
+    renderObject = initRenderMargin(renderObject, style);
+
+    // The layout boundary of element.
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
 
     // Build root render stack.
     if (targetId == BODY_ID) {
@@ -910,16 +910,13 @@ class Element extends Node
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
-    RenderObjectWithChildMixin parentRenderObject = renderVisibility != null ? renderVisibility : renderIntersectionObserver;
-
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: parentRenderObject);
+    updateRenderOpacity(present, parentRenderObject: renderMargin);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
-
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: transform);
+    updateRenderVisibility(present, parentRenderObject: renderMargin);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
@@ -1152,11 +1149,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = transform.child;
+    var originalChild = renderMargin.child;
     // Make sure child is detached.
-    transform.child = null;
+    renderMargin.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    transform.child = renderRepaintBoundary;
+    renderMargin.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
     requestAnimationFrame((_) async {
@@ -1170,7 +1167,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      transform.child = originalChild;
+      renderMargin.child = originalChild;
 
       completer.complete(captured);
     });

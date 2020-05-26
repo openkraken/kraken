@@ -261,16 +261,11 @@ mixin CSSSizingMixin {
     }
   }
 
-  RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
+  RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
-
-    bool shouldRender = style['display'] != 'none';
-    return renderMargin = RenderElementBoundary(
+    return renderMargin = RenderMargin(
       margin: edgeInsets,
       child: renderObject,
-      targetId: targetId,
-      style: style,
-      shouldRender: shouldRender,
     );
   }
 

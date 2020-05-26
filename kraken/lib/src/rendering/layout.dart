@@ -552,17 +552,6 @@ class RenderFlowLayout extends RenderBox
     RenderBox preChild = null;
 
     while (child != null) {
-      // Element with display none takes no space
-      if (child is RenderElementBoundary && child.style['display'] == 'none') {
-        childConstraints = BoxConstraints(
-          minWidth: 0,
-          maxWidth: 0,
-          minHeight: 0,
-          maxHeight: 0,
-        );
-      } else {
-        childConstraints = BoxConstraints();
-      }
       child.layout(childConstraints, parentUsesSize: true);
       final RenderLayoutParentData childParentData = child.parentData;
       double childMainAxisExtent = _getMainAxisExtent(child);
