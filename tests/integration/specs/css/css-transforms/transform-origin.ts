@@ -52,7 +52,7 @@ describe('Transform origin', () => {
               await matchScreenshot();
             });
 
-    it('works width margin' , async () => {
+    xit('works width margin' , async () => {
       let n1, n2;
       n1 = createElementWithStyle(
          'div',
