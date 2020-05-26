@@ -20,7 +20,7 @@ class ImageElement extends Element {
   ImageInfo _imageInfo;
 
   ImageElement(int targetId)
-      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: true, tagName: IMAGE);
+      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE);
 
   bool _hasLazyLoading = false;
 
