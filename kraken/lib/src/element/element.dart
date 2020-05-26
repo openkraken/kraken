@@ -439,6 +439,23 @@ class Element extends Node
   @override
   bool get attached => renderElementBoundary.attached;
 
+  // read parent RenderFlexLayout inherited crossAxisAlignment property
+  CrossAxisAlignment getInheritedCrossAxisAlignment(RenderFlexLayout renderFlexLayout) {
+    // not default value, child's property is priority than parent
+    if (renderFlexLayout.crossAxisAlignment != CrossAxisAlignment.stretch) {
+      return renderFlexLayout.crossAxisAlignment;
+    }
+
+    Element _parent = parent;
+    while (_parent != null && _parent.renderLayoutBox is! RenderFlexLayout) {
+      _parent = _parent.parent;
+    }
+    if (_parent != null) {
+      return (_parent.renderLayoutBox as RenderFlexLayout).crossAxisAlignment;
+    }
+    return renderFlexLayout.crossAxisAlignment;
+  }
+
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
@@ -451,7 +468,18 @@ class Element extends Node
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       renderPadding.child = null;
-      renderPadding.child = RenderFlexItem(child: renderLayoutBox as RenderBox);
+      RenderFlexItem flexItem = RenderFlexItem(child: renderLayoutBox as RenderBox);
+      // read parent inherited align-items
+      if (renderLayoutBox is RenderFlexLayout) {
+        flexItem.crossAxisAlignment = getInheritedCrossAxisAlignment(renderLayoutBox);
+      }
+
+      // save direction and elementBoundary reference for RenderItem's performLayout steps.
+      if (parent.renderLayoutBox is RenderFlexLayout) {
+        flexItem.direction = (parent.renderLayoutBox as RenderFlexLayout).direction;
+        flexItem.elementBoundary = renderElementBoundary;
+      }
+      renderPadding.child = flexItem;
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
