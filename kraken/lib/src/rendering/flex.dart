@@ -16,6 +16,9 @@ class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex basis
   String flexBasis;
 
+  // align-items
+  CrossAxisAlignment crossAxisAlignment;
+
   @override
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
@@ -760,7 +763,10 @@ class RenderFlexLayout extends RenderBox
           double maxChildExtent;
           double minChildExtent;
 
-          if (isFlexGrow && freeSpace >= 0) {
+          if (limitedCrossSize) {
+            maxChildExtent = _getMainSize(child);
+            minChildExtent = maxChildExtent;
+          } else if (isFlexGrow && freeSpace >= 0) {
             final int flexGrow = _getFlexGrow(child);
             final double mainSize = _getMainSize(child);
             maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
@@ -774,9 +780,6 @@ class RenderFlexLayout extends RenderBox
 
             dynamic current = childSizeMap[childNodeId];
             minChildExtent = maxChildExtent = current['size'] + shrinkValue;
-          } else if (limitedCrossSize) {
-            maxChildExtent = _getMainSize(child);
-            minChildExtent = maxChildExtent;
           }
 
           BoxConstraints innerConstraints;
