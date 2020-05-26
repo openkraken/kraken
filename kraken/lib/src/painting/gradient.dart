@@ -44,6 +44,9 @@ class WebLinearGradient extends LinearGradient with BorderGradientMixin {
 
     double width = rect.width;
     double height = rect.height;
+    // If width/height is null, x/y can be infinite.
+    if (width == 0 || height == 0) return null;
+
     double length = (sin * width).abs() + (cos * height).abs();
     double x = sin * length / width;
     double y = cos * length / height;

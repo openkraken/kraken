@@ -86,12 +86,12 @@ class CanvasElement extends Element {
 
   void _widthChangedListener(String key, String original, String present) {
     // Trigger width setter to invoke rerender.
-    width = CSSLength.toDisplayPortValue(present);
+    width = CSSLength.toDisplayPortValue(present) ?? width;
   }
 
   void _heightChangedListener(String key, String original, String present) {
     // Trigger height setter to invoke rerender.
-    height = CSSLength.toDisplayPortValue(present);
+    height = CSSLength.toDisplayPortValue(present) ?? height;
   }
 
   void _applyContext2DMethod(List args) {

@@ -495,23 +495,23 @@ class RenderFlexLayout extends RenderBox
         String width = child.style['width'];
         if (flexBasis == 'auto') {
           if (width != null) {
-            minConstraints = CSSLength.toDisplayPortValue(width);
+            minConstraints = CSSLength.toDisplayPortValue(width) ?? 0;
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       } else {
         String height = child.style['height'];
         if (flexBasis == 'auto') {
           if (height != null) {
-            minConstraints = CSSLength.toDisplayPortValue(height);
+            minConstraints = CSSLength.toDisplayPortValue(height) ?? 0;
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       }
     }

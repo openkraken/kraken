@@ -266,7 +266,7 @@ mixin CSSTextMixin {
 
   double getFontSize(CSSStyleDeclaration style) {
     if (style.contains(FONT_SIZE)) {
-      return CSSLength.toDisplayPortValue(style[FONT_SIZE]);
+      return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
     } else {
       return DEFAULT_FONT_SIZE;
     }
@@ -277,7 +277,7 @@ mixin CSSTextMixin {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
 
-      return CSSLength.toDisplayPortValue(_letterSpacing);
+      return CSSLength.toDisplayPortValue(_letterSpacing) ?? DEFAULT_LETTER_SPACING;
     } else {
       return DEFAULT_LETTER_SPACING;
     }
@@ -288,7 +288,7 @@ mixin CSSTextMixin {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
 
-      return CSSLength.toDisplayPortValue(_wordSpacing);
+      return CSSLength.toDisplayPortValue(_wordSpacing) ?? DEFAULT_WORD_SPACING;
     } else {
       return DEFAULT_WORD_SPACING;
     }
@@ -296,10 +296,10 @@ mixin CSSTextMixin {
 
   double getHeight(CSSStyleDeclaration style) {
     if (style.contains(LINE_HEIGHT)) {
-      return CSSLength.toDisplayPortValue(style[LINE_HEIGHT]) / getFontSize(style);
-    } else {
-      return null;
+      var lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
+      if (lineHeight != null) return lineHeight / getFontSize(style);
     }
+    return null;
   }
 
   Locale getLocale(CSSStyleDeclaration style) {
@@ -326,9 +326,9 @@ mixin CSSTextMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
-          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) : 0.0;
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+          double blurRadius = shadowDefinitions.length > 3 ? (CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0) : 0.0;
           Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {
             textShadows.add(Shadow(

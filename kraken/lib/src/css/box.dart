@@ -210,10 +210,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       for (String rawShadow in rawShadows) {
         List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
         if (shadowDefinitions.length > 2) {
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]);
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]);
-          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) : 0.0;
-          double spreadRadius = shadowDefinitions.length > 4 ? CSSLength.toDisplayPortValue(shadowDefinitions[3]) : 0.0;
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0 : 0.0;
+          double spreadRadius = shadowDefinitions.length > 4 ? CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0 : 0.0;
 
           Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {
@@ -238,9 +238,9 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
   double getBorderRadius(CSSStyleDeclaration style, String side) {
     if (style.contains(side)) {
-      return CSSLength.toDisplayPortValue(style[side]);
+      return CSSLength.toDisplayPortValue(style[side]) ?? 0;
     } else if (style.contains('borderRadius')) {
-      return CSSLength.toDisplayPortValue(style['borderRadius']);
+      return CSSLength.toDisplayPortValue(style['borderRadius']) ?? 0;
     }
     return 0.0;
   }
@@ -323,12 +323,12 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
       final String borderWidthName = borderName + widthName; // borderWidth
       if (style.contains(borderSideWidthName) && (style[borderSideWidthName] as String).isNotEmpty) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]);
+        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]) ?? 0;
       } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) {
         // eg. borderLeft: 'solid 1px black'
         borderSide.borderWidth = borderSideShorttedInfo[widthName];
       } else if (style.contains(borderWidthName)) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]);
+        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]) ?? 0;
       } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) {
         // eg. border: 'solid 2px red'
         borderSide.borderWidth = borderShorttedInfo[widthName];
