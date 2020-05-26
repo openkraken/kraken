@@ -26,6 +26,17 @@
 
 + **intergration test**: npm run test 
 
+### For MacBook Pro 16 inc Users (with dedicated AMD GPU)
+
+Use the following commands to switch your GPU into Intel's integration GPU.
+
+```
+sudo pmset -a gpuswitch 0
+```
+
++ 0: Intel's GPU only
++ 1: AMD GPU only
++ 2: dynamic switch
 
 ### Run single spec
 

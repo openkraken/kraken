@@ -23,7 +23,7 @@ mixin CSSComputedMixin on RenderBox {
 
     // Get width of element if it's not inline
     if (display != 'inline' && style.contains('width')) {
-      width = CSSLength.toDisplayPortValue(style['width']);
+      width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
       cropPaddingBorder(child);
     } else {
       // Get the nearest width of ancestor with width
@@ -39,7 +39,7 @@ mixin CSSComputedMixin on RenderBox {
           CSSStyleDeclaration style = child.style;
           String display = _getElementRealDisplayValue(child.targetId);
           if (style.contains('width') && display != 'inline') {
-            width = CSSLength.toDisplayPortValue(style['width']);
+            width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
             cropPaddingBorder(child);
             break;
           }
@@ -76,7 +76,7 @@ mixin CSSComputedMixin on RenderBox {
       case 'flex':
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains('width')) {
-          width = CSSLength.toDisplayPortValue(style['width']);
+          width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
           cropPaddingBorder(child);
         } else {
           while (true) {
@@ -96,7 +96,7 @@ mixin CSSComputedMixin on RenderBox {
                 // Skip to find upper parent
                 if (style.contains('width')) {
                   // Use style width
-                  width = CSSLength.toDisplayPortValue(style['width']);
+                  width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
                   cropPaddingBorder(child);
                   break;
                 } else if (display == 'inline-block' || display == 'inline-flex') {
@@ -112,7 +112,7 @@ mixin CSSComputedMixin on RenderBox {
       case 'inline-block':
       case 'inline-flex':
         if (style.contains('width')) {
-          width = CSSLength.toDisplayPortValue(style['width']);
+          width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
           cropPaddingBorder(child);
         } else {
           width = null;
@@ -154,7 +154,7 @@ mixin CSSComputedMixin on RenderBox {
       return null;
     } else if (style.contains('height')) {
       if (child is Element) {
-        height = CSSLength.toDisplayPortValue(style['height']);
+        height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
         cropPaddingBorder(child);
       }
     } else {
@@ -170,7 +170,7 @@ mixin CSSComputedMixin on RenderBox {
           CSSStyleDeclaration style = child.style;
           if (_isStretchChildrenHeight(child)) {
             if (style.contains('height')) {
-              height = CSSLength.toDisplayPortValue(style['height']);
+              height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
               cropPaddingBorder(child);
               break;
             } else {

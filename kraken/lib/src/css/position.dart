@@ -52,13 +52,15 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
     if (style.contains('left')) {
       dx = CSSLength.toDisplayPortValue(style['left']);
     } else if (style.contains('right')) {
-      dx = -CSSLength.toDisplayPortValue(style['right']);
+      var _dx = CSSLength.toDisplayPortValue(style['right']);
+      if (_dx != null) dx = -_dx;
     }
 
     if (style.contains('top')) {
       dy = CSSLength.toDisplayPortValue(style['top']);
     } else if (style.contains('bottom')) {
-      dy = -CSSLength.toDisplayPortValue(style['bottom']);
+      var _dy = CSSLength.toDisplayPortValue(style['bottom']);
+      if (_dy != null) dy = -_dy;
     }
 
     if (dx != null || dy != null) {

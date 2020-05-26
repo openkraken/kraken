@@ -46,10 +46,14 @@ class CSSLength implements CSSValue<double> {
   static double toDisplayPortValue(String unitedValue) {
     double displayPortValue = 0.0;
 
-    if (unitedValue == null) return displayPortValue;
+    if (unitedValue == null) return null;
     unitedValue = unitedValue.trim();
+    if (unitedValue == INITIAL) return null;
 
-    if (unitedValue.endsWith(RPX)) {
+    // Only '0' is accepted with no unit.
+    if (unitedValue == '0') {
+      return 0;
+    } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
       displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(PX)) {
@@ -61,8 +65,10 @@ class CSSLength implements CSSValue<double> {
     } else if (unitedValue.endsWith(VH)) {
       double currentValue = double.parse(unitedValue.split(VH)[0]);
       displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
+    } else {
+      // Failed silently.
+      return null;
     }
-    // Failed silently
 
     return displayPortValue;
   }

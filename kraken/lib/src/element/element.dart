@@ -623,8 +623,8 @@ class Element extends Node
     if ((!childDisplay.isEmpty && childDisplay != 'inline') ||
         (position != CSSPositionType.static && position != CSSPositionType.relative)) {
       preferredSize = Size(
-        CSSLength.toDisplayPortValue(child.style[WIDTH]),
-        CSSLength.toDisplayPortValue(child.style[HEIGHT]),
+        CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
+        CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
       );
     }
 
@@ -806,13 +806,13 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    double _original = CSSLength.toDisplayPortValue(original);
-
+    double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+    double current = CSSLength.toDisplayPortValue(present) ?? 0;
     _updateOffset(
       definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
-      diff: CSSLength.toDisplayPortValue(present) - _original,
+      diff: current - _original,
     );
   }
 
@@ -849,12 +849,13 @@ class Element extends Node
     updateConstraints(style, transitionMap);
 
     if (property == WIDTH || property == HEIGHT) {
-      double _original = CSSLength.toDisplayPortValue(original);
+      double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+      double current = CSSLength.toDisplayPortValue(present) ?? 0;
       _updateOffset(
         definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
-        diff: CSSLength.toDisplayPortValue(present) - _original,
+        diff: current - _original,
       );
     }
   }
@@ -1250,8 +1251,8 @@ PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, Ren
   if (style.contains('right')) {
     parentData.right = CSSLength.toDisplayPortValue(style['right']);
   }
-  parentData.width = CSSLength.toDisplayPortValue(style['width']);
-  parentData.height = CSSLength.toDisplayPortValue(style['height']);
+  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
+  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
   return parentData;
 }
