@@ -52,31 +52,6 @@ mixin CSSFlexboxMixin {
     }
   }
 
-  MainAxisAlignment _getAlignContent(CSSStyleDeclaration style, Axis axis) {
-    // @TODO: add flex-direction column support
-    String flexProperty = style[ALIGN_CONTENT];
-    MainAxisAlignment runAlignment = MainAxisAlignment.start;
-    switch (flexProperty) {
-      case 'flex-end':
-      case 'end':
-        runAlignment = MainAxisAlignment.end;
-        break;
-      case 'center':
-        runAlignment = MainAxisAlignment.center;
-        break;
-      case 'space-around':
-        runAlignment = MainAxisAlignment.spaceAround;
-        break;
-      case 'space-between':
-        runAlignment = MainAxisAlignment.spaceBetween;
-        break;
-      case 'space-evenly':
-        runAlignment = MainAxisAlignment.spaceEvenly;
-        break;
-    }
-    return runAlignment;
-  }
-
   MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style, Axis axis) {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
 
