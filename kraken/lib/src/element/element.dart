@@ -446,7 +446,7 @@ class Element extends Node
       return renderFlexLayout.crossAxisAlignment;
     }
 
-    Element _parent = parent;
+    Element _parent = parent.parent;
     while (_parent != null && _parent.renderLayoutBox is! RenderFlexLayout) {
       _parent = _parent.parent;
     }
