@@ -13,6 +13,7 @@ export class Document extends Node {
   public documentElement: Element = this.bodyElement;
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
+  public cookie = cookie;
 
   constructor() {
     // Use the same targetId with body, only used in event targets,
@@ -39,10 +40,6 @@ export class Document extends Node {
 }
 
 export const document = new Document();
-
-Object.defineProperties(document, {
-  cookie
-});
 
 export function getNodeByNodeId(targetId: number) : Node|null|Window {
   if (targetId === WINDOW) {
