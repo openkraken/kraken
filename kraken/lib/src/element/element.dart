@@ -470,8 +470,8 @@ class Element extends Node
       renderPadding.child = null;
       RenderFlexItem flexItem = RenderFlexItem(child: renderLayoutBox as RenderBox);
       // read parent inherited align-items
-      if (renderLayoutBox is RenderFlexLayout) {
-        flexItem.crossAxisAlignment = getInheritedCrossAxisAlignment(renderLayoutBox);
+      if (parent.renderLayoutBox is RenderFlexLayout) {
+        flexItem.crossAxisAlignment = getInheritedCrossAxisAlignment(parent.renderLayoutBox);
       }
 
       // save direction and elementBoundary reference for RenderItem's performLayout steps.
