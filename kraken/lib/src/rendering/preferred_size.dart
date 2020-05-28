@@ -45,10 +45,7 @@ class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
     @required Size preferredSize,
     RenderBox child = null,
-    this.positionType,
   }) : super(preferredSize: preferredSize, child: child);
-
-  CSSPositionType positionType;
 
   RenderElementBoundary realDisplayedBox;
 }

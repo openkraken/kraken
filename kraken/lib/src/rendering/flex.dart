@@ -553,9 +553,15 @@ class RenderFlexLayout extends RenderBox
   }
 
   bool isPlaceholderPositioned(RenderObject child) {
-    return child is RenderPositionHolder && (
-        child.positionType == CSSPositionType.absolute ||
-      child.positionType == CSSPositionType.fixed);
+    if (child is RenderPositionHolder) {
+      RenderElementBoundary realDisplayedBox = child.realDisplayedBox;
+      CSSPositionType positionType = resolvePositionFromStyle(realDisplayedBox.style);
+      if (positionType == CSSPositionType.absolute ||
+        positionType == CSSPositionType.fixed) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
