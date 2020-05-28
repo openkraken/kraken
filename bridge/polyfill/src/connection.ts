@@ -8,6 +8,7 @@ export function dispatchConnectivityChangeEvent(event: any) {
   }
 }
 
+Event
 export default {
   getConnectivity() {
     return new Promise((resolve) => {

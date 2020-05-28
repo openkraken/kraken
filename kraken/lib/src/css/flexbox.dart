@@ -52,7 +52,6 @@ mixin CSSFlexboxMixin {
   JustifyContent _getJustifyContent(String justifyContent) {
     switch(justifyContent) {
       case 'normal':
-        return JustifyContent.normal;
       case 'start':
         return JustifyContent.start;
       case 'flex-start':
@@ -63,8 +62,6 @@ mixin CSSFlexboxMixin {
         return JustifyContent.flexEnd;
       case 'center':
         return JustifyContent.center;
-      case 'stretch':
-        return JustifyContent.stretch;
       case 'space-between':
         return JustifyContent.spaceBetween;
       case 'space-around':
@@ -72,13 +69,11 @@ mixin CSSFlexboxMixin {
       case 'space-evenly':
         return JustifyContent.spaceEvenly;
     }
-    return JustifyContent.normal;
+    return JustifyContent.start;
   }
 
   AlignItems _getAlignItems(String alignItems) {
     switch(alignItems) {
-      case 'normal':
-        return AlignItems.normal;
       case 'start':
         return AlignItems.start;
       case 'flex-start':
@@ -89,11 +84,12 @@ mixin CSSFlexboxMixin {
         return AlignItems.flexEnd;
       case 'center':
         return AlignItems.center;
+      case 'normal':
       case 'stretch':
         return AlignItems.stretch;
     }
 
-    return AlignItems.normal;
+    return AlignItems.stretch;
   }
 }
 

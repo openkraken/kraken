@@ -74,8 +74,6 @@ enum FlexDirection {
 /// Defines how the browser distributes space between and around content items along the main-axis of a flex container,
 /// and the inline axis of a grid container.
 enum JustifyContent {
-  /// The items are packed in their default position as if no justify-content value was set. This value behaves as stretch in grid and flex containers.
-  normal,
   /// The items are packed flush to each other toward the start edge of the alignment container in the main axis.
   start,
 
@@ -110,11 +108,6 @@ enum JustifyContent {
   /// The items are evenly distributed within the alignment container along the main axis. The spacing between each pair of adjacent items,
   /// the main-start edge and the first item, and the main-end edge and the last item, are all exactly the same.
   spaceEvenly,
-
-  /// If the combined size of the items along the main axis is less than the size of the alignment container,
-  /// any auto-sized items have their size increased equally (not proportionally), while still respecting the constraints imposed by max-height/max-width (or equivalent functionality),
-  /// so that the combined size exactly fills the alignment container along the main axis.
-  stretch
 }
 
 /// Sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.
@@ -158,14 +151,6 @@ enum AlignContent {
 
 /// Set the space distributed between and around content items along the cross-axis of their container.
 enum AlignItems {
-  /// The effect of this keyword is dependent of the layout mode we are in:
-  ///   1. In absolutely-positioned layouts, the keyword behaves like start on replaced absolutely-positioned boxes, and as stretch on all other absolutely-positioned boxes.
-  ///   2. In static position of absolutely-positioned layouts, the keyword behaves as stretch.
-  ///   3. For flex items, the keyword behaves as stretch.
-  ///   4. For grid items, this keyword leads to a behavior similar to the one of stretch, except for boxes with an aspect ratio or an intrinsic sizes where it behaves like start.
-  ///   5. The property doesn't apply to block-level boxes, and to table cells.
-  normal,
-
   /// The items are packed flush to each other toward the start edge of the alignment container in the appropriate axis.
   start,
 
@@ -186,38 +171,19 @@ enum AlignItems {
   stretch
 }
 
-bool _startIsTopLeft(FlexDirection direction, JustifyContent justifyContent, AlignItems alignItems) {
+bool _startIsTopLeft(FlexDirection direction) {
   assert(direction != null);
-  assert(justifyContent != null);
-  assert(alignItems != null);
 
-  if (direction == FlexDirection.row) {
-    if (justifyContent == JustifyContent.start || justifyContent == JustifyContent.flexStart) {
-      if (alignItems == AlignItems.start || alignItems == AlignItems.flexStart) {
-        return true;
-      }
-    }
-  } else if (direction == FlexDirection.rowReverse) {
-    if (justifyContent == JustifyContent.end || justifyContent == JustifyContent.flexEnd) {
-      if (alignItems == AlignItems.start || alignItems == AlignItems.flexStart) {
-        return true;
-      }
-    }
-  } else if (direction == FlexDirection.column) {
-    if (justifyContent == JustifyContent.start || justifyContent == JustifyContent.flexStart) {
-      if (alignItems == AlignItems.start || alignItems == AlignItems.flexStart) {
-        return true;
-      }
-    }
-  } else if (direction == FlexDirection.columnReverse) {
-    if (justifyContent == JustifyContent.end || justifyContent == JustifyContent.flexEnd) {
-      if (alignItems == AlignItems.start || alignItems == AlignItems.flexStart) {
-        return true;
-      }
-    }
+  switch(direction) {
+    case FlexDirection.column:
+    case FlexDirection.row:
+      return true;
+    case FlexDirection.rowReverse:
+    case FlexDirection.columnReverse:
+      return false;
   }
 
-  return false;
+  return null;
 }
 
 typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
@@ -283,20 +249,17 @@ class RenderFlexLayout extends RenderBox
     List<RenderBox> children,
     FlexDirection flexDirection = FlexDirection.row,
     FlexWrap flexWrap = FlexWrap.nowrap,
-    JustifyContent justifyContent = JustifyContent.normal,
-    AlignContent alignContent = AlignContent.normal,
-    AlignItems alignItems = AlignItems.normal,
+    JustifyContent justifyContent = JustifyContent.start,
+    AlignItems alignItems = AlignItems.stretch,
     this.targetId,
     this.style,
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
-        assert(alignContent != null),
         assert(alignItems != null),
         _flexDirection = flexDirection,
         _flexWrap = flexWrap,
         _justifyContent = justifyContent,
-        _alignContent = alignContent,
         _alignItems = alignItems {
     addAll(children);
   }
@@ -336,16 +299,6 @@ class RenderFlexLayout extends RenderBox
     assert(value != null);
     if (_justifyContent != value) {
       _justifyContent = value;
-      markNeedsLayout();
-    }
-  }
-
-  AlignContent get alignContent => _alignContent;
-  AlignContent _alignContent;
-  set alignContent(AlignContent value) {
-    assert(value != null);
-    if (_alignContent != value) {
-      _alignContent = value;
       markNeedsLayout();
     }
   }
@@ -725,8 +678,6 @@ class RenderFlexLayout extends RenderBox
         childNodeId = child.targetId;
       }
 
-      print('first layout child id: ${child} size: ${child.size}, container width: $elementWidth, height: $elementHeight');
-
       childSizeMap[childNodeId] = {
         'size': _getMainSize(child),
         'flexShrink': _getFlexShrink(child),
@@ -852,11 +803,13 @@ class RenderFlexLayout extends RenderBox
 
     switch (_flexDirection) {
       case FlexDirection.row:
+      case FlexDirection.rowReverse:
         size = Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case FlexDirection.column:
+      case FlexDirection.columnReverse:
         size = Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight));
         actualSize = size.height;
         crossSize = size.width;
@@ -872,7 +825,7 @@ class RenderFlexLayout extends RenderBox
     // right-to-left/bottom-to-top (true). The _startIsTopLeft will return null if there's only
     // one child and the relevant direction is null, in which case we arbitrarily decide not to
     // flip, but that doesn't have any detectable effect.
-    final bool flipMainAxis = !(_startIsTopLeft(flexDirection, justifyContent, alignItems) ?? true);
+    final bool flipMainAxis = !(_startIsTopLeft(flexDirection) ?? true);
     switch (justifyContent) {
       case JustifyContent.flexStart:
       case JustifyContent.start:
@@ -916,8 +869,10 @@ class RenderFlexLayout extends RenderBox
       double childCrossPosition;
       switch (alignItems) {
         case AlignItems.start:
+        case AlignItems.flexStart:
+        case AlignItems.flexEnd:
         case AlignItems.end:
-          childCrossPosition = _startIsTopLeft(flipDirection(flexDirection), justifyContent, alignItems) ==
+          childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
                   (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
               ? 0.0
               : crossSize - _getCrossSize(child);
@@ -925,10 +880,10 @@ class RenderFlexLayout extends RenderBox
         case AlignItems.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
           break;
-        case AlignItems.normal:
         case AlignItems.stretch:
           childCrossPosition = 0.0;
           break;
+//        temporary not support baseline
 //        case AlignItems.baseline:
 //          childCrossPosition = 0.0;
 //          if (_flexDirection == FlexDirection.row) {
@@ -1012,7 +967,6 @@ class RenderFlexLayout extends RenderBox
     properties.add(DiagnosticsProperty<FlexDirection>('flexDirection', flexDirection));
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
-    properties.add(DiagnosticsProperty<AlignContent>('alignContent', alignContent));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
   }
 }
