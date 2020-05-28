@@ -739,36 +739,40 @@ class RenderFlexLayout extends RenderBox
 
           BoxConstraints innerConstraints;
           // @TODO: minChildExtent.isNegative
-//          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
-//            switch (_flexDirection) {
-//              case FlexDirection.row:
-//                innerConstraints = BoxConstraints(
-//                  minWidth: minChildExtent,
-//                  maxWidth: maxChildExtent,
-//                  minHeight: constraints.minHeight,
-//                  maxHeight: constraints.maxHeight);
-//
-//                break;
-//              case FlexDirection.column:
-//                innerConstraints = BoxConstraints(
-//                  minWidth: constraints.minWidth,
-//                  maxWidth: constraints.maxWidth,
-//                  minHeight: minChildExtent,
-//                  maxHeight: maxChildExtent);
-//                break;
-//            }
-//          } else {
-//            switch (_flexDirection) {
-//              case FlexDirection.row:
-//                innerConstraints = BoxConstraints(
-//                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: constraints.maxHeight);
-//                break;
-//              case FlexDirection.column:
-//                innerConstraints = BoxConstraints(
-//                    maxWidth: constraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
-//                break;
-//            }
-//          }
+          if (alignItems == AlignItems.stretch) {
+            switch (_flexDirection) {
+              case FlexDirection.row:
+              case FlexDirection.rowReverse:
+                innerConstraints = BoxConstraints(
+                  minWidth: minChildExtent,
+                  maxWidth: maxChildExtent,
+                  minHeight: constraints.minHeight,
+                  maxHeight: constraints.maxHeight);
+
+                break;
+              case FlexDirection.column:
+              case FlexDirection.columnReverse:
+                innerConstraints = BoxConstraints(
+                  minWidth: constraints.minWidth,
+                  maxWidth: constraints.maxWidth,
+                  minHeight: minChildExtent,
+                  maxHeight: maxChildExtent);
+                break;
+            }
+          } else {
+            switch (_flexDirection) {
+              case FlexDirection.row:
+              case FlexDirection.rowReverse:
+                innerConstraints = BoxConstraints(
+                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: constraints.maxHeight);
+                break;
+              case FlexDirection.column:
+              case FlexDirection.columnReverse:
+                innerConstraints = BoxConstraints(
+                    maxWidth: constraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
+                break;
+            }
+          }
           child.layout(innerConstraints, parentUsesSize: true);
           final double childSize = _getMainSize(child);
           assert(childSize <= maxChildExtent);
