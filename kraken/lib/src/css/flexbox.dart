@@ -3,123 +3,97 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 
 mixin CSSFlexboxMixin {
-  void decorateRenderFlex(RenderFlexLayout renderObject, CSSStyleDeclaration style) {
+  void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
     if (style != null) {
-      Axis axis;
-      TextDirection textDirection;
-      VerticalDirection verticalDirection;
-      String direction = style[FLEX_DIRECTION];
-      switch (direction) {
-        case 'row':
-          axis = Axis.horizontal;
-          textDirection = TextDirection.ltr;
-          verticalDirection = VerticalDirection.down;
-          break;
-        case 'row-reverse':
-          axis = Axis.horizontal;
-          verticalDirection = VerticalDirection.down;
-          textDirection = TextDirection.rtl;
-          break;
-        case 'column':
-          axis = Axis.vertical;
-          textDirection = TextDirection.ltr;
-          verticalDirection = VerticalDirection.down;
-          break;
-        case 'column-reverse':
-          axis = Axis.vertical;
-          verticalDirection = VerticalDirection.up;
-          textDirection = TextDirection.ltr;
-          break;
-        default:
-          axis = Axis.horizontal;
-          textDirection = TextDirection.ltr;
-          verticalDirection = VerticalDirection.down;
-          break;
-      }
-
-      renderObject.verticalDirection = verticalDirection;
-      renderObject.direction = axis;
-      renderObject.textDirection = textDirection;
-      renderObject.mainAxisAlignment = _getJustifyContent(style, axis);
-      renderObject.crossAxisAlignment = _getAlignItems(style, axis);
-    }
-  }
-
-  MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style, Axis axis) {
-    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
-
-    if (style.contains(TEXT_ALIGN) && axis == Axis.horizontal) {
-      String textAlign = style[TEXT_ALIGN];
-      switch (textAlign) {
-        case 'right':
-          mainAxisAlignment = MainAxisAlignment.end;
-          break;
-        case 'center':
-          mainAxisAlignment = MainAxisAlignment.center;
-          break;
-      }
-    }
-
-    if (style.contains(JUSTIFY_CONTENT)) {
+      String flexDirection = style[FLEX_DIRECTION];
       String justifyContent = style[JUSTIFY_CONTENT];
-      switch (justifyContent) {
-        case 'flex-end':
-          mainAxisAlignment = MainAxisAlignment.end;
-          break;
-        case 'center':
-          mainAxisAlignment = MainAxisAlignment.center;
-          break;
-        case 'space-between':
-          mainAxisAlignment = MainAxisAlignment.spaceBetween;
-          break;
-        case 'space-around':
-          mainAxisAlignment = MainAxisAlignment.spaceAround;
-          break;
-      }
+      String alignItems = style[ALIGN_ITEMS];
+      String flexWrap = style[FLEX_WRAP];
+
+      renderFlexLayout.flexDirection = _getFlexDirection(flexDirection);
+      renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
+      renderFlexLayout.justifyContent = _getJustifyContent(justifyContent);
+      renderFlexLayout.alignItems = _getAlignItems(alignItems);
     }
-    return mainAxisAlignment;
   }
 
-  CrossAxisAlignment _getAlignItems(CSSStyleDeclaration style, Axis axis) {
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.stretch;
-    if (style.contains(TEXT_ALIGN) && axis == Axis.vertical) {
-      String textAlign = style[TEXT_ALIGN];
-      switch (textAlign) {
-        case 'right':
-          crossAxisAlignment = CrossAxisAlignment.end;
-          break;
-        case 'center':
-          crossAxisAlignment = CrossAxisAlignment.center;
-          break;
-      }
+  FlexDirection _getFlexDirection(String flexDirection) {
+    switch(flexDirection) {
+      case 'row':
+        return FlexDirection.row;
+      case 'row-reverse':
+        return FlexDirection.rowReverse;
+      case 'column':
+        return FlexDirection.column;
+      case 'column-reverse':
+        return FlexDirection.columnReverse;
     }
-    if (style.contains(ALIGN_ITEMS)) {
-      String alignItems = style[ALIGN_ITEMS];
-      switch (alignItems) {
-        case 'flex-start':
-          crossAxisAlignment = CrossAxisAlignment.start;
-          break;
-        case 'center':
-          crossAxisAlignment = CrossAxisAlignment.center;
-          break;
-        case 'baseline':
-          crossAxisAlignment = CrossAxisAlignment.baseline;
-          break;
-        case 'flex-end':
-          crossAxisAlignment = CrossAxisAlignment.end;
-          break;
-        default:
-          crossAxisAlignment = CrossAxisAlignment.stretch;
-      }
+    return FlexDirection.row;
+  }
+
+  FlexWrap _getFlexWrap(String flexWrap) {
+    switch(flexWrap) {
+      case 'nowrap':
+        return FlexWrap.nowrap;
+      case 'wrap':
+        return FlexWrap.wrap;
+      case 'wrap-reverse':
+        return FlexWrap.wrapReverse;
     }
-    return crossAxisAlignment;
+    return FlexWrap.nowrap;
+  }
+
+  JustifyContent _getJustifyContent(String justifyContent) {
+    switch(justifyContent) {
+      case 'normal':
+        return JustifyContent.normal;
+      case 'start':
+        return JustifyContent.start;
+      case 'flex-start':
+        return JustifyContent.flexStart;
+      case 'end':
+        return JustifyContent.end;
+      case 'flex-end':
+        return JustifyContent.flexEnd;
+      case 'center':
+        return JustifyContent.center;
+      case 'stretch':
+        return JustifyContent.stretch;
+      case 'space-between':
+        return JustifyContent.spaceBetween;
+      case 'space-around':
+        return JustifyContent.spaceAround;
+      case 'space-evenly':
+        return JustifyContent.spaceEvenly;
+    }
+    return JustifyContent.normal;
+  }
+
+  AlignItems _getAlignItems(String alignItems) {
+    switch(alignItems) {
+      case 'normal':
+        return AlignItems.normal;
+      case 'start':
+        return AlignItems.start;
+      case 'flex-start':
+        return AlignItems.flexStart;
+      case 'end':
+        return AlignItems.end;
+      case 'flex-end':
+        return AlignItems.flexEnd;
+      case 'center':
+        return AlignItems.center;
+      case 'stretch':
+        return AlignItems.stretch;
+    }
+
+    return AlignItems.normal;
   }
 }
 

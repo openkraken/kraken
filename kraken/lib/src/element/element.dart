@@ -410,9 +410,6 @@ class Element extends Node
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: children,
         style: style,
         targetId: targetId,
@@ -439,23 +436,6 @@ class Element extends Node
   @override
   bool get attached => renderElementBoundary.attached;
 
-  // read parent RenderFlexLayout inherited crossAxisAlignment property
-  CrossAxisAlignment getInheritedCrossAxisAlignment(RenderFlexLayout renderFlexLayout) {
-    // not default value, child's property is priority than parent
-    if (renderFlexLayout.crossAxisAlignment != CrossAxisAlignment.stretch) {
-      return renderFlexLayout.crossAxisAlignment;
-    }
-
-    Element _parent = parent.parent;
-    while (_parent != null && _parent.renderLayoutBox is! RenderFlexLayout) {
-      _parent = _parent.parent;
-    }
-    if (_parent != null) {
-      return (_parent.renderLayoutBox as RenderFlexLayout).crossAxisAlignment;
-    }
-    return renderFlexLayout.crossAxisAlignment;
-  }
-
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
@@ -469,14 +449,8 @@ class Element extends Node
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       renderPadding.child = null;
       RenderFlexItem flexItem = RenderFlexItem(child: renderLayoutBox as RenderBox);
-      // read parent inherited align-items
-      if (parent.renderLayoutBox is RenderFlexLayout) {
-        flexItem.crossAxisAlignment = getInheritedCrossAxisAlignment(parent.renderLayoutBox);
-      }
-
       // save direction and elementBoundary reference for RenderItem's performLayout steps.
       if (parent.renderLayoutBox is RenderFlexLayout) {
-        flexItem.direction = (parent.renderLayoutBox as RenderFlexLayout).direction;
         flexItem.elementBoundary = renderElementBoundary;
       }
       renderPadding.child = flexItem;
