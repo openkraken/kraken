@@ -18,8 +18,8 @@ mixin CSSFlexboxMixin {
 
       renderFlexLayout.flexDirection = _getFlexDirection(flexDirection);
       renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
-      renderFlexLayout.justifyContent = _getJustifyContent(justifyContent);
-      renderFlexLayout.alignItems = _getAlignItems(alignItems);
+      renderFlexLayout.justifyContent = _getJustifyContent(justifyContent, style, renderFlexLayout.flexDirection);
+      renderFlexLayout.alignItems = _getAlignItems(alignItems, style, renderFlexLayout.flexDirection);
     }
   }
 
@@ -49,7 +49,19 @@ mixin CSSFlexboxMixin {
     return FlexWrap.nowrap;
   }
 
-  JustifyContent _getJustifyContent(String justifyContent) {
+  JustifyContent _getJustifyContent(String justifyContent, CSSStyleDeclaration style, FlexDirection flexDirection) {
+    if (isHorizontalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          return JustifyContent.end;
+          break;
+        case 'center':
+          return JustifyContent.center;
+          break;
+      }
+    }
+
     switch(justifyContent) {
       case 'normal':
       case 'start':
@@ -72,7 +84,19 @@ mixin CSSFlexboxMixin {
     return JustifyContent.start;
   }
 
-  AlignItems _getAlignItems(String alignItems) {
+  AlignItems _getAlignItems(String alignItems, CSSStyleDeclaration style, FlexDirection flexDirection) {
+    if (isVerticalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'right':
+          return AlignItems.end;
+          break;
+        case 'center':
+          return AlignItems.center;
+          break;
+      }
+    }
+
     switch(alignItems) {
       case 'start':
         return AlignItems.start;
