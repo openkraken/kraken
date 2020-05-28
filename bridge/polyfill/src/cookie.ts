@@ -2,14 +2,14 @@ const cookieStorage = {};
 
 // @TODO Persisent cookie and Session cookie support
 export const cookie = {
-  get() {
+  get: () => {
     const output = [];
     for (let cookieName in cookieStorage) {
       output.push(cookieName + '=' + cookieStorage[cookieName]);
     }
     return output.join('; ');
   },
-  set(str: String) {
+  set: (str: String) => {
     const cookieStr = str.toString().trim();
     let key;
     let value;

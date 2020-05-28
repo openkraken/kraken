@@ -36,13 +36,17 @@ export class Document extends Node {
   createComment(data: string) {
     return new Comment(data);
   }
+
+  get cookie() {
+    return cookie.get();
+  }
+
+  set cookie(str: String) {
+    cookie.set(str);
+  }
 }
 
 export const document = new Document();
-
-Object.defineProperties(document, {
-  cookie,
-});
 
 export function getNodeByNodeId(targetId: number) : Node|null|Window {
   if (targetId === WINDOW) {
