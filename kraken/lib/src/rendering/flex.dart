@@ -23,6 +23,14 @@ class RenderFlexParentData extends RenderLayoutParentData {
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
 
+bool isHorizontalFlexDirection(FlexDirection direction) {
+  return direction == FlexDirection.row || direction == FlexDirection.rowReverse;
+}
+
+bool isVerticalFlexDirection(FlexDirection direction) {
+  return direction == FlexDirection.columnReverse || direction == FlexDirection.column;
+}
+
 FlexDirection flipDirection(FlexDirection direction) {
   assert(direction != null);
   switch (direction) {
@@ -602,10 +610,10 @@ class RenderFlexLayout extends RenderBox
       totalChildren++;
       final int flexGrow = _getFlexGrow(child);
       final int flexShrink = _getFlexShrink(child);
-      final String flexBasis = _getFlexBasis(child);
       if (flexShrink != 0) {
         hasFlexShrink = true;
       }
+
       if (flexGrow > 0) {
         assert(() {
           final String identity = _flexDirection == FlexDirection.row ? 'row' : 'column';
@@ -666,7 +674,15 @@ class RenderFlexLayout extends RenderBox
         totalFlexGrow += childParentData.flexGrow;
       }
 
-      BoxConstraints innerConstraints = BoxConstraints();
+      double baseConstraints = _getBaseConstraints(child);
+      BoxConstraints innerConstraints;
+
+      if (isHorizontalFlexDirection(_flexDirection)) {
+        innerConstraints = BoxConstraints(minWidth: baseConstraints);
+      } else {
+        innerConstraints = BoxConstraints(minHeight: baseConstraints);
+      }
+
       child.layout(innerConstraints, parentUsesSize: true);
       allocatedMainSize += _getMainSize(child);
       crossSize = math.max(crossSize, _getCrossSize(child));
