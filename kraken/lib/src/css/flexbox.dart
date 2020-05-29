@@ -111,6 +111,8 @@ mixin CSSFlexboxMixin {
       case 'normal':
       case 'stretch':
         return AlignItems.stretch;
+      case 'baseline':
+        return AlignItems.baseline;
     }
 
     return AlignItems.stretch;
