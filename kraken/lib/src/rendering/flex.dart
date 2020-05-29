@@ -547,6 +547,31 @@ class RenderFlexLayout extends RenderBox
     return null;
   }
 
+  // detect should use content size suggestion instead of content-based minimum size
+  double getContentBasedMinimumSize(RenderBox child, double maxMainSize) {
+    if (child is RenderElementBoundary) {
+      CSSStyleDeclaration style = child.style;
+
+      switch(_flexDirection) {
+        case FlexDirection.column:
+        case FlexDirection.columnReverse:
+          if (style.contains('minHeight')) {
+            double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
+            return minHeight < maxMainSize ? maxMainSize : minHeight;
+          }
+          return child.size.height > maxMainSize ? child.size.height : maxMainSize;
+        case FlexDirection.row:
+        case FlexDirection.rowReverse:
+          if (style.contains('minWidth')) {
+            double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
+            return minWidth < maxMainSize ? maxMainSize : minWidth;
+          }
+          return child.size.width > maxMainSize ? child.size.width : maxMainSize;
+      }
+    }
+    return maxMainSize;
+  }
+
   @override
   void performLayout() {
     RenderBox child = firstChild;
@@ -592,7 +617,10 @@ class RenderFlexLayout extends RenderBox
       maxHeight = elementHeight;
     }
 
-    final double maxMainSize = _flexDirection == FlexDirection.row ? maxWidth : maxHeight;
+    // maxMainSize still can be updated by content size suggestion and transferred size suggestion
+    // https://www.w3.org/TR/css-flexbox-1/#specified-size-suggestion
+    // https://www.w3.org/TR/css-flexbox-1/#content-size-suggestion
+    double maxMainSize = _flexDirection == FlexDirection.row ? maxWidth : maxHeight;
     final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
@@ -684,7 +712,13 @@ class RenderFlexLayout extends RenderBox
       }
 
       child.layout(innerConstraints, parentUsesSize: true);
-      allocatedMainSize += _getMainSize(child);
+      double childMainSize = _getMainSize(child);
+
+      // get minimum content based size
+      // https://www.w3.org/TR/css-flexbox-1/#min-size-auto
+      maxMainSize = getContentBasedMinimumSize(child, maxMainSize);
+
+      allocatedMainSize += childMainSize;
       crossSize = math.max(crossSize, _getCrossSize(child));
 
       int childNodeId;
@@ -704,6 +738,8 @@ class RenderFlexLayout extends RenderBox
       // Only layout placeholder renderObject child
       child = placeholderChild == null ? childParentData.nextSibling : null;
     }
+
+    print('allocate $allocatedMainSize, maxMainSize: $maxMainSize');
 
     // Distribute free space to flexible children, and determine baseline.
     final double freeMainAxisSpace = maxMainSize == 0 ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
@@ -746,7 +782,7 @@ class RenderFlexLayout extends RenderBox
             // get the maximum child size between baseConstraints and maxChildExtent.
             maxChildExtent = math.max(baseConstraints, maxChildExtent);
             minChildExtent = maxChildExtent;
-          } else if (isFlexShrink) {
+          } else if (isFlexShrink && child is! RenderTextBox) {
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeMainAxisSpace);
 
             dynamic current = childSizeMap[childNodeId];
@@ -769,8 +805,6 @@ class RenderFlexLayout extends RenderBox
               case FlexDirection.column:
               case FlexDirection.columnReverse:
                 innerConstraints = BoxConstraints(
-                  minWidth: constraints.minWidth,
-                  maxWidth: constraints.maxWidth,
                   minHeight: minChildExtent,
                   maxHeight: maxChildExtent);
                 break;
