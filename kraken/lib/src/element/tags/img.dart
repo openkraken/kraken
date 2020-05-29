@@ -20,7 +20,9 @@ class ImageElement extends Element {
   ImageInfo _imageInfo;
 
   ImageElement(int targetId)
-      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE);
+      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE) {
+    _renderImage();
+  }
 
   bool _hasLazyLoading = false;
 
@@ -32,14 +34,15 @@ class ImageElement extends Element {
       _hasLazyLoading = true;
       renderIntersectionObserver.addListener(_handleIntersectionChange);
     } else {
-      _setImageBox();
+      _constructImageChild();
+      _setImage();
     }
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
     if (entry.isIntersecting) {
-      _setImageBox();
+      _setImage();
       // Once appear remove the listener
       _resetLazyLoading();
     }
@@ -50,29 +53,13 @@ class ImageElement extends Element {
     renderIntersectionObserver.removeListener(_handleIntersectionChange);
   }
 
-  void _setImageBox() {
-    String src = properties['src'];
-    if (src != null && src.isNotEmpty) {
-      image = CSSUrl(src, cache: properties['caching']).computedValue;
-      _constructImageChild();
-    }
-  }
-
-  void _removeImageBox() {
+  void _removeImage() {
+    _removeStreamListener();
     image = null;
-    imageBox = null;
-    renderPadding.child = null;
+    imageBox.image = null;
   }
 
   void _constructImageChild() {
-    imageStream = image.resolve(ImageConfiguration.empty);
-    // Store listeners for remove listener.
-    imageListeners = [
-      ImageStreamListener(_initImageInfo),
-    ];
-    imageListeners.forEach((ImageStreamListener imageListener) {
-      imageStream.addListener(imageListener);
-    });
     imageBox = getRenderImageBox(style, image);
 
     if (childNodes.isEmpty) {
@@ -88,21 +75,13 @@ class ImageElement extends Element {
     _imageInfo = imageInfo;
     imageBox.image = _imageInfo?.image;
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
-
+    _removeStreamListener();
     _resize();
   }
 
   void _resize() {
-    // Not to resize while image is not loaded.
-    if (_imageInfo == null) return;
-
-    imageListeners?.forEach((ImageStreamListener imageListener) {
-      imageStream.removeListener(imageListener);
-    });
-    imageListeners = null;
-
-    double realWidth = _imageInfo.image.width + 0.0;
-    double realHeight = _imageInfo.image.height + 0.0;
+    double realWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
+    double realHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
     double width = 0.0;
     double height = 0.0;
     bool containWidth = style.contains('width');
@@ -123,12 +102,19 @@ class ImageElement extends Element {
         width = height * realWidth / realHeight;
       }
     }
-    imageBox.width = width;
-    imageBox.height = height;
+    imageBox?.width = width;
+    imageBox?.height = height;
   }
 
-  BoxFit _getBoxFit(CSSStyleDeclaration style) {
-    String fit = style['objectFit'];
+  void _removeStreamListener() {
+    imageListeners?.forEach((ImageStreamListener imageListener) {
+      imageStream?.removeListener(imageListener);
+    });
+    imageStream = null;
+    imageListeners = null;
+  }
+
+  BoxFit _getBoxFit(String fit) {
     switch (fit) {
       case 'contain':
         return BoxFit.contain;
@@ -157,12 +143,11 @@ class ImageElement extends Element {
     }
   }
 
-  Alignment _getAlignment(CSSStyleDeclaration style) {
+  Alignment _getAlignment(String position) {
     // Syntax: object-position: <position>
     // position: From one to four values that define the 2D position of the element. Relative or absolute offsets can be used.
     // <position> = [ [ left | center | right ] || [ top | center | bottom ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]? | [ [ left | right ] <length-percentage> ] && [ [ top | bottom ] <length-percentage> ] ]
-    String objectPosition = style['objectPosition'];
-    List<String> splitted = CSSSizingMixin.getShortedProperties(objectPosition);
+    List<String> splitted = CSSSizingMixin.getShortedProperties(position);
     if (splitted.length == 1) {
       double value = _getAlignmentValueFromString(splitted.first);
       return Alignment(value, value);
@@ -201,8 +186,8 @@ class ImageElement extends Element {
   }
 
   RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
-    BoxFit fit = _getBoxFit(style);
-    Alignment alignment = _getAlignment(style);
+    BoxFit fit = _getBoxFit(style['objectFit']);
+    Alignment alignment = _getAlignment(style['objectPosition']);
     return RenderImage(
       image: _imageInfo?.image,
       fit: fit,
@@ -214,7 +199,7 @@ class ImageElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
     if (key == 'src') {
-      _removeImageBox();
+      _removeImage();
     } else if (key == 'loading' && _hasLazyLoading && image == null) {
       _resetLazyLoading();
     }
@@ -225,11 +210,26 @@ class ImageElement extends Element {
     super.setProperty(key, value);
 
     if (key == 'src') {
-      _renderImage();
+      _setImage();
     } else if (key == 'loading' && _hasLazyLoading) {
       // Should reset lazy when value change
       _resetLazyLoading();
-      _renderImage();
+    }
+  }
+
+  void _setImage() {
+    String src = properties['src'];
+    if (src != null && src.isNotEmpty) {
+      _removeStreamListener();
+      image = CSSUrl(src, cache: properties['caching']).computedValue;
+      imageStream = image.resolve(ImageConfiguration.empty);
+      // Store listeners for remove listener.
+      imageListeners = [
+        ImageStreamListener(_initImageInfo),
+      ];
+      imageListeners.forEach((ImageStreamListener imageListener) {
+        imageStream.addListener(imageListener);
+      });
     }
   }
 
@@ -252,6 +252,12 @@ class ImageElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    _resize();
+    if (key == 'width' || key == 'height') {
+      _resize();
+    } else if (key == 'objectFit') {
+      imageBox.fit = _getBoxFit(value);
+    } else if (key == 'objectPosition') {
+      imageBox.alignment = _getAlignment(value);
+    }
   }
 }

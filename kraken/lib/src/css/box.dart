@@ -381,6 +381,9 @@ class TransitionBorderSide with TransitionColorMixin {
   }
 
   BorderSide toBorderSide() {
+    if (borderWidth == 0.0) {
+      return BorderSide.none;
+    }
     return BorderSide(color: color, width: borderWidth, style: borderStyle);
   }
 }
