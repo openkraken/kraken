@@ -82,4 +82,40 @@ describe('flex-items', () => {
 
     await matchScreenshot();
   });
+
+  it('works with multiple relative item', async () => {
+    const n1 = createElementWithStyle(
+       'div',
+       {
+         display: 'flex',
+         flexDirection: 'column',
+         width: '300px',
+         height: '300px',
+         backgroundColor: 'gray',
+       },
+       [
+        createElementWithStyle(
+          'div',
+           {
+             position: 'relative',
+             width: '100px',
+             height: '100px',
+             backgroundColor: 'blue',
+           },
+        ),
+        createElementWithStyle(
+          'div',
+           {
+             position: 'relative',
+             width: '100px',
+             height: '100px',
+             backgroundColor: 'green',
+           },
+        ),
+       ]
+     );
+    BODY.appendChild(n1);
+
+    await matchScreenshot();
+  });
 });
