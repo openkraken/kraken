@@ -37,7 +37,7 @@ const forbiddenRequestHeaders = [
   "expect",
   "host",
   "keep-alive",
-  "origin",
+  // "origin", // Allow to set origin to enable CORS in lib-mtop request
   "referer",
   "te",
   "trailer",
