@@ -178,6 +178,19 @@ class Element extends Node
     if (targetId == BODY_ID) {
       _buildRenderStack();
     }
+
+    setElementSizeType();
+  }
+
+  void setElementSizeType() {
+    bool widthDefined = style.contains('width') || style.contains('minWidth');
+    bool heightDefined = style.contains('height') || style.contains('minHeight');
+
+    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+
+    renderElementBoundary.widthSizeType = widthType;
+    renderElementBoundary.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollTop) {
@@ -841,6 +854,8 @@ class Element extends Node
   void _styleSizeChangedListener(String property, String original, String present) {
     // Update constrained box.
     updateConstraints(style, transitionMap);
+
+    setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original) ?? 0;

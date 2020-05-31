@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex-minimum', () => {
-  xit('height-flex-items-001', async () => {
+  it('height-flex-items-001', async () => {
     let referenceOverlappedRed;
     let content100X100;
     let testFlexItemOverlappingGreen;
