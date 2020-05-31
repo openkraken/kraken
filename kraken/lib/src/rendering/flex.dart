@@ -704,10 +704,12 @@ class RenderFlexLayout extends RenderBox
             RenderBox node = this;
             switch (_flexDirection) {
               case FlexDirection.row:
+              case FlexDirection.rowReverse:
                 while (!node.constraints.hasBoundedWidth && node.parent is RenderBox) node = node.parent;
                 if (!node.constraints.hasBoundedWidth) node = null;
                 break;
               case FlexDirection.column:
+              case FlexDirection.columnReverse:
                 while (!node.constraints.hasBoundedHeight && node.parent is RenderBox) node = node.parent;
                 if (!node.constraints.hasBoundedHeight) node = null;
                 break;
@@ -785,7 +787,6 @@ class RenderFlexLayout extends RenderBox
 
     // Distribute free space to flexible children, and determine baseline.
     final double freeMainAxisSpace = maxMainSize == 0 ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
-    double maxBaselineDistance = 0.0;
     bool isFlexGrow = freeMainAxisSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = freeMainAxisSpace < 0 && hasFlexShrink;
     if (isFlexGrow || isFlexShrink || alignItems == AlignItems.stretch && placeholderChild == null) {
@@ -793,8 +794,6 @@ class RenderFlexLayout extends RenderBox
       allocatedMainSize = 0;
       final double spacePerFlex = canFlex && totalFlexGrow > 0 ? (freeMainAxisSpace / totalFlexGrow) : double.nan;
       child = placeholderChild != null ? placeholderChild : firstChild;
-      double maxSizeAboveBaseline = 0;
-      double maxSizeBelowBaseline = 0;
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
