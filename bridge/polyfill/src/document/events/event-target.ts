@@ -1,4 +1,5 @@
 import { addEvent } from '../ui-manager';
+import { Node } from '../node';
 import { Event } from './event';
 
 export const BODY = -1;
@@ -75,15 +76,32 @@ export class EventTarget {
     if (!this._eventHandlers.has(event.type)) {
       return;
     }
-    event._dispatchFlag = true;
     event.currentTarget = event.target = this;
+
+    event._dispatchFlag = true;
+    let cancelled = true;
+
+    while (event.currentTarget !== null) {
+      cancelled = this._dispatchEvent(event);
+      if (event.bubbles || cancelled) break;
+      if (event.currentTarget) {
+        // EventTarget type conversion to Node
+        let node = (event.currentTarget as unknown) as Node;
+        event.currentTarget = node.parentNode as EventTarget;
+      }
+    }
+
+    event._dispatchFlag = false;
+    return !event.defaultPrevented;
+  }
+
+  private _dispatchEvent(event: Event) {
     let stack = this._eventHandlers.get(event.type)!.slice();
 
     for (let i = 0; i < stack.length; i++) {
       stack[i].call(this, event);
     }
-    event._dispatchFlag = false;
 
-    return !event.defaultPrevented;
+    return !event._canceledFlag;
   }
 }

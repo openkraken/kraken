@@ -72,14 +72,9 @@ class EventTarget {
   bool dispatchEvent(Event event) {
     bool cancelled = true;
     event.currentTarget = event.target = this;
-    while (event.currentTarget != null) {
+    if (event.currentTarget != null) {
       List<EventHandler> handlers = event.currentTarget.getEventHandlers(event.type);
       cancelled = _dispatchEventToTarget(event.currentTarget, handlers, event);
-      if (!event.bubbles || cancelled) break;
-      if (event.currentTarget is Node) {
-        Node currentTarget = event.currentTarget;
-        event.currentTarget = currentTarget?.parentNode;
-      }
     }
     return cancelled;
   }
