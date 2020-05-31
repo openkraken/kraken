@@ -4,6 +4,7 @@ import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
 import { BODY, WINDOW } from './events/event-target';
+import { cookie } from '../cookie';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -34,6 +35,14 @@ export class Document extends Node {
    */
   createComment(data: string) {
     return new Comment(data);
+  }
+
+  get cookie() {
+    return cookie.get();
+  }
+
+  set cookie(str: String) {
+    cookie.set(str);
   }
 }
 

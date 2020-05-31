@@ -262,7 +262,7 @@ class Element extends Node
     (renderStack.parent as RenderObjectWithChildMixin).child = originalChild;
 
     if (renderStack.childCount > 0) {
-      Element parentPositionedElement = findParent(this, (el) => el.renderStack != null);
+      Element parentPositionedElement = findPositionedParent(this);
       List<RenderBox> stackedChildren = renderStack.getChildrenAsList();
       for (var stackedChild in stackedChildren) {
         renderStack.dropChild(stackedChild);
@@ -572,6 +572,7 @@ class Element extends Node
     if (renderLayoutBox is RenderFlexLayout) {
       Size preferredSize =
           Size(CSSLength.toDisplayPortValue(element.style[WIDTH]), CSSLength.toDisplayPortValue(element.style[HEIGHT]));
+
       renderPositionedPlaceholder = RenderPositionHolder(preferredSize: preferredSize);
     } else {
       // Positioned element in flow layout will position in old flow layer
@@ -601,7 +602,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.absolute:
-        Element parentStackedElement = findParent(child, (element) => element.renderStack != null);
+        Element parentStackedElement = findPositionedParent(child);
         parentRenderPosition = parentStackedElement.renderStack;
         break;
 
@@ -621,8 +622,8 @@ class Element extends Node
     if ((!childDisplay.isEmpty && childDisplay != 'inline') ||
         (position != CSSPositionType.static && position != CSSPositionType.relative)) {
       preferredSize = Size(
-        CSSLength.toDisplayPortValue(child.style[WIDTH]),
-        CSSLength.toDisplayPortValue(child.style[HEIGHT]),
+        CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
+        CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
       );
     }
 
@@ -804,13 +805,13 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    double _original = CSSLength.toDisplayPortValue(original);
-
+    double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+    double current = CSSLength.toDisplayPortValue(present) ?? 0;
     _updateOffset(
       definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
-      diff: CSSLength.toDisplayPortValue(present) - _original,
+      diff: current - _original,
     );
   }
 
@@ -847,12 +848,13 @@ class Element extends Node
     updateConstraints(style, transitionMap);
 
     if (property == WIDTH || property == HEIGHT) {
-      double _original = CSSLength.toDisplayPortValue(original);
+      double _original = CSSLength.toDisplayPortValue(original) ?? 0;
+      double current = CSSLength.toDisplayPortValue(present) ?? 0;
       _updateOffset(
         definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
-        diff: CSSLength.toDisplayPortValue(present) - _original,
+        diff: current - _original,
       );
     }
   }
@@ -1074,7 +1076,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    Element element = findParent(this, (element) => element.renderStack != null);
+    Element element = findPositionedParent(this);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1174,9 +1176,19 @@ class Element extends Node
   }
 }
 
-Element findParent(Element element, TestElement testElement) {
+Element findPositionedParent(Element element) {
   Element _el = element?.parent;
-  while (_el != null && !testElement(_el)) {
+  Element rootEl = ElementManager().getRootElement();
+
+  while (_el != null) {
+    bool isElementNonStatic = _el.style['position'] != 'static' &&
+      _el.style['position'] != '';
+    // Find element with renderStack and position is not static,
+    // use root element if none was found
+    if (_el == rootEl ||
+      (_el.renderStack != null && isElementNonStatic)) {
+      break;
+    }
     _el = _el.parent;
   }
   return _el;
@@ -1238,8 +1250,8 @@ PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, Ren
   if (style.contains('right')) {
     parentData.right = CSSLength.toDisplayPortValue(style['right']);
   }
-  parentData.width = CSSLength.toDisplayPortValue(style['width']);
-  parentData.height = CSSLength.toDisplayPortValue(style['height']);
+  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
+  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
   return parentData;
 }

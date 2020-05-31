@@ -74,11 +74,6 @@ class RenderElementBoundary extends RenderTransform
       performResize();
     }
 
-    // default transform origin center
-    if (origin == null) {
-      origin = Offset(size.width / 2, size.height / 2);
-    }
-
     if (positionedHolder != null) {
       // Make position holder preferred size equal to current element boundary size.
       positionedHolder.preferredSize = Size.copy(size);
@@ -105,8 +100,8 @@ class RenderElementBoundary extends RenderTransform
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      double width = (layoutSize?.width ?? 0.0) - (element?.cropBorderWidth ?? 0.0);
-      double height = (layoutSize?.height ?? 0.0) - (element?.cropBorderHeight ?? 0.0);
+      double width = (layoutSize?.width ?? 0.0) - (element?.cropMarginWidth ?? 0.0);
+      double height = (layoutSize?.height ?? 0.0) - (element?.cropMarginHeight ?? 0.0);
 
       translation = (alignment as Alignment).alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);

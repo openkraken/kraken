@@ -94,7 +94,7 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
     newSnap.writeAsBytesSync(encodePng(diffImg));
   }
 
-  return (diff * 10e7) < 20;
+  return (diff * 10e6) < 20;
 }
 
 bool matchFile(List<int> left, List<int> right) {

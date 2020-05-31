@@ -492,23 +492,23 @@ class RenderFlexLayout extends RenderBox
         String width = child.style['width'];
         if (flexBasis == 'auto') {
           if (width != null) {
-            minConstraints = CSSLength.toDisplayPortValue(width);
+            minConstraints = CSSLength.toDisplayPortValue(width) ?? 0;
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       } else {
         String height = child.style['height'];
         if (flexBasis == 'auto') {
           if (height != null) {
-            minConstraints = CSSLength.toDisplayPortValue(height);
+            minConstraints = CSSLength.toDisplayPortValue(height) ?? 0;
           } else {
             minConstraints = 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis);
+          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       }
     }
@@ -540,14 +540,28 @@ class RenderFlexLayout extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
-      // Layout placeholder renderObject of positioned element(absolute/fixed) in new layer
-      if (child is RenderPositionHolder) {
+      // Layout placeholder of positioned element(absolute/fixed) in new layer
+      if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
         _layoutChildren(child);
       }
+
+
       child = childParentData.nextSibling;
     }
     // Layout non placeholder renderObject
     _layoutChildren(null);
+  }
+
+  bool isPlaceholderPositioned(RenderObject child) {
+    if (child is RenderPositionHolder) {
+      RenderElementBoundary realDisplayedBox = child.realDisplayedBox;
+      CSSPositionType positionType = resolvePositionFromStyle(realDisplayedBox.style);
+      if (positionType == CSSPositionType.absolute ||
+        positionType == CSSPositionType.fixed) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
@@ -591,8 +605,8 @@ class RenderFlexLayout extends RenderBox
     Map<int, dynamic> childSizeMap = {};
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
-      // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderPositionHolder) {
+      // Exclude positioned placeholder renderObject when layout non placeholder object
+      if (placeholderChild == null && isPlaceholderPositioned(child)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -722,8 +736,8 @@ class RenderFlexLayout extends RenderBox
       double maxSizeBelowBaseline = 0;
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
-        // Exclude placeholder renderObject when layout non placeholder object
-        if (placeholderChild == null && child is RenderPositionHolder) {
+        // Exclude positioned placeholder renderObject when layout non placeholder object
+        if (placeholderChild == null && isPlaceholderPositioned(child)) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -737,9 +751,8 @@ class RenderFlexLayout extends RenderBox
             maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
 
             double baseConstraints = _getBaseConstraints(child);
-            if (baseConstraints != 0) {
-              maxChildExtent = baseConstraints;
-            }
+            // get the maximum child size between baseConstraints and maxChildExtent.
+            maxChildExtent = math.max(baseConstraints, maxChildExtent);
             minChildExtent = maxChildExtent;
           } else {
             double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeSpace);
@@ -893,8 +906,8 @@ class RenderFlexLayout extends RenderBox
     child = placeholderChild != null ? placeholderChild : firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
-      // Exclude placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && child is RenderPositionHolder) {
+      // Exclude positioned placeholder renderObject when layout non placeholder object
+      if (placeholderChild == null && isPlaceholderPositioned(child)) {
         child = childParentData.nextSibling;
         continue;
       }

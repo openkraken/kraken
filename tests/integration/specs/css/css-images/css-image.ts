@@ -169,4 +169,37 @@ describe('css-image', () => {
 
     await matchScreenshot();
   });
+
+  it('size works width position absolute' , async () => {
+    let n1, n2;
+    n1 = createElementWithStyle(
+       'div',
+       {
+         display: 'flex',
+         position: 'relative',
+         flexDirection: 'column',
+         justifyContent: 'center',
+         alignItems: 'center',
+         width: '300px',
+         height: '300px',
+         backgroundColor: 'gray',
+       },
+       [
+        (n2 = createElementWithStyle(
+          'img',
+           {
+             position: 'absolute',
+             top: '20px',
+             left: '20px',
+             width: '100px',
+             height: '100px',
+           },
+        ))
+       ]
+     );
+    BODY.appendChild(n1);
+    n2.src = 'https://img.alicdn.com/tfs/TB14bXLHFT7gK0jSZFpXXaTkpXa-100-100.png';
+
+    await matchScreenshot();
+  });
 });

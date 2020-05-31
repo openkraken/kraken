@@ -76,4 +76,42 @@ describe('Position relative', () => {
 
     await matchScreenshot();
   });
+
+  it('works with child remove' , async () => {
+    let n1, n2;
+    n1 = createElementWithStyle(
+       'div',
+       {
+         display: 'flex',
+         flexDirection: 'column',
+         width: '300px',
+         height: '300px',
+         backgroundColor: 'gray',
+       },
+       [
+        (n2 = createElementWithStyle(
+          'div',
+           {
+             position: 'relative',
+             width: '100px',
+             height: '100px',
+             backgroundColor: 'blue',
+           },
+        )),
+        createElementWithStyle(
+          'div',
+           {
+             position: 'relative',
+             width: '100px',
+             height: '100px',
+             backgroundColor: 'green',
+           },
+        ),
+       ]
+     );
+    BODY.appendChild(n1);
+    n1.removeChild(n2);
+
+    await matchScreenshot();
+  });
 });

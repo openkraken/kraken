@@ -240,7 +240,7 @@ class CanvasTextDrawingStyles2D implements CanvasTextDrawingStyles {
   set font(String newValue) {
     List<String> splitVal = newValue.split(_splitRegExp);
     if (splitVal.length == 2) {
-      fontSize = CSSLength.toDisplayPortValue(splitVal[0]);
+      fontSize = CSSLength.toDisplayPortValue(splitVal[0]) ?? 14.0;
       fontFamily = splitVal[1];
     }
   }

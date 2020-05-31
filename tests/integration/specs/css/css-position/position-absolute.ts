@@ -1079,7 +1079,7 @@ describe('position-absolute', () => {
         position: 'relative',
         'background-color': 'red',
         'box-sizing': 'border-box',
-        border: 'solid green 10px',
+        border: '10px solid green',
         width: '100px',
         height: '100px',
       },

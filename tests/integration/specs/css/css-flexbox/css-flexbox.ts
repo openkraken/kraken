@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('css-flexbox', () => {
-  xit('img-expand-evenly', async () => {
+  it('img-expand-evenly', async () => {
     let p;
     let flexbox;
     p = createElement(
