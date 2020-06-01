@@ -601,6 +601,11 @@ class RenderFlexLayout extends RenderBox
     return maxMainSize;
   }
 
+  // There are four steps for Flex Container to layout.
+  // Step 1: layout positioned child earlyer.
+  // Step 2: layout flex-items with No constraints, this step is aiming to collect original box size of every flex-items.
+  // Step 3: apply flex-grow, flex-shrink and align-items: stretch to flex-items, this steps will layout twice in order to change flex-items box size.
+  // Step 4: apply justify-content, and other flexbox properties, this steps will update flex-items offset and put them into right position.
   @override
   void performLayout() {
     RenderBox child = firstChild;
@@ -688,9 +693,9 @@ class RenderFlexLayout extends RenderBox
 
       if (flexGrow > 0) {
         assert(() {
-          final String identity = _flexDirection == FlexDirection.row ? 'row' : 'column';
-          final String axis = _flexDirection == FlexDirection.row ? 'horizontal' : 'vertical';
-          final String dimension = _flexDirection == FlexDirection.row ? 'width' : 'height';
+          final String identity = isHorizontalFlexDirection(_flexDirection) ? 'row' : 'column';
+          final String axis = isHorizontalFlexDirection(_flexDirection) ? 'horizontal' : 'vertical';
+          final String dimension = isHorizontalFlexDirection(_flexDirection) ? 'width' : 'height';
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
           if (!canFlex) {
@@ -814,12 +819,6 @@ class RenderFlexLayout extends RenderBox
           continue;
         }
 
-        // Skip Empty Size child,
-        if (child.hasSize && child.size.isEmpty) {
-          child = childParentData.nextSibling;
-          continue;
-        }
-
         assert(childNodeId != null);
 
         double maxChildExtent;
@@ -839,6 +838,10 @@ class RenderFlexLayout extends RenderBox
 
           dynamic current = childSizeMap[childNodeId];
           minChildExtent = maxChildExtent = current['size'] + shrinkValue;
+        } else if (child.hasSize && child.size.isEmpty) {
+          // Skip No Grow and unsized child.
+          child = childParentData.nextSibling;
+          continue;
         }
 
         BoxConstraints innerConstraints;
@@ -971,14 +974,14 @@ class RenderFlexLayout extends RenderBox
     double actualSizeDelta;
 
     // Get layout width from children's width by flex axis
-    double constraintWidth = _flexDirection == FlexDirection.row ? idealMainSize : crossSize;
+    double constraintWidth = isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
     // Get max of element's width and children's width if element's width exists
     if (elementWidth != null) {
       constraintWidth = math.max(constraintWidth, elementWidth);
     }
 
     // Get layout height from children's height by flex axis
-    double constraintHeight = _flexDirection == FlexDirection.row ? crossSize : idealMainSize;
+    double constraintHeight = isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
     // Get max of element's height and children's height if element's height exists
     if (elementHeight != null) {
       constraintHeight = math.max(constraintHeight, elementHeight);
@@ -987,13 +990,13 @@ class RenderFlexLayout extends RenderBox
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight));
+        size = constraints.constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight));
+        size = constraints.constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
         actualSize = size.height;
         crossSize = size.width;
         break;

@@ -577,25 +577,6 @@ class Element extends Node
     return node;
   }
 
-  // Store placeholder renderObject reference to parentData of element boundary
-  // to enable access from parent RenderStack
-  RenderBox getStackedRenderBox(Element element) {
-    // Positioned element in flex layout will reposition in new layer
-    if (renderLayoutBox is RenderFlexLayout) {
-      Size preferredSize =
-          Size(CSSLength.toDisplayPortValue(element.style[WIDTH]), CSSLength.toDisplayPortValue(element.style[HEIGHT]));
-
-      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: preferredSize);
-    } else {
-      // Positioned element in flow layout will position in old flow layer
-      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: Size.zero);
-    }
-
-    RenderBox stackedRenderBox = element.renderObject as RenderBox;
-    stackedRenderBox.parentData = getPositionParentDataFromStyle(element.style, renderPositionedPlaceholder);
-    return stackedRenderBox;
-  }
-
   // Add placeholder to positioned element for calculate original
   // coordinate before moved away
   void addPositionPlaceholder() {
@@ -642,7 +623,7 @@ class Element extends Node
     RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     var childRenderElementBoundary = child.renderElementBoundary;
-    if (position == CSSPositionType.relative) {
+    if (position == CSSPositionType.relative || position == CSSPositionType.absolute) {
       childRenderElementBoundary.positionedHolder = positionedBoxHolder;
     }
 
