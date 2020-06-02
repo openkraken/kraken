@@ -70,10 +70,10 @@ class ImageElement extends Element {
     imageListeners = [
       ImageStreamListener(_initImageInfo),
     ];
+    imageBox = getRenderImageBox(style, image);
     imageListeners.forEach((ImageStreamListener imageListener) {
       imageStream.addListener(imageListener);
     });
-    imageBox = getRenderImageBox(style, image);
 
     if (childNodes.isEmpty) {
       addChild(imageBox);
@@ -138,6 +138,7 @@ class ImageElement extends Element {
     }
     imageBox.width = width;
     imageBox.height = height;
+    print('image width $width, height: $height');
   }
 
   BoxFit _getBoxFit(CSSStyleDeclaration style) {

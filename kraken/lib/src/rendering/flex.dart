@@ -623,6 +623,17 @@ class RenderFlexLayout extends RenderBox
     _layoutChildren(null);
   }
 
+  bool _isChildDisplayNone(RenderObject child) {
+    CSSStyleDeclaration style;
+    if (child is RenderTextBox) {
+      style = child.style;
+    } else if (child is RenderElementBoundary) {
+      style = child.style;
+    }
+
+    return style['display'] == 'none';
+  }
+
   bool isPlaceholderPositioned(RenderObject child) {
     if (child is RenderPositionHolder) {
       RenderElementBoundary realDisplayedBox = child.realDisplayedBox;
@@ -807,10 +818,13 @@ class RenderFlexLayout extends RenderBox
           continue;
         }
         int childNodeId;
+        CSSStyleDeclaration style;
         if (child is RenderTextBox) {
           childNodeId = child.targetId;
+          style = child.style;
         } else if (child is RenderElementBoundary) {
           childNodeId = child.targetId;
+          style = child.style;
         }
 
         // Skip RenderPlaceHolder child
@@ -823,6 +837,12 @@ class RenderFlexLayout extends RenderBox
 
         double maxChildExtent;
         double minChildExtent;
+
+        if (_isChildDisplayNone(child)) {
+          // Skip No Grow and unsized child.
+          child = childParentData.nextSibling;
+          continue;
+        }
 
         if (isFlexGrow && freeMainAxisSpace >= 0) {
           final int flexGrow = _getFlexGrow(child);
@@ -838,10 +858,6 @@ class RenderFlexLayout extends RenderBox
 
           dynamic current = childSizeMap[childNodeId];
           minChildExtent = maxChildExtent = current['size'] + shrinkValue;
-        } else if (child.hasSize && child.size.isEmpty) {
-          // Skip No Grow and unsized child.
-          child = childParentData.nextSibling;
-          continue;
         }
 
         BoxConstraints innerConstraints;
@@ -867,8 +883,14 @@ class RenderFlexLayout extends RenderBox
 
                   // child have predefined height, use previous layout height.
                   if (sizeType == BoxSizeType.specified) {
-                    minCrossAxisSize = child.size.height;
-                    maxCrossAxisSize = child.size.height;
+                    // for empty child width, maybe it's unloaded image, set constraints range.
+                    if (child.size.isEmpty) {
+                      minCrossAxisSize = 0.0;
+                      maxCrossAxisSize = constraints.maxHeight;
+                    } else {
+                      minCrossAxisSize = child.size.height;
+                      maxCrossAxisSize = child.size.height;
+                    }
                   } else {
                   // expand child's height to constraints.maxHeight;
                     minCrossAxisSize = constraints.maxHeight;
@@ -913,8 +935,14 @@ class RenderFlexLayout extends RenderBox
 
                   // child have predefined width, use previous layout width.
                   if (sizeType == BoxSizeType.specified) {
-                    minCrossAxisSize = child.size.width;
-                    maxCrossAxisSize = child.size.width;
+                    // for empty child width, maybe it's unloaded image, set constraints range.
+                    if (child.size.isEmpty) {
+                      minCrossAxisSize = 0.0;
+                      maxCrossAxisSize = constraints.maxWidth;
+                    } else {
+                      minCrossAxisSize = child.size.width;
+                      maxCrossAxisSize = child.size.width;
+                    }
                   } else {
                     // expand child's height to constraints.maxWidth;
                     minCrossAxisSize = constraints.maxWidth;
@@ -957,6 +985,7 @@ class RenderFlexLayout extends RenderBox
               break;
           }
         }
+        print('child layout $innerConstraints');
         child.layout(innerConstraints, parentUsesSize: true);
         final double childSize = _getMainSize(child);
         allocatedMainSize += childSize;
