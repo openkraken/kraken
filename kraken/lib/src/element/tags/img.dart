@@ -115,6 +115,14 @@ class ImageElement extends Element {
         width = height * realWidth / realHeight;
       }
     }
+
+    if (!height.isFinite) {
+      height = 0.0;
+    }
+    if (!width.isFinite) {
+      width = 0.0;
+    }
+
     imageBox?.width = width;
     imageBox?.height = height;
   }

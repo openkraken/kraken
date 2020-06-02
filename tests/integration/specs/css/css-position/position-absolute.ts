@@ -1339,4 +1339,59 @@ describe('position-absolute', () => {
 
     await matchScreenshot();
   });
+  it('auto computed height from innerChild', async () => {
+    let containingBlock = createElementWithStyle(
+      'div',
+      {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        'background-color': 'red',
+        display: 'flex',
+        'flex-direction': 'column',
+      },
+      [
+        createElementWithStyle(
+          'div',
+          {
+            'flex-grow': '1',
+            display: 'flex',
+            'align-items': 'center',
+            margin: '10px',
+            width: '100px',
+          },
+          [
+            createElementWithStyle(
+              'div',
+              {
+                position: 'absolute',
+                left: '0',
+                width: '100px',
+                'background-color': 'green',
+              },
+              [
+                createElementWithStyle('span', {
+                  display: 'inline-block',
+                  height: '50px',
+                  width: '50px',
+                }),
+                createElementWithStyle('span', {
+                  display: 'inline-block',
+                  height: '50px',
+                  width: '50px',
+                }),
+              ]
+            ),
+          ]
+        ),
+        createElementWithStyle('div', {
+          'flex-grow': '1',
+          width: '100px',
+          'background-color': 'green',
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchScreenshot();
+  });
 });
