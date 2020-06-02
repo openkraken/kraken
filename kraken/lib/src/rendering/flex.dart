@@ -818,13 +818,10 @@ class RenderFlexLayout extends RenderBox
           continue;
         }
         int childNodeId;
-        CSSStyleDeclaration style;
         if (child is RenderTextBox) {
           childNodeId = child.targetId;
-          style = child.style;
         } else if (child is RenderElementBoundary) {
           childNodeId = child.targetId;
-          style = child.style;
         }
 
         // Skip RenderPlaceHolder child
@@ -1196,40 +1193,6 @@ class RenderFlexItem extends RenderBox
         DebugOverflowIndicatorMixin {
   RenderFlexItem({RenderBox child}) {
     add(child);
-  }
-
-  RenderElementBoundary _elementBoundary;
-
-  RenderElementBoundary get elementBoundary {
-    return _elementBoundary;
-  }
-  set elementBoundary(RenderElementBoundary value) {
-    assert(value != null);
-    if (_elementBoundary != value) {
-      _elementBoundary = value;
-    }
-  }
-
-  CrossAxisAlignment _crossAxisAlignment;
-  CrossAxisAlignment get crossAxisAlignment {
-    return _crossAxisAlignment;
-  }
-  set crossAxisAlignment(CrossAxisAlignment value) {
-    assert(value != null);
-    if (_crossAxisAlignment != value) {
-      _crossAxisAlignment = value;
-    }
-  }
-
-  /// The direction to use as the main axis.
-  Axis get direction => _direction;
-  Axis _direction;
-
-  set direction(Axis value) {
-    assert(value != null);
-    if (_direction != value) {
-      _direction = value;
-    }
   }
 
   @override

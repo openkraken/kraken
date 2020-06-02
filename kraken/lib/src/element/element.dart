@@ -461,12 +461,7 @@ class Element extends Node
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       renderPadding.child = null;
-      RenderFlexItem flexItem = RenderFlexItem(child: renderLayoutBox as RenderBox);
-      // save direction and elementBoundary reference for RenderItem's performLayout steps.
-      if (parent.renderLayoutBox is RenderFlexLayout) {
-        flexItem.elementBoundary = renderElementBoundary;
-      }
-      renderPadding.child = flexItem;
+      renderPadding.child = RenderFlexItem(child: renderLayoutBox as RenderBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
