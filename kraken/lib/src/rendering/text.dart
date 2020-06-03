@@ -6,6 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
+import 'element_boundary.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -32,6 +33,9 @@ class RenderTextBox extends RenderBox
     );
     add(_renderParagraph);
   }
+
+  BoxSizeType widthSizeType;
+  BoxSizeType heightSizeType;
 
   void _rebuild() {
     _renderParagraph.text = createTextSpanWithStyle(text, style);

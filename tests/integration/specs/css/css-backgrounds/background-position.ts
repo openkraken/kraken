@@ -15,13 +15,13 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+        'url(assets/cat.png)',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
     });
     position.appendChild(position1);
     append(BODY, position);
-    await sleep(1);
+    await sleep(0.1);
     await matchElementImageSnapshot(position);
   });
 
@@ -41,7 +41,7 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundPosition: 'left',
       backgroundRepeat: 'no-repeat',
     });
@@ -68,7 +68,7 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundPosition: 'top',
       backgroundRepeat: 'no-repeat',
     });
@@ -95,7 +95,7 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundPosition: 'right',
       backgroundRepeat: 'no-repeat',
     });
@@ -121,7 +121,7 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundPosition: 'bottom',
       backgroundRepeat: 'no-repeat',
     });
@@ -145,7 +145,7 @@ describe('Background-position', () => {
       width: '100vw',
       height: '200px',
       backgroundImage:
-        'url(https://img.alicdn.com/tfs/TB1H2Kcb1H2gK0jSZFEXXcqMpXa-70-72.png)',
+        'url(assets/rax.png)',
       backgroundPosition: 'right center',
       backgroundRepeat: 'no-repeat',
     });

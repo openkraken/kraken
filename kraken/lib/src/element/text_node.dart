@@ -75,6 +75,10 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     Element parentElement = parentNode;
     renderTextBox.text = data;
     renderTextBox.style = parentElement.style;
+
+    // migrate element's size type to RenderTextBox
+    renderTextBox.widthSizeType = parentElement.renderElementBoundary.widthSizeType;
+    renderTextBox.heightSizeType = parentElement.renderElementBoundary.heightSizeType;
   }
 
   @override

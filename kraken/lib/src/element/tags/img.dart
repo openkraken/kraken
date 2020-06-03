@@ -65,6 +65,19 @@ class ImageElement extends Element {
     if (childNodes.isEmpty) {
       addChild(imageBox);
     }
+
+    setElementSizeType();
+  }
+
+  void setElementSizeType() {
+    bool widthDefined = style.contains('width') || style.contains('minWidth');
+    bool heightDefined = style.contains('height') || style.contains('minHeight');
+
+    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+
+    renderElementBoundary.widthSizeType = widthType;
+    renderElementBoundary.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
@@ -102,6 +115,14 @@ class ImageElement extends Element {
         width = height * realWidth / realHeight;
       }
     }
+
+    if (!height.isFinite) {
+      height = 0.0;
+    }
+    if (!width.isFinite) {
+      width = 0.0;
+    }
+
     imageBox?.width = width;
     imageBox?.height = height;
   }

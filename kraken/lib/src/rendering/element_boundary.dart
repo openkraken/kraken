@@ -9,6 +9,17 @@ import 'package:kraken/rendering.dart';
 
 class ElementBoundaryParentData extends ContainerBoxParentData<RenderBox> {}
 
+enum BoxSizeType {
+  // Element which have intrinsic before layout. Such as <img /> and <video />
+  intrinsic,
+
+  // Element which have width or min-width properties defined.
+  specified,
+
+  // Element which neither have intrinsic or predefined size.
+  automatic,
+}
+
 class RenderElementBoundary extends RenderTransform
     with
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
@@ -33,6 +44,9 @@ class RenderElementBoundary extends RenderTransform
 
   Matrix4 _transform;
   Size layoutSize;
+
+  BoxSizeType widthSizeType;
+  BoxSizeType heightSizeType;
 
   set transform(Matrix4 value) {
     super.transform = value;

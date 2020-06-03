@@ -2844,4 +2844,139 @@ describe('align-content', () => {
 
     await matchScreenshot();
   });
+
+  it('stretch unbound flex-item 001', async () => {
+    let content1Horizontal;
+    let itemHorizontal;
+    let flexHorizontal;
+    flexHorizontal = createElement(
+      'div',
+      {
+        style: {
+          width: '400px',
+          display: 'flex',
+          height: '100px',
+          'background-color': 'gray',
+          'margin-bottom': '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (itemHorizontal = createElement(
+          'div',
+          {
+            style: {
+              width: '100px',
+              'background-color': 'yellow',
+              margin: '10px',
+              flex: 'none',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (content1Horizontal = createElement('div', {
+              style: {
+                width: '70px',
+                height: '150px',
+                'background-color': 'red',
+                'box-sizing': 'border-box',
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(flexHorizontal);
+    await matchScreenshot();
+  });
+
+  it('stretch unbound flex-item 002', async () => {
+    let content3Horizontal;
+    let itemHorizontal;
+    let flexHorizontal;
+    flexHorizontal = createElement(
+      'div',
+      {
+        style: {
+          width: '400px',
+          display: 'flex',
+          height: '100px',
+          'background-color': 'gray',
+          'margin-bottom': '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (itemHorizontal = createElement(
+          'div',
+          {
+            style: {
+              width: '100px',
+              'background-color': 'yellow',
+              margin: '10px',
+              flex: 'none',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (content3Horizontal = createElement('div', {
+              style: {
+                width: '70px',
+                height: '50px',
+                'background-color': 'red',
+                'box-sizing': 'border-box',
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(flexHorizontal);
+    await matchScreenshot();
+  });
+
+  it('stretch unbound flex-item 003', async () => {
+    let content2Horizontal;
+    let itemHorizontal;
+    let flexHorizontal;
+    flexHorizontal = createElement(
+      'div',
+      {
+        style: {
+          width: '400px',
+          display: 'flex',
+          height: '100px',
+          'background-color': 'gray',
+          'margin-bottom': '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (itemHorizontal = createElement(
+          'div',
+          {
+            style: {
+              width: '100px',
+              'background-color': 'yellow',
+              margin: '10px',
+              flex: 'none',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (content2Horizontal = createElement('div', {
+              style: {
+                width: '70px',
+                height: '100px',
+                'background-color': 'red',
+                'box-sizing': 'border-box',
+              },
+            })),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(flexHorizontal);
+    await matchScreenshot();
+  });
 });

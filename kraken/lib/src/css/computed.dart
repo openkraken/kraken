@@ -78,6 +78,11 @@ mixin CSSComputedMixin on RenderBox {
         if (style.contains('width')) {
           width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
           cropPaddingBorder(child);
+        } else if (style.contains('minWidth')) {
+          if (child is Element) {
+            width = CSSLength.toDisplayPortValue(style['minWidth']) ?? 0;
+            cropPaddingBorder(child);
+          }
         } else {
           while (true) {
             if (child.parentNode != null) {
@@ -155,6 +160,11 @@ mixin CSSComputedMixin on RenderBox {
     } else if (style.contains('height')) {
       if (child is Element) {
         height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+        cropPaddingBorder(child);
+      }
+    } else if (style.contains('minHeight')) {
+      if (child is Element) {
+        height = CSSLength.toDisplayPortValue(style['minHeight']) ?? 0;
         cropPaddingBorder(child);
       }
     } else {
