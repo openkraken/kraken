@@ -43,10 +43,6 @@ mixin CSSTransitionMixin on Node {
     dispatchEvent(Event('transitioncancel'));
   }
 
-  void _dispatchTransitionEnd() {
-    dispatchEvent(Event('transitionend'));
-  }
-
   void dispatchTransitionEnd() {
     dispatchEvent(Event('transitionend'));
   }
