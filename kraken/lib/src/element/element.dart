@@ -630,8 +630,25 @@ class Element extends Node
 
   void _addStickyChild(Element child, CSSPositionType position) {}
 
+  // Inline box including inline/inline-block/inline-flex/...
+  bool get isInlineBox {
+    String displayValue = style['display'];
+    return displayValue.startsWith('inline');
+  }
+
+  // Inline content means children should be inline elements.
+  bool get isInlineContent {
+    String displayValue = style['display'];
+    return displayValue == 'inline';
+  }
+
   /// Append a child to childList, if after is null, insert into first.
   void _append(Node child, {RenderBox after}) {
+    // @NOTE: Make sure inline-box only have inline children, or print warning.
+    if ((child is Element) && !child.isInlineBox) {
+      if (isInlineContent) print('[WARN]: Can not nest non-inline element into non-inline parent element.');
+    }
+    
     // Only append childNode when it is not attached.
     if (!child.attached) child.attachTo(this, after: after);
   }
