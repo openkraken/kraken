@@ -3,7 +3,7 @@ import {Element} from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
-import { BODY, WINDOW } from './event-target';
+import { BODY, WINDOW } from './events/event-target';
 import { cookie } from '../cookie';
 
 export class Document extends Node {

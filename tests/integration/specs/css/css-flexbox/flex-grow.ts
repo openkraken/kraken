@@ -429,4 +429,70 @@ describe('flex-grow', () => {
 
     await matchScreenshot();
   });
+  it('010', async () => {
+    let test;
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'column-reverse',
+          'flex-wrap': 'nowrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+      ]
+    );
+    BODY.appendChild(test);
+    await matchScreenshot();
+  });
 });

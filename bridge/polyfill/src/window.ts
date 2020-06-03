@@ -1,6 +1,6 @@
-import { EventTarget } from './document/event-target';
+import { EventTarget } from './document/events/event-target';
 import { krakenWindow } from './bridge';
-import { WINDOW } from './document/event-target';
+import { WINDOW } from './document/events/event-target';
 
 const windowBuiltInEvents = ['load', 'colorschemechange'];
 const windowJsOnlyEvents = ['unhandledrejection', 'error'];

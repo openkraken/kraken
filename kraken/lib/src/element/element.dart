@@ -20,6 +20,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
+import '../css/flow.dart';
 import 'event_handler.dart';
 import 'bounding_client_rect.dart';
 
@@ -40,7 +41,7 @@ class Element extends Node
         CSSDecoratedBoxMixin,
         CSSSizingMixin,
         CSSFlexboxMixin,
-        CSSAlignMixin,
+        CSSFlowMixin,
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
@@ -177,6 +178,19 @@ class Element extends Node
     if (targetId == BODY_ID) {
       _buildRenderStack();
     }
+
+    setElementSizeType();
+  }
+
+  void setElementSizeType() {
+    bool widthDefined = style.contains('width') || style.contains('minWidth');
+    bool heightDefined = style.contains('height') || style.contains('minHeight');
+
+    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+
+    renderElementBoundary.widthSizeType = widthType;
+    renderElementBoundary.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollTop) {
@@ -409,9 +423,6 @@ class Element extends Node
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: children,
         style: style,
         targetId: targetId,
@@ -423,16 +434,12 @@ class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      ContainerRenderObjectMixin flowLayout = RenderFlowLayout(
+      RenderFlowLayout flowLayout = RenderFlowLayout(
         children: children,
         style: style,
         targetId: targetId,
       );
-      if (isFlexWrap) {
-        decorateRenderFlex(flowLayout, style);
-      } else {
-        decorateRenderFlow(flowLayout, style);
-      }
+      decorateAlignment(flowLayout, style);
       return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');
@@ -565,25 +572,6 @@ class Element extends Node
     return node;
   }
 
-  // Store placeholder renderObject reference to parentData of element boundary
-  // to enable access from parent RenderStack
-  RenderBox getStackedRenderBox(Element element) {
-    // Positioned element in flex layout will reposition in new layer
-    if (renderLayoutBox is RenderFlexLayout) {
-      Size preferredSize =
-          Size(CSSLength.toDisplayPortValue(element.style[WIDTH]), CSSLength.toDisplayPortValue(element.style[HEIGHT]));
-
-      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: preferredSize);
-    } else {
-      // Positioned element in flow layout will position in old flow layer
-      renderPositionedPlaceholder = RenderPositionHolder(preferredSize: Size.zero);
-    }
-
-    RenderBox stackedRenderBox = element.renderObject as RenderBox;
-    stackedRenderBox.parentData = getPositionParentDataFromStyle(element.style, renderPositionedPlaceholder);
-    return stackedRenderBox;
-  }
-
   // Add placeholder to positioned element for calculate original
   // coordinate before moved away
   void addPositionPlaceholder() {
@@ -630,7 +618,7 @@ class Element extends Node
     RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     var childRenderElementBoundary = child.renderElementBoundary;
-    if (position == CSSPositionType.relative) {
+    if (position == CSSPositionType.relative || position == CSSPositionType.absolute) {
       childRenderElementBoundary.positionedHolder = positionedBoxHolder;
     }
 
@@ -642,8 +630,25 @@ class Element extends Node
 
   void _addStickyChild(Element child, CSSPositionType position) {}
 
+  // Inline box including inline/inline-block/inline-flex/...
+  bool get isInlineBox {
+    String displayValue = style['display'];
+    return displayValue.startsWith('inline');
+  }
+
+  // Inline content means children should be inline elements.
+  bool get isInlineContent {
+    String displayValue = style['display'];
+    return displayValue == 'inline';
+  }
+
   /// Append a child to childList, if after is null, insert into first.
   void _append(Node child, {RenderBox after}) {
+    // @NOTE: Make sure inline-box only have inline children, or print warning.
+    if ((child is Element) && !child.isInlineBox) {
+      if (isInlineContent) print('[WARN]: Can not nest non-inline element into non-inline parent element.');
+    }
+    
     // Only append childNode when it is not attached.
     if (!child.attached) child.attachTo(this, after: after);
   }
@@ -821,11 +826,7 @@ class Element extends Node
 
   void _updateDecorationRenderLayoutBox() {
     if (renderLayoutBox is RenderFlexLayout) {
-      if (style['flexWrap'] == 'wrap') {
-        decorateRenderFlow(renderLayoutBox, style);
-      } else {
-        decorateRenderFlex(renderLayoutBox, style);
-      }
+      decorateRenderFlex(renderLayoutBox, style);
     } else if (renderLayoutBox is RenderFlowLayout) {
       decorateRenderFlow(renderLayoutBox, style);
     }
@@ -846,6 +847,8 @@ class Element extends Node
   void _styleSizeChangedListener(String property, String original, String present) {
     // Update constrained box.
     updateConstraints(style, transitionMap);
+
+    setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original) ?? 0;

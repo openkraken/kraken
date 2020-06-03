@@ -1,4 +1,4 @@
-import { BODY } from './event-target';
+import { BODY } from './events/event-target';
 import { Node, NodeType } from './node';
 import {
   createElement,

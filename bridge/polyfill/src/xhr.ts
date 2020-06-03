@@ -1,7 +1,8 @@
 // Forked from https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 
 import { URL } from './url';
-import { EventTarget, Event } from './document/event-target';
+import { Event } from './document/events/event';
+import { EventTarget } from './document/events/event-target';
 import { navigator } from './navigator';
 
 // XHR buildin events

@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "pretest": "npm install",
-    "clean": "rm -rf ./integration/.specs",
+    "clean": "rm -rf ./integration/.specs && rm -rf ./integration/snapshots/*.current.png && rm -rf ./integration/snapshots/*.diff.png",
     "compile:ts": "cd integration && tsc --outDir ./.specs",
     "test": "flutter pub get && flutter clean && npm run integration",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./integration/specs/{.,**,**/**}/*.ts",
