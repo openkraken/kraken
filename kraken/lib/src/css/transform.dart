@@ -9,6 +9,7 @@ mixin CSSTransformMixin on Node {
   RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
   List<CSSFunctionalNotation> prevMethods;
+  double prevMethodsProgress = 0;
 
   // transform origin impl by offset and alignment
   Offset oldOffset = Offset.zero;
@@ -50,6 +51,7 @@ mixin CSSTransformMixin on Node {
         CSSTransition all = transitionMap['all'];
         List<CSSFunctionalNotation> baseMethods = prevMethods;
         CSSTransitionProgressListener progressListener = (progress) {
+          prevMethodsProgress = progress;
           if (progress > 0.0) {
             transform.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
           }
@@ -63,8 +65,12 @@ mixin CSSTransformMixin on Node {
         }
       } else {
         transform.transform = combineTransform(newMethods);
+        prevMethodsProgress = 1;
       }
-      prevMethods = newMethods;
+
+      if (prevMethodsProgress == 1) {
+        prevMethods = newMethods;
+      }
     }
   }
 
