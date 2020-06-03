@@ -8,6 +8,41 @@ import 'package:kraken/css.dart';
 
 // CSS Flexible Box Layout: https://drafts.csswg.org/css-flexbox-1/
 
+class _FlexShortHand {
+  String flexGrow;
+  String flexShrink;
+  String flexBasis;
+
+  _FlexShortHand(String flex) {
+    assert(flex != null);
+
+    List<String> group = flex.split(' ');
+    if (group.length == 0) return;
+
+    if (group.length == 1) {
+      flexGrow = group[0];
+    } else if (group.length == 2) {
+      flexGrow = group[0];
+
+      if (CSSLength.isValidateLength(group[1])) {
+        flexBasis = group[1];
+      } else {
+        flexShrink = group[1];
+      }
+    } else {
+      flexGrow = group[0];
+      flexShrink = group[1];
+      flexBasis = group[2];
+    }
+  }
+
+  @override
+  String toString() {
+    return "flexShotHand(flexGrow: $flexGrow, flexShrink: $flexShrink, flexBasis: $flexBasis)";
+  }
+}
+
+
 mixin CSSFlexboxMixin {
   void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
     if (style != null) {
@@ -124,21 +159,28 @@ class CSSFlexItem {
   static const String SHRINK = 'flexShrink';
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
+  static const String FLEX = 'flex';
 
   static RenderFlexParentData getParentData(CSSStyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
+    String flexShotHand = style[FLEX];
+    String grow = style[GROW] ?? '';
+    String shrink = style[SHRINK] ?? '';
+    String basis = style[BASIS] ?? '';
 
-    String grow = style[GROW];
+    if (flexShotHand != null) {
+      _FlexShortHand _flexShortHand = _FlexShortHand(flexShotHand);
+      grow = grow.isEmpty ? _flexShortHand.flexGrow : grow;
+      shrink = shrink.isEmpty ? _flexShortHand.flexShrink : shrink;
+      basis = basis.isEmpty ? _flexShortHand.flexBasis : basis;
+    }
+
     parentData.flexGrow = CSSStyleDeclaration.isNullOrEmptyValue(grow)
         ? 0 // Grow default to 0.
         : CSSLength.toInt(grow);
-
-    String shrink = style[SHRINK];
     parentData.flexShrink = CSSStyleDeclaration.isNullOrEmptyValue(shrink)
         ? 1 // Shrink default to 1.
         : CSSLength.toInt(shrink);
-
-    String basis = style[BASIS];
     parentData.flexBasis = CSSStyleDeclaration.isNullOrEmptyValue(basis)
         ? 'auto' // flexBasis default to auto.
         : basis;
