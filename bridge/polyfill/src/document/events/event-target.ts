@@ -1,4 +1,6 @@
-import { addEvent } from './ui-manager';
+import { addEvent } from '../ui-manager';
+import { Node } from '../node';
+import { Event } from './event';
 
 export const BODY = -1;
 // Window is not inherit node but EventTarget, so we assume window is a node.
@@ -75,54 +77,32 @@ export class EventTarget {
       return;
     }
     event.currentTarget = event.target = this;
+
+    // event has been dispatched, then do not dispatch
+    event._dispatchFlag = true;
+    let cancelled = true;
+
+    while (event.currentTarget !== null) {
+      cancelled = this._dispatchEvent(event);
+      if (event.bubbles || cancelled) break;
+      if (event.currentTarget) {
+        let node = event.currentTarget as Node;
+        event.currentTarget = node.parentNode as EventTarget;
+      }
+    }
+
+    event._dispatchFlag = false;
+    return !event.defaultPrevented;
+  }
+
+  private _dispatchEvent(event: Event) {
     let stack = this._eventHandlers.get(event.type)!.slice();
 
     for (let i = 0; i < stack.length; i++) {
       stack[i].call(this, event);
     }
 
-    return !event.defaultPrevented;
-  }
-}
-
-export class Event {
-  type: string;
-  cancelable: boolean;
-  currentTarget: EventTarget;
-  target: EventTarget;
-  defaultPrevented: boolean;
-
-  [key: string]: any;
-
-  constructor(type: string) {
-    this.type = type;
-  }
-}
-
-export class PromiseRejectionEvent extends Event {
-  promise: Promise<any>;
-  reason?: any;
-  constructor(eventInit?: PromiseRejectionEventInit) {
-    super('unhandledrejection');
-
-    if (eventInit) {
-      this.promise = eventInit.promise;
-      this.reason = eventInit.reason;
-    }
-  }
-}
-
-export class ErrorEvent extends Event {
-  colno: number;
-  error: any;
-  filename: string;
-  lineno: number;
-  message: string;
-
-  constructor(init?: ErrorEventInit) {
-    super('error');
-    if (init) {
-      Object.assign(this, init);
-    }
+    // do not dispatch event when event has been canceled
+    return !event._canceledFlag;
   }
 }

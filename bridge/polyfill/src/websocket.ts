@@ -1,4 +1,5 @@
-import { EventTarget, Event } from './document/event-target';
+import { Event } from './document/events/event';
+import { EventTarget } from './document/events/event-target';
 import { krakenInvokeModule } from './bridge';
 
 function validateUrl(url: string) {
