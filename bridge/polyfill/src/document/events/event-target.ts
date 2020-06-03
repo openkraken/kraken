@@ -78,6 +78,7 @@ export class EventTarget {
     }
     event.currentTarget = event.target = this;
 
+    // event has been dispatched, then do not dispatch
     event._dispatchFlag = true;
     let cancelled = true;
 
@@ -85,8 +86,7 @@ export class EventTarget {
       cancelled = this._dispatchEvent(event);
       if (event.bubbles || cancelled) break;
       if (event.currentTarget) {
-        // EventTarget type conversion to Node
-        let node = (event.currentTarget as unknown) as Node;
+        let node = event.currentTarget as Node;
         event.currentTarget = node.parentNode as EventTarget;
       }
     }
@@ -102,6 +102,7 @@ export class EventTarget {
       stack[i].call(this, event);
     }
 
+    // do not dispatch event when event has been canceled
     return !event._canceledFlag;
   }
 }

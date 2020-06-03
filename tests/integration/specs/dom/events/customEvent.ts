@@ -1,4 +1,12 @@
 describe('CustomEvent', () => {
+  function _listenEvent(done, event: CustomEvent) {
+    expect(event.detail).toEqual('detailMessage');
+    if (done) {
+      document.body.removeEventListener('customEvent', _listenEvent.bind(document.body, null));
+      done();
+    }
+  }
+
   it('should exist CustomEvent global object', () => {
     expect(CustomEvent).toBeDefined();
     expect(() => {
@@ -12,10 +20,7 @@ describe('CustomEvent', () => {
   });
 
   it('should dispatch custom event', (done) => {
-    document.body.addEventListener('customEvent', (event: CustomEvent) => {
-      expect(event.detail).toEqual('detailMessage');
-      done();
-    });
+    document.body.addEventListener('customEvent', _listenEvent.bind(document.body, done));
     document.body.dispatchEvent(new CustomEvent('customEvent', {
       detail: 'detailMessage'
     }));
