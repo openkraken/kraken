@@ -78,11 +78,6 @@ mixin CSSComputedMixin on RenderBox {
         if (style.contains('width')) {
           width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
           cropPaddingBorder(child);
-        } else if (style.contains('minWidth')) {
-          if (child is Element) {
-            width = CSSLength.toDisplayPortValue(style['minWidth']) ?? 0;
-            cropPaddingBorder(child);
-          }
         } else {
           while (true) {
             if (child.parentNode != null) {

@@ -473,6 +473,29 @@ class RenderFlexLayout extends RenderBox
     return childParentData.flexBasis ?? 'auto';
   }
 
+  BoxSizeType _getMainAxisSizeType(RenderBox child) {
+    BoxSizeType sizeType = BoxSizeType.automatic;
+    switch(_flexDirection) {
+      case FlexDirection.row:
+      case FlexDirection.rowReverse:
+        if (child is RenderTextBox) {
+          sizeType = child.widthSizeType;
+        } else if (child is RenderElementBoundary) {
+          sizeType = child.widthSizeType;
+        }
+        break;
+      case FlexDirection.column:
+      case FlexDirection.columnReverse:
+        if (child is RenderTextBox) {
+          sizeType = child.heightSizeType;
+        } else if (child is RenderElementBoundary) {
+          sizeType = child.heightSizeType;
+        }
+        break;
+    }
+    return sizeType;
+  }
+
   double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
     double totalExtent = 0;
     childSizeMap.forEach((targetId, item) {
@@ -630,6 +653,8 @@ class RenderFlexLayout extends RenderBox
     } else if (child is RenderElementBoundary) {
       style = child.style;
     }
+
+    if (style == null) return false;
 
     return style['display'] == 'none';
   }
@@ -817,20 +842,6 @@ class RenderFlexLayout extends RenderBox
           child = childParentData.nextSibling;
           continue;
         }
-        int childNodeId;
-        if (child is RenderTextBox) {
-          childNodeId = child.targetId;
-        } else if (child is RenderElementBoundary) {
-          childNodeId = child.targetId;
-        }
-
-        // Skip RenderPlaceHolder child
-        if (childNodeId == null) {
-          child = childParentData.nextSibling;
-          continue;
-        }
-
-        assert(childNodeId != null);
 
         double maxChildExtent;
         double minChildExtent;
@@ -850,11 +861,26 @@ class RenderFlexLayout extends RenderBox
           // get the maximum child size between baseConstraints and maxChildExtent.
           maxChildExtent = math.max(baseConstraints, maxChildExtent);
           minChildExtent = maxChildExtent;
-        } else if (isFlexShrink) {
+        } else if (isFlexShrink && _getMainAxisSizeType(child) != BoxSizeType.automatic) {
+          int childNodeId;
+          if (child is RenderTextBox) {
+            childNodeId = child.targetId;
+          } else if (child is RenderElementBoundary) {
+            childNodeId = child.targetId;
+          }
+
+          // Skip RenderPlaceHolder child
+          if (childNodeId == null) {
+            child = childParentData.nextSibling;
+            continue;
+          }
+
           double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeMainAxisSpace);
 
           dynamic current = childSizeMap[childNodeId];
           minChildExtent = maxChildExtent = current['size'] + shrinkValue;
+        } else {
+          maxChildExtent = minChildExtent = _getMainSize(child);
         }
 
         BoxConstraints innerConstraints;
