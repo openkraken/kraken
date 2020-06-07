@@ -684,6 +684,7 @@ class RenderFlexLayout extends RenderBox
     double maxMainSize = isHorizontalFlexDirection(_flexDirection) ? maxWidth : maxHeight;
     double maxCrossSize = isHorizontalFlexDirection(_flexDirection) ? maxHeight : maxWidth;
     final bool canFlex = maxMainSize < double.infinity;
+    final BoxSizeType mainSizeType = maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
     double crossSize = 0.0;
     double allocatedMainSize = 0.0; // Sum of the sizes of the children.
@@ -804,7 +805,7 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeMainAxisSpace = maxMainSize == 0 ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
+    final double freeMainAxisSpace = mainSizeType == BoxSizeType.automatic ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
     bool isFlexGrow = freeMainAxisSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = freeMainAxisSpace < 0 && hasFlexShrink;
     if (isFlexGrow || isFlexShrink || alignItems == AlignItems.stretch && placeholderChild == null) {
@@ -1004,7 +1005,7 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Align items along the main axis.
-    final double idealMainSize = maxMainSize != 0 ? maxMainSize : allocatedMainSize;
+    final double idealMainSize = mainSizeType != BoxSizeType.automatic ? maxMainSize : allocatedMainSize;
 
     // final double idealMainSize = mainAxisSize;
     double actualSize;
