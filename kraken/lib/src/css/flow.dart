@@ -35,7 +35,7 @@ mixin CSSFlowMixin {
       switch (textAlign) {
         case 'start':
         case 'left':
-        // Use default value: start
+          // Use default value: start
           break;
         case 'end':
         case 'right':
@@ -47,9 +47,9 @@ mixin CSSFlowMixin {
         case 'justify-all':
           mainAxisAlignment = MainAxisAlignment.spaceBetween;
           break;
-      // Like inherit, which is the same with parent element.
-      // Not impl it due to performance consideration.
-      // case 'match-parent':
+        // Like inherit, which is the same with parent element.
+        // Not impl it due to performance consideration.
+        // case 'match-parent':
       }
     }
 

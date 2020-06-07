@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 
 // ignore: must_be_immutable
 class WebLinearGradient extends LinearGradient with BorderGradientMixin {
-
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
@@ -20,16 +19,16 @@ class WebLinearGradient extends LinearGradient with BorderGradientMixin {
     List<double> stops,
     TileMode tileMode = TileMode.clamp,
     GradientTransform transform,
-  }) : _angle = angle,
-      super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
+  })  : _angle = angle,
+        super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
   final double _angle;
 
   @override
   Shader createShader(Rect rect, {TextDirection textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top,
-        rect.right - borderEdge.right, rect.bottom - borderEdge.bottom);
+      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top, rect.right - borderEdge.right,
+          rect.bottom - borderEdge.bottom);
     }
     double angle;
     if (_angle != null) {
@@ -61,15 +60,12 @@ class WebLinearGradient extends LinearGradient with BorderGradientMixin {
       rect.top + halfHeight - y * halfHeight,
     );
     return ui.Gradient.linear(
-      beginOffset, endOffset, colors, _impliedStops(), tileMode,
-      _resolveTransform(rect, textDirection)
-    );
+        beginOffset, endOffset, colors, _impliedStops(), tileMode, _resolveTransform(rect, textDirection));
   }
 }
 
 // ignore: must_be_immutable
 class WebRadialGradient extends RadialGradient with BorderGradientMixin {
-
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
@@ -86,8 +82,8 @@ class WebRadialGradient extends RadialGradient with BorderGradientMixin {
   @override
   Shader createShader(Rect rect, {TextDirection textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top,
-        rect.right - borderEdge.right, rect.bottom - borderEdge.bottom);
+      rect = Rect.fromLTRB(rect.left + borderEdge.left, rect.top + borderEdge.top, rect.right - borderEdge.right,
+          rect.bottom - borderEdge.bottom);
     }
     Offset centerOffset = center.resolve(textDirection).withinRect(rect);
     // calculate the longest distance from center to cornor
@@ -114,9 +110,11 @@ class WebRadialGradient extends RadialGradient with BorderGradientMixin {
     return ui.Gradient.radial(
       centerOffset,
       radiusValue,
-      colors, _impliedStops(), tileMode,
+      colors,
+      _impliedStops(),
+      tileMode,
       _resolveTransform(rect, textDirection),
-      focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
+      focal == null ? null : focal.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
   }
@@ -124,29 +122,28 @@ class WebRadialGradient extends RadialGradient with BorderGradientMixin {
 
 // ignore: must_be_immutable
 class WebConicGradient extends SweepGradient with BorderGradientMixin {
-
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  WebConicGradient({
-    AlignmentGeometry center = Alignment.center,
-    @required List<Color> colors,
-    List<double> stops,
-    GradientTransform transform
-  }) : super(center: center, colors: colors, stops: stops, transform: transform);
+  WebConicGradient(
+      {AlignmentGeometry center = Alignment.center,
+      @required List<Color> colors,
+      List<double> stops,
+      GradientTransform transform})
+      : super(center: center, colors: colors, stops: stops, transform: transform);
 
   @override
   Shader createShader(Rect rect, {TextDirection textDirection}) {
     if (borderEdge != null) {
-      rect = Rect.fromLTRB(rect.left - borderEdge.left, rect.top - borderEdge.top, rect.right - borderEdge.right, rect.bottom - borderEdge.bottom);
+      rect = Rect.fromLTRB(rect.left - borderEdge.left, rect.top - borderEdge.top, rect.right - borderEdge.right,
+          rect.bottom - borderEdge.bottom);
     }
     return super.createShader(rect, textDirection: textDirection);
   }
 }
 
 mixin BorderGradientMixin on Gradient {
-
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;
   EdgeInsets get borderEdge => _borderEdge;
@@ -155,13 +152,12 @@ mixin BorderGradientMixin on Gradient {
   }
 
   List<double> _impliedStops() {
-    if (stops != null)
-      return stops;
+    if (stops != null) return stops;
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
     return List<double>.generate(
       colors.length,
-        (int index) => index * separation,
+      (int index) => index * separation,
       growable: false,
     );
   }

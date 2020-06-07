@@ -83,9 +83,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     renderTextBox.style = parentElement.style;
 
     _setTextSizeType(
-      parentElement.renderElementBoundary.widthSizeType,
-      parentElement.renderElementBoundary.heightSizeType
-    );
+        parentElement.renderElementBoundary.widthSizeType, parentElement.renderElementBoundary.heightSizeType);
   }
 
   @override
@@ -100,10 +98,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
     parent.renderLayoutBox.insert(renderTextBox, after: after);
-    _setTextSizeType(
-      parent.renderElementBoundary.widthSizeType,
-      parent.renderElementBoundary.heightSizeType
-    );
+    _setTextSizeType(parent.renderElementBoundary.widthSizeType, parent.renderElementBoundary.heightSizeType);
   }
 
   // Detach renderObject of current node from parent

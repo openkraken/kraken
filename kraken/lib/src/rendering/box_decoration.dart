@@ -19,7 +19,7 @@ class RenderDecorateElementBox extends RenderProxyBox {
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
     RenderBox child,
-  }) : assert(decoration != null),
+  })  : assert(decoration != null),
         assert(position != null),
         assert(configuration != null),
         _decoration = decoration,

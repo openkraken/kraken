@@ -209,7 +209,7 @@ class VideoElement extends Element {
   @override
   void removeProperty(String key) {
     super.removeProperty(key);
-    switch(key) {
+    switch (key) {
       case 'loop':
         controller.setLooping(false);
         break;

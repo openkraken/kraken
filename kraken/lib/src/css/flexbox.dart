@@ -42,7 +42,6 @@ class _FlexShortHand {
   }
 }
 
-
 mixin CSSFlexboxMixin {
   void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
     if (style != null) {
@@ -59,7 +58,7 @@ mixin CSSFlexboxMixin {
   }
 
   FlexDirection _getFlexDirection(String flexDirection) {
-    switch(flexDirection) {
+    switch (flexDirection) {
       case 'row':
         return FlexDirection.row;
       case 'row-reverse':
@@ -73,7 +72,7 @@ mixin CSSFlexboxMixin {
   }
 
   FlexWrap _getFlexWrap(String flexWrap) {
-    switch(flexWrap) {
+    switch (flexWrap) {
       case 'nowrap':
         return FlexWrap.nowrap;
       case 'wrap':
@@ -97,7 +96,7 @@ mixin CSSFlexboxMixin {
       }
     }
 
-    switch(justifyContent) {
+    switch (justifyContent) {
       case 'normal':
       case 'start':
         return JustifyContent.start;
@@ -132,7 +131,7 @@ mixin CSSFlexboxMixin {
       }
     }
 
-    switch(alignItems) {
+    switch (alignItems) {
       case 'start':
         return AlignItems.start;
       case 'flex-start':
