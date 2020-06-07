@@ -98,6 +98,7 @@ enum JustifyContent {
 
   /// The items are packed flush to each other toward the center of the alignment container along the main axis.
   center,
+
   /// Specifies participation in first- or last-baseline alignment:
   /// aligns the alignment baseline of the box’s first or last baseline set with the corresponding baseline in the shared first or last baseline set of all the boxes in its baseline-sharing group.
   /// The fallback alignment for first baseline is start, the one for last baseline is end.
@@ -186,7 +187,7 @@ enum AlignItems {
 bool _startIsTopLeft(FlexDirection direction) {
   assert(direction != null);
 
-  switch(direction) {
+  switch (direction) {
     case FlexDirection.column:
     case FlexDirection.row:
       return true;
@@ -285,6 +286,7 @@ class RenderFlexLayout extends RenderBox
   /// The direction to use as the main axis.
   FlexDirection get flexDirection => _flexDirection;
   FlexDirection _flexDirection;
+
   set flexDirection(FlexDirection value) {
     assert(value != null);
     if (_flexDirection != value) {
@@ -296,6 +298,7 @@ class RenderFlexLayout extends RenderBox
   /// whether flex items are forced onto one line or can wrap onto multiple lines.
   FlexWrap get flexWrap => _flexWrap;
   FlexWrap _flexWrap;
+
   set flexWrap(FlexWrap value) {
     assert(value != null);
     if (_flexWrap != value) {
@@ -304,9 +307,9 @@ class RenderFlexLayout extends RenderBox
     }
   }
 
-
   JustifyContent get justifyContent => _justifyContent;
   JustifyContent _justifyContent;
+
   set justifyContent(JustifyContent value) {
     assert(value != null);
     if (_justifyContent != value) {
@@ -317,6 +320,7 @@ class RenderFlexLayout extends RenderBox
 
   AlignItems get alignItems => _alignItems;
   AlignItems _alignItems;
+
   set alignItems(AlignItems value) {
     assert(value != null);
     if (_alignItems != value) {
@@ -327,6 +331,7 @@ class RenderFlexLayout extends RenderBox
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow;
+
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow > precisionErrorTolerance;
@@ -492,19 +497,30 @@ class RenderFlexLayout extends RenderBox
     return minusConstraints;
   }
 
-  bool _isCrossAxisDefinedSize(RenderBox child) {
-    BoxSizeType widthSizeType;
-    BoxSizeType heightSizeType;
+  BoxSizeType _getChildWidthSizeType(RenderBox child) {
     if (child is RenderTextBox) {
-      widthSizeType = child.widthSizeType;
-      heightSizeType = child.heightSizeType;
+      return child.widthSizeType;
     } else if (child is RenderElementBoundary) {
-      widthSizeType = child.widthSizeType;
-      heightSizeType = child.heightSizeType;
+      return child.widthSizeType;
     }
+    return null;
+  }
+
+  BoxSizeType _getChildHeightSizeType(RenderBox child) {
+    if (child is RenderTextBox) {
+      return child.heightSizeType;
+    } else if (child is RenderElementBoundary) {
+      return child.heightSizeType;
+    }
+    return null;
+  }
+
+  bool _isCrossAxisDefinedSize(RenderBox child) {
+    BoxSizeType widthSizeType = _getChildWidthSizeType(child);
+    BoxSizeType heightSizeType = _getChildHeightSizeType(child);
 
     if (style != null) {
-      switch(_flexDirection) {
+      switch (_flexDirection) {
         case FlexDirection.row:
         case FlexDirection.rowReverse:
           return heightSizeType != null && heightSizeType != BoxSizeType.automatic;
@@ -581,7 +597,7 @@ class RenderFlexLayout extends RenderBox
     if (child is RenderElementBoundary) {
       CSSStyleDeclaration style = child.style;
 
-      switch(_flexDirection) {
+      switch (_flexDirection) {
         case FlexDirection.column:
         case FlexDirection.columnReverse:
           if (style.contains('minHeight')) {
@@ -616,7 +632,6 @@ class RenderFlexLayout extends RenderBox
         _layoutChildren(child);
       }
 
-
       child = childParentData.nextSibling;
     }
     // Layout non placeholder renderObject
@@ -640,8 +655,7 @@ class RenderFlexLayout extends RenderBox
     if (child is RenderPositionHolder) {
       RenderElementBoundary realDisplayedBox = child.realDisplayedBox;
       CSSPositionType positionType = resolvePositionFromStyle(realDisplayedBox.style);
-      if (positionType == CSSPositionType.absolute ||
-        positionType == CSSPositionType.fixed) {
+      if (positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed) {
         return true;
       }
     }
@@ -805,7 +819,8 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeMainAxisSpace = mainSizeType == BoxSizeType.automatic ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
+    final double freeMainAxisSpace =
+        mainSizeType == BoxSizeType.automatic ? 0 : (canFlex ? maxMainSize : 0.0) - allocatedMainSize;
     bool isFlexGrow = freeMainAxisSpace >= 0 && totalFlexGrow > 0;
     bool isFlexShrink = freeMainAxisSpace < 0 && hasFlexShrink;
     if (isFlexGrow || isFlexShrink || alignItems == AlignItems.stretch && placeholderChild == null) {
@@ -859,10 +874,17 @@ class RenderFlexLayout extends RenderBox
           double computedSize = current['size'] + shrinkValue;
 
           // if shrink size is lower than child's min-content, should reset to min-content size
-          if (isHorizontalFlexDirection(flexDirection) && computedSize < child.size.width) {
-            computedSize = child.size.width;
-          } else if (isVerticalFlexDirection(flexDirection) && computedSize < child.size.height) {
-            computedSize = child.size.height;
+          // @TODO no proper way to get real min-content of child element.
+          if (mainSizeType == BoxSizeType.automatic) {
+            if (isHorizontalFlexDirection(flexDirection) &&
+                computedSize < child.size.width &&
+                _getChildWidthSizeType(child) == BoxSizeType.automatic) {
+              computedSize = child.size.width;
+            } else if (isVerticalFlexDirection(flexDirection) &&
+                computedSize < child.size.height &&
+                _getChildHeightSizeType(child) == BoxSizeType.automatic) {
+              computedSize = child.size.height;
+            }
           }
 
           maxChildExtent = minChildExtent = computedSize;
@@ -884,12 +906,7 @@ class RenderFlexLayout extends RenderBox
               // if child have predefined size
               if (_isCrossAxisDefinedSize(child)) {
                 if (child.hasSize) {
-                  BoxSizeType sizeType;
-                  if (child is RenderElementBoundary) {
-                    sizeType = child.heightSizeType;
-                  } else if (child is RenderTextBox) {
-                    sizeType = child.heightSizeType;
-                  }
+                  BoxSizeType sizeType = _getChildHeightSizeType(child);
 
                   // child have predefined height, use previous layout height.
                   if (sizeType == BoxSizeType.specified) {
@@ -902,14 +919,14 @@ class RenderFlexLayout extends RenderBox
                       maxCrossAxisSize = child.size.height;
                     }
                   } else {
-                  // expand child's height to constraints.maxHeight;
+                    // expand child's height to constraints.maxHeight;
                     minCrossAxisSize = constraints.maxHeight;
                     maxCrossAxisSize = constraints.maxHeight;
                   }
                 } else {
-                 // child is't layout, so set minHeight
-                 minCrossAxisSize = maxCrossSize;
-                 maxCrossSize = double.infinity;
+                  // child is't layout, so set minHeight
+                  minCrossAxisSize = maxCrossSize;
+                  maxCrossSize = double.infinity;
                 }
               } else if (child is! RenderTextBox) {
                 minCrossAxisSize = maxCrossSize;
@@ -920,11 +937,10 @@ class RenderFlexLayout extends RenderBox
               }
 
               innerConstraints = BoxConstraints(
-                minWidth: minMainAxisSize,
-                maxWidth: maxMainAxisSize,
-                minHeight: minCrossAxisSize,
-                maxHeight: maxCrossAxisSize
-              );
+                  minWidth: minMainAxisSize,
+                  maxWidth: maxMainAxisSize,
+                  minHeight: minCrossAxisSize,
+                  maxHeight: maxCrossAxisSize);
               break;
             case FlexDirection.column:
             case FlexDirection.columnReverse:
@@ -936,12 +952,7 @@ class RenderFlexLayout extends RenderBox
               // if child have predefined size
               if (_isCrossAxisDefinedSize(child)) {
                 if (child.hasSize) {
-                  BoxSizeType sizeType;
-                  if (child is RenderElementBoundary) {
-                    sizeType = child.widthSizeType;
-                  } else if (child is RenderTextBox) {
-                    sizeType = child.widthSizeType;
-                  }
+                  BoxSizeType sizeType = _getChildWidthSizeType(child);
 
                   // child have predefined width, use previous layout width.
                   if (sizeType == BoxSizeType.specified) {
@@ -974,24 +985,23 @@ class RenderFlexLayout extends RenderBox
               }
 
               innerConstraints = BoxConstraints(
-                minHeight: mainAxisMinSize,
-                maxHeight: mainAxisMaxSize,
-                minWidth: minCrossAxisSize,
-                maxWidth: maxCrossAxisSize
-              );
+                  minHeight: mainAxisMinSize,
+                  maxHeight: mainAxisMaxSize,
+                  minWidth: minCrossAxisSize,
+                  maxWidth: maxCrossAxisSize);
               break;
           }
         } else {
           switch (_flexDirection) {
             case FlexDirection.row:
             case FlexDirection.rowReverse:
-              innerConstraints = BoxConstraints(
-                minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: constraints.maxHeight);
+              innerConstraints =
+                  BoxConstraints(minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: constraints.maxHeight);
               break;
             case FlexDirection.column:
             case FlexDirection.columnReverse:
-              innerConstraints = BoxConstraints(
-                maxWidth: constraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
+              innerConstraints =
+                  BoxConstraints(maxWidth: constraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
               break;
           }
         }
@@ -1028,13 +1038,15 @@ class RenderFlexLayout extends RenderBox
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = constraints.constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
+        size = constraints
+            .constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = constraints.constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
+        size = constraints
+            .constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
         actualSize = size.height;
         crossSize = size.width;
         break;
