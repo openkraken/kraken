@@ -1,4 +1,4 @@
-import { EventTarget, BODY } from './event-target';
+import { EventTarget, BODY } from './events/event-target';
 import { insertAdjacentNode, removeNode } from './ui-manager';
 
 export type NodeList = Array<Node>;

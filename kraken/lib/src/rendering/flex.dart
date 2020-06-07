@@ -1124,17 +1124,13 @@ class RenderFlexLayout extends RenderBox
       if (flipMainAxis) childMainPosition -= _getMainSize(child);
       Offset relativeOffset;
       switch (_flexDirection) {
+        case FlexDirection.rowReverse:
         case FlexDirection.row:
           relativeOffset = Offset(childMainPosition, childCrossPosition);
           break;
+        case FlexDirection.columnReverse:
         case FlexDirection.column:
           relativeOffset = Offset(childCrossPosition, childMainPosition);
-          break;
-        case FlexDirection.rowReverse:
-          // @TODO support rowReverse
-          break;
-        case FlexDirection.columnReverse:
-          // @TODO support columnReverse
           break;
       }
 
