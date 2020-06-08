@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const String INPUT = 'INPUT';
 
@@ -126,6 +127,31 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
+
+    setBoxConstraints();
+  }
+
+  void setBoxConstraints() {
+    bool containWidth = style.contains('width');
+    bool containHeight = style.contains('height');
+    BoxConstraints oldConstraints = renderConstrainedBox.additionalConstraints;
+    double minWidth = oldConstraints.minWidth;
+    double maxWidth = oldConstraints.maxWidth;
+    double minHeight = oldConstraints.minHeight;
+    double maxHeight = oldConstraints.maxHeight;
+
+    if (containWidth) {
+      minWidth = maxWidth = CSSSizingMixin.getDisplayPortedLength(style['width']);
+    }
+    if (containHeight) {
+      minHeight = maxHeight = CSSSizingMixin.getDisplayPortedLength(style['height']);
+    }
+    renderConstrainedBox.additionalConstraints = BoxConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
+    );
   }
 
   TextSpan buildTextSpan({String text}) {
