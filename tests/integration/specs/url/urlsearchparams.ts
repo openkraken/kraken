@@ -78,4 +78,57 @@ describe('URLSearchParams', () => {
     params.append('first', 10);
     expect(params.get('first')).toBe('1');
   });
+
+  it('constructor Basic URLSearchParams construction', () => {
+    var params = new URLSearchParams();
+    expect(params + '').toBe('');
+    params = new URLSearchParams('');
+    expect(params + '').toBe('');
+    params = new URLSearchParams('a=b');
+    expect(params + '').toBe('a=b');
+    params = new URLSearchParams(params);
+    expect(params + '').toBe('a=b');
+  });
+
+  it('constructor, no arguments"', async () => {
+    var params = new URLSearchParams()
+    expect(params.toString()).toBe('');
+  });
+
+  it(' constructor, remove leading "?"', () => {
+    var params = new URLSearchParams("?a=b")
+    expect(params.toString()).toBe("a=b");
+  });
+
+  it('constructor, {} as argument', () => {
+    var params = new URLSearchParams({});
+    expect(params + '').toBe( "");
+  });
+
+  it('constructor, string. 001', () => {
+    var params = new URLSearchParams('a=b');
+    expect(params != null).toBe(true, 'constructor returned non-null value.');
+    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
+    expect(params.has('b')).toBe(false, 'Search params object has not got name "b"');
+  });
+
+  it('constructor, string. 002', () => {
+    var params = new URLSearchParams('a=b&c');
+    expect(params != null).toBe(true, 'constructor returned non-null value.');
+    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
+    expect(params.has('c')).toBe(true,  'Search params object has name "c"');
+  });
+
+  it('constructor, string. 003', () => {
+    var params = new URLSearchParams('&a&&& &&&&&a+b=& c&m%c3%b8%c3%b8');
+    expect(params != null).toBe(true);
+    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
+    expect(params.has('a b')).toBe(true, 'Search params object has name "a b"');
+    expect(params.has(' ')).toBe(true, 'Search params object has name " "');
+    expect(params.has('c')).toBe(false, 'Search params object did not have the name "c"');
+    expect(params.has(' c')).toBe(true, 'Search params object has name " c"');
+    expect(params.has('møø')).toBe(true, 'Search params object has name "møø"');
+  });
+
+
 });

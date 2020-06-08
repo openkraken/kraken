@@ -1,0 +1,197 @@
+/*auto generated*/
+describe('border', () => {
+  it('001', async () => {
+    let div;
+    div = createElement('div', {
+      xmlns: 'http://www.w3.org/1999/xhtml',
+      style: {
+        border: '25px',
+        'border-style': 'solid',
+        'border-color': '#000',
+        height: '100px',
+        width: '100px',
+        'box-sizing': 'border-box',
+      },
+    });
+    BODY.appendChild(div);
+
+    await matchScreenshot();
+  });
+  it('003', async () => {
+    let div;
+    div = createElement('div', {
+      xmlns: 'http://www.w3.org/1999/xhtml',
+      style: {
+        'border-color': 'blue',
+        'border-style': 'solid',
+        'border-width': '5px',
+        height: '100px',
+        width: '100px',
+        'box-sizing': 'border-box',
+      },
+    });
+    BODY.appendChild(div);
+
+    await matchScreenshot();
+  });
+  xit('005', async () => {
+    let reference;
+    let test;
+    let wrapper;
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          position: 'relative',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (reference = createElement('div', {
+          id: 'reference',
+          style: {
+            position: 'absolute',
+            background: 'red',
+            height: '200px',
+            left: '0',
+            top: '0',
+            width: '200px',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test = createElement('div', {
+          id: 'test',
+          style: {
+            position: 'relative',
+            border: '100px solid blue',
+            height: '0',
+            width: '0',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  xit('006', async () => {
+    let reference;
+    let test;
+    let wrapper;
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          position: 'relative',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (reference = createElement('div', {
+          id: 'reference',
+          style: {
+            position: 'absolute',
+            background: 'red',
+            height: '200px',
+            left: '0',
+            top: '0',
+            width: '200px',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test = createElement('div', {
+          id: 'test',
+          style: {
+            position: 'relative',
+            border: '100px solid #000',
+            height: '0',
+            width: '0',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('008', async () => {
+    let reference;
+    let test;
+    let wrapper;
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          position: 'relative',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (reference = createElement('div', {
+          id: 'reference',
+          style: {
+            position: 'absolute',
+            background: 'red',
+            height: '200px',
+            left: '0',
+            top: '0',
+            width: '200px',
+            'box-sizing': 'border-box',
+          },
+        })),
+        (test = createElement('div', {
+          id: 'test',
+          style: {
+            position: 'relative',
+            border: '100px solid blue',
+            height: '0',
+            width: '0',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('010', async () => {
+    let p;
+    let div;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is a box below with a dashed blue border.`
+        ),
+      ]
+    );
+    div = createElement('div', {
+      xmlns: 'http://www.w3.org/1999/xhtml',
+      style: {
+        border: '5px solid blue',
+        height: '100px',
+        width: '100px',
+        'box-sizing': 'border-box',
+      },
+    });
+    BODY.appendChild(p);
+    BODY.appendChild(div);
+
+    await matchScreenshot();
+  });
+});

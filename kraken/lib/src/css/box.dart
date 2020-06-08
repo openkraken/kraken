@@ -255,7 +255,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   // border default width 3.0
   static double defaultBorderLineWidth = 3.0;
   static BorderStyle defaultBorderStyle = BorderStyle.none;
-  static Color defaultBorderColor = CSSColor.transparent;
+  static Color defaultBorderColor = CSSColor.black;
 
   static BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
