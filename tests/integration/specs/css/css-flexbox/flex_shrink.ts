@@ -80,4 +80,39 @@ describe('flexbox flex-shrink', () => {
 
     await matchScreenshot();
   });
+  it('not shrink no defined size elements', async () => {
+    let element = createElement('div', {
+      style: {
+        'box-sizing': 'border-box',
+        'display': 'flex',
+        'position': 'relative',
+        'flex-direction': 'column',
+        'flex-shrink': 0,
+        'align-content': 'flex-start',
+        'margin': '0vw',
+        padding: '0vw',
+        'min-width': '0vw',
+        height: '100vh'
+      }
+    }, [
+      createElement('div', {
+        style: {
+          'box-sizing': 'border-box',
+          'display': 'flex',
+          'position': 'relative',
+          'flex-direction': 'column',
+          'flex-shrink': 0,
+          'align-content': 'flex-start',
+          'margin': '0vw',
+          padding: '0vw',
+          'min-width': '0vw',
+          height: '29.3vw',
+          'aligm-items': 'center',
+          background: 'blue'
+        }
+      })
+    ]);
+    BODY.appendChild(element);
+    await matchScreenshot();
+  });
 });

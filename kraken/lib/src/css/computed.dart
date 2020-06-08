@@ -56,11 +56,14 @@ mixin CSSComputedMixin on RenderBox {
 
   // Get element width according to element tree
   double getElementComputedWidth(int targetId) {
-    double width;
     double cropWidth = 0;
     Element child = getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
     String display = _getElementRealDisplayValue(targetId);
+
+    double width = CSSLength.toDisplayPortValue(style['width']);
+    double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
+    double maxWidth = CSSLength.toDisplayPortValue(style['maxWidth']);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -71,6 +74,12 @@ mixin CSSComputedMixin on RenderBox {
       cropWidth += childNode.cropPaddingWidth;
     }
 
+    if (minWidth != null && (width == null || width < minWidth)) {
+      width = minWidth;
+    } else if (maxWidth != null && (width == null || width > maxWidth)) {
+      width = maxWidth;
+    }
+
     switch (display) {
       case 'block':
       case 'flex':
@@ -78,11 +87,6 @@ mixin CSSComputedMixin on RenderBox {
         if (style.contains('width')) {
           width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
           cropPaddingBorder(child);
-        } else if (style.contains('minWidth')) {
-          if (child is Element) {
-            width = CSSLength.toDisplayPortValue(style['minWidth']) ?? 0;
-            cropPaddingBorder(child);
-          }
         } else {
           while (true) {
             if (child.parentNode != null) {
@@ -139,10 +143,12 @@ mixin CSSComputedMixin on RenderBox {
 
   // Get element width according to element tree
   double getElementComputedHeight(int targetId) {
-    double height;
     Element child = getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
     String display = _getElementRealDisplayValue(targetId);
+    double height = CSSLength.toDisplayPortValue(style['height']);
+    double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
+    double maxHeight = CSSLength.toDisplayPortValue(style['maxHeight']);
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
@@ -154,17 +160,18 @@ mixin CSSComputedMixin on RenderBox {
       cropHeight += childNode.cropPaddingHeight;
     }
 
+    if (minHeight != null && (height == null || height < minHeight)) {
+      height = minHeight;
+    } else if (maxHeight != null && (height == null || height > maxHeight)) {
+      height = maxHeight;
+    }
+
     // inline element has no height
     if (display == 'inline') {
       return null;
     } else if (style.contains('height')) {
       if (child is Element) {
         height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-        cropPaddingBorder(child);
-      }
-    } else if (style.contains('minHeight')) {
-      if (child is Element) {
-        height = CSSLength.toDisplayPortValue(style['minHeight']) ?? 0;
         cropPaddingBorder(child);
       }
     } else {

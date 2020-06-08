@@ -283,16 +283,14 @@ mixin CSSBackgroundMixin {
             decorationImage = getBackgroundImage(url);
             if (decorationImage != null) {
               return _renderDecorateElementBox = RenderDecorateElementBox(
-                  decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-                  child: renderObject);
+                  decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: renderObject);
             }
           }
         } else {
           gradient = getBackgroundGradient(method);
           if (gradient != null) {
             return _renderDecorateElementBox = RenderDecorateElementBox(
-                decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-                child: renderObject);
+                decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: renderObject);
           }
         }
       }
@@ -338,8 +336,8 @@ mixin CSSBackgroundMixin {
     } else {
       RenderObject child = parent.child;
       parent.child = null;
-      _renderDecorateElementBox = RenderDecorateElementBox(
-          decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
+      _renderDecorateElementBox =
+          RenderDecorateElementBox(decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
       parent.child = _renderDecorateElementBox;
     }
   }
@@ -568,7 +566,7 @@ mixin CSSBackgroundMixin {
     if (args.length - start - 1 > 0) {
       double grow = 1.0 / (args.length - start - 1);
       for (int i = start; i < args.length; i++) {
-        List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), (i - start)* grow);
+        List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), (i - start) * grow);
         colorGradients.forEach((element) {
           colors.add(element.color);
           stops.add(element.stop);

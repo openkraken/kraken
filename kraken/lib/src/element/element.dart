@@ -607,8 +607,7 @@ class Element extends Node
     }
     Size preferredSize = Size.zero;
     String childDisplay = child.style['display'];
-    if ((!childDisplay.isEmpty && childDisplay != 'inline') ||
-        (position != CSSPositionType.static && position != CSSPositionType.relative)) {
+    if ((!childDisplay.isEmpty && childDisplay != 'inline') || (position != CSSPositionType.static)) {
       preferredSize = Size(
         CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
         CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
@@ -648,7 +647,7 @@ class Element extends Node
     if ((child is Element) && !child.isInlineBox) {
       if (isInlineContent) print('[WARN]: Can not nest non-inline element into non-inline parent element.');
     }
-    
+
     // Only append childNode when it is not attached.
     if (!child.attached) child.attachTo(this, after: after);
   }
@@ -1184,12 +1183,10 @@ Element findPositionedParent(Element element) {
   Element rootEl = ElementManager().getRootElement();
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style['position'] != 'static' &&
-      _el.style['position'] != '';
+    bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
     // Find element with renderStack and position is not static,
     // use root element if none was found
-    if (_el == rootEl ||
-      (_el.renderStack != null && isElementNonStatic)) {
+    if (_el == rootEl || (_el.renderStack != null && isElementNonStatic)) {
       break;
     }
     _el = _el.parent;

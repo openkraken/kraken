@@ -212,8 +212,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         if (shadowDefinitions.length > 2) {
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
-          double blurRadius = shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0 : 0.0;
-          double spreadRadius = shadowDefinitions.length > 4 ? CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0 : 0.0;
+          double blurRadius =
+              shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0 : 0.0;
+          double spreadRadius =
+              shadowDefinitions.length > 4 ? CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0 : 0.0;
 
           Color color = CSSColor.generate(shadowDefinitions.last);
           if (color != null) {

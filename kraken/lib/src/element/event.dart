@@ -117,7 +117,7 @@ class MediaError extends Event {
   /// If no diagnostics are available, or no explanation can be provided, this value is an empty string ("").
   String message;
 
-  MediaError(this.code, this.message): super('error');
+  MediaError(this.code, this.message) : super('error');
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
