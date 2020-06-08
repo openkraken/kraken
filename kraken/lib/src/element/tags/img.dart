@@ -109,10 +109,14 @@ class ImageElement extends Element {
         height = sizedConstraints.height;
       } else if (containWidth) {
         width = sizedConstraints.width;
-        height = width * realHeight / realWidth;
+        if (realWidth != 0) {
+          height = width * realHeight / realWidth;
+        }
       } else if (containHeight) {
         height = sizedConstraints.height;
-        width = height * realWidth / realHeight;
+        if (realHeight != 0) {
+          width = height * realWidth / realHeight;
+        }
       }
     }
 

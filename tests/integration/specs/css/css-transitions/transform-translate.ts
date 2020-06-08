@@ -113,3 +113,44 @@ describe('Transition transform', () => {
     });
   });
 });
+
+describe('Multiple transition transform', () => {
+  fit('translate3d', done => {
+    const container1 = document.createElement('div');
+    const div = document.createElement('div');
+    setElementStyle(div, {
+        width: '200px',
+        height: '200px',
+        backgroundColor: 'red',
+    });
+    document.body.appendChild(div);
+
+    setElementStyle(container1, {
+      width: '100px',
+      height: '100px',
+      padding: '20px',
+      marginLeft: '100px',
+      backgroundColor: '#999',
+      transitionProperty: 'transform',
+      transitionDuration: '0.5s',
+      transitionTimingFunction: 'ease',
+    });
+    container1.appendChild(document.createTextNode('DIV 1'));
+
+    div.appendChild(container1);
+
+    requestAnimationFrame(async () => {
+      await matchScreenshot();
+      setElementStyle(container1, {
+        transform: 'translate3d(-100px, 0vw, 0vw)',
+      });
+      setElementStyle(container1, {
+        transform: 'translate3d(-100px, 0px, 0px)',
+      });
+      setTimeout(async () => {
+        await matchScreenshot();
+        done();
+      }, 1000);
+    });
+  });
+});
