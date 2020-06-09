@@ -336,6 +336,28 @@ describe('containing-block', () => {
     let div3;
     let div2;
     let div1;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if a filled blue square is in the `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`upper-right corner`)]
+        ),
+        createText(` of an hollow black square.`),
+      ]
+    );
     div1 = createElement(
       'div',
       {
@@ -380,6 +402,7 @@ describe('containing-block', () => {
         )),
       ]
     );
+    BODY.appendChild(p);
     BODY.appendChild(div1);
 
     await matchScreenshot();
@@ -928,6 +951,28 @@ describe('containing-block', () => {
     let p;
     let span1;
     let div;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if a filled blue square is in the `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`lower-right corner`)]
+        ),
+        createText(` of an hollow black square.`),
+      ]
+    );
     div = createElement(
       'div',
       {
@@ -968,6 +1013,7 @@ describe('containing-block', () => {
         )),
       ]
     );
+    BODY.appendChild(p);
     BODY.appendChild(div);
 
     await matchScreenshot();
@@ -975,6 +1021,24 @@ describe('containing-block', () => {
   it('020-ref', async () => {
     let p;
     let div;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {},
+      },
+      [
+        createText(`Test passes if a filled blue square is in the `),
+        createElement(
+          'strong',
+          {
+            style: {},
+          },
+          [createText(`lower-left corner`)]
+        ),
+        createText(` of an hollow black square.`),
+      ]
+    );
     div = createElement(
       'div',
       {
@@ -996,6 +1060,7 @@ describe('containing-block', () => {
         }),
       ]
     );
+    BODY.appendChild(p);
     BODY.appendChild(div);
 
     await matchScreenshot();
