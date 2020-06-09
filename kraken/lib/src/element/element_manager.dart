@@ -21,6 +21,9 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
     case SPAN:
       element = SpanElement(id);
       break;
+    case STRONG:
+      element = StrongElement(id);
+      break;
     case IMAGE:
       element = ImageElement(id);
       break;
