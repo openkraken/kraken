@@ -4693,7 +4693,7 @@ describe('border-bottom', () => {
 
     await matchScreenshot();
   });
-  xit('color-088', async () => {
+  it('color-088', async () => {
     let p;
     let test;
     let reference;

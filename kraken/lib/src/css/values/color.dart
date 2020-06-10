@@ -199,6 +199,16 @@ class CSSColor implements CSSValue<Color> {
     }
   }
 
+  static int _limitRGB(int input) {
+    if (input >= 255) {
+      return 255;
+    } else if (input <= 0) {
+      return 0;
+    } else {
+      return input;
+    }
+  }
+
   static Color _generateColorFromRGBA(String input) {
     if (_cachedColor.containsKey(input)) {
       Color ret = _cachedColor[input];
@@ -213,9 +223,9 @@ class CSSColor implements CSSValue<Color> {
     Iterable<RegExpMatch> matches = rgbaRexExp.allMatches(input);
     if (matches.length == 1) {
       RegExpMatch match = matches.first;
-      red = int.tryParse(match[1]) ?? 0;
-      green = int.tryParse(match[2]) ?? 0;
-      blue = int.tryParse(match[3]) ?? 0;
+      red = _limitRGB(int.tryParse(match[1]) ?? 0);
+      green = _limitRGB(int.tryParse(match[2]) ?? 0);
+      blue = _limitRGB(int.tryParse(match[3]) ?? 0);
       if (match[4] != null) {
         alpha = double.tryParse(match[4]) ?? 1.0;
         if (alpha > 1.0) alpha = 1.0;
