@@ -115,13 +115,13 @@ describe('Transition transform', () => {
 });
 
 describe('Multiple transition transform', () => {
-  fit('translate3d', done => {
+  it('translate3d', done => {
     const container1 = document.createElement('div');
     const div = document.createElement('div');
     setElementStyle(div, {
-        width: '200px',
-        height: '200px',
-        backgroundColor: 'red',
+      width: '200px',
+      height: '200px',
+      backgroundColor: 'red',
     });
     document.body.appendChild(div);
 
