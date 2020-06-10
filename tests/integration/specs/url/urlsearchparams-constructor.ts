@@ -201,6 +201,7 @@ describe('URlSearchParams delete', () => {
       // @ts-ignore
       let params = new URLSearchParams(val.input),
         i = 0;
+      // @ts-ignore
       for (let param of params) {
         expect(param).toEqual(val.output[i]);
         i++;
