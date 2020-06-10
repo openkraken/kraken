@@ -1,4 +1,4 @@
-fdescribe('URLSearchParams has', () => {
+describe('URLSearchParams has', () => {
   it('Has basics', function () {
     var params = new URLSearchParams('a=b&c=d');
     expect(params.has('a')).toBeTrue();

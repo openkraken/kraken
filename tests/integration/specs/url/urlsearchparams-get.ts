@@ -1,4 +1,4 @@
-fdescribe('URLSearchParams get', () => {
+describe('URLSearchParams get', () => {
   it('Get basics', function () {
     var params = new URLSearchParams('a=b&c=d');
     expect(params.get('a')).toBe('b');

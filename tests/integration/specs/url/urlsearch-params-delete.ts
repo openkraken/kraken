@@ -1,4 +1,4 @@
-fdescribe('URLSearchParams delete', () => {
+describe('URLSearchParams delete', () => {
   it('Delete basics', function () {
     var params = new URLSearchParams('a=b&c=d');
     params.delete('a');

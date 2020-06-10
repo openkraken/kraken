@@ -1,4 +1,4 @@
-fdescribe('URLSearchParams getAll', () => {
+describe('URLSearchParams getAll', () => {
   it('getAll() basics', function () {
     var params = new URLSearchParams('a=b&c=d');
     expect(params.getAll('a')).toEqual(['b']);

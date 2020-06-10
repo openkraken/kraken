@@ -489,7 +489,7 @@ describe('border-bottom', () => {
 
     await matchScreenshot();
   });
-  it('color-001-ref', async () => {
+  xit('color-001-ref', async () => {
     let p;
     let div;
     let div_1;
