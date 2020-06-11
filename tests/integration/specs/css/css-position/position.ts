@@ -1,253 +1,304 @@
-describe('Position', () => {
-  it('should work with flow', async () => {
-    const container1 = createElementWithStyle('div', {
-      width: '200px',
-      height: '200px',
-      backgroundColor: '#999',
-      position: 'relative',
-    });
-
-    document.body.appendChild(container1);
-
-    const div1 = createElementWithStyle('div', {
-      width: '100px',
-      height: '100px',
-      backgroundColor: 'red',
-      position: 'absolute',
-      top: '100px',
-      right: '-100px',
-    });
-    div1.appendChild(document.createTextNode('absolute to container 1'));
-
-    container1.appendChild(div1);
-
-    const container2 = createElementWithStyle('div', {
-      width: '200px',
-      height: '200px',
-      backgroundColor: '#666',
-    });
-    document.body.appendChild(container2);
-
-    const div2 = createElementWithStyle('div', {
-      width: '100px',
-      height: '100px',
-      backgroundColor: 'blue',
-      position: 'absolute',
-      top: '20px',
-      left: '20px',
-    });
-    div2.appendChild(document.createTextNode('absolute to root'));
-
-    container2.appendChild(div2);
-
-    await matchScreenshot();
-  });
-
-  it('should work with flex', async () => {
-    const WIDTH = '100vw';
-    const HEIGHT = '100vh';
-
-    const container = document.createElement('div');
-    setElementStyle(container, {
-      backgroundColor: '#252423',
-      width: WIDTH,
-      height: HEIGHT,
-    });
-
-    const absoluteEl = document.createElement('p');
-    const fixedEl = document.createElement('span');
-
-    const absoluteStyle = {
-      position: 'absolute',
-      left: '100px',
-      top: '100px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'green',
-      width: '200px',
-      height: '200px',
-    };
-    const fixedStyle = {
-      position: 'fixed',
-      left: '200px',
-      top: '200px',
-      display: 'flex',
-      width: '200px',
-      height: '200px',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: 'red',
-    };
-
-    setElementStyle(absoluteEl, absoluteStyle);
-    setElementStyle(fixedEl, fixedStyle);
-
-    var textNode1 = document.createTextNode('absolute');
-    var textNode2 = document.createTextNode('fixed');
-    absoluteEl.appendChild(textNode1);
-    fixedEl.appendChild(textNode2);
-    container.appendChild(fixedEl);
-    container.appendChild(absoluteEl);
-
-    document.body.appendChild(container);
-    await matchScreenshot();
-  });
-
-  it('property static', async () => {
-    const div1 = document.createElement('div');
-    setElementStyle(div1, {
-      width: '100px',
-      height: '100px',
-      backgroundColor: '#666',
-      position: 'static',
-      top: '100px',
-      left: '100px',
-    });
-    div1.appendChild(document.createTextNode('static element'));
-
-    document.body.appendChild(div1);
+/*auto generated*/
+describe('position', () => {
+  it('001', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if the blue bar fills the entire area of the wide hollow orange rectangle.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'static',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
 
     await matchScreenshot();
   });
-
-  it('proeprty relative', async () => {
-    const div1 = document.createElement('div');
-    setElementStyle(div1, {
-      width: '100px',
-      height: '100px',
-      backgroundColor: '#666',
-      position: 'relative',
-      top: '50px',
-      left: '50px',
-    });
-    div1.appendChild(document.createTextNode('relative top & left'));
-    document.body.appendChild(div1);
-
-    const div2 = document.createElement('div');
-    setElementStyle(div2, {
-      width: '100px',
-      height: '100px',
-      backgroundColor: '#999',
-      position: 'relative',
-      bottom: '-50px',
-      right: '-50px',
-    });
-    div2.appendChild(document.createTextNode('relative bottom & right'));
-    document.body.appendChild(div2);
-
-    await matchScreenshot();
-  });
-
-  it('property fixed', async () => {
-    const container1 = document.createElement('div');
-    setElementStyle(container1, {
-      width: '200px',
-      height: '200px',
-      backgroundColor: '#999',
-      position: 'relative',
-      top: '100px',
-      left: '100px',
-    });
-    document.body.appendChild(container1);
-
-    const div1 = document.createElement('div');
-    setElementStyle(div1, {
-      width: '100px',
-      height: '100px',
-      backgroundColor: 'red',
-      position: 'fixed',
-      top: '50px',
-      left: '50px',
-    });
-    div1.appendChild(document.createTextNode('fixed element'));
-
-    container1.appendChild(div1);
+  it('002', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if the blue bar is completely shifted below the wide hollow orange rectangle.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'relative',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
 
     await matchScreenshot();
   });
+  it('003', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue stripe is just as wide and just as tall as its text and if the blue stripe is completely shifted below the orange line.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          background: 'red',
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'absolute',
+              top: '144px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
 
-  xit('peroperty sticky', async () => {
-    const sticky1 = document.createElement('div');
-    sticky1.appendChild(document.createTextNode('sticky top 1'));
-    setElementStyle(sticky1, {
-      backgroundColor: '#f40',
-      color: '#FFF',
-      position: 'sticky',
-      top: '0px',
-      width: '414px',
-      height: '50px',
-    });
+    await matchScreenshot();
+  });
+  it('004', async () => {
+    let p;
+    let div2;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue stripe is just as wide and just as tall as its text and if the blue stripe is completely shifted below the orange line. Also when scrolling, the blue stripe must stay at its same position on the screen, all other content can scroll.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          height: '3000px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'red',
+              border: '3px solid orange',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (div2 = createElement(
+              'div',
+              {
+                id: 'div2',
+                style: {
+                  background: 'blue',
+                  color: 'white',
+                  left: '96px',
+                  position: 'fixed',
+                  top: '168px',
+                  'box-sizing': 'border-box',
+                },
+              },
+              [createText(`Text sample`)]
+            )),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
 
-    const block1 = document.createElement('div');
-    block1.appendChild(document.createTextNode('block1'));
-    setElementStyle(block1, {
-      backgroundColor: '#999',
-      height: '200px',
-    });
+    await matchScreenshot();
+  });
+  xit('005', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue rectangle is just as wide as its longest word and just as tall as its text and if the blue rectangle is completely shifted below the tiny orange square.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          background: 'red',
+          border: '3px solid orange',
+          position: 'absolute',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'inherit',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
 
-    const sticky2 = document.createElement('div');
-    sticky2.appendChild(document.createTextNode('sticky top 2'));
-    setElementStyle(sticky2, {
-      backgroundColor: 'blue',
-      color: '#FFF',
-      position: 'sticky',
-      top: '50px',
-      width: '414px',
-      height: '50px',
-    });
-
-    const block2 = document.createElement('div');
-    block2.appendChild(document.createTextNode('block2'));
-    setElementStyle(block2, {
-      backgroundColor: '#999',
-      height: '200px',
-    });
-
-    const sticky3 = document.createElement('div');
-    sticky3.appendChild(document.createTextNode('sticky top 3'));
-    setElementStyle(sticky3, {
-      backgroundColor: 'green',
-      color: '#FFF',
-      position: 'sticky',
-      top: '100px',
-      width: '414px',
-      height: '50px',
-    });
-
-    const block3 = document.createElement('div');
-    block3.appendChild(document.createTextNode('block3'));
-    setElementStyle(block3, {
-      backgroundColor: '#999',
-      height: '200px',
-    });
-
-    const sticky4 = document.createElement('div');
-    sticky4.appendChild(document.createTextNode('sticky bottom'));
-    setElementStyle(sticky4, {
-      backgroundColor: 'purple',
-      color: '#FFF',
-      position: 'sticky',
-      bottom: '50px',
-      width: '414px',
-      height: '50px',
-    });
-
-    const block4 = document.createElement('div');
-    block4.appendChild(document.createTextNode('bottom block'));
-    setElementStyle(block4, {
-      backgroundColor: '#999',
-      height: '800px',
-    });
-
-    document.body.appendChild(sticky1);
-    document.body.appendChild(block1);
-    document.body.appendChild(sticky2);
-    document.body.appendChild(block2);
-    document.body.appendChild(sticky3);
-    document.body.appendChild(block3);
-    document.body.appendChild(sticky4);
-    document.body.appendChild(block4);
+    await matchScreenshot();
+  });
+  it('006', async () => {
+    let p;
+    let p_1;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          position: 'fixed, top',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`There should be 2 sentences on this page.`)]
+    );
+    p_1 = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          position: 'fixed, top',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`The test has passed if you see this as the 2nd sentence.`)]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(p_1);
 
     await matchScreenshot();
   });
