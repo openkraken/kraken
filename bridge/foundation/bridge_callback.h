@@ -8,6 +8,8 @@
 
 #include "jsa.h"
 #include "thread_safe_array.h"
+#include "bridge.h"
+#include "kraken_bridge.h"
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -44,6 +46,12 @@ public:
 
   // dispose all callbacks and recycle callback context's memory
   void disposeAllCallbacks();
+
+  static bool checkContext(JSContext &context) {
+    auto *bridge = static_cast<kraken::JSBridge*>(getBridge());
+    auto currentContext = bridge->getContext();
+    return currentContext == &context;
+  }
 
 private:
   ThreadSafeArray<std::unique_ptr<Context>> contextList;

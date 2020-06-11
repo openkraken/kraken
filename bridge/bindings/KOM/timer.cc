@@ -17,6 +17,11 @@ using namespace kraken::foundation;
 void handlePersistentCallback(void *data, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
+
+  if (!BridgeCallback::checkContext(_context)) {
+    return;
+  }
+
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
@@ -40,6 +45,11 @@ void handlePersistentCallback(void *data, const char *errmsg) {
 void handleRAFPersistentCallback(void *data, double result, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
+
+  if (!BridgeCallback::checkContext(_context)) {
+    return;
+  }
+
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
