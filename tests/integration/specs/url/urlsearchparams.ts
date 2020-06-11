@@ -79,56 +79,252 @@ describe('URLSearchParams', () => {
     expect(params.get('first')).toBe('1');
   });
 
-  it('constructor Basic URLSearchParams construction', () => {
+  it('Set basics', function () {
+    var params = new URLSearchParams('a=b&c=d');
+    params.set('a', 'B');
+    expect(params + '').toBe('a=B&c=d');
+    params = new URLSearchParams('a=b&c=d&a=e');
+    params.set('a', 'B');
+    expect(params + '').toBe('a=B&c=d');
+    params.set('e', 'f');
+    expect(params + '').toBe('a=B&c=d&e=f');
+  });
+  it('URLSearchParams.set', function () {
+    var params = new URLSearchParams('a=1&a=2&a=3');
+    expect(params.has('a')).toBeTrue();
+    expect(params.get('a')).toBe(
+      '1',
+      'Search params object has name "a" with value "1"'
+    );
+    // @ts-ignore
+    params.set('first', 4);
+    expect(params.has('a')).toBeTrue();
+    expect(params.get('a')).toBe(
+      '1',
+      'Search params object has name "a" with value "1"'
+    );
+    // @ts-ignore
+    params.set('a', 4);
+    expect(params.has('a')).toBeTrue();
+    expect(params.get('a')).toBe(
+      '4',
+      'Search params object has name "a" with value "4"'
+    );
+  });
+  [
+    {
+      input: 'z=b&a=b&z=a&a=a',
+      output: [
+        ['a', 'b'],
+        ['a', 'a'],
+        ['z', 'b'],
+        ['z', 'a'],
+      ],
+    },
+    {
+      input: '\uFFFD=x&\uFFFC&\uFFFD=a',
+      output: [
+        ['\uFFFC', ''],
+        ['\uFFFD', 'x'],
+        ['\uFFFD', 'a'],
+      ],
+    },
+    {
+      input: 'ﬃ&\uD83C\uDF08',
+      output: [
+        ['\uD83C\uDF08', ''],
+        ['ﬃ', ''],
+      ],
+    },
+    {
+      input: 'é&e\uFFFD&é',
+      output: [
+        ['é', ''],
+        ['e\uFFFD', ''],
+        ['é', ''],
+      ],
+    },
+    {
+      input: 'z=z&a=a&z=y&a=b&z=x&a=c&z=w&a=d&z=v&a=e&z=u&a=f&z=t&a=g',
+      output: [
+        ['a', 'a'],
+        ['a', 'b'],
+        ['a', 'c'],
+        ['a', 'd'],
+        ['a', 'e'],
+        ['a', 'f'],
+        ['a', 'g'],
+        ['z', 'z'],
+        ['z', 'y'],
+        ['z', 'x'],
+        ['z', 'w'],
+        ['z', 'v'],
+        ['z', 'u'],
+        ['z', 't'],
+      ],
+    },
+    {
+      input: 'bbb&bb&aaa&aa=x&aa=y',
+      output: [
+        ['aa', 'x'],
+        ['aa', 'y'],
+        ['aaa', ''],
+        ['bb', ''],
+        ['bbb', ''],
+      ],
+    },
+    {
+      input: 'z=z&=f&=t&=x',
+      output: [
+        ['', 'f'],
+        ['', 't'],
+        ['', 'x'],
+        ['z', 'z'],
+      ],
+    },
+    {
+      input: 'a\uD83C\uDF08&a\uD83D\uDCA9',
+      output: [
+        ['a\uD83C\uDF08', ''],
+        ['a\uD83D\uDCA9', ''],
+      ],
+    },
+  ].forEach((val) => {
+    xit('Parse and sort: ' + val.input, () => {
+      let params = new URLSearchParams(val.input),
+        i = 0;
+      params.sort();
+      // @ts-ignore
+      for (let param of params) {
+        expect(param).toEqual(val.output[i]);
+        i++;
+      }
+    });
+    xit('URL parse and sort: ' + val.input, () => {
+      let url = new URL('?' + val.input, 'https://example/');
+      url.searchParams.sort();
+      let params = new URLSearchParams(url.search),
+        i = 0;
+      // @ts-ignore
+      for (let param of params) {
+        expect(param).toEqual(val.output[i]);
+        i++;
+      }
+    });
+  });
+  xit('Sorting non-existent params removes ? from URL', function () {
+    const url = new URL('http://example.com/?');
+    url.searchParams.sort();
+    expect(url.href).toBe('http://example.com/');
+    expect(url.search).toBe('');
+  });
+
+  it('Serialize space', function () {
     var params = new URLSearchParams();
-    expect(params + '').toBe('');
-    params = new URLSearchParams('');
-    expect(params + '').toBe('');
-    params = new URLSearchParams('a=b');
-    expect(params + '').toBe('a=b');
-    params = new URLSearchParams(params);
-    expect(params + '').toBe('a=b');
+    params.append('a', 'b c');
+    expect(params + '').toBe('a=b+c');
+    params.delete('a');
+    params.append('a b', 'c');
+    expect(params + '').toBe('a+b=c');
   });
-
-  it('constructor, no arguments"', async () => {
-    var params = new URLSearchParams()
-    expect(params.toString()).toBe('');
+  it('Serialize empty value', function () {
+    var params = new URLSearchParams();
+    params.append('a', '');
+    expect(params + '').toBe('a=');
+    params.append('a', '');
+    expect(params + '').toBe('a=&a=');
+    params.append('', 'b');
+    expect(params + '').toBe('a=&a=&=b');
+    params.append('', '');
+    expect(params + '').toBe('a=&a=&=b&=');
+    params.append('', '');
+    expect(params + '').toBe('a=&a=&=b&=&=');
   });
-
-  it(' constructor, remove leading "?"', () => {
-    var params = new URLSearchParams("?a=b")
-    expect(params.toString()).toBe("a=b");
+  it('Serialize empty name', function () {
+    var params = new URLSearchParams();
+    params.append('', 'b');
+    expect(params + '').toBe('=b');
+    params.append('', 'b');
+    expect(params + '').toBe('=b&=b');
   });
-
-  it('constructor, {} as argument', () => {
-    var params = new URLSearchParams({});
-    expect(params + '').toBe( "");
+  it('Serialize empty name and value', function () {
+    var params = new URLSearchParams();
+    params.append('', '');
+    expect(params + '').toBe('=');
+    params.append('', '');
+    expect(params + '').toBe('=&=');
   });
-
-  it('constructor, string. 001', () => {
-    var params = new URLSearchParams('a=b');
-    expect(params != null).toBe(true, 'constructor returned non-null value.');
-    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
-    expect(params.has('b')).toBe(false, 'Search params object has not got name "b"');
+  it('Serialize +', function () {
+    var params = new URLSearchParams();
+    params.append('a', 'b+c');
+    expect(params + '').toBe('a=b%2Bc');
+    params.delete('a');
+    params.append('a+b', 'c');
+    expect(params + '').toBe('a%2Bb=c');
   });
-
-  it('constructor, string. 002', () => {
-    var params = new URLSearchParams('a=b&c');
-    expect(params != null).toBe(true, 'constructor returned non-null value.');
-    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
-    expect(params.has('c')).toBe(true,  'Search params object has name "c"');
+  it('Serialize =', function () {
+    var params = new URLSearchParams();
+    params.append('=', 'a');
+    expect(params + '').toBe('%3D=a');
+    params.append('b', '=');
+    expect(params + '').toBe('%3D=a&b=%3D');
   });
-
-  it('constructor, string. 003', () => {
-    var params = new URLSearchParams('&a&&& &&&&&a+b=& c&m%c3%b8%c3%b8');
-    expect(params != null).toBe(true);
-    expect(params.has('a')).toBe(true, 'Search params object has name "a"');
-    expect(params.has('a b')).toBe(true, 'Search params object has name "a b"');
-    expect(params.has(' ')).toBe(true, 'Search params object has name " "');
-    expect(params.has('c')).toBe(false, 'Search params object did not have the name "c"');
-    expect(params.has(' c')).toBe(true, 'Search params object has name " c"');
-    expect(params.has('møø')).toBe(true, 'Search params object has name "møø"');
+  it('Serialize &', function () {
+    var params = new URLSearchParams();
+    params.append('&', 'a');
+    expect(params + '').toBe('%26=a');
+    params.append('b', '&');
+    expect(params + '').toBe('%26=a&b=%26');
   });
-
+  it('Serialize *-._', function () {
+    var params = new URLSearchParams();
+    params.append('a', '*-._');
+    expect(params + '').toBe('a=*-._');
+    params.delete('a');
+    params.append('*-._', 'c');
+    expect(params + '').toBe('*-._=c');
+  });
+  it('Serialize %', function () {
+    var params = new URLSearchParams();
+    params.append('a', 'b%c');
+    expect(params + '').toBe('a=b%25c');
+    params.delete('a');
+    params.append('a%b', 'c');
+    expect(params + '').toBe('a%25b=c');
+  });
+  xit('Serialize \\0', function () {
+    var params = new URLSearchParams();
+    params.append('a', 'b\0c');
+    expect(params + '').toBe('a=b%00c');
+    params.delete('a');
+    params.append('a\0b', 'c');
+    expect(params + '').toBe('a%00b=c');
+  });
+  it('Serialize \uD83D\uDCA9', function () {
+    var params = new URLSearchParams();
+    params.append('a', 'b\uD83D\uDCA9c');
+    expect(params + '').toBe('a=b%F0%9F%92%A9c');
+    params.delete('a');
+    params.append('a\uD83D\uDCA9b', 'c');
+    expect(params + '').toBe('a%F0%9F%92%A9b=c');
+  });
+  it('URLSearchParams.toString', function () {
+    var params;
+    params = new URLSearchParams('a=b&c=d&&e&&');
+    expect(params.toString()).toBe('a=b&c=d&e=');
+    params = new URLSearchParams('a = b &a=b&c=d%20');
+    expect(params.toString()).toBe('a+=+b+&a=b&c=d+');
+    params = new URLSearchParams('a=&a=b');
+    expect(params.toString()).toBe('a=&a=b');
+  });
+  it('URLSearchParams connected to URL', () => {
+    const url = new URL('http://www.example.com/?a=b,c');
+    const params = url.searchParams;
+    expect(url.toString()).toBe('http://www.example.com/?a=b,c');
+    expect(params.toString()).toBe('a=b%2Cc');
+    params.append('x', 'y');
+    expect(url.toString()).toBe('http://www.example.com/?a=b%2Cc&x=y');
+    expect(params.toString()).toBe('a=b%2Cc&x=y');
+  });
 
 });

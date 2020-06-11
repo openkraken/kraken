@@ -27,3 +27,4 @@ export 'src/element/tags/p.dart';
 export 'src/element/tags/span.dart';
 export 'src/element/tags/video.dart';
 export 'src/element/tags/pre.dart';
+export 'src/element/tags/strong.dart';

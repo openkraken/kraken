@@ -489,7 +489,7 @@ describe('border-bottom', () => {
 
     await matchScreenshot();
   });
-  it('color-001-ref', async () => {
+  xit('color-001-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -543,7 +543,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -586,7 +586,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -645,6 +645,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
+    await sleep(0.5);
     await matchScreenshot();
   });
   it('color-003', async () => {
@@ -665,7 +666,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -744,7 +745,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -814,7 +815,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -900,7 +901,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -944,7 +945,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#1000000',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -973,7 +974,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#fgfgfg',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -1037,7 +1038,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1116,7 +1117,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1195,7 +1196,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1274,7 +1275,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1318,7 +1319,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#fg0000',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -1382,7 +1383,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1461,7 +1462,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1540,7 +1541,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1619,7 +1620,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1663,7 +1664,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#00fg00',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -1727,7 +1728,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1806,7 +1807,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1885,7 +1886,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -1964,7 +1965,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2008,7 +2009,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#0000fg',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -2037,7 +2038,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#00',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -2065,7 +2066,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2144,7 +2145,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2223,7 +2224,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2302,7 +2303,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2362,7 +2363,7 @@ describe('border-bottom', () => {
             'border-bottom-style': 'solid',
             'border-bottom-width': '100px',
             'border-bottom-color': '#1000',
-            height: '0',
+
             width: '100px',
             'box-sizing': 'border-box',
           },
@@ -2393,7 +2394,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#ggg',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -2457,7 +2458,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2500,7 +2501,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2579,7 +2580,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2622,7 +2623,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2666,7 +2667,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#g00',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -2730,7 +2731,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2809,7 +2810,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2888,7 +2889,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2931,7 +2932,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -2975,7 +2976,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#0g0',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -3039,7 +3040,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3082,7 +3083,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3161,7 +3162,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3204,7 +3205,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3248,7 +3249,7 @@ describe('border-bottom', () => {
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
         'border-bottom-color': '#00g',
-        height: '0',
+
         width: '100px',
         'box-sizing': 'border-box',
       },
@@ -3276,7 +3277,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3319,7 +3320,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3402,7 +3403,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3445,7 +3446,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3488,7 +3489,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3571,7 +3572,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3656,7 +3657,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3735,7 +3736,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3778,7 +3779,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3861,7 +3862,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3904,7 +3905,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -3990,7 +3991,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4033,7 +4034,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4116,7 +4117,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4159,7 +4160,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4202,7 +4203,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4245,7 +4246,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4288,7 +4289,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4331,7 +4332,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4374,7 +4375,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4417,7 +4418,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4496,7 +4497,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4539,7 +4540,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4582,7 +4583,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4625,7 +4626,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4668,7 +4669,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4711,7 +4712,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4754,7 +4755,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4837,7 +4838,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4920,7 +4921,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -4963,7 +4964,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5046,7 +5047,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5089,7 +5090,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5132,7 +5133,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5175,7 +5176,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5218,7 +5219,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5299,7 +5300,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5342,7 +5343,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5385,7 +5386,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5464,7 +5465,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5507,7 +5508,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5550,7 +5551,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5593,7 +5594,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5636,7 +5637,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5679,7 +5680,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5762,7 +5763,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5805,7 +5806,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5848,7 +5849,7 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
+
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
@@ -5931,7 +5932,6 @@ describe('border-bottom', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       id: 'test',
       style: {
-        height: '0',
         width: '100px',
         'border-bottom-style': 'solid',
         'border-bottom-width': '100px',
