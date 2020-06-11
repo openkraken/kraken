@@ -12,7 +12,7 @@ describe('Horizontal formatting', () => {
 
     ruleImg.setAttribute(
       'src',
-      'https://img.alicdn.com/tfs/TB1xF94zxn1gK0jSZKPXXXvUXXa-640-20.gif'
+      'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/scaleplate.png'
     );
 
     setElementStyle(ruleImg, {
@@ -52,7 +52,7 @@ describe('Horizontal formatting', () => {
 
     ruleImg2.setAttribute(
       'src',
-      'https://img.alicdn.com/tfs/TB1GV14zxn1gK0jSZKPXXXvUXXa-640-64.gif'
+      'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/content-area.png'
     );
     setElementStyle(ruleImg2, {
       width: '640px',

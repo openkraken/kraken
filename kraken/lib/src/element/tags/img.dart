@@ -280,10 +280,6 @@ class ImageElement extends Element {
     }
   }
 
-  void _setSize() {
-
-  }
-
   @override
   dynamic getProperty(String key) {
     switch (key) {

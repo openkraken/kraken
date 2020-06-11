@@ -130,7 +130,7 @@ describe('abspos-paged', () => {
 
     await matchScreenshot();
   });
-  it('002', async () => {
+  xit('002', async () => {
     let div;
     let div_1;
     let div_2;
