@@ -1300,7 +1300,7 @@ describe('border-bottom', () => {
 
     await matchScreenshot();
   });
-  xit('color-013', async () => {
+  it('color-013', async () => {
     let p;
     let div;
     p = createElement(
