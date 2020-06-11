@@ -71,6 +71,11 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
 void handleInvokeModuleTransientCallback(char *json, void *data) {
   auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
+
+  if (!BridgeCallback::checkContext(_context)) {
+    return;
+  }
+
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
@@ -162,6 +167,11 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
 void handleTransientCallback(void *data, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(data);
   JSContext &_context = obj->_context;
+
+  if (!BridgeCallback::checkContext(_context)) {
+    return;
+  }
+
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {

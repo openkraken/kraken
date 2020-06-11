@@ -9,10 +9,6 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
 include(./jsa/jsa.cmake)
 
-# foundation
-add_subdirectory(foundation)
-include_directories(foundation)
-
 list(APPEND BRIDGE_SOURCE
     bindings/KOM/console.cc
     bindings/KOM/screen.cc
@@ -26,6 +22,11 @@ list(APPEND BRIDGE_SOURCE
     bindings/KOM/blob.h
     bindings/KOM/toBlob.cc
     bindings/KOM/toBlob.h
+    foundation/logging.cc
+    foundation/logging.h
+    foundation/colors.h
+    foundation/bridge_callback.h
+    foundation/bridge_callback.cc
     dart_methods.cc
     dart_methods.h
     bridge.cc
@@ -46,7 +47,6 @@ list(APPEND BRIDGE_INCLUDE
 list(APPEND BRIDGE_LINK_LIBS
         jsa_abstraction
         jsa_implementation
-        foundation
         -pthread
 )
 
@@ -56,6 +56,11 @@ list(APPEND PUBLIC_HEADER
 
 add_library(bridge STATIC ${BRIDGE_SOURCE})
 add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h)
+
+if (${IS_ANDROID})
+  find_library(log-lib log)
+  target_link_libraries(bridge ${log-lib})
+endif ()
 
 ### bridge
 target_link_libraries(bridge PRIVATE ${BRIDGE_LINK_LIBS})
