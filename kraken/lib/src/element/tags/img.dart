@@ -12,12 +12,20 @@ const String IMAGE = 'IMG';
 
 const Map<String, dynamic> _defaultStyle = {'display': 'inline-block'};
 
+bool _isNumber(String str) {
+  RegExp regExp = new RegExp(r"^\d+$");
+  return regExp.hasMatch(str);
+}
+
 class ImageElement extends Element {
   ImageProvider image;
   RenderImage imageBox;
   ImageStream imageStream;
   List<ImageStreamListener> imageListeners;
   ImageInfo _imageInfo;
+
+  double _propertyWidth;
+  double _propertyHeight;
 
   ImageElement(int targetId)
       : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE) {
@@ -97,23 +105,23 @@ class ImageElement extends Element {
     double realHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
     double width = 0.0;
     double height = 0.0;
-    bool containWidth = style.contains('width');
-    bool containHeight = style.contains('height');
+    bool containWidth = style.contains('width') || _propertyWidth != null;
+    bool containHeight = style.contains('height') || _propertyHeight != null;
     if (!containWidth && !containHeight) {
       width = realWidth;
       height = realHeight;
     } else {
       CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
       if (containWidth && containHeight) {
-        width = sizedConstraints.width;
-        height = sizedConstraints.height;
+        width = sizedConstraints.width ?? _propertyWidth;
+        height = sizedConstraints.height ?? _propertyHeight;
       } else if (containWidth) {
-        width = sizedConstraints.width;
+        width = sizedConstraints.width ?? _propertyWidth;
         if (realWidth != 0) {
           height = width * realHeight / realWidth;
         }
       } else if (containHeight) {
-        height = sizedConstraints.height;
+        height = sizedConstraints.height ?? _propertyHeight;
         if (realHeight != 0) {
           width = height * realWidth / realHeight;
         }
@@ -239,6 +247,20 @@ class ImageElement extends Element {
     } else if (key == 'loading' && _hasLazyLoading) {
       // Should reset lazy when value change
       _resetLazyLoading();
+    } else if (key == 'width') {
+      if (value is String && _isNumber(value)) {
+        value += 'px';
+      }
+
+      _propertyWidth = CSSLength.toDisplayPortValue(value);
+      _resize();
+    } else if (key == 'height') {
+      if (value is String && _isNumber(value)) {
+        value += 'px';
+      }
+
+      _propertyHeight = CSSLength.toDisplayPortValue(value);
+      _resize();
     }
   }
 

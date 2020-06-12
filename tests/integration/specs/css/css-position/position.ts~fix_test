@@ -1,0 +1,305 @@
+/*auto generated*/
+describe('position', () => {
+  it('001', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if the blue bar fills the entire area of the wide hollow orange rectangle.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'static',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('002', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if the blue bar is completely shifted below the wide hollow orange rectangle.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'relative',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('003', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue stripe is just as wide and just as tall as its text and if the blue stripe is completely shifted below the orange line.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          background: 'red',
+          border: '3px solid orange',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'absolute',
+              top: '144px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('004', async () => {
+    let p;
+    let div2;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue stripe is just as wide and just as tall as its text and if the blue stripe is completely shifted below the orange line. Also when scrolling, the blue stripe must stay at its same position on the screen, all other content can scroll.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          height: '3000px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'red',
+              border: '3px solid orange',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (div2 = createElement(
+              'div',
+              {
+                id: 'div2',
+                style: {
+                  background: 'blue',
+                  color: 'white',
+                  left: '96px',
+                  position: 'fixed',
+                  top: '168px',
+                  'box-sizing': 'border-box',
+                },
+              },
+              [createText(`Text sample`)]
+            )),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  xit('005', async () => {
+    let p;
+    let div1;
+    let wrapper;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is no red, if the blue rectangle is just as wide as its longest word and just as tall as its text and if the blue rectangle is completely shifted below the tiny orange square.`
+        ),
+      ]
+    );
+    wrapper = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'wrapper',
+        style: {
+          background: 'red',
+          border: '3px solid orange',
+          position: 'absolute',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (div1 = createElement(
+          'div',
+          {
+            id: 'div1',
+            style: {
+              background: 'blue',
+              color: 'white',
+              left: '96px',
+              position: 'inherit',
+              top: '96px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`Text sample`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(wrapper);
+
+    await matchScreenshot();
+  });
+  it('006', async () => {
+    let p;
+    let p_1;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          position: 'fixed, top',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`There should be 2 sentences on this page.`)]
+    );
+    p_1 = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          position: 'fixed, top',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`The test has passed if you see this as the 2nd sentence.`)]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(p_1);
+
+    await matchScreenshot();
+  });
+});
