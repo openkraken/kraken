@@ -246,17 +246,18 @@ class CSSColor implements CSSValue<Color> {
       String g = hex.substring(2, 3);
       String b = hex.substring(3, 4);
 
-      _r = int.parse(r + r, radix: 16);
-      _g = int.parse(g + g, radix: 16);
-      _b = int.parse(b + b, radix: 16);
+      _r = int.tryParse(r + r, radix: 16) ?? 0;
+      _g = int.tryParse(g + g, radix: 16) ?? 0;
+      _b = int.tryParse(b + b, radix: 16) ?? 0;
     } else if (hex.length == 7) {
       String r = hex.substring(1, 3);
       String g = hex.substring(3, 5);
       String b = hex.substring(5, 7);
 
-      _r = int.parse(r, radix: 16);
-      _g = int.parse(g, radix: 16);
-      _b = int.parse(b, radix: 16);
+      _r = int.tryParse(r, radix: 16) ?? 0;
+      _g = int.tryParse(g, radix: 16) ?? 0;
+      _b = int.tryParse(b, radix: 16) ?? 0;
+
     }
     //  255 r
     //  0 g
