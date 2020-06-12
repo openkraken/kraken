@@ -10,7 +10,7 @@ buildscript {
 }
 
 ext {
-    moduleVersion = "0.3.3.0-SNAPSHOT"
+    moduleVersion = "0.4.0.0-SNAPSHOT"
 }
 
 allprojects {

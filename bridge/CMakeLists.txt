@@ -59,7 +59,7 @@ add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/k
 
 if (${IS_ANDROID})
   find_library(log-lib log)
-  target_link_libraries(bridge ${log-lib})
+  list(APPEND BRIDGE_LINK_LIBS ${log-lib})
 endif ()
 
 ### bridge
