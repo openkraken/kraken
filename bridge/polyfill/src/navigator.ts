@@ -1,8 +1,10 @@
 import { krakenInvokeModule, privateKraken } from './bridge';
 import geolocation from './geolocation';
 import connection from './connection';
+import { vibrate } from './vibration';
 
 export const navigator = {
+  vibrate,
   connection,
   geolocation,
   // UA is read-only.

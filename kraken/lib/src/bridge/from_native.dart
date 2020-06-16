@@ -12,6 +12,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
+import 'package:vibration/vibration.dart';
 import 'platform.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
@@ -290,6 +291,14 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       } else if (method == 'close') {
         List methodArgs = args[2];
         KrakenWebSocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
+      }
+    } else if (module == 'Navigator') {
+      String method = args[1];
+      if (method == 'vibrate') {
+        List<int> methodArgs = args[2];
+        Vibration.vibrate(pattern: methodArgs);
+      } else if (method == 'cancelVibrate') {
+        Vibration.cancel();
       }
     }
   } catch (e, stack) {
