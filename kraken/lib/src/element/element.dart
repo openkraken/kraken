@@ -439,7 +439,6 @@ class Element extends Node
       if (parentData.renderPositionHolder != null) {
         ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
         parent.remove(parentData.renderPositionHolder);
-        parentRenderObject.remove(renderElementBoundary);
       }
     }
   }
@@ -531,7 +530,7 @@ class Element extends Node
 
     switch (position) {
       case CSSPositionType.absolute:
-        Element parentStackedElement = findPositionedParent(child);
+        Element parentStackedElement = findContainingBlock(child);
         parentRenderLayoutBox = parentStackedElement.renderLayoutBox;
         break;
 
@@ -1021,7 +1020,7 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
-    Element element = findPositionedParent(this);
+    Element element = findContainingBlock(this);
     if (element == null) {
       element = ElementManager().getRootElement();
     }
@@ -1121,15 +1120,15 @@ class Element extends Node
   }
 }
 
-Element findPositionedParent(Element element) {
+Element findContainingBlock(Element element) {
   Element _el = element?.parent;
   Element rootEl = ElementManager().getRootElement();
 
   while (_el != null) {
     bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
-    // Find element position is not static,
-    // use root element if none was found
-    if (_el == rootEl || isElementNonStatic) {
+    bool hasTransform = _el.style['transform'] != '';
+    // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
+    if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
     }
     _el = _el.parent;

@@ -126,7 +126,9 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
   EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
 
-  // Position element's offset relative to parent's inner border area
+  // Positioned element is positioned relative to the edge of
+  // padding box of containing block
+  // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
   x = x - resolvedPadding.left;
   y = y - resolvedPadding.top;
 

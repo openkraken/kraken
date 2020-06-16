@@ -867,8 +867,9 @@ class RenderFlowLayout extends RenderBox
     children.sort((RenderObject prev, RenderObject next) {
       RenderLayoutParentData prevParentData = prev.parentData;
       RenderLayoutParentData nextParentData = next.parentData;
-      int prevZIndex = prevParentData.zIndex ?? 0;
-      int nextZIndex = nextParentData.zIndex ?? 0;
+      // z-index applies to element when position is not static
+      int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
+      int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
       return prevZIndex - nextZIndex;
     });
 

@@ -1218,6 +1218,7 @@ class RenderFlexLayout extends RenderBox
     children.sort((RenderObject prev, RenderObject next) {
       RenderFlexParentData prevParentData = prev.parentData;
       RenderFlexParentData nextParentData = next.parentData;
+      // z-index applies to flex-item ignoring position property
       int prevZIndex = prevParentData.zIndex ?? 0;
       int nextZIndex = nextParentData.zIndex ?? 0;
       return prevZIndex - nextZIndex;
