@@ -1,4 +1,5 @@
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -38,9 +39,16 @@ void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, CSSStyleDec
     if (renderBox is! RenderTextBox && style != null) {
       styleOffset = getRelativeOffset(style);
     }
-    boxParentData.offset = relativeOffset == null
-        ? styleOffset
-        : styleOffset == null ? relativeOffset : relativeOffset.translate(styleOffset.dx, styleOffset.dy);
+
+    if (relativeOffset != null) {
+      if (styleOffset != null) {
+        boxParentData.offset = relativeOffset.translate(styleOffset.dx, styleOffset.dy);
+      } else {
+        boxParentData.offset = relativeOffset;
+      }
+    } else {
+      boxParentData.offset = styleOffset;
+    }
   }
 }
 
@@ -68,4 +76,59 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
     }
   }
   return null;
+}
+
+void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
+  BoxConstraints constraints = parent.constraints;
+  double width = constraints.minWidth;
+  double height = constraints.minHeight;
+
+  final RenderLayoutParentData childParentData = child.parentData;
+
+  // Default to no constraints. (0 - infinite)
+  BoxConstraints childConstraints = const BoxConstraints();
+
+  Size trySize = constraints.biggest;
+  parent.size = trySize.isInfinite ? constraints.smallest : trySize;
+
+  // if child has no width, calculate width by left and right.
+  if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
+    childConstraints = childConstraints.tighten(width: parent.size.width - childParentData.left - childParentData.right);
+  }
+  // if child has not height, should be calculate height by top and bottom
+  if (childParentData.height == 0.0 && childParentData.top != null && childParentData.bottom != null) {
+    childConstraints =
+      childConstraints.tighten(height: parent.size.height - childParentData.top - childParentData.bottom);
+  }
+
+  child.layout(childConstraints, parentUsesSize: true);
+
+  // Calc x,y by parentData.
+  double x, y;
+
+  // Offset to global coordinate system of base
+  if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
+    Offset baseOffset =
+      childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
+
+    double top = childParentData.top ?? baseOffset.dy;
+    if (childParentData.top == null && childParentData.bottom != null)
+      top = height - child.size.height - (childParentData.bottom ?? 0);
+    double left = childParentData.left ?? baseOffset.dx;
+    if (childParentData.left == null && childParentData.right != null) {
+      left = width - child.size.width - (childParentData.right ?? 0);
+    }
+
+    x = left;
+    y = top;
+  }
+
+  EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
+  EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
+
+  // Position element's offset relative to parent's inner border area
+  x = x - resolvedPadding.left;
+  y = y - resolvedPadding.top;
+
+  childParentData.offset = Offset(x ?? 0, y ?? 0);
 }

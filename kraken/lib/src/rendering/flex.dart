@@ -7,6 +7,30 @@ import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 
 class RenderFlexParentData extends RenderLayoutParentData {
+  /// The distance by which the child's top edge is inset from the top of the stack.
+  double top;
+
+  /// The distance by which the child's right edge is inset from the right of the stack.
+  double right;
+
+  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
+  double bottom;
+
+  /// The distance by which the child's left edge is inset from the left of the stack.
+  double left;
+
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
+  double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
+  double height;
+
+  bool isPositioned = false;
+
   /// Flex grow
   int flexGrow;
 
@@ -338,7 +362,13 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! RenderFlexParentData) child.parentData = RenderFlexParentData();
+    if (child.parentData is! RenderFlexParentData) {
+      if (child is RenderElementBoundary) {
+        child.parentData = getPositionParentDataFromStyle(child.style);
+      } else {
+        child.parentData = RenderFlexParentData();
+      }
+    }
   }
 
   double _getIntrinsicSize({
@@ -625,16 +655,19 @@ class RenderFlexLayout extends RenderBox
   @override
   void performLayout() {
     RenderBox child = firstChild;
+    Element element = getEventTargetByTargetId<Element>(targetId);
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
-      if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
+      if (childParentData.isPositioned) {
+        layoutPositionedChild(element, this, child);
+      } else if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
         _layoutChildren(child);
       }
 
       child = childParentData.nextSibling;
     }
-    // Layout non placeholder renderObject
+    // Layout non positioned and its placeholder renderObject
     _layoutChildren(null);
   }
 
@@ -707,7 +740,9 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && isPlaceholderPositioned(child)) {
+      // and positioned renderObject
+      if (placeholderChild == null &&
+        (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -831,7 +866,9 @@ class RenderFlexLayout extends RenderBox
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
-        if (placeholderChild == null && isPlaceholderPositioned(child)) {
+        // and positioned renderObject
+        if (placeholderChild == null &&
+          (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -1098,7 +1135,9 @@ class RenderFlexLayout extends RenderBox
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
-      if (placeholderChild == null && isPlaceholderPositioned(child)) {
+      // and positioned renderObject
+      if (placeholderChild == null &&
+        (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -1175,14 +1214,22 @@ class RenderFlexLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderBox child = firstChild;
-    while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData as RenderFlexParentData;
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      RenderFlexParentData prevParentData = prev.parentData;
+      RenderFlexParentData nextParentData = next.parentData;
+      int prevZIndex = prevParentData.zIndex ?? 0;
+      int nextZIndex = nextParentData.zIndex ?? 0;
+      return prevZIndex - nextZIndex;
+    });
+
+    for (var child in children) {
       // Don't paint placeholder of positioned element
-      if (child is! RenderConstrainedBox) {
+      if (child is! RenderPositionHolder) {
+        final RenderFlexParentData childParentData = child.parentData;
         context.paintChild(child, childParentData.offset + offset);
+        child = childParentData.nextSibling;
       }
-      child = childParentData.nextSibling;
     }
   }
 
@@ -1203,6 +1250,33 @@ class RenderFlexLayout extends RenderBox
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
+  }
+
+  RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
+    RenderFlexParentData parentData = RenderFlexParentData();
+    CSSPositionType positionType = resolvePositionFromStyle(style);
+    parentData.position = positionType;
+
+    if (style.contains('top')) {
+      parentData.top = CSSLength.toDisplayPortValue(style['top']);
+    }
+    if (style.contains('left')) {
+      parentData.left = CSSLength.toDisplayPortValue(style['left']);
+    }
+    if (style.contains('bottom')) {
+      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
+    }
+    if (style.contains('right')) {
+      parentData.right = CSSLength.toDisplayPortValue(style['right']);
+    }
+    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
+    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+    parentData.zIndex = CSSLength.toInt(style['zIndex']);
+
+    parentData.isPositioned = positionType == CSSPositionType.absolute ||
+      positionType == CSSPositionType.fixed;
+
+    return parentData;
   }
 }
 

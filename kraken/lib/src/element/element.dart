@@ -80,7 +80,6 @@ class Element extends Node
   RenderObject renderObject;
   RenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
-  RenderStack renderStack;
   ContainerRenderObjectMixin renderLayoutBox;
   RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
@@ -174,11 +173,6 @@ class Element extends Node
     // The layout boundary of element.
     renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
 
-    // Build root render stack.
-    if (targetId == BODY_ID) {
-      _buildRenderStack();
-    }
-
     setElementSizeType();
   }
 
@@ -239,65 +233,16 @@ class Element extends Node
     });
   }
 
-  void _buildRenderStack() {
-    if (renderStack != null) return;
-
-    List<RenderBox> shouldStackedChildren = [renderDecoratedBox.child];
-    renderDecoratedBox.child = null;
-
-    // Stack children that is attached but not
-    children.forEach((element) {
-      if (_isPositioned(element.style)) {
-        RenderElementBoundary child = element.renderElementBoundary;
-        // Parent should be one of RenderFlowLayout or RenderFlexLayout,
-        // Only move attached child.
-        // @TODO: can be optimized by common abstract class.
-        if (child.attached && child.parent is! RenderStack) {
-          (child.parent as ContainerRenderObjectMixin).remove(child);
-          shouldStackedChildren.add(child);
-        }
-      }
-    });
-
-    renderStack = RenderPosition(
-      textDirection: TextDirection.ltr,
-      fit: StackFit.passthrough,
-      overflow: Overflow.visible,
-      children: shouldStackedChildren,
-    );
-    renderDecoratedBox.child = renderStack;
-  }
-
-  void _dropRenderStack() {
-    if (renderStack == null) return;
-
-    RenderBox originalChild = renderStack.firstChild;
-    renderStack.remove(originalChild);
-    (renderStack.parent as RenderObjectWithChildMixin).child = originalChild;
-
-    if (renderStack.childCount > 0) {
-      Element parentPositionedElement = findPositionedParent(this);
-      List<RenderBox> stackedChildren = renderStack.getChildrenAsList();
-      for (var stackedChild in stackedChildren) {
-        renderStack.dropChild(stackedChild);
-        parentPositionedElement.renderStack?.add(stackedChild);
-      }
-    }
-
-    renderStack = null;
-  }
-
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
-    if (renderElementBoundary.parentData is PositionParentData) {
-      (renderElementBoundary.parentData as PositionParentData).position = currentPosition;
+
+    if (renderElementBoundary.parentData is RenderLayoutParentData) {
+      (renderElementBoundary.parentData as RenderLayoutParentData).position = currentPosition;
     }
 
     // Remove stack node when change to non positioned.
     if (currentPosition == CSSPositionType.static) {
-      _dropRenderStack();
     } else {
       // Add stack node when change to positioned.
-      _buildRenderStack();
     }
   }
 
@@ -466,7 +411,6 @@ class Element extends Node
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
-      case CSSPositionType.relative:
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         parent._addPositionedChild(this, positionType);
@@ -474,6 +418,7 @@ class Element extends Node
       case CSSPositionType.sticky:
         parent._addStickyChild(this, positionType);
         break;
+      case CSSPositionType.relative:
       case CSSPositionType.static:
         parent.renderLayoutBox.insert(renderElementBoundary, after: after);
         break;
@@ -489,7 +434,7 @@ class Element extends Node
     AbstractNode parentRenderObject = renderObject.parent;
     if (parentRenderObject == parent.renderLayoutBox) {
       parent.renderLayoutBox.remove(renderElementBoundary);
-    } else if (parentRenderObject is RenderStack) {
+      // Remove placeholder of positioned element
       PositionParentData parentData = renderElementBoundary.parentData;
       if (parentData.renderPositionHolder != null) {
         ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
@@ -581,22 +526,18 @@ class Element extends Node
   }
 
   void _addPositionedChild(Element child, CSSPositionType position) {
-    RenderPosition parentRenderPosition;
-    switch (position) {
-      case CSSPositionType.relative:
-        // Ensure renderStack exists.
-        _buildRenderStack();
-        parentRenderPosition = renderStack;
-        break;
+    // RenderPosition parentRenderPosition;
+    ContainerRenderObjectMixin parentRenderLayoutBox;
 
+    switch (position) {
       case CSSPositionType.absolute:
         Element parentStackedElement = findPositionedParent(child);
-        parentRenderPosition = parentStackedElement.renderStack;
+        parentRenderLayoutBox = parentStackedElement.renderLayoutBox;
         break;
 
       case CSSPositionType.fixed:
         final Element rootEl = ElementManager().getRootElement();
-        parentRenderPosition = rootEl.renderStack;
+        parentRenderLayoutBox = rootEl.renderLayoutBox;
         break;
 
       case CSSPositionType.static:
@@ -622,9 +563,11 @@ class Element extends Node
     }
 
     addChild(positionedBoxHolder);
-    childRenderElementBoundary.parentData = getPositionParentDataFromStyle(child.style, positionedBoxHolder);
+
+    setPositionedChildParentData(parentRenderLayoutBox, child, positionedBoxHolder);
     positionedBoxHolder.realDisplayedBox = childRenderElementBoundary;
-    parentRenderPosition.add(childRenderElementBoundary);
+
+    parentRenderLayoutBox.add(childRenderElementBoundary);
   }
 
   void _addStickyChild(Element child, CSSPositionType position) {}
@@ -1184,9 +1127,9 @@ Element findPositionedParent(Element element) {
 
   while (_el != null) {
     bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
-    // Find element with renderStack and position is not static,
+    // Find element position is not static,
     // use root element if none was found
-    if (_el == rootEl || (_el.renderStack != null && isElementNonStatic)) {
+    if (_el == rootEl || isElementNonStatic) {
       break;
     }
     _el = _el.parent;
@@ -1233,10 +1176,18 @@ bool _isSticky(CSSStyleDeclaration style) {
   return style['position'] == 'sticky' && style.contains('top') || style.contains('bottom');
 }
 
-PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderPositionHolder placeholder) {
-  PositionParentData parentData = PositionParentData();
+void setPositionedChildParentData(ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
+  var parentData;
+  if (parentRenderLayoutBox is RenderFlowLayout) {
+    parentData = RenderLayoutParentData();
+  } else {
+    parentData = RenderFlexParentData();
+  }
+  CSSStyleDeclaration style = child.style;
+
+  CSSPositionType positionType = resolvePositionFromStyle(style);
   parentData.renderPositionHolder = placeholder;
-  parentData.position = resolvePositionFromStyle(style);
+  parentData.position = positionType;
 
   if (style.contains('top')) {
     parentData.top = CSSLength.toDisplayPortValue(style['top']);
@@ -1253,5 +1204,10 @@ PositionParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, Ren
   parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
   parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
-  return parentData;
+
+  parentData.isPositioned = positionType == CSSPositionType.absolute ||
+    positionType == CSSPositionType.fixed;
+
+  RenderElementBoundary childRenderElementBoundary = child.renderElementBoundary;
+  childRenderElementBoundary.parentData = parentData;
 }
