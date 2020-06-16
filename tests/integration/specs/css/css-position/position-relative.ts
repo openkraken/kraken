@@ -1953,7 +1953,7 @@ describe('position-relative', () => {
 
     await matchScreenshot();
   });
-  it('033', async () => {
+  it('033', async (done) => {
     let p;
     let span2;
     let span1;
@@ -2015,7 +2015,10 @@ describe('position-relative', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    requestAnimationFrame(async () => {
+      await matchScreenshot();
+      done();
+    });
   });
   xit('034', async () => {
     let p;
