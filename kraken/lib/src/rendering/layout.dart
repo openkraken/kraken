@@ -564,16 +564,28 @@ class RenderFlowLayout extends RenderBox
    void performLayout() {
      RenderBox child = firstChild;
      Element element = getEventTargetByTargetId<Element>(targetId);
+     // Layout positioned element
      while (child != null) {
        final RenderLayoutParentData childParentData = child.parentData;
-
        if (childParentData.isPositioned) {
          layoutPositionedChild(element, this, child);
        }
        child = childParentData.nextSibling;
      }
-     // Layout non placeholder renderObject
+
+     // Layout non positioned element
      _layoutChildren();
+
+     // Set offset of positioned elemen
+     child = firstChild;
+     while (child != null) {
+       final RenderLayoutParentData childParentData = child.parentData;
+
+       if (childParentData.isPositioned) {
+         setPositionedChildOffset(element, this, child, size);
+       }
+       child = childParentData.nextSibling;
+     }
    }
 
   void _layoutChildren() {
@@ -867,6 +879,15 @@ class RenderFlowLayout extends RenderBox
     children.sort((RenderObject prev, RenderObject next) {
       RenderLayoutParentData prevParentData = prev.parentData;
       RenderLayoutParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static &&
+        nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static &&
+        nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
       // z-index applies to element when position is not static
       int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
       int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;

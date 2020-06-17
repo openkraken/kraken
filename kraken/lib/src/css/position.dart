@@ -89,20 +89,28 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   BoxConstraints childConstraints = const BoxConstraints();
 
   Size trySize = parentConstraints.biggest;
-  parent.size = trySize.isInfinite ? parentConstraints.smallest : trySize;
+  Size parentSize = trySize.isInfinite ? parentConstraints.smallest : trySize;
 
   // if child has no width, calculate width by left and right.
   if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
-    childConstraints = childConstraints.tighten(width: parent.size.width - childParentData.left - childParentData.right);
+    childConstraints = childConstraints.tighten(width: parentSize.width - childParentData.left - childParentData.right);
   }
   // if child has not height, should be calculate height by top and bottom
   if (childParentData.height == 0.0 && childParentData.top != null && childParentData.bottom != null) {
     childConstraints =
-      childConstraints.tighten(height: parent.size.height - childParentData.top - childParentData.bottom);
+      childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
 
   child.layout(childConstraints, parentUsesSize: true);
 
+}
+
+void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox child, Size parentSize) {
+  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
+  double width = parentSize.width;
+  double height = parentSize.height;
+
+  final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
 

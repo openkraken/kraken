@@ -632,6 +632,7 @@ class RenderFlexLayout extends RenderBox
   void performLayout() {
     RenderBox child = firstChild;
     Element element = getEventTargetByTargetId<Element>(targetId);
+    // Layout positioned element
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
@@ -643,8 +644,19 @@ class RenderFlexLayout extends RenderBox
 
       child = childParentData.nextSibling;
     }
-    // Layout non positioned and its placeholder renderObject
+    // Layout non positioned element and its placeholder
     _layoutChildren(null);
+
+    // Set offset of positioned elemen
+    child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      if (childParentData.isPositioned) {
+        setPositionedChildOffset(element, this, child, size);
+      }
+      child = childParentData.nextSibling;
+    }
   }
 
   bool _isChildDisplayNone(RenderObject child) {
@@ -1194,6 +1206,15 @@ class RenderFlexLayout extends RenderBox
     children.sort((RenderObject prev, RenderObject next) {
       RenderFlexParentData prevParentData = prev.parentData;
       RenderFlexParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static &&
+        nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static &&
+        nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
       // z-index applies to flex-item ignoring position property
       int prevZIndex = prevParentData.zIndex ?? 0;
       int nextZIndex = nextParentData.zIndex ?? 0;
