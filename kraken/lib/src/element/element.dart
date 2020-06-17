@@ -339,11 +339,11 @@ class Element extends Node
   }
 
   void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
-    PositionParentData positionParentData;
+    RenderLayoutParentData positionParentData;
     RenderBox renderParent = renderElementBoundary.parent;
-    if (renderParent is RenderPosition && renderElementBoundary.parentData is PositionParentData) {
+    if (renderElementBoundary.parentData is RenderLayoutParentData) {
       positionParentData = renderElementBoundary.parentData;
-      PositionParentData progressParentData = positionParentData;
+      RenderLayoutParentData progressParentData = positionParentData;
 
       CSSTransition allTransition;
       if (transitionMap != null) {
@@ -1269,8 +1269,8 @@ void setPositionedChildParentData(ContainerRenderObjectMixin parentRenderLayoutB
   if (style.contains('right')) {
     parentData.right = CSSLength.toDisplayPortValue(style['right']);
   }
-  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
-  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0.0;
+  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0.0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
 
   parentData.isPositioned = positionType == CSSPositionType.absolute ||

@@ -79,17 +79,17 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints constraints = parent.constraints;
-  double width = constraints.minWidth;
-  double height = constraints.minHeight;
+  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
+  double width = parentConstraints.minWidth;
+  double height = parentConstraints.minHeight;
 
   final RenderLayoutParentData childParentData = child.parentData;
 
   // Default to no constraints. (0 - infinite)
   BoxConstraints childConstraints = const BoxConstraints();
 
-  Size trySize = constraints.biggest;
-  parent.size = trySize.isInfinite ? constraints.smallest : trySize;
+  Size trySize = parentConstraints.biggest;
+  parent.size = trySize.isInfinite ? parentConstraints.smallest : trySize;
 
   // if child has no width, calculate width by left and right.
   if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
@@ -106,15 +106,25 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   // Calc x,y by parentData.
   double x, y;
 
+  EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
+  EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
+
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     Offset baseOffset =
       childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
 
-    double top = childParentData.top ?? baseOffset.dy;
-    if (childParentData.top == null && childParentData.bottom != null)
+    // Positioned element is positioned relative to the edge of
+    // padding box of containing block
+    // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
+    double top = childParentData.top != null ? (childParentData.top - resolvedPadding.top) :
+      baseOffset.dy;
+    if (childParentData.top == null && childParentData.bottom != null) {
       top = height - child.size.height - (childParentData.bottom ?? 0);
-    double left = childParentData.left ?? baseOffset.dx;
+    }
+
+    double left = childParentData.left != null ? (childParentData.left - resolvedPadding.left):
+      baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
       left = width - child.size.width - (childParentData.right ?? 0);
     }
@@ -122,15 +132,6 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
     x = left;
     y = top;
   }
-
-  EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
-  EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
-
-  // Positioned element is positioned relative to the edge of
-  // padding box of containing block
-  // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-  x = x - resolvedPadding.left;
-  y = y - resolvedPadding.top;
 
   childParentData.offset = Offset(x ?? 0, y ?? 0);
 }
