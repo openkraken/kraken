@@ -78,6 +78,24 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
   return null;
 }
 
+BoxSizeType _getChildWidthSizeType(RenderBox child) {
+  if (child is RenderTextBox) {
+    return child.widthSizeType;
+  } else if (child is RenderElementBoundary) {
+    return child.widthSizeType;
+  }
+  return null;
+}
+
+BoxSizeType _getChildHeightSizeType(RenderBox child) {
+  if (child is RenderTextBox) {
+    return child.heightSizeType;
+  } else if (child is RenderElementBoundary) {
+    return child.heightSizeType;
+  }
+  return null;
+}
+
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
   BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
   double width = parentConstraints.minWidth;
@@ -91,12 +109,15 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   Size trySize = parentConstraints.biggest;
   Size parentSize = trySize.isInfinite ? parentConstraints.smallest : trySize;
 
+  BoxSizeType widthType = _getChildWidthSizeType(child);
+  BoxSizeType heightType = _getChildHeightSizeType(child);
+
   // if child has no width, calculate width by left and right.
-  if (childParentData.width == 0.0 && childParentData.left != null && childParentData.right != null) {
+  if (childParentData.width == 0.0 && widthType != BoxSizeType.intrinsic && childParentData.left != null && childParentData.right != null) {
     childConstraints = childConstraints.tighten(width: parentSize.width - childParentData.left - childParentData.right);
   }
   // if child has not height, should be calculate height by top and bottom
-  if (childParentData.height == 0.0 && childParentData.top != null && childParentData.bottom != null) {
+  if (childParentData.height == 0.0 && heightType != BoxSizeType.intrinsic && childParentData.top != null && childParentData.bottom != null) {
     childConstraints =
       childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
@@ -121,20 +142,19 @@ void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     Offset baseOffset =
       childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
-
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     double top = childParentData.top != null ? (childParentData.top - resolvedPadding.top) :
       baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = height - child.size.height - (childParentData.bottom ?? 0);
+      top = height - child.size.height - ((childParentData.bottom - resolvedPadding.bottom) ?? 0);
     }
 
     double left = childParentData.left != null ? (childParentData.left - resolvedPadding.left):
       baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
-      left = width - child.size.width - (childParentData.right ?? 0);
+      left = width - child.size.width - ((childParentData.right - resolvedPadding.right) ?? 0);
     }
 
     x = left;
