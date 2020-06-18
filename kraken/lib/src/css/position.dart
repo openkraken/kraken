@@ -58,6 +58,7 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
     double dx;
     double dy;
 
+    // @TODO support auto value
     if (style.contains('left') && style['left'] != 'auto') {
       dx = CSSLength.toDisplayPortValue(style['left']);
     } else if (style.contains('right') && style['right'] != 'auto') {
@@ -113,11 +114,12 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   BoxSizeType widthType = _getChildWidthSizeType(child);
   BoxSizeType heightType = _getChildHeightSizeType(child);
 
-  // if child has no width, calculate width by left and right.
+  // If child has no width, calculate width by left and right.
+  // Element with intrinsic size such as image will not stretch
   if (childParentData.width == 0.0 && widthType != BoxSizeType.intrinsic && childParentData.left != null && childParentData.right != null) {
     childConstraints = childConstraints.tighten(width: parentSize.width - childParentData.left - childParentData.right);
   }
-  // if child has not height, should be calculate height by top and bottom
+  // If child has not height, should be calculate height by top and bottom
   if (childParentData.height == 0.0 && heightType != BoxSizeType.intrinsic && childParentData.top != null && childParentData.bottom != null) {
     childConstraints =
       childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);

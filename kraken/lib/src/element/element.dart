@@ -277,7 +277,7 @@ class Element extends Node
               layoutChildren.add(child);
             });
             int idx = layoutChildren.indexOf(renderPositionHolder);
-            RenderObject previousSibling = idx > -1 ? layoutChildren[idx - 1] : null;
+            RenderObject previousSibling = idx > 0 ? layoutChildren[idx - 1] : null;
             detach();
             attachTo(parentElement, after: previousSibling);
           }
