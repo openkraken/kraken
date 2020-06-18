@@ -502,13 +502,12 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    AbstractNode parentRenderObject = renderObject.parent;
-      // Remove placeholder of positioned element
-      RenderLayoutParentData parentData = renderElementBoundary.parentData;
-      if (parentData.renderPositionHolder != null) {
-        ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
-        parent.remove(parentData.renderPositionHolder);
-      }
+    // Remove placeholder of positioned element
+    RenderLayoutParentData parentData = renderElementBoundary.parentData;
+    if (parentData.renderPositionHolder != null) {
+      ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
+      parent.remove(parentData.renderPositionHolder);
+    }
     (renderElementBoundary.parent as ContainerRenderObjectMixin).remove(renderElementBoundary);
   }
 
