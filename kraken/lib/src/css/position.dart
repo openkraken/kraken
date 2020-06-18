@@ -57,16 +57,17 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
   if (position == CSSPositionType.relative) {
     double dx;
     double dy;
-    if (style.contains('left')) {
+
+    if (style.contains('left') && style['left'] != 'auto') {
       dx = CSSLength.toDisplayPortValue(style['left']);
-    } else if (style.contains('right')) {
+    } else if (style.contains('right') && style['right'] != 'auto') {
       var _dx = CSSLength.toDisplayPortValue(style['right']);
       if (_dx != null) dx = -_dx;
     }
 
-    if (style.contains('top')) {
+    if (style.contains('top') && style['top'] != 'auto') {
       dy = CSSLength.toDisplayPortValue(style['top']);
-    } else if (style.contains('bottom')) {
+    } else if (style.contains('bottom') && style['bottom'] != 'auto') {
       var _dy = CSSLength.toDisplayPortValue(style['bottom']);
       if (_dy != null) dy = -_dy;
     }
