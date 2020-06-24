@@ -60,7 +60,7 @@ mixin CSSBackgroundMixin {
   }
 
   void _setBackgroundProperty(String property, String value) {
-    if (property == 'background') {
+    if (property == BACKGROUND) {
       List<String> shorthand = value.split(' ');
       background = _consumeBackground(shorthand);
     } else {
