@@ -51,6 +51,34 @@ describe('Position non-static', () => {
     div1.style.position = 'static';
     div2.style.position = 'static';
     div3.style.position = 'static';
+  
+    await matchScreenshot();
+  });
+
+  xit('nonstat to sticky', async () => {
+    const container = document.createElement('div');
+    setElementStyle(container, {
+      width: '400px',
+      height: '400px',
+      marginBottom: '20px',
+      backgroundColor: '#999',
+      position: 'relative',
+    });
+    document.body.appendChild(container);
+
+    const div4 = document.createElement('div');
+    setElementStyle(div4, {
+      width: '100px',
+      height: '100px',
+      backgroundColor: 'yellow',
+      position: 'sticky',
+      top: '50px',
+    });
+    div4.appendChild(document.createTextNode('sticky to static'));
+    container.appendChild(div4);
+
+    div4.style.position = 'static';
+  
     await matchScreenshot();
   });
 });
