@@ -33,6 +33,17 @@ describe('background-shorthand', () => {
     await matchElementImageSnapshot(div);
   });
 
+  it('background color rgb', async () => {
+    let div = document.createElement('div');
+    setElementStyle(div, {
+      width: '100vw',
+      height: '200px',
+      background: 'rgb(255, 0, 0)'
+    });
+    document.body.appendChild(div);
+    await matchElementImageSnapshot(div);
+  });
+
   it("background gradient with space", async () => {
     let p;
     let flexbox;

@@ -16,6 +16,7 @@ import 'package:kraken/css.dart';
 typedef ConsumeProperty = bool Function(String src);
 
 const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
+final RegExp SHORTHAND_REGEXP = RegExp('(?<!,)\\s');
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
@@ -36,7 +37,8 @@ mixin CSSBackgroundMixin {
 
   void _parseBackground(CSSStyleDeclaration style) {
     if (style.contains(BACKGROUND)) {
-      List<String> shorthand = style[BACKGROUND].split(' ');
+      String rawBackground = style[BACKGROUND];
+      List<String> shorthand = rawBackground.split(SHORTHAND_REGEXP);
       background = _consumeBackground(shorthand);
     }
     if (style.contains(BACKGROUND_ATTACHMENT)) {
@@ -61,7 +63,7 @@ mixin CSSBackgroundMixin {
 
   void _setBackgroundProperty(String property, String value) {
     if (property == 'background') {
-      List<String> shorthand = value.split(' ');
+      List<String> shorthand = value.split(SHORTHAND_REGEXP);
       background = _consumeBackground(shorthand);
     } else {
       background[property] = value;
