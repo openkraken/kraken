@@ -20,11 +20,47 @@ class _RunMetrics {
 }
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
+  /// The distance by which the child's top edge is inset from the top of the stack.
+  double top;
+
+  /// The distance by which the child's right edge is inset from the right of the stack.
+  double right;
+
+  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
+  double bottom;
+
+  /// The distance by which the child's left edge is inset from the left of the stack.
+  double left;
+
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
+  double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
+  double height;
+
+  bool isPositioned = false;
+
   /// Row index of child when wrapping
   int runIndex = 0;
 
+  RenderPositionHolder renderPositionHolder;
+  int zIndex = 0;
+  CSSPositionType position = CSSPositionType.static;
+
+  /// Get element original position offset to parent(layoutBox) should be.
+  Offset get stackedChildOriginalRelativeOffset {
+    if (renderPositionHolder == null) return Offset.zero;
+    return (renderPositionHolder.parentData as BoxParentData).offset;
+  }
+
   @override
-  String toString() => '${super.toString()}; runIndex: $runIndex;';
+  String toString() {
+    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; renderPositionHolder=$renderPositionHolder; ${super.toString()}; runIndex: $runIndex;';
+  }
 }
 
 /// Impl flow layout algorithm.
@@ -154,6 +190,27 @@ class RenderFlowLayout extends RenderBox
   /// 10.0 logical pixels apart in the cross axis.
   ///
   /// If there is additional free space in the overall [RenderWrap] (e.g.,
+  /// The distance by which the child's top edge is inset from the top of the stack.
+  double top;
+
+  /// The distance by which the child's right edge is inset from the right of the stack.
+  double right;
+
+  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
+  double bottom;
+
+  /// The distance by which the child's left edge is inset from the left of the stack.
+  double left;
+
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
+  double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
+  double height;
   /// because the wrap has a minimum size that is not filled), the additional
   /// free space will be allocated according to the [runAlignment].
   ///
@@ -314,7 +371,11 @@ class RenderFlowLayout extends RenderBox
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
-      child.parentData = RenderLayoutParentData();
+      if (child is RenderElementBoundary) {
+        child.parentData = getPositionParentDataFromStyle(child.style);
+      } else {
+        child.parentData = RenderLayoutParentData();
+      }
     }
   }
 
@@ -499,8 +560,35 @@ class RenderFlowLayout extends RenderBox
     return 0.0;
   }
 
-  @override
-  void performLayout() {
+   // @override
+   void performLayout() {
+     RenderBox child = firstChild;
+     Element element = getEventTargetByTargetId<Element>(targetId);
+     // Layout positioned element
+     while (child != null) {
+       final RenderLayoutParentData childParentData = child.parentData;
+       if (childParentData.isPositioned) {
+         layoutPositionedChild(element, this, child);
+       }
+       child = childParentData.nextSibling;
+     }
+
+     // Layout non positioned element
+     _layoutChildren();
+
+     // Set offset of positioned elemen
+     child = firstChild;
+     while (child != null) {
+       final RenderLayoutParentData childParentData = child.parentData;
+
+       if (childParentData.isPositioned) {
+         setPositionedChildOffset(element, this, child, size);
+       }
+       child = childParentData.nextSibling;
+     }
+   }
+
+  void _layoutChildren() {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
@@ -552,8 +640,14 @@ class RenderFlowLayout extends RenderBox
     RenderBox preChild = null;
 
     while (child != null) {
-      child.layout(childConstraints, parentUsesSize: true);
       final RenderLayoutParentData childParentData = child.parentData;
+
+      if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -561,9 +655,9 @@ class RenderFlowLayout extends RenderBox
         RenderPositionHolder positionHolder = child;
         RenderElementBoundary childElementBoundary = positionHolder.realDisplayedBox;
         if (childElementBoundary != null) {
-          PositionParentData positionParentData = childElementBoundary.parentData as PositionParentData;
-          if (positionParentData.position != CSSPositionType.static &&
-              positionParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
+          RenderLayoutParentData childParentData = childElementBoundary.parentData;
+          if (childParentData.position != CSSPositionType.static &&
+            childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
         }
       }
 
@@ -698,6 +792,10 @@ class RenderFlowLayout extends RenderBox
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
+        if (childParentData.isPositioned) {
+          child = childParentData.nextSibling;
+          continue;
+        }
         if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
@@ -709,8 +807,15 @@ class RenderFlowLayout extends RenderBox
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
         Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
 
+        CSSStyleDeclaration childStyle;
+        if (child is RenderTextBox) {
+          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+        } else if (child is RenderElementBoundary) {
+          int childNodeId = child.targetId;
+          childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+        }
         /// Apply position relative offset change.
-        childParentData.offset = relativeOffset;
+        applyRelativeOffset(relativeOffset, child, childStyle);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
@@ -770,7 +875,32 @@ class RenderFlowLayout extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      RenderLayoutParentData prevParentData = prev.parentData;
+      RenderLayoutParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static &&
+        nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static &&
+        nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
+      // z-index applies to element when position is not static
+      int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
+      int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
+      return prevZIndex - nextZIndex;
+    });
+
+    for (var child in children) {
+      if (child is! RenderPositionHolder) {
+        final RenderLayoutParentData childParentData = child.parentData;
+        context.paintChild(child, childParentData.offset + offset);
+        child = childParentData.nextSibling;
+      }
+    }
   }
 
   @override
@@ -785,5 +915,32 @@ class RenderFlowLayout extends RenderBox
     properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<VerticalDirection>('verticalDirection', verticalDirection,
         defaultValue: VerticalDirection.down));
+  }
+
+  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
+    RenderLayoutParentData parentData = RenderLayoutParentData();
+    CSSPositionType positionType = resolvePositionFromStyle(style);
+    parentData.position = positionType;
+
+    if (style.contains('top')) {
+      parentData.top = CSSLength.toDisplayPortValue(style['top']);
+    }
+    if (style.contains('left')) {
+      parentData.left = CSSLength.toDisplayPortValue(style['left']);
+    }
+    if (style.contains('bottom')) {
+      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
+    }
+    if (style.contains('right')) {
+      parentData.right = CSSLength.toDisplayPortValue(style['right']);
+    }
+    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
+    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+    parentData.zIndex = CSSLength.toInt(style['zIndex']);
+
+    parentData.isPositioned = positionType == CSSPositionType.absolute ||
+      positionType == CSSPositionType.fixed;
+
+    return parentData;
   }
 }
