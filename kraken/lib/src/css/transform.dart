@@ -50,18 +50,24 @@ mixin CSSTransformMixin on Node {
         CSSTransition transition = transitionMap['transform'];
         CSSTransition all = transitionMap['all'];
         List<CSSFunctionalNotation> baseMethods = prevMethods;
+
         CSSTransitionProgressListener progressListener = (progress) {
           prevMethodsProgress = progress;
           if (progress > 0.0) {
             transform.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
           }
+          if (progress == 1) {
+            prevMethods = newMethods;
+          }
         };
+
         if (transition != null) {
           transition.addProgressListener(progressListener);
         } else if (all != null) {
           all.addProgressListener(progressListener);
         } else {
           transform.transform = combineTransform(newMethods);
+          prevMethods = newMethods;
         }
       } else {
         transform.transform = combineTransform(newMethods);
