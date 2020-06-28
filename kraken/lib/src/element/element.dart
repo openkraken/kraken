@@ -143,16 +143,6 @@ class Element extends Node
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
-    // Pointer event listener boundary.
-    renderObject = RenderPointerListener(
-      child: renderObject,
-      onPointerDown: this.handlePointDown,
-      onPointerMove: this.handlePointMove,
-      onPointerUp: this.handlePointUp,
-      onPointerCancel: this.handlePointCancel,
-      behavior: HitTestBehavior.translucent,
-    );
-
     // Opacity
     renderObject = initRenderOpacity(renderObject, style);
 
@@ -1102,6 +1092,9 @@ class Element extends Node
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
     super.addEventListener(eventName, _eventResponder);
 
+    // Insert pointer listener render if event needs
+    insertRenderPointerListener(renderConstrainedBox);
+
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
       renderIntersectionObserver.addListener(handleIntersectionChange);
@@ -1111,6 +1104,9 @@ class Element extends Node
   void removeEvent(String eventName) {
     if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.removeEventListener(eventName, _eventResponder);
+
+    // Remove pointer listener render if no event needs
+    removeRenderPointerListener();
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
