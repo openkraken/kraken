@@ -4,11 +4,48 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
 
 mixin EventHandlerMixin on Node {
+  RenderPointerListener renderPointerListener;
   num _touchStartTime = 0;
   num _touchEndTime = 0;
 
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+
+  insertRenderPointerListener(RenderObjectWithChildMixin parentRenderObject) {
+    if (renderPointerListener == null && hasPointerEvent()) {
+      RenderObject child = parentRenderObject.child;
+      // Drop child by set null first.
+      parentRenderObject.child = null;
+      renderPointerListener = RenderPointerListener(
+        child: child,
+        onPointerDown: handlePointDown,
+        onPointerMove: handlePointMove,
+        onPointerUp: handlePointUp,
+        onPointerCancel: handlePointCancel,
+        behavior: HitTestBehavior.translucent,
+      );
+      parentRenderObject.child = renderPointerListener;
+    }
+  }
+
+  removeRenderPointerListener() {
+    if (renderPointerListener != null && !hasPointerEvent()) {
+      RenderObjectWithChildMixin parent = renderPointerListener.parent;
+      // Drop child by set null first.
+      parent.child = null;
+      // Replace with renderPointerListener's child
+      parent.child = renderPointerListener.child;
+      renderPointerListener = null;
+    }
+  }
+
+  bool hasPointerEvent() {
+    return eventHandlers.containsKey('click') ||
+      eventHandlers.containsKey('touchstart') ||
+      eventHandlers.containsKey('touchmove') ||
+      eventHandlers.containsKey('touchend') ||
+      eventHandlers.containsKey('touchcancel');
+  }
 
   void handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);

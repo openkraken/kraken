@@ -202,63 +202,59 @@ mixin CSSSizingMixin {
   }
 
   RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
-    if (style != null) {
-      oldConstraints = getConstraints(style);
-      return renderConstrainedBox = RenderConstrainedBox(
-        additionalConstraints: oldConstraints.toBoxConstraints(),
-        child: renderObject,
-      );
-    } else {
-      return renderObject;
-    }
+    oldConstraints = getConstraints(style);
+    return renderConstrainedBox = RenderConstrainedBox(
+      additionalConstraints: oldConstraints.toBoxConstraints(),
+      child: renderObject,
+    );
   }
 
   static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
-    if (style != null) {
-      double width = getDisplayPortedLength(style['width']);
-      double height = getDisplayPortedLength(style['height']);
-      double minHeight = getDisplayPortedLength(style['minHeight']);
-      double maxWidth = getDisplayPortedLength(style['maxWidth']);
-      double maxHeight = getDisplayPortedLength(style['maxHeight']);
-      double minWidth = getDisplayPortedLength(style['minWidth']);
+    double width = getDisplayPortedLength(style['width']);
+    double height = getDisplayPortedLength(style['height']);
+    double minHeight = getDisplayPortedLength(style['minHeight']);
+    double maxWidth = getDisplayPortedLength(style['maxWidth']);
+    double maxHeight = getDisplayPortedLength(style['maxHeight']);
+    double minWidth = getDisplayPortedLength(style['minWidth']);
 
-      CSSPadding padding = _getPaddingFromStyle(style);
-      EdgeInsets border = _getBorderEdgeFromStyle(style);
+    CSSPadding padding = _getPaddingFromStyle(style);
+    EdgeInsets border = _getBorderEdgeFromStyle(style);
 
-      if (width != null) {
-        if (maxWidth != null && width > maxWidth) {
-          width = maxWidth;
-        } else if (minWidth != null && width < minWidth) {
-          width = minWidth;
-        }
+    if (width != null) {
+      if (maxWidth != null && width > maxWidth) {
+        width = maxWidth;
+      } else if (minWidth != null && width < minWidth) {
+        width = minWidth;
       }
-
-      if (height != null) {
-        if (minHeight != null && height < minHeight) {
-          height = minHeight;
-        } else if (maxHeight != null && height > maxHeight) {
-          height = maxHeight;
-        }
-      }
-
-      double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
-      if (height == null)
-        minHeight = internalHeight;
-      else if (internalHeight > height) height = internalHeight;
-
-      if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
-
-      double internalWidth = padding.left + padding.right + border.left + border.right;
-      if (width == null)
-        minWidth = internalWidth;
-      else if (internalWidth > width) width = internalWidth;
-
-      if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
-
-      return CSSSizedConstraints(width, height, minWidth, maxWidth, minHeight, maxHeight);
-    } else {
-      return null;
     }
+
+    if (height != null) {
+      if (minHeight != null && height < minHeight) {
+        height = minHeight;
+      } else if (maxHeight != null && height > maxHeight) {
+        height = maxHeight;
+      }
+    }
+
+    double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
+    if (height == null) {
+      minHeight = internalHeight;
+    } else if (internalHeight > height) {
+      height = internalHeight;
+    }
+
+    if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
+
+    double internalWidth = padding.left + padding.right + border.left + border.right;
+    if (width == null) {
+      minWidth = internalWidth;
+    } else if (internalWidth > width) {
+      width = internalWidth;
+    }
+
+    if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
+
+    return CSSSizedConstraints(width, height, minWidth, maxWidth, minHeight, maxHeight);
   }
 
   RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
