@@ -16,6 +16,8 @@ import 'package:kraken/css.dart';
 typedef ConsumeProperty = bool Function(String src);
 
 const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
+// Used to split short hand CSS value, can not use space,
+// eg: background: rgb(0, 0, 0);
 final RegExp SHORTHAND_REGEXP = RegExp('(?<!,)\\s');
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
