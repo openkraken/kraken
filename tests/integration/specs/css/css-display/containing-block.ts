@@ -1541,4 +1541,91 @@ describe('containing-block', () => {
 
     await matchScreenshot();
   });
+
+  it('with transform', async () => {
+    let root;
+    let containingBlock;
+    root = createElement(
+      'div',
+      {
+        style: {
+           background: '#999',
+           width: '200px',
+           height: '200px',
+           padding: '50px',
+        },
+      }
+    );
+    containingBlock = createElement(
+      'div',
+      {
+        style: {
+          'transform': 'translate3d(0, 0, 0)',
+          'background-color': 'blue',
+          height: '100px',
+          'padding-left': '5px',
+          width: '100px',
+        },
+      },
+      [
+        (createElement('div', {
+          style: {
+            position: 'absolute',
+            'background-color': 'orange',
+            height: '50px',
+            width: '50px',
+            top: '25px',
+            left: '25px',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(root);
+    root.appendChild(containingBlock);
+
+    await matchScreenshot();
+  });
+
+  it('without transform', async () => {
+    let root;
+    let containingBlock;
+    root = createElement(
+      'div',
+      {
+        style: {
+           background: '#999',
+           width: '200px',
+           height: '200px',
+           padding: '50px',
+        },
+      }
+    );
+    containingBlock = createElement(
+      'div',
+      {
+        style: {
+          'background-color': 'blue',
+          height: '100px',
+          'padding-left': '5px',
+          width: '100px',
+        },
+      },
+      [
+        (createElement('div', {
+          style: {
+            position: 'absolute',
+            'background-color': 'orange',
+            height: '50px',
+            width: '50px',
+            top: '25px',
+            left: '25px',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(root);
+    root.appendChild(containingBlock);
+
+    await matchScreenshot();
+  });
 });

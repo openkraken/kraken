@@ -1,5 +1,5 @@
 describe('Position non-static', () => {
-  xit('to static', async () => {
+  it('to static', async () => {
     const container = document.createElement('div');
     setElementStyle(container, {
       width: '400px',
@@ -46,6 +46,26 @@ describe('Position non-static', () => {
     div3.appendChild(document.createTextNode('fixed to static'));
     container.appendChild(div3);
 
+    await matchScreenshot();
+
+    div1.style.position = 'static';
+    div2.style.position = 'static';
+    div3.style.position = 'static';
+  
+    await matchScreenshot();
+  });
+
+  xit('nonstat to sticky', async () => {
+    const container = document.createElement('div');
+    setElementStyle(container, {
+      width: '400px',
+      height: '400px',
+      marginBottom: '20px',
+      backgroundColor: '#999',
+      position: 'relative',
+    });
+    document.body.appendChild(container);
+
     const div4 = document.createElement('div');
     setElementStyle(div4, {
       width: '100px',
@@ -57,13 +77,8 @@ describe('Position non-static', () => {
     div4.appendChild(document.createTextNode('sticky to static'));
     container.appendChild(div4);
 
-    await matchScreenshot();
-
-    div1.style.position = 'static';
-    div2.style.position = 'static';
-    div3.style.position = 'static';
     div4.style.position = 'static';
-
+  
     await matchScreenshot();
   });
 });
