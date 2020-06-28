@@ -56,7 +56,7 @@ mixin CSSTransformMixin on Node {
           if (progress > 0.0) {
             transform.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
           }
-          if (progress == 1) {
+          if (progress >= 1) {
             prevMethods = newMethods;
           }
         };
