@@ -230,10 +230,19 @@ class Element extends Node
 
     double offsetY = child.originalOffset.dy;
     double offsetX = child.originalOffset.dx;
+    double childHeight = child.renderElementBoundary?.size?.height;
+    double childWidth = child.renderElementBoundary?.size?.width;
+
+    // Sticky element cannot exceed the boundary of its parent element container
+    RenderBox parentContainer = child.parent.renderLayoutBox as RenderBox;
+    double minOffsetY = 0;
+    double maxOffsetY = parentContainer?.size?.height - childHeight;
+    double minOffsetX = 0;
+    double maxOffsetX = parentContainer?.size?.width - childWidth;
+
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
       double viewPortHeight = renderScrollViewPortY?.size?.height;
-      double childHeight = child.renderElementBoundary?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains('top')) {
@@ -241,18 +250,23 @@ class Element extends Node
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
+          if (offsetY > maxOffsetY) {
+            offsetY = maxOffsetY;
+          }
         }
       } else if (childStyle.contains('bottom')) {
         double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']);
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
+          if (offsetY < minOffsetY) {
+            offsetY = minOffsetY;
+          }
         }
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
       double viewPortWidth = renderScrollViewPortX?.size?.width;
-      double childWidth = child.renderElementBoundary?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains('left')) {
@@ -260,27 +274,34 @@ class Element extends Node
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
+          if (offsetX > maxOffsetX) {
+            offsetX = maxOffsetX;
+          }
         }
       } else if (childStyle.contains('right')) {
         double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']);
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
+          if (offsetX < minOffsetX) {
+            offsetX = minOffsetX;
+          }
         }
       }
     }
 
     if (isFixed) {
-      // change sticky status to fixed
+      // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
       BoxParentData boxParentData = child.renderElementBoundary?.parentData;
       boxParentData.offset = Offset(offsetX, offsetY);
       child.renderElementBoundary.markNeedsPaint();
     } else {
-      // change sticky status to relative
+      // Change sticky status to relative
       if (child.stickyStatus == StickyPositionType.fixed) {
         child.stickyStatus = StickyPositionType.relative;
         BoxParentData boxParentData = child.renderElementBoundary?.parentData;
+        // Reset child offset to its original offset
         boxParentData.offset = child.originalOffset;
         child.renderElementBoundary.markNeedsPaint();
       }
