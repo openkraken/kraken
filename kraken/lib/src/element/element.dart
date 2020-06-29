@@ -32,6 +32,11 @@ const String ELEMENT_DEFAULT_HEIGHT = '150px';
 
 typedef TestElement = bool Function(Element element);
 
+enum StickyPositionType {
+  relative,
+  fixed,
+}
+
 class Element extends Node
     with
         NodeLifeCycle,
@@ -60,8 +65,12 @@ class Element extends Node
 
   bool shouldBlockStretch = true;
 
-  double offsetTop = null; // offset to the top of viewport
-  bool stickyFixed = false;
+  // Position of sticky element changes between relative and fixed of scroll container
+  StickyPositionType stickyStatus = StickyPositionType.relative;
+  // Original offset to scroll container of sticky element
+  Offset originalScrollContainerOffset;
+  // Original offset of sticky element
+  Offset originalOffset;
 
   final String tagName;
 
@@ -187,49 +196,102 @@ class Element extends Node
     renderElementBoundary.heightSizeType = heightType;
   }
 
-  void _scrollListener(double scrollTop) {
-    // Only trigger on body element
-    if (this != ElementManager().getRootElement()) {
-      return;
-    }
-    _updateStickyPosition(scrollTop);
+  void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
+    _updateStickyChildrenPosition(scrollOffset, axisDirection);
   }
 
-  // Calculate sticky status according to scrollTop
-  void _updateStickyPosition(double scrollTop) {
+  void _updateStickyChildPosition(Element child, double scrollOffset, AxisDirection axisDirection) {
+    CSSStyleDeclaration childStyle = child.style;
+    bool isFixed = false;
+
+    if (child.originalScrollContainerOffset == null) {
+      Offset horizontalScrollContainerOffset = child.renderElementBoundary.localToGlobal(Offset.zero) -
+        renderScrollViewPortX.localToGlobal(Offset.zero);
+      Offset verticalScrollContainerOffset = child.renderElementBoundary.localToGlobal(Offset.zero) -
+        renderScrollViewPortY.localToGlobal(Offset.zero);
+
+      double offsetY = verticalScrollContainerOffset.dy;
+      double offsetX = horizontalScrollContainerOffset.dx;
+      if (axisDirection == AxisDirection.down) {
+        offsetY += scrollOffset;
+      } else if (axisDirection == AxisDirection.right) {
+        offsetX += scrollOffset;
+      }
+      child.originalScrollContainerOffset = Offset(
+        offsetX,
+        offsetY
+      );
+    }
+
+    if (child.originalOffset == null) {
+      BoxParentData boxParentData = child.renderElementBoundary?.parentData;
+      child.originalOffset = boxParentData.offset;
+    }
+
+    double offsetY = child.originalOffset.dy;
+    double offsetX = child.originalOffset.dx;
+    if (axisDirection == AxisDirection.down) {
+      double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
+      double viewPortHeight = renderScrollViewPortY?.size?.height;
+      double childHeight = child.renderElementBoundary?.size?.height;
+      double offsetBottom = viewPortHeight - childHeight - offsetTop;
+
+      if (childStyle.contains('top')) {
+        double top = CSSSizingMixin.getDisplayPortedLength(childStyle['top']);
+        isFixed = offsetTop < top;
+        if (isFixed) {
+          offsetY += top - offsetTop;
+        }
+      } else if (childStyle.contains('bottom')) {
+        double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']);
+        isFixed = offsetBottom < bottom;
+        if (isFixed) {
+          offsetY += offsetBottom - bottom;
+        }
+      }
+    } else if (axisDirection == AxisDirection.right) {
+      double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
+      double viewPortWidth = renderScrollViewPortX?.size?.width;
+      double childWidth = child.renderElementBoundary?.size?.width;
+      double offsetRight = viewPortWidth - childWidth - offsetLeft;
+
+      if (childStyle.contains('left')) {
+        double left = CSSSizingMixin.getDisplayPortedLength(childStyle['left']);
+        isFixed = offsetLeft < left;
+        if (isFixed) {
+          offsetX += left - offsetLeft;
+        }
+      } else if (childStyle.contains('right')) {
+        double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']);
+        isFixed = offsetRight < right;
+        if (isFixed) {
+          offsetX += offsetRight - right;
+        }
+      }
+    }
+
+    if (isFixed) {
+      // change sticky status to fixed
+      child.stickyStatus = StickyPositionType.fixed;
+      BoxParentData boxParentData = child.renderElementBoundary?.parentData;
+      boxParentData.offset = Offset(offsetX, offsetY);
+      child.renderElementBoundary.markNeedsPaint();
+    } else {
+      // change sticky status to relative
+      if (child.stickyStatus == StickyPositionType.fixed) {
+        child.stickyStatus = StickyPositionType.relative;
+        BoxParentData boxParentData = child.renderElementBoundary?.parentData;
+        boxParentData.offset = child.originalOffset;
+        child.renderElementBoundary.markNeedsPaint();
+      }
+    }
+  }
+
+  // Calculate sticky status according to scroll offset and scroll direction
+  void _updateStickyChildrenPosition(double scrollOffset, AxisDirection axisDirection) {
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
-      CSSStyleDeclaration elStyle = el.style;
-      bool isFixed;
-
-      if (el.offsetTop == null) {
-        double offsetTop = el.getOffsetY();
-        // save element original offset to viewport
-        el.offsetTop = offsetTop;
-      }
-
-      if (elStyle.contains('top')) {
-        double top = CSSSizingMixin.getDisplayPortedLength(elStyle['top']);
-        isFixed = el.offsetTop - scrollTop <= top;
-      } else if (elStyle.contains('bottom')) {
-        double bottom = CSSSizingMixin.getDisplayPortedLength(elStyle['bottom']);
-        double viewPortHeight = renderMargin?.size?.height;
-        double elViewPortTop = el.offsetTop - scrollTop;
-        isFixed = viewPortHeight - elViewPortTop <= bottom;
-      }
-      if (isFixed) {
-        // change to fixed behavior
-        if (!el.stickyFixed) {
-          el.stickyFixed = true;
-          el._updatePosition(resolvePositionFromStyle(el.style), CSSPositionType.fixed);
-        }
-      } else {
-        // change to relative behavior
-        if (el.stickyFixed) {
-          el.stickyFixed = false;
-          el._updatePosition(resolvePositionFromStyle(el.style), CSSPositionType.sticky);
-        }
-      }
+      _updateStickyChildPosition(el, scrollOffset, axisDirection);
     });
   }
 
@@ -317,14 +379,14 @@ class Element extends Node
     }
   }
 
-  void removeStickyPlaceholder() {
+  void _removeStickyPlaceholder() {
     if (stickyPlaceholder != null) {
       ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder.parent;
       stickyPlaceholderParent.remove(stickyPlaceholder);
     }
   }
 
-  void insertStickyPlaceholder() {
+  void _insertStickyPlaceholder() {
     if (!renderMargin.hasSize) {
       renderMargin.owner.flushLayout();
     }
@@ -487,7 +549,7 @@ class Element extends Node
         parent._addPositionedChild(this, positionType);
         break;
       case CSSPositionType.sticky:
-        parent._addStickyChild(this, positionType);
+        parent._addStickyChild(this, after);
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
@@ -607,9 +669,11 @@ class Element extends Node
         parentRenderLayoutBox = rootEl.renderLayoutBox;
         break;
 
-      case CSSPositionType.static:
       case CSSPositionType.sticky:
-      // @TODO: sticky.
+        Element containingBlockElement = findContainingBlock(child);
+        parentRenderLayoutBox = containingBlockElement.renderLayoutBox;
+        break;
+
       default:
         return;
     }
@@ -637,7 +701,10 @@ class Element extends Node
     parentRenderLayoutBox.add(childRenderElementBoundary);
   }
 
-  void _addStickyChild(Element child, CSSPositionType position) {}
+  void _addStickyChild(Element child, RenderObject after) {
+    // @TODO cal init offset to nearest scroll container
+    renderLayoutBox.insert(child.renderElementBoundary, after: after);
+  }
 
   // Inline box including inline/inline-block/inline-flex/...
   bool get isInlineBox {
@@ -1209,7 +1276,16 @@ List<Element> findStickyChildren(Element element) {
   List<Element> result = [];
 
   element.children.forEach((Element child) {
+    List<CSSOverflowType> overflow = getOverflowFromStyle(child.style);
+    CSSOverflowType overflowX = overflow[0];
+    CSSOverflowType overflowY = overflow[1];
+
     if (_isSticky(child.style)) result.add(child);
+
+    // No need to loop scrollable container children
+    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
+      return;
+    }
 
     List<Element> mergedChildren = findStickyChildren(child);
     mergedChildren.forEach((Element child) {
