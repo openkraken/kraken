@@ -229,7 +229,6 @@ class Element extends Node
       child.originalOffset = boxParentData.offset;
     }
 
-
     double offsetY = child.originalOffset.dy;
     double offsetX = child.originalOffset.dx;
 
@@ -340,7 +339,6 @@ class Element extends Node
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
-
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
       (renderElementBoundary.parentData as RenderLayoutParentData).position = currentPosition;
     }
@@ -388,6 +386,13 @@ class Element extends Node
           }
         }
 
+        // Reset stick element offset to normal flow
+        if (prevPosition == CSSPositionType.sticky) {
+          RenderLayoutParentData boxParentData = renderElementBoundary?.parentData;
+          boxParentData.isOffsetSet = false;
+          renderElementBoundary.markNeedsLayout();
+          renderElementBoundary.markNeedsPaint();
+        }
       } else {
         // Move self to containing block
         if (currentPosition == CSSPositionType.absolute ||
@@ -405,6 +410,14 @@ class Element extends Node
           child.detach();
           child.attachTo(this);
         });
+
+        // Set stick element offset
+        if (currentPosition == CSSPositionType.sticky) {
+          Element scrollContainer = findScrollContainer(this);
+          // Set sticky child offset manually
+          scrollContainer.layoutStickyChild(this, 0, AxisDirection.down);
+          scrollContainer.layoutStickyChild(this, 0, AxisDirection.right);
+        }
       }
     }
   }
