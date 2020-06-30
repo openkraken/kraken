@@ -197,10 +197,10 @@ class Element extends Node
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
-    _updateStickyChildrenPosition(scrollOffset, axisDirection);
+    layoutStickyChildren(scrollOffset, axisDirection);
   }
 
-  void _updateStickyChildPosition(Element child, double scrollOffset, AxisDirection axisDirection) {
+  void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
     CSSStyleDeclaration childStyle = child.style;
     bool isFixed = false;
 
@@ -230,9 +230,9 @@ class Element extends Node
 
     double offsetY = child.originalOffset.dy;
     double offsetX = child.originalOffset.dx;
+
     double childHeight = child.renderElementBoundary?.size?.height;
     double childWidth = child.renderElementBoundary?.size?.width;
-
     // Sticky element cannot exceed the boundary of its parent element container
     RenderBox parentContainer = child.parent.renderLayoutBox as RenderBox;
     double minOffsetY = 0;
@@ -293,8 +293,10 @@ class Element extends Node
     if (isFixed) {
       // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
-      BoxParentData boxParentData = child.renderElementBoundary?.parentData;
+      RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
       boxParentData.offset = Offset(offsetX, offsetY);
+      boxParentData.isOffsetSet = true;
+      // print('fixed offset-------- ${boxParentData.offset}');
       child.renderElementBoundary.markNeedsPaint();
     } else {
       // Change sticky status to relative
@@ -309,10 +311,10 @@ class Element extends Node
   }
 
   // Calculate sticky status according to scroll offset and scroll direction
-  void _updateStickyChildrenPosition(double scrollOffset, AxisDirection axisDirection) {
+  void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
     List<Element> stickyElements = findStickyChildren(this);
     stickyElements.forEach((Element el) {
-      _updateStickyChildPosition(el, scrollOffset, axisDirection);
+      layoutStickyChild(el, scrollOffset, axisDirection);
     });
   }
 
@@ -321,7 +323,6 @@ class Element extends Node
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
       (renderElementBoundary.parentData as RenderLayoutParentData).position = currentPosition;
     }
-
     // Move element according to position when it's already connected
     if (isConnected) {
       if (currentPosition == CSSPositionType.static) {
@@ -723,8 +724,17 @@ class Element extends Node
   }
 
   void _addStickyChild(Element child, RenderObject after) {
-    // @TODO cal init offset to nearest scroll container
     renderLayoutBox.insert(child.renderElementBoundary, after: after);
+
+    // Set sticky element offset
+    Element scrollContainer = findScrollContainer(child);
+    // Flush layout first to calculate sticky offset
+    if (!child.renderElementBoundary.hasSize) {
+      child.renderElementBoundary.owner.flushLayout();
+    }
+    // Set sticky child offset manually
+    scrollContainer.layoutStickyChild(child, 0, AxisDirection.down);
+    scrollContainer.layoutStickyChild(child, 0, AxisDirection.right);
   }
 
   // Inline box including inline/inline-block/inline-flex/...
@@ -1285,6 +1295,26 @@ Element findContainingBlock(Element element) {
     bool hasTransform = _el.style['transform'] != '';
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
+      break;
+    }
+    _el = _el.parent;
+  }
+  return _el;
+}
+
+Element findScrollContainer(Element element) {
+  Element _el = element?.parent;
+  Element rootEl = ElementManager().getRootElement();
+
+  while (_el != null) {
+    bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
+    bool hasTransform = _el.style['transform'] != '';
+
+    List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);
+    CSSOverflowType overflowX = overflow[0];
+    CSSOverflowType overflowY = overflow[1];
+
+    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
       break;
     }
     _el = _el.parent;
