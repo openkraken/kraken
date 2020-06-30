@@ -223,10 +223,12 @@ class Element extends Node
       );
     }
 
+    RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
+
     if (child.originalOffset == null) {
-      BoxParentData boxParentData = child.renderElementBoundary?.parentData;
       child.originalOffset = boxParentData.offset;
     }
+
 
     double offsetY = child.originalOffset.dy;
     double offsetX = child.originalOffset.dx;
@@ -264,6 +266,18 @@ class Element extends Node
           }
         }
       }
+
+      if (isFixed) {
+        boxParentData.offset = Offset(
+          boxParentData.offset.dx,
+          offsetY,
+        );
+      } else {
+        boxParentData.offset = Offset(
+          boxParentData.offset.dx,
+          child.originalOffset.dy,
+        );
+      }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
       double viewPortWidth = renderScrollViewPortX?.size?.width;
@@ -288,23 +302,30 @@ class Element extends Node
           }
         }
       }
+
+      if (isFixed) {
+        boxParentData.offset = Offset(
+          offsetX,
+          boxParentData.offset.dy,
+        );
+      } else {
+        boxParentData.offset = Offset(
+          child.originalOffset.dx,
+          boxParentData.offset.dy,
+        );
+      }
     }
 
     if (isFixed) {
       // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
-      RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
-      boxParentData.offset = Offset(offsetX, offsetY);
       boxParentData.isOffsetSet = true;
-      // print('fixed offset-------- ${boxParentData.offset}');
       child.renderElementBoundary.markNeedsPaint();
     } else {
       // Change sticky status to relative
       if (child.stickyStatus == StickyPositionType.fixed) {
         child.stickyStatus = StickyPositionType.relative;
-        BoxParentData boxParentData = child.renderElementBoundary?.parentData;
         // Reset child offset to its original offset
-        boxParentData.offset = child.originalOffset;
         child.renderElementBoundary.markNeedsPaint();
       }
     }
