@@ -7,6 +7,9 @@ import 'dart:io';
 final Directory specsDirectory = Directory('./integration/.specs');
 final Directory snapshotsDirectory = Directory('./integration/snapshots');
 
+final Directory raxComponentsDirectory =
+    Directory('./integration/rax-components/build/kraken');
+
 void main() async {
   if (!snapshotsDirectory.existsSync()) {
     snapshotsDirectory.createSync();
@@ -28,6 +31,17 @@ void main() async {
     }
   }
 
+  // List<FileSystemEntity> raxComponets =
+  //     raxComponentsDirectory.listSync(recursive: true);
+  // for (FileSystemEntity file in raxComponets) {
+  //   String filename = path.basename(file.path);
+  //   String code = File(file.path).readAsStringSync();
+  //   testPayload.add({
+  //     'filename': filename,
+  //     'filepath': file.path,
+  //     'code': code,
+  //   });
+  // }
   String status = await driver.requestData(jsonEncode(testPayload));
   await driver.close();
 

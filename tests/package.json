@@ -6,7 +6,7 @@
     "compile:ts": "cd integration && tsc --outDir ./.specs",
     "test": "flutter pub get && flutter clean && npm run integration",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./integration/specs/{.,**,**/**}/*.ts",
-    "integration": "npm run clean && npm run compile:ts && node scripts/integration_starter.js"
+    "integration": "npm run clean && npm run compile:ts && cp ./integration/rax-components/build/kraken/index.js ./integration/.specs/specs/kraken && node scripts/integration_starter.js"
   },
   "devDependencies": {
     "chalk": "^3.0.0",
@@ -15,5 +15,8 @@
     "typescript": "^3.8.3",
     "ws": "^7.3.0",
     "is-port-reachable": "^3.0.0"
+  },
+  "dependencies": {
+    "rax-text": "^1.3.1"
   }
 }
