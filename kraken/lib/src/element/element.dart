@@ -432,27 +432,6 @@ class Element extends Node
     }
   }
 
-  void _removeStickyPlaceholder() {
-    if (stickyPlaceholder != null) {
-      ContainerRenderObjectMixin stickyPlaceholderParent = stickyPlaceholder.parent;
-      stickyPlaceholderParent.remove(stickyPlaceholder);
-    }
-  }
-
-  void _insertStickyPlaceholder() {
-    if (!renderMargin.hasSize) {
-      renderMargin.owner.flushLayout();
-    }
-
-    CSSStyleDeclaration pStyle = CSSStyleDeclaration(style: {
-      'width': renderMargin.size.width.toString() + 'px',
-      'height': renderMargin.size.height.toString() + 'px',
-    });
-    stickyPlaceholder = initRenderConstrainedBox(stickyPlaceholder, pStyle);
-    stickyPlaceholder = initRenderDecoratedBox(stickyPlaceholder, pStyle, targetId);
-    (renderObject.parent as ContainerRenderObjectMixin).insert(stickyPlaceholder, after: renderObject);
-  }
-
   void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
     RenderBox renderParent = renderElementBoundary.parent;
