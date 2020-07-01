@@ -234,9 +234,9 @@ class Element extends Node
     // Sticky element cannot exceed the boundary of its parent element container
     RenderBox parentContainer = child.parent.renderLayoutBox as RenderBox;
     double minOffsetY = 0;
-    double maxOffsetY = parentContainer?.size?.height - childHeight;
+    double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
-    double maxOffsetX = parentContainer?.size?.width - childWidth;
+    double maxOffsetX = parentContainer.size.width - childWidth;
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
@@ -1323,14 +1323,11 @@ Element findScrollContainer(Element element) {
   Element rootEl = ElementManager().getRootElement();
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
-    bool hasTransform = _el.style['transform'] != '';
-
     List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
-    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
+    if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible || _el == rootEl) {
       break;
     }
     _el = _el.parent;

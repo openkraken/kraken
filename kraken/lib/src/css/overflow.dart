@@ -194,7 +194,7 @@ mixin CSSOverflowMixin {
     if (_scrollableY != null) {
       return _scrollableY.renderBox?.size?.height ?? 0;
     } else if (renderScrollViewPortY is RenderBox) {
-      RenderBox renderObjectY = renderScrollViewPortY as RenderBox;
+      RenderBox renderObjectY = renderScrollViewPortY;
       return renderObjectY.hasSize ? renderObjectY.size.height : 0;
     }
     return 0;
@@ -204,7 +204,7 @@ mixin CSSOverflowMixin {
     if (_scrollableX != null) {
       return _scrollableX.renderBox?.size?.width ?? 0;
     } else if (renderScrollViewPortX is RenderBox) {
-      RenderBox renderObjectX = renderScrollViewPortX as RenderBox;
+      RenderBox renderObjectX = renderScrollViewPortX;
       return renderObjectX.hasSize ? renderObjectX.size.width : 0;
     }
     return 0;
