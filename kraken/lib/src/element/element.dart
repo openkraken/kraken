@@ -190,6 +190,7 @@ class Element extends Node
     layoutStickyChildren(scrollOffset, axisDirection);
   }
 
+  // Set sticky child offset according to scroll offset and direction
   void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
     CSSStyleDeclaration childStyle = child.style;
     bool isFixed = false;
