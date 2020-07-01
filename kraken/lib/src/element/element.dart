@@ -207,11 +207,17 @@ class Element extends Node
       } else if (axisDirection == AxisDirection.right) {
         offsetX += scrollOffset;
       }
+      // Save original offset to scroll container in element tree to
+      // act as base offset to compute dynamic sticky offset later
       child.originalScrollContainerOffset = Offset(
         offsetX,
         offsetY
       );
     }
+
+    // Sticky offset to scroll container must include padding
+    EdgeInsetsGeometry padding = renderPadding.padding;
+    EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
 
     RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
 
@@ -237,7 +243,7 @@ class Element extends Node
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains('top')) {
-        double top = CSSSizingMixin.getDisplayPortedLength(childStyle['top']);
+        double top = CSSSizingMixin.getDisplayPortedLength(childStyle['top']) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -246,7 +252,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('bottom')) {
-        double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']);
+        double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -273,7 +279,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains('left')) {
-        double left = CSSSizingMixin.getDisplayPortedLength(childStyle['left']);
+        double left = CSSSizingMixin.getDisplayPortedLength(childStyle['left']) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -282,7 +288,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('right')) {
-        double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']);
+        double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
