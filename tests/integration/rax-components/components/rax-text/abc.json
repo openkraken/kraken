@@ -1,0 +1,12 @@
+{
+  "type": "rax",
+  "assets": {
+    "type": "builder",
+    "builder": {
+      "name": "@ali/builder-rax-v1"
+    }
+  },
+  "info": {
+    "raxVersion": "1.x"
+  }
+}

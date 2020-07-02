@@ -1,12 +1,11 @@
 {
-  "type": "rax",
-  "assets": {
-    "type": "builder",
-    "builder": {
-      "name": "@ali/builder-rax-v1"
+  "assets":{
+    "type":"command",
+    "command":{
+      "cmd":[
+        "tnpm i",
+        "node ./build.js"
+      ]
     }
-  },
-  "info": {
-    "raxVersion": "1.x"
   }
 }

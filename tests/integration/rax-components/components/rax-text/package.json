@@ -1,6 +1,6 @@
 {
-  "name": "helloworld",
-  "author": "chenghuai.dtc",
+  "name": "rax",
+  "author": "ranmo.cy",
   "scripts": {
     "build": "build-scripts build",
     "start": "build-scripts start"
