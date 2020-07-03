@@ -6,7 +6,7 @@
     "compile:ts": "cd integration && tsc --outDir ./.specs",
     "test": "flutter pub get && flutter clean && npm run integration",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./integration/specs/{.,**,**/**}/*.ts",
-    "rax": "mkdir ./integration/.specs/specs/rax  && cp -r ./integration/rax-components/build/* ./integration/.specs/specs/rax",
+    "rax": "mkdir ./integration/.specs/specs/rax && cd ./integration/rax-components && def b && cp -r ./build/* ../../integration/.specs/specs/rax",
     "integration": "npm run clean && npm run compile:ts && npm run rax && node scripts/integration_starter.js"
   },
   "devDependencies": {

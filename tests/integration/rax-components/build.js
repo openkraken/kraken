@@ -12,7 +12,6 @@ const projects = readdirSync('./components');
 mkdirSync(destDir);
 
 function build(projectName) {
-  console.log('--------projectName=', projectName)
   const contextPath = join(__dirname, 'components', projectName);
   const spawnOptions = {
     stdio: 'inherit',
