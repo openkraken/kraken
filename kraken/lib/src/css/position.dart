@@ -32,7 +32,13 @@ CSSPositionType resolveCSSPosition(String input) {
 }
 
 void applyRelativeOffset(Offset relativeOffset, RenderBox renderBox, CSSStyleDeclaration style) {
-  BoxParentData boxParentData = renderBox?.parentData;
+  RenderLayoutParentData boxParentData = renderBox?.parentData;
+
+  // Don't set offset if it was already set
+  if (boxParentData.isOffsetSet) {
+    return;
+  }
+
   if (boxParentData != null) {
     Offset styleOffset;
     // Text node does not have relative offset

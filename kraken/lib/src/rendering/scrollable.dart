@@ -12,7 +12,7 @@ import 'package:kraken/gesture.dart';
 import 'package:meta/meta.dart';
 import 'ticker_provider.dart';
 
-typedef ScrollListener = void Function(double scrollTop);
+typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
@@ -31,7 +31,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderObject getScrollableRenderObject(RenderBox child) {
+  RenderBox getScrollableRenderObject(RenderBox child) {
     RenderSingleChildViewport renderSingleChildViewport = RenderSingleChildViewport(
       axisDirection: _axisDirection,
       offset: position,
@@ -252,7 +252,7 @@ class RenderSingleChildViewport extends RenderBox
   }
 
   void _hasScrolled() {
-    scrollListener(offset.pixels);
+    scrollListener(offset.pixels, axisDirection);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
