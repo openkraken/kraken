@@ -9,12 +9,15 @@ const App = () => {
   let index = 0;
 
   const handleChange = async (idx) => {
-    await matchScreenshot();
-    if (index >= 1) {
-      done();
-    } else {
-      index++;
-    }
+    /* 保证动画执行完毕再截图 */
+    setTimeout(async () => {
+      await matchScreenshot();
+      if (index >= 2) {
+        done();
+      } else {
+        index++;
+      }
+    }, 500);
   };
 
   return (
@@ -23,7 +26,7 @@ const App = () => {
         className="slider"
         width="750"
         height="500"
-        autoPlayInterval={1500}
+        autoPlayInterval={1000}
         autoPlay
         onChange={handleChange}
       >

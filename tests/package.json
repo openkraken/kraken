@@ -7,8 +7,7 @@
     "test": "flutter pub get && flutter clean && npm run integration",
     "prettier": "prettier --no-config --single-quote --trailing-comma=es5 --write ./integration/specs/{.,**,**/**}/*.ts",
     "rax": "mkdir ./integration/.specs/specs/rax && cd ./integration/rax-components && rm -rf ./build && def b && cp -r ./build/* ../../integration/.specs/specs/rax",
-    "delete": "cd ./integration/.specs/specs && rm -rf cookie && rm -rf css && rm -rf dom && rm -rf kom && rm -rf kraken && rm -rf url && rm -rf websocket && rm -rf xhr",
-    "integration": "npm run clean && npm run compile:ts && npm run rax && npm run delete && node scripts/integration_starter.js"
+    "integration": "npm run clean && npm run compile:ts && npm run rax && node scripts/integration_starter.js"
   },
   "devDependencies": {
     "chalk": "^3.0.0",

@@ -26,7 +26,6 @@ function build(projectName) {
     try {
       const buff = readFileSync(join(contextPath, KRAKEN_PATH, 'index.js'));
       writeFileSync(join(contextPath, KRAKEN_PATH, 'index.js'), `describe('rax-components', () => {it('${projectName}', async (done) => {${buff};});});`);
-      // writeFileSync(join(contextPath, KRAKEN_PATH, 'index.js'), `describe('rax-components', () => {${buff}});`);
     } catch (err) {
       console.log(err)
     }
