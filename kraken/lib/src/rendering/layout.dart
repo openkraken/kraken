@@ -57,6 +57,9 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
     return (renderPositionHolder.parentData as BoxParentData).offset;
   }
 
+  // Whether offset is aleady set
+  bool isOffsetSet = false;
+
   @override
   String toString() {
     return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; renderPositionHolder=$renderPositionHolder; ${super.toString()}; runIndex: $runIndex;';
