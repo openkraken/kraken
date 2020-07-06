@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    [
+      "build-plugin-rax-app",
+      {
+        "targets": [
+          "kraken"
+        ]
+      }
+    ]
+  ]
+}

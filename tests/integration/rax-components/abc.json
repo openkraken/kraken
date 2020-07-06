@@ -1,0 +1,11 @@
+{
+  "assets":{
+    "type":"command",
+    "command":{
+      "cmd":[
+        "tnpm i",
+        "node ./build.js"
+      ]
+    }
+  }
+}

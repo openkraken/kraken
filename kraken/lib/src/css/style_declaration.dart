@@ -35,7 +35,7 @@ class CSSStyleDeclaration {
 
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
-  Map<String, List<StyleChangeListener>> _styleChangeListeners = {};
+  List<StyleChangeListener> _styleChangeListeners = [];
 
   Map<String, String> _cssProperties = {};
 
@@ -136,23 +136,21 @@ class CSSStyleDeclaration {
     return !CSSStyleDeclaration.isNullOrEmptyValue(value);
   }
 
-  void addStyleChangeListener(String property, StyleChangeListener listener) {
-    if (!_styleChangeListeners.containsKey(property)) _styleChangeListeners[property] = [];
-    _styleChangeListeners[property].add(listener);
+  void addStyleChangeListener(StyleChangeListener listener) {
+    _styleChangeListeners.add(listener);
   }
 
-  void removeStyleChangeListener({String property}) {
-    if (property != null) {
-      _styleChangeListeners[property] = [];
+  void removeStyleChangeListener(StyleChangeListener listener) {
+    if (listener != null) {
+      _styleChangeListeners.remove(listener);
     } else {
-      // Remove all if no property specified.
-      _styleChangeListeners = {};
+      _styleChangeListeners.clear();
     }
   }
 
   void _invokePropertyChangedListener(String property, String original, String present) {
     assert(property != null);
-    _styleChangeListeners[property]?.forEach((StyleChangeListener listener) {
+    _styleChangeListeners.forEach((StyleChangeListener listener) {
       listener(property, original, present);
     });
   }
