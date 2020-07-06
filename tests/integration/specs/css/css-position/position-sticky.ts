@@ -1,6 +1,6 @@
 /*auto generated*/
-xdescribe('position-sticky', () => {
-  xit('bottom', async () => {
+describe('position-sticky', () => {
+  it('bottom', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -63,10 +63,9 @@ xdescribe('position-sticky', () => {
     BODY.appendChild(scroller);
 
     await matchScreenshot();
-
-    await matchScreenshot();
   });
-  xit('change-top-ref', async () => {
+
+  it('change-top-ref', async () => {
     let box;
     let spacer;
     box = createElementWithStyle('div', {
@@ -90,7 +89,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('change-top', async () => {
+  it('change-top', async () => {
     let marker;
     let sticky;
     let spacer;
@@ -124,7 +123,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('child-multicolumn-ref', async () => {
+  it('child-multicolumn-ref', async () => {
     let contents;
     let child;
     let relative;
@@ -203,7 +202,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('child-multicolumn', async () => {
+  it('child-multicolumn', async () => {
     let contents;
     let multicolumn;
     let sticky;
@@ -637,7 +636,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('get-bounding-client-rect', async () => {
+  it('get-bounding-client-rect', async () => {
     let sticky1;
     let spacer;
     let spacer_1;
@@ -728,7 +727,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('inflow-position', async () => {
+  it('inflow-position', async () => {
     let before;
     let sticky;
     let after;
@@ -935,7 +934,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('inline', async () => {
+  it('inline', async () => {
     let indicator;
     let indicator_1;
     let indicator_2;
@@ -1397,7 +1396,7 @@ xdescribe('position-sticky', () => {
           'box-sizing': 'border-box',
         })),
         (block = createElementWithStyle('div', {
-          width: '100%',
+          width: '200px',
           height: '200px',
           background: 'yellow',
           position: 'absolute',
@@ -1427,7 +1426,7 @@ xdescribe('position-sticky', () => {
           'box-sizing': 'border-box',
         })),
         (block_1 = createElementWithStyle('div', {
-          width: '100%',
+          width: '200px',
           height: '200px',
           background: 'yellow',
           position: 'absolute',
@@ -1471,7 +1470,7 @@ xdescribe('position-sticky', () => {
           'box-sizing': 'border-box',
         })),
         (block = createElementWithStyle('div', {
-          width: '100%',
+          width: '200px',
           height: '200px',
           background: 'yellow',
           'box-sizing': 'border-box',
@@ -1497,7 +1496,7 @@ xdescribe('position-sticky', () => {
           'box-sizing': 'border-box',
         })),
         (block_1 = createElementWithStyle('div', {
-          width: '100%',
+          width: '200px',
           height: '200px',
           background: 'yellow',
           'box-sizing': 'border-box',
@@ -1706,14 +1705,14 @@ xdescribe('position-sticky', () => {
                     createElementWithStyle('div', {
                       'box-sizing': 'border-box',
                       height: '50px',
-                      width: '100%',
+                      width: '100px',
                     }),
                     createElementWithStyle('div', {
                       'box-sizing': 'border-box',
                       bottom: '35px',
                       position: 'sticky',
                       height: '50px',
-                      width: '100%',
+                      width: '100px',
                       'background-color': 'blue',
                     }),
                   ]
@@ -1934,7 +1933,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('nested-inline', async () => {
+  xit('nested-inline', async () => {
     let outerIndicator;
     let outerIndicator_1;
     let outerIndicator_2;
@@ -2516,7 +2515,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('offset-overflow', async () => {
+  it('offset-overflow', async () => {
     let sticky;
     let scroller1;
     scroller1 = createElementWithStyle(
@@ -2542,7 +2541,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('offset-top-left', async () => {
+  it('offset-top-left', async () => {
     let sticky;
     let spacer;
     let scroller1;
@@ -2615,7 +2614,7 @@ xdescribe('position-sticky', () => {
     BODY.appendChild(div);
     await matchScreenshot();
   });
-  xit('overflow-padding', async () => {
+  it('overflow-padding', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -2682,7 +2681,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  it('scroll-reposition', async (done) => {
+  xit('scroll-reposition', async (done) => {
     let sticky: any;
     let scroller;
     scroller = createElementWithStyle(
@@ -2833,7 +2832,7 @@ xdescribe('position-sticky', () => {
 
     await matchScreenshot();
   });
-  xit('transforms-translate', async () => {
+  it('transforms-translate', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -2886,7 +2885,7 @@ xdescribe('position-sticky', () => {
                   height: '100px',
                   width: '100px',
                   'background-color': 'green',
-                  transform: 'translateY(-100%)',
+                  transform: 'translateY(-100px)',
                 })),
               ]
             )),
