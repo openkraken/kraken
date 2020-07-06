@@ -1,0 +1,24 @@
+{
+  "name": "rax",
+  "author": "ranmo.cy",
+  "scripts": {
+    "build": "build-scripts build",
+    "start": "build-scripts start"
+  },
+  "dependencies": {
+    "rax": "^1.1.0",
+    "rax-app": "^2.0.0",
+    "rax-document": "^0.1.0",
+    "rax-image": "^2.2.1",
+    "rax-link": "^1.0.1",
+    "rax-slider": "^2.3.3",
+    "rax-text": "^1.0.0",
+    "rax-view": "^1.0.0",
+    "universal-env": "^3.0.0"
+  },
+  "devDependencies": {
+    "build-plugin-rax-app": "^1.0.0",
+    "@alib/build-scripts": "^0.1.0",
+    "@ali/build-plugin-rax-app-def": "^0.1.0"
+  }
+}
