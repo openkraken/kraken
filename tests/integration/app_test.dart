@@ -7,9 +7,6 @@ import 'dart:io';
 final Directory specsDirectory = Directory('./integration/.specs');
 final Directory snapshotsDirectory = Directory('./integration/snapshots');
 
-final Directory raxComponentsDirectory =
-    Directory('./integration/rax-components/build/kraken');
-
 void main() async {
   if (!snapshotsDirectory.existsSync()) {
     snapshotsDirectory.createSync();
