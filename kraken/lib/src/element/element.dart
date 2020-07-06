@@ -127,7 +127,7 @@ class Element extends Node
     defaultDisplay = defaultStyle.containsKey('display') ? defaultStyle['display'] : 'block';
     style = CSSStyleDeclaration(style: defaultStyle);
 
-    _registerStyleChangedListeners();
+    style.addStyleChangeListener(_onStyleChanged);
 
     // Mark element needs to reposition according to position CSS.
     if (_isPositioned(style)) needsReposition = true;
@@ -785,99 +785,139 @@ class Element extends Node
     }
   }
 
-  void _registerStyleChangedListeners() {
-    style.addStyleChangeListener('display', _styleDisplayChangedListener);
-    style.addStyleChangeListener('position', _stylePositionChangedListener);
-    style.addStyleChangeListener('zIndex', _stylePositionChangedListener);
+  void _onStyleChanged(String property, String original, String present) {
+    switch(property) {
+      case 'display':
+        _styleDisplayChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('top', _styleOffsetChangedListener);
-    style.addStyleChangeListener('left', _styleOffsetChangedListener);
-    style.addStyleChangeListener('bottom', _styleOffsetChangedListener);
-    style.addStyleChangeListener('right', _styleOffsetChangedListener);
+      case 'position':
+      case 'zIndex':
+        _stylePositionChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('flexDirection', _styleFlexChangedListener);
-    style.addStyleChangeListener('flexWrap', _styleFlexChangedListener);
-    style.addStyleChangeListener('flexFlow', _styleFlexItemChangedListener);
-    style.addStyleChangeListener('justifyContent', _styleFlexChangedListener);
-    style.addStyleChangeListener('alignItems', _styleFlexChangedListener);
-    style.addStyleChangeListener('alignContent', _styleFlexChangedListener);
-    style.addStyleChangeListener('textAlign', _styleFlexChangedListener);
+      case 'top':
+      case 'left':
+      case 'bottom':
+      case 'right':
+        _styleOffsetChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('flexGrow', _styleFlexItemChangedListener);
-    style.addStyleChangeListener('flexShrink', _styleFlexItemChangedListener);
-    style.addStyleChangeListener('flexBasis', _styleFlexItemChangedListener);
-    style.addStyleChangeListener('alignItems', _styleFlexItemChangedListener);
+      case 'flexDirection':
+      case 'flexWrap':
+      case 'justifyContent':
+      case 'alignItems':
+      case 'alignContent':
+      case 'textAlign':
+        _styleFlexChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('textAlign', _styleTextAlignChangedListener);
+      case 'flexFlow':
+      case 'flexGrow':
+      case 'flexShrink':
+      case 'flexBasis':
+      case 'flex':
+      case 'alignItems':
+        _styleFlexItemChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('padding', _stylePaddingChangedListener);
-    style.addStyleChangeListener('paddingLeft', _stylePaddingChangedListener);
-    style.addStyleChangeListener('paddingTop', _stylePaddingChangedListener);
-    style.addStyleChangeListener('paddingRight', _stylePaddingChangedListener);
-    style.addStyleChangeListener('paddingBottom', _stylePaddingChangedListener);
+      case 'textAlign':
+        _styleTextAlignChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('width', _styleSizeChangedListener);
-    style.addStyleChangeListener('minWidth', _styleSizeChangedListener);
-    style.addStyleChangeListener('maxWidth', _styleSizeChangedListener);
-    style.addStyleChangeListener('height', _styleSizeChangedListener);
-    style.addStyleChangeListener('minHeight', _styleSizeChangedListener);
-    style.addStyleChangeListener('maxHeight', _styleSizeChangedListener);
+      case 'padding':
+      case 'paddingLeft':
+      case 'paddingTop':
+      case 'paddingRight':
+      case 'paddingBottom':
+        _stylePaddingChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('overflow', _styleOverflowChangedListener);
-    style.addStyleChangeListener('overflowX', _styleOverflowChangedListener);
-    style.addStyleChangeListener('overflowY', _styleOverflowChangedListener);
+      case 'width':
+      case 'minWidth':
+      case 'maxWidth':
+      case 'height':
+      case 'minHeight':
+      case 'maxHeight':
+        _styleSizeChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('background', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundColor', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundAttachment', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundImage', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundRepeat', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundSize', _styleBackgroundChangedListener);
-    style.addStyleChangeListener('backgroundPosition', _styleBackgroundChangedListener);
+      case 'overflow':
+      case 'overflowX':
+      case 'overflowY':
+        _styleOverflowChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('border', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTop', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderLeft', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderRight', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottom', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderLeftWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTopWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderRightWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottomWidth', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTopLeftRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTopRightRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottomLeftRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottomRightRadius', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderLeftStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTopStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderRightStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottomStyle', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderLeftColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderTopColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderRightColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('borderBottomColor', _styleDecoratedChangedListener);
-    style.addStyleChangeListener('boxShadow', _styleDecoratedChangedListener);
+      case 'background':
+      case 'backgroundColor':
+      case 'backgroundAttachment':
+      case 'backgroundImage':
+      case 'backgroundRepeat':
+      case 'backgroundSize':
+      case 'backgroundPosition':
+        _styleBackgroundChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('margin', _styleMarginChangedListener);
-    style.addStyleChangeListener('marginLeft', _styleMarginChangedListener);
-    style.addStyleChangeListener('marginTop', _styleMarginChangedListener);
-    style.addStyleChangeListener('marginRight', _styleMarginChangedListener);
-    style.addStyleChangeListener('marginBottom', _styleMarginChangedListener);
+      case 'border':
+      case 'borderTop':
+      case 'borderLeft':
+      case 'borderRight':
+      case 'borderBottom':
+      case 'borderWidth':
+      case 'borderLeftWidth':
+      case 'borderTopWidth':
+      case 'borderRightWidth':
+      case 'borderBottomWidth':
+      case 'borderRadius':
+      case 'borderTopLeftRadius':
+      case 'borderTopRightRadius':
+      case 'borderBottomLeftRadius':
+      case 'borderBottomRightRadius':
+      case 'borderStyle':
+      case 'borderLeftStyle':
+      case 'borderTopStyle':
+      case 'borderRightStyle':
+      case 'borderBottomStyle':
+      case 'borderColor':
+      case 'borderLeftColor':
+      case 'borderTopColor':
+      case 'borderRightColor':
+      case 'borderBottomColor':
+      case 'boxShadow':
+        _styleDecoratedChangedListener(property, original, present);
+        break;
 
-    style.addStyleChangeListener('opacity', _styleOpacityChangedListener);
-    style.addStyleChangeListener('visibility', _styleVisibilityChangedListener);
-    style.addStyleChangeListener('contentVisibility', _styleContentVisibilityChangedListener);
-    style.addStyleChangeListener('transform', _styleTransformChangedListener);
-    style.addStyleChangeListener('transformOrigin', _styleTransformOriginChangedListener);
-    style.addStyleChangeListener('transition', _styleTransitionChangedListener);
-    style.addStyleChangeListener('transitionProperty', _styleTransitionChangedListener);
-    style.addStyleChangeListener('transitionDuration', _styleTransitionChangedListener);
-    style.addStyleChangeListener('transitionTimingFunction', _styleTransitionChangedListener);
-    style.addStyleChangeListener('transitionDelay', _styleTransitionChangedListener);
+      case 'margin':
+      case 'marginLeft':
+      case 'marginTop':
+      case 'marginRight':
+      case 'marginBottom':
+        _styleMarginChangedListener(property, original, present);
+        break;
+
+      case 'opacity':
+        _styleOpacityChangedListener(property, original, present);
+        break;
+      case 'visibility':
+        _styleVisibilityChangedListener(property, original, present);
+        break;
+      case 'contentVisibility':
+        _styleContentVisibilityChangedListener(property, original, present);
+        break;
+      case 'transform':
+        _styleTransformChangedListener(property, original, present);
+        break;
+      case 'transformOrigin':
+        _styleTransformOriginChangedListener(property, original, present);
+        break;
+      case 'transition':
+      case 'transitionProperty':
+      case 'transitionDuration':
+      case 'transitionTimingFunction':
+      case 'transitionDelay':
+        _styleTransitionChangedListener(property, original, present);
+        break;
+    }
   }
 
   void _styleDisplayChangedListener(String property, String original, String present) {
