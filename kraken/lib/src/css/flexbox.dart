@@ -55,7 +55,7 @@ mixin CSSFlexboxMixin {
       renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
       renderFlexLayout.justifyContent = _getJustifyContent(justifyContent, style, renderFlexLayout.flexDirection);
       renderFlexLayout.alignItems = _getAlignItems(alignItems, style, renderFlexLayout.flexDirection);
-      renderFlexLayout.runAlignment = _getAlignContent(style);
+      renderFlexLayout.alignContent = _getAlignContent(style);
     }
   }
 
@@ -90,7 +90,7 @@ mixin CSSFlexboxMixin {
       String textAlign = style[TEXT_ALIGN];
       switch (textAlign) {
         case 'right':
-          return JustifyContent.end;
+          return JustifyContent.flexEnd;
           break;
         case 'center':
           return JustifyContent.center;
@@ -99,13 +99,8 @@ mixin CSSFlexboxMixin {
     }
 
     switch (justifyContent) {
-      case 'normal':
-      case 'start':
-        return JustifyContent.start;
       case 'flex-start':
         return JustifyContent.flexStart;
-      case 'end':
-        return JustifyContent.end;
       case 'flex-end':
         return JustifyContent.flexEnd;
       case 'center':
@@ -114,10 +109,8 @@ mixin CSSFlexboxMixin {
         return JustifyContent.spaceBetween;
       case 'space-around':
         return JustifyContent.spaceAround;
-      case 'space-evenly':
-        return JustifyContent.spaceEvenly;
     }
-    return JustifyContent.start;
+    return JustifyContent.flexStart;
   }
 
   AlignItems _getAlignItems(String alignItems, CSSStyleDeclaration style, FlexDirection flexDirection) {
@@ -125,7 +118,7 @@ mixin CSSFlexboxMixin {
       String textAlign = style[TEXT_ALIGN];
       switch (textAlign) {
         case 'right':
-          return AlignItems.end;
+          return AlignItems.flexEnd;
           break;
         case 'center':
           return AlignItems.center;
@@ -134,17 +127,12 @@ mixin CSSFlexboxMixin {
     }
 
     switch (alignItems) {
-      case 'start':
-        return AlignItems.start;
       case 'flex-start':
         return AlignItems.flexStart;
-      case 'end':
-        return AlignItems.end;
       case 'flex-end':
         return AlignItems.flexEnd;
       case 'center':
         return AlignItems.center;
-      case 'normal':
       case 'stretch':
         return AlignItems.stretch;
       case 'baseline':
@@ -154,28 +142,27 @@ mixin CSSFlexboxMixin {
     return AlignItems.stretch;
   }
 
-  MainAxisAlignment _getAlignContent(CSSStyleDeclaration style) {
+  AlignContent _getAlignContent(CSSStyleDeclaration style) {
     String flexProperty = style[ALIGN_CONTENT];
-    MainAxisAlignment runAlignment = MainAxisAlignment.start;
+    AlignContent alignContent = AlignContent.stretch;
     switch (flexProperty) {
       case 'flex-end':
-      case 'end':
-        runAlignment = MainAxisAlignment.end;
+        alignContent = AlignContent.flexEnd;
         break;
       case 'center':
-        runAlignment = MainAxisAlignment.center;
+        alignContent = AlignContent.center;
         break;
       case 'space-around':
-        runAlignment = MainAxisAlignment.spaceAround;
+        alignContent = AlignContent.spaceAround;
         break;
       case 'space-between':
-        runAlignment = MainAxisAlignment.spaceBetween;
+        alignContent = AlignContent.spaceBetween;
         break;
-      case 'space-evenly':
-        runAlignment = MainAxisAlignment.spaceEvenly;
+      case 'stretch':
+        alignContent = AlignContent.stretch;
         break;
     }
-    return runAlignment;
+    return alignContent;
   }
 }
 

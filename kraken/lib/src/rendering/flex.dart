@@ -98,12 +98,6 @@ enum FlexDirection {
 /// Defines how the browser distributes space between and around content items along the main-axis of a flex container,
 /// and the inline axis of a grid container.
 enum JustifyContent {
-  /// The items are packed flush to each other toward the start edge of the alignment container in the main axis.
-  start,
-
-  /// The items are packed flush to each other toward the end edge of the alignment container in the main axis.
-  end,
-
   /// The items are packed flush to each other toward the edge of the alignment container depending on the flex container's main-start side.
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like start.
   flexStart,
@@ -115,12 +109,6 @@ enum JustifyContent {
   /// The items are packed flush to each other toward the center of the alignment container along the main axis.
   center,
 
-  /// Specifies participation in first- or last-baseline alignment:
-  /// aligns the alignment baseline of the box’s first or last baseline set with the corresponding baseline in the shared first or last baseline set of all the boxes in its baseline-sharing group.
-  /// The fallback alignment for first baseline is start, the one for last baseline is end.
-  /// @TODO not supported
-  baseline,
-
   /// The items are evenly distributed within the alignment container along the main axis.
   /// The spacing between each pair of adjacent items is the same.
   /// The first item is flush with the main-start edge, and the last item is flush with the main-end edge.
@@ -129,23 +117,10 @@ enum JustifyContent {
   /// The items are evenly distributed within the alignment container along the main axis. The spacing between each pair of adjacent items is the same.
   /// The empty space before the first and after the last item equals half of the space between each pair of adjacent items.
   spaceAround,
-
-  /// The items are evenly distributed within the alignment container along the main axis. The spacing between each pair of adjacent items,
-  /// the main-start edge and the first item, and the main-end edge and the last item, are all exactly the same.
-  spaceEvenly,
 }
 
-/// Sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.
+/// Sets the distribution of space between and around content items along a flexbox's cross-axis.
 enum AlignContent {
-  /// The items are packed in their default position as if no align-content value was set.
-  normal,
-
-  /// The items are packed flush to each other against the start edge of the alignment container in the cross axis.
-  start,
-
-  /// The items are packed flush to each other against the end edge of the alignment container in the cross axis.
-  end,
-
   /// The items are packed flush to each other against the edge of the alignment container depending on the flex container's cross-start side.
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like start.
   flexStart,
@@ -176,12 +151,6 @@ enum AlignContent {
 
 /// Set the space distributed between and around content items along the cross-axis of their container.
 enum AlignItems {
-  /// The items are packed flush to each other toward the start edge of the alignment container in the appropriate axis.
-  start,
-
-  /// The items are packed flush to each other toward the end edge of the alignment container in the appropriate axis.
-  end,
-
   /// The cross-start margin edges of the flex items are flushed with the cross-start edge of the line.
   flexStart,
 
@@ -256,7 +225,7 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///    incoming constraints).
 /// 6. Determine the position for each child according to the
 ///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
-///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
+///    [mainAxisAlignment] is [AlignContent.spaceBetween], any main axis
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
 ///
@@ -278,20 +247,20 @@ class RenderFlexLayout extends RenderBox
     List<RenderBox> children,
     FlexDirection flexDirection = FlexDirection.row,
     FlexWrap flexWrap = FlexWrap.nowrap,
-    JustifyContent justifyContent = JustifyContent.start,
+    JustifyContent justifyContent = JustifyContent.flexStart,
     AlignItems alignItems = AlignItems.stretch,
-    MainAxisAlignment runAlignment = MainAxisAlignment.start,
+    AlignContent alignContent = AlignContent.stretch,
     this.targetId,
     this.style,
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
         assert(alignItems != null),
-        assert(runAlignment != null),
+        assert(alignContent != null),
         _flexDirection = flexDirection,
         _flexWrap = flexWrap,
         _justifyContent = justifyContent,
-        _runAlignment = runAlignment,
+        _alignContent = alignContent,
         _alignItems = alignItems {
     addAll(children);
   }
@@ -348,12 +317,12 @@ class RenderFlexLayout extends RenderBox
     }
   }
 
-  MainAxisAlignment get runAlignment => _runAlignment;
-  MainAxisAlignment _runAlignment;
-  set runAlignment(MainAxisAlignment value) {
+  AlignContent get alignContent => _alignContent;
+  AlignContent _alignContent;
+  set alignContent(AlignContent value) {
     assert(value != null);
-    if (_runAlignment == value) return;
-    _runAlignment = value;
+    if (_alignContent == value) return;
+    _alignContent = value;
     markNeedsLayout();
   }
 
@@ -1195,25 +1164,24 @@ class RenderFlexLayout extends RenderBox
     final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
-    switch (runAlignment) {
-      case MainAxisAlignment.start:
+    switch (alignContent) {
+      case AlignContent.flexStart:
         break;
-      case MainAxisAlignment.end:
+      case AlignContent.flexEnd:
         runLeadingSpace = crossAxisFreeSpace;
         break;
-      case MainAxisAlignment.center:
+      case AlignContent.center:
         runLeadingSpace = crossAxisFreeSpace / 2.0;
         break;
-      case MainAxisAlignment.spaceBetween:
+      case AlignContent.spaceBetween:
         runBetweenSpace = runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
         break;
-      case MainAxisAlignment.spaceAround:
+      case AlignContent.spaceAround:
         runBetweenSpace = crossAxisFreeSpace / runCount;
         runLeadingSpace = runBetweenSpace / 2.0;
         break;
-      case MainAxisAlignment.spaceEvenly:
-        runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
-        runLeadingSpace = runBetweenSpace;
+      case AlignContent.stretch:
+        // @TODO
         break;
     }
 
@@ -1240,11 +1208,9 @@ class RenderFlexLayout extends RenderBox
       final bool flipMainAxis = !(_startIsTopLeft(flexDirection) ?? true);
       switch (justifyContent) {
         case JustifyContent.flexStart:
-        case JustifyContent.start:
           leadingSpace = 0.0;
           betweenSpace = 0.0;
           break;
-        case JustifyContent.end:
         case JustifyContent.flexEnd:
           leadingSpace = remainingSpace;
           betweenSpace = 0.0;
@@ -1260,10 +1226,6 @@ class RenderFlexLayout extends RenderBox
         case JustifyContent.spaceAround:
           betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
           leadingSpace = betweenSpace / 2.0;
-          break;
-        case JustifyContent.spaceEvenly:
-          betweenSpace = totalChildren > 0 ? remainingSpace / (totalChildren + 1) : 0.0;
-          leadingSpace = betweenSpace;
           break;
         default:
       }
@@ -1283,12 +1245,10 @@ class RenderFlexLayout extends RenderBox
 
         double childCrossPosition;
         switch (alignItems) {
-          case AlignItems.start:
           case AlignItems.flexStart:
           case AlignItems.flexEnd:
-          case AlignItems.end:
             childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
-              (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
+              (alignItems == AlignItems.flexStart)
               ? 0.0
               : crossSize - _getCrossSize(child);
             break;
