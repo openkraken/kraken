@@ -302,7 +302,8 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
         } else {
           List<int> filteredArgs = [];
           for (var number in methodArgs) {
-            if (number is double) filteredArgs.add(number.floor());
+            if (number is double)
+              filteredArgs.add(number.floor());
             else if (number is int) filteredArgs.add(number);
           }
           // Pattern must have even number of elements, default duration to 500ms.

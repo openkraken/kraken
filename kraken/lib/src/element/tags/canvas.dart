@@ -84,7 +84,7 @@ class CanvasElement extends Element {
   }
 
   void _propertyChangedListener(String key, String original, String present) {
-    switch(key) {
+    switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.
         width = CSSLength.toDisplayPortValue(present) ?? width;

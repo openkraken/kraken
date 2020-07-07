@@ -729,8 +729,7 @@ class RenderFlexLayout extends RenderBox
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
       // and positioned renderObject
-      if (placeholderChild == null &&
-        (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+      if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -855,8 +854,7 @@ class RenderFlexLayout extends RenderBox
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
         // and positioned renderObject
-        if (placeholderChild == null &&
-          (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+        if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
           child = childParentData.nextSibling;
           continue;
         }
@@ -1124,8 +1122,7 @@ class RenderFlexLayout extends RenderBox
       final RenderFlexParentData childParentData = child.parentData;
       // Exclude positioned placeholder renderObject when layout non placeholder object
       // and positioned renderObject
-      if (placeholderChild == null &&
-        (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
+      if (placeholderChild == null && (isPlaceholderPositioned(child) || childParentData.isPositioned)) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -1207,12 +1204,10 @@ class RenderFlexLayout extends RenderBox
       RenderFlexParentData prevParentData = prev.parentData;
       RenderFlexParentData nextParentData = next.parentData;
       // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static &&
-        nextParentData.position != CSSPositionType.static) {
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
         return -1;
       }
-      if (prevParentData.position != CSSPositionType.static &&
-        nextParentData.position == CSSPositionType.static) {
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
         return 1;
       }
       // z-index applies to flex-item ignoring position property
@@ -1271,8 +1266,7 @@ class RenderFlexLayout extends RenderBox
     parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
     parentData.zIndex = CSSLength.toInt(style['zIndex']);
 
-    parentData.isPositioned = positionType == CSSPositionType.absolute ||
-      positionType == CSSPositionType.fixed;
+    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
     return parentData;
   }

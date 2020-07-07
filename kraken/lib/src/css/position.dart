@@ -120,17 +120,22 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
 
   // If child has no width, calculate width by left and right.
   // Element with intrinsic size such as image will not stretch
-  if (childParentData.width == 0.0 && widthType != BoxSizeType.intrinsic && childParentData.left != null && childParentData.right != null) {
+  if (childParentData.width == 0.0 &&
+      widthType != BoxSizeType.intrinsic &&
+      childParentData.left != null &&
+      childParentData.right != null) {
     childConstraints = childConstraints.tighten(width: parentSize.width - childParentData.left - childParentData.right);
   }
   // If child has not height, should be calculate height by top and bottom
-  if (childParentData.height == 0.0 && heightType != BoxSizeType.intrinsic && childParentData.top != null && childParentData.bottom != null) {
+  if (childParentData.height == 0.0 &&
+      heightType != BoxSizeType.intrinsic &&
+      childParentData.top != null &&
+      childParentData.bottom != null) {
     childConstraints =
-      childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
+        childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
 
   child.layout(childConstraints, parentUsesSize: true);
-
 }
 
 void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox child, Size parentSize) {
@@ -147,18 +152,16 @@ void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     Offset baseOffset =
-      childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
+        childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    double top = childParentData.top != null ? (childParentData.top - resolvedPadding.top) :
-      baseOffset.dy;
+    double top = childParentData.top != null ? (childParentData.top - resolvedPadding.top) : baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
       top = height - child.size.height - ((childParentData.bottom - resolvedPadding.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? (childParentData.left - resolvedPadding.left):
-      baseOffset.dx;
+    double left = childParentData.left != null ? (childParentData.left - resolvedPadding.left) : baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
       left = width - child.size.width - ((childParentData.right - resolvedPadding.right) ?? 0);
     }
