@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -54,6 +55,7 @@ mixin CSSFlexboxMixin {
       renderFlexLayout.flexWrap = _getFlexWrap(flexWrap);
       renderFlexLayout.justifyContent = _getJustifyContent(justifyContent, style, renderFlexLayout.flexDirection);
       renderFlexLayout.alignItems = _getAlignItems(alignItems, style, renderFlexLayout.flexDirection);
+      renderFlexLayout.runAlignment = _getAlignContent(style);
     }
   }
 
@@ -150,6 +152,30 @@ mixin CSSFlexboxMixin {
     }
 
     return AlignItems.stretch;
+  }
+
+  MainAxisAlignment _getAlignContent(CSSStyleDeclaration style) {
+    String flexProperty = style[ALIGN_CONTENT];
+    MainAxisAlignment runAlignment = MainAxisAlignment.start;
+    switch (flexProperty) {
+      case 'flex-end':
+      case 'end':
+        runAlignment = MainAxisAlignment.end;
+        break;
+      case 'center':
+        runAlignment = MainAxisAlignment.center;
+        break;
+      case 'space-around':
+        runAlignment = MainAxisAlignment.spaceAround;
+        break;
+      case 'space-between':
+        runAlignment = MainAxisAlignment.spaceBetween;
+        break;
+      case 'space-evenly':
+        runAlignment = MainAxisAlignment.spaceEvenly;
+        break;
+    }
+    return runAlignment;
   }
 }
 

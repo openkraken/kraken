@@ -529,9 +529,7 @@ class Element extends Node
 
   ContainerRenderObjectMixin createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    String flexWrap = style['flexWrap'];
-    bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
-    if (display.endsWith('flex') && flexWrap != 'wrap') {
+    if (display.endsWith('flex')) {
       ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
         children: children,
         style: style,
@@ -542,14 +540,13 @@ class Element extends Node
     } else if (display == 'none' ||
         display == 'inline' ||
         display == 'inline-block' ||
-        display == 'block' ||
-        isFlexWrap) {
+        display == 'block') {
       RenderFlowLayout flowLayout = RenderFlowLayout(
         children: children,
         style: style,
         targetId: targetId,
       );
-      decorateAlignment(flowLayout, style);
+      decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');

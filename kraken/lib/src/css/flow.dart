@@ -18,13 +18,36 @@ mixin CSSFlowMixin {
     renderFlowLayout.verticalDirection = verticalDirection;
     renderFlowLayout.direction = axis;
     renderFlowLayout.textDirection = textDirection;
-    renderFlowLayout.mainAxisAlignment = _getJustifyContent(style, axis);
-    renderFlowLayout.crossAxisAlignment = _getAlignItems(style, axis);
-    renderFlowLayout.runAlignment = _getAlignContent(style, axis);
+    renderFlowLayout.mainAxisAlignment = _getTextAlign(style);
   }
 
-  void decorateAlignment(RenderFlowLayout renderFlowLayout, CSSStyleDeclaration style) {
-    renderFlowLayout.mainAxisAlignment = _getJustifyContent(style, Axis.horizontal);
+  MainAxisAlignment _getTextAlign(CSSStyleDeclaration style) {
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start;
+
+    if (style.contains(TEXT_ALIGN)) {
+      String textAlign = style[TEXT_ALIGN];
+      switch (textAlign) {
+        case 'start':
+        case 'left':
+        // Use default value: start
+          break;
+        case 'end':
+        case 'right':
+          mainAxisAlignment = MainAxisAlignment.end;
+          break;
+        case 'center':
+          mainAxisAlignment = MainAxisAlignment.center;
+          break;
+        case 'justify-all':
+          mainAxisAlignment = MainAxisAlignment.spaceBetween;
+          break;
+      // Like inherit, which is the same with parent element.
+      // Not impl it due to performance consideration.
+      // case 'match-parent':
+      }
+    }
+
+    return mainAxisAlignment;
   }
 
   MainAxisAlignment _getJustifyContent(CSSStyleDeclaration style, Axis axis) {
@@ -89,28 +112,4 @@ mixin CSSFlowMixin {
     return crossAxisAlignment;
   }
 
-  MainAxisAlignment _getAlignContent(CSSStyleDeclaration style, Axis axis) {
-    // @TODO: add flex-direction column support
-    String flexProperty = style[ALIGN_CONTENT];
-    MainAxisAlignment runAlignment = MainAxisAlignment.start;
-    switch (flexProperty) {
-      case 'flex-end':
-      case 'end':
-        runAlignment = MainAxisAlignment.end;
-        break;
-      case 'center':
-        runAlignment = MainAxisAlignment.center;
-        break;
-      case 'space-around':
-        runAlignment = MainAxisAlignment.spaceAround;
-        break;
-      case 'space-between':
-        runAlignment = MainAxisAlignment.spaceBetween;
-        break;
-      case 'space-evenly':
-        runAlignment = MainAxisAlignment.spaceEvenly;
-        break;
-    }
-    return runAlignment;
-  }
 }
