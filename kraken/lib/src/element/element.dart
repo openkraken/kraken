@@ -131,16 +131,11 @@ class Element extends Node
     // Mark element needs to reposition according to position CSS.
     if (_isPositioned(style)) needsReposition = true;
 
-    if (allowChildren) {
-      // Content children layout, BoxModel content.
-      renderObject = renderLayoutBox = createRenderLayoutBox(style);
-    }
+    // Content children layout, BoxModel content.
+    renderObject = renderLayoutBox = createRenderLayoutBox(style);
 
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
-
-    // BoxModel Padding
-//    renderObject = renderPadding = initRenderPadding(renderObject, style);
 
     // Overflow
     renderObject = initOverflowBox(renderObject, style, _scrollListener);
