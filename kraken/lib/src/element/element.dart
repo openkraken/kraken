@@ -1141,10 +1141,10 @@ class Element extends Node
       case 'offsetHeight':
         return renderMargin.hasSize ? renderMargin.size.height : 0;
         // TODO support clientWidth clientHeight clientLeft clientTop
-//      case 'clientWidth':
-//        return renderLayoutBox.padding != null ? renderLayoutBox.size.width : 0;
-//      case 'clientHeight':
-//        return renderPadding.hasSize ? renderPadding.size.height : 0;
+      case 'clientWidth':
+        return renderLayoutBox.clientWidth;
+      case 'clientHeight':
+        return renderLayoutBox.clientHeight;
 //      case 'clientLeft':
 //        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
 //      case 'clientTop':

@@ -69,4 +69,23 @@ class RenderLayoutBox extends RenderBox
 
   // Element style;
   CSSStyleDeclaration style;
+
+  // the contentSize of layout box
+  Size contentSize = Size(0, 0);
+
+  double get clientWidth {
+    double width = contentSize.width;
+    if (padding != null) {
+      width += padding.horizontal;
+    }
+    return width;
+  }
+
+  double get clientHeight {
+    double height = contentSize.height;
+    if (padding != null) {
+      height += padding.vertical;
+    }
+    return height;
+  }
 }

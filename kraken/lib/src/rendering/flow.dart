@@ -535,12 +535,13 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
   }
 
-  void _computeSize(Size baseSize) {
+  void _computeBoxSize(Size contentSize) {
+    Size boxSize = contentSize;
     if (padding != null) {
-      baseSize = wrapPaddingSize(baseSize);
+      boxSize = wrapPaddingSize(boxSize);
     }
 
-    size = constraints.constrain(baseSize);
+    size = constraints.constrain(boxSize);
   }
 
   void _layoutChildren() {
@@ -552,11 +553,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      Size baseSize = Size(
+      contentSize = Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      _computeSize(baseSize);
+      _computeBoxSize(contentSize);
       return;
     }
 
@@ -668,7 +669,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        _computeSize(Size(constraintWidth, constraintHeight));
+        contentSize = Size(constraintWidth, constraintHeight);
+        _computeBoxSize(contentSize);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
