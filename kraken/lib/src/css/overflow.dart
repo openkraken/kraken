@@ -59,18 +59,21 @@ mixin CSSOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style,
+      void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     assert(style != null);
     _child = current;
     List<CSSOverflowType> overflow = getOverflowFromStyle(style);
     // X direction overflow
     renderScrollViewPortX = _getRenderObjectByOverflow(overflow[0], current, AxisDirection.right, scrollListener);
     // Y direction overflow
-    renderScrollViewPortY = _getRenderObjectByOverflow(overflow[1], renderScrollViewPortX, AxisDirection.down, scrollListener);
+    renderScrollViewPortY =
+        _getRenderObjectByOverflow(overflow[1], renderScrollViewPortX, AxisDirection.down, scrollListener);
     return renderScrollViewPortY;
   }
 
-  void updateOverFlowBox(CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+  void updateOverFlowBox(
+      CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowFromStyle(style);
 

@@ -214,6 +214,7 @@ class RenderFlowLayout extends RenderBox
   ///
   /// Ignored if both top and bottom are non-null.
   double height;
+
   /// because the wrap has a minimum size that is not filled), the additional
   /// free space will be allocated according to the [runAlignment].
   ///
@@ -563,33 +564,33 @@ class RenderFlowLayout extends RenderBox
     return 0.0;
   }
 
-   // @override
-   void performLayout() {
-     RenderBox child = firstChild;
-     Element element = getEventTargetByTargetId<Element>(targetId);
-     // Layout positioned element
-     while (child != null) {
-       final RenderLayoutParentData childParentData = child.parentData;
-       if (childParentData.isPositioned) {
-         layoutPositionedChild(element, this, child);
-       }
-       child = childParentData.nextSibling;
-     }
+  // @override
+  void performLayout() {
+    RenderBox child = firstChild;
+    Element element = getEventTargetByTargetId<Element>(targetId);
+    // Layout positioned element
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+      if (childParentData.isPositioned) {
+        layoutPositionedChild(element, this, child);
+      }
+      child = childParentData.nextSibling;
+    }
 
-     // Layout non positioned element
-     _layoutChildren();
+    // Layout non positioned element
+    _layoutChildren();
 
-     // Set offset of positioned elemen
-     child = firstChild;
-     while (child != null) {
-       final RenderLayoutParentData childParentData = child.parentData;
+    // Set offset of positioned elemen
+    child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
 
-       if (childParentData.isPositioned) {
-         setPositionedChildOffset(element, this, child, size);
-       }
-       child = childParentData.nextSibling;
-     }
-   }
+      if (childParentData.isPositioned) {
+        setPositionedChildOffset(element, this, child, size);
+      }
+      child = childParentData.nextSibling;
+    }
+  }
 
   void _layoutChildren() {
     assert(_debugHasNecessaryDirections);
@@ -660,7 +661,7 @@ class RenderFlowLayout extends RenderBox
         if (childElementBoundary != null) {
           RenderLayoutParentData childParentData = childElementBoundary.parentData;
           if (childParentData.position != CSSPositionType.static &&
-            childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
+              childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
         }
       }
 
@@ -817,6 +818,7 @@ class RenderFlowLayout extends RenderBox
           int childNodeId = child.targetId;
           childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
         }
+
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
 
@@ -883,12 +885,10 @@ class RenderFlowLayout extends RenderBox
       RenderLayoutParentData prevParentData = prev.parentData;
       RenderLayoutParentData nextParentData = next.parentData;
       // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static &&
-        nextParentData.position != CSSPositionType.static) {
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
         return -1;
       }
-      if (prevParentData.position != CSSPositionType.static &&
-        nextParentData.position == CSSPositionType.static) {
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
         return 1;
       }
       // z-index applies to element when position is not static
@@ -941,8 +941,7 @@ class RenderFlowLayout extends RenderBox
     parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
     parentData.zIndex = CSSLength.toInt(style['zIndex']);
 
-    parentData.isPositioned = positionType == CSSPositionType.absolute ||
-      positionType == CSSPositionType.fixed;
+    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
     return parentData;
   }

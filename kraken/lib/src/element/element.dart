@@ -196,10 +196,10 @@ class Element extends Node
     bool isFixed = false;
 
     if (child.originalScrollContainerOffset == null) {
-      Offset horizontalScrollContainerOffset = child.renderElementBoundary.localToGlobal(Offset.zero) -
-        renderScrollViewPortX.localToGlobal(Offset.zero);
-      Offset verticalScrollContainerOffset = child.renderElementBoundary.localToGlobal(Offset.zero) -
-        renderScrollViewPortY.localToGlobal(Offset.zero);
+      Offset horizontalScrollContainerOffset =
+          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortX.localToGlobal(Offset.zero);
+      Offset verticalScrollContainerOffset =
+          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortY.localToGlobal(Offset.zero);
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -210,10 +210,7 @@ class Element extends Node
       }
       // Save original offset to scroll container in element tree to
       // act as base offset to compute dynamic sticky offset later
-      child.originalScrollContainerOffset = Offset(
-        offsetX,
-        offsetY
-      );
+      child.originalScrollContainerOffset = Offset(offsetX, offsetY);
     }
 
     // Sticky offset to scroll container must include padding
@@ -347,8 +344,7 @@ class Element extends Node
           if (childRenderObject is RenderElementBoundary) {
             Element child = getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
-            if (childPositionType == CSSPositionType.absolute ||
-              childPositionType == CSSPositionType.fixed) {
+            if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = findContainingBlock(child);
               child.detach();
               child.attachTo(containgBlockElement);
@@ -357,9 +353,7 @@ class Element extends Node
         });
 
         // Move self from containing block to original position in element tree
-        if (prevPosition == CSSPositionType.absolute ||
-          prevPosition == CSSPositionType.fixed
-        ) {
+        if (prevPosition == CSSPositionType.absolute || prevPosition == CSSPositionType.fixed) {
           RenderLayoutParentData parentData = renderElementBoundary.parentData;
           RenderPositionHolder renderPositionHolder = parentData.renderPositionHolder;
           if (renderPositionHolder != null) {
@@ -392,9 +386,7 @@ class Element extends Node
         }
       } else {
         // Move self to containing block
-        if (currentPosition == CSSPositionType.absolute ||
-          currentPosition == CSSPositionType.fixed
-        ) {
+        if (currentPosition == CSSPositionType.absolute || currentPosition == CSSPositionType.fixed) {
           Element containgBlockElement = findContainingBlock(this);
           detach();
           attachTo(containgBlockElement);
@@ -423,8 +415,7 @@ class Element extends Node
     for (int i = 0; i < parent.children.length; i++) {
       Element child = parent.children[i];
       CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
-      if (childPositionType == CSSPositionType.absolute ||
-        childPositionType == CSSPositionType.fixed) {
+      if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
         positionedChildren.add(child);
       } else if (child.children.length != 0) {
         _findPositionedChildren(child, positionedChildren);
@@ -786,7 +777,7 @@ class Element extends Node
   }
 
   void _onStyleChanged(String property, String original, String present) {
-    switch(property) {
+    switch (property) {
       case 'display':
         _styleDisplayChangedListener(property, original, present);
         break;
@@ -1423,7 +1414,8 @@ bool _isSticky(CSSStyleDeclaration style) {
   return style['position'] == 'sticky' && style.contains('top') || style.contains('bottom');
 }
 
-void setPositionedChildParentData(ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
+void setPositionedChildParentData(
+    ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
   var parentData;
   if (parentRenderLayoutBox is RenderFlowLayout) {
     parentData = RenderLayoutParentData();
@@ -1452,8 +1444,7 @@ void setPositionedChildParentData(ContainerRenderObjectMixin parentRenderLayoutB
   parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0.0;
   parentData.zIndex = CSSLength.toInt(style['zIndex']);
 
-  parentData.isPositioned = positionType == CSSPositionType.absolute ||
-    positionType == CSSPositionType.fixed;
+  parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
   RenderElementBoundary childRenderElementBoundary = child.renderElementBoundary;
   childRenderElementBoundary.parentData = parentData;
