@@ -435,15 +435,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     return null;
   }
 
-  @override
-  BoxConstraints get constraints {
-    if (padding != null) {
-      return deflatePaddingConstraints(super.constraints);
-    }
-
-    return super.constraints;
-  }
-
   /// Get current offset.
   Offset get offset => (parentData as BoxParentData).offset;
 
@@ -544,6 +535,14 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
   }
 
+  void _computeSize(Size baseSize) {
+    if (padding != null) {
+      baseSize = wrapPaddingSize(baseSize);
+    }
+
+    size = constraints.constrain(baseSize);
+  }
+
   void _layoutChildren() {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
@@ -553,10 +552,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      size = constraints.constrain(Size(
+      Size baseSize = Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
-      ));
+      );
+      _computeSize(baseSize);
       return;
     }
 
@@ -668,7 +668,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        size = constraints.constrain(Size(constraintWidth, constraintHeight));
+        _computeSize(Size(constraintWidth, constraintHeight));
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;

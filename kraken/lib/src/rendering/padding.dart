@@ -38,7 +38,6 @@ mixin RenderPaddingMixin on RenderBox {
     if (_padding == value)
       return;
     _padding = value;
-    print('set padding');
     _markNeedResolution();
   }
 
@@ -52,7 +51,7 @@ mixin RenderPaddingMixin on RenderBox {
     return Offset(_resolvedPadding.left, _resolvedPadding.top);
   }
 
-  Size constrainPaddingSize(Size innerSize) {
+  Size wrapPaddingSize(Size innerSize) {
     _resolve();
     return Size(
       _resolvedPadding.left + innerSize.width + _resolvedPadding.right,

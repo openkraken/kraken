@@ -90,7 +90,6 @@ class Element extends Node
   RenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
-  RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
@@ -214,7 +213,7 @@ class Element extends Node
     }
 
     // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = renderPadding.padding;
+    EdgeInsetsGeometry padding = renderLayoutBox.padding;
     EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
 
     RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
@@ -509,7 +508,7 @@ class Element extends Node
     if (renderLayoutBox != null) {
       renderLayoutBox.add(child);
     } else {
-      renderPadding.child = child;
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = child;
     }
   }
 
@@ -556,8 +555,8 @@ class Element extends Node
 
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
-      renderPadding.child = null;
-      renderPadding.child = RenderFlexItem(child: renderLayoutBox as RenderBox);
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox as RenderBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -926,9 +925,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderPadding.child = null;
+        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
         renderLayoutBox = createRenderLayoutBox(style, children: children);
-        renderPadding.child = renderLayoutBox as RenderBox;
+        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
       }
 
       if (currentDisplay.endsWith('flex')) {
@@ -1022,9 +1021,9 @@ class Element extends Node
         })
         ..removeAll();
 
-      renderPadding.child = null;
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
       renderLayoutBox = createRenderLayoutBox(style, children: children);
-      renderPadding.child = renderLayoutBox as RenderBox;
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
 
       this.children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -1045,7 +1044,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, renderPadding, targetId);
+    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }
@@ -1146,14 +1145,15 @@ class Element extends Node
         return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
         return renderMargin.hasSize ? renderMargin.size.height : 0;
-      case 'clientWidth':
-        return renderPadding.hasSize ? renderPadding.size.width : 0;
-      case 'clientHeight':
-        return renderPadding.hasSize ? renderPadding.size.height : 0;
-      case 'clientLeft':
-        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
-      case 'clientTop':
-        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
+        // TODO support clientWidth clientHeight clientLeft clientTop
+//      case 'clientWidth':
+//        return renderLayoutBox.padding != null ? renderLayoutBox.size.width : 0;
+//      case 'clientHeight':
+//        return renderPadding.hasSize ? renderPadding.size.height : 0;
+//      case 'clientLeft':
+//        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
+//      case 'clientTop':
+//        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':

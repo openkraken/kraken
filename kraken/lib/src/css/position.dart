@@ -146,8 +146,11 @@ void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox
   // Calc x,y by parentData.
   double x, y;
 
-  EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
-  EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
+  EdgeInsetsGeometry padding = parentElement.renderLayoutBox.padding;
+  EdgeInsets resolvedPadding = EdgeInsets.all(0);
+  if (padding != null) {
+    resolvedPadding = padding.resolve(TextDirection.ltr);
+  }
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {

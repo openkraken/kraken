@@ -83,7 +83,6 @@ mixin CSSSizingMixin {
 
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
-  RenderPadding renderPadding;
   CSSPadding oldPadding;
   CSSPadding oldMargin;
   CSSSizedConstraints oldConstraints;
@@ -411,11 +410,6 @@ mixin CSSSizingMixin {
 
   void _updateMargin(EdgeInsets margin) {
     renderMargin.margin = margin;
-  }
-
-  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
-    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-    return renderPadding = RenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   CSSPadding getPaddingFromStyle(CSSStyleDeclaration style) {
