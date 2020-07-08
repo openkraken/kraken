@@ -427,8 +427,7 @@ mixin CSSSizingMixin {
     return EdgeInsets.fromLTRB(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
-    assert(renderPadding != null);
+  void updateRenderPadding(RenderLayoutBox renderLayoutBox, CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
@@ -469,7 +468,7 @@ mixin CSSSizingMixin {
             progressPadding.right = progress * paddingRightInterval + basePadding.right;
           }
 
-          renderPadding.padding = EdgeInsets.fromLTRB(
+          renderLayoutBox.padding = EdgeInsets.fromLTRB(
               progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
         }
       });
@@ -487,27 +486,27 @@ mixin CSSSizingMixin {
           progressPadding.right = progress * paddingRightInterval + basePadding.right;
         }
 
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderLayoutBox.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingTop?.addProgressListener((progress) {
         progressPadding.top = progress * paddingTopInterval + basePadding.top;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderLayoutBox.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingBottom?.addProgressListener((progress) {
         progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderLayoutBox.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingLeft?.addProgressListener((progress) {
         progressPadding.left = progress * paddingLeftInterval + basePadding.left;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderLayoutBox.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingRight?.addProgressListener((progress) {
         progressPadding.right = progress * paddingRightInterval + basePadding.right;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderLayoutBox.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
@@ -516,7 +515,7 @@ mixin CSSSizingMixin {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
 
     // Update renderPadding.
-    renderPadding.padding = edgeInsets;
+    renderLayoutBox.padding = edgeInsets;
   }
 }
 

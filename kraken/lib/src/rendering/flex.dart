@@ -248,12 +248,7 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
-class RenderFlexLayout extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
-        DebugOverflowIndicatorMixin,
-        CSSComputedMixin {
+class RenderFlexLayout extends RenderLayoutBox {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -264,8 +259,8 @@ class RenderFlexLayout extends RenderBox
     FlexWrap flexWrap = FlexWrap.nowrap,
     JustifyContent justifyContent = JustifyContent.start,
     AlignItems alignItems = AlignItems.stretch,
-    this.targetId,
-    this.style,
+    int targetId,
+    CSSStyleDeclaration style,
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
@@ -273,15 +268,10 @@ class RenderFlexLayout extends RenderBox
         _flexDirection = flexDirection,
         _flexWrap = flexWrap,
         _justifyContent = justifyContent,
-        _alignItems = alignItems {
+        _alignItems = alignItems,
+        super(targetId: targetId, style: style) {
     addAll(children);
   }
-
-  // Element style;
-  CSSStyleDeclaration style;
-
-  // id of current element
-  int targetId;
 
   /// The direction to use as the main axis.
   FlexDirection get flexDirection => _flexDirection;

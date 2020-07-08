@@ -89,7 +89,7 @@ class Element extends Node
   RenderObject renderObject;
   RenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
-  ContainerRenderObjectMixin renderLayoutBox;
+  RenderLayoutBox renderLayoutBox;
   RenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
@@ -103,9 +103,9 @@ class Element extends Node
   // Vertical margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
   // Horizontal padding dimension (left + right)
-  double get cropPaddingWidth => renderPadding.padding.horizontal;
+  double get cropPaddingWidth => renderLayoutBox.padding != null ? renderLayoutBox.padding.horizontal : 0;
   // Vertical padding dimension (top + bottom)
-  double get cropPaddingHeight => renderPadding.padding.vertical;
+  double get cropPaddingHeight => renderLayoutBox.padding != null ? renderLayoutBox.padding.vertical : 0;
   // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
   // Vertical border dimension (top + bottom)
@@ -141,7 +141,7 @@ class Element extends Node
     renderObject = initBackground(renderObject, style, targetId);
 
     // BoxModel Padding
-    renderObject = renderPadding = initRenderPadding(renderObject, style);
+//    renderObject = renderPadding = initRenderPadding(renderObject, style);
 
     // Overflow
     renderObject = initOverflowBox(renderObject, style, _scrollListener);
@@ -357,13 +357,8 @@ class Element extends Node
           RenderLayoutParentData parentData = renderElementBoundary.parentData;
           RenderPositionHolder renderPositionHolder = parentData.renderPositionHolder;
           if (renderPositionHolder != null) {
-            ContainerRenderObjectMixin parentLayoutBox = renderPositionHolder.parent;
-            int parentTargetId;
-            if (parentLayoutBox is RenderFlowLayout) {
-              parentTargetId = parentLayoutBox.targetId;
-            } else if (parentLayoutBox is RenderFlexLayout) {
-              parentTargetId = parentLayoutBox.targetId;
-            }
+            RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
+            int parentTargetId = parentLayoutBox.targetId;
             Element parentElement = getEventTargetByTargetId<Element>(parentTargetId);
 
             List<RenderObject> layoutChildren = [];
@@ -535,7 +530,7 @@ class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      RenderFlowLayout flowLayout = RenderFlowLayout(
+      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
         children: children,
         style: style,
         targetId: targetId,
@@ -975,7 +970,7 @@ class Element extends Node
   void _updateDecorationRenderLayoutBox() {
     if (renderLayoutBox is RenderFlexLayout) {
       decorateRenderFlex(renderLayoutBox, style);
-    } else if (renderLayoutBox is RenderFlowLayout) {
+    } else if (renderLayoutBox is RenderFlowLayoutBox) {
       decorateRenderFlow(renderLayoutBox, style);
     }
   }
@@ -989,7 +984,7 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(style, transitionMap);
+    updateRenderPadding(renderLayoutBox, style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
@@ -1417,7 +1412,7 @@ bool _isSticky(CSSStyleDeclaration style) {
 void setPositionedChildParentData(
     ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
   var parentData;
-  if (parentRenderLayoutBox is RenderFlowLayout) {
+  if (parentRenderLayoutBox is RenderFlowLayoutBox) {
     parentData = RenderLayoutParentData();
   } else {
     parentData = RenderFlexParentData();
