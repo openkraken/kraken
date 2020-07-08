@@ -146,6 +146,9 @@ mixin CSSFlexboxMixin {
     String flexProperty = style[ALIGN_CONTENT];
     AlignContent alignContent = AlignContent.stretch;
     switch (flexProperty) {
+      case 'flex-start':
+        alignContent = AlignContent.flexStart;
+        break;
       case 'flex-end':
         alignContent = AlignContent.flexEnd;
         break;

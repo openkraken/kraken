@@ -141,7 +141,7 @@ mixin CSSComputedMixin on RenderBox {
     }
   }
 
-  // Get element width according to element tree
+  // Get element height according to element tree
   double getElementComputedHeight(int targetId) {
     Element child = getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
@@ -166,42 +166,13 @@ mixin CSSComputedMixin on RenderBox {
       height = maxHeight;
     }
 
-    // inline element has no height
-    if (display == 'inline') {
-      return null;
-    } else if (style.contains('height')) {
+    if (style.contains('height')) {
       if (child is Element) {
         height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
         cropPaddingBorder(child);
       }
     } else {
-      while (true) {
-        if (child.parentNode != null) {
-          cropMargin(child);
-          cropPaddingBorder(child);
-          child = child.parentNode;
-        } else {
-          break;
-        }
-        if (child is Element) {
-          CSSStyleDeclaration style = child.style;
-          if (_isStretchChildrenHeight(child)) {
-            if (style.contains('height')) {
-              height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-              cropPaddingBorder(child);
-              break;
-            } else {
-              if (child.renderPadding.hasSize) {
-                height = child.renderPadding.size.height;
-                cropPaddingBorder(child);
-                break;
-              }
-            }
-          } else {
-            break;
-          }
-        }
-      }
+      return null;
     }
 
     if (height != null) {
@@ -209,21 +180,6 @@ mixin CSSComputedMixin on RenderBox {
     } else {
       return null;
     }
-  }
-
-  // Whether current node should stretch children's height
-  static bool _isStretchChildrenHeight(Element element) {
-    bool isStretch = false;
-    CSSStyleDeclaration style = element.style;
-    String display = style['display'];
-    bool isFlex = display == 'flex' || display == 'inline-flex';
-    if (isFlex &&
-        style['flexDirection'] == 'row' &&
-        (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
-      isStretch = true;
-    }
-
-    return isStretch;
   }
 
   // Element tree hierarchy can cause element display behavior to change,

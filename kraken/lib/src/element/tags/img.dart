@@ -98,6 +98,10 @@ class ImageElement extends Element {
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
     _removeStreamListener();
     _resize();
+
+    // Image size may affect parent layout,
+    // make parent relayout after image inited
+    parent.renderLayoutBox.markNeedsLayout();
   }
 
   void _resize() {
