@@ -209,7 +209,10 @@ class Element extends Node
 
     // Sticky offset to scroll container must include padding
     EdgeInsetsGeometry padding = renderLayoutBox.padding;
-    EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
+    EdgeInsets resolvedPadding = EdgeInsets.all(0);
+    if (padding != null) {
+      resolvedPadding = padding.resolve(TextDirection.ltr);
+    }
 
     RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
 

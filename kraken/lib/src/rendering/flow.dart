@@ -529,7 +529,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(element, this, child, size);
+        setPositionedChildOffset(this, child, size);
       }
       child = childParentData.nextSibling;
     }
