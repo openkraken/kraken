@@ -778,7 +778,6 @@ class RenderFlexLayout extends RenderBox
       child.layout(innerConstraints, parentUsesSize: true);
       double childMainSize = _getMainSize(child);
       double childCrossSize = _getCrossSize(child);
-      print('childCrossSize=============== $innerConstraints $childCrossSize');
 
       // get minimum content based size
       // https://www.w3.org/TR/css-flexbox-1/#min-size-auto
@@ -891,7 +890,7 @@ class RenderFlexLayout extends RenderBox
       // Only layout placeholder renderObject child
       child = placeholderChild == null ? childParentData.nextSibling : null;
     }
-print('runMetrics------------ $_effectiveChildCount ${runMetrics.length}');
+
     if (_effectiveChildCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -965,7 +964,6 @@ print('runMetrics------------ $_effectiveChildCount ${runMetrics.length}');
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
-      final int metricChildCount = metrics.childCount;
       final int totalFlexGrow = metrics.totalFlexGrow;
       final bool hasFlexShrink = metrics.hasFlexShrink;
 
@@ -1083,7 +1081,6 @@ print('runMetrics------------ $_effectiveChildCount ${runMetrics.length}');
                 } else if (child is! RenderTextBox) {
                   // Stretch child height to flex line' height
                   double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
-                  print('runCrossAxisExtent====================== $runCrossAxisExtent $runBetweenSpace');
                   minCrossAxisSize = flexLineHeight;
                   maxCrossAxisSize = flexLineHeight;
                 } else {
@@ -1161,7 +1158,6 @@ print('runMetrics------------ $_effectiveChildCount ${runMetrics.length}');
             }
           }
           child.layout(innerConstraints, parentUsesSize: true);
-          final double childSize = _getMainSize(child);
           crossSize = math.max(crossSize, _getCrossSize(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;
