@@ -257,7 +257,6 @@ class CSSColor implements CSSValue<Color> {
       _r = int.tryParse(r, radix: 16) ?? 0;
       _g = int.tryParse(g, radix: 16) ?? 0;
       _b = int.tryParse(b, radix: 16) ?? 0;
-
     }
     //  255 r
     //  0 g

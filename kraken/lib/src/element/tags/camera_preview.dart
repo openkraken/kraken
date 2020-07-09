@@ -52,8 +52,7 @@ class CameraPreviewElement extends Element {
       )),
     );
 
-    style.addStyleChangeListener('width', _widthChangedListener);
-    style.addStyleChangeListener('height', _heightChangedListener);
+    style.addStyleChangeListener(_propertyChangedListener);
     addChild(sizedBox);
   }
 
@@ -205,14 +204,18 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  void _widthChangedListener(String key, String original, String present) {
-    // Trigger width setter to invoke rerender.
-    width = CSSLength.toDisplayPortValue(present) ?? width;
-  }
-
-  void _heightChangedListener(String key, String original, String present) {
-    // Trigger height setter to invoke rerender.
-    height = CSSLength.toDisplayPortValue(present) ?? height;
+  void _propertyChangedListener(String key, String original, String present) {
+    switch (key) {
+      case 'width':
+        // Trigger width setter to invoke rerender.
+        width = CSSLength.toDisplayPortValue(present) ?? width;
+        break;
+      case 'height':
+        // Trigger height setter to invoke rerender.
+        height = CSSLength.toDisplayPortValue(present) ?? height;
+        break;
+      default:
+    }
   }
 
   void _setProperty(String key, value) {

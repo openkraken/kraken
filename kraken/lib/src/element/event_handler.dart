@@ -41,10 +41,10 @@ mixin EventHandlerMixin on Node {
 
   bool hasPointerEvent() {
     return eventHandlers.containsKey('click') ||
-      eventHandlers.containsKey('touchstart') ||
-      eventHandlers.containsKey('touchmove') ||
-      eventHandlers.containsKey('touchend') ||
-      eventHandlers.containsKey('touchcancel');
+        eventHandlers.containsKey('touchstart') ||
+        eventHandlers.containsKey('touchmove') ||
+        eventHandlers.containsKey('touchend') ||
+        eventHandlers.containsKey('touchcancel');
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {

@@ -55,7 +55,6 @@ describe('Position static', () => {
     div1.style.position = 'absolute';
     div2.style.position = 'relative';
     div3.style.position = 'fixed';
-    div4.style.position = 'sticky';
 
     await matchScreenshot();
   });
