@@ -78,11 +78,11 @@ class ImageElement extends Element {
   }
 
   void setElementSizeType() {
-    bool widthDefined = style.contains('width') || style.contains('minWidth');
-    bool heightDefined = style.contains('height') || style.contains('minHeight');
+    bool isWidthDefined = _propertyWidth != null || style.contains('width') || style.contains('minWidth');
+    bool isHeightDefined = _propertyHeight != null || style.contains('height') || style.contains('minHeight');
 
-    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+    BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+    BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
 
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
@@ -101,15 +101,15 @@ class ImageElement extends Element {
   }
 
   void _resize() {
-    double realWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
-    double realHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
+    double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
+    double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
     double width = 0.0;
     double height = 0.0;
     bool containWidth = style.contains('width') || _propertyWidth != null;
     bool containHeight = style.contains('height') || _propertyHeight != null;
     if (!containWidth && !containHeight) {
-      width = realWidth;
-      height = realHeight;
+      width = naturalWidth;
+      height = naturalHeight;
     } else {
       CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
       if (containWidth && containHeight) {
@@ -117,13 +117,13 @@ class ImageElement extends Element {
         height = sizedConstraints.height ?? _propertyHeight;
       } else if (containWidth) {
         width = sizedConstraints.width ?? _propertyWidth;
-        if (realWidth != 0) {
-          height = width * realHeight / realWidth;
+        if (naturalWidth != 0) {
+          height = width * naturalHeight / naturalWidth;
         }
       } else if (containHeight) {
         height = sizedConstraints.height ?? _propertyHeight;
-        if (realHeight != 0) {
-          width = height * realWidth / realHeight;
+        if (naturalHeight != 0) {
+          width = height * naturalWidth / naturalHeight;
         }
       }
     }
