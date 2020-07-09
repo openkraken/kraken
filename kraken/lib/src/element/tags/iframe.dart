@@ -480,7 +480,7 @@ abstract class WebViewElement extends Element {
     if (key == SRC) {
       String url = value;
       initialUrl = url;
-      renderLayoutBox.removeAll();
+      renderIntrinsicBox.child = null;
       _buildPlatformRenderBox();
       addChild(sizedBox);
     } else if (key == WIDTH || key == HEIGHT) {

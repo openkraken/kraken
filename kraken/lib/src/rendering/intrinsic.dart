@@ -3,12 +3,9 @@
  * Author: Kraken Team.
  */
 
-import 'dart:math' as math;
 import 'package:kraken/css.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
 
 class RenderIntrinsicBox extends RenderBoxModel with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderIntrinsicBox(int targetId, CSSStyleDeclaration style): super(targetId: targetId, style: style);

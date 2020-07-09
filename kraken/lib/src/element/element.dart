@@ -103,9 +103,23 @@ class Element extends Node
   // Vertical margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
   // Horizontal padding dimension (left + right)
-  double get cropPaddingWidth => renderLayoutBox.padding != null ? renderLayoutBox.padding.horizontal : 0;
+  double get cropPaddingWidth {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+      return renderIntrinsicBox.padding.horizontal;
+    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+      return renderLayoutBox.padding.horizontal;
+    }
+    return 0.0;
+  }
   // Vertical padding dimension (top + bottom)
-  double get cropPaddingHeight => renderLayoutBox.padding != null ? renderLayoutBox.padding.vertical : 0;
+  double get cropPaddingHeight {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+      return renderIntrinsicBox.padding.vertical;
+    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+      return renderLayoutBox.padding.vertical;
+    }
+    return 0.0;
+  }
   // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
   // Vertical border dimension (top + bottom)
