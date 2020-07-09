@@ -166,20 +166,65 @@ mixin CSSComputedMixin on RenderBox {
       height = maxHeight;
     }
 
-    if (style.contains('height')) {
+    // inline element has no height
+    if (display == 'inline') {
+      return null;
+    } else if (style.contains('height')) {
       if (child is Element) {
         height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
         cropPaddingBorder(child);
       }
     } else {
-      return null;
+      while (true) {
+        if (child.parentNode != null) {
+          cropMargin(child);
+          cropPaddingBorder(child);
+          child = child.parentNode;
+        } else {
+          break;
+        }
+        if (child is Element) {
+          CSSStyleDeclaration style = child.style;
+          if (_isStretchChildrenHeight(child)) {
+            if (style.contains('height')) {
+              height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+              cropPaddingBorder(child);
+              break;
+            } else {
+              if (child.renderPadding.hasSize) {
+                height = child.renderPadding.size.height;
+                cropPaddingBorder(child);
+                break;
+              }
+            }
+          } else {
+            break;
+          }
+        }
+      }
     }
-
     if (height != null) {
       return height - cropHeight;
     } else {
       return null;
     }
+  }
+
+  // Whether current node should stretch children's height
+  static bool _isStretchChildrenHeight(Element element) {
+    bool isStretch = false;
+    CSSStyleDeclaration style = element.style;
+    String display = style['display'];
+    bool isFlex = display.endsWith('flex');
+
+    if (isFlex &&
+        style['flexDirection'] == 'row' &&
+        style['flexWrap'] != 'wrap' &&
+        (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
+      isStretch = true;
+    }
+
+    return isStretch;
   }
 
   // Element tree hierarchy can cause element display behavior to change,

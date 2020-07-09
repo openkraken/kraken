@@ -100,8 +100,10 @@ mixin CSSFlexboxMixin {
 
     switch (justifyContent) {
       case 'flex-start':
+      case 'start':
         return JustifyContent.flexStart;
       case 'flex-end':
+      case 'end':
         return JustifyContent.flexEnd;
       case 'center':
         return JustifyContent.center;
@@ -128,8 +130,10 @@ mixin CSSFlexboxMixin {
 
     switch (alignItems) {
       case 'flex-start':
+      case 'start':
         return AlignItems.flexStart;
       case 'flex-end':
+      case 'end':
         return AlignItems.flexEnd;
       case 'center':
         return AlignItems.center;
@@ -147,9 +151,11 @@ mixin CSSFlexboxMixin {
     AlignContent alignContent = AlignContent.stretch;
     switch (flexProperty) {
       case 'flex-start':
+      case 'start':
         alignContent = AlignContent.flexStart;
         break;
       case 'flex-end':
+      case 'end':
         alignContent = AlignContent.flexEnd;
         break;
       case 'center':
@@ -160,6 +166,9 @@ mixin CSSFlexboxMixin {
         break;
       case 'space-between':
         alignContent = AlignContent.spaceBetween;
+        break;
+      case 'space-evenly':
+        alignContent = AlignContent.spaceEvenly;
         break;
       case 'stretch':
         alignContent = AlignContent.stretch;

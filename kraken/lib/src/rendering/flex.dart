@@ -99,9 +99,15 @@ enum JustifyContent {
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like start.
   flexStart,
 
+  /// The items are packed flush to each other toward the start edge of the alignment container in the main axis.
+  start,
+
   /// The items are packed flush to each other toward the edge of the alignment container depending on the flex container's main-end side.
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like end.
   flexEnd,
+
+  /// The items are packed flush to each other toward the end edge of the alignment container in the main axis.
+  end,
 
   /// The items are packed flush to each other toward the center of the alignment container along the main axis.
   center,
@@ -122,9 +128,15 @@ enum AlignContent {
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like start.
   flexStart,
 
+  /// The items are packed flush to each other against the start edge of the alignment container in the cross axis.
+  start,
+
   /// The items are packed flush to each other against the edge of the alignment container depending on the flex container's cross-end side.
   /// This only applies to flex layout items. For items that are not children of a flex container, this value is treated like end.
   flexEnd,
+
+  /// The items are packed flush to each other against the end edge of the alignment container in the cross axis.
+  end,
 
   /// The items are packed flush to each other in the center of the alignment container along the cross axis.
   center,
@@ -139,6 +151,11 @@ enum AlignContent {
   /// The empty space before the first and after the last item equals half of the space between each pair of adjacent items.
   spaceAround,
 
+  /// The items are evenly distributed within the alignment container along the cross axis.
+  /// The spacing between each pair of adjacent items, the start edge and the first item,
+  /// and the end edge and the last item, are all exactly the same.
+  spaceEvenly,
+
   /// If the combined size of the items along the cross axis is less than the size of the alignment container,
   /// any auto-sized items have their size increased equally (not proportionally),
   /// while still respecting the constraints imposed by max-height/max-width (or equivalent functionality),
@@ -151,8 +168,14 @@ enum AlignItems {
   /// The cross-start margin edges of the flex items are flushed with the cross-start edge of the line.
   flexStart,
 
+  /// The items are packed flush to each other toward the start edge of the alignment container in the appropriate axis.
+  start,
+
   /// The cross-end margin edges of the flex items are flushed with the cross-end edge of the line.
   flexEnd,
+
+  /// The items are packed flush to each other toward the end edge of the alignment container in the appropriate axis.
+  end,
 
   /// The flex items' margin boxes are centered within the line on the cross-axis.
   /// If the cross-size of an item is larger than the flex container, it will overflow equally in both directions.
@@ -733,7 +756,14 @@ class RenderFlexLayout extends RenderBox
         if (sizeType == BoxSizeType.specified) {
           maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle['height']);
         } else {
-          maxCrossAxisSize = double.infinity;
+          // Child in flex line expand automatic when height is not specified
+          if (flexWrap == FlexWrap.wrap) {
+            maxCrossAxisSize = double.infinity;
+          } else if (child is RenderTextBox) {
+            maxCrossAxisSize = double.infinity;
+          } else {
+            maxCrossAxisSize = elementHeight ?? double.infinity;
+          }
         }
         innerConstraints = BoxConstraints(
           minWidth: baseConstraints,
@@ -748,6 +778,7 @@ class RenderFlexLayout extends RenderBox
       child.layout(innerConstraints, parentUsesSize: true);
       double childMainSize = _getMainSize(child);
       double childCrossSize = _getCrossSize(child);
+      print('childCrossSize=============== $innerConstraints $childCrossSize');
 
       // get minimum content based size
       // https://www.w3.org/TR/css-flexbox-1/#min-size-auto
@@ -860,7 +891,7 @@ class RenderFlexLayout extends RenderBox
       // Only layout placeholder renderObject child
       child = placeholderChild == null ? childParentData.nextSibling : null;
     }
-
+print('runMetrics------------ $_effectiveChildCount ${runMetrics.length}');
     if (_effectiveChildCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
@@ -873,6 +904,14 @@ class RenderFlexLayout extends RenderBox
       ));
 
       crossSize = crossAxisExtent;
+    } else {
+      // Stop layout when no non positioned child exists
+      Size preferredSize = Size(
+        elementWidth ?? 0,
+        elementHeight ?? 0,
+      );
+      size = constraints.constrain(preferredSize);
+      return;
     }
 
     final int runCount = runMetrics.length;
@@ -892,8 +931,10 @@ class RenderFlexLayout extends RenderBox
     double runBetweenSpace = 0.0;
     switch (alignContent) {
       case AlignContent.flexStart:
+      case AlignContent.start:
         break;
       case AlignContent.flexEnd:
+      case AlignContent.end:
         runLeadingSpace = crossAxisFreeSpace;
         break;
       case AlignContent.center:
@@ -905,6 +946,10 @@ class RenderFlexLayout extends RenderBox
       case AlignContent.spaceAround:
         runBetweenSpace = crossAxisFreeSpace / runCount;
         runLeadingSpace = runBetweenSpace / 2.0;
+        break;
+      case AlignContent.spaceEvenly:
+        runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
+        runLeadingSpace = runBetweenSpace;
         break;
       case AlignContent.stretch:
         runBetweenSpace = crossAxisFreeSpace / runCount;
@@ -1038,6 +1083,7 @@ class RenderFlexLayout extends RenderBox
                 } else if (child is! RenderTextBox) {
                   // Stretch child height to flex line' height
                   double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+                  print('runCrossAxisExtent====================== $runCrossAxisExtent $runBetweenSpace');
                   minCrossAxisSize = flexLineHeight;
                   maxCrossAxisSize = flexLineHeight;
                 } else {
@@ -1164,7 +1210,6 @@ class RenderFlexLayout extends RenderBox
         crossSize = size.width;
         break;
     }
-
     child = placeholderChild != null ? placeholderChild : firstChild;
 
     for (int i = 0; i < runCount; ++i) {
@@ -1186,10 +1231,12 @@ class RenderFlexLayout extends RenderBox
       final bool flipMainAxis = !(_startIsTopLeft(flexDirection) ?? true);
       switch (justifyContent) {
         case JustifyContent.flexStart:
+        case JustifyContent.start:
           leadingSpace = 0.0;
           betweenSpace = 0.0;
           break;
         case JustifyContent.flexEnd:
+        case JustifyContent.end:
           leadingSpace = remainingSpace;
           betweenSpace = 0.0;
           break;
@@ -1224,9 +1271,11 @@ class RenderFlexLayout extends RenderBox
         double childCrossPosition;
         switch (alignItems) {
           case AlignItems.flexStart:
+          case AlignItems.start:
           case AlignItems.flexEnd:
+          case AlignItems.end:
             childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
-              (alignItems == AlignItems.flexStart)
+              (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
               ? 0.0
               : crossSize - _getCrossSize(child);
             break;
