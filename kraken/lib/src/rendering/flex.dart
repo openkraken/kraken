@@ -32,9 +32,6 @@ class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex basis
   String flexBasis;
 
-  // align-items
-  CrossAxisAlignment crossAxisAlignment;
-
   @override
   String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
 }
@@ -186,53 +183,23 @@ bool _startIsTopLeft(FlexDirection direction) {
 
 typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 
-/// Displays its children in a one-dimensional array.
-///
 /// ## Layout algorithm
 ///
 /// _This section describes how the framework causes [RenderFlexLayout] to position
 /// its children._
-/// _See [BoxConstraints] for an introduction to box layout models._
 ///
-/// Layout for a [RenderFlexLayout] proceeds in six steps:
+/// Layout for a [RenderFlexLayout] proceeds in 5 steps:
 ///
-/// 1. Layout each child a null or zero flex factor with unbounded main axis
-///    constraints and the incoming cross axis constraints. If the
-///    [crossAxisAlignment] is [CrossAxisAlignment.stretch], instead use tight
-///    cross axis constraints that match the incoming max extent in the cross
-///    axis.
-/// 2. Divide the remaining main axis space among the children with non-zero
-///    flex factors according to their flex factor. For example, a child with a
-///    flex factor of 2.0 will receive twice the amount of main axis space as a
-///    child with a flex factor of 1.0.
-/// 3. Layout each of the remaining children with the same cross axis
-///    constraints as in step 1, but instead of using unbounded main axis
-///    constraints, use max axis constraints based on the amount of space
-///    allocated in step 2. Children with [Flexible.fit] properties that are
-///    [FlexFit.tight] are given tight constraints (i.e., forced to fill the
-///    allocated space), and children with [Flexible.fit] properties that are
-///    [FlexFit.loose] are given loose constraints (i.e., not forced to fill the
-///    allocated space).
-/// 4. The cross axis extent of the [RenderFlexLayout] is the maximum cross axis
-///    extent of the children (which will always satisfy the incoming
-///    constraints).
-/// 5. The main axis extent of the [RenderFlexLayout] is determined by the
-///    [mainAxisSize] property. If the [mainAxisSize] property is
-///    [MainAxisSize.max], then the main axis extent of the [RenderFlex] is the
-///    max extent of the incoming main axis constraints. If the [mainAxisSize]
-///    property is [MainAxisSize.min], then the main axis extent of the [Flex]
-///    is the sum of the main axis extents of the children (subject to the
-///    incoming constraints).
-/// 6. Determine the position for each child according to the
-///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
-///    [mainAxisAlignment] is [AlignContent.spaceBetween], any main axis
-///    space that has not been allocated to children is divided evenly and
-///    placed between the children.
+/// 1. Layout placeholder child of positioned element(absolute/fixed) in new layer
+/// 2. Layout no positioned children with no constraints, compare children width with flex container main axis extent
+///    to caculate total flex lines
+/// 3. Caculate horizontal constraints of each child according to availabe horizontal space in each flex line
+///    and flex-grow and flex-shrink properties
+/// 4. Caculate vertical constraints of each child accordint to availabe vertical space in flex container vertial
+///    and align-content properties and set
+/// 5. Layout children again with above cacluated constraints
+/// 6. Caculate flex line leading space and between space and position children in each flex line
 ///
-/// See also:
-///
-///  * [Flex], the widget equivalent.
-///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlexLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
@@ -620,11 +587,6 @@ class RenderFlexLayout extends RenderBox
     return maxMainSize;
   }
 
-  // There are four steps for Flex Container to layout.
-  // Step 1: layout positioned child earlyer.
-  // Step 2: layout flex-items with No constraints, this step is aiming to collect original box size of every flex-items.
-  // Step 3: apply flex-grow, flex-shrink and align-items: stretch to flex-items, this steps will layout twice in order to change flex-items box size.
-  // Step 4: apply justify-content, and other flexbox properties, this steps will update flex-items offset and put them into right position.
   @override
   void performLayout() {
     RenderBox child = firstChild;
