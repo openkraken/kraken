@@ -13,7 +13,13 @@ class RenderIntrinsicBox extends RenderBoxModel with RenderObjectWithChildMixin<
   @override
   void performLayout() {
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
+      BoxConstraints childConstraints = constraints;
+
+      if (padding != null) {
+        childConstraints = deflatePaddingConstraints(childConstraints);
+      }
+
+      child.layout(childConstraints, parentUsesSize: true);
       contentSize = child.size;
       computeBoxSize(contentSize);
     }

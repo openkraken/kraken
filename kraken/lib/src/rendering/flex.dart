@@ -683,6 +683,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         elementWidth ?? 0,
         elementHeight ?? 0,
       );
+      contentSize = preferredSize;
+      computeBoxSize(contentSize);
       size = constraints.constrain(preferredSize);
       return;
     }
@@ -1051,15 +1053,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = constraints
+        contentSize = constraints
             .constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
+        computeBoxSize(contentSize);
         actualSize = size.width;
         crossSize = size.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = constraints
+        contentSize = constraints
             .constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
+        computeBoxSize(contentSize);
         actualSize = size.height;
         crossSize = size.width;
         break;
@@ -1189,6 +1193,10 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (padding != null) {
+      offset += getPaddingOffset();
+    }
+
     List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
       RenderFlexParentData prevParentData = prev.parentData;

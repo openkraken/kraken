@@ -529,12 +529,12 @@ class Element extends Node
     }
   }
 
-  ContainerRenderObjectMixin createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
+  RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     String flexWrap = style['flexWrap'];
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
-      ContainerRenderObjectMixin flexLayout = RenderFlexLayout(
+      RenderBoxModel flexLayout = RenderFlexLayout(
         children: children,
         style: style,
         targetId: targetId,
@@ -941,7 +941,7 @@ class Element extends Node
           ..removeAll();
 
         (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-        renderLayoutBox = createRenderLayoutBox(style, children: children);
+        renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
         (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
       }
 
@@ -1042,7 +1042,7 @@ class Element extends Node
         ..removeAll();
 
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      renderLayoutBox = createRenderLayoutBox(style, children: children);
+      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
 
       this.children.forEach((Element child) {
@@ -1064,7 +1064,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
+    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>) , targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }

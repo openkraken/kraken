@@ -75,6 +75,14 @@ class RenderBoxModel extends RenderBox
   // Element style;
   CSSStyleDeclaration style;
 
+  RenderBoxModel fromCopy(RenderBoxModel newBox) {
+    if (padding != null) {
+      newBox.padding = padding;
+    }
+
+    return newBox;
+  }
+
   // the contentSize of layout box
   Size _contentSize;
   set contentSize(Size value) {
