@@ -138,7 +138,7 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderLayoutBox parent, RenderBox child, Size parentSize) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize) {
   double width = parentSize.width;
   double height = parentSize.height;
 

@@ -57,7 +57,7 @@ class Element extends Node
   List<String> events;
 
   // Whether element allows children.
-  bool allowChildren = true;
+  bool isIntrinsicBox = false;
 
   /// whether element needs reposition when append to tree or
   /// changing position property.
@@ -90,6 +90,7 @@ class Element extends Node
   RenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
+  RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
@@ -116,7 +117,7 @@ class Element extends Node
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
-    this.allowChildren = true,
+    this.isIntrinsicBox = false,
   })  : assert(targetId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, targetId, tagName) {
@@ -132,7 +133,11 @@ class Element extends Node
     if (_isPositioned(style)) needsReposition = true;
 
     // Content children layout, BoxModel content.
-    renderObject = renderLayoutBox = createRenderLayoutBox(style);
+    if (isIntrinsicBox) {
+      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style);
+    } else {
+      renderObject = renderLayoutBox = createRenderLayoutBox(style);
+    }
 
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
@@ -506,7 +511,7 @@ class Element extends Node
     if (renderLayoutBox != null) {
       renderLayoutBox.add(child);
     } else {
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = child;
+      renderIntrinsicBox.child = child;
     }
   }
 
@@ -591,7 +596,6 @@ class Element extends Node
   @override
   @mustCallSuper
   Node appendChild(Node child) {
-    assert(allowChildren, 'The element($this) does not support child.');
     super.appendChild(child);
 
     VoidCallback doAppendChild = () {
@@ -628,7 +632,6 @@ class Element extends Node
   @override
   @mustCallSuper
   Node insertBefore(Node child, Node referenceNode) {
-    assert(allowChildren, 'The element($this) does not support child.');
     int referenceIndex = childNodes.indexOf(referenceNode);
 
     // Node.insertBefore will change element tree structure,
@@ -981,7 +984,12 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(renderLayoutBox, style, transitionMap);
+    if (renderLayoutBox != null) {
+      updateRenderPadding(renderLayoutBox, style, transitionMap);
+    } else {
+      updateRenderPadding(renderIntrinsicBox, style, transitionMap);
+    }
+
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {

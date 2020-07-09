@@ -56,13 +56,18 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-class RenderLayoutBox extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-        RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-        CSSComputedMixin,
-        RenderPaddingMixin {
-  RenderLayoutBox({this.targetId, this.style});
+class RenderLayoutBox extends RenderBoxModel with
+    ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
+    RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
+    CSSComputedMixin {
+  RenderLayoutBox({
+    int targetId, CSSStyleDeclaration style
+  }) : super(targetId: targetId, style: style);
+}
+
+class RenderBoxModel extends RenderBox
+    with RenderPaddingMixin {
+  RenderBoxModel({this.targetId, this.style});
 
   // id of current element
   int targetId;
@@ -71,7 +76,17 @@ class RenderLayoutBox extends RenderBox
   CSSStyleDeclaration style;
 
   // the contentSize of layout box
-  Size contentSize = Size(0, 0);
+  Size _contentSize;
+  set contentSize(Size value) {
+    assert(value != null);
+    _contentSize = value;
+  }
+  Size get contentSize {
+    if (_contentSize == null) {
+      return Size(0, 0);
+    }
+    return _contentSize;
+  }
 
   double get clientWidth {
     double width = contentSize.width;
@@ -87,5 +102,14 @@ class RenderLayoutBox extends RenderBox
       height += padding.vertical;
     }
     return height;
+  }
+
+  void computeBoxSize(Size contentSize) {
+    Size boxSize = contentSize;
+    if (padding != null) {
+      boxSize = wrapPaddingSize(boxSize);
+    }
+
+    size = constraints.constrain(boxSize);
   }
 }

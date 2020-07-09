@@ -24,7 +24,7 @@ class VideoElement extends Element {
       : super(
           targetId: targetId,
           defaultStyle: _defaultStyle,
-          allowChildren: false,
+          isIntrinsicBox: true,
           tagName: VIDEO,
         );
 
