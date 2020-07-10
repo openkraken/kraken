@@ -191,12 +191,6 @@ mixin CSSComputedMixin on RenderBox {
               height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
               cropPaddingBorder(child);
               break;
-            } else {
-//              if (child.renderPadding.hasSize) {
-//                height = child.renderPadding.size.height;
-//                cropPaddingBorder(child);
-//                break;
-//              }
             }
           } else {
             break;

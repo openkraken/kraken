@@ -1172,10 +1172,14 @@ class Element extends Node
         return renderLayoutBox.clientWidth;
       case 'clientHeight':
         return renderLayoutBox.clientHeight;
-//      case 'clientLeft':
-//        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dx : 0;
-//      case 'clientTop':
-//        return renderPadding.hasSize ? renderPadding.localToGlobal(Offset.zero, ancestor: renderMargin).dy : 0;
+      case 'clientLeft':
+        // TODO: implement this after border has supported in renderLayoutBox
+        //  return renderLayoutBox.borderLeft();
+        break;
+      case 'clientTop':
+        // TODO: implement this after border has supported in renderLayoutBox
+        // return renderLayoutBox.borderTop;
+        break;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
