@@ -247,7 +247,7 @@ class Element extends Node
     double childHeight = child.renderElementBoundary?.size?.height;
     double childWidth = child.renderElementBoundary?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent.renderLayoutBox as RenderBox;
+    RenderBox parentContainer = child.parent.renderLayoutBox;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
@@ -576,7 +576,7 @@ class Element extends Node
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child =
-          RenderFlexItem(child: renderLayoutBox as RenderBox);
+          RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -945,7 +945,7 @@ class Element extends Node
 
         (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
         renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
+        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith('flex')) {
@@ -1045,7 +1045,7 @@ class Element extends Node
 
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
       renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox as RenderBox;
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
 
       this.children.forEach((Element child) {
         _updateFlexItemStyle(child);
