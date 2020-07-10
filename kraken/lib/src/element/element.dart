@@ -111,6 +111,7 @@ class Element extends Node
     }
     return 0.0;
   }
+
   // Vertical padding dimension (top + bottom)
   double get cropPaddingHeight {
     if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
@@ -120,6 +121,7 @@ class Element extends Node
     }
     return 0.0;
   }
+
   // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
   // Vertical border dimension (top + bottom)
@@ -573,7 +575,8 @@ class Element extends Node
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox as RenderBox);
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child =
+          RenderFlexItem(child: renderLayoutBox as RenderBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -1003,7 +1006,6 @@ class Element extends Node
     } else {
       updateRenderPadding(renderIntrinsicBox, style, transitionMap);
     }
-
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
@@ -1064,7 +1066,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>) , targetId);
+    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }
@@ -1165,7 +1167,7 @@ class Element extends Node
         return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
         return renderMargin.hasSize ? renderMargin.size.height : 0;
-        // TODO support clientWidth clientHeight clientLeft clientTop
+      // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         return renderLayoutBox.clientWidth;
       case 'clientHeight':

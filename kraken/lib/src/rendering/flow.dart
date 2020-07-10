@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
-
 class _RunMetrics {
   _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.childCount);
 
@@ -268,11 +267,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null,
-          'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
+              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
           break;
         case Axis.vertical:
           assert(verticalDirection != null,
-          'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
+              'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
           break;
       }
     }
@@ -280,11 +279,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null,
-          'Horizontal $runtimeType with mainAxisAlignment $mainAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with mainAxisAlignment $mainAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(verticalDirection != null,
-          'Vertical $runtimeType with mainAxisAlignment $mainAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with mainAxisAlignment $mainAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
@@ -292,11 +291,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-          'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-          'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
@@ -304,11 +303,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       switch (direction) {
         case Axis.horizontal:
           assert(verticalDirection != null,
-          'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
+              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the mainAxisAlignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null,
-          'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
+              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the mainAxisAlignment cannot be resolved.');
           break;
       }
     }
@@ -754,7 +753,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        Offset relativeOffset = _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
+        Offset relativeOffset =
+            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
@@ -800,7 +800,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // @HACK: Use inline to impl flexWrap in with flex layout.
         Element currentElement = getEventTargetByTargetId<Element>(this.targetId);
         String currentElementDisplay =
-        CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
+            CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
         if (currentElementDisplay.endsWith('flex') && style['flexWrap'] == 'wrap') {
           display = 'inline';
         }

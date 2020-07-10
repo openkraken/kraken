@@ -9,8 +9,7 @@ mixin RenderPaddingMixin on RenderBox {
   EdgeInsets _resolvedPadding;
 
   void _resolve() {
-    if (_resolvedPadding != null)
-      return;
+    if (_resolvedPadding != null) return;
     if (padding == null) return;
     _resolvedPadding = padding.resolve(TextDirection.ltr);
     assert(_resolvedPadding.isNonNegative);
@@ -30,8 +29,7 @@ mixin RenderPaddingMixin on RenderBox {
   set padding(EdgeInsetsGeometry value) {
     assert(value != null);
     assert(value.isNonNegative);
-    if (_padding == value)
-      return;
+    if (_padding == value) return;
     _padding = value;
     _markNeedResolution();
   }
@@ -67,9 +65,7 @@ mixin RenderPaddingMixin on RenderBox {
 
   Size wrapPaddingSize(Size innerSize) {
     _resolve();
-    return Size(
-      _resolvedPadding.left + innerSize.width + _resolvedPadding.right,
-      _resolvedPadding.top + innerSize.height + _resolvedPadding.bottom
-    );
+    return Size(_resolvedPadding.left + innerSize.width + _resolvedPadding.right,
+        _resolvedPadding.top + innerSize.height + _resolvedPadding.bottom);
   }
 }

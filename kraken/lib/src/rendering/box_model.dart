@@ -56,17 +56,15 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-class RenderLayoutBox extends RenderBoxModel with
-    ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-    RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-    CSSComputedMixin {
-  RenderLayoutBox({
-    int targetId, CSSStyleDeclaration style
-  }) : super(targetId: targetId, style: style);
+class RenderLayoutBox extends RenderBoxModel
+    with
+        ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
+        RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
+        CSSComputedMixin {
+  RenderLayoutBox({int targetId, CSSStyleDeclaration style}) : super(targetId: targetId, style: style);
 }
 
-class RenderBoxModel extends RenderBox
-    with RenderPaddingMixin {
+class RenderBoxModel extends RenderBox with RenderPaddingMixin {
   RenderBoxModel({this.targetId, this.style});
 
   // id of current element
@@ -89,6 +87,7 @@ class RenderBoxModel extends RenderBox
     assert(value != null);
     _contentSize = value;
   }
+
   Size get contentSize {
     if (_contentSize == null) {
       return Size(0, 0);

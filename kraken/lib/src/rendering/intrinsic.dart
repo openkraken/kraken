@@ -7,8 +7,9 @@ import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderIntrinsicBox extends RenderBoxModel with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style): super(targetId: targetId, style: style);
+class RenderIntrinsicBox extends RenderBoxModel
+    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style) : super(targetId: targetId, style: style);
 
   @override
   void performLayout() {
@@ -31,7 +32,6 @@ class RenderIntrinsicBox extends RenderBoxModel with RenderObjectWithChildMixin<
       offset += Offset(paddingLeft, paddingTop);
     }
 
-    if (child != null)
-      context.paintChild(child, offset);
+    if (child != null) context.paintChild(child, offset);
   }
 }

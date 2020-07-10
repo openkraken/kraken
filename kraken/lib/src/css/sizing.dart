@@ -421,7 +421,8 @@ mixin CSSSizingMixin {
     return EdgeInsets.fromLTRB(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
+  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style,
+      [Map<String, CSSTransition> transitionMap]) {
     CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
     if (transitionMap != null) {
       all = transitionMap["all"];

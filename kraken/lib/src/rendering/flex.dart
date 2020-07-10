@@ -1135,7 +1135,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     // Position elements
-    double childMainPosition = flipMainAxis ? mainAxisOffset + actualSize - leadingSpace : leadingSpace + mainAxisOffset;
+    double childMainPosition =
+        flipMainAxis ? mainAxisOffset + actualSize - leadingSpace : leadingSpace + mainAxisOffset;
     child = placeholderChild != null ? placeholderChild : firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -1151,13 +1152,14 @@ class RenderFlexLayout extends RenderLayoutBox {
         case AlignItems.flexStart:
         case AlignItems.flexEnd:
         case AlignItems.end:
-          childCrossPosition = crossAxisOffset + (_startIsTopLeft(flipDirection(flexDirection)) ==
-                  (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
-              ? 0.0
-              : crossSize - _getCrossSize(child));
+          childCrossPosition = crossAxisOffset +
+              (_startIsTopLeft(flipDirection(flexDirection)) ==
+                      (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
+                  ? 0.0
+                  : crossSize - _getCrossSize(child));
           break;
         case AlignItems.center:
-            childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
+          childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
           break;
         case AlignItems.stretch:
           childCrossPosition = crossAxisOffset;
