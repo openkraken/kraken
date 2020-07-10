@@ -248,12 +248,7 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
-class RenderFlexLayout extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
-        DebugOverflowIndicatorMixin,
-        CSSComputedMixin {
+class RenderFlexLayout extends RenderLayoutBox {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -264,8 +259,8 @@ class RenderFlexLayout extends RenderBox
     FlexWrap flexWrap = FlexWrap.nowrap,
     JustifyContent justifyContent = JustifyContent.start,
     AlignItems alignItems = AlignItems.stretch,
-    this.targetId,
-    this.style,
+    int targetId,
+    CSSStyleDeclaration style,
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
@@ -273,15 +268,10 @@ class RenderFlexLayout extends RenderBox
         _flexDirection = flexDirection,
         _flexWrap = flexWrap,
         _justifyContent = justifyContent,
-        _alignItems = alignItems {
+        _alignItems = alignItems,
+        super(targetId: targetId, style: style) {
     addAll(children);
   }
-
-  // Element style;
-  CSSStyleDeclaration style;
-
-  // id of current element
-  int targetId;
 
   /// The direction to use as the main axis.
   FlexDirection get flexDirection => _flexDirection;
@@ -425,6 +415,30 @@ class RenderFlexLayout extends RenderBox
 
       return maxCrossSize;
     }
+  }
+
+  double flowAwarePaddingStart() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
+  }
+
+  double flowAwarePaddingEnd() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingRight : paddingLeft;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
+  }
+
+  double flowAwarePaddingBefore() {
+    // NOTE: We did't going to support writing mode.
+    return paddingTop;
+  }
+
+  double flowAwarePaddingAfter() {
+    // NOTE: We did't going to support writing mode.
+    return paddingBottom;
   }
 
   @override
@@ -653,7 +667,7 @@ class RenderFlexLayout extends RenderBox
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(element, this, child, size);
+        setPositionedChildOffset(this, child, size);
       }
       child = childParentData.nextSibling;
     }
@@ -693,7 +707,8 @@ class RenderFlexLayout extends RenderBox
         elementWidth ?? 0,
         elementHeight ?? 0,
       );
-      size = constraints.constrain(preferredSize);
+      contentSize = preferredSize;
+      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -1061,22 +1076,26 @@ class RenderFlexLayout extends RenderBox
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = constraints
+        contentSize = constraints
             .constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
-        actualSize = size.width;
-        crossSize = size.height;
+        size = computeBoxSize(contentSize);
+        actualSize = contentSize.width;
+        crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = constraints
+        contentSize = constraints
             .constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
-        actualSize = size.height;
-        crossSize = size.width;
+        size = computeBoxSize(contentSize);
+        actualSize = contentSize.height;
+        crossSize = contentSize.width;
         break;
     }
     actualSizeDelta = actualSize - allocatedMainSize;
     _overflow = math.max(0.0, -actualSizeDelta);
     final double remainingSpace = math.max(0.0, actualSizeDelta);
+    double mainAxisOffset = flowAwarePaddingStart();
+    double crossAxisOffset = flowAwarePaddingEnd();
     double leadingSpace;
     double betweenSpace;
 
@@ -1116,7 +1135,8 @@ class RenderFlexLayout extends RenderBox
     }
 
     // Position elements
-    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
+    double childMainPosition =
+        flipMainAxis ? mainAxisOffset + actualSize - leadingSpace : leadingSpace + mainAxisOffset;
     child = placeholderChild != null ? placeholderChild : firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -1132,19 +1152,20 @@ class RenderFlexLayout extends RenderBox
         case AlignItems.flexStart:
         case AlignItems.flexEnd:
         case AlignItems.end:
-          childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
-                  (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
-              ? 0.0
-              : crossSize - _getCrossSize(child);
+          childCrossPosition = crossAxisOffset +
+              (_startIsTopLeft(flipDirection(flexDirection)) ==
+                      (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
+                  ? 0.0
+                  : crossSize - _getCrossSize(child));
           break;
         case AlignItems.center:
-          childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+          childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
           break;
         case AlignItems.stretch:
-          childCrossPosition = 0.0;
+          childCrossPosition = crossAxisOffset;
           break;
         case AlignItems.baseline:
-          childCrossPosition = 0.0;
+          childCrossPosition = crossAxisOffset;
           break;
 //        temporary not support baseline
 //        case AlignItems.baseline:
@@ -1243,6 +1264,7 @@ class RenderFlexLayout extends RenderBox
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
+    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
