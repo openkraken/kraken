@@ -789,7 +789,7 @@ class RenderFlexLayout extends RenderBox
           maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle['height']);
         } else {
           // Child in flex line expand automatic when height is not specified
-          if (flexWrap == FlexWrap.wrap) {
+          if (flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) {
             maxCrossAxisSize = double.infinity;
           } else if (child is RenderTextBox) {
             maxCrossAxisSize = double.infinity;
@@ -821,7 +821,8 @@ class RenderFlexLayout extends RenderBox
       };
 
       // Caculate flex line
-      if (flexWrap == FlexWrap.wrap && _effectiveChildCount > 0 &&
+      if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
+        _effectiveChildCount > 0 &&
         (runMainAxisExtent + childMainSize > flexLineLimit)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
@@ -1342,7 +1343,15 @@ class RenderFlexLayout extends RenderBox
         }
 
         if (flipMainAxis) childMainPosition -= _getMainSize(child);
-        Offset relativeOffset = _getOffset(childMainPosition, childCrossPosition + crossAxisOffset);
+
+        double crossOffset;
+        if (flexWrap == FlexWrap.wrapReverse) {
+          crossOffset = constraintHeight - (childCrossPosition + crossAxisOffset + _getCrossSize(child));
+        } else {
+          crossOffset = childCrossPosition + crossAxisOffset;
+        }
+
+        Offset relativeOffset = _getOffset(childMainPosition, crossOffset);
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {

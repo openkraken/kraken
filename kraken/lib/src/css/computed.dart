@@ -220,6 +220,7 @@ mixin CSSComputedMixin on RenderBox {
     if (isFlex &&
         style['flexDirection'] == 'row' &&
         style['flexWrap'] != 'wrap' &&
+        style['flexWrap'] != 'wrap-reverse' &&
         (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
       isStretch = true;
     }
