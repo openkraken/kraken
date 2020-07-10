@@ -5,18 +5,13 @@
 
 import 'package:flutter/rendering.dart';
 
-/// Insets its child by the given padding.
-///
-/// When passing layout constraints to its child, padding shrinks the
-/// constraints by the given padding, causing the child to layout at a smaller
-/// size. Padding then sizes itself to its child's size, inflated by the
-/// padding, effectively creating empty space around the child.
 mixin RenderPaddingMixin on RenderBox {
   EdgeInsets _resolvedPadding;
 
   void _resolve() {
     if (_resolvedPadding != null)
       return;
+    if (padding == null) return;
     _resolvedPadding = padding.resolve(TextDirection.ltr);
     assert(_resolvedPadding.isNonNegative);
   }
@@ -39,6 +34,30 @@ mixin RenderPaddingMixin on RenderBox {
       return;
     _padding = value;
     _markNeedResolution();
+  }
+
+  double get paddingTop {
+    _resolve();
+    if (_resolvedPadding == null) return 0;
+    return _resolvedPadding.top;
+  }
+
+  double get paddingRight {
+    _resolve();
+    if (_resolvedPadding == null) return 0;
+    return _resolvedPadding.right;
+  }
+
+  double get paddingBottom {
+    _resolve();
+    if (_resolvedPadding == null) return 0;
+    return _resolvedPadding.bottom;
+  }
+
+  double get paddingLeft {
+    _resolve();
+    if (_resolvedPadding == null) return 0;
+    return _resolvedPadding.left;
   }
 
   BoxConstraints deflatePaddingConstraints(BoxConstraints constraints) {

@@ -90,8 +90,9 @@ mixin CSSOverflowMixin {
           case CSSOverflowType.auto:
           case CSSOverflowType.scroll:
             setChild(parent, null);
+            setChild(renderScrollViewPortX.parent, null);
             _scrollableY = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
-            setChild(parent, _scrollableY.getScrollableRenderObject(renderScrollViewPortX));
+            setChild(parent, renderScrollViewPortY = _scrollableY.getScrollableRenderObject(renderScrollViewPortX));
             break;
           case CSSOverflowType.hidden:
             setChild(parent, null);

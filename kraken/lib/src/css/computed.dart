@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'dart:math' as math;
 
 mixin CSSComputedMixin on RenderBox {
   // Get max width of element, use width if exist,
@@ -135,7 +136,7 @@ mixin CSSComputedMixin on RenderBox {
     }
 
     if (width != null) {
-      return width - cropWidth;
+      return math.max(0, width - cropWidth);
     } else {
       return null;
     }
@@ -205,7 +206,7 @@ mixin CSSComputedMixin on RenderBox {
     }
 
     if (height != null) {
-      return height - cropHeight;
+      return math.max(0, height - cropHeight);
     } else {
       return null;
     }
