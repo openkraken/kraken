@@ -417,6 +417,30 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  double flowAwarePaddingStart() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
+  }
+
+  double flowAwarePaddingEnd() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingRight : paddingLeft;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
+  }
+
+  double flowAwarePaddingBefore() {
+    // NOTE: We did't going to support writing mode.
+    return paddingTop;
+  }
+
+  double flowAwarePaddingAfter() {
+    // NOTE: We did't going to support writing mode.
+    return paddingBottom;
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     return _getIntrinsicSize(
@@ -684,8 +708,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         elementHeight ?? 0,
       );
       contentSize = preferredSize;
-      computeBoxSize(contentSize);
-      size = constraints.constrain(preferredSize);
+      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -1055,22 +1078,24 @@ class RenderFlexLayout extends RenderLayoutBox {
       case FlexDirection.rowReverse:
         contentSize = constraints
             .constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
-        computeBoxSize(contentSize);
-        actualSize = size.width;
-        crossSize = size.height;
+        size = computeBoxSize(contentSize);
+        actualSize = contentSize.width;
+        crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
         contentSize = constraints
             .constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
-        computeBoxSize(contentSize);
-        actualSize = size.height;
-        crossSize = size.width;
+        size = computeBoxSize(contentSize);
+        actualSize = contentSize.height;
+        crossSize = contentSize.width;
         break;
     }
     actualSizeDelta = actualSize - allocatedMainSize;
     _overflow = math.max(0.0, -actualSizeDelta);
     final double remainingSpace = math.max(0.0, actualSizeDelta);
+    double mainAxisOffset = flowAwarePaddingStart();
+    double crossAxisOffset = flowAwarePaddingEnd();
     double leadingSpace;
     double betweenSpace;
 
@@ -1110,7 +1135,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     // Position elements
-    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
+    double childMainPosition = flipMainAxis ? mainAxisOffset + actualSize - leadingSpace : leadingSpace + mainAxisOffset;
     child = placeholderChild != null ? placeholderChild : firstChild;
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -1126,19 +1151,19 @@ class RenderFlexLayout extends RenderLayoutBox {
         case AlignItems.flexStart:
         case AlignItems.flexEnd:
         case AlignItems.end:
-          childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
+          childCrossPosition = crossAxisOffset + (_startIsTopLeft(flipDirection(flexDirection)) ==
                   (alignItems == AlignItems.start || alignItems == AlignItems.flexStart)
               ? 0.0
-              : crossSize - _getCrossSize(child);
+              : crossSize - _getCrossSize(child));
           break;
         case AlignItems.center:
-          childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+            childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
           break;
         case AlignItems.stretch:
-          childCrossPosition = 0.0;
+          childCrossPosition = crossAxisOffset;
           break;
         case AlignItems.baseline:
-          childCrossPosition = 0.0;
+          childCrossPosition = crossAxisOffset;
           break;
 //        temporary not support baseline
 //        case AlignItems.baseline:
@@ -1193,10 +1218,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += getPaddingOffset();
-    }
-
     List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
       RenderFlexParentData prevParentData = prev.parentData;

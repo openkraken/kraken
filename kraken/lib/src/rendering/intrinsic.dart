@@ -21,14 +21,14 @@ class RenderIntrinsicBox extends RenderBoxModel with RenderObjectWithChildMixin<
 
       child.layout(childConstraints, parentUsesSize: true);
       contentSize = child.size;
-      computeBoxSize(contentSize);
+      size = computeBoxSize(contentSize);
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (padding != null) {
-      offset += getPaddingOffset();
+      offset += Offset(paddingLeft, paddingTop);
     }
 
     if (child != null)

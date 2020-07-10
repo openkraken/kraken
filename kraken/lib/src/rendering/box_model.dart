@@ -112,12 +112,12 @@ class RenderBoxModel extends RenderBox
     return height;
   }
 
-  void computeBoxSize(Size contentSize) {
+  Size computeBoxSize(Size contentSize) {
     Size boxSize = contentSize;
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
     }
 
-    size = constraints.constrain(boxSize);
+    return constraints.constrain(boxSize);
   }
 }

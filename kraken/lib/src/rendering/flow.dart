@@ -548,7 +548,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      computeBoxSize(contentSize);
+      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -661,7 +661,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     switch (direction) {
       case Axis.horizontal:
         contentSize = Size(constraintWidth, constraintHeight);
-        computeBoxSize(contentSize);
+        size = computeBoxSize(contentSize);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
@@ -754,7 +754,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
+        Offset relativeOffset = _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
@@ -762,10 +762,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         } else if (child is RenderElementBoundary) {
           int childNodeId = child.targetId;
           childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
-        }
-
-        if (padding != null) {
-          relativeOffset += getPaddingOffset();
         }
 
         /// Apply position relative offset change.

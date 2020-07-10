@@ -65,11 +65,6 @@ mixin RenderPaddingMixin on RenderBox {
     return constraints.deflate(_resolvedPadding);
   }
 
-  Offset getPaddingOffset() {
-    _resolve();
-    return Offset(_resolvedPadding.left, _resolvedPadding.top);
-  }
-
   Size wrapPaddingSize(Size innerSize) {
     _resolve();
     return Size(
