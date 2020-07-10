@@ -177,11 +177,31 @@ mixin CSSFlexboxMixin {
   }
 }
 
+AlignSelf _getAlignSelf(String alignSelf, CSSStyleDeclaration style) {
+  switch (alignSelf) {
+    case 'flex-start':
+    case 'start':
+      return AlignSelf.flexStart;
+    case 'flex-end':
+    case 'end':
+      return AlignSelf.flexEnd;
+    case 'center':
+      return AlignSelf.center;
+    case 'stretch':
+      return AlignSelf.stretch;
+    case 'baseline':
+      return AlignSelf.baseline;
+  }
+
+  return AlignSelf.auto;
+}
+
 class CSSFlexItem {
   static const String GROW = 'flexGrow';
   static const String SHRINK = 'flexShrink';
   static const String BASIS = 'flexBasis';
   static const String ALIGN_ITEMS = 'alignItems';
+  static const String ALIGN_SELF = 'alignSelf';
   static const String FLEX = 'flex';
 
   static RenderFlexParentData getParentData(CSSStyleDeclaration style) {
@@ -190,6 +210,7 @@ class CSSFlexItem {
     String grow = style[GROW] ?? '';
     String shrink = style[SHRINK] ?? '';
     String basis = style[BASIS] ?? '';
+    String alignSelf = style[ALIGN_SELF] ?? '';
 
     if (flexShotHand != null) {
       _FlexShortHand _flexShortHand = _FlexShortHand(flexShotHand);
@@ -207,7 +228,11 @@ class CSSFlexItem {
     parentData.flexBasis = CSSStyleDeclaration.isNullOrEmptyValue(basis)
         ? 'auto' // flexBasis default to auto.
         : basis;
+    parentData.alignSelf = CSSStyleDeclaration.isNullOrEmptyValue(alignSelf)
+      ? AlignSelf.auto // alignSelf default to auto.
+      : _getAlignSelf(alignSelf, style);
 
     return parentData;
   }
+
 }

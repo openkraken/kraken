@@ -32,8 +32,11 @@ class RenderFlexParentData extends RenderLayoutParentData {
   /// Flex basis
   String flexBasis;
 
+  /// Align self
+  AlignSelf alignSelf = AlignSelf.auto;
+
   @override
-  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis';
+  String toString() => '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis; alignSelf=$alignSelf';
 }
 
 bool isHorizontalFlexDirection(FlexDirection flexDirection) {
@@ -165,6 +168,35 @@ enum AlignContent {
 
 /// Set the space distributed between and around content items along the cross-axis of their container.
 enum AlignItems {
+  /// The cross-start margin edges of the flex items are flushed with the cross-start edge of the line.
+  flexStart,
+
+  /// The items are packed flush to each other toward the start edge of the alignment container in the appropriate axis.
+  start,
+
+  /// The cross-end margin edges of the flex items are flushed with the cross-end edge of the line.
+  flexEnd,
+
+  /// The items are packed flush to each other toward the end edge of the alignment container in the appropriate axis.
+  end,
+
+  /// The flex items' margin boxes are centered within the line on the cross-axis.
+  /// If the cross-size of an item is larger than the flex container, it will overflow equally in both directions.
+  center,
+
+  /// Flex items are stretched such that the cross-size of the item's margin box is the same as the line while respecting width and height constraints.
+  stretch,
+
+  /// All flex items are aligned such that their flex container baselines align.
+  /// The item with the largest distance between its cross-start margin edge and its baseline is flushed with the cross-start edge of the line.
+  baseline
+}
+
+/// Overrides a flex item's align-items value
+enum AlignSelf {
+  /// Computes to the parent's align-items value.
+  auto,
+
   /// The cross-start margin edges of the flex items are flushed with the cross-start edge of the line.
   flexStart,
 
@@ -1265,37 +1297,50 @@ class RenderFlexLayout extends RenderBox
         if (childParentData.runIndex != i) break;
 
         double childCrossPosition;
-        switch (alignItems) {
-          case AlignItems.flexStart:
-          case AlignItems.start:
-          case AlignItems.flexEnd:
-          case AlignItems.end:
-            childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
-              (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
-              ? 0.0
-              : crossSize - _getCrossSize(child);
-            break;
-          case AlignItems.center:
-            childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
-            break;
-          case AlignItems.stretch:
-            childCrossPosition = 0.0;
-            break;
-          case AlignItems.baseline:
-            childCrossPosition = 0.0;
-            break;
-//        temporary not support baseline
-//        case AlignItems.baseline:
-//          childCrossPosition = 0.0;
-//          if (_flexDirection == FlexDirection.row) {
-//            assert(textBaseline != null);
-//            final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
-//            if (distance != null) childCrossPosition = maxBaselineDistance - distance;
-//          }
-//          break;
-          default:
-            break;
+
+        AlignSelf alignSelf = childParentData.alignSelf;
+        if (alignSelf == AlignSelf.auto) {
+          switch (alignItems) {
+            case AlignItems.flexStart:
+            case AlignItems.start:
+            case AlignItems.flexEnd:
+            case AlignItems.end:
+              childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
+                (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
+                ? 0.0
+                : crossSize - _getCrossSize(child);
+              break;
+            case AlignItems.center:
+              childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+              break;
+            case AlignItems.stretch:
+              childCrossPosition = 0.0;
+              break;
+            default:
+              break;
+          }
+        } else {
+          switch (alignSelf) {
+            case AlignSelf.flexStart:
+            case AlignSelf.start:
+            case AlignSelf.flexEnd:
+            case AlignSelf.end:
+              childCrossPosition = _startIsTopLeft(flipDirection(flexDirection)) ==
+                (alignSelf == AlignSelf.flexStart || alignSelf == AlignSelf.start)
+                ? 0.0
+                : crossSize - _getCrossSize(child);
+              break;
+            case AlignSelf.center:
+              childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+              break;
+            case AlignSelf.stretch:
+              childCrossPosition = 0.0;
+              break;
+            default:
+              break;
+          }
         }
+
         if (flipMainAxis) childMainPosition -= _getMainSize(child);
         Offset relativeOffset = _getOffset(childMainPosition, childCrossPosition + crossAxisOffset);
 

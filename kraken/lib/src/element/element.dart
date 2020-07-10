@@ -766,6 +766,7 @@ class Element extends Node
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
+      parentData.alignSelf = flexParentData.alignSelf;
 
       // Update margin for flex child.
       element.updateRenderMargin(element.style);
@@ -795,6 +796,7 @@ class Element extends Node
       case 'flexWrap':
       case 'justifyContent':
       case 'alignItems':
+      case 'alignSelf':
       case 'alignContent':
       case 'textAlign':
         _styleFlexChangedListener(property, original, present);
