@@ -391,10 +391,6 @@ task('ios-clean', (done) => {
 
 ['Debug', 'Release'].forEach(mode => {
   task(`build-ios-kraken-lib-${mode.toLowerCase()}`, (done) => {
-    let buildInSDKs = JSON.parse(execSync('xcodebuild -showsdks -json', {
-      encoding: 'utf-8'
-    }));
-
     // generate build scripts for simulator
     execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
       -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
@@ -414,33 +410,33 @@ task('ios-clean', (done) => {
       stdio: 'inherit'
     });
 
-    // geneate builds scripts for ARM64
+    // geneate builds scripts for ARMV7, ARM64
     execSync(`cmake -DCMAKE_BUILD_TYPE=${mode} \
       -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
-      -DPLATFORM=OS64 \
-      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
+      -DPLATFORM=OS \
+      -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm -S ${paths.bridge}`, {
       cwd: paths.bridge,
       stdio: 'inherit',
       env: {
         ...process.env,
         KRAKEN_JS_ENGINE: 'jsc',
-        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm64')
+        LIBRARY_OUTPUT_DIR: path.join(paths.sdk, 'build/ios/lib/arm')
       }
     });
 
-    // build for simulator
-    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken -- -j 4`, {
+    // build for ARMV7, ARM64
+    execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken -- -j 4`, {
       stdio: 'inherit'
     });
 
-    const arm64SDKPath = path.join(paths.sdk, 'build/ios/lib/arm64/kraken_bridge.framework/kraken_bridge');
+    const armSDKPath = path.join(paths.sdk, 'build/ios/lib/arm/kraken_bridge.framework/kraken_bridge');
     const x64SDKPath = path.join(paths.sdk, 'build/ios/lib/x86_64/kraken_bridge.framework/kraken_bridge');
 
     const targetPath = `${paths.sdk}/build/ios/framework/${mode}`;
     const frameworkPath = `${targetPath}/kraken_bridge.framework`;
     const plistPath = path.join(paths.scripts, 'support/kraken_bridge.plist');
     mkdirp.sync(frameworkPath);
-    execSync(`lipo -create ${arm64SDKPath} ${x64SDKPath} -output ${frameworkPath}/kraken_bridge`, {
+    execSync(`lipo -create ${armSDKPath} ${x64SDKPath} -output ${frameworkPath}/kraken_bridge`, {
       stdio: 'inherit'
     });
     execSync(`cp ${plistPath} ${frameworkPath}/Info.plist`);
