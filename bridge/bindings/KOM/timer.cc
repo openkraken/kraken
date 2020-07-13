@@ -14,11 +14,11 @@ namespace binding {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-void handlePersistentCallback(void *data, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handlePersistentCallback(void *context, int32_t contextIndex, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(context);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context)) {
+  if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
   }
 
@@ -42,11 +42,11 @@ void handlePersistentCallback(void *data, const char *errmsg) {
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *data, double result, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handleRAFPersistentCallback(void *context, int32_t contextIndex, double result, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(context);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context)) {
+  if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
   }
 
@@ -70,12 +70,12 @@ void handleRAFPersistentCallback(void *data, double result, const char *errmsg) 
   callback.asFunction(_context).call(_context, Value(result), 0);
 }
 
-void handleTransientCallback(void *data, const char *errmsg) {
-  handlePersistentCallback(data, errmsg);
+void handleTransientCallback(void *context, int32_t contextIndex, const char *errmsg) {
+  handlePersistentCallback(context, contextIndex, errmsg);
 }
 
-void handleRAFTransientCallback(void *data, double result, const char *errmsg) {
-  handleRAFPersistentCallback(data, result, errmsg);
+void handleRAFTransientCallback(void *context, int32_t contextIndex, double result, const char *errmsg) {
+  handleRAFPersistentCallback(context, contextIndex, result, errmsg);
 }
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -107,8 +107,8 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *data) {
-      return getDartMethod()->setTimeout(handleTransientCallback, data, timeout);
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *data, int32_t contextIndex) {
+      return getDartMethod()->setTimeout(handleTransientCallback, data, contextIndex, timeout);
     });
 
   // `-1` represents ffi error occurred.
@@ -154,8 +154,8 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *data) {
-      return getDartMethod()->setInterval(handlePersistentCallback, data, delay);
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *data, int32_t contextIndex) {
+      return getDartMethod()->setInterval(handlePersistentCallback, data, contextIndex, delay);
     });
 
   if (timerId == -1) {
@@ -227,8 +227,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
                   "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *data) {
-    return getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, data);
+  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *data, int32_t contextIndex) {
+    return getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, data, contextIndex);
   });
 
   // `-1` represents some error occurred.

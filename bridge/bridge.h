@@ -26,13 +26,14 @@ private:
 
 public:
   JSBridge() = delete;
-  JSBridge(const alibaba::jsa::JSExceptionHandler& handler);
+  JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler& handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
+  int32_t contextIndex;
   /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 

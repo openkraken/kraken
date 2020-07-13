@@ -37,18 +37,18 @@ public:
   };
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
-  template <typename T> T registerCallback(std::unique_ptr<Context> &&context, std::function<T(void *)> fn) {
+  template <typename T> T registerCallback(std::unique_ptr<Context> &&context, std::function<T(void *, int32_t)> fn) {
     Context *p = context.get();
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
-    return fn(static_cast<void *>(p));
+    return fn(static_cast<void *>(p), p->_context.getContextIndex());
   }
 
   // dispose all callbacks and recycle callback context's memory
   void disposeAllCallbacks();
 
-  static bool checkContext(JSContext &context) {
-    auto *bridge = static_cast<kraken::JSBridge*>(getBridge());
+  static bool checkContext(JSContext &context, int32_t contextIndex) {
+    auto *bridge = static_cast<kraken::JSBridge*>(getJSEngine(contextIndex));
     auto currentContext = bridge->getContext();
     return currentContext == &context;
   }

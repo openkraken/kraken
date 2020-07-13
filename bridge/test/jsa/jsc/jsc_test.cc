@@ -20,19 +20,19 @@ void normalPrint(const jsa::JSError &error) {
 }
 
 TEST(JSCContext, undefined) {
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("undefined;", "", 0);
   EXPECT_EQ(result.isUndefined(), true);
 }
 
 TEST(JSCContext, null) {
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("null", "", 0);
   EXPECT_EQ(result.isNull(), true);
 }
 
 TEST(JSCContext, number) {
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(0, normalPrint);
   EXPECT_EQ(context->evaluateJavaScript("123456", "", 0).isNumber(), true);
   EXPECT_EQ(context->evaluateJavaScript("new Number('1234')", "", 0).isObject(),
             true);
@@ -49,7 +49,7 @@ TEST(JSCContext, number) {
 }
 
 TEST(JSCContext, boolean) {
-  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> context = createJSContext(0, normalPrint);
   EXPECT_EQ(context->evaluateJavaScript("true", "", 0).isBool(), true);
   EXPECT_EQ(
       context->evaluateJavaScript("new Boolean('1234')", "", 0).isObject(),
@@ -57,7 +57,7 @@ TEST(JSCContext, boolean) {
 }
 
 TEST(JSCContext, newString) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   const std::string str = "helloworld";
 
   jsa::String string = jsa::String::createFromUtf8(*context, str);
@@ -66,7 +66,7 @@ TEST(JSCContext, newString) {
 }
 
 TEST(JSCContext, evaluateString) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("'12345'", "", 0);
   EXPECT_EQ(result.isString(), true);
   std::string resultStr = result.getString(*context).utf8(*context);
@@ -74,12 +74,12 @@ TEST(JSCContext, evaluateString) {
 }
 
 TEST(JSCContext, stringCopyRefer) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::String a = jsa::String::createFromAscii(*context, "1234");
 }
 
 TEST(JSCContext, evaluateStringObject) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   auto result = context->evaluateJavaScript("new String(12345)", "", 0);
   EXPECT_EQ(result.isObject(), true);
   auto resultStr = result.toString(*context).utf8(*context);
@@ -87,7 +87,7 @@ TEST(JSCContext, evaluateStringObject) {
 }
 
 TEST(JSCContext, createString) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value string = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   EXPECT_EQ(string.isString(), true);
   auto result = string.getString(*context).utf8(*context);
@@ -95,7 +95,7 @@ TEST(JSCContext, createString) {
 }
 
 TEST(JSCContext, getProperty) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
   EXPECT_EQ(result.isObject(), true);
   jsa::Object obj = result.getObject(*context);
@@ -104,7 +104,7 @@ TEST(JSCContext, getProperty) {
 }
 
 TEST(JSCContext, removeProperty) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
   EXPECT_EQ(result.isObject(), true);
   EXPECT_EQ(result.getObject(*context).hasProperty(*context, "name"), true);
@@ -113,7 +113,7 @@ TEST(JSCContext, removeProperty) {
 }
 
 TEST(JSCContext, removePropertyPropName) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("({name: 1})", "", 0);
   EXPECT_EQ(result.isObject(), true);
   EXPECT_EQ(result.getObject(*context).hasProperty(*context, jsa::PropNameID::forAscii(*context, "name")), true);
@@ -122,7 +122,7 @@ TEST(JSCContext, removePropertyPropName) {
 }
 
 TEST(JSCContext, getGlobalProperty) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Object global = context->global();
   global.setProperty(*context, "name", jsa::Value(1));
   jsa::Value result = context->evaluateJavaScript("this.name = 2", "", 0);
@@ -135,7 +135,7 @@ TEST(JSCContext, getGlobalProperty) {
 }
 
 TEST(JSCContext, setProperty) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value = jsa::Value(*context, jsa::Object(*context));
   value.getObject(*context).setProperty(*context, "name", jsa::Value(1));
   EXPECT_EQ(value.isObject(), true);
@@ -158,7 +158,7 @@ TEST(JSCContext, setProperty) {
 }
 
 TEST(JSCContext, hasProperty) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value = context->evaluateJavaScript("({name: '12345'})", "", 0);
   EXPECT_EQ(value.isObject(), true);
   EXPECT_EQ(value.getObject(*context).hasProperty(*context, "name"), true);
@@ -171,7 +171,7 @@ TEST(JSCContext, hasProperty) {
 }
 
 TEST(JSCContext, getPropertyNames) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value =
       context->evaluateJavaScript("({name: '12345', age: 20})", "", 0);
   jsa::Array names = value.getObject(*context).getPropertyNames(*context);
@@ -186,7 +186,7 @@ TEST(JSCContext, getPropertyNames) {
 }
 
 TEST(JSCContext, global) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Object global = context->global();
   global.setProperty(*context, "helloworld", "12345");
   jsa::Value result = context->evaluateJavaScript("globalThis.helloworld", "", 0);
@@ -195,7 +195,7 @@ TEST(JSCContext, global) {
 }
 
 TEST(JSCContext, global_with_none_global_var) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   auto global = context->global();
   global.setProperty(*context, "helloworld", "12345");
   jsa::Value result = context->evaluateJavaScript("helloworld", "", 0);
@@ -204,28 +204,28 @@ TEST(JSCContext, global_with_none_global_var) {
 }
 
 TEST(JSCContext, propIdStrictEquals) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::PropNameID &&left = jsa::PropNameID::forAscii(*context, "1234");
   jsa::PropNameID &&right = jsa::PropNameID::forAscii(*context, "1234");
   EXPECT_EQ(left.compare(*context, left, right), true);
 }
 
 TEST(JSCContext, symbolStrictEquals) {
-  //  auto context = std::make_unique<JSCContext>(normalPrint);
+  //  auto context = std::make_unique<JSCContext>(0, normalPrint);
   //  jsa::Value left = context->evaluateJavaScript("Symbol.for('1234')", "",
   //  0); jsa::Value right = context->evaluateJavaScript("Symbol.for('1234')",
   //  "", 0); EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
 
 TEST(JSCContext, stringStrictEquals) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value left = jsa::Value(*context, jsa::String::createFromAscii(*context, "helloworld"));
   jsa::Value right = context->evaluateJavaScript("'helloworld'", "", 0);
   EXPECT_EQ(jsa::Value::strictEquals(*context, left, right), true);
 }
 
 TEST(JSCContext, array_get) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("[1,2,3,4]", "", 0);
   EXPECT_EQ(result.getObject(*context).isArray(*context), true);
   jsa::Array array = result.getObject(*context).getArray(*context);
@@ -238,7 +238,7 @@ TEST(JSCContext, array_get) {
 }
 
 TEST(JSCContext, array_set) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("a = [1,2,3,4]", "", 0);
   jsa::Array array = result.getObject(*context).getArray(*context);
   size_t length = array.length(*context);
@@ -254,7 +254,7 @@ TEST(JSCContext, array_set) {
 }
 
 TEST(JSCContext, arrayBuffer_uint8) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value =
       context->evaluateJavaScript("new Int8Array([1,2,3,4,5]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
@@ -270,7 +270,7 @@ TEST(JSCContext, arrayBuffer_uint8) {
 }
 
 TEST(JSCContext, arrayBuffer_uint16) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value = context->evaluateJavaScript(
       "new Int16Array([1000, 2000, 3000, 4000, 5000]).buffer", "", 0);
   jsa::ArrayBuffer buffer = value.getObject(*context).getArrayBuffer(*context);
@@ -286,7 +286,7 @@ TEST(JSCContext, arrayBuffer_uint16) {
 }
 
 TEST(JSCContext, instanceof) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value constructor = context->evaluateJavaScript("Object", "", 0);
   jsa::Object obj = jsa::Object(*context);
   obj.instanceOf(*context,
@@ -294,7 +294,7 @@ TEST(JSCContext, instanceof) {
 }
 
 TEST(JSCContext, callFunction) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value value =
       context->evaluateJavaScript("function A() {return 11;}; A;", "", 0);
   jsa::Function func = value.getObject(*context).getFunction(*context);
@@ -310,7 +310,7 @@ TEST(JSCContext, callFunction) {
 }
 
 TEST(JSCContext, callFunctionWithArgs) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   context->evaluateJavaScript(R"(
 function fibonacci(num) {
   if (num <= 1) return 1;
@@ -332,7 +332,7 @@ TEST(JSCContext, callFunctionWithException) {
                                "Error: 1234\n"
                                "    at throwAnError");
   };
-  auto context = std::make_unique<JSCContext>(errorPrint);
+  auto context = std::make_unique<JSCContext>(0, errorPrint);
   jsa::Value result = context->evaluateJavaScript(
       R"(function throwAnError() { throw new Error('1234');}; throwAnError; )",
       "", 0);
@@ -341,7 +341,7 @@ TEST(JSCContext, callFunctionWithException) {
 }
 
 TEST(JSCContext, callFunctionWithThis) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript(R"(
 function callThis() {
   this.name = 20;
@@ -355,7 +355,7 @@ function callThis() {
 }
 
 TEST(JSCContext, callAsConstructor) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript(
       "function F(name) { this.prop = name}; F;", "", 0);
   jsa::Function F = result.getObject(*context).getFunction(*context);
@@ -371,7 +371,7 @@ TEST(JSCContext, callAsConstructor) {
 }
 
 TEST(JSCContext, hostFunction) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -386,7 +386,7 @@ TEST(JSCContext, hostFunction) {
 }
 
 TEST(JSCContext, hostFunctionWithParams) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args, size_t count) -> jsa::Value {
@@ -405,7 +405,7 @@ TEST(JSCContext, hostFunctionWithParams) {
 }
 
 TEST(JSCContext, hostFunctionWithThis) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args, size_t count) -> jsa::Value {
@@ -431,7 +431,7 @@ TEST(JSCContext, hostFunctionThrowError) {
                                "Error: ops !!\n"
                                "    at global code");
   };
-  auto context = std::make_unique<JSCContext>(errorPrint);
+  auto context = std::make_unique<JSCContext>(0, errorPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -443,7 +443,7 @@ TEST(JSCContext, hostFunctionThrowError) {
 }
 
 TEST(JSCContext, isHostFunction) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -455,7 +455,7 @@ TEST(JSCContext, isHostFunction) {
 }
 
 TEST(JSCContext, getHostFunction) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostFunctionType callback =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
          const jsa::Value *args,
@@ -472,7 +472,7 @@ TEST(JSCContext, getHostFunction) {
 }
 
 TEST(JSCContext, hostObject_get) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
       auto _prop = prop.utf8(context);
@@ -511,7 +511,7 @@ TEST(JSCContext, hostObject_get) {
 }
 
 TEST(JSCContext, hostObject_set) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
       auto _prop = prop.utf8(context);
@@ -551,7 +551,7 @@ TEST(JSCContext, hostObject_set) {
 }
 
 TEST(JSCContext, hostObject_getPropertyNames) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     std::vector<jsa::PropNameID> getPropertyNames(jsa::JSContext &context) {
       std::vector<jsa::PropNameID> propertyNames;
@@ -570,7 +570,7 @@ TEST(JSCContext, hostObject_getPropertyNames) {
 }
 
 TEST(JSCContext, createHostClass) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
                             size_t count) -> jsa::Object {
     constructor.setProperty(context, "abc", jsa::Value(1234));
@@ -585,7 +585,7 @@ TEST(JSCContext, createHostClass) {
 }
 
 TEST(JSCContext, createHostClassWithInstanceof) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
                             size_t count) -> jsa::Object {
     constructor.setProperty(context, "abc", jsa::Value(1234));
@@ -601,7 +601,7 @@ TEST(JSCContext, createHostClassWithInstanceof) {
 }
 
 TEST(JSCContext, isHostClass) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
                             size_t count) -> jsa::Object {
     constructor.setProperty(context, "abc", jsa::Value(1234));
@@ -617,7 +617,7 @@ TEST(JSCContext, isHostClass) {
 }
 
 TEST(JSCContext, getHostClass) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::HostClassType F = [](jsa::JSContext &context, jsa::Object &constructor, const jsa::Value *args,
                             size_t count) -> jsa::Object {
     constructor.setProperty(context, "abc", jsa::Value(1234));
@@ -634,7 +634,7 @@ TEST(JSCContext, getHostClass) {
 }
 
 TEST(JSCContext, prototypeChain) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Object parentPrototype = jsa::Object(*context);
   parentPrototype.setProperty(*context, "name", "helloworld");
 
@@ -654,7 +654,7 @@ TEST(JSCContext, prototypeChain) {
 }
 
 TEST(JSCContext, createArrayBuffer) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   const size_t len = 20;
   uint8_t *data = new uint8_t[len];
   for (int i = 0; i < 20; i++) {
@@ -681,7 +681,7 @@ TEST(JSCContext, createArrayBuffer) {
 }
 
 TEST(JSCContext, isArrayBufferView) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result =
       context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
   EXPECT_EQ(result.getObject(*context).isArrayBufferView(*context), true);
@@ -691,7 +691,7 @@ TEST(JSCContext, isArrayBufferView) {
 }
 
 TEST(JSCContext, ArrayBufferView_data) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result =
       context->evaluateJavaScript("new Uint8Array([1,2,3,4,5])", "", 0);
   jsa::ArrayBufferView bufferView =
@@ -707,7 +707,7 @@ TEST(JSCContext, ArrayBufferView_data) {
 }
 
 TEST(JSCContext, HostObjectAsArgs) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
   jsa::HostFunctionType getBlob =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
@@ -724,7 +724,7 @@ TEST(JSCContext, HostObjectAsArgs) {
 }
 
 TEST(JSCContext, getHostObject) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   std::vector<uint8_t> vector = {1, 2, 3, 4, 5};
   jsa::HostFunctionType getBlob =
       [](jsa::JSContext &context, const jsa::Value &thisVal,
@@ -749,7 +749,7 @@ TEST(JSCContext, codeSyntaxError) {
     EXPECT_STREQ(error.what(), "\nSyntaxError: Unexpected end of script\n"
                                "no stack");
   };
-  auto context = std::make_unique<JSCContext>(errorPrint);
+  auto context = std::make_unique<JSCContext>(0, errorPrint);
   jsa::Value result = context->evaluateJavaScript("qwe823-qe,sd.a.", "internal://", 0);
   EXPECT_EQ(result.isNull(), true);
 }
@@ -761,7 +761,7 @@ TEST(JSCContext, undefinedError) {
                                "    at f (internal://:1:21)\n"
                                "    at global code (internal://:1:31)");
   };
-  auto context = std::make_unique<JSCContext>(errorPrint);
+  auto context = std::make_unique<JSCContext>(0, errorPrint);
   jsa::Value result = context->evaluateJavaScript("function f(obj) {obj.abc()}; f(null);", "internal://", 0);
   EXPECT_EQ(result.isNull(), true);
 }
@@ -772,12 +772,12 @@ TEST(JSCContext, test) {
                                "ReferenceError: Can't find variable: setTimeout\n"
                                "    at global code (internal://:1:11)");
   };
-  auto context = std::make_unique<JSCContext>(errorPrint);
+  auto context = std::make_unique<JSCContext>(0, errorPrint);
   context->evaluateJavaScript("setTimeout('12345');", "internal://", 0);
 }
 
 TEST(JSContext, window) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
   jsa::Value result = context->evaluateJavaScript("window == globalThis", "internal://", 0);
   EXPECT_EQ(result.getBool(), true);
   jsa::Object global = context->global();

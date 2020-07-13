@@ -48,9 +48,13 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
-  auto fn = [](void *data, const char *errmsg) {
+  auto fn = [](void *data, int32_t contextIndex, const char *errmsg) {
     auto ctx = static_cast<BridgeCallback::Context *>(data);
     JSContext &context = ctx->_context;
+
+    if (!BridgeCallback::checkContext(context, contextIndex)) {
+      return;
+    }
 
     if (errmsg != nullptr) {
       ctx->_callback->getObject(context).getFunction(context).call(
@@ -64,7 +68,7 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   };
 
   BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext),
-                                                     [&fn](void *data) { getDartMethod()->refreshPaint(data, fn); });
+                                                     [&fn](void *data, int32_t contextIndex) { getDartMethod()->refreshPaint(data, contextIndex, fn); });
 
   return Value::undefined();
 }
@@ -101,15 +105,15 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
-  auto fn = [](void *data, int8_t result) {
+  auto fn = [](void *data, int32_t contextIndex, int8_t result) {
     auto ctx = static_cast<BridgeCallback::Context *>(data);
     JSContext &context = ctx->_context;
     ctx->_callback->getObject(context).getFunction(context).call(context, {Value(static_cast<bool>(result))});
     delete ctx;
   };
 
-  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext), [&jsBlob, &name, &fn](void *data) {
-    getDartMethod()->matchImageSnapshot(jsBlob->bytes(), jsBlob->size(), name.c_str(), data, fn);
+  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext), [&jsBlob, &name, &fn](void *data, int32_t contextIndex) {
+    getDartMethod()->matchImageSnapshot(data, contextIndex, jsBlob->bytes(), jsBlob->size(), name.c_str(), fn);
   });
 
   return Value::undefined();

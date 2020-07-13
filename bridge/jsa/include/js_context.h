@@ -165,6 +165,9 @@ public:
   /// verify is JS Engine is ready to use
   virtual bool isValid() = 0;
 
+  /// get current
+  virtual int32_t getContextIndex() = 0;
+
 protected:
   friend class Pointer;
   friend class PropNameID;
