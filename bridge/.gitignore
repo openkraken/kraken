@@ -3,6 +3,7 @@ xcschememanagement.plist
 cmake-build-ios
 cmake-build-ios-x64
 cmake-build-ios-arm64
+cmake-build-ios-arm
 cmake-build-ios
 cmake-build-debug
 cmake-build-release
