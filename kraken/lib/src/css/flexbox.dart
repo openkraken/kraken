@@ -179,7 +179,22 @@ class _FlexShortHand {
     if (group.length == 0) return;
 
     if (group.length == 1) {
-      flexGrow = group[0];
+      String flexValue = group[0];
+      if (flexValue == 'initial') {
+        flexGrow = '0';
+        flexShrink = '1';
+        flexBasis = 'auto';
+      } else if (flexValue == 'auto') {
+        flexGrow = '1';
+        flexShrink = '1';
+        flexBasis = 'auto';
+      } else if (flexValue == 'none') {
+        flexGrow = '0';
+        flexShrink = '0';
+        flexBasis = 'auto';
+      } else {
+        flexGrow = group[0];
+      }
     } else if (group.length == 2) {
       flexGrow = group[0];
 
