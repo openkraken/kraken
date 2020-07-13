@@ -14,7 +14,7 @@
 using namespace alibaba;
 using namespace jsc;
 
-void normalPrint(const jsa::JSError &error) {
+void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
   std::cerr << error.what() << std::endl;
   FAIL();
 }
@@ -327,7 +327,7 @@ function fibonacci(num) {
 }
 
 TEST(JSCContext, callFunctionWithException) {
-  auto errorPrint = [](const jsa::JSError &error) {
+  auto errorPrint = [](alibaba::jsa::JSContext &context, const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
                                "Error: 1234\n"
                                "    at throwAnError");
@@ -426,7 +426,7 @@ TEST(JSCContext, hostFunctionWithThis) {
 }
 
 TEST(JSCContext, hostFunctionThrowError) {
-  auto errorPrint = [](const jsa::JSError &error) {
+  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
                                "Error: ops !!\n"
                                "    at global code");
@@ -745,7 +745,7 @@ TEST(JSCContext, getHostObject) {
 }
 
 TEST(JSCContext, codeSyntaxError) {
-  auto errorPrint = [](const jsa::JSError &error) {
+  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\nSyntaxError: Unexpected end of script\n"
                                "no stack");
   };
@@ -755,7 +755,7 @@ TEST(JSCContext, codeSyntaxError) {
 }
 
 TEST(JSCContext, undefinedError) {
-  auto errorPrint = [](const jsa::JSError &error) {
+  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
                                "TypeError: null is not an object (evaluating 'obj.abc')\n"
                                "    at f (internal://:1:21)\n"
@@ -767,7 +767,7 @@ TEST(JSCContext, undefinedError) {
 }
 
 TEST(JSCContext, test) {
-  auto errorPrint = [](const jsa::JSError &error) {
+  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
     EXPECT_STREQ(error.what(), "\n"
                                "ReferenceError: Can't find variable: setTimeout\n"
                                "    at global code (internal://:1:11)");

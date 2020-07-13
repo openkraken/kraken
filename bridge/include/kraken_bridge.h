@@ -17,22 +17,21 @@ using AsyncCallback = void (*)(void *context, int32_t contextIndex, const char* 
 using AsyncRAFCallback = void (*)(void *context, int32_t contextIndex, double result, const char* errmsg);
 using AsyncModuleCallback = void (*)(void *context, int32_t contextIndex, char *json, void *data);
 using AsyncBlobCallback = void (*)(void *context, int32_t contextIndex, const char *error, uint8_t *bytes, int32_t length);
-typedef const char *(*InvokeUIManager)(const char *);
-typedef const char *(*InvokeModule)(const char *, AsyncModuleCallback callback, void *context, int32_t contextIndex);
-typedef void (*RequestBatchUpdate)(AsyncCallback callback, void *context, int32_t contextIndex);
-typedef void (*ReloadApp)();
-typedef int32_t (*SetTimeout)(AsyncCallback callback, void *context, int32_t contextIndex, int32_t timeout);
-typedef int32_t (*SetInterval)(AsyncCallback callback, void *context, int32_t contextIndex, int32_t timeout);
-typedef int32_t (*RequestAnimationFrame)(AsyncRAFCallback callback, void *context, int32_t contextIndex);
-typedef void (*ClearTimeout)(int32_t);
-typedef void (*CancelAnimationFrame)(int32_t);
-typedef Screen *(*GetScreen)();
-typedef void (*InvokeFetch)(int32_t, const char *, const char *);
-typedef double (*DevicePixelRatio)();
-typedef const char *(*PlatformBrightness)();
-typedef void (*OnPlatformBrightnessChanged)();
-typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t contextIndex, double);
-typedef void (*OnJSError)(const char *);
+typedef const char *(*InvokeUIManager)(void *context, int32_t contextIndex, const char *json);
+typedef const char *(*InvokeModule)(void *context, int32_t contextIndex, const char *, AsyncModuleCallback callback);
+typedef void (*RequestBatchUpdate)(void *context, int32_t contextIndex, AsyncCallback callback);
+typedef void (*ReloadApp)(void *context, int32_t contextIndex);
+typedef int32_t (*SetTimeout)(void *context, int32_t contextIndex, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*SetInterval)(void *context, int32_t contextIndex, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*RequestAnimationFrame)(void *context, int32_t contextIndex, AsyncRAFCallback callback);
+typedef void (*ClearTimeout)(void *context, int32_t contextIndex, int32_t timerId);
+typedef void (*CancelAnimationFrame)(void *context, int32_t contextIndex, int32_t id);
+typedef Screen *(*GetScreen)(void *context, int32_t contextIndex);
+typedef double (*DevicePixelRatio)(void *context, int32_t contextIndex);
+typedef const char *(*PlatformBrightness)(void *context, int32_t contextIndex);
+typedef void (*OnPlatformBrightnessChanged)(void *context, int32_t contextIndex);
+typedef void (*ToBlob)(void *context, int32_t contextIndex, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio);
+typedef void (*OnJSError)(void *context, int32_t contextIndex, const char *);
 
 KRAKEN_EXPORT
 void* initJSEnginePool(int poolSize);

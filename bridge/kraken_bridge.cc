@@ -18,9 +18,9 @@ int maxPoolSize = 0;
 void **bridgePool;
 Screen screen;
 
-void printError(const alibaba::jsa::JSError &error) {
+void printError(alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(error.what());
+    kraken::getDartMethod()->onJsError(&context, context.getContextIndex(), error.what());
   } else {
     KRAKEN_LOG(ERROR) << error.what() << std::endl;
   }

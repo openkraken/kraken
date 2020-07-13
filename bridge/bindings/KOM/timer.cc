@@ -107,8 +107,8 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *data, int32_t contextIndex) {
-      return getDartMethod()->setTimeout(handleTransientCallback, data, contextIndex, timeout);
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *context, int32_t contextIndex) {
+      return getDartMethod()->setTimeout(context, contextIndex, handleTransientCallback, timeout);
     });
 
   // `-1` represents ffi error occurred.
@@ -154,8 +154,8 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
   auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *data, int32_t contextIndex) {
-      return getDartMethod()->setInterval(handlePersistentCallback, data, contextIndex, delay);
+    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *context, int32_t contextIndex) {
+      return getDartMethod()->setInterval(context, contextIndex, handlePersistentCallback, delay);
     });
 
   if (timerId == -1) {
@@ -181,7 +181,7 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
     throw JSError(context, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
-  getDartMethod()->clearTimeout(id);
+  getDartMethod()->clearTimeout(&context, context.getContextIndex(), id);
   return Value::undefined();
 }
 
@@ -202,7 +202,7 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value
                   "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
 
-  getDartMethod()->cancelAnimationFrame(id);
+  getDartMethod()->cancelAnimationFrame(&context, context.getContextIndex(), id);
 
   return Value::undefined();
 }
@@ -227,8 +227,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
                   "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *data, int32_t contextIndex) {
-    return getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, data, contextIndex);
+  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *context, int32_t contextIndex) {
+    return getDartMethod()->requestAnimationFrame(context, contextIndex, handleRAFTransientCallback);
   });
 
   // `-1` represents some error occurred.

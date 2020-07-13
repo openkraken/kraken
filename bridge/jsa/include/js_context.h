@@ -46,7 +46,7 @@ template <typename T> using ArrayBufferDeallocator = void (*)(T *bytes);
 using HostFunctionType =
   std::function<Value(JSContext &context, const Value &thisVal, const Value *args, size_t count)>;
 
-using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
+using JSExceptionHandler = std::function<void(JSContext &context, const jsa::JSError &error)>;
 
 /// A function which has this type can be registered as a class callable from
 /// Javascript using Function::createFromClassFunction().

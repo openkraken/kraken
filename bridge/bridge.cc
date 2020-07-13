@@ -54,7 +54,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
+  const char *result = getDartMethod()->invokeUIManager(&context, context.getContextIndex(), messageStr.c_str());
   std::string resultStr = std::string(result);
 
   if (resultStr.find("Error:", 0) != std::string::npos) {
@@ -112,7 +112,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   const char *result =
     BridgeCallback::instance()->registerCallback<const char *>(std::move(callbackContext), [&messageStr](void *data, int32_t contextIndex) {
-      return getDartMethod()->invokeModule(messageStr.c_str(), handleInvokeModuleTransientCallback, data, contextIndex);
+      return getDartMethod()->invokeModule(data, contextIndex, messageStr.c_str(), handleInvokeModuleTransientCallback);
     });
 
   if (result == nullptr) {
@@ -214,7 +214,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [](void *data, int32_t contextIndex) { getDartMethod()->requestBatchUpdate(handleTransientCallback, data, contextIndex); });
+    std::move(callbackContext), [](void *data, int32_t contextIndex) { getDartMethod()->requestBatchUpdate(data, contextIndex, handleTransientCallback); });
 
   return Value::undefined();
 }
@@ -225,14 +225,14 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
  * JSRuntime
  */
 JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler& handler): contextIndex(contextIndex) {
-  auto errorHandler = [handler, this](const alibaba::jsa::JSError &error) {
-    handler(error);
+  auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
+    handler(context, error);
     // trigger window.onerror handler.
     const alibaba::jsa::Value &errorObject = error.value();
-    context->global()
-      .getPropertyAsObject(*context, "__global_onerror_handler__")
-      .getFunction(*context)
-      .call(*context, Value(*context, errorObject));
+    context.global()
+      .getPropertyAsObject(context, "__global_onerror_handler__")
+      .getFunction(context)
+      .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
   context = alibaba::jsc::createJSContext(contextIndex, errorHandler);
@@ -342,7 +342,7 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
       this->handleModuleListener(args);
     }
   } catch (JSError &error) {
-    handler_(error);
+    handler_(*context, error);
   }
 }
 
