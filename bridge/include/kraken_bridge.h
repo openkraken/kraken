@@ -13,10 +13,11 @@ struct Screen {
   double width;
   double height;
 };
-using AsyncCallback = void (*)(void *context, int32_t contextIndex, const char* errmsg);
-using AsyncRAFCallback = void (*)(void *context, int32_t contextIndex, double result, const char* errmsg);
+using AsyncCallback = void (*)(void *context, int32_t contextIndex, const char *errmsg);
+using AsyncRAFCallback = void (*)(void *context, int32_t contextIndex, double result, const char *errmsg);
 using AsyncModuleCallback = void (*)(void *context, int32_t contextIndex, char *json, void *data);
-using AsyncBlobCallback = void (*)(void *context, int32_t contextIndex, const char *error, uint8_t *bytes, int32_t length);
+using AsyncBlobCallback = void (*)(void *context, int32_t contextIndex, const char *error, uint8_t *bytes,
+                                   int32_t length);
 typedef const char *(*InvokeUIManager)(void *context, int32_t contextIndex, const char *json);
 typedef const char *(*InvokeModule)(void *context, int32_t contextIndex, const char *, AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(void *context, int32_t contextIndex, AsyncCallback callback);
@@ -30,23 +31,28 @@ typedef Screen *(*GetScreen)(void *context, int32_t contextIndex);
 typedef double (*DevicePixelRatio)(void *context, int32_t contextIndex);
 typedef const char *(*PlatformBrightness)(void *context, int32_t contextIndex);
 typedef void (*OnPlatformBrightnessChanged)(void *context, int32_t contextIndex);
-typedef void (*ToBlob)(void *context, int32_t contextIndex, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio);
+typedef void (*ToBlob)(void *context, int32_t contextIndex, AsyncBlobCallback blobCallback, int32_t elementId,
+                       double devicePixelRatio);
 typedef void (*OnJSError)(void *context, int32_t contextIndex, const char *);
 
 KRAKEN_EXPORT
-void* initJSEnginePool(int poolSize);
+void *initJSContextPool(int poolSize);
 KRAKEN_EXPORT
-void disposeEngine(void *context, int32_t contextIndex);
+void disposeContext(void *context, int32_t contextIndex);
 KRAKEN_EXPORT
-int32_t allocateNewJSEngine();
+int32_t allocateNewContext();
 KRAKEN_EXPORT
-void *getJSEngine(int32_t);
+void *getJSContext(int32_t contextIndex);
 KRAKEN_EXPORT
-int32_t checkEngineIndex(int32_t contextIndex);
+int32_t checkContextIndex(int32_t contextIndex);
 KRAKEN_EXPORT
-int32_t checkEngine(void *context, int32_t contextIndex);
+int32_t checkContext(void *context, int32_t contextIndex);
 KRAKEN_EXPORT
-void evaluateScripts(void* context, int32_t contextIndex, const char *code, const char *bundleFilename, int startLine);
+void muteContext(void *context, int32_t contextIndex);
+KRAKEN_EXPORT
+void unmuteContext(void *context, int32_t contextIndex);
+KRAKEN_EXPORT
+void evaluateScripts(void *context, int32_t contextIndex, const char *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
 void reloadJsContext(void *context, int32_t contextIndex);

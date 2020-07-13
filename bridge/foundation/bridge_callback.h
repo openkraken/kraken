@@ -48,7 +48,7 @@ public:
   void disposeAllCallbacks();
 
   static bool checkContext(JSContext &context, int32_t contextIndex) {
-    auto *bridge = static_cast<kraken::JSBridge*>(getJSEngine(contextIndex));
+    auto *bridge = static_cast<kraken::JSBridge*>(getJSContext(contextIndex));
     auto currentContext = bridge->getContext();
     return currentContext == &context;
   }

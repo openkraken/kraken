@@ -26,7 +26,7 @@ void printError(alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &e
   }
 }
 
-void *initJSEnginePool(int poolSize) {
+void *initJSContextPool(int poolSize) {
   assert(inited && "JS context Pool has already inited");
   bridgePool = new void *[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -39,7 +39,7 @@ void *initJSEnginePool(int poolSize) {
   return bridgePool[0];
 }
 
-void disposeEngine(void *context, int32_t contextIndex) {
+void disposeContext(void *context, int32_t contextIndex) {
   assert(contextIndex < maxPoolSize);
   assert(bridgePool[contextIndex] != nullptr);
   assert(bridgePool[contextIndex] == context);
@@ -47,7 +47,7 @@ void disposeEngine(void *context, int32_t contextIndex) {
   delete bridge;
 }
 
-int32_t allocateNewJSEngine() {
+int32_t allocateNewContext() {
   int newIndex = poolIndex.fetch_add(std::memory_order::memory_order_acquire);
   assert(newIndex < maxPoolSize);
   auto bridge = new kraken::JSBridge(newIndex, printError);
@@ -55,30 +55,38 @@ int32_t allocateNewJSEngine() {
   return newIndex;
 }
 
-void *getJSEngine(int32_t contextIndex) {
-  assert(checkEngineIndex(contextIndex) && "getJSEngine: contextIndex is not valid.");
+void *getJSContext(int32_t contextIndex) {
+  assert(checkContextIndex(contextIndex) && "getJSContext: contextIndex is not valid.");
   return bridgePool[contextIndex];
 }
 
-int32_t checkEngineIndex(int32_t contextIndex) {
+int32_t checkContextIndex(int32_t contextIndex) {
   return contextIndex < maxPoolSize && bridgePool[contextIndex] != nullptr;
 }
 
-int32_t checkEngine(void *context, int32_t contextIndex) {
-  assert(checkEngineIndex(contextIndex) && "checkEngine: contextIndex is not valid.");
+int32_t checkContext(void *context, int32_t contextIndex) {
+  assert(checkContextIndex(contextIndex) && "checkContext: contextIndex is not valid.");
   return bridgePool[contextIndex] == context;
 }
 
+void muteContext(void *context, int32_t contextIndex) {
+
+}
+void unmuteContext(void *context, int32_t contextIndex) {
+
+}
+
+
 void evaluateScripts(void *context, int32_t contextIndex, const char *code, const char *bundleFilename, int startLine) {
-  assert(checkEngineIndex(contextIndex) && "evaluateScripts: contextIndex is not valid");
-  assert(checkEngine(context, contextIndex) && "evaluateScripts: context is not valid");
+  assert(checkContextIndex(contextIndex) && "evaluateScripts: contextIndex is not valid");
+  assert(checkContext(context, contextIndex) && "evaluateScripts: context is not valid");
   auto bridge = static_cast<kraken::JSBridge *>(context);
   bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
 }
 
 void reloadJsContext(void *context, int32_t contextIndex) {
-  assert(checkEngineIndex(contextIndex) && "reloadJSContext: contextIndex is not valid");
-  assert(checkEngine(context, contextIndex) && "reloadJSContext: context is not valid");
+  assert(checkContextIndex(contextIndex) && "reloadJSContext: contextIndex is not valid");
+  assert(checkContext(context, contextIndex) && "reloadJSContext: context is not valid");
   auto bridge = static_cast<kraken::JSBridge *>(context);
   delete bridge;
   bridge = new kraken::JSBridge(contextIndex, printError);
@@ -86,8 +94,8 @@ void reloadJsContext(void *context, int32_t contextIndex) {
 }
 
 void invokeEventListener(void *context, int32_t contextIndex, int32_t type, const char *data) {
-  assert(checkEngineIndex(contextIndex) && "invokeEventListener: contextIndex is not valid");
-  assert(checkEngine(context, contextIndex) && "invokeEventListener: context is not valid");
+  assert(checkContextIndex(contextIndex) && "invokeEventListener: contextIndex is not valid");
+  assert(checkContext(context, contextIndex) && "invokeEventListener: context is not valid");
   auto bridge = static_cast<kraken::JSBridge *>(context);
   bridge->invokeEventListener(type, data);
 }

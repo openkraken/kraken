@@ -14,9 +14,13 @@
 using namespace alibaba;
 using namespace jsc;
 
+namespace {
+
 void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
   std::cerr << error.what() << std::endl;
   FAIL();
+}
+
 }
 
 TEST(JSCContext, undefined) {
