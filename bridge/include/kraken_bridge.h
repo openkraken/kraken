@@ -15,7 +15,7 @@ struct Screen {
 };
 using AsyncCallback = void (*)(void *context, int32_t contextIndex, const char *errmsg);
 using AsyncRAFCallback = void (*)(void *context, int32_t contextIndex, double result, const char *errmsg);
-using AsyncModuleCallback = void (*)(void *context, int32_t contextIndex, char *json, void *data);
+using AsyncModuleCallback = void (*)(void *context, int32_t contextIndex, char *json);
 using AsyncBlobCallback = void (*)(void *context, int32_t contextIndex, const char *error, uint8_t *bytes,
                                    int32_t length);
 typedef const char *(*InvokeUIManager)(void *context, int32_t contextIndex, const char *json);

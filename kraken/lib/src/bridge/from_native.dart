@@ -25,7 +25,7 @@ import 'platform.dart';
 // 6. Call from C.
 
 // Register InvokeUIManager
-typedef Native_InvokeUIManager = Pointer<Utf8> Function(Pointer<Utf8>);
+typedef Native_InvokeUIManager = Pointer<Utf8> Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8>);
 typedef Native_RegisterInvokeUIManager = Void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 typedef Dart_RegisterInvokeUIManager = void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 
@@ -56,7 +56,7 @@ String handleAction(List directive) {
   }
 }
 
-String invokeUIManager(String json) {
+String invokeUIManager(Pointer<JSContext> context, int contextIndex, String json) {
   dynamic directive = jsonDecode(json);
 
   if (directive == null) {
@@ -75,9 +75,9 @@ String invokeUIManager(String json) {
   }
 }
 
-Pointer<Utf8> _invokeUIManager(Pointer<Utf8> json) {
+Pointer<Utf8> _invokeUIManager(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> json) {
   try {
-    String result = invokeUIManager(Utf8.fromUtf8(json));
+    String result = invokeUIManager(context, contextIndex, Utf8.fromUtf8(json));
     return Utf8.toUtf8(result);
   } catch (e, stack) {
     return Utf8.toUtf8('Error: $e\n$stack');
@@ -90,18 +90,19 @@ void registerInvokeUIManager() {
 }
 
 // Register InvokeModule
-typedef NativeAsyncModuleCallback = Void Function(Pointer<Utf8>, Pointer<Void>);
-typedef DartAsyncModuleCallback = void Function(Pointer<Utf8>, Pointer<Void>);
+typedef NativeAsyncModuleCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> json);
+typedef DartAsyncModuleCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> json);
 
 typedef Native_InvokeModule = Pointer<Utf8> Function(
-    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>, Pointer<Void>);
+    Pointer<JSContext> context, Int32 contextIndex,
+    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
 final Dart_RegisterInvokeModule _registerInvokeModule =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
-String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void> context) {
+String invokeModule(Pointer<JSContext> context, int contextIndex, String json, DartAsyncModuleCallback callback) {
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
@@ -110,7 +111,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       String method = args[1];
       if (method == 'getConnectivity') {
         Connection.getConnectivity((String json) {
-          callback(Utf8.toUtf8(json), context);
+          callback(context, contextIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'onConnectivityChanged') {
         Connection.onConnectivityChanged();
@@ -121,7 +122,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
       Map<String, dynamic> options = fetchArgs[1];
       fetch(url, options).then((Response response) {
         String json = jsonEncode(['', response.statusCode, response.data]);
-        callback(Utf8.toUtf8(json), context);
+        callback(context, contextIndex, Utf8.toUtf8(json));
       }).catchError((e, stack) {
         String errorMessage = e.message;
         String json;
@@ -130,13 +131,13 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
         } else {
           json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
         }
-        callback(Utf8.toUtf8(json), context);
+        callback(context, contextIndex, Utf8.toUtf8(json));
       });
     } else if (module == 'DeviceInfo') {
       String method = args[1];
       if (method == 'getDeviceInfo') {
         DeviceInfo.getDeviceInfo().then((String json) {
-          callback(Utf8.toUtf8(json), context);
+          callback(context, contextIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'getHardwareConcurrency') {
         result = DeviceInfo.getHardwareConcurrency().toString();
@@ -148,40 +149,40 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
         String key = methodArgs[0];
         // @TODO: catch error case
         AsyncStorage.getItem(key).then((String value) {
-          callback(Utf8.toUtf8(value ?? EMPTY_STRING), context);
+          callback(context, contextIndex, Utf8.toUtf8(value ?? EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         String value = methodArgs[1];
         AsyncStorage.setItem(key, value).then((bool isSuccess) {
-          callback(Utf8.toUtf8(isSuccess.toString()), context);
+          callback(context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'removeItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         AsyncStorage.removeItem(key).then((bool isSuccess) {
-          callback(Utf8.toUtf8(isSuccess.toString()), context);
+          callback(context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'getAllKeys') {
         // @TODO: catch error case
         AsyncStorage.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
-          callback(Utf8.toUtf8(jsonEncode(list)), context);
+          callback(context, contextIndex, Utf8.toUtf8(jsonEncode(list)));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'clear') {
         AsyncStorage.clear().then((bool isSuccess) {
-          callback(Utf8.toUtf8(isSuccess.toString()), context);
+          callback(context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       }
     } else if (module == 'MQTT') {
@@ -220,7 +221,7 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
           options = positionArgs[0];
         }
         Geolocation.getCurrentPosition(options, (json) {
-          callback(Utf8.toUtf8(json), context);
+          callback(context, contextIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'watchPosition') {
         List positionArgs = args[2];
@@ -252,29 +253,29 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
           } else {
             ret = jsonEncode(result);
           }
-          callback(Utf8.toUtf8(ret), context);
+          callback(context, contextIndex, Utf8.toUtf8(ret));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
         KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
-          emitModuleEvent(jsonEncode(['MethodChannel', call.method, call.arguments]));
+          emitModuleEvent(context, contextIndex, jsonEncode(['MethodChannel', call.method, call.arguments]));
         });
       }
     } else if (module == 'Clipboard') {
       String method = args[1];
       if (method == 'readText') {
         KrakenClipboard.readText().then((String value) {
-          callback(Utf8.toUtf8(value ?? ''), context);
+          callback(context, contextIndex, Utf8.toUtf8(value ?? ''));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'writeText') {
         List methodArgs = args[2];
         KrakenClipboard.writeText(methodArgs[0]).then((_) {
-          callback(Utf8.toUtf8(EMPTY_STRING), context);
+          callback(context, contextIndex, Utf8.toUtf8(EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(Utf8.toUtf8('Error: $e\n$stack'), context);
+          callback(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       }
     } else if (module == 'WebSocket') {
@@ -323,8 +324,9 @@ String invokeModule(String json, DartAsyncModuleCallback callback, Pointer<Void>
 }
 
 Pointer<Utf8> _invokeModule(
-    Pointer<Utf8> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback, Pointer<Void> context) {
-  String result = invokeModule(Utf8.fromUtf8(json), callback.asFunction(), context);
+    Pointer<JSContext> context, int contextIndex,
+    Pointer<Utf8> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+  String result = invokeModule(context, contextIndex, Utf8.fromUtf8(json), callback.asFunction());
   return Utf8.toUtf8(result);
 }
 
@@ -334,16 +336,16 @@ void registerInvokeModule() {
 }
 
 // Register reloadApp
-typedef Native_ReloadApp = Void Function();
+typedef Native_ReloadApp = Void Function(Pointer<JSContext> context, Int32 contextIndex);
 typedef Native_RegisterReloadApp = Void Function(Pointer<NativeFunction<Native_ReloadApp>>);
 typedef Dart_RegisterReloadApp = void Function(Pointer<NativeFunction<Native_ReloadApp>>);
 
 final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
-void _reloadApp() {
+void _reloadApp(Pointer<JSContext> context, int contextIndex) {
   try {
-    reloadApp();
+    reloadApp(context, contextIndex);
   } catch (e, stack) {
     print('Dart Error: $e\n$stack');
   }
@@ -354,13 +356,13 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
-typedef NativeAsyncCallback = Void Function(Pointer<Void> context, Pointer<Utf8>);
-typedef DartAsyncCallback = void Function(Pointer<Void> context, Pointer<Utf8>);
-typedef NativeRAFAsyncCallback = Void Function(Pointer<Void> context, Double data, Pointer<Utf8>);
-typedef DartRAFAsyncCallback = void Function(Pointer<Void> context, double data, Pointer<Utf8>);
+typedef NativeAsyncCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> timeout);
+typedef DartAsyncCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> timeout);
+typedef NativeRAFAsyncCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Double data, Pointer<Utf8>);
+typedef DartRAFAsyncCallback = void Function(Pointer<JSContext> context, int contextIndex, double data, Pointer<Utf8>);
 
 // Register requestBatchUpdate
-typedef Native_RequestBatchUpdate = Void Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>);
+typedef Native_RequestBatchUpdate = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>);
 typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 
@@ -368,13 +370,13 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
     .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
     .asFunction();
 
-void _requestBatchUpdate(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context) {
+void _requestBatchUpdate(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
   return requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(context, nullptr);
+      func(context, contextIndex, nullptr);
     } catch (e, stack) {
-      func(context, Utf8.toUtf8('Error: $e\n$stack'));
+      func(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -385,20 +387,20 @@ void registerRequestBatchUpdate() {
 }
 
 // Register setTimeout
-typedef Native_SetTimeout = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
+typedef Native_SetTimeout = Int32 Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
-int _setTimeout(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
+int _setTimeout(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(context, nullptr);
+      func(context, contextIndex, nullptr);
     } catch (e, stack) {
-      func(context, Utf8.toUtf8('Error: $e\n$stack'));
+      func(context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -410,20 +412,20 @@ void registerSetTimeout() {
 }
 
 // Register setInterval
-typedef Native_SetInterval = Int32 Function(Pointer<NativeFunction<NativeAsyncCallback>>, Pointer<Void>, Int32);
+typedef Native_SetInterval = Int32 Function(Pointer<JSContext>, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetInterval = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetInterval _registerSetInterval =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
-int _setInterval(Pointer<NativeFunction<NativeAsyncCallback>> callback, Pointer<Void> context, int timeout) {
+int _setInterval(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(context, nullptr);
+      func(context, contextIndex, nullptr);
     } catch (e, stack) {
-      func(context, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(context, contextIndex, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -452,7 +454,7 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Pointer<NativeFunction<NativeRAFAsyncCallback>>, Pointer<Void>);
+typedef Native_RequestAnimationFrame = Int32 Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -460,13 +462,13 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(Pointer<NativeFunction<NativeRAFAsyncCallback>> callback, Pointer<Void> context) {
+int _requestAnimationFrame(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   return requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
-      func(context, highResTimeStamp, nullptr);
+      func(context, contextIndex, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(context, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
+      func(context, contextIndex, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -480,7 +482,7 @@ void registerRequestAnimationFrame() {
 }
 
 // Register cancelAnimationFrame
-typedef Native_CancelAnimationFrame = Void Function(Int32);
+typedef Native_CancelAnimationFrame = Void Function(Pointer<JSContext> context, Int32 contextIndex, Int32 id);
 typedef Native_RegisterCancelAnimationFrame = Void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
 typedef Dart_RegisterCancelAnimationFrame = void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
 
@@ -488,8 +490,9 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>('registerCancelAnimationFrame')
     .asFunction();
 
-void _cancelAnimationFrame(int timerId) {
-  cancelAnimationFrame(timerId);
+void _cancelAnimationFrame(Pointer<JSContext> context, int contextIndex, int timerId) {
+  // TODO cancelAnimationFrame
+//  cancelAnimationFrame(context, contextIndex, timerId);
 }
 
 void registerCancelAnimationFrame() {

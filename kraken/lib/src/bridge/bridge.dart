@@ -4,10 +4,17 @@
  */
 import 'from_native.dart';
 import 'to_native.dart';
+import 'dart:ffi';
 
 /// Init bridge
-void initBridge() {
+Pointer<JSContext> initBridge(int poolSize, bool firstView) {
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
-  initJSEngine();
+
+  if (firstView) {
+    return initJSContextPool(poolSize);
+  } else {
+    int contextIndex = allocateNewContext();
+    return getJSContext(contextIndex);
+  }
 }

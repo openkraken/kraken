@@ -73,7 +73,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-void handleInvokeModuleTransientCallback(void *context, int32_t contextIndex, char *json, void *data) {
+void handleInvokeModuleTransientCallback(void *context, int32_t contextIndex, char *json) {
   auto *obj = static_cast<BridgeCallback::Context *>(context);
   JSContext &_context = obj->_context;
 
