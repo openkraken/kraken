@@ -168,6 +168,15 @@ public:
   /// get current
   virtual int32_t getContextIndex() = 0;
 
+  /// verify is JS Engine is freeze.
+  virtual bool isFreeze() = 0;
+
+  // set js context to freeze
+  virtual void freeze() = 0;
+
+  // set js context to unfreeze
+  virtual void unFreeze() = 0;
+
 protected:
   friend class Pointer;
   friend class PropNameID;

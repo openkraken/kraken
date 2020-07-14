@@ -42,6 +42,11 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
     throw JSError(context, "Failed to execute '__kraken_ui_manager__': 1 argument required, but only 0 present.");
   }
 
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_ui_manager__': context is freeze" << std::endl;
+    return Value::undefined();
+  }
+
   auto &&message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
 
@@ -78,6 +83,11 @@ void handleInvokeModuleTransientCallback(void *context, int32_t contextIndex, ch
 
   if (!_context.isValid()) return;
 
+  if (_context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_invoke_module': context is freeze" << std::endl;
+    return;
+  }
+
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_invoke_module__': callback is null.");
     obj->_context.reportError(error);
@@ -89,6 +99,10 @@ void handleInvokeModuleTransientCallback(void *context, int32_t contextIndex, ch
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute __kraken_invoke_module__: context is freeze" << std::endl;
+    return Value::undefined();
+  }
 
   const Value &message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
@@ -138,6 +152,11 @@ Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *ar
     throw JSError(context, "Failed to execute '__kraken_ui_listener__': parameter 1 (callback) must be an function.");
   }
 
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_ui_listener__': context is freeze" << std::endl;
+    return Value::undefined();
+  }
+
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
@@ -154,6 +173,11 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
     throw JSError(context,
                   "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '_kraken_module_listener__': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -173,6 +197,11 @@ void handleTransientCallback(void *data, int32_t contextIndex, const char *errms
   }
 
   if (!_context.isValid()) return;
+
+  if (_context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_request_batch_update__': context is freeze" << std::endl;
+    return;
+  }
 
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
@@ -199,6 +228,11 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
     throw JSError(context,
                   "Failed to execute '__kraken_request_batch_update__': parameter 1 (callback) must be an function.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_request_batch_update': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -289,6 +323,11 @@ void JSBridge::detachDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::handleUIListener(const char *args) {
+  if (context->isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_ui_listener__: context is freeze'" << std::endl;
+    return;
+  }
+
   std::unique_lock<std::mutex> lock = krakenUIListenerList.getLock();
   auto list = krakenUIListenerList.getVector();
   for (const auto &callback : *list) {
@@ -306,6 +345,11 @@ void JSBridge::handleUIListener(const char *args) {
 }
 
 void JSBridge::handleModuleListener(const char *args) {
+  if (context->isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute '__kraken_module_listener__': context is freeze" << std::endl;
+    return;
+  }
+
   std::unique_lock<std::mutex> lock = krakenModuleListenerList.getLock();
   auto list = krakenModuleListenerList.getVector();
   for (const auto &callback : *list) {
@@ -331,6 +375,11 @@ const int MODULE_EVENT = 1;
 
 void JSBridge::invokeEventListener(int32_t type, const char *args) {
   if (!context->isValid()) return;
+
+  if (context->isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to invokeEventListener: context is freeze" << std::endl;
+    return;
+  }
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeEventListener VERBOSE]: message " << args;

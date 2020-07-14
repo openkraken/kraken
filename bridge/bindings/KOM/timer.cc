@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
+#include "foundation/logging.h"
 #include "jsa.h"
 
 namespace kraken {
@@ -23,6 +24,11 @@ void handlePersistentCallback(void *context, int32_t contextIndex, const char *e
   }
 
   if (!_context.isValid()) return;
+
+  if (_context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to trigger callback: timer callback is null." << std::endl;
+    return;
+  }
 
   if (obj->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
@@ -51,6 +57,11 @@ void handleRAFPersistentCallback(void *context, int32_t contextIndex, double res
   }
 
   if (!_context.isValid()) return;
+
+  if (_context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to trigger callback: context is freeze" << std::endl;
+    return;
+  }
 
   if (obj->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
@@ -85,6 +96,11 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
 
   if (!args->isObject() || !args->getObject(context).isFunction(context)) {
     throw JSError(context, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute 'setTimeout': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -126,6 +142,11 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
 
   if (!args->isObject() || !args->getObject(context).isFunction(context)) {
     throw JSError(context, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute 'setInterval': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -170,6 +191,11 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
     throw JSError(context, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
   }
 
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute 'clearTimeout': context is freeze" << std::endl;
+    return Value::undefined();
+  }
+
   const Value &timerId = args[0];
   if (!timerId.isNumber()) {
     throw JSError(context, "Failed to execute 'clearTimeout': parameter 1  is not an timer kind.");
@@ -188,6 +214,11 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
 Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
     throw JSError(context, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute 'cancelAnimationFrame': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   const Value &requestId = args[0];
@@ -214,6 +245,11 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
 
   if (!args[0].isObject() || !args[0].getObject(context).isFunction(context)) {
     throw JSError(context, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+  }
+
+  if (context.isFreeze()) {
+    KRAKEN_LOG(ERROR) << "Failed to execute 'requestAnimationFrame': context is freeze" << std::endl;
+    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));

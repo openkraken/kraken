@@ -80,6 +80,10 @@ public:
 
   int32_t getContextIndex() override;
 
+  bool isFreeze() override;
+  void freeze() override;
+  void unFreeze() override;
+
   void reportError(jsa::JSError &error) override;
 
 protected:
@@ -248,6 +252,7 @@ private:
   std::atomic<bool> ctxInvalid_;
   std::string desc_;
   int32_t _contextIndex;
+  std::atomic<bool> _freeze;
   jsa::JSExceptionHandler _handler;
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;

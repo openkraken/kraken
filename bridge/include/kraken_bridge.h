@@ -48,9 +48,9 @@ int32_t checkContextIndex(int32_t contextIndex);
 KRAKEN_EXPORT
 int32_t checkContext(void *context, int32_t contextIndex);
 KRAKEN_EXPORT
-void muteContext(void *context, int32_t contextIndex);
+void freezeContext(void *context, int32_t contextIndex);
 KRAKEN_EXPORT
-void unmuteContext(void *context, int32_t contextIndex);
+void unfreezeContext(void *context, int32_t contextIndex);
 KRAKEN_EXPORT
 void evaluateScripts(void *context, int32_t contextIndex, const char *code, const char *bundleFilename, int startLine);
 

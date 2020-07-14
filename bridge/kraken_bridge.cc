@@ -65,15 +65,20 @@ int32_t checkContextIndex(int32_t contextIndex) {
 }
 
 int32_t checkContext(void *context, int32_t contextIndex) {
-  assert(checkContextIndex(contextIndex) && "checkContext: contextIndex is not valid.");
   return bridgePool[contextIndex] == context;
 }
 
-void muteContext(void *context, int32_t contextIndex) {
+void freezeContext(void *context, int32_t contextIndex) {
+  checkContext(context, contextIndex);
+}
+
+void unfreezeContext(void *context, int32_t contextIndex) {
 
 }
-void unmuteContext(void *context, int32_t contextIndex) {
 
+bool isContextFreeze(void *context) {
+  auto bridge = static_cast<kraken::JSBridge *>(context);
+  return bridge->getContext()->isFreeze();
 }
 
 
@@ -87,6 +92,7 @@ void evaluateScripts(void *context, int32_t contextIndex, const char *code, cons
 void reloadJsContext(void *context, int32_t contextIndex) {
   assert(checkContextIndex(contextIndex) && "reloadJSContext: contextIndex is not valid");
   assert(checkContext(context, contextIndex) && "reloadJSContext: context is not valid");
+  if (isContextFreeze(context)) return;
   auto bridge = static_cast<kraken::JSBridge *>(context);
   delete bridge;
   bridge = new kraken::JSBridge(contextIndex, printError);
@@ -96,6 +102,7 @@ void reloadJsContext(void *context, int32_t contextIndex) {
 void invokeEventListener(void *context, int32_t contextIndex, int32_t type, const char *data) {
   assert(checkContextIndex(contextIndex) && "invokeEventListener: contextIndex is not valid");
   assert(checkContext(context, contextIndex) && "invokeEventListener: context is not valid");
+  if (isContextFreeze(context)) return;
   auto bridge = static_cast<kraken::JSBridge *>(context);
   bridge->invokeEventListener(type, data);
 }

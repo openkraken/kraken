@@ -115,4 +115,25 @@ TEST(multiple_context, hostObject_get) {
 }
 
 
+TEST(multiple_context, globalContext) {
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
+  auto contextB = std::make_unique<JSCContext>(0, normalPrint);
+  contextA->evaluateJavaScript("String.prototype.helloworld = 1234", "", 0);
+  jsa::Value strA = contextA->evaluateJavaScript("new String('1234');", "", 0);
+  EXPECT_EQ(strA.asObject(*contextA).getProperty(*contextA, "helloworld").getNumber(), 1234);
+
+  jsa::Value strB = contextB->evaluateJavaScript("new String('1234');", "", 0);
+  EXPECT_EQ(strB.asObject(*contextB).getProperty(*contextB, "helloworld").isNumber(), false);
+}
+
+TEST(multiple_context, freeze) {
+  auto context = std::make_unique<JSCContext>(0, normalPrint);
+  EXPECT_EQ(context->isFreeze(), false);
+  context->freeze();
+  EXPECT_EQ(context->isFreeze(), true);
+  context->unFreeze();
+  EXPECT_EQ(context->isFreeze(), false);
+}
+
+
 #endif

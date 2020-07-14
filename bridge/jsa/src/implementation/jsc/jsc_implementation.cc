@@ -1234,6 +1234,16 @@ int32_t JSCContext::getContextIndex() {
   return _contextIndex;
 }
 
+bool JSCContext::isFreeze() {
+  return _freeze;
+}
+void JSCContext::freeze() {
+  _freeze = true;
+}
+void JSCContext::unFreeze() {
+  _freeze = false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler) {
   return std::make_unique<JSCContext>(contextIndex, handler);

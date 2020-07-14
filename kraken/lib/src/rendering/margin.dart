@@ -103,6 +103,10 @@ class RenderMargin extends RenderShiftedBox {
     return totalVerticalPadding;
   }
 
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+
+  }
+
   @override
   void performLayout() {
     _resolve();
