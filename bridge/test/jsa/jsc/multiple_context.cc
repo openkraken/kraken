@@ -20,7 +20,6 @@ void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
 }
 }
 
-
 TEST(multiple_context, initJSEngine) {
   std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint);
   std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(1, normalPrint);
@@ -30,5 +29,90 @@ TEST(multiple_context, initJSEngine) {
   EXPECT_EQ(contextA->global().getProperty(*contextA, "name").isUndefined(), false);
   EXPECT_EQ(contextA->global().getProperty(*contextA, "name").getNumber(), 1);
 }
+
+TEST(multiple_context, evaluateString) {
+  auto errorPrint = [](alibaba::jsa::JSContext &context, const jsa::JSError &error) {
+    EXPECT_STREQ(error.what(), "\nReferenceError: Can't find variable: A\n"
+                               "    at global code");
+  };
+
+  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(1, errorPrint);
+  contextA->evaluateJavaScript("function A() {return 'a';}", "", 0);
+  contextB->evaluateJavaScript("A()", "", 0);
+}
+
+TEST(multiple_context, hostFunction) {
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
+  auto contextB = std::make_unique<JSCContext>(1, normalPrint);
+  jsa::HostFunctionType callback =
+    [](jsa::JSContext &context, const jsa::Value &thisVal,
+       const jsa::Value *args,
+       size_t count) -> jsa::Value { return jsa::Value(12345); };
+  JSA_BINDING_FUNCTION(*contextA, contextA->global(), "helloworld", 0, callback);
+
+  jsa::Function helloworldA = contextA->global().getPropertyAsFunction(*contextA, "helloworld");
+  jsa::Value result = helloworldA.call(*contextA);
+  EXPECT_EQ(result.getNumber(), 12345);
+  EXPECT_EQ(helloworldA.isHostFunction(*contextA), true);
+
+  JSA_BINDING_FUNCTION(*contextB, contextB->global(), "helloworld", 0, callback);
+  jsa::Function helloworldB = contextB->global().getPropertyAsFunction(*contextB, "helloworld");
+  EXPECT_EQ(helloworldB.isHostFunction(*contextB), true);
+  jsa::Value resultB = helloworldB.call(*contextB);
+  EXPECT_EQ(resultB.getNumber(), 12345);
+}
+
+TEST(multiple_context, hostObject_get) {
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
+  auto contextB = std::make_unique<JSCContext>(0, normalPrint);
+  class User : public jsa::HostObject, std::enable_shared_from_this<User> {
+    jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
+      auto _prop = prop.utf8(context);
+      if (_prop == "helloworld") {
+        return jsa::Value(12345);
+      } else if (_prop == "getName") {
+        auto func = jsa::Function::createFromHostFunction(
+          context, jsa::PropNameID::forAscii(context, "getName"), 1, getName);
+        return jsa::Value(context, func);
+      }
+      return jsa::Value::undefined();
+    }
+
+    static jsa::Value getName(jsa::JSContext &context,
+                              const jsa::Value &thisVal, const jsa::Value *args,
+                              size_t count) {
+      const jsa::Value &name = args[0];
+      if (name.getString(context).utf8(context) == "andycall") {
+        return jsa::Value(context, jsa::String::createFromAscii(context, "chenghuai.dtc"));
+      } else if (name.getString(context).utf8(context) == "wssgcg1213") {
+        return jsa::Value(context, jsa::String::createFromAscii(context, "zhuoling.lcl"));
+      }
+      return jsa::Value::undefined();
+    };
+  };
+  jsa::Object userA =
+    jsa::Object::createFromHostObject(*contextA, std::make_shared<User>());
+  jsa::Value resultA = userA.getProperty(*contextA, "helloworld");
+  EXPECT_EQ(resultA.getNumber(), 12345);
+  jsa::Value undefinedA = userA.getProperty(*contextA, "unknown");
+  EXPECT_EQ(undefinedA.isUndefined(), true);
+
+  jsa::Function getNameA = userA.getPropertyAsFunction(*contextA, "getName");
+  jsa::Value nameA = getNameA.call(*contextA, "andycall");
+  EXPECT_EQ(nameA.getString(*contextA).utf8(*contextA), "chenghuai.dtc");
+
+  jsa::Object userB =
+    jsa::Object::createFromHostObject(*contextA, std::make_shared<User>());
+  jsa::Value resultB = userB.getProperty(*contextA, "helloworld");
+  EXPECT_EQ(resultB.getNumber(), 12345);
+  jsa::Value undefinedB = userB.getProperty(*contextA, "unknown");
+  EXPECT_EQ(undefinedB.isUndefined(), true);
+
+  jsa::Function getNameB = userB.getPropertyAsFunction(*contextA, "getName");
+  jsa::Value nameB = getNameB.call(*contextA, "andycall");
+  EXPECT_EQ(nameB.getString(*contextA).utf8(*contextA), "chenghuai.dtc");
+}
+
 
 #endif
