@@ -727,7 +727,6 @@ class RenderFlowLayout extends RenderBox
         containerCrossAxisExtent = elementWidth ?? size.width;
         break;
     }
-
     final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
