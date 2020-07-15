@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/element.dart';
-import 'package:meta/meta.dart';
 
 const String PRE = 'PRE';
 
@@ -12,6 +11,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class PreElement extends Element {
-  PreElement({@required int targetId, @required ElementManager elementManager})
+  PreElement(targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: PRE, defaultStyle: _defaultStyle);
 }

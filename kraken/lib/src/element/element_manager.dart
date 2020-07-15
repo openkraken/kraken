@@ -20,46 +20,46 @@ Element _createElement(
   Element element;
   switch (type) {
     case DIV:
-      element = DivElement(targetId: id, elementManager: elementManager);
+      element = DivElement(id, elementManager);
       break;
     case SPAN:
-      element = SpanElement(targetId: id, elementManager: elementManager);
+      element = SpanElement(id, elementManager);
       break;
     case STRONG:
-      element = StrongElement(targetId: id, elementManager: elementManager);
+      element = StrongElement(id, elementManager);
       break;
     case IMAGE:
-      element = ImageElement(targetId: id, elementManager: elementManager);
+      element = ImageElement(id, elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(targetId: id, elementManager: elementManager);
+      element = ParagraphElement(id, elementManager);
       break;
     case INPUT:
-      element = InputElement(targetId: id, elementManager: elementManager);
+      element = InputElement(id, elementManager);
       break;
     case PRE:
-      element = PreElement(targetId: id, elementManager: elementManager);
+      element = PreElement(id, elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(targetId: id, elementManager: elementManager);
+      element = CanvasElement(id, elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(targetId: id, elementManager: elementManager);
+      element = AnimationPlayerElement(id, elementManager);
       break;
     case VIDEO:
-      element = VideoElement(targetId: id, elementManager: elementManager);
+      element = VideoElement(id, elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(targetId: id, elementManager: elementManager);
+      element = CameraPreviewElement(id, elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(targetId: id, elementManager: elementManager);
+      element = IFrameElement(id, elementManager);
       break;
     case AUDIO:
-      element = AudioElement(targetId: id, elementManager: elementManager);
+      element = AudioElement(id, elementManager);
       break;
     default:
-      element = DivElement(targetId: id, elementManager: elementManager);
+      element = DivElement(id, elementManager);
       print('ERROR: unexpected element type "$type"');
   }
 

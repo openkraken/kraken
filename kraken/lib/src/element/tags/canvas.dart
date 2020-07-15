@@ -7,7 +7,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
-import 'package:meta/meta.dart';
 
 const String CANVAS = 'CANVAS';
 
@@ -18,9 +17,10 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class CanvasElement extends Element {
-  CanvasElement({@required int targetId, @required ElementManager elementManager})
+  CanvasElement(int targetId, ElementManager elementManager)
       : super(
-          targetId: targetId,
+          targetId,
+          elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           tagName: CANVAS,

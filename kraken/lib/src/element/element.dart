@@ -539,6 +539,7 @@ class Element extends Node
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
@@ -551,6 +552,7 @@ class Element extends Node
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateAlignment(flowLayout, style);
       return flowLayout;

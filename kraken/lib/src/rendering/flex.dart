@@ -260,6 +260,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     JustifyContent justifyContent = JustifyContent.start,
     AlignItems alignItems = AlignItems.stretch,
     int targetId,
+    ElementManager elementManager,
     CSSStyleDeclaration style,
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
@@ -269,7 +270,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         _flexWrap = flexWrap,
         _justifyContent = justifyContent,
         _alignItems = alignItems,
-        super(targetId: targetId, style: style) {
+        super(targetId: targetId, style: style, elementManager: elementManager) {
     addAll(children);
   }
 

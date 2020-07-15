@@ -5,7 +5,6 @@
 
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/css.dart';
@@ -26,8 +25,8 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId)
-      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  AnimationPlayerElement(int targetId, ElementManager elementManager)
+      : super(targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   String get objectFit => style['objectFit'];
 

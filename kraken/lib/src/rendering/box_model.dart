@@ -6,6 +6,7 @@
 import 'dart:ui';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'padding.dart';
 
@@ -61,17 +62,23 @@ class RenderLayoutBox extends RenderBoxModel
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         CSSComputedMixin {
-  RenderLayoutBox({int targetId, CSSStyleDeclaration style}) : super(targetId: targetId, style: style);
+  RenderLayoutBox({
+    int targetId,
+    CSSStyleDeclaration style,
+    ElementManager elementManager
+  }) : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
 class RenderBoxModel extends RenderBox with RenderPaddingMixin {
-  RenderBoxModel({this.targetId, this.style});
+  RenderBoxModel({this.targetId, this.style, this.elementManager});
 
   // id of current element
   int targetId;
 
   // Element style;
   CSSStyleDeclaration style;
+
+  ElementManager elementManager;
 
   RenderBoxModel fromCopy(RenderBoxModel newBox) {
     if (padding != null) {

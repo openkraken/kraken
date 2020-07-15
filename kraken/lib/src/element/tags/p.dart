@@ -3,11 +3,10 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/element.dart';
-import 'package:meta/meta.dart';
 
 const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
-  ParagraphElement({@required int targetId, @required ElementManager elementManager})
+  ParagraphElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: PARAGRAPH);
 }

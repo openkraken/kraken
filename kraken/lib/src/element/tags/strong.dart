@@ -4,13 +4,12 @@
  */
 
 import 'package:kraken/element.dart';
-import 'package:meta/meta.dart';
 
 const String STRONG = 'STRONG';
 
 const Map<String, dynamic> _defaultStyle = {'display': 'inline', 'fontWeight': 'bold'};
 
 class StrongElement extends Element {
-  StrongElement({@required int targetId, @required ElementManager elementManager})
+  StrongElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: STRONG, defaultStyle: _defaultStyle);
 }

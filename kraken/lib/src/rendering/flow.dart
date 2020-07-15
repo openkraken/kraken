@@ -31,6 +31,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     VerticalDirection verticalDirection = VerticalDirection.down,
     CSSStyleDeclaration style,
     int targetId,
+    ElementManager elementManager
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
@@ -45,7 +46,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         _crossAxisAlignment = crossAxisAlignment,
         _textDirection = textDirection,
         _verticalDirection = verticalDirection,
-        super(targetId: targetId, style: style) {
+        super(targetId: targetId, style: style, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -538,8 +539,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double contentWidth = getElementComputedWidth(targetId);
-    double contentHeight = getElementComputedHeight(targetId);
+    double contentWidth = getElementComputedWidth(targetId, elementManager);
+    double contentHeight = getElementComputedHeight(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
