@@ -20,17 +20,13 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class VideoElement extends Element {
-  VideoElement({
-    @required int targetId,
-    @required ElementManager elementManager
-})
+  VideoElement({@required int targetId, @required ElementManager elementManager})
       : super(
-          targetId: targetId,
-          defaultStyle: _defaultStyle,
-          allowChildren: false,
-          tagName: VIDEO,
-          elementManager: elementManager
-        );
+            targetId: targetId,
+            defaultStyle: _defaultStyle,
+            allowChildren: false,
+            tagName: VIDEO,
+            elementManager: elementManager);
 
   VideoPlayerController controller;
 

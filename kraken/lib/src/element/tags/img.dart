@@ -29,7 +29,12 @@ class ImageElement extends Element {
   double _propertyHeight;
 
   ImageElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, defaultStyle: _defaultStyle, allowChildren: false, tagName: IMAGE, elementManager: elementManager) {
+      : super(
+            targetId: targetId,
+            defaultStyle: _defaultStyle,
+            allowChildren: false,
+            tagName: IMAGE,
+            elementManager: elementManager) {
     _renderImage();
   }
 

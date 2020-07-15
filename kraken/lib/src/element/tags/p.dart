@@ -8,8 +8,6 @@ import 'package:meta/meta.dart';
 const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
-  ParagraphElement({
-    @required int targetId,
-    @required ElementManager elementManager
-  }) : super(targetId: targetId, tagName: PARAGRAPH, elementManager: elementManager);
+  ParagraphElement({@required int targetId, @required ElementManager elementManager})
+      : super(targetId: targetId, tagName: PARAGRAPH, elementManager: elementManager);
 }

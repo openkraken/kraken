@@ -16,10 +16,8 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement({
-    @required int targetId,
-    @required ElementManager elementManager
-}) : super(targetId: targetId, allowChildren: false, tagName: AUDIO, elementManager: elementManager) {
+  AudioElement({@required int targetId, @required ElementManager elementManager})
+      : super(targetId: targetId, allowChildren: false, tagName: AUDIO, elementManager: elementManager) {
     initAudioPlayer();
     initSizedBox();
   }

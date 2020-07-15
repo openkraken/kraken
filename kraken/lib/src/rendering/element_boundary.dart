@@ -25,7 +25,14 @@ class RenderElementBoundary extends RenderTransform
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary(
-      {this.child, this.style, this.elementManager, Matrix4 transform, Offset origin, this.targetId, bool shouldRender, Alignment alignment})
+      {this.child,
+      this.style,
+      this.elementManager,
+      Matrix4 transform,
+      Offset origin,
+      this.targetId,
+      bool shouldRender,
+      Alignment alignment})
       : assert(child != null),
         _shouldRender = shouldRender,
         _transform = transform,

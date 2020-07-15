@@ -9,5 +9,6 @@ import 'package:meta/meta.dart';
 const String DIV = 'DIV';
 
 class DivElement extends Element {
-  DivElement({@required int targetId, @required ElementManager elementManager}) : super(targetId: targetId, tagName: DIV, elementManager: elementManager);
+  DivElement({@required int targetId, @required ElementManager elementManager})
+      : super(targetId: targetId, tagName: DIV, elementManager: elementManager);
 }

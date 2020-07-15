@@ -760,10 +760,8 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement({
-    @required int targetId,
-    @required ElementManager elementManager
-}) : super(targetId: targetId, tagName: IFRAME, elementManager: elementManager);
+  IFrameElement({@required int targetId, @required ElementManager elementManager})
+      : super(targetId: targetId, tagName: IFRAME, elementManager: elementManager);
 
   @override
   void onWebViewCreated(WebViewController controller) {}

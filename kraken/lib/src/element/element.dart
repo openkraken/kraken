@@ -536,12 +536,8 @@ class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      RenderFlowLayout flowLayout = RenderFlowLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlowLayout flowLayout =
+          RenderFlowLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateAlignment(flowLayout, style);
       return flowLayout;
     } else {

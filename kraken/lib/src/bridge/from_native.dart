@@ -97,8 +97,7 @@ typedef NativeAsyncModuleCallback = Void Function(Pointer<JSContext> context, In
 typedef DartAsyncModuleCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> json);
 
 typedef Native_InvokeModule = Pointer<Utf8> Function(
-    Pointer<JSContext> context, Int32 contextIndex,
-    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
@@ -334,9 +333,8 @@ String invokeModule(Pointer<JSContext> context, int contextIndex, String json, D
   return result;
 }
 
-Pointer<Utf8> _invokeModule(
-    Pointer<JSContext> context, int contextIndex,
-    Pointer<Utf8> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+Pointer<Utf8> _invokeModule(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> json,
+    Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
   String result = invokeModule(context, contextIndex, Utf8.fromUtf8(json), callback.asFunction());
   return Utf8.toUtf8(result);
 }
@@ -371,11 +369,13 @@ void registerReloadApp() {
 
 typedef NativeAsyncCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> timeout);
 typedef DartAsyncCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> timeout);
-typedef NativeRAFAsyncCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Double data, Pointer<Utf8>);
+typedef NativeRAFAsyncCallback = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Double data, Pointer<Utf8>);
 typedef DartRAFAsyncCallback = void Function(Pointer<JSContext> context, int contextIndex, double data, Pointer<Utf8>);
 
 // Register requestBatchUpdate
-typedef Native_RequestBatchUpdate = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>);
+typedef Native_RequestBatchUpdate = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>);
 typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 
@@ -383,7 +383,8 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
     .lookup<NativeFunction<Native_RegisterRequestBatchUpdate>>('registerRequestBatchUpdate')
     .asFunction();
 
-void _requestBatchUpdate(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
+void _requestBatchUpdate(
+    Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
   return requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -400,14 +401,16 @@ void registerRequestBatchUpdate() {
 }
 
 // Register setTimeout
-typedef Native_SetTimeout = Int32 Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
+typedef Native_SetTimeout = Int32 Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
-int _setTimeout(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+int _setTimeout(
+    Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -425,14 +428,16 @@ void registerSetTimeout() {
 }
 
 // Register setInterval
-typedef Native_SetInterval = Int32 Function(Pointer<JSContext>, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
+typedef Native_SetInterval = Int32 Function(
+    Pointer<JSContext>, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetInterval = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
 final Dart_RegisterSetInterval _registerSetInterval =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
-int _setInterval(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+int _setInterval(
+    Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -467,7 +472,8 @@ void registerClearTimeout() {
 }
 
 // Register requestAnimationFrame
-typedef Native_RequestAnimationFrame = Int32 Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
+typedef Native_RequestAnimationFrame = Int32 Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -475,7 +481,8 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
+int _requestAnimationFrame(
+    Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   return requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
@@ -572,19 +579,20 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
-typedef NativeAsyncBlobCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8>, Pointer<Uint8>, Int32);
-typedef DartAsyncBlobCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef Native_ToBlob = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
+typedef NativeAsyncBlobCallback = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8>, Pointer<Uint8>, Int32);
+typedef DartAsyncBlobCallback = void Function(
+    Pointer<JSContext> context, int contextIndex, Pointer<Utf8>, Pointer<Uint8>, int);
+typedef Native_ToBlob = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(Pointer<NativeFunction<Native_ToBlob>>);
 
 final Dart_RegisterToBlob _registerToBlob =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob').asFunction();
 
-void _toBlob(
-    Pointer<JSContext> context,
-    int contextIndex,
-    Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
+void _toBlob(Pointer<JSContext> context, int contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
+    int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
   KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
   ElementManager manager = controller.getElementManager();

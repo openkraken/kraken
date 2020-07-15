@@ -15,7 +15,8 @@ import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 
-Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
+Element _createElement(
+    int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case DIV:
@@ -312,7 +313,7 @@ class ElementManager {
 
     if (showPerformanceOverlay) {
       RenderPerformanceOverlay renderPerformanceOverlay =
-      RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
+          RenderPerformanceOverlay(optionsMask: 15, rasterizerThreshold: 0);
       RenderConstrainedBox renderConstrainedPerformanceOverlayBox = RenderConstrainedBox(
         child: renderPerformanceOverlay,
         additionalConstraints: BoxConstraints.tight(Size(

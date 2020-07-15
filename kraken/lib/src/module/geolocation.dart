@@ -22,7 +22,6 @@ LocationData _watchCachedLocation;
 typedef Callback = void Function(String json);
 typedef WatchPositionCallback = void Function(String result);
 
-
 class Geolocation {
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
     Location location = await _getLocation();

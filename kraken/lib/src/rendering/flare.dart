@@ -12,7 +12,6 @@ class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
 
   FlareRenderObject(this._targetId, this.elementManager);
 
-
   @override
   void adoptChild(RenderObject child) {
     super.adoptChild(child);

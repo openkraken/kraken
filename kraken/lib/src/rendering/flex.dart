@@ -258,16 +258,16 @@ class RenderFlexLayout extends RenderBox
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
   /// start of the main axis and the center of the cross axis.
-  RenderFlexLayout({
-    List<RenderBox> children,
-    FlexDirection flexDirection = FlexDirection.row,
-    FlexWrap flexWrap = FlexWrap.nowrap,
-    JustifyContent justifyContent = JustifyContent.start,
-    AlignItems alignItems = AlignItems.stretch,
-    this.targetId,
-    this.style,
-    this.elementManager
-  })  : assert(flexDirection != null),
+  RenderFlexLayout(
+      {List<RenderBox> children,
+      FlexDirection flexDirection = FlexDirection.row,
+      FlexWrap flexWrap = FlexWrap.nowrap,
+      JustifyContent justifyContent = JustifyContent.start,
+      AlignItems alignItems = AlignItems.stretch,
+      this.targetId,
+      this.style,
+      this.elementManager})
+      : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
         assert(alignItems != null),

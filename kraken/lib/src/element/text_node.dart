@@ -8,13 +8,9 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
-  TextNode(int targetId, this._data, ElementManager elementManager) : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    renderTextBox = RenderTextBox(
-      targetId: targetId,
-      text: '',
-      style: null,
-      elementManager: elementManager
-    );
+  TextNode(int targetId, this._data, ElementManager elementManager)
+      : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
+    renderTextBox = RenderTextBox(targetId: targetId, text: '', style: null, elementManager: elementManager);
   }
 
   RenderTextBox renderTextBox;

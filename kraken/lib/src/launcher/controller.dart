@@ -47,7 +47,6 @@ class KrakenViewController {
     return _viewControllerList.elementAt(contextIndex);
   }
 
-
   ElementManager _elementManager;
   Pointer<JSContext> _context;
   int _contextIndex;
@@ -60,7 +59,12 @@ class KrakenViewController {
 
   bool enableDebug;
 
-  KrakenViewController({this.showPerformanceOverlay, this.bundleContentOverride, this.bundlePathOverride, this.bundleURLOverride, this.enableDebug = false}) {
+  KrakenViewController(
+      {this.showPerformanceOverlay,
+      this.bundleContentOverride,
+      this.bundlePathOverride,
+      this.bundleURLOverride,
+      this.enableDebug = false}) {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -73,13 +77,11 @@ class KrakenViewController {
 
     firstView = false;
 
-    _elementManager = ElementManager(jsContext: _context, jsContextIndex: _contextIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
+    _elementManager = ElementManager(
+        jsContext: _context, jsContextIndex: _contextIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
 
     // @TODO native public API need to support KrakenViewController
-    String bundleURL = bundleURLOverride ??
-      bundlePathOverride ??
-      getBundleURLFromEnv() ??
-      getBundlePathFromEnv();
+    String bundleURL = bundleURLOverride ?? bundlePathOverride ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
     _bundleFuture = KrakenBundle.getBundle(bundleURL, contentOverride: bundleContentOverride);
   }
 

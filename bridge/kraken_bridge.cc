@@ -28,7 +28,7 @@ void printError(alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &e
 
 void disposeAllContext() {
   for (int i = 0; i <= poolIndex; i ++) {
-    disposeContext(bridgePool, i);
+    disposeContext(bridgePool[i], i);
   }
   poolIndex = 0;
   inited = false;

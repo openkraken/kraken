@@ -18,7 +18,8 @@ import 'platform.dart';
 class JSContext extends Struct {}
 
 // Register invokeEventListener
-typedef Native_InvokeEventListener = Void Function(Pointer<JSContext> context, Int32 contextIndex, Int32 type, Pointer<Utf8>);
+typedef Native_InvokeEventListener = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Int32 type, Pointer<Utf8>);
 typedef Dart_InvokeEventListener = void Function(Pointer<JSContext> context, int contextIndex, int type, Pointer<Utf8>);
 
 final Dart_InvokeEventListener _invokeEventListener =
@@ -56,8 +57,10 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
-typedef Dart_EvaluateScripts = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
+typedef Native_EvaluateScripts = Void Function(
+    Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
+typedef Dart_EvaluateScripts = void Function(
+    Pointer<JSContext> context, int contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
@@ -86,7 +89,8 @@ Pointer<JSContext> initJSContextPool(int poolSize) {
 typedef Native_DisposeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
 typedef Dart_DisposeContext = void Function(Pointer<JSContext> context, int contextIndex);
 
-final Dart_DisposeContext _disposeContext = nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
+final Dart_DisposeContext _disposeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
 
 void disposeContext(Pointer<JSContext> context, int contextIndex) {
   _disposeContext(context, contextIndex);
@@ -95,7 +99,8 @@ void disposeContext(Pointer<JSContext> context, int contextIndex) {
 typedef Native_AllocateNewContext = Int32 Function();
 typedef Dart_AllocateNewContext = int Function();
 
-final Dart_AllocateNewContext _allocateNewContext = nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
+final Dart_AllocateNewContext _allocateNewContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
 
 int allocateNewContext() {
   return _allocateNewContext();
@@ -104,7 +109,8 @@ int allocateNewContext() {
 typedef Native_GetJSContext = Pointer<JSContext> Function(Int32 contextIndex);
 typedef Dart_GetJSContext = Pointer<JSContext> Function(int contextIndex);
 
-final Dart_GetJSContext _getJSContext = nativeDynamicLibrary.lookup<NativeFunction<Native_GetJSContext>>('getJSContext').asFunction();
+final Dart_GetJSContext _getJSContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetJSContext>>('getJSContext').asFunction();
 
 Pointer<JSContext> getJSContext(int contextIndex) {
   return _getJSContext(contextIndex);
@@ -113,7 +119,8 @@ Pointer<JSContext> getJSContext(int contextIndex) {
 typedef Native_FreezeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
 typedef Dart_FreezeContext = void Function(Pointer<JSContext> context, int contextIndex);
 
-final Dart_FreezeContext _freezeContext = nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeContext').asFunction();
+final Dart_FreezeContext _freezeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeContext').asFunction();
 
 void freezeContext(Pointer<JSContext> context, int contextIndex) {
   _freezeContext(context, contextIndex);
@@ -122,7 +129,8 @@ void freezeContext(Pointer<JSContext> context, int contextIndex) {
 typedef Native_UnFreezeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
 typedef Dart_UnFreezeContext = void Function(Pointer<JSContext> context, int contextIndex);
 
-final Dart_UnFreezeContext _unfreezeContext = nativeDynamicLibrary.lookup<NativeFunction<Native_UnFreezeContext>>('unfreezeContext').asFunction();
+final Dart_UnFreezeContext _unfreezeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_UnFreezeContext>>('unfreezeContext').asFunction();
 
 void unfreezeContext(Pointer<JSContext> context, int contextIndex) {
   _unfreezeContext(context, contextIndex);
