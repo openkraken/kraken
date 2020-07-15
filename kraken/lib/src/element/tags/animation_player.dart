@@ -26,9 +26,8 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement({@required int targetId, @required ElementManager elementManager})
-      : super(
-            targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle);
+  AnimationPlayerElement(int targetId)
+      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   String get objectFit => style['objectFit'];
 

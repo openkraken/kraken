@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:meta/meta.dart';
 
 const String IMAGE = 'IMG';
 
@@ -28,13 +27,8 @@ class ImageElement extends Element {
   double _propertyWidth;
   double _propertyHeight;
 
-  ImageElement({@required int targetId, @required ElementManager elementManager})
-      : super(
-            targetId,
-            elementManager,
-            defaultStyle: _defaultStyle,
-            allowChildren: false,
-            tagName: IMAGE) {
+  ImageElement(int targetId)
+      : super(targetId: targetId, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
     _renderImage();
   }
 

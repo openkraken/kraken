@@ -4,9 +4,11 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 
-class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
+class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin, RenderPaddingMixin {
   int _targetId;
   ElementManager elementManager;
 

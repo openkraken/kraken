@@ -1,15 +1,13 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:ui';
 import 'dart:math' as math;
-
+import 'package:kraken/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/css.dart';
 
 class _RunMetrics {
   _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.childCount);
@@ -19,73 +17,21 @@ class _RunMetrics {
   final int childCount;
 }
 
-class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
-  /// The distance by which the child's top edge is inset from the top of the stack.
-  double top;
-
-  /// The distance by which the child's right edge is inset from the right of the stack.
-  double right;
-
-  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
-  double bottom;
-
-  /// The distance by which the child's left edge is inset from the left of the stack.
-  double left;
-
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
-
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
-
-  bool isPositioned = false;
-
-  /// Row index of child when wrapping
-  int runIndex = 0;
-
-  RenderPositionHolder renderPositionHolder;
-  int zIndex = 0;
-  CSSPositionType position = CSSPositionType.static;
-
-  /// Get element original position offset to parent(layoutBox) should be.
-  Offset get stackedChildOriginalRelativeOffset {
-    if (renderPositionHolder == null) return Offset.zero;
-    return (renderPositionHolder.parentData as BoxParentData).offset;
-  }
-
-  // Whether offset is aleady set
-  bool isOffsetSet = false;
-
-  @override
-  String toString() {
-    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; renderPositionHolder=$renderPositionHolder; ${super.toString()}; runIndex: $runIndex;';
-  }
-}
-
 /// Impl flow layout algorithm.
-class RenderFlowLayout extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, RenderLayoutParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, RenderLayoutParentData>,
-        CSSComputedMixin {
-  RenderFlowLayout(
-      {List<RenderBox> children,
-      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
-      TextDirection textDirection = TextDirection.ltr,
-      Axis direction = Axis.horizontal,
-      double spacing = 0.0,
-      MainAxisAlignment runAlignment = MainAxisAlignment.start,
-      double runSpacing = 0.0,
-      CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
-      VerticalDirection verticalDirection = VerticalDirection.down,
-      this.style,
-      this.targetId,
-      this.elementManager})
-      : assert(direction != null),
+class RenderFlowLayoutBox extends RenderLayoutBox {
+  RenderFlowLayoutBox({
+    List<RenderBox> children,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    TextDirection textDirection = TextDirection.ltr,
+    Axis direction = Axis.horizontal,
+    double spacing = 0.0,
+    MainAxisAlignment runAlignment = MainAxisAlignment.start,
+    double runSpacing = 0.0,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    CSSStyleDeclaration style,
+    int targetId,
+  })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
         assert(runAlignment != null),
@@ -98,18 +44,10 @@ class RenderFlowLayout extends RenderBox
         _runSpacing = runSpacing,
         _crossAxisAlignment = crossAxisAlignment,
         _textDirection = textDirection,
-        _verticalDirection = verticalDirection {
+        _verticalDirection = verticalDirection,
+        super(targetId: targetId, style: style) {
     addAll(children);
   }
-
-  // Element style;
-  CSSStyleDeclaration style;
-
-  // id of current element
-  final int targetId;
-
-  // @TODO: need to remove this after RenderObject merge have completed.
-  ElementManager elementManager;
 
   /// The direction to use as the main axis.
   ///
@@ -584,13 +522,13 @@ class RenderFlowLayout extends RenderBox
     // Layout non positioned element
     _layoutChildren();
 
-    // Set offset of positioned elemen
+    // Set offset of positioned element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(element, this, child, size);
+        setPositionedChildOffset(this, child, size);
       }
       child = childParentData.nextSibling;
     }
@@ -600,15 +538,16 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double elementWidth = getElementComputedWidth(targetId, elementManager);
-    double elementHeight = getElementComputedHeight(targetId, elementManager);
+    double contentWidth = getElementComputedWidth(targetId);
+    double contentHeight = getElementComputedHeight(targetId);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      size = constraints.constrain(Size(
-        elementWidth ?? 0,
-        elementHeight ?? 0,
-      ));
+      contentSize = Size(
+        contentWidth ?? 0,
+        contentHeight ?? 0,
+      );
+      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -620,8 +559,8 @@ class RenderFlowLayout extends RenderBox
     bool flipCrossAxis = false;
     switch (direction) {
       case Axis.horizontal:
-        if (elementWidth != null) {
-          mainAxisLimit = elementWidth;
+        if (contentWidth != null) {
+          mainAxisLimit = contentWidth;
         } else {
           mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
         }
@@ -707,28 +646,29 @@ class RenderFlowLayout extends RenderBox
     // Default to children's width
     double constraintWidth = mainAxisExtent;
     // Get max of element's width and children's width if element's width exists
-    if (elementWidth != null) {
-      constraintWidth = math.max(constraintWidth, elementWidth);
+    if (contentWidth != null) {
+      constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
     // Get max of element's height and children's height if element's height exists
-    if (elementHeight != null) {
-      constraintHeight = math.max(constraintHeight, elementHeight);
+    if (contentHeight != null) {
+      constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
     switch (direction) {
       case Axis.horizontal:
-        size = constraints.constrain(Size(constraintWidth, constraintHeight));
+        contentSize = Size(constraintWidth, constraintHeight);
+        size = computeBoxSize(contentSize);
         // AxisExtent should be size.
-        containerMainAxisExtent = elementWidth ?? size.width;
-        containerCrossAxisExtent = elementHeight ?? size.height;
+        containerMainAxisExtent = contentWidth ?? size.width;
+        containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-        containerMainAxisExtent = elementHeight ?? size.height;
-        containerCrossAxisExtent = elementWidth ?? size.width;
+        containerMainAxisExtent = contentHeight ?? size.height;
+        containerCrossAxisExtent = contentWidth ?? size.width;
         break;
     }
 
@@ -813,7 +753,8 @@ class RenderFlowLayout extends RenderBox
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        Offset relativeOffset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
+        Offset relativeOffset =
+            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
@@ -846,7 +787,7 @@ class RenderFlowLayout extends RenderBox
   String _getChildDisplayFromRenderBox(RenderBox child) {
     String display = 'inline'; // Default value.
     int targetId;
-    if (child is RenderFlowLayout) targetId = child.targetId;
+    if (child is RenderFlowLayoutBox) targetId = child.targetId;
     if (child is RenderElementBoundary) targetId = child.targetId;
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
@@ -917,15 +858,8 @@ class RenderFlowLayout extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Axis>('direction', direction));
-    properties.add(DiagnosticsProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
-    properties.add(DiagnosticsProperty('spacing', spacing));
     properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DiagnosticsProperty('runSpacing', runSpacing));
-    properties.add(DiagnosticsProperty('crossAxisAlignment', runSpacing));
-    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<VerticalDirection>('verticalDirection', verticalDirection,
-        defaultValue: VerticalDirection.down));
+    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {

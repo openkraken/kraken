@@ -443,9 +443,8 @@ abstract class WebViewElement extends Element {
   /// `onWebViewCreated` callback once the web view is created.
   ///
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
-  WebViewElement({
-    @required int targetId,
-    @required ElementManager elementManager,
+  WebViewElement(
+    int targetId, {
     String tagName,
     this.initialUrl,
     this.javascriptMode = JavascriptMode.unrestricted,
@@ -458,7 +457,7 @@ abstract class WebViewElement extends Element {
     this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
-        super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle);
+        super(targetId: targetId, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   /// The url that WebView loaded at first time.
   String initialUrl;
@@ -481,7 +480,7 @@ abstract class WebViewElement extends Element {
     if (key == SRC) {
       String url = value;
       initialUrl = url;
-      renderLayoutBox.removeAll();
+      renderIntrinsicBox.child = null;
       _buildPlatformRenderBox();
       addChild(sizedBox);
     } else if (key == WIDTH || key == HEIGHT) {
@@ -760,8 +759,7 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, tagName: IFRAME, elementManager: elementManager);
+  IFrameElement(int targetId) : super(targetId, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}

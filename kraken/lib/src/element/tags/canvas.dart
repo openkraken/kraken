@@ -20,11 +20,11 @@ const Map<String, dynamic> _defaultStyle = {
 class CanvasElement extends Element {
   CanvasElement({@required int targetId, @required ElementManager elementManager})
       : super(
-            targetId,
-            elementManager,
-            defaultStyle: _defaultStyle,
-            allowChildren: false,
-            tagName: CANVAS) {
+          targetId: targetId,
+          defaultStyle: _defaultStyle,
+          isIntrinsicBox: true,
+          tagName: CANVAS,
+        ) {
     painter = CanvasPainter();
     _width = CSSLength(ELEMENT_DEFAULT_WIDTH).computedValue;
     _height = CSSLength(ELEMENT_DEFAULT_HEIGHT).computedValue;

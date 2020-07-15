@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
 import 'dart:io';
 
 import 'package:flutter/rendering.dart';
@@ -29,6 +28,10 @@ class CSSUrl implements CSSValue<ImageProvider> {
         (_rawInput.startsWith('\"') && _rawInput.endsWith('\"'))) {
       _rawInput = _rawInput.substring(1, _rawInput.length - 1);
     }
+
+    // Default is raw value
+    _url = _rawInput;
+
     if (_rawInput.startsWith('//') || _rawInput.startsWith('http://') || _rawInput.startsWith('https://')) {
       var url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
       _url = url;
@@ -40,11 +43,20 @@ class CSSUrl implements CSSValue<ImageProvider> {
       }
     } else if (_rawInput.startsWith('file://')) {
       _value = FileImage(File.fromUri(Uri.parse(_rawInput)));
-      _url = _rawInput;
+    } else if (_rawInput.startsWith('data:')) {
+      // Data URL:  https://tools.ietf.org/html/rfc2397
+      // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
+
+      UriData data = UriData.parse(_rawInput);
+      if (data.isBase64) {
+        _value = MemoryImage(data.contentAsBytes());
+      }
+
+    } else if (_rawInput.startsWith('blob:')) {
+      // @TODO: support blob file url
     } else {
       // Fallback to asset image
       _value = AssetImage(_rawInput);
-      _url = _rawInput;
     }
   }
 

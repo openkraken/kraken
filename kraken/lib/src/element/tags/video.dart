@@ -4,8 +4,6 @@
  */
 
 import 'dart:async';
-import 'package:kraken/element.dart';
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
@@ -19,14 +17,16 @@ const Map<String, dynamic> _defaultStyle = {
   'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
+List<VideoPlayerController> _videoControllers = [];
+
 class VideoElement extends Element {
-  VideoElement({@required int targetId, @required ElementManager elementManager})
+  VideoElement(int targetId)
       : super(
-            targetId,
-            elementManager,
-            defaultStyle: _defaultStyle,
-            allowChildren: false,
-            tagName: VIDEO);
+          targetId: targetId,
+          defaultStyle: _defaultStyle,
+          isIntrinsicBox: true,
+          tagName: VIDEO,
+        );
 
   VideoPlayerController controller;
 
@@ -39,6 +39,7 @@ class VideoElement extends Element {
 
       if (needDispose) {
         controller.dispose().then((_) {
+          _videoControllers.remove(controller);
           _removeVideoBox();
 
           _createVideoBox();
@@ -47,13 +48,6 @@ class VideoElement extends Element {
         _createVideoBox();
       }
     }
-  }
-
-  // Detach renderObject of current node from parent
-  @override
-  void detach() {
-    super.detach();
-    controller.dispose();
   }
 
   Future<int> createVideoPlayer(String src) {
@@ -87,6 +81,8 @@ class VideoElement extends Element {
       completer.complete(textureId);
     });
 
+    _videoControllers.add(controller);
+
     return completer.future;
   }
 
@@ -113,7 +109,7 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    renderPadding.child = null;
+    (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
   }
 
   onCanPlay() async {
@@ -221,5 +217,13 @@ class VideoElement extends Element {
         controller.setMuted(false);
         break;
     }
+  }
+
+  // dispose all video player when Dart VM is going to shutdown
+  static Future<void> disposeVideos() async {
+    for (int i = 0; i < _videoControllers.length; i++) {
+      await _videoControllers[i].dispose();
+    }
+    _videoControllers.clear();
   }
 }
