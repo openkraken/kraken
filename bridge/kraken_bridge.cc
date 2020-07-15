@@ -27,7 +27,12 @@ void printError(alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &e
 }
 
 void *initJSContextPool(int poolSize) {
-  assert(inited && "JS context Pool has already inited");
+  if (inited) {
+    for (int i = 0; i < poolIndex; i ++) {
+      disposeContext(bridgePool[i], i);
+    }
+    inited = false;
+  };
   bridgePool = new void *[poolSize];
   for (int i = 1; i < poolSize; i++) {
     bridgePool[i] = nullptr;

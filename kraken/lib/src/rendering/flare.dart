@@ -2,18 +2,29 @@ import 'dart:ui';
 
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/element.dart';
 
 class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
   int _targetId;
+  ElementManager elementManager;
 
-  FlareRenderObject(this._targetId);
+  FlareRenderObject(this._targetId, this.elementManager);
+
+
+  @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    // remove element reference to prevent memory leaks
+    elementManager = null;
+  }
 
   @override
   void performLayout() {
     if (!sizedByParent) {
-      double width = getElementComputedWidth(_targetId);
-      double height = getElementComputedHeight(_targetId);
+      double width = getElementComputedWidth(_targetId, elementManager);
+      double height = getElementComputedHeight(_targetId, elementManager);
       size = Size(width, height);
     }
   }
@@ -28,8 +39,8 @@ class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
 
   @override
   void performResize() {
-    double width = getElementComputedWidth(_targetId);
-    double height = getElementComputedHeight(_targetId);
+    double width = getElementComputedWidth(_targetId, elementManager);
+    double height = getElementComputedHeight(_targetId, elementManager);
     size = Size(width, height);
   }
 }

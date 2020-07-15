@@ -266,6 +266,7 @@ class RenderFlexLayout extends RenderBox
     AlignItems alignItems = AlignItems.stretch,
     this.targetId,
     this.style,
+    this.elementManager
   })  : assert(flexDirection != null),
         assert(flexWrap != null),
         assert(justifyContent != null),
@@ -282,6 +283,9 @@ class RenderFlexLayout extends RenderBox
 
   // id of current element
   int targetId;
+
+  // @TODO: need to remove this after RenderObject merge have completed.
+  ElementManager elementManager;
 
   /// The direction to use as the main axis.
   FlexDirection get flexDirection => _flexDirection;
@@ -623,6 +627,14 @@ class RenderFlexLayout extends RenderBox
     return maxMainSize;
   }
 
+  @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    // remove element reference to prevent memory leaks
+    // @TODO: need to remove this after RenderObject merge have completed.
+    elementManager = null;
+  }
+
   // There are four steps for Flex Container to layout.
   // Step 1: layout positioned child earlyer.
   // Step 2: layout flex-items with No constraints, this step is aiming to collect original box size of every flex-items.
@@ -631,7 +643,7 @@ class RenderFlexLayout extends RenderBox
   @override
   void performLayout() {
     RenderBox child = firstChild;
-    Element element = getEventTargetByTargetId<Element>(targetId);
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -684,8 +696,8 @@ class RenderFlexLayout extends RenderBox
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
-    double elementWidth = getElementComputedWidth(targetId);
-    double elementHeight = getElementComputedHeight(targetId);
+    double elementWidth = getElementComputedWidth(targetId, elementManager);
+    double elementHeight = getElementComputedHeight(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -1173,10 +1185,12 @@ class RenderFlexLayout extends RenderBox
 
       CSSStyleDeclaration childStyle;
       if (child is RenderTextBox) {
-        childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+        // @TODO: need to remove this after RenderObject merge have completed.
+        childStyle = elementManager.getEventTargetByTargetId<Element>(targetId)?.style;
       } else if (child is RenderElementBoundary) {
         int childNodeId = child.targetId;
-        childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+        // @TODO: need to remove this after RenderObject merge have completed.
+        childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
       /// Apply position relative offset change

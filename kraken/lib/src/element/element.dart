@@ -342,7 +342,7 @@ class Element extends Node
         // Loop renderObject children to move positioned children to its containing block
         renderLayoutBox.visitChildren((childRenderObject) {
           if (childRenderObject is RenderElementBoundary) {
-            Element child = getEventTargetByTargetId<Element>(childRenderObject.targetId);
+            Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = findContainingBlock(child);
@@ -364,7 +364,7 @@ class Element extends Node
             } else if (parentLayoutBox is RenderFlexLayout) {
               parentTargetId = parentLayoutBox.targetId;
             }
-            Element parentElement = getEventTargetByTargetId<Element>(parentTargetId);
+            Element parentElement = elementManager.getEventTargetByTargetId<Element>(parentTargetId);
 
             List<RenderObject> layoutChildren = [];
             parentLayoutBox.visitChildren((child) {
@@ -539,6 +539,7 @@ class Element extends Node
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateAlignment(flowLayout, style);
       return flowLayout;
@@ -1265,7 +1266,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(json);
+    emitUIEvent(elementManager.jsContext, elementManager.jsContextIndex, json);
   }
 
   void click() {

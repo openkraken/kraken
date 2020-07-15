@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ffi';
 
 import 'package:kraken/bridge.dart';
 import 'package:crypto/crypto.dart';
@@ -93,9 +94,9 @@ abstract class KrakenBundle {
     return localBundleDirectory;
   }
 
-  Future<void> run() async {
+  Future<void> run(Pointer<JSContext> context, int contextIndex) async {
     if (!isResolved) await resolve();
-    evaluateScripts(content, url.toString(), lineOffset);
+    evaluateScripts(context, contextIndex, content, url.toString(), lineOffset);
   }
 }
 

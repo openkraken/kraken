@@ -17,8 +17,6 @@ const Map<String, dynamic> _defaultStyle = {
   'height': ELEMENT_DEFAULT_HEIGHT,
 };
 
-List<VideoPlayerController> _videoControllers = [];
-
 class VideoElement extends Element {
   VideoElement(int targetId)
       : super(
@@ -39,7 +37,6 @@ class VideoElement extends Element {
 
       if (needDispose) {
         controller.dispose().then((_) {
-          _videoControllers.remove(controller);
           _removeVideoBox();
 
           _createVideoBox();
@@ -48,6 +45,13 @@ class VideoElement extends Element {
         _createVideoBox();
       }
     }
+  }
+
+  // Detach renderObject of current node from parent
+  @override
+  void detach() {
+    super.detach();
+    controller.dispose();
   }
 
   Future<int> createVideoPlayer(String src) {
@@ -80,8 +84,6 @@ class VideoElement extends Element {
 
       completer.complete(textureId);
     });
-
-    _videoControllers.add(controller);
 
     return completer.future;
   }
@@ -217,13 +219,5 @@ class VideoElement extends Element {
         controller.setMuted(false);
         break;
     }
-  }
-
-  // dispose all video player when Dart VM is going to shutdown
-  static Future<void> disposeVideos() async {
-    for (int i = 0; i < _videoControllers.length; i++) {
-      await _videoControllers[i].dispose();
-    }
-    _videoControllers.clear();
   }
 }

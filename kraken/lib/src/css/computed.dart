@@ -5,12 +5,12 @@ import 'package:kraken/css.dart';
 mixin CSSComputedMixin on RenderBox {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementComputedMaxWidth(int targetId) {
+  static double getElementComputedMaxWidth(int targetId, ElementManager elementManager) {
     double width;
     double cropWidth = 0;
-    Element child = getEventTargetByTargetId<Element>(targetId);
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -37,7 +37,7 @@ mixin CSSComputedMixin on RenderBox {
         }
         if (child is Element) {
           CSSStyleDeclaration style = child.style;
-          String display = _getElementRealDisplayValue(child.targetId);
+          String display = _getElementRealDisplayValue(child.targetId, elementManager);
           if (style.contains('width') && display != 'inline') {
             width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
             cropPaddingBorder(child);
@@ -55,11 +55,11 @@ mixin CSSComputedMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementComputedWidth(int targetId) {
+  double getElementComputedWidth(int targetId, ElementManager elementManager) {
     double cropWidth = 0;
-    Element child = getEventTargetByTargetId<Element>(targetId);
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
 
     double width = CSSLength.toDisplayPortValue(style['width']);
     double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
@@ -98,7 +98,7 @@ mixin CSSComputedMixin on RenderBox {
             }
             if (child is Element) {
               CSSStyleDeclaration style = child.style;
-              String display = _getElementRealDisplayValue(child.targetId);
+              String display = _getElementRealDisplayValue(child.targetId, elementManager);
 
               // Set width of element according to parent display
               if (display != 'inline') {
@@ -142,10 +142,10 @@ mixin CSSComputedMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementComputedHeight(int targetId) {
-    Element child = getEventTargetByTargetId<Element>(targetId);
+  double getElementComputedHeight(int targetId, ElementManager elementManager) {
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
     double height = CSSLength.toDisplayPortValue(style['height']);
     double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
     double maxHeight = CSSLength.toDisplayPortValue(style['maxHeight']);
@@ -228,8 +228,8 @@ mixin CSSComputedMixin on RenderBox {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String _getElementRealDisplayValue(int targetId) {
-    Element element = getEventTargetByTargetId<Element>(targetId);
+  static String _getElementRealDisplayValue(int targetId, ElementManager elementManager) {
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
     String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style['display'])
         ? element.defaultDisplay

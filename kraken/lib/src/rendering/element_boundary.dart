@@ -25,7 +25,7 @@ class RenderElementBoundary extends RenderTransform
         ContainerRenderObjectMixin<RenderBox, ElementBoundaryParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ElementBoundaryParentData> {
   RenderElementBoundary(
-      {this.child, this.style, Matrix4 transform, Offset origin, this.targetId, bool shouldRender, Alignment alignment})
+      {this.child, this.style, this.elementManager, Matrix4 transform, Offset origin, this.targetId, bool shouldRender, Alignment alignment})
       : assert(child != null),
         _shouldRender = shouldRender,
         _transform = transform,
@@ -39,6 +39,9 @@ class RenderElementBoundary extends RenderTransform
   RenderPositionHolder positionedHolder;
 
   int targetId;
+
+  // @TODO: need to remove this after RenderObject merge have completed.
+  ElementManager elementManager;
 
   CSSStyleDeclaration style;
 
@@ -71,6 +74,13 @@ class RenderElementBoundary extends RenderTransform
   }
 
   @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    // remove element reference to prevent memory leaks
+    elementManager = null;
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
@@ -96,7 +106,8 @@ class RenderElementBoundary extends RenderTransform
 
   Matrix4 getEffectiveTransform() {
     Offset origin = this.origin;
-    Element element = getEventTargetByTargetId<Element>(targetId);
+    // @TODO: need to remove this after RenderObject merge have completed.
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // transform origin is apply to border in browser
     // so apply the margin child offset
     // percent or keyword apply by border size

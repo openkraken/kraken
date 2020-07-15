@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -13,6 +14,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
       targetId: targetId,
       text: '',
       style: null,
+      elementManager: elementManager
     );
   }
 

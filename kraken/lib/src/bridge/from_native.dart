@@ -35,11 +35,14 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
 const String BATCH_UPDATE = 'batchUpdate';
 const String EMPTY_STRING = '';
 
-String handleAction(List directive) {
+String handleAction(Pointer<JSContext> context, int contextIndex, List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  var result = ElementManager.applyAction(action, payload);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+  ElementManager elementManager = controller.getElementManager();
+
+  var result = elementManager.applyAction(action, payload);
 
   if (result == null) {
     return EMPTY_STRING;
@@ -67,11 +70,11 @@ String invokeUIManager(Pointer<JSContext> context, int contextIndex, String json
     List<dynamic> directiveList = directive[1];
     List<String> result = [];
     for (dynamic item in directiveList) {
-      result.add(handleAction(item as List));
+      result.add(handleAction(context, contextIndex, item as List));
     }
     return EMPTY_STRING;
   } else {
-    return handleAction(directive);
+    return handleAction(context, contextIndex, directive);
   }
 }
 
@@ -352,8 +355,10 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp(Pointer<JSContext> context, int contextIndex) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+
   try {
-    reloadApp(context, contextIndex);
+    controller.reloadCurrentView();
   } catch (e, stack) {
     print('Dart Error: $e\n$stack');
   }
@@ -567,9 +572,9 @@ void registerGetScreen() {
   _registerGetScreen(pointer);
 }
 
-typedef NativeAsyncBlobCallback = Void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, Int32);
-typedef DartAsyncBlobCallback = void Function(Pointer<Void> context, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef Native_ToBlob = Void Function(Pointer<NativeFunction<NativeAsyncBlobCallback>>, Pointer<Void>, Int32, Double);
+typedef NativeAsyncBlobCallback = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8>, Pointer<Uint8>, Int32);
+typedef DartAsyncBlobCallback = void Function(Pointer<JSContext> context, int contextIndex, Pointer<Utf8>, Pointer<Uint8>, int);
+typedef Native_ToBlob = Void Function(Pointer<JSContext> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(Pointer<NativeFunction<Native_ToBlob>>);
 
@@ -577,35 +582,40 @@ final Dart_RegisterToBlob _registerToBlob =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob').asFunction();
 
 void _toBlob(
-    Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, Pointer<Void> context, int id, double devicePixelRatio) {
+    Pointer<JSContext> context,
+    int contextIndex,
+    Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+  ElementManager manager = controller.getElementManager();
+
   try {
-    if (!existsTarget(id)) {
+    if (!manager.existsTarget(id)) {
       Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unknown node id: $id');
-      func(context, msg, nullptr, -1);
+      func(context, contextIndex, msg, nullptr, -1);
       return;
     }
 
-    var node = getEventTargetByTargetId<EventTarget>(id);
+    var node = manager.getEventTargetByTargetId<EventTarget>(id);
     if (node is Element) {
       node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
         Uint8List byteList = bytePtr.asTypedList(bytes.length);
         byteList.setAll(0, bytes);
-        func(context, nullptr, bytePtr, bytes.length);
+        func(context, contextIndex, nullptr, bytePtr, bytes.length);
       }).catchError((e, stack) {
         Pointer<Utf8> msg =
             Utf8.toUtf8('toBlob: failed to export image data from element id: $id. error: $e}.\n$stack');
-        func(context, msg, nullptr, -1);
+        func(context, contextIndex, msg, nullptr, -1);
       });
     } else {
       Pointer<Utf8> msg = Utf8.toUtf8('toBlob: node is not an element, id: $id');
-      func(context, msg, nullptr, -1);
+      func(context, contextIndex, msg, nullptr, -1);
       return;
     }
   } catch (e, stack) {
     Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unexpected error: $e\n$stack');
-    func(context, msg, nullptr, -1);
+    func(context, contextIndex, msg, nullptr, -1);
   }
 }
 

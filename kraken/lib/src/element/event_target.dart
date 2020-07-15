@@ -8,40 +8,12 @@ import 'package:kraken/element.dart';
 
 typedef EventHandler = void Function(Event event);
 
-Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
-
-T getEventTargetByTargetId<T>(int targetId) {
-  assert(targetId != null);
-  EventTarget target = _eventTargets[targetId];
-  if (target is T)
-    return target as T;
-  else
-    return null;
-}
-
-bool existsTarget(int id) {
-  return _eventTargets.containsKey(id);
-}
-
-void removeTarget(int targetId) {
-  assert(targetId != null);
-  _eventTargets.remove(targetId);
-}
-
-void setEventTarget(EventTarget target) {
-  assert(target != null);
-
-  _eventTargets[target.targetId] = target;
-}
-
-void clearTargets() {
-  // Set current eventTargets to a new object, clean old targets by gc.
-  _eventTargets = <int, EventTarget>{};
-}
-
 class EventTarget {
   // A unique target identifier.
   int targetId;
+
+  // the self reference the ElementManager
+  ElementManager elementManager;
 
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};

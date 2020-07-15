@@ -21,12 +21,12 @@ class Window extends EventTarget {
 
   void _handleColorSchemeChange(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(json);
+    emitUIEvent(elementManager.jsContext, elementManager.jsContextIndex, json);
   }
 
   void _handleLoad(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(json);
+    emitUIEvent(elementManager.jsContext, elementManager.jsContextIndex, json);
   }
 
   @override

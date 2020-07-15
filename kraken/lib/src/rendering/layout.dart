@@ -84,6 +84,7 @@ class RenderFlowLayout extends RenderBox
     VerticalDirection verticalDirection = VerticalDirection.down,
     this.style,
     this.targetId,
+    this.elementManager
   })  : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
@@ -106,6 +107,9 @@ class RenderFlowLayout extends RenderBox
 
   // id of current element
   final int targetId;
+
+  // @TODO: need to remove this after RenderObject merge have completed.
+  ElementManager elementManager;
 
   /// The direction to use as the main axis.
   ///
@@ -564,10 +568,18 @@ class RenderFlowLayout extends RenderBox
     return 0.0;
   }
 
+  @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    // remove element reference to prevent memory leaks
+    // @TODO: need to remove this after RenderObject merge have completed.
+    elementManager = null;
+  }
+
   // @override
   void performLayout() {
     RenderBox child = firstChild;
-    Element element = getEventTargetByTargetId<Element>(targetId);
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -596,8 +608,8 @@ class RenderFlowLayout extends RenderBox
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double elementWidth = getElementComputedWidth(targetId);
-    double elementHeight = getElementComputedHeight(targetId);
+    double elementWidth = getElementComputedWidth(targetId, elementManager);
+    double elementHeight = getElementComputedHeight(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -619,7 +631,7 @@ class RenderFlowLayout extends RenderBox
         if (elementWidth != null) {
           mainAxisLimit = elementWidth;
         } else {
-          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId);
+          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -813,10 +825,12 @@ class RenderFlowLayout extends RenderBox
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
-          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+          // @TODO: need to remove this after RenderObject merge have completed.
+          childStyle = elementManager.getEventTargetByTargetId<Element>(targetId)?.style;
         } else if (child is RenderElementBoundary) {
           int childNodeId = child.targetId;
-          childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+          // @TODO: need to remove this after RenderObject merge have completed.
+          childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
         }
 
         /// Apply position relative offset change.
@@ -845,7 +859,8 @@ class RenderFlowLayout extends RenderBox
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
     if (targetId != null) {
-      Element element = getEventTargetByTargetId<Element>(targetId);
+      // @TODO: need to remove this after RenderObject merge have completed.
+      Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
       if (element != null) {
         String elementDisplayDeclaration = element.style['display'];
         display = CSSStyleDeclaration.isNullOrEmptyValue(elementDisplayDeclaration)
@@ -853,7 +868,8 @@ class RenderFlowLayout extends RenderBox
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
-        Element currentElement = getEventTargetByTargetId<Element>(this.targetId);
+        // @TODO: need to remove this after RenderObject merge have completed.
+        Element currentElement = elementManager.getEventTargetByTargetId<Element>(this.targetId);
         String currentElementDisplay =
             CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
         if (currentElementDisplay.endsWith('flex') && style['flexWrap'] == 'wrap') {

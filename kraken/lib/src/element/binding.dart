@@ -123,17 +123,17 @@ mixin ElementsBinding
   void initServiceExtensions() {
     super.initServiceExtensions();
     if (!kReleaseMode) {
-      registerBoolServiceExtension(
-        name: 'showPerformanceOverlay',
-        getter: () => Future<bool>.value(ElementManager.showPerformanceOverlayOverride ?? false),
-        setter: (bool value) {
-          if (ElementManager.showPerformanceOverlayOverride != value) {
-            ElementManager.showPerformanceOverlayOverride = value;
-            reloadApp();
-          }
-          return Future<void>.value();
-        },
-      );
+//      registerBoolServiceExtension(
+//        name: 'showPerformanceOverlay',
+//        getter: () => Future<bool>.value(ElementManager.showPerformanceOverlayOverride ?? false),
+//        setter: (bool value) {
+////          if (ElementManager.showPerformanceOverlayOverride != value) {
+////            ElementManager.showPerformanceOverlayOverride = value;
+////            reloadApp();
+////          }
+//          return Future<void>.value();
+//        },
+//      );
 
       ElementInspectorService.instance.initServiceExtensions(registerServiceExtension);
     }

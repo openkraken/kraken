@@ -124,7 +124,7 @@ class AnimationPlayerElement extends Element {
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();
 
-    return FlareRenderObject(targetId)
+    return FlareRenderObject(targetId, elementManager)
       ..assetProvider = AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center
