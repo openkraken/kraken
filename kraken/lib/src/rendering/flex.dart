@@ -1147,12 +1147,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         default:
       }
 
-      double mainAxisOffset = flowAwarePaddingStart();
-      double crossAxisOffset = flowAwarePaddingEnd();
-
+      double mainAxisPadding = flowAwarePaddingStart();
+      double crossAxisPadding = flowAwarePaddingEnd();
       // Position elements
       double childMainPosition =
-        flipMainAxis ? mainAxisOffset + actualSize - leadingSpace : leadingSpace + mainAxisOffset;
+        flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
@@ -1173,18 +1172,18 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignItems.start:
             case AlignItems.flexEnd:
             case AlignItems.end:
-              childCrossPosition = crossAxisOffset +
+              childCrossPosition = crossAxisPadding +
                 (_startIsTopLeft(flipDirection(flexDirection)) ==
                   (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
                 ? 0.0
                 : crossSize - _getCrossSize(child));
               break;
             case AlignItems.center:
-              childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
+              childCrossPosition = crossAxisPadding + (crossSize - _getCrossSize(child)) / 2.0;
               break;
             case AlignItems.baseline: // @TODO currently not supported
             case AlignItems.stretch:
-              childCrossPosition = crossAxisOffset;
+              childCrossPosition = crossAxisPadding;
               break;
             default:
               break;
@@ -1195,18 +1194,18 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignSelf.start:
             case AlignSelf.flexEnd:
             case AlignSelf.end:
-              childCrossPosition = crossAxisOffset +
+              childCrossPosition = crossAxisPadding +
                 (_startIsTopLeft(flipDirection(flexDirection)) ==
-                  (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
+                  (alignSelf == AlignSelf.flexStart || alignSelf == AlignSelf.start)
                   ? 0.0
                   : crossSize - _getCrossSize(child));
               break;
             case AlignSelf.center:
-              childCrossPosition = crossAxisOffset + (crossSize - _getCrossSize(child)) / 2.0;
+              childCrossPosition = crossAxisPadding + (crossSize - _getCrossSize(child)) / 2.0;
               break;
             case AlignSelf.baseline: // @TODO currently not supported
             case AlignSelf.stretch:
-              childCrossPosition = crossAxisOffset;
+              childCrossPosition = crossAxisPadding;
               break;
             default:
               break;
@@ -1221,7 +1220,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           crossOffset = childCrossPosition + crossAxisOffset;
         }
-
         Offset relativeOffset = _getOffset(childMainPosition, crossOffset);
 
         CSSStyleDeclaration childStyle;
@@ -1240,7 +1238,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           childMainPosition += _getMainSize(child) + betweenSpace;
         }
-
 
         // Only layout placeholder renderObject child
         child = placeholderChild == null ? childParentData.nextSibling : null;
