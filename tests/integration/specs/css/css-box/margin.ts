@@ -51,7 +51,7 @@ describe('Box margin', () => {
     await matchScreenshot();
   });
 
-  fit('should work with shorthand', async () => {
+  it('should work with shorthand', async () => {
     const div = document.createElement('div');
     setElementStyle(div, {
       width: '100px',
