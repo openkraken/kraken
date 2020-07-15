@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:meta/meta.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -103,8 +104,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration textInputConfiguration;
 
-  InputElement(
-    int targetId, {
+  InputElement({
+    @required int targetId,
+    @required ElementManager elementManager,
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,

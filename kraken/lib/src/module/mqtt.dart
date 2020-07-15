@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
-import 'package:kraken/bridge.dart';
 
 Map<String, MqttClient> _clientMap = {};
 int _clientId = 0;

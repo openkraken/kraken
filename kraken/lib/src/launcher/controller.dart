@@ -37,10 +37,14 @@ void setTargetPlatformForDesktop() {
 class KrakenViewController {
   static List<KrakenViewController> _viewControllerList = new List();
   static KrakenViewController getViewControllerOfJSContextIndex(int contextIndex) {
-    if (!_viewControllerList.contains(contextIndex)) {
+    if (contextIndex >= _viewControllerList.length) {
       return null;
     }
-    return _viewControllerList[contextIndex];
+    if (_viewControllerList.elementAt(contextIndex) == null) {
+      return null;
+    }
+
+    return _viewControllerList.elementAt(contextIndex);
   }
 
 
@@ -65,7 +69,7 @@ class KrakenViewController {
     _contextIndex = initBridge(_poolSize, firstView);
     _context = getJSContext(_contextIndex);
 
-    _viewControllerList[_contextIndex] = this;
+    _viewControllerList.add(this);
 
     firstView = false;
 

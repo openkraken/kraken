@@ -131,7 +131,7 @@ TEST(multiple_context, freeze) {
   EXPECT_EQ(context->isFreeze(), false);
   context->freeze();
   EXPECT_EQ(context->isFreeze(), true);
-  context->unFreeze();
+  context->unfreeze();
   EXPECT_EQ(context->isFreeze(), false);
 }
 

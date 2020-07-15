@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:kraken/bridge.dart';
 import 'package:kraken_geolocation/kraken_geolocation.dart';
 
 // getCurrentPosition relative

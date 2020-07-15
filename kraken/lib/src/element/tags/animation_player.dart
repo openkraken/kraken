@@ -1,5 +1,11 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
+import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/css.dart';
@@ -20,8 +26,8 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId)
-      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle);
+  AnimationPlayerElement({@required int targetId, @required ElementManager elementManager})
+      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, elementManager: elementManager);
 
   String get objectFit => style['objectFit'];
 

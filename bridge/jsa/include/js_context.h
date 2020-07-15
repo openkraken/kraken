@@ -175,7 +175,7 @@ public:
   virtual void freeze() = 0;
 
   // set js context to unfreeze
-  virtual void unFreeze() = 0;
+  virtual void unfreeze() = 0;
 
 protected:
   friend class Pointer;

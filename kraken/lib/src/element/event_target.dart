@@ -18,10 +18,7 @@ class EventTarget {
   @protected
   Map<String, List<EventHandler>> eventHandlers = {};
 
-  EventTarget(int targetId) {
-    assert(targetId != null);
-    this.targetId = targetId;
-  }
+  EventTarget({this.targetId, this.elementManager}): assert(targetId != null);
 
   void addEvent(String eventName) {}
 

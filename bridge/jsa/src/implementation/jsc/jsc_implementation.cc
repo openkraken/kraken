@@ -1240,7 +1240,7 @@ bool JSCContext::isFreeze() {
 void JSCContext::freeze() {
   _freeze = true;
 }
-void JSCContext::unFreeze() {
+void JSCContext::unfreeze() {
   _freeze = false;
 }
 

@@ -114,13 +114,14 @@ class Element extends Node
   Element({
     @required int targetId,
     @required this.tagName,
+    @required ElementManager elementManager,
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
     this.allowChildren = true,
   })  : assert(targetId != null),
         assert(tagName != null),
-        super(NodeType.ELEMENT_NODE, targetId, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];
 
@@ -689,7 +690,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.fixed:
-        final Element rootEl = ElementManager().getRootElement();
+        final Element rootEl = elementManager.getRootElement();
         parentRenderLayoutBox = rootEl.renderLayoutBox;
         break;
 
@@ -1230,7 +1231,7 @@ class Element extends Node
   Offset getOffset(RenderBox renderBox) {
     Element element = findContainingBlock(this);
     if (element == null) {
-      element = ElementManager().getRootElement();
+      element = elementManager.getRootElement();
     }
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
@@ -1336,7 +1337,7 @@ class Element extends Node
 
 Element findContainingBlock(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
     bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
@@ -1352,7 +1353,7 @@ Element findContainingBlock(Element element) {
 
 Element findScrollContainer(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
     List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);

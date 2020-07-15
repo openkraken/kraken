@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:meta/meta.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
@@ -15,7 +16,10 @@ class AudioElement extends Element {
   static double defaultWidth = 300.0;
   static double defaultHeight = 150.0;
 
-  AudioElement(int targetId) : super(targetId: targetId, allowChildren: false, tagName: AUDIO) {
+  AudioElement({
+    @required int targetId,
+    @required ElementManager elementManager
+}) : super(targetId: targetId, allowChildren: false, tagName: AUDIO, elementManager: elementManager) {
     initAudioPlayer();
     initSizedBox();
   }

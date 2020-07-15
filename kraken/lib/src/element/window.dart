@@ -11,7 +11,7 @@ import 'package:kraken/element.dart';
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {
-  Window() : super(WINDOW_ID) {
+  Window(ElementManager elementManager) : super(targetId: WINDOW_ID, elementManager: elementManager) {
     window.onPlatformBrightnessChanged = () {
       Event event = Event('colorschemechange');
       event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';

@@ -4,7 +4,6 @@
  */
 import 'from_native.dart';
 import 'to_native.dart';
-import 'dart:ffi';
 
 /// Init bridge
 int initBridge(int poolSize, bool firstView) {

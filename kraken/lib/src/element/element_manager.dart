@@ -15,50 +15,50 @@ import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 
-Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
+Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case DIV:
-      element = DivElement(id);
+      element = DivElement(targetId: id, elementManager: elementManager);
       break;
     case SPAN:
-      element = SpanElement(id);
+      element = SpanElement(targetId: id, elementManager: elementManager);
       break;
     case STRONG:
-      element = StrongElement(id);
+      element = StrongElement(targetId: id, elementManager: elementManager);
       break;
     case IMAGE:
-      element = ImageElement(id);
+      element = ImageElement(targetId: id, elementManager: elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id);
+      element = ParagraphElement(targetId: id, elementManager: elementManager);
       break;
     case INPUT:
-      element = InputElement(id);
+      element = InputElement(targetId: id, elementManager: elementManager);
       break;
     case PRE:
-      element = PreElement(id);
+      element = PreElement(targetId: id, elementManager: elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(id);
+      element = CanvasElement(targetId: id, elementManager: elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id);
+      element = AnimationPlayerElement(targetId: id, elementManager: elementManager);
       break;
     case VIDEO:
-      element = VideoElement(id);
+      element = VideoElement(targetId: id, elementManager: elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id);
+      element = CameraPreviewElement(targetId: id, elementManager: elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(id);
+      element = IFrameElement(targetId: id, elementManager: elementManager);
       break;
     case AUDIO:
-      element = AudioElement(id);
+      element = AudioElement(targetId: id, elementManager: elementManager);
       break;
     default:
-      element = DivElement(id);
+      element = DivElement(targetId: id, elementManager: elementManager);
       print('ERROR: unexpected element type "$type"');
   }
 
@@ -84,10 +84,10 @@ class ElementManager {
   Pointer<JSContext> jsContext;
   int jsContextIndex;
   ElementManager({@required this.jsContext, @required this.jsContextIndex, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(BODY_ID);
+    _rootElement = BodyElement(targetId: BODY_ID, elementManager: this);
     _root = _rootElement.renderObject;
     setEventTarget(_rootElement);
-    setEventTarget(Window());
+    setEventTarget(Window(this));
   }
 
   T getEventTargetByTargetId<T>(int targetId) {
@@ -130,19 +130,18 @@ class ElementManager {
       }
     }
 
-    EventTarget target = _createElement(id, type, props, eventList);
-    target.elementManager = this;
+    EventTarget target = _createElement(id, type, props, eventList, this);
     setEventTarget(target);
   }
 
   void createTextNode(int id, String data) {
-    TextNode textNode = TextNode(id, data);
+    TextNode textNode = TextNode(id, data, this);
     textNode.elementManager = this;
     setEventTarget(textNode);
   }
 
   void createComment(int id, String data) {
-    EventTarget comment = Comment(id, data);
+    EventTarget comment = Comment(targetId: id, data: data, elementManager: this);
     comment.elementManager = this;
     setEventTarget(comment);
   }

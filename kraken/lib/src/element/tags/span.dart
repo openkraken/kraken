@@ -4,11 +4,12 @@
  */
 
 import 'package:kraken/element.dart';
+import 'package:meta/meta.dart';
 
 const String SPAN = 'SPAN';
 
 const Map<String, dynamic> _defaultStyle = {'display': 'inline'};
 
 class SpanElement extends Element {
-  SpanElement(int targetId) : super(targetId: targetId, tagName: SPAN, defaultStyle: _defaultStyle);
+  SpanElement({@required int targetId, @required ElementManager elementManager}) : super(targetId: targetId, tagName: SPAN, defaultStyle: _defaultStyle, elementManager: elementManager);
 }

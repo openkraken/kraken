@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:kraken/bridge.dart';
 
 Connectivity _connectivity;
 

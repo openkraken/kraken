@@ -26,13 +26,16 @@ void printError(alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &e
   }
 }
 
+void disposeAllContext() {
+  for (int i = 0; i <= poolIndex; i ++) {
+    disposeContext(bridgePool, i);
+  }
+  poolIndex = 0;
+  inited = false;
+}
+
 void *initJSContextPool(int poolSize) {
-  if (inited) {
-    for (int i = 0; i < poolIndex; i ++) {
-      disposeContext(bridgePool[i], i);
-    }
-    inited = false;
-  };
+  if (inited) disposeAllContext();
   bridgePool = new void *[poolSize];
   for (int i = 1; i < poolSize; i++) {
     bridgePool[i] = nullptr;
@@ -74,11 +77,15 @@ int32_t checkContext(void *context, int32_t contextIndex) {
 }
 
 void freezeContext(void *context, int32_t contextIndex) {
-  checkContext(context, contextIndex);
+  assert(checkContext(context, contextIndex) && "freeezeContext: context is not valid");
+  auto bridge = static_cast<kraken::JSBridge *>(context);
+  bridge->getContext()->freeze();
 }
 
 void unfreezeContext(void *context, int32_t contextIndex) {
-
+  assert(checkContext(context, contextIndex) && "unfreezeContext: context is not valid");
+  auto bridge = static_cast<kraken::JSBridge *>(context);
+  bridge->getContext()->unfreeze();
 }
 
 bool isContextFreeze(void *context) {

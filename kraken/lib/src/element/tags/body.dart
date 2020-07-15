@@ -4,6 +4,7 @@
  */
 
 import 'package:kraken/element.dart';
+import 'package:meta/meta.dart';
 
 const String BODY = 'BODY';
 
@@ -15,5 +16,5 @@ final Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(int targetId) : super(targetId: targetId, tagName: BODY, defaultStyle: _defaultStyle);
+  BodyElement({@required int targetId, @required ElementManager elementManager}) : super(targetId: targetId, tagName: BODY, defaultStyle: _defaultStyle, elementManager: elementManager);
 }

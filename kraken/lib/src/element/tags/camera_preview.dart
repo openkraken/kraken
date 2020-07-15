@@ -9,6 +9,7 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_camera/camera.dart';
+import 'package:meta/meta.dart';
 
 const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
 
@@ -44,7 +45,10 @@ Future<CameraDescription> detectCamera(String lens) async {
 }
 
 class CameraPreviewElement extends Element {
-  CameraPreviewElement(int targetId) : super(targetId: targetId, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle) {
+  CameraPreviewElement({
+    @required int targetId,
+    @required ElementManager elementManager
+}) : super(targetId: targetId, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, elementManager: elementManager) {
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
         CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),

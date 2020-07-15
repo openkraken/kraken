@@ -7,6 +7,7 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
+import 'package:meta/meta.dart';
 
 const String CANVAS = 'CANVAS';
 
@@ -17,12 +18,13 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId)
+  CanvasElement({@required int targetId, @required ElementManager elementManager})
       : super(
           targetId: targetId,
           defaultStyle: _defaultStyle,
           allowChildren: false,
           tagName: CANVAS,
+          elementManager: elementManager
         ) {
     painter = CanvasPainter();
     _width = CSSLength(ELEMENT_DEFAULT_WIDTH).computedValue;

@@ -82,7 +82,7 @@ public:
 
   bool isFreeze() override;
   void freeze() override;
-  void unFreeze() override;
+  void unfreeze() override;
 
   void reportError(jsa::JSError &error) override;
 
@@ -252,7 +252,7 @@ private:
   std::atomic<bool> ctxInvalid_;
   std::string desc_;
   int32_t _contextIndex;
-  std::atomic<bool> _freeze;
+  std::atomic<bool> _freeze {false};
   jsa::JSExceptionHandler _handler;
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;
