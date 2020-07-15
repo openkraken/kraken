@@ -627,14 +627,6 @@ class RenderFlexLayout extends RenderBox
     return maxMainSize;
   }
 
-  @override
-  void adoptChild(RenderObject child) {
-    super.adoptChild(child);
-    // remove element reference to prevent memory leaks
-    // @TODO: need to remove this after RenderObject merge have completed.
-    elementManager = null;
-  }
-
   // There are four steps for Flex Container to layout.
   // Step 1: layout positioned child earlyer.
   // Step 2: layout flex-items with No constraints, this step is aiming to collect original box size of every flex-items.

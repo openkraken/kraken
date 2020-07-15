@@ -568,14 +568,6 @@ class RenderFlowLayout extends RenderBox
     return 0.0;
   }
 
-  @override
-  void adoptChild(RenderObject child) {
-    super.adoptChild(child);
-    // remove element reference to prevent memory leaks
-    // @TODO: need to remove this after RenderObject merge have completed.
-    elementManager = null;
-  }
-
   // @override
   void performLayout() {
     RenderBox child = firstChild;

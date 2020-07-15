@@ -76,13 +76,6 @@ class RenderTextBox extends RenderBox
   }
 
   @override
-  void adoptChild(RenderObject child) {
-    super.adoptChild(child);
-    // remove element reference to prevent memory leaks
-    elementManager = null;
-  }
-
-  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();

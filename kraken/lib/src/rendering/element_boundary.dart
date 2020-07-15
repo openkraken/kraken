@@ -27,10 +27,10 @@ class RenderElementBoundary extends RenderTransform
   RenderElementBoundary(
       {this.child,
       this.style,
-      this.elementManager,
       Matrix4 transform,
       Offset origin,
       this.targetId,
+      this.elementManager,
       bool shouldRender,
       Alignment alignment})
       : assert(child != null),
@@ -78,13 +78,6 @@ class RenderElementBoundary extends RenderTransform
     if (child.parentData is! ElementBoundaryParentData) {
       child.parentData = ElementBoundaryParentData();
     }
-  }
-
-  @override
-  void adoptChild(RenderObject child) {
-    super.adoptChild(child);
-    // remove element reference to prevent memory leaks
-    elementManager = null;
   }
 
   @override

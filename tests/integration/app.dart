@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:kraken/kraken.dart';
+import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_driver/driver_extension.dart';
@@ -13,6 +14,7 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
+  KrakenViewController controller = KrakenViewController();
   registerDartTestMethodsToCpp();
   initTestFramework();
   addJSErrorListener((String err) {
@@ -40,20 +42,16 @@ void main() {
       WidgetsBinding.instance.attachRootWidget(MaterialApp(home: Scaffold()));
     } catch(err) {} // Ignore throwing errors.
 
-    runApp(
-      shouldInitializeBinding: false,
-      enableDebug: false,
-      afterConnected: () async {
-        String status = await executeTest();
-        if (status == 'failed') {
-          print('$err with $status.');
-          completer.complete('failed');
-        } else {
-          print('$pass with $status.');
-          completer.complete('success');
-        }
-      },
-    );
+    controller.attachView(RendererBinding.instance.renderView);
+
+    String status = await executeTest();
+    if (status == 'failed') {
+      print('$err with $status.');
+      completer.complete('failed');
+    } else {
+      print('$pass with $status.');
+      completer.complete('success');
+    }
 
     return completer.future;
   });

@@ -13,13 +13,6 @@ class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin {
   FlareRenderObject(this._targetId, this.elementManager);
 
   @override
-  void adoptChild(RenderObject child) {
-    super.adoptChild(child);
-    // remove element reference to prevent memory leaks
-    elementManager = null;
-  }
-
-  @override
   void performLayout() {
     if (!sizedByParent) {
       double width = getElementComputedWidth(_targetId, elementManager);

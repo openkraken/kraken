@@ -169,7 +169,7 @@ class Element extends Node
     renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
 
     setElementSizeType();
   }
