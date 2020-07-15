@@ -114,7 +114,9 @@ String invokeModule(Pointer<JSContext> context, int contextIndex, String json, D
           callback(context, contextIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'onConnectivityChanged') {
-        Connection.onConnectivityChanged();
+        Connection.onConnectivityChanged((String json) {
+          emitModuleEvent(context, contextIndex, '["onConnectivityChanged", $json]');
+        });
       }
     } else if (module == 'fetch') {
       List fetchArgs = args[1];
@@ -210,7 +212,9 @@ String invokeModule(Pointer<JSContext> context, int contextIndex, String json, D
         return MQTT.getReadyState(methodArgs[0]);
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        MQTT.addEvent(methodArgs[0], methodArgs[1]);
+        MQTT.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
+          emitModuleEvent(context, contextIndex, '["MQTT", $id, $event]');
+        });
       }
     } else if (module == 'Geolocation') {
       String method = args[1];
@@ -229,7 +233,9 @@ String invokeModule(Pointer<JSContext> context, int contextIndex, String json, D
         if (positionArgs.length > 0) {
           options = positionArgs[0];
         }
-        return Geolocation.watchPosition(options).toString();
+        return Geolocation.watchPosition(options, (String result) {
+          emitModuleEvent(context, contextIndex, '["watchPosition", $result]');
+        }).toString();
       } else if (method == 'clearWatch') {
         List positionArgs = args[2];
         int id = positionArgs[0];
@@ -282,7 +288,9 @@ String invokeModule(Pointer<JSContext> context, int contextIndex, String json, D
       String method = args[1];
       if (method == 'init') {
         List methodArgs = args[2];
-        return KrakenWebSocket.init(methodArgs[0]);
+        return KrakenWebSocket.init(methodArgs[0], (String id, String event) {
+          emitModuleEvent(context, contextIndex, '["WebSocket", $id, ${jsonEncode(event)}]');
+        });
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
         KrakenWebSocket.addEvent(methodArgs[0], methodArgs[1]);

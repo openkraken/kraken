@@ -5,6 +5,7 @@ import '../element/event.dart';
 import 'package:kraken/bridge.dart';
 
 enum _ConnectionState { closed }
+typedef WebSocketEventCallback = void Function(String id, String event);
 
 class _WebSocketState {
   _ConnectionState status;
@@ -18,7 +19,7 @@ Map<String, _WebSocketState> _stateMap = {};
 int _clientId = 0;
 
 class KrakenWebSocket {
-  static String init(String url, {String protocols}) {
+  static String init(String url, WebSocketEventCallback callback, {String protocols}) {
     var id = (_clientId++).toString();
     WebSocket.connect(url, protocols: [protocols]).then((webSocket) {
       IOWebSocketChannel client = IOWebSocketChannel(webSocket);
@@ -27,24 +28,24 @@ class KrakenWebSocket {
         dynamic data = state.data;
         webSocket.close(data[0], data[1]);
         CloseEvent event = CloseEvent(data[0], data[1], true);
-        emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+        callback(id, jsonEncode(event));
         _stateMap.remove(id);
         return;
       }
       _clientMap[id] = client;
       // Listen all event
-      _listen(id);
+      _listen(id, callback);
       // Emit open event
       String type = 'open';
       if (_hasListener(id, type)) {
         Event event = Event(type);
-        emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+        callback(id, jsonEncode(event));
       }
     }).catchError((e, stack) {
       // print connection error internally and trigger error event.
       print(e);
       Event event = Event('error');
-      emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+      callback(id, jsonEncode(event));
     });
 
     return id;
@@ -82,27 +83,27 @@ class KrakenWebSocket {
     return listeners.containsKey(type);
   }
 
-  static void _listen(String id) {
+  static void _listen(String id, WebSocketEventCallback callback) {
     IOWebSocketChannel client = _clientMap[id];
 
     client.stream.listen((message) {
       String type = 'message';
       if (!_hasListener(id, type)) return;
       MessageEvent event = MessageEvent(message);
-      emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+      callback(id, jsonEncode(event));
     }, onError: (error) {
       String type = 'error';
       if (!_hasListener(id, type)) return;
       // print error internally and trigger error event;
       print(error);
       Event event = Event(type);
-      emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+      callback(id, jsonEncode(event));
     }, onDone: () {
       String type = 'close';
       if (_hasListener(id, type)) {
         // CloseEvent https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/CloseEvent
         CloseEvent event = CloseEvent(client.closeCode, client.closeReason, false);
-        emitModuleEvent('["WebSocket", $id, ${jsonEncode(event)}]');
+        callback(id, jsonEncode(event));
       }
       // Clear instance after close
       _listenMap.remove(id);
