@@ -122,6 +122,10 @@ class Element extends Node
     return 0.0;
   }
 
+  bool get isValidSticky {
+    return style['position'] == 'sticky' && (style.contains('top') || style.contains('bottom'));
+  }
+
   // Horizontal border dimension (left + right)
   double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
   // Vertical border dimension (top + bottom)
@@ -1396,7 +1400,7 @@ List<Element> findStickyChildren(Element element) {
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
-    if (_isSticky(child.style)) result.add(child);
+    if (child.isValidSticky) result.add(child);
 
     // No need to loop scrollable container children
     if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
@@ -1429,10 +1433,6 @@ bool _isPositioned(CSSStyleDeclaration style) {
   } else {
     return false;
   }
-}
-
-bool _isSticky(CSSStyleDeclaration style) {
-  return style['position'] == 'sticky' && (style.contains('top') || style.contains('bottom'));
 }
 
 void setPositionedChildParentData(
