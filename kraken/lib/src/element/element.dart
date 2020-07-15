@@ -1432,7 +1432,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
 }
 
 bool _isSticky(CSSStyleDeclaration style) {
-  return style['position'] == 'sticky' && style.contains('top') || style.contains('bottom');
+  return style['position'] == 'sticky' && (style.contains('top') || style.contains('bottom'));
 }
 
 void setPositionedChildParentData(
