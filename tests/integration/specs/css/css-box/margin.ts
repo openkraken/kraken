@@ -50,4 +50,18 @@ describe('Box margin', () => {
     div.style.margin = '20px';
     await matchScreenshot();
   });
+
+  fit('should work with shorthand', async () => {
+    const div = document.createElement('div');
+    setElementStyle(div, {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#666',
+      marginTop: '10px',
+      margin: '30px',
+    });
+
+    document.body.appendChild(div);
+    await matchScreenshot();
+  });
 });
