@@ -138,16 +138,13 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox child, Size parentSize) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize) {
   double width = parentSize.width;
   double height = parentSize.height;
 
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
-
-  EdgeInsetsGeometry padding = parentElement.renderPadding.padding;
-  EdgeInsets resolvedPadding = padding.resolve(TextDirection.ltr);
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
@@ -156,14 +153,14 @@ void setPositionedChildOffset(Element parentElement, RenderBox parent, RenderBox
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    double top = childParentData.top != null ? (childParentData.top - resolvedPadding.top) : baseOffset.dy;
+    double top = childParentData.top != null ? (childParentData.top) : baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = height - child.size.height - ((childParentData.bottom - resolvedPadding.bottom) ?? 0);
+      top = height - child.size.height - ((childParentData.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? (childParentData.left - resolvedPadding.left) : baseOffset.dx;
+    double left = childParentData.left != null ? (childParentData.left) : baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
-      left = width - child.size.width - ((childParentData.right - resolvedPadding.right) ?? 0);
+      left = width - child.size.width - ((childParentData.right) ?? 0);
     }
 
     x = left;

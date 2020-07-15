@@ -69,6 +69,11 @@ enum JustifyContent {
   /// The items are evenly distributed within the alignment container along the main axis. The spacing between each pair of adjacent items is the same.
   /// The empty space before the first and after the last item equals half of the space between each pair of adjacent items.
   spaceAround,
+
+  /// The items are evenly distributed within the alignment container along the cross axis.
+  /// The spacing between each pair of adjacent items, the start edge and the first item,
+  /// and the end edge and the last item, are all exactly the same.
+  spaceEvenly,
 }
 
 /// Sets the distribution of space between and around content items along a flexbox's cross-axis.
@@ -350,6 +355,8 @@ JustifyContent _getJustifyContent(String justifyContent, CSSStyleDeclaration sty
       return JustifyContent.spaceBetween;
     case 'space-around':
       return JustifyContent.spaceAround;
+    case 'space-evenly':
+      return JustifyContent.spaceEvenly;
   }
   return JustifyContent.flexStart;
 }
