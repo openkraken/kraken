@@ -730,7 +730,7 @@ describe('flex', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -739,7 +739,7 @@ describe('flex', () => {
             flex: 'initial',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -747,7 +747,7 @@ describe('flex', () => {
             height: '100px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',
@@ -775,7 +775,7 @@ describe('flex', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -784,7 +784,7 @@ describe('flex', () => {
             flex: 'auto',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -792,7 +792,7 @@ describe('flex', () => {
             height: '100px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',
@@ -820,7 +820,7 @@ describe('flex', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -829,7 +829,7 @@ describe('flex', () => {
             flex: 'none',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -837,7 +837,7 @@ describe('flex', () => {
             height: '100px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',

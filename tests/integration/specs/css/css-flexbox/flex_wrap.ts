@@ -15,7 +15,7 @@ describe('flexbox flex-wrap', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -24,7 +24,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -33,7 +33,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',
@@ -65,7 +65,7 @@ describe('flexbox flex-wrap', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -74,7 +74,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -83,7 +83,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',
@@ -115,7 +115,7 @@ describe('flexbox flex-wrap', () => {
         },
       },
       [
-        (child1 = createElement('div', {
+        (createElement('div', {
           id: 'child_1',
           style: {
             backgroundColor: 'red',
@@ -124,7 +124,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child2 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'blue',
@@ -133,7 +133,7 @@ describe('flexbox flex-wrap', () => {
             margin: '10px',
           },
         })),
-        (child3 = createElement('div', {
+        (createElement('div', {
           id: 'child_2',
           style: {
             backgroundColor: 'green',

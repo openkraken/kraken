@@ -899,18 +899,15 @@ class RenderFlexLayout extends RenderBox
             double computedSize = current['size'] + shrinkValue;
             // if shrink size is lower than child's min-content, should reset to min-content size
             // @TODO no proper way to get real min-content of child element.
-            if (mainSizeType == BoxSizeType.automatic) {
-              if (isHorizontalFlexDirection(flexDirection) &&
-                computedSize < child.size.width &&
-                _getChildWidthSizeType(child) == BoxSizeType.automatic) {
-                computedSize = child.size.width;
-              } else if (isVerticalFlexDirection(flexDirection) &&
-                computedSize < child.size.height &&
-                _getChildHeightSizeType(child) == BoxSizeType.automatic) {
-                computedSize = child.size.height;
-              }
+            if (isHorizontalFlexDirection(flexDirection) &&
+              computedSize < child.size.width &&
+              _getChildWidthSizeType(child) == BoxSizeType.automatic) {
+              computedSize = child.size.width;
+            } else if (isVerticalFlexDirection(flexDirection) &&
+              computedSize < child.size.height &&
+              _getChildHeightSizeType(child) == BoxSizeType.automatic) {
+              computedSize = child.size.height;
             }
-
             maxChildExtent = minChildExtent = computedSize;
           } else {
             maxChildExtent = minChildExtent = _getMainSize(child);
@@ -1005,7 +1002,7 @@ class RenderFlexLayout extends RenderBox
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // only scretch ElementBox, not TextBox.
+                  // only stretch ElementBox, not TextBox.
                   minCrossAxisSize = maxCrossSize;
                   maxCrossAxisSize = math.max(maxCrossSize, constraints.maxWidth);
                 } else {
@@ -1013,7 +1010,6 @@ class RenderFlexLayout extends RenderBox
                   minCrossAxisSize = 0.0;
                   maxCrossAxisSize = double.infinity;
                 }
-
                 innerConstraints = BoxConstraints(
                   minHeight: mainAxisMinSize,
                   maxHeight: mainAxisMaxSize,
@@ -1159,6 +1155,7 @@ class RenderFlexLayout extends RenderBox
             case AlignItems.center:
               childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
               break;
+            case AlignItems.baseline: // @TODO currently not supported
             case AlignItems.stretch:
               childCrossPosition = 0.0;
               break;
@@ -1179,6 +1176,7 @@ class RenderFlexLayout extends RenderBox
             case AlignSelf.center:
               childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
               break;
+            case AlignSelf.baseline: // @TODO currently not supported
             case AlignSelf.stretch:
               childCrossPosition = 0.0;
               break;
