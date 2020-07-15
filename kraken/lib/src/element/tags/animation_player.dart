@@ -28,7 +28,7 @@ class AnimationPlayerElement extends Element {
 
   AnimationPlayerElement({@required int targetId, @required ElementManager elementManager})
       : super(
-            targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, elementManager: elementManager);
+            targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle);
 
   String get objectFit => style['objectFit'];
 

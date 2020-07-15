@@ -17,5 +17,5 @@ final Map<String, dynamic> _defaultStyle = {
 
 class BodyElement extends Element {
   BodyElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, tagName: BODY, defaultStyle: _defaultStyle, elementManager: elementManager);
+      : super(targetId, elementManager, tagName: BODY, defaultStyle: _defaultStyle);
 }

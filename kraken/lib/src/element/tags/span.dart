@@ -12,5 +12,5 @@ const Map<String, dynamic> _defaultStyle = {'display': 'inline'};
 
 class SpanElement extends Element {
   SpanElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, tagName: SPAN, defaultStyle: _defaultStyle, elementManager: elementManager);
+      : super(targetId, elementManager, tagName: SPAN, defaultStyle: _defaultStyle);
 }

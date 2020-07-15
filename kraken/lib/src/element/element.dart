@@ -111,10 +111,8 @@ class Element extends Node
   // Vertical border dimension (top + bottom)
   double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
-  Element({
-    @required int targetId,
-    @required this.tagName,
-    @required ElementManager elementManager,
+  Element(int targetId, ElementManager elementManager, {
+    this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,

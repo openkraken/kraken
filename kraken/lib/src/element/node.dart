@@ -69,7 +69,7 @@ abstract class Node extends EventTarget {
   }
 
   Node(this.nodeType, int targetId, ElementManager elementManager, this.nodeName)
-      : super(targetId: targetId, elementManager: elementManager) {
+      : super(targetId, elementManager) {
     assert(nodeType != null);
     assert(targetId != null);
     nodeName = nodeName ?? '';

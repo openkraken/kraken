@@ -12,5 +12,5 @@ const Map<String, dynamic> _defaultStyle = {'display': 'inline', 'fontWeight': '
 
 class StrongElement extends Element {
   StrongElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, tagName: STRONG, defaultStyle: _defaultStyle, elementManager: elementManager);
+      : super(targetId, elementManager, tagName: STRONG, defaultStyle: _defaultStyle);
 }

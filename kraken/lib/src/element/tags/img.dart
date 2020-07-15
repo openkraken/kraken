@@ -30,11 +30,11 @@ class ImageElement extends Element {
 
   ImageElement({@required int targetId, @required ElementManager elementManager})
       : super(
-            targetId: targetId,
+            targetId,
+            elementManager,
             defaultStyle: _defaultStyle,
             allowChildren: false,
-            tagName: IMAGE,
-            elementManager: elementManager) {
+            tagName: IMAGE) {
     _renderImage();
   }
 

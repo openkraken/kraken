@@ -111,7 +111,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId: targetId, tagName: INPUT, defaultStyle: _defaultStyle, allowChildren: false) {
+  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, allowChildren: false) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,

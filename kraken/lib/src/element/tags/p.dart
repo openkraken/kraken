@@ -9,5 +9,5 @@ const String PARAGRAPH = 'P';
 
 class ParagraphElement extends Element {
   ParagraphElement({@required int targetId, @required ElementManager elementManager})
-      : super(targetId: targetId, tagName: PARAGRAPH, elementManager: elementManager);
+      : super(targetId, elementManager, tagName: PARAGRAPH);
 }
