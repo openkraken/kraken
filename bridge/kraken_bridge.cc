@@ -20,7 +20,7 @@ Screen screen;
 
 void printError(alibaba::jsa::JSContext &bridge, const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(&bridge, bridge.getContextIndex(), error.what());
+    kraken::getDartMethod()->onJsError(bridge.getContextIndex(), error.what());
   } else {
     KRAKEN_LOG(ERROR) << error.what() << std::endl;
   }
@@ -30,7 +30,7 @@ namespace {
 
 void disposeAllBridge() {
   for (int i = 0; i <= poolIndex; i++) {
-    disposeBridge(bridgePool[i], i);
+    disposeBridge(i);
   }
   poolIndex = 0;
   inited = false;
@@ -47,7 +47,7 @@ int32_t searchForAvailableBridgeIndex() {
 
 } // namespace
 
-void *initJSBridgePool(int poolSize) {
+void initJSBridgePool(int poolSize) {
   if (inited) disposeAllBridge();
   bridgePool = new kraken::JSBridge *[poolSize];
   for (int i = 1; i < poolSize; i++) {
@@ -57,19 +57,15 @@ void *initJSBridgePool(int poolSize) {
   bridgePool[0] = new kraken::JSBridge(0, printError);
   inited = true;
   maxPoolSize = poolSize;
-  return bridgePool[0];
 }
 
-void disposeBridge(void *bridgePtr, int32_t bridgeIndex) {
+void disposeBridge(int32_t bridgeIndex) {
   assert(bridgeIndex < maxPoolSize);
   assert(bridgePool[bridgeIndex] != nullptr);
-  assert(bridgePool[bridgeIndex] == bridgePtr);
   auto bridge = static_cast<kraken::JSBridge *>(bridgePool[bridgeIndex]);
   delete bridge;
   bridgePool[bridgeIndex] = nullptr;
 }
-
-
 
 int32_t allocateNewBridge() {
   poolIndex++;
@@ -86,60 +82,53 @@ int32_t allocateNewBridge() {
   return poolIndex;
 }
 
-void *getJSBridge(int32_t contextIndex) {
-  assert(checkBridgeIndex(contextIndex) && "getJSBridge: bridgeIndex is not valid.");
-  return bridgePool[contextIndex];
+void *getJSBridge(int32_t bridgeIndex) {
+  assert(checkBridgeIndex(bridgeIndex) && "getJSBridge: bridgeIndex is not valid.");
+  return bridgePool[bridgeIndex];
 }
 
 int32_t checkBridgeIndex(int32_t bridgeIndex) {
   return bridgeIndex < maxPoolSize && bridgePool[bridgeIndex] != nullptr;
 }
 
-int32_t checkBridge(void *bridge, int32_t bridgeIndex) {
-  return bridgePool[bridgeIndex] == bridge;
-}
-
-void freezeBridge(void *bridgePtr, int32_t bridgeIndex) {
-  assert(checkBridge(bridgePtr, bridgeIndex) && "freeezeContext: bridge is not valid");
+void freezeBridge(int32_t bridgeIndex) {
+  auto bridgePtr = getJSBridge(bridgeIndex);
   auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
   bridge->getContext()->freeze();
 }
 
-void unfreezeBridge(void *bridgePtr, int32_t bridgeIndex) {
-  assert(checkBridge(bridgePtr, bridgeIndex) && "unfreezeBridge: bridge is not valid");
+void unfreezeBridge(int32_t bridgeIndex) {
+  auto bridgePtr = getJSBridge(bridgeIndex);
   auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
   bridge->getContext()->unfreeze();
 }
 
-bool isContextFreeze(void *bridgePtr) {
-  auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
+bool isContextFreeze(int32_t bridgeIndex) {
+  auto bridge = static_cast<kraken::JSBridge *>(getJSBridge(bridgeIndex));
   return bridge->getContext()->isFreeze();
 }
 
-void evaluateScripts(void *bridgePtr, int32_t bridgeIndex, const char *code, const char *bundleFilename,
+void evaluateScripts(int32_t bridgeIndex, const char *code, const char *bundleFilename,
                      int startLine) {
   assert(checkBridgeIndex(bridgeIndex) && "evaluateScripts: bridgeIndex is not valid");
-  assert(checkBridge(bridgePtr, bridgeIndex) && "evaluateScripts: bridge is not valid");
-  auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
+  auto bridge = static_cast<kraken::JSBridge *>(getJSBridge(bridgeIndex ));
   bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
 }
 
-void* reloadJsContext(void *bridgePtr, int32_t bridgeIndex) {
+void reloadJsContext(int32_t bridgeIndex) {
   assert(checkBridgeIndex(bridgeIndex) && "reloadJSContext: bridgeIndex is not valid");
-  assert(checkBridge(bridgePtr, bridgeIndex) && "reloadJSContext: bridge is not valid");
-  if (isContextFreeze(bridgePtr)) return nullptr;
+  auto bridgePtr = getJSBridge(bridgeIndex);
+  if (isContextFreeze(bridgeIndex)) return;
   auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
   delete bridge;
   bridge = new kraken::JSBridge(bridgeIndex, printError);
   bridgePool[bridgeIndex] = bridge;
-  return bridge;
 }
 
-void invokeEventListener(void *bridgePtr, int32_t bridgeIndex, int32_t type, const char *data) {
+void invokeEventListener(int32_t bridgeIndex, int32_t type, const char *data) {
   assert(checkBridgeIndex(bridgeIndex) && "invokeEventListener: bridgeIndex is not valid");
-  assert(checkBridge(bridgePtr, bridgeIndex) && "invokeEventListener: bridge is not valid");
-  if (isContextFreeze(bridgePtr)) return;
-  auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
+  if (isContextFreeze(bridgeIndex)) return;
+  auto bridge = static_cast<kraken::JSBridge *>(getJSBridge(bridgeIndex));
   bridge->invokeEventListener(type, data);
 }
 

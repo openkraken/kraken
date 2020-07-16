@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
-import 'dart:ffi';
 import 'bundle.dart';
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
@@ -49,7 +48,6 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     }
 
     _bridgeIndex = initBridge();
-    _bridge = getJSBridge(_bridgeIndex);
 
     _viewControllerList.add(this);
 
@@ -58,12 +56,6 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
-  // the pointer address of Javascript runtime context
-  Pointer<JSBridge> _bridge;
-
-  Pointer<JSBridge> get bridge {
-    return _bridge;
-  }
   int get bridgeIndex {
     return _bridgeIndex;
   }
@@ -110,7 +102,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     _elementManager.detach();
     _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
-    _bridge = await reloadJSContext(_bridge, _bridgeIndex);
+    await reloadJSContext(_bridgeIndex);
     run();
   }
 
@@ -131,7 +123,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // dispose controller and recycle all resources.
   void dispose() {
     detachView();
-    disposeBridge(_bridge, _bridgeIndex);
+    disposeBridge(_bridgeIndex);
     _viewControllerList[_bridgeIndex] = null;
   }
 
@@ -158,11 +150,11 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // execute preloaded javascript source
   void run() async {
     if (_bundle != null) {
-      await _bundle.run(_bridge, _bridgeIndex);
+      await _bundle.run(_bridgeIndex);
       // trigger window load event
       requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_bridge, _bridgeIndex, json);
+        emitUIEvent(_bridgeIndex, json);
       });
     } else {
       print('ERROR: No bundle found.');

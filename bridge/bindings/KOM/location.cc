@@ -43,7 +43,7 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal, const Value *
     return Value::undefined();
   }
 
-  getDartMethod()->reloadApp(&context, context.getContextIndex());
+  getDartMethod()->reloadApp(context.getContextIndex());
   return Value::undefined();
 }
 

@@ -56,7 +56,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  const char *result = getDartMethod()->invokeUIManager(&context, context.getContextIndex(), messageStr.c_str());
+  const char *result = getDartMethod()->invokeUIManager(context.getContextIndex(), messageStr.c_str());
   std::string resultStr = std::string(result);
 
   if (resultStr.find("Error:", 0) != std::string::npos) {
@@ -70,7 +70,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-void handleInvokeModuleTransientCallback(void *callbackContext, void *context, int32_t contextIndex, char *json) {
+void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextIndex, char *json) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
@@ -131,8 +131,8 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   const char *result = BridgeCallback::instance()->registerCallback<const char *>(
     std::move(callbackContext),
-    [&messageStr](BridgeCallback::Context *bridgeContext, JSBridge *bridge, int32_t contextIndex) {
-      return getDartMethod()->invokeModule(bridgeContext, bridge, contextIndex, messageStr.c_str(),
+    [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextIndex) {
+      return getDartMethod()->invokeModule(bridgeContext, contextIndex, messageStr.c_str(),
                                            handleInvokeModuleTransientCallback);
     });
 
@@ -197,7 +197,7 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *callbackContext, void *context, int32_t contextIndex, const char *errmsg) {
+void handleTransientCallback(void *callbackContext, int32_t contextIndex, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
@@ -257,8 +257,8 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, JSBridge *bridge, int32_t contextIndex) {
-      getDartMethod()->requestBatchUpdate(callbackContext, bridge, contextIndex, handleTransientCallback);
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextIndex) {
+      getDartMethod()->requestBatchUpdate(callbackContext, contextIndex, handleTransientCallback);
     });
 
   return Value::undefined();

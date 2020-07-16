@@ -39,16 +39,14 @@ public:
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
   T registerCallback(std::unique_ptr<Context> &&context,
-                     std::function<T(BridgeCallback::Context *, JSBridge *, int32_t)> fn) {
+                     std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
     JSContext &jsContext = context->_context;
     int32_t contextIndex = context->_context.getContextIndex();
-    auto bridge = static_cast<JSBridge *>(getJSBridge(contextIndex));
-    assert(bridge != nullptr && "bridge ptr can not be nullptr");
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
-    return fn(p, bridge, contextIndex);
+    return fn(p, contextIndex);
   }
 
   // dispose all callbacks and recycle callback context's memory
