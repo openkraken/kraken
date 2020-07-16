@@ -2,11 +2,9 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:io';
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/painting.dart';
+
 import 'value.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
