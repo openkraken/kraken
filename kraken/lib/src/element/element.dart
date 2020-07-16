@@ -18,11 +18,14 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 import 'package:meta/meta.dart';
 
 import '../css/flow.dart';
 import 'event_handler.dart';
 import 'bounding_client_rect.dart';
+
+const String STYLE = 'style';
 
 /// Defined by W3C Standard,
 /// Most elements's default width is 300 in pixel,
@@ -263,7 +266,7 @@ class Element extends Node
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains('top')) {
-        double top = CSSSizingMixin.getDisplayPortedLength(childStyle['top']) + resolvedPadding.top;
+        double top = CSSStyleProperty.getDisplayPortValue(childStyle['top']) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -272,7 +275,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('bottom')) {
-        double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']) + resolvedPadding.bottom;
+        double bottom = CSSStyleProperty.getDisplayPortValue(childStyle['bottom']) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -299,7 +302,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains('left')) {
-        double left = CSSSizingMixin.getDisplayPortedLength(childStyle['left']) + resolvedPadding.left;
+        double left = CSSStyleProperty.getDisplayPortValue(childStyle['left']) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -308,7 +311,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('right')) {
-        double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']) + resolvedPadding.right;
+        double right = CSSStyleProperty.getDisplayPortValue(childStyle['right']) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -1136,14 +1139,16 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-    properties[key] = value;
 
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
+    } else {
+      properties[key] = value;
     }
+
   }
 
   @mustCallSuper
