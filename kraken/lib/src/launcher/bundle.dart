@@ -94,7 +94,7 @@ abstract class KrakenBundle {
     return localBundleDirectory;
   }
 
-  Future<void> run(Pointer<JSContext> context, int contextIndex) async {
+  Future<void> run(Pointer<JSBridge> context, int contextIndex) async {
     if (!isResolved) await resolve();
     evaluateScripts(context, contextIndex, content, url.toString(), lineOffset);
   }

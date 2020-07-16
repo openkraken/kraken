@@ -15,34 +15,35 @@ import 'platform.dart';
 // 6. Call the C function.
 
 // representation of JSContext
-class JSContext extends Struct {}
+class JSBridge extends Struct {}
+class JSCallbackContext extends Struct {}
 
 // Register invokeEventListener
 typedef Native_InvokeEventListener = Void Function(
-    Pointer<JSContext> context, Int32 contextIndex, Int32 type, Pointer<Utf8>);
-typedef Dart_InvokeEventListener = void Function(Pointer<JSContext> context, int contextIndex, int type, Pointer<Utf8>);
+    Pointer<JSBridge> bridge, Int32 contextIndex, Int32 type, Pointer<Utf8>);
+typedef Dart_InvokeEventListener = void Function(Pointer<JSBridge> bridge, int contextIndex, int type, Pointer<Utf8>);
 
 final Dart_InvokeEventListener _invokeEventListener =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
-void invokeEventListener(Pointer<JSContext> context, int contextIndex, int type, String data) {
-  _invokeEventListener(context, contextIndex, type, Utf8.toUtf8(data));
+void invokeEventListener(Pointer<JSBridge> bridge, int contextIndex, int type, String data) {
+  _invokeEventListener(bridge, contextIndex, type, Utf8.toUtf8(data));
 }
 
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(Pointer<JSContext> context, int contextIndex, String data) {
-  invokeEventListener(context, contextIndex, UI_EVENT, data);
+void emitUIEvent(Pointer<JSBridge> bridge, int contextIndex, String data) {
+  invokeEventListener(bridge, contextIndex, UI_EVENT, data);
 }
 
-void emitModuleEvent(Pointer<JSContext> context, int contextIndex, String data) {
-  invokeEventListener(context, contextIndex, MODULE_EVENT, data);
+void emitModuleEvent(Pointer<JSBridge> bridge, int contextIndex, String data) {
+  invokeEventListener(bridge, contextIndex, MODULE_EVENT, data);
 }
 
-void invokeOnPlatformBrightnessChangedCallback(Pointer<JSContext> context, int contextIndex) {
+void invokeOnPlatformBrightnessChangedCallback(Pointer<JSBridge> bridge, int contextIndex) {
   String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
-  emitUIEvent(context, contextIndex, json);
+  emitUIEvent(bridge, contextIndex, json);
 }
 
 // Register createScreen
@@ -58,93 +59,93 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 
 // Register evaluateScripts
 typedef Native_EvaluateScripts = Void Function(
-    Pointer<JSContext> context, Int32 contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
+    Pointer<JSBridge> bridge, Int32 contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
 typedef Dart_EvaluateScripts = void Function(
-    Pointer<JSContext> context, int contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
+    Pointer<JSBridge> bridge, int contextIndex, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
-void evaluateScripts(Pointer<JSContext> context, int contextIndex, String code, String url, int line) {
+void evaluateScripts(Pointer<JSBridge> bridge, int contextIndex, String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
   try {
-    _evaluateScripts(context, contextIndex, _code, _url, line);
+    _evaluateScripts(bridge, contextIndex, _code, _url, line);
   } catch (e, stack) {
     print('$e\n$stack');
   }
 }
 
 // Register initJsEngine
-typedef Native_InitJSContextPool = Pointer<JSContext> Function(Int32 poolSize);
-typedef Dart_InitJSContextPool = Pointer<JSContext> Function(int poolSize);
+typedef Native_InitJSBridgePool = Pointer<JSBridge> Function(Int32 poolSize);
+typedef Dart_InitJSBridgePool = Pointer<JSBridge> Function(int poolSize);
 
-final Dart_InitJSContextPool _initJSContextPool =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
+final Dart_InitJSBridgePool _initJSBridgePool =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSBridgePool>>('initJSBridgePool').asFunction();
 
-Pointer<JSContext> initJSContextPool(int poolSize) {
-  return _initJSContextPool(poolSize);
+Pointer<JSBridge> initJSBridgePool(int poolSize) {
+  return _initJSBridgePool(poolSize);
 }
 
-typedef Native_DisposeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
-typedef Dart_DisposeContext = void Function(Pointer<JSContext> context, int contextIndex);
+typedef Native_DisposeBridge = Void Function(Pointer<JSBridge> bridge, Int32 contextIndex);
+typedef Dart_DisposeBridge = void Function(Pointer<JSBridge> bridge, int contextIndex);
 
-final Dart_DisposeContext _disposeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
+final Dart_DisposeBridge _disposeBridge =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeBridge>>('disposeBridge').asFunction();
 
-void disposeContext(Pointer<JSContext> context, int contextIndex) {
-  _disposeContext(context, contextIndex);
+void disposeBridge(Pointer<JSBridge> bridge, int contextIndex) {
+  _disposeBridge(bridge, contextIndex);
 }
 
-typedef Native_AllocateNewContext = Int32 Function();
-typedef Dart_AllocateNewContext = int Function();
+typedef Native_AllocateNewBridge = Int32 Function();
+typedef Dart_AllocateNewBridge = int Function();
 
-final Dart_AllocateNewContext _allocateNewContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
+final Dart_AllocateNewBridge _allocateNewBridge =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewBridge>>('allocateNewBridge').asFunction();
 
-int allocateNewContext() {
-  return _allocateNewContext();
+int allocateNewBridge() {
+  return _allocateNewBridge();
 }
 
-typedef Native_GetJSContext = Pointer<JSContext> Function(Int32 contextIndex);
-typedef Dart_GetJSContext = Pointer<JSContext> Function(int contextIndex);
+typedef Native_GetJSBridge = Pointer<JSBridge> Function(Int32 contextIndex);
+typedef Dart_GetJSBridge = Pointer<JSBridge> Function(int contextIndex);
 
-final Dart_GetJSContext _getJSContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_GetJSContext>>('getJSContext').asFunction();
+final Dart_GetJSBridge _getJSBridge =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetJSBridge>>('getJSBridge').asFunction();
 
-Pointer<JSContext> getJSContext(int contextIndex) {
-  return _getJSContext(contextIndex);
+Pointer<JSBridge> getJSBridge(int contextIndex) {
+  return _getJSBridge(contextIndex);
 }
 
-typedef Native_FreezeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
-typedef Dart_FreezeContext = void Function(Pointer<JSContext> context, int contextIndex);
+typedef Native_FreezeContext = Void Function(Pointer<JSBridge> bridge, Int32 contextIndex);
+typedef Dart_FreezeContext = void Function(Pointer<JSBridge> bridge, int contextIndex);
 
-final Dart_FreezeContext _freezeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeContext').asFunction();
+final Dart_FreezeContext _freezeBridge =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeBridge').asFunction();
 
-void freezeContext(Pointer<JSContext> context, int contextIndex) {
-  _freezeContext(context, contextIndex);
+void freezeContext(Pointer<JSBridge> bridge, int contextIndex) {
+  _freezeBridge(bridge, contextIndex);
 }
 
-typedef Native_UnFreezeContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
-typedef Dart_UnFreezeContext = void Function(Pointer<JSContext> context, int contextIndex);
+typedef Native_UnFreezeContext = Void Function(Pointer<JSBridge> bridge, Int32 contextIndex);
+typedef Dart_UnFreezeContext = void Function(Pointer<JSBridge> bridge, int contextIndex);
 
 final Dart_UnFreezeContext _unfreezeContext =
     nativeDynamicLibrary.lookup<NativeFunction<Native_UnFreezeContext>>('unfreezeContext').asFunction();
 
-void unfreezeContext(Pointer<JSContext> context, int contextIndex) {
-  _unfreezeContext(context, contextIndex);
+void unfreezeContext(Pointer<JSBridge> bridge, int contextIndex) {
+  _unfreezeContext(bridge, contextIndex);
 }
 
 // Register reloadJsContext
-typedef Native_ReloadJSContext = Void Function(Pointer<JSContext> context, Int32 contextIndex);
-typedef Dart_ReloadJSContext = void Function(Pointer<JSContext> context, int contextIndex);
+typedef Native_ReloadJSContext = Void Function(Pointer<JSBridge> bridge, Int32 contextIndex);
+typedef Dart_ReloadJSContext = void Function(Pointer<JSBridge> bridge, int contextIndex);
 
 final Dart_ReloadJSContext _reloadJSContext =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
-Future<void> reloadJSContext(Pointer<JSContext> context, int contextIndex) async {
+Future<void> reloadJSContext(Pointer<JSBridge> bridge, int contextIndex) async {
   return Future.microtask(() {
-    _reloadJSContext(context, contextIndex);
+    _reloadJSContext(bridge, contextIndex);
   });
 }

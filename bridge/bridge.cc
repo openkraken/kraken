@@ -73,9 +73,11 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-void handleInvokeModuleTransientCallback(void *context, int32_t contextIndex, char *json) {
-  auto *obj = static_cast<BridgeCallback::Context *>(context);
+void handleInvokeModuleTransientCallback(void *callbackContext, void *context, int32_t contextIndex, char *json) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
+
+  assert(context == &_context && "callback Context is not match with current context");
 
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
@@ -118,15 +120,25 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
 
-  if (count == 2) {
+  if (count < 2) {
+    HostFunctionType emptyCallback = [](JSContext &context, const Value &thisVal, const Value *args,
+                                        size_t count) -> Value { return Value::undefined(); };
+
+    std::shared_ptr<Value> callbackValue = std::make_shared<Value>(
+      Function::createFromHostFunction(context, PropNameID::forAscii(context, "f"), 0, emptyCallback));
+    Object &&callbackFunction = callbackValue->getObject(context);
+    callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
+  } else if (count == 2) {
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  const char *result =
-    BridgeCallback::instance()->registerCallback<const char *>(std::move(callbackContext), [&messageStr](void *data, int32_t contextIndex) {
-      return getDartMethod()->invokeModule(data, contextIndex, messageStr.c_str(), handleInvokeModuleTransientCallback);
+  const char *result = BridgeCallback::instance()->registerCallback<const char *>(
+    std::move(callbackContext),
+    [&messageStr](BridgeCallback::Context *bridgeContext, JSBridge *bridge, int32_t contextIndex) {
+      return getDartMethod()->invokeModule(bridgeContext, bridge, contextIndex, messageStr.c_str(),
+                                           handleInvokeModuleTransientCallback);
     });
 
   if (result == nullptr) {
@@ -188,9 +200,11 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *data, int32_t contextIndex, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handleTransientCallback(void *callbackContext, void *context, int32_t contextIndex, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
+
+  assert(context == &_context && "callback Context is not match with current context");
 
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
@@ -248,7 +262,9 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [](void *data, int32_t contextIndex) { getDartMethod()->requestBatchUpdate(data, contextIndex, handleTransientCallback); });
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, JSBridge *bridge, int32_t contextIndex) {
+      getDartMethod()->requestBatchUpdate(callbackContext, bridge, contextIndex, handleTransientCallback);
+    });
 
   return Value::undefined();
 }
@@ -258,7 +274,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
 /**
  * JSRuntime
  */
-JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler& handler): contextIndex(contextIndex) {
+JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler &handler) : contextIndex(contextIndex) {
   auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
     handler(context, error);
     // trigger window.onerror handler.

@@ -48,10 +48,10 @@ class KrakenViewController {
   }
 
   ElementManager _elementManager;
-  Pointer<JSContext> _context;
+  Pointer<JSBridge> _context;
   int _contextIndex;
   bool showPerformanceOverlay;
-  Future<KrakenBundle> _bundleFuture;
+  KrakenBundle _bundle;
 
   String bundleURLOverride;
   String bundlePathOverride;
@@ -61,9 +61,6 @@ class KrakenViewController {
 
   KrakenViewController(
       {this.showPerformanceOverlay,
-      this.bundleContentOverride,
-      this.bundlePathOverride,
-      this.bundleURLOverride,
       this.enableDebug = false}) {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -71,7 +68,7 @@ class KrakenViewController {
     }
 
     _contextIndex = initBridge(_poolSize, firstView);
-    _context = getJSContext(_contextIndex);
+    _context = getJSBridge(_contextIndex);
 
     _viewControllerList.add(this);
 
@@ -79,10 +76,6 @@ class KrakenViewController {
 
     _elementManager = ElementManager(
         jsContext: _context, jsContextIndex: _contextIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
-
-    // @TODO native public API need to support KrakenViewController
-    String bundleURL = bundleURLOverride ?? bundlePathOverride ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
-    _bundleFuture = KrakenBundle.getBundle(bundleURL, contentOverride: bundleContentOverride);
   }
 
   // reload current kraken view
@@ -106,12 +99,19 @@ class KrakenViewController {
     return _elementManager;
   }
 
+  void loadBundle({
+    String bundleContentOverride,
+    String bundlePathOverride,
+    String bundleURLOverride,
+  }) async {
+    // TODO native public API need to support KrakenViewController
+    String bundleURL = bundleURLOverride ?? bundlePathOverride ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: bundleContentOverride);
+  }
+
   void run() async {
-    KrakenBundle bundle = await _bundleFuture;
-
-    if (bundle != null) {
-      await bundle.run(_context, _contextIndex);
-
+    if (_bundle != null) {
+      await _bundle.run(_context, _contextIndex);
       // trigger window load event
       requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);

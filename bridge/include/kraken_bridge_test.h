@@ -23,13 +23,13 @@ void executeTest(ExecuteCallback executeCallback);
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);
 
-using RefreshPaintCallback = void (*)(void *data, int32_t contextIndex, const char *);
-using RefreshPaint = void (*)(void *data, int32_t contextIndex, RefreshPaintCallback callback);
+using RefreshPaintCallback = void (*)(void *callbackContext, void *context, int32_t contextIndex, const char *);
+using RefreshPaint = void (*)(void *callbackContext, void *context, int32_t contextIndex, RefreshPaintCallback callback);
 KRAKEN_EXPORT
 void registerRefreshPaint(RefreshPaint refreshPaint);
 
-using MatchImageSnapshotCallback = void (*)(void *data, int32_t contextIndex, int8_t);
-using MatchImageSnapshot = void (*)(void *data, int32_t contextIndex, uint8_t *bytes, int32_t length, const char *name,
+using MatchImageSnapshotCallback = void (*)(void *callbackContext, void *context, int32_t contextIndex, int8_t);
+using MatchImageSnapshot = void (*)(void *callbackContext, void *context, int32_t contextIndex, uint8_t *bytes, int32_t length, const char *name,
                                     MatchImageSnapshotCallback callback);
 KRAKEN_EXPORT
 void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot);

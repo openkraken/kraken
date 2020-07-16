@@ -11,10 +11,10 @@ int initBridge(int poolSize, bool firstView) {
   registerDartMethodsToCpp();
 
   if (firstView) {
-    initJSContextPool(poolSize);
+    initJSBridgePool(poolSize);
     return 0;
   } else {
-    int contextIndex = allocateNewContext();
+    int contextIndex = allocateNewBridge();
     return contextIndex;
   }
 }

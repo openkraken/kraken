@@ -82,7 +82,7 @@ class ElementManager {
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
-  Pointer<JSContext> jsContext;
+  Pointer<JSBridge> jsContext;
   int jsContextIndex;
   ElementManager({@required this.jsContext, @required this.jsContextIndex, this.showPerformanceOverlayOverride}) {
     _rootElement = BodyElement(targetId: BODY_ID, elementManager: this);

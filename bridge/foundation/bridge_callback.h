@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_BRIDGE_CALLBACK_H
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
-#include "jsa.h"
-#include "thread_safe_array.h"
 #include "bridge.h"
+#include "jsa.h"
 #include "kraken_bridge.h"
+#include "thread_safe_array.h"
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -37,18 +37,24 @@ public:
   };
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
-  template <typename T> T registerCallback(std::unique_ptr<Context> &&context, std::function<T(void *, int32_t)> fn) {
+  template <typename T>
+  T registerCallback(std::unique_ptr<Context> &&context,
+                     std::function<T(BridgeCallback::Context *, JSBridge *, int32_t)> fn) {
     Context *p = context.get();
+    assert(p != nullptr && "Callback context can not be nullptr");
+    JSContext &jsContext = context->_context;
+    int32_t contextIndex = context->_context.getContextIndex();
+    auto bridge = static_cast<JSBridge *>(getJSBridge(contextIndex));
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
-    return fn(static_cast<void *>(p), p->_context.getContextIndex());
+    return fn(p, bridge, contextIndex);
   }
 
   // dispose all callbacks and recycle callback context's memory
   void disposeAllCallbacks();
 
   static bool checkContext(JSContext &context, int32_t contextIndex) {
-    auto *bridge = static_cast<kraken::JSBridge*>(getJSContext(contextIndex));
+    auto *bridge = static_cast<kraken::JSBridge *>(getJSBridge(contextIndex));
     auto currentContext = bridge->getContext();
     return currentContext == &context;
   }
