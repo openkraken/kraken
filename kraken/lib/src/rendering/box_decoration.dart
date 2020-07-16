@@ -109,6 +109,13 @@ class RenderDecorateElementBox extends RenderProxyBox {
   }
 
   @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    child?.hitTest(result, position: position);
+    result.add(BoxHitTestEntry(this, position));
+    return true;
+  }
+
+  @override
   bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }

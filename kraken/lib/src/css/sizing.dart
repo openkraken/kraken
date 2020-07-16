@@ -83,7 +83,7 @@ mixin CSSSizingMixin {
 
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
-  RenderPadding renderPadding;
+  KrakenRenderPadding renderPadding;
   CSSPadding oldPadding;
   CSSPadding oldMargin;
   CSSSizedConstraints oldConstraints;
@@ -415,7 +415,7 @@ mixin CSSSizingMixin {
 
   RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-    return renderPadding = RenderPadding(padding: edgeInsets, child: renderObject);
+    return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   CSSPadding getPaddingFromStyle(CSSStyleDeclaration style) {

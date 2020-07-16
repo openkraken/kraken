@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 import 'ticker_provider.dart';
 
@@ -41,8 +42,8 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     );
 
     _renderBox = child;
-    RenderPointerListener renderPointerListener =
-        RenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
+    KrakenRenderPointerListener renderPointerListener =
+      KrakenRenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
@@ -408,6 +409,13 @@ class RenderSingleChildViewport extends RenderBox
   Rect describeApproximatePaintClip(RenderObject child) {
     if (child != null && _shouldClipAtPaintOffset(_paintOffset)) return Offset.zero & size;
     return null;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    child?.hitTest(result, position: position);
+    result.add(BoxHitTestEntry(this, position));
+    return true;
   }
 
   @override

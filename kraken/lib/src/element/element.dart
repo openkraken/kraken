@@ -90,7 +90,7 @@ class Element extends Node
   RenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
   ContainerRenderObjectMixin renderLayoutBox;
-  RenderPadding renderPadding;
+  KrakenRenderPadding renderPadding;
   RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
