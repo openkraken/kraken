@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/rendering.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/painting.dart';
 import 'value.dart';
 
@@ -35,28 +36,15 @@ class CSSUrl implements CSSValue<ImageProvider> {
     if (_rawInput.startsWith('//') || _rawInput.startsWith('http://') || _rawInput.startsWith('https://')) {
       var url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
       _url = url;
-      // @TODO: caching also works after image downloaded
-      if (cache == 'store' || cache == 'auto') {
-        _value = CachedNetworkImage(url);
-      } else {
-        _value = NetworkImage(url);
-      }
+      _value = DelegateConfig.imageProviderDelegate.createNetworkImage(url,cache: cache);
     } else if (_rawInput.startsWith('file://')) {
-      _value = FileImage(File.fromUri(Uri.parse(_rawInput)));
+      _value = DelegateConfig.imageProviderDelegate.createFileImage(_rawInput);
     } else if (_rawInput.startsWith('data:')) {
-      // Data URL:  https://tools.ietf.org/html/rfc2397
-      // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
-
-      UriData data = UriData.parse(_rawInput);
-      if (data.isBase64) {
-        _value = MemoryImage(data.contentAsBytes());
-      }
-
+      _value = DelegateConfig.imageProviderDelegate.createMemoryImage(_rawInput);
     } else if (_rawInput.startsWith('blob:')) {
-      // @TODO: support blob file url
+      _value = DelegateConfig.imageProviderDelegate.createBlobImage(_rawInput);
     } else {
-      // Fallback to asset image
-      _value = AssetImage(_rawInput);
+      _value = DelegateConfig.imageProviderDelegate.createFallbackImage(_rawInput);
     }
   }
 
