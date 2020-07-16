@@ -25,7 +25,7 @@ import 'platform.dart';
 // 6. Call from C.
 
 // Register InvokeUIManager
-typedef Native_InvokeUIManager = Pointer<Utf8> Function(Pointer<JSBridge> context, Int32 contextIndex, Pointer<Utf8>);
+typedef Native_InvokeUIManager = Pointer<Utf8> Function(Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<Utf8>);
 typedef Native_RegisterInvokeUIManager = Void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 typedef Dart_RegisterInvokeUIManager = void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 
@@ -35,11 +35,11 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
 const String BATCH_UPDATE = 'batchUpdate';
 const String EMPTY_STRING = '';
 
-String handleAction(Pointer<JSBridge> context, int contextIndex, List directive) {
+String handleAction(Pointer<JSBridge> bridge, int bridgeIndex, List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
   ElementManager elementManager = controller.getElementManager();
 
   var result = elementManager.applyAction(action, payload);
@@ -59,7 +59,7 @@ String handleAction(Pointer<JSBridge> context, int contextIndex, List directive)
   }
 }
 
-String invokeUIManager(Pointer<JSBridge> context, int contextIndex, String json) {
+String invokeUIManager(Pointer<JSBridge> bridge, int bridgeIndex, String json) {
   dynamic directive = jsonDecode(json);
 
   if (directive == null) {
@@ -70,17 +70,17 @@ String invokeUIManager(Pointer<JSBridge> context, int contextIndex, String json)
     List<dynamic> directiveList = directive[1];
     List<String> result = [];
     for (dynamic item in directiveList) {
-      result.add(handleAction(context, contextIndex, item as List));
+      result.add(handleAction(bridge, bridgeIndex, item as List));
     }
     return EMPTY_STRING;
   } else {
-    return handleAction(context, contextIndex, directive);
+    return handleAction(bridge, bridgeIndex, directive);
   }
 }
 
-Pointer<Utf8> _invokeUIManager(Pointer<JSBridge> context, int contextIndex, Pointer<Utf8> json) {
+Pointer<Utf8> _invokeUIManager(Pointer<JSBridge> bridge, int bridgeIndex, Pointer<Utf8> json) {
   try {
-    String result = invokeUIManager(context, contextIndex, Utf8.fromUtf8(json));
+    String result = invokeUIManager(bridge, bridgeIndex, Utf8.fromUtf8(json));
     return Utf8.toUtf8(result);
   } catch (e, stack) {
     return Utf8.toUtf8('Error: $e\n$stack');
@@ -93,19 +93,19 @@ void registerInvokeUIManager() {
 }
 
 // Register InvokeModule
-typedef NativeAsyncModuleCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Int32 contextIndex, Pointer<Utf8> json);
-typedef DartAsyncModuleCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, Pointer<Utf8> json);
+typedef NativeAsyncModuleCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<Utf8> json);
+typedef DartAsyncModuleCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, Pointer<Utf8> json);
 
 typedef Native_InvokeModule = Pointer<Utf8> Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
 final Dart_RegisterInvokeModule _registerInvokeModule =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
-String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, String json, DartAsyncModuleCallback callback) {
+String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, String json, DartAsyncModuleCallback callback) {
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
@@ -114,11 +114,11 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       String method = args[1];
       if (method == 'getConnectivity') {
         Connection.getConnectivity((String json) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(json));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'onConnectivityChanged') {
         Connection.onConnectivityChanged((String json) {
-          emitModuleEvent(context, contextIndex, '["onConnectivityChanged", $json]');
+          emitModuleEvent(bridge, bridgeIndex, '["onConnectivityChanged", $json]');
         });
       }
     } else if (module == 'fetch') {
@@ -127,7 +127,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       Map<String, dynamic> options = fetchArgs[1];
       fetch(url, options).then((Response response) {
         String json = jsonEncode(['', response.statusCode, response.data]);
-        callback(callbackContext, context, contextIndex, Utf8.toUtf8(json));
+        callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(json));
       }).catchError((e, stack) {
         String errorMessage = e.message;
         String json;
@@ -136,13 +136,13 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
         } else {
           json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
         }
-        callback(callbackContext, context, contextIndex, Utf8.toUtf8(json));
+        callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(json));
       });
     } else if (module == 'DeviceInfo') {
       String method = args[1];
       if (method == 'getDeviceInfo') {
         DeviceInfo.getDeviceInfo().then((String json) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(json));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'getHardwareConcurrency') {
         result = DeviceInfo.getHardwareConcurrency().toString();
@@ -154,40 +154,40 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
         String key = methodArgs[0];
         // @TODO: catch error case
         AsyncStorage.getItem(key).then((String value) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(value ?? EMPTY_STRING));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(value ?? EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         String value = methodArgs[1];
         AsyncStorage.setItem(key, value).then((bool isSuccess) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'removeItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         AsyncStorage.removeItem(key).then((bool isSuccess) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'getAllKeys') {
         // @TODO: catch error case
         AsyncStorage.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(jsonEncode(list)));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(jsonEncode(list)));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'clear') {
         AsyncStorage.clear().then((bool isSuccess) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       }
     } else if (module == 'MQTT') {
@@ -216,7 +216,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
         MQTT.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
-          emitModuleEvent(context, contextIndex, '["MQTT", $id, $event]');
+          emitModuleEvent(bridge, bridgeIndex, '["MQTT", $id, $event]');
         });
       }
     } else if (module == 'Geolocation') {
@@ -228,7 +228,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
           options = positionArgs[0];
         }
         Geolocation.getCurrentPosition(options, (json) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(json));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(json));
         });
       } else if (method == 'watchPosition') {
         List positionArgs = args[2];
@@ -237,7 +237,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
           options = positionArgs[0];
         }
         return Geolocation.watchPosition(options, (String result) {
-          emitModuleEvent(context, contextIndex, '["watchPosition", $result]');
+          emitModuleEvent(bridge, bridgeIndex, '["watchPosition", $result]');
         }).toString();
       } else if (method == 'clearWatch') {
         List positionArgs = args[2];
@@ -262,29 +262,29 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
           } else {
             ret = jsonEncode(result);
           }
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(ret));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(ret));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
         KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
-          emitModuleEvent(context, contextIndex, jsonEncode(['MethodChannel', call.method, call.arguments]));
+          emitModuleEvent(bridge, bridgeIndex, jsonEncode(['MethodChannel', call.method, call.arguments]));
         });
       }
     } else if (module == 'Clipboard') {
       String method = args[1];
       if (method == 'readText') {
         KrakenClipboard.readText().then((String value) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(value ?? ''));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(value ?? ''));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'writeText') {
         List methodArgs = args[2];
         KrakenClipboard.writeText(methodArgs[0]).then((_) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8(EMPTY_STRING));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8(EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
         });
       }
     } else if (module == 'WebSocket') {
@@ -292,7 +292,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       if (method == 'init') {
         List methodArgs = args[2];
         return KrakenWebSocket.init(methodArgs[0], (String id, String event) {
-          emitModuleEvent(context, contextIndex, '["WebSocket", $id, ${jsonEncode(event)}]');
+          emitModuleEvent(bridge, bridgeIndex, '["WebSocket", $id, $event]');
         });
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
@@ -336,9 +336,9 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
 
 Pointer<Utf8> _invokeModule(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, int contextIndex, Pointer<Utf8> json,
+    Pointer<JSBridge> bridge, int bridgeIndex, Pointer<Utf8> json,
     Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
-  String result = invokeModule(callbackContext, context, contextIndex, Utf8.fromUtf8(json), callback.asFunction());
+  String result = invokeModule(callbackContext, bridge, bridgeIndex, Utf8.fromUtf8(json), callback.asFunction());
   return Utf8.toUtf8(result);
 }
 
@@ -348,15 +348,15 @@ void registerInvokeModule() {
 }
 
 // Register reloadApp
-typedef Native_ReloadApp = Void Function(Pointer<JSBridge> context, Int32 contextIndex);
+typedef Native_ReloadApp = Void Function(Pointer<JSBridge> bridge, Int32 bridgeIndex);
 typedef Native_RegisterReloadApp = Void Function(Pointer<NativeFunction<Native_ReloadApp>>);
 typedef Dart_RegisterReloadApp = void Function(Pointer<NativeFunction<Native_ReloadApp>>);
 
 final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
-void _reloadApp(Pointer<JSBridge> context, int contextIndex) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
+void _reloadApp(Pointer<JSBridge> bridge, int bridgeIndex) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
 
   try {
     controller.reloadCurrentView();
@@ -370,17 +370,17 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
-typedef NativeAsyncCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Int32 contextIndex, Pointer<Utf8> timeout);
-typedef DartAsyncCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, Pointer<Utf8> timeout);
+typedef NativeAsyncCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<Utf8> timeout);
+typedef DartAsyncCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, Pointer<Utf8> timeout);
 typedef NativeRAFAsyncCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Double data, Pointer<Utf8>);
-typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, Pointer<JSBridge> context, int contextIndex, double data, Pointer<Utf8>);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Double data, Pointer<Utf8>);
+typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, Pointer<JSBridge> bridge, int bridgeIndex, double data, Pointer<Utf8>);
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>>);
 typedef Native_RegisterRequestBatchUpdate = Void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 typedef Dart_RegisterRequestBatchUpdate = void Function(Pointer<NativeFunction<Native_RequestBatchUpdate>>);
 
@@ -390,13 +390,13 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
+    Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
   return requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(callbackContext, context, contextIndex, nullptr);
+      func(callbackContext, bridge, bridgeIndex, nullptr);
     } catch (e, stack) {
-      func(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+      func(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -408,7 +408,7 @@ void registerRequestBatchUpdate() {
 
 // Register setTimeout
 typedef Native_SetTimeout = Int32 Function(
-    Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
+    Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetTimeout = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
@@ -416,13 +416,13 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
 int _setTimeout(
-    Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+    Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(callbackContext, context, contextIndex, nullptr);
+      func(callbackContext, bridge, bridgeIndex, nullptr);
     } catch (e, stack) {
-      func(callbackContext, context, contextIndex, Utf8.toUtf8('Error: $e\n$stack'));
+      func(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -436,7 +436,7 @@ void registerSetTimeout() {
 // Register setInterval
 typedef Native_SetInterval = Int32 Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge>, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
+    Pointer<JSBridge>, Int32 bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 typedef Native_RegisterSetInterval = Void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_SetTimeout>>);
 
@@ -445,13 +445,13 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+    Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   return setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
-      func(callbackContext, context, contextIndex, nullptr);
+      func(callbackContext, bridge, bridgeIndex, nullptr);
     } catch (e, stack) {
-      func(callbackContext, context, contextIndex, Utf8.toUtf8('Dart Error: $e\n$stack'));
+      func(callbackContext, bridge, bridgeIndex, Utf8.toUtf8('Dart Error: $e\n$stack'));
     }
   });
 }
@@ -482,7 +482,7 @@ void registerClearTimeout() {
 // Register requestAnimationFrame
 typedef Native_RequestAnimationFrame = Int32 Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
 typedef Native_RegisterRequestAnimationFrame = Void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 typedef Dart_RegisterRequestAnimationFrame = void Function(Pointer<NativeFunction<Native_RequestAnimationFrame>>);
 
@@ -492,13 +492,13 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
+    Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   return requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
-      func(callbackContext, context, contextIndex, highResTimeStamp, nullptr);
+      func(callbackContext, bridge, bridgeIndex, highResTimeStamp, nullptr);
     } catch (e, stack) {
-      func(callbackContext, context, contextIndex, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
+      func(callbackContext, bridge, bridgeIndex, highResTimeStamp, Utf8.toUtf8('Error: $e\n$stack'));
     }
   });
 }
@@ -512,7 +512,7 @@ void registerRequestAnimationFrame() {
 }
 
 // Register cancelAnimationFrame
-typedef Native_CancelAnimationFrame = Void Function(Pointer<JSBridge> context, Int32 contextIndex, Int32 id);
+typedef Native_CancelAnimationFrame = Void Function(Pointer<JSBridge> bridge, Int32 bridgeIndex, Int32 id);
 typedef Native_RegisterCancelAnimationFrame = Void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
 typedef Dart_RegisterCancelAnimationFrame = void Function(Pointer<NativeFunction<Native_CancelAnimationFrame>>);
 
@@ -520,9 +520,8 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .lookup<NativeFunction<Native_RegisterCancelAnimationFrame>>('registerCancelAnimationFrame')
     .asFunction();
 
-void _cancelAnimationFrame(Pointer<JSBridge> context, int contextIndex, int timerId) {
-  // TODO cancelAnimationFrame
-//  cancelAnimationFrame(context, contextIndex, timerId);
+void _cancelAnimationFrame(Pointer<JSBridge> bridge, int bridgeIndex, int timerId) {
+//  cancelAnimationFrame(bridge, bridgeIndex, timerId);
 }
 
 void registerCancelAnimationFrame() {
@@ -591,29 +590,29 @@ void registerGetScreen() {
 
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Pointer<Utf8>, Pointer<Uint8>, Int32);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, int contextIndex, Pointer<Utf8>, Pointer<Uint8>, int);
+    Pointer<JSBridge> bridge, int bridgeIndex, Pointer<Utf8>, Pointer<Uint8>, int);
 typedef Native_ToBlob = Void Function(
     Pointer<JSCallbackContext> callbackContext,
-    Pointer<JSBridge> context, Int32 contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
+    Pointer<JSBridge> bridge, Int32 bridgeIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(Pointer<NativeFunction<Native_ToBlob>>);
 
 final Dart_RegisterToBlob _registerToBlob =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob').asFunction();
 
-void _toBlob(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
+void _toBlob(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
     int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
   ElementManager manager = controller.getElementManager();
 
   try {
     if (!manager.existsTarget(id)) {
       Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unknown node id: $id');
-      func(callbackContext, context, contextIndex, msg, nullptr, -1);
+      func(callbackContext, bridge, bridgeIndex, msg, nullptr, -1);
       return;
     }
 
@@ -623,20 +622,20 @@ void _toBlob(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> conte
         Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
         Uint8List byteList = bytePtr.asTypedList(bytes.length);
         byteList.setAll(0, bytes);
-        func(callbackContext, context, contextIndex, nullptr, bytePtr, bytes.length);
+        func(callbackContext, bridge, bridgeIndex, nullptr, bytePtr, bytes.length);
       }).catchError((e, stack) {
         Pointer<Utf8> msg =
             Utf8.toUtf8('toBlob: failed to export image data from element id: $id. error: $e}.\n$stack');
-        func(callbackContext, context, contextIndex, msg, nullptr, -1);
+        func(callbackContext, bridge, bridgeIndex, msg, nullptr, -1);
       });
     } else {
       Pointer<Utf8> msg = Utf8.toUtf8('toBlob: node is not an element, id: $id');
-      func(callbackContext, context, contextIndex, msg, nullptr, -1);
+      func(callbackContext, bridge, bridgeIndex, msg, nullptr, -1);
       return;
     }
   } catch (e, stack) {
     Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unexpected error: $e\n$stack');
-    func(callbackContext, context, contextIndex, msg, nullptr, -1);
+    func(callbackContext, bridge, bridgeIndex, msg, nullptr, -1);
   }
 }
 

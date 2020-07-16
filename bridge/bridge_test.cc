@@ -7,7 +7,6 @@
 #include "bindings/KOM/blob.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
-#include "foundation/logging.h"
 #include "testframework.h"
 
 namespace kraken {
@@ -60,8 +59,8 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
     if (errmsg != nullptr) {
       ctx->_callback->getObject(_context).getFunction(_context).call(
         _context, {_context.global()
-                    .getPropertyAsFunction(_context, "Error")
-                    .call(_context, String::createFromAscii(_context, errmsg))});
+                     .getPropertyAsFunction(_context, "Error")
+                     .call(_context, String::createFromAscii(_context, errmsg))});
     } else {
       ctx->_callback->getObject(_context).getFunction(_context).call(_context);
     }
@@ -69,8 +68,10 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   };
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [&fn](BridgeCallback::Context *callbackContext, JSBridge *bridge,
-                                      int32_t contextIndex) { getDartMethod()->refreshPaint(callbackContext, bridge, contextIndex, fn); });
+    std::move(callbackContext),
+    [&fn](BridgeCallback::Context *callbackContext, JSBridge *bridge, int32_t contextIndex) {
+      getDartMethod()->refreshPaint(callbackContext, bridge, contextIndex, fn);
+    });
 
   return Value::undefined();
 }
@@ -115,8 +116,10 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   };
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [&jsBlob, &name, &fn](BridgeCallback::Context *callbackContext, JSBridge *bridge, int32_t contextIndex) {
-      getDartMethod()->matchImageSnapshot(callbackContext, bridge, contextIndex, jsBlob->bytes(), jsBlob->size(), name.c_str(), fn);
+    std::move(callbackContext),
+    [&jsBlob, &name, &fn](BridgeCallback::Context *callbackContext, JSBridge *bridge, int32_t contextIndex) {
+      getDartMethod()->matchImageSnapshot(callbackContext, bridge, contextIndex, jsBlob->bytes(), jsBlob->size(),
+                                          name.c_str(), fn);
     });
 
   return Value::undefined();
