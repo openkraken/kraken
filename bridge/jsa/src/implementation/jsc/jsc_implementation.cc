@@ -89,8 +89,8 @@ std::string to_string(void *value) {
 }
 } // namespace
 
-JSCContext::JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler)
-  : _contextIndex(contextIndex), ctxInvalid_(false), _handler(handler)
+JSCContext::JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner)
+  : _contextIndex(contextIndex), ctxInvalid_(false), _handler(handler), _owner(owner)
 #ifndef NDEBUG
     ,
     objectCounter_(0), stringCounter_(0)
@@ -1234,6 +1234,10 @@ int32_t JSCContext::getContextIndex() {
   return _contextIndex;
 }
 
+void *JSCContext::getOwner() {
+  return _owner;
+}
+
 bool JSCContext::isFreeze() {
   return _freeze;
 }
@@ -1245,8 +1249,8 @@ void JSCContext::unfreeze() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler) {
-  return std::make_unique<JSCContext>(contextIndex, handler);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner) {
+  return std::make_unique<JSCContext>(contextIndex, handler, owner);
 }
 
 } // namespace jsc

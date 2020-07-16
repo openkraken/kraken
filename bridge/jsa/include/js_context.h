@@ -177,6 +177,9 @@ public:
   // set js context to unfreeze
   virtual void unfreeze() = 0;
 
+  // get the pointer of context create owner.
+  virtual void* getOwner() = 0;
+
 protected:
   friend class Pointer;
   friend class PropNameID;

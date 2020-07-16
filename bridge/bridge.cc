@@ -24,11 +24,8 @@
 namespace kraken {
 namespace {
 
-using namespace alibaba::jsa;
 using namespace foundation;
 
-ThreadSafeArray<std::shared_ptr<Value>> krakenUIListenerList;
-ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
 /**
  * Message channel, send message from JS to Dart.
  * @param context
@@ -170,7 +167,8 @@ Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *ar
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
-  krakenUIListenerList.push(val);
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+  bridge->krakenUIListenerList.emplace_back(val);
 
   return Value::undefined();
 }
@@ -193,7 +191,8 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
-  krakenModuleListenerList.push(val);
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+  bridge->krakenModuleListenerList.emplace_back(val);
 
   return Value::undefined();
 }
@@ -281,7 +280,7 @@ JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler 
       .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
-  context = alibaba::jsc::createJSContext(contextIndex, errorHandler);
+  context = alibaba::jsc::createJSContext(contextIndex, errorHandler, this);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
   context = alibaba::jsa_v8::createJSContext(errorHandler);
@@ -340,9 +339,7 @@ void JSBridge::handleUIListener(const char *args) {
     return;
   }
 
-  std::unique_lock<std::mutex> lock = krakenUIListenerList.getLock();
-  auto list = krakenUIListenerList.getVector();
-  for (const auto &callback : *list) {
+  for (const auto &callback : krakenUIListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
     }
@@ -362,9 +359,7 @@ void JSBridge::handleModuleListener(const char *args) {
     return;
   }
 
-  std::unique_lock<std::mutex> lock = krakenModuleListenerList.getLock();
-  auto list = krakenModuleListenerList.getVector();
-  for (const auto &callback : *list) {
+  for (const auto &callback : krakenModuleListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
     }

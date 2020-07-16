@@ -48,7 +48,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
       debugPaintSizeEnabled = true;
     }
 
-    _bridgeIndex = initBridge(_getAvailableBridgeIndex());
+    _bridgeIndex = initBridge();
     _bridge = getJSBridge(_bridgeIndex);
 
     _viewControllerList.add(this);
@@ -103,15 +103,6 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
 
   // print debug message when rendering.
   bool enableDebug;
-
-  int _getAvailableBridgeIndex() {
-    for (int i = 0; i < _viewControllerList.length; i ++) {
-      if (_viewControllerList[i] == null) {
-        return i;
-      }
-    }
-    return -1;
-  }
 
   // reload current kraken view.
   reloadCurrentView() async {

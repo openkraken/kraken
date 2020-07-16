@@ -48,7 +48,7 @@ class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
   JSCContext() = delete;
-  JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler);
+  JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner);
   ~JSCContext();
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
@@ -83,6 +83,8 @@ public:
   bool isFreeze() override;
   void freeze() override;
   void unfreeze() override;
+
+  void *getOwner() override;
 
   void reportError(jsa::JSError &error) override;
 
@@ -253,6 +255,7 @@ private:
   std::string desc_;
   int32_t _contextIndex;
   std::atomic<bool> _freeze {false};
+  void *_owner {nullptr};
   jsa::JSExceptionHandler _handler;
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;
@@ -261,7 +264,7 @@ private:
 #endif
 }; // JSCContext
 
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner);
 
 } // namespace jsc
 } // namespace alibaba

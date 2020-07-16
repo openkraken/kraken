@@ -98,14 +98,14 @@ void disposeBridge(Pointer<JSBridge> bridge, int contextIndex) {
   _disposeBridge(bridge, contextIndex);
 }
 
-typedef Native_AllocateNewBridge = Int32 Function(Int32);
-typedef Dart_AllocateNewBridge = int Function(int);
+typedef Native_AllocateNewBridge = Int32 Function();
+typedef Dart_AllocateNewBridge = int Function();
 
 final Dart_AllocateNewBridge _allocateNewBridge =
     nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewBridge>>('allocateNewBridge').asFunction();
 
-int allocateNewBridge([int bridgeIndex = -1]) {
-  return _allocateNewBridge(bridgeIndex);
+int allocateNewBridge() {
+  return _allocateNewBridge();
 }
 
 typedef Native_GetJSBridge = Pointer<JSBridge> Function(Int32 contextIndex);

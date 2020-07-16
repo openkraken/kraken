@@ -35,6 +35,16 @@ void disposeAllBridge() {
   poolIndex = 0;
   inited = false;
 }
+
+int32_t searchForAvailableBridgeIndex() {
+  for (int i = 0; i < maxPoolSize; i ++) {
+    if (bridgePool[i] == nullptr) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 } // namespace
 
 void *initJSBridgePool(int poolSize) {
@@ -59,25 +69,21 @@ void disposeBridge(void *bridgePtr, int32_t bridgeIndex) {
   bridgePool[bridgeIndex] = nullptr;
 }
 
-int32_t allocateNewBridge(int32_t existIndex) {
-  int32_t newIndex;
-  if (existIndex >= 0) {
-    newIndex = existIndex;
-  } else {
-    newIndex = poolIndex.fetch_add(std::memory_order::memory_order_acquire);
+
+
+int32_t allocateNewBridge() {
+  poolIndex++;
+  if (poolIndex >= maxPoolSize) {
+    return searchForAvailableBridgeIndex();
   }
 
-  if (newIndex >= maxPoolSize) {
-    return -1;
-  }
-
-  assert(bridgePool[newIndex] != nullptr && (std::string("can not allocate JSBridge at index") +
-                                             std::to_string(newIndex) + std::string(": bridge have already exist."))
+  assert(bridgePool[poolIndex] == nullptr && (std::string("can not allocate JSBridge at index") +
+                                             std::to_string(poolIndex) + std::string(": bridge have already exist."))
                                               .c_str());
 
-  auto bridge = new kraken::JSBridge(newIndex, printError);
-  bridgePool[newIndex] = bridge;
-  return newIndex;
+  auto bridge = new kraken::JSBridge(poolIndex, printError);
+  bridgePool[poolIndex] = bridge;
+  return poolIndex;
 }
 
 void *getJSBridge(int32_t contextIndex) {

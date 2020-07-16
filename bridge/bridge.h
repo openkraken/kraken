@@ -8,14 +8,18 @@
 
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/window.h"
+#include "foundation/thread_safe_array.h"
 
 #include "bindings/kraken.h"
 #include <atomic>
+#include <vector>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
 namespace kraken {
+
+using namespace alibaba::jsa;
 
 class JSBridge final {
 private:
@@ -32,6 +36,9 @@ public:
   void attachDevtools();
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
+
+  std::vector<std::shared_ptr<Value>> krakenUIListenerList;
+  std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
 
   int32_t contextIndex;
   /// evaluate JavaScript source codes in standard mode.

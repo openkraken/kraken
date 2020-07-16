@@ -360,7 +360,7 @@ class ElementManager {
   }
 
   dynamic applyAction(String action, List payload) {
-    String returnValue;
+    var returnValue;
 
     switch (action) {
       case 'createElement':
