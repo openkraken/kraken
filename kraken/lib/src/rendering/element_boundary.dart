@@ -166,7 +166,9 @@ class RenderElementBoundary extends RenderTransform
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
     child?.hitTest(result, position: position);
-    result.add(BoxHitTestEntry(this, position));
+    if (this.size.contains(this.globalToLocal(position))) {
+      result.add(BoxHitTestEntry(this, position));
+    }
     return true;
   }
 
