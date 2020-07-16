@@ -1287,7 +1287,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.jsContext, elementManager.jsContextIndex, json);
+    emitUIEvent(elementManager.controller.bridge, elementManager.controller.bridgeIndex, json);
   }
 
   void click() {
@@ -1335,7 +1335,8 @@ class Element extends Node
     renderMargin.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
-    requestAnimationFrame((_) async {
+
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       if (renderRepaintBoundary.size == Size.zero) {
         // Return a blob with zero length.

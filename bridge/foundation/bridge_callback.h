@@ -45,6 +45,7 @@ public:
     JSContext &jsContext = context->_context;
     int32_t contextIndex = context->_context.getContextIndex();
     auto bridge = static_cast<JSBridge *>(getJSBridge(contextIndex));
+    assert(bridge != nullptr && "bridge ptr can not be nullptr");
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
     return fn(p, bridge, contextIndex);

@@ -27,30 +27,18 @@ void setTargetPlatformForDesktop() {
 }
 
 // An kraken View Controller designed for multiple kraken view control.
-class KrakenViewController {
+class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   static List<KrakenViewController> _viewControllerList = new List();
-  static KrakenViewController getViewControllerOfJSBridgeIndex(int contextIndex) {
-    if (contextIndex >= _viewControllerList.length) {
+  static KrakenViewController getViewControllerOfJSBridgeIndex(int bridgeIndex) {
+    if (bridgeIndex >= _viewControllerList.length) {
       return null;
     }
-    if (_viewControllerList.elementAt(contextIndex) == null) {
+    if (_viewControllerList.elementAt(bridgeIndex) == null) {
       return null;
     }
 
-    return _viewControllerList.elementAt(contextIndex);
+    return _viewControllerList.elementAt(bridgeIndex);
   }
-
-  ElementManager _elementManager;
-  Pointer<JSBridge> _bridge;
-  int _bridgeIndex;
-  bool showPerformanceOverlay;
-  KrakenBundle _bundle;
-
-  String bundleURLOverride;
-  String bundlePathOverride;
-  String bundleContentOverride;
-
-  bool enableDebug;
 
   KrakenViewController(
       {this.showPerformanceOverlay,
@@ -60,16 +48,63 @@ class KrakenViewController {
       debugPaintSizeEnabled = true;
     }
 
-    _bridgeIndex = initBridge(_getAvaliableBridgeIndex());
+    _bridgeIndex = initBridge(_getAvailableBridgeIndex());
     _bridge = getJSBridge(_bridgeIndex);
 
     _viewControllerList.add(this);
 
-    _elementManager = ElementManager(
-        jsContext: _bridge, jsContextIndex: _bridgeIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
+    _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
   }
 
-  int _getAvaliableBridgeIndex() {
+  // the manager which controller all renderObjects of Kraken
+  ElementManager _elementManager;
+  // the pointer address of Javascript runtime context
+  Pointer<JSBridge> _bridge;
+
+  Pointer<JSBridge> get bridge {
+    return _bridge;
+  }
+  int get bridgeIndex {
+    return _bridgeIndex;
+  }
+
+  // index value which identify javascript runtime context.
+  int _bridgeIndex;
+
+  // should render performanceOverlay layer into the screen for performance profile.
+  bool showPerformanceOverlay;
+
+  // the bundle manager which used to download javascript source and run.
+  KrakenBundle _bundle;
+
+  // the websocket instance
+  KrakenWebSocket _websocket;
+  KrakenWebSocket get websocket {
+    if (_websocket == null) {
+      _websocket = KrakenWebSocket();
+    }
+
+    return _websocket;
+  }
+
+  // the MQTT instance
+  MQTT _mqtt;
+  MQTT get mqtt {
+    if (_mqtt == null) {
+      _mqtt = MQTT();
+    }
+    return _mqtt;
+  }
+
+  // specify
+  String bundleURLOverride;
+  String bundlePathOverride;
+  String bundleContentOverride;
+
+  // print debug message when rendering.
+  bool enableDebug;
+
+  int _getAvailableBridgeIndex() {
     for (int i = 0; i < _viewControllerList.length; i ++) {
       if (_viewControllerList[i] == null) {
         return i;
@@ -78,12 +113,23 @@ class KrakenViewController {
     return -1;
   }
 
-  // reload current kraken view
+  // reload current kraken view.
   reloadCurrentView() async {
     RenderObject root = _elementManager.getRootRenderObject().parent;
-    await _elementManager.detach();
+    _elementManager.detach();
+    _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
-    await reloadJSContext(_bridge, _bridgeIndex);
+    _bridge = await reloadJSContext(_bridge, _bridgeIndex);
+    run();
+  }
+
+  // regenerate generate renderObject created by kraken but not affect jsBridge context.
+  // test used only.
+  testRefreshPaint() {
+    RenderObject root = _elementManager.getRootRenderObject().parent;
+    _elementManager.detach();
+    _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
+    _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
   // attach kraken's renderObject to an renderObject.
@@ -91,12 +137,14 @@ class KrakenViewController {
     _elementManager.attach(parent, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
+  // dispose controller and recycle all resources.
   void dispose() {
     detachView();
     disposeBridge(_bridge, _bridgeIndex);
     _viewControllerList[_bridgeIndex] = null;
   }
 
+  // detach renderObject from parent but keep everything in active.
   void detachView() {
     _elementManager.detach();
   }
@@ -105,6 +153,7 @@ class KrakenViewController {
     return _elementManager;
   }
 
+  // preload javascript source and cache it.
   void loadBundle({
     String bundleContentOverride,
     String bundlePathOverride,
@@ -115,6 +164,7 @@ class KrakenViewController {
     _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: bundleContentOverride);
   }
 
+  // execute preloaded javascript source
   void run() async {
     if (_bundle != null) {
       await _bundle.run(_bridge, _bridgeIndex);

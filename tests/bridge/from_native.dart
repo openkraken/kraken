@@ -69,8 +69,7 @@ void _refreshPaint(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge>
   Dart_RefreshPaintCallback callback = pointer.asFunction();
   KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
   try {
-    controller.detachView();
-    controller.attachView(RendererBinding.instance.renderView);
+    controller.testRefreshPaint();
     callback(callbackContext, bridge, bridgeIndex, nullptr);
   } catch (e) {
     print(e);

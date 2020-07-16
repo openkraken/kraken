@@ -46,13 +46,13 @@ void main() {
 
     print('attach complete');
     String status = await executeTest();
-//    if (status == 'failed') {
-//      print('$err with $status.');
-//      completer.complete('failed');
-//    } else {
-//      print('$pass with $status.');
-//      completer.complete('success');
-//    }
+    if (status == 'failed') {
+      print('$err with $status.');
+      completer.complete('failed');
+    } else {
+      print('$pass with $status.');
+      completer.complete('success');
+    }
 
     return completer.future;
   });

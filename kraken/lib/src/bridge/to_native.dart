@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
@@ -138,14 +139,17 @@ void unfreezeContext(Pointer<JSBridge> bridge, int contextIndex) {
 }
 
 // Register reloadJsContext
-typedef Native_ReloadJSContext = Void Function(Pointer<JSBridge> bridge, Int32 contextIndex);
-typedef Dart_ReloadJSContext = void Function(Pointer<JSBridge> bridge, int contextIndex);
+typedef Native_ReloadJSContext = Pointer<JSBridge> Function(Pointer<JSBridge> bridge, Int32 contextIndex);
+typedef Dart_ReloadJSContext = Pointer<JSBridge> Function(Pointer<JSBridge> bridge, int contextIndex);
 
 final Dart_ReloadJSContext _reloadJSContext =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
-Future<void> reloadJSContext(Pointer<JSBridge> bridge, int contextIndex) async {
-  return Future.microtask(() {
-    _reloadJSContext(bridge, contextIndex);
+Future<Pointer<JSBridge>> reloadJSContext(Pointer<JSBridge> bridge, int contextIndex) async {
+  Completer completer = Completer<Pointer<JSBridge>>();
+  Future.microtask(() {
+    Pointer<JSBridge> newBridge = _reloadJSContext(bridge, contextIndex);
+    completer.complete(newBridge);
   });
+  return completer.future;
 }

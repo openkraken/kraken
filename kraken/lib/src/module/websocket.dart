@@ -12,13 +12,13 @@ class _WebSocketState {
   _WebSocketState(this.status);
 }
 
-Map<String, IOWebSocketChannel> _clientMap = {};
-Map<String, Map<String, bool>> _listenMap = {};
-Map<String, _WebSocketState> _stateMap = {};
-int _clientId = 0;
-
 class KrakenWebSocket {
-  static String init(String url, WebSocketEventCallback callback, {String protocols}) {
+  Map<String, IOWebSocketChannel> _clientMap = {};
+  Map<String, Map<String, bool>> _listenMap = {};
+  Map<String, _WebSocketState> _stateMap = {};
+  int _clientId = 0;
+
+  String init(String url, WebSocketEventCallback callback, {String protocols}) {
     var id = (_clientId++).toString();
     WebSocket.connect(url, protocols: [protocols]).then((webSocket) {
       IOWebSocketChannel client = IOWebSocketChannel(webSocket);
@@ -50,7 +50,7 @@ class KrakenWebSocket {
     return id;
   }
 
-  static void send(String id, String message) {
+  void send(String id, String message) {
     IOWebSocketChannel client = _clientMap[id];
 
     if (client == null) return;
@@ -58,7 +58,7 @@ class KrakenWebSocket {
     client.sink.add(message);
   }
 
-  static void close(String id, [int closeCode, String closeReason]) {
+  void close(String id, [int closeCode, String closeReason]) {
     IOWebSocketChannel client = _clientMap[id];
     // has not connect
     if (client == null) {
@@ -77,12 +77,12 @@ class KrakenWebSocket {
     client.sink.close(closeCode, closeReason);
   }
 
-  static bool _hasListener(String id, String type) {
+  bool _hasListener(String id, String type) {
     var listeners = _listenMap[id];
     return listeners.containsKey(type);
   }
 
-  static void _listen(String id, WebSocketEventCallback callback) {
+  void _listen(String id, WebSocketEventCallback callback) {
     IOWebSocketChannel client = _clientMap[id];
 
     client.stream.listen((message) {
@@ -111,7 +111,7 @@ class KrakenWebSocket {
     });
   }
 
-  static void addEvent(String id, String type) {
+  void addEvent(String id, String type) {
     if (!_listenMap.containsKey(id)) {
       // Init listener map
       _listenMap[id] = {};

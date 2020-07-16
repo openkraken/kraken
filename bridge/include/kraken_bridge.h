@@ -55,7 +55,7 @@ KRAKEN_EXPORT
 void evaluateScripts(void *bridge, int32_t contextIndex, const char *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
-void reloadJsContext(void *bridge, int32_t contextIndex);
+void* reloadJsContext(void *bridge, int32_t contextIndex);
 KRAKEN_EXPORT
 void invokeEventListener(void *bridge, int32_t contextIndex, int32_t type, const char *json);
 KRAKEN_EXPORT

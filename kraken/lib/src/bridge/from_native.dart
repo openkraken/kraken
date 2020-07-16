@@ -106,6 +106,7 @@ final Dart_RegisterInvokeModule _registerInvokeModule =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
 String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, String json, DartAsyncModuleCallback callback) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
@@ -194,28 +195,28 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       String method = args[1];
       if (method == 'init') {
         List methodArgs = args[2];
-        return MQTT.init(methodArgs[0], methodArgs[1]);
+        return controller.mqtt.init(methodArgs[0], methodArgs[1]);
       } else if (method == 'open') {
         List methodArgs = args[2];
-        MQTT.open(methodArgs[0], methodArgs[1]);
+        controller.mqtt.open(methodArgs[0], methodArgs[1]);
       } else if (method == 'close') {
         List methodArgs = args[2];
-        MQTT.close(methodArgs[0]);
+        controller.mqtt.close(methodArgs[0]);
       } else if (method == 'publish') {
         List methodArgs = args[2];
-        MQTT.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+        controller.mqtt.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
       } else if (method == 'subscribe') {
         List methodArgs = args[2];
-        MQTT.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+        controller.mqtt.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
       } else if (method == 'unsubscribe') {
         List methodArgs = args[2];
-        MQTT.unsubscribe(methodArgs[0], methodArgs[1]);
+        controller.mqtt.unsubscribe(methodArgs[0], methodArgs[1]);
       } else if (method == 'getReadyState') {
         List methodArgs = args[2];
-        return MQTT.getReadyState(methodArgs[0]);
+        return controller.mqtt.getReadyState(methodArgs[0]);
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        MQTT.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
+        controller.mqtt.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
           emitModuleEvent(bridge, bridgeIndex, '["MQTT", $id, $event]');
         });
       }
@@ -291,18 +292,18 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge
       String method = args[1];
       if (method == 'init') {
         List methodArgs = args[2];
-        return KrakenWebSocket.init(methodArgs[0], (String id, String event) {
+        return controller.websocket.init(methodArgs[0], (String id, String event) {
           emitModuleEvent(bridge, bridgeIndex, '["WebSocket", $id, $event]');
         });
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        KrakenWebSocket.addEvent(methodArgs[0], methodArgs[1]);
+        controller.websocket.addEvent(methodArgs[0], methodArgs[1]);
       } else if (method == 'send') {
         List methodArgs = args[2];
-        KrakenWebSocket.send(methodArgs[0], methodArgs[1]);
+        controller.websocket.send(methodArgs[0], methodArgs[1]);
       } else if (method == 'close') {
         List methodArgs = args[2];
-        KrakenWebSocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
+        controller.websocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
       }
     } else if (module == 'Navigator') {
       String method = args[1];
@@ -391,7 +392,8 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 void _requestBatchUpdate(
     Pointer<JSCallbackContext> callbackContext,
     Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
-  return requestBatchUpdate((Duration timeStamp) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  return controller.requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, bridge, bridgeIndex, nullptr);
@@ -417,7 +419,9 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(
     Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  return setTimeout(timeout, () {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+
+  return controller.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, bridge, bridgeIndex, nullptr);
@@ -446,7 +450,8 @@ final Dart_RegisterSetInterval _registerSetInterval =
 int _setInterval(
     Pointer<JSCallbackContext> callbackContext,
     Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  return setInterval(timeout, () {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  return controller.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, bridge, bridgeIndex, nullptr);
@@ -463,15 +468,16 @@ void registerSetInterval() {
 }
 
 // Register clearTimeout
-typedef Native_ClearTimeout = Void Function(Int32);
+typedef Native_ClearTimeout = Void Function(Pointer<JSBridge> bridge, Int32 bridgeIndex, Int32);
 typedef Native_RegisterClearTimeout = Void Function(Pointer<NativeFunction<Native_ClearTimeout>>);
 typedef Dart_RegisterClearTimeout = void Function(Pointer<NativeFunction<Native_ClearTimeout>>);
 
 final Dart_RegisterClearTimeout _registerClearTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout').asFunction();
 
-void _clearTimeout(int timerId) {
-  return clearTimeout(timerId);
+void _clearTimeout(Pointer<JSBridge> bridge, int bridgeIndex, int timerId) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  return controller.clearTimeout(timerId);
 }
 
 void registerClearTimeout() {
@@ -493,7 +499,8 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 int _requestAnimationFrame(
     Pointer<JSCallbackContext> callbackContext,
     Pointer<JSBridge> bridge, int bridgeIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
-  return requestAnimationFrame((double highResTimeStamp) {
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  return controller.requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, bridge, bridgeIndex, highResTimeStamp, nullptr);
@@ -521,7 +528,8 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .asFunction();
 
 void _cancelAnimationFrame(Pointer<JSBridge> bridge, int bridgeIndex, int timerId) {
-//  cancelAnimationFrame(bridge, bridgeIndex, timerId);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  controller.cancelAnimationFrame(timerId);
 }
 
 void registerCancelAnimationFrame() {

@@ -118,14 +118,15 @@ void evaluateScripts(void *bridgePtr, int32_t bridgeIndex, const char *code, con
   bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
 }
 
-void reloadJsContext(void *bridgePtr, int32_t bridgeIndex) {
+void* reloadJsContext(void *bridgePtr, int32_t bridgeIndex) {
   assert(checkBridgeIndex(bridgeIndex) && "reloadJSContext: bridgeIndex is not valid");
   assert(checkBridge(bridgePtr, bridgeIndex) && "reloadJSContext: bridge is not valid");
-  if (isContextFreeze(bridgePtr)) return;
+  if (isContextFreeze(bridgePtr)) return nullptr;
   auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);
   delete bridge;
   bridge = new kraken::JSBridge(bridgeIndex, printError);
   bridgePool[bridgeIndex] = bridge;
+  return bridge;
 }
 
 void invokeEventListener(void *bridgePtr, int32_t bridgeIndex, int32_t type, const char *data) {

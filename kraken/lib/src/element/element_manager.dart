@@ -7,6 +7,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'dart:ffi';
+import 'package:kraken/launcher.dart';
 import 'package:meta/meta.dart';
 
 import 'package:flutter/rendering.dart';
@@ -82,9 +83,8 @@ class ElementManager {
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
-  Pointer<JSBridge> jsContext;
-  int jsContextIndex;
-  ElementManager({@required this.jsContext, @required this.jsContextIndex, this.showPerformanceOverlayOverride}) {
+  KrakenViewController controller;
+  ElementManager({KrakenViewController this.controller, this.showPerformanceOverlayOverride}) {
     _rootElement = BodyElement(targetId: BODY_ID, elementManager: this);
     _root = _rootElement.renderObject;
     setEventTarget(_rootElement);
