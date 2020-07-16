@@ -53,8 +53,6 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
     auto ctx = static_cast<BridgeCallback::Context *>(callbackContext);
     JSContext &_context = ctx->_context;
 
-    assert(context == &_context && "callback Context is not match with current context");
-
     if (!BridgeCallback::checkContext(_context, contextIndex)) {
       return;
     }
@@ -112,7 +110,6 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   auto fn = [](void *callbackContext, void *context, int32_t contextIndex, int8_t result) {
     auto ctx = static_cast<BridgeCallback::Context *>(callbackContext);
     JSContext &_context = ctx->_context;
-    assert(context == &_context && "callback Context is not match with current context");
     ctx->_callback->getObject(_context).getFunction(_context).call(_context, {Value(static_cast<bool>(result))});
     delete ctx;
   };

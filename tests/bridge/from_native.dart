@@ -27,7 +27,7 @@ import 'match_snapshots.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.
 
-typedef NativeTestCallback = Void Function(Pointer<JSContext> context);
+typedef NativeTestCallback = Void Function(Pointer<JSBridge> context);
 typedef DartTestCallback = void Function(Pointer<Void> context);
 
 typedef Native_JSError = Void Function(Pointer<Utf8>);
@@ -56,18 +56,18 @@ void registerJSError() {
   _registerOnJSError(pointer);
 }
 
-typedef Native_RefreshPaintCallback = Void Function(Pointer<JSCallbackContext>, Pointer<JSContext>, Pointer<Utf8>);
-typedef Dart_RefreshPaintCallback = void Function(Pointer<JSCallbackContext>, Pointer<JSContext>, Pointer<Utf8>);
-typedef Native_RefreshPaint = Void Function(Pointer<JSCallbackContext>, Pointer<JSContext>, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
+typedef Native_RefreshPaintCallback = Void Function(Pointer<JSCallbackContext>, Pointer<JSBridge>, Pointer<Utf8>);
+typedef Dart_RefreshPaintCallback = void Function(Pointer<JSCallbackContext>, Pointer<JSBridge>, Pointer<Utf8>);
+typedef Native_RefreshPaint = Void Function(Pointer<JSCallbackContext>, Pointer<JSBridge>, Pointer<NativeFunction<Native_RefreshPaintCallback>>);
 typedef Native_RegisterRefreshPaint = Void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
 typedef Dart_RegisterRefreshPaint = void Function(Pointer<NativeFunction<Native_RefreshPaint>>);
 
 final Dart_RegisterRefreshPaint _registerRefreshPaint =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterRefreshPaint>>('registerRefreshPaint').asFunction();
 
-void _refreshPaint(Pointer<JSCallbackContext> callbackContext, Pointer<JSContext> context, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
+void _refreshPaint(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Pointer<NativeFunction<Native_RefreshPaintCallback>> pointer) {
   Dart_RefreshPaintCallback callback = pointer.asFunction();
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(0);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(0);
   controller.detachView();
   controller.attachView(RendererBinding.instance.renderView);
   callback(callbackContext, context, nullptr);
@@ -78,10 +78,10 @@ void registerRefreshPaint() {
   _registerRefreshPaint(pointer);
 }
 
-typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSContext> context, Int8);
-typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSContext> context, int);
+typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Int8);
+typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int);
 typedef Native_MatchImageSnapshot = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Pointer<JSContext> context,
+    Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context,
     Pointer<Uint8>, Int32, Pointer<Utf8>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
 typedef Native_RegisterMatchImageSnapshot = Void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
 typedef Dart_RegisterMatchImageSnapshot = void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
@@ -90,7 +90,7 @@ final Dart_RegisterMatchImageSnapshot _registerMatchImageSnapshot = nativeDynami
     .lookup<NativeFunction<Native_RegisterMatchImageSnapshot>>('registerMatchImageSnapshot')
     .asFunction();
 
-void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, Pointer<JSContext> context, Pointer<Uint8> bytes, int size, Pointer<Utf8> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
+void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, Pointer<Uint8> bytes, int size, Pointer<Utf8> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
   matchImageSnapshot(bytes.asTypedList(size), Utf8.fromUtf8(snapshotNamePtr)).then((value) {
     callback(callbackContext, context, value ? 1 : 0);

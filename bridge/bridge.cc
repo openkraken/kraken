@@ -77,8 +77,6 @@ void handleInvokeModuleTransientCallback(void *callbackContext, void *context, i
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  assert(context == &_context && "callback Context is not match with current context");
-
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
   }
@@ -203,8 +201,6 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
 void handleTransientCallback(void *callbackContext, void *context, int32_t contextIndex, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  assert(context == &_context && "callback Context is not match with current context");
 
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;

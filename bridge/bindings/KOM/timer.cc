@@ -19,8 +19,6 @@ void handlePersistentCallback(void *callbackContext, void *context, int32_t cont
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  assert(context == &_context && "callback Context is not match with current context");
-
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;
   }
@@ -54,8 +52,6 @@ void handleRAFPersistentCallback(void *callbackContext, void *context, int32_t c
                                  const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  assert(context == &_context && "callback Context is not match with current context");
 
   if (!BridgeCallback::checkContext(_context, contextIndex)) {
     return;

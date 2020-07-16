@@ -15,13 +15,6 @@ import 'package:kraken/module.dart';
 import 'dart:ffi';
 import 'bundle.dart';
 
-int _poolSize = 4;
-bool firstView = true;
-
-void setJSContextPoolSize(int poolSize) {
-  _poolSize = poolSize;
-}
-
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
 /// TargetPlatform, override the default platform to one that is.
@@ -36,7 +29,7 @@ void setTargetPlatformForDesktop() {
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController {
   static List<KrakenViewController> _viewControllerList = new List();
-  static KrakenViewController getViewControllerOfJSContextIndex(int contextIndex) {
+  static KrakenViewController getViewControllerOfJSBridgeIndex(int contextIndex) {
     if (contextIndex >= _viewControllerList.length) {
       return null;
     }
@@ -48,8 +41,8 @@ class KrakenViewController {
   }
 
   ElementManager _elementManager;
-  Pointer<JSBridge> _context;
-  int _contextIndex;
+  Pointer<JSBridge> _bridge;
+  int _bridgeIndex;
   bool showPerformanceOverlay;
   KrakenBundle _bundle;
 
@@ -67,15 +60,22 @@ class KrakenViewController {
       debugPaintSizeEnabled = true;
     }
 
-    _contextIndex = initBridge(_poolSize, firstView);
-    _context = getJSBridge(_contextIndex);
+    _bridgeIndex = initBridge(_getAvaliableBridgeIndex());
+    _bridge = getJSBridge(_bridgeIndex);
 
     _viewControllerList.add(this);
 
-    firstView = false;
-
     _elementManager = ElementManager(
-        jsContext: _context, jsContextIndex: _contextIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
+        jsContext: _bridge, jsContextIndex: _bridgeIndex, showPerformanceOverlayOverride: showPerformanceOverlay);
+  }
+
+  int _getAvaliableBridgeIndex() {
+    for (int i = 0; i < _viewControllerList.length; i ++) {
+      if (_viewControllerList[i] == null) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   // reload current kraken view
@@ -83,12 +83,18 @@ class KrakenViewController {
     RenderObject root = _elementManager.getRootRenderObject().parent;
     await _elementManager.detach();
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
-    await reloadJSContext(_context, _contextIndex);
+    await reloadJSContext(_bridge, _bridgeIndex);
   }
 
   // attach kraken's renderObject to an renderObject.
   void attachView(RenderObject parent) {
     _elementManager.attach(parent, showPerformanceOverlay: showPerformanceOverlay ?? false);
+  }
+
+  void dispose() {
+    detachView();
+    disposeBridge(_bridge, _bridgeIndex);
+    _viewControllerList[_bridgeIndex] = null;
   }
 
   void detachView() {
@@ -111,11 +117,11 @@ class KrakenViewController {
 
   void run() async {
     if (_bundle != null) {
-      await _bundle.run(_context, _contextIndex);
+      await _bundle.run(_bridge, _bridgeIndex);
       // trigger window load event
       requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_context, _contextIndex, json);
+        emitUIEvent(_bridge, _bridgeIndex, json);
       });
     } else {
       print('ERROR: No bundle found.');

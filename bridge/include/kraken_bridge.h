@@ -40,7 +40,7 @@ void *initJSBridgePool(int poolSize);
 KRAKEN_EXPORT
 void disposeBridge(void *bridgePtr, int32_t contextIndex);
 KRAKEN_EXPORT
-int32_t allocateNewBridge();
+int32_t allocateNewBridge(int32_t existIndex);
 KRAKEN_EXPORT
 void *getJSBridge(int32_t contextIndex);
 KRAKEN_EXPORT

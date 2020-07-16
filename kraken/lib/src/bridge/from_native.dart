@@ -39,7 +39,7 @@ String handleAction(Pointer<JSBridge> context, int contextIndex, List directive)
   String action = directive[0];
   List payload = directive[1];
 
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
   ElementManager elementManager = controller.getElementManager();
 
   var result = elementManager.applyAction(action, payload);
@@ -356,7 +356,7 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp(Pointer<JSBridge> context, int contextIndex) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
 
   try {
     controller.reloadCurrentView();
@@ -607,7 +607,7 @@ final Dart_RegisterToBlob _registerToBlob =
 void _toBlob(Pointer<JSCallbackContext> callbackContext, Pointer<JSBridge> context, int contextIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
     int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(contextIndex);
   ElementManager manager = controller.getElementManager();
 
   try {

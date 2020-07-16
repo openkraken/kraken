@@ -56,11 +56,25 @@ void disposeBridge(void *bridgePtr, int32_t bridgeIndex) {
   assert(bridgePool[bridgeIndex] == bridgePtr);
   auto bridge = static_cast<kraken::JSBridge *>(bridgePool[bridgeIndex]);
   delete bridge;
+  bridgePool[bridgeIndex] = nullptr;
 }
 
-int32_t allocateNewBridge() {
-  int newIndex = poolIndex.fetch_add(std::memory_order::memory_order_acquire);
-  assert(newIndex < maxPoolSize);
+int32_t allocateNewBridge(int32_t existIndex) {
+  int32_t newIndex;
+  if (existIndex >= 0) {
+    newIndex = existIndex;
+  } else {
+    newIndex = poolIndex.fetch_add(std::memory_order::memory_order_acquire);
+  }
+
+  if (newIndex >= maxPoolSize) {
+    return -1;
+  }
+
+  assert(bridgePool[newIndex] != nullptr && (std::string("can not allocate JSBridge at index") +
+                                             std::to_string(newIndex) + std::string(": bridge have already exist."))
+                                              .c_str());
+
   auto bridge = new kraken::JSBridge(newIndex, printError);
   bridgePool[newIndex] = bridge;
   return newIndex;
@@ -96,7 +110,8 @@ bool isContextFreeze(void *bridgePtr) {
   return bridge->getContext()->isFreeze();
 }
 
-void evaluateScripts(void *bridgePtr, int32_t bridgeIndex, const char *code, const char *bundleFilename, int startLine) {
+void evaluateScripts(void *bridgePtr, int32_t bridgeIndex, const char *code, const char *bundleFilename,
+                     int startLine) {
   assert(checkBridgeIndex(bridgeIndex) && "evaluateScripts: bridgeIndex is not valid");
   assert(checkBridge(bridgePtr, bridgeIndex) && "evaluateScripts: bridge is not valid");
   auto bridge = static_cast<kraken::JSBridge *>(bridgePtr);

@@ -45,8 +45,6 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
         auto ctx = static_cast<BridgeCallback::Context *>(calbackContext);
         JSContext &_context = ctx->_context;
 
-        assert(context == &_context && "callback Context is not match with current context");
-
         if (error != nullptr) {
           ctx->_callback->getObject(_context).getFunction(_context).call(
             _context, {Value(_context, String::createFromAscii(_context, error))});

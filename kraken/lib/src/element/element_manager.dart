@@ -348,6 +348,8 @@ class ElementManager {
   void detach() {
     RenderObject parent = root.parent;
 
+    if (parent == null) return;
+
     if (parent is ContainerRenderObjectMixin) {
       parent.remove(root);
     } else if (parent is RenderObjectWithChildMixin) {
