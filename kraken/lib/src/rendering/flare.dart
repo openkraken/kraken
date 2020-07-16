@@ -5,7 +5,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 
 class FlareRenderObject extends FlareActorRenderObject with CSSComputedMixin, RenderPaddingMixin {

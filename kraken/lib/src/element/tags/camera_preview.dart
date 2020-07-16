@@ -9,7 +9,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_camera/camera.dart';
-import 'package:meta/meta.dart';
 
 const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
 

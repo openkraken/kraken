@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
-import 'package:meta/meta.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
