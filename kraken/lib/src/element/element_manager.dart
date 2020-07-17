@@ -242,6 +242,8 @@ class ElementManager {
 
         break;
     }
+    print('perform Layout');
+//    getRootRenderObject().performLayout();
     RendererBinding.instance.renderView.performLayout();
   }
 

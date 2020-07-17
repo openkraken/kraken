@@ -1161,17 +1161,29 @@ class Element extends Node
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetY();
       case 'offsetLeft':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetX();
       case 'offsetWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientWidth;
       case 'clientHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
         // TODO: implement this after border has supported in renderLayoutBox
@@ -1205,6 +1217,9 @@ class Element extends Node
 
     RenderBox sizedBox = renderConstrainedBox.child;
     if (isConnected) {
+      // need to flush layout to get correct size
+      elementManager.getRootRenderObject().owner.flushLayout();
+
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
@@ -1249,6 +1264,9 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
+    // need to flush layout to get correct size
+    elementManager.getRootRenderObject().owner.flushLayout();
+
     Element element = findContainingBlock(this);
     if (element == null) {
       element = elementManager.getRootElement();
@@ -1298,7 +1316,7 @@ class Element extends Node
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
       // or child may miss size.
-      RendererBinding.instance.renderView.owner.flushLayout();
+      elementManager.getRootRenderObject().owner.flushLayout();
 
       // Position the center of element.
       Offset position = box.localToGlobal(box.size.center(Offset.zero));
