@@ -12,6 +12,13 @@ class MQTT {
   Map<String, MqttClient> _clientMap = {};
   int _clientId = 0;
 
+  void dispose() {
+    _clientMap.forEach((key, client) {
+      client.disconnect();
+    });
+    _clientMap.clear();
+  }
+
   String init(String url, String clientId) {
     // The client identifier can be a maximum length of 23 characters
     clientId = clientId.isEmpty ? '${DateTime.now().millisecondsSinceEpoch}:${Random().nextInt(999999999)}' : clientId;

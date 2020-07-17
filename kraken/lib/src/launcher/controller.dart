@@ -88,11 +88,6 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     return _mqtt;
   }
 
-  // specify
-  String bundleURL;
-  String bundlePath;
-  String bundleContent;
-
   // print debug message when rendering.
   bool enableDebug;
 
@@ -125,6 +120,20 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     detachView();
     disposeBridge(_contextIndex);
     _viewControllerList[_contextIndex] = null;
+    clearTimer();
+    clearAnimationFrame();
+
+    if (_websocket != null) {
+      websocket.dispose();
+    }
+
+    if (_mqtt != null) {
+      mqtt.dispose();
+    }
+
+    // break circle reference
+    _elementManager.controller._elementManager = null;
+    _elementManager = null;
   }
 
   // detach renderObject from parent but keep everything in active.
