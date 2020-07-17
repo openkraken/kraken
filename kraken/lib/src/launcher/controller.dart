@@ -47,7 +47,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
       debugPaintSizeEnabled = true;
     }
 
-    _bridgeIndex = initBridge();
+    _contextIndex = initBridge();
 
     _viewControllerList.add(this);
 
@@ -56,12 +56,12 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
-  int get bridgeIndex {
-    return _bridgeIndex;
+  int get contextIndex {
+    return _contextIndex;
   }
 
   // index value which identify javascript runtime context.
-  int _bridgeIndex;
+  int _contextIndex;
 
   // should render performanceOverlay layer into the screen for performance profile.
   bool showPerformanceOverlay;
@@ -89,9 +89,9 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   }
 
   // specify
-  String bundleURLOverride;
-  String bundlePathOverride;
-  String bundleContentOverride;
+  String bundleURL;
+  String bundlePath;
+  String bundleContent;
 
   // print debug message when rendering.
   bool enableDebug;
@@ -102,7 +102,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     _elementManager.detach();
     _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
-    await reloadJSContext(_bridgeIndex);
+    await reloadJSContext(_contextIndex);
     run();
   }
 
@@ -123,8 +123,8 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // dispose controller and recycle all resources.
   void dispose() {
     detachView();
-    disposeBridge(_bridgeIndex);
-    _viewControllerList[_bridgeIndex] = null;
+    disposeBridge(_contextIndex);
+    _viewControllerList[_contextIndex] = null;
   }
 
   // detach renderObject from parent but keep everything in active.
@@ -150,11 +150,11 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // execute preloaded javascript source
   void run() async {
     if (_bundle != null) {
-      await _bundle.run(_bridgeIndex);
+      await _bundle.run(_contextIndex);
       // trigger window load event
       requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_bridgeIndex, json);
+        emitUIEvent(_contextIndex, json);
       });
     } else {
       print('ERROR: No bundle found.');

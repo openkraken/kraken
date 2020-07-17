@@ -74,44 +74,44 @@ void evaluateScripts(int contextIndex, String code, String url, int line) {
 }
 
 // Register initJsEngine
-typedef Native_InitJSBridgePool = Void Function(Int32 poolSize);
-typedef Dart_InitJSBridgePool = void Function(int poolSize);
+typedef Native_InitJSContextPool = Void Function(Int32 poolSize);
+typedef Dart_InitJSContextPool = void Function(int poolSize);
 
-final Dart_InitJSBridgePool _initJSBridgePool =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSBridgePool>>('initJSBridgePool').asFunction();
+final Dart_InitJSContextPool _initJSContextPool =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
 
-void initJSBridgePool(int poolSize) {
-  _initJSBridgePool(poolSize);
+void initJSContextPool(int poolSize) {
+  _initJSContextPool(poolSize);
 }
 
-typedef Native_DisposeBridge = Void Function(Int32 contextIndex);
-typedef Dart_DisposeBridge = void Function(int contextIndex);
+typedef Native_DisposeContext = Void Function(Int32 contextIndex);
+typedef Dart_DisposeContext = void Function(int contextIndex);
 
-final Dart_DisposeBridge _disposeBridge =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeBridge>>('disposeBridge').asFunction();
+final Dart_DisposeContext _disposeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
 
 void disposeBridge(int contextIndex) {
-  _disposeBridge(contextIndex);
+  _disposeContext(contextIndex);
 }
 
-typedef Native_AllocateNewBridge = Int32 Function();
-typedef Dart_AllocateNewBridge = int Function();
+typedef Native_AllocateNewContext = Int32 Function();
+typedef Dart_AllocateNewContext = int Function();
 
-final Dart_AllocateNewBridge _allocateNewBridge =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewBridge>>('allocateNewBridge').asFunction();
+final Dart_AllocateNewContext _allocateNewContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
 
-int allocateNewBridge() {
-  return _allocateNewBridge();
+int allocateNewContext() {
+  return _allocateNewContext();
 }
 
 typedef Native_FreezeContext = Void Function(Int32 contextIndex);
 typedef Dart_FreezeContext = void Function(int contextIndex);
 
-final Dart_FreezeContext _freezeBridge =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeBridge').asFunction();
+final Dart_FreezeContext _freezeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeContext').asFunction();
 
 void freezeContext(int contextIndex) {
-  _freezeBridge(contextIndex);
+  _freezeContext(contextIndex);
 }
 
 typedef Native_UnFreezeContext = Void Function(Int32 contextIndex);
@@ -124,7 +124,7 @@ void unfreezeContext(int contextIndex) {
   _unfreezeContext(contextIndex);
 }
 
-// Register reloadJsContext
+// Regisdster reloadJsContext
 typedef Native_ReloadJSContext = Void Function(Int32 contextIndex);
 typedef Dart_ReloadJSContext = void Function(int contextIndex);
 

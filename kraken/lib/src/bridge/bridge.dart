@@ -16,11 +16,11 @@ int initBridge() {
   registerDartMethodsToCpp();
 
   if (_firstView) {
-    initJSBridgePool(kKrakenJSBridgePoolSize);
+    initJSContextPool(kKrakenJSBridgePoolSize);
     _firstView = false;
     return 0;
   } else {
-    int contextIndex = allocateNewBridge();
+    int contextIndex = allocateNewContext();
     print(contextIndex);
     if (contextIndex == -1) {
       throw new Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');

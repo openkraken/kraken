@@ -9,7 +9,7 @@
 #include <cstdint>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
-void *getJSBridge(int32_t contextIndex);
+void *getJSContext(int32_t contextIndex);
 
 struct Screen {
   double width;
@@ -38,18 +38,18 @@ typedef void (*ToBlob)(void *callbackContext, int32_t contextIndex, AsyncBlobCal
 typedef void (*OnJSError)(int32_t contextIndex, const char *);
 
 KRAKEN_EXPORT
-void initJSBridgePool(int poolSize);
+void initJSContextPool(int poolSize);
 KRAKEN_EXPORT
-void disposeBridge(int32_t contextIndex);
+void disposeContext(int32_t contextIndex);
 KRAKEN_EXPORT
-int32_t allocateNewBridge();
+int32_t allocateNewContext();
 
 KRAKEN_EXPORT
-int32_t checkBridgeIndex(int32_t contextIndex);
+int32_t checkContextIndex(int32_t bridgeIndex);
 KRAKEN_EXPORT
-void freezeBridge(int32_t bridgeIndex);
+void freezeContext(int32_t contextIndex);
 KRAKEN_EXPORT
-void unfreezeBridge(int32_t bridgeIndex);
+void unfreezeContext(int32_t contextIndex);
 KRAKEN_EXPORT
 void evaluateScripts(int32_t contextIndex, const char *code, const char *bundleFilename, int startLine);
 
