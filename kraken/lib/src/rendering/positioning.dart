@@ -156,4 +156,22 @@ class RenderPosition extends RenderStack {
       child = childParentData.nextSibling;
     }
   }
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) {
+    return this.size.contains(this.globalToLocal(position));
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    return defaultHitTestChildren(result, position: position);
+  }
 }

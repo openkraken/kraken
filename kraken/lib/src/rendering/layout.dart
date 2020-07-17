@@ -875,9 +875,16 @@ class RenderFlowLayout extends RenderBox
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    hitTestChildren(result, position: position);
-    result.add(BoxHitTestEntry(this, position));
-    return true;
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) {
+    return this.size.contains(this.globalToLocal(position));
   }
 
   @override

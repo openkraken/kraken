@@ -81,7 +81,7 @@ mixin CSSSizingMixin {
     return input.trim().split(_splitRegExp);
   }
 
-  RenderConstrainedBox renderConstrainedBox;
+  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   KrakenRenderPadding renderPadding;
   CSSPadding oldPadding;
@@ -203,7 +203,7 @@ mixin CSSSizingMixin {
 
   RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
     oldConstraints = getConstraints(style);
-    return renderConstrainedBox = RenderConstrainedBox(
+    return renderConstrainedBox = KrakenRenderConstrainedBox(
       additionalConstraints: oldConstraints.toBoxConstraints(),
       child: renderObject,
     );
