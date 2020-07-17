@@ -28,15 +28,15 @@ void setTargetPlatformForDesktop() {
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   static List<KrakenViewController> _viewControllerList = new List();
-  static KrakenViewController getViewControllerOfJSContextIndex(int contextIndex) {
-    if (contextIndex >= _viewControllerList.length) {
+  static KrakenViewController getViewControllerOfJSContextIndex(int contextId) {
+    if (contextId >= _viewControllerList.length) {
       return null;
     }
-    if (_viewControllerList.elementAt(contextIndex) == null) {
+    if (_viewControllerList.elementAt(contextId) == null) {
       return null;
     }
 
-    return _viewControllerList.elementAt(contextIndex);
+    return _viewControllerList.elementAt(contextId);
   }
 
   KrakenViewController(
@@ -47,7 +47,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
       debugPaintSizeEnabled = true;
     }
 
-    _contextIndex = initBridge();
+    _contextId = initBridge();
 
     _viewControllerList.add(this);
 
@@ -56,12 +56,12 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
-  int get contextIndex {
-    return _contextIndex;
+  int get contextId {
+    return _contextId;
   }
 
   // index value which identify javascript runtime context.
-  int _contextIndex;
+  int _contextId;
 
   // should render performanceOverlay layer into the screen for performance profile.
   bool showPerformanceOverlay;
@@ -98,7 +98,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     _recycleResource();
     _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
-    await reloadJSContext(_contextIndex);
+    await reloadJSContext(_contextId);
     run();
   }
 
@@ -136,8 +136,8 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // dispose controller and recycle all resources.
   void dispose() {
     detachView();
-    disposeBridge(_contextIndex);
-    _viewControllerList[_contextIndex] = null;
+    disposeBridge(_contextId);
+    _viewControllerList[_contextId] = null;
     _recycleResource();
   }
 
@@ -164,11 +164,11 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   // execute preloaded javascript source
   void run() async {
     if (_bundle != null) {
-      await _bundle.run(_contextIndex);
+      await _bundle.run(_contextId);
       // trigger window load event
       requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
-        emitUIEvent(_contextIndex, json);
+        emitUIEvent(_contextId, json);
       });
     } else {
       print('ERROR: No bundle found.');

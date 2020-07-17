@@ -26,7 +26,7 @@ void handlePersistentCallback(void *callbackContext, int32_t contextIndex, const
   if (!_context.isValid()) return;
 
   if (_context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to trigger callback: timer callback is null." << std::endl;
+    KRAKEN_LOG(ERROR) << "Failed to trigger callback: context is freeze" << std::endl;
     return;
   }
 
@@ -211,7 +211,7 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
     throw JSError(context, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
-  getDartMethod()->clearTimeout(context.getContextIndex(), id);
+  getDartMethod()->clearTimeout(context.getContextId(), id);
   return Value::undefined();
 }
 
@@ -237,7 +237,7 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value
                   "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
 
-  getDartMethod()->cancelAnimationFrame(context.getContextIndex(), id);
+  getDartMethod()->cancelAnimationFrame(context.getContextId(), id);
 
   return Value::undefined();
 }

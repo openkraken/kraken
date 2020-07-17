@@ -20,11 +20,10 @@ int initBridge() {
     _firstView = false;
     return 0;
   } else {
-    int contextIndex = allocateNewContext();
-    print(contextIndex);
-    if (contextIndex == -1) {
+    int contextId = allocateNewContext();
+    if (contextId == -1) {
       throw new Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
     }
-    return contextIndex;
+    return contextId;
   }
 }

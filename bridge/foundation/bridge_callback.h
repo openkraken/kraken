@@ -43,7 +43,7 @@ public:
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
     JSContext &jsContext = context->_context;
-    int32_t contextIndex = context->_context.getContextIndex();
+    int32_t contextIndex = context->_context.getContextId();
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
     return fn(p, contextIndex);

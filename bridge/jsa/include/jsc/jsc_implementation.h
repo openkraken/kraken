@@ -48,7 +48,7 @@ class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
   JSCContext() = delete;
-  JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner);
+  JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
   ~JSCContext();
 
   jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
@@ -78,7 +78,7 @@ public:
 
   bool isValid() override;
 
-  int32_t getContextIndex() override;
+  int32_t getContextId() override;
 
   bool isFreeze() override;
   void freeze() override;
@@ -253,7 +253,7 @@ private:
   JSGlobalContextRef ctx_;
   std::atomic<bool> ctxInvalid_;
   std::string desc_;
-  int32_t _contextIndex;
+  int32_t _contextId;
   std::atomic<bool> _freeze {false};
   void *_owner {nullptr};
   jsa::JSExceptionHandler _handler;

@@ -307,9 +307,6 @@ task('macos-upload', (done) => {
 });
 
 task('bridge-test', (done) => {
-  if (platform === 'darwin') {
-    execSync(`${libOutputPath}/jsa_test_v8`, { stdio: 'inherit' });
-  }
   execSync(`${libOutputPath}/jsa_test_jsc`, { stdio: 'inherit' });
   execSync(`${libOutputPath}/foundation_test`, { stdio: 'inherit' })
   done();

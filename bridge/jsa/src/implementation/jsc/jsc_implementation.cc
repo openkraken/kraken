@@ -89,8 +89,8 @@ std::string to_string(void *value) {
 }
 } // namespace
 
-JSCContext::JSCContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner)
-  : _contextIndex(contextIndex), ctxInvalid_(false), _handler(handler), _owner(owner)
+JSCContext::JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner)
+  : _contextId(contextId), ctxInvalid_(false), _handler(handler), _owner(owner)
 #ifndef NDEBUG
     ,
     objectCounter_(0), stringCounter_(0)
@@ -1230,8 +1230,8 @@ bool JSCContext::hasException(JSValueRef res, JSValueRef exc, const char *msg) {
   return false;
 }
 
-int32_t JSCContext::getContextIndex() {
-  return _contextIndex;
+int32_t JSCContext::getContextId() {
+  return _contextId;
 }
 
 void *JSCContext::getOwner() {
