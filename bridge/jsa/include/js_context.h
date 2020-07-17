@@ -166,7 +166,7 @@ public:
   virtual bool isValid() = 0;
 
   /// get current
-  virtual int32_t getContextIndex() = 0;
+  virtual int32_t getContextId() = 0;
 
   /// verify is JS Engine is freeze.
   virtual bool isFreeze() = 0;

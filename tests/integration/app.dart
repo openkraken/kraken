@@ -44,7 +44,6 @@ void main() {
 
     controller.attachView(RendererBinding.instance.renderView);
 
-    print('attach complete');
     String status = await executeTest();
     if (status == 'failed') {
       print('$err with $status.');

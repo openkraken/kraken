@@ -19,13 +19,13 @@ using namespace kraken::foundation;
 using namespace alibaba;
 using namespace jsc;
 
-void normalPrint(const jsa::JSError &error) {
+void normalPrint(jsa::JSContext &context, const jsa::JSError &error) {
   std::cerr << error.what() << std::endl;
   FAIL();
 }
 
 TEST(BridgeCallback, worksWithNoFunctionLeaks) {
-  auto context = std::make_unique<JSCContext>(normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint, nullptr);
   std::mutex mutex;
   std::condition_variable condition;
   void *sharedData = nullptr;
@@ -46,7 +46,7 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
     auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
 
     BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext),
-                                                       [&postToChildThread](void *data) { postToChildThread(data); });
+                                                       [&postToChildThread](void *data, int32_t contextIndex) { postToChildThread(data); });
   };
 
   auto customerThread = [&]() {

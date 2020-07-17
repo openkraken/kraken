@@ -18,14 +18,14 @@ Value JSWindow::get(JSContext &context, const PropNameID &name) {
       throw JSError(context, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
     }
 
-    double devicePixelRatio = getDartMethod()->devicePixelRatio(context.getContextIndex());
+    double devicePixelRatio = getDartMethod()->devicePixelRatio(context.getContextId());
     return Value(devicePixelRatio);
   } else if (_name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
       throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
 
-    return Value(context, String::createFromUtf8(context, getDartMethod()->platformBrightness(context.getContextIndex())));
+    return Value(context, String::createFromUtf8(context, getDartMethod()->platformBrightness(context.getContextId())));
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }

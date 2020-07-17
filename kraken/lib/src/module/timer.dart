@@ -27,6 +27,13 @@ mixin TimerMixin {
     }
   }
 
+  void clearTimer() {
+    _timerMap.forEach((key, timer) {
+      timer.cancel();
+    });
+    _timerMap.clear();
+  }
+
   int setInterval(int timeout, Function callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = _timerId++;

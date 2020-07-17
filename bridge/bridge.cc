@@ -56,7 +56,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  const char *result = getDartMethod()->invokeUIManager(context.getContextIndex(), messageStr.c_str());
+  const char *result = getDartMethod()->invokeUIManager(context.getContextId(), messageStr.c_str());
   std::string resultStr = std::string(result);
 
   if (resultStr.find("Error:", 0) != std::string::npos) {

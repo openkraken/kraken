@@ -18,6 +18,15 @@ class KrakenWebSocket {
   Map<String, _WebSocketState> _stateMap = {};
   int _clientId = 0;
 
+  void dispose() {
+    _clientMap.forEach((id, socket) {
+      socket.sink.close();
+    });
+    _clientMap.clear();
+    _listenMap.clear();
+    _stateMap.clear();
+  }
+
   String init(String url, WebSocketEventCallback callback, {String protocols}) {
     var id = (_clientId++).toString();
     WebSocket.connect(url, protocols: [protocols]).then((webSocket) {

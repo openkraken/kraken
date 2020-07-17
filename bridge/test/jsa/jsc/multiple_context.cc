@@ -21,8 +21,8 @@ void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
 }
 
 TEST(multiple_context, initJSEngine) {
-  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint);
-  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(1, normalPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint, nullptr);
+  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(0, normalPrint, nullptr);
 
   contextA->global().setProperty(*contextA, "name", jsa::Value(1));
   EXPECT_EQ(contextB->global().getProperty(*contextB, "name").isUndefined(), true);
@@ -36,15 +36,15 @@ TEST(multiple_context, evaluateString) {
                                "    at global code");
   };
 
-  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint);
-  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(1, errorPrint);
+  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint, nullptr);
+  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(0, normalPrint, nullptr);
   contextA->evaluateJavaScript("function A() {return 'a';}", "", 0);
   contextB->evaluateJavaScript("A()", "", 0);
 }
 
 TEST(multiple_context, hostFunction) {
-  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
-  auto contextB = std::make_unique<JSCContext>(1, normalPrint);
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint, nullptr);
+  auto contextB = std::make_unique<JSCContext>(1, normalPrint, nullptr);
   jsa::HostFunctionType callback =
     [](jsa::JSContext &context, const jsa::Value &thisVal,
        const jsa::Value *args,
@@ -64,8 +64,8 @@ TEST(multiple_context, hostFunction) {
 }
 
 TEST(multiple_context, hostObject_get) {
-  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
-  auto contextB = std::make_unique<JSCContext>(0, normalPrint);
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint, nullptr);
+  auto contextB = std::make_unique<JSCContext>(0, normalPrint, nullptr);
   class User : public jsa::HostObject, std::enable_shared_from_this<User> {
     jsa::Value get(jsa::JSContext &context, const jsa::PropNameID &prop) {
       auto _prop = prop.utf8(context);
@@ -116,8 +116,8 @@ TEST(multiple_context, hostObject_get) {
 
 
 TEST(multiple_context, globalContext) {
-  auto contextA = std::make_unique<JSCContext>(0, normalPrint);
-  auto contextB = std::make_unique<JSCContext>(0, normalPrint);
+  auto contextA = std::make_unique<JSCContext>(0, normalPrint, nullptr);
+  auto contextB = std::make_unique<JSCContext>(0, normalPrint, nullptr);
   contextA->evaluateJavaScript("String.prototype.helloworld = 1234", "", 0);
   jsa::Value strA = contextA->evaluateJavaScript("new String('1234');", "", 0);
   EXPECT_EQ(strA.asObject(*contextA).getProperty(*contextA, "helloworld").getNumber(), 1234);
@@ -127,7 +127,7 @@ TEST(multiple_context, globalContext) {
 }
 
 TEST(multiple_context, freeze) {
-  auto context = std::make_unique<JSCContext>(0, normalPrint);
+  auto context = std::make_unique<JSCContext>(0, normalPrint, nullptr);
   EXPECT_EQ(context->isFreeze(), false);
   context->freeze();
   EXPECT_EQ(context->isFreeze(), true);

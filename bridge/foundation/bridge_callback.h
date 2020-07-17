@@ -43,7 +43,7 @@ public:
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
     JSContext &jsContext = context->_context;
-    int32_t contextIndex = context->_context.getContextIndex();
+    int32_t contextIndex = context->_context.getContextId();
     contextList.push(std::move(context));
     callbackCount.fetch_add(1);
     return fn(p, contextIndex);
@@ -53,7 +53,7 @@ public:
   void disposeAllCallbacks();
 
   static bool checkContext(JSContext &context, int32_t contextIndex) {
-    auto *bridge = static_cast<kraken::JSBridge *>(getJSBridge(contextIndex));
+    auto *bridge = static_cast<kraken::JSBridge *>(getJSContext(contextIndex));
     auto currentContext = bridge->getContext();
     return currentContext == &context;
   }

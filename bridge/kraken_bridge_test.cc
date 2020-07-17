@@ -13,7 +13,7 @@ std::atomic<bool> inited{false};
 
 void initTestFramework() {
   if (inited == true) return;
-  auto bridge = static_cast<kraken::JSBridge *>(getJSBridge(0));
+  auto bridge = static_cast<kraken::JSBridge *>(getJSContext(0));
   bridgeTest = std::make_unique<kraken::JSBridgeTest>(bridge);
   inited = true;
 }

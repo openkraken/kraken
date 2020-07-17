@@ -32,5 +32,9 @@ mixin ScheduleFrameMixin {
     SchedulerBinding.instance.scheduleFrameCallback(callback);
     SchedulerBinding.instance.scheduleFrame();
   }
+
+  void clearAnimationFrame() {
+    _animationFrameCallbackMap.clear();
+  }
 }
 
