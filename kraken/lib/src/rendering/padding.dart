@@ -7,9 +7,7 @@ class KrakenRenderPadding extends RenderPadding {
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
     child?.hitTest(result, position: position);
-    if (this.size.contains(this.globalToLocal(position))) {
-      result.add(BoxHitTestEntry(this, position));
-    }
+    result.add(BoxHitTestEntry(this, position));
     return true;
   }
 }
