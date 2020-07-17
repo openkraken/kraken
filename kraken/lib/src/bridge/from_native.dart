@@ -39,7 +39,7 @@ String handleAction(int bridgeIndex, List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   ElementManager elementManager = controller.getElementManager();
 
   var result = elementManager.applyAction(action, payload);
@@ -105,7 +105,7 @@ final Dart_RegisterInvokeModule _registerInvokeModule =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
 String invokeModule(Pointer<JSCallbackContext> callbackContext, int bridgeIndex, String json, DartAsyncModuleCallback callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
@@ -355,7 +355,7 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp(int bridgeIndex) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
 
   try {
     controller.reloadCurrentView();
@@ -387,7 +387,7 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(
     Pointer<JSCallbackContext> callbackContext, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   return controller.requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -414,7 +414,7 @@ final Dart_RegisterSetTimeout _registerSetTimeout =
 
 int _setTimeout(
     Pointer<JSCallbackContext> callbackContext, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
 
   return controller.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
@@ -443,7 +443,7 @@ final Dart_RegisterSetInterval _registerSetInterval =
 
 int _setInterval(
     Pointer<JSCallbackContext> callbackContext, int bridgeIndex, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   return controller.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -469,7 +469,7 @@ final Dart_RegisterClearTimeout _registerClearTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout').asFunction();
 
 void _clearTimeout(int bridgeIndex, int timerId) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   return controller.clearTimeout(timerId);
 }
 
@@ -490,7 +490,7 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 
 int _requestAnimationFrame(
     Pointer<JSCallbackContext> callbackContext, int bridgeIndex, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   return controller.requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
@@ -519,7 +519,7 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .asFunction();
 
 void _cancelAnimationFrame(int bridgeIndex, int timerId) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   controller.cancelAnimationFrame(timerId);
 }
 
@@ -602,7 +602,7 @@ final Dart_RegisterToBlob _registerToBlob =
 void _toBlob(Pointer<JSCallbackContext> callbackContext, int bridgeIndex, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
     int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSBridgeIndex(bridgeIndex);
+  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(bridgeIndex);
   ElementManager manager = controller.getElementManager();
 
   try {

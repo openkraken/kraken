@@ -28,6 +28,9 @@ mixin TimerMixin {
   }
 
   void clearTimer() {
+    _timerMap.forEach((key, timer) {
+      timer.cancel();
+    });
     _timerMap.clear();
   }
 

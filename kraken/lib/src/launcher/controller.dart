@@ -28,15 +28,15 @@ void setTargetPlatformForDesktop() {
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   static List<KrakenViewController> _viewControllerList = new List();
-  static KrakenViewController getViewControllerOfJSBridgeIndex(int bridgeIndex) {
-    if (bridgeIndex >= _viewControllerList.length) {
+  static KrakenViewController getViewControllerOfJSContextIndex(int contextIndex) {
+    if (contextIndex >= _viewControllerList.length) {
       return null;
     }
-    if (_viewControllerList.elementAt(bridgeIndex) == null) {
+    if (_viewControllerList.elementAt(contextIndex) == null) {
       return null;
     }
 
-    return _viewControllerList.elementAt(bridgeIndex);
+    return _viewControllerList.elementAt(contextIndex);
   }
 
   KrakenViewController(
@@ -95,10 +95,28 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
   reloadCurrentView() async {
     RenderObject root = _elementManager.getRootRenderObject().parent;
     _elementManager.detach();
+    _recycleResource();
     _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     _elementManager.attach(root, showPerformanceOverlay: showPerformanceOverlay ?? false);
     await reloadJSContext(_contextIndex);
     run();
+  }
+
+  void _recycleResource() {
+    clearTimer();
+    clearAnimationFrame();
+
+    if (_websocket != null) {
+      websocket.dispose();
+    }
+
+    if (_mqtt != null) {
+      mqtt.dispose();
+    }
+
+    // break circle reference
+    _elementManager.controller._elementManager = null;
+    _elementManager = null;
   }
 
   // regenerate generate renderObject created by kraken but not affect jsBridge context.
@@ -120,20 +138,7 @@ class KrakenViewController with TimerMixin, ScheduleFrameMixin {
     detachView();
     disposeBridge(_contextIndex);
     _viewControllerList[_contextIndex] = null;
-    clearTimer();
-    clearAnimationFrame();
-
-    if (_websocket != null) {
-      websocket.dispose();
-    }
-
-    if (_mqtt != null) {
-      mqtt.dispose();
-    }
-
-    // break circle reference
-    _elementManager.controller._elementManager = null;
-    _elementManager = null;
+    _recycleResource();
   }
 
   // detach renderObject from parent but keep everything in active.

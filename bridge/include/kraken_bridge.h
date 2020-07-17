@@ -45,7 +45,7 @@ KRAKEN_EXPORT
 int32_t allocateNewContext();
 
 KRAKEN_EXPORT
-int32_t checkContextIndex(int32_t bridgeIndex);
+int32_t checkContextIndex(int32_t contextIndex);
 KRAKEN_EXPORT
 void freezeContext(int32_t contextIndex);
 KRAKEN_EXPORT
