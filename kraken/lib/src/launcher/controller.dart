@@ -222,7 +222,7 @@ class KrakenController with TimerMixin, ScheduleFrameMixin {
 
   void dispose() {
     _disposeModule();
-    _view.dispose();
+    _disposeView();
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
   }

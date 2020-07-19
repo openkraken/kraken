@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 
 import 'package:kraken/launcher.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:vibration/vibration.dart';
