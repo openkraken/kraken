@@ -1,6 +1,5 @@
 import 'package:flutter/scheduler.dart';
 
-
 typedef DoubleCallback = void Function(double);
 typedef VoidCallback = void Function();
 
@@ -37,4 +36,3 @@ mixin ScheduleFrameMixin {
     _animationFrameCallbackMap.clear();
   }
 }
-

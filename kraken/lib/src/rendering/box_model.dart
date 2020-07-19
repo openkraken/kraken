@@ -62,11 +62,8 @@ class RenderLayoutBox extends RenderBoxModel
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         CSSComputedMixin {
-  RenderLayoutBox({
-    int targetId,
-    CSSStyleDeclaration style,
-    ElementManager elementManager
-  }) : super(targetId: targetId, style: style, elementManager: elementManager);
+  RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
+      : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
 class RenderBoxModel extends RenderBox with RenderPaddingMixin {

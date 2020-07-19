@@ -45,7 +45,7 @@ KRAKEN_EXPORT
 int32_t allocateNewContext();
 
 KRAKEN_EXPORT
-int32_t checkcontextId(int32_t contextId);
+int32_t checkContext(int32_t contextId);
 KRAKEN_EXPORT
 void freezeContext(int32_t contextId);
 KRAKEN_EXPORT

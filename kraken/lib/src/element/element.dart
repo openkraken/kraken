@@ -127,7 +127,9 @@ class Element extends Node
   // Vertical border dimension (top + bottom)
   double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
-  Element(int targetId, ElementManager elementManager, {
+  Element(
+    int targetId,
+    ElementManager elementManager, {
     this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
@@ -535,12 +537,8 @@ class Element extends Node
     String flexWrap = style['flexWrap'];
     bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
     if (display.endsWith('flex') && flexWrap != 'wrap') {
-      RenderBoxModel flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderBoxModel flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
     } else if (display == 'none' ||
@@ -548,12 +546,8 @@ class Element extends Node
         display == 'inline-block' ||
         display == 'block' ||
         isFlexWrap) {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateAlignment(flowLayout, style);
       return flowLayout;
     } else {
@@ -576,8 +570,7 @@ class Element extends Node
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child =
-          RenderFlexItem(child: renderLayoutBox);
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);

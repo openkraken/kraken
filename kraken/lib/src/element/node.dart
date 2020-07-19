@@ -68,8 +68,7 @@ abstract class Node extends EventTarget {
     return _children;
   }
 
-  Node(this.nodeType, int targetId, ElementManager elementManager, this.nodeName)
-      : super(targetId, elementManager) {
+  Node(this.nodeType, int targetId, ElementManager elementManager, this.nodeName) : super(targetId, elementManager) {
     assert(nodeType != null);
     assert(targetId != null);
     nodeName = nodeName ?? '';

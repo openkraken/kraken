@@ -39,24 +39,8 @@ String handleAction(int contextId, List directive) {
   String action = directive[0];
   List payload = directive[1];
 
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
-  ElementManager elementManager = controller.getElementManager();
-
-  var result = elementManager.applyAction(action, payload);
-
-  if (result == null) {
-    return EMPTY_STRING;
-  }
-
-  switch (result.runtimeType) {
-    case String:
-      return result;
-    case Map:
-    case List:
-      return jsonEncode(result);
-    default:
-      return result.toString();
-  }
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  return controller.view.applyUIOperation(action, payload);
 }
 
 String invokeUIManager(int contextId, String json) {
@@ -93,19 +77,22 @@ void registerInvokeUIManager() {
 }
 
 // Register InvokeModule
-typedef NativeAsyncModuleCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> json);
-typedef DartAsyncModuleCallback = void Function(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json);
+typedef NativeAsyncModuleCallback = Void Function(
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> json);
+typedef DartAsyncModuleCallback = void Function(
+    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json);
 
-typedef Native_InvokeModule = Pointer<Utf8> Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+typedef Native_InvokeModule = Pointer<Utf8> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
+    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
 final Dart_RegisterInvokeModule _registerInvokeModule =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeModule>>('registerInvokeModule').asFunction();
 
-String invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, String json, DartAsyncModuleCallback callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+String invokeModule(
+    Pointer<JSCallbackContext> callbackContext, int contextId, String json, DartAsyncModuleCallback callback) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   dynamic args = jsonDecode(json);
   String module = args[0];
   String result = EMPTY_STRING;
@@ -334,8 +321,7 @@ String invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, S
   return result;
 }
 
-Pointer<Utf8> _invokeModule(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json,
+Pointer<Utf8> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json,
     Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
   String result = invokeModule(callbackContext, contextId, Utf8.fromUtf8(json), callback.asFunction());
   return Utf8.toUtf8(result);
@@ -355,10 +341,10 @@ final Dart_RegisterReloadApp _registerReloadApp =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterReloadApp>>('registerReloadApp').asFunction();
 
 void _reloadApp(int contextId) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
 
   try {
-    controller.reloadCurrentView();
+    controller.reload();
   } catch (e, stack) {
     print('Dart Error: $e\n$stack');
   }
@@ -369,8 +355,10 @@ void registerReloadApp() {
   _registerReloadApp(pointer);
 }
 
-typedef NativeAsyncCallback = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> timeout);
-typedef DartAsyncCallback = void Function(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> timeout);
+typedef NativeAsyncCallback = Void Function(
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> timeout);
+typedef DartAsyncCallback = void Function(
+    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> timeout);
 typedef NativeRAFAsyncCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Double data, Pointer<Utf8>);
 typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8>);
@@ -387,7 +375,7 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 
 void _requestBatchUpdate(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   return controller.requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -412,9 +400,9 @@ typedef Dart_RegisterSetTimeout = void Function(Pointer<NativeFunction<Native_Se
 final Dart_RegisterSetTimeout _registerSetTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetTimeout').asFunction();
 
-int _setTimeout(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
 
   return controller.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
@@ -441,9 +429,10 @@ typedef Dart_RegisterSetInterval = void Function(Pointer<NativeFunction<Native_S
 final Dart_RegisterSetInterval _registerSetInterval =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSetTimeout>>('registerSetInterval').asFunction();
 
-int _setInterval(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  print('controller: $controller, id: $contextId');
   return controller.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
@@ -469,7 +458,7 @@ final Dart_RegisterClearTimeout _registerClearTimeout =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterClearTimeout>>('registerClearTimeout').asFunction();
 
 void _clearTimeout(int contextId, int timerId) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   return controller.clearTimeout(timerId);
 }
 
@@ -488,9 +477,9 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
     .lookup<NativeFunction<Native_RegisterRequestAnimationFrame>>('registerRequestAnimationFrame')
     .asFunction();
 
-int _requestAnimationFrame(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   return controller.requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
@@ -519,7 +508,7 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
     .asFunction();
 
 void _cancelAnimationFrame(int contextId, int timerId) {
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   controller.cancelAnimationFrame(timerId);
 }
 
@@ -591,48 +580,27 @@ typedef NativeAsyncBlobCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef Native_ToBlob = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
+typedef Native_ToBlob = Void Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
+    Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
 typedef Native_RegisterToBlob = Void Function(Pointer<NativeFunction<Native_ToBlob>>);
 typedef Dart_RegisterToBlob = void Function(Pointer<NativeFunction<Native_ToBlob>>);
 
 final Dart_RegisterToBlob _registerToBlob =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterToBlob>>('registerToBlob').asFunction();
 
-void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
-    int id, double devicePixelRatio) {
+void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
-  KrakenViewController controller = KrakenViewController.getViewControllerOfJSContextIndex(contextId);
-  ElementManager manager = controller.getElementManager();
-
-  try {
-    if (!manager.existsTarget(id)) {
-      Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unknown node id: $id');
-      func(callbackContext, contextId, msg, nullptr, -1);
-      return;
-    }
-
-    var node = manager.getEventTargetByTargetId<EventTarget>(id);
-    if (node is Element) {
-      node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
-        Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
-        Uint8List byteList = bytePtr.asTypedList(bytes.length);
-        byteList.setAll(0, bytes);
-        func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
-      }).catchError((e, stack) {
-        Pointer<Utf8> msg =
-            Utf8.toUtf8('toBlob: failed to export image data from element id: $id. error: $e}.\n$stack');
-        func(callbackContext, contextId, msg, nullptr, -1);
-      });
-    } else {
-      Pointer<Utf8> msg = Utf8.toUtf8('toBlob: node is not an element, id: $id');
-      func(callbackContext, contextId, msg, nullptr, -1);
-      return;
-    }
-  } catch (e, stack) {
-    Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unexpected error: $e\n$stack');
-    func(callbackContext, contextId, msg, nullptr, -1);
-  }
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  controller.view.toImage(devicePixelRatio, id).then((Uint8List bytes) {
+    Pointer<Uint8> bytePtr = allocate<Uint8>(count: bytes.length);
+    Uint8List byteList = bytePtr.asTypedList(bytes.length);
+    byteList.setAll(0, bytes);
+    func(callbackContext, contextId, nullptr, bytePtr, bytes.length);
+  }).catchError((error, stack) {
+    Pointer<Utf8> msg = Utf8.toUtf8('$error\n$stack');
+    func(callbackContext, contextId, msg, nullptr, 0);
+  });
 }
 
 void registerToBlob() {
