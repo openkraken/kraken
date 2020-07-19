@@ -36,8 +36,8 @@ TEST(multiple_context, evaluateString) {
                                "    at global code");
   };
 
-  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, normalPrint, nullptr);
-  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(0, normalPrint, nullptr);
+  std::unique_ptr<alibaba::jsa::JSContext> contextA = createJSContext(0, errorPrint, nullptr);
+  std::unique_ptr<alibaba::jsa::JSContext> contextB = createJSContext(0, errorPrint, nullptr);
   contextA->evaluateJavaScript("function A() {return 'a';}", "", 0);
   contextB->evaluateJavaScript("A()", "", 0);
 }
