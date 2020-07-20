@@ -134,10 +134,7 @@ describe('align-self', () => {
 
     await matchScreenshot();
   });
-  xit('003', async () => {
-    await matchScreenshot();
-  });
-  xit('004', async () => {
+  it('004', async () => {
     let test;
     test = createElement(
       'div',
@@ -185,7 +182,7 @@ describe('align-self', () => {
 
     await matchScreenshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let p;
     let test;
     let cover;
@@ -730,7 +727,7 @@ describe('align-self', () => {
 
     await matchScreenshot();
   });
-  xit('011', async () => {
+  it('011', async () => {
     let p;
     let test;
     p = createElement(
@@ -797,7 +794,7 @@ describe('align-self', () => {
 
     await matchScreenshot();
   });
-  xit('012', async () => {
+  it('012', async () => {
     let p;
     let auto;
     let auto_1;
