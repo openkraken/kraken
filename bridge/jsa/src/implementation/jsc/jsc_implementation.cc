@@ -1238,19 +1238,9 @@ void *JSCContext::getOwner() {
   return _owner;
 }
 
-bool JSCContext::isFreeze() {
-  return _freeze;
-}
-void JSCContext::freeze() {
-  _freeze = true;
-}
-void JSCContext::unfreeze() {
-  _freeze = false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner) {
-  return std::make_unique<JSCContext>(contextIndex, handler, owner);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner) {
+  return std::make_unique<JSCContext>(contextId, handler, owner);
 }
 
 } // namespace jsc

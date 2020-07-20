@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -93,6 +94,11 @@ class CSSStyleDeclaration {
     String prevValue = getPropertyValue(propertyName);
 
     if (!isNullOrEmptyValue(prevValue)) {
+      if (propertyName == PADDING) {
+        CSSStyleProperty.removeShorthandPadding(_cssProperties);
+      } else if (propertyName == MARGIN) {
+        CSSStyleProperty.removeShorthandMargin(_cssProperties);
+      }
       _cssProperties.remove(propertyName);
       _invokePropertyChangedListener(propertyName, prevValue, '');
     }
@@ -119,6 +125,11 @@ class CSSStyleDeclaration {
     String prevValue = _cssProperties[propertyName];
 
     if (normalizedValue != prevValue) {
+      if (propertyName == PADDING) {
+        CSSStyleProperty.setShorthandPadding(_cssProperties, normalizedValue);
+      } else if (propertyName == MARGIN) {
+        CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
+      }
       _cssProperties[propertyName] = normalizedValue;
       _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
     }

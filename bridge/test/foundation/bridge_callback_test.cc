@@ -46,7 +46,7 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
     auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
 
     BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext),
-                                                       [&postToChildThread](void *data, int32_t contextIndex) { postToChildThread(data); });
+                                                       [&postToChildThread](void *data, int32_t contextId) { postToChildThread(data); });
   };
 
   auto customerThread = [&]() {

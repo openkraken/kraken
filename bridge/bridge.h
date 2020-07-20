@@ -30,7 +30,7 @@ private:
 
 public:
   JSBridge() = delete;
-  JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler& handler);
+  JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler& handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
@@ -40,7 +40,7 @@ public:
   std::vector<std::shared_ptr<Value>> krakenUIListenerList;
   std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
 
-  int32_t contextIndex;
+  int32_t contextId;
   /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 

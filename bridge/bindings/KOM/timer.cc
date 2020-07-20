@@ -15,20 +15,15 @@ namespace binding {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-void handlePersistentCallback(void *callbackContext, int32_t contextIndex, const char *errmsg) {
+void handlePersistentCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextIndex)) {
+  if (!BridgeCallback::checkContext(_context, contextId)) {
     return;
   }
 
   if (!_context.isValid()) return;
-
-  if (_context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to trigger callback: context is freeze" << std::endl;
-    return;
-  }
 
   if (obj->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
@@ -48,21 +43,16 @@ void handlePersistentCallback(void *callbackContext, int32_t contextIndex, const
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *callbackContext, int32_t contextIndex, double result,
+void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, double result,
                                  const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextIndex)) {
+  if (!BridgeCallback::checkContext(_context, contextId)) {
     return;
   }
 
   if (!_context.isValid()) return;
-
-  if (_context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to trigger callback: context is freeze" << std::endl;
-    return;
-  }
 
   if (obj->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
@@ -82,13 +72,13 @@ void handleRAFPersistentCallback(void *callbackContext, int32_t contextIndex, do
   callback.asFunction(_context).call(_context, Value(result), 0);
 }
 
-void handleTransientCallback(void *callbackContext, int32_t contextIndex, const char *errmsg) {
-  handlePersistentCallback(callbackContext, contextIndex, errmsg);
+void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+  handlePersistentCallback(callbackContext, contextId, errmsg);
 }
 
-void handleRAFTransientCallback(void *callbackContext, int32_t contextIndex, double result,
+void handleRAFTransientCallback(void *callbackContext, int32_t contextId, double result,
                                 const char *errmsg) {
-  handleRAFPersistentCallback(callbackContext, contextIndex, result, errmsg);
+  handleRAFPersistentCallback(callbackContext, contextId, result, errmsg);
 }
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -98,11 +88,6 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
 
   if (!args->isObject() || !args->getObject(context).isFunction(context)) {
     throw JSError(context, "Failed to execute 'setTimeout': parameter 1 (callback) must be a function.");
-  }
-
-  if (context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'setTimeout': context is freeze" << std::endl;
-    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -126,8 +111,8 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   auto timerId = BridgeCallback::instance()->registerCallback<int32_t>(
     std::move(callbackContext),
-    [&timeout](BridgeCallback::Context *callbackContext, int32_t contextIndex) {
-      return getDartMethod()->setTimeout(callbackContext, contextIndex, handleTransientCallback, timeout);
+    [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
     });
 
   // `-1` represents ffi error occurred.
@@ -145,11 +130,6 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
 
   if (!args->isObject() || !args->getObject(context).isFunction(context)) {
     throw JSError(context, "Failed to execute 'setInterval': parameter 1 (callback) must be a function.");
-  }
-
-  if (context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'setInterval': context is freeze" << std::endl;
-    return Value::undefined();
   }
 
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
@@ -179,8 +159,8 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
 
   auto timerId = BridgeCallback::instance()->registerCallback<int32_t>(
     std::move(callbackContext),
-    [&delay](BridgeCallback::Context *callbackContext, int32_t contextIndex) {
-      return getDartMethod()->setInterval(callbackContext, contextIndex, handlePersistentCallback, delay);
+    [&delay](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, delay);
     });
 
   if (timerId == -1) {
@@ -193,11 +173,6 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
 Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
     throw JSError(context, "Failed to execute 'clearTimeout': 1 argument required, but only 0 present.");
-  }
-
-  if (context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'clearTimeout': context is freeze" << std::endl;
-    return Value::undefined();
   }
 
   const Value &timerId = args[0];
@@ -218,11 +193,6 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
 Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count <= 0) {
     throw JSError(context, "Failed to execute 'cancelAnimationFrame': 1 argument required, but only 0 present.");
-  }
-
-  if (context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'cancelAnimationFrame': context is freeze" << std::endl;
-    return Value::undefined();
   }
 
   const Value &requestId = args[0];
@@ -251,11 +221,6 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
     throw JSError(context, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
 
-  if (context.isFreeze()) {
-    KRAKEN_LOG(ERROR) << "Failed to execute 'requestAnimationFrame': context is freeze" << std::endl;
-    return Value::undefined();
-  }
-
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&callbackFunction = callbackValue->getObject(context);
 
@@ -268,8 +233,8 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
   }
 
   int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(
-    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextIndex) {
-      return getDartMethod()->requestAnimationFrame(callbackContext, contextIndex,
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->requestAnimationFrame(callbackContext, contextId,
                                                     handleRAFTransientCallback);
     });
 

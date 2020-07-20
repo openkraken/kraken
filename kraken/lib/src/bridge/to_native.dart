@@ -104,26 +104,6 @@ int allocateNewContext() {
   return _allocateNewContext();
 }
 
-typedef Native_FreezeContext = Void Function(Int32 contextId);
-typedef Dart_FreezeContext = void Function(int contextId);
-
-final Dart_FreezeContext _freezeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FreezeContext>>('freezeContext').asFunction();
-
-void freezeContext(int contextId) {
-  _freezeContext(contextId);
-}
-
-typedef Native_UnFreezeContext = Void Function(Int32 contextId);
-typedef Dart_UnFreezeContext = void Function(int contextId);
-
-final Dart_UnFreezeContext _unfreezeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_UnFreezeContext>>('unfreezeContext').asFunction();
-
-void unfreezeContext(int contextId) {
-  _unfreezeContext(contextId);
-}
-
 // Regisdster reloadJsContext
 typedef Native_ReloadJSContext = Void Function(Int32 contextId);
 typedef Dart_ReloadJSContext = void Function(int contextId);

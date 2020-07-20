@@ -80,10 +80,6 @@ public:
 
   int32_t getContextId() override;
 
-  bool isFreeze() override;
-  void freeze() override;
-  void unfreeze() override;
-
   void *getOwner() override;
 
   void reportError(jsa::JSError &error) override;
@@ -264,7 +260,7 @@ private:
 #endif
 }; // JSCContext
 
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
 
 } // namespace jsc
 } // namespace alibaba

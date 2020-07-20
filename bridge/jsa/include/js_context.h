@@ -168,14 +168,14 @@ public:
   /// get current
   virtual int32_t getContextId() = 0;
 
-  /// verify is JS Engine is freeze.
-  virtual bool isFreeze() = 0;
-
-  // set js context to freeze
-  virtual void freeze() = 0;
-
-  // set js context to unfreeze
-  virtual void unfreeze() = 0;
+//  /// verify is JS Engine is freeze.
+//  virtual bool isFreeze() = 0;
+//
+//  // set js context to freeze
+//  virtual void freeze() = 0;
+//
+//  // set js context to unfreeze
+//  virtual void unfreeze() = 0;
 
   // get the pointer of context create owner.
   virtual void* getOwner() = 0;

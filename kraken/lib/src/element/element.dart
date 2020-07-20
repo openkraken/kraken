@@ -18,11 +18,14 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 import 'package:meta/meta.dart';
 
 import '../css/flow.dart';
 import 'event_handler.dart';
 import 'bounding_client_rect.dart';
+
+const String STYLE = 'style';
 
 /// Defined by W3C Standard,
 /// Most elements's default width is 300 in pixel,
@@ -120,6 +123,10 @@ class Element extends Node
       return renderLayoutBox.padding.vertical;
     }
     return 0.0;
+  }
+
+  bool get isValidSticky {
+    return style['position'] == 'sticky' && (style.contains('top') || style.contains('bottom'));
   }
 
   // Horizontal border dimension (left + right)
@@ -260,7 +267,7 @@ class Element extends Node
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains('top')) {
-        double top = CSSSizingMixin.getDisplayPortedLength(childStyle['top']) + resolvedPadding.top;
+        double top = CSSStyleProperty.getDisplayPortValue(childStyle['top']) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -269,7 +276,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('bottom')) {
-        double bottom = CSSSizingMixin.getDisplayPortedLength(childStyle['bottom']) + resolvedPadding.bottom;
+        double bottom = CSSStyleProperty.getDisplayPortValue(childStyle['bottom']) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -296,7 +303,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains('left')) {
-        double left = CSSSizingMixin.getDisplayPortedLength(childStyle['left']) + resolvedPadding.left;
+        double left = CSSStyleProperty.getDisplayPortValue(childStyle['left']) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -305,7 +312,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains('right')) {
-        double right = CSSSizingMixin.getDisplayPortedLength(childStyle['right']) + resolvedPadding.right;
+        double right = CSSStyleProperty.getDisplayPortValue(childStyle['right']) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -534,21 +541,26 @@ class Element extends Node
 
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    String flexWrap = style['flexWrap'];
-    bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
-    if (display.endsWith('flex') && flexWrap != 'wrap') {
-      RenderBoxModel flexLayout =
-          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
+    if (display.endsWith('flex')) {
+      RenderFlexLayout flexLayout = RenderFlexLayout(
+        children: children,
+        style: style,
+        targetId: targetId,
+        elementManager: elementManager
+      );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
     } else if (display == 'none' ||
         display == 'inline' ||
         display == 'inline-block' ||
-        display == 'block' ||
-        isFlexWrap) {
-      RenderFlowLayoutBox flowLayout =
-          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
-      decorateAlignment(flowLayout, style);
+        display == 'block') {
+      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
+        children: children,
+        style: style,
+        targetId: targetId,
+        elementManager: elementManager
+      );
+      decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');
@@ -775,6 +787,7 @@ class Element extends Node
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
+      parentData.alignSelf = flexParentData.alignSelf;
 
       // Update margin for flex child.
       element.updateRenderMargin(element.style);
@@ -804,6 +817,7 @@ class Element extends Node
       case 'flexWrap':
       case 'justifyContent':
       case 'alignItems':
+      case 'alignSelf':
       case 'alignContent':
       case 'textAlign':
         _styleFlexChangedListener(property, original, present);
@@ -1126,14 +1140,16 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-    properties[key] = value;
 
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
+    } else {
+      properties[key] = value;
     }
+
   }
 
   @mustCallSuper
@@ -1409,7 +1425,7 @@ List<Element> findStickyChildren(Element element) {
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
-    if (_isSticky(child.style)) result.add(child);
+    if (child.isValidSticky) result.add(child);
 
     // No need to loop scrollable container children
     if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
@@ -1442,10 +1458,6 @@ bool _isPositioned(CSSStyleDeclaration style) {
   } else {
     return false;
   }
-}
-
-bool _isSticky(CSSStyleDeclaration style) {
-  return style['position'] == 'sticky' && style.contains('top') || style.contains('bottom');
 }
 
 void setPositionedChildParentData(
