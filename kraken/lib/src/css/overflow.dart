@@ -304,14 +304,11 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
   }
 
   @override
-  bool hitTestSelf(Offset position) {
-    return this.size.contains(this.globalToLocal(position));
-  }
-
-  @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position);
   }
+
+
 }
 
 void setChild(RenderBox renderBox, RenderBox child) {

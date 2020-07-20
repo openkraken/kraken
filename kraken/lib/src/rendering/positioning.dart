@@ -166,11 +166,6 @@ class RenderPosition extends RenderStack {
   }
 
   @override
-  bool hitTestSelf(Offset position) {
-    return this.size.contains(this.globalToLocal(position));
-  }
-
-  @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }

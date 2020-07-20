@@ -36,11 +36,6 @@ class KrakenRenderConstrainedBox extends RenderConstrainedBox {
     return false;
   }
 
-//  @override
-//  bool hitTestSelf(Offset position) {
-//    return size.contains(position);
-//  }
-
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position);

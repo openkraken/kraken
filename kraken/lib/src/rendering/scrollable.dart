@@ -421,11 +421,6 @@ class RenderSingleChildViewport extends RenderBox
   }
 
   @override
-  bool hitTestSelf(Offset position) {
-    return this.size.contains(this.globalToLocal(position));
-  }
-
-  @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     if (child != null) {
       return result.addWithPaintOffset(
