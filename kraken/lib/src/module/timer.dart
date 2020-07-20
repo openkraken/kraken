@@ -42,5 +42,4 @@ mixin TimerMixin {
     });
     return id;
   }
-
 }

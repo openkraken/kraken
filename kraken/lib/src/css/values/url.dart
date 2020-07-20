@@ -51,7 +51,6 @@ class CSSUrl implements CSSValue<ImageProvider> {
       if (data.isBase64) {
         _value = MemoryImage(data.contentAsBytes());
       }
-
     } else if (_rawInput.startsWith('blob:')) {
       // @TODO: support blob file url
     } else {

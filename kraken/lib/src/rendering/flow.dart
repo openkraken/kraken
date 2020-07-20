@@ -19,20 +19,20 @@ class _RunMetrics {
 
 /// Impl flow layout algorithm.
 class RenderFlowLayoutBox extends RenderLayoutBox {
-  RenderFlowLayoutBox({
-    List<RenderBox> children,
-    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
-    TextDirection textDirection = TextDirection.ltr,
-    Axis direction = Axis.horizontal,
-    double spacing = 0.0,
-    MainAxisAlignment runAlignment = MainAxisAlignment.start,
-    double runSpacing = 0.0,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
-    VerticalDirection verticalDirection = VerticalDirection.down,
-    CSSStyleDeclaration style,
-    int targetId,
-    ElementManager elementManager
-  })  : assert(direction != null),
+  RenderFlowLayoutBox(
+      {List<RenderBox> children,
+      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+      TextDirection textDirection = TextDirection.ltr,
+      Axis direction = Axis.horizontal,
+      double spacing = 0.0,
+      MainAxisAlignment runAlignment = MainAxisAlignment.start,
+      double runSpacing = 0.0,
+      CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
+      VerticalDirection verticalDirection = VerticalDirection.down,
+      CSSStyleDeclaration style,
+      int targetId,
+      ElementManager elementManager})
+      : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
         assert(runAlignment != null),

@@ -21,14 +21,15 @@ void launch({
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
-  KrakenViewController controller = KrakenViewController(
-      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
+  KrakenController controller =
+      KrakenController(showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
 
-  await controller.loadBundle(bundleURLOverride: bundleURLOverride,
-    bundlePathOverride: bundlePathOverride,
-    bundleContentOverride: bundleContentOverride);
+  controller.view.attachView(RendererBinding.instance.renderView);
 
-  controller.attachView(RendererBinding.instance.renderView);
+  await controller.loadBundle(
+      bundleURLOverride: bundleURLOverride,
+      bundlePathOverride: bundlePathOverride,
+      bundleContentOverride: bundleContentOverride);
 
   await controller.run();
 }

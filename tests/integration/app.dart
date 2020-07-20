@@ -14,7 +14,7 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
-  KrakenViewController controller = KrakenViewController();
+  KrakenController controller = KrakenController();
   registerDartTestMethodsToCpp();
   initTestFramework();
   addJSErrorListener((String err) {
@@ -42,7 +42,7 @@ void main() {
       WidgetsBinding.instance.attachRootWidget(MaterialApp(home: Scaffold()));
     } catch(err) {} // Ignore throwing errors.
 
-    controller.attachView(RendererBinding.instance.renderView);
+    controller.view.attachView(RendererBinding.instance.renderView);
 
     String status = await executeTest();
     if (status == 'failed') {
