@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/config/image_provider_adapter.dart';
 
 const String IMAGE = 'IMG';
 
@@ -18,6 +19,8 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
+  static ImageProviderAdapter _imageProviderAdapter;
+
   ImageProvider image;
   RenderImage imageBox;
   ImageStream imageStream;
@@ -26,6 +29,14 @@ class ImageElement extends Element {
 
   double _propertyWidth;
   double _propertyHeight;
+
+  static ImageProviderAdapter getImageProviderAdapter() => _imageProviderAdapter ?? DefaultImageProviderAdapter();
+
+  static setCustomImageProviderAdapter(ImageProviderAdapter imageProviderAdapter){
+    if(imageProviderAdapter != null){
+      _imageProviderAdapter = imageProviderAdapter;
+    }
+  }
 
   ImageElement(int targetId)
       : super(targetId: targetId, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {

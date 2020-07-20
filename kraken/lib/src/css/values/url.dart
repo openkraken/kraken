@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/element.dart';
 
 import 'value.dart';
 
@@ -29,21 +29,11 @@ class CSSUrl implements CSSValue<ImageProvider> {
     }
 
     // Default is raw value
-    _url = _rawInput;
-
     if (_rawInput.startsWith('//') || _rawInput.startsWith('http://') || _rawInput.startsWith('https://')) {
-      var url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
-      _url = url;
-      _value = DelegateConfig.imageProviderDelegate.createNetworkImage(url,cache: cache);
-    } else if (_rawInput.startsWith('file://')) {
-      _value = DelegateConfig.imageProviderDelegate.createFileImage(_rawInput);
-    } else if (_rawInput.startsWith('data:')) {
-      _value = DelegateConfig.imageProviderDelegate.createMemoryImage(_rawInput);
-    } else if (_rawInput.startsWith('blob:')) {
-      _value = DelegateConfig.imageProviderDelegate.createBlobImage(_rawInput);
-    } else {
-      _value = DelegateConfig.imageProviderDelegate.createFallbackImage(_rawInput);
+      _url = _rawInput.startsWith('//') ? 'https:' + _rawInput : _rawInput;
     }
+
+    _value = ImageElement.getImageProviderAdapter().getImageProvider(_rawInput, {'cache': this.cache});
   }
 
   @override
