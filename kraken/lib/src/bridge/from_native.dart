@@ -39,7 +39,7 @@ String handleAction(int contextId, List directive) {
   List payload = directive[1];
 
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.view.applyUIOperation(action, payload);
+  return controller.view.applyViewAction(action, payload);
 }
 
 String invokeUIManager(int contextId, String json) {
@@ -180,28 +180,28 @@ String invokeModule(
       String method = args[1];
       if (method == 'init') {
         List methodArgs = args[2];
-        return controller.mqtt.init(methodArgs[0], methodArgs[1]);
+        return controller.module.mqtt.init(methodArgs[0], methodArgs[1]);
       } else if (method == 'open') {
         List methodArgs = args[2];
-        controller.mqtt.open(methodArgs[0], methodArgs[1]);
+        controller.module.mqtt.open(methodArgs[0], methodArgs[1]);
       } else if (method == 'close') {
         List methodArgs = args[2];
-        controller.mqtt.close(methodArgs[0]);
+        controller.module.mqtt.close(methodArgs[0]);
       } else if (method == 'publish') {
         List methodArgs = args[2];
-        controller.mqtt.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
+        controller.module.mqtt.publish(methodArgs[0], methodArgs[1], methodArgs[2], methodArgs[3], methodArgs[4]);
       } else if (method == 'subscribe') {
         List methodArgs = args[2];
-        controller.mqtt.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
+        controller.module.mqtt.subscribe(methodArgs[0], methodArgs[1], methodArgs[2]);
       } else if (method == 'unsubscribe') {
         List methodArgs = args[2];
-        controller.mqtt.unsubscribe(methodArgs[0], methodArgs[1]);
+        controller.module.mqtt.unsubscribe(methodArgs[0], methodArgs[1]);
       } else if (method == 'getReadyState') {
         List methodArgs = args[2];
-        return controller.mqtt.getReadyState(methodArgs[0]);
+        return controller.module.mqtt.getReadyState(methodArgs[0]);
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        controller.mqtt.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
+        controller.module.mqtt.addEvent(methodArgs[0], methodArgs[1], (String id, String event) {
           emitModuleEvent(contextId, '["MQTT", $id, $event]');
         });
       }
@@ -277,18 +277,18 @@ String invokeModule(
       String method = args[1];
       if (method == 'init') {
         List methodArgs = args[2];
-        return controller.websocket.init(methodArgs[0], (String id, String event) {
+        return controller.module.websocket.init(methodArgs[0], (String id, String event) {
           emitModuleEvent(contextId, '["WebSocket", $id, $event]');
         });
       } else if (method == 'addEvent') {
         List methodArgs = args[2];
-        controller.websocket.addEvent(methodArgs[0], methodArgs[1]);
+        controller.module.websocket.addEvent(methodArgs[0], methodArgs[1]);
       } else if (method == 'send') {
         List methodArgs = args[2];
-        controller.websocket.send(methodArgs[0], methodArgs[1]);
+        controller.module.websocket.send(methodArgs[0], methodArgs[1]);
       } else if (method == 'close') {
         List methodArgs = args[2];
-        controller.websocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
+        controller.module.websocket.close(methodArgs[0], methodArgs[1], methodArgs[2]);
       }
     } else if (module == 'Navigator') {
       String method = args[1];
@@ -375,7 +375,7 @@ final Dart_RegisterRequestBatchUpdate _registerRequestBatchUpdate = nativeDynami
 void _requestBatchUpdate(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.requestBatchUpdate((Duration timeStamp) {
+  return controller.module.requestBatchUpdate((Duration timeStamp) {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, contextId, nullptr);
@@ -403,7 +403,7 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
 
-  return controller.setTimeout(timeout, () {
+  return controller.module.setTimeout(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, contextId, nullptr);
@@ -432,7 +432,7 @@ int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
   print('controller: $controller, id: $contextId');
-  return controller.setInterval(timeout, () {
+  return controller.module.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, contextId, nullptr);
@@ -458,7 +458,7 @@ final Dart_RegisterClearTimeout _registerClearTimeout =
 
 void _clearTimeout(int contextId, int timerId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.clearTimeout(timerId);
+  return controller.module.clearTimeout(timerId);
 }
 
 void registerClearTimeout() {
@@ -479,7 +479,7 @@ final Dart_RegisterRequestAnimationFrame _registerRequestAnimationFrame = native
 int _requestAnimationFrame(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  return controller.requestAnimationFrame((double highResTimeStamp) {
+  return controller.module.requestAnimationFrame((double highResTimeStamp) {
     DartRAFAsyncCallback func = callback.asFunction();
     try {
       func(callbackContext, contextId, highResTimeStamp, nullptr);
@@ -508,7 +508,7 @@ final Dart_RegisterCancelAnimationFrame _registerCancelAnimationFrame = nativeDy
 
 void _cancelAnimationFrame(int contextId, int timerId) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  controller.cancelAnimationFrame(timerId);
+  controller.module.cancelAnimationFrame(timerId);
 }
 
 void registerCancelAnimationFrame() {

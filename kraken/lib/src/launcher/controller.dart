@@ -31,7 +31,7 @@ void setTargetPlatformForDesktop() {
 
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController {
-  KrakenViewController({this.showPerformanceOverlay, this.enableDebug = false}) {
+  KrakenViewController({this.showPerformanceOverlay, this.enableDebug = false, int contextId}): _contextId = contextId {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -50,10 +50,6 @@ class KrakenViewController {
   int _contextId;
   int get contextId {
     return _contextId;
-  }
-
-  set contextId(int value) {
-    _contextId = value;
   }
 
   // should render performanceOverlay layer into the screen for performance profile.
@@ -120,7 +116,7 @@ class KrakenViewController {
     return completer.future;
   }
 
-  String applyUIOperation(String action, List payload) {
+  String applyViewAction(String action, List payload) {
     var result = _elementManager.applyAction(action, payload);
 
     if (result == null) {
@@ -148,29 +144,8 @@ class KrakenViewController {
   }
 }
 
-class KrakenController with TimerMixin, ScheduleFrameMixin {
-  static Map<int, KrakenController> _controllerMap = new Map();
-  static KrakenController getControllerOfJSContextId(int contextId) {
-    if (!_controllerMap.containsKey(contextId)) {
-      return null;
-    }
-
-    return _controllerMap[contextId];
-  }
-
-  KrakenController({bool showPerformanceOverlay = false, enableDebug = false}) {
-    _view = KrakenViewController(showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
-    _controllerMap[_view.contextId] = this;
-  }
-
-  KrakenViewController _view;
-  KrakenViewController get view {
-    return _view;
-  }
-
-  // the bundle manager which used to download javascript source and run.
-  KrakenBundle _bundle;
-
+// An controller designed to control kraken's functional modules.
+class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   // the websocket instance
   KrakenWebSocket _websocket;
   KrakenWebSocket get websocket {
@@ -179,19 +154,6 @@ class KrakenController with TimerMixin, ScheduleFrameMixin {
     }
 
     return _websocket;
-  }
-
-  // reload current kraken view.
-  reload() async {
-    RenderObject root = _view.getRootRenderObject().parent;
-    int existContextId = _view.contextId;
-    _disposeModule();
-    _view.detachView();
-    _view = KrakenViewController(showPerformanceOverlay: _view.showPerformanceOverlay, enableDebug: _view.enableDebug);
-    _view.contextId = existContextId;
-    _view.attachView(root);
-    await reloadJSContext(_view.contextId);
-    await run();
   }
 
   // the MQTT instance
@@ -203,7 +165,7 @@ class KrakenController with TimerMixin, ScheduleFrameMixin {
     return _mqtt;
   }
 
-  void _disposeModule() {
+  void dispose() {
     clearTimer();
     clearAnimationFrame();
 
@@ -215,14 +177,52 @@ class KrakenController with TimerMixin, ScheduleFrameMixin {
       mqtt.dispose();
     }
   }
+}
 
-  void _disposeView() {
-    _view.dispose();
+class KrakenController {
+  static Map<int, KrakenController> _controllerMap = new Map();
+  static KrakenController getControllerOfJSContextId(int contextId) {
+    if (!_controllerMap.containsKey(contextId)) {
+      return null;
+    }
+
+    return _controllerMap[contextId];
+  }
+
+  KrakenController({bool showPerformanceOverlay = false, enableDebug = false}) {
+    _view = KrakenViewController(showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
+    _module = KrakenModuleController();
+    _controllerMap[_view.contextId] = this;
+  }
+
+  KrakenViewController _view;
+  KrakenViewController get view {
+    return _view;
+  }
+
+  KrakenModuleController _module;
+  KrakenModuleController get module {
+    return _module;
+  }
+
+  // the bundle manager which used to download javascript source and run.
+  KrakenBundle _bundle;
+
+  // reload current kraken view.
+  reload() async {
+    RenderObject root = _view.getRootRenderObject().parent;
+    int existContextId = _view.contextId;
+    _module.dispose();
+    _view.detachView();
+    _view = KrakenViewController(showPerformanceOverlay: _view.showPerformanceOverlay, enableDebug: _view.enableDebug, contextId: _view.contextId);
+    _view.attachView(root);
+    await reloadJSContext(_view.contextId);
+    await run();
   }
 
   void dispose() {
-    _disposeModule();
-    _disposeView();
+    _view.dispose();
+    _module.dispose();
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
   }
@@ -243,7 +243,7 @@ class KrakenController with TimerMixin, ScheduleFrameMixin {
     if (_bundle != null) {
       await _bundle.run(_view.contextId);
       // trigger window load event
-      requestAnimationFrame((_) {
+      module.requestAnimationFrame((_) {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
         emitUIEvent(_view.contextId, json);
       });
