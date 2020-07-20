@@ -47,10 +47,6 @@ int32_t allocateNewContext();
 KRAKEN_EXPORT
 int32_t checkContext(int32_t contextId);
 KRAKEN_EXPORT
-void freezeContext(int32_t contextId);
-KRAKEN_EXPORT
-void unfreezeContext(int32_t contextId);
-KRAKEN_EXPORT
 void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT

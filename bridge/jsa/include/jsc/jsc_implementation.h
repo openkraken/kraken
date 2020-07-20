@@ -80,10 +80,6 @@ public:
 
   int32_t getContextId() override;
 
-  bool isFreeze() override;
-  void freeze() override;
-  void unfreeze() override;
-
   void *getOwner() override;
 
   void reportError(jsa::JSError &error) override;
