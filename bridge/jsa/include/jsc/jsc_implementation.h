@@ -264,7 +264,7 @@ private:
 #endif
 }; // JSCContext
 
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextIndex, jsa::JSExceptionHandler handler, void *owner);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
 
 } // namespace jsc
 } // namespace alibaba

@@ -211,7 +211,6 @@ class KrakenController {
   // reload current kraken view.
   reload() async {
     RenderObject root = _view.getRootRenderObject().parent;
-    int existContextId = _view.contextId;
     _module.dispose();
     _view.detachView();
     _view = KrakenViewController(showPerformanceOverlay: _view.showPerformanceOverlay, enableDebug: _view.enableDebug, contextId: _view.contextId);

@@ -70,11 +70,11 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextIndex, char *json) {
+void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, char *json) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextIndex)) {
+  if (!BridgeCallback::checkContext(_context, contextId)) {
     return;
   }
 
@@ -131,8 +131,8 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   const char *result = BridgeCallback::instance()->registerCallback<const char *>(
     std::move(callbackContext),
-    [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextIndex) {
-      return getDartMethod()->invokeModule(bridgeContext, contextIndex, messageStr.c_str(),
+    [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+      return getDartMethod()->invokeModule(bridgeContext, contextId, messageStr.c_str(),
                                            handleInvokeModuleTransientCallback);
     });
 
@@ -197,11 +197,11 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *callbackContext, int32_t contextIndex, const char *errmsg) {
+void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextIndex)) {
+  if (!BridgeCallback::checkContext(_context, contextId)) {
     return;
   }
 
@@ -257,8 +257,8 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextIndex) {
-      getDartMethod()->requestBatchUpdate(callbackContext, contextIndex, handleTransientCallback);
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
     });
 
   return Value::undefined();
@@ -269,7 +269,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
 /**
  * JSRuntime
  */
-JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler &handler) : contextIndex(contextIndex) {
+JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &handler) : contextId(contextId) {
   auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
     handler(context, error);
     // trigger window.onerror handler.
@@ -280,7 +280,7 @@ JSBridge::JSBridge(int32_t contextIndex, const alibaba::jsa::JSExceptionHandler 
       .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
-  context = alibaba::jsc::createJSContext(contextIndex, errorHandler, this);
+  context = alibaba::jsc::createJSContext(contextId, errorHandler, this);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
   context = alibaba::jsa_v8::createJSContext(errorHandler);
