@@ -43,11 +43,6 @@ class CSSLength implements CSSValue<double> {
     }
   }
 
-
-  //todo maybe relate to ElementManger Index
-  static double displayWidth = window.physicalSize.width;
-  static double displayHeight = 1850;
-
   static double toDisplayPortValue(String unitedValue) {
     double displayPortValue = 0.0;
 
@@ -60,16 +55,16 @@ class CSSLength implements CSSValue<double> {
       return 0;
     } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
-      displayPortValue = currentValue / 750.0 * displayWidth / window.devicePixelRatio;
+      displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(PX)) {
       double currentValue = double.parse(unitedValue.split(PX)[0]);
       displayPortValue = currentValue;
     } else if (unitedValue.endsWith(VW)) {
       double currentValue = double.parse(unitedValue.split(VW)[0]);
-      displayPortValue = currentValue / 100.0 * displayWidth / window.devicePixelRatio;
+      displayPortValue = currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(VH)) {
       double currentValue = double.parse(unitedValue.split(VH)[0]);
-      displayPortValue = currentValue / 100.0 * displayHeight / window.devicePixelRatio;
+      displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
     } else {
       // Failed silently.
       return null;
