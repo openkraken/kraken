@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let flexItem1;
     let flexbox;
@@ -55,7 +55,7 @@ describe('flex', () => {
 
     await matchScreenshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let p;
     let flexItem1;
     let flexItem2;
@@ -136,7 +136,7 @@ describe('flex', () => {
 
     await matchScreenshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let flexItem1;
     let flexItem2;
@@ -218,7 +218,7 @@ describe('flex', () => {
 
     await matchScreenshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let flexItem1;
     let flexItem2;
@@ -300,7 +300,7 @@ describe('flex', () => {
 
     await matchScreenshot();
   });
-  xit('direction', async () => {
+  it('direction', async () => {
     let flexItem;
     let flexItem_1;
     let flexItem_2;
@@ -714,6 +714,141 @@ describe('flex', () => {
     );
     BODY.appendChild(test);
 
+    await matchScreenshot();
+  });
+
+  it('should work with initial', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '50px',
+            height: '100px',
+            flex: 'initial',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '80px',
+            height: '100px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
+    await matchScreenshot();
+  });
+
+  it('should work with auto', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '50px',
+            height: '100px',
+            flex: 'auto',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '80px',
+            height: '100px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
+    await matchScreenshot();
+  });
+
+  it('should work with none', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '150px',
+            height: '100px',
+            flex: 'none',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '80px',
+            height: '100px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
     await matchScreenshot();
   });
 });
