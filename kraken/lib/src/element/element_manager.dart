@@ -81,8 +81,8 @@ class ElementManager {
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
   KrakenViewController controller;
-  ElementManager({KrakenViewController this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(targetId: BODY_ID, elementManager: this);
+  ElementManager(double viewportWidth, double viewportHeight, {KrakenViewController this.controller, this.showPerformanceOverlayOverride}) {
+    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
     _root = _rootElement.renderObject;
     setEventTarget(_rootElement);
     setEventTarget(Window(this));

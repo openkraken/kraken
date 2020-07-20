@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -22,7 +23,9 @@ void launch({
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
   KrakenController controller =
-      KrakenController(showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
+      KrakenController(
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+          showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
 
   controller.view.attachView(RendererBinding.instance.renderView);
 

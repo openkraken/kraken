@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/widget.dart';
 
 ///
 ///@author tylorvan.fzm
@@ -42,9 +41,7 @@ class TitleBar extends StatelessWidget {
                             TitleBar("跳转后的页面"),
                             LayoutBuilder(
                                 builder: (BuildContext context, BoxConstraints constraints) {
-                                  print(constraints);
-                                  return KrakenWidget(
-                                      "https://dev.g.alicdn.com/kraken/kraken-demos/dragable-list/build/kraken/index.js");
+                                  return KrakenWidget(500, 500, bundleURL: 'https://dev.g.alicdn.com/kraken/kraken-demos/dragable-list/build/kraken/index.js',);
                                 })
                           ],
                         ),
@@ -72,20 +69,4 @@ class TitleBar extends StatelessWidget {
       ),
     );
   }
-
-  void _back(BuildContext context) {
-    var result = Navigator.canPop(context);
-    if (result == true) {
-      Navigator.pop(context, true);
-    } else {
-      SystemNavigator.pop();
-    }
-  }
-}
-
-void main() {
-  runApp(MaterialApp(
-    title: '测试',
-    home: SafeArea(child: Center(child: Material(child: TitleBar("优酷")))),
-  ));
 }

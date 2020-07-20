@@ -31,7 +31,8 @@ void setTargetPlatformForDesktop() {
 
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController {
-  KrakenViewController({this.showPerformanceOverlay, this.enableDebug = false, int contextId}): _contextId = contextId {
+  KrakenViewController(double viewportWidth, double viewportHeight, {this.showPerformanceOverlay, this.enableDebug = false, int contextId}):
+        _contextId = contextId, viewportWidth = viewportWidth, viewportHeight = viewportHeight {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
@@ -40,8 +41,11 @@ class KrakenViewController {
     if (_contextId == null) {
       _contextId = initBridge();
     }
-    _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
+    _elementManager = ElementManager(viewportWidth, viewportHeight, showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
   }
+
+  final double viewportWidth;
+  final double viewportHeight;
 
   // the manager which controller all renderObjects of Kraken
   ElementManager _elementManager;
@@ -63,7 +67,7 @@ class KrakenViewController {
   testRefreshPaint() {
     RenderObject root = _elementManager.getRootRenderObject().parent;
     detachView();
-    _elementManager = ElementManager(showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
+    _elementManager = ElementManager(viewportWidth, viewportHeight, showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
     attachView(root);
   }
 
@@ -189,8 +193,8 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
-  KrakenController({bool showPerformanceOverlay = false, enableDebug = false}) {
-    _view = KrakenViewController(showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
+  KrakenController(double viewportWidth, double viewportHeight, {bool showPerformanceOverlay = false, enableDebug = false}) {
+    _view = KrakenViewController(viewportWidth, viewportHeight, showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
     _module = KrakenModuleController();
     _controllerMap[_view.contextId] = this;
   }
@@ -213,7 +217,7 @@ class KrakenController {
     RenderObject root = _view.getRootRenderObject().parent;
     _module.dispose();
     _view.detachView();
-    _view = KrakenViewController(showPerformanceOverlay: _view.showPerformanceOverlay, enableDebug: _view.enableDebug, contextId: _view.contextId);
+    _view = KrakenViewController(view.viewportWidth, view.viewportHeight, showPerformanceOverlay: _view.showPerformanceOverlay, enableDebug: _view.enableDebug, contextId: _view.contextId);
     _view.attachView(root);
     await reloadJSContext(_view.contextId);
     await run();
