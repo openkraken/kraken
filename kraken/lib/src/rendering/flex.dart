@@ -1322,8 +1322,10 @@ class RenderFlexItem extends RenderBox
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    hitTestChildren(result, position: position);
-    result.add(BoxHitTestEntry(this, position));
-    return true;
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
   }
 }
