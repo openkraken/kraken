@@ -540,10 +540,8 @@ class Element extends Node
 
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    String flexWrap = style['flexWrap'];
-    bool isFlexWrap = display.endsWith('flex') && flexWrap == 'wrap';
-    if (display.endsWith('flex') && flexWrap != 'wrap') {
-      RenderBoxModel flexLayout = RenderFlexLayout(
+    if (display.endsWith('flex')) {
+      RenderFlexLayout flexLayout = RenderFlexLayout(
         children: children,
         style: style,
         targetId: targetId,
@@ -553,14 +551,13 @@ class Element extends Node
     } else if (display == 'none' ||
         display == 'inline' ||
         display == 'inline-block' ||
-        display == 'block' ||
-        isFlexWrap) {
+        display == 'block') {
       RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
         children: children,
         style: style,
         targetId: targetId,
       );
-      decorateAlignment(flowLayout, style);
+      decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
       throw FlutterError('Not supported display type $display: $this');
@@ -788,6 +785,7 @@ class Element extends Node
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
+      parentData.alignSelf = flexParentData.alignSelf;
 
       // Update margin for flex child.
       element.updateRenderMargin(element.style);
@@ -817,6 +815,7 @@ class Element extends Node
       case 'flexWrap':
       case 'justifyContent':
       case 'alignItems':
+      case 'alignSelf':
       case 'alignContent':
       case 'textAlign':
         _styleFlexChangedListener(property, original, present);

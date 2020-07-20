@@ -42,6 +42,7 @@ const String FLEX_FLOW = 'flexFlow';
 const String JUSTIFY_CONTENT = 'justifyContent';
 const String TEXT_ALIGN = 'textAlign';
 const String ALIGN_ITEMS = 'alignItems';
+const String ALIGN_SELF = 'alignSelf';
 const String ALIGN_CONTENT = 'alignContent';
 
 const String ANIMATION = 'animation';
