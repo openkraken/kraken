@@ -126,14 +126,4 @@ TEST(multiple_context, globalContext) {
   EXPECT_EQ(strB.asObject(*contextB).getProperty(*contextB, "helloworld").isNumber(), false);
 }
 
-TEST(multiple_context, freeze) {
-  auto context = std::make_unique<JSCContext>(0, normalPrint, nullptr);
-  EXPECT_EQ(context->isFreeze(), false);
-  context->freeze();
-  EXPECT_EQ(context->isFreeze(), true);
-  context->unfreeze();
-  EXPECT_EQ(context->isFreeze(), false);
-}
-
-
 #endif
