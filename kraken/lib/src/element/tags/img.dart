@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/config/image_provider_adapter.dart';
+import 'package:kraken/src/config/image_provider_factory.dart';
 
 const String IMAGE = 'IMG';
 
@@ -19,7 +19,14 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
-  static ImageProviderAdapter _imageProviderAdapter;
+  static Map<ImageType, ImageProviderFactory> _imageProviderFactoryMap = {
+    ImageType.cacheNetImage: defaultCachedNetImageProviderFactory,
+    ImageType.noCacheNetImage: defaultNoCachedNetworkImageProviderFactory,
+    ImageType.fileImage: defaultFileImageProviderFactory,
+    ImageType.dataImage: defaultDataImageProviderFactory,
+    ImageType.blobImage: defaultBlobImageProvider,
+    ImageType.fallbackImage: defaultFallbackImageProvider
+  };
 
   ImageProvider image;
   RenderImage imageBox;
@@ -30,11 +37,11 @@ class ImageElement extends Element {
   double _propertyWidth;
   double _propertyHeight;
 
-  static ImageProviderAdapter getImageProviderAdapter() => _imageProviderAdapter ?? DefaultImageProviderAdapter();
+  static ImageProviderFactory getImageProviderFactory(ImageType imageType) => _imageProviderFactoryMap[imageType];
 
-  static setCustomImageProviderAdapter(ImageProviderAdapter imageProviderAdapter){
-    if(imageProviderAdapter != null){
-      _imageProviderAdapter = imageProviderAdapter;
+  static setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
+    if (customImageProviderFactory != null) {
+      _imageProviderFactoryMap[imageType] = customImageProviderFactory;
     }
   }
 

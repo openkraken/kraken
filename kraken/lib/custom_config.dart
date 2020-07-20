@@ -3,4 +3,4 @@
  * Author: Kraken Team.
  */
 
-export 'src/config/image_provider_adapter.dart';
+export 'src/config/image_provider_factory.dart';
