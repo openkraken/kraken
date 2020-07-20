@@ -142,7 +142,7 @@ mixin CSSComputedMixin on RenderBox {
     }
   }
 
-  // Get element width according to element tree
+  // Get element height according to element tree
   double getElementComputedHeight(int targetId, ElementManager elementManager) {
     Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
@@ -177,16 +177,18 @@ mixin CSSComputedMixin on RenderBox {
       }
     } else {
       while (true) {
+        Element current;
         if (child.parentNode != null) {
           cropMargin(child);
           cropPaddingBorder(child);
+          current = child;
           child = child.parentNode;
         } else {
           break;
         }
         if (child is Element) {
           CSSStyleDeclaration style = child.style;
-          if (_isStretchChildrenHeight(child)) {
+          if (_isStretchChildHeight(child, current)) {
             if (style.contains('height')) {
               height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
               cropPaddingBorder(child);
@@ -198,7 +200,6 @@ mixin CSSComputedMixin on RenderBox {
         }
       }
     }
-
     if (height != null) {
       return math.max(0, height - cropHeight);
     } else {
@@ -207,14 +208,22 @@ mixin CSSComputedMixin on RenderBox {
   }
 
   // Whether current node should stretch children's height
-  static bool _isStretchChildrenHeight(Element element) {
+  static bool _isStretchChildHeight(Element current, Element child) {
     bool isStretch = false;
-    CSSStyleDeclaration style = element.style;
-    String display = style['display'];
-    bool isFlex = display == 'flex' || display == 'inline-flex';
-    if (isFlex &&
-        style['flexDirection'] == 'row' &&
-        (!style.contains('alignItems') || (style.contains('alignItems') && style['alignItems'] == 'stretch'))) {
+    CSSStyleDeclaration style = current.style;
+    CSSStyleDeclaration childStyle = child.style;
+    bool isFlex = style['display'].endsWith('flex');
+    bool isHoriontalDirection = !style.contains('flexDirection') ||
+      style['flexDirection'] == 'row';
+    bool isAlignItemsStretch = !style.contains('alignItems') ||
+      style['alignItems'] == 'stretch';
+    bool isFlexNoWrap = style['flexWrap'] != 'wrap' &&
+        style['flexWrap'] != 'wrap-reverse';
+    bool isChildAlignSelfStretch = childStyle['alignSelf'] == 'stretch';
+
+    if (isFlex && isHoriontalDirection && isFlexNoWrap &&
+        (isAlignItemsStretch || isChildAlignSelfStretch)
+    ) {
       isStretch = true;
     }
 
