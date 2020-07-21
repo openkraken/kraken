@@ -20,16 +20,15 @@ import 'package:meta/meta.dart';
 class KrakenRenderPointerListener extends RenderPointerListener {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
-  /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
+  /// The [behavior] must be [HitTestBehavior.deferToChild].
   KrakenRenderPointerListener({
     onPointerDown,
     onPointerMove,
     onPointerUp,
     onPointerCancel,
     onPointerSignal,
-    HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  }) : super(onPointerDown: onPointerDown, onPointerMove: onPointerMove,onPointerUp: onPointerUp,onPointerCancel: onPointerCancel,onPointerSignal: onPointerSignal, behavior: behavior, child: child);
+  }) : super(onPointerDown: onPointerDown, onPointerMove: onPointerMove, onPointerUp: onPointerUp, onPointerCancel: onPointerCancel, onPointerSignal: onPointerSignal, child: child);
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
@@ -42,7 +41,7 @@ class KrakenRenderPointerListener extends RenderPointerListener {
 
   @override
   bool hitTestSelf(Offset position) {
-    return this.size.contains(position);
+    return size.contains(position);
   }
 }
 

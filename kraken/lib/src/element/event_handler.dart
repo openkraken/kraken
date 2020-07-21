@@ -22,7 +22,6 @@ mixin EventHandlerMixin on Node {
         onPointerMove: handlePointMove,
         onPointerUp: handlePointUp,
         onPointerCancel: handlePointCancel,
-        behavior: HitTestBehavior.translucent,
       );
       parentRenderObject.child = renderPointerListener;
     }
