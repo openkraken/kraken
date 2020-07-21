@@ -64,16 +64,16 @@ class KrakenViewController {
   // regenerate generate renderObject created by kraken but not affect jsBridge context.
   // test used only.
   testRefreshPaint() {
-    RenderObject parent = _elementManager.getRootRenderObject().parent;
     RenderObject root = _elementManager.getRootRenderObject();
-    RenderObject previewSibling = null;
+    RenderObject parent = root.parent;
+    RenderObject previousSibling;
     if (parent is ContainerRenderObjectMixin) {
-      previewSibling = parent.childBefore(root);
+      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
     }
     detachView();
     _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
-    attachView(root, previewSibling);
+    attachView(parent, previousSibling);
   }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
@@ -81,8 +81,8 @@ class KrakenViewController {
   }
 
   // attach kraken's renderObject to an renderObject.
-  void attachView(RenderObject parent, [RenderObject rootBefore]) {
-    _elementManager.attach(parent, rootBefore, showPerformanceOverlay: showPerformanceOverlay ?? false);
+  void attachView(RenderObject parent, [RenderObject previousSibling]) {
+    _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
   // dispose controller and recycle all resources.
@@ -221,11 +221,11 @@ class KrakenController {
 
   // reload current kraken view.
   reload() async {
-    RenderObject parent = _view.getRootRenderObject().parent;
     RenderObject root = _view.getRootRenderObject();
-    RenderObject previewSibling = null;
+    RenderObject parent = root.parent;
+    RenderObject previousSibling;
     if (parent is ContainerRenderObjectMixin) {
-      previewSibling = parent.childBefore(root);
+      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
     }
     _module.dispose();
     _view.detachView();
@@ -233,7 +233,7 @@ class KrakenController {
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId);
-    _view.attachView(parent, previewSibling);
+    _view.attachView(parent, previousSibling);
     await reloadJSContext(_view.contextId);
     await run();
   }
