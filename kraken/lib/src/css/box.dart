@@ -244,7 +244,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   // border default width 3.0
-  static double defaultBorderLineWidth = 3.0;
+  static double defaultBorderWidth = 3.0;
   static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = CSSColor.initial;
 
@@ -254,7 +254,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       case SOLID:
         borderStyle = BorderStyle.solid;
         break;
-      default:
+      case NONE:
         borderStyle = BorderStyle.none;
         break;
     }
@@ -263,17 +263,29 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
   static Map _getShorthandInfo(String input) {
     List<String> properties = CSSStyleProperty.getBorderValues(input);
+    if (properties == null) return null;
 
-    double width = CSSLength.toDisplayPortValue(properties[0]) ?? defaultBorderLineWidth;
-    BorderStyle style = getBorderStyle(properties[1]);
-    Color color = CSSColor.parseColor(properties[2]) ?? defaultBorderColor;
+    double width;
+    if (properties[0] != null) {
+      width = CSSLength.toDisplayPortValue(properties[0]);
+    }
 
-    return {'Color': color, 'Style': style, 'Width': width};
+    BorderStyle style;
+    if (properties[1] != null) {
+      style = getBorderStyle(properties[1]);
+    }
+
+    Color color;
+    if (properties[2] != null) {
+      color = CSSColor.parseColor(properties[2]);
+    }
+
+    return {'Color': color ?? defaultBorderWidth, 'Style': style ?? defaultBorderStyle, 'Width': width ?? defaultBorderWidth};
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
   static TransitionBorderSide getBorderSideByStyle(CSSStyleDeclaration style, String side) {
-    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);
+    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderWidth, defaultBorderStyle);
     final String borderName = 'border';
     final String borderSideName = borderName + side; // eg. borderLeft/borderRight
     // Same with the key in shortted info map
@@ -291,44 +303,50 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     }
 
     // Set border style
+    BorderStyle borderStyle;
     final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
     final String borderStyleName = borderName + styleName; // borderStyle
     if (style.contains(borderSideStyleName)) {
-      borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
+      borderStyle = getBorderStyle(style[borderSideStyleName]);
     } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[styleName] != null) {
-      borderSide.borderStyle = borderSideShorthandInfo[styleName];
+      borderStyle = borderSideShorthandInfo[styleName];
     } else if (style.contains(borderStyleName)) {
-      borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
+      borderStyle = getBorderStyle(style[borderStyleName]);
     } else if (borderShorthandInfo != null && borderShorthandInfo[styleName] != null) {
-      borderSide.borderStyle = borderShorthandInfo[styleName];
+      borderStyle = borderShorthandInfo[styleName];
     }
 
+    borderSide.borderStyle = borderStyle ?? defaultBorderStyle;
+
+    // Set border width
+    double borderWidth;
     // border width should be zero when style is none
     if (borderSide.borderStyle == BorderStyle.none) {
-      borderSide.borderWidth = 0.0;
+      borderWidth = 0.0;
     } else {
-      // Set border width
       final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
       final String borderWidthName = borderName + widthName; // borderWidth
       if (style.contains(borderSideWidthName) && (style[borderSideWidthName] as String).isNotEmpty) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]) ?? 0;
+        borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]);
       } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[widthName] != null) {
         // eg. borderLeft: 'solid 1px black'
-        borderSide.borderWidth = borderSideShorthandInfo[widthName];
+        borderWidth = borderSideShorthandInfo[widthName];
       } else if (style.contains(borderWidthName)) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]) ?? 0;
+        borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]);
       } else if (borderShorthandInfo != null && borderShorthandInfo[widthName] != null) {
         // eg. border: 'solid 2px red'
-        borderSide.borderWidth = borderShorthandInfo[widthName];
+        borderWidth = borderShorthandInfo[widthName];
       }
     }
+
+    borderSide.borderWidth = borderWidth ?? defaultBorderWidth;
 
     // Set border color
     Color borderColor;
     final String borderSideColorName = borderSideName + colorName; // eg. borderLeftColor/borderRightColor
     final String borderColorName = borderName + colorName; // borderColor
     if (style.contains(borderSideColorName)) {
-      borderColor = CSSColor.parseColor(style[borderSideColorName]);
+      borderColor = CSSColor.parseColor(style[borderSideColorName]) ;
     } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[colorName] != null) {
       borderColor = borderSideShorthandInfo[colorName];
     } else if (style.contains(borderColorName)) {
@@ -337,9 +355,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       borderColor = borderShorthandInfo[colorName];
     }
 
-    if (borderColor != null) {
-      borderSide.color = borderColor;
-    }
+    borderSide.color = borderColor ?? defaultBorderColor;
 
     return borderSide;
   }

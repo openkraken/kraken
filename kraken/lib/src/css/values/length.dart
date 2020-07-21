@@ -6,6 +6,8 @@
 import 'dart:ui';
 import 'value.dart';
 
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh$', caseSensitive: false);
+
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength implements CSSValue<double> {
   static const String RPX = 'rpx';
@@ -16,8 +18,6 @@ class CSSLength implements CSSValue<double> {
   static bool isValidateLength(String value) {
     return value != null && value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VW) || value.endsWith(VH);
   }
-
-  static RegExp NUMBERIC_REGEXP = RegExp(r"^[+-]?(\d+)?(\.\d+)?$");
 
   static double toDouble(value) {
     if (value is double) {
@@ -57,7 +57,7 @@ class CSSLength implements CSSValue<double> {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
       displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
     } else if (unitedValue.endsWith(PX)) {
-      double currentValue = double.parse(unitedValue.split(PX)[0]);
+      double currentValue = double.tryParse(unitedValue.split(PX)[0]);
       displayPortValue = currentValue;
     } else if (unitedValue.endsWith(VW)) {
       double currentValue = double.parse(unitedValue.split(VW)[0]);
@@ -75,7 +75,7 @@ class CSSLength implements CSSValue<double> {
 
   static bool isLength(String value) {
     return value != null &&
-        (value == '0' || value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) || value.endsWith(VW));
+        (value == '0' || _lengthRegExp.firstMatch(value) != null);
   }
 
   final String _rawInput;

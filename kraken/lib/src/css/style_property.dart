@@ -54,34 +54,38 @@ class CSSStyleProperty {
 
   static List<List<String>> getShadowValues(String property) {
     assert(property != null);
-    return property.split(_commaRegExp).map((String shadow) {
+    
+    List shadows = property.split(_commaRegExp);
+    List<List<String>> values = List();
+    for (String shadow in shadows) {
       List<String> parts = shadow.trim().split(_spaceRegExp);
 
       String inset;
       String color;
 
-      List<String> lengthValues = [];
-
+      List<String> lengthValues = List(4);
+      int i = 0;
       for (String part in parts) {
-
         if (part == 'inset') {
           inset = part;
         } else if (CSSLength.isLength(part)) {
-          lengthValues.add(part);
+          lengthValues[i++] = part;
         } else {
           color = part;
         }
       }
 
-      return [
+      values.add([
         color,
         lengthValues[0], // offsetX
         lengthValues[1], // offsetY
         lengthValues[2], // blurRadius
         lengthValues[3], // spreadRadius
         inset
-      ];
-    });
+      ]);
+    }
+
+    return values;
   }
 
   static List<String> getBorderValues(String shorthandProperty) {
@@ -92,15 +96,18 @@ class CSSStyleProperty {
     String style;
     String color;
 
-    properties.forEach((String property) {
+    // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work 
+    for (String property in properties) {
       if (width == null && CSSLength.isLength(property)) {
         width = property;
       } else if (style == null && (property == SOLID || property == NONE)) {
         style = property;
-      } else {
+      } else if (color == null && CSSColor.isColor(property)) {
         color = property;
+      } else {
+        return null;
       }
-    });
+    }
 
     return [width, style, color];
   }

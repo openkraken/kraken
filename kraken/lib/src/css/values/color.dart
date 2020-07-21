@@ -166,12 +166,6 @@ const Map<String, int> _namedColors = {
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
 // CSS Color: https://drafts.csswg.org/css-color-4/
 // ignore: public_member_api_docs
-final RegExp rgbaRexExp = RegExp(
-  r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
-  caseSensitive: false,
-  multiLine: false,
-);
-
 final _colorHexRegExp = RegExp(r'^#([a-f0-9]{3,8})$', caseSensitive: false);
 final _colorHslRegExp = RegExp(
     r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\)$');
@@ -222,6 +216,10 @@ class CSSColor implements CSSValue<Color> {
     }
   }
 
+  static bool isColor(String color) {
+    return parseColor(color) != null;
+  }
+
   static Color parseColor(String color) {
     if (color == null) return null;
     
@@ -264,13 +262,13 @@ class CSSColor implements CSSValue<Color> {
         final rgbR = _parseColorPart(rgbMatch[2], 0, 255);
         final rgbG = _parseColorPart(rgbMatch[3], 0, 255);
         final rgbB = _parseColorPart(rgbMatch[4], 0, 255);
-        final rgbA = _parseColorPart(rgbMatch[6] ?? '1', 0, 1);
+        final rgbA = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
         if (rgbR != null && rgbG != null && rgbB != null && rgbA != null) {
           parsed = Color.fromARGB(
-            (255 * rgbA).ceil(),
-            rgbR.toInt(),
-            rgbG.toInt(),
-            rgbB.toInt(),
+            (255 * rgbA).round(),
+            rgbR.round(),
+            rgbG.round(),
+            rgbB.round(),
           );
         }
       }
