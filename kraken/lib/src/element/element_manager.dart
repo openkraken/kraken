@@ -279,15 +279,15 @@ class ElementManager {
     return target.method(method, _args);
   }
 
-  RenderBox _root;
-  RenderBox get root => _root;
+  RenderObject _root;
+  RenderObject get root => _root;
   set root(RenderObject root) {
     assert(() {
       throw FlutterError('Can not set root to ElementManagerActionDelegate.');
     }());
   }
 
-  RenderBox getRootRenderObject() {
+  RenderObject getRootRenderObject() {
     return root;
   }
 
