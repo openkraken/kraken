@@ -13,7 +13,7 @@ Map<String, dynamic> createBodyStyle(double viewportWidth, double viewportHeight
     'width': '${viewportWidth}px',
     'height': '${viewportHeight}px',
     'overflow': 'auto',
-    'backgroundColor': 'black'
+    'backgroundColor': 'white'
   };
 }
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/widgets.dart' show WidgetsBinding;
 import 'package:kraken/kraken.dart';
@@ -14,7 +15,7 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
-  KrakenController controller = KrakenController();
+  KrakenController controller = KrakenController(window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio);
   registerDartTestMethodsToCpp();
   initTestFramework();
   addJSErrorListener((String err) {
