@@ -126,16 +126,11 @@ class RenderMargin extends RenderShiftedBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    Offset childPositon = Offset(position.dx - _resolvedMargin.left, position.dy - _resolvedMargin.top);
-    if (hitTestChildren(result, position: childPositon) || hitTestSelf(childPositon)) {
-      result.add(BoxHitTestEntry(this, childPositon));
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
       return true;
     }
     return false;
   }
 
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return child?.hitTest(result, position: position);
-  }
 }

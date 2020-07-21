@@ -164,9 +164,4 @@ class RenderPosition extends RenderStack {
     }
     return false;
   }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return defaultHitTestChildren(result, position: position);
-  }
 }

@@ -163,16 +163,7 @@ class RenderElementBoundary extends RenderTransform
     transform.multiply(getEffectiveTransform());
   }
 
-  @override
-  bool hitTest(BoxHitTestResult result, {Offset position }) {
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
-  }
-
-    // FIXME when super class RenderTransform hitTestChildren change
+  // FIXME when super class RenderTransform hitTestChildren change
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     assert(!transformHitTests || getEffectiveTransform() != null);

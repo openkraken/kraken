@@ -12,9 +12,4 @@ class KrakenRenderPadding extends RenderPadding {
     }
     return false;
   }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return child?.hitTest(result, position: position);
-  }
 }

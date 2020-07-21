@@ -23,12 +23,7 @@ class KrakenRenderPointerListener extends RenderPointerListener {
 
   @override
   bool hitTestSelf(Offset position) {
-    return (this.localToGlobal(Offset(0,0)) & this.size).contains(this.localToGlobal(position));
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return child?.hitTest(result, position: position);
+    return (this.localToGlobal(Offset(0, 0)) & this.size).contains(this.localToGlobal(position));
   }
 }
 
