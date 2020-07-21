@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 
 const String INPUT = 'INPUT';
 
@@ -109,7 +110,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId: targetId, tagName: INPUT, defaultStyle: _defaultStyle, allowChildren: false) {
+  }) : super(targetId: targetId, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,
@@ -140,10 +141,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     double maxHeight = oldConstraints.maxHeight;
 
     if (containWidth) {
-      minWidth = maxWidth = CSSSizingMixin.getDisplayPortedLength(style['width']);
+      minWidth = maxWidth = CSSStyleProperty.getDisplayPortValue(style['width']);
     }
     if (containHeight) {
-      minHeight = maxHeight = CSSSizingMixin.getDisplayPortedLength(style['height']);
+      minHeight = maxHeight = CSSStyleProperty.getDisplayPortValue(style['height']);
     }
     renderConstrainedBox.additionalConstraints = BoxConstraints(
       minWidth: minWidth,

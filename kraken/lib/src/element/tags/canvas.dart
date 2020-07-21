@@ -21,7 +21,7 @@ class CanvasElement extends Element {
       : super(
           targetId: targetId,
           defaultStyle: _defaultStyle,
-          allowChildren: false,
+          isIntrinsicBox: true,
           tagName: CANVAS,
         ) {
     painter = CanvasPainter();

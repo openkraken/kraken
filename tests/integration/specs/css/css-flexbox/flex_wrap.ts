@@ -1,48 +1,151 @@
 describe('flexbox flex-wrap', () => {
   it('should work with wrap', async () => {
-    const container1 = document.createElement('div');
-    setElementStyle(container1, {
-      display: 'flex',
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      width: '300rpx',
-      height: '1000rpx',
-      marginBottom: '10rpx',
-      backgroundColor: '#ddd',
-    });
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+      ]
+    );
 
-    document.body.appendChild(container1);
+    document.body.appendChild(container);
+    await matchScreenshot();
+  });
 
-    const child1 = document.createElement('div');
-    setElementStyle(child1, {
-      display: 'inline-block',
-      backgroundColor: '#f40',
-      width: '100rpx',
-      height: '100rpx',
-      margin: '10rpx',
-    });
-    container1.appendChild(child1);
+  it('should work with nowrap', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'nowrap',
+          justifyContent: 'center',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+      ]
+    );
 
-    const child2 = document.createElement('div');
-    setElementStyle(child2, {
-      display: 'inline-block',
-      backgroundColor: '#f40',
-      width: '100rpx',
-      height: '100rpx',
-      margin: '10rpx',
-    });
-    container1.appendChild(child2);
+    document.body.appendChild(container);
+    await matchScreenshot();
+  });
 
-    const child3 = document.createElement('div');
-    setElementStyle(child3, {
-      display: 'inline-block',
-      backgroundColor: '#f40',
-      width: '100rpx',
-      height: '100rpx',
-      margin: '10rpx',
-    });
-    container1.appendChild(child3);
+  it('should work with wrap-reverse', async () => {
+    const container = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap-reverse',
+          justifyContent: 'center',
+          width: '300px',
+          height: '400px',
+          marginBottom: '10px',
+          backgroundColor: '#ddd',
+        },
+      },
+      [
+        (createElement('div', {
+          id: 'child_1',
+          style: {
+            backgroundColor: 'red',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'blue',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+        (createElement('div', {
+          id: 'child_2',
+          style: {
+            backgroundColor: 'green',
+            width: '100px',
+            height: '100px',
+            margin: '10px',
+          },
+        })),
+      ]
+    );
+
+    document.body.appendChild(container);
     await matchScreenshot();
   });
 });

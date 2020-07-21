@@ -6,68 +6,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
-final RegExp _splitRegExp = RegExp(r'\s+');
-
-double _getDisplayPortedLength(input) {
-  if (CSSStyleDeclaration.isNullOrEmptyValue(input)) {
-    // Null is not equal with 0.0
-    return null;
-  }
-  if (input is! String) {
-    input = input.toString();
-  }
-  return CSSLength.toDisplayPortValue(input as String);
-}
-
-CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
-  double left = 0.0;
-  double top = 0.0;
-  double right = 0.0;
-  double bottom = 0.0;
-
-  if (style != null) {
-    String padding = style['padding'];
-    double paddingLeft;
-    double paddingTop;
-    double paddingRight;
-    double paddingBottom;
-    if (padding != null) {
-      List<String> splitPadding = CSSSizingMixin.getShortedProperties(padding);
-      if (splitPadding.length == 1) {
-        paddingLeft = paddingRight = paddingTop = paddingBottom = _getDisplayPortedLength(splitPadding[0]);
-      } else if (splitPadding.length == 2) {
-        paddingTop = paddingBottom = _getDisplayPortedLength(splitPadding[0]);
-        paddingLeft = paddingRight = _getDisplayPortedLength(splitPadding[1]);
-      } else if (splitPadding.length == 3) {
-        paddingTop = _getDisplayPortedLength(splitPadding[0]);
-        paddingRight = paddingLeft = _getDisplayPortedLength(splitPadding[1]);
-        paddingBottom = _getDisplayPortedLength(splitPadding[2]);
-      } else if (splitPadding.length == 4) {
-        paddingTop = _getDisplayPortedLength(splitPadding[0]);
-        paddingRight = _getDisplayPortedLength(splitPadding[1]);
-        paddingBottom = _getDisplayPortedLength(splitPadding[2]);
-        paddingLeft = _getDisplayPortedLength(splitPadding[3]);
-      }
-    }
-
-    if (style.contains('paddingLeft')) paddingLeft = _getDisplayPortedLength(style['paddingLeft']);
-
-    if (style.contains('paddingTop')) paddingTop = _getDisplayPortedLength(style['paddingTop']);
-
-    if (style.contains('paddingRight')) paddingRight = _getDisplayPortedLength(style['paddingRight']);
-
-    if (style.contains('paddingBottom')) paddingBottom = _getDisplayPortedLength(style['paddingBottom']);
-
-    left = paddingLeft ?? left;
-    top = paddingTop ?? top;
-    right = paddingRight ?? right;
-    bottom = paddingBottom ?? bottom;
-  }
-
-  return CSSPadding(left, top, right, bottom);
-}
 
 /// - width
 /// - height
@@ -76,21 +17,13 @@ CSSPadding _getPaddingFromStyle(CSSStyleDeclaration style) {
 /// - min-width
 /// - min-height
 mixin CSSSizingMixin {
-  static List<String> getShortedProperties(String input) {
-    assert(input != null);
-    return input.trim().split(_splitRegExp);
-  }
 
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   KrakenRenderPadding renderPadding;
-  CSSPadding oldPadding;
-  CSSPadding oldMargin;
+  CSSInset oldPadding;
+  CSSInset oldMargin;
   CSSSizedConstraints oldConstraints;
-
-  static double getDisplayPortedLength(input) {
-    return _getDisplayPortedLength(input);
-  }
 
   static EdgeInsets _getBorderEdgeFromStyle(CSSStyleDeclaration style) {
     TransitionBorderSide leftSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Left');
@@ -210,14 +143,14 @@ mixin CSSSizingMixin {
   }
 
   static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
-    double width = getDisplayPortedLength(style['width']);
-    double height = getDisplayPortedLength(style['height']);
-    double minHeight = getDisplayPortedLength(style['minHeight']);
-    double maxWidth = getDisplayPortedLength(style['maxWidth']);
-    double maxHeight = getDisplayPortedLength(style['maxHeight']);
-    double minWidth = getDisplayPortedLength(style['minWidth']);
+    double width = CSSStyleProperty.getDisplayPortValue(style['width']);
+    double height = CSSStyleProperty.getDisplayPortValue(style['height']);
+    double minHeight = CSSStyleProperty.getDisplayPortValue(style['minHeight']);
+    double maxWidth = CSSStyleProperty.getDisplayPortValue(style['maxWidth']);
+    double maxHeight = CSSStyleProperty.getDisplayPortValue(style['maxHeight']);
+    double minWidth = CSSStyleProperty.getDisplayPortValue(style['minWidth']);
 
-    CSSPadding padding = _getPaddingFromStyle(style);
+    CSSInset padding = _getPaddingFromStyle(style);
     EdgeInsets border = _getBorderEdgeFromStyle(style);
 
     if (width != null) {
@@ -265,59 +198,23 @@ mixin CSSSizingMixin {
     );
   }
 
-  CSSPadding getMarginFromStyle(CSSStyleDeclaration style) {
-    double left = 0.0;
-    double top = 0.0;
-    double right = 0.0;
-    double bottom = 0.0;
+  static CSSInset _getMarginFromStyle(CSSStyleDeclaration style) {
 
-    if (style != null) {
-      var margin = style['margin'];
-      if (margin is! String) {
-        margin = margin.toString();
-      }
+    double marginLeft;
+    double marginTop;
+    double marginRight;
+    double marginBottom;
 
-      double marginLeft;
-      double marginTop;
-      double marginRight;
-      double marginBottom;
-      if (margin != null) {
-        List<String> splitMargin = CSSSizingMixin.getShortedProperties(margin);
-        if (splitMargin.length == 1) {
-          marginLeft = marginRight = marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
-        } else if (splitMargin.length == 2) {
-          marginTop = marginBottom = getDisplayPortedLength(splitMargin[0]);
-          marginLeft = marginRight = getDisplayPortedLength(splitMargin[1]);
-        } else if (splitMargin.length == 3) {
-          marginTop = getDisplayPortedLength(splitMargin[0]);
-          marginRight = marginLeft = getDisplayPortedLength(splitMargin[1]);
-          marginBottom = getDisplayPortedLength(splitMargin[2]);
-        } else if (splitMargin.length == 4) {
-          marginTop = getDisplayPortedLength(splitMargin[0]);
-          marginRight = getDisplayPortedLength(splitMargin[1]);
-          marginBottom = getDisplayPortedLength(splitMargin[2]);
-          marginLeft = getDisplayPortedLength(splitMargin[3]);
-        }
-      }
+    if (style.contains(MARGIN_LEFT)) marginLeft = CSSStyleProperty.getDisplayPortValue(style[MARGIN_LEFT]);
+    if (style.contains(MARGIN_TOP)) marginTop = CSSStyleProperty.getDisplayPortValue(style[MARGIN_TOP]);
+    if (style.contains(MARGIN_RIGHT)) marginRight = CSSStyleProperty.getDisplayPortValue(style[MARGIN_RIGHT]);
+    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSStyleProperty.getDisplayPortValue(style[MARGIN_BOTTOM]);
 
-      if (style.contains('marginLeft')) marginLeft = getDisplayPortedLength(style['marginLeft']);
-
-      if (style.contains('marginTop')) marginTop = getDisplayPortedLength(style['marginTop']);
-
-      if (style.contains('marginRight')) marginRight = getDisplayPortedLength(style['marginRight']);
-
-      if (style.contains('marginBottom')) marginBottom = getDisplayPortedLength(style['marginBottom']);
-
-      left = marginLeft ?? left;
-      top = marginTop ?? top;
-      right = marginRight ?? right;
-      bottom = marginBottom ?? bottom;
-    }
-    return CSSPadding(left, top, right, bottom);
+    return CSSInset(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
   }
 
   EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
-    oldMargin = getMarginFromStyle(style);
+    oldMargin = _getMarginFromStyle(style);
     return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
@@ -338,15 +235,15 @@ mixin CSSSizingMixin {
         marginLeft != null ||
         marginRight != null ||
         marginTop != null) {
-      CSSPadding newMargin = getMarginFromStyle(style);
+      CSSInset newMargin = _getMarginFromStyle(style);
 
       double marginLeftInterval = newMargin.left - oldMargin.left;
       double marginRightInterval = newMargin.right - oldMargin.right;
       double marginTopInterval = newMargin.top - oldMargin.top;
       double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
 
-      CSSPadding progressMargin = CSSPadding(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-      CSSPadding baseMargin = CSSPadding(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
+      CSSInset progressMargin = CSSInset(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
+      CSSInset baseMargin = CSSInset(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
 
       all?.addProgressListener((progress) {
         if (margin == null) {
@@ -418,17 +315,28 @@ mixin CSSSizingMixin {
     return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  CSSPadding getPaddingFromStyle(CSSStyleDeclaration style) {
-    return _getPaddingFromStyle(style);
+  static CSSInset _getPaddingFromStyle(CSSStyleDeclaration style) {
+
+    double paddingTop;
+    double paddingRight;
+    double paddingBottom;
+    double paddingLeft;
+
+    if (style.contains(PADDING_TOP)) paddingTop = CSSStyleProperty.getDisplayPortValue(style[PADDING_TOP]);
+    if (style.contains(PADDING_RIGHT)) paddingRight = CSSStyleProperty.getDisplayPortValue(style[PADDING_RIGHT]);
+    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSStyleProperty.getDisplayPortValue(style[PADDING_BOTTOM]);
+    if (style.contains(PADDING_LEFT)) paddingLeft = CSSStyleProperty.getDisplayPortValue(style[PADDING_LEFT]);
+
+    return CSSInset(paddingTop ?? 0.0, paddingRight ?? 0.0, paddingBottom ?? 0.0, paddingLeft ?? 0.0);
   }
 
   EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
-    oldPadding = getPaddingFromStyle(style);
+    oldPadding = _getPaddingFromStyle(style);
     return EdgeInsets.fromLTRB(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
   }
 
-  void updateRenderPadding(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
-    assert(renderPadding != null);
+  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style,
+      [Map<String, CSSTransition> transitionMap]) {
     CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
     if (transitionMap != null) {
       all = transitionMap["all"];
@@ -444,15 +352,15 @@ mixin CSSSizingMixin {
         paddingLeft != null ||
         paddingRight != null ||
         paddingTop != null) {
-      CSSPadding newPadding = getPaddingFromStyle(style);
+      CSSInset newPadding = _getPaddingFromStyle(style);
 
       double paddingLeftInterval = newPadding.left - oldPadding.left;
       double paddingRightInterval = newPadding.right - oldPadding.right;
       double paddingTopInterval = newPadding.top - oldPadding.top;
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-      CSSPadding progressPadding = CSSPadding(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
-      CSSPadding basePadding = CSSPadding(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
+      CSSInset progressPadding = CSSInset(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
+      CSSInset basePadding = CSSInset(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
 
       all?.addProgressListener((progress) {
         if (padding == null) {
@@ -469,7 +377,7 @@ mixin CSSSizingMixin {
             progressPadding.right = progress * paddingRightInterval + basePadding.right;
           }
 
-          renderPadding.padding = EdgeInsets.fromLTRB(
+          renderBoxModel.padding = EdgeInsets.fromLTRB(
               progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
         }
       });
@@ -487,27 +395,27 @@ mixin CSSSizingMixin {
           progressPadding.right = progress * paddingRightInterval + basePadding.right;
         }
 
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderBoxModel.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingTop?.addProgressListener((progress) {
         progressPadding.top = progress * paddingTopInterval + basePadding.top;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderBoxModel.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingBottom?.addProgressListener((progress) {
         progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderBoxModel.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingLeft?.addProgressListener((progress) {
         progressPadding.left = progress * paddingLeftInterval + basePadding.left;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderBoxModel.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       paddingRight?.addProgressListener((progress) {
         progressPadding.right = progress * paddingRightInterval + basePadding.right;
-        renderPadding.padding = EdgeInsets.fromLTRB(
+        renderBoxModel.padding = EdgeInsets.fromLTRB(
             progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
       });
       oldPadding = newPadding;
@@ -516,17 +424,17 @@ mixin CSSSizingMixin {
     EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
 
     // Update renderPadding.
-    renderPadding.padding = edgeInsets;
+    renderBoxModel.padding = edgeInsets;
   }
 }
 
-class CSSPadding {
+class CSSInset {
   double left;
   double top;
   double right;
   double bottom;
 
-  CSSPadding(this.left, this.top, this.right, this.bottom);
+  CSSInset(this.top, this.right, this.bottom, this.left);
 }
 
 class CSSSizedConstraints {

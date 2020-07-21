@@ -32,7 +32,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderBox getScrollableRenderObject(RenderBox child) {
+  RenderObject getScrollableRenderObject(RenderObject child) {
     RenderSingleChildViewport renderSingleChildViewport = RenderSingleChildViewport(
       axisDirection: _axisDirection,
       offset: position,
