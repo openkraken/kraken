@@ -8,7 +8,6 @@ void main() {
       title: 'Loading Test',
       debugShowCheckedModeBanner: false,
       home: KrakenWidget(
-          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-          bundleURL: 'http://localhost:9999/kraken/index.js')
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRation)
   ));
 }

@@ -9,6 +9,7 @@
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/window.h"
 #include "foundation/thread_safe_array.h"
+#include "foundation/bridge_callback.h"
 
 #include "bindings/kraken.h"
 #include <atomic>
@@ -41,6 +42,7 @@ public:
   std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
 
   int32_t contextId;
+  foundation::BridgeCallback bridgeCallback;
   /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 

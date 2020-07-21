@@ -5,6 +5,7 @@
 
 #include "toBlob.h"
 #include "blob.h"
+#include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include <vector>
@@ -38,8 +39,8 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
   std::shared_ptr<Value> func = std::make_shared<Value>(Value(context, callback));
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, func);
-
-  BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  bridge->bridgeCallback.registerCallback<void>(std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
     getDartMethod()->toBlob(callbackContext, contextId,
       [](void *calbackContext, int32_t contextId, const char *error, uint8_t *bytes, int32_t length) {
         auto ctx = static_cast<BridgeCallback::Context *>(calbackContext);

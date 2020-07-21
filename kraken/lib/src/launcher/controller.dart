@@ -64,11 +64,16 @@ class KrakenViewController {
   // regenerate generate renderObject created by kraken but not affect jsBridge context.
   // test used only.
   testRefreshPaint() {
-    RenderObject root = _elementManager.getRootRenderObject().parent;
+    RenderObject parent = _elementManager.getRootRenderObject().parent;
+    RenderObject root = _elementManager.getRootRenderObject();
+    RenderObject previewSibling = null;
+    if (parent is ContainerRenderObjectMixin) {
+      previewSibling = parent.childBefore(root);
+    }
     detachView();
     _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
-    attachView(root);
+    attachView(root, previewSibling);
   }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
@@ -76,8 +81,8 @@ class KrakenViewController {
   }
 
   // attach kraken's renderObject to an renderObject.
-  void attachView(RenderObject parent) {
-    _elementManager.attach(parent, showPerformanceOverlay: showPerformanceOverlay ?? false);
+  void attachView(RenderObject parent, [RenderObject rootBefore]) {
+    _elementManager.attach(parent, rootBefore, showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
   // dispose controller and recycle all resources.
@@ -216,14 +221,19 @@ class KrakenController {
 
   // reload current kraken view.
   reload() async {
-    RenderObject root = _view.getRootRenderObject().parent;
+    RenderObject parent = _view.getRootRenderObject().parent;
+    RenderObject root = _view.getRootRenderObject();
+    RenderObject previewSibling = null;
+    if (parent is ContainerRenderObjectMixin) {
+      previewSibling = parent.childBefore(root);
+    }
     _module.dispose();
     _view.detachView();
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId);
-    _view.attachView(root);
+    _view.attachView(parent, previewSibling);
     await reloadJSContext(_view.contextId);
     await run();
   }

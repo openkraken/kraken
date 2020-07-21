@@ -338,11 +338,11 @@ class ElementManager {
     return result;
   }
 
-  void attach(RenderObject parent, {bool showPerformanceOverlay}) {
+  void attach(RenderObject parent, RenderObject rootBefore, {bool showPerformanceOverlay}) {
     RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
 
     if (parent is ContainerRenderObjectMixin) {
-      parent.add(root);
+      parent.insert(root, after: rootBefore);
     } else if (parent is RenderObjectWithChildMixin) {
       parent.child = root;
     }

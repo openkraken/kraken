@@ -26,7 +26,6 @@ list(APPEND BRIDGE_SOURCE
     foundation/logging.h
     foundation/colors.h
     foundation/bridge_callback.h
-    foundation/bridge_callback.cc
     dart_methods.cc
     dart_methods.h
     bridge.cc

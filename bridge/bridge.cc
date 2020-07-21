@@ -69,10 +69,6 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextId)) {
-    return;
-  }
-
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
@@ -114,7 +110,8 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  const char *result = BridgeCallback::instance()->registerCallback<const char *>(
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  const char *result = bridge->bridgeCallback.registerCallback<const char *>(
     std::move(callbackContext),
     [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextId) {
       return getDartMethod()->invokeModule(bridgeContext, contextId, messageStr.c_str(),
@@ -176,10 +173,6 @@ void handleTransientCallback(void *callbackContext, int32_t contextId, const cha
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  if (!BridgeCallback::checkContext(_context, contextId)) {
-    return;
-  }
-
   if (!_context.isValid()) return;
 
   if (obj->_callback == nullptr) {
@@ -221,7 +214,8 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
-  BridgeCallback::instance()->registerCallback<void>(
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
     });
@@ -368,7 +362,6 @@ JSBridge::~JSBridge() {
   screen_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
-  BridgeCallback::instance()->disposeAllCallbacks();
 }
 
 } // namespace kraken

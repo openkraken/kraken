@@ -6,10 +6,8 @@
 #ifndef KRAKENBRIDGE_BRIDGE_CALLBACK_H
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
-#include "bridge.h"
 #include "jsa.h"
-#include "kraken_bridge.h"
-#include "thread_safe_array.h"
+#include <vector>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -26,10 +24,10 @@ using namespace alibaba::jsa;
 class BridgeCallback {
 public:
   ~BridgeCallback() {
-    disposeAllCallbacks();
+    contextList.clear();
+    callbackCount = 0;
   }
 
-  static std::shared_ptr<BridgeCallback> instance();
   struct Context {
     Context(JSContext &context, std::shared_ptr<Value> callback) : _context(context), _callback(std::move(callback)){};
     JSContext &_context;
@@ -44,22 +42,13 @@ public:
     assert(p != nullptr && "Callback context can not be nullptr");
     JSContext &jsContext = context->_context;
     int32_t contextId = context->_context.getContextId();
-    contextList.push(std::move(context));
+    contextList.emplace_back(std::move(context));
     callbackCount.fetch_add(1);
     return fn(p, contextId);
   }
 
-  // dispose all callbacks and recycle callback context's memory
-  void disposeAllCallbacks();
-
-  static bool checkContext(JSContext &context, int32_t contextId) {
-    auto *bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-    auto currentContext = bridge->getContext();
-    return currentContext == &context;
-  }
-
 private:
-  ThreadSafeArray<std::unique_ptr<Context>> contextList;
+  std::vector<std::unique_ptr<Context>> contextList;
   std::atomic<int> callbackCount{0};
 };
 
