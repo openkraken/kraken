@@ -163,7 +163,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return properties['placeholder'] ?? '';
   }
 
-  get cursorColor => CSSColor.black;
+  get cursorColor => CSSColor.initial;
 
   @override
   void handleClick(Event event) {

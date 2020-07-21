@@ -560,7 +560,7 @@ mixin CSSBackgroundMixin {
   Color getBackgroundColor(CSSStyleDeclaration style) {
     Color backgroundColor = CSSColor.transparent;
     if (background.containsKey(BACKGROUND_COLOR)) {
-      backgroundColor = CSSColor.generate(background[BACKGROUND_COLOR]);
+      backgroundColor = CSSColor.parseColor(background[BACKGROUND_COLOR]);
     }
     return backgroundColor;
   }
@@ -607,11 +607,11 @@ mixin CSSBackgroundMixin {
             } else if (CSSAngle.isAngle(strings[i])) {
               stop = CSSAngle(strings[i]).angleValue / (math.pi * 2);
             }
-            colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
+            colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
           }
         } catch (e) {}
       } else {
-        colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
+        colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
       }
     }
     return colorGradients;

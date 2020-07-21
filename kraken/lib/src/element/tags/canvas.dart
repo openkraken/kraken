@@ -166,10 +166,10 @@ class CanvasElement extends Element {
     String property = args[0];
     switch (property) {
       case 'fillStyle':
-        painter.context.fillStyle = CSSColor.generate(args[1]);
+        painter.context.fillStyle = CSSColor.parseColor(args[1]);
         break;
       case 'strokeStyle':
-        painter.context.strokeStyle = CSSColor.generate(args[1]);
+        painter.context.strokeStyle = CSSColor.parseColor(args[1]);
         break;
       case 'font':
         painter.context.font = args[1];

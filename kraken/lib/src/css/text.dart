@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/style_property.dart';
 
 const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;
@@ -101,9 +102,9 @@ mixin CSSTextMixin {
 
   Color getColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
-      return CSSColor.generate(style[COLOR]);
+      return CSSColor.parseColor(style[COLOR]);
     } else {
-      return CSSColor.black; // Default color to black.
+      return CSSColor.initial; // Default color to black.
     }
   }
 
@@ -138,12 +139,12 @@ mixin CSSTextMixin {
 
   Color getDecorationColor(CSSStyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
-      return CSSColor.generate(style[TEXT_DECORATION_COLOR]);
+      return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
       List<String> splitedDecoration = textDecoration.split(_splitRegExp);
       if (splitedDecoration.length >= 2) {
-        return CSSColor.generate(splitedDecoration.last);
+        return CSSColor.parseColor(splitedDecoration.last);
       }
     }
     return getColor(style); // Default to currentColor (style.color)
@@ -317,29 +318,26 @@ mixin CSSTextMixin {
     return null;
   }
 
-  static RegExp commaRegExp = RegExp(r',');
   List<Shadow> getShadows(CSSStyleDeclaration style) {
     List<Shadow> textShadows = [];
-    if (style.contains('textShadow')) {
-      String processedValue = CSSColor.preprocessCSSPropertyWithRGBAColor(style['textShadow']);
-      List<String> rawShadows = processedValue.split(commaRegExp);
-      for (String rawShadow in rawShadows) {
-        List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
-        if (shadowDefinitions.length > 2) {
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
-          double blurRadius =
-              shadowDefinitions.length > 3 ? (CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0) : 0.0;
-          Color color = CSSColor.generate(shadowDefinitions.last);
-          if (color != null) {
-            textShadows.add(Shadow(
-              offset: Offset(offsetX, offsetY),
-              blurRadius: blurRadius,
-              color: color,
-            ));
-          }
+    if (style.contains(TEXT_SHADOW)) {
+      var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
+      shadows.forEach((shadowDefinitions) {
+
+        // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
+        Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+        double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+        double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
+        double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
+
+        if (color != null) {
+          textShadows.add(Shadow(
+            offset: Offset(offsetX, offsetY),
+            blurRadius: blurRadius,
+            color: color,
+          ));
         }
-      }
+      });
     }
     return textShadows;
   }
