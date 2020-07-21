@@ -8,6 +8,6 @@ void main() {
       title: 'Loading Test',
       debugShowCheckedModeBanner: false,
       home: KrakenWidget(
-          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRation)
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio)
   ));
 }
