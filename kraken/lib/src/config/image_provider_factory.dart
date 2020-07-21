@@ -34,8 +34,8 @@ typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param
 /// ----------------------------------------------------------------------------------------------------
 /// | type                    | example                                |
 /// ----------------------------------------------------------------------------------------------------
-/// | type [cacheNetImage]    | startsWith '//' ,'http://'，'https://' | cacheNetImage [param]may has cache store、auto
-/// | type [noCacheNetImage]  |                                        | [param]may has cache
+/// | type [cacheNetworkImage]    | startsWith '//' ,'http://'，'https://' | cacheNetImage [param]may has cache store、auto
+/// | type [nocacheNetworkImage]  |                                        | [param]may has cache
 /// |                         |                                        | cache maybe store、auto; default is auto
 /// ----------------------------------------------------------------------------------------------------
 /// | type [fileImage]        | startsWith 'file://''                  | [param] file => [File]
@@ -48,8 +48,8 @@ typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param
 /// ----------------------------------------------------------------------------------------------------
 ///
 enum ImageType {
-  cacheNetImage,
-  noCacheNetImage,
+  cacheNetworkImage,
+  nocacheNetworkImage,
   fileImage,
   dataImage,
   blobImage,

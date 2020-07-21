@@ -21,8 +21,8 @@ bool _isNumber(String str) {
 
 class ImageElement extends Element {
   static Map<ImageType, ImageProviderFactory> _imageProviderFactoryMap = {
-    ImageType.cacheNetImage: defaultCachedNetImageProviderFactory,
-    ImageType.noCacheNetImage: defaultNoCachedNetworkImageProviderFactory,
+    ImageType.cacheNetworkImage: defaultCachedNetImageProviderFactory,
+    ImageType.nocacheNetworkImage: defaultNoCachedNetworkImageProviderFactory,
     ImageType.fileImage: defaultFileImageProviderFactory,
     ImageType.dataImage: defaultDataImageProviderFactory,
     ImageType.blobImage: defaultBlobImageProvider,

@@ -39,9 +39,9 @@ class CSSUrl implements CSSValue<ImageProvider> {
       _url = url;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
-        _value = ImageElement.getImageProviderFactory(ImageType.cacheNetImage)(url);
+        _value = ImageElement.getImageProviderFactory(ImageType.cacheNetworkImage)(url);
       } else {
-        _value = ImageElement.getImageProviderFactory(ImageType.noCacheNetImage)(url);
+        _value = ImageElement.getImageProviderFactory(ImageType.nocacheNetworkImage)(url);
       }
 
     } else if (_rawInput.startsWith('file://')) {
