@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/widget.dart';
 import 'dart:ui';
-import 'title_bar.dart';
 
 void main() {
-  runApp(LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return KrakenWidget(400, 300,
+  runApp(MaterialApp(
+      title: 'Loading Test',
+      debugShowCheckedModeBanner: false,
+      home: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return KrakenWidget(
+            window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
             bundleURL: 'http://localhost:9999/kraken/index.js');
-      }
-  ));
+      })));
 }

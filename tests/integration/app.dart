@@ -29,7 +29,7 @@ void main() {
         home: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
           return KrakenWidget(
               window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-              bundleURL: 'http://127.0.0.1:8080/bundle.js');
+              bundleContent: '',);
         })));
 
     WidgetsBinding.instance
