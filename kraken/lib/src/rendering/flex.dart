@@ -1179,7 +1179,7 @@ class RenderFlexLayout extends RenderBox
         childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
       }
 
-      /// Apply position relative offset change
+      /// Apply position relative offset change.
       applyRelativeOffset(relativeOffset, child, childStyle);
 
       if (flipMainAxis) {
@@ -1187,7 +1187,7 @@ class RenderFlexLayout extends RenderBox
       } else {
         childMainPosition += _getMainSize(child) + betweenSpace;
       }
-      // Only layout placeholder renderObject child
+      // Only layout placeholder renderObject child.
       child = placeholderChild == null ? childParentData.nextSibling : null;
     }
   }

@@ -427,7 +427,7 @@ class RenderSingleChildViewport extends RenderBox
         offset: _paintOffset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position + -_paintOffset);
+          assert(transformed == position - _paintOffset);
           return child.hitTest(result, position: transformed);
         },
       );

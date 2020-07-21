@@ -300,6 +300,7 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
       result.add(BoxHitTestEntry(this, position));
       return true;
     }
+
     return false;
   }
 
@@ -307,8 +308,6 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position);
   }
-
-
 }
 
 void setChild(RenderBox renderBox, RenderBox child) {
