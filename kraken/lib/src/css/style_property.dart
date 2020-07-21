@@ -1,4 +1,3 @@
-
 import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
@@ -95,10 +94,10 @@ class CSSStyleProperty {
     }
 
     return [x, y];
-  } 
+  }
 
   static bool isShorthandProperty(String property) {
-    return property == PADDING || 
+    return property == PADDING ||
       property == MARGIN ||
       property == BORDER ||
       property == BACKGROUND ||

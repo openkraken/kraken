@@ -4,11 +4,12 @@
  */
 
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/painting.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/src/painting/cached_network_image.dart';
-import 'dart:io';
+import 'package:kraken/painting.dart';
+
 
 ///
 /// [ImageElement] allow change Default ImageProvider for
@@ -22,7 +23,6 @@ import 'dart:io';
 ///
 
 typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param]);
-
 
 ///
 /// create image from after JSRuntime Converted
@@ -48,16 +48,67 @@ typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param
 /// ----------------------------------------------------------------------------------------------------
 ///
 enum ImageType {
-  cacheNetworkImage,
-  nocacheNetworkImage,
+  cachedNetworkImage,
+  uncachedNetworkImage,
   fileImage,
   dataImage,
   blobImage,
   fallbackImage
 }
 
+ImageProviderFactory _cachedNetworkImageProviderFactory = defaultCachedNetImageProviderFactory;
+ImageProviderFactory _uncachedNetworkImageProviderFactory = defaultUncachedNetworkImageProviderFactory;
+ImageProviderFactory _fileImageProviderFactory = defaultFileImageProviderFactory;
+ImageProviderFactory _dataImageProviderFactory = defaultDataImageProviderFactory;
+ImageProviderFactory _blobImageProviderFactory = defaultBlobImageProviderFactory;
+ImageProviderFactory _fallbackImageProviderFactory = defaultFallbackImageProvider;
+
+ImageProviderFactory getImageProviderFactory(ImageType imageType) {
+  switch (imageType) {
+    case ImageType.cachedNetworkImage:
+      return _cachedNetworkImageProviderFactory;
+    case ImageType.uncachedNetworkImage:
+      return _uncachedNetworkImageProviderFactory;
+    case ImageType.fileImage:
+      return _fileImageProviderFactory;
+    case ImageType.dataImage:
+      return _dataImageProviderFactory;
+    case ImageType.blobImage:
+      return _blobImageProviderFactory;
+    case ImageType.fallbackImage:
+    default:
+      return _fallbackImageProviderFactory;
+  }
+}
+
+void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
+  if (customImageProviderFactory != null) {
+    switch (imageType) {
+      case ImageType.cachedNetworkImage:
+        _cachedNetworkImageProviderFactory = customImageProviderFactory;
+        break;
+      case ImageType.uncachedNetworkImage:
+        _uncachedNetworkImageProviderFactory = customImageProviderFactory;
+        break;
+      case ImageType.fileImage:
+        _fileImageProviderFactory = customImageProviderFactory;
+        break;
+      case ImageType.dataImage:
+        _dataImageProviderFactory = customImageProviderFactory;
+        break;
+      case ImageType.blobImage:
+        _blobImageProviderFactory = customImageProviderFactory;
+        break;
+      case ImageType.fallbackImage:
+      default:
+        _fallbackImageProviderFactory = customImageProviderFactory;
+        break;
+    }
+  }
+}
+
 ///
-/// create image from data
+/// Create image from data
 ///
 /// [uriDataPath] startsWith 'data://''
 /// desc:
@@ -68,12 +119,12 @@ ImageProvider defaultCachedNetImageProviderFactory(String url, [dynamic param]) 
   return CachedNetworkImage(url);
 }
 
-ImageProvider defaultNoCachedNetworkImageProviderFactory(String url, [dynamic param]) {
+ImageProvider defaultUncachedNetworkImageProviderFactory(String url, [dynamic param]) {
   return NetworkImage(url);
 }
 
 ///
-/// create image from network
+/// Create image from network
 ///
 /// [rawPath] startsWith 'file://''
 ///
@@ -86,7 +137,7 @@ ImageProvider defaultFileImageProviderFactory(String rawPath, [dynamic param]) {
 }
 
 ///
-/// create image from data
+/// Create image from data
 ///
 /// [uriDataPath] startsWith 'data://''
 /// desc:
@@ -102,18 +153,18 @@ ImageProvider defaultDataImageProviderFactory(String uriDataPath, [dynamic param
 }
 
 ///
-/// create image from network
+/// Create image from network
 ///
 /// [blobPath] @TODO
 ///
-ImageProvider defaultBlobImageProvider(String blobPath, [dynamic param]) {
+ImageProvider defaultBlobImageProviderFactory(String blobPath, [dynamic param]) {
   // @TODO: support blob file url
   return null;
 }
 
 ///
 /// create image Fallback to image
-/// maybe assetimage
+/// maybe asset image
 /// [url] image from JSRuntime
 ///
 ImageProvider defaultFallbackImageProvider(String rawUrl, [dynamic param]) {

@@ -5,8 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/custom_config.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/painting.dart';
 
 import 'value.dart';
 
@@ -39,29 +38,29 @@ class CSSUrl implements CSSValue<ImageProvider> {
       _url = url;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
-        _value = ImageElement.getImageProviderFactory(ImageType.cacheNetworkImage)(url);
+        _value = getImageProviderFactory(ImageType.cachedNetworkImage)(url);
       } else {
-        _value = ImageElement.getImageProviderFactory(ImageType.nocacheNetworkImage)(url);
+        _value = getImageProviderFactory(ImageType.uncachedNetworkImage)(url);
       }
 
     } else if (_rawInput.startsWith('file://')) {
       File file = File.fromUri(Uri.parse(_rawInput));
-      _value = ImageElement.getImageProviderFactory(ImageType.fileImage)(_rawInput, file);
+      _value = getImageProviderFactory(ImageType.fileImage)(_rawInput, file);
     } else if (_rawInput.startsWith('data:')) {
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
 
       UriData data = UriData.parse(_rawInput);
       if (data.isBase64) {
-        _value = ImageElement.getImageProviderFactory(ImageType.dataImage)(_rawInput, data.contentAsBytes());
+        _value = getImageProviderFactory(ImageType.dataImage)(_rawInput, data.contentAsBytes());
       }
 
     } else if (_rawInput.startsWith('blob:')) {
       // @TODO: support blob file url
-      _value = ImageElement.getImageProviderFactory(ImageType.blobImage)(_rawInput);
+      _value = getImageProviderFactory(ImageType.blobImage)(_rawInput);
     } else {
       // Fallback to asset image
-      _value = ImageElement.getImageProviderFactory(ImageType.fallbackImage)(_rawInput);
+      _value = getImageProviderFactory(ImageType.fallbackImage)(_rawInput);
     }
   }
 

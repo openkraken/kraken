@@ -6,3 +6,4 @@
 export 'src/painting/cached_network_image.dart';
 export 'src/painting/canvas.dart';
 export 'src/painting/gradient.dart';
+export 'src/painting/image_provider_factory.dart';
