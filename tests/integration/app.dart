@@ -26,11 +26,10 @@ void main() {
     runApp(MaterialApp(
         title: 'Loading Test',
         debugShowCheckedModeBanner: false,
-        home: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return KrakenWidget(
-              window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-              bundleContent: '',);
-        })));
+        home: KrakenWidget(
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+          bundleContent: '',)
+    ));
 
     WidgetsBinding.instance
         .addPostFrameCallback((_) async {

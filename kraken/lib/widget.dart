@@ -17,24 +17,32 @@ class KrakenWidget extends StatefulWidget {
   final double viewportWidth;
   final double viewportHeight;
 
-  KrakenWidget(double viewportWidth, double viewportHeight, {Key key, this.bundleURL, this.bundlePath, this.bundleContent}) :
-        viewportWidth = viewportWidth,
+  KrakenWidget(double viewportWidth, double viewportHeight,
+      {Key key, this.bundleURL, this.bundlePath, this.bundleContent})
+      : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         super(key: key);
 
   @override
   _KrakenWidgetState createState() => _KrakenWidgetState(viewportWidth, viewportHeight);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<double>('viewportWidth', viewportWidth));
+    properties.add(DiagnosticsProperty<double>('viewportHeight', viewportHeight));
+    properties.add(DiagnosticsProperty<String>('bundleURL', bundleURL));
+    properties.add(DiagnosticsProperty<String>('bundlePath', bundlePath));
+    properties.add(DiagnosticsProperty<String>('bundleContent', bundleContent));
+  }
 }
 
 class _KrakenWidgetState extends State<KrakenWidget> {
   KrakenController controller;
 
   _KrakenWidgetState(double viewportWidth, double viewportHeight) {
-    controller = KrakenController(
-        viewportWidth,
-        viewportHeight,
-        showPerformanceOverlay:
-        Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
+    controller = KrakenController(viewportWidth, viewportHeight,
+        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
   }
 
   @override
@@ -76,12 +84,6 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _controller.view.getRootRenderObject();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('KrakenRenderWidget', 'url'));
   }
 
   @override

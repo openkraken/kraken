@@ -544,24 +544,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == 'none' ||
-        display == 'inline' ||
-        display == 'inline-block' ||
-        display == 'block') {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == 'none' || display == 'inline' || display == 'inline-block' || display == 'block') {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -1142,7 +1131,6 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1151,7 +1139,6 @@ class Element extends Node
     } else {
       properties[key] = value;
     }
-
   }
 
   @mustCallSuper

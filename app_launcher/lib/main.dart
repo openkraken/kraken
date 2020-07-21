@@ -7,9 +7,8 @@ void main() {
   runApp(MaterialApp(
       title: 'Loading Test',
       debugShowCheckedModeBanner: false,
-      home: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return KrakenWidget(
-            window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-            bundleURL: 'http://localhost:9999/kraken/index.js');
-      })));
+      home: KrakenWidget(
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+          bundleURL: 'http://localhost:9999/kraken/index.js')
+  ));
 }

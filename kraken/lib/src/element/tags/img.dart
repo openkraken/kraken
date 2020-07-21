@@ -193,7 +193,6 @@ class ImageElement extends Element {
 
     // The default value for object-position is 50% 50%
     return Alignment.center;
-    
   }
 
   double _getAlignmentValueFromString(String value) {

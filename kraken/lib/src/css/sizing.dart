@@ -17,7 +17,6 @@ import 'package:kraken/src/css/style_property.dart';
 /// - min-width
 /// - min-height
 mixin CSSSizingMixin {
-
   RenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   CSSInset oldPadding;
@@ -198,7 +197,6 @@ mixin CSSSizingMixin {
   }
 
   static CSSInset _getMarginFromStyle(CSSStyleDeclaration style) {
-
     double marginLeft;
     double marginTop;
     double marginRight;
@@ -208,7 +206,7 @@ mixin CSSSizingMixin {
     if (style.contains(MARGIN_TOP)) marginTop = CSSStyleProperty.getDisplayPortValue(style[MARGIN_TOP]);
     if (style.contains(MARGIN_RIGHT)) marginRight = CSSStyleProperty.getDisplayPortValue(style[MARGIN_RIGHT]);
     if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSStyleProperty.getDisplayPortValue(style[MARGIN_BOTTOM]);
-    
+
     return CSSInset(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
   }
 
@@ -310,7 +308,6 @@ mixin CSSSizingMixin {
   }
 
   static CSSInset _getPaddingFromStyle(CSSStyleDeclaration style) {
-
     double paddingTop;
     double paddingRight;
     double paddingBottom;

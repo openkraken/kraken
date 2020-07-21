@@ -22,10 +22,9 @@ void launch({
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
-  KrakenController controller =
-      KrakenController(
-          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-          showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
+  KrakenController controller = KrakenController(
+      window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
 
   controller.view.attachView(RendererBinding.instance.renderView);
 
