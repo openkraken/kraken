@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
+import 'package:kraken/module.dart';
 
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {

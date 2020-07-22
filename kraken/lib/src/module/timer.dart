@@ -43,3 +43,11 @@ mixin TimerMixin {
     return id;
   }
 }
+
+void clearTimer() {
+  _timerId = 1;
+  _timerMap.forEach((key, timer) {
+    timer.cancel();
+  });
+  _timerMap.clear();
+}
