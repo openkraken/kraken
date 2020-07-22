@@ -27,6 +27,7 @@ class CSSLength implements CSSValue<double> {
   static const String IN = 'in';
   static const String PC = 'pc';
   static const String PT = 'pt';
+  static const String Q = 'q';
 
   static double toDouble(value) {
     if (value is double) {
@@ -65,6 +66,8 @@ class CSSLength implements CSSValue<double> {
     } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
       displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
+    } else if (unitedValue.endsWith(Q)) {
+      displayPortValue = double.tryParse(unitedValue.split(Q)[0]) * _1Q;
     } else if (unitedValue.length > 2) {
       switch (unitedValue.substring(unitedValue.length - 2)) {
         case PX:

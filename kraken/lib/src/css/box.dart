@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
 // CSS Backgrounds and Borders: https://drafts.csswg.org/css-backgrounds/
@@ -197,6 +196,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       getBorderRadius(style, 'borderBottomLeftRadius'),
       getBorderRadius(style, 'borderBottomRightRadius')
     ];
+
     return TransitionDecoration(color?.alpha, color?.red, color?.green, color?.blue, leftSide, topSide, rightSide,
         bottomSide, decorationImage, getBoxShadow(style), borderRadiusTLTRBLBR, gradient);
   }
@@ -422,7 +422,6 @@ class TransitionDecoration with TransitionColorMixin {
 
   TransitionDecoration(alpha, red, green, blue, borderLeftSide, borderTopSide, borderRightSide, borderBottomSide,
       this.image, this.boxShadow, this.borderRadiusTLTRBLBR, this.gradient) {
-    initColor(Color.fromARGB(alpha, red, green, blue));
     // side add inorder left top right bottom
     borderSidesLTRB = [
       borderLeftSide,

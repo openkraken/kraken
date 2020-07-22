@@ -168,9 +168,9 @@ const Map<String, int> _namedColors = {
 // ignore: public_member_api_docs
 final _colorHexRegExp = RegExp(r'^#([a-f0-9]{3,8})$', caseSensitive: false);
 final _colorHslRegExp = RegExp(
-    r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\)$');
+    r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\s*\)$');
 final _colorRgbRegExp = RegExp(
-    r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\)$');
+    r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
 
 /// #123
 /// #123456
@@ -222,7 +222,6 @@ class CSSColor implements CSSValue<Color> {
 
   static Color parseColor(String color) {
     if (color == null) return null;
-    
     color = color.trim().toLowerCase();
     
     if (color == 'transparent') {
@@ -259,16 +258,16 @@ class CSSColor implements CSSValue<Color> {
     } else if (color.startsWith('rgb')) {
       final rgbMatch = _colorRgbRegExp.firstMatch(color);
       if (rgbMatch != null) {
-        final rgbR = _parseColorPart(rgbMatch[2], 0, 255);
-        final rgbG = _parseColorPart(rgbMatch[3], 0, 255);
-        final rgbB = _parseColorPart(rgbMatch[4], 0, 255);
-        final rgbA = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
-        if (rgbR != null && rgbG != null && rgbB != null && rgbA != null) {
-          parsed = Color.fromARGB(
-            (255 * rgbA).round(),
+        final double rgbR = _parseColorPart(rgbMatch[2], 0, 255);
+        final double rgbG = _parseColorPart(rgbMatch[3], 0, 255);
+        final double rgbB = _parseColorPart(rgbMatch[4], 0, 255);
+        final double rgbO = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
+        if (rgbR != null && rgbG != null && rgbB != null && rgbO != null) {
+          parsed = Color.fromRGBO(
             rgbR.round(),
             rgbG.round(),
             rgbB.round(),
+            rgbO
           );
         }
       }
@@ -278,7 +277,7 @@ class CSSColor implements CSSValue<Color> {
         final hslH = _parseColorHue(hslMatch[2], hslMatch[3]);
         final hslS = _parseColorPart(hslMatch[4], 0, 1);
         final hslL = _parseColorPart(hslMatch[5], 0, 1);
-        final hslA = _parseColorPart(hslMatch[7] ?? '1', 0, 1);
+        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7], 0 ,1) : 1;
         if (hslH != null && hslS != null && hslL != null && hslA != null) {
           parsed = HSLColor.fromAHSL(hslA, hslH, hslS, hslL).toColor();
         }
@@ -290,7 +289,6 @@ class CSSColor implements CSSValue<Color> {
     if (parsed != null) {
       _cachedColor[color] = parsed;
     }
-
     return parsed;
   }
 
