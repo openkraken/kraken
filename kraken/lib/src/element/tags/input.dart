@@ -222,7 +222,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textDirection: textDirection,
       selection: blurSelection, // Default to blur
       offset: offset,
-      forceLine: false,
+      readOnly: false,
+      forceLine: true,
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: _handleCaretChanged,
       obscureText: obscureText,
