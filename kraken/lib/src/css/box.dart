@@ -302,7 +302,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       color = CSSColor.parseColor(properties[2]);
     }
 
-    return {'Color': color ?? defaultBorderWidth, 'Style': style ?? defaultBorderStyle, 'Width': width ?? defaultBorderWidth};
+    return {'Color': color ?? defaultBorderColor, 'Style': style ?? defaultBorderStyle, 'Width': width ?? defaultBorderWidth};
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
