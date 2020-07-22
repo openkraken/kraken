@@ -806,9 +806,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
             ? 0
             : _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
-        Offset relativeOffset =
-            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
-
         CSSStyleDeclaration childStyle = _getChildStyle(child);
 
         // Line height of child
@@ -818,7 +815,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (childLineHeight != null) {
           childLeading = childLineHeight - child.size.height;
         }
-        double topOffset = relativeOffset.dy;
+        // Child line extent caculated according to vertical align
+        double childLineExtent = childCrossAxisOffset;
 
         String childDisplay = childStyle['display'];
         if (childDisplay.startsWith('inline')) {
@@ -828,31 +826,32 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
           switch(verticalAlign) {
             case VerticalAlign.baseline:
-              topOffset = lineBoxLeading / 2 + (runBaselineExtent - childAscent);
+              childLineExtent = lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case VerticalAlign.top:
-              topOffset = childLeading / 2;
+              childLineExtent = childLeading / 2;
               break;
             case VerticalAlign.bottom:
-              topOffset = (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent)
+              childLineExtent = (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent)
                 - child.size.height - childLeading / 2;
               break;
-    //          case VerticalAlign.textTop:
-    //            topOffset = leading / 2;
-    //            break;
-    //          case VerticalAlign.textBottom:
-    //            topOffset = leading / 2 + runCrossAxisExtent - child.size.height;
-    //            break;
-            /// @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
-            /// currently flutter lack the api to caculate x-height of glyph
-    //          case VerticalAlign.middle:
-    //            topOffset = lineBoxLeading / 2 + (runBaselineExtent - childAscent);
-    //            break;
+  //          case VerticalAlign.textTop:
+  //            childLineExtent = leading / 2;
+  //            break;
+  //          case VerticalAlign.textBottom:
+  //            childLineExtent = leading / 2 + runCrossAxisExtent - child.size.height;
+  //            break;
+            // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
+            // currently flutter lack the api to caculate x-height of glyph
+//            case VerticalAlign.middle:
+//                break;
             }
         }
 
-
-        relativeOffset = Offset(relativeOffset.dx, topOffset);
+        Offset relativeOffset = _getOffset(
+          childMainPosition + paddingLeft,
+          crossAxisOffset + childLineExtent + paddingTop
+        );
 
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
