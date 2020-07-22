@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 const String INPUT = 'INPUT';
 

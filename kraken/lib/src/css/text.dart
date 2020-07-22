@@ -4,7 +4,6 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;

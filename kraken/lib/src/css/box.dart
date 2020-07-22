@@ -263,7 +263,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
   static double getBorderWidth(String input) {
     // https://drafts.csswg.org/css2/#border-width-properties
-    // The interpretation of the first three values depends on the user agent. 
+    // The interpretation of the first three values depends on the user agent.
     // The following relationships must hold, however:
     // thin ≤ medium ≤ thick.
     double borderWidth;
