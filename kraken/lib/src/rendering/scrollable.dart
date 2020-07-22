@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/gesture.dart';
+import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 import 'ticker_provider.dart';
 
@@ -41,8 +42,8 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     );
 
     _renderBox = child;
-    RenderPointerListener renderPointerListener =
-        RenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
+    KrakenRenderPointerListener renderPointerListener =
+      KrakenRenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
 
     return renderPointerListener;
   }
@@ -411,13 +412,57 @@ class RenderSingleChildViewport extends RenderBox
   }
 
   @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    assert(() {
+      if (!hasSize) {
+        if (debugNeedsLayout) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
+            describeForError('The hitTest() method was called on this RenderBox'),
+            ErrorDescription(
+                "Unfortunately, this object's geometry is not known at this time, "
+                    'probably because it has never been laid out. '
+                    'This means it cannot be accurately hit-tested.'
+            ),
+            ErrorHint(
+                'If you are trying '
+                    'to perform a hit test during the layout phase itself, make sure '
+                    "you only hit test nodes that have completed layout (e.g. the node's "
+                    'children, after their layout() method has been called).'
+            ),
+          ]);
+        }
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot hit test a render box with no size.'),
+          describeForError('The hitTest() method was called on this RenderBox'),
+          ErrorDescription(
+              'Although this node is not marked as needing layout, '
+                  'its size is not set.'
+          ),
+          ErrorHint(
+              'A RenderBox object must have an '
+                  'explicit size before it can be hit-tested. Make sure '
+                  'that the RenderBox in question sets its size during layout.'
+          ),
+        ]);
+      }
+      return true;
+    }());
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
+  @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     if (child != null) {
       return result.addWithPaintOffset(
         offset: _paintOffset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position + -_paintOffset);
+          assert(transformed == position - _paintOffset);
           return child.hitTest(result, position: transformed);
         },
       );

@@ -4,16 +4,17 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 mixin CSSOpacityMixin on Node {
-  RenderOpacity renderOpacity;
+  KrakenRenderOpacity renderOpacity;
 
   RenderObject initRenderOpacity(RenderObject renderObject, CSSStyleDeclaration style) {
     bool existsOpacity = style.contains('opacity');
     if (existsOpacity) {
       double opacity = _convertStringToDouble(style['opacity']);
-      renderOpacity = RenderOpacity(opacity: opacity, child: renderObject);
+      renderOpacity = KrakenRenderOpacity(opacity: opacity, child: renderObject);
       return renderOpacity;
     } else {
       return renderObject;
@@ -32,7 +33,7 @@ mixin CSSOpacityMixin on Node {
       RenderObject child = parentRenderObject.child;
       // Drop child by set null first.
       parentRenderObject.child = null;
-      renderOpacity = RenderOpacity(
+      renderOpacity = KrakenRenderOpacity(
         opacity: opacity,
         child: child,
       );
