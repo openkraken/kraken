@@ -81,8 +81,15 @@ class ElementManager {
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
   KrakenViewController controller;
-  ElementManager({KrakenViewController this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(targetId: BODY_ID, elementManager: this);
+
+  final double viewportWidth;
+  final double viewportHeight;
+
+  ElementManager(double viewportWidth, double viewportHeight,
+      {KrakenViewController this.controller, this.showPerformanceOverlayOverride})
+      : viewportWidth = viewportWidth,
+        viewportHeight = viewportHeight {
+    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
     _root = _rootElement.renderObject;
     setEventTarget(_rootElement);
     setEventTarget(Window(this));
@@ -279,15 +286,15 @@ class ElementManager {
     return target.method(method, _args);
   }
 
-  RenderBox _root;
-  RenderBox get root => _root;
+  RenderObject _root;
+  RenderObject get root => _root;
   set root(RenderObject root) {
     assert(() {
       throw FlutterError('Can not set root to ElementManagerActionDelegate.');
     }());
   }
 
-  RenderBox getRootRenderObject() {
+  RenderObject getRootRenderObject() {
     return root;
   }
 
@@ -331,11 +338,11 @@ class ElementManager {
     return result;
   }
 
-  void attach(RenderObject parent, {bool showPerformanceOverlay}) {
+  void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay}) {
     RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
 
     if (parent is ContainerRenderObjectMixin) {
-      parent.add(root);
+      parent.insert(root, after: previousSibling);
     } else if (parent is RenderObjectWithChildMixin) {
       parent.child = root;
     }

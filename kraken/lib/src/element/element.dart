@@ -220,9 +220,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortX.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortY.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -542,24 +544,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
     if (display.endsWith('flex')) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == 'none' ||
-        display == 'inline' ||
-        display == 'inline-block' ||
-        display == 'block') {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == 'none' || display == 'inline' || display == 'inline-block' || display == 'block') {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -1140,7 +1131,6 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1149,7 +1139,6 @@ class Element extends Node
     } else {
       properties[key] = value;
     }
-
   }
 
   @mustCallSuper
@@ -1328,7 +1317,7 @@ class Element extends Node
       elementManager.getRootRenderObject().owner.flushLayout();
 
       // Position the center of element.
-      Offset position = box.localToGlobal(box.size.center(Offset.zero));
+      Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderObject());
       final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
       GestureBinding.instance.hitTest(boxHitTestResult, position);
       bool hitTest = true;

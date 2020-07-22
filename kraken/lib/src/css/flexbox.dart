@@ -252,21 +252,14 @@ class _FlexFlowShortHand {
   }
 
   _isFlexWrap(String val) {
-    if (val == 'wrap' ||
-      val == 'nowrap' ||
-      val == 'wrap-reverse'
-    ) {
+    if (val == 'wrap' || val == 'nowrap' || val == 'wrap-reverse') {
       return true;
     }
     return false;
   }
 
   _isFlexDirection(String val) {
-    if (val == 'row' ||
-      val == 'row-reverse' ||
-      val == 'column' ||
-      val == 'column-reverse'
-    ) {
+    if (val == 'row' || val == 'row-reverse' || val == 'column' || val == 'column-reverse') {
       return true;
     }
     return false;
@@ -300,7 +293,6 @@ mixin CSSFlexboxMixin {
       renderFlexLayout.alignContent = _getAlignContent(style);
     }
   }
-
 }
 
 FlexDirection _getFlexDirection(String flexDirection) {
@@ -422,6 +414,7 @@ AlignContent _getAlignContent(CSSStyleDeclaration style) {
   }
   return alignContent;
 }
+
 AlignSelf _getAlignSelf(String alignSelf, CSSStyleDeclaration style) {
   switch (alignSelf) {
     case 'flex-start':
@@ -473,10 +466,9 @@ class CSSFlexItem {
         ? 'auto' // flexBasis default to auto.
         : basis;
     parentData.alignSelf = CSSStyleDeclaration.isNullOrEmptyValue(alignSelf)
-      ? AlignSelf.auto // alignSelf default to auto.
-      : _getAlignSelf(alignSelf, style);
+        ? AlignSelf.auto // alignSelf default to auto.
+        : _getAlignSelf(alignSelf, style);
 
     return parentData;
   }
-
 }

@@ -7,6 +7,7 @@
 
 #include "foundation/bridge_callback.h"
 #include "js_context.h"
+#include "bridge.h"
 #include "jsc/jsc_implementation.h"
 #include "gtest/gtest.h"
 #include <chrono>
@@ -25,7 +26,8 @@ void normalPrint(jsa::JSContext &context, const jsa::JSError &error) {
 }
 
 TEST(BridgeCallback, worksWithNoFunctionLeaks) {
-  auto context = std::make_unique<JSCContext>(0, normalPrint, nullptr);
+  auto bridge = std::make_unique<kraken::JSBridge>(0, normalPrint);
+  auto context = bridge->getContext();
   std::mutex mutex;
   std::condition_variable condition;
   void *sharedData = nullptr;
@@ -44,8 +46,8 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
 
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(jsa::Value(*context, hostFunction));
     auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
-
-    BridgeCallback::instance()->registerCallback<void>(std::move(callbackContext),
+    auto bridge = static_cast<kraken::JSBridge*>(context->getOwner());
+    bridge->bridgeCallback.registerCallback<void>(std::move(callbackContext),
                                                        [&postToChildThread](void *data, int32_t contextId) { postToChildThread(data); });
   };
 
@@ -63,8 +65,6 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
 
   childA.join();
   childB.join();
-
-  BridgeCallback::instance()->disposeAllCallbacks();
 }
 
 #endif

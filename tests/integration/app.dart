@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/material.dart' show MaterialApp, Scaffold;
-import 'package:flutter/widgets.dart' show WidgetsBinding;
-import 'package:kraken/kraken.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart' show MaterialApp;
+import 'package:flutter/widgets.dart';
+import 'package:kraken/widget.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -14,13 +15,6 @@ String pass = (AnsiPen()..green())('[TEST PASS]');
 String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
-  KrakenController controller = KrakenController();
-  registerDartTestMethodsToCpp();
-  initTestFramework();
-  addJSErrorListener((String err) {
-    print(err);
-  });
-
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSTextMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
@@ -29,29 +23,38 @@ void main() {
     Completer<String> completer = Completer();
     List specDescriptions = jsonDecode(payload);
 
+    runApp(MaterialApp(
+        title: 'Loading Test',
+        debugShowCheckedModeBanner: false,
+        home: KrakenWidget(
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+          bundleContent: '',)
+    ));
 
-    // Preload load test cases
-    for (Map spec in specDescriptions) {
-      String filename = spec['filename'];
-      String code = spec['code'];
-      evaluateTestScripts(code, url: filename);
-    }
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) async {
+      registerDartTestMethodsToCpp();
+      initTestFramework();
+      addJSErrorListener((String err) {
+        print(err);
+      });
 
-    // Start warm-up frame, make frameEnabled equals true.
-    try {
-      WidgetsBinding.instance.attachRootWidget(MaterialApp(home: Scaffold()));
-    } catch(err) {} // Ignore throwing errors.
+      // Preload load test cases
+      for (Map spec in specDescriptions) {
+        String filename = spec['filename'];
+        String code = spec['code'];
+        evaluateTestScripts(code, url: filename);
+      }
 
-    controller.view.attachView(RendererBinding.instance.renderView);
-
-    String status = await executeTest();
-    if (status == 'failed') {
-      print('$err with $status.');
-      completer.complete('failed');
-    } else {
-      print('$pass with $status.');
-      completer.complete('success');
-    }
+      String status = await executeTest();
+      if (status == 'failed') {
+        print('$err with $status.');
+        completer.complete('failed');
+      } else {
+        print('$pass with $status.');
+        completer.complete('success');
+      }
+    });
 
     return completer.future;
   });

@@ -1,10 +1,8 @@
-
 import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
 class CSSStyleProperty {
-
   static double getDisplayPortValue(input) {
     if (CSSStyleDeclaration.isNullOrEmptyValue(input)) {
       // Null is not equal with 0.0
@@ -15,7 +13,6 @@ class CSSStyleProperty {
     }
     return CSSLength.toDisplayPortValue(input as String);
   }
-
 
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
@@ -95,14 +92,14 @@ class CSSStyleProperty {
     }
 
     return [x, y];
-  } 
+  }
 
   static bool isShorthandProperty(String property) {
-    return property == PADDING || 
-      property == MARGIN ||
-      property == BORDER ||
-      property == BACKGROUND ||
-      property == FONT ||
-      property == ANIMATION;
+    return property == PADDING ||
+        property == MARGIN ||
+        property == BORDER ||
+        property == BACKGROUND ||
+        property == FONT ||
+        property == ANIMATION;
   }
 }

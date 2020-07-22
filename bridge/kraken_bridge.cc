@@ -87,8 +87,8 @@ void *getJSContext(int32_t contextId) {
   return contextPool[contextId];
 }
 
-int32_t checkContext(int32_t contextId) {
-  return contextId < maxPoolSize && contextPool[contextId] != nullptr;
+bool checkContext(int32_t contextId) {
+  return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
 }
 
 void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename,

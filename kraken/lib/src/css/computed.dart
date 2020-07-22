@@ -213,17 +213,12 @@ mixin CSSComputedMixin on RenderBox {
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
     bool isFlex = style['display'].endsWith('flex');
-    bool isHoriontalDirection = !style.contains('flexDirection') ||
-      style['flexDirection'] == 'row';
-    bool isAlignItemsStretch = !style.contains('alignItems') ||
-      style['alignItems'] == 'stretch';
-    bool isFlexNoWrap = style['flexWrap'] != 'wrap' &&
-        style['flexWrap'] != 'wrap-reverse';
+    bool isHoriontalDirection = !style.contains('flexDirection') || style['flexDirection'] == 'row';
+    bool isAlignItemsStretch = !style.contains('alignItems') || style['alignItems'] == 'stretch';
+    bool isFlexNoWrap = style['flexWrap'] != 'wrap' && style['flexWrap'] != 'wrap-reverse';
     bool isChildAlignSelfStretch = childStyle['alignSelf'] == 'stretch';
 
-    if (isFlex && isHoriontalDirection && isFlexNoWrap &&
-        (isAlignItemsStretch || isChildAlignSelfStretch)
-    ) {
+    if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
 
