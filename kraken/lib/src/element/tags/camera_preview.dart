@@ -138,16 +138,16 @@ class CameraPreviewElement extends Element {
     if (cameraDescription == null) {
       isFallback = true;
       _invokeReady();
-      sizedBox.child = buildFallbackView('Camera Fallback View');
+      sizedBox.child = _buildFallbackView('Camera Fallback View');
     } else {
       await _initCamera();
     }
   }
 
-  RenderBox buildFallbackView(String description) {
+  RenderBox _buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: CSSColor.transparent);
+    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: Color(0xFFFFFFFF));
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),

@@ -261,13 +261,35 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     return borderStyle;
   }
 
+  static double getBorderWidth(String input) {
+    // https://drafts.csswg.org/css2/#border-width-properties
+    // The interpretation of the first three values depends on the user agent. 
+    // The following relationships must hold, however:
+    // thin ≤ medium ≤ thick.
+    double borderWidth;
+    switch (input) {
+      case THIN:
+        borderWidth = 1;
+        break;
+      case MEDIUM:
+        borderWidth = 3;
+        break;
+      case THICK:
+        borderWidth = 5;
+        break;
+      default:
+        borderWidth = CSSLength.toDisplayPortValue(input);
+    }
+    return borderWidth;
+  }
+
   static Map _getShorthandInfo(String input) {
     List<String> properties = CSSStyleProperty.getBorderValues(input);
     if (properties == null) return null;
 
     double width;
     if (properties[0] != null) {
-      width = CSSLength.toDisplayPortValue(properties[0]);
+      width = getBorderWidth(properties[0]);
     }
 
     BorderStyle style;
@@ -327,12 +349,12 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
       final String borderWidthName = borderName + widthName; // borderWidth
       if (style.contains(borderSideWidthName) && (style[borderSideWidthName] as String).isNotEmpty) {
-        borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]);
+        borderWidth = getBorderWidth(style[borderSideWidthName]);
       } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[widthName] != null) {
         // eg. borderLeft: 'solid 1px black'
         borderWidth = borderSideShorthandInfo[widthName];
       } else if (style.contains(borderWidthName)) {
-        borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]);
+        borderWidth = getBorderWidth(style[borderWidthName]);
       } else if (borderShorthandInfo != null && borderShorthandInfo[widthName] != null) {
         // eg. border: 'solid 2px red'
         borderWidth = borderShorthandInfo[widthName];

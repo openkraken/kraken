@@ -71,6 +71,11 @@ const String WORD_SPACING = 'wordSpacing';
 const String BOX_SHADOW = 'boxShadow';
 
 // values
+
+
+const String THIN = 'thin'; // A thin border.
+const String MEDIUM = 'medium'; // A medium border.
+const String THICK = 'thick'; // A thick border.
 const String NORMAL = 'normal';
 const String SOLID = 'solid';
 const String NONE = 'none';

@@ -98,7 +98,7 @@ class CSSStyleProperty {
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work 
     for (String property in properties) {
-      if (width == null && CSSLength.isLength(property)) {
+      if (width == null && (CSSLength.isLength(property) || property == THIN || property == MEDIUM || property == THICK)) {
         width = property;
       } else if (style == null && (property == SOLID || property == NONE)) {
         style = property;

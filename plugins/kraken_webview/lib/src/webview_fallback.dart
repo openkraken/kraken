@@ -31,7 +31,7 @@ class FallbackWebView with CSSTextMixin implements WebViewPlatform {
   }) {
     String description = _getWebViewDescriptionFromCreationParams(creationParams);
     TextStyle textStyle = getTextStyle(CSSStyleDeclaration())
-        .copyWith(backgroundColor: CSSColor.transparent);
+        .copyWith(backgroundColor: Color(0xFFFFFFFF));
 
     return RenderFallbackViewBox(
       child: RenderParagraph(
