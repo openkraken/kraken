@@ -91,7 +91,6 @@ mixin CSSTextMixin {
       fontSize: getFontSize(style),
       letterSpacing: getLetterSpacing(style),
       wordSpacing: getWordSpacing(style),
-      height: getHeight(style),
       locale: getLocale(style),
       background: getBackground(style),
       foreground: getForeground(style),
@@ -292,14 +291,6 @@ mixin CSSTextMixin {
     } else {
       return DEFAULT_WORD_SPACING;
     }
-  }
-
-  double getHeight(CSSStyleDeclaration style) {
-    if (style.contains(LINE_HEIGHT)) {
-      var lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
-      if (lineHeight != null) return lineHeight / getFontSize(style);
-    }
-    return null;
   }
 
   Locale getLocale(CSSStyleDeclaration style) {

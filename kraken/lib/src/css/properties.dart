@@ -35,6 +35,7 @@ const String FONT_WEIGHT = 'fontWeight';
 const String FONT_SIZE = 'fontSize';
 const String LINE_HEIGHT = 'lineHeight';
 const String FONT_FAMILY = 'fontFamily';
+const String VERTICAL_ALIGN = 'verticalAlign';
 
 const String FLEX_DIRECTION = 'flexDirection';
 const String FLEX_WRAP = 'flexWrap';

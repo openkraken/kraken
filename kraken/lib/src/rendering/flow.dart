@@ -10,10 +10,11 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
 class _RunMetrics {
-  _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.childCount);
+  _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.baselineExtent, this.childCount);
 
   final double mainAxisExtent;
   final double crossAxisExtent;
+  final double baselineExtent;
   final int childCount;
 }
 
@@ -470,9 +471,12 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   }
 
   double _getCrossAxisExtent(RenderBox child) {
+    CSSStyleDeclaration childStyle = _getChildStyle(child);
+    double lineHeight = getLineHeight(childStyle);
+
     switch (direction) {
       case Axis.horizontal:
-        return child.size.height;
+        return lineHeight != null ? lineHeight : child.size.height;
       case Axis.vertical:
         return child.size.width;
     }
@@ -586,6 +590,9 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     RenderBox preChild = null;
 
+    double maxSizeAboveBaseline = 0;
+    double maxSizeBelowBaseline = 0;
+
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
@@ -615,14 +622,43 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
-        runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, _effectiveChildCount));
+        runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, maxSizeAboveBaseline, _effectiveChildCount));
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
+        maxSizeAboveBaseline = 0.0;
+        maxSizeBelowBaseline = 0.0;
         _effectiveChildCount = 0;
       }
       runMainAxisExtent += childMainAxisExtent;
       if (_effectiveChildCount > 0) runMainAxisExtent += spacing;
-      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+
+      /// Caculate baseline extent of layout box
+      CSSStyleDeclaration childStyle = _getChildStyle(child);
+      VerticalAlign verticalAlign = getVerticalAlign(childStyle);
+      if (verticalAlign == VerticalAlign.baseline) {
+        double distance = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+        CSSStyleDeclaration childStyle = _getChildStyle(child);
+        double lineHeight = getLineHeight(childStyle);
+        double leading = 0;
+        if (lineHeight != null) {
+          leading = lineHeight - child.size.height;
+        }
+
+        if (distance != null) {
+          maxSizeAboveBaseline = math.max(
+            distance + leading / 2,
+            maxSizeAboveBaseline,
+          );
+          maxSizeBelowBaseline = math.max(
+            child.size.height - distance + leading / 2,
+            maxSizeBelowBaseline,
+          );
+          runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        }
+      } else {
+        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+      }
+
       _effectiveChildCount += 1;
       childParentData.runIndex = runMetrics.length;
       preChild = child;
@@ -633,7 +669,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
       crossAxisExtent += runCrossAxisExtent;
       if (runMetrics.isNotEmpty) crossAxisExtent += runSpacing;
-      runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
+      runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, maxSizeAboveBaseline, childCount));
     }
 
     final int runCount = runMetrics.length;
@@ -704,6 +740,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
+      final double runBaselineExtent = metrics.baselineExtent;
       final int metricChildCount = metrics.childCount;
 
       final double mainAxisFreeSpace = math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
@@ -736,6 +773,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       double childMainPosition = flipMainAxis ? containerMainAxisExtent - childLeadingSpace : childLeadingSpace;
 
       if (flipCrossAxis) crossAxisOffset -= runCrossAxisExtent;
+
       while (child != null) {
         final RenderLayoutParentData childParentData = child.parentData;
 
@@ -755,13 +793,50 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         Offset relativeOffset =
             _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childCrossAxisOffset + paddingTop);
 
-        CSSStyleDeclaration childStyle;
-        if (child is RenderTextBox) {
-          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
-        } else if (child is RenderElementBoundary) {
-          int childNodeId = child.targetId;
-          childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+        CSSStyleDeclaration childStyle = _getChildStyle(child);
+
+        // Leading between height of line box's content area and line height of line box
+        double lineBoxLeading = 0;
+        double lineBoxHeight = getLineHeight(style);
+        if (lineBoxHeight != null) {
+          lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
         }
+
+        double childLineHeight = getLineHeight(childStyle);
+        double childLeading = 0;
+        if (childLineHeight != null) {
+          childLeading = childLineHeight - child.size.height;
+        }
+
+        double childBaselineExtent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true) ?? 0;
+        double topOffset = relativeOffset.dy;
+
+        VerticalAlign verticalAlign = getVerticalAlign(childStyle);
+        switch(verticalAlign) {
+          case VerticalAlign.baseline:
+            topOffset = lineBoxLeading / 2 + (runBaselineExtent - childBaselineExtent);
+            break;
+          case VerticalAlign.top:
+            topOffset = childLeading / 2;
+            break;
+          case VerticalAlign.bottom:
+            topOffset = (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent)
+              - child.size.height - childLeading / 2;
+            break;
+//          case VerticalAlign.textTop:
+//            topOffset = leading / 2;
+//            break;
+//          case VerticalAlign.textBottom:
+//            topOffset = leading / 2 + runCrossAxisExtent - child.size.height;
+//            break;
+            /// @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
+            /// currently flutter lack the api to caculate x-height of glyph
+          case VerticalAlign.middle:
+            topOffset = lineBoxLeading / 2 + (runBaselineExtent - childBaselineExtent);
+            break;
+        }
+
+        relativeOffset = Offset(relativeOffset.dx, topOffset);
 
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
@@ -779,6 +854,17 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
+  }
+
+  CSSStyleDeclaration _getChildStyle(RenderBox child) {
+    CSSStyleDeclaration childStyle;
+    if (child is RenderTextBox) {
+      childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+    } else if (child is RenderElementBoundary) {
+      int childNodeId = child.targetId;
+      childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+    }
+    return childStyle;
   }
 
   String _getChildDisplayFromRenderBox(RenderBox child) {
