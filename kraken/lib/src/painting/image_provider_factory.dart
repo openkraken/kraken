@@ -3,56 +3,77 @@
  * Author: Kraken Team.
  */
 
-import 'dart:typed_data';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/painting.dart';
 
 
+/// This class allows user to override default implement of image loading,
 ///
-/// [ImageElement] allow change Default ImageProvider for
+/// [ImageProviderFactory] define the interface, will be used by [CSSUrl] create
+/// ImageProvider, which used by [ImageElement] to render image.
+/// [ImageType] defines the types of different image source.
+/// use [setCustomImageProviderFactory] override default ImageProviderFactory
 ///
-/// can be replace by call [ImageElement.setCustomImageProviderFactory]
-///
-/// [url] startsWith '//' ,'http://'，'https://'
-/// [cache] cache maybe store、auto
-///
-/// only
-///
+/// The ImageProviderFactory uses to render image by following steps:
+/// 1. ImageElement creates CSSUrl.
+/// 2. CSSUrl parses url & get corresponding ImageProviderFactory of ImageType.
+/// 3. CSSUrl creates ImageProvider by corresponding ImageProviderFactory with url & param.
+/// 4. ImageElement uses created ImageProvider to render Image.
 
 typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param]);
 
-///
-/// create image from after JSRuntime Converted
-///
-/// [param] constains following types
-///  params has [cache] maybe store、auto default is auto
-///
-/// [url] constains following types
-/// ----------------------------------------------------------------------------------------------------
-/// | type                    | example                                |
-/// ----------------------------------------------------------------------------------------------------
-/// | type [cacheNetworkImage]    | startsWith '//' ,'http://'，'https://' | cacheNetImage [param]may has cache store、auto
-/// | type [nocacheNetworkImage]  |                                        | [param]may has cache
-/// |                         |                                        | cache maybe store、auto; default is auto
-/// ----------------------------------------------------------------------------------------------------
-/// | type [fileImage]        | startsWith 'file://''                  | [param] file => [File]
-/// ----------------------------------------------------------------------------------------------------
-/// | type [dataImage]        | startsWith 'data://''                  | [param] => [Uint8List]
-/// |                         |                                        | Data URL:  https://tools.ietf.org/html/rfc2397
-/// |                         |                                        | dataurl := "data:" [ mediatype ] [ ";base64" ] "," data
-/// ----------------------------------------------------------------------------------------------------
-/// | type [fallbackImage]    | image from JSRuntime                   | maybe assetimage
-/// ----------------------------------------------------------------------------------------------------
-///
+/// defines the types of supported image source.
+/// [ImageType] is used to map url to corresponding ImageProviderFactory
 enum ImageType {
+  /// Indicate image source is network and require implement can auto cache to storage.
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation [defaultCachedNetImageProviderFactory].
+  /// will be called when [url] startsWith '//' ,'http://'，'https://'.
+  /// [param] will be [bool], the value is true.
   cachedNetworkImage,
+
+  /// Indicate another image source is network, require to get image immediately from network without cache.
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation [defaultUncachedNetworkImageProviderFactory]
+  /// will be called when [url] startsWith '//' ,'http://'，'https://'
+  /// [param] will be [bool], the value is false.
   uncachedNetworkImage,
+
+  /// Indicate image source is file path
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation [defaultFileImageProviderFactory]
+  /// will be called when [url] startsWith 'file://'
+  /// [param] will be type [File]
   fileImage,
+
+  /// Indicate image source is raw data.
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation [defaultDataImageProviderFactory]
+  /// will be called when [url] startsWith 'data://'
+  /// [param]  will be [Uint8List], value is the content part of the data URI as bytes,
+  /// which is converted by [UriData.contentAsBytes].
   dataImage,
+
+  /// Indicate image source is blob path.
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation is [defaultBlobImageProviderFactory]
+  /// [blobPath] @TODO
   blobImage,
+
+  /// Indicate image source is not any of below.
+  ///
+  /// NOTE:
+  /// default ImageProviderFactory implementation is [defaultFallbackImageProvider]
+  /// Current, this type only has asset image source, [fallbackImage] should treat as asset image.
   fallbackImage
 }
 
@@ -107,27 +128,17 @@ void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory cus
   }
 }
 
-///
-/// Create image from data
-///
-/// [uriDataPath] startsWith 'data://''
-/// desc:
-/// * Data URL:  https://tools.ietf.org/html/rfc2397
-/// * dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
-///
+/// default ImageProviderFactory implementation of [ImageType.cachedNetworkImage]
 ImageProvider defaultCachedNetImageProviderFactory(String url, [dynamic param]) {
   return CachedNetworkImage(url);
 }
 
+/// default ImageProviderFactory implementation of [ImageType.uncachedNetworkImage]
 ImageProvider defaultUncachedNetworkImageProviderFactory(String url, [dynamic param]) {
   return NetworkImage(url);
 }
 
-///
-/// Create image from network
-///
-/// [rawPath] startsWith 'file://''
-///
+/// default ImageProviderFactory implementation of [ImageType.fileImage]
 ImageProvider defaultFileImageProviderFactory(String rawPath, [dynamic param]) {
   ImageProvider _imageProvider = null;
   if(param is File){
@@ -136,14 +147,7 @@ ImageProvider defaultFileImageProviderFactory(String rawPath, [dynamic param]) {
   return _imageProvider;
 }
 
-///
-/// Create image from data
-///
-/// [uriDataPath] startsWith 'data://''
-/// desc:
-/// * Data URL:  https://tools.ietf.org/html/rfc2397
-/// * dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
-///
+/// default ImageProviderFactory implementation of [ImageType.dataImage].
 ImageProvider defaultDataImageProviderFactory(String uriDataPath, [dynamic param]) {
   ImageProvider _imageProvider = null;
   if (param is Uint8List) {
@@ -152,21 +156,13 @@ ImageProvider defaultDataImageProviderFactory(String uriDataPath, [dynamic param
   return _imageProvider;
 }
 
-///
-/// Create image from network
-///
-/// [blobPath] @TODO
-///
+/// default ImageProviderFactory implementation of [ImageType.blobImage].
 ImageProvider defaultBlobImageProviderFactory(String blobPath, [dynamic param]) {
   // @TODO: support blob file url
   return null;
 }
 
-///
-/// create image Fallback to image
-/// maybe asset image
-/// [url] image from JSRuntime
-///
+/// default ImageProviderFactory implementation of [ImageType.fallbackImage].
 ImageProvider defaultFallbackImageProvider(String rawUrl, [dynamic param]) {
   return AssetImage(rawUrl);
 }
