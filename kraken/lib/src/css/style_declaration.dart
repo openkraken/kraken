@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 typedef StyleChangeListener = void Function(
   String property,

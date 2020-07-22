@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
 // CSS Backgrounds and Borders: https://drafts.csswg.org/css-backgrounds/
@@ -263,7 +262,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
   static double getBorderWidth(String input) {
     // https://drafts.csswg.org/css2/#border-width-properties
-    // The interpretation of the first three values depends on the user agent. 
+    // The interpretation of the first three values depends on the user agent.
     // The following relationships must hold, however:
     // thin ≤ medium ≤ thick.
     double borderWidth;
