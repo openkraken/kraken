@@ -14,6 +14,8 @@ import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 
+class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
+
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
   ScrollPosition position;
@@ -259,9 +261,9 @@ class RenderSingleChildViewport extends RenderBox
 
   @override
   void setupParentData(RenderObject child) {
-    // We don't actually use the offset argument in BoxParentData, so let's
-    // avoid allocating it at all.
-    if (child.parentData is! ParentData) child.parentData = ParentData();
+    if (child.parentData is! RenderSingleViewPortParentData) {
+      child.parentData = RenderSingleViewPortParentData();
+    }
   }
 
   @override
@@ -519,5 +521,20 @@ class RenderSingleChildViewport extends RenderBox
         );
     }
     return null;
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    double result;
+    final RenderSingleViewPortParentData childParentData = child.parentData;
+    double candidate = child.getDistanceToActualBaseline(baseline);
+    if (candidate != null) {
+      candidate += childParentData.offset.dy;
+      if (result != null)
+        result = math.min(result, candidate);
+      else
+        result = candidate;
+    }
+    return result;
   }
 }

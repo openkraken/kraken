@@ -478,10 +478,17 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   double _getCrossAxisExtent(RenderBox child) {
     CSSStyleDeclaration childStyle = _getChildStyle(child);
     double lineHeight = getLineHeight(childStyle);
+    double margin = 0;
 
+    if (child is RenderElementBoundary) {
+      int childNodeId = child.targetId;
+      Element childEl = getEventTargetByTargetId<Element>(childNodeId);
+      margin = childEl.cropMarginHeight;
+    }
     switch (direction) {
       case Axis.horizontal:
-        return lineHeight != null ? lineHeight : child.size.height;
+        return lineHeight != null ? math.max(lineHeight + margin, child.size.height) :
+          child.size.height;
       case Axis.vertical:
         return child.size.width;
     }
@@ -652,7 +659,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (lineHeight != null) {
           childLeading = lineHeight - child.size.height;
         }
-
         maxSizeAboveBaseline = math.max(
           childAscent + childLeading / 2,
           maxSizeAboveBaseline,
@@ -665,7 +671,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
-
       _effectiveChildCount += 1;
       childParentData.runIndex = runMetrics.length;
       preChild = child;
@@ -699,7 +704,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
-
     switch (direction) {
       case Axis.horizontal:
         contentSize = Size(constraintWidth, constraintHeight);
@@ -750,7 +754,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final int metricChildCount = metrics.childCount;
-      print('runCrossAxisExtent---------------------- $runCrossAxisExtent');
 
       final double mainAxisFreeSpace = math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
       double childLeadingSpace = 0.0;
