@@ -12,10 +12,11 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class Kraken {
-  static String NAME_METHOD_SPLIT = "__";
+  static String NAME_METHOD_SPLIT = "@≥_≤@";
 
   private String url;
   private FlutterEngine flutterEngine;
+  // the KrakenWidget's name, use this property to control an KrakenWidget of flutter side.
   private String name;
 
   private MethodChannel.MethodCallHandler handler;

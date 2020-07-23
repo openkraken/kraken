@@ -5,7 +5,7 @@ import 'package:kraken/kraken.dart';
 
 typedef MethodCallHandler = Future<dynamic> Function(String methodd, dynamic arguments);
 
-final String NAME_METHOD_SPLIT = '__';
+final String NAME_METHOD_SPLIT = '@≥_≤@';
 
 class KrakenMethodChannel {
   static MethodChannel _channel = MethodChannel('kraken')
