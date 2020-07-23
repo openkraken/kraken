@@ -355,7 +355,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   String _getFlexBasis(RenderBox child) {
     final RenderFlexParentData childParentData = child.parentData;
-    return childParentData.flexBasis ?? 'auto';
+    return childParentData.flexBasis ?? AUTO;
   }
 
   double _getShrinkConstraints(RenderBox child, Map<int, dynamic> childSizeMap, double freeSpace) {
@@ -422,8 +422,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       String flexBasis = _getFlexBasis(child);
 
       if (_flexDirection == FlexDirection.row) {
-        String width = child.style['width'];
-        if (flexBasis == 'auto') {
+        String width = child.style[WIDTH];
+        if (flexBasis == AUTO) {
           if (width != null) {
             minConstraints = CSSLength.toDisplayPortValue(width) ?? 0;
           } else {
@@ -433,8 +433,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       } else {
-        String height = child.style['height'];
-        if (flexBasis == 'auto') {
+        String height = child.style[HEIGHT];
+        if (flexBasis == AUTO) {
           if (height != null) {
             minConstraints = CSSLength.toDisplayPortValue(height) ?? 0;
           } else {
@@ -480,15 +480,15 @@ class RenderFlexLayout extends RenderLayoutBox {
       switch (_flexDirection) {
         case FlexDirection.column:
         case FlexDirection.columnReverse:
-          if (style.contains('minHeight')) {
-            double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
+          if (style.contains(MIN_HEIGHT)) {
+            double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
             return minHeight < maxMainSize ? maxMainSize : minHeight;
           }
           return child.size.height > maxMainSize ? child.size.height : maxMainSize;
         case FlexDirection.row:
         case FlexDirection.rowReverse:
-          if (style.contains('minWidth')) {
-            double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
+          if (style.contains(MIN_WIDTH)) {
+            double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
             return minWidth < maxMainSize ? maxMainSize : minWidth;
           }
           return child.size.width > maxMainSize ? child.size.width : maxMainSize;
@@ -538,7 +538,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (style == null) return false;
 
-    return style['display'] == 'none';
+    return style[DISPLAY] == NONE;
   }
 
   bool isPlaceholderPositioned(RenderObject child) {
@@ -642,7 +642,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // Caculate max height constaints
         if (sizeType == BoxSizeType.specified) {
-          maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle['height']);
+          maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT]);
         } else {
           // Child in flex line expand automatic when height is not specified
           if (flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) {
@@ -717,7 +717,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         assert(() {
           final String identity = isHorizontalFlexDirection(_flexDirection) ? 'row' : 'column';
           final String axis = isHorizontalFlexDirection(_flexDirection) ? 'horizontal' : 'vertical';
-          final String dimension = isHorizontalFlexDirection(_flexDirection) ? 'width' : 'height';
+          final String dimension = isHorizontalFlexDirection(_flexDirection) ? WIDTH : HEIGHT;
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
           if (!canFlex) {
@@ -1337,8 +1337,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (style.contains('right')) {
       parentData.right = CSSLength.toDisplayPortValue(style['right']);
     }
-    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
+    parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+    parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
     parentData.zIndex = CSSLength.toInt(style['zIndex']);
 
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
