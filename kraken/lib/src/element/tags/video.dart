@@ -189,7 +189,6 @@ class VideoElement extends Element {
 
   @override
   dynamic getProperty(String key) {
-    print('getProperty $key');
     switch (key) {
       case 'loop':
         return controller.value.isLooping;

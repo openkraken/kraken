@@ -28,6 +28,7 @@ const String BORDER = 'border';
 const String BORDER_WIDTH = 'borderWidth';
 const String BORDER_STYLE = 'borderStyle';
 const String BORDER_COLOR = 'borderColor';
+const String BORDER_RADIUS = 'borderRadius';
 
 const String FONT = 'font';
 const String FONT_STYLE = 'fontStyle';
@@ -63,8 +64,18 @@ const String TEXT_DECORATION = 'textDecoration';
 const String TEXT_DECORATION_LINE = 'textDecorationLine';
 const String TEXT_DECORATION_COLOR = 'textDecorationColor';
 const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
+const String TEXT_SHADOW = 'textShadow';
 const String LETTER_SPACING = 'letterSpacing';
 const String WORD_SPACING = 'wordSpacing';
 
+const String BOX_SHADOW = 'boxShadow';
+
 // values
+
+
+const String THIN = 'thin'; // A thin border.
+const String MEDIUM = 'medium'; // A medium border.
+const String THICK = 'thick'; // A thick border.
 const String NORMAL = 'normal';
+const String SOLID = 'solid';
+const String NONE = 'none';

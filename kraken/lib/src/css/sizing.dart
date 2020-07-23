@@ -6,7 +6,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 

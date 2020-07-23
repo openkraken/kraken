@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 const String INPUT = 'INPUT';
 
@@ -163,7 +162,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     return properties['placeholder'] ?? '';
   }
 
-  get cursorColor => CSSColor.black;
+  get cursorColor => CSSColor.initial;
 
   @override
   void handleClick(Event event) {

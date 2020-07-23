@@ -196,167 +196,188 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       getBorderRadius(style, 'borderBottomLeftRadius'),
       getBorderRadius(style, 'borderBottomRightRadius')
     ];
+
     return TransitionDecoration(color?.alpha, color?.red, color?.green, color?.blue, leftSide, topSide, rightSide,
         bottomSide, decorationImage, getBoxShadow(style), borderRadiusTLTRBLBR, gradient);
   }
 
   /// Tip: inset not supported.
-  static RegExp commaRegExp = RegExp(r',');
   List<BoxShadow> getBoxShadow(CSSStyleDeclaration style) {
     List<BoxShadow> boxShadow = [];
-    if (style.contains('boxShadow')) {
-      String processedValue = CSSColor.preprocessCSSPropertyWithRGBAColor(style['boxShadow']);
-      List<String> rawShadows = processedValue.split(commaRegExp);
-      for (String rawShadow in rawShadows) {
-        List<String> shadowDefinitions = rawShadow.trim().split(_splitRegExp);
-        if (shadowDefinitions.length > 2) {
-          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[0]) ?? 0;
-          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
-          double blurRadius =
-              shadowDefinitions.length > 3 ? CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0 : 0.0;
-          double spreadRadius =
-              shadowDefinitions.length > 4 ? CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0 : 0.0;
+    if (style.contains(BOX_SHADOW)) {
+      var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
+      shadows.forEach((shadowDefinitions) {
+        // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
+        Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+        double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+        double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
+        double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
+        double spreadRadius = CSSLength.toDisplayPortValue(shadowDefinitions[4]) ?? 0;
 
-          Color color = CSSColor.generate(shadowDefinitions.last);
-          if (color != null) {
-            boxShadow.add(BoxShadow(
-              offset: Offset(offsetX, offsetY),
-              blurRadius: blurRadius,
-              spreadRadius: spreadRadius,
-              color: color,
-            ));
-          }
+        if (color != null) {
+          boxShadow.add(BoxShadow(
+            offset: Offset(offsetX, offsetY),
+            blurRadius: blurRadius,
+            spreadRadius: spreadRadius,
+            color: color,
+          ));
         }
-      }
+      });
 
       // Tips only debug.
       if (!PRODUCTION && boxShadow.isEmpty) {
-        print('[Warning] Wrong style format with boxShadow: ${style['boxShadow']}');
+        print('[Warning] Wrong style format with boxShadow: ${style[BOX_SHADOW]}');
         print('    Correct syntax: inset? && <length>{2,4} && <color>?');
       }
     }
+
     return boxShadow;
   }
 
   double getBorderRadius(CSSStyleDeclaration style, String side) {
     if (style.contains(side)) {
       return CSSLength.toDisplayPortValue(style[side]) ?? 0;
-    } else if (style.contains('borderRadius')) {
-      return CSSLength.toDisplayPortValue(style['borderRadius']) ?? 0;
+    } else if (style.contains(BORDER_RADIUS)) {
+      return CSSLength.toDisplayPortValue(style[BORDER_RADIUS]) ?? 0;
     }
     return 0.0;
   }
 
-  static RegExp _splitRegExp = RegExp(r' ');
-
-  static List<String> getShorttedProperties(String input) {
-    assert(input != null);
-    return input.trim().split(_splitRegExp);
-  }
-
   // border default width 3.0
-  static double defaultBorderLineWidth = 3.0;
+  static double defaultBorderWidth = 3.0;
   static BorderStyle defaultBorderStyle = BorderStyle.none;
-  static Color defaultBorderColor = CSSColor.black;
+  static Color defaultBorderColor = CSSColor.initial;
 
   static BorderStyle getBorderStyle(String input) {
     BorderStyle borderStyle;
     switch (input) {
-      case 'solid':
+      case SOLID:
         borderStyle = BorderStyle.solid;
         break;
-      default:
+      case NONE:
         borderStyle = BorderStyle.none;
         break;
     }
     return borderStyle;
   }
 
-  // TODO: Shortted order in web not keep in same order
-  static Map _getShorttedInfoFromString(String input) {
-    List<String> splittedBorder = getShorttedProperties(input);
+  static double getBorderWidth(String input) {
+    // https://drafts.csswg.org/css2/#border-width-properties
+    // The interpretation of the first three values depends on the user agent.
+    // The following relationships must hold, however:
+    // thin ≤ medium ≤ thick.
+    double borderWidth;
+    switch (input) {
+      case THIN:
+        borderWidth = 1;
+        break;
+      case MEDIUM:
+        borderWidth = 3;
+        break;
+      case THICK:
+        borderWidth = 5;
+        break;
+      default:
+        borderWidth = CSSLength.toDisplayPortValue(input);
+    }
+    return borderWidth;
+  }
 
-    double width = splittedBorder.length > 0 ? CSSLength.toDisplayPortValue(splittedBorder[0]) : null;
+  static Map _getShorthandInfo(String input) {
+    List<String> properties = CSSStyleProperty.getBorderValues(input);
+    if (properties == null) return null;
 
-    BorderStyle style = splittedBorder.length > 1 ? getBorderStyle(splittedBorder[1]) : null;
+    double width;
+    if (properties[0] != null) {
+      width = getBorderWidth(properties[0]);
+    }
 
-    Color color = splittedBorder.length > 2 ? CSSColor.generate(splittedBorder[2]) : null;
+    BorderStyle style;
+    if (properties[1] != null) {
+      style = getBorderStyle(properties[1]);
+    }
 
-    return {'Color': color, 'Style': style, 'Width': width};
+    Color color;
+    if (properties[2] != null) {
+      color = CSSColor.parseColor(properties[2]);
+    }
+
+    return {'Color': color ?? defaultBorderColor, 'Style': style ?? defaultBorderStyle, 'Width': width ?? defaultBorderWidth};
   }
 
   // TODO: shorthand format like `borderColor: 'red yellow green blue'` should full support
   static TransitionBorderSide getBorderSideByStyle(CSSStyleDeclaration style, String side) {
-    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderLineWidth, defaultBorderStyle);
+    TransitionBorderSide borderSide = TransitionBorderSide(0, 0, 0, 0, defaultBorderWidth, defaultBorderStyle);
     final String borderName = 'border';
     final String borderSideName = borderName + side; // eg. borderLeft/borderRight
     // Same with the key in shortted info map
     final String widthName = 'Width';
     final String styleName = 'Style';
     final String colorName = 'Color';
-    Map borderShorttedInfo;
-    Map borderSideShorttedInfo;
-    if (style.contains(borderName)) {
-      borderShorttedInfo = _getShorttedInfoFromString(style[borderName]);
+    Map borderShorthandInfo;
+    Map borderSideShorthandInfo;
+    if (style.contains(BORDER)) {
+      borderShorthandInfo = _getShorthandInfo(style[BORDER]);
     }
 
     if (style.contains(borderSideName)) {
-      borderSideShorttedInfo = _getShorttedInfoFromString(style[borderSideName]);
+      borderSideShorthandInfo = _getShorthandInfo(style[borderSideName]);
     }
 
     // Set border style
+    BorderStyle borderStyle;
     final String borderSideStyleName = borderSideName + styleName; // eg. borderLeftStyle/borderRightStyle
     final String borderStyleName = borderName + styleName; // borderStyle
     if (style.contains(borderSideStyleName)) {
-      borderSide.borderStyle = getBorderStyle(style[borderSideStyleName]);
-    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[styleName] != null) {
-      borderSide.borderStyle = borderSideShorttedInfo[styleName];
+      borderStyle = getBorderStyle(style[borderSideStyleName]);
+    } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[styleName] != null) {
+      borderStyle = borderSideShorthandInfo[styleName];
     } else if (style.contains(borderStyleName)) {
-      borderSide.borderStyle = getBorderStyle(style[borderStyleName]);
-    } else if (borderShorttedInfo != null && borderShorttedInfo[styleName] != null) {
-      borderSide.borderStyle = borderShorttedInfo[styleName];
+      borderStyle = getBorderStyle(style[borderStyleName]);
+    } else if (borderShorthandInfo != null && borderShorthandInfo[styleName] != null) {
+      borderStyle = borderShorthandInfo[styleName];
     }
 
+    borderSide.borderStyle = borderStyle ?? defaultBorderStyle;
+
+    // Set border width
+    double borderWidth;
     // border width should be zero when style is none
     if (borderSide.borderStyle == BorderStyle.none) {
-      borderSide.borderWidth = 0.0;
+      borderWidth = 0.0;
     } else {
-      // Set border width
       final String borderSideWidthName = borderSideName + widthName; // eg. borderLeftWidth/borderRightWidth
       final String borderWidthName = borderName + widthName; // borderWidth
       if (style.contains(borderSideWidthName) && (style[borderSideWidthName] as String).isNotEmpty) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderSideWidthName]) ?? 0;
-      } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[widthName] != null) {
+        borderWidth = getBorderWidth(style[borderSideWidthName]);
+      } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[widthName] != null) {
         // eg. borderLeft: 'solid 1px black'
-        borderSide.borderWidth = borderSideShorttedInfo[widthName];
+        borderWidth = borderSideShorthandInfo[widthName];
       } else if (style.contains(borderWidthName)) {
-        borderSide.borderWidth = CSSLength.toDisplayPortValue(style[borderWidthName]) ?? 0;
-      } else if (borderShorttedInfo != null && borderShorttedInfo[widthName] != null) {
+        borderWidth = getBorderWidth(style[borderWidthName]);
+      } else if (borderShorthandInfo != null && borderShorthandInfo[widthName] != null) {
         // eg. border: 'solid 2px red'
-        borderSide.borderWidth = borderShorttedInfo[widthName];
+        borderWidth = borderShorthandInfo[widthName];
       }
     }
+
+    borderSide.borderWidth = borderWidth ?? defaultBorderWidth;
 
     // Set border color
     Color borderColor;
     final String borderSideColorName = borderSideName + colorName; // eg. borderLeftColor/borderRightColor
     final String borderColorName = borderName + colorName; // borderColor
     if (style.contains(borderSideColorName)) {
-      borderColor = CSSColor.generate(style[borderSideColorName]);
-    } else if (borderSideShorttedInfo != null && borderSideShorttedInfo[colorName] != null) {
-      borderColor = borderSideShorttedInfo[colorName];
+      borderColor = CSSColor.parseColor(style[borderSideColorName]) ;
+    } else if (borderSideShorthandInfo != null && borderSideShorthandInfo[colorName] != null) {
+      borderColor = borderSideShorthandInfo[colorName];
     } else if (style.contains(borderColorName)) {
-      borderColor = CSSColor.generate(style[borderColorName]);
-    } else if (borderShorttedInfo != null && borderShorttedInfo[colorName] != null) {
-      borderColor = borderShorttedInfo[colorName];
+      borderColor = CSSColor.parseColor(style[borderColorName]);
+    } else if (borderShorthandInfo != null && borderShorthandInfo[colorName] != null) {
+      borderColor = borderShorthandInfo[colorName];
     }
 
-    if (borderColor != null) {
-      borderSide.color = borderSide.color.withAlpha(borderColor.alpha);
-      borderSide.color = borderSide.color.withRed(borderColor.red);
-      borderSide.color = borderSide.color.withGreen(borderColor.green);
-      borderSide.color = borderSide.color.withBlue(borderColor.blue);
-    }
+    borderSide.color = borderColor ?? defaultBorderColor;
 
     return borderSide;
   }
