@@ -159,7 +159,7 @@ describe('flexbox align-items', () => {
     await matchScreenshot();
   });
 
-  fit('should work with baseline when flex-direction is row', async () => {
+  it('should work with baseline when flex-direction is row', async () => {
     const container = document.createElement('div');
     setElementStyle(container, {
       width: '200px',
