@@ -217,12 +217,6 @@ VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
       return VerticalAlign.top;
     case 'bottom':
       return VerticalAlign.bottom;
-    case 'text-top':
-      return VerticalAlign.textTop;
-    case 'text-bottom':
-      return VerticalAlign.textBottom;
-    case 'middle':
-      return VerticalAlign.middle;
   }
   return VerticalAlign.baseline;
 }
