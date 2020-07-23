@@ -19,19 +19,20 @@ class _RunMetrics {
 
 /// Impl flow layout algorithm.
 class RenderFlowLayoutBox extends RenderLayoutBox {
-  RenderFlowLayoutBox({
-    List<RenderBox> children,
-    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
-    TextDirection textDirection = TextDirection.ltr,
-    Axis direction = Axis.horizontal,
-    double spacing = 0.0,
-    MainAxisAlignment runAlignment = MainAxisAlignment.start,
-    double runSpacing = 0.0,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
-    VerticalDirection verticalDirection = VerticalDirection.down,
-    CSSStyleDeclaration style,
-    int targetId,
-  })  : assert(direction != null),
+  RenderFlowLayoutBox(
+      {List<RenderBox> children,
+      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+      TextDirection textDirection = TextDirection.ltr,
+      Axis direction = Axis.horizontal,
+      double spacing = 0.0,
+      MainAxisAlignment runAlignment = MainAxisAlignment.start,
+      double runSpacing = 0.0,
+      CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.end,
+      VerticalDirection verticalDirection = VerticalDirection.down,
+      CSSStyleDeclaration style,
+      int targetId,
+      ElementManager elementManager})
+      : assert(direction != null),
         assert(mainAxisAlignment != null),
         assert(spacing != null),
         assert(runAlignment != null),
@@ -45,7 +46,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         _crossAxisAlignment = crossAxisAlignment,
         _textDirection = textDirection,
         _verticalDirection = verticalDirection,
-        super(targetId: targetId, style: style) {
+        super(targetId: targetId, style: style, elementManager: elementManager) {
     addAll(children);
   }
 
@@ -509,7 +510,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   // @override
   void performLayout() {
     RenderBox child = firstChild;
-    Element element = getEventTargetByTargetId<Element>(targetId);
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -538,8 +539,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double contentWidth = getElementComputedWidth(targetId);
-    double contentHeight = getElementComputedHeight(targetId);
+    double contentWidth = getElementComputedWidth(targetId, elementManager);
+    double contentHeight = getElementComputedHeight(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -562,7 +563,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId);
+          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -757,10 +758,12 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
         CSSStyleDeclaration childStyle;
         if (child is RenderTextBox) {
-          childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+          // @TODO: need to remove this after RenderObject merge have completed.
+          childStyle = elementManager.getEventTargetByTargetId<Element>(targetId)?.style;
         } else if (child is RenderElementBoundary) {
           int childNodeId = child.targetId;
-          childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+          // @TODO: need to remove this after RenderObject merge have completed.
+          childStyle = elementManager.getEventTargetByTargetId<Element>(childNodeId)?.style;
         }
 
         /// Apply position relative offset change.
@@ -789,7 +792,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
     if (targetId != null) {
-      Element element = getEventTargetByTargetId<Element>(targetId);
+      // @TODO: need to remove this after RenderObject merge have completed.
+      Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
       if (element != null) {
         String elementDisplayDeclaration = element.style['display'];
         display = CSSStyleDeclaration.isNullOrEmptyValue(elementDisplayDeclaration)
@@ -797,7 +801,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
             : element.style['display'];
 
         // @HACK: Use inline to impl flexWrap in with flex layout.
-        Element currentElement = getEventTargetByTargetId<Element>(this.targetId);
+        // @TODO: need to remove this after RenderObject merge have completed.
+        Element currentElement = elementManager.getEventTargetByTargetId<Element>(this.targetId);
         String currentElementDisplay =
             CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? currentElement.defaultDisplay : style['display'];
         if (currentElementDisplay.endsWith('flex') && style['flexWrap'] == 'wrap') {

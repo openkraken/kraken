@@ -6,6 +6,7 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
+import 'package:kraken/launcher.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -13,50 +14,51 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/module.dart';
 
-Element _createElement(int id, String type, Map<String, dynamic> props, List<String> events) {
+Element _createElement(
+    int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case DIV:
-      element = DivElement(id);
+      element = DivElement(id, elementManager);
       break;
     case SPAN:
-      element = SpanElement(id);
+      element = SpanElement(id, elementManager);
       break;
     case STRONG:
-      element = StrongElement(id);
+      element = StrongElement(id, elementManager);
       break;
     case IMAGE:
-      element = ImageElement(id);
+      element = ImageElement(id, elementManager);
       break;
     case PARAGRAPH:
-      element = ParagraphElement(id);
+      element = ParagraphElement(id, elementManager);
       break;
     case INPUT:
-      element = InputElement(id);
+      element = InputElement(id, elementManager);
       break;
     case PRE:
-      element = PreElement(id);
+      element = PreElement(id, elementManager);
       break;
     case CANVAS:
-      element = CanvasElement(id);
+      element = CanvasElement(id, elementManager);
       break;
     case ANIMATION_PLAYER:
-      element = AnimationPlayerElement(id);
+      element = AnimationPlayerElement(id, elementManager);
       break;
     case VIDEO:
-      element = VideoElement(id);
+      element = VideoElement(id, elementManager);
       break;
     case CAMERA_PREVIEW:
-      element = CameraPreviewElement(id);
+      element = CameraPreviewElement(id, elementManager);
       break;
     case IFRAME:
-      element = IFrameElement(id);
+      element = IFrameElement(id, elementManager);
       break;
     case AUDIO:
-      element = AudioElement(id);
+      element = AudioElement(id, elementManager);
       break;
     default:
-      element = DivElement(id);
+      element = DivElement(id, elementManager);
       print('ERROR: unexpected element type "$type"');
   }
 
@@ -75,22 +77,52 @@ Element _createElement(int id, String type, Map<String, dynamic> props, List<Str
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;
 
-class ElementManagerActionDelegate {
-  Element rootElement;
+class ElementManager {
+  Element _rootElement;
+  Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
+  bool showPerformanceOverlayOverride;
+  KrakenViewController controller;
 
-  ElementManagerActionDelegate() {
-    rootElement = BodyElement(BODY_ID);
-    _root = rootElement.renderObject;
-    setEventTarget(rootElement);
-    setEventTarget(Window());
+  final double viewportWidth;
+  final double viewportHeight;
+
+  ElementManager(double viewportWidth, double viewportHeight,
+      {KrakenViewController this.controller, this.showPerformanceOverlayOverride})
+      : viewportWidth = viewportWidth,
+        viewportHeight = viewportHeight {
+    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
+    _root = _rootElement.renderObject;
+    setEventTarget(_rootElement);
+    setEventTarget(Window(this));
   }
 
-  RenderBox _root;
-  RenderBox get root => _root;
-  set root(RenderObject root) {
-    assert(() {
-      throw FlutterError('Can not set root to ElementManagerActionDelegate.');
-    }());
+  T getEventTargetByTargetId<T>(int targetId) {
+    assert(targetId != null);
+    EventTarget target = _eventTargets[targetId];
+    if (target is T)
+      return target as T;
+    else
+      return null;
+  }
+
+  bool existsTarget(int id) {
+    return _eventTargets.containsKey(id);
+  }
+
+  void removeTarget(int targetId) {
+    assert(targetId != null);
+    _eventTargets.remove(targetId);
+  }
+
+  void setEventTarget(EventTarget target) {
+    assert(target != null);
+
+    _eventTargets[target.targetId] = target;
+  }
+
+  void clearTargets() {
+    // Set current eventTargets to a new object, clean old targets by gc.
+    _eventTargets = <int, EventTarget>{};
   }
 
   void createElement(int id, String type, Map<String, dynamic> props, List events) {
@@ -104,16 +136,20 @@ class ElementManagerActionDelegate {
       }
     }
 
-    setEventTarget(_createElement(id, type, props, eventList));
+    EventTarget target = _createElement(id, type, props, eventList, this);
+    setEventTarget(target);
   }
 
   void createTextNode(int id, String data) {
-    TextNode textNode = TextNode(id, data);
+    TextNode textNode = TextNode(id, data, this);
+    textNode.elementManager = this;
     setEventTarget(textNode);
   }
 
   void createComment(int id, String data) {
-    setEventTarget(Comment(id, data));
+    EventTarget comment = Comment(targetId: id, data: data, elementManager: this);
+    comment.elementManager = this;
+    setEventTarget(comment);
   }
 
   void removeNode(int targetId) {
@@ -123,6 +159,8 @@ class ElementManagerActionDelegate {
     assert(target != null);
 
     target?.parentNode?.removeChild(target);
+    // remove node reference to ElementManager
+    target.elementManager = null;
     removeTarget(targetId);
   }
 
@@ -212,7 +250,6 @@ class ElementManagerActionDelegate {
 
         break;
     }
-    RendererBinding.instance.renderView.performLayout();
   }
 
   void addEvent(int targetId, String eventName) {
@@ -249,30 +286,26 @@ class ElementManagerActionDelegate {
     assert(target.method != null);
     return target.method(method, _args);
   }
-}
 
-class ElementManager {
-  static ElementManagerActionDelegate _actionDelegate;
-  static ElementManager _managerSingleton = ElementManager._();
-  factory ElementManager() => _managerSingleton;
-
-  ElementManager._() {
-    _actionDelegate = ElementManagerActionDelegate();
+  RenderObject _root;
+  RenderObject get root => _root;
+  set root(RenderObject root) {
+    assert(() {
+      throw FlutterError('Can not set root to ElementManagerActionDelegate.');
+    }());
   }
 
-  static bool showPerformanceOverlayOverride;
-
-  RenderBox getRootRenderObject() {
-    return _actionDelegate.root;
+  RenderObject getRootRenderObject() {
+    return root;
   }
 
   Element getRootElement() {
-    return _actionDelegate.rootElement;
+    return _rootElement;
   }
 
   bool showPerformanceOverlay = false;
 
-  void connect({bool showPerformanceOverlay}) {
+  RenderBox buildRenderBox({bool showPerformanceOverlay}) {
     if (showPerformanceOverlay != null) {
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
@@ -303,19 +336,34 @@ class ElementManager {
         textDirection: TextDirection.ltr,
       );
     }
-
-    RendererBinding.instance.renderView.child = result;
+    return result;
   }
 
-  void disconnect() async {
-    RendererBinding.instance.renderView.child = null;
+  void attach(RenderObject parent, RenderObject previousSibling, {bool showPerformanceOverlay}) {
+    RenderObject root = buildRenderBox(showPerformanceOverlay: showPerformanceOverlay);
+
+    if (parent is ContainerRenderObjectMixin) {
+      parent.insert(root, after: previousSibling);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = root;
+    }
+  }
+
+  void detach() {
+    RenderObject parent = root.parent;
+
+    if (parent == null) return;
+
+    if (parent is ContainerRenderObjectMixin) {
+      parent.remove(root);
+    } else if (parent is RenderObjectWithChildMixin) {
+      parent.child = null;
+    }
+
     clearTargets();
-    clearTimer();
-    await VideoElement.disposeVideos();
-    _managerSingleton = ElementManager._();
   }
 
-  static applyAction(String action, List payload) {
+  dynamic applyAction(String action, List payload) {
     var returnValue;
 
     switch (action) {
@@ -325,40 +373,40 @@ class ElementManager {
           props = payload[2];
           if (payload.length > 3) events = payload[3];
         }
-        _actionDelegate.createElement(payload[0], payload[1], props, events);
+        createElement(payload[0], payload[1], props, events);
         break;
       case 'createTextNode':
-        _actionDelegate.createTextNode(payload[0], payload[1]);
+        createTextNode(payload[0], payload[1]);
         break;
       case 'createComment':
-        _actionDelegate.createComment(payload[0], payload[1]);
+        createComment(payload[0], payload[1]);
         break;
       case 'insertAdjacentNode':
-        _actionDelegate.insertAdjacentNode(payload[0], payload[1], payload[2]);
+        insertAdjacentNode(payload[0], payload[1], payload[2]);
         break;
       case 'removeNode':
-        _actionDelegate.removeNode(payload[0]);
+        removeNode(payload[0]);
         break;
       case 'setStyle':
-        _actionDelegate.setStyle(payload[0], payload[1], payload[2]);
+        setStyle(payload[0], payload[1], payload[2]);
         break;
       case 'setProperty':
-        _actionDelegate.setProperty(payload[0], payload[1], payload[2]);
+        setProperty(payload[0], payload[1], payload[2]);
         break;
       case 'getProperty':
-        returnValue = _actionDelegate.getProperty(payload[0], payload[1]);
+        returnValue = getProperty(payload[0], payload[1]);
         break;
       case 'removeProperty':
-        _actionDelegate.removeProperty(payload[0], payload[1]);
+        removeProperty(payload[0], payload[1]);
         break;
       case 'addEvent':
-        _actionDelegate.addEvent(payload[0], payload[1]);
+        addEvent(payload[0], payload[1]);
         break;
       case 'removeEvent':
-        _actionDelegate.removeEvent(payload[0], payload[1]);
+        removeEvent(payload[0], payload[1]);
         break;
       case 'method':
-        returnValue = _actionDelegate.method(payload[0], payload[1], payload[2]);
+        returnValue = method(payload[0], payload[1], payload[2]);
         break;
     }
 

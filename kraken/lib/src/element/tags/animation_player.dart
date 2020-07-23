@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
@@ -20,8 +25,8 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId)
-      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  AnimationPlayerElement(int targetId, ElementManager elementManager)
+      : super(targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   String get objectFit => style[OBJECT_FIT];
 
@@ -124,7 +129,7 @@ class AnimationPlayerElement extends Element {
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();
 
-    return FlareRenderObject(targetId)
+    return FlareRenderObject(targetId, elementManager)
       ..assetProvider = AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center

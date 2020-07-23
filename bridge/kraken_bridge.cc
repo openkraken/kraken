@@ -13,43 +13,104 @@
 
 // this is not thread safe
 std::atomic<bool> inited{false};
-kraken::JSBridge *bridge;
+std::atomic<int32_t> poolIndex{0};
+int maxPoolSize = 0;
+kraken::JSBridge **contextPool;
+Screen screen;
 
-void *getBridge() {
-  return bridge;
-}
-
-void printError(const alibaba::jsa::JSError &error) {
+void printError(alibaba::jsa::JSContext &bridge, const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(error.what());
+    kraken::getDartMethod()->onJsError(bridge.getContextId(), error.what());
   } else {
     KRAKEN_LOG(ERROR) << error.what() << std::endl;
   }
 }
 
-Screen screen;
+namespace {
 
-void reloadJsContext() {
+void disposeAllBridge() {
+  for (int i = 0; i <= poolIndex; i++) {
+    disposeContext(i);
+  }
+  poolIndex = 0;
   inited = false;
-  delete bridge;
-  bridge = new kraken::JSBridge(printError);
+}
+
+int32_t searchForAvailablecontextId() {
+  for (int i = 0; i < maxPoolSize; i ++) {
+    if (contextPool[i] == nullptr) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+} // namespace
+
+void initJSContextPool(int poolSize) {
+  if (inited) disposeAllBridge();
+  contextPool = new kraken::JSBridge *[poolSize];
+  for (int i = 1; i < poolSize; i++) {
+    contextPool[i] = nullptr;
+  }
+
+  contextPool[0] = new kraken::JSBridge(0, printError);
   inited = true;
+  maxPoolSize = poolSize;
 }
 
-void initJsEngine() {
-  delete bridge;
-  bridge = new kraken::JSBridge(printError);
-  inited = true;
+void disposeContext(int32_t contextId) {
+  assert(contextId < maxPoolSize);
+  assert(contextPool[contextId] != nullptr);
+  auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
+  delete context;
+  contextPool[contextId] = nullptr;
 }
 
-void evaluateScripts(const char *code, const char *bundleFilename, int startLine) {
-  if (!inited) return;
-  bridge->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
+int32_t allocateNewContext() {
+  poolIndex++;
+  if (poolIndex >= maxPoolSize) {
+    return searchForAvailablecontextId();
+  }
+
+  assert(contextPool[poolIndex] == nullptr && (std::string("can not allocate JSBridge at index") +
+                                             std::to_string(poolIndex) + std::string(": bridge have already exist."))
+                                              .c_str());
+
+  auto context = new kraken::JSBridge(poolIndex, printError);
+  contextPool[poolIndex] = context;
+  return poolIndex;
 }
 
-void invokeEventListener(int32_t type, const char *data) {
-  if (!inited) return;
-  bridge->invokeEventListener(type, data);
+void *getJSContext(int32_t contextId) {
+  assert(checkContext(contextId) && "getJSContext: contextId is not valid.");
+  return contextPool[contextId];
+}
+
+bool checkContext(int32_t contextId) {
+  return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
+}
+
+void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename,
+                     int startLine) {
+  assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
+}
+
+void reloadJsContext(int32_t contextId) {
+  assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
+  auto bridgePtr = getJSContext(contextId);
+  auto context = static_cast<kraken::JSBridge *>(bridgePtr);
+  delete context;
+  context = new kraken::JSBridge(contextId, printError);
+  contextPool[contextId] = context;
+}
+
+void invokeEventListener(int32_t contextId, int32_t type, const char *data) {
+  assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
+  auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  context->invokeEventListener(type, data);
 }
 
 void registerInvokeUIManager(InvokeUIManager callbacks) {

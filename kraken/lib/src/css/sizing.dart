@@ -16,7 +16,6 @@ import 'package:kraken/css.dart';
 /// - min-width
 /// - min-height
 mixin CSSSizingMixin {
-
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   KrakenRenderPadding renderPadding;

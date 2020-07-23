@@ -16,7 +16,8 @@ mixin CSSTransformMixin on Node {
   Alignment oldAlignment = Alignment.center;
   int targetId;
 
-  RenderObject initTransform(RenderObject current, CSSStyleDeclaration style, int targetId) {
+  RenderObject initTransform(
+      RenderObject current, CSSStyleDeclaration style, int targetId, ElementManager elementManager) {
     this.targetId = targetId;
 
     if (style.contains('transform')) {
@@ -34,6 +35,7 @@ mixin CSSTransformMixin on Node {
       child: current,
       transform: matrix4,
       targetId: targetId,
+      elementManager: elementManager,
       style: style,
       origin: oldOffset,
       alignment: oldAlignment,

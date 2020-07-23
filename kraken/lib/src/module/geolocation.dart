@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:kraken/bridge.dart';
 import 'package:kraken_geolocation/kraken_geolocation.dart';
 
 // getCurrentPosition relative
@@ -21,6 +20,7 @@ StreamSubscription<LocationData> _streamSubscription;
 LocationData _watchCachedLocation;
 
 typedef Callback = void Function(String json);
+typedef WatchPositionCallback = void Function(String result);
 
 class Geolocation {
   static void getCurrentPosition(Map<String, dynamic> options, Callback callback) async {
@@ -61,12 +61,12 @@ class Geolocation {
     }
   }
 
-  static int watchPosition(Map<String, dynamic> options) {
+  static int watchPosition(Map<String, dynamic> options, WatchPositionCallback callback) {
     _changeOptions(options, true);
     _getLocation().then((location) {
       if (location == null) {
         String result = jsonEncode({'code': ERROR_CODE_PERMISSION_DENIED, 'message': 'permission denied'});
-        emitModuleEvent('["watchPosition", $result]');
+        callback(result);
         if (_streamSubscription != null) {
           _streamSubscription.cancel();
           _streamSubscription = null;
@@ -78,7 +78,7 @@ class Geolocation {
           _watchCachedLocation != null &&
           (DateTime.now().microsecondsSinceEpoch - _watchCachedLocation.time) < watchMaximumAge) {
         String result = _getLocationResult(_watchCachedLocation);
-        emitModuleEvent('["watchPosition", $result]');
+        callback(result);
       }
       Stream<LocationData> stream = location.onLocationChanged();
       if (_streamSubscription == null) {
@@ -87,11 +87,11 @@ class Geolocation {
               (_watchCachedLocation != null && !_compareLocation(_watchCachedLocation, locationData))) {
             _watchCachedLocation = locationData;
             String result = _getLocationResult(_watchCachedLocation);
-            emitModuleEvent('["watchPosition", $result]');
+            callback(result);
           }
         }, onError: (e) {
           String result = jsonEncode({'code': ERROR_CODE_POSITION_UNAVAILABLE, 'message': e?.toString()});
-          emitModuleEvent('["watchPosition", $result]');
+          callback(result);
         }, cancelOnError: false);
       }
     });

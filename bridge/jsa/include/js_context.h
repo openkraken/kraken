@@ -46,7 +46,7 @@ template <typename T> using ArrayBufferDeallocator = void (*)(T *bytes);
 using HostFunctionType =
   std::function<Value(JSContext &context, const Value &thisVal, const Value *args, size_t count)>;
 
-using JSExceptionHandler = std::function<void(const jsa::JSError &error)>;
+using JSExceptionHandler = std::function<void(JSContext &context, const jsa::JSError &error)>;
 
 /// A function which has this type can be registered as a class callable from
 /// Javascript using Function::createFromClassFunction().
@@ -164,6 +164,21 @@ public:
 
   /// verify is JS Engine is ready to use
   virtual bool isValid() = 0;
+
+  /// get current
+  virtual int32_t getContextId() = 0;
+
+//  /// verify is JS Engine is freeze.
+//  virtual bool isFreeze() = 0;
+//
+//  // set js context to freeze
+//  virtual void freeze() = 0;
+//
+//  // set js context to unfreeze
+//  virtual void unfreeze() = 0;
+
+  // get the pointer of context create owner.
+  virtual void* getOwner() = 0;
 
 protected:
   friend class Pointer;

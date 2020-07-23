@@ -6,6 +6,8 @@
 #include "timer.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
+#include "foundation/logging.h"
+#include "bridge.h"
 #include "jsa.h"
 
 namespace kraken {
@@ -14,13 +16,9 @@ namespace binding {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-void handlePersistentCallback(void *data, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handlePersistentCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  if (!BridgeCallback::checkContext(_context)) {
-    return;
-  }
 
   if (!_context.isValid()) return;
 
@@ -42,13 +40,10 @@ void handlePersistentCallback(void *data, const char *errmsg) {
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *data, double result, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, double result,
+                                 const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  if (!BridgeCallback::checkContext(_context)) {
-    return;
-  }
 
   if (!_context.isValid()) return;
 
@@ -70,12 +65,13 @@ void handleRAFPersistentCallback(void *data, double result, const char *errmsg) 
   callback.asFunction(_context).call(_context, Value(result), 0);
 }
 
-void handleTransientCallback(void *data, const char *errmsg) {
-  handlePersistentCallback(data, errmsg);
+void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+  handlePersistentCallback(callbackContext, contextId, errmsg);
 }
 
-void handleRAFTransientCallback(void *data, double result, const char *errmsg) {
-  handleRAFPersistentCallback(data, result, errmsg);
+void handleRAFTransientCallback(void *callbackContext, int32_t contextId, double result,
+                                const char *errmsg) {
+  handleRAFPersistentCallback(callbackContext, contextId, result, errmsg);
 }
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -106,9 +102,11 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
   }
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
-  auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&timeout](void *data) {
-      return getDartMethod()->setTimeout(handleTransientCallback, data, timeout);
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+    std::move(callbackContext),
+    [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
     });
 
   // `-1` represents ffi error occurred.
@@ -152,10 +150,11 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
 
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
-
-  auto timerId =
-    BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [&delay](void *data) {
-      return getDartMethod()->setInterval(handlePersistentCallback, data, delay);
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+    std::move(callbackContext),
+    [&delay](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, delay);
     });
 
   if (timerId == -1) {
@@ -181,7 +180,7 @@ Value clearTimeout(JSContext &context, const Value &thisVal, const Value *args, 
     throw JSError(context, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
   }
 
-  getDartMethod()->clearTimeout(id);
+  getDartMethod()->clearTimeout(context.getContextId(), id);
   return Value::undefined();
 }
 
@@ -202,7 +201,7 @@ Value cancelAnimationFrame(JSContext &context, const Value &thisVal, const Value
                   "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
 
-  getDartMethod()->cancelAnimationFrame(id);
+  getDartMethod()->cancelAnimationFrame(context.getContextId(), id);
 
   return Value::undefined();
 }
@@ -227,9 +226,12 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
                   "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 
-  int32_t requestId = BridgeCallback::instance()->registerCallback<int32_t>(std::move(callbackContext), [](void *data) {
-    return getDartMethod()->requestAnimationFrame(handleRAFTransientCallback, data);
-  });
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  int32_t requestId = bridge->bridgeCallback.registerCallback<int32_t>(
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      return getDartMethod()->requestAnimationFrame(callbackContext, contextId,
+                                                    handleRAFTransientCallback);
+    });
 
   // `-1` represents some error occurred.
   if (requestId == -1) {

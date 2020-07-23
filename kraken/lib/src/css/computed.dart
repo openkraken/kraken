@@ -6,12 +6,12 @@ import 'dart:math' as math;
 mixin CSSComputedMixin on RenderBox {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementComputedMaxWidth(int targetId) {
+  static double getElementComputedMaxWidth(int targetId, ElementManager elementManager) {
     double width;
     double cropWidth = 0;
-    Element child = getEventTargetByTargetId<Element>(targetId);
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -38,7 +38,7 @@ mixin CSSComputedMixin on RenderBox {
         }
         if (child is Element) {
           CSSStyleDeclaration style = child.style;
-          String display = _getElementRealDisplayValue(child.targetId);
+          String display = _getElementRealDisplayValue(child.targetId, elementManager);
           if (style.contains(WIDTH) && display != INLINE) {
             width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
             cropPaddingBorder(child);
@@ -56,11 +56,11 @@ mixin CSSComputedMixin on RenderBox {
   }
 
   // Get element width according to element tree
-  double getElementComputedWidth(int targetId) {
+  double getElementComputedWidth(int targetId, ElementManager elementManager) {
     double cropWidth = 0;
-    Element child = getEventTargetByTargetId<Element>(targetId);
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
 
     double width = CSSLength.toDisplayPortValue(style[WIDTH]);
     double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
@@ -99,7 +99,7 @@ mixin CSSComputedMixin on RenderBox {
             }
             if (child is Element) {
               CSSStyleDeclaration style = child.style;
-              String display = _getElementRealDisplayValue(child.targetId);
+              String display = _getElementRealDisplayValue(child.targetId, elementManager);
 
               // Set width of element according to parent display
               if (display != INLINE) {
@@ -143,10 +143,10 @@ mixin CSSComputedMixin on RenderBox {
   }
 
   // Get element height according to element tree
-  double getElementComputedHeight(int targetId) {
-    Element child = getEventTargetByTargetId<Element>(targetId);
+  double getElementComputedHeight(int targetId, ElementManager elementManager) {
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId);
+    String display = _getElementRealDisplayValue(targetId, elementManager);
     double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
     double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
     double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
@@ -221,9 +221,7 @@ mixin CSSComputedMixin on RenderBox {
         style[FLEX_WRAP] != WRAP_REVERSE;
     bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
 
-    if (isFlex && isHoriontalDirection && isFlexNoWrap &&
-        (isAlignItemsStretch || isChildAlignSelfStretch)
-    ) {
+    if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
 
@@ -232,8 +230,8 @@ mixin CSSComputedMixin on RenderBox {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String _getElementRealDisplayValue(int targetId) {
-    Element element = getEventTargetByTargetId<Element>(targetId);
+  static String _getElementRealDisplayValue(int targetId, ElementManager elementManager) {
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
     String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])
         ? element.defaultDisplay

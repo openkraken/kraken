@@ -148,8 +148,10 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
+    RenderObject root = parent.elementManager.getRootRenderObject();
     Offset baseOffset =
-        childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
+        childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root)
+            - parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details

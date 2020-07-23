@@ -134,16 +134,17 @@ class Element extends Node
   // Vertical border dimension (top + bottom)
   double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
-  Element({
-    @required int targetId,
-    @required this.tagName,
+  Element(
+    int targetId,
+    ElementManager elementManager, {
+    this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
   })  : assert(targetId != null),
         assert(tagName != null),
-        super(NodeType.ELEMENT_NODE, targetId, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];
 
@@ -192,7 +193,7 @@ class Element extends Node
     renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
 
     setElementSizeType();
   }
@@ -219,9 +220,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortX.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortY.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -367,7 +370,7 @@ class Element extends Node
         // Loop renderObject children to move positioned children to its containing block
         renderLayoutBox.visitChildren((childRenderObject) {
           if (childRenderObject is RenderElementBoundary) {
-            Element child = getEventTargetByTargetId<Element>(childRenderObject.targetId);
+            Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = findContainingBlock(child);
@@ -384,7 +387,7 @@ class Element extends Node
           if (renderPositionHolder != null) {
             RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
             int parentTargetId = parentLayoutBox.targetId;
-            Element parentElement = getEventTargetByTargetId<Element>(parentTargetId);
+            Element parentElement = elementManager.getEventTargetByTargetId<Element>(parentTargetId);
 
             List<RenderObject> layoutChildren = [];
             parentLayoutBox.visitChildren((child) {
@@ -544,6 +547,7 @@ class Element extends Node
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
@@ -555,6 +559,7 @@ class Element extends Node
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
@@ -578,8 +583,7 @@ class Element extends Node
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child =
-          RenderFlexItem(child: renderLayoutBox);
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -703,7 +707,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.fixed:
-        final Element rootEl = ElementManager().getRootElement();
+        final Element rootEl = elementManager.getRootElement();
         parentRenderLayoutBox = rootEl.renderLayoutBox;
         break;
 
@@ -1137,7 +1141,6 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1146,7 +1149,6 @@ class Element extends Node
     } else {
       properties[key] = value;
     }
-
   }
 
   @mustCallSuper
@@ -1167,17 +1169,29 @@ class Element extends Node
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetY();
       case 'offsetLeft':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetX();
       case 'offsetWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientWidth;
       case 'clientHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
         // TODO: implement this after border has supported in renderLayoutBox
@@ -1211,6 +1225,9 @@ class Element extends Node
 
     RenderBox sizedBox = renderConstrainedBox.child;
     if (isConnected) {
+      // need to flush layout to get correct size
+      elementManager.getRootRenderObject().owner.flushLayout();
+
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
@@ -1255,9 +1272,12 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
+    // need to flush layout to get correct size
+    elementManager.getRootRenderObject().owner.flushLayout();
+
     Element element = findContainingBlock(this);
     if (element == null) {
-      element = ElementManager().getRootElement();
+      element = elementManager.getRootElement();
     }
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
@@ -1293,7 +1313,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(json);
+    emitUIEvent(elementManager.controller.contextId, json);
   }
 
   void click() {
@@ -1304,10 +1324,10 @@ class Element extends Node
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
       // or child may miss size.
-      RendererBinding.instance.renderView.owner.flushLayout();
+      elementManager.getRootRenderObject().owner.flushLayout();
 
       // Position the center of element.
-      Offset position = box.localToGlobal(box.size.center(Offset.zero));
+      Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderObject());
       final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
       GestureBinding.instance.hitTest(boxHitTestResult, position);
       bool hitTest = true;
@@ -1341,7 +1361,8 @@ class Element extends Node
     renderMargin.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
-    requestAnimationFrame((_) async {
+
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       if (renderRepaintBoundary.size == Size.zero) {
         // Return a blob with zero length.
@@ -1363,7 +1384,7 @@ class Element extends Node
 
 Element findContainingBlock(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
     bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION] != '';
@@ -1379,7 +1400,7 @@ Element findContainingBlock(Element element) {
 
 Element findScrollContainer(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
     List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);

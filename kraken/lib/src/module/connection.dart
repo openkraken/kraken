@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:kraken/bridge.dart';
 
 Connectivity _connectivity;
 
@@ -24,6 +23,8 @@ String _parseConnectivityResult(ConnectivityResult state) {
   }
 }
 
+typedef OnConnectivityChangedCallback = void Function(String json);
+
 class Connection {
   static void _initConnectivity() {
     if (_connectivity == null) {
@@ -38,11 +39,11 @@ class Connection {
     });
   }
 
-  static void onConnectivityChanged() {
+  static void onConnectivityChanged(OnConnectivityChangedCallback callback) {
     _initConnectivity();
     _connectivity.onConnectivityChanged.listen((ConnectivityResult connectivityResul) {
       String json = _toString(connectivityResul);
-      emitModuleEvent('["onConnectivityChanged", $json]');
+      callback(json);
     });
   }
 }

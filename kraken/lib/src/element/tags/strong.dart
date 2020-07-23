@@ -13,5 +13,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class StrongElement extends Element {
-  StrongElement(int targetId) : super(targetId: targetId, tagName: STRONG, defaultStyle: _defaultStyle);
+  StrongElement(int targetId, ElementManager elementManager)
+      : super(targetId, elementManager, tagName: STRONG, defaultStyle: _defaultStyle);
 }

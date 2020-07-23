@@ -47,7 +47,7 @@ set(TEST_INCLUDE_DIR
         )
 
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
-  add_executable(jsa_test_jsc ./test/jsa/jsc/jsc_test.cc)
+  add_executable(jsa_test_jsc ./test/jsa/jsc/jsc_test.cc ./test/jsa/jsc/multiple_context.cc)
   target_link_libraries(jsa_test_jsc ${TEST_LINK_LIBRARY})
   target_include_directories(jsa_test_jsc PUBLIC ${TEST_INCLUDE_DIR})
 endif()
