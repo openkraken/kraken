@@ -90,6 +90,11 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     dispatchEvent(Event('load'));
+    try {
+      throw new Error();
+    } catch(e, s) {
+      print(s);
+    }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
@@ -101,7 +106,7 @@ class ImageElement extends Element {
 
     // Image size may affect parent layout,
     // make parent relayout after image inited
-    (imageBox.parent as RenderBox).markNeedsLayout();
+    imageBox.markParentNeedsLayout();
   }
 
   void _resize() {
@@ -242,7 +247,7 @@ class ImageElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
+  void setProperty(String key, value) {
     super.setProperty(key, value);
 
     if (key == 'src') {
@@ -284,16 +289,12 @@ class ImageElement extends Element {
   }
 
   @override
-  dynamic getProperty(String key) {
+  getProperty(String key) {
     switch (key) {
       case 'width':
-        {
-          return this._imageInfo != null ? this._imageInfo.image.width : 0;
-        }
+        return this._imageInfo != null ? this._imageInfo.image.width : 0;
       case 'height':
-        {
-          return this._imageInfo != null ? this._imageInfo.image.height : 0;
-        }
+        return this._imageInfo != null ? this._imageInfo.image.height : 0;
     }
 
     return super.getProperty(key);
