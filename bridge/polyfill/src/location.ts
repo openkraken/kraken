@@ -1,42 +1,53 @@
 import { krakenWindow } from './bridge';
 import { URL } from './url';
+import { UnImplError } from './unimpl-error';
 
 const krakenLocation = krakenWindow.location;
+const url = new URL(krakenLocation.href);
 
-class Location {
-  private url: URL;
-  href: string;
-  constructor(href: string) {
-    this.href = href;
-    this.url = new URL(href);
-  }
+export const location = {
+  get href() {
+    return krakenLocation.href;
+  },
   get origin() {
-    return this.url.origin;
-  }
+    return url.origin;
+  },
   get protocol() {
-    return this.url.protocol;
-  }
+    return url.protocol;
+  },
   get host() {
-    return this.url.host;
-  }
+    return url.host;
+  },
   get hostname() {
-    return this.url.hostname;
-  }
+    return url.hostname;
+  },
   get port() {
-    return this.url.port;
-  }
+    return url.port;
+  },
   get pathname() {
-    return this.url.pathname;
-  }
+    return url.pathname;
+  },
   get search() {
-    return this.url.search;
-  }
+    return url.search;
+  },
   get hash() {
-    return this.url.hash;
-  }
-  reload() {
-    return krakenLocation.reload();
-  }
-}
+    return url.hash;
+  },
 
-export const location = new Location(krakenLocation.href);
+  get assign() {
+    return (assignURL: string) => {
+      throw new UnImplError('location.assign');
+    };
+  },
+  get reload() {
+    return krakenLocation.reload;
+  },
+  get replace() {
+    return (replaceURL: string) => {
+      throw new UnImplError('location.replace');
+    };
+  },
+  get toString() {
+    return () => location.href;
+  },
+};
