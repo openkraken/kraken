@@ -706,11 +706,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       /// Caculate baseline extent of layout box
       AlignSelf alignSelf = childParentData.alignSelf;
-      String childDisplay = childStyle['display'];
       // Vertical align is only valid for inline box
-      if ((alignSelf == AlignSelf.baseline || alignItems == AlignItems.baseline) &&
-        childDisplay.startsWith('inline')
-      ) {
+      if ((alignSelf == AlignSelf.baseline || alignItems == AlignItems.baseline)) {
         // Distance from top to baseline of child
         double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
@@ -730,6 +727,8 @@ class RenderFlexLayout extends RenderLayoutBox {
             maxSizeBelowBaseline,
           );
           runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+        } else {
+          runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossSize);
         }
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossSize);
@@ -1304,12 +1303,15 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   CSSStyleDeclaration _getChildStyle(RenderBox child) {
     CSSStyleDeclaration childStyle;
+    int childNodeId;
     if (child is RenderTextBox) {
-      childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+      childNodeId = targetId;
     } else if (child is RenderElementBoundary) {
-      int childNodeId = child.targetId;
-      childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+      childNodeId = child.targetId;
+    } else if (child is RenderPositionHolder) {
+      childNodeId = child.realDisplayedBox?.targetId;
     }
+    childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
     return childStyle;
   }
 

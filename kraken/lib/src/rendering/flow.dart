@@ -640,9 +640,9 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       /// Caculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = getVerticalAlign(childStyle);
-      String childDisplay = childStyle['display'];
+      bool isLineHeightValid = _isLineHeightValid(child);
       // Vertical align is only valid for inline box
-      if (verticalAlign == VerticalAlign.baseline && childDisplay.startsWith('inline')) {
+      if (verticalAlign == VerticalAlign.baseline && isLineHeightValid) {
         // Distance from top to baseline of child
         double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
@@ -652,17 +652,16 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (lineHeight != null) {
           childLeading = lineHeight - child.size.height;
         }
-        if (childAscent != null) {
-          maxSizeAboveBaseline = math.max(
-            childAscent + childLeading / 2,
-            maxSizeAboveBaseline,
-          );
-          maxSizeBelowBaseline = math.max(
-            child.size.height - childAscent + childLeading / 2,
-            maxSizeBelowBaseline,
-          );
-          runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
-        }
+
+        maxSizeAboveBaseline = math.max(
+          childAscent + childLeading / 2,
+          maxSizeAboveBaseline,
+        );
+        maxSizeBelowBaseline = math.max(
+          child.size.height - childAscent + childLeading / 2,
+          maxSizeBelowBaseline,
+        );
+        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
       } else {
         runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
@@ -751,6 +750,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final int metricChildCount = metrics.childCount;
+      print('runCrossAxisExtent---------------------- $runCrossAxisExtent');
 
       final double mainAxisFreeSpace = math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
       double childLeadingSpace = 0.0;
@@ -818,10 +818,10 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // Child line extent caculated according to vertical align
         double childLineExtent = childCrossAxisOffset;
 
-        String childDisplay = childStyle['display'];
-        if (childDisplay.startsWith('inline')) {
+        bool isLineHeightValid = _isLineHeightValid(child);
+        if (isLineHeightValid) {
           // Distance from top to baseline of child
-          double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true) ?? 0;
+          double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
           VerticalAlign verticalAlign = getVerticalAlign(childStyle);
 
           switch(verticalAlign) {
@@ -871,14 +871,29 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
   }
 
+  bool _isLineHeightValid(RenderBox child) {
+    if (child is RenderPositionHolder) {
+      return false;
+    } else if (child is RenderTextBox) {
+      return true;
+    } else {
+      CSSStyleDeclaration childStyle = _getChildStyle(child);
+      String childDisplay = childStyle['display'];
+      return childDisplay.startsWith('inline');
+    }
+  }
+
   CSSStyleDeclaration _getChildStyle(RenderBox child) {
     CSSStyleDeclaration childStyle;
+    int childNodeId;
     if (child is RenderTextBox) {
-      childStyle = getEventTargetByTargetId<Element>(targetId)?.style;
+      childNodeId = targetId;
     } else if (child is RenderElementBoundary) {
-      int childNodeId = child.targetId;
-      childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
+      childNodeId = child.targetId;
+    } else if (child is RenderPositionHolder) {
+      childNodeId = child.realDisplayedBox?.targetId;
     }
+    childStyle = getEventTargetByTargetId<Element>(childNodeId)?.style;
     return childStyle;
   }
 
