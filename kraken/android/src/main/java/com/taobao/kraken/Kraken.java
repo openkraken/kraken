@@ -16,7 +16,7 @@ public class Kraken {
 
   private String url;
   private FlutterEngine flutterEngine;
-  // the KrakenWidget's name, use this property to control an KrakenWidget of flutter side.
+  // the KrakenWidget's name, use this property to control a KrakenWidget of flutter side.
   private String name;
 
   private MethodChannel.MethodCallHandler handler;
