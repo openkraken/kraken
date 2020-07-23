@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
-#import <Flutter/FlutterViewController.h>
 
 static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
 

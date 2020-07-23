@@ -1,44 +1,33 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
-#import "KrakenSDKPlugin.h"
 
-static NSMutableArray *engineList = nil;
-static NSMutableArray<Kraken*> *instanceList = nil;
+static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
 
 @implementation Kraken
 
-+ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
-  // Return last instance, multi instance not supported yet.
-  if (instanceList != nil && instanceList.count > 0) {
-    return [instanceList objectAtIndex: instanceList.count - 1];
-  }
-  return nil;
++ (Kraken*) instanceByName:(NSString*) name {
+  return instanceMap[name];
 }
 
-- (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
-  self.flutterEngine = engine;
+- (instancetype _Nonnull)initWithName:(NSString*) name {
+  self.name = name;
   
   FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
-
+  
   if (channel == nil) {
     NSException* exception = [NSException
-                                exceptionWithName:@"InitError"
-                                reason:@"KrakenSDK should init after Flutter's plugin registered."
-                                userInfo:nil];
+                              exceptionWithName:@"InitError"
+                              reason:@"KrakenSDK should init after Flutter's plugin registered."
+                              userInfo:nil];
     @throw exception;
   }
   self.channel = channel;
   
-  if (engineList == nil) {
-    engineList = [[NSMutableArray alloc] initWithCapacity: 0];
+  if (instanceMap == nil) {
+    instanceMap = [[NSMutableDictionary alloc] init];
   }
-  [engineList addObject: engine];
-  
-  if (instanceList == nil) {
-    instanceList = [[NSMutableArray alloc] initWithCapacity: 0];
-  }
-  [instanceList addObject: self];
-  
+  [instanceMap setValue:self forKey:name];
+
   return self;
 }
 
@@ -50,7 +39,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 
 - (void) reload {
   if (self.channel != nil) {
-    [self.channel invokeMethod:@"reload" arguments:nil];
+    [self invokeMethod:@"reload" arguments:nil];
   }
 }
 
@@ -66,14 +55,14 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 - (void) invokeMethod:(NSString *)method arguments:(nullable id) arguments {
   dispatch_async(dispatch_get_main_queue(), ^{
     if (self.channel != nil) {
-      [self.channel invokeMethod:method arguments:arguments];
+      [self.channel invokeMethod:[NSString stringWithFormat:@"%@%@%@", self.name, NAME_METHOD_SPLIT, method] arguments:arguments];
     }
   });
 }
 
 - (void) _handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if (self.methodHandler != nil) {
-   self.methodHandler(call, result);
+    self.methodHandler(call, result);
   }
 }
 

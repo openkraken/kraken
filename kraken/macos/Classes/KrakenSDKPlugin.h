@@ -1,5 +1,7 @@
 #import <FlutterMacOS/FlutterMacOS.h>
 
+#define NAME_METHOD_SPLIT @"__"
+
 @interface KrakenSDKPlugin : NSObject<FlutterPlugin>
 
 @property NSObject<FlutterPluginRegistrar> *registrar;
