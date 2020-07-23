@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 
-typedef MethodCallback = Future<dynamic> Function(MethodCall call);
+typedef MethodCallHandler = Future<dynamic> Function(String methodd, dynamic arguments);
 
 final String NAME_METHOD_SPLIT = '__';
 
@@ -18,7 +18,7 @@ class KrakenMethodChannel {
       if ('reload' == method) {
         await controller.reload();
       } else if (controller.methodChannel.methodCallHandler != null) {
-        return controller.methodChannel.methodCallHandler(call);
+        return controller.methodChannel.methodCallHandler(method, call.arguments);
       }
       return Future<dynamic>.value(null);
     });
@@ -26,10 +26,10 @@ class KrakenMethodChannel {
   KrakenMethodChannel(this._name, KrakenController controller);
 
   final String _name;
-  MethodCallback _methodCallHandler;
-  MethodCallback get methodCallHandler => _methodCallHandler;
+  MethodCallHandler _methodCallHandler;
+  MethodCallHandler get methodCallHandler => _methodCallHandler;
 
-  void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+  void setMethodCallHandler(MethodCallHandler handler) {
     _methodCallHandler = handler;
   }
 

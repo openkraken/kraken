@@ -234,7 +234,7 @@ class KrakenController {
   KrakenBundle _bundle;
 
   // reload current kraken view.
-  reload() async {
+  void reload() async {
     RenderObject root = _view.getRootRenderObject();
     RenderObject parent = root.parent;
     RenderObject previousSibling;
@@ -251,6 +251,11 @@ class KrakenController {
     await reloadJSContext(_view.contextId);
     await loadBundle();
     await run();
+  }
+
+  void reloadWithUrl(String url) async {
+    _bundleURL = url;
+    await reload();
   }
 
   void dispose() {
@@ -270,9 +275,9 @@ class KrakenController {
     String bundlePathOverride,
     String bundleURLOverride,
   }) async {
-    _bundleContent = bundleURLOverride;
-    _bundlePath = bundlePathOverride;
-    _bundleURL = bundleURLOverride;
+    _bundleContent = _bundleContent ?? bundleURLOverride;
+    _bundlePath = _bundlePath ?? bundlePathOverride;
+    _bundleURL = _bundleURL ?? bundleURLOverride;
     // TODO native public API need to support KrakenViewController
     String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
     _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
