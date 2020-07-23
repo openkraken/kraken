@@ -14,7 +14,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
-  fit('new Image', (done) => {
+  it('new Image', (done) => {
     const img = new Image();
     img.onload = img.onerror = (evt) => {
       done();
