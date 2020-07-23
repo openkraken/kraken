@@ -40,6 +40,7 @@ mixin CSSBackgroundMixin {
   void _parseBackground(CSSStyleDeclaration style) {
     if (style.contains(BACKGROUND)) {
       String rawBackground = style[BACKGROUND];
+      // @TODO: procsss in style_property
       List<String> shorthand = rawBackground.split(SHORTHAND_REGEXP);
       background = _consumeBackground(shorthand);
     }
@@ -560,7 +561,7 @@ mixin CSSBackgroundMixin {
   Color getBackgroundColor(CSSStyleDeclaration style) {
     Color backgroundColor = CSSColor.transparent;
     if (background.containsKey(BACKGROUND_COLOR)) {
-      backgroundColor = CSSColor.generate(background[BACKGROUND_COLOR]);
+      backgroundColor = CSSColor.parseColor(background[BACKGROUND_COLOR]);
     }
     return backgroundColor;
   }
@@ -607,11 +608,11 @@ mixin CSSBackgroundMixin {
             } else if (CSSAngle.isAngle(strings[i])) {
               stop = CSSAngle(strings[i]).angleValue / (math.pi * 2);
             }
-            colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
+            colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
           }
         } catch (e) {}
       } else {
-        colorGradients.add(CSSColorStop(CSSColor.generate(strings[0]), stop));
+        colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
       }
     }
     return colorGradients;

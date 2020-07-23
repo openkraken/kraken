@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 const String IMAGE = 'IMG';
 
@@ -102,7 +101,7 @@ class ImageElement extends Element {
 
     // Image size may affect parent layout,
     // make parent relayout after image inited
-    parent.renderLayoutBox.markNeedsLayout();
+    (imageBox.parent as RenderBox).markNeedsLayout();
   }
 
   void _resize() {
@@ -193,7 +192,7 @@ class ImageElement extends Element {
 
     // The default value for object-position is 50% 50%
     return Alignment.center;
-    
+
   }
 
   double _getAlignmentValueFromString(String value) {

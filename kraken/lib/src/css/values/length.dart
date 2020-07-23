@@ -6,18 +6,28 @@
 import 'dart:ui';
 import 'value.dart';
 
+// https://drafts.csswg.org/css-values-3/#absolute-lengths
+const _1in = 96; // 1in = 2.54cm = 96px
+const _1cm = _1in / 2.54; // 1cm = 96px/2.54
+const _1mm = _1cm / 10; // 1mm = 1/10th of 1cm
+const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
+const _1pc = _1in / 6; // 1pc = 1/6th of 1in
+const _1pt = _1in / 72; // 1pt = 1/72th of 1in
+
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
+
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength implements CSSValue<double> {
   static const String RPX = 'rpx';
   static const String PX = 'px';
   static const String VW = 'vw';
   static const String VH = 'vh';
-
-  static bool isValidateLength(String value) {
-    return value != null && value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VW) || value.endsWith(VH);
-  }
-
-  static RegExp NUMBERIC_REGEXP = RegExp(r"^[+-]?(\d+)?(\.\d+)?$");
+  static const String MM = 'mm';
+  static const String CM = 'cm';
+  static const String IN = 'in';
+  static const String PC = 'pc';
+  static const String PT = 'pt';
+  static const String Q = 'q';
 
   static double toDouble(value) {
     if (value is double) {
@@ -44,38 +54,56 @@ class CSSLength implements CSSValue<double> {
   }
 
   static double toDisplayPortValue(String unitedValue) {
-    double displayPortValue = 0.0;
-
     if (unitedValue == null) return null;
+
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
 
+    double displayPortValue;
     // Only '0' is accepted with no unit.
     if (unitedValue == '0') {
       return 0;
     } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
       displayPortValue = currentValue / 750.0 * window.physicalSize.width / window.devicePixelRatio;
-    } else if (unitedValue.endsWith(PX)) {
-      double currentValue = double.parse(unitedValue.split(PX)[0]);
-      displayPortValue = currentValue;
-    } else if (unitedValue.endsWith(VW)) {
-      double currentValue = double.parse(unitedValue.split(VW)[0]);
-      displayPortValue = currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
-    } else if (unitedValue.endsWith(VH)) {
-      double currentValue = double.parse(unitedValue.split(VH)[0]);
-      displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
-    } else {
-      // Failed silently.
-      return null;
+    } else if (unitedValue.endsWith(Q)) {
+      displayPortValue = double.tryParse(unitedValue.split(Q)[0]) * _1Q;
+    } else if (unitedValue.length > 2) {
+      switch (unitedValue.substring(unitedValue.length - 2)) {
+        case PX:
+          displayPortValue = double.tryParse(unitedValue.split(PX)[0]);
+          break;
+        case VW:
+          double currentValue = double.parse(unitedValue.split(VW)[0]);
+          displayPortValue = currentValue / 100.0 * window.physicalSize.width / window.devicePixelRatio;
+          break;
+        case VH:
+          double currentValue = double.parse(unitedValue.split(VH)[0]);
+          displayPortValue = currentValue / 100.0 * window.physicalSize.height / window.devicePixelRatio;
+          break;
+        case IN:
+          displayPortValue = double.tryParse(unitedValue.split(IN)[0]) * _1in;
+          break;
+        case CM:
+          displayPortValue = double.tryParse(unitedValue.split(CM)[0]) * _1cm;
+          break;
+        case MM:
+          displayPortValue = double.tryParse(unitedValue.split(MM)[0]) * _1mm;
+          break;
+        case PC:
+          displayPortValue = double.tryParse(unitedValue.split(PC)[0]) * _1pc;
+          break;
+        case PT:
+          displayPortValue = double.tryParse(unitedValue.split(PT)[0]) * _1pt;
+          break;
+      }
     }
 
     return displayPortValue;
   }
 
   static bool isLength(String value) {
-    return value != null &&
-        (value == '0' || value.endsWith(RPX) || value.endsWith(PX) || value.endsWith(VH) || value.endsWith(VW));
+    return value != null && (value == '0' || _lengthRegExp.firstMatch(value) != null);
   }
 
   final String _rawInput;

@@ -18,7 +18,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 import 'package:meta/meta.dart';
 
 import '../css/flow.dart';
@@ -90,8 +89,9 @@ class Element extends Node
 
   // A point reference to treed renderObject.
   RenderObject renderObject;
-  RenderConstrainedBox renderConstrainedBox;
+  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
+  KrakenRenderPadding renderPadding;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;

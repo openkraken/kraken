@@ -291,6 +291,21 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
     properties.add(DiagnosticsProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+
+    return false;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    return child?.hitTest(result, position: position);
+  }
 }
 
 void setChild(RenderObject parent, RenderObject child) {

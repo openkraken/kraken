@@ -6,7 +6,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 
@@ -18,8 +17,9 @@ import 'package:kraken/src/css/style_property.dart';
 /// - min-height
 mixin CSSSizingMixin {
 
-  RenderConstrainedBox renderConstrainedBox;
+  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
+  KrakenRenderPadding renderPadding;
   CSSInset oldPadding;
   CSSInset oldMargin;
   CSSSizedConstraints oldConstraints;
@@ -135,7 +135,7 @@ mixin CSSSizingMixin {
 
   RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
     oldConstraints = getConstraints(style);
-    return renderConstrainedBox = RenderConstrainedBox(
+    return renderConstrainedBox = KrakenRenderConstrainedBox(
       additionalConstraints: oldConstraints.toBoxConstraints(),
       child: renderObject,
     );
@@ -208,7 +208,7 @@ mixin CSSSizingMixin {
     if (style.contains(MARGIN_TOP)) marginTop = CSSStyleProperty.getDisplayPortValue(style[MARGIN_TOP]);
     if (style.contains(MARGIN_RIGHT)) marginRight = CSSStyleProperty.getDisplayPortValue(style[MARGIN_RIGHT]);
     if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSStyleProperty.getDisplayPortValue(style[MARGIN_BOTTOM]);
-    
+
     return CSSInset(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
   }
 
@@ -307,6 +307,11 @@ mixin CSSSizingMixin {
 
   void _updateMargin(EdgeInsets margin) {
     renderMargin.margin = margin;
+  }
+
+  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
+    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
+    return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   static CSSInset _getPaddingFromStyle(CSSStyleDeclaration style) {
