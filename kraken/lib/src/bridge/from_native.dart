@@ -241,7 +241,7 @@ String invokeModule(
       String method = args[1];
       if (method == 'invokeMethod') {
         List methodArgs = args[2];
-        KrakenMethodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
+        controller.methodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
           String ret;
           if (result is String) {
             ret = result;
@@ -253,8 +253,8 @@ String invokeModule(
           callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
-        KrakenMethodChannel.setMethodCallHandler((MethodCall call) async {
-          emitModuleEvent(contextId, jsonEncode(['MethodChannel', call.method, call.arguments]));
+        controller.methodChannel.setMethodCallHandler((String method, dynamic arguments) async {
+          emitModuleEvent(contextId, jsonEncode(['MethodChannel', method, arguments]));
         });
       }
     } else if (module == 'Clipboard') {
