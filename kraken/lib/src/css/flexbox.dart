@@ -203,7 +203,7 @@ class _FlexShortHand {
     } else if (group.length == 2) {
       flexGrow = group[0];
 
-      if (CSSLength.isValidateLength(group[1])) {
+      if (CSSLength.isLength(group[1])) {
         flexBasis = group[1];
       } else {
         flexShrink = group[1];

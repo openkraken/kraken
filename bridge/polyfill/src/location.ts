@@ -2,41 +2,55 @@ import { krakenWindow } from './bridge';
 import { URL } from './url';
 
 const krakenLocation = krakenWindow.location;
-
-class Location {
-  private url: URL;
-  href: string;
-  constructor(href: string) {
-    this.href = href;
-    this.url = new URL(href);
-  }
-  get origin() {
-    return this.url.origin;
-  }
-  get protocol() {
-    return this.url.protocol;
-  }
-  get host() {
-    return this.url.host;
-  }
-  get hostname() {
-    return this.url.hostname;
-  }
-  get port() {
-    return this.url.port;
-  }
-  get pathname() {
-    return this.url.pathname;
-  }
-  get search() {
-    return this.url.search;
-  }
-  get hash() {
-    return this.url.hash;
-  }
-  reload() {
-    return krakenLocation.reload();
-  }
+// Lazy parse url.
+let _url: URL;
+export function getUrl() : URL {
+  return _url ? _url : (_url = new URL(krakenLocation.href));
 }
 
-export const location = new Location(krakenLocation.href);
+export const location = {
+  get href() {
+    return getUrl().href;
+  },
+  get origin() {
+    return getUrl().origin;
+  },
+  get protocol() {
+    return getUrl().protocol;
+  },
+  get host() {
+    return getUrl().host;
+  },
+  get hostname() {
+    return getUrl().hostname;
+  },
+  get port() {
+    return getUrl().port;
+  },
+  get pathname() {
+    return getUrl().pathname;
+  },
+  get search() {
+    return getUrl().search;
+  },
+  get hash() {
+    return getUrl().hash;
+  },
+
+  get assign() {
+    return (assignURL: string) => {
+      console.warn('Unimpl location.assign');
+    };
+  },
+  get reload() {
+    return krakenLocation.reload;
+  },
+  get replace() {
+    return (replaceURL: string) => {
+      console.warn('Unimpl location.replace');
+    };
+  },
+  get toString() {
+    return () => location.href;
+  },
+};

@@ -1,6 +1,7 @@
 import 'package:kraken/css.dart';
 
-final RegExp _splitRegExp = RegExp(r'\s+');
+final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
+final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
 
 class CSSStyleProperty {
   static double getDisplayPortValue(input) {
@@ -48,9 +49,69 @@ class CSSStyleProperty {
     if (style.containsKey(MARGIN_BOTTOM)) style.remove(MARGIN_BOTTOM);
   }
 
+  static List<List<String>> getShadowValues(String property) {
+    assert(property != null);
+
+    List shadows = property.split(_commaRegExp);
+    List<List<String>> values = List();
+    for (String shadow in shadows) {
+      List<String> parts = shadow.trim().split(_spaceRegExp);
+
+      String inset;
+      String color;
+
+      List<String> lengthValues = List(4);
+      int i = 0;
+      for (String part in parts) {
+        if (part == 'inset') {
+          inset = part;
+        } else if (CSSLength.isLength(part)) {
+          lengthValues[i++] = part;
+        } else {
+          color = part;
+        }
+      }
+
+      values.add([
+        color,
+        lengthValues[0], // offsetX
+        lengthValues[1], // offsetY
+        lengthValues[2], // blurRadius
+        lengthValues[3], // spreadRadius
+        inset
+      ]);
+    }
+
+    return values;
+  }
+
+  static List<String> getBorderValues(String shorthandProperty) {
+    assert(shorthandProperty != null);
+    var properties = shorthandProperty.trim().split(_spaceRegExp);
+
+    String width;
+    String style;
+    String color;
+
+    // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
+    for (String property in properties) {
+      if (width == null && (CSSLength.isLength(property) || property == THIN || property == MEDIUM || property == THICK)) {
+        width = property;
+      } else if (style == null && (property == SOLID || property == NONE)) {
+        style = property;
+      } else if (color == null && CSSColor.isColor(property)) {
+        color = property;
+      } else {
+        return null;
+      }
+    }
+
+    return [width, style, color];
+  }
+
   static List<String> getInsetValues(String shorthandProperty) {
     assert(shorthandProperty != null);
-    var properties = shorthandProperty.trim().split(_splitRegExp);
+    var properties = shorthandProperty.trim().split(_spaceRegExp);
 
     String topValue;
     String rightValue;
@@ -80,7 +141,7 @@ class CSSStyleProperty {
   // https://drafts.csswg.org/css-values-4/#typedef-position
   static List<String> getPositionValues(String shorthandProperty) {
     assert(shorthandProperty != null);
-    var properties = shorthandProperty.trim().split(_splitRegExp);
+    var properties = shorthandProperty.trim().split(_spaceRegExp);
 
     String x;
     String y;
@@ -103,3 +164,4 @@ class CSSStyleProperty {
         property == ANIMATION;
   }
 }
+

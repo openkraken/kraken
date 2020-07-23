@@ -5,7 +5,332 @@
 
 import 'dart:math';
 import 'dart:ui' show Color;
+import 'package:flutter/painting.dart';
+
 import 'value.dart';
+
+/// Only support Basic color keywords and Extended color keywords,
+/// for CSS system colors is not recommended for use after CSS3
+const Map<String, int> _namedColors = {
+  'transparent': 0x00000000,
+  'aliceblue': 0xFFF0F8FF,
+  'antiquewhite': 0xFFFAEBD7,
+  'aqua': 0xFF00FFFF,
+  'aquamarine': 0xFF7FFFD4,
+  'azure': 0xFFF0FFFF,
+  'beige': 0xFFF5F5DC,
+  'bisque': 0xFFFFE4C4,
+  'black': 0xFF000000,
+  'blanchedalmond': 0xFFFFEBCD,
+  'blue': 0xFF0000FF,
+  'blueviolet': 0xFF8A2BE2,
+  'brown': 0xFFA52A2A,
+  'burlywood': 0xFFDEB887,
+  'cadetblue': 0xFF5F9EA0,
+  'chartreuse': 0xFF7FFF00,
+  'chocolate': 0xFFD2691E,
+  'coral': 0xFFFF7F50,
+  'cornflowerblue': 0xFF6495ED,
+  'cornsilk': 0xFFFFF8DC,
+  'crimson': 0xFFDC143C,
+  'cyan': 0xFF00FFFF,
+  'darkblue': 0xFF00008B,
+  'darkcyan': 0xFF008B8B,
+  'darkgoldenrod': 0xFFB8860B,
+  'darkgray': 0xFFA9A9A9,
+  'darkgreen': 0xFF006400,
+  'darkgrey': 0xFFA9A9A9,
+  'darkkhaki': 0xFFBDB76B,
+  'darkmagenta': 0xFF8B008B,
+  'darkolivegreen': 0xFF556B2F,
+  'darkorange': 0xFFFF8C00,
+  'darkorchid': 0xFF9932CC,
+  'darkred': 0xFF8B0000,
+  'darksalmon': 0xFFE9967A,
+  'darkseagreen': 0xFF8FBC8F,
+  'darkslateblue': 0xFF483D8B,
+  'darkslategray': 0xFF2F4F4F,
+  'darkslategrey': 0xFF2F4F4F,
+  'darkturquoise': 0xFF00CED1,
+  'darkviolet': 0xFF9400D3,
+  'deeppink': 0xFFFF1493,
+  'deepskyblue': 0xFF00BFFF,
+  'dimgray': 0xFF696969,
+  'dimgrey': 0xFF696969,
+  'dodgerblue': 0xFF1E90FF,
+  'firebrick': 0xFFB22222,
+  'floralwhite': 0xFFFFFAF0,
+  'forestgreen': 0xFF228B22,
+  'fuchsia': 0xFFFF00FF,
+  'gainsboro': 0xFFDCDCDC,
+  'ghostwhite': 0xFFF8F8FF,
+  'gold': 0xFFFFD700,
+  'goldenrod': 0xFFDAA520,
+  'gray': 0xFF808080,
+  'green': 0xFF008000,
+  'greenyellow': 0xFFADFF2F,
+  'grey': 0xFF808080,
+  'honeydew': 0xFFF0FFF0,
+  'hotpink': 0xFFFF69B4,
+  'indianred': 0xFFCD5C5C,
+  'indigo': 0xFF4B0082,
+  'ivory': 0xFFFFFFF0,
+  'khaki': 0xFFF0E68C,
+  'lavender': 0xFFE6E6FA,
+  'lavenderblush': 0xFFFFF0F5,
+  'lawngreen': 0xFF7CFC00,
+  'lemonchiffon': 0xFFFFFACD,
+  'lightblue': 0xFFADD8E6,
+  'lightcoral': 0xFFF08080,
+  'lightcyan': 0xFFE0FFFF,
+  'lightgoldenrodyellow': 0xFFFAFAD2,
+  'lightgray': 0xFFD3D3D3,
+  'lightgreen': 0xFF90EE90,
+  'lightgrey': 0xFFD3D3D3,
+  'lightpink': 0xFFFFB6C1,
+  'lightsalmon': 0xFFFFA07A,
+  'lightseagreen': 0xFF20B2AA,
+  'lightskyblue': 0xFF87CEFA,
+  'lightslategray': 0xFF778899,
+  'lightslategrey': 0xFF778899,
+  'lightsteelblue': 0xFFB0C4DE,
+  'lightyellow': 0xFFFFFFE0,
+  'lime': 0xFF00FF00,
+  'limegreen': 0xFF32CD32,
+  'linen': 0xFFFAF0E6,
+  'magenta': 0xFFFF00FF,
+  'maroon': 0xFF800000,
+  'mediumaquamarine': 0xFF66CDAA,
+  'mediumblue': 0xFF0000CD,
+  'mediumorchid': 0xFFBA55D3,
+  'mediumpurple': 0xFF9370DB,
+  'mediumseagreen': 0xFF3CB371,
+  'mediumslateblue': 0xFF7B68EE,
+  'mediumspringgreen': 0xFF00FA9A,
+  'mediumturquoise': 0xFF48D1CC,
+  'mediumvioletred': 0xFFC71585,
+  'midnightblue': 0xFF191970,
+  'mintcream': 0xFFF5FFFA,
+  'mistyrose': 0xFFFFE4E1,
+  'moccasin': 0xFFFFE4B5,
+  'navajowhite': 0xFFFFDEAD,
+  'navy': 0xFF000080,
+  'oldlace': 0xFFFDF5E6,
+  'olive': 0xFF808000,
+  'olivedrab': 0xFF6B8E23,
+  'orange': 0xFFFFA500,
+  'orangered': 0xFFFF4500,
+  'orchid': 0xFFDA70D6,
+  'palegoldenrod': 0xFFEEE8AA,
+  'palegreen': 0xFF98FB98,
+  'paleturquoise': 0xFFAFEEEE,
+  'palevioletred': 0xFFDB7093,
+  'papayawhip': 0xFFFFEFD5,
+  'peachpuff': 0xFFFFDAB9,
+  'peru': 0xFFCD853F,
+  'pink': 0xFFFFC0CB,
+  'plum': 0xFFDDA0DD,
+  'powderblue': 0xFFB0E0E6,
+  'purple': 0xFF800080,
+  'rebeccapurple': 0xFF663399,
+  'red': 0xFFFF0000,
+  'rosybrown': 0xFFBC8F8F,
+  'royalblue': 0xFF4169E1,
+  'saddlebrown': 0xFF8B4513,
+  'salmon': 0xFFFA8072,
+  'sandybrown': 0xFFF4A460,
+  'seagreen': 0xFF2E8B57,
+  'seashell': 0xFFFFF5EE,
+  'sienna': 0xFFA0522D,
+  'silver': 0xFFC0C0C0,
+  'skyblue': 0xFF87CEEB,
+  'slateblue': 0xFF6A5ACD,
+  'slategray': 0xFF708090,
+  'slategrey': 0xFF708090,
+  'snow': 0xFFFFFAFA,
+  'springgreen': 0xFF00FF7F,
+  'steelblue': 0xFF4682B4,
+  'tan': 0xFFD2B48C,
+  'teal': 0xFF008080,
+  'thistle': 0xFFD8BFD8,
+  'tomato': 0xFFFF6347,
+  'turquoise': 0xFF40E0D0,
+  'violet': 0xFFEE82EE,
+  'wheat': 0xFFF5DEB3,
+  'white': 0xFFFFFFFF,
+  'whitesmoke': 0xFFF5F5F5,
+  'yellow': 0xFFFFFF00,
+  'yellowgreen': 0xFF9ACD32,
+};
+
+// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
+// CSS Color: https://drafts.csswg.org/css-color-4/
+// ignore: public_member_api_docs
+final _colorHexRegExp = RegExp(r'^#([a-f0-9]{3,8})$', caseSensitive: false);
+final _colorHslRegExp = RegExp(
+    r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\s*\)$');
+final _colorRgbRegExp = RegExp(
+    r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
+
+/// #123
+/// #123456
+/// rgb(r,g,b)
+/// rgba(r,g,b,a)
+class CSSColor implements CSSValue<Color> {
+  // Use a preprocessed color to cache.
+  // Example:
+  //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
+  //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
+  //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
+  // Cache will be terminated after used once.
+  static final Map<String, Color> _cachedColor = {};
+
+  static String convertToHex(Color color) {
+    String red = color.red.toRadixString(16).padLeft(2);
+    String green = color.green.toRadixString(16).padLeft(2);
+    String blue = color.blue.toRadixString(16).padLeft(2);
+    return '#${red}${green}${blue}';
+  }
+
+  static Color tranformToDarkColor(Color color) {
+    // Convert to lab color
+    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
+    num invertedL = min(110 - lab.l, 100);
+    if (invertedL < lab.l) {
+      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
+      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
+    } else {
+      return color;
+    }
+  }
+
+  static Color transformToLightColor(Color color) {
+    // Convert to lab color
+    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
+    num invertedL = min(110 - lab.l, 100);
+    if (invertedL > lab.l) {
+      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
+      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
+    } else {
+      return color;
+    }
+  }
+
+  static bool isColor(String color) {
+    return parseColor(color) != null;
+  }
+
+  static Color parseColor(String color) {
+    if (color == null) return null;
+    color = color.trim().toLowerCase();
+    
+    if (color == 'transparent') {
+      return CSSColor.transparent;
+    } else if (_cachedColor.containsKey(color)) {
+      return _cachedColor[color];
+    }
+
+    Color parsed;
+    if (color.startsWith('#')) {
+      final hexMatch = _colorHexRegExp.firstMatch(color);
+      if (hexMatch != null) {
+        final hex = hexMatch[1].toUpperCase();
+        // https://drafts.csswg.org/css-color-4/#hex-notation
+        switch (hex.length) {
+          case 3:
+            parsed = Color(int.parse('0xFF${_x2(hex)}'));
+            break;
+          case 4:
+            final alpha = hex[3];
+            final rgb = hex.substring(0, 3);
+            parsed = Color(int.parse('0x${_x2(alpha)}${_x2(rgb)}'));
+            break;
+          case 6:
+            parsed = Color(int.parse('0xFF$hex'));
+            break;
+          case 8:
+            final alpha = hex.substring(6, 8);
+            final rgb = hex.substring(0, 6);
+            parsed = Color(int.parse('0x$alpha$rgb'));
+            break;
+        }
+      }
+    } else if (color.startsWith('rgb')) {
+      final rgbMatch = _colorRgbRegExp.firstMatch(color);
+      if (rgbMatch != null) {
+        final double rgbR = _parseColorPart(rgbMatch[2], 0, 255);
+        final double rgbG = _parseColorPart(rgbMatch[3], 0, 255);
+        final double rgbB = _parseColorPart(rgbMatch[4], 0, 255);
+        final double rgbO = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
+        if (rgbR != null && rgbG != null && rgbB != null && rgbO != null) {
+          parsed = Color.fromRGBO(
+            rgbR.round(),
+            rgbG.round(),
+            rgbB.round(),
+            rgbO
+          );
+        }
+      }
+    } else if(color.startsWith('hsl')) {
+      final hslMatch = _colorHslRegExp.firstMatch(color);
+      if (hslMatch != null) {
+        final hslH = _parseColorHue(hslMatch[2], hslMatch[3]);
+        final hslS = _parseColorPart(hslMatch[4], 0, 1);
+        final hslL = _parseColorPart(hslMatch[5], 0, 1);
+        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7], 0 ,1) : 1;
+        if (hslH != null && hslS != null && hslL != null && hslA != null) {
+          parsed = HSLColor.fromAHSL(hslA, hslH, hslS, hslL).toColor();
+        }
+      }
+    } else if (_namedColors.containsKey(color)) {
+      parsed = Color(_namedColors[color]);
+    }
+
+    if (parsed != null) {
+      _cachedColor[color] = parsed;
+    }
+
+    return parsed;
+  }
+
+  final String rawInput;
+  Color value;
+
+  CSSColor(this.rawInput);
+
+  static const Color transparent = Color(0x00000000);
+  static const Color initial = Color(0xFF000000);
+
+  bool _parsed = false;
+  @override
+  void parse() {
+    if (!_parsed) value = CSSColor.parseColor(rawInput);
+    _parsed = true;
+  }
+
+  @override
+  Color get computedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    return value;
+  }
+
+  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
+  @override
+  String get serializedValue {
+    // Lazy parse to get performance improved.
+    parse();
+
+    var rgb = '${value.red}, ${value.green}, ${value.blue}';
+    if (value.alpha == 255) {
+      return 'rgb($rgb)';
+    } else {
+      return 'rgba($rgb, ${value.opacity})';
+    }
+  }
+}
+
 
 /// A color in the CIELAB color space.
 ///
@@ -130,645 +455,53 @@ class RgbColor {
   }
 }
 
-// CSS Values and Units: https://drafts.csswg.org/css-values-3/#colors
-// CSS Color: https://drafts.csswg.org/css-color-4/
-// ignore: public_member_api_docs
-final RegExp rgbaRexExp = RegExp(
-  r'rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?(\s*\d*\.?\d+\s*)?\)',
-  caseSensitive: false,
-  multiLine: false,
-);
+String _x2(String value) {
+  final sb = StringBuffer();
+  for (var i = 0; i < value.length; i++) {
+    sb.write(value[i] * 2);
+  }
+  return sb.toString();
+}
 
-/// #123
-/// #123456
-/// rgb(r,g,b)
-/// rgba(r,g,b,a)
-class CSSColor implements CSSValue<Color> {
-  // Use a preprocessed color to cache.
-  // Example:
-  //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
-  //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
-  //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
-  // Cache will be terminated after used once.
-  static final Map<String, Color> _cachedColor = {};
-  static int _cacheCount = 0;
+double _parseColorPart(String value, double min, double max) {
+  double v;
 
-  // ignore: public_member_api_docs
-  static String preprocessCSSPropertyWithRGBAColor(String input) {
-    var ret = input;
-    var match = rgbaRexExp.firstMatch(ret);
-    while (match != null) {
-      var cacheId = 'rgba$_cacheCount';
-      _cachedColor[cacheId] = _generateColorFromRGBA(ret.substring(match.start, match.end));
-      ret = ret.replaceRange(match.start, match.end, cacheId);
-      _cacheCount++;
-
-      match = rgbaRexExp.firstMatch(ret);
-    }
-    return ret;
+  if (value.endsWith('%')) {
+    final p = double.tryParse(value.substring(0, value.length - 1));
+    if (p == null) return null;
+    v = p / 100.0 * max;
   }
 
-  static String convertToHex(Color color) {
-    String red = color.red.toRadixString(16).padLeft(2);
-    String green = color.green.toRadixString(16).padLeft(2);
-    String blue = color.blue.toRadixString(16).padLeft(2);
-    return '#${red}${green}${blue}';
+  v ??= double.tryParse(value);
+
+  return v < min ? min : (v > max ? max : v);
+}
+
+double _parseColorHue(String number, String unit) {
+  final v = double.tryParse(number);
+  if (v == null) return null;
+
+  double deg;
+  switch (unit) {
+    case 'rad':
+      final rad = v;
+      deg = rad * (180 / pi);
+      break;
+    case 'grad':
+      final grad = v;
+      deg = grad * 0.9;
+      break;
+    case 'turn':
+      final turn = v;
+      deg = turn * 360;
+      break;
+    default:
+      deg = v;
   }
 
-  static Color tranformToDarkColor(Color color) {
-    // Convert to lab color
-    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
-    num invertedL = min(110 - lab.l, 100);
-    if (invertedL < lab.l) {
-      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
-      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
-    } else {
-      return color;
-    }
+  while (deg < 0) {
+    deg += 360;
   }
 
-  static Color transformToLightColor(Color color) {
-    // Convert to lab color
-    LabColor lab = RgbColor(color.red, color.green, color.blue).toLabColor();
-    num invertedL = min(110 - lab.l, 100);
-    if (invertedL > lab.l) {
-      RgbColor rgb = LabColor(invertedL, lab.a, lab.b).toRgbColor();
-      return Color.fromARGB(color.alpha, rgb.r.toInt(), rgb.g.toInt(), rgb.b.toInt());
-    } else {
-      return color;
-    }
-  }
-
-  static int _limitRGB(int input) {
-    if (input >= 255) {
-      return 255;
-    } else if (input <= 0) {
-      return 0;
-    } else {
-      return input;
-    }
-  }
-
-  static Color _generateColorFromRGBA(String input) {
-    if (_cachedColor.containsKey(input)) {
-      Color ret = _cachedColor[input];
-      _cachedColor.remove(input);
-      return ret;
-    }
-
-    int red = 0;
-    int green = 0;
-    int blue = 0;
-    double alpha = 1.0;
-    Iterable<RegExpMatch> matches = rgbaRexExp.allMatches(input);
-    if (matches.length == 1) {
-      RegExpMatch match = matches.first;
-      red = _limitRGB(int.tryParse(match[1]) ?? 0);
-      green = _limitRGB(int.tryParse(match[2]) ?? 0);
-      blue = _limitRGB(int.tryParse(match[3]) ?? 0);
-      if (match[4] != null) {
-        alpha = double.tryParse(match[4]) ?? 1.0;
-        if (alpha > 1.0) alpha = 1.0;
-        if (alpha < 0.0) alpha = 0.0;
-      }
-    }
-    return Color.fromRGBO(red, green, blue, alpha);
-  }
-
-  static Color _generateColorFromHex(String hex) {
-    int _r = 0;
-    int _g = 0;
-    int _b = 0;
-    int _a = 0xFF;
-
-    if (hex.length == 4) {
-      String r = hex.substring(1, 2);
-      String g = hex.substring(2, 3);
-      String b = hex.substring(3, 4);
-
-      _r = int.tryParse(r + r, radix: 16) ?? 0;
-      _g = int.tryParse(g + g, radix: 16) ?? 0;
-      _b = int.tryParse(b + b, radix: 16) ?? 0;
-    } else if (hex.length == 7) {
-      String r = hex.substring(1, 3);
-      String g = hex.substring(3, 5);
-      String b = hex.substring(5, 7);
-
-      _r = int.tryParse(r, radix: 16) ?? 0;
-      _g = int.tryParse(g, radix: 16) ?? 0;
-      _b = int.tryParse(b, radix: 16) ?? 0;
-    }
-    //  255 r
-    //  0 g
-    //  0 b
-    //  255 a
-    //  ->
-    //  0xFF FF 00 00
-    return Color((_a << 24) + (_r << 16) + (_g << 8) + _b);
-  }
-
-  static Color generate(String color) {
-    if (color == null) return CSSColor.transparent;
-    color = color.trim();
-
-    switch (color) {
-      case 'black':
-        return CSSColor.black;
-      case 'silver':
-        return CSSColor.silver;
-      case 'gray':
-        return CSSColor.gray;
-      case 'white':
-        return CSSColor.white;
-      case 'maroon':
-        return CSSColor.maroon;
-      case 'red':
-        return CSSColor.red;
-      case 'purple':
-        return CSSColor.purple;
-      case 'fuchsia':
-        return CSSColor.fuchsia;
-      case 'green':
-        return CSSColor.green;
-      case 'lime':
-        return CSSColor.lime;
-      case 'olive':
-        return CSSColor.olive;
-      case 'yellow':
-        return CSSColor.yellow;
-      case 'navy':
-        return CSSColor.navy;
-      case 'blue':
-        return CSSColor.blue;
-      case 'teal':
-        return CSSColor.teal;
-      case 'aqua':
-        return CSSColor.aqua;
-      case 'aliceblue':
-        return CSSColor.aliceblue;
-      case 'antiquewhite':
-        return CSSColor.antiquewhite;
-      case 'aquamarine':
-        return CSSColor.aquamarine;
-      case 'azure':
-        return CSSColor.azure;
-      case 'beige':
-        return CSSColor.beige;
-      case 'bisque':
-        return CSSColor.bisque;
-      case 'blanchedalmond':
-        return CSSColor.blanchedalmond;
-      case 'blueviolet':
-        return CSSColor.blueviolet;
-      case 'brown':
-        return CSSColor.brown;
-      case 'burlywood':
-        return CSSColor.burlywood;
-      case 'cadetblue':
-        return CSSColor.cadetblue;
-      case 'chartreuse':
-        return CSSColor.chartreuse;
-      case 'chocolate':
-        return CSSColor.chocolate;
-      case 'coral':
-        return CSSColor.coral;
-      case 'cornflowerblue':
-        return CSSColor.cornflowerblue;
-      case 'cornsilk':
-        return CSSColor.cornsilk;
-      case 'crimson':
-        return CSSColor.crimson;
-      case 'cyan':
-        return CSSColor.cyan;
-      case 'darkblue':
-        return CSSColor.darkblue;
-      case 'darkcyan':
-        return CSSColor.darkcyan;
-      case 'darkgoldenrod':
-        return CSSColor.darkgoldenrod;
-      case 'darkgray':
-        return CSSColor.darkgray;
-      case 'darkgreen':
-        return CSSColor.darkgreen;
-      case 'darkgrey':
-        return CSSColor.darkgrey;
-      case 'darkkhaki':
-        return CSSColor.darkkhaki;
-      case 'darkmagenta':
-        return CSSColor.darkmagenta;
-      case 'darkolivegreen':
-        return CSSColor.darkolivegreen;
-      case 'darkorange':
-        return CSSColor.darkorange;
-      case 'darkorchid':
-        return CSSColor.darkorchid;
-      case 'darkred':
-        return CSSColor.darkred;
-      case 'darksalmon':
-        return CSSColor.darksalmon;
-      case 'darkseagreen':
-        return CSSColor.darkseagreen;
-      case 'darkslateblue':
-        return CSSColor.darkslateblue;
-      case 'darkslategray':
-        return CSSColor.darkslategray;
-      case 'darkslategrey':
-        return CSSColor.darkslategrey;
-      case 'darkturquoise':
-        return CSSColor.darkturquoise;
-      case 'darkviolet':
-        return CSSColor.darkviolet;
-      case 'deeppink':
-        return CSSColor.deeppink;
-      case 'deepskyblue':
-        return CSSColor.deepskyblue;
-      case 'dimgray':
-        return CSSColor.dimgray;
-      case 'dimgrey':
-        return CSSColor.dimgrey;
-      case 'dodgerblue':
-        return CSSColor.dodgerblue;
-      case 'firebrick':
-        return CSSColor.firebrick;
-      case 'floralwhite':
-        return CSSColor.floralwhite;
-      case 'forestgreen':
-        return CSSColor.forestgreen;
-      case 'gainsboro':
-        return CSSColor.gainsboro;
-      case 'ghostwhite':
-        return CSSColor.ghostwhite;
-      case 'gold':
-        return CSSColor.gold;
-      case 'goldenrod':
-        return CSSColor.goldenrod;
-      case 'greenyellow':
-        return CSSColor.greenyellow;
-      case 'grey':
-        return CSSColor.grey;
-      case 'honeydew':
-        return CSSColor.honeydew;
-      case 'hotpink':
-        return CSSColor.hotpink;
-      case 'indianred':
-        return CSSColor.indianred;
-      case 'indigo':
-        return CSSColor.indigo;
-      case 'ivory':
-        return CSSColor.ivory;
-      case 'khaki':
-        return CSSColor.khaki;
-      case 'lavender':
-        return CSSColor.lavender;
-      case 'lavenderblush':
-        return CSSColor.lavenderblush;
-      case 'lawngreen':
-        return CSSColor.lawngreen;
-      case 'lemonchiffon':
-        return CSSColor.lemonchiffon;
-      case 'lightblue':
-        return CSSColor.lightblue;
-      case 'lightcoral':
-        return CSSColor.lightcoral;
-      case 'lightcyan':
-        return CSSColor.lightcyan;
-      case 'lightgoldenrodyellow':
-        return CSSColor.lightgoldenrodyellow;
-      case 'lightgray':
-        return CSSColor.lightgray;
-      case 'lightgreen':
-        return CSSColor.lightgreen;
-      case 'lightgrey':
-        return CSSColor.lightgrey;
-      case 'lightpink':
-        return CSSColor.lightpink;
-      case 'lightsalmon':
-        return CSSColor.lightsalmon;
-      case 'lightseagreen':
-        return CSSColor.lightseagreen;
-      case 'lightskyblue':
-        return CSSColor.lightskyblue;
-      case 'lightslategray':
-        return CSSColor.lightslategray;
-      case 'lightslategrey':
-        return CSSColor.lightslategrey;
-      case 'lightsteelblue':
-        return CSSColor.lightsteelblue;
-      case 'lightyellow':
-        return CSSColor.lightyellow;
-      case 'limegreen':
-        return CSSColor.limegreen;
-      case 'linen':
-        return CSSColor.linen;
-      case 'magenta':
-        return CSSColor.magenta;
-      case 'mediumaquamarine':
-        return CSSColor.mediumaquamarine;
-      case 'mediumblue':
-        return CSSColor.mediumblue;
-      case 'mediumorchid':
-        return CSSColor.mediumorchid;
-      case 'mediumpurple':
-        return CSSColor.mediumpurple;
-      case 'mediumseagreen':
-        return CSSColor.mediumseagreen;
-      case 'mediumslateblue':
-        return CSSColor.mediumslateblue;
-      case 'mediumspringgreen':
-        return CSSColor.mediumspringgreen;
-      case 'mediumturquoise':
-        return CSSColor.mediumturquoise;
-      case 'mediumvioletred':
-        return CSSColor.mediumvioletred;
-      case 'midnightblue':
-        return CSSColor.midnightblue;
-      case 'mintcream':
-        return CSSColor.mintcream;
-      case 'mistyrose':
-        return CSSColor.mistyrose;
-      case 'moccasin':
-        return CSSColor.moccasin;
-      case 'navajowhite':
-        return CSSColor.navajowhite;
-      case 'oldlace':
-        return CSSColor.oldlace;
-      case 'olivedrab':
-        return CSSColor.olivedrab;
-      case 'orange':
-        return CSSColor.orange;
-      case 'orangered':
-        return CSSColor.orangered;
-      case 'orchid':
-        return CSSColor.orchid;
-      case 'palegoldenrod':
-        return CSSColor.palegoldenrod;
-      case 'palegreen':
-        return CSSColor.palegreen;
-      case 'paleturquoise':
-        return CSSColor.paleturquoise;
-      case 'palevioletred':
-        return CSSColor.palevioletred;
-      case 'papayawhip':
-        return CSSColor.papayawhip;
-      case 'peachpuff':
-        return CSSColor.peachpuff;
-      case 'peru':
-        return CSSColor.peru;
-      case 'pink':
-        return CSSColor.pink;
-      case 'plum':
-        return CSSColor.plum;
-      case 'powderblue':
-        return CSSColor.powderblue;
-      case 'rosybrown':
-        return CSSColor.rosybrown;
-      case 'royalblue':
-        return CSSColor.royalblue;
-      case 'saddlebrown':
-        return CSSColor.saddlebrown;
-      case 'salmon':
-        return CSSColor.salmon;
-      case 'sandybrown':
-        return CSSColor.sandybrown;
-      case 'seagreen':
-        return CSSColor.seagreen;
-      case 'seashell':
-        return CSSColor.seashell;
-      case 'sienna':
-        return CSSColor.sienna;
-      case 'skyblue':
-        return CSSColor.skyblue;
-      case 'slateblue':
-        return CSSColor.slateblue;
-      case 'slategray':
-        return CSSColor.slategray;
-      case 'slategrey':
-        return CSSColor.slategrey;
-      case 'snow':
-        return CSSColor.snow;
-      case 'springgreen':
-        return CSSColor.springgreen;
-      case 'steelblue':
-        return CSSColor.steelblue;
-      case 'tan':
-        return CSSColor.tan;
-      case 'thistle':
-        return CSSColor.thistle;
-      case 'tomato':
-        return CSSColor.tomato;
-      case 'turquoise':
-        return CSSColor.turquoise;
-      case 'violet':
-        return CSSColor.violet;
-      case 'wheat':
-        return CSSColor.wheat;
-      case 'whitesmoke':
-        return CSSColor.whitesmoke;
-      case 'yellowgreen':
-        return CSSColor.yellowgreen;
-      case 'transparent':
-        return CSSColor.transparent;
-    }
-
-    if (color.startsWith('#')) {
-      return _generateColorFromHex(color);
-    } else if (color.startsWith('rgb')) {
-      return _generateColorFromRGBA(color);
-    } else {
-      return CSSColor.transparent;
-    }
-  }
-
-  final String rawInput;
-  Color value;
-
-  CSSColor(this.rawInput);
-
-  /// Only support Basic color keywords and Extended color keywords,
-  /// for CSS system colors is not recommended for use after CSS3
-  /// https://www.w3.org/TR/css-color-3/#html4
-  /// https://www.w3.org/TR/css-color-3/#css-system
-  /// https://www.w3.org/TR/css-color-3/#svg-color
-
-  // Basic color keywords
-  static const Color black = Color(0xFF000000);
-  static const Color silver = Color(0xFFC0C0C0);
-  static const Color gray = Color(0xFF808080);
-  static const Color white = Color(0xFFFFFFFF);
-  static const Color maroon = Color(0xFF800000);
-  static const Color red = Color(0xFFFF0000);
-  static const Color purple = Color(0xFF800080);
-  static const Color fuchsia = Color(0xFFFF00FF);
-  static const Color green = Color(0xFF008000);
-  static const Color lime = Color(0xFF00FF00);
-  static const Color olive = Color(0xFF808000);
-  static const Color yellow = Color(0xFFFFFF00);
-  static const Color navy = Color(0xFF000080);
-  static const Color blue = Color(0xFF0000FF);
-  static const Color teal = Color(0xFF008080);
-  static const Color aqua = Color(0xFF00FFFF);
-
-  // Extended color keywords
-  static const Color aliceblue = Color(0xFFF0F8FF);
-  static const Color antiquewhite = Color(0xFFFAEBD7);
-  static const Color aquamarine = Color(0xFF7FFFD4);
-  static const Color azure = Color(0xFFF0FFFF);
-  static const Color beige = Color(0xFFF5F5DC);
-  static const Color bisque = Color(0xFFFFE4C4);
-  static const Color blanchedalmond = Color(0xFFFFEBCD);
-  static const Color blueviolet = Color(0xFF8A2BE2);
-  static const Color brown = Color(0xFFA52A2A);
-  static const Color burlywood = Color(0xFFDEB887);
-  static const Color cadetblue = Color(0xFF5F9EA0);
-  static const Color chartreuse = Color(0xFF7FFF00);
-  static const Color chocolate = Color(0xFFD2691E);
-  static const Color coral = Color(0xFFFF7F50);
-  static const Color cornflowerblue = Color(0xFF6495ED);
-  static const Color cornsilk = Color(0xFFFFF8DC);
-  static const Color crimson = Color(0xFFDC143C);
-  static const Color cyan = Color(0xFF00FFFF);
-  static const Color darkblue = Color(0xFF00008B);
-  static const Color darkcyan = Color(0xFF008B8B);
-  static const Color darkgoldenrod = Color(0xFFB8860B);
-  static const Color darkgray = Color(0xFFA9A9A9);
-  static const Color darkgreen = Color(0xFF006400);
-  static const Color darkgrey = Color(0xFFA9A9A9);
-  static const Color darkkhaki = Color(0xFFBDB76B);
-  static const Color darkmagenta = Color(0xFF8B008B);
-  static const Color darkolivegreen = Color(0xFF556B2F);
-  static const Color darkorange = Color(0xFFFF8C00);
-  static const Color darkorchid = Color(0xFF9932CC);
-  static const Color darkred = Color(0xFF8B0000);
-  static const Color darksalmon = Color(0xFFE9967A);
-  static const Color darkseagreen = Color(0xFF8FBC8F);
-  static const Color darkslateblue = Color(0xFF483D8B);
-  static const Color darkslategray = Color(0xFF2F4F4F);
-  static const Color darkslategrey = Color(0xFF2F4F4F);
-  static const Color darkturquoise = Color(0xFF00CED1);
-  static const Color darkviolet = Color(0xFF9400D3);
-  static const Color deeppink = Color(0xFFFF1493);
-  static const Color deepskyblue = Color(0xFF00BFFF);
-  static const Color dimgray = Color(0xFF696969);
-  static const Color dimgrey = Color(0xFF696969);
-  static const Color dodgerblue = Color(0xFF1E90FF);
-  static const Color firebrick = Color(0xFFB22222);
-  static const Color floralwhite = Color(0xFFFFFAF0);
-  static const Color forestgreen = Color(0xFF228B22);
-  static const Color gainsboro = Color(0xFFDCDCDC);
-  static const Color ghostwhite = Color(0xFFF8F8FF);
-  static const Color gold = Color(0xFFFFD700);
-  static const Color goldenrod = Color(0xFFDAA520);
-  static const Color greenyellow = Color(0xFFADFF2F);
-  static const Color grey = Color(0xFF808080);
-  static const Color honeydew = Color(0xFFF0FFF0);
-  static const Color hotpink = Color(0xFFFF69B4);
-  static const Color indianred = Color(0xFFCD5C5C);
-  static const Color indigo = Color(0xFF4B0082);
-  static const Color ivory = Color(0xFFFFFFF0);
-  static const Color khaki = Color(0xFFF0E68C);
-  static const Color lavender = Color(0xFFE6E6FA);
-  static const Color lavenderblush = Color(0xFFFFF0F5);
-  static const Color lawngreen = Color(0xFF7CFC00);
-  static const Color lemonchiffon = Color(0xFFFFFACD);
-  static const Color lightblue = Color(0xFFADD8E6);
-  static const Color lightcoral = Color(0xFFF08080);
-  static const Color lightcyan = Color(0xFFE0FFFF);
-  static const Color lightgoldenrodyellow = Color(0xFFFAFAD2);
-  static const Color lightgray = Color(0xFFD3D3D3);
-  static const Color lightgreen = Color(0xFF90EE90);
-  static const Color lightgrey = Color(0xFFD3D3D3);
-  static const Color lightpink = Color(0xFFFFB6C1);
-  static const Color lightsalmon = Color(0xFFFFA07A);
-  static const Color lightseagreen = Color(0xFF20B2AA);
-  static const Color lightskyblue = Color(0xFF87CEFA);
-  static const Color lightslategray = Color(0xFF778899);
-  static const Color lightslategrey = Color(0xFF778899);
-  static const Color lightsteelblue = Color(0xFFB0C4DE);
-  static const Color lightyellow = Color(0xFFFFFFE0);
-  static const Color limegreen = Color(0xFF32CD32);
-  static const Color linen = Color(0xFFFAF0E6);
-  static const Color magenta = Color(0xFFFF00FF);
-  static const Color mediumaquamarine = Color(0xFF66CDAA);
-  static const Color mediumblue = Color(0xFF0000CD);
-  static const Color mediumorchid = Color(0xFFBA55D3);
-  static const Color mediumpurple = Color(0xFF9370DB);
-  static const Color mediumseagreen = Color(0xFF3CB371);
-  static const Color mediumslateblue = Color(0xFF7B68EE);
-  static const Color mediumspringgreen = Color(0xFF00FA9A);
-  static const Color mediumturquoise = Color(0xFF48D1CC);
-  static const Color mediumvioletred = Color(0xFFC71585);
-  static const Color midnightblue = Color(0xFF191970);
-  static const Color mintcream = Color(0xFFF5FFFA);
-  static const Color mistyrose = Color(0xFFFFE4E1);
-  static const Color moccasin = Color(0xFFFFE4B5);
-  static const Color navajowhite = Color(0xFFFFDEAD);
-  static const Color oldlace = Color(0xFFFDF5E6);
-  static const Color olivedrab = Color(0xFF6B8E23);
-  static const Color orange = Color(0xFFFFA500);
-  static const Color orangered = Color(0xFFFF4500);
-  static const Color orchid = Color(0xFFDA70D6);
-  static const Color palegoldenrod = Color(0xFFEEE8AA);
-  static const Color palegreen = Color(0xFF98FB98);
-  static const Color paleturquoise = Color(0xFFAFEEEE);
-  static const Color palevioletred = Color(0xFFDB7093);
-  static const Color papayawhip = Color(0xFFFFEFD5);
-  static const Color peachpuff = Color(0xFFFFDAB9);
-  static const Color peru = Color(0xFFCD853F);
-  static const Color pink = Color(0xFFFFC0CB);
-  static const Color plum = Color(0xFFDDA0DD);
-  static const Color powderblue = Color(0xFFB0E0E6);
-  static const Color rosybrown = Color(0xFFBC8F8F);
-  static const Color royalblue = Color(0xFF4169E1);
-  static const Color saddlebrown = Color(0xFF8B4513);
-  static const Color salmon = Color(0xFFFA8072);
-  static const Color sandybrown = Color(0xFFF4A460);
-  static const Color seagreen = Color(0xFF2E8B57);
-  static const Color seashell = Color(0xFFFFF5EE);
-  static const Color sienna = Color(0xFFA0522D);
-  static const Color skyblue = Color(0xFF87CEEB);
-  static const Color slateblue = Color(0xFF6A5ACD);
-  static const Color slategray = Color(0xFF708090);
-  static const Color slategrey = Color(0xFF708090);
-  static const Color snow = Color(0xFFFFFAFA);
-  static const Color springgreen = Color(0xFF00FF7F);
-  static const Color steelblue = Color(0xFF4682B4);
-  static const Color tan = Color(0xFFD2B48C);
-  static const Color thistle = Color(0xFFD8BFD8);
-  static const Color tomato = Color(0xFFFF6347);
-  static const Color turquoise = Color(0xFF40E0D0);
-  static const Color violet = Color(0xFFEE82EE);
-  static const Color wheat = Color(0xFFF5DEB3);
-  static const Color whitesmoke = Color(0xFFF5F5F5);
-  static const Color yellowgreen = Color(0xFF9ACD32);
-
-  static const Color transparent = Color(0x00000000);
-
-  bool _parsed = false;
-  @override
-  void parse() {
-    if (!_parsed) value = CSSColor.generate(rawInput);
-    _parsed = true;
-  }
-
-  @override
-  Color get computedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    return value;
-  }
-
-  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
-  @override
-  String get serializedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    var rgb = '${value.red}, ${value.green}, ${value.blue}';
-    if (value.alpha == 255) {
-      return 'rgb($rgb)';
-    } else {
-      return 'rgba($rgb, ${value.opacity})';
-    }
-  }
+  return deg % 360;
 }

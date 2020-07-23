@@ -120,7 +120,7 @@ class RenderFpsOverlay extends RenderBox {
     assert(needsCompositing);
     Canvas canvas = context.canvas;
     if (_fpsInfo != null) {
-      TextPainter textPainter = _getTextPainter(_fpsInfo.toString(), CSSColor.red);
+      TextPainter textPainter = _getTextPainter(_fpsInfo.toString(), CSSColor.parseColor('red'));
       textPainter.layout();
       textPainter.paint(canvas, Offset(0, 0));
     }

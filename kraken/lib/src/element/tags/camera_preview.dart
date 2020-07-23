@@ -13,8 +13,8 @@ import 'package:kraken_camera/camera.dart';
 const String CAMERA_PREVIEW = 'CAMERA-PREVIEW';
 
 final Map<String, dynamic> _defaultStyle = {
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 bool camerasDetected = false;
@@ -29,7 +29,7 @@ Future<CameraDescription> detectCamera(String lens) async {
       cameras = await availableCameras();
     } on CameraException catch (err) {
       // No available camera devices, need to fallback.
-      print('CameraException $err');
+      print('Camera Exception $err');
     }
     camerasDetected = true;
   }
@@ -138,16 +138,16 @@ class CameraPreviewElement extends Element {
     if (cameraDescription == null) {
       isFallback = true;
       _invokeReady();
-      sizedBox.child = buildFallbackView('Camera Fallback View');
+      sizedBox.child = _buildFallbackView('Camera Fallback View');
     } else {
       await _initCamera();
     }
   }
 
-  RenderBox buildFallbackView(String description) {
+  RenderBox _buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: CSSColor.white);
+    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: Color(0xFFFFFFFF));
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: style),

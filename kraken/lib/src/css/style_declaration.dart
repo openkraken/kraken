@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/style_property.dart';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -164,6 +163,10 @@ class CSSStyleDeclaration {
     _styleChangeListeners.forEach((StyleChangeListener listener) {
       listener(property, original, present);
     });
+  }
+
+  double getLengthByPropertyName(properyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
   }
 
   CSSStyleDeclaration copyWith(Map<String, String> override) {

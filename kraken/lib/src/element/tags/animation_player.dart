@@ -14,8 +14,8 @@ import 'package:kraken/rendering.dart';
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 
 final Map<String, dynamic> _defaultStyle = {
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 // Ref: https://github.com/LottieFiles/lottie-player
@@ -28,7 +28,7 @@ class AnimationPlayerElement extends Element {
   AnimationPlayerElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
-  String get objectFit => style['objectFit'];
+  String get objectFit => style[OBJECT_FIT];
 
   String get type {
     if (properties.containsKey('type')) return properties['type'];
@@ -84,7 +84,7 @@ class AnimationPlayerElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    if (key == 'objectFit') {
+    if (key == OBJECT_FIT) {
       _updateObjectFit();
     }
   }

@@ -7,8 +7,8 @@ export class IframeElement extends Element {
   static DEFAULT_WIDTH = 300;
   static DEFAULT_HEIGHT = 150;
 
-  constructor(tagName: string) {
-    super(tagName, undefined, [], iframeBuiltInProperties);
+  constructor() {
+    super('iframe', undefined, [], iframeBuiltInProperties);
   }
 
   set width(value: number) {

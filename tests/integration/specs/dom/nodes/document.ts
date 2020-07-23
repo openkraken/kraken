@@ -28,4 +28,9 @@ describe('Document api', () => {
     await matchScreenshot();
   });
 
+  it('document.all', () => {
+    expect(document.all).not.toBeUndefined();
+    expect(document.all.length).toBeGreaterThan(0);
+  });
+
 });

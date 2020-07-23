@@ -8,6 +8,8 @@ export const WINDOW = -2;
 
 type EventHandler = EventListener;
 
+export const eventTargetMap = {};
+
 export class EventTarget {
   public targetId: number;
   // built-in events which no need to notify dart side.
@@ -18,7 +20,9 @@ export class EventTarget {
   constructor(targetId?: number, builtInEvents: Array<string> = [], jsOnlyEvents: Array<string> = []) {
     if (targetId) {
       this.targetId = targetId;
+      eventTargetMap[targetId] = this;
     }
+
     this._jsOnlyEvents = jsOnlyEvents;
     builtInEvents.forEach(event => {
       let eventName = 'on' + event.toLowerCase();
