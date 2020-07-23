@@ -103,7 +103,7 @@ class ImageElement extends Element {
 
     // Image size may affect parent layout,
     // make parent relayout after image inited
-    (imageBox.parent as RenderBox).markNeedsLayout();
+    imageBox.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
@@ -244,7 +244,7 @@ class ImageElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
+  void setProperty(String key, value) {
     super.setProperty(key, value);
 
     if (key == 'src') {
@@ -286,16 +286,12 @@ class ImageElement extends Element {
   }
 
   @override
-  dynamic getProperty(String key) {
+  getProperty(String key) {
     switch (key) {
       case WIDTH:
-        {
-          return this._imageInfo != null ? this._imageInfo.image.width : 0;
-        }
+        return this._imageInfo != null ? this._imageInfo.image.width : 0;
       case HEIGHT:
-        {
-          return this._imageInfo != null ? this._imageInfo.image.height : 0;
-        }
+        return this._imageInfo != null ? this._imageInfo.image.height : 0;
     }
 
     return super.getProperty(key);

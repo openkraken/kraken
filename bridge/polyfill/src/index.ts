@@ -19,6 +19,7 @@ import { kraken } from './kraken';
 import { MQTT } from './mqtt';
 import { windowExtension } from './window';
 import { traverseNode } from "./document/node";
+import { ImageElement } from './document/elements/img';
 
 Object.assign(window, windowExtension);
 
@@ -43,6 +44,8 @@ defineGlobalProperty('performance', performance);
 defineGlobalProperty('kraken', kraken);
 defineGlobalProperty('MQTT', MQTT);
 defineGlobalProperty('CustomEvent', CustomEvent);
+
+defineGlobalProperty('Image', ImageElement);
 
 function defineGlobalProperty(key: string, value: any) {
   Object.defineProperty(globalThis, key, {

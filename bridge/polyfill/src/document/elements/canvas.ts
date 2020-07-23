@@ -16,8 +16,8 @@ export class CanvasElement extends Element {
   static DEFAULT_WIDTH = 300;
   static DEFAULT_HEIGHT = 150;
 
-  constructor(tagName: string) {
-    super(tagName);
+  constructor() {
+    super('canvas');
   }
 
   set width(value: number) {
