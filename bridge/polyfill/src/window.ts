@@ -1,6 +1,7 @@
 import { EventTarget } from './document/events/event-target';
 import { krakenWindow } from './bridge';
 import { WINDOW } from './document/events/event-target';
+import { registerGlobalEventHandlers } from './global-event-handlers';
 
 const windowBuiltInEvents = ['load', 'colorschemechange'];
 const windowJsOnlyEvents = ['unhandledrejection', 'error'];
@@ -65,3 +66,5 @@ Object.defineProperties(window, {
     get() { return windowExtension.__clearListeners__.bind(windowExtension); }
   }
 });
+
+registerGlobalEventHandlers(window);
