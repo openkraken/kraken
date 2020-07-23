@@ -18,12 +18,6 @@ enum VerticalAlign {
   /// Aligns the baseline of the element with the baseline of its parent.
   baseline,
 
-  /// Aligns the top of the element with the top of the parent element's font.
-  textTop,
-
-  /// Aligns the bottom of the element with the bottom of the parent element's font.
-  textBottom,
-
   /// Aligns the top of the element and its descendants with the top of the entire line.
   top,
 
@@ -31,7 +25,8 @@ enum VerticalAlign {
   bottom,
 
   /// Aligns the middle of the element with the baseline plus half the x-height of the parent.
-  middle,
+  /// @TODO not supported
+  ///  middle,
 }
 
 CSSPositionType resolvePositionFromStyle(CSSStyleDeclaration style) {

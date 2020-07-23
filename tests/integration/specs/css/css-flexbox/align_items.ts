@@ -159,6 +159,57 @@ describe('flexbox align-items', () => {
     await matchScreenshot();
   });
 
+  fit('should work with baseline when flex-direction is row', async () => {
+    const container = document.createElement('div');
+    setElementStyle(container, {
+      width: '200px',
+      height: '100px',
+      display: 'flex',
+      backgroundColor: '#666',
+      flexDirection: 'row',
+      alignItems: 'baseline',
+    });
+
+    document.body.appendChild(container);
+
+    const child1 = document.createElement('div');
+    setElementStyle(child1, {
+      width: '50px',
+      height: '50px',
+      backgroundColor: 'blue',
+      fontSize: '26px',
+    });
+    const text1 = document.createTextNode('111');
+    child1.appendChild(text1);
+    container.appendChild(child1);
+
+    const child2 = document.createElement('div');
+    setElementStyle(child2, {
+      width: '50px',
+      height: '50px',
+      backgroundColor: 'red',
+      fontSize: '14px',
+
+    });
+    const text2 = document.createTextNode('222');
+    child2.appendChild(text2);
+    container.appendChild(child2);
+
+    const child3 = document.createElement('div');
+    setElementStyle(child3, {
+      width: '50px',
+      height: '50px',
+      backgroundColor: 'green',
+    fontSize: '20px',
+
+    });
+    const text3 = document.createTextNode('333');
+    child3.appendChild(text3);
+    container.appendChild(child3);
+
+    await matchScreenshot();
+  });
+
   it('should work with flex-start when flex-direction is column', async () => {
     const container = document.createElement('div');
     setElementStyle(container, {
