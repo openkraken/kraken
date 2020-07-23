@@ -40,6 +40,7 @@ mixin CSSBackgroundMixin {
   void _parseBackground(CSSStyleDeclaration style) {
     if (style.contains(BACKGROUND)) {
       String rawBackground = style[BACKGROUND];
+      // @TODO: procsss in style_property
       List<String> shorthand = rawBackground.split(SHORTHAND_REGEXP);
       background = _consumeBackground(shorthand);
     }

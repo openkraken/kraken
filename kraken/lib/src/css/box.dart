@@ -422,6 +422,7 @@ class TransitionDecoration with TransitionColorMixin {
 
   TransitionDecoration(alpha, red, green, blue, borderLeftSide, borderTopSide, borderRightSide, borderBottomSide,
       this.image, this.boxShadow, this.borderRadiusTLTRBLBR, this.gradient) {
+    initColor(Color.fromARGB(alpha, red, green, blue));
     // side add inorder left top right bottom
     borderSidesLTRB = [
       borderLeftSide,

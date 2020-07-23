@@ -283,12 +283,13 @@ class CSSColor implements CSSValue<Color> {
         }
       }
     } else if (_namedColors.containsKey(color)) {
-      return Color(_namedColors[color]);
+      parsed = Color(_namedColors[color]);
     }
 
     if (parsed != null) {
       _cachedColor[color] = parsed;
     }
+
     return parsed;
   }
 
