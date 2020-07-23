@@ -27,6 +27,7 @@ void main() {
         title: 'Loading Test',
         debugShowCheckedModeBanner: false,
         home: KrakenWidget(
+          'main',
           window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
           bundleContent: '',)
     ));

@@ -11,20 +11,33 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 
 class KrakenWidget extends StatefulWidget {
+  // a absolute URL address which point to a javascript source file.
   final String bundleURL;
+  // a local file path which point to a javascript source file.
   final String bundlePath;
+  // a raw javascript source content which will evaluate after kraken have initialized.
   final String bundleContent;
-  final double viewportWidth;
-  final double viewportHeight;
+  // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
+  final String name;
 
-  KrakenWidget(double viewportWidth, double viewportHeight,
+  // the width of krakenWidget
+  final double viewportWidth;
+  // the height of krakenWidget
+  final double viewportHeight;
+  // the kraken controller.
+  final KrakenController controller;
+
+  KrakenWidget(String name, double viewportWidth, double viewportHeight,
       {Key key, this.bundleURL, this.bundlePath, this.bundleContent})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
+        name = name,
+        controller = KrakenController(name, viewportWidth, viewportHeight,
+            showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
         super(key: key);
 
   @override
-  _KrakenWidgetState createState() => _KrakenWidgetState(viewportWidth, viewportHeight);
+  _KrakenWidgetState createState() => _KrakenWidgetState(controller);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -38,16 +51,12 @@ class KrakenWidget extends StatefulWidget {
 }
 
 class _KrakenWidgetState extends State<KrakenWidget> {
-  KrakenController controller;
-
-  _KrakenWidgetState(double viewportWidth, double viewportHeight) {
-    controller = KrakenController(viewportWidth, viewportHeight,
-        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
-  }
+  final KrakenController _controller;
+  _KrakenWidgetState(this._controller);
 
   @override
   Widget build(BuildContext context) {
-    return KrakenRenderWidget(controller);
+    return KrakenRenderWidget(_controller);
   }
 
   @override
@@ -58,18 +67,18 @@ class _KrakenWidgetState extends State<KrakenWidget> {
   }
 
   Future init() async {
-    await controller.loadBundle(
+    await _controller.loadBundle(
         bundleURLOverride: widget.bundleURL,
         bundlePathOverride: widget.bundlePath,
         bundleContentOverride: widget.bundleContent);
-    await controller.run();
+    await _controller.run();
     setState(() {});
   }
 
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    _controller.dispose();
   }
 }
 

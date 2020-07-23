@@ -189,7 +189,8 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 }
 
 class KrakenController {
-  static Map<int, KrakenController> _controllerMap = new Map();
+  static Map<int, KrakenController> _controllerMap = Map();
+  static Map<String, int> _nameIdMap = Map();
   static KrakenController getControllerOfJSContextId(int contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;
@@ -198,12 +199,25 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
-  KrakenController(double viewportWidth, double viewportHeight,
+  static KrakenController getControllerOfName(String name) {
+    if (!_nameIdMap.containsKey(name)) return null;
+    int contextId = _nameIdMap[name];
+    return getControllerOfJSContextId(contextId);
+  }
+
+  KrakenMethodChannel _methodChannel;
+  KrakenMethodChannel get methodChannel => _methodChannel;
+
+  KrakenController(String name, double viewportWidth, double viewportHeight,
       {bool showPerformanceOverlay = false, enableDebug = false}) {
+    _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
     _module = KrakenModuleController();
+    assert(!_controllerMap.containsKey(_view.contextId), "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
+    assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
+    _nameIdMap[name] = _view.contextId;
   }
 
   KrakenViewController _view;
@@ -235,6 +249,7 @@ class KrakenController {
         contextId: _view.contextId);
     _view.attachView(parent, previousSibling);
     await reloadJSContext(_view.contextId);
+    await loadBundle();
     await run();
   }
 
@@ -245,15 +260,22 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
   }
 
+  String _bundleContent;
+  String _bundlePath;
+  String _bundleURL;
+
   // preload javascript source and cache it.
   void loadBundle({
     String bundleContentOverride,
     String bundlePathOverride,
     String bundleURLOverride,
   }) async {
+    _bundleContent = bundleURLOverride;
+    _bundlePath = bundlePathOverride;
+    _bundleURL = bundleURLOverride;
     // TODO native public API need to support KrakenViewController
-    String bundleURL = bundleURLOverride ?? bundlePathOverride ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
-    _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: bundleContentOverride);
+    String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
+    _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
   }
 
   // execute preloaded javascript source
