@@ -20,8 +20,8 @@ mixin CSSSizingMixin {
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   KrakenRenderPadding renderPadding;
-  CSSInset oldPadding;
-  CSSInset oldMargin;
+  CSSEdgeInsets oldPadding;
+  CSSEdgeInsets oldMargin;
   CSSSizedConstraints oldConstraints;
 
   static EdgeInsets _getBorderEdgeFromStyle(CSSStyleDeclaration style) {
@@ -149,7 +149,7 @@ mixin CSSSizingMixin {
     double maxHeight = CSSStyleProperty.getDisplayPortValue(style['maxHeight']);
     double minWidth = CSSStyleProperty.getDisplayPortValue(style['minWidth']);
 
-    CSSInset padding = _getPaddingFromStyle(style);
+    CSSEdgeInsets padding = _getPaddingFromStyle(style);
     EdgeInsets border = _getBorderEdgeFromStyle(style);
 
     if (width != null) {
@@ -197,7 +197,7 @@ mixin CSSSizingMixin {
     );
   }
 
-  static CSSInset _getMarginFromStyle(CSSStyleDeclaration style) {
+  static CSSEdgeInsets _getMarginFromStyle(CSSStyleDeclaration style) {
 
     double marginLeft;
     double marginTop;
@@ -209,7 +209,7 @@ mixin CSSSizingMixin {
     if (style.contains(MARGIN_RIGHT)) marginRight = CSSStyleProperty.getDisplayPortValue(style[MARGIN_RIGHT]);
     if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSStyleProperty.getDisplayPortValue(style[MARGIN_BOTTOM]);
 
-    return CSSInset(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
+    return CSSEdgeInsets(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
   }
 
   EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
@@ -234,15 +234,15 @@ mixin CSSSizingMixin {
         marginLeft != null ||
         marginRight != null ||
         marginTop != null) {
-      CSSInset newMargin = _getMarginFromStyle(style);
+      CSSEdgeInsets newMargin = _getMarginFromStyle(style);
 
       double marginLeftInterval = newMargin.left - oldMargin.left;
       double marginRightInterval = newMargin.right - oldMargin.right;
       double marginTopInterval = newMargin.top - oldMargin.top;
       double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
 
-      CSSInset progressMargin = CSSInset(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
-      CSSInset baseMargin = CSSInset(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
+      CSSEdgeInsets progressMargin = CSSEdgeInsets(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
+      CSSEdgeInsets baseMargin = CSSEdgeInsets(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
 
       all?.addProgressListener((progress) {
         if (margin == null) {
@@ -314,7 +314,7 @@ mixin CSSSizingMixin {
     return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
-  static CSSInset _getPaddingFromStyle(CSSStyleDeclaration style) {
+  static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {
 
     double paddingTop;
     double paddingRight;
@@ -326,7 +326,7 @@ mixin CSSSizingMixin {
     if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSStyleProperty.getDisplayPortValue(style[PADDING_BOTTOM]);
     if (style.contains(PADDING_LEFT)) paddingLeft = CSSStyleProperty.getDisplayPortValue(style[PADDING_LEFT]);
 
-    return CSSInset(paddingTop ?? 0.0, paddingRight ?? 0.0, paddingBottom ?? 0.0, paddingLeft ?? 0.0);
+    return CSSEdgeInsets(paddingTop ?? 0.0, paddingRight ?? 0.0, paddingBottom ?? 0.0, paddingLeft ?? 0.0);
   }
 
   EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
@@ -351,15 +351,15 @@ mixin CSSSizingMixin {
         paddingLeft != null ||
         paddingRight != null ||
         paddingTop != null) {
-      CSSInset newPadding = _getPaddingFromStyle(style);
+      CSSEdgeInsets newPadding = _getPaddingFromStyle(style);
 
       double paddingLeftInterval = newPadding.left - oldPadding.left;
       double paddingRightInterval = newPadding.right - oldPadding.right;
       double paddingTopInterval = newPadding.top - oldPadding.top;
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-      CSSInset progressPadding = CSSInset(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
-      CSSInset basePadding = CSSInset(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
+      CSSEdgeInsets progressPadding = CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
+      CSSEdgeInsets basePadding = CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
 
       all?.addProgressListener((progress) {
         if (padding == null) {
@@ -427,13 +427,13 @@ mixin CSSSizingMixin {
   }
 }
 
-class CSSInset {
+class CSSEdgeInsets {
   double left;
   double top;
   double right;
   double bottom;
 
-  CSSInset(this.top, this.right, this.bottom, this.left);
+  CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
 }
 
 class CSSSizedConstraints {

@@ -10,7 +10,9 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-const Map<String, dynamic> _defaultStyle = {'display': 'inline-block'};
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK
+};
 
 bool _isNumber(String str) {
   RegExp regExp = new RegExp(r"^\d+$");
@@ -78,8 +80,8 @@ class ImageElement extends Element {
   }
 
   void setElementSizeType() {
-    bool isWidthDefined = _propertyWidth != null || style.contains('width') || style.contains('minWidth');
-    bool isHeightDefined = _propertyHeight != null || style.contains('height') || style.contains('minHeight');
+    bool isWidthDefined = _propertyWidth != null || style.contains(WIDTH) || style.contains(MIN_WIDTH);
+    bool isHeightDefined = _propertyHeight != null || style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
 
     BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
     BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
@@ -109,8 +111,8 @@ class ImageElement extends Element {
     double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
     double width = 0.0;
     double height = 0.0;
-    bool containWidth = style.contains('width') || _propertyWidth != null;
-    bool containHeight = style.contains('height') || _propertyHeight != null;
+    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
+    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
     if (!containWidth && !containHeight) {
       width = naturalWidth;
       height = naturalHeight;
@@ -222,8 +224,8 @@ class ImageElement extends Element {
   }
 
   RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
-    BoxFit fit = _getBoxFit(style['objectFit']);
-    Alignment alignment = _getAlignment(style['objectPosition']);
+    BoxFit fit = _getBoxFit(style[OBJECT_FIT]);
+    Alignment alignment = _getAlignment(style[OBJECT_POSITION]);
     return RenderImage(
       image: _imageInfo?.image,
       fit: fit,
@@ -257,7 +259,7 @@ class ImageElement extends Element {
 
       _propertyWidth = CSSLength.toDisplayPortValue(value);
       _resize();
-    } else if (key == 'height') {
+    } else if (key == HEIGHT) {
       if (value is String && _isNumber(value)) {
         value += 'px';
       }
@@ -286,11 +288,11 @@ class ImageElement extends Element {
   @override
   dynamic getProperty(String key) {
     switch (key) {
-      case 'width':
+      case WIDTH:
         {
           return this._imageInfo != null ? this._imageInfo.image.width : 0;
         }
-      case 'height':
+      case HEIGHT:
         {
           return this._imageInfo != null ? this._imageInfo.image.height : 0;
         }
@@ -302,11 +304,11 @@ class ImageElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    if (key == 'width' || key == 'height') {
+    if (key == WIDTH || key == HEIGHT) {
       _resize();
-    } else if (key == 'objectFit') {
+    } else if (key == OBJECT_FIT) {
       imageBox.fit = _getBoxFit(value);
-    } else if (key == 'objectPosition') {
+    } else if (key == OBJECT_POSITION) {
       imageBox.alignment = _getAlignment(value);
     }
   }

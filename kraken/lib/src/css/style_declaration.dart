@@ -165,6 +165,10 @@ class CSSStyleDeclaration {
     });
   }
 
+  double getLengthByPropertyName(properyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
+  }
+
   CSSStyleDeclaration copyWith(Map<String, String> override) {
     Map<String, dynamic> mergedProperties = {};
     var copy = (property, value) {

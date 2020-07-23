@@ -17,8 +17,8 @@ import 'package:kraken/css.dart';
 const String INPUT = 'INPUT';
 
 const Map<String, dynamic> _defaultStyle = {
-  'display': 'inline-block',
-  'width': '150px',
+  DISPLAY: INLINE_BLOCK,
+  WIDTH: '150px',
 };
 
 typedef ValueChanged<T> = void Function(T value);
