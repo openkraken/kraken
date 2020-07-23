@@ -3,35 +3,39 @@ import { URL } from './url';
 import { UnImplError } from './unimpl-error';
 
 const krakenLocation = krakenWindow.location;
-const url = new URL(krakenLocation.href);
+// Lazy parse url.
+let _url: URL;
+function getUrl() : URL {
+  return _url ? _url : (_url = new URL(krakenLocation.href));
+}
 
 export const location = {
   get href() {
     return krakenLocation.href;
   },
   get origin() {
-    return url.origin;
+    return getUrl().origin;
   },
   get protocol() {
-    return url.protocol;
+    return getUrl().protocol;
   },
   get host() {
-    return url.host;
+    return getUrl().host;
   },
   get hostname() {
-    return url.hostname;
+    return getUrl().hostname;
   },
   get port() {
-    return url.port;
+    return getUrl().port;
   },
   get pathname() {
-    return url.pathname;
+    return getUrl().pathname;
   },
   get search() {
-    return url.search;
+    return getUrl().search;
   },
   get hash() {
-    return url.hash;
+    return getUrl().hash;
   },
 
   get assign() {
