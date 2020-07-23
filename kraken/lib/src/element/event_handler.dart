@@ -4,7 +4,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
 
 mixin EventHandlerMixin on Node {
-  RenderPointerListener renderPointerListener;
+  KrakenRenderPointerListener renderPointerListener;
   num _touchStartTime = 0;
   num _touchEndTime = 0;
 
@@ -16,13 +16,12 @@ mixin EventHandlerMixin on Node {
       RenderObject child = parentRenderObject.child;
       // Drop child by set null first.
       parentRenderObject.child = null;
-      renderPointerListener = RenderPointerListener(
+      renderPointerListener = KrakenRenderPointerListener(
         child: child,
         onPointerDown: handlePointDown,
         onPointerMove: handlePointMove,
         onPointerUp: handlePointUp,
         onPointerCancel: handlePointCancel,
-        behavior: HitTestBehavior.translucent,
       );
       parentRenderObject.child = renderPointerListener;
     }

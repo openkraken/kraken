@@ -89,8 +89,9 @@ class Element extends Node
 
   // A point reference to treed renderObject.
   RenderObject renderObject;
-  RenderConstrainedBox renderConstrainedBox;
+  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
+  KrakenRenderPadding renderPadding;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;

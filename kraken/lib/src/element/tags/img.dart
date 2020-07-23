@@ -101,7 +101,7 @@ class ImageElement extends Element {
 
     // Image size may affect parent layout,
     // make parent relayout after image inited
-    parent.renderLayoutBox.markNeedsLayout();
+    (imageBox.parent as RenderBox).markNeedsLayout();
   }
 
   void _resize() {
