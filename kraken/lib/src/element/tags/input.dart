@@ -19,6 +19,7 @@ const String INPUT = 'INPUT';
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
   WIDTH: '150px',
+  BORDER: '1px solid #767676'
 };
 
 typedef ValueChanged<T> = void Function(T value);
@@ -65,7 +66,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 class InputElement extends Element implements TextInputClient, TickerProvider {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
-  final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
   AnimationController _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
 
@@ -79,8 +80,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   bool obscureText = false;
   TextSelectionDelegate textSelectionDelegate = EditableTextDelegate();
   TextSpan textSpan;
-  TextSpan placeholderTextSpan;
-  TextStyle placeholderTextStyle;
   RenderEditable renderEditable;
   TextInputConnection textInputConnection;
 
@@ -88,18 +87,21 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
-  String _placeholder;
-  String get placeholder => _placeholder;
-  set placeholder(String text) {
-    _placeholder = text;
-    placeholderTextStyle ??= getTextStyle(style.copyWith({
+  String get placeholderText => properties['placeholder'] ?? '';
+
+  TextStyle get placeholderTextStyle {
+    return getTextStyle(style.copyWith({
       'color': 'grey',
     }));
-    placeholderTextSpan = TextSpan(
-      text: _placeholder,
+  }
+
+  TextSpan get placeholderTextSpan {
+    return TextSpan(
+      text: placeholderText,
       style: placeholderTextStyle,
     );
   }
+
 
   TextInputConfiguration textInputConfiguration;
 
@@ -119,15 +121,33 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       keyboardAppearance: Brightness.light,
     );
     textSpan = buildTextSpan();
-    placeholder = getPlaceholderText();
     renderEditable = createRenderObject();
+
     addChild(renderEditable);
+
+    // Make element listen to click event to trigger focus.
+    addEvent("click");
+
     textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
 
     setBoxConstraints();
+  }
+
+  @override
+  void setStyle(String key, value) {
+    super.setStyle(key, value);
+
+    // @TODO: Filter style properties that used by text span.
+    updateTextSpan();
+  }
+
+  void updateTextSpan() {
+    // Rebuilt text span, for style has changed.
+    textSpan = buildTextSpan();
+    renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
   }
 
   void setBoxConstraints() {
@@ -145,6 +165,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (containHeight) {
       minHeight = maxHeight = CSSStyleProperty.getDisplayPortValue(style['height']);
     }
+
     renderConstrainedBox.additionalConstraints = BoxConstraints(
       minWidth: minWidth,
       maxWidth: maxWidth,
@@ -153,13 +174,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-  TextSpan buildTextSpan({String text}) {
+  TextSpan buildTextSpan({ String text = '' }) {
     text ??= properties['value'];
-    return createTextSpanWithStyle(text ?? '', style);
-  }
-
-  String getPlaceholderText() {
-    return properties['placeholder'] ?? '';
+    return createTextSpanWithStyle(text, style);
   }
 
   get cursorColor => CSSColor.initial;
@@ -189,6 +206,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   RenderEditable createRenderObject() {
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
+
     return RenderEditable(
       text: text,
       cursorColor: cursorColor,
@@ -202,7 +220,8 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textDirection: textDirection,
       selection: blurSelection, // Default to blur
       offset: offset,
-      forceLine: false,
+      readOnly: false,
+      forceLine: true,
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: _handleCaretChanged,
       obscureText: obscureText,
@@ -289,14 +308,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
-    if (key == 'value' && value is String) {
-      String text = value ?? '';
+
+    if (key == 'value') {
+      String text = value?.toString() ?? '';
 
       TextEditingValue newTextEditingValue = textSelectionDelegate.textEditingValue.copyWith(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       );
       _formatAndSetValue(newTextEditingValue);
+    } else if (key == 'placeholder') {
+      // Update placeholder text.
+      updateTextSpan();
     }
   }
 
@@ -320,6 +343,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         newCaretRect.right,
         newCaretRect.bottom,
       );
+
       renderEditable.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
