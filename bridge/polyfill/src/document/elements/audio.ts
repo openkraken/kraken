@@ -2,8 +2,8 @@ import { MediaElement } from '../media-element';
 import { method } from '../ui-manager';
 
 export class AudioElement extends MediaElement {
-  constructor(tagName: string) {
-    super(tagName);
+  constructor() {
+    super('audio');
   }
 
   play = () => {

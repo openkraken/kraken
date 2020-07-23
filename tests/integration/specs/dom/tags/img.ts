@@ -14,6 +14,14 @@ describe('Tags img', () => {
     document.body.appendChild(img);
   });
 
+  fit('new Image', (done) => {
+    const img = new Image();
+    img.onload = img.onerror = (evt) => {
+      done();
+    };
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+  });
+
   describe('object-fit', () => {
     const imageURL = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     const OBJECT_FITS = [
