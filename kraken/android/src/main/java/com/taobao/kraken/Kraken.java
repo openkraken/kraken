@@ -12,7 +12,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class Kraken {
-  static String NAME_METHOD_SPLIT = "@≥_≤@";
+  static String NAME_METHOD_SPLIT = "!!";
 
   private String url;
   private FlutterEngine flutterEngine;

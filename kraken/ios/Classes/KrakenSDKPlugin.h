@@ -1,6 +1,6 @@
 #import <Flutter/Flutter.h>
 
-#define NAME_METHOD_SPLIT @"@≥_≤@"
+#define NAME_METHOD_SPLIT @"!!"
 
 @interface KrakenSDKPlugin : NSObject<FlutterPlugin>
 
