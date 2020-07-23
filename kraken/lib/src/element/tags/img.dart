@@ -90,11 +90,6 @@ class ImageElement extends Element {
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     dispatchEvent(Event('load'));
-    try {
-      throw new Error();
-    } catch(e, s) {
-      print(s);
-    }
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
