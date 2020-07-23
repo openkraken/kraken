@@ -1,10 +1,11 @@
 import { Node, NodeType, traverseNode } from './node';
-import {Element} from './element';
+import { Element } from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
 import { BODY, WINDOW } from './events/event-target';
 import { cookie } from '../cookie';
+import { HTMLAllCollection } from './collection';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -35,6 +36,14 @@ export class Document extends Node {
    */
   createComment(data: string) {
     return new Comment(data);
+  }
+
+  get all(): HTMLAllCollection {
+    const all = new HTMLAllCollection();
+    traverseNode(document, (node: Node) => {
+      all.add(node);
+    });
+    return all;
   }
 
   get cookie() {
