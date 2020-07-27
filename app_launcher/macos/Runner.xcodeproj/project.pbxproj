@@ -22,12 +22,6 @@
 
 /* Begin PBXBuildFile section */
 		1B9FA455242CC54F00FB3624 /* libkraken_jsc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA44E242CC54E00FB3624 /* libkraken_jsc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA456242CC54F00FB3624 /* libicuuc.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA44F242CC54F00FB3624 /* libicuuc.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA457242CC54F00FB3624 /* libv8_libbase.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA450242CC54F00FB3624 /* libv8_libbase.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA458242CC54F00FB3624 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA451242CC54F00FB3624 /* libv8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA459242CC54F00FB3624 /* libicui18n.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA452242CC54F00FB3624 /* libicui18n.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA45A242CC54F00FB3624 /* libkraken_v8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA453242CC54F00FB3624 /* libkraken_v8.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1B9FA45B242CC54F00FB3624 /* libv8_libplatform.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B9FA454242CC54F00FB3624 /* libv8_libplatform.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
@@ -58,12 +52,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1B9FA455242CC54F00FB3624 /* libkraken_jsc.dylib in CopyFiles */,
-				1B9FA456242CC54F00FB3624 /* libicuuc.dylib in CopyFiles */,
-				1B9FA457242CC54F00FB3624 /* libv8_libbase.dylib in CopyFiles */,
-				1B9FA458242CC54F00FB3624 /* libv8.dylib in CopyFiles */,
-				1B9FA459242CC54F00FB3624 /* libicui18n.dylib in CopyFiles */,
-				1B9FA45A242CC54F00FB3624 /* libkraken_v8.dylib in CopyFiles */,
-				1B9FA45B242CC54F00FB3624 /* libv8_libplatform.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
