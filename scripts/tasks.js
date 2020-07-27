@@ -10,7 +10,7 @@ const fs = require('fs');
 const del = require('del');
 const os = require('os');
 
-const SUPPORTED_JS_ENGINES = ['jsc', 'v8'];
+const SUPPORTED_JS_ENGINES = ['jsc'];
 const V8_VERSION = '7.9.317.31';
 
 const KRAKEN_ROOT = join(__dirname, '..');
