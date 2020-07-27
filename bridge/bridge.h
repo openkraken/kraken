@@ -8,14 +8,19 @@
 
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/window.h"
+#include "foundation/thread_safe_array.h"
+#include "foundation/bridge_callback.h"
 
 #include "bindings/kraken.h"
 #include <atomic>
+#include <vector>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
 
 namespace kraken {
+
+using namespace alibaba::jsa;
 
 class JSBridge final {
 private:
@@ -26,13 +31,18 @@ private:
 
 public:
   JSBridge() = delete;
-  JSBridge(const alibaba::jsa::JSExceptionHandler& handler);
+  JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler& handler);
   ~JSBridge();
 #ifdef ENABLE_DEBUGGER
   void attachDevtools();
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
+  std::vector<std::shared_ptr<Value>> krakenUIListenerList;
+  std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
+
+  int32_t contextId;
+  foundation::BridgeCallback bridgeCallback;
   /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 

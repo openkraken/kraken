@@ -1,17 +1,16 @@
 import { krakenWindow } from './bridge';
 import { URL } from './url';
-import { UnImplError } from './unimpl-error';
 
 const krakenLocation = krakenWindow.location;
 // Lazy parse url.
 let _url: URL;
-function getUrl() : URL {
+export function getUrl() : URL {
   return _url ? _url : (_url = new URL(krakenLocation.href));
 }
 
 export const location = {
   get href() {
-    return krakenLocation.href;
+    return getUrl().href;
   },
   get origin() {
     return getUrl().origin;
@@ -40,7 +39,7 @@ export const location = {
 
   get assign() {
     return (assignURL: string) => {
-      throw new UnImplError('location.assign');
+      console.warn('Unimpl location.assign');
     };
   },
   get reload() {
@@ -48,7 +47,7 @@ export const location = {
   },
   get replace() {
     return (replaceURL: string) => {
-      throw new UnImplError('location.replace');
+      console.warn('Unimpl location.replace');
     };
   },
   get toString() {

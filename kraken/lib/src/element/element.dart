@@ -126,7 +126,7 @@ class Element extends Node
   }
 
   bool get isValidSticky {
-    return style['position'] == 'sticky' && (style.contains('top') || style.contains('bottom'));
+    return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
 
   // Horizontal border dimension (left + right)
@@ -134,20 +134,21 @@ class Element extends Node
   // Vertical border dimension (top + bottom)
   double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
-  Element({
-    @required int targetId,
-    @required this.tagName,
+  Element(
+    int targetId,
+    ElementManager elementManager, {
+    this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
   })  : assert(targetId != null),
         assert(tagName != null),
-        super(NodeType.ELEMENT_NODE, targetId, tagName) {
+        super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];
 
-    defaultDisplay = defaultStyle.containsKey('display') ? defaultStyle['display'] : 'block';
+    defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
     style = CSSStyleDeclaration(style: defaultStyle);
 
     style.addStyleChangeListener(_onStyleChanged);
@@ -183,7 +184,7 @@ class Element extends Node
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
-    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style['contentVisibility']);
+    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
 
     // Visibility
     renderObject = initRenderVisibility(renderObject, style);
@@ -192,14 +193,14 @@ class Element extends Node
     renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId);
+    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
 
     setElementSizeType();
   }
 
   void setElementSizeType() {
-    bool widthDefined = style.contains('width') || style.contains('minWidth');
-    bool heightDefined = style.contains('height') || style.contains('minHeight');
+    bool widthDefined = style.contains(WIDTH) || style.contains(MIN_WIDTH);
+    bool heightDefined = style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
 
     BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
     BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
@@ -219,9 +220,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortX.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero) - renderScrollViewPortY.localToGlobal(Offset.zero);
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -265,8 +268,8 @@ class Element extends Node
       double viewPortHeight = renderScrollViewPortY?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
-      if (childStyle.contains('top')) {
-        double top = CSSStyleProperty.getDisplayPortValue(childStyle['top']) + resolvedPadding.top;
+      if (childStyle.contains(TOP)) {
+        double top = CSSStyleProperty.getDisplayPortValue(childStyle[TOP]) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -274,8 +277,8 @@ class Element extends Node
             offsetY = maxOffsetY;
           }
         }
-      } else if (childStyle.contains('bottom')) {
-        double bottom = CSSStyleProperty.getDisplayPortValue(childStyle['bottom']) + resolvedPadding.bottom;
+      } else if (childStyle.contains(BOTTOM)) {
+        double bottom = CSSStyleProperty.getDisplayPortValue(childStyle[BOTTOM]) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -301,8 +304,8 @@ class Element extends Node
       double viewPortWidth = renderScrollViewPortX?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
-      if (childStyle.contains('left')) {
-        double left = CSSStyleProperty.getDisplayPortValue(childStyle['left']) + resolvedPadding.left;
+      if (childStyle.contains(LEFT)) {
+        double left = CSSStyleProperty.getDisplayPortValue(childStyle[LEFT]) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -310,8 +313,8 @@ class Element extends Node
             offsetX = maxOffsetX;
           }
         }
-      } else if (childStyle.contains('right')) {
-        double right = CSSStyleProperty.getDisplayPortValue(childStyle['right']) + resolvedPadding.right;
+      } else if (childStyle.contains(RIGHT)) {
+        double right = CSSStyleProperty.getDisplayPortValue(childStyle[RIGHT]) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -367,7 +370,7 @@ class Element extends Node
         // Loop renderObject children to move positioned children to its containing block
         renderLayoutBox.visitChildren((childRenderObject) {
           if (childRenderObject is RenderElementBoundary) {
-            Element child = getEventTargetByTargetId<Element>(childRenderObject.targetId);
+            Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = findContainingBlock(child);
@@ -384,7 +387,7 @@ class Element extends Node
           if (renderPositionHolder != null) {
             RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
             int parentTargetId = parentLayoutBox.targetId;
-            Element parentElement = getEventTargetByTargetId<Element>(parentTargetId);
+            Element parentElement = elementManager.getEventTargetByTargetId<Element>(parentTargetId);
 
             List<RenderObject> layoutChildren = [];
             parentLayoutBox.visitChildren((child) {
@@ -462,22 +465,22 @@ class Element extends Node
         CSSTransitionProgressListener progressListener = (percent) {
           double newValue = original + diff * percent;
           switch (property) {
-            case 'top':
+            case TOP:
               progressParentData.top = newValue;
               break;
-            case 'left':
+            case LEFT:
               progressParentData.left = newValue;
               break;
-            case 'right':
+            case RIGHT:
               progressParentData.right = newValue;
               break;
-            case 'bottom':
+            case BOTTOM:
               progressParentData.bottom = newValue;
               break;
-            case 'width':
+            case WIDTH:
               progressParentData.width = newValue;
               break;
-            case 'height':
+            case HEIGHT:
               progressParentData.height = newValue;
               break;
           }
@@ -488,27 +491,26 @@ class Element extends Node
         definiteTransition?.addProgressListener(progressListener);
         allTransition?.addProgressListener(progressListener);
       } else {
-        if (style.contains('zIndex')) {
-          positionParentData.zIndex = CSSLength.toInt(style['zIndex']);
-          ;
+        if (style.contains(Z_INDEX)) {
+          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
         }
-        if (style.contains('top')) {
-          positionParentData.top = CSSLength.toDisplayPortValue(style['top']);
+        if (style.contains(TOP)) {
+          positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
         }
-        if (style.contains('left')) {
-          positionParentData.left = CSSLength.toDisplayPortValue(style['left']);
+        if (style.contains(LEFT)) {
+          positionParentData.left = CSSLength.toDisplayPortValue(style[LEFT]);
         }
-        if (style.contains('right')) {
-          positionParentData.right = CSSLength.toDisplayPortValue(style['right']);
+        if (style.contains(RIGHT)) {
+          positionParentData.right = CSSLength.toDisplayPortValue(style[RIGHT]);
         }
-        if (style.contains('bottom')) {
-          positionParentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
+        if (style.contains(BOTTOM)) {
+          positionParentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM]);
         }
-        if (style.contains('width')) {
-          positionParentData.width = CSSLength.toDisplayPortValue(style['width']);
+        if (style.contains(WIDTH)) {
+          positionParentData.width = CSSLength.toDisplayPortValue(style[WIDTH]);
         }
-        if (style.contains('height')) {
-          positionParentData.height = CSSLength.toDisplayPortValue(style['height']);
+        if (style.contains(HEIGHT)) {
+          positionParentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]);
         }
         renderObject.parentData = positionParentData;
         renderParent.markNeedsLayout();
@@ -539,23 +541,25 @@ class Element extends Node
   }
 
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    if (display.endsWith('flex')) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
+    if (display.endsWith(FLEX)) {
       RenderFlexLayout flexLayout = RenderFlexLayout(
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == 'none' ||
-        display == 'inline' ||
-        display == 'inline-block' ||
-        display == 'block') {
+    } else if (display == NONE ||
+        display == INLINE ||
+        display == INLINE_BLOCK ||
+        display == BLOCK) {
       RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
         children: children,
         style: style,
         targetId: targetId,
+        elementManager: elementManager
       );
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
@@ -572,15 +576,14 @@ class Element extends Node
   void attachTo(Element parent, {RenderObject after}) {
     CSSStyleDeclaration parentStyle = parent.style;
     String parentDisplayValue =
-        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle['display']) ? parent.defaultDisplay : parentStyle['display'];
+        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY];
     // InlineFlex or Flex
-    bool isParentFlexDisplayType = parentDisplayValue.endsWith('flex');
+    bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
 
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
       (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child =
-          RenderFlexItem(child: renderLayoutBox);
+      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -704,7 +707,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.fixed:
-        final Element rootEl = ElementManager().getRootElement();
+        final Element rootEl = elementManager.getRootElement();
         parentRenderLayoutBox = rootEl.renderLayoutBox;
         break;
 
@@ -717,8 +720,8 @@ class Element extends Node
         return;
     }
     Size preferredSize = Size.zero;
-    String childDisplay = child.style['display'];
-    if ((!childDisplay.isEmpty && childDisplay != 'inline') || (position != CSSPositionType.static)) {
+    String childDisplay = child.style[DISPLAY];
+    if ((!childDisplay.isEmpty && childDisplay != INLINE) || (position != CSSPositionType.static)) {
       preferredSize = Size(
         CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
         CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
@@ -756,14 +759,14 @@ class Element extends Node
 
   // Inline box including inline/inline-block/inline-flex/...
   bool get isInlineBox {
-    String displayValue = style['display'];
-    return displayValue.startsWith('inline');
+    String displayValue = style[DISPLAY];
+    return displayValue.startsWith(INLINE);
   }
 
   // Inline content means children should be inline elements.
   bool get isInlineContent {
-    String displayValue = style['display'];
-    return displayValue == 'inline';
+    String displayValue = style[DISPLAY];
+    return displayValue == INLINE;
   }
 
   /// Append a child to childList, if after is null, insert into first.
@@ -795,19 +798,19 @@ class Element extends Node
 
   void _onStyleChanged(String property, String original, String present) {
     switch (property) {
-      case 'display':
+      case DISPLAY:
         _styleDisplayChangedListener(property, original, present);
         break;
 
-      case 'position':
-      case 'zIndex':
+      case POSITION:
+      case Z_INDEX:
         _stylePositionChangedListener(property, original, present);
         break;
 
-      case 'top':
-      case 'left':
-      case 'bottom':
-      case 'right':
+      case TOP:
+      case LEFT:
+      case BOTTOM:
+      case RIGHT:
         _styleOffsetChangedListener(property, original, present);
         break;
 
@@ -933,7 +936,7 @@ class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
-    bool shouldRender = present != 'none';
+    bool shouldRender = present != NONE;
     renderElementBoundary.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
@@ -954,7 +957,7 @@ class Element extends Node
         (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
       }
 
-      if (currentDisplay.endsWith('flex')) {
+      if (currentDisplay.endsWith(FLEX)) {
         // update flex layout properties
         decorateRenderFlex(renderLayoutBox, style);
       } else {
@@ -1038,8 +1041,8 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    if (display.endsWith('flex')) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
+    if (display.endsWith(FLEX)) {
       ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
       // Collect children of renderLayoutBox and remove their relationship.
       List<RenderBox> children = [];
@@ -1062,8 +1065,8 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style['display']) ? defaultDisplay : style['display'];
-    if (display.endsWith('flex')) {
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
+    if (display.endsWith(FLEX)) {
       children.forEach((Element child) {
         _updateFlexItemStyle(child);
       });
@@ -1138,7 +1141,6 @@ class Element extends Node
 
   @mustCallSuper
   void setProperty(String key, value) {
-
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1147,7 +1149,6 @@ class Element extends Node
     } else {
       properties[key] = value;
     }
-
   }
 
   @mustCallSuper
@@ -1168,17 +1169,29 @@ class Element extends Node
   method(String name, List args) {
     switch (name) {
       case 'offsetTop':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetY();
       case 'offsetLeft':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return getOffsetX();
       case 'offsetWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.width : 0;
       case 'offsetHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderMargin.hasSize ? renderMargin.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientWidth;
       case 'clientHeight':
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
         // TODO: implement this after border has supported in renderLayoutBox
@@ -1212,6 +1225,9 @@ class Element extends Node
 
     RenderBox sizedBox = renderConstrainedBox.child;
     if (isConnected) {
+      // need to flush layout to get correct size
+      elementManager.getRootRenderObject().owner.flushLayout();
+
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
@@ -1256,9 +1272,12 @@ class Element extends Node
   }
 
   Offset getOffset(RenderBox renderBox) {
+    // need to flush layout to get correct size
+    elementManager.getRootRenderObject().owner.flushLayout();
+
     Element element = findContainingBlock(this);
     if (element == null) {
-      element = ElementManager().getRootElement();
+      element = elementManager.getRootElement();
     }
     return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
   }
@@ -1294,7 +1313,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(json);
+    emitUIEvent(elementManager.controller.contextId, json);
   }
 
   void click() {
@@ -1305,10 +1324,10 @@ class Element extends Node
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
       // or child may miss size.
-      RendererBinding.instance.renderView.owner.flushLayout();
+      elementManager.getRootRenderObject().owner.flushLayout();
 
       // Position the center of element.
-      Offset position = box.localToGlobal(box.size.center(Offset.zero));
+      Offset position = box.localToGlobal(box.size.center(Offset.zero), ancestor: elementManager.getRootRenderObject());
       final BoxHitTestResult boxHitTestResult = BoxHitTestResult();
       GestureBinding.instance.hitTest(boxHitTestResult, position);
       bool hitTest = true;
@@ -1342,7 +1361,8 @@ class Element extends Node
     renderMargin.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
-    requestAnimationFrame((_) async {
+
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       if (renderRepaintBoundary.size == Size.zero) {
         // Return a blob with zero length.
@@ -1364,11 +1384,11 @@ class Element extends Node
 
 Element findContainingBlock(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style['position'] != 'static' && _el.style['position'] != '';
-    bool hasTransform = _el.style['transform'] != '';
+    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION] != '';
+    bool hasTransform = _el.style[TRANSFORM] != '';
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
@@ -1380,7 +1400,7 @@ Element findContainingBlock(Element element) {
 
 Element findScrollContainer(Element element) {
   Element _el = element?.parent;
-  Element rootEl = ElementManager().getRootElement();
+  Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
     List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);
@@ -1431,9 +1451,9 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 }
 
 bool _isPositioned(CSSStyleDeclaration style) {
-  if (style.contains('position')) {
-    String position = style['position'];
-    return position != '' && position != 'static';
+  if (style.contains(POSITION)) {
+    String position = style[POSITION];
+    return position != '' && position != STATIC;
   } else {
     return false;
   }
@@ -1453,21 +1473,21 @@ void setPositionedChildParentData(
   parentData.renderPositionHolder = placeholder;
   parentData.position = positionType;
 
-  if (style.contains('top')) {
-    parentData.top = CSSLength.toDisplayPortValue(style['top']);
+  if (style.contains(TOP)) {
+    parentData.top = CSSLength.toDisplayPortValue(style[TOP]);
   }
-  if (style.contains('left')) {
-    parentData.left = CSSLength.toDisplayPortValue(style['left']);
+  if (style.contains(LEFT)) {
+    parentData.left = CSSLength.toDisplayPortValue(style[LEFT]);
   }
-  if (style.contains('bottom')) {
-    parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
+  if (style.contains(BOTTOM)) {
+    parentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM]);
   }
-  if (style.contains('right')) {
-    parentData.right = CSSLength.toDisplayPortValue(style['right']);
+  if (style.contains(RIGHT)) {
+    parentData.right = CSSLength.toDisplayPortValue(style[RIGHT]);
   }
-  parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0.0;
-  parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style['zIndex']);
+  parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
+  parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
+  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

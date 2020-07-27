@@ -4,6 +4,14 @@
  */
 
 // properties
+const String DISPLAY = 'display';
+const String POSITION = 'position';
+const String Z_INDEX = 'zIndex';
+const String CONTENT_VISIBILITY = 'contentVisibility';
+const String TRANSFORM = 'transform';
+const String OVERFLOW = 'overflow';
+const String BOX_SHADOW = 'boxShadow';
+
 const String PADDING = 'padding';
 const String PADDING_LEFT = 'paddingLeft';
 const String PADDING_TOP = 'paddingTop';
@@ -60,6 +68,10 @@ const String ANIMATION_PLAY_STATE = 'animationPlayState';
 const String COLOR = 'color';
 const String WIDTH = 'width';
 const String HEIGHT = 'height';
+const String MIN_HEIGHT = 'minHeight';
+const String MAX_HEIGHT = 'maxHeight';
+const String MIN_WIDTH = 'minWidth';
+const String MAX_WIDTH = 'maxWidth';
 
 const String TEXT_DECORATION = 'textDecoration';
 const String TEXT_DECORATION_LINE = 'textDecorationLine';
@@ -68,15 +80,62 @@ const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
 const String TEXT_SHADOW = 'textShadow';
 const String LETTER_SPACING = 'letterSpacing';
 const String WORD_SPACING = 'wordSpacing';
+const String WHITE_SPACE = 'whiteSpace';
 
-const String BOX_SHADOW = 'boxShadow';
+const String OBJECT_FIT = 'objectFit';
+const String OBJECT_POSITION = 'objectPosition';
 
 // values
+const String NORMAL = 'normal';
 
-
+// Border
 const String THIN = 'thin'; // A thin border.
 const String MEDIUM = 'medium'; // A medium border.
 const String THICK = 'thick'; // A thick border.
-const String NORMAL = 'normal';
+
+// Font absolute size keyword: [ xx-small | x-small | small | medium | large | x-large | xx-large ]
+const String XX_SMALL = 'xx-small';
+const String X_SMALL = 'x-small';
+const String SMALL =  'small';
+const String LARGE =  'large';
+const String X_LARGE =  'x-large';
+const String XX_LARGE =  'xx-large';
+// Font relative size keyword
+const String SMALLER =  'smaller';
+const String LARGER =  'larger';
+
 const String SOLID = 'solid';
 const String NONE = 'none';
+
+// Display
+const String INLINE = 'inline';
+const String BLOCK = 'block';
+const String INLINE_BLOCK = 'inline-block';
+const String INLINE_FLEX = 'inline-flex';
+const String FLEX = 'flex';
+
+// Position
+const String RELATIVE = 'relative';
+const String ABSOLUTE = 'absolute';
+const String FIXED = 'fixed';
+const String STICKY = 'sticky';
+const String STATIC = 'static';
+
+const String LEFT = 'left';
+const String RIGHT = 'right';
+const String TOP = 'top';
+const String BOTTOM = 'bottom';
+const String AUTO = 'auto';
+
+// Flex
+const String ROW = 'row';
+const String COLUMN = 'column';
+const String STRETCH = 'stretch';
+const String WRAP = 'wrap';
+const String WRAP_REVERSE = 'wrap-reverse';
+
+const String PRE = 'pre';
+
+const String LIGHTER = 'lighter';
+const String BOLD = 'bold';
+const String BOLDER = 'bolder';

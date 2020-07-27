@@ -1,11 +1,9 @@
-
 import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
 
 class CSSStyleProperty {
-
   static double getDisplayPortValue(input) {
     if (CSSStyleDeclaration.isNullOrEmptyValue(input)) {
       // Null is not equal with 0.0
@@ -16,7 +14,6 @@ class CSSStyleProperty {
     }
     return CSSLength.toDisplayPortValue(input as String);
   }
-
 
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
@@ -54,7 +51,7 @@ class CSSStyleProperty {
 
   static List<List<String>> getShadowValues(String property) {
     assert(property != null);
-    
+
     List shadows = property.split(_commaRegExp);
     List<List<String>> values = List();
     for (String shadow in shadows) {
@@ -96,7 +93,7 @@ class CSSStyleProperty {
     String style;
     String color;
 
-    // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work 
+    // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String property in properties) {
       if (width == null && (CSSLength.isLength(property) || property == THIN || property == MEDIUM || property == THICK)) {
         width = property;
@@ -156,15 +153,15 @@ class CSSStyleProperty {
     }
 
     return [x, y];
-  } 
+  }
 
   static bool isShorthandProperty(String property) {
-    return property == PADDING || 
-      property == MARGIN ||
-      property == BORDER ||
-      property == BACKGROUND ||
-      property == FONT ||
-      property == ANIMATION;
+    return property == PADDING ||
+        property == MARGIN ||
+        property == BORDER ||
+        property == BACKGROUND ||
+        property == FONT ||
+        property == ANIMATION;
   }
 }
 

@@ -1,26 +1,16 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
-#import <Flutter/FlutterViewController.h>
 
-static NSMutableArray *engineList = nil;
-static NSMutableArray<Kraken*> *instanceList = nil;
+static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
 
 @implementation Kraken
 
-+ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
-  for (int i = 0; i < engineList.count; i++) {
-    FlutterEngine *engine = engineList[i];
-    if (engine != nil && engine.viewController != nil && engine.viewController.binaryMessenger != nil) {
-      if (engine.viewController.binaryMessenger == messenger) {
-        return [instanceList objectAtIndex:i];
-      }
-    }
-  }
-  return nil;
++ (Kraken*) instanceByName:(NSString*) name {
+  return instanceMap[name];
 }
 
-- (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
-  self.flutterEngine = engine;
+- (instancetype _Nonnull)initWithName:(NSString*) name {
+  self.name = name;
   
   FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
   
@@ -33,16 +23,11 @@ static NSMutableArray<Kraken*> *instanceList = nil;
   }
   self.channel = channel;
   
-  if (engineList == nil) {
-    engineList = [[NSMutableArray alloc] initWithCapacity: 0];
+  if (instanceMap == nil) {
+    instanceMap = [[NSMutableDictionary alloc] init];
   }
-  [engineList addObject: engine];
-  
-  if (instanceList == nil) {
-    instanceList = [[NSMutableArray alloc] initWithCapacity: 0];
-  }
-  [instanceList addObject: self];
-  
+  [instanceMap setValue:self forKey:name];
+
   return self;
 }
 
@@ -54,7 +39,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 
 - (void) reload {
   if (self.channel != nil) {
-    [self.channel invokeMethod:@"reload" arguments:nil];
+    [self invokeMethod:@"reload" arguments:nil];
   }
 }
 
@@ -70,7 +55,7 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 - (void) invokeMethod:(NSString *)method arguments:(nullable id) arguments {
   dispatch_async(dispatch_get_main_queue(), ^{
     if (self.channel != nil) {
-      [self.channel invokeMethod:method arguments:arguments];
+      [self.channel invokeMethod:[NSString stringWithFormat:@"%@%@%@", self.name, NAME_METHOD_SPLIT, method] arguments:arguments];
     }
   });
 }

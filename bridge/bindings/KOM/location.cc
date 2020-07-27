@@ -5,6 +5,7 @@
 
 #include "location.h"
 #include "dart_methods.h"
+#include "foundation/logging.h"
 
 namespace kraken {
 namespace binding {
@@ -37,7 +38,8 @@ Value JSLocation::reload(JSContext &context, const Value &thisVal, const Value *
   if (getDartMethod()->reloadApp == nullptr) {
     throw JSError(context, "Failed to execute 'reload': dart method (reloadApp) is not registered.");
   }
-  getDartMethod()->reloadApp();
+
+  getDartMethod()->reloadApp(context.getContextId());
   return Value::undefined();
 }
 

@@ -1,12 +1,12 @@
 import { Element } from '../element';
 import { method } from '../ui-manager';
 
-const animationPlayerBuiltInEvents = ['load'];
+const animationPlayerBuiltInEvents = ['load', 'error'];
 const animationPlayerBuiltInProperties = ['src', 'type'];
 
 export class AnimationPlayerElement extends Element {
-  constructor(tagName: string) {
-    super(tagName, undefined, animationPlayerBuiltInEvents, animationPlayerBuiltInProperties);
+  constructor() {
+    super('animation-player', undefined, animationPlayerBuiltInEvents, animationPlayerBuiltInProperties);
   }
 
   play = (name: string, options: any) => {

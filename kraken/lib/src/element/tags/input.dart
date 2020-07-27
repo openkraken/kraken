@@ -17,10 +17,9 @@ import 'package:kraken/css.dart';
 const String INPUT = 'INPUT';
 
 const Map<String, dynamic> _defaultStyle = {
-  'display': 'inline-block',
-  'width': '150px',
-  'border': '1px solid #767676',
-  'border-radius': '2px',
+  DISPLAY: INLINE_BLOCK,
+  WIDTH: '150px',
+  BORDER: '1px solid #767676'
 };
 
 typedef ValueChanged<T> = void Function(T value);
@@ -107,12 +106,13 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   TextInputConfiguration textInputConfiguration;
 
   InputElement(
-    int targetId, {
+    int targetId,
+    ElementManager elementManager, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(targetId: targetId, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(targetId, elementManager, tagName: INPUT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     textInputConfiguration = TextInputConfiguration(
       inputType: inputType,
       obscureText: false,

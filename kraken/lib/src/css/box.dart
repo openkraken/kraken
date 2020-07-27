@@ -18,7 +18,7 @@ import 'package:kraken/css.dart';
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   RenderDecorateElementBox renderDecoratedBox;
   TransitionDecoration oldDecoration;
-  CSSInset oldBorderPadding;
+  CSSEdgeInsets oldBorderPadding;
 
   RenderObject initRenderDecoratedBox(RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
     oldDecoration = getTransitionDecoration(style);

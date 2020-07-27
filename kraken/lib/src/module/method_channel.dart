@@ -1,49 +1,51 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
+import 'package:kraken/kraken.dart';
 
-typedef MethodCallback = Future<dynamic> Function(MethodCall call);
+typedef MethodCallHandler = Future<dynamic> Function(String methodd, dynamic arguments);
+
+final String NAME_METHOD_SPLIT = '!!';
 
 class KrakenMethodChannel {
-  static VoidCallback _reloadHandler;
-  static MethodCallback _methodCallHandler;
   static MethodChannel _channel = MethodChannel('kraken')
     ..setMethodCallHandler((call) async {
-      if ('reload' == call.method && _reloadHandler != null) {
-        await _reloadHandler();
-      } else if (_methodCallHandler != null) {
-        return _methodCallHandler(call);
-      }
+      List<String> group = call.method.split(NAME_METHOD_SPLIT);
+      String name = group[0];
+      String method = group[1];
+      KrakenController controller = KrakenController.getControllerOfName(name);
 
+      if ('reload' == method) {
+        await controller.reload();
+      } else if (controller.methodChannel.methodCallHandler != null) {
+        return controller.methodChannel.methodCallHandler(method, call.arguments);
+      }
       return Future<dynamic>.value(null);
     });
 
-  static void setReloadHandler(VoidCallback reloadHandler) {
-    _reloadHandler = reloadHandler;
-  }
+  KrakenMethodChannel(this._name, KrakenController controller);
 
-  static void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+  final String _name;
+  MethodCallHandler _methodCallHandler;
+  MethodCallHandler get methodCallHandler => _methodCallHandler;
+
+  void setMethodCallHandler(MethodCallHandler handler) {
     _methodCallHandler = handler;
   }
 
   // Support for method channel
-  static Future<dynamic> invokeMethod(String method, List args) async {
+  Future<dynamic> invokeMethod(String method, List args) async {
     Map<String, dynamic> argsWrap = {
       'method': method,
       'args': args,
     };
 
-    return await _channel.invokeMethod('invokeMethod', argsWrap);
+    return await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}invokeMethod', argsWrap);
   }
 
-  static Future<String> getPlatformVersion() async {
-    return await _channel.invokeMethod('getPlatformVersion');
-  }
-
-  static Future<String> getUrl() async {
+  Future<String> getUrl() async {
     // Maybe url of zip bundle or js bundle
-    String url = await _channel.invokeMethod('getUrl');
+    String url = await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}getUrl');
 
     // @NOTE(zhuoling.lcl): Android plugin protocol cannot return `null` directly, which
     // will case method channel invoke failed with exception, use empty

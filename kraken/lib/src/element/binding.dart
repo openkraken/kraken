@@ -10,10 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/launcher.dart';
 
 import 'element_inspector.dart';
-import 'element_manager.dart';
 
 /// This class can be extended directly, to get default behaviors for all of the
 /// handlers, or can used with the `implements` keyword, in which case all the
@@ -123,18 +121,6 @@ mixin ElementsBinding
   void initServiceExtensions() {
     super.initServiceExtensions();
     if (!kReleaseMode) {
-      registerBoolServiceExtension(
-        name: 'showPerformanceOverlay',
-        getter: () => Future<bool>.value(ElementManager.showPerformanceOverlayOverride ?? false),
-        setter: (bool value) {
-          if (ElementManager.showPerformanceOverlayOverride != value) {
-            ElementManager.showPerformanceOverlayOverride = value;
-            reloadApp();
-          }
-          return Future<void>.value();
-        },
-      );
-
       ElementInspectorService.instance.initServiceExtensions(registerServiceExtension);
     }
   }

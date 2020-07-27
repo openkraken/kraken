@@ -7,9 +7,7 @@
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
 #include "jsa.h"
-#include "thread_safe_array.h"
-#include "bridge.h"
-#include "kraken_bridge.h"
+#include <vector>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -26,10 +24,10 @@ using namespace alibaba::jsa;
 class BridgeCallback {
 public:
   ~BridgeCallback() {
-    disposeAllCallbacks();
+    contextList.clear();
+    callbackCount = 0;
   }
 
-  static std::shared_ptr<BridgeCallback> instance();
   struct Context {
     Context(JSContext &context, std::shared_ptr<Value> callback) : _context(context), _callback(std::move(callback)){};
     JSContext &_context;
@@ -37,24 +35,20 @@ public:
   };
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
-  template <typename T> T registerCallback(std::unique_ptr<Context> &&context, std::function<T(void *)> fn) {
+  template <typename T>
+  T registerCallback(std::unique_ptr<Context> &&context,
+                     std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
-    contextList.push(std::move(context));
+    assert(p != nullptr && "Callback context can not be nullptr");
+    JSContext &jsContext = context->_context;
+    int32_t contextId = context->_context.getContextId();
+    contextList.emplace_back(std::move(context));
     callbackCount.fetch_add(1);
-    return fn(static_cast<void *>(p));
-  }
-
-  // dispose all callbacks and recycle callback context's memory
-  void disposeAllCallbacks();
-
-  static bool checkContext(JSContext &context) {
-    auto *bridge = static_cast<kraken::JSBridge*>(getBridge());
-    auto currentContext = bridge->getContext();
-    return currentContext == &context;
+    return fn(p, contextId);
   }
 
 private:
-  ThreadSafeArray<std::unique_ptr<Context>> contextList;
+  std::vector<std::unique_ptr<Context>> contextList;
   std::atomic<int> callbackCount{0};
 };
 

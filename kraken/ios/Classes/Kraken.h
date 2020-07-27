@@ -6,14 +6,14 @@ typedef void(^MethodHandler)(FlutterMethodCall* _Nonnull , FlutterResult _Nonnul
 
 @interface Kraken : NSObject
 
-+ (Kraken* _Nonnull) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>* _Nonnull) messenger;
++ (Kraken* _Nonnull) instanceByName: (NSString* _Nonnull) name;
 
 @property NSString* _Nullable bundleUrl;
-@property FlutterEngine* _Nonnull flutterEngine;
 @property FlutterMethodChannel* _Nullable channel;
 @property MethodHandler _Nullable methodHandler;
+@property NSString* _Nonnull name;
 
-- (instancetype _Nonnull)initWithFlutterEngine: (FlutterEngine* _Nonnull) engine;
+- (instancetype _Nonnull) initWithName:(NSString* _Nonnull) name;
 
 - (NSString* _Nullable) getUrl;
 

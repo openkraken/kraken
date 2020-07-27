@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui';
+
 import 'value.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
@@ -14,7 +15,9 @@ const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
 const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
-final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
+const _0 = '0';
+
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|em|in|cm|mm|pc|pt$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength implements CSSValue<double> {
@@ -61,7 +64,7 @@ class CSSLength implements CSSValue<double> {
 
     double displayPortValue;
     // Only '0' is accepted with no unit.
-    if (unitedValue == '0') {
+    if (unitedValue == _0) {
       return 0;
     } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
@@ -103,7 +106,7 @@ class CSSLength implements CSSValue<double> {
   }
 
   static bool isLength(String value) {
-    return value != null && (value == '0' || _lengthRegExp.firstMatch(value) != null);
+    return value != null && (value == _0 || _lengthRegExp.firstMatch(value) != null);
   }
 
   final String _rawInput;

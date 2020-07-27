@@ -4,25 +4,25 @@
  */
 
 import 'dart:async';
+import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
-
-import '../element.dart';
-import '../event.dart';
 
 const String VIDEO = 'VIDEO';
 
 const Map<String, dynamic> _defaultStyle = {
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 List<VideoPlayerController> _videoControllers = [];
 
 class VideoElement extends Element {
-  VideoElement(int targetId)
+  VideoElement(int targetId, ElementManager elementManager)
       : super(
-          targetId: targetId,
+          targetId,
+          elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           tagName: VIDEO,

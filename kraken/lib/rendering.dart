@@ -15,7 +15,6 @@ export 'src/rendering/box_model.dart';
 export 'src/rendering/intrinsic.dart';
 export 'src/rendering/preferred_size.dart';
 export 'src/rendering/margin.dart';
-export 'src/rendering/positioning.dart';
 export 'src/rendering/scrollable.dart';
 export 'src/rendering/text.dart';
 export 'src/rendering/ticker_provider.dart';

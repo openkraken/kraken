@@ -9,42 +9,49 @@
 #include <cstdint>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
-void *getBridge();
+void *getJSContext(int32_t contextId);
 
 struct Screen {
   double width;
   double height;
 };
-using AsyncCallback = void (*)(void *, const char*);
-using AsyncRAFCallback = void (*)(void *, double, const char*);
-using AsyncModuleCallback = void (*)(char *, void *);
-using AsyncBlobCallback = void (*)(void *, const char *, uint8_t *, int32_t);
-typedef const char *(*InvokeUIManager)(const char *);
-typedef const char *(*InvokeModule)(const char *, AsyncModuleCallback callback, void *context);
-typedef void (*RequestBatchUpdate)(AsyncCallback callback, void *context);
-typedef void (*ReloadApp)();
-typedef int32_t (*SetTimeout)(AsyncCallback callback, void *context, int32_t);
-typedef int32_t (*SetInterval)(AsyncCallback callback, void *context, int32_t);
-typedef int32_t (*RequestAnimationFrame)(AsyncRAFCallback callback, void *context);
-typedef void (*ClearTimeout)(int32_t);
-typedef void (*CancelAnimationFrame)(int32_t);
-typedef Screen *(*GetScreen)();
-typedef void (*InvokeFetch)(int32_t, const char *, const char *);
-typedef double (*DevicePixelRatio)();
-typedef const char *(*PlatformBrightness)();
-typedef void (*OnPlatformBrightnessChanged)();
-typedef void (*ToBlob)(AsyncBlobCallback blobCallback, void *context, int32_t, double);
-typedef void (*OnJSError)(const char *);
+using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
+using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
+using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, char *json);
+using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
+                                   int32_t length);
+typedef const char *(*InvokeUIManager)(int32_t contextId, const char *json);
+typedef const char *(*InvokeModule)(void *callbackContext, int32_t contextId, const char *, AsyncModuleCallback callback);
+typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
+typedef void (*ReloadApp)(int32_t contextId);
+typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*SetInterval)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
+typedef int32_t (*RequestAnimationFrame)(void *callbackContext, int32_t contextId, AsyncRAFCallback callback);
+typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
+typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
+typedef Screen *(*GetScreen)(int32_t contextId);
+typedef double (*DevicePixelRatio)(int32_t contextId);
+typedef const char *(*PlatformBrightness)(int32_t contextId);
+typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
+typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
+                       double devicePixelRatio);
+typedef void (*OnJSError)(int32_t contextId, const char *);
 
 KRAKEN_EXPORT
-void initJsEngine();
+void initJSContextPool(int poolSize);
 KRAKEN_EXPORT
-void evaluateScripts(const char *code, const char *bundleFilename, int startLine);
+void disposeContext(int32_t contextId);
+KRAKEN_EXPORT
+int32_t allocateNewContext();
+
+bool checkContext(int32_t contextId);
+KRAKEN_EXPORT
+void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
-void reloadJsContext();
+void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT
-void invokeEventListener(int32_t type, const char *json);
+void invokeEventListener(int32_t contextId, int32_t type, const char *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 

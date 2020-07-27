@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
@@ -14,42 +15,34 @@ import 'platform.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call the C function.
 
+// representation of JSContext
+class JSCallbackContext extends Struct {}
+
 // Register invokeEventListener
-typedef Native_InvokeEventListener = Void Function(Int32, Pointer<Utf8>);
-typedef Dart_InvokeEventListener = void Function(int, Pointer<Utf8>);
+typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<Utf8>);
+typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<Utf8>);
 
 final Dart_InvokeEventListener _invokeEventListener =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
-void invokeEventListener(int type, String data) {
-  _invokeEventListener(type, Utf8.toUtf8(data));
+void invokeEventListener(int contextId, int type, String data) {
+  _invokeEventListener(contextId, type, Utf8.toUtf8(data));
 }
 
 const UI_EVENT = 0;
 const MODULE_EVENT = 1;
 
-void emitUIEvent(String data) {
-  invokeEventListener(UI_EVENT, data);
+void emitUIEvent(int contextId, String data) {
+  invokeEventListener(contextId, UI_EVENT, data);
 }
 
-void emitModuleEvent(String data) {
-  invokeEventListener(MODULE_EVENT, data);
+void emitModuleEvent(int contextId, String data) {
+  invokeEventListener(contextId, MODULE_EVENT, data);
 }
 
-// Register invokeOnloadCallback
-typedef Native_InvokeOnloadCallback = Void Function();
-typedef Dart_InvokeOnLoadCallback = void Function();
-
-final Dart_InvokeOnLoadCallback _invokeOnloadCallback =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeOnloadCallback>>('invokeOnloadCallback').asFunction();
-
-void invokeOnloadCallback() {
-  _invokeOnloadCallback();
-}
-
-void invokeOnPlatformBrightnessChangedCallback() {
+void invokeOnPlatformBrightnessChangedCallback(int contextId) {
   String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
-  emitUIEvent(json);
+  emitUIEvent(contextId, json);
 }
 
 // Register createScreen
@@ -64,53 +57,65 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(Pointer<Utf8>, Pointer<Utf8>, Int32);
-typedef Dart_EvaluateScripts = void Function(Pointer<Utf8>, Pointer<Utf8>, int);
+typedef Native_EvaluateScripts = Void Function(Int32 contextId, Pointer<Utf8> code, Pointer<Utf8> url, Int32 startLine);
+typedef Dart_EvaluateScripts = void Function(int contextId, Pointer<Utf8> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
-void evaluateScripts(String code, String url, int line) {
+void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
   try {
-    _evaluateScripts(_code, _url, line);
+    _evaluateScripts(contextId, _code, _url, line);
   } catch (e, stack) {
     print('$e\n$stack');
   }
 }
 
 // Register initJsEngine
-typedef Native_InitJSEngine = Void Function();
-typedef Dart_InitJSEngine = void Function();
+typedef Native_InitJSContextPool = Void Function(Int32 poolSize);
+typedef Dart_InitJSContextPool = void Function(int poolSize);
 
-final Dart_InitJSEngine _initJsEngine =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSEngine>>('initJsEngine').asFunction();
+final Dart_InitJSContextPool _initJSContextPool =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
 
-void initJSEngine() {
-  _initJsEngine();
+void initJSContextPool(int poolSize) {
+  _initJSContextPool(poolSize);
 }
 
-// Register reloadJsContext
-typedef Native_ReloadJSContext = Void Function();
-typedef Dart_ReloadJSContext = void Function();
+typedef Native_DisposeContext = Void Function(Int32 contextId);
+typedef Dart_DisposeContext = void Function(int contextId);
+
+final Dart_DisposeContext _disposeContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
+
+void disposeBridge(int contextId) {
+  _disposeContext(contextId);
+}
+
+typedef Native_AllocateNewContext = Int32 Function();
+typedef Dart_AllocateNewContext = int Function();
+
+final Dart_AllocateNewContext _allocateNewContext =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
+
+int allocateNewContext() {
+  return _allocateNewContext();
+}
+
+// Regisdster reloadJsContext
+typedef Native_ReloadJSContext = Void Function(Int32 contextId);
+typedef Dart_ReloadJSContext = void Function(int contextId);
 
 final Dart_ReloadJSContext _reloadJSContext =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
-Future<void> reloadJSContext() async {
-  return Future.microtask(() {
-    _reloadJSContext();
+void reloadJSContext(int contextId) async {
+  Completer completer = Completer<void>();
+  Future.microtask(() {
+    _reloadJSContext(contextId);
+    completer.complete();
   });
-}
-
-// Register flushUITask
-typedef Native_FlushUITask = Void Function();
-typedef Dart_FlushUITask = void Function();
-
-final Dart_FlushUITask _flushUITask =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FlushUITask>>('flushUITask').asFunction();
-
-void flushUITask() {
-  _flushUITask();
+  return completer.future;
 }

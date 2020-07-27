@@ -10,7 +10,9 @@ import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 
-const Map<String, dynamic> _defaultStyle = {'display': 'inline-block'};
+const Map<String, dynamic> _defaultStyle = {
+  DISPLAY: INLINE_BLOCK
+};
 
 bool _isNumber(String str) {
   RegExp regExp = new RegExp(r"^\d+$");
@@ -27,8 +29,8 @@ class ImageElement extends Element {
   double _propertyWidth;
   double _propertyHeight;
 
-  ImageElement(int targetId)
-      : super(targetId: targetId, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
+  ImageElement(int targetId, ElementManager elementManager)
+      : super(targetId, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
     _renderImage();
   }
 
@@ -78,8 +80,8 @@ class ImageElement extends Element {
   }
 
   void setElementSizeType() {
-    bool isWidthDefined = _propertyWidth != null || style.contains('width') || style.contains('minWidth');
-    bool isHeightDefined = _propertyHeight != null || style.contains('height') || style.contains('minHeight');
+    bool isWidthDefined = _propertyWidth != null || style.contains(WIDTH) || style.contains(MIN_WIDTH);
+    bool isHeightDefined = _propertyHeight != null || style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
 
     BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
     BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
@@ -101,7 +103,7 @@ class ImageElement extends Element {
 
     // Image size may affect parent layout,
     // make parent relayout after image inited
-    (imageBox.parent as RenderBox).markNeedsLayout();
+    imageBox.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
@@ -109,8 +111,8 @@ class ImageElement extends Element {
     double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
     double width = 0.0;
     double height = 0.0;
-    bool containWidth = style.contains('width') || _propertyWidth != null;
-    bool containHeight = style.contains('height') || _propertyHeight != null;
+    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
+    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
     if (!containWidth && !containHeight) {
       width = naturalWidth;
       height = naturalHeight;
@@ -222,8 +224,8 @@ class ImageElement extends Element {
   }
 
   RenderImage getRenderImageBox(CSSStyleDeclaration style, ImageProvider image) {
-    BoxFit fit = _getBoxFit(style['objectFit']);
-    Alignment alignment = _getAlignment(style['objectPosition']);
+    BoxFit fit = _getBoxFit(style[OBJECT_FIT]);
+    Alignment alignment = _getAlignment(style[OBJECT_POSITION]);
     return RenderImage(
       image: _imageInfo?.image,
       fit: fit,
@@ -242,7 +244,7 @@ class ImageElement extends Element {
   }
 
   @override
-  void setProperty(String key, dynamic value) {
+  void setProperty(String key, value) {
     super.setProperty(key, value);
 
     if (key == 'src') {
@@ -257,7 +259,7 @@ class ImageElement extends Element {
 
       _propertyWidth = CSSLength.toDisplayPortValue(value);
       _resize();
-    } else if (key == 'height') {
+    } else if (key == HEIGHT) {
       if (value is String && _isNumber(value)) {
         value += 'px';
       }
@@ -284,16 +286,12 @@ class ImageElement extends Element {
   }
 
   @override
-  dynamic getProperty(String key) {
+  getProperty(String key) {
     switch (key) {
-      case 'width':
-        {
-          return this._imageInfo != null ? this._imageInfo.image.width : 0;
-        }
-      case 'height':
-        {
-          return this._imageInfo != null ? this._imageInfo.image.height : 0;
-        }
+      case WIDTH:
+        return this._imageInfo != null ? this._imageInfo.image.width : 0;
+      case HEIGHT:
+        return this._imageInfo != null ? this._imageInfo.image.height : 0;
     }
 
     return super.getProperty(key);
@@ -302,11 +300,11 @@ class ImageElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    if (key == 'width' || key == 'height') {
+    if (key == WIDTH || key == HEIGHT) {
       _resize();
-    } else if (key == 'objectFit') {
+    } else if (key == OBJECT_FIT) {
       imageBox.fit = _getBoxFit(value);
-    } else if (key == 'objectPosition') {
+    } else if (key == OBJECT_POSITION) {
       imageBox.alignment = _getAlignment(value);
     }
   }

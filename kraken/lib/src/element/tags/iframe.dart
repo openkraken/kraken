@@ -14,8 +14,8 @@ import 'package:kraken_webview/kraken_webview.dart';
 const String IFRAME = 'IFRAME';
 
 const Map<String, dynamic> _defaultStyle = {
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 /// Optional callback invoked when a web view is first created. [controller] is
@@ -444,7 +444,8 @@ abstract class WebViewElement extends Element {
   ///
   /// The `javascriptMode` and `autoMediaPlaybackPolicy` parameters must not be null.
   WebViewElement(
-    int targetId, {
+    int targetId,
+    ElementManager elementManager, {
     String tagName,
     this.initialUrl,
     this.javascriptMode = JavascriptMode.unrestricted,
@@ -457,7 +458,7 @@ abstract class WebViewElement extends Element {
     this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
-        super(targetId: targetId, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+        super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   /// The url that WebView loaded at first time.
   String initialUrl;
@@ -759,7 +760,7 @@ abstract class WebViewElement extends Element {
 //   Document? getSVGDocument();
 // };
 class IFrameElement extends WebViewElement {
-  IFrameElement(int targetId) : super(targetId, tagName: IFRAME);
+  IFrameElement(int targetId, ElementManager elementManager) : super(targetId, elementManager, tagName: IFRAME);
 
   @override
   void onWebViewCreated(WebViewController controller) {}
