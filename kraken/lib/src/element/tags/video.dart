@@ -8,7 +8,6 @@ import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
-import 'package:kraken/element.dart';
 
 const String VIDEO = 'VIDEO';
 
