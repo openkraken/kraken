@@ -462,7 +462,32 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return defaultComputeDistanceToHighestActualBaseline(baseline);
+    return computeDistanceToHighestActualBaseline(baseline);
+  }
+
+  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
+    double result;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      // Positioned element doesn't involve in baseline alignment
+      if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      double candidate = child.getDistanceToActualBaseline(baseline);
+      if (candidate != null) {
+        candidate += childParentData.offset.dy;
+        if (result != null)
+          result = math.min(result, candidate);
+        else
+          result = candidate;
+      }
+      child = childParentData.nextSibling;
+    }
+    return result;
   }
 
   double _getMainAxisExtent(RenderBox child) {
