@@ -275,7 +275,7 @@ class KrakenController {
     String bundlePathOverride,
     String bundleURLOverride,
   }) async {
-    _bundleContent = _bundleContent ?? bundleURLOverride;
+    _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
     // TODO native public API need to support KrakenViewController

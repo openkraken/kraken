@@ -29,7 +29,7 @@ void main() {
         home: KrakenWidget(
           'main',
           window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-          bundleContent: '',)
+          bundleContent: 'console.log("starting integration test")',)
     ));
 
     WidgetsBinding.instance

@@ -56,19 +56,21 @@ abstract class KrakenBundle {
     KrakenBundle bundle;
     if (contentOverride != null && contentOverride.isNotEmpty) {
       bundle = RawBundle(contentOverride, null);
-    } else if (path == null) {
-      path = DEFAULT_BUNDLE_PATH;
-    }
-
-    // Treat empty scheme as https.
-    if (path.startsWith('//')) path = 'https' + path;
-
-    Uri uri = Uri.parse(path);
-
-    if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
-      bundle = NetworkBundle(uri);
     } else {
-      bundle = AssetsBundle(uri);
+      if (path == null) {
+        path = DEFAULT_BUNDLE_PATH;
+      }
+
+      // Treat empty scheme as https.
+      if (path.startsWith('//')) path = 'https' + path;
+
+      Uri uri = Uri.parse(path);
+
+      if (uri.isScheme('HTTP') || uri.isScheme('HTTPS')) {
+        bundle = NetworkBundle(uri);
+      } else {
+        bundle = AssetsBundle(uri);
+      }
     }
 
     if (bundle != null) {
