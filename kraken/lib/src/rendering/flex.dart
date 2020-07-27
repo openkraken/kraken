@@ -1233,13 +1233,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         double childCrossPosition;
 
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        // Line height of child
-        double childLineHeight = getLineHeight(childStyle);
-        // Leading space between content box and virtual box of child
-        double childLeading = 0;
-        if (childLineHeight != null) {
-          childLeading = childLineHeight - child.size.height;
-        }
 
         AlignSelf alignSelf = childParentData.alignSelf;
         if (alignSelf == AlignSelf.auto) {
