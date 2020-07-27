@@ -57,7 +57,7 @@ class CSSLength implements CSSValue<double> {
   }
 
   static double toDisplayPortValue(String unitedValue) {
-    if (unitedValue == null) return null;
+    if (unitedValue == null || unitedValue == '') return null;
 
     unitedValue = unitedValue.trim();
     if (unitedValue == INITIAL) return null;
