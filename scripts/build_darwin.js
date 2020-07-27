@@ -6,7 +6,7 @@ const chalk = require('chalk');
 const minimist = require('minimist');
 const { series, parallel } = require('gulp');
 
-const SUPPORTED_JS_ENGINES = ['v8', 'jsc'];
+const SUPPORTED_JS_ENGINES = ['jsc'];
 const buildMode = process.env.KRAKEN_BUILD || 'Debug';
 const args = minimist(process.argv.slice(3));
 const uploadToOSS = args['upload-to-oss'];
