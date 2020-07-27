@@ -11,135 +11,124 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/painting.dart';
 
 
-/// This class allows user to override default implement of image loading,
-///
-/// [ImageProviderFactory] define the interface, will be used by [CSSUrl] create
-/// ImageProvider, which used by [ImageElement] to render image.
-/// [ImageType] defines the types of different image source.
-/// use [setCustomImageProviderFactory] override default ImageProviderFactory
-///
-/// The ImageProviderFactory uses to render image by following steps:
-/// 1. ImageElement creates CSSUrl.
-/// 2. CSSUrl parses url & get corresponding ImageProviderFactory of ImageType.
-/// 3. CSSUrl creates ImageProvider by corresponding ImageProviderFactory with url & param.
-/// 4. ImageElement uses created ImageProvider to render Image.
+/// This class allows user to customize Kraken's image loading.
 
+/// A factory function allow user to build an customized ImageProvider class.
 typedef ImageProviderFactory = ImageProvider Function(String url, [dynamic param]);
 
 /// defines the types of supported image source.
-/// [ImageType] is used to map url to corresponding ImageProviderFactory
 enum ImageType {
-  /// Indicate image source is network and require implement can auto cache to storage.
+  /// Network image source with memory cache.
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation [defaultCachedNetImageProviderFactory].
+  /// default ImageProviderFactory implementation [CachedNetworkImage].
   /// will be called when [url] startsWith '//' ,'http://'，'https://'.
   /// [param] will be [bool], the value is true.
-  cachedNetworkImage,
+  cached,
 
-  /// Indicate another image source is network, require to get image immediately from network without cache.
+  /// Network image source.
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation [defaultUncachedNetworkImageProviderFactory]
+  /// default ImageProviderFactory implementation [NetworkImage]
   /// will be called when [url] startsWith '//' ,'http://'，'https://'
   /// [param] will be [bool], the value is false.
-  uncachedNetworkImage,
+  network,
 
-  /// Indicate image source is file path
+  /// File path image source
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation [defaultFileImageProviderFactory]
+  /// default ImageProviderFactory implementation [FileImage]
   /// will be called when [url] startsWith 'file://'
   /// [param] will be type [File]
-  fileImage,
+  file,
 
-  /// Indicate image source is raw data.
+  /// Raw image data source
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation [defaultDataImageProviderFactory]
+  /// default ImageProviderFactory implementation [MemoryImage]
   /// will be called when [url] startsWith 'data://'
   /// [param]  will be [Uint8List], value is the content part of the data URI as bytes,
   /// which is converted by [UriData.contentAsBytes].
-  dataImage,
+  dataUrl,
 
-  /// Indicate image source is blob path.
+  /// Blob image source which created by URL.createObjectURL()
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation is [defaultBlobImageProviderFactory]
+  /// default ImageProviderFactory implementation is [defaultBlobProviderFactory]
   /// [blobPath] @TODO
-  blobImage,
+  blob,
 
-  /// Indicate image source is not any of below.
+  /// Assets image source.
   ///
   /// NOTE:
-  /// default ImageProviderFactory implementation is [defaultFallbackImageProvider]
-  /// Current, this type only has asset image source, [fallbackImage] should treat as asset image.
-  fallbackImage
+  /// default ImageProviderFactory implementation is [defaultAssetsProvider]
+  /// Current, this type only has asset image source, [assets] should treat as asset image.
+  assets
 }
 
-ImageProviderFactory _cachedNetworkImageProviderFactory = defaultCachedNetImageProviderFactory;
-ImageProviderFactory _uncachedNetworkImageProviderFactory = defaultUncachedNetworkImageProviderFactory;
-ImageProviderFactory _fileImageProviderFactory = defaultFileImageProviderFactory;
-ImageProviderFactory _dataImageProviderFactory = defaultDataImageProviderFactory;
-ImageProviderFactory _blobImageProviderFactory = defaultBlobImageProviderFactory;
-ImageProviderFactory _fallbackImageProviderFactory = defaultFallbackImageProvider;
+ImageProviderFactory _cachedProviderFactory = defaultCachedProviderFactory;
+ImageProviderFactory _networkProviderFactory = defaultNetworkProviderFactory;
+ImageProviderFactory _fileProviderFactory = defaultFileProviderFactory;
+ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
+ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
+ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
 ImageProviderFactory getImageProviderFactory(ImageType imageType) {
   switch (imageType) {
-    case ImageType.cachedNetworkImage:
-      return _cachedNetworkImageProviderFactory;
-    case ImageType.uncachedNetworkImage:
-      return _uncachedNetworkImageProviderFactory;
-    case ImageType.fileImage:
-      return _fileImageProviderFactory;
-    case ImageType.dataImage:
-      return _dataImageProviderFactory;
-    case ImageType.blobImage:
-      return _blobImageProviderFactory;
-    case ImageType.fallbackImage:
+    case ImageType.cached:
+      return _cachedProviderFactory;
+    case ImageType.network:
+      return _networkProviderFactory;
+    case ImageType.file:
+      return _fileProviderFactory;
+    case ImageType.dataUrl:
+      return _dataUrlProviderFactory;
+    case ImageType.blob:
+      return _blobProviderFactory;
+    case ImageType.assets:
     default:
-      return _fallbackImageProviderFactory;
+      return _assetsProviderFactory;
   }
 }
 
 void setCustomImageProviderFactory(ImageType imageType, ImageProviderFactory customImageProviderFactory) {
   if (customImageProviderFactory != null) {
     switch (imageType) {
-      case ImageType.cachedNetworkImage:
-        _cachedNetworkImageProviderFactory = customImageProviderFactory;
+      case ImageType.cached:
+        _cachedProviderFactory = customImageProviderFactory;
         break;
-      case ImageType.uncachedNetworkImage:
-        _uncachedNetworkImageProviderFactory = customImageProviderFactory;
+      case ImageType.network:
+        _networkProviderFactory = customImageProviderFactory;
         break;
-      case ImageType.fileImage:
-        _fileImageProviderFactory = customImageProviderFactory;
+      case ImageType.file:
+        _fileProviderFactory = customImageProviderFactory;
         break;
-      case ImageType.dataImage:
-        _dataImageProviderFactory = customImageProviderFactory;
+      case ImageType.dataUrl:
+        _dataUrlProviderFactory = customImageProviderFactory;
         break;
-      case ImageType.blobImage:
-        _blobImageProviderFactory = customImageProviderFactory;
+      case ImageType.blob:
+        _blobProviderFactory = customImageProviderFactory;
         break;
-      case ImageType.fallbackImage:
+      case ImageType.assets:
       default:
-        _fallbackImageProviderFactory = customImageProviderFactory;
+        _assetsProviderFactory = customImageProviderFactory;
         break;
     }
   }
 }
 
-/// default ImageProviderFactory implementation of [ImageType.cachedNetworkImage]
-ImageProvider defaultCachedNetImageProviderFactory(String url, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.cached]
+ImageProvider defaultCachedProviderFactory(String url, [dynamic param]) {
   return CachedNetworkImage(url);
 }
 
-/// default ImageProviderFactory implementation of [ImageType.uncachedNetworkImage]
-ImageProvider defaultUncachedNetworkImageProviderFactory(String url, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.network]
+ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
   return NetworkImage(url);
 }
 
-/// default ImageProviderFactory implementation of [ImageType.fileImage]
-ImageProvider defaultFileImageProviderFactory(String rawPath, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.file]
+ImageProvider defaultFileProviderFactory(String rawPath, [dynamic param]) {
   ImageProvider _imageProvider = null;
   if(param is File){
     _imageProvider = FileImage(param);
@@ -147,8 +136,8 @@ ImageProvider defaultFileImageProviderFactory(String rawPath, [dynamic param]) {
   return _imageProvider;
 }
 
-/// default ImageProviderFactory implementation of [ImageType.dataImage].
-ImageProvider defaultDataImageProviderFactory(String uriDataPath, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.dataUrl].
+ImageProvider defaultDataUrlProviderFactory(String uriDataPath, [dynamic param]) {
   ImageProvider _imageProvider = null;
   if (param is Uint8List) {
     _imageProvider = MemoryImage(param);
@@ -156,13 +145,13 @@ ImageProvider defaultDataImageProviderFactory(String uriDataPath, [dynamic param
   return _imageProvider;
 }
 
-/// default ImageProviderFactory implementation of [ImageType.blobImage].
-ImageProvider defaultBlobImageProviderFactory(String blobPath, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.blob].
+ImageProvider defaultBlobProviderFactory(String blobPath, [dynamic param]) {
   // @TODO: support blob file url
   return null;
 }
 
-/// default ImageProviderFactory implementation of [ImageType.fallbackImage].
-ImageProvider defaultFallbackImageProvider(String rawUrl, [dynamic param]) {
+/// default ImageProviderFactory implementation of [ImageType.assets].
+ImageProvider defaultAssetsProvider(String rawUrl, [dynamic param]) {
   return AssetImage(rawUrl);
 }
