@@ -170,7 +170,7 @@ describe('css-image', () => {
     await matchScreenshot();
   });
 
-  it('size works width position absolute' , async () => {
+ it('size works width position absolute' , async (done) => {
     let n1, n2;
     n1 = createElementWithStyle(
        'div',
@@ -200,6 +200,9 @@ describe('css-image', () => {
     BODY.appendChild(n1);
     n2.src = 'https://img.alicdn.com/tfs/TB14bXLHFT7gK0jSZFpXXaTkpXa-100-100.png';
 
-    await matchScreenshot();
+    n2.onload = async () => {
+      await matchScreenshot();
+      done();
+    };
   });
 });
