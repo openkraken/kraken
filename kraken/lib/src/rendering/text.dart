@@ -109,6 +109,11 @@ class RenderTextBox extends RenderBox
   }
 
   @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return _renderParagraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     if (child != null) {

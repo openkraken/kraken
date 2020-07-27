@@ -322,18 +322,6 @@ FlexWrap _getFlexWrap(String flexWrap) {
 }
 
 JustifyContent _getJustifyContent(String justifyContent, CSSStyleDeclaration style, FlexDirection flexDirection) {
-  if (isHorizontalFlexDirection(flexDirection) && style.contains(TEXT_ALIGN)) {
-    String textAlign = style[TEXT_ALIGN];
-    switch (textAlign) {
-      case 'right':
-        return JustifyContent.flexEnd;
-        break;
-      case 'center':
-        return JustifyContent.center;
-        break;
-    }
-  }
-
   switch (justifyContent) {
     case 'flex-start':
     case 'start':

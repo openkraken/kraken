@@ -13,6 +13,22 @@ enum CSSPositionType {
   sticky,
 }
 
+/// Sets vertical alignment of an inline, inline-block
+enum VerticalAlign {
+  /// Aligns the baseline of the element with the baseline of its parent.
+  baseline,
+
+  /// Aligns the top of the element and its descendants with the top of the entire line.
+  top,
+
+  /// Aligns the bottom of the element and its descendants with the bottom of the entire line.
+  bottom,
+
+  /// Aligns the middle of the element with the baseline plus half the x-height of the parent.
+  /// @TODO not supported
+  ///  middle,
+}
+
 CSSPositionType resolvePositionFromStyle(CSSStyleDeclaration style) {
   return resolveCSSPosition(style[POSITION]);
 }
@@ -170,4 +186,39 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   }
 
   childParentData.offset = Offset(x ?? 0, y ?? 0);
+}
+
+double getFontSize(CSSStyleDeclaration style) {
+  if (style.contains(FONT_SIZE)) {
+    return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
+  } else {
+    return DEFAULT_FONT_SIZE;
+  }
+}
+
+double getLineHeight(CSSStyleDeclaration style) {
+  String lineHeightStr = style[LINE_HEIGHT];
+  double lineHeight;
+  if (lineHeightStr != '') {
+    if (lineHeightStr.endsWith('px') ||
+      lineHeightStr.endsWith('rpx')
+    ) {
+      lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
+    } else {
+      lineHeight = getFontSize(style) * double.parse(lineHeightStr);
+    }
+  }
+  return lineHeight;
+}
+
+VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
+  String verticalAlign = style[VERTICAL_ALIGN];
+
+  switch (verticalAlign) {
+    case 'top':
+      return VerticalAlign.top;
+    case 'bottom':
+      return VerticalAlign.bottom;
+  }
+  return VerticalAlign.baseline;
 }
