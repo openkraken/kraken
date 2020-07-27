@@ -38,28 +38,28 @@ class CSSUrl implements CSSValue<ImageProvider> {
       _url = url;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
-        _value = getImageProviderFactory(ImageType.cachedNetworkImage)(url);
+        _value = getImageProviderFactory(ImageType.cached)(url);
       } else {
-        _value = getImageProviderFactory(ImageType.uncachedNetworkImage)(url);
+        _value = getImageProviderFactory(ImageType.network)(url);
       }
 
     } else if (_rawInput.startsWith('file://')) {
       File file = File.fromUri(Uri.parse(_rawInput));
-      _value = getImageProviderFactory(ImageType.fileImage)(_rawInput, file);
+      _value = getImageProviderFactory(ImageType.file)(_rawInput, file);
     } else if (_rawInput.startsWith('data:')) {
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
 
       UriData data = UriData.parse(_rawInput);
       if (data.isBase64) {
-        _value = getImageProviderFactory(ImageType.dataImage)(_rawInput, data.contentAsBytes());
+        _value = getImageProviderFactory(ImageType.dataUrl)(_rawInput, data.contentAsBytes());
       }
     } else if (_rawInput.startsWith('blob:')) {
       // @TODO: support blob file url
-      _value = getImageProviderFactory(ImageType.blobImage)(_rawInput);
+      _value = getImageProviderFactory(ImageType.blob)(_rawInput);
     } else {
       // Fallback to asset image
-      _value = getImageProviderFactory(ImageType.fallbackImage)(_rawInput);
+      _value = getImageProviderFactory(ImageType.assets)(_rawInput);
     }
   }
 
