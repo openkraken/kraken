@@ -164,4 +164,3 @@ class CSSStyleProperty {
         property == ANIMATION;
   }
 }
-

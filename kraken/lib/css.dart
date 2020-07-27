@@ -15,6 +15,7 @@ export 'src/css/properties.dart';
 export 'src/css/sizing.dart';
 export 'src/css/style_declaration.dart';
 export 'src/css/style_property.dart';
+export 'src/css/style_rule.dart';
 export 'src/css/text.dart';
 export 'src/css/transform.dart';
 export 'src/css/transition.dart';

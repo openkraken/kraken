@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
+
 import 'value.dart';
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#urls
@@ -37,25 +38,28 @@ class CSSUrl implements CSSValue<ImageProvider> {
       _url = url;
       // @TODO: caching also works after image downloaded
       if (cache == 'store' || cache == 'auto') {
-        _value = CachedNetworkImage(url);
+        _value = getImageProviderFactory(ImageType.cachedNetworkImage)(url);
       } else {
-        _value = NetworkImage(url);
+        _value = getImageProviderFactory(ImageType.uncachedNetworkImage)(url);
       }
+
     } else if (_rawInput.startsWith('file://')) {
-      _value = FileImage(File.fromUri(Uri.parse(_rawInput)));
+      File file = File.fromUri(Uri.parse(_rawInput));
+      _value = getImageProviderFactory(ImageType.fileImage)(_rawInput, file);
     } else if (_rawInput.startsWith('data:')) {
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
 
       UriData data = UriData.parse(_rawInput);
       if (data.isBase64) {
-        _value = MemoryImage(data.contentAsBytes());
+        _value = getImageProviderFactory(ImageType.dataImage)(_rawInput, data.contentAsBytes());
       }
     } else if (_rawInput.startsWith('blob:')) {
       // @TODO: support blob file url
+      _value = getImageProviderFactory(ImageType.blobImage)(_rawInput);
     } else {
       // Fallback to asset image
-      _value = AssetImage(_rawInput);
+      _value = getImageProviderFactory(ImageType.fallbackImage)(_rawInput);
     }
   }
 

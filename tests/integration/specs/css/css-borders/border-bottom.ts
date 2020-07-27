@@ -2711,6 +2711,8 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
+    await sleep(0.5);
+
     await matchScreenshot();
   });
   it('color-037', async () => {
