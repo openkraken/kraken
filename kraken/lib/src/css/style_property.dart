@@ -4,17 +4,6 @@ final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
 
 class CSSStyleProperty {
-  static double getDisplayPortValue(input) {
-    if (CSSStyleDeclaration.isNullOrEmptyValue(input)) {
-      // Null is not equal with 0.0
-      return null;
-    }
-    if (input is! String) {
-      input = input.toString();
-    }
-    return CSSLength.toDisplayPortValue(input as String);
-  }
-
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
       List<String> properties = CSSStyleProperty.getInsetValues(shorthandValue);

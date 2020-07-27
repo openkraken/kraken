@@ -141,12 +141,12 @@ mixin CSSSizingMixin {
   }
 
   static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
-    double width = CSSStyleProperty.getDisplayPortValue(style['width']);
-    double height = CSSStyleProperty.getDisplayPortValue(style['height']);
-    double minHeight = CSSStyleProperty.getDisplayPortValue(style['minHeight']);
-    double maxWidth = CSSStyleProperty.getDisplayPortValue(style['maxWidth']);
-    double maxHeight = CSSStyleProperty.getDisplayPortValue(style['maxHeight']);
-    double minWidth = CSSStyleProperty.getDisplayPortValue(style['minWidth']);
+    double width = CSSLength.toDisplayPortValue(style['width']);
+    double height = CSSLength.toDisplayPortValue(style['height']);
+    double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
+    double maxWidth = CSSLength.toDisplayPortValue(style['maxWidth']);
+    double maxHeight = CSSLength.toDisplayPortValue(style['maxHeight']);
+    double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
 
     CSSEdgeInsets padding = _getPaddingFromStyle(style);
     EdgeInsets border = _getBorderEdgeFromStyle(style);
@@ -203,10 +203,10 @@ mixin CSSSizingMixin {
     double marginRight;
     double marginBottom;
 
-    if (style.contains(MARGIN_LEFT)) marginLeft = CSSStyleProperty.getDisplayPortValue(style[MARGIN_LEFT]);
-    if (style.contains(MARGIN_TOP)) marginTop = CSSStyleProperty.getDisplayPortValue(style[MARGIN_TOP]);
-    if (style.contains(MARGIN_RIGHT)) marginRight = CSSStyleProperty.getDisplayPortValue(style[MARGIN_RIGHT]);
-    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSStyleProperty.getDisplayPortValue(style[MARGIN_BOTTOM]);
+    if (style.contains(MARGIN_LEFT)) marginLeft = CSSLength.toDisplayPortValue(style[MARGIN_LEFT]);
+    if (style.contains(MARGIN_TOP)) marginTop = CSSLength.toDisplayPortValue(style[MARGIN_TOP]);
+    if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT]);
+    if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM]);
 
     return CSSEdgeInsets(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
   }
@@ -320,10 +320,10 @@ mixin CSSSizingMixin {
     double paddingBottom;
     double paddingLeft;
 
-    if (style.contains(PADDING_TOP)) paddingTop = CSSStyleProperty.getDisplayPortValue(style[PADDING_TOP]);
-    if (style.contains(PADDING_RIGHT)) paddingRight = CSSStyleProperty.getDisplayPortValue(style[PADDING_RIGHT]);
-    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSStyleProperty.getDisplayPortValue(style[PADDING_BOTTOM]);
-    if (style.contains(PADDING_LEFT)) paddingLeft = CSSStyleProperty.getDisplayPortValue(style[PADDING_LEFT]);
+    if (style.contains(PADDING_TOP)) paddingTop = CSSLength.toDisplayPortValue(style[PADDING_TOP]);
+    if (style.contains(PADDING_RIGHT)) paddingRight = CSSLength.toDisplayPortValue(style[PADDING_RIGHT]);
+    if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM]);
+    if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT]);
 
     return CSSEdgeInsets(paddingTop ?? 0.0, paddingRight ?? 0.0, paddingBottom ?? 0.0, paddingLeft ?? 0.0);
   }

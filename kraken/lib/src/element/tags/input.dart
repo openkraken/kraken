@@ -161,10 +161,10 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     double maxHeight = oldConstraints.maxHeight;
 
     if (containWidth) {
-      minWidth = maxWidth = CSSStyleProperty.getDisplayPortValue(style['width']);
+      minWidth = maxWidth = CSSLength.toDisplayPortValue(style['width']);
     }
     if (containHeight) {
-      minHeight = maxHeight = CSSStyleProperty.getDisplayPortValue(style['height']);
+      minHeight = maxHeight = CSSLength.toDisplayPortValue(style['height']);
     }
 
     renderConstrainedBox.additionalConstraints = BoxConstraints(
