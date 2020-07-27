@@ -27,7 +27,7 @@ Value JSScreen::get(JSContext &context, const PropNameID &name) {
     throw JSError(context, "Failed to read screen: dart method (getScreen) is not registered.");
   }
 
-  Screen *screen = getDartMethod()->getScreen();
+  Screen *screen = getDartMethod()->getScreen(context.getContextId());
 
   if (propertyName == "width" || propertyName == "availWidth") {
     return Value(screen->width);

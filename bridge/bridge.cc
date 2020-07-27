@@ -24,11 +24,8 @@
 namespace kraken {
 namespace {
 
-using namespace alibaba::jsa;
 using namespace foundation;
 
-ThreadSafeArray<std::shared_ptr<Value>> krakenUIListenerList;
-ThreadSafeArray<std::shared_ptr<Value>> krakenModuleListenerList;
 /**
  * Message channel, send message from JS to Dart.
  * @param context
@@ -54,7 +51,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  const char *result = getDartMethod()->invokeUIManager(messageStr.c_str());
+  const char *result = getDartMethod()->invokeUIManager(context.getContextId(), messageStr.c_str());
   std::string resultStr = std::string(result);
 
   if (resultStr.find("Error:", 0) != std::string::npos) {
@@ -68,13 +65,9 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   return Value(context, String::createFromUtf8(context, resultStr));
 }
 
-void handleInvokeModuleTransientCallback(char *json, void *data) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextId, char *json) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  if (!BridgeCallback::checkContext(_context)) {
-    return;
-  }
 
   if (!_context.isValid()) return;
 
@@ -89,7 +82,6 @@ void handleInvokeModuleTransientCallback(char *json, void *data) {
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
-
   const Value &message = args[0];
   const std::string messageStr = message.getString(context).utf8(context);
 
@@ -104,15 +96,26 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   std::unique_ptr<BridgeCallback::Context> callbackContext = nullptr;
 
-  if (count == 2) {
+  if (count < 2) {
+    HostFunctionType emptyCallback = [](JSContext &context, const Value &thisVal, const Value *args,
+                                        size_t count) -> Value { return Value::undefined(); };
+
+    std::shared_ptr<Value> callbackValue = std::make_shared<Value>(
+      Function::createFromHostFunction(context, PropNameID::forAscii(context, "f"), 0, emptyCallback));
+    Object &&callbackFunction = callbackValue->getObject(context);
+    callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
+  } else if (count == 2) {
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, args[1].getObject(context)));
     Object &&callbackFunction = callbackValue->getObject(context);
     callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   }
 
-  const char *result =
-    BridgeCallback::instance()->registerCallback<const char *>(std::move(callbackContext), [&messageStr](void *data) {
-      return getDartMethod()->invokeModule(messageStr.c_str(), handleInvokeModuleTransientCallback, data);
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  const char *result = bridge->bridgeCallback.registerCallback<const char *>(
+    std::move(callbackContext),
+    [&messageStr](BridgeCallback::Context *bridgeContext, int32_t contextId) {
+      return getDartMethod()->invokeModule(bridgeContext, contextId, messageStr.c_str(),
+                                           handleInvokeModuleTransientCallback);
     });
 
   if (result == nullptr) {
@@ -141,7 +144,8 @@ Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *ar
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
-  krakenUIListenerList.push(val);
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+  bridge->krakenUIListenerList.emplace_back(val);
 
   return Value::undefined();
 }
@@ -159,18 +163,15 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   std::shared_ptr<Value> val = std::make_shared<Value>(Value(context, args[0].getObject(context)));
   Object &&func = val->getObject(context);
 
-  krakenModuleListenerList.push(val);
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+  bridge->krakenModuleListenerList.emplace_back(val);
 
   return Value::undefined();
 }
 
-void handleTransientCallback(void *data, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(data);
+void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-
-  if (!BridgeCallback::checkContext(_context)) {
-    return;
-  }
 
   if (!_context.isValid()) return;
 
@@ -213,8 +214,11 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_request_batch_update__': dart method (requestBatchUpdate) is not registered.");
   }
 
-  BridgeCallback::instance()->registerCallback<void>(
-    std::move(callbackContext), [](void *data) { getDartMethod()->requestBatchUpdate(handleTransientCallback, data); });
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  bridge->bridgeCallback.registerCallback<void>(
+    std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
+    });
 
   return Value::undefined();
 }
@@ -224,18 +228,18 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
 /**
  * JSRuntime
  */
-JSBridge::JSBridge(const alibaba::jsa::JSExceptionHandler& handler) {
-  auto errorHandler = [handler, this](const alibaba::jsa::JSError &error) {
-    handler(error);
+JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &handler) : contextId(contextId) {
+  auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
+    handler(context, error);
     // trigger window.onerror handler.
     const alibaba::jsa::Value &errorObject = error.value();
-    context->global()
-      .getPropertyAsObject(*context, "__global_onerror_handler__")
-      .getFunction(*context)
-      .call(*context, Value(*context, errorObject));
+    context.global()
+      .getPropertyAsObject(context, "__global_onerror_handler__")
+      .getFunction(context)
+      .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
-  context = alibaba::jsc::createJSContext(errorHandler);
+  context = alibaba::jsc::createJSContext(contextId, errorHandler, this);
 #elif KRAKEN_V8_ENGINE
   alibaba::jsa_v8::initV8Engine("");
   context = alibaba::jsa_v8::createJSContext(errorHandler);
@@ -289,9 +293,7 @@ void JSBridge::detachDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::handleUIListener(const char *args) {
-  std::unique_lock<std::mutex> lock = krakenUIListenerList.getLock();
-  auto list = krakenUIListenerList.getVector();
-  for (const auto &callback : *list) {
+  for (const auto &callback : krakenUIListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
     }
@@ -306,9 +308,7 @@ void JSBridge::handleUIListener(const char *args) {
 }
 
 void JSBridge::handleModuleListener(const char *args) {
-  std::unique_lock<std::mutex> lock = krakenModuleListenerList.getLock();
-  auto list = krakenModuleListenerList.getVector();
-  for (const auto &callback : *list) {
+  for (const auto &callback : krakenModuleListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
     }
@@ -342,7 +342,7 @@ void JSBridge::invokeEventListener(int32_t type, const char *args) {
       this->handleModuleListener(args);
     }
   } catch (JSError &error) {
-    handler_(error);
+    handler_(*context, error);
   }
 }
 
@@ -362,7 +362,6 @@ JSBridge::~JSBridge() {
   screen_->unbind(context);
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
-  BridgeCallback::instance()->disposeAllCallbacks();
 }
 
 } // namespace kraken

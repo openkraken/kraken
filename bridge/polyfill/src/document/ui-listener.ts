@@ -1,14 +1,14 @@
 // import { krakenUIListener } from '../bridge';
-import { getNodeByNodeId } from './document';
+import { getNodeByTargetId } from './document';
 
 export function krakenUIListener(message: any) {
   const parsed = JSON.parse(message);
   const targetId = parsed[0];
   const event = parsed[1];
-  const currentTarget = getNodeByNodeId(targetId);
+  const currentTarget = getNodeByTargetId(targetId);
 
   if (currentTarget !== null) {
-    const target = getNodeByNodeId(event.target);
+    const target = getNodeByTargetId(event.target);
     event.targetId = event.target;
     event.target = target;
 

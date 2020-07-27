@@ -11,15 +11,16 @@ import 'package:kraken/css.dart';
 const String CANVAS = 'CANVAS';
 
 const Map<String, dynamic> _defaultStyle = {
-  'display': 'inline-block',
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  DISPLAY: INLINE_BLOCK,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 class CanvasElement extends Element {
-  CanvasElement(int targetId)
+  CanvasElement(int targetId, ElementManager elementManager)
       : super(
-          targetId: targetId,
+          targetId,
+          elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           tagName: CANVAS,
@@ -166,10 +167,10 @@ class CanvasElement extends Element {
     String property = args[0];
     switch (property) {
       case 'fillStyle':
-        painter.context.fillStyle = CSSColor.generate(args[1]);
+        painter.context.fillStyle = CSSColor.parseColor(args[1]);
         break;
       case 'strokeStyle':
-        painter.context.strokeStyle = CSSColor.generate(args[1]);
+        painter.context.strokeStyle = CSSColor.parseColor(args[1]);
         break;
       case 'font':
         painter.context.font = args[1];

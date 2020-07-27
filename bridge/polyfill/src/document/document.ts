@@ -1,10 +1,11 @@
 import { Node, NodeType, traverseNode } from './node';
-import {Element} from './element';
+import { Element } from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
-import { BODY, WINDOW } from './events/event-target';
+import { BODY, WINDOW, eventTargetMap } from './events/event-target';
 import { cookie } from '../cookie';
+import { HTMLAllCollection } from './collection';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -37,6 +38,14 @@ export class Document extends Node {
     return new Comment(data);
   }
 
+  get all(): HTMLAllCollection {
+    const all = new HTMLAllCollection();
+    traverseNode(document, (node: Node) => {
+      all.add(node);
+    });
+    return all;
+  }
+
   get cookie() {
     return cookie.get();
   }
@@ -48,17 +57,17 @@ export class Document extends Node {
 
 export const document = new Document();
 
-export function getNodeByNodeId(targetId: number) : Node|null|Window {
+export function getNodeByTargetId(targetId: number) : Node|null|Window {
   if (targetId === WINDOW) {
     return window;
   }
 
-  let _node = null;
-  traverseNode(document.body, (node: Node) : any => {
-    if (node.targetId === targetId) {
-      _node = node;
-      return true; // Return true to stop traversing
+  if (eventTargetMap.hasOwnProperty(targetId)) {
+    const eventTarget = eventTargetMap[targetId];
+    if (eventTarget instanceof Node) {
+      return eventTarget;
     }
-  });
-  return _node;
+  }
+  
+  return null;
 }

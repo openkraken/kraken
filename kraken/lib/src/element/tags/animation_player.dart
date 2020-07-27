@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:flare_flutter/provider/asset_flare.dart';
 import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
@@ -9,8 +14,8 @@ import 'package:kraken/rendering.dart';
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
 
 final Map<String, dynamic> _defaultStyle = {
-  'width': ELEMENT_DEFAULT_WIDTH,
-  'height': ELEMENT_DEFAULT_HEIGHT,
+  WIDTH: ELEMENT_DEFAULT_WIDTH,
+  HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
 // Ref: https://github.com/LottieFiles/lottie-player
@@ -20,10 +25,10 @@ class AnimationPlayerElement extends Element {
   RenderObject _animationRenderObject;
   FlareControls _animationController;
 
-  AnimationPlayerElement(int targetId)
-      : super(targetId: targetId, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+  AnimationPlayerElement(int targetId, ElementManager elementManager)
+      : super(targetId, elementManager, tagName: ANIMATION_PLAYER, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
-  String get objectFit => style['objectFit'];
+  String get objectFit => style[OBJECT_FIT];
 
   String get type {
     if (properties.containsKey('type')) return properties['type'];
@@ -79,7 +84,7 @@ class AnimationPlayerElement extends Element {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    if (key == 'objectFit') {
+    if (key == OBJECT_FIT) {
       _updateObjectFit();
     }
   }
@@ -124,7 +129,7 @@ class AnimationPlayerElement extends Element {
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();
 
-    return FlareRenderObject(targetId)
+    return FlareRenderObject(targetId, elementManager)
       ..assetProvider = AssetFlare(bundle: NetworkAssetBundle(Uri.parse(src)), name: '')
       ..fit = boxFit
       ..alignment = Alignment.center

@@ -14,18 +14,18 @@ enum CSSPositionType {
 }
 
 CSSPositionType resolvePositionFromStyle(CSSStyleDeclaration style) {
-  return resolveCSSPosition(style['position']);
+  return resolveCSSPosition(style[POSITION]);
 }
 
 CSSPositionType resolveCSSPosition(String input) {
   switch (input) {
-    case 'relative':
+    case RELATIVE:
       return CSSPositionType.relative;
-    case 'absolute':
+    case ABSOLUTE:
       return CSSPositionType.absolute;
-    case 'fixed':
+    case FIXED:
       return CSSPositionType.fixed;
-    case 'sticky':
+    case STICKY:
       return CSSPositionType.sticky;
   }
   return CSSPositionType.static;
@@ -65,17 +65,17 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
     double dy;
 
     // @TODO support auto value
-    if (style.contains('left') && style['left'] != 'auto') {
-      dx = CSSLength.toDisplayPortValue(style['left']);
-    } else if (style.contains('right') && style['right'] != 'auto') {
-      var _dx = CSSLength.toDisplayPortValue(style['right']);
+    if (style.contains(LEFT) && style[LEFT] != AUTO) {
+      dx = CSSLength.toDisplayPortValue(style[LEFT]);
+    } else if (style.contains(RIGHT) && style[RIGHT] != AUTO) {
+      var _dx = CSSLength.toDisplayPortValue(style[RIGHT]);
       if (_dx != null) dx = -_dx;
     }
 
-    if (style.contains('top') && style['top'] != 'auto') {
-      dy = CSSLength.toDisplayPortValue(style['top']);
-    } else if (style.contains('bottom') && style['bottom'] != 'auto') {
-      var _dy = CSSLength.toDisplayPortValue(style['bottom']);
+    if (style.contains(TOP) && style[TOP] != AUTO) {
+      dy = CSSLength.toDisplayPortValue(style[TOP]);
+    } else if (style.contains(BOTTOM) && style[BOTTOM] != AUTO) {
+      var _dy = CSSLength.toDisplayPortValue(style[BOTTOM]);
       if (_dy != null) dy = -_dy;
     }
 
@@ -148,8 +148,10 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
+    RenderObject root = parent.elementManager.getRootRenderObject();
     Offset baseOffset =
-        childParentData.renderPositionHolder.localToGlobal(Offset.zero) - parent.localToGlobal(Offset.zero);
+        childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root)
+            - parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details

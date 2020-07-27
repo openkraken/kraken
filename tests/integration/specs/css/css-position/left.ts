@@ -1366,7 +1366,6 @@ describe('left', () => {
             position: 'relative',
             width: '96px',
             'border-left': '25.4mm solid black',
-            'margin-left': '-50.8mm',
             left: '+25.4mm',
             'box-sizing': 'border-box',
           },

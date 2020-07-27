@@ -17,7 +17,8 @@ enum NodeType {
 }
 
 class Comment extends Node {
-  Comment(int targetId, this.data) : super(NodeType.COMMENT_NODE, targetId, '#comment');
+  Comment({int targetId, ElementManager elementManager, this.data})
+      : super(NodeType.COMMENT_NODE, targetId, elementManager, '#comment');
 
   // The comment information.
   String data;
@@ -67,7 +68,7 @@ abstract class Node extends EventTarget {
     return _children;
   }
 
-  Node(this.nodeType, int targetId, this.nodeName) : super(targetId) {
+  Node(this.nodeType, int targetId, ElementManager elementManager, this.nodeName) : super(targetId, elementManager) {
     assert(nodeType != null);
     assert(targetId != null);
     nodeName = nodeName ?? '';
@@ -79,7 +80,7 @@ abstract class Node extends EventTarget {
     while (parent.parentNode != null) {
       parent = parent.parentNode;
     }
-    return parent == ElementManager().getRootElement();
+    return parent == this.elementManager.getRootElement();
   }
 
   Node get firstChild => childNodes?.first;

@@ -29,7 +29,6 @@ final Dart_InitTestFramework _initTestFramework =
 
 void initTestFramework() {
   registerDartMethodsToCpp();
-  initJSEngine();
   _initTestFramework();
 }
 

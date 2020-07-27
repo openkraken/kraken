@@ -29,15 +29,23 @@ static FlutterMethodChannel *methodChannel = nil;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"getUrl" isEqualToString:call.method]) {
-    Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
+  NSArray<NSString*> *group = [call.method componentsSeparatedByString:NAME_METHOD_SPLIT];
+  NSString *name = group[0];
+  NSString *method = group[1];
+  Kraken* krakenInstance = [Kraken instanceByName:name];
+  
+  if (krakenInstance == nil) {
+    result(nil);
+    return;
+  }
+  
+  if ([@"getUrl" isEqualToString:method]) {
     if (krakenInstance != nil) {
       result([krakenInstance getUrl]);
     } else {
       result(nil);
     }
-  } else if ([@"invokeMethod" isEqualToString: call.method]) {
-    Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
+  } else if ([@"invokeMethod" isEqualToString: method]) {
     FlutterMethodCall* callWrap = [FlutterMethodCall methodCallWithMethodName: call.arguments[@"method"] arguments: call.arguments[@"args"]];
     [krakenInstance _handleMethodCall:callWrap result:result];
   } else {

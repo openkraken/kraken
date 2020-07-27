@@ -93,9 +93,9 @@ abstract class KrakenBundle {
     return localBundleDirectory;
   }
 
-  Future<void> run() async {
+  Future<void> run(int contextId) async {
     if (!isResolved) await resolve();
-    evaluateScripts(content, url.toString(), lineOffset);
+    evaluateScripts(contextId, content, url.toString(), lineOffset);
   }
 }
 

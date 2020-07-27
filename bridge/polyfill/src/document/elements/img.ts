@@ -1,11 +1,11 @@
 import { Element } from '../element';
 
 const imgBuiltInProperties = ['src', 'loading'];
-const imgBuiltInEvents = ['load'];
+const imgBuiltInEvents = ['load', 'error'];
 
-export class ImgElement extends Element {
-  constructor(tagName: string) {
-    super(tagName, undefined, imgBuiltInEvents, imgBuiltInProperties);
+export class ImageElement extends Element {
+  constructor() {
+    super('img', undefined, imgBuiltInEvents, imgBuiltInProperties);
   }
 
   get width() {

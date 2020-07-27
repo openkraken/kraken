@@ -89,8 +89,8 @@ std::string to_string(void *value) {
 }
 } // namespace
 
-JSCContext::JSCContext(jsa::JSExceptionHandler handler)
-  : ctxInvalid_(false), _handler(handler)
+JSCContext::JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner)
+  : _contextId(contextId), ctxInvalid_(false), _handler(handler), _owner(owner)
 #ifndef NDEBUG
     ,
     objectCounter_(0), stringCounter_(0)
@@ -175,7 +175,7 @@ bool JSCContext::isValid() {
 }
 
 void JSCContext::reportError(jsa::JSError &error) {
-  _handler(error);
+  _handler(*this, error);
 }
 
 namespace {
@@ -1197,7 +1197,7 @@ JSObjectRef JSCContext::objectRef(const jsa::Object &obj) {
 bool JSCContext::hasException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-    _handler(error);
+    _handler(*this, error);
     return true;
   }
   return false;
@@ -1206,7 +1206,7 @@ bool JSCContext::hasException(JSValueRef exc) {
 bool JSCContext::hasException(JSValueRef res, JSValueRef exc) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(*this, createValue(exc));
-    _handler(error);
+    _handler(*this, error);
     return true;
   }
   return false;
@@ -1215,7 +1215,7 @@ bool JSCContext::hasException(JSValueRef res, JSValueRef exc) {
 bool JSCContext::hasException(JSValueRef exc, const char *msg) {
   if (JSC_UNLIKELY(exc)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-    _handler(error);
+    _handler(*this, error);
     return true;
   }
   return false;
@@ -1224,15 +1224,23 @@ bool JSCContext::hasException(JSValueRef exc, const char *msg) {
 bool JSCContext::hasException(JSValueRef res, JSValueRef exc, const char *msg) {
   if (JSC_UNLIKELY(!res)) {
     jsa::JSError error = jsa::JSError(std::string(msg), *this, createValue(exc));
-    _handler(error);
+    _handler(*this, error);
     return true;
   }
   return false;
 }
 
+int32_t JSCContext::getContextId() {
+  return _contextId;
+}
+
+void *JSCContext::getOwner() {
+  return _owner;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<jsa::JSContext> createJSContext(jsa::JSExceptionHandler handler) {
-  return std::make_unique<JSCContext>(handler);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner) {
+  return std::make_unique<JSCContext>(contextId, handler, owner);
 }
 
 } // namespace jsc

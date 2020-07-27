@@ -3,17 +3,23 @@
  * Author: Kraken Team.
  */
 
+import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
+import 'package:meta/meta.dart';
 
 const String BODY = 'BODY';
 
-final Map<String, dynamic> _defaultStyle = {
-  'width': '100vw',
-  'height': '100vh',
-  'overflow': 'auto',
-  'backgroundColor': 'white'
-};
+Map<String, dynamic> createBodyStyle(double viewportWidth, double viewportHeight) {
+  return {
+    WIDTH: '${viewportWidth}px',
+    HEIGHT: '${viewportHeight}px',
+    OVERFLOW: AUTO,
+    BACKGROUND_COLOR: 'white'
+  };
+}
 
 class BodyElement extends Element {
-  BodyElement(int targetId) : super(targetId: targetId, tagName: BODY, defaultStyle: _defaultStyle);
+  BodyElement(double viewportWidth, double viewportHeight,
+      {@required int targetId, @required ElementManager elementManager})
+      : super(targetId, elementManager, tagName: BODY, defaultStyle: createBodyStyle(viewportWidth, viewportHeight));
 }

@@ -82,10 +82,10 @@ class CanvasPathDrawingStyles2D implements CanvasPathDrawingStyles {
 
 class CanvasFillStrokeStyles2D implements CanvasFillStrokeStyles {
   @override
-  Color strokeStyle = CSSColor.black;
+  Color strokeStyle = CSSColor.initial;
 
   @override
-  Color fillStyle = CSSColor.black;
+  Color fillStyle = CSSColor.initial;
 
   @override
   CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1) {
