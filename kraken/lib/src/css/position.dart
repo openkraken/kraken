@@ -201,8 +201,10 @@ double getLineHeight(CSSStyleDeclaration style) {
   double lineHeight;
   if (lineHeightStr != '') {
     if (lineHeightStr.endsWith('px') ||
-      lineHeightStr.endsWith('rpx')
-    ) {
+      lineHeightStr.endsWith('rpx') ||
+      lineHeightStr.endsWith('vw') ||
+      lineHeightStr.endsWith('vh')
+  ) {
       lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
     } else {
       lineHeight = getFontSize(style) * double.parse(lineHeightStr);
