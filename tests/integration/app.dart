@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/material.dart' show MaterialApp;
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
@@ -24,48 +24,54 @@ void main() {
     KrakenWidget main = KrakenWidget(
       'main',
       360, 640,
-      bundleContent: 'console.log("starting integration test")',);
+      bundleContent: 'console.log("starting main integration test")',);
 
     KrakenWidget child = KrakenWidget(
       'child',
       360, 640,
-      bundleContent: 'document.body.style.background = "black"');
+      bundleContent: 'console.log("starting child integration test")');
 
     runApp(MaterialApp(
         title: 'Loading Test',
         debugShowCheckedModeBanner: false,
-        home: Row(children: <Widget>[
-          main,
-          child
-        ])
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text('Kraken Integration Test')
+          ),
+          body: Wrap(
+            children: <Widget>[
+              main,
+            ],
+          )
+        )
     ));
 
     WidgetsBinding.instance
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
       int mainContextId = main.controller.view.contextId;
-      int childContextId = child.controller.view.contextId;
+//      int childContextId = child.controller.view.contextId;
       initTestFramework(mainContextId);
-      initTestFramework(childContextId);
+//      initTestFramework(childContextId);
       addJSErrorListener(mainContextId, (String err) {
         print(err);
       });
-      addJSErrorListener(childContextId, (String err) {
-        print(err);
-      });
+//      addJSErrorListener(childContextId, (String err) {
+//        print(err);
+//      });
 
       // Preload load test cases
       for (Map spec in specDescriptions) {
         String filename = spec['filename'];
         String code = spec['code'];
         evaluateTestScripts(mainContextId, code, url: filename);
-        evaluateTestScripts(childContextId, code, url: filename);
+//        evaluateTestScripts(childContextId, code, url: filename);
       }
 
       Future<String> mainTestResult = executeTest(mainContextId);
-      Future<String> childTestResult = executeTest(childContextId);
+//      Future<String> childTestResult = executeTest(childContextId);
 
-      List<String> results = await Future.wait([mainTestResult, childTestResult]);
+      List<String> results = await Future.wait([mainTestResult]);
 
       for (int i = 0; i < results.length; i ++) {
         String status = results[i];
