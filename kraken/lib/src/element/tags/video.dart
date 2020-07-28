@@ -16,8 +16,6 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
-List<VideoPlayerController> _videoControllers = [];
-
 class VideoElement extends Element {
   VideoElement(int targetId, ElementManager elementManager)
       : super(
@@ -26,8 +24,18 @@ class VideoElement extends Element {
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
           tagName: VIDEO,
-        );
+        ) {
+    renderVideo();
+  }
 
+  void renderVideo() {
+    _textureBox = TextureBox(textureId: 0);
+    if (childNodes.isEmpty) {
+      addChild(_textureBox);
+    }
+  }
+
+  TextureBox _textureBox;
   VideoPlayerController controller;
 
   String _src;
@@ -39,9 +47,7 @@ class VideoElement extends Element {
 
       if (needDispose) {
         controller.dispose().then((_) {
-          _videoControllers.remove(controller);
           _removeVideoBox();
-
           _createVideoBox();
         });
       } else {
@@ -81,15 +87,11 @@ class VideoElement extends Element {
       completer.complete(textureId);
     });
 
-    _videoControllers.add(controller);
-
     return completer.future;
   }
 
   void addVideoBox(int textureId) {
     if (properties['src'] == null) {
-      TextureBox box = TextureBox(textureId: 0);
-      addChild(box);
       return;
     }
 
@@ -216,13 +218,5 @@ class VideoElement extends Element {
         controller.setMuted(false);
         break;
     }
-  }
-
-  // dispose all video player when Dart VM is going to shutdown
-  static Future<void> disposeVideos() async {
-    for (int i = 0; i < _videoControllers.length; i++) {
-      await _videoControllers[i].dispose();
-    }
-    _videoControllers.clear();
   }
 }
