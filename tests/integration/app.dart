@@ -41,6 +41,7 @@ void main() {
           body: Wrap(
             children: <Widget>[
               main,
+              child
             ],
           )
         )
@@ -50,28 +51,28 @@ void main() {
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
       int mainContextId = main.controller.view.contextId;
-//      int childContextId = child.controller.view.contextId;
+      int childContextId = child.controller.view.contextId;
       initTestFramework(mainContextId);
-//      initTestFramework(childContextId);
+      initTestFramework(childContextId);
       addJSErrorListener(mainContextId, (String err) {
         print(err);
       });
-//      addJSErrorListener(childContextId, (String err) {
-//        print(err);
-//      });
+      addJSErrorListener(childContextId, (String err) {
+        print(err);
+      });
 
       // Preload load test cases
       for (Map spec in specDescriptions) {
         String filename = spec['filename'];
         String code = spec['code'];
         evaluateTestScripts(mainContextId, code, url: filename);
-//        evaluateTestScripts(childContextId, code, url: filename);
+        evaluateTestScripts(childContextId, code, url: filename);
       }
 
       Future<String> mainTestResult = executeTest(mainContextId);
-//      Future<String> childTestResult = executeTest(childContextId);
+      Future<String> childTestResult = executeTest(childContextId);
 
-      List<String> results = await Future.wait([mainTestResult]);
+      List<String> results = await Future.wait([mainTestResult, childTestResult]);
 
       for (int i = 0; i < results.length; i ++) {
         String status = results[i];
