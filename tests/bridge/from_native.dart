@@ -27,10 +27,7 @@ import 'match_snapshots.dart';
 // 5. Get a reference to the C function, and put it into a variable.
 // 6. Call from C.
 
-typedef NativeTestCallback = Void Function();
-typedef DartTestCallback = void Function(Pointer<Void> bridge);
-
-typedef Native_JSError = Void Function(Pointer<Utf8>);
+typedef Native_JSError = Void Function(Int32 contextId, Pointer<Utf8>);
 typedef Native_RegisterJSError = Void Function(Pointer<NativeFunction<Native_JSError>>);
 typedef Dart_RegisterJSError = void Function(Pointer<NativeFunction<Native_JSError>>);
 
@@ -39,16 +36,16 @@ final Dart_RegisterJSError _registerOnJSError =
 
 typedef JSErrorListener = void Function(String);
 
-JSErrorListener _listener;
+List<JSErrorListener> _listenerList = List(10);
 
-void addJSErrorListener(JSErrorListener listener) {
-  _listener = listener;
+void addJSErrorListener(int contextId, JSErrorListener listener) {
+  _listenerList[contextId] = listener;
 }
 
-void _onJSError(Pointer<Utf8> charStr) {
-  if (_listener == null) return;
+void _onJSError(int contextId, Pointer<Utf8> charStr) {
+  if (_listenerList[contextId] == null) return;
   String msg = Utf8.fromUtf8(charStr);
-  _listener(msg);
+  _listenerList[contextId](msg);
 }
 
 void registerJSError() {

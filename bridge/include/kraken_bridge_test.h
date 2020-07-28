@@ -11,14 +11,14 @@
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 KRAKEN_EXPORT
-void initTestFramework();
+void initTestFramework(int32_t contextId);
 KRAKEN_EXPORT
-int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine);
+int8_t evaluateTestScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine);
 
-using ExecuteCallback = void *(*)(const char *status);
+using ExecuteCallback = void *(*)(int32_t contextId, const char *status);
 
 KRAKEN_EXPORT
-void executeTest(ExecuteCallback executeCallback);
+void executeTest(int32_t contextId, ExecuteCallback executeCallback);
 
 KRAKEN_EXPORT
 void registerJSError(OnJSError jsError);

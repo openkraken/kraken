@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart' show MaterialApp;
 import 'package:flutter/widgets.dart';
 import 'package:kraken/widget.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter_driver/driver_extension.dart';
@@ -23,20 +21,36 @@ void main() {
     Completer<String> completer = Completer();
     List specDescriptions = jsonDecode(payload);
 
+    KrakenWidget main = KrakenWidget(
+      'main',
+      360, 640,
+      bundleContent: 'console.log("starting integration test")',);
+
+    KrakenWidget child = KrakenWidget(
+      'child',
+      360, 640,
+      bundleContent: 'document.body.style.background = "black"');
+
     runApp(MaterialApp(
         title: 'Loading Test',
         debugShowCheckedModeBanner: false,
-        home: KrakenWidget(
-          'main',
-          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-          bundleContent: 'console.log("starting integration test")',)
+        home: Row(children: <Widget>[
+          main,
+          child
+        ])
     ));
 
     WidgetsBinding.instance
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
-      initTestFramework();
-      addJSErrorListener((String err) {
+      int mainContextId = main.controller.view.contextId;
+      int childContextId = child.controller.view.contextId;
+      initTestFramework(mainContextId);
+      initTestFramework(childContextId);
+      addJSErrorListener(mainContextId, (String err) {
+        print(err);
+      });
+      addJSErrorListener(childContextId, (String err) {
         print(err);
       });
 
@@ -44,16 +58,21 @@ void main() {
       for (Map spec in specDescriptions) {
         String filename = spec['filename'];
         String code = spec['code'];
-        evaluateTestScripts(code, url: filename);
+        evaluateTestScripts(mainContextId, code, url: filename);
+        evaluateTestScripts(childContextId, code, url: filename);
       }
 
-      String status = await executeTest();
-      if (status == 'failed') {
-        print('$err with $status.');
-        completer.complete('failed');
-      } else {
-        print('$pass with $status.');
-        completer.complete('success');
+      Future<String> mainTestResult = executeTest(mainContextId);
+      Future<String> childTestResult = executeTest(childContextId);
+
+      List<String> results = await Future.wait([mainTestResult, childTestResult]);
+
+      for (int i = 0; i < results.length; i ++) {
+        String status = results[i];
+        if (status == 'failed') {
+          completer.complete('failed');
+          break;
+        }
       }
     });
 
