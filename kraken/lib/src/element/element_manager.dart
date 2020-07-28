@@ -23,6 +23,9 @@ Element _createElement(
     case SPAN:
       element = SpanElement(id, elementManager);
       break;
+    case ANCHOR:
+      element = AnchorElement(id, elementManager);
+      break;
     case STRONG:
       element = StrongElement(id, elementManager);
       break;
