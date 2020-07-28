@@ -88,6 +88,8 @@ class ElementManager {
   final double viewportWidth;
   final double viewportHeight;
 
+  List<VoidCallback> _detachCallbacks = [];
+
   ElementManager(double viewportWidth, double viewportHeight,
       {KrakenViewController this.controller, this.showPerformanceOverlayOverride})
       : viewportWidth = viewportWidth,
@@ -114,6 +116,10 @@ class ElementManager {
   void removeTarget(int targetId) {
     assert(targetId != null);
     _eventTargets.remove(targetId);
+  }
+
+  void setDetachCallback(VoidCallback callback) {
+    _detachCallbacks.add(callback);
   }
 
   void setEventTarget(EventTarget target) {
@@ -363,6 +369,10 @@ class ElementManager {
     }
 
     clearTargets();
+    _detachCallbacks.forEach((callback) {
+      callback();
+    });
+    _detachCallbacks.clear();
   }
 
   dynamic applyAction(String action, List payload) {

@@ -26,6 +26,10 @@ class VideoElement extends Element {
           tagName: VIDEO,
         ) {
     renderVideo();
+    elementManager.setDetachCallback(() {
+      if (controller == null) return;
+      controller.dispose();
+    });
   }
 
   void renderVideo() {
