@@ -77,9 +77,11 @@ void main() {
         String status = results[i];
         if (status == 'failed') {
           completer.complete('failed');
-          break;
+          return;
         }
       }
+
+      completer.complete('success');
     });
 
     return completer.future;

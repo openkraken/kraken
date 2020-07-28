@@ -2,7 +2,7 @@ describe('Tags audio', () => {
   it('basic', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
-      height: '500rpx',
+      height: '500px',
     });
 
     document.body.appendChild(container1);

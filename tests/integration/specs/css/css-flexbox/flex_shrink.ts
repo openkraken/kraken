@@ -92,7 +92,7 @@ describe('flexbox flex-shrink', () => {
         'margin': '0vw',
         padding: '0vw',
         'min-width': '0vw',
-        height: '100vh'
+        height: '640px'
       }
     }, [
       createElement('div', {
@@ -106,7 +106,7 @@ describe('flexbox flex-shrink', () => {
           'margin': '0vw',
           padding: '0vw',
           'min-width': '0vw',
-          height: '29.3vw',
+          height: '20px',
           'aligm-items': 'center',
           background: 'blue'
         }

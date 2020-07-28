@@ -3,7 +3,7 @@ describe('Background-position', () => {
     // position
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -12,7 +12,7 @@ describe('Background-position', () => {
 
     const position1 = document.createElement('div');
     setElementStyle(position1, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/cat.png)',
@@ -29,7 +29,7 @@ describe('Background-position', () => {
     // position
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -38,7 +38,7 @@ describe('Background-position', () => {
 
     const position2 = document.createElement('div');
     setElementStyle(position2, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -56,7 +56,7 @@ describe('Background-position', () => {
     // position
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -65,7 +65,7 @@ describe('Background-position', () => {
 
     const position3 = document.createElement('div');
     setElementStyle(position3, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -83,7 +83,7 @@ describe('Background-position', () => {
     // position
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -92,7 +92,7 @@ describe('Background-position', () => {
 
     const position4 = document.createElement('div');
     setElementStyle(position4, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -110,7 +110,7 @@ describe('Background-position', () => {
     // position
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -118,7 +118,7 @@ describe('Background-position', () => {
     });
     const position5 = document.createElement('div');
     setElementStyle(position5, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -134,7 +134,7 @@ describe('Background-position', () => {
   it('right center', async () => {
     const position = document.createElement('div');
     setElementStyle(position, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -142,7 +142,7 @@ describe('Background-position', () => {
     });
     const div = document.createElement('div');
     setElementStyle(div, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
