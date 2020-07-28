@@ -236,7 +236,7 @@ class KrakenController {
       {bool showPerformanceOverlay = false, enableDebug = false}) {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
-        showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug, rootController: this);
+        showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug, rootController: this, navigationDelegate: KrakenNavigationDelegate());
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId), "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;

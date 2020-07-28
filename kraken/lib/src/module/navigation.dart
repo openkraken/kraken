@@ -34,6 +34,10 @@ class KrakenNavigationAction {
   String toString() => 'KrakenNavigationType(source:$source, target:$target, navigationType:$navigationType)';
 }
 
+Future<KrakenNavigationActionPolicy> defaultDecisionHandler(KrakenNavigationAction action) async {
+  return KrakenNavigationActionPolicy.allow;
+}
+
 class KrakenNavigationDelegate {
   // Called when an error occurs during navigation.
   KrakenNavigationErrorHandler _errorHandler;
@@ -43,7 +47,7 @@ class KrakenNavigationDelegate {
     _errorHandler = errorHandler;
   }
 
-  KrakenNavigationDecisionHandler _decisionHandler;
+  KrakenNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
   void setDecisionHandler(KrakenNavigationDecisionHandler handler) {
     _decisionHandler = handler;
   }
