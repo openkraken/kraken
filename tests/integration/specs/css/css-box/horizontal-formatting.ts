@@ -32,7 +32,7 @@ describe('Horizontal formatting', () => {
 
     setElementStyle(p, {
       backgroundColor: 'aqua',
-      width: '400px',
+      width: '560px',
       borderStyle: 'solid',
       borderColor: 'silver',
       borderTopWidth: '0px',
@@ -68,7 +68,7 @@ describe('Horizontal formatting', () => {
     document.body.appendChild(p);
     document.body.appendChild(bottomRuler);
 
-    await sleep(1); // Wait for image load.
+    await sleep(100); // Wait for image load.
     await matchScreenshot();
   });
 });

@@ -8,11 +8,11 @@ const String _0s = '0s';
 class CSSStyleProperty {
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
-      List<String> properties = CSSStyleProperty.getInsetValues(shorthandValue);
-      style[PADDING_TOP] = properties[0];
-      style[PADDING_RIGHT] = properties[1];
-      style[PADDING_BOTTOM] = properties[2];
-      style[PADDING_LEFT] = properties[3];
+      List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
+      style[PADDING_TOP] = values[0];
+      style[PADDING_RIGHT] = values[1];
+      style[PADDING_BOTTOM] = values[2];
+      style[PADDING_LEFT] = values[3];
     }
   }
 
@@ -25,11 +25,13 @@ class CSSStyleProperty {
 
   static void setShorthandMargin(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
-      List<String> properties = CSSStyleProperty.getInsetValues(shorthandValue);
-      style[MARGIN_TOP] = properties[0];
-      style[MARGIN_RIGHT] = properties[1];
-      style[MARGIN_BOTTOM] = properties[2];
-      style[MARGIN_LEFT] = properties[3];
+      List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
+      if (values != null) {
+        style[MARGIN_TOP] = values[0];
+        style[MARGIN_RIGHT] = values[1];
+        style[MARGIN_BOTTOM] = values[2];
+        style[MARGIN_LEFT] = values[3];
+      }
     }
   }
 
@@ -42,12 +44,12 @@ class CSSStyleProperty {
 
   static void setShorthandTransition(Map<String, String> style, String shorthandValue) {
     if (shorthandValue != null) {
-      List<String> properties = CSSStyleProperty.getTransitionValues(shorthandValue);
-      if (properties != null) {
-        style[TRANSITION_PROPERTY] = properties[0];
-        style[TRANSITION_DURATION] = properties[1];
-        style[TRANSITION_TIMING_FUNCTION] = properties[2];
-        style[TRANSITION_DELAY] = properties[3];
+      List<String> values = CSSStyleProperty.getTransitionValues(shorthandValue);
+      if (values != null) {
+        style[TRANSITION_PROPERTY] = values[0];
+        style[TRANSITION_DURATION] = values[1];
+        style[TRANSITION_TIMING_FUNCTION] = values[2];
+        style[TRANSITION_DELAY] = values[3];
       }
     }
   }
@@ -58,6 +60,95 @@ class CSSStyleProperty {
     if (style.containsKey(TRANSITION_TIMING_FUNCTION)) style.remove(TRANSITION_TIMING_FUNCTION);
     if (style.containsKey(TRANSITION_DELAY)) style.remove(TRANSITION_DELAY);
   }
+
+  static void setShorthandBorder(Map<String, String> style, String property, String shorthandValue) {
+
+    String borderTopColor;
+    String borderRightColor;
+    String borderBottomColor;
+    String borderLeftColor;
+    String borderTopStyle;
+    String borderRightStyle;
+    String borderBottomStyle;
+    String borderLeftStyle;
+    String borderTopWidth;
+    String borderRightWidth;
+    String borderBottomWidth;
+    String borderLeftWidth;
+
+    if (shorthandValue != null) {
+      if (property == BORDER ||
+        property == BORDER_TOP ||
+        property == BORDER_RIGHT ||
+        property == BORDER_BOTTOM ||
+        property == BORDER_LEFT) {
+        List<String> values = CSSStyleProperty._getBorderValues(shorthandValue);
+        if (values == null) return;
+
+        if (property == BORDER || property == BORDER_TOP) {
+          borderTopWidth = values[0];
+          borderTopStyle = values[1];
+          borderTopColor = values[2];
+        }
+        if (property == BORDER || property == BORDER_RIGHT) {
+          borderRightWidth = values[0];
+          borderRightStyle = values[1];
+          borderRightColor = values[2];
+        }
+        if (property == BORDER || property == BORDER_BOTTOM) {
+          borderBottomWidth = values[0];
+          borderBottomStyle = values[1];
+          borderBottomColor = values[2];
+        }
+        if (property == BORDER || property == BORDER_LEFT) {
+          borderLeftWidth = values[0];
+          borderLeftStyle = values[1];
+          borderLeftColor = values[2];
+        }
+      } else {
+        
+        List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
+        if (values == null) return;
+        //@TODO valide value
+        if (property == BORDER_WIDTH) {
+          borderTopWidth = values[0];
+          borderRightWidth = values[1];
+          borderBottomWidth = values[2];
+          borderLeftWidth = values[3];
+        } else if (property == BORDER_STYLE) {
+          borderTopStyle = values[0];
+          borderRightStyle = values[1];
+          borderBottomStyle = values[2];
+          borderLeftStyle = values[3];
+        } else if (property == BORDER_COLOR) {
+          borderTopColor = values[0];
+          borderRightColor = values[1];
+          borderBottomColor = values[2];
+          borderLeftColor = values[3];
+        }
+      }
+    }
+
+    if (borderTopColor != null) style[BORDER_TOP_COLOR] = borderTopColor;
+    if (borderRightColor != null) style[BORDER_RIGHT_COLOR] = borderRightColor;
+    if (borderBottomColor != null) style[BORDER_BOTTOM_COLOR] = borderBottomColor;
+    if (borderLeftColor != null) style[BORDER_LEFT_COLOR] = borderLeftColor;
+    if (borderTopStyle != null) style[BORDER_TOP_STYLE] = borderTopStyle;
+    if (borderRightStyle != null) style[BORDER_RIGHT_STYLE] = borderRightStyle;
+    if (borderBottomStyle != null) style[BORDER_BOTTOM_STYLE] = borderBottomStyle;
+    if (borderLeftStyle != null) style[BORDER_LEFT_STYLE] = borderLeftStyle;
+    if (borderTopWidth != null) style[BORDER_TOP_WIDTH] = borderTopWidth;
+    if (borderRightWidth != null) style[BORDER_RIGHT_WIDTH] = borderRightWidth;
+    if (borderBottomWidth != null) style[BORDER_BOTTOM_WIDTH] = borderBottomWidth;
+    if (borderLeftWidth != null) style[BORDER_LEFT_WIDTH] = borderLeftWidth;
+  }
+
+  static void removeShorthandBorder(Map<String, String> style, String property) {
+    if (style.containsKey(BORDER_WIDTH)) style.remove(BORDER_WIDTH);
+    if (style.containsKey(BORDER_STYLE)) style.remove(BORDER_STYLE);
+    if (style.containsKey(BORDER_COLOR)) style.remove(BORDER_COLOR);
+  }
+
   // all, -moz-specific, sliding; => ['all', '-moz-specific', 'sliding']
   static List<String> getMultipleValues(String property) {
     assert(property != null);
@@ -78,7 +169,7 @@ class CSSStyleProperty {
       List<String> lengthValues = List(4);
       int i = 0;
       for (String part in parts) {
-        if (part == 'inset') {
+        if (part == INSET) {
           inset = part;
         } else if (CSSLength.isLength(part)) {
           lengthValues[i++] = part;
@@ -115,19 +206,11 @@ class CSSStyleProperty {
       String delay;
 
       for (String part in parts) {
-        if (property == null && (part == ALL || part == NONE || CSSTextual.isCustomIdent(part))) {
+        if (property == null && CSSTransition.isValidTransitionPropertyValue(part)) {
           property = part;
         } else if (duration == null && CSSTime.isTime(part)) {
           duration = part;
-        } else if (timingFuction == null && 
-          (part == LINEAR ||
-          part == EASE ||
-          part == EASE_IN ||
-          part == EASE_OUT ||
-          part == EASE_IN_OUT ||
-          part == STEP_END ||
-          part == STEP_START ||
-          CSSFunction.isFunction(part))) {
+        } else if (timingFuction == null && CSSTransition.isValidTransitionTimingFunctionValue(part)) {
           timingFuction = part;
         } else if (delay == null && CSSTime.isTime(delay)) {
           delay = part;
@@ -150,22 +233,22 @@ class CSSStyleProperty {
     return values;
   }
 
-  static List<String> getBorderValues(String shorthandProperty) {
+  static List<String> _getBorderValues(String shorthandProperty) {
     assert(shorthandProperty != null);
-    var properties = shorthandProperty.trim().split(_spaceRegExp);
+    var values = shorthandProperty.trim().split(_spaceRegExp);
 
     String width;
     String style;
     String color;
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
-    for (String property in properties) {
-      if (width == null && (CSSLength.isLength(property) || property == THIN || property == MEDIUM || property == THICK)) {
-        width = property;
-      } else if (style == null && (property == SOLID || property == NONE)) {
-        style = property;
-      } else if (color == null && CSSColor.isColor(property)) {
-        color = property;
+    for (String value in values) {
+      if (width == null && CSSBorder.isValidBorderWidthValue(value)) {
+        width = value;
+      } else if (style == null && CSSBorder.isValidBorderStyleValue(value)) {
+        style = value;
+      } else if (color == null && CSSColor.isColor(value)) {
+        color = value;
       } else {
         return null;
       }
@@ -174,7 +257,7 @@ class CSSStyleProperty {
     return [width, style, color];
   }
 
-  static List<String> getInsetValues(String shorthandProperty) {
+  static List<String> getEdgeValues(String shorthandProperty) {
     assert(shorthandProperty != null);
     var properties = shorthandProperty.trim().split(_spaceRegExp);
 
@@ -218,14 +301,5 @@ class CSSStyleProperty {
     }
 
     return [x, y];
-  }
-
-  static bool isShorthandProperty(String property) {
-    return property == PADDING ||
-        property == MARGIN ||
-        property == BORDER ||
-        property == BACKGROUND ||
-        property == FONT ||
-        property == ANIMATION;
   }
 }
