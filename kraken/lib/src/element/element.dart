@@ -163,11 +163,11 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
-    // Background image
-    renderObject = initBackground(renderObject, style, targetId);
-
     // Overflow
     renderObject = initOverflowBox(renderObject, style, _scrollListener);
+
+    // Background image
+    renderObject = initBackground(renderObject, style, targetId);
 
     // BoxModel Border
     renderObject = initRenderDecoratedBox(renderObject, style, targetId);
