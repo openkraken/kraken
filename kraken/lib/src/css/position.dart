@@ -200,10 +200,10 @@ double getLineHeight(CSSStyleDeclaration style) {
   String lineHeightStr = style[LINE_HEIGHT];
   double lineHeight;
   if (lineHeightStr != '') {
-    if (lineHeightStr.endsWith('px') ||
-      lineHeightStr.endsWith('rpx') ||
-      lineHeightStr.endsWith('vw') ||
-      lineHeightStr.endsWith('vh')
+    if (lineHeightStr.endsWith(CSSLength.PX) ||
+      lineHeightStr.endsWith(CSSLength.RPX) ||
+      lineHeightStr.endsWith(CSSLength.VW) ||
+      lineHeightStr.endsWith(CSSLength.VH)
   ) {
       lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
     } else {

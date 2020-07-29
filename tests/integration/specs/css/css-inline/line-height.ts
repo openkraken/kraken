@@ -21,7 +21,7 @@ describe('line-height', () => {
     await matchScreenshot();
   });
 
-  fit('with unit of rpx', async () => {
+  it('with unit of rpx', async () => {
     const div = createElement(
       'div',
       {
