@@ -1002,7 +1002,7 @@ class Element extends Node
   }
 
   void _styleTransitionChangedListener(String property, String original, String present) {
-    if (present != null) initTransition(style, property);
+    if (present != null) updateTransition(style);
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {

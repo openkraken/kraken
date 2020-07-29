@@ -2,6 +2,8 @@ import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
+const String _comma = ', ';
+const String _0s = '0s';
 
 class CSSStyleProperty {
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
@@ -38,6 +40,30 @@ class CSSStyleProperty {
     if (style.containsKey(MARGIN_BOTTOM)) style.remove(MARGIN_BOTTOM);
   }
 
+  static void setShorthandTransition(Map<String, String> style, String shorthandValue) {
+    if (shorthandValue != null) {
+      List<String> properties = CSSStyleProperty.getTransitionValues(shorthandValue);
+      if (properties != null) {
+        style[TRANSITION_PROPERTY] = properties[0];
+        style[TRANSITION_DURATION] = properties[1];
+        style[TRANSITION_TIMING_FUNCTION] = properties[2];
+        style[TRANSITION_DELAY] = properties[3];
+      }
+    }
+  }
+
+  static void removeShorthandTransition(Map<String, String> style) {
+    if (style.containsKey(TRANSITION_PROPERTY)) style.remove(TRANSITION_PROPERTY);
+    if (style.containsKey(TRANSITION_DURATION)) style.remove(TRANSITION_DURATION);
+    if (style.containsKey(TRANSITION_TIMING_FUNCTION)) style.remove(TRANSITION_TIMING_FUNCTION);
+    if (style.containsKey(TRANSITION_DELAY)) style.remove(TRANSITION_DELAY);
+  }
+  // all, -moz-specific, sliding; => ['all', '-moz-specific', 'sliding']
+  static List<String> getMultipleValues(String property) {
+    assert(property != null);
+    return property.split(_commaRegExp);
+  }
+
   static List<List<String>> getShadowValues(String property) {
     assert(property != null);
 
@@ -56,8 +82,10 @@ class CSSStyleProperty {
           inset = part;
         } else if (CSSLength.isLength(part)) {
           lengthValues[i++] = part;
-        } else {
+        } else if (color == null && CSSColor.isColor(part)){
           color = part;
+        } else {
+          return null;
         }
       }
 
@@ -71,6 +99,54 @@ class CSSStyleProperty {
       ]);
     }
 
+    return values;
+  }
+
+  static List<String> getTransitionValues(String shorthandProperty) {
+    List transitions = shorthandProperty.split(_commaRegExp);
+    List<String> values = List(4);
+
+    for (String transition in transitions) {
+      List<String> parts = transition.trim().split(_spaceRegExp);
+
+      String property;
+      String duration;
+      String timingFuction;
+      String delay;
+
+      for (String part in parts) {
+        if (property == null && (part == ALL || part == NONE || CSSTextual.isCustomIdent(part))) {
+          property = part;
+        } else if (duration == null && CSSTime.isTime(part)) {
+          duration = part;
+        } else if (timingFuction == null && 
+          (part == LINEAR ||
+          part == EASE ||
+          part == EASE_IN ||
+          part == EASE_OUT ||
+          part == EASE_IN_OUT ||
+          part == STEP_END ||
+          part == STEP_START ||
+          CSSFunction.isFunction(part))) {
+          timingFuction = part;
+        } else if (delay == null && CSSTime.isTime(delay)) {
+          delay = part;
+        } else {
+          return null;
+        }
+      }
+
+      property = property ?? ALL;
+      duration = duration ?? _0s;
+      timingFuction = timingFuction ?? EASE;
+      delay = delay ?? _0s;
+
+      values[0] == null ? values[0] = property : values[0] += (_comma + property);
+      values[1] == null ? values[1] = duration : values[1] += (_comma + duration);
+      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);  
+      values[3] == null ? values[3] = delay : values[3] += (_comma + delay);
+    }
+    
     return values;
   }
 

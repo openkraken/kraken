@@ -93,10 +93,16 @@ class CSSStyleDeclaration {
     String prevValue = getPropertyValue(propertyName);
 
     if (!isNullOrEmptyValue(prevValue)) {
-      if (propertyName == PADDING) {
-        CSSStyleProperty.removeShorthandPadding(_cssProperties);
-      } else if (propertyName == MARGIN) {
-        CSSStyleProperty.removeShorthandMargin(_cssProperties);
+      switch (propertyName) {
+        case PADDING:
+          CSSStyleProperty.removeShorthandPadding(_cssProperties);
+          break;
+        case MARGIN:
+          CSSStyleProperty.removeShorthandMargin(_cssProperties);
+          break;
+        case TRANSITION:
+          CSSStyleProperty.removeShorthandTransition(_cssProperties);
+          break;
       }
       _cssProperties.remove(propertyName);
       _invokePropertyChangedListener(propertyName, prevValue, '');
@@ -117,17 +123,23 @@ class CSSStyleDeclaration {
     String normalizedValue = value.toString().trim();
 
     // Illegal value like '   ' after trim is '' shoud do nothing.
-    if (normalizedValue == '') {
+    if (normalizedValue.isEmpty) {
       return;
     }
 
     String prevValue = _cssProperties[propertyName];
 
     if (normalizedValue != prevValue) {
-      if (propertyName == PADDING) {
-        CSSStyleProperty.setShorthandPadding(_cssProperties, normalizedValue);
-      } else if (propertyName == MARGIN) {
-        CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
+      switch (propertyName) {
+        case PADDING:
+          CSSStyleProperty.setShorthandPadding(_cssProperties, normalizedValue);
+          break;
+        case MARGIN:
+          CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
+          break;
+        case TRANSITION:
+          CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
+          break;
       }
       _cssProperties[propertyName] = normalizedValue;
       _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
