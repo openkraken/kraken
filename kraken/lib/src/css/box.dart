@@ -206,23 +206,25 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     List<BoxShadow> boxShadow = [];
     if (style.contains(BOX_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
-      shadows.forEach((shadowDefinitions) {
-        // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-        Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
-        double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
-        double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
-        double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
-        double spreadRadius = CSSLength.toDisplayPortValue(shadowDefinitions[4]) ?? 0;
+      if (shadows != null) {
+        shadows.forEach((shadowDefinitions) {
+          // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
+          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
+          double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
+          double spreadRadius = CSSLength.toDisplayPortValue(shadowDefinitions[4]) ?? 0;
 
-        if (color != null) {
-          boxShadow.add(BoxShadow(
-            offset: Offset(offsetX, offsetY),
-            blurRadius: blurRadius,
-            spreadRadius: spreadRadius,
-            color: color,
-          ));
-        }
-      });
+          if (color != null) {
+            boxShadow.add(BoxShadow(
+              offset: Offset(offsetX, offsetY),
+              blurRadius: blurRadius,
+              spreadRadius: spreadRadius,
+              color: color,
+            ));
+          }
+        });
+      }
 
       // Tips only debug.
       if (!PRODUCTION && boxShadow.isEmpty) {

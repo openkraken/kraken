@@ -10,6 +10,9 @@ class CSSFunctionalNotation {
   CSSFunctionalNotation(this.name, this.args);
 }
 
+final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
+
+
 // ignore: public_member_api_docs
 class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
   final String _rawInput;
@@ -18,6 +21,10 @@ class CSSFunction implements CSSValue<List<CSSFunctionalNotation>> {
   /// Returns a CSSFunction.
   CSSFunction(this._rawInput) {
     parse();
+  }
+
+  static bool isFunction(String value) {
+    return value != null &&_functionRegExp.hasMatch(value);
   }
 
   @override

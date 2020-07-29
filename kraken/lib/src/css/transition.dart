@@ -10,8 +10,8 @@ mixin CSSTransitionMixin on Node {
   Throttling throttler = Throttling();
   Map<String, CSSTransition> transitionMap;
 
-  void initTransition(CSSStyleDeclaration style, String property) {
-    transitionMap = CSSTransition.parseTransitions(style, property, this);
+  void updateTransition(CSSStyleDeclaration style) {
+    transitionMap = CSSTransition.parseTransitions(style, this);
   }
 
   void initTransitionEvent(CSSTransition transition) {
@@ -116,89 +116,52 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
-  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, String property, Element el) {
-    List<String> list = [];
-
-    if (property == 'transitionProperty' ||
-        property == 'transitionDuration' ||
-        property == 'transitionTimingFunction' ||
-        property == 'transitionDelay') {
-      String transitionProperty = style['transitionProperty'] != '' ? style['transitionProperty'] : 'all';
-      String transitionDuration = style['transitionDuration'] != '' ? style['transitionDuration'] : '0s';
-      String transitionTimingFunction =
-          style['transitionTimingFunction'] != '' ? style['transitionTimingFunction'] : 'ease';
-      String transitionDelay = style['transitionDelay'] != '' ? style['transitionDelay'] : '0s';
-      List<String> properties = transitionProperty.split(',');
-      for (String prop in properties) {
-        list.add(prop + ' ' + transitionDuration + ' ' + transitionTimingFunction + ' ' + transitionDelay);
-      }
-    } else {
-      list = style['transition'].split(',');
-    }
+  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, Element el) {
 
     Map<String, CSSTransition> map = {};
-    for (String transition in list) {
-      parseTransition(transition, map, el);
+
+    List<String> transitionProperty = CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY].isEmpty ? ALL : style[TRANSITION_PROPERTY]);
+    List<String> transitionDuration = CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION].isEmpty ? '0s' : style[TRANSITION_DURATION]);
+    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(style[TRANSITION_TIMING_FUNCTION].isEmpty ? EASE : style[TRANSITION_TIMING_FUNCTION]);
+    List<String> transitionDelay = CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY].isEmpty ? '0s' : style[TRANSITION_DELAY]);
+
+    for (int i = 0; i < transitionProperty.length; i++) {
+      String property = transitionProperty[i];
+      String function = transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
+      String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
+      String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
+  
+      Curve curve = _parseFunction(function);
+      if (curve != null) {
+        CSSTransition transition = CSSTransition();
+        el?.dispatchTransitionRun();
+
+        AnimationController controller = AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
+        transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
+        transition.controller = controller;
+        transition.delay = Duration(milliseconds: CSSTime.parseTime(delay));
+        map[property] = transition;
+      }
     }
+
     return map;
   }
 
-  static void parseTransition(String string, Map<String, CSSTransition> map, Element el) {
-    if (string != null && string.isNotEmpty) {
-      List<String> strs = string.trim().split(' ');
-      if (strs.length > 1) {
-        String property = strs[0];
-        CSSTime duration = CSSTime(strs[1]);
-        CSSTime delay;
-        String function;
-        if (strs.length == 3) {
-          String third = strs[2];
-          if (third.endsWith('s')) {
-            delay = CSSTime(third);
-          } else {
-            function = third;
-          }
-        } else if (strs.length == 4) {
-          delay = CSSTime(strs[3]);
-          function = strs[2];
-        }
-        if (delay?.computedValue == null) {
-          delay = CSSTime.zero;
-        }
-        if (duration.computedValue == null || duration.computedValue <= 0) {
-          return;
-        }
-        Curve curve = parseFunction(function);
-        if (curve != null) {
-          CSSTransition transition = CSSTransition();
-          el?.dispatchTransitionRun();
-
-          AnimationController controller =
-              AnimationController(duration: Duration(milliseconds: duration.computedValue?.toInt()), vsync: transition);
-          transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
-          transition.controller = controller;
-          transition.delay = Duration(milliseconds: delay.computedValue?.toInt());
-          map[property] = transition;
-        }
-      }
-    }
-  }
-
-  static Curve parseFunction(String function) {
+  static Curve _parseFunction(String function) {
     switch (function) {
-      case "linear":
+      case LINEAR:
         return Curves.linear;
-      case "ease":
+      case EASE:
         return Curves.ease;
-      case "ease-in":
+      case EASE_IN:
         return Curves.easeIn;
-      case "ease-out":
+      case EASE_OUT:
         return Curves.easeOut;
-      case "ease-in-out":
+      case EASE_IN_OUT:
         return Curves.easeInOut;
-      case "step-start":
+      case STEP_START:
         return Threshold(0);
-      case "step-end":
+      case STEP_END:
         return Threshold(1);
     }
     List<CSSFunctionalNotation> methods = CSSFunction(function).computedValue;
@@ -214,7 +177,7 @@ class CSSTransition with CustomTickerProviderStateMixin {
             }
             return CSSStepCurve(step, isStart);
           }
-        } else if ("cubic-bezier" == method.name) {
+        } else if (method.name == 'cubic-bezier') {
           if (method.args.length == 4) {
             var first = double.tryParse(method.args[0]);
             var sec = double.tryParse(method.args[1]);

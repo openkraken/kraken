@@ -312,22 +312,24 @@ mixin CSSTextMixin {
     List<Shadow> textShadows = [];
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
-      shadows.forEach((shadowDefinitions) {
+      if (shadows != null) {
+        shadows.forEach((shadowDefinitions) {
+          // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
+          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+          double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
+          double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
+          double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
 
-        // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-        Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
-        double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
-        double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
-        double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;
+          if (color != null) {
+            textShadows.add(Shadow(
+              offset: Offset(offsetX, offsetY),
+              blurRadius: blurRadius,
+              color: color,
+            ));
+          }
+        });
+      }
 
-        if (color != null) {
-          textShadows.add(Shadow(
-            offset: Offset(offsetX, offsetY),
-            blurRadius: blurRadius,
-            color: color,
-          ));
-        }
-      });
     }
     return textShadows;
   }

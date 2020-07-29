@@ -55,6 +55,12 @@ const String ALIGN_ITEMS = 'alignItems';
 const String ALIGN_SELF = 'alignSelf';
 const String ALIGN_CONTENT = 'alignContent';
 
+const String TRANSITION = 'transition';
+const String TRANSITION_PROPERTY = 'transitionProperty';
+const String TRANSITION_DURATION = 'transitionDuration';
+const String TRANSITION_TIMING_FUNCTION = 'transitionTimingFunction';
+const String TRANSITION_DELAY = 'transitionDelay';
+
 const String ANIMATION = 'animation';
 const String ANIMATION_NAME = 'animationName';
 const String ANIMATION_DURATION = 'animationDuration';
@@ -139,3 +145,13 @@ const String PRE = 'pre';
 const String LIGHTER = 'lighter';
 const String BOLD = 'bold';
 const String BOLDER = 'bolder';
+
+// Transition
+const String ALL = 'all';
+const String LINEAR = 'linear';
+const String EASE = 'ease';
+const String EASE_IN = 'ease-in';
+const String EASE_OUT = 'ease-out';
+const String EASE_IN_OUT= 'ease-in-out';
+const String STEP_START = 'step-start';
+const String STEP_END = 'step-end';

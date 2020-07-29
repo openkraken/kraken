@@ -269,7 +269,7 @@ class Element extends Node
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
-        double top = CSSStyleProperty.getDisplayPortValue(childStyle[TOP]) + resolvedPadding.top;
+        double top = CSSLength.toDisplayPortValue(childStyle[TOP]) + resolvedPadding.top;
         isFixed = offsetTop < top;
         if (isFixed) {
           offsetY += top - offsetTop;
@@ -278,7 +278,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(BOTTOM)) {
-        double bottom = CSSStyleProperty.getDisplayPortValue(childStyle[BOTTOM]) + resolvedPadding.bottom;
+        double bottom = CSSLength.toDisplayPortValue(childStyle[BOTTOM]) + resolvedPadding.bottom;
         isFixed = offsetBottom < bottom;
         if (isFixed) {
           offsetY += offsetBottom - bottom;
@@ -305,7 +305,7 @@ class Element extends Node
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
-        double left = CSSStyleProperty.getDisplayPortValue(childStyle[LEFT]) + resolvedPadding.left;
+        double left = CSSLength.toDisplayPortValue(childStyle[LEFT]) + resolvedPadding.left;
         isFixed = offsetLeft < left;
         if (isFixed) {
           offsetX += left - offsetLeft;
@@ -314,7 +314,7 @@ class Element extends Node
           }
         }
       } else if (childStyle.contains(RIGHT)) {
-        double right = CSSStyleProperty.getDisplayPortValue(childStyle[RIGHT]) + resolvedPadding.right;
+        double right = CSSLength.toDisplayPortValue(childStyle[RIGHT]) + resolvedPadding.right;
         isFixed = offsetRight < right;
         if (isFixed) {
           offsetX += offsetRight - right;
@@ -1002,7 +1002,7 @@ class Element extends Node
   }
 
   void _styleTransitionChangedListener(String property, String original, String present) {
-    if (present != null) initTransition(style, property);
+    if (present != null) updateTransition(style);
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
