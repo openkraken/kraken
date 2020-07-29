@@ -1,8 +1,9 @@
 /*auto generated*/
 describe('auto-margins', () => {
-  it('002', async () => {
+  it('002', async (done) => {
     let div;
     let div_1;
+    let img;
     div = createElement(
       'div',
       {
@@ -50,7 +51,7 @@ describe('auto-margins', () => {
         },
       },
       [
-        createElement('img', {
+        img = createElement('img', {
           src:
             'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/300x150-green.png',
           style: {
@@ -65,6 +66,9 @@ describe('auto-margins', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    img.onload = async () => {
+      await matchScreenshot();
+      done();
+    };
   });
 });

@@ -19,7 +19,7 @@ void main() {
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {
     Completer<String> completer = Completer();
-    List specDescriptions = jsonDecode(payload);
+    List allSpecsPayload = jsonDecode(payload);
 
     KrakenWidget main = KrakenWidget(
       'main',
@@ -61,11 +61,19 @@ void main() {
         print(err);
       });
 
+      List mainTestPayload = allSpecsPayload[0];
+      List childTestPayload = allSpecsPayload[1];
+
       // Preload load test cases
-      for (Map spec in specDescriptions) {
+      for (Map spec in mainTestPayload) {
         String filename = spec['filename'];
         String code = spec['code'];
         evaluateTestScripts(mainContextId, code, url: filename);
+      }
+
+      for (Map spec in childTestPayload) {
+        String filename = spec['filename'];
+        String code = spec['code'];
         evaluateTestScripts(childContextId, code, url: filename);
       }
 
