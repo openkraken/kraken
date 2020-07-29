@@ -18,7 +18,6 @@ import 'package:kraken/css.dart';
 mixin CSSSizingMixin {
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
-  KrakenRenderPadding renderPadding;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
   CSSSizedConstraints oldConstraints;
@@ -306,11 +305,6 @@ mixin CSSSizingMixin {
 
   void _updateMargin(EdgeInsets margin) {
     renderMargin.margin = margin;
-  }
-
-  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
-    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-    return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {

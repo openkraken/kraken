@@ -91,7 +91,6 @@ class Element extends Node
   RenderObject renderObject;
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
-  KrakenRenderPadding renderPadding;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;
@@ -163,8 +162,8 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
-    // Overflow
-    renderObject = initOverflowBox(renderObject, style, _scrollListener);
+//    // Overflow
+//    renderObject = initOverflowBox(renderObject, style, _scrollListener);
 
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
