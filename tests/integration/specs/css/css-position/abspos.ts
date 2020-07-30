@@ -488,7 +488,7 @@ describe('abspos', () => {
       xmlns: 'http://www.w3.org/1999/xhtml',
       class: 'control',
       style: {
-        'border-right': '10em solid red',
+        'border-right': '30px solid red',
         height: '10px',
         'box-sizing': 'border-box',
       },

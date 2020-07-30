@@ -131,16 +131,62 @@ class CSSStyleDeclaration {
 
     if (normalizedValue != prevValue) {
       switch (propertyName) {
+        case WIDTH:
+        case HEIGHT:
+        case MIN_WIDTH:
+        case MIN_HEIGHT:
+        case MAX_WIDTH:
+        case MAX_HEIGHT:
+        case BORDER_BOTTOM_WIDTH:
+        case BORDER_TOP_WIDTH:
+        case BORDER_LEFT_WIDTH:
+        case BORDER_RIGHT_WIDTH:
+        case PADDING_TOP:
+        case PADDING_LEFT:
+        case PADDING_BOTTOM:
+        case PADDING_RIGHT:
+        case MARGIN_TOP:
+        case MARGIN_LEFT:
+        case MARGIN_RIGHT:
+        case MARGIN_BOTTOM:
+          // Validation length type
+          if (!CSSLength.isLength(normalizedValue)) {
+            return;
+          }
+          break;
+        case COLOR:
+        case BACKGROUND_COLOR:
+        case BORDER_BOTTOM_COLOR:
+        case BORDER_TOP_COLOR:
+        case BORDER_LEFT_COLOR:
+        case BORDER_RIGHT_COLOR:
+        case TEXT_DECORATION_COLOR:
+          // Validation color type
+          if (!CSSColor.isColor(normalizedValue)) {
+            return;
+          }
+          break;
         case PADDING:
           CSSStyleProperty.setShorthandPadding(_cssProperties, normalizedValue);
           break;
         case MARGIN:
           CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
           break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.setShorthandBorder(_cssProperties, propertyName, normalizedValue);
+          break;
         case TRANSITION:
           CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
           break;
       }
+
       _cssProperties[propertyName] = normalizedValue;
       _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
     }

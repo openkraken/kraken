@@ -17,7 +17,7 @@ const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
 const _0 = '0';
 
-final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|em|in|cm|mm|pc|pt$', caseSensitive: false);
+final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength implements CSSValue<double> {
