@@ -8,19 +8,20 @@
 #include "dart_methods.h"
 #include <atomic>
 
-std::unique_ptr<kraken::JSBridgeTest> bridgeTest;
-std::atomic<bool> inited{false};
+kraken::JSBridgeTest **bridgeTestPool {nullptr};
 
-void initTestFramework() {
-  if (inited == true) return;
-  auto bridge = static_cast<kraken::JSBridge *>(getJSContext(0));
-  bridgeTest = std::make_unique<kraken::JSBridgeTest>(bridge);
-  inited = true;
+void initTestFramework(int32_t contextId) {
+  if (bridgeTestPool == nullptr) {
+      bridgeTestPool = new kraken::JSBridgeTest*[10];
+  }
+
+  auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
+  auto bridgeTest = new kraken::JSBridgeTest(bridge);
+  bridgeTestPool[contextId] = bridgeTest;
 }
 
-int8_t evaluateTestScripts(const char *code, const char *bundleFilename, int startLine) {
-  if (inited == false) return 0;
-
+int8_t evaluateTestScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine) {
+  auto bridgeTest = bridgeTestPool[contextId];
   return bridgeTest->evaluateTestScripts(std::string(code), std::string(bundleFilename), startLine);
 }
 
@@ -28,7 +29,8 @@ void registerJSError(OnJSError jsError) {
   kraken::registerJSError(jsError);
 }
 
-void executeTest(ExecuteCallback executeCallback) {
+void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
+  auto bridgeTest = bridgeTestPool[contextId];
   bridgeTest->invokeExecuteTest(executeCallback);
 }
 

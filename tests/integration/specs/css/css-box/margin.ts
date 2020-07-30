@@ -1,7 +1,7 @@
 describe('Box margin', () => {
   it('should work with radial-gradient', async () => {
     const div = document.createElement('div');
-    div.style.margin = '20rpx 30rpx 30rpx 30rpx';
+    div.style.margin = '10px 20px 20px 20px';
     div.style.backgroundColor = 'blue';
 
     document.body.appendChild(div);
@@ -16,7 +16,7 @@ describe('Box margin', () => {
     div3.style.width = '200px';
     div3.style.height = '200px';
     div3.style.backgroundImage =
-      'radial-gradient(50%, red 0%, yellow 20%, blue 80%)';
+      'radial-gradient(black 50%, red 0%, yellow 20%, blue 80%)';
 
     document.body.appendChild(div3);
 

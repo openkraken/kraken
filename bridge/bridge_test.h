@@ -20,6 +20,8 @@ public:
   bool evaluateTestScripts(const std::string &script, const std::string &url, int startLine);
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
+  std::shared_ptr<Value> executeTestCallback{nullptr};
+
 private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
