@@ -13,12 +13,6 @@ import 'package:kraken/css.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
-typedef ConsumeProperty = bool Function(String src);
-
-const String BACKGROUND_POSITION_AND_SIZE = 'backgroundPositionAndSize';
-// Used to split short hand CSS value, can not use space,
-// eg: background: rgb(0, 0, 0);
-final RegExp SHORTHAND_REGEXP = RegExp('(?<!,)\\s');
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
@@ -35,369 +29,173 @@ mixin CSSBackgroundMixin {
 
   RenderDecorateElementBox _renderDecorateElementBox;
 
-  double linearAngle;
+  void updateBackground(CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
+    if (!CSSBackground.hasLocalBackgroundImage(style)) return;
 
-  void _parseBackground(CSSStyleDeclaration style) {
-    if (style.contains(BACKGROUND)) {
-      String rawBackground = style[BACKGROUND];
-      // @TODO: procsss in style_property
-      List<String> shorthand = rawBackground.split(SHORTHAND_REGEXP);
-      background = _consumeBackground(shorthand);
-    }
-    if (style.contains(BACKGROUND_ATTACHMENT)) {
-      background[BACKGROUND_ATTACHMENT] = style[BACKGROUND_ATTACHMENT];
-    }
-    if (style.contains(BACKGROUND_REPEAT)) {
-      background[BACKGROUND_REPEAT] = style[BACKGROUND_REPEAT];
-    }
-    if (style.contains(BACKGROUND_SIZE)) {
-      background[BACKGROUND_SIZE] = style[BACKGROUND_SIZE];
-    }
-    if (style.contains(BACKGROUND_POSITION)) {
-      background[BACKGROUND_POSITION] = style[BACKGROUND_POSITION];
-    }
-    if (style.contains(BACKGROUND_COLOR)) {
-      background[BACKGROUND_COLOR] = style[BACKGROUND_COLOR];
-    }
-    if (style.contains(BACKGROUND_IMAGE)) {
-      background[BACKGROUND_IMAGE] = style[BACKGROUND_IMAGE];
-    }
-  }
-
-  void _setBackgroundProperty(String property, String value) {
-    if (property == BACKGROUND) {
-      List<String> shorthand = value.split(SHORTHAND_REGEXP);
-      background = _consumeBackground(shorthand);
-    } else {
-      background[property] = value;
-    }
-  }
-
-  Map<String, String> _consumeBackground(List<String> shorthand) {
-    int longhandCount = shorthand.length;
-    Map<String, ConsumeProperty> propertyMap = {
-      BACKGROUND_IMAGE: _consumeBackgroundImage,
-      BACKGROUND_REPEAT: _consumeBackgroundRepeat,
-      BACKGROUND_ATTACHMENT: _consumeBackgroundAttachment,
-      BACKGROUND_POSITION_AND_SIZE: _consumeBackgroundPosition
-    };
-    // default property
-    Map<String, String> background = {
-      BACKGROUND_REPEAT: 'repeat',
-      BACKGROUND_ATTACHMENT: 'scroll',
-      BACKGROUND_POSITION: 'left top',
-      BACKGROUND_IMAGE: '',
-      BACKGROUND_SIZE: 'auto',
-      BACKGROUND_COLOR: 'transparent'
-    };
-    bool broken = false;
-    for (int i = 0; i < longhandCount; i++) {
-      if (broken) {
-        break;
-      }
-      String property = shorthand[i].trim();
-      Iterable<String> keys = propertyMap.keys;
-      // record the consumed property
-      String consumedKey;
-      for (String key in keys) {
-        // The value of background image is function, may be contain space,
-        // should begin with left parenthesis and end with right parenthesis.
-        if (key == BACKGROUND_IMAGE && _consumeBackgroundImage(property)) {
-          consumedKey = key;
-          String backgroundImage = property;
-          while (i + 1 < longhandCount && !_consumeBackgroundImageEnd(shorthand[i + 1])) {
-            backgroundImage = backgroundImage + ' ' + shorthand[++i];
-          }
-          if (i + 1 < longhandCount && _consumeBackgroundImageEnd(shorthand[i + 1])) {
-            backgroundImage = backgroundImage + ' ' + shorthand[++i];
-          }
-          background[BACKGROUND_IMAGE] = backgroundImage;
-
-          // position may be more than one(at most four), should special handle
-          // size is follow position and split by /
-        } else if (key == BACKGROUND_POSITION_AND_SIZE) {
-          if (property != '/' && property.contains('/')) {
-            int index = property.indexOf('/');
-            String position = property.substring(0, index);
-            if (_consumeBackgroundPosition(position)) {
-              background[BACKGROUND_POSITION] = position;
-              String size = property.substring(index + 1);
-              if (_consumeBackgroundSize(size)) {
-                // size at most two value
-                if (i + 1 < longhandCount && _consumeBackgroundSize(shorthand[i + 1].trim())) {
-                  size = size + ' ' + shorthand[i + 1].trim();
-                  i++;
-                }
-                background[BACKGROUND_SIZE] = size;
-              } else {
-                broken = true;
-                break;
-              }
-              consumedKey = key;
-            } else {
-              broken = true;
-              break;
-            }
-          } else if (_consumeBackgroundPosition(property)) {
-            String position = property;
-            String size;
-            bool hasSize = false;
-            // position at most four value
-            for (int j = 1; j <= 4; j++) {
-              if (i + j < longhandCount) {
-                String temp = shorthand[i + j].trim();
-                if (temp == '/') {
-                  i = i + j;
-                  hasSize = true;
-                  break;
-                } else if (temp.contains('/')) {
-                  i = i + j;
-                  hasSize = true;
-                  int index = temp.indexOf('/');
-                  String positionTemp = temp.substring(0, index);
-                  if (_consumeBackgroundPosition(positionTemp)) {
-                    background[BACKGROUND_POSITION] = position;
-                    size = property.substring(index + 1);
-                    if (!_consumeBackgroundSize(size)) {
-                      broken = true;
-                    }
-                  } else {
-                    broken = true;
-                  }
-                  break;
-                } else if (_consumeBackgroundPosition(temp)) {
-                  position = position + ' ' + temp;
-                } else {
-                  i = i + j - 1;
-                  break;
-                }
-              } else {
-                break;
-              }
-            }
-            // handle size when / follow, at most two value
-            if (hasSize) {
-              if (i + 1 < longhandCount) {
-                String nextSize = shorthand[i + 1].trim();
-                if (size == null) {
-                  size = nextSize;
-                  if (_consumeBackgroundSize(size)) {
-                    i++;
-                    if (i + 1 < longhandCount) {
-                      if (_consumeBackgroundSize(shorthand[i + 1].trim())) {
-                        size = size + ' ' + shorthand[i + 1].trim();
-                        i++;
-                      }
-                    }
-                    background[BACKGROUND_SIZE] = size;
-                  } else {
-                    broken = true;
-                    break;
-                  }
-                } else if (_consumeBackgroundSize(nextSize)) {
-                  size = size + ' ' + nextSize;
-                  background[BACKGROUND_SIZE] = size;
-                } else {
-                  broken = true;
-                  break;
-                }
-              } else {
-                broken = true;
-                break;
-              }
-            }
-            consumedKey = key;
-            break;
-          }
-        } else if (propertyMap[key](property)) {
-          background[key] = property;
-          consumedKey = key;
-          break;
-        }
-      }
-      // consumed the property when find
-      if (consumedKey != null) {
-        propertyMap.remove(consumedKey);
-      } else if (i == longhandCount - 1) {
-        background[BACKGROUND_COLOR] = property;
-      }
-    }
-    return background;
-  }
-
-  bool _consumeBackgroundRepeat(String src) {
-    return 'repeat-x' == src || 'repeat-y' == src || 'repeat' == src || 'no-repeat' == src;
-  }
-
-  bool _consumeBackgroundAttachment(String src) {
-    return 'fixed' == src || 'scroll' == src || 'local' == src;
-  }
-
-  bool _consumeBackgroundImage(String src) {
-    return src.startsWith('url(') ||
-        src.startsWith('linear-gradient(') ||
-        src.startsWith('repeating-linear-gradient(') ||
-        src.startsWith('radial-gradient(') ||
-        src.startsWith('repeating-radial-gradient(') ||
-        src.startsWith('conic-gradient(');
-  }
-
-  bool _consumeBackgroundImageEnd(String src) {
-    return src.endsWith(')');
-  }
-
-  bool _consumeBackgroundPosition(String src) {
-    return src == 'center' ||
-        src == 'left' ||
-        src == 'right' ||
-        CSSLength.isLength(src) ||
-        CSSPercentage.isPercentage(src) ||
-        src == 'top' ||
-        src == 'bottom';
-  }
-
-  bool _consumeBackgroundSize(String src) {
-    return src == 'auto' ||
-        src == 'contain' ||
-        src == 'cover' ||
-        src == 'fit-width' ||
-        src == 'fit-height' ||
-        src == 'scale-down' ||
-        src == 'fill' ||
-        CSSLength.isLength(src) ||
-        CSSPercentage.isPercentage(src);
-  }
-
-  bool _shouldRenderBackgroundImage() {
-    return background[BACKGROUND_ATTACHMENT] == 'local' && background.containsKey(BACKGROUND_IMAGE);
-  }
-
-  RenderObject initBackground(RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
-    _parseBackground(style);
-    if (!_shouldRenderBackgroundImage()) return renderObject;
-    DecorationImage decorationImage;
-    Gradient gradient;
-
-    if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
-      // FIXME flutter just support one property
+    if (style[BACKGROUND_IMAGE].isNotEmpty) {
+      DecorationImage decorationImage;
+      Gradient gradient;
+      List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
+      // @FIXME: flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : '';
-          if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url);
-            if (decorationImage != null) {
-              return _renderDecorateElementBox = RenderDecorateElementBox(
-                  decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: renderObject);
-            }
-          }
+          decorationImage = CSSBackground.getDecorationImage(style, method);
         } else {
-          gradient = getBackgroundGradient(method);
-          if (gradient != null) {
-            return _renderDecorateElementBox = RenderDecorateElementBox(
-                decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: renderObject);
-          }
+          gradient = CSSBackground.getBackgroundGradient(method);
         }
-      }
-    }
 
-    return renderObject;
-  }
-
-  void updateBackground(String property, String value, RenderObjectWithChildMixin parent, int targetId) {
-    _setBackgroundProperty(property, value);
-    if (!_shouldRenderBackgroundImage()) return;
-
-    DecorationImage decorationImage;
-    Gradient gradient;
-    if (background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
-      //FIXME flutter just support one property
-      for (CSSFunctionalNotation method in methods) {
-        if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : '';
-          if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url);
-            if (decorationImage != null) {
-              _updateRenderGradient(decorationImage, gradient, parent, targetId);
-              return;
-            }
-          }
-        } else {
-          gradient = getBackgroundGradient(method);
-          if (gradient != null) {
-            _updateRenderGradient(decorationImage, gradient, parent, targetId);
-            return;
-          }
+        if (decorationImage != null || gradient != null) {
+          _updateRenderGradient(decorationImage, gradient, parent, targetId);
+          return;
         }
       }
     }
   }
 
-  void _updateRenderGradient(
-      DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
+  void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
     if (_renderDecorateElementBox != null) {
-      _renderDecorateElementBox.decoration = BoxDecoration(image: decorationImage, gradient: gradient);
+      _renderDecorateElementBox.decoration = BoxDecoration(
+        image: decorationImage,
+        gradient: gradient
+      );
     } else {
       RenderObject child = parent.child;
       parent.child = null;
-      _renderDecorateElementBox =
-          RenderDecorateElementBox(decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
+      _renderDecorateElementBox = RenderDecorateElementBox(
+        decoration: BoxDecoration(image: decorationImage, gradient: gradient),
+        child: child
+      );
       parent.child = _renderDecorateElementBox;
     }
   }
+}
 
-  DecorationImage getBackgroundImage(String url) {
-    DecorationImage backgroundImage = null;
-    if (background.containsKey(BACKGROUND_REPEAT)) {
-      // default repeat
-      ImageRepeat imageRepeat = ImageRepeat.repeat;
-      if (background.containsKey(BACKGROUND_REPEAT)) {
-        switch (background[BACKGROUND_REPEAT]) {
-          case 'repeat-x':
-            imageRepeat = ImageRepeat.repeatX;
-            break;
-          case 'repeat-y':
-            imageRepeat = ImageRepeat.repeatY;
-            break;
-          case 'no-repeat':
-            imageRepeat = ImageRepeat.noRepeat;
-            break;
-        }
-      }
-      CSSPosition position = CSSPosition(background[BACKGROUND_POSITION]);
-      // size default auto equals none
-      BoxFit boxFit = BoxFit.none;
-      if (background.containsKey(BACKGROUND_SIZE)) {
-        switch (background[BACKGROUND_SIZE]) {
-          case 'cover':
-            boxFit = BoxFit.cover;
-            break;
-          case 'contain':
-            boxFit = BoxFit.contain;
-            break;
-          case 'fill':
-            boxFit = BoxFit.fill;
-            break;
-          case 'fit-width':
-            boxFit = BoxFit.fitWidth;
-            break;
-          case 'fit-height':
-            boxFit = BoxFit.fitHeight;
-            break;
-          case 'scale-down':
-            boxFit = BoxFit.scaleDown;
-            break;
-        }
-      }
-      backgroundImage = DecorationImage(
-          image: CSSUrl(url).computedValue, repeat: imageRepeat, alignment: position.computedValue, fit: boxFit);
+class CSSColorStop {
+  Color color;
+  double stop;
+  CSSColorStop(this.color, this.stop);
+}
+
+class CSSBackground {
+  static bool isValidBackgroundRepeatValue(String value) {
+    return 'repeat-x' == value || 'repeat-y' == value || 'repeat' == value || 'no-repeat' == value;
+  }
+
+  static bool isValidBackgroundSizeValue(String value) {
+    return value == 'auto' ||
+        value == 'contain' ||
+        value == 'cover' ||
+        value == 'fit-width' ||
+        value == 'fit-height' ||
+        value == 'scale-down' ||
+        value == 'fill' ||
+        CSSLength.isLength(value) ||
+        CSSPercentage.isPercentage(value);
+  }
+
+  static bool isValidBackgroundAttachmentValue(String value) {
+    return 'scroll' == value || 'local' == value;
+  }
+
+  static bool isValidBackgroundImageValue(String value) {
+    return value.startsWith('url(') ||
+      value.startsWith('linear-gradient(') ||
+      value.startsWith('repeating-linear-gradient(') ||
+      value.startsWith('radial-gradient(') ||
+      value.startsWith('repeating-radial-gradient(') ||
+      value.startsWith('conic-gradient(');
+  }
+
+  static bool isValidBackgroundPositionValue(String value) {
+    return value == 'center' ||
+      value == 'left' ||
+      value == 'right' ||
+      value == 'top' ||
+      value == 'bottom' ||
+      CSSLength.isLength(value) ||
+      CSSPercentage.isPercentage(value);
+  }
+
+  static Color getBackgroundColor(CSSStyleDeclaration style) {
+    Color backgroundColor;
+    if (style[BACKGROUND_COLOR].isNotEmpty) {
+      backgroundColor = CSSColor.parseColor(style[BACKGROUND_COLOR]);
     }
+    return backgroundColor;
+  }
+
+  static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {
+    return style[BACKGROUND_IMAGE].isNotEmpty && style[BACKGROUND_ATTACHMENT] == 'local';
+  }
+
+  static bool hasScrollBackgroundImage(CSSStyleDeclaration style) {
+    String attachment = style[BACKGROUND_ATTACHMENT];
+    // Default is `scroll` attachment
+    return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == 'scroll');
+  }
+
+  static DecorationImage getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method) {
+    DecorationImage backgroundImage;
+
+    String url = method.args.length > 0 ? method.args[0] : '';
+    if (url == null || url.isEmpty) {
+      return null;
+    }
+
+    ImageRepeat imageRepeat = ImageRepeat.repeat;
+    if (style[BACKGROUND_REPEAT].isNotEmpty) {
+      switch (style[BACKGROUND_REPEAT]) {
+        case 'repeat-x':
+          imageRepeat = ImageRepeat.repeatX;
+          break;
+        case 'repeat-y':
+          imageRepeat = ImageRepeat.repeatY;
+          break;
+        case 'no-repeat':
+          imageRepeat = ImageRepeat.noRepeat;
+          break;
+      }
+    }
+
+    BoxFit boxFit = BoxFit.none;
+    if (style[BACKGROUND_SIZE].isNotEmpty) {
+      switch (style[BACKGROUND_SIZE]) {
+        case 'cover':
+          boxFit = BoxFit.cover;
+          break;
+        case 'contain':
+          boxFit = BoxFit.contain;
+          break;
+        case 'fill':
+          boxFit = BoxFit.fill;
+          break;
+        case 'fit-width':
+          boxFit = BoxFit.fitWidth;
+          break;
+        case 'fit-height':
+          boxFit = BoxFit.fitHeight;
+          break;
+        case 'scale-down':
+          boxFit = BoxFit.scaleDown;
+          break;
+      }
+    }
+
+    CSSPosition position = CSSPosition(style[BACKGROUND_POSITION]);
+
+    backgroundImage = DecorationImage(
+      image: CSSUrl(url).computedValue,
+      repeat: imageRepeat,
+      alignment: position.computedValue,
+      fit: boxFit
+    );
+
     return backgroundImage;
   }
 
-  Gradient getBackgroundGradient(CSSFunctionalNotation method) {
+  static Gradient getBackgroundGradient(CSSFunctionalNotation method) {
     Gradient gradient;
+
     if (method.args.length > 1) {
       List<Color> colors = [];
       List<double> stops = [];
@@ -405,6 +203,7 @@ mixin CSSBackgroundMixin {
       switch (method.name) {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
+          double linearAngle;
           Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
           if (method.args[0].startsWith('to ')) {
             List<String> toString = method.args[0].trim().split(' ');
@@ -475,7 +274,7 @@ mixin CSSBackgroundMixin {
             linearAngle = angle.angleValue;
             start = 1;
           }
-          applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = WebLinearGradient(
                 begin: begin,
@@ -511,7 +310,7 @@ mixin CSSBackgroundMixin {
               }
             }
           }
-          applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = WebRadialGradient(
               center: FractionalOffset(atX, atY),
@@ -543,7 +342,7 @@ mixin CSSBackgroundMixin {
             }
             start = 1;
           }
-          applyColorAndStops(start, method.args, colors, stops);
+          _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
             gradient = WebConicGradient(
                 center: FractionalOffset(atX, atY),
@@ -558,20 +357,13 @@ mixin CSSBackgroundMixin {
     return gradient;
   }
 
-  Color getBackgroundColor(CSSStyleDeclaration style) {
-    Color backgroundColor = CSSColor.transparent;
-    if (background.containsKey(BACKGROUND_COLOR)) {
-      backgroundColor = CSSColor.parseColor(background[BACKGROUND_COLOR]);
-    }
-    return backgroundColor;
-  }
 
-  void applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
+  static void _applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
     // colors should more than one, otherwise invalid
     if (args.length - start - 1 > 0) {
       double grow = 1.0 / (args.length - start - 1);
       for (int i = start; i < args.length; i++) {
-        List<CSSColorStop> colorGradients = parseColorAndStop(args[i].trim(), (i - start) * grow);
+        List<CSSColorStop> colorGradients = _parseColorAndStop(args[i].trim(), (i - start) * grow);
         colorGradients.forEach((element) {
           colors.add(element.color);
           stops.add(element.stop);
@@ -580,7 +372,7 @@ mixin CSSBackgroundMixin {
     }
   }
 
-  List<CSSColorStop> parseColorAndStop(String src, [double defaultStop]) {
+  static List<CSSColorStop> _parseColorAndStop(String src, [double defaultStop]) {
     List<String> strings = [];
     List<CSSColorStop> colorGradients = [];
     // rgba may contain space, color should handle special
@@ -617,10 +409,4 @@ mixin CSSBackgroundMixin {
     }
     return colorGradients;
   }
-}
-
-class CSSColorStop {
-  Color color;
-  double stop;
-  CSSColorStop(this.color, this.stop);
 }

@@ -178,22 +178,18 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if ((background[BACKGROUND_ATTACHMENT] == '' || background[BACKGROUND_ATTACHMENT] == 'scroll') &&
-        background.containsKey(BACKGROUND_IMAGE)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(background[BACKGROUND_IMAGE]).computedValue;
+    if (CSSBackground.hasScrollBackgroundImage(style)) {
+      List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
-          String url = method.args.length > 0 ? method.args[0] : '';
-          if (url != null && url.isNotEmpty) {
-            decorationImage = getBackgroundImage(url);
-          }
+          decorationImage = CSSBackground.getDecorationImage(style, method);
         } else {
-          gradient = getBackgroundGradient(method);
+          gradient = CSSBackground.getBackgroundGradient(method);
         }
       }
     }
 
-    Color bgColor = getBackgroundColor(style);
+    Color bgColor = CSSBackground.getBackgroundColor(style) ?? CSSColor.transparent;
     BorderSide leftSide = CSSBorder.getBorderSide(style, CSSBorder.LEFT);
     BorderSide topSide = CSSBorder.getBorderSide(style, CSSBorder.TOP);
     BorderSide rightSide = CSSBorder.getBorderSide(style, CSSBorder.RIGHT);
