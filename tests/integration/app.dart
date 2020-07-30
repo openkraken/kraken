@@ -26,10 +26,10 @@ void main() {
       360, 640,
       bundleContent: 'console.log("starting main integration test")',);
 
-    KrakenWidget child = KrakenWidget(
-      'child',
+    KrakenWidget secondary = KrakenWidget(
+      'secondary',
       360, 640,
-      bundleContent: 'console.log("starting child integration test")');
+      bundleContent: 'console.log("starting secondary integration test")');
 
     runApp(MaterialApp(
         title: 'Loading Test',
@@ -41,7 +41,7 @@ void main() {
           body: Wrap(
             children: <Widget>[
               main,
-              child
+              secondary
             ],
           )
         )
@@ -51,7 +51,7 @@ void main() {
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
       int mainContextId = main.controller.view.contextId;
-      int childContextId = child.controller.view.contextId;
+      int childContextId = secondary.controller.view.contextId;
       initTestFramework(mainContextId);
       initTestFramework(childContextId);
       addJSErrorListener(mainContextId, (String err) {
