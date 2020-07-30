@@ -116,6 +116,15 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
+  static bool isValidTransitionPropertyValue(String value) {
+    return value == ALL || value == NONE || CSSTextual.isCustomIdent(value);
+  }
+
+  static bool isValidTransitionTimingFunctionValue(String value) {
+    return value == LINEAR || value == EASE || value == EASE_IN || value == EASE_OUT || value == EASE_IN_OUT ||
+      value == STEP_END || value == STEP_START || CSSFunction.isFunction(value);
+  }
+
   static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, Element el) {
 
     Map<String, CSSTransition> map = {};

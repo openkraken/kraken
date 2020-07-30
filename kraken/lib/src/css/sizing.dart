@@ -15,22 +15,13 @@ import 'package:kraken/css.dart';
 /// - max-height
 /// - min-width
 /// - min-height
+
 mixin CSSSizingMixin {
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
   CSSSizedConstraints oldConstraints;
-
-  static EdgeInsets _getBorderEdgeFromStyle(CSSStyleDeclaration style) {
-    TransitionBorderSide leftSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Left');
-    TransitionBorderSide topSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Top');
-    TransitionBorderSide rightSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Right');
-    TransitionBorderSide bottomSide = CSSDecoratedBoxMixin.getBorderSideByStyle(style, 'Bottom');
-
-    return EdgeInsets.fromLTRB(
-        leftSide.borderWidth, topSide.borderWidth, rightSide.borderWidth, bottomSide.borderWidth);
-  }
 
   void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     if (renderConstrainedBox != null) {
@@ -123,7 +114,7 @@ mixin CSSSizingMixin {
       }
 
       // Remove inline element dimension
-      if (style['display'] == 'inline') {
+      if (style[DISPLAY] == INLINE) {
         renderConstrainedBox.additionalConstraints = BoxConstraints();
       }
 
@@ -140,15 +131,15 @@ mixin CSSSizingMixin {
   }
 
   static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
-    double width = CSSLength.toDisplayPortValue(style['width']);
-    double height = CSSLength.toDisplayPortValue(style['height']);
-    double minHeight = CSSLength.toDisplayPortValue(style['minHeight']);
-    double maxWidth = CSSLength.toDisplayPortValue(style['maxWidth']);
-    double maxHeight = CSSLength.toDisplayPortValue(style['maxHeight']);
-    double minWidth = CSSLength.toDisplayPortValue(style['minWidth']);
+    double width = CSSLength.toDisplayPortValue(style[WIDTH]);
+    double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
+    double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
+    double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
+    double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
+    double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
 
     CSSEdgeInsets padding = _getPaddingFromStyle(style);
-    EdgeInsets border = _getBorderEdgeFromStyle(style);
+    EdgeInsets border = CSSBorder.getBorderEdgeInsets(style);
 
     if (width != null) {
       if (maxWidth != null && width > maxWidth) {
@@ -219,12 +210,12 @@ mixin CSSSizingMixin {
     assert(renderMargin != null);
     CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
-      all = transitionMap["all"];
-      margin = transitionMap["margin"];
-      marginLeft = transitionMap["margin-left"];
-      marginRight = transitionMap["margin-right"];
-      marginBottom = transitionMap["margin-bottom"];
-      marginTop = transitionMap["margin-top"];
+      all = transitionMap['all'];
+      margin = transitionMap['margin'];
+      marginLeft = transitionMap['margin-left'];
+      marginRight = transitionMap['margin-right'];
+      marginBottom = transitionMap['margin-bottom'];
+      marginTop = transitionMap['margin-top'];
     }
     if (all != null ||
         margin != null ||
@@ -331,12 +322,12 @@ mixin CSSSizingMixin {
       [Map<String, CSSTransition> transitionMap]) {
     CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
     if (transitionMap != null) {
-      all = transitionMap["all"];
-      padding = transitionMap["padding"];
-      paddingLeft = transitionMap["padding-left"];
-      paddingRight = transitionMap["padding-right"];
-      paddingBottom = transitionMap["padding-bottom"];
-      paddingTop = transitionMap["padding-top"];
+      all = transitionMap['all'];
+      padding = transitionMap['padding'];
+      paddingLeft = transitionMap['padding-left'];
+      paddingRight = transitionMap['padding-right'];
+      paddingBottom = transitionMap['padding-bottom'];
+      paddingTop = transitionMap['padding-top'];
     }
     if (all != null ||
         padding != null ||

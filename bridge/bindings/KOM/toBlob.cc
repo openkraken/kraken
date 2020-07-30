@@ -39,25 +39,28 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
   std::shared_ptr<Value> func = std::make_shared<Value>(Value(context, callback));
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, func);
-  auto bridge = static_cast<JSBridge*>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
-    getDartMethod()->toBlob(callbackContext, contextId,
-      [](void *calbackContext, int32_t contextId, const char *error, uint8_t *bytes, int32_t length) {
-        auto ctx = static_cast<BridgeCallback::Context *>(calbackContext);
-        JSContext &_context = ctx->_context;
+  auto bridge = static_cast<JSBridge *>(context.getOwner());
+  bridge->bridgeCallback.registerCallback<void>(
+    std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
+      getDartMethod()->toBlob(
+        callbackContext, contextId,
+        [](void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes, int32_t length) {
+          auto ctx = static_cast<BridgeCallback::Context *>(callbackContext);
+          JSContext &_context = ctx->_context;
 
-        if (error != nullptr) {
-          ctx->_callback->getObject(_context).getFunction(_context).call(
-            _context, {Value(_context, String::createFromAscii(_context, error))});
-        } else {
-          std::vector<uint8_t> vec(bytes, bytes + length);
-          ctx->_callback->getObject(_context).getFunction(_context).call(
-            _context,
-            {Value::null(), Value(_context, Object::createFromHostObject(_context, std::make_shared<JSBlob>(vec)))});
-        }
-      },
-      id.getNumber(), devicePixelRatio.getNumber());
-  });
+          if (!checkContext(contextId, &_context)) return;
+          if (error != nullptr) {
+            ctx->_callback->getObject(_context).getFunction(_context).call(
+              _context, {Value(_context, String::createFromAscii(_context, error))});
+          } else {
+            std::vector<uint8_t> vec(bytes, bytes + length);
+            ctx->_callback->getObject(_context).getFunction(_context).call(
+              _context,
+              {Value::null(), Value(_context, Object::createFromHostObject(_context, std::make_shared<JSBlob>(vec)))});
+          }
+        },
+        id.getNumber(), devicePixelRatio.getNumber());
+    });
   return Value::undefined();
 }
 
