@@ -33,6 +33,7 @@ add_subdirectory(./third_party/googletest)
 set(TEST_LINK_LIBRARY
         ${BRIDGE_LINK_LIBS}
         kraken_test
+        kraken
         bridge
         gtest
         gtest_main

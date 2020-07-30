@@ -33,10 +33,31 @@ const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';
 
 const String BORDER = 'border';
+const String BORDER_TOP = 'borderTop';
+const String BORDER_RIGHT = 'borderRight';
+const String BORDER_BOTTOM = 'borderBottom';
+const String BORDER_LEFT = 'borderLeft';
 const String BORDER_WIDTH = 'borderWidth';
+const String BORDER_TOP_WIDTH = 'borderTopWidth';
+const String BORDER_RIGHT_WIDTH = 'borderRightWidth';
+const String BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
+const String BORDER_LEFT_WIDTH = 'borderLeftWidth';
 const String BORDER_STYLE = 'borderStyle';
+const String BORDER_TOP_STYLE = 'borderTopStyle';
+const String BORDER_RIGHT_STYLE = 'borderRightStyle';
+const String BORDER_BOTTOM_STYLE = 'borderBottomStyle';
+const String BORDER_LEFT_STYLE = 'borderLeftStyle';
 const String BORDER_COLOR = 'borderColor';
+const String BORDER_TOP_COLOR = 'borderTopColor';
+const String BORDER_RIGHT_COLOR = 'borderRightColor';
+const String BORDER_BOTTOM_COLOR = 'borderBottomColor';
+const String BORDER_LEFT_COLOR = 'borderLeftColor';
+
 const String BORDER_RADIUS = 'borderRadius';
+const String BORDER_TOP_LEFT_RADIUS = 'borderTopLeftRadius';
+const String BORDER_TOP_RIGHT_RADIUS = 'borderTopRightRadius';
+const String BORDER_BOTTOM_RIGHT_RADIUS = 'borderBottomRightRadius';
+const String BORDER_BOTTOM_LEFT_RADIUS = 'borderBottomLeftRadius';
 
 const String FONT = 'font';
 const String FONT_STYLE = 'fontStyle';
@@ -155,3 +176,6 @@ const String EASE_OUT = 'ease-out';
 const String EASE_IN_OUT= 'ease-in-out';
 const String STEP_START = 'step-start';
 const String STEP_END = 'step-end';
+
+// Shadow
+const String INSET = 'inset';

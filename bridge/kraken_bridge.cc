@@ -91,6 +91,11 @@ bool checkContext(int32_t contextId) {
   return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
 }
 
+bool checkContext(int32_t contextId, void* context) {
+  auto bridge = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+  return bridge->getContext() == context;
+}
+
 void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename,
                      int startLine) {
   assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
