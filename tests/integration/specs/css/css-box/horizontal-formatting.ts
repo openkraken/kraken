@@ -20,6 +20,12 @@ describe('Horizontal formatting', () => {
       height: '20px',
     });
 
+    let ruleImgP = new Promise((resolve, reject) => {
+      ruleImg.onload = () => {
+        resolve();
+      };
+    });
+
     setElementStyle(topRuler, rulerStyle);
     setElementStyle(ruleImg, rulerStyle);
     topRuler.appendChild(ruleImg);
@@ -59,6 +65,12 @@ describe('Horizontal formatting', () => {
       height: '64px',
     });
 
+    let ruleImg2P = new Promise((resolve) => {
+      ruleImg2.onload = () => {
+        resolve();
+      };
+    });
+
     setElementStyle(bottomRuler, rulerStyle);
     setElementStyle(ruleImg2, rulerStyle);
 
@@ -68,7 +80,7 @@ describe('Horizontal formatting', () => {
     document.body.appendChild(p);
     document.body.appendChild(bottomRuler);
 
-    await sleep(100); // Wait for image load.
+    await Promise.all([ruleImgP, ruleImg2P]);
     await matchScreenshot();
   });
 });
