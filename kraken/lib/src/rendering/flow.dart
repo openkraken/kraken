@@ -830,9 +830,32 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
 
+        // Calculate margin auto length according to CSS spec
+        // https://www.w3.org/TR/CSS21/visudet.html#blockwidth
+        // margin-left and margin-right auto takes up available space
+        // between element and its containing block on block-level element
+        // which is not positioned and computed to 0px in other cases
+        double mainPosition = childMainPosition;
+        if (child is RenderElementBoundary) {
+          String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
+          CSSStyleDeclaration childStyle = child.style;
+          String marginLeft = childStyle[MARGIN_LEFT];
+          String marginRight = childStyle[MARGIN_RIGHT];
 
-        childMainPosition = getAutoMarginElementMainPosition(child, childMainPosition,
-          containerMainAxisExtent, childMainAxisExtent);
+          // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
+          // 'border-right-width' + 'margin-right' = width of containing block
+          if (childRealDisplay == BLOCK || childRealDisplay == FLEX) {
+            if (marginLeft == 'auto') {
+              double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
+              if (marginRight == 'auto') {
+                mainPosition = remainingSpace / 2;
+              } else {
+                mainPosition = remainingSpace;
+              }
+            }
+          }
+        }
+
 
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
@@ -897,35 +920,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       else
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
-  }
-
-  // Calculate margin auto length according to CSS spec rules
-  // margin-left and margin-right auto takes up available space
-  // between element and its containing block on block-level element
-  // which is not positioned and computed to 0px in other cases
-  // https://www.w3.org/TR/CSS21/visudet.html#blockwidth
-  double getAutoMarginElementMainPosition(RenderBox child, double childMainPosition, double containerMainAxisExtent, double childMainAxisExtent) {
-    double mainPosition = childMainPosition;
-    if (child is RenderElementBoundary) {
-      String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
-      CSSStyleDeclaration childStyle = child.style;
-      String marginLeft = childStyle[MARGIN_LEFT];
-      String marginRight = childStyle[MARGIN_RIGHT];
-
-      // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
-      // 'border-right-width' + 'margin-right' = width of containing block
-      if (childRealDisplay == BLOCK || childRealDisplay == FLEX) {
-        if (marginLeft == 'auto') {
-          double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
-          if (marginRight == 'auto') {
-            mainPosition = remainingSpace / 2;
-          } else {
-            mainPosition = remainingSpace;
-          }
-        }
-      }
-    }
-    return mainPosition;
   }
 
   bool _isLineHeightValid(RenderBox child) {

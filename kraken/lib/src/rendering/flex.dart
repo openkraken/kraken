@@ -1165,6 +1165,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
+      final int totalFlexGrow = metrics.totalFlexGrow;
 
       actualSizeDelta = actualSize - runMainAxisExtent;
       _overflow = math.max(0.0, -actualSizeDelta);
@@ -1218,6 +1219,30 @@ class RenderFlexLayout extends RenderLayoutBox {
       double lineBoxHeight = getLineHeight(style);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
+      }
+
+      // Calculate margin auto children in the main axis
+      double mainAxisMarginAutoChildren = 0;
+      RenderBox runChild = firstChild;
+      while(runChild != null) {
+        final RenderFlexParentData childParentData = runChild.parentData;
+        if (childParentData.runIndex != i) break;
+        if (runChild is RenderElementBoundary) {
+          CSSStyleDeclaration childStyle = runChild.style;
+          String marginLeft = childStyle[MARGIN_LEFT];
+          String marginTop = childStyle[MARGIN_TOP];
+
+          if (flexDirection == FlexDirection.row || flexDirection == FlexDirection.rowReverse) {
+            if (marginLeft == 'auto') {
+              mainAxisMarginAutoChildren++;
+            }
+          } else {
+            if (marginTop == 'auto') {
+              mainAxisMarginAutoChildren++;
+            }
+          }
+        }
+        runChild = childParentData.nextSibling;
       }
 
       while (child != null) {
@@ -1289,6 +1314,63 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
         }
 
+        // Calculate margin auto length according to CSS spec rules
+        // https://www.w3.org/TR/css-flexbox-1/#auto-margins
+        // margin auto takes up available space in the remaining space
+        // between flex items and flex container, also note
+        // margin auto alignment takes priority over align-self alignment
+        if (child is RenderElementBoundary) {
+          CSSStyleDeclaration childStyle = child.style;
+          String marginLeft = childStyle[MARGIN_LEFT];
+          String marginRight = childStyle[MARGIN_RIGHT];
+          String marginTop = childStyle[MARGIN_TOP];
+          String marginBottom = childStyle[MARGIN_BOTTOM];
+
+          double horizontalRemainingSpace;
+          double verticalRemainingSpace;
+          double mainAxisRemainingSpace = remainingSpace;
+          double crossAxisRemainingSpace = crossSize - _getCrossSize(child);
+
+          if (flexDirection == FlexDirection.row || flexDirection == FlexDirection.rowReverse) {
+            horizontalRemainingSpace = mainAxisRemainingSpace;
+            verticalRemainingSpace = crossAxisRemainingSpace;
+            if (totalFlexGrow == 0 && marginLeft == 'auto') {
+              if (marginRight == 'auto') {
+                childMainPosition += (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+              } else {
+                childMainPosition += horizontalRemainingSpace / mainAxisMarginAutoChildren;
+              }
+            }
+
+            if (marginTop == 'auto') {
+              if (marginBottom == 'auto') {
+                childCrossPosition += verticalRemainingSpace / 2;
+              } else {
+                childCrossPosition += verticalRemainingSpace
+                  - CSSLength.toDisplayPortValue(marginBottom);
+              }
+            }
+          } else {
+            horizontalRemainingSpace = crossAxisRemainingSpace;
+            verticalRemainingSpace = mainAxisRemainingSpace;
+            if (totalFlexGrow == 0 && marginTop == 'auto') {
+              if (marginBottom == 'auto') {
+                childMainPosition += (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+              } else {
+                childMainPosition += verticalRemainingSpace / mainAxisMarginAutoChildren;
+              }
+            }
+
+            if (marginLeft == 'auto') {
+              if (marginRight == 'auto') {
+                childCrossPosition += horizontalRemainingSpace / 2;
+              } else {
+                childCrossPosition += horizontalRemainingSpace;
+              }
+            }
+          }
+        }
+
         if (flipMainAxis) childMainPosition -= _getMainSize(child);
 
         double crossOffset;
@@ -1307,7 +1389,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           childMainPosition += _getMainSize(child) + betweenSpace;
         }
-
         // Only layout placeholder renderObject child
         child = placeholderChild == null ? childParentData.nextSibling : null;
       }
