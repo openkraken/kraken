@@ -109,7 +109,7 @@ class CSSStyleProperty {
         
         List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
         if (values == null) return;
-        //@TODO valide value
+        // @TODO validate value
         if (property == BORDER_WIDTH) {
           borderTopWidth = values[0];
           borderRightWidth = values[1];
