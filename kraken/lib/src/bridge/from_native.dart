@@ -311,11 +311,19 @@ String invokeModule(
       } else if (method == 'cancelVibrate') {
         Vibration.cancel();
       }
-    } else if (module == 'KrakenNavigation') {
-      String url = args[1];
-      String sourceUrl = controller.bundleURL;
-      KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
-      controller.view.handleNavigationAction(action);
+    } else if (module == 'Navigation') {
+      String method = args[1];
+      switch(method) {
+        case 'href':
+        case 'assign':
+        case 'replace':
+          String url = args[2];
+          String sourceUrl = controller.bundleURL;
+          KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+          controller.view.handleNavigationAction(action);
+        break;
+        default:
+      }
     }
   } catch (e, stack) {
     // Dart side internal error should print it directly.
