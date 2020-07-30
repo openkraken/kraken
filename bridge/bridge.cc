@@ -69,10 +69,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  auto bridge = static_cast<JSBridge*>(getJSContext(contextId));
-  if (bridge->getContext() != &_context) {
-    return;
-  }
+  if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
@@ -178,10 +175,7 @@ void handleTransientCallback(void *callbackContext, int32_t contextId, const cha
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
-  auto bridge = static_cast<JSBridge*>(getJSContext(contextId));
-  if (bridge->getContext() != &_context) {
-    return;
-  }
+  if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 

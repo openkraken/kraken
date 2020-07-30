@@ -91,7 +91,7 @@ bool checkContext(int32_t contextId) {
   return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
 }
 
-bool checkContextWithExistContext(int32_t contextId, void* context) {
+bool checkContext(int32_t contextId, void* context) {
   auto bridge = static_cast<kraken::JSBridge*>(getJSContext(contextId));
   return bridge->getContext() == context;
 }

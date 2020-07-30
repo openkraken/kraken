@@ -6,10 +6,8 @@
 #include "timer.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
-#include "foundation/logging.h"
 #include "bridge.h"
 #include "jsa.h"
-#include <bridge.h>
 
 namespace kraken {
 namespace binding {
@@ -20,7 +18,7 @@ using namespace kraken::foundation;
 void handlePersistentCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-  if (!checkContextWithExistContext(contextId, &_context)) return;
+  if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
@@ -45,7 +43,7 @@ void handlePersistentCallback(void *callbackContext, int32_t contextId, const ch
 void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
-  if (!checkContextWithExistContext(contextId, &_context)) return;
+  if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
