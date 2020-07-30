@@ -45,6 +45,7 @@ KRAKEN_EXPORT
 int32_t allocateNewContext();
 
 bool checkContext(int32_t contextId);
+bool checkContextWithExistContext(int32_t contextId, void* context);
 KRAKEN_EXPORT
 void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine);
 
