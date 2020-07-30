@@ -1208,19 +1208,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         default:
       }
 
-      double mainAxisPadding = flowAwarePaddingStart();
-      double crossAxisPadding = flowAwarePaddingEnd();
-      // Position elements
-      double childMainPosition =
-        flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
-
-      // Leading between height of line box's content area and line height of line box
-      double lineBoxLeading = 0;
-      double lineBoxHeight = getLineHeight(style);
-      if (lineBoxHeight != null) {
-        lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
-      }
-
       // Calculate margin auto children in the main axis
       double mainAxisMarginAutoChildren = 0;
       RenderBox runChild = firstChild;
@@ -1244,6 +1231,26 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
         runChild = childParentData.nextSibling;
       }
+
+      // Margin auto alignment takes priority over align-self alignment
+      if (mainAxisMarginAutoChildren != 0) {
+        leadingSpace = 0;
+        betweenSpace = 0;
+      }
+
+      double mainAxisPadding = flowAwarePaddingStart();
+      double crossAxisPadding = flowAwarePaddingEnd();
+      // Position elements
+      double childMainPosition =
+        flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
+
+      // Leading between height of line box's content area and line height of line box
+      double lineBoxLeading = 0;
+      double lineBoxHeight = getLineHeight(style);
+      if (lineBoxHeight != null) {
+        lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
+      }
+
 
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
@@ -1317,8 +1324,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Calculate margin auto length according to CSS spec rules
         // https://www.w3.org/TR/css-flexbox-1/#auto-margins
         // margin auto takes up available space in the remaining space
-        // between flex items and flex container, also note
-        // margin auto alignment takes priority over align-self alignment
+        // between flex items and flex container
         if (child is RenderElementBoundary) {
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
@@ -1337,6 +1343,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             if (totalFlexGrow == 0 && marginLeft == 'auto') {
               if (marginRight == 'auto') {
                 childMainPosition += (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                betweenSpace = (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
                 childMainPosition += horizontalRemainingSpace / mainAxisMarginAutoChildren;
               }
@@ -1356,6 +1363,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             if (totalFlexGrow == 0 && marginTop == 'auto') {
               if (marginBottom == 'auto') {
                 childMainPosition += (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
+                betweenSpace = (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
                 childMainPosition += verticalRemainingSpace / mainAxisMarginAutoChildren;
               }

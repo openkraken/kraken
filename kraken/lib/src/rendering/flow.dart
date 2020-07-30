@@ -835,7 +835,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // margin-left and margin-right auto takes up available space
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
-        double mainPosition = childMainPosition;
         if (child is RenderElementBoundary) {
           String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
@@ -848,14 +847,13 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
             if (marginLeft == 'auto') {
               double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
               if (marginRight == 'auto') {
-                mainPosition = remainingSpace / 2;
+                childMainPosition = remainingSpace / 2;
               } else {
-                mainPosition = remainingSpace;
+                childMainPosition = remainingSpace;
               }
             }
           }
         }
-
 
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
