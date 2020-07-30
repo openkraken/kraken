@@ -5,8 +5,8 @@ enum KrakenNavigationActionPolicy {
   // allow kraken to perform navigate.
   allow,
 
-  // deny kraken to perform navigate.
-  deny
+  // cancel kraken default's navigate action.
+  cancel
 }
 
 enum KrakenNavigationType {

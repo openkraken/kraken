@@ -311,19 +311,17 @@ String invokeModule(
       } else if (method == 'cancelVibrate') {
         Vibration.cancel();
       }
-    } else if (module == 'Navigation') {
+    } else if (module == 'location') {
       String method = args[1];
-      switch(method) {
-        case 'href':
-        case 'assign':
-        case 'replace':
-          String url = args[2];
-          String sourceUrl = controller.bundleURL;
-          KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
-          controller.view.handleNavigationAction(action);
-        break;
-        default:
+      List locationArgs = args[2];
+      KrakenNavigationAction action;
+      String url = locationArgs[0];
+      String sourceUrl = controller.bundleURL;
+      if (method == 'href' || method == 'assign') {
+        // @TODO needs to save navigation history when History API had supported.
       }
+      action = KrakenNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+      controller.view.handleNavigationAction(action);
     }
   } catch (e, stack) {
     // Dart side internal error should print it directly.

@@ -152,13 +152,14 @@ class KrakenViewController {
   void handleNavigationAction(KrakenNavigationAction action) async {
     try {
       KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
-      if (policy == KrakenNavigationActionPolicy.deny) return;
+      if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch(action.navigationType) {
         case KrakenNavigationType.reload:
           rootController.reloadWithUrl(action.target);
           break;
         default:
+        // for linkActivated and other type, we choose to do nothing.
       }
     } catch (e, stack) {
       if (navigationDelegate.errorHandler != null) {
