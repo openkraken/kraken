@@ -6,7 +6,7 @@ describe('Tags input', () => {
     input.setAttribute('value', 'Hello World');
     document.body.appendChild(input);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with default width', async () => {
@@ -15,6 +15,6 @@ describe('Tags input', () => {
     input.setAttribute('value', 'Hello World Hello World Hello World Hello World');
     document.body.appendChild(input);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

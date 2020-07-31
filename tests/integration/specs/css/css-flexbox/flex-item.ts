@@ -171,7 +171,7 @@ describe('flex-item', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it("img-size", async () => {
     let flexItem;
@@ -245,9 +245,9 @@ describe('flex-item', () => {
       ]
     );
     BODY.appendChild(div);
-    
-    
-    await matchScreenshot();
+
+
+    await matchViewportSnapshot();
   });
   it('and-percentage-abspos', async () => {
     let div;
@@ -294,6 +294,6 @@ describe('flex-item', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

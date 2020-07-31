@@ -46,7 +46,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('002', async () => {
     let p;
@@ -94,7 +94,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let p;
@@ -142,7 +142,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('004', async () => {
     let div1;
@@ -280,7 +280,7 @@ describe('align-items', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('005', async () => {
     let p;
@@ -326,7 +326,7 @@ describe('align-items', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('006', async () => {
     let p;
@@ -394,7 +394,7 @@ describe('align-items', () => {
     BODY.appendChild(block);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('007', async () => {
     let div;
@@ -433,7 +433,7 @@ describe('align-items', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('baseline-overflow-non-visible', async () => {
     let overflow;
@@ -482,6 +482,6 @@ describe('align-items', () => {
     );
     BODY.appendChild(flex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

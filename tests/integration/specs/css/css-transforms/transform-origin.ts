@@ -10,7 +10,7 @@ describe('Transform origin', () => {
       })
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('percent', async function() {
       document.body.appendChild(
@@ -23,7 +23,7 @@ describe('Transform origin', () => {
         })
       );
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
     it('keyword', async function() {
         document.body.appendChild(
@@ -36,7 +36,7 @@ describe('Transform origin', () => {
           })
         );
 
-        await matchScreenshot();
+        await matchViewportSnapshot();
       });
       it('keyword center', async function() {
               document.body.appendChild(
@@ -49,7 +49,7 @@ describe('Transform origin', () => {
                 })
               );
 
-              await matchScreenshot();
+              await matchViewportSnapshot();
             });
 
     xit('works width margin' , async () => {
@@ -81,6 +81,6 @@ describe('Transform origin', () => {
        );
       BODY.appendChild(n1);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 });

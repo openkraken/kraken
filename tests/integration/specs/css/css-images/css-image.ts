@@ -24,7 +24,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('fallbacks-and-annotations', async () => {
     let p;
@@ -51,7 +51,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('fallbacks-and-annotations002', async () => {
     let p;
@@ -79,7 +79,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('fallbacks-and-annotations003', async () => {
     let p;
@@ -107,7 +107,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('fallbacks-and-annotations004', async () => {
     let p;
@@ -135,7 +135,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('fallbacks-and-annotations005', async () => {
     let p;
@@ -167,7 +167,7 @@ describe('css-image', () => {
     BODY.appendChild(p);
     BODY.appendChild(square);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
  it('size works width position absolute' , async (done) => {
@@ -201,7 +201,7 @@ describe('css-image', () => {
     n2.src = 'https://img.alicdn.com/tfs/TB14bXLHFT7gK0jSZFpXXaTkpXa-100-100.png';
 
     n2.onload = async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     };
   });

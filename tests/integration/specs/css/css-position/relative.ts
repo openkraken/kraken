@@ -24,7 +24,7 @@ describe('Position relative', () => {
     div2.appendChild(document.createTextNode('relative bottom & right'));
     document.body.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should be a green square below', async done => {
@@ -74,7 +74,7 @@ describe('Position relative', () => {
 
     document.body.appendChild(parent);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('works with child remove' , async () => {
@@ -112,6 +112,6 @@ describe('Position relative', () => {
     BODY.appendChild(n1);
     n1.removeChild(n2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

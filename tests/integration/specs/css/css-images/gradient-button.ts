@@ -17,6 +17,6 @@ describe('gradient-button', () => {
     });
     BODY.appendChild(button);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

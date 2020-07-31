@@ -79,7 +79,7 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function matchScreenshot() {
+async function matchViewportSnapshot() {
   await sleep(16 / 1000); // Force wait 1 frame for async rendering finished.
   return await matchElementImageSnapshot(document.body);
 }

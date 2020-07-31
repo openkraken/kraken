@@ -15,13 +15,13 @@ describe('Transition transform origin', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'rotateZ(0.6turn)',
         transformOrigin: '10px 10px',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -45,13 +45,13 @@ describe('Transition transform origin', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'rotateZ(0.6turn)',
         transformOrigin: '80% 80%',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -75,13 +75,13 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'rotateZ(0.1turn)',
         transformOrigin: 'top left',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });

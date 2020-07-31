@@ -35,7 +35,7 @@ describe('Node API', () => {
     const child_3 = document.createTextNode('fourth child');
     el.replaceChild(child_3, child_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('ChildNode.prototype.remove', () => {

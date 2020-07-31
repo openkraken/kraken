@@ -9,7 +9,7 @@ describe('Width', function() {
 
     document.body.appendChild(div);
     div.style.width = '200px';
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   describe('element style has width', () => {
@@ -22,7 +22,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is inline-block', async () => {
@@ -34,7 +34,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is inline-flex', async () => {
@@ -46,7 +46,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is block', async () => {
@@ -58,7 +58,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is flex', async () => {
@@ -70,7 +70,7 @@ describe('Width', function() {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 
@@ -95,7 +95,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('parent is inline-block and has width', async () => {
@@ -113,7 +113,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('parent is inline-block and has no width', async () => {
@@ -130,7 +130,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('parent is block and has width', async () => {
@@ -148,7 +148,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('parent is block and has no width', async () => {
@@ -165,7 +165,7 @@ describe('Width', function() {
       ]);
 
       append(BODY, container);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 });

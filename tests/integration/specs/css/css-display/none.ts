@@ -13,6 +13,6 @@ describe('Display', () => {
       document.createTextNode('The box should not display.')
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
