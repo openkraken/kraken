@@ -87,7 +87,7 @@ describe('position-sticky', () => {
     BODY.appendChild(box);
     BODY.appendChild(spacer);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.4);
   });
   it('change-top', async () => {
     let marker;
@@ -121,7 +121,7 @@ describe('position-sticky', () => {
     BODY.appendChild(sticky);
     BODY.appendChild(spacer);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   it('child-multicolumn-ref', async () => {
     let contents;

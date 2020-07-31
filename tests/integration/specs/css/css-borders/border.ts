@@ -15,7 +15,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   it('003', async () => {
     let div;
@@ -32,7 +32,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('005', async () => {
     let reference;
@@ -75,7 +75,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('006', async () => {
     let reference;
@@ -118,7 +118,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   it('008', async () => {
     let reference;
@@ -161,7 +161,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
   it('010', async () => {
     let p;
@@ -192,7 +192,7 @@ describe('border', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
 
   it('border will not appear if border width is 0.0', async () => {
@@ -226,6 +226,6 @@ describe('border', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   });
 });
