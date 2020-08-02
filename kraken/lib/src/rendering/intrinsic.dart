@@ -21,8 +21,7 @@ class RenderIntrinsicBox extends RenderBoxModel
       }
 
       child.layout(childConstraints, parentUsesSize: true);
-      contentSize = child.size;
-      size = computeBoxSize(contentSize);
+      size = child.size;
     }
   }
 

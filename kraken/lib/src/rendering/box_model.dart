@@ -85,13 +85,18 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin {
     return newBox;
   }
 
-  // the contentSize of layout box
-  Size _contentSize;
-  set contentSize(Size value) {
-    assert(value != null);
+  set size(Size value) {
     _contentSize = value;
+    Size boxSize = value;
+    if (padding != null) {
+      boxSize = wrapPaddingSize(boxSize);
+    }
+
+    super.size = constraints.constrain(boxSize);
   }
 
+  // the contentSize of layout box
+  Size _contentSize;
   Size get contentSize {
     if (_contentSize == null) {
       return Size(0, 0);
@@ -113,14 +118,5 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin {
       height += padding.vertical;
     }
     return height;
-  }
-
-  Size computeBoxSize(Size contentSize) {
-    Size boxSize = contentSize;
-    if (padding != null) {
-      boxSize = wrapPaddingSize(boxSize);
-    }
-
-    return constraints.constrain(boxSize);
   }
 }

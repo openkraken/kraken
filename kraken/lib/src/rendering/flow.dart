@@ -585,11 +585,10 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      contentSize = Size(
+      size = Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -732,8 +731,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
     switch (direction) {
       case Axis.horizontal:
-        contentSize = Size(constraintWidth, constraintHeight);
-        size = computeBoxSize(contentSize);
+        size = Size(constraintWidth, constraintHeight);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
