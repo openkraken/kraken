@@ -51,7 +51,7 @@ describe('fit-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('item-002', async () => {
     let p;
@@ -98,7 +98,7 @@ describe('fit-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('item-003', async () => {
     let p;
@@ -113,7 +113,7 @@ describe('fit-content', () => {
     );
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('item-004', async () => {
     let p;
@@ -128,6 +128,6 @@ describe('fit-content', () => {
     );
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

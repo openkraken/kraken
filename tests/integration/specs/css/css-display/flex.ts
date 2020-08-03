@@ -17,7 +17,7 @@ describe('Display flex', () => {
         'This text should display as the next line as the box'
       )
     );
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('002', async () => {
@@ -28,6 +28,6 @@ describe('Display flex', () => {
     container.style.backgroundColor = 'red';
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

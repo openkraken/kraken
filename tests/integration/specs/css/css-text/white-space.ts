@@ -6,7 +6,7 @@ describe('Text WhiteSpace', () => {
     );
     document.body.appendChild(document.createTextNode(' new line'));
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 
   it('should work with default value', () => {
@@ -24,7 +24,7 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 
   it('should work with normal', () => {
@@ -43,7 +43,7 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 
   it('should work with no-wrap', () => {
@@ -62,6 +62,6 @@ describe('Text WhiteSpace', () => {
 
     append(BODY, cont);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 });

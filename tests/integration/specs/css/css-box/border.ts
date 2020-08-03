@@ -10,7 +10,7 @@ describe('Box border', () => {
 
     document.body.appendChild(div);
     div.style.border = '4px solid blue';
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('test pass if there is a hollow black square', async () => {

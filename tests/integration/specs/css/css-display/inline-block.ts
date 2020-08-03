@@ -15,7 +15,7 @@ describe('Display inline-block', () => {
       )
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('inline-block box constraint is tight', async () => {
@@ -33,7 +33,7 @@ describe('Display inline-block', () => {
     });
     append(magenta, box);
     append(BODY, magenta);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('inline-block nest inline-block should behavior like inline-block', async () => {
@@ -97,6 +97,6 @@ describe('Display inline-block', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

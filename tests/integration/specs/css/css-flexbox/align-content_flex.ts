@@ -65,7 +65,7 @@ describe('align-content_flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('start', async () => {
     let test01;
@@ -132,7 +132,7 @@ describe('align-content_flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('stretch', async () => {
@@ -199,7 +199,7 @@ describe('align-content_flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('center', async () => {
@@ -267,6 +267,6 @@ describe('align-content_flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

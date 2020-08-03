@@ -9,6 +9,6 @@ describe('Transform rotate', function() {
       })
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

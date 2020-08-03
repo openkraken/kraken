@@ -43,7 +43,7 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with top', async () => {
@@ -89,7 +89,7 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with bottom', async () => {
@@ -135,6 +135,6 @@ describe('vertical-align', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

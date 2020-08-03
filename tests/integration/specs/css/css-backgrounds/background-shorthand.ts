@@ -72,6 +72,6 @@ describe('background-shorthand', () => {
     document.body.appendChild(flexbox);
 
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   })
 });

@@ -20,7 +20,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with basic samples', async () => {
@@ -34,7 +34,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div);
     div.style.margin = '20px';
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with basic samples', async () => {
@@ -48,7 +48,7 @@ describe('Box margin', () => {
 
     document.body.appendChild(div);
     div.style.margin = '20px';
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with shorthand', async () => {
@@ -62,6 +62,6 @@ describe('Box margin', () => {
     });
 
     document.body.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

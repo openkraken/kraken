@@ -5,13 +5,13 @@
 
 #ifdef KRAKEN_JSC_ENGINE
 
-#include "foundation/bridge_callback.h"
 #include "js_context.h"
+#include "kraken_bridge.h"
 #include "bridge.h"
 #include "jsc/jsc_implementation.h"
+#include "foundation/bridge_callback.h"
 #include "gtest/gtest.h"
 #include <chrono>
-#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <thread>

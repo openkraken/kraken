@@ -45,7 +45,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with wrap column', async () => {
@@ -94,7 +94,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with row', async () => {
@@ -143,7 +143,7 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with column', async () => {
@@ -192,6 +192,6 @@ describe('flexbox flex-flow', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

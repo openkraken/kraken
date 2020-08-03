@@ -62,7 +62,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('change-top-ref', async () => {
@@ -87,7 +87,7 @@ describe('position-sticky', () => {
     BODY.appendChild(box);
     BODY.appendChild(spacer);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.4);
   });
   it('change-top', async () => {
     let marker;
@@ -121,7 +121,7 @@ describe('position-sticky', () => {
     BODY.appendChild(sticky);
     BODY.appendChild(spacer);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   it('child-multicolumn-ref', async () => {
     let contents;
@@ -200,7 +200,7 @@ describe('position-sticky', () => {
     // wait for image load
     await sleep(1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('child-multicolumn', async () => {
     let contents;
@@ -275,7 +275,7 @@ describe('position-sticky', () => {
       scroller.scrollTop = 100;
     });
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexbox-ref', async () => {
     let flexItem;
@@ -447,7 +447,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller2);
     BODY.appendChild(scroller3);
     BODY.appendChild(p);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexbox', async () => {
     let indicator;
@@ -634,7 +634,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller2);
     BODY.appendChild(scroller3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('get-bounding-client-rect', async () => {
     let sticky1;
@@ -725,7 +725,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller2);
     BODY.appendChild(scroller3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inflow-position', async () => {
     let before;
@@ -772,7 +772,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroller);
 
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-ref', async () => {
     let indicator;
@@ -932,7 +932,7 @@ describe('position-sticky', () => {
     BODY.appendChild(group_1);
     BODY.appendChild(group_2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline', async () => {
     let indicator;
@@ -1188,7 +1188,7 @@ describe('position-sticky', () => {
     BODY.appendChild(group_1);
     BODY.appendChild(group_2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('large-top-2-ref', async () => {
     let sticky;
@@ -1282,9 +1282,9 @@ describe('position-sticky', () => {
       // document.getElementById("scroll2").scrollTop = 50;
     }
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('large-top-2.tentative', async () => {
     let sticky;
@@ -1366,7 +1366,7 @@ describe('position-sticky', () => {
     BODY.appendChild(scroll);
     BODY.appendChild(scroll2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('large-top-ref', async () => {
     let sticky;
@@ -1442,7 +1442,7 @@ describe('position-sticky', () => {
       scroll2.scrollTop = 50;
     }
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('large-top.tentative', async () => {
     let sticky;
@@ -1510,7 +1510,7 @@ describe('position-sticky', () => {
       scroll2.scrollTop = 50;
     }
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('left', async () => {
     let prepadding;
@@ -1578,7 +1578,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('margins', async () => {
     let prepadding;
@@ -1643,7 +1643,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('nested-bottom', async () => {
     let prepadding;
@@ -1725,7 +1725,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('nested-inline-ref', async () => {
     let outerIndicator;
@@ -1931,7 +1931,7 @@ describe('position-sticky', () => {
     BODY.appendChild(group_2);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('nested-inline', async () => {
     let outerIndicator;
@@ -2262,7 +2262,7 @@ describe('position-sticky', () => {
     BODY.appendChild(group_1);
     BODY.appendChild(group_2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('nested-left', async () => {
     let prepadding;
@@ -2344,9 +2344,9 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('nested-right', async () => {
     let prepadding;
@@ -2434,9 +2434,9 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('nested-top', async () => {
     let prepadding;
@@ -2513,7 +2513,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('offset-overflow', async () => {
     let sticky;
@@ -2539,7 +2539,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('offset-top-left', async () => {
     let sticky;
@@ -2573,7 +2573,7 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('overflow-hidden', async () => {
     let div;
@@ -2612,7 +2612,7 @@ describe('position-sticky', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('overflow-padding', async () => {
     let prepadding;
@@ -2677,9 +2677,9 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('scroll-reposition', async (done) => {
     let sticky: any;
@@ -2712,11 +2712,11 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     requestAnimationFrame(async () => {
       sticky.style.top = '5px';
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     });
 
@@ -2749,11 +2749,11 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     requestAnimationFrame(async () => {
       bigItem.style.display = 'none';
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     });
   });
@@ -2780,7 +2780,7 @@ describe('position-sticky', () => {
     BODY.appendChild(indicator);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('stacking-context', async () => {
     let indicator;
@@ -2830,7 +2830,7 @@ describe('position-sticky', () => {
     BODY.appendChild(sticky);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('transforms-translate', async () => {
     let prepadding;
@@ -2895,8 +2895,8 @@ describe('position-sticky', () => {
     );
     BODY.appendChild(scroller);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

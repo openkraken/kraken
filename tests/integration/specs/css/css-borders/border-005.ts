@@ -32,6 +32,6 @@ describe('border-005', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
 });

@@ -15,7 +15,7 @@ describe('descendant-display', () => {
       }),
     ]);
     append(BODY, element);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('override-001', async () => {
@@ -35,6 +35,6 @@ describe('descendant-display', () => {
       }),
     ]);
     append(BODY, element);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
