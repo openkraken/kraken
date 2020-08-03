@@ -13,24 +13,21 @@ class RenderIntrinsicBox extends RenderBoxModel
 
   @override
   void performLayout() {
+    baseLayout();
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
-
-      if (padding != null) {
-        childConstraints = deflatePaddingConstraints(childConstraints);
-      }
-
-      child.layout(childConstraints, parentUsesSize: true);
+      child.layout(contentConstraints, parentUsesSize: true);
       size = child.size;
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += Offset(paddingLeft, paddingTop);
-    }
+    basePaint(context, offset, (PaintingContext context, Offset offset) {
+      if (padding != null) {
+        offset += Offset(paddingLeft, paddingTop);
+      }
 
-    if (child != null) context.paintChild(child, offset);
+      if (child != null) context.paintChild(child, offset);
+    });
   }
 }

@@ -53,128 +53,49 @@ CSSOverflowType _getOverflow(String definition) {
 }
 
 mixin CSSOverflowMixin {
-  RenderBox renderScrollViewPortX;
-  RenderBox renderScrollViewPortY;
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
-
-  RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style,
+  void updateRenderOverflow(
+      RenderBoxModel renderBoxModel,
+      CSSStyleDeclaration style,
       void scrollListener(double scrollTop, AxisDirection axisDirection)) {
-    assert(style != null);
-    List<CSSOverflowType> overflow = getOverflowFromStyle(style);
-    // X direction overflow
-    renderScrollViewPortX = _getRenderObjectByOverflow(overflow[0], current, AxisDirection.right, scrollListener);
-    // Y direction overflow
-    renderScrollViewPortY =
-        _getRenderObjectByOverflow(overflow[1], renderScrollViewPortX, AxisDirection.down, scrollListener);
-    return renderScrollViewPortY;
-  }
-
-  void updateOverFlowBox(
-      CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowFromStyle(style);
+      CSSOverflowType overflowX = overflow[0];
+      CSSOverflowType overflowY = overflow[1];
 
-      if (renderScrollViewPortY != null) {
-        RenderObject parent = renderScrollViewPortY.parent;
-        AxisDirection axisDirection = AxisDirection.down;
-        setChild(renderScrollViewPortY, null);
-        switch (overflow[1]) {
-          case CSSOverflowType.visible:
-            setChild(parent, null);
-            CSSOverflowDirectionBox overflowCustomBox = CSSOverflowDirectionBox(
-                child: renderScrollViewPortX, textDirection: TextDirection.ltr, axisDirection: axisDirection);
-            setChild(parent, renderScrollViewPortY = overflowCustomBox);
-            _scrollableY = null;
-            break;
-          case CSSOverflowType.auto:
-          case CSSOverflowType.scroll:
-            setChild(parent, null);
-            setChild(renderScrollViewPortX.parent, null);
-            _scrollableY = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
-            setChild(parent, renderScrollViewPortY = _scrollableY.getScrollableRenderObject(renderScrollViewPortX));
-            break;
-          case CSSOverflowType.hidden:
-            setChild(parent, null);
-            setChild(
-                parent,
-                renderScrollViewPortY = RenderSingleChildViewport(
-                    axisDirection: axisDirection,
-                    offset: ViewportOffset.zero(),
-                    child: renderScrollViewPortX,
-                    shouldClip: true));
-            _scrollableY = null;
-            break;
-        }
+      switch(overflowX) {
+        case CSSOverflowType.hidden:
+          renderBoxModel.clipX = true;
+          break;
+        case CSSOverflowType.auto:
+        case CSSOverflowType.scroll:
+          _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+          renderBoxModel.clipX = true;
+          renderBoxModel.enableScroll = true;
+          renderBoxModel.scrollOffsetX = ViewportOffset.zero();
+          break;
+        case CSSOverflowType.visible:
+        default:
+          _scrollableX = null;
+          break;
       }
 
-      if (renderScrollViewPortX != null) {
-        RenderObject parent = renderScrollViewPortX.parent;
-        RenderObject child = (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child;
-        AxisDirection axisDirection = AxisDirection.right;
-        setChild(parent, null);
-        setChild(renderScrollViewPortX, null);
-        switch (overflow[0]) {
-          case CSSOverflowType.visible:
-            setChild(
-                parent,
-                renderScrollViewPortX = CSSOverflowDirectionBox(
-                    child: child, textDirection: TextDirection.ltr, axisDirection: axisDirection));
-            _scrollableX = null;
-            break;
-          case CSSOverflowType.auto:
-          case CSSOverflowType.scroll:
-            _scrollableX = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
-            setChild(parent, renderScrollViewPortX = _scrollableX.getScrollableRenderObject(child));
-            break;
-          case CSSOverflowType.hidden:
-            setChild(
-                parent,
-                renderScrollViewPortX = RenderSingleChildViewport(
-                    axisDirection: axisDirection, offset: ViewportOffset.zero(), child: child, shouldClip: true));
-            _scrollableX = null;
-            break;
-        }
+      switch(overflowY) {
+        case CSSOverflowType.hidden:
+          renderBoxModel.clipY = true;
+          break;
+        case CSSOverflowType.auto:
+        case CSSOverflowType.scroll:
+          renderBoxModel.clipY = true;
+          renderBoxModel.enableScroll = true;
+          renderBoxModel.scrollOffsetY = ViewportOffset.zero();
+          break;
+        case CSSOverflowType.visible:
+        default:
+          break;
       }
     }
-  }
-
-  RenderObject _getRenderObjectByOverflow(CSSOverflowType overflow, RenderObject current, AxisDirection axisDirection,
-      void scrollListener(double scrollTop, AxisDirection axisDirection)) {
-    switch (overflow) {
-      case CSSOverflowType.visible:
-        if (axisDirection == AxisDirection.right) {
-          _scrollableX = null;
-        } else {
-          _scrollableY = null;
-        }
-        current = CSSOverflowDirectionBox(
-          child: current,
-          textDirection: TextDirection.ltr,
-          axisDirection: axisDirection,
-        );
-        break;
-      case CSSOverflowType.auto:
-      case CSSOverflowType.scroll:
-        KrakenScrollable scrollable = KrakenScrollable(axisDirection: axisDirection, scrollListener: scrollListener);
-        if (axisDirection == AxisDirection.right) {
-          _scrollableX = scrollable;
-        } else {
-          _scrollableY = scrollable;
-        }
-        current = scrollable.getScrollableRenderObject(current);
-        break;
-      case CSSOverflowType.hidden:
-        if (axisDirection == AxisDirection.right) {
-          _scrollableX = null;
-        } else {
-          _scrollableY = null;
-        }
-        current = RenderSingleChildViewport(
-            axisDirection: axisDirection, offset: ViewportOffset.zero(), child: current, shouldClip: true);
-        break;
-    }
-    return current;
   }
 
   double getScrollTop() {
@@ -192,22 +113,22 @@ mixin CSSOverflowMixin {
   }
 
   double getScrollHeight() {
-    if (_scrollableY != null) {
-      return _scrollableY.renderBox?.size?.height ?? 0;
-    } else if (renderScrollViewPortY is RenderBox) {
-      RenderBox renderObjectY = renderScrollViewPortY;
-      return renderObjectY.hasSize ? renderObjectY.size.height : 0;
-    }
+//    if (_scrollableY != null) {
+//      return _scrollableY.renderBox?.size?.height ?? 0;
+//    } else if (renderScrollViewPortY is RenderBox) {
+//      RenderBox renderObjectY = renderScrollViewPortY;
+//      return renderObjectY.hasSize ? renderObjectY.size.height : 0;
+//    }
     return 0;
   }
 
   double getScrollWidth() {
-    if (_scrollableX != null) {
-      return _scrollableX.renderBox?.size?.width ?? 0;
-    } else if (renderScrollViewPortX is RenderBox) {
-      RenderBox renderObjectX = renderScrollViewPortX;
-      return renderObjectX.hasSize ? renderObjectX.size.width : 0;
-    }
+//    if (_scrollableX != null) {
+//      return _scrollableX.renderBox?.size?.width ?? 0;
+//    } else if (renderScrollViewPortX is RenderBox) {
+//      RenderBox renderObjectX = renderScrollViewPortX;
+//      return renderObjectX.hasSize ? renderObjectX.size.width : 0;
+//    }
     return 0;
   }
 

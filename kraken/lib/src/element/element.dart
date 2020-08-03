@@ -162,9 +162,6 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
-//    // Overflow
-//    renderObject = initOverflowBox(renderObject, style, _scrollListener);
-
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
 
@@ -220,10 +217,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -264,7 +261,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderScrollViewPortY?.size?.height;
+      double viewPortHeight = renderDecoratedBox?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -300,7 +297,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderScrollViewPortX?.size?.width;
+      double viewPortWidth = renderDecoratedBox?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -581,8 +578,8 @@ class Element extends Node
 
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox);
+      renderDecoratedBox.child = null;
+      renderDecoratedBox.child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -951,9 +948,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
+        renderDecoratedBox.child = null;
         renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
+        renderDecoratedBox.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -1005,7 +1002,11 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateOverFlowBox(style, _scrollListener);
+    if (renderLayoutBox != null) {
+      updateRenderOverflow(renderLayoutBox, style, _scrollListener);
+    } else {
+      updateRenderOverflow(renderIntrinsicBox, style, _scrollListener);
+    }
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
@@ -1051,9 +1052,9 @@ class Element extends Node
         })
         ..removeAll();
 
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
+      renderDecoratedBox.child = null;
       renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
+      renderDecoratedBox.child = renderLayoutBox;
 
       this.children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -1074,7 +1075,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
+    updateBackground(property, present, renderDecoratedBox, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }

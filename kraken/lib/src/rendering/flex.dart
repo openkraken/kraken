@@ -527,6 +527,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    baseLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
@@ -594,7 +595,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       return;
     }
 
-    assert(constraints != null);
+    assert(contentConstraints != null);
 
     double maxWidth = 0;
     if (elementWidth != null) {
@@ -1013,14 +1014,14 @@ class RenderFlexLayout extends RenderLayoutBox {
                       // for empty child width, maybe it's unloaded image, set constraints range.
                       if (child.size.isEmpty) {
                         minCrossAxisSize = 0.0;
-                        maxCrossAxisSize = constraints.maxHeight;
+                        maxCrossAxisSize = contentConstraints.maxHeight;
                       } else {
                         minCrossAxisSize = maxCrossAxisSize = child.size.height + childMarginHeight;
                       }
                     } else {
-                      // expand child's height to constraints.maxHeight;
-                      minCrossAxisSize = constraints.maxHeight;
-                      maxCrossAxisSize = constraints.maxHeight;
+                      // expand child's height to contentConstraints.maxHeight;
+                      minCrossAxisSize = contentConstraints.maxHeight;
+                      maxCrossAxisSize = contentConstraints.maxHeight;
                     }
                   } else {
                     // child is't layout, so set minHeight
@@ -1056,17 +1057,17 @@ class RenderFlexLayout extends RenderLayoutBox {
 
                     // child have predefined width, use previous layout width.
                     if (sizeType == BoxSizeType.specified) {
-                      // for empty child width, maybe it's unloaded image, set constraints range.
+                      // for empty child width, maybe it's unloaded image, set contentConstraints range.
                       if (child.size.isEmpty) {
                         minCrossAxisSize = 0.0;
-                        maxCrossAxisSize = constraints.maxWidth;
+                        maxCrossAxisSize = contentConstraints.maxWidth;
                       } else {
                         minCrossAxisSize = maxCrossAxisSize = child.size.width;
                       }
                     } else {
-                      // expand child's height to constraints.maxWidth;
-                      minCrossAxisSize = constraints.maxWidth;
-                      maxCrossAxisSize = constraints.maxWidth;
+                      // expand child's height to contentConstraints.maxWidth;
+                      minCrossAxisSize = contentConstraints.maxWidth;
+                      maxCrossAxisSize = contentConstraints.maxWidth;
                     }
                   } else {
                     // child is't layout, so set minHeight
@@ -1076,9 +1077,9 @@ class RenderFlexLayout extends RenderLayoutBox {
                 } else if (child is! RenderTextBox) {
                   // only stretch ElementBox, not TextBox.
                   minCrossAxisSize = maxCrossSize;
-                  maxCrossAxisSize = math.max(maxCrossSize, constraints.maxWidth);
+                  maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
                 } else {
-                  // for RenderTextBox, there are no cross Axis constraints.
+                  // for RenderTextBox, there are no cross Axis contentConstraints.
                   minCrossAxisSize = 0.0;
                   maxCrossAxisSize = double.infinity;
                 }
@@ -1094,12 +1095,12 @@ class RenderFlexLayout extends RenderLayoutBox {
               case FlexDirection.row:
               case FlexDirection.rowReverse:
                 innerConstraints = BoxConstraints(
-                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: constraints.maxHeight);
+                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: contentConstraints.maxHeight);
                 break;
               case FlexDirection.column:
               case FlexDirection.columnReverse:
                 innerConstraints = BoxConstraints(
-                    maxWidth: constraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
+                    maxWidth: contentConstraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
                 break;
             }
           }
@@ -1139,15 +1140,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = constraints
-            .constrain(Size(math.max(constraintWidth, idealMainSize), constraints.constrainHeight(constraintHeight)));
+        size = contentConstraints
+            .constrain(Size(math.max(constraintWidth, idealMainSize), contentConstraints.constrainHeight(constraintHeight)));
         actualSize = contentSize.width;
         crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = constraints
-            .constrain(Size(math.max(constraintWidth, crossSize), constraints.constrainHeight(constraintHeight)));
+        size = contentConstraints
+            .constrain(Size(math.max(constraintWidth, crossSize), contentConstraints.constrainHeight(constraintHeight)));
         actualSize = contentSize.height;
         crossSize = contentSize.width;
         break;
@@ -1351,31 +1352,33 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    List<RenderObject> children = getChildrenAsList();
-    children.sort((RenderObject prev, RenderObject next) {
-      RenderFlexParentData prevParentData = prev.parentData;
-      RenderFlexParentData nextParentData = next.parentData;
-      // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-        return 1;
-      }
-      // z-index applies to flex-item ignoring position property
-      int prevZIndex = prevParentData.zIndex ?? 0;
-      int nextZIndex = nextParentData.zIndex ?? 0;
-      return prevZIndex - nextZIndex;
-    });
+    basePaint(context, offset, (context, offset) {
+      List<RenderObject> children = getChildrenAsList();
+      children.sort((RenderObject prev, RenderObject next) {
+        RenderFlexParentData prevParentData = prev.parentData;
+        RenderFlexParentData nextParentData = next.parentData;
+        // Place positioned element after non positioned element
+        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+          return -1;
+        }
+        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+          return 1;
+        }
+        // z-index applies to flex-item ignoring position property
+        int prevZIndex = prevParentData.zIndex ?? 0;
+        int nextZIndex = nextParentData.zIndex ?? 0;
+        return prevZIndex - nextZIndex;
+      });
 
-    for (var child in children) {
-      // Don't paint placeholder of positioned element
-      if (child is! RenderPositionHolder) {
-        final RenderFlexParentData childParentData = child.parentData;
-        context.paintChild(child, childParentData.offset + offset);
-        child = childParentData.nextSibling;
+      for (var child in children) {
+        // Don't paint placeholder of positioned element
+        if (child is! RenderPositionHolder) {
+          final RenderFlexParentData childParentData = child.parentData;
+          context.paintChild(child, childParentData.offset + offset);
+          child = childParentData.nextSibling;
+        }
       }
-    }
+    });
   }
 
   @override

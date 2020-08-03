@@ -66,8 +66,17 @@ class RenderLayoutBox extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
-class RenderBoxModel extends RenderBox with RenderPaddingMixin {
+class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMixin {
   RenderBoxModel({this.targetId, this.style, this.elementManager});
+
+  bool _debugHasBoxLayout = false;
+
+  BoxConstraints _contentConstraints;
+  BoxConstraints get contentConstraints {
+    assert(_debugHasBoxLayout, 'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
+    assert(_contentConstraints != null);
+    return _contentConstraints;
+  }
 
   // id of current element
   int targetId;
@@ -92,7 +101,7 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin {
       boxSize = wrapPaddingSize(boxSize);
     }
 
-    super.size = constraints.constrain(boxSize);
+    super.size = super.constraints.constrain(boxSize);
   }
 
   // the contentSize of layout box
@@ -118,5 +127,25 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin {
       height += padding.vertical;
     }
     return height;
+  }
+
+  // base layout methods to compute content constraints before content box layout.
+  // call this method before content box layout.
+  BoxConstraints baseLayout() {
+    _debugHasBoxLayout = true;
+    _contentConstraints = super.constraints;
+
+    if (padding != null) {
+      _contentConstraints = deflatePaddingConstraints(_contentConstraints);
+    }
+
+    // layout overflow Box
+    _contentConstraints = deflateOverflowConstraints(_contentConstraints);
+
+    return _contentConstraints;
+  }
+
+  void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    paintOverflow(context, offset, callback);
   }
 }

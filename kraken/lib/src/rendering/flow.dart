@@ -550,6 +550,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   // @override
   void performLayout() {
+    baseLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
@@ -609,7 +610,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = constraints.maxHeight;
+        mainAxisLimit = contentConstraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
@@ -731,13 +732,13 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
     switch (direction) {
       case Axis.horizontal:
-        size = Size(constraintWidth, constraintHeight);
+        size = contentConstraints.constrain(Size(constraintWidth, constraintHeight));
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+        size = contentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;
@@ -1007,30 +1008,32 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    List<RenderObject> children = getChildrenAsList();
-    children.sort((RenderObject prev, RenderObject next) {
-      RenderLayoutParentData prevParentData = prev.parentData;
-      RenderLayoutParentData nextParentData = next.parentData;
-      // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-        return 1;
-      }
-      // z-index applies to element when position is not static
-      int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-      int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-      return prevZIndex - nextZIndex;
-    });
+    basePaint(context, offset, (context, offset) {
+      List<RenderObject> children = getChildrenAsList();
+      children.sort((RenderObject prev, RenderObject next) {
+        RenderLayoutParentData prevParentData = prev.parentData;
+        RenderLayoutParentData nextParentData = next.parentData;
+        // Place positioned element after non positioned element
+        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+          return -1;
+        }
+        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+          return 1;
+        }
+        // z-index applies to element when position is not static
+        int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
+        int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
+        return prevZIndex - nextZIndex;
+      });
 
-    for (var child in children) {
-      if (child is! RenderPositionHolder) {
-        final RenderLayoutParentData childParentData = child.parentData;
-        context.paintChild(child, childParentData.offset + offset);
-        child = childParentData.nextSibling;
+      for (var child in children) {
+        if (child is! RenderPositionHolder) {
+          final RenderLayoutParentData childParentData = child.parentData;
+          context.paintChild(child, childParentData.offset + offset);
+          child = childParentData.nextSibling;
+        }
       }
-    }
+    });
   }
 
   @override

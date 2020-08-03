@@ -201,6 +201,102 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   TickerProvider get vsync => this;
 }
 
+mixin RenderOverflowMixin on RenderBox {
+  AxisDirection XAxis;
+  AxisDirection YAxis;
+
+  bool _clipX = false;
+  bool get clipX => _clipX;
+  set clipX(bool value) {
+    if (_clipX == value) return;
+    _clipX = value;
+    markNeedsLayout();
+  }
+
+  bool _clipY = false;
+  bool get clipY => _clipY;
+  set clipY(bool value) {
+    if (_clipY == value) return;
+    _clipY = value;
+    markNeedsLayout();
+  }
+
+  bool _enableScroll = false;
+  bool get enableScroll => _enableScroll;
+  set enableScroll(bool value) {
+    if (_enableScroll == value) return;
+    _enableScroll = value;
+  }
+
+  ViewportOffset get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset _scrollOffsetX;
+  set scrollOffsetX(ViewportOffset value) {
+    assert(value != null);
+    if (value == _scrollOffsetX) return;
+//    if (attached) _offset.removeListener(_hasScrolled);
+    _scrollOffsetX = value;
+//    if (attached) _offset.addListener(_hasScrolled);
+    markNeedsLayout();
+  }
+
+  ViewportOffset get scrollOffsetY => _scrollOffsetY;
+  ViewportOffset _scrollOffsetY;
+  set scrollOffsetY(ViewportOffset value) {
+    assert(value != null);
+    if (value == _scrollOffsetY) return;
+    //    if (attached) _offset.removeListener(_hasScrolled);
+    _scrollOffsetY = value;
+//    if (attached) _offset.addListener(_hasScrolled);
+    markNeedsLayout();
+  }
+
+  BoxConstraints deflateOverflowConstraints(BoxConstraints constraints) {
+    BoxConstraints result = constraints;
+    if (_clipX && _clipY) {
+      result = BoxConstraints();
+    } else if (_clipX) {
+      result = BoxConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    } else if (_clipY) {
+      result = BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight);
+    }
+
+//    _scrollOffset.applyViewportDimension(_viewportExtent);
+//    _scrollOffset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    return result;
+  }
+
+  double get _paintOffsetX => _paintOffsetForOverflowX(_scrollOffsetX.pixels);
+  double get _paintOffsetY => _paintOffsetForOverflowY(_scrollOffsetY.pixels);
+
+  double _paintOffsetForOverflowX(double position) {
+    return -position;
+  }
+
+  double _paintOffsetForOverflowY(double position) {
+    return -position;
+  }
+
+  bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
+    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
+  }
+
+  // @TODO implement RenderSilver protocol to achieve high performance scroll list.
+  void paintOverflow(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    if (clipX == false && clipY == false) return callback(context, offset);
+    final double paintOffsetX = _paintOffsetX;
+    final double paintOffsetY = _paintOffsetY;
+    final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
+
+    if (_shouldClipAtPaintOffset(paintOffset, size)) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, (PaintingContext context, Offset offset) {
+        callback(context, offset + paintOffset);
+      });
+    } else {
+      callback(context, offset);
+    }
+  }
+}
+
 class RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
