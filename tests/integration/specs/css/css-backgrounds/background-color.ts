@@ -25,7 +25,7 @@ describe('Background-color', () => {
   xit('red with display when window.onload', done => {
     window.onload = async () => {
       div.style.display = 'none';
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     };
     const div = createElementWithStyle('div', {
@@ -54,6 +54,6 @@ describe('Background-color', () => {
     append(BODY, red);
     append(BODY, green);
     await sleep(1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

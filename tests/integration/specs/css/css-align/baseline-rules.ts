@@ -54,7 +54,7 @@ describe('Baseline-rules flexbox', () => {
     });
     append(magenta, box);
     append(BODY, wrapper);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('synthesized-baseline-flexbox-003', async () => {

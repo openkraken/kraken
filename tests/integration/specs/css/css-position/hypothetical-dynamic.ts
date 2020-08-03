@@ -12,7 +12,7 @@ describe('hypothetical-dynamic', () => {
     });
     BODY.appendChild(ancestor);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('change-001', async () => {
     let child;
@@ -38,11 +38,11 @@ describe('hypothetical-dynamic', () => {
     );
     BODY.appendChild(ancestor);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     ancestor.style.left = '100px';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('change-002', async () => {
     let child;
@@ -68,11 +68,11 @@ describe('hypothetical-dynamic', () => {
     );
     BODY.appendChild(ancestor);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     ancestor.style.left = '100px';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('change-003', async () => {
     let child;
@@ -98,11 +98,11 @@ describe('hypothetical-dynamic', () => {
     );
     BODY.appendChild(ancestor);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
     ancestor.style.left = '100px';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

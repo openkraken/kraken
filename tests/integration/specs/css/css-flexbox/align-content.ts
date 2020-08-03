@@ -53,7 +53,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('002', async () => {
     let flexbox;
@@ -107,7 +107,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let p;
@@ -172,7 +172,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('004', async () => {
     let p;
@@ -237,7 +237,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('005', async () => {
     let p;
@@ -302,7 +302,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let p;
@@ -363,7 +363,7 @@ describe('align-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('wrap-001', async () => {
     let log;
@@ -577,7 +577,7 @@ describe('align-content', () => {
     BODY.appendChild(box_5);
     BODY.appendChild(box_6);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('wrap-002', async () => {
     let content1Horizontal;
@@ -989,7 +989,7 @@ describe('align-content', () => {
     BODY.appendChild(flexHorizontal_2);
     BODY.appendChild(flexVertical);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('wrap-003', async () => {
     let flexbox;
@@ -2769,7 +2769,7 @@ describe('align-content', () => {
     BODY.appendChild(flexbox_42);
     BODY.appendChild(flexbox_43);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('wrap-004', async () => {
     let flex;
@@ -2842,7 +2842,7 @@ describe('align-content', () => {
     );
     BODY.appendChild(flex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('stretch unbound flex-item 001', async () => {
@@ -2887,7 +2887,7 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('stretch unbound flex-item 002', async () => {
@@ -2932,7 +2932,7 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('stretch unbound flex-item 003', async () => {
@@ -2977,6 +2977,6 @@ describe('align-content', () => {
       ]
     );
     BODY.appendChild(flexHorizontal);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

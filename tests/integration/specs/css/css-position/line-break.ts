@@ -37,7 +37,7 @@ describe('line-break', () => {
     );
     BODY.appendChild(parent);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('after-leading-oof-001-ref', async () => {
     let div;
@@ -53,7 +53,7 @@ describe('line-break', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('after-leading-oof-001', async () => {
     let div;
@@ -78,6 +78,6 @@ describe('line-break', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

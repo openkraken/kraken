@@ -6,7 +6,7 @@ describe('TextNode', () => {
     document.body.appendChild(div);
     div.appendChild(text);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with text update', async () => {
@@ -18,7 +18,7 @@ describe('TextNode', () => {
 
     text.data = 'after modified';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with style update of non empty text', async () => {
@@ -35,7 +35,7 @@ describe('TextNode', () => {
     div.style.color = 'blue';
     document.body.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with style update of empty text', async () => {
@@ -52,6 +52,6 @@ describe('TextNode', () => {
     div.style.color = 'blue';
     document.body.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -28,7 +28,7 @@ describe('left-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('to-008', async () => {
     let p;
@@ -65,7 +65,7 @@ describe('left-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('to-009', async () => {
     let p;
@@ -109,7 +109,7 @@ describe('left-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('to-012', async () => {
     let p;
@@ -179,6 +179,6 @@ describe('left-applies', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

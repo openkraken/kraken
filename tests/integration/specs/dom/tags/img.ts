@@ -91,10 +91,10 @@ describe('Tags img', () => {
     expect(src).toBe('assets/rabbit.png');
     // have to wait for asset load?
     await sleep(0.1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
     img.src = 'assets/solidblue.png';
     await sleep(0.1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
     src = img.src;
     expect(src).toBe('assets/solidblue.png');
   });
@@ -104,7 +104,7 @@ describe('Tags img', () => {
     img.onload = async () => {
       expect(img.width).toBe(70);
       expect(img.height).toBe(72);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     };
     img.src = 'assets/rabbit.png';
@@ -116,9 +116,9 @@ describe('Tags img', () => {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
-    await matchScreenshot();
+    await matchViewportSnapshot();
     img.src = 'assets/300x150-green.png';
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
 

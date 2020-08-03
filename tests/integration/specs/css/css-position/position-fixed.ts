@@ -62,7 +62,7 @@ describe('position-fixed', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('003', async () => {
     let p;
@@ -106,7 +106,7 @@ describe('position-fixed', () => {
     BODY.appendChild(div1);
     BODY.appendChild(filler);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('005', async () => {
     let prerequisite;
@@ -183,7 +183,7 @@ describe('position-fixed', () => {
     BODY.appendChild(p);
     BODY.appendChild(fixed);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let p;
@@ -202,7 +202,7 @@ describe('position-fixed', () => {
       ]
     );
     BODY.appendChild(p);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('007-ref', async () => {
     let div;
@@ -243,7 +243,7 @@ describe('position-fixed', () => {
     BODY.appendChild(div);
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('007', async () => {
     let p;
@@ -279,6 +279,6 @@ describe('position-fixed', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

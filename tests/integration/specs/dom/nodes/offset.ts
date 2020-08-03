@@ -44,6 +44,6 @@ describe('Offset api', () => {
 
     document.body.appendChild(document.createTextNode(str));
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

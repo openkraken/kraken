@@ -37,7 +37,7 @@ describe('flexbox flex-shrink', () => {
     child3.appendChild(document.createTextNode('flex-shrink: 1'));
     container1.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work when flex-direction is column', async () => {
@@ -78,7 +78,7 @@ describe('flexbox flex-shrink', () => {
     child6.appendChild(document.createTextNode('flex-shrink: 1'));
     container2.appendChild(child6);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('not shrink no defined size elements', async () => {
     let element = createElement('div', {
@@ -113,6 +113,6 @@ describe('flexbox flex-shrink', () => {
       })
     ]);
     BODY.appendChild(element);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

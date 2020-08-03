@@ -106,7 +106,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let filler;
@@ -215,7 +215,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('003', async () => {
     let filler;
@@ -324,7 +324,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('004', async () => {
     let filler;
@@ -433,7 +433,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('005', async () => {
     let filler;
@@ -542,7 +542,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let filler;
@@ -651,7 +651,7 @@ describe('abspos-inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('007-ref', async () => {
     let abspos;
@@ -852,7 +852,7 @@ block, and 2) is not a child of the inline containing block, but a descendant.`)
     BODY.appendChild(blockContainer);
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('007', async () => {
     let abspos;
@@ -1059,7 +1059,7 @@ block, and 2) is not a child of the inline containing block, but a descendant.`)
     BODY.appendChild(blockContainer);
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('008', async () => {
     let p;
@@ -1113,6 +1113,6 @@ block, and 2) is not a child of the inline containing block, but a descendant.`)
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

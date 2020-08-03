@@ -35,7 +35,7 @@ describe('Text TextDecoration', () => {
           );
           append(BODY, cont);
 
-          return matchScreenshot();
+          return matchViewportSnapshot();
         });
 
         // Merged property.
@@ -53,7 +53,7 @@ describe('Text TextDecoration', () => {
           );
           append(BODY, cont);
 
-          return matchScreenshot();
+          return matchViewportSnapshot();
         });
       });
     });

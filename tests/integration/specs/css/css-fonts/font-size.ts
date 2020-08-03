@@ -9,7 +9,7 @@ describe('FontSize', () => {
     );
     append(BODY, p1);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 
   it('should work with chinese', () => {
@@ -22,7 +22,7 @@ describe('FontSize', () => {
     );
     append(BODY, p1);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 
   it('should work with less than 12px', () => {
@@ -44,6 +44,6 @@ describe('FontSize', () => {
     append(BODY, p1);
     append(BODY, p2);
 
-    return matchScreenshot();
+    return matchViewportSnapshot();
   });
 });

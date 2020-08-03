@@ -12,7 +12,7 @@ describe('Insert before', () => {
     insertSpan.appendChild(insertText);
     div.insertBefore(insertSpan, span);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('referenceNode is null', async () => {
@@ -27,7 +27,7 @@ describe('Insert before', () => {
     );
     BODY.insertBefore(n1, null);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with orphan element', async () => {
@@ -52,7 +52,7 @@ describe('Insert before', () => {
     BODY.appendChild(n1);
     BODY.insertBefore(n2, n1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with element which has parent and connected', async () => {
@@ -80,7 +80,7 @@ describe('Insert before', () => {
     BODY.appendChild(n2);
     n1.insertBefore(n2, null);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with element which has parent but not connected', async () => {
@@ -107,7 +107,7 @@ describe('Insert before', () => {
     BODY.appendChild(n1);
     BODY.insertBefore(n2, n1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
 });

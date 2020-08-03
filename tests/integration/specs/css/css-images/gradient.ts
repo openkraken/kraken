@@ -18,7 +18,7 @@ describe('gradient', () => {
     });
     BODY.appendChild(button);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('refcrash', async () => {
     let div;
@@ -30,6 +30,6 @@ describe('gradient', () => {
     });
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
