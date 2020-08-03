@@ -13,7 +13,7 @@ export const location = {
     return getUrl().href;
   },
   set href(url: string) {
-    krakenInvokeModule(JSON.stringify(['location', 'href', [url]]));
+    krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [url]]));
   },
   get origin() {
     return getUrl().origin;
@@ -42,7 +42,7 @@ export const location = {
 
   get assign() {
     return (assignURL: string) => {
-      krakenInvokeModule(JSON.stringify(['location', 'assign', [assignURL]]));
+      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [assignURL]]));
     };
   },
   get reload() {
@@ -50,7 +50,7 @@ export const location = {
   },
   get replace() {
     return (replaceURL: string) => {
-      krakenInvokeModule(JSON.stringify(['location', 'replace', [replaceURL]]));
+      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [replaceURL]]));
     };
   },
   get toString() {

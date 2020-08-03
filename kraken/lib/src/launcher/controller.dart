@@ -149,7 +149,9 @@ class KrakenViewController {
     }
   }
 
-  void handleNavigationAction(KrakenNavigationAction action) async {
+  void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+
     try {
       KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;

@@ -41,10 +41,7 @@ class AnchorElement extends Element {
     } else {
       scheme = uri.scheme;
     }
-    KrakenNavigationType navigationType = _getNavigationType(scheme);
-    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, _href, navigationType);
-
-    elementManager.controller.handleNavigationAction(action);
+    elementManager.controller.handleNavigationAction(sourceUrl, _href, _getNavigationType(scheme));
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {
