@@ -50,8 +50,8 @@ class CSSStyleProperty {
       style[BACKGROUND_IMAGE] = values[1];
       style[BACKGROUND_REPEAT] = values[2];
       style[BACKGROUND_ATTACHMENT] = values[3];
-      style[BACKGROUND_POSITION] = values[3];
-      style[BACKGROUND_SIZE] = values[3];
+      style[BACKGROUND_POSITION] = values[4];
+      style[BACKGROUND_SIZE] = values[5];
     }
   }
 
