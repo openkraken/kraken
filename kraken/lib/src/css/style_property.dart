@@ -128,7 +128,7 @@ class CSSStyleProperty {
           borderLeftColor = values[2];
         }
       } else {
-        
+
         List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
         if (values == null) return;
         // @TODO validate value
@@ -184,12 +184,12 @@ class CSSStyleProperty {
       if (property == BORDER || property == BORDER_BOTTOM) {
         if (style.containsKey(BORDER_BOTTOM_COLOR)) style.remove(BORDER_BOTTOM_COLOR);
         if (style.containsKey(BORDER_BOTTOM_STYLE)) style.remove(BORDER_BOTTOM_STYLE);
-        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);         
+        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);
       }
       if (property == BORDER || property == BORDER_LEFT) {
         if (style.containsKey(BORDER_LEFT_COLOR)) style.remove(BORDER_LEFT_COLOR);
         if (style.containsKey(BORDER_LEFT_STYLE)) style.remove(BORDER_LEFT_STYLE);
-        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);          
+        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);
       }
     } else {
       if (property == BORDER_WIDTH) {
@@ -255,7 +255,7 @@ class CSSStyleProperty {
     return values;
   }
 
-  // Current not support multiple background layer: 
+  // Current not support multiple background layer:
   static List<String> getBackgroundValues(String shorthandProperty) {
     assert(shorthandProperty != null);
     // Convert 40%/10em -> 40% / 10em
@@ -301,8 +301,8 @@ class CSSStyleProperty {
     }
 
     // Before `/` must have one position value, after `/` must have on size value
-    if (isPositionEndAndSizeStart && 
-      (positionX == null && positionY == null) || (sizeWidth == null && sizeHeight == null)) {
+    if (isPositionEndAndSizeStart &&
+        ((positionX == null && positionY == null) || (sizeWidth == null && sizeHeight == null))) {
        return null;
     }
 
@@ -366,10 +366,10 @@ class CSSStyleProperty {
 
       values[0] == null ? values[0] = property : values[0] += (_comma + property);
       values[1] == null ? values[1] = duration : values[1] += (_comma + duration);
-      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);  
+      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);
       values[3] == null ? values[3] = delay : values[3] += (_comma + delay);
     }
-    
+
     return values;
   }
 
