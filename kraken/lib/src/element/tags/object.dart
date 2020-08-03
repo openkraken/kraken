@@ -15,8 +15,8 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
-_DefaultObjectElementClient _DefaultObjectElementFactory() {
-  return _DefaultObjectElementClient();
+_DefaultObjectElementClient _DefaultObjectElementFactory(ObjectElementHost objectElementHost) {
+  return _DefaultObjectElementClient(objectElementHost);
 }
 
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
@@ -69,17 +69,21 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   void initObjectClient() {
     _objectElementClientFactory = getObjectElementFactory() ?? _DefaultObjectElementFactory;
-    _objectElementClient = _objectElementClientFactory();
+    _objectElementClient = _objectElementClientFactory(this);
   }
 
-  void initSizedBox() {
+  void initSizedBox(){
     _sizedBox = RenderConstrainedBox(
         additionalConstraints: BoxConstraints.loose(Size(
       CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
       CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
     )));
     addChild(_sizedBox);
-    _textureBox = _objectElementClient?.createRenderObject(properties);
+    initChildTextureBox();
+  }
+
+  Future<dynamic> initChildTextureBox() async {
+    _textureBox = await _objectElementClient?.createRenderObject(properties);
     if (_textureBox != null) {
       _sizedBox.child = _textureBox;
     }
@@ -117,11 +121,29 @@ class ObjectElement extends Element implements ObjectElementHost {
     double h = style.contains(HEIGHT) ? CSSLength.toDisplayPortValue(style[HEIGHT]) : null;
     _sizedBox.additionalConstraints = BoxConstraints.tight(Size(w ?? defaultWidth, h ?? defaultHeight));
   }
+
+  @override
+  updateChildTextureBox(TextureBox textureBox) {
+    _sizedBox.child = textureBox;
+    _updateSizedBox();
+  }
+
+  @override
+  method(String name, List args) {
+   super.method(name, args);
+   _objectElementClient?.method(name, args);
+  }
+
+
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {
+  ObjectElementHost objectElementHost;
+
+  _DefaultObjectElementClient(this.objectElementHost);
+
   @override
-  TextureBox createRenderObject(Map<String, dynamic> properties) {
+  Future<TextureBox> createRenderObject(Map<String, dynamic> properties) async {
     print('call DefaultObjectElementClient createRenderObject properties[$properties]');
     return null;
   }
