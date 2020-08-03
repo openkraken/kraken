@@ -37,8 +37,8 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   ObjectElement(targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
-    initSizedBox();
     initObjectClient();
+    initSizedBox();
   }
 
   @override
@@ -68,8 +68,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   void initObjectClient() {
-    _objectElementClientFactory =
-        getObjectElementFactory() ?? _DefaultObjectElementFactory;
+    _objectElementClientFactory = getObjectElementFactory() ?? _DefaultObjectElementFactory;
     _objectElementClient = _objectElementClientFactory();
   }
 
@@ -80,7 +79,7 @@ class ObjectElement extends Element implements ObjectElementHost {
       CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
     )));
     addChild(_sizedBox);
-    _textureBox = _objectElementClient.createRenderObject(properties);
+    _textureBox = _objectElementClient?.createRenderObject(properties);
     if (_textureBox != null) {
       _sizedBox.child = _textureBox;
     }
