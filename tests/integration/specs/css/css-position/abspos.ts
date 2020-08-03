@@ -71,7 +71,7 @@ describe('abspos', () => {
     BODY.appendChild(abs);
     BODY.appendChild(flow);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let p;
@@ -139,7 +139,7 @@ describe('abspos', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let absolute;
@@ -187,7 +187,7 @@ describe('abspos', () => {
     BODY.appendChild(absolute);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('004', async () => {
     let absolute;
@@ -235,9 +235,9 @@ describe('abspos', () => {
     BODY.appendChild(absolute);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let description;
@@ -281,7 +281,7 @@ describe('abspos', () => {
     BODY.appendChild(description);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('007', async () => {
     let test;
@@ -349,7 +349,7 @@ describe('abspos', () => {
     );
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('008', async () => {
     let p;
@@ -442,7 +442,7 @@ describe('abspos', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('009', async () => {
     let p;
@@ -497,7 +497,7 @@ describe('abspos', () => {
     BODY.appendChild(test);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('010', async () => {
     let p;
@@ -513,7 +513,7 @@ describe('abspos', () => {
     );
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('011', async () => {
     let p;
@@ -573,7 +573,7 @@ describe('abspos', () => {
     BODY.appendChild(p_2);
     BODY.appendChild(p_3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('013', async () => {
     let a;
@@ -617,7 +617,7 @@ describe('abspos', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('014', async () => {
     let b;
@@ -661,7 +661,7 @@ describe('abspos', () => {
     BODY.appendChild(b);
     BODY.appendChild(a);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('015', async () => {
     let a;
@@ -705,7 +705,7 @@ describe('abspos', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('016', async () => {
     let b;
@@ -749,7 +749,7 @@ describe('abspos', () => {
     BODY.appendChild(b);
     BODY.appendChild(a);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('017', async () => {
     let a;
@@ -793,7 +793,7 @@ describe('abspos', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('018', async () => {
     let b;
@@ -837,7 +837,7 @@ describe('abspos', () => {
     BODY.appendChild(b);
     BODY.appendChild(a);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('019', async () => {
     let a;
@@ -881,7 +881,7 @@ describe('abspos', () => {
     BODY.appendChild(a);
     BODY.appendChild(b);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('020', async () => {
     let b;
@@ -925,7 +925,7 @@ describe('abspos', () => {
     BODY.appendChild(b);
     BODY.appendChild(a);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('022', async () => {
     let c3;
@@ -1015,7 +1015,7 @@ describe('abspos', () => {
     BODY.appendChild(a);
     BODY.appendChild(c4);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('023', async () => {
     let p;
@@ -1076,7 +1076,7 @@ describe('abspos', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('024', async () => {
     let p;
@@ -1129,7 +1129,7 @@ describe('abspos', () => {
     BODY.appendChild(test);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('025', async () => {
     let p;
@@ -1170,7 +1170,7 @@ describe('abspos', () => {
     );
     BODY.appendChild(p);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('026', async () => {
     let p;
@@ -1225,6 +1225,6 @@ describe('abspos', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

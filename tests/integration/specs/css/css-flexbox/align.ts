@@ -65,7 +65,7 @@ describe('align', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('content_stretch', async () => {
     let test01;
@@ -132,6 +132,6 @@ describe('align', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

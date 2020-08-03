@@ -9,6 +9,6 @@ describe('Transform translate', () => {
       })
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

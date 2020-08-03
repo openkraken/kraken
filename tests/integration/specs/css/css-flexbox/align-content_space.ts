@@ -65,7 +65,7 @@ describe('align-content_space', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('between', async () => {
     let test01;
@@ -132,6 +132,6 @@ describe('align-content_space', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

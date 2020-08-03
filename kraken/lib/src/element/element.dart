@@ -91,7 +91,6 @@ class Element extends Node
   RenderObject renderObject;
   KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
-  KrakenRenderPadding renderPadding;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;

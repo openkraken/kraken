@@ -61,6 +61,6 @@ describe('Tags audio', () => {
       audio.fastSeek(1);
     });
     container1.appendChild(seekBtn);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

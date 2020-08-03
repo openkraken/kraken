@@ -16,14 +16,14 @@ describe('AnimationPlayer', () => {
 
       // Need to impl onload event.
       await sleep(1);
-      await matchScreenshot();
+      await matchViewportSnapshot();
 
       animationPlayer.play('hands_up');
       // Wait for animation end.
       // Need to impl animation_end event.
       await sleep(1);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 });

@@ -82,7 +82,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(inlineBlock);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('001', async () => {
     let p;
@@ -130,7 +130,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('002', async () => {
     let p;
@@ -178,7 +178,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('003-ref', async () => {
     let p;
@@ -219,7 +219,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let p;
@@ -279,7 +279,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('percentage-001-ref', async () => {
     let p;
@@ -320,7 +320,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('percentage-001', async () => {
     let p;
@@ -370,7 +370,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('percentage-002-ref', async () => {
     let p;
@@ -407,7 +407,7 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('percentage-002', async () => {
     let p;
@@ -492,6 +492,6 @@ describe('left-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(grandParentAbsPos);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

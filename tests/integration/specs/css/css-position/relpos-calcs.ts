@@ -32,7 +32,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('001', async () => {
     let p;
@@ -119,7 +119,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let p;
@@ -206,7 +206,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('003', async () => {
     let p;
@@ -293,7 +293,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(control);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('004', async () => {
     let p;
@@ -390,7 +390,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(control);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('005', async () => {
     let p;
@@ -487,7 +487,7 @@ describe('relpos-calcs', () => {
     BODY.appendChild(control);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let p;
@@ -579,11 +579,11 @@ describe('relpos-calcs', () => {
     BODY.appendChild(control);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('007', async () => {
     let p;
@@ -670,6 +670,6 @@ describe('relpos-calcs', () => {
     BODY.appendChild(container);
     BODY.appendChild(control);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

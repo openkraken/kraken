@@ -14,7 +14,7 @@ describe('block-in', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-003', async () => {
     let block;
@@ -67,7 +67,7 @@ describe('block-in', () => {
     BODY.appendChild(block);
     BODY.appendChild(block_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-004', async () => {
     let block;
@@ -123,7 +123,7 @@ describe('block-in', () => {
     BODY.appendChild(block);
     BODY.appendChild(block_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-005', async () => {
     let test;
@@ -177,7 +177,7 @@ describe('block-in', () => {
       ]
     );
     BODY.appendChild(block);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-008-ref', async () => {
     let p;
@@ -201,7 +201,7 @@ describe('block-in', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-008', async () => {
     let p;
@@ -268,7 +268,7 @@ describe('block-in', () => {
     BODY.appendChild(control);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-relpos-001-ref', async () => {
     let p;
@@ -412,7 +412,7 @@ describe('block-in', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('inline-relpos-001', async () => {
     let p;
@@ -556,7 +556,7 @@ describe('block-in', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('inline-empty-001-ref', async () => {
     let span;
@@ -585,7 +585,7 @@ describe('block-in', () => {
     BODY.appendChild(span);
     BODY.appendChild(span_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('inline-empty-003-ref', async () => {
     let span;
@@ -614,7 +614,7 @@ describe('block-in', () => {
     BODY.appendChild(span);
     BODY.appendChild(span_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('inline-empty-003', async () => {
     let span;
@@ -645,7 +645,7 @@ describe('block-in', () => {
     );
     BODY.appendChild(span);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('inline-empty-004', async () => {
     let span;
@@ -676,6 +676,6 @@ describe('block-in', () => {
     );
     BODY.appendChild(span);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

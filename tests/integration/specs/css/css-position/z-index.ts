@@ -40,7 +40,7 @@ describe('z-index', () => {
       });
     });
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with flex-item', async () => {
@@ -88,7 +88,7 @@ describe('z-index', () => {
     );
     BODY.appendChild(root);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('without flex-item', async () => {
@@ -136,6 +136,6 @@ describe('z-index', () => {
 
     BODY.appendChild(root);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

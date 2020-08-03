@@ -52,7 +52,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-002', async () => {
     let referenceOverlappedRed;
@@ -105,7 +105,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-003', async () => {
     let p;
@@ -182,7 +182,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-004', async () => {
     let referenceOverlappedRed;
@@ -220,7 +220,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-005', async () => {
     let referenceOverlappedRed;
@@ -262,7 +262,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-006', async () => {
     let referenceOverlappedRed;
@@ -304,7 +304,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-007', async () => {
     let p;
@@ -366,7 +366,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-008', async () => {
     let p;
@@ -428,7 +428,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('height-flex-items-009', async () => {
     let p;
@@ -649,6 +649,6 @@ describe('flex-minimum', () => {
     //   checkLayout('.container');
     // }
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

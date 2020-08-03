@@ -14,7 +14,7 @@ describe('containing-block legacy', () => {
     });
     append(div1, child);
     append(BODY, div1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('003', async () => {
@@ -35,7 +35,7 @@ describe('containing-block legacy', () => {
     });
     append(div1, child);
     append(BODY, div1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('004', async () => {
@@ -71,7 +71,7 @@ describe('containing-block legacy', () => {
     });
     append(div1, child);
     append(BODY, div1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('008', async () => {
@@ -97,7 +97,7 @@ describe('containing-block legacy', () => {
     append(div2, div3);
     append(div1, div2);
     append(BODY, div1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('009', async () => {
     let div1 = createElementWithStyle('div', {
@@ -272,7 +272,7 @@ describe('containing-block legacy', () => {
     append(test, lastBox);
     append(container, test);
     append(BODY, container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('018', async () => {
@@ -342,7 +342,7 @@ describe('containing-block legacy', () => {
     append(test, lastBox);
     append(container, test);
     append(BODY, container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('019', async () => {
@@ -367,7 +367,7 @@ describe('containing-block legacy', () => {
     append(span, spanSpan);
     append(div, span);
     append(BODY, div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('023', async () => {
@@ -390,7 +390,7 @@ describe('containing-block legacy', () => {
     append(div2, div3);
     append(div1, div2);
     append(BODY, div1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('026', async () => {
@@ -431,7 +431,7 @@ describe('containing-block legacy', () => {
     let wrapper = createElementWithStyle('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('028', async () => {
@@ -455,7 +455,7 @@ describe('containing-block legacy', () => {
     let wrapper = createElementWithStyle('div', divStyle);
     append(wrapper, child);
     append(BODY, wrapper);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('030', async () => {
@@ -474,7 +474,7 @@ describe('containing-block legacy', () => {
     let container = createElementWithStyle('div', containingBlockStyle);
     append(container, div);
     append(BODY, container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('relative positioned elements near block-level ancestor', async () => {
@@ -504,7 +504,7 @@ describe('containing-block legacy', () => {
     });
     div1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('relative positioned elements near inline-block ancestor', async () => {
@@ -537,7 +537,7 @@ describe('containing-block legacy', () => {
     });
     div1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('static positioned elements near block-level ancestor', async () => {
@@ -567,7 +567,7 @@ describe('containing-block legacy', () => {
     });
     div1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('static positioned elements near block-level ancestor', async () => {
@@ -597,7 +597,7 @@ describe('containing-block legacy', () => {
     });
     div1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('fixed positioned elements', async () => {
@@ -627,7 +627,7 @@ describe('containing-block legacy', () => {
     });
     div1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('absolute positioned elements near absolute ancestor', async () => {

@@ -11,7 +11,7 @@ describe('Content Visibility', () => {
 
     document.body.appendChild(container1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should hidden', async () => {
@@ -26,7 +26,7 @@ describe('Content Visibility', () => {
 
     document.body.appendChild(container1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should auto visible', async () => {
@@ -46,7 +46,7 @@ describe('Content Visibility', () => {
     });
 
     await sleep(0.1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should auto hidden', async () => {

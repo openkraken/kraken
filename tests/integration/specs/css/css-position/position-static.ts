@@ -43,7 +43,7 @@ describe('position-static', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('001', async () => {
     let p;
@@ -97,6 +97,6 @@ describe('position-static', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

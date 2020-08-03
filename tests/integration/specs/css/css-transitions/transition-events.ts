@@ -56,12 +56,12 @@ describe('Transition events', () => {
 
     container1.addEventListener('transitionend', async function self() {
       container1.removeEventListener('transitionend', self);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     });
     requestAnimationFrame(async () => {
       await sleep(0.1);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
@@ -94,12 +94,12 @@ describe('Transition events', () => {
 
     function second() {
       container1.removeEventListener('transitionend', second);
-      matchScreenshot().then(done);
+      matchViewportSnapshot().then(done);
     }
 
     container1.addEventListener('transitionend', first);
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translate(30px,30px)',
       });

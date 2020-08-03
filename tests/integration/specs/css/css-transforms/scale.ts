@@ -10,7 +10,7 @@ describe('Transform scale', () => {
       })
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('002', async () => {
@@ -24,6 +24,6 @@ describe('Transform scale', () => {
         })
       );
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 });

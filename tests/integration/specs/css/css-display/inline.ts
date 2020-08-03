@@ -18,7 +18,7 @@ describe('Display inline', () => {
       )
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('textNode only if have one space', async () => {
@@ -44,6 +44,6 @@ describe('Display inline', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

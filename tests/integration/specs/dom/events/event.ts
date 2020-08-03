@@ -36,6 +36,6 @@ describe('Event', () => {
     wrapper.appendChild(document.createTextNode('Click DIV 2: '));
 
     container2.click();
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

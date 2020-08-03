@@ -12,6 +12,6 @@ describe('Box nesting', () => {
 
     container.appendChild(box);
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
