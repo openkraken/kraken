@@ -37,6 +37,19 @@ export class Document extends Node {
   createComment(data: string) {
     return new Comment(data);
   }
+  
+  getElementById(id: string): Element|null {
+    if(id==''){
+      return null
+    }
+    for (let key in eventTargetMap){
+      const element=eventTargetMap[key];
+      if( element instanceof Element && element.getAttribute('id')===id){
+          return element;
+      }
+    }
+    return null;
+  }
 
   get all(): HTMLAllCollection {
     const all = new HTMLAllCollection();
