@@ -17,15 +17,6 @@ import 'package:kraken/css.dart';
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
 mixin CSSBackgroundMixin {
-  // Default property.
-  Map<String, String> background = {
-    BACKGROUND_REPEAT: 'repeat',
-    BACKGROUND_ATTACHMENT: 'scroll',
-    BACKGROUND_POSITION: 'left top',
-    BACKGROUND_IMAGE: '',
-    BACKGROUND_SIZE: 'auto',
-    BACKGROUND_COLOR: 'transparent'
-  };
 
   RenderDecorateElementBox _renderDecorateElementBox;
 
@@ -181,12 +172,10 @@ class CSSBackground {
       }
     }
 
-    CSSPosition position = CSSPosition(style[BACKGROUND_POSITION]);
-
     backgroundImage = DecorationImage(
       image: CSSUrl(url).computedValue,
       repeat: imageRepeat,
-      alignment: position.computedValue,
+      alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION]),
       fit: boxFit
     );
 
