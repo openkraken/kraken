@@ -56,4 +56,32 @@ describe('Overflow', () => {
 
     await matchScreenshot();
   });
+
+  it('scrollTo', async (done) => {
+    let container = document.createElement('div');
+    let div1 = document.createElement('div');
+    Object.assign(div1.style, {
+      overflowX: 'scroll',
+      overflowY: 'visible',
+      width: '100px',
+      height: '100px',
+    });
+
+    let inner1 = document.createElement('div');
+    Object.assign(inner1.style, {
+      width: '120px',
+      height: '120px',
+      background: 'conic-gradient(from -90deg, blue 0 25%, black 25% 50%, red 50% 75%, green 75% 100%)',
+    });
+
+    div1.appendChild(inner1);
+    container.appendChild(div1);
+
+    requestAnimationFrame(async () => {
+      div1.scroll(20, 20);
+      await matchScreenshot();
+      done();
+    });
+    document.body.appendChild(container);
+  });
 });
