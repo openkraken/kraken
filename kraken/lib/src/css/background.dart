@@ -16,6 +16,10 @@ import 'package:kraken/css.dart';
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
+/// 
+
+final RegExp _splitRegExp = RegExp(r'\s+');
+
 mixin CSSBackgroundMixin {
 
   RenderDecorateElementBox _renderDecorateElementBox;
@@ -69,23 +73,26 @@ class CSSColorStop {
 
 class CSSBackground {
   static bool isValidBackgroundRepeatValue(String value) {
-    return 'repeat-x' == value || 'repeat-y' == value || 'repeat' == value || 'no-repeat' == value;
+    return value == REPEAT ||
+      value == NO_REPEAT ||
+      value == REPEAT_X ||
+      value == REPEAT_Y;
   }
 
   static bool isValidBackgroundSizeValue(String value) {
-    return value == 'auto' ||
-        value == 'contain' ||
-        value == 'cover' ||
-        value == 'fit-width' ||
-        value == 'fit-height' ||
-        value == 'scale-down' ||
-        value == 'fill' ||
+    return value == AUTO ||
+        value == CONTAIN ||
+        value == COVER ||
+        value == FIT_WIDTH ||
+        value == FIT_HEIGTH ||
+        value == SCALE_DOWN ||
+        value == FILL ||
         CSSLength.isLength(value) ||
         CSSPercentage.isPercentage(value);
   }
 
   static bool isValidBackgroundAttachmentValue(String value) {
-    return 'scroll' == value || 'local' == value;
+    return value == SCROLL || value == LOCAL;
   }
 
   static bool isValidBackgroundImageValue(String value) {
@@ -98,11 +105,11 @@ class CSSBackground {
   }
 
   static bool isValidBackgroundPositionValue(String value) {
-    return value == 'center' ||
-      value == 'left' ||
-      value == 'right' ||
-      value == 'top' ||
-      value == 'bottom' ||
+    return value == CSSPosition.CENTER ||
+      value == CSSPosition.LEFT ||
+      value == CSSPosition.RIGHT ||
+      value == CSSPosition.TOP ||
+      value == CSSPosition.BOTTOM ||
       CSSLength.isLength(value) ||
       CSSPercentage.isPercentage(value);
   }
@@ -116,13 +123,13 @@ class CSSBackground {
   }
 
   static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {
-    return style[BACKGROUND_IMAGE].isNotEmpty && style[BACKGROUND_ATTACHMENT] == 'local';
+    return style[BACKGROUND_IMAGE].isNotEmpty && style[BACKGROUND_ATTACHMENT] == LOCAL;
   }
 
   static bool hasScrollBackgroundImage(CSSStyleDeclaration style) {
     String attachment = style[BACKGROUND_ATTACHMENT];
     // Default is `scroll` attachment
-    return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == 'scroll');
+    return style[BACKGROUND_IMAGE].isNotEmpty && (attachment.isEmpty || attachment == SCROLL);
   }
 
   static DecorationImage getDecorationImage(CSSStyleDeclaration style, CSSFunctionalNotation method) {
@@ -136,13 +143,13 @@ class CSSBackground {
     ImageRepeat imageRepeat = ImageRepeat.repeat;
     if (style[BACKGROUND_REPEAT].isNotEmpty) {
       switch (style[BACKGROUND_REPEAT]) {
-        case 'repeat-x':
+        case REPEAT_X:
           imageRepeat = ImageRepeat.repeatX;
           break;
-        case 'repeat-y':
+        case REPEAT_Y:
           imageRepeat = ImageRepeat.repeatY;
           break;
-        case 'no-repeat':
+        case NO_REPEAT:
           imageRepeat = ImageRepeat.noRepeat;
           break;
       }
@@ -151,22 +158,22 @@ class CSSBackground {
     BoxFit boxFit = BoxFit.none;
     if (style[BACKGROUND_SIZE].isNotEmpty) {
       switch (style[BACKGROUND_SIZE]) {
-        case 'cover':
+        case COVER:
           boxFit = BoxFit.cover;
           break;
-        case 'contain':
+        case CONTAIN:
           boxFit = BoxFit.contain;
           break;
-        case 'fill':
+        case FILL:
           boxFit = BoxFit.fill;
           break;
-        case 'fit-width':
+        case FIT_WIDTH:
           boxFit = BoxFit.fitWidth;
           break;
-        case 'fit-height':
+        case FIT_HEIGTH:
           boxFit = BoxFit.fitHeight;
           break;
-        case 'scale-down':
+        case SCALE_DOWN:
           boxFit = BoxFit.scaleDown;
           break;
       }
@@ -193,17 +200,19 @@ class CSSBackground {
         case 'linear-gradient':
         case 'repeating-linear-gradient':
           double linearAngle;
-          Alignment begin = Alignment.topCenter, end = Alignment.bottomCenter;
-          if (method.args[0].startsWith('to ')) {
-            List<String> toString = method.args[0].trim().split(' ');
-            if (toString.length >= 2) {
-              switch (toString[1]) {
-                case 'left':
-                  if (toString.length == 3) {
-                    if (toString[2] == 'top') {
+          Alignment begin = Alignment.topCenter;
+          Alignment end = Alignment.bottomCenter;
+          String arg0 = method.args[0].trim();
+          if (arg0.startsWith('to ')) {
+            List<String> parts = arg0.split(_splitRegExp);
+            if (parts.length >= 2) {
+              switch (parts[1]) {
+                case LEFT:
+                  if (parts.length == 3) {
+                    if (parts[2] == TOP) {
                       begin = Alignment.bottomRight;
                       end = Alignment.topLeft;
-                    } else if (toString[2] == 'bottom') {
+                    } else if (parts[2] == BOTTOM) {
                       begin = Alignment.topRight;
                       end = Alignment.bottomLeft;
                     }
@@ -212,12 +221,12 @@ class CSSBackground {
                     end = Alignment.centerLeft;
                   }
                   break;
-                case 'top':
-                  if (toString.length == 3) {
-                    if (toString[2] == 'left') {
+                case TOP:
+                  if (parts.length == 3) {
+                    if (parts[2] == LEFT) {
                       begin = Alignment.bottomRight;
                       end = Alignment.topLeft;
-                    } else if (toString[2] == 'right') {
+                    } else if (parts[2] == RIGHT) {
                       begin = Alignment.bottomLeft;
                       end = Alignment.topRight;
                     }
@@ -226,12 +235,12 @@ class CSSBackground {
                     end = Alignment.topCenter;
                   }
                   break;
-                case 'right':
-                  if (toString.length == 3) {
-                    if (toString[2] == 'top') {
+                case RIGHT:
+                  if (parts.length == 3) {
+                    if (parts[2] == TOP) {
                       begin = Alignment.bottomLeft;
                       end = Alignment.topRight;
-                    } else if (toString[2] == 'bottom') {
+                    } else if (parts[2] == BOTTOM) {
                       begin = Alignment.topLeft;
                       end = Alignment.bottomRight;
                     }
@@ -240,12 +249,12 @@ class CSSBackground {
                     end = Alignment.centerRight;
                   }
                   break;
-                case 'bottom':
-                  if (toString.length == 3) {
-                    if (toString[2] == 'left') {
+                case BOTTOM:
+                  if (parts.length == 3) {
+                    if (parts[2] == LEFT) {
                       begin = Alignment.topRight;
                       end = Alignment.bottomLeft;
-                    } else if (toString[2] == 'right') {
+                    } else if (parts[2] == RIGHT) {
                       begin = Alignment.topLeft;
                       end = Alignment.bottomRight;
                     }
@@ -258,8 +267,8 @@ class CSSBackground {
             }
             linearAngle = null;
             start = 1;
-          } else if (CSSAngle.isAngle(method.args[0])) {
-            CSSAngle angle = CSSAngle(method.args[0]);
+          } else if (CSSAngle.isAngle(arg0)) {
+            CSSAngle angle = CSSAngle(arg0);
             linearAngle = angle.angleValue;
             start = 1;
           }
