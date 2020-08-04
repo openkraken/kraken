@@ -527,7 +527,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    baseLayout();
+    beforeLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
@@ -555,6 +555,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
       child = childParentData.nextSibling;
     }
+
+    didLayout();
   }
 
   bool _isChildDisplayNone(RenderObject child) {

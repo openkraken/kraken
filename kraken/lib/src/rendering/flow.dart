@@ -550,7 +550,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   // @override
   void performLayout() {
-    baseLayout();
+    beforeLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
@@ -575,6 +575,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       }
       child = childParentData.nextSibling;
     }
+
+    didLayout();
   }
 
   void _layoutChildren() {

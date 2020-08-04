@@ -12,6 +12,7 @@ enum CSSOverflowType {
   visible,
   hidden,
   scroll,
+  clip
 }
 
 List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
@@ -55,6 +56,11 @@ CSSOverflowType _getOverflow(String definition) {
 mixin CSSOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
+
+  void initRenderOverflow(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+    updateRenderOverflow(renderBoxModel, style, scrollListener);
+  }
+
   void updateRenderOverflow(
       RenderBoxModel renderBoxModel,
       CSSStyleDeclaration style,
@@ -66,35 +72,76 @@ mixin CSSOverflowMixin {
 
       switch(overflowX) {
         case CSSOverflowType.hidden:
+          _scrollableX = null;
           renderBoxModel.clipX = true;
+          // overflow hidden can be scrolled programmatically
+          renderBoxModel.enableScrollX = true;
+          renderBoxModel.scrollListener = null;
+          break;
+        case CSSOverflowType.clip:
+          _scrollableX = null;
+          renderBoxModel.clipX = true;
+          // overflow clip can't scrolled programmatically
+          renderBoxModel.enableScrollX = false;
+          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
           renderBoxModel.clipX = true;
-          renderBoxModel.enableScroll = true;
-          renderBoxModel.scrollOffsetX = ViewportOffset.zero();
+          renderBoxModel.enableScrollX = true;
+          renderBoxModel.scrollListener = scrollListener;
+          renderBoxModel.scrollOffsetX = _scrollableX.position;
           break;
         case CSSOverflowType.visible:
         default:
           _scrollableX = null;
+          renderBoxModel.clipX = false;
+          renderBoxModel.enableScrollX = false;
+          renderBoxModel.scrollListener = null;
           break;
       }
 
       switch(overflowY) {
         case CSSOverflowType.hidden:
+          _scrollableY = null;
           renderBoxModel.clipY = true;
+          // overflow hidden can be scrolled programmatically
+          renderBoxModel.enableScrollY = true;
+          renderBoxModel.scrollListener = null;
+          break;
+        case CSSOverflowType.clip:
+          _scrollableY = null;
+          renderBoxModel.clipY = true;
+          // overflow clip can't scrolled programmatically
+          renderBoxModel.enableScrollY = false;
+          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
+          _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
           renderBoxModel.clipY = true;
-          renderBoxModel.enableScroll = true;
-          renderBoxModel.scrollOffsetY = ViewportOffset.zero();
+          renderBoxModel.enableScrollY = true;
+          renderBoxModel.scrollListener = scrollListener;
+          renderBoxModel.scrollOffsetY = _scrollableY.position;
           break;
         case CSSOverflowType.visible:
         default:
+          _scrollableY = null;
+          renderBoxModel.clipY = false;
+          renderBoxModel.enableScrollY = false;
+          renderBoxModel.scrollListener = null;
           break;
       }
+
+      renderBoxModel.onPointerDown = (PointerDownEvent event) {
+        if (_scrollableX != null) {
+          _scrollableX.handlePointerDown(event);
+        }
+        if (_scrollableY != null) {
+          _scrollableY.handlePointerDown(event);
+        }
+      };
     }
   }
 
@@ -112,24 +159,12 @@ mixin CSSOverflowMixin {
     return 0;
   }
 
-  double getScrollHeight() {
-//    if (_scrollableY != null) {
-//      return _scrollableY.renderBox?.size?.height ?? 0;
-//    } else if (renderScrollViewPortY is RenderBox) {
-//      RenderBox renderObjectY = renderScrollViewPortY;
-//      return renderObjectY.hasSize ? renderObjectY.size.height : 0;
-//    }
-    return 0;
+  double getScrollHeight(RenderBoxModel renderBoxModel) {
+    return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
   }
 
-  double getScrollWidth() {
-//    if (_scrollableX != null) {
-//      return _scrollableX.renderBox?.size?.width ?? 0;
-//    } else if (renderScrollViewPortX is RenderBox) {
-//      RenderBox renderObjectX = renderScrollViewPortX;
-//      return renderObjectX.hasSize ? renderObjectX.size.width : 0;
-//    }
-    return 0;
+  double getScrollWidth(RenderBoxModel renderBoxModel) {
+    return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
   }
 
   void scroll(List args, {bool isScrollBy = false}) {

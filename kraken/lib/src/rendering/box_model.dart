@@ -66,7 +66,7 @@ class RenderLayoutBox extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
-class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMixin {
+class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMixin, RenderPointerListenerMixin {
   RenderBoxModel({this.targetId, this.style, this.elementManager});
 
   bool _debugHasBoxLayout = false;
@@ -131,7 +131,7 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
 
   // base layout methods to compute content constraints before content box layout.
   // call this method before content box layout.
-  BoxConstraints baseLayout() {
+  BoxConstraints beforeLayout() {
     _debugHasBoxLayout = true;
     _contentConstraints = super.constraints;
 
@@ -143,6 +143,11 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     _contentConstraints = deflateOverflowConstraints(_contentConstraints);
 
     return _contentConstraints;
+  }
+
+  // hooks when content box had layout.
+  void didLayout() {
+    setUpOverflowScroller(_contentSize);
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {

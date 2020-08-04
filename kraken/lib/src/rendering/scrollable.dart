@@ -22,7 +22,6 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
-  RenderBox _renderBox;
   ScrollListener scrollListener;
 
   KrakenScrollable({
@@ -34,30 +33,12 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderObject getScrollableRenderObject(RenderObject child) {
-    RenderSingleChildViewport renderSingleChildViewport = RenderSingleChildViewport(
-      axisDirection: _axisDirection,
-      offset: position,
-      child: child,
-      scrollListener: scrollListener,
-      shouldClip: true,
-    );
-
-    _renderBox = child;
-    KrakenRenderPointerListener renderPointerListener =
-      KrakenRenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
-
-    return renderPointerListener;
-  }
-
-  RenderBox get renderBox => _renderBox;
-
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(_axisDirection);
 
-  void _handlePointerDown(PointerDownEvent event) {
+  void handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
     for (GestureRecognizer recognizer in _recognizers.values) {
       recognizer.addPointer(event);
@@ -204,6 +185,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 mixin RenderOverflowMixin on RenderBox {
   AxisDirection XAxis;
   AxisDirection YAxis;
+  ScrollListener scrollListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;
@@ -221,21 +203,30 @@ mixin RenderOverflowMixin on RenderBox {
     markNeedsLayout();
   }
 
-  bool _enableScroll = false;
-  bool get enableScroll => _enableScroll;
-  set enableScroll(bool value) {
-    if (_enableScroll == value) return;
-    _enableScroll = value;
+  bool _enableScrollX = false;
+  bool get enableScrollX => _enableScrollX;
+  set enableScrollX(bool value) {
+    if (_enableScrollX == value) return;
+    _enableScrollX = value;
   }
+
+  bool _enableScrollY = false;
+  bool get enableScrollY => _enableScrollY;
+  set enableScrollY(bool value) {
+    if (_enableScrollY == value) return;
+    _enableScrollY = value;
+  }
+
+  Size _contentSize;
 
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
   ViewportOffset _scrollOffsetX;
   set scrollOffsetX(ViewportOffset value) {
     assert(value != null);
     if (value == _scrollOffsetX) return;
-//    if (attached) _offset.removeListener(_hasScrolled);
     _scrollOffsetX = value;
-//    if (attached) _offset.addListener(_hasScrolled);
+    _scrollOffsetX.removeListener(_scrollXListener);
+    _scrollOffsetX.addListener(_scrollXListener);
     markNeedsLayout();
   }
 
@@ -244,10 +235,22 @@ mixin RenderOverflowMixin on RenderBox {
   set scrollOffsetY(ViewportOffset value) {
     assert(value != null);
     if (value == _scrollOffsetY) return;
-    //    if (attached) _offset.removeListener(_hasScrolled);
     _scrollOffsetY = value;
-//    if (attached) _offset.addListener(_hasScrolled);
+    _scrollOffsetY.removeListener(_scrollYListener);
+    _scrollOffsetY.addListener(_scrollYListener);
     markNeedsLayout();
+  }
+
+  void _scrollXListener() {
+    assert(scrollListener != null);
+    scrollListener(scrollOffsetX.pixels, AxisDirection.right);
+    markNeedsPaint();
+  }
+
+  void _scrollYListener() {
+    assert(scrollListener != null);
+    scrollListener(scrollOffsetY.pixels, AxisDirection.down);
+    markNeedsPaint();
   }
 
   BoxConstraints deflateOverflowConstraints(BoxConstraints constraints) {
@@ -259,22 +262,32 @@ mixin RenderOverflowMixin on RenderBox {
     } else if (_clipY) {
       result = BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight);
     }
-
-//    _scrollOffset.applyViewportDimension(_viewportExtent);
-//    _scrollOffset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
     return result;
   }
 
-  double get _paintOffsetX => _paintOffsetForOverflowX(_scrollOffsetX.pixels);
-  double get _paintOffsetY => _paintOffsetForOverflowY(_scrollOffsetY.pixels);
-
-  double _paintOffsetForOverflowX(double position) {
-    return -position;
+  void _setUpScrollX() {
+    _scrollOffsetX.applyViewportDimension(size.width);
+    _scrollOffsetX.applyContentDimensions(0.0, _contentSize.width - size.width);
   }
 
-  double _paintOffsetForOverflowY(double position) {
-    return -position;
+  void _setUpScrollY() {
+    _scrollOffsetY.applyViewportDimension(size.height);
+    _scrollOffsetY.applyContentDimensions(0.0, _contentSize.height - size.height);
   }
+
+  void setUpOverflowScroller(Size contentSize) {
+    _contentSize = contentSize;
+    if (_clipX) {
+      _setUpScrollX();
+    }
+
+    if (_clipY) {
+      _setUpScrollY();
+    }
+  }
+
+  double get _paintOffsetX => -_scrollOffsetX.pixels;
+  double get _paintOffsetY => -_scrollOffsetY.pixels;
 
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
@@ -294,6 +307,34 @@ mixin RenderOverflowMixin on RenderBox {
     } else {
       callback(context, offset);
     }
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    double result;
+    final RenderSingleViewPortParentData childParentData = parentData;
+    double candidate = getDistanceToActualBaseline(baseline);
+    if (candidate != null) {
+      candidate += childParentData.offset.dy;
+      if (result != null)
+        result = math.min(result, candidate);
+      else
+        result = candidate;
+    }
+    return result;
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
+    transform.translate(paintOffset.dx, paintOffset.dy);
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) {
+    final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
+    if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
+    return null;
   }
 }
 
@@ -495,18 +536,6 @@ class RenderSingleChildViewport extends RenderBox
         paintContents(context, offset);
       }
     }
-  }
-
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset paintOffset = _paintOffset;
-    transform.translate(paintOffset.dx, paintOffset.dy);
-  }
-
-  @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffset)) return Offset.zero & size;
-    return null;
   }
 
   @override

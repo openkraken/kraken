@@ -162,6 +162,8 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
+    initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+
     // Background image
     renderObject = initBackground(renderObject, style, targetId);
 
@@ -1002,19 +1004,11 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    if (renderLayoutBox != null) {
-      updateRenderOverflow(renderLayoutBox, style, _scrollListener);
-    } else {
-      updateRenderOverflow(renderIntrinsicBox, style, _scrollListener);
-    }
+    updateRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    if (renderLayoutBox != null) {
-      updateRenderPadding(renderLayoutBox, style, transitionMap);
-    } else {
-      updateRenderPadding(renderIntrinsicBox, style, transitionMap);
-    }
+    updateRenderPadding(_getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
@@ -1130,6 +1124,14 @@ class Element extends Node
     updateChildNodesStyle();
   }
 
+  RenderBoxModel _getRenderBoxModel() {
+    if (isIntrinsicBox) {
+      return renderIntrinsicBox;
+    } else {
+      return renderLayoutBox;
+    }
+  }
+
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
@@ -1206,9 +1208,9 @@ class Element extends Node
       case 'scrollLeft':
         return getScrollLeft();
       case 'scrollHeight':
-        return getScrollHeight();
+        return getScrollHeight(_getRenderBoxModel());
       case 'scrollWidth':
-        return getScrollWidth();
+        return getScrollWidth(_getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
       case 'click':

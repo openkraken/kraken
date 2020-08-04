@@ -13,11 +13,12 @@ class RenderIntrinsicBox extends RenderBoxModel
 
   @override
   void performLayout() {
-    baseLayout();
+    beforeLayout();
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
       size = child.size;
     }
+    didLayout();
   }
 
   @override
