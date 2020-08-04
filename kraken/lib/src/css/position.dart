@@ -206,16 +206,16 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
 
     // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
     // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
-    if ((left != '' && left != 'auto') &&
-      (right != '' && right != 'auto') &&
-      (width != '' && width != 'auto')
+    if ((left.isNotEmpty && left != AUTO) &&
+      (right.isNotEmpty && right != AUTO) &&
+      (width.isNotEmpty && width != AUTO)
     ) {
-      if (marginLeft == 'auto') {
+      if (marginLeft == AUTO) {
         double leftValue = CSSLength.toDisplayPortValue(left);
         double rightValue = CSSLength.toDisplayPortValue(right);
         double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
 
-        if (marginRight == 'auto') {
+        if (marginRight == AUTO) {
           x = leftValue + remainingSpace / 2;
         } else {
           x = leftValue + remainingSpace;
@@ -223,16 +223,16 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
       }
     }
 
-    if ((top != '' && top != 'auto') &&
-      (bottom != '' && bottom != 'auto') &&
-      (height != '' && height != 'auto')
+    if ((top.isNotEmpty && top != AUTO) &&
+      (bottom.isNotEmpty && bottom != AUTO) &&
+      (height.isNotEmpty && height != AUTO)
     ) {
-      if (marginTop == 'auto') {
+      if (marginTop == AUTO) {
         double topValue = CSSLength.toDisplayPortValue(top);
         double bottomValue = CSSLength.toDisplayPortValue(bottom);
         double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
 
-        if (marginBottom == 'auto') {
+        if (marginBottom == AUTO) {
           y = topValue + remainingSpace / 2;
         } else {
           y = topValue + remainingSpace;

@@ -1219,14 +1219,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginTop = childStyle[MARGIN_TOP];
 
-          if (isHorizontalFlexDirection(flexDirection)) {
-            if (marginLeft == 'auto') {
+          if ((isHorizontalFlexDirection(flexDirection) && marginLeft == AUTO) ||
+            (isVerticalFlexDirection(flexDirection) && marginTop == AUTO)
+          ) {
               mainAxisMarginAutoChildren++;
-            }
-          } else {
-            if (marginTop == 'auto') {
-              mainAxisMarginAutoChildren++;
-            }
           }
         }
         runChild = childParentData.nextSibling;

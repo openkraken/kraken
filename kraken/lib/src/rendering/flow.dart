@@ -844,9 +844,9 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childRealDisplay == BLOCK || childRealDisplay == FLEX) {
-            if (marginLeft == 'auto') {
+            if (marginLeft == AUTO) {
               double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
-              if (marginRight == 'auto') {
+              if (marginRight == AUTO) {
                 childMainPosition = remainingSpace / 2;
               } else {
                 childMainPosition = remainingSpace;
