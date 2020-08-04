@@ -1289,8 +1289,8 @@ class Element extends Node
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
     super.addEventListener(eventName, _eventResponder);
 
-    // Insert pointer listener render if event needs
-    insertRenderPointerListener(renderConstrainedBox);
+    // bind pointer responder.
+    addEventResponder(_getRenderBoxModel());
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
@@ -1302,8 +1302,8 @@ class Element extends Node
     if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.removeEventListener(eventName, _eventResponder);
 
-    // Remove pointer listener render if no event needs
-    removeRenderPointerListener();
+    // Remove pointer responder.
+    removeEventResponder(_getRenderBoxModel());
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
