@@ -76,21 +76,18 @@ mixin CSSOverflowMixin {
           renderBoxModel.clipX = true;
           // overflow hidden can be scrolled programmatically
           renderBoxModel.enableScrollX = true;
-          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.clip:
           _scrollableX = null;
           renderBoxModel.clipX = true;
           // overflow clip can't scrolled programmatically
           renderBoxModel.enableScrollX = false;
-          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
           renderBoxModel.clipX = true;
           renderBoxModel.enableScrollX = true;
-          renderBoxModel.scrollListener = scrollListener;
           renderBoxModel.scrollOffsetX = _scrollableX.position;
           break;
         case CSSOverflowType.visible:
@@ -98,7 +95,6 @@ mixin CSSOverflowMixin {
           _scrollableX = null;
           renderBoxModel.clipX = false;
           renderBoxModel.enableScrollX = false;
-          renderBoxModel.scrollListener = null;
           break;
       }
 
@@ -108,21 +104,18 @@ mixin CSSOverflowMixin {
           renderBoxModel.clipY = true;
           // overflow hidden can be scrolled programmatically
           renderBoxModel.enableScrollY = true;
-          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.clip:
           _scrollableY = null;
           renderBoxModel.clipY = true;
           // overflow clip can't scrolled programmatically
           renderBoxModel.enableScrollY = false;
-          renderBoxModel.scrollListener = null;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
           renderBoxModel.clipY = true;
           renderBoxModel.enableScrollY = true;
-          renderBoxModel.scrollListener = scrollListener;
           renderBoxModel.scrollOffsetY = _scrollableY.position;
           break;
         case CSSOverflowType.visible:
@@ -130,10 +123,10 @@ mixin CSSOverflowMixin {
           _scrollableY = null;
           renderBoxModel.clipY = false;
           renderBoxModel.enableScrollY = false;
-          renderBoxModel.scrollListener = null;
           break;
       }
 
+      renderBoxModel.scrollListener = scrollListener;
       renderBoxModel.onPointerDown = (PointerDownEvent event) {
         if (_scrollableX != null) {
           _scrollableX.handlePointerDown(event);
