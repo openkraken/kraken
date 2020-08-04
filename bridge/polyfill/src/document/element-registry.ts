@@ -4,6 +4,7 @@ import { CanvasElement } from './elements/canvas';
 import { ImageElement } from './elements/img';
 import { IframeElement } from './elements/iframe';
 import { AnimationPlayerElement } from './elements/animation-player';
+import { ObjectElement } from "./elements/object";
 
 const ElementRegistryMap = {};
 
@@ -25,3 +26,4 @@ ElementRegistry.define('canvas', CanvasElement);
 ElementRegistry.define('iframe', IframeElement);
 ElementRegistry.define('img', ImageElement);
 ElementRegistry.define('animation-player', AnimationPlayerElement);
+ElementRegistry.define('object', ObjectElement);
