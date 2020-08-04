@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -199,66 +198,4 @@ mixin CSSOverflowMixin {
       scrollable.position.moveTo(distance, duration: duration, curve: curve);
     }
   }
-}
-
-class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
-  AxisDirection axisDirection;
-
-  CSSOverflowDirectionBox(
-      {RenderObject child,
-      Size requestedSize = Size.zero,
-      AlignmentGeometry alignment = Alignment.topLeft,
-      TextDirection textDirection,
-      this.axisDirection})
-      : assert(requestedSize != null),
-        super(child: child, alignment: alignment, textDirection: textDirection, requestedSize: requestedSize);
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      size = constraints.constrain(child.size);
-      alignChild();
-    } else {
-      size = Size.zero;
-    }
-  }
-
-  @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
-    super.debugPaintSize(context, offset);
-    assert(() {
-      final Rect outerRect = offset & size;
-      debugPaintPadding(context.canvas, outerRect, outerRect);
-      return true;
-    }());
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<AxisDirection>('axisDirection', axisDirection));
-    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-
-    return false;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return child?.hitTest(result, position: position);
-  }
-}
-
-void setChild(RenderObject parent, RenderObject child) {
-  if (parent is RenderObjectWithChildMixin)
-    parent.child = child;
-  else if (parent is ContainerRenderObjectMixin) parent.add(child);
 }
