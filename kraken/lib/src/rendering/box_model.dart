@@ -145,6 +145,12 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     return _contentConstraints;
   }
 
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    applyOverflowPaintTransform(child, transform);
+  }
+
   // hooks when content box had layout.
   void didLayout() {
     setUpOverflowScroller(_contentSize);

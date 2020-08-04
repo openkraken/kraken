@@ -277,17 +277,23 @@ mixin RenderOverflowMixin on RenderBox {
 
   void setUpOverflowScroller(Size contentSize) {
     _contentSize = contentSize;
-    if (_clipX) {
+    if (_clipX && _scrollOffsetX != null) {
       _setUpScrollX();
     }
 
-    if (_clipY) {
+    if (_clipY && _scrollOffsetY != null) {
       _setUpScrollY();
     }
   }
 
-  double get _paintOffsetX => -_scrollOffsetX.pixels;
-  double get _paintOffsetY => -_scrollOffsetY.pixels;
+  double get _paintOffsetX {
+    if (_scrollOffsetX == null) return 0.0;
+    return -_scrollOffsetX.pixels;
+  }
+  double get _paintOffsetY {
+    if (_scrollOffsetY == null) return 0.0;
+    return -_scrollOffsetY.pixels;
+  }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
@@ -324,8 +330,7 @@ mixin RenderOverflowMixin on RenderBox {
     return result;
   }
 
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  void applyOverflowPaintTransform(RenderBox child, Matrix4 transform) {
     final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
