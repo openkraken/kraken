@@ -3,7 +3,7 @@ import 'package:kraken/element.dart';
 
 typedef ObjectElementClientFactory = ObjectElementClient Function(ObjectElementHost objectElementHost);
 
-ObjectElementClientFactory getObjectElementFactory() {
+ObjectElementClientFactory getObjectElementClientFactory() {
   return _objectElementFactory;
 }
 
@@ -17,13 +17,10 @@ abstract class ObjectElementHost implements EventTarget {
 
   updateChildTextureBox(TextureBox textureBox);
 
-  double get width;
-
-  double get height;
 }
 
 abstract class ObjectElementClient {
-  Future<TextureBox> createRenderObject(Map<String, dynamic> properties);
+  Future<dynamic> initElementClient(Map<String, dynamic> properties);
 
   dynamic method(String name, List args);
 

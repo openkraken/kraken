@@ -6,7 +6,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
-import 'package:kraken/src/element/object_element_factory.dart';
+import 'package:kraken/src/element/object_element_client.dart';
 
 const String OBJECT = 'OBJECT';
 
@@ -15,7 +15,7 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
-_DefaultObjectElementClient _DefaultObjectElementFactory(ObjectElementHost objectElementHost) {
+_DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost objectElementHost) {
   return _DefaultObjectElementClient(objectElementHost);
 }
 
@@ -27,65 +27,33 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
   RenderConstrainedBox _sizedBox;
-  TextureBox _textureBox;
-
-  /// Element attribute width
-  double _width;
-
-  /// Element attribute height
-  double _height;
 
   ObjectElement(targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
-    initSizedBox();
-  }
-
-  @override
-  double get height => _height ?? 0.0;
-
-  set height(double newValue) {
-    if (newValue != null) {
-      _height = newValue;
-      _sizedBox.additionalConstraints = BoxConstraints.expand(
-        width: width,
-        height: height,
-      );
-    }
-  }
-
-  @override
-  double get width => _width ?? 0.0;
-
-  set width(double newValue) {
-    if (newValue != null) {
-      _width = newValue;
-      _sizedBox.additionalConstraints = BoxConstraints.expand(
-        width: width,
-        height: height,
-      );
-    }
+    initTextureContainerBox();
+    initElementClient();
   }
 
   void initObjectClient() {
-    _objectElementClientFactory = getObjectElementFactory() ?? _DefaultObjectElementFactory;
+    _objectElementClientFactory = getObjectElementClientFactory() ?? _DefaultObjectElementClientFactory;
     _objectElementClient = _objectElementClientFactory(this);
   }
 
-  void initSizedBox(){
+  void initTextureContainerBox(){
     _sizedBox = RenderConstrainedBox(
         additionalConstraints: BoxConstraints.loose(Size(
-      CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
-      CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
-    )));
+          CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
+          CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
+        )));
     addChild(_sizedBox);
-    initChildTextureBox();
   }
 
-  Future<dynamic> initChildTextureBox() async {
-    _textureBox = await _objectElementClient?.createRenderObject(properties);
-    if (_textureBox != null) {
-      _sizedBox.child = _textureBox;
+  Future<dynamic> initElementClient() async {
+    try {
+      await _objectElementClient?.initElementClient(properties);
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -143,8 +111,8 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   _DefaultObjectElementClient(this.objectElementHost);
 
   @override
-  Future<TextureBox> createRenderObject(Map<String, dynamic> properties) async {
-    print('call DefaultObjectElementClient createRenderObject properties[$properties]');
+  Future<dynamic> initElementClient(Map<String, dynamic> properties) async {
+    print('call DefaultObjectElementClient initElementClient properties[$properties]');
     return null;
   }
 
