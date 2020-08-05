@@ -1010,6 +1010,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    
     basePaint(context, offset, (context, offset) {
       List<RenderObject> children = getChildrenAsList();
       children.sort((RenderObject prev, RenderObject next) {

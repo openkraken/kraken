@@ -6,8 +6,10 @@
 import 'dart:ui';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/css.dart';
 import 'padding.dart';
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
@@ -66,8 +68,18 @@ class RenderLayoutBox extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
-class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMixin, RenderPointerListenerMixin {
-  RenderBoxModel({this.targetId, this.style, this.elementManager});
+class RenderBoxModel extends RenderBox with
+  RenderPaddingMixin,
+  RenderBoxDecorationMixin,
+  RenderOverflowMixin,
+  RenderPointerListenerMixin {
+  RenderBoxModel({
+    this.targetId,
+    this.style,
+    this.elementManager
+  }) : super();
+
+  BoxPainter _painter;
 
   bool _debugHasBoxLayout = false;
 
@@ -139,6 +151,8 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
       _contentConstraints = deflatePaddingConstraints(_contentConstraints);
     }
 
+    _contentConstraints = deflateBorderConstraints(_contentConstraints);
+
     // layout overflow Box
     _contentConstraints = deflateOverflowConstraints(_contentConstraints);
 
@@ -158,5 +172,111 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintOverflow(context, offset, callback);
+  }
+
+  @override
+  void detach() {
+    _painter?.dispose();
+    _painter = null;
+    super.detach();
+    // Since we're disposing of our painter, we won't receive change
+    // notifications. We mark ourselves as needing paint so that we will
+    // resubscribe to change notifications. If we didn't do this, then, for
+    // example, animated GIFs would stop animating when a DecoratedBox gets
+    // moved around the tree due to GlobalKey reparenting.
+    markNeedsPaint();
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    assert(() {
+      if (!hasSize) {
+        if (debugNeedsLayout) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
+            describeForError('The hitTest() method was called on this RenderBox'),
+            ErrorDescription(
+              "Unfortunately, this object's geometry is not known at this time, "
+                'probably because it has never been laid out. '
+                'This means it cannot be accurately hit-tested.'
+            ),
+            ErrorHint(
+              'If you are trying '
+                'to perform a hit test during the layout phase itself, make sure '
+                "you only hit test nodes that have completed layout (e.g. the node's "
+                'children, after their layout() method has been called).'
+            ),
+          ]);
+        }
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot hit test a render box with no size.'),
+          describeForError('The hitTest() method was called on this RenderBox'),
+          ErrorDescription(
+            'Although this node is not marked as needing layout, '
+              'its size is not set.'
+          ),
+          ErrorHint(
+            'A RenderBox object must have an '
+              'explicit size before it can be hit-tested. Make sure '
+              'that the RenderBox in question sets its size during layout.'
+          ),
+        ]);
+      }
+      return true;
+    }());
+    if (hitTestChildren(result, position: position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) {
+    return decoration.hitTest(size, position, textDirection: configuration.textDirection);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(size.width != null);
+    assert(size.height != null);
+    _painter ??= decoration.createBoxPainter(markNeedsPaint);
+    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
+    if (position == DecorationPosition.background) {
+      int debugSaveCount;
+      assert(() {
+        debugSaveCount = context.canvas.getSaveCount();
+        return true;
+      }());
+      _painter.paint(context.canvas, offset, filledConfiguration);
+      assert(() {
+        if (debugSaveCount != context.canvas.getSaveCount()) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
+              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+              'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration,
+              style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
+        }
+        return true;
+      }());
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
+    Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    super.paint(context, contentOffset);
+    if (position == DecorationPosition.foreground) {
+      _painter.paint(context.canvas, offset, filledConfiguration);
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
+    properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }

@@ -124,14 +124,29 @@ class Element extends Node
     return 0.0;
   }
 
+  // Horizontal border dimension (left + right)
+  double get cropBorderWidth {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+      return renderIntrinsicBox.borderEdge.horizontal;
+    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+      return renderLayoutBox.borderEdge.horizontal;
+    }
+    return 0.0;
+  }
+
+  // Vertical border dimension (top + bottom)
+  double get cropBorderHeight {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+      return renderIntrinsicBox.borderEdge.vertical;
+    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+      return renderLayoutBox.borderEdge.vertical;
+    }
+    return 0.0;
+  }
+
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
-
-  // Horizontal border dimension (left + right)
-  double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
-  // Vertical border dimension (top + bottom)
-  double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
   Element(
     int targetId,
@@ -141,7 +156,7 @@ class Element extends Node
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
-  })  : assert(targetId != null),
+  }) : assert(targetId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
@@ -164,9 +179,11 @@ class Element extends Node
 
     // Init overflow
     initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
-    
+
+    // Init border and background
+    initRenderDecoratedBox(_getRenderBoxModel(), style);
     // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
+//    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
@@ -217,10 +234,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -261,7 +278,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderDecoratedBox?.size?.height;
+      double viewPortHeight = renderConstrainedBox?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -297,7 +314,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderDecoratedBox?.size?.width;
+      double viewPortWidth = renderConstrainedBox?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -578,8 +595,8 @@ class Element extends Node
 
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
-      renderDecoratedBox.child = null;
-      renderDecoratedBox.child = RenderFlexItem(child: renderLayoutBox);
+      renderConstrainedBox.child = null;
+      renderConstrainedBox.child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -948,9 +965,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderDecoratedBox.child = null;
+        renderConstrainedBox.child = null;
         renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        renderDecoratedBox.child = renderLayoutBox;
+        renderConstrainedBox.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -1044,9 +1061,9 @@ class Element extends Node
         })
         ..removeAll();
 
-      renderDecoratedBox.child = null;
+      renderConstrainedBox.child = null;
       renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      renderDecoratedBox.child = renderLayoutBox;
+      renderConstrainedBox.child = renderLayoutBox;
 
       this.children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -1067,14 +1084,14 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(style, property, present, renderDecoratedBox, targetId);
+    updateBackground(_getRenderBoxModel(), style, property, present, renderConstrainedBox, targetId);
     // decoratedBox may contains background and border
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(_getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(_getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {

@@ -121,7 +121,7 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
+  BoxConstraints parentConstraints = parentElement.renderLayoutBox.constraints;
 
   final RenderLayoutParentData childParentData = child.parentData;
 

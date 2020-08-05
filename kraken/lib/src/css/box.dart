@@ -16,23 +16,16 @@ import 'package:kraken/css.dart';
 /// - background
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
-  RenderDecorateElementBox renderDecoratedBox;
-  TransitionDecoration oldDecoration;
-  CSSEdgeInsets oldBorderPadding;
-
-  RenderObject initRenderDecoratedBox(RenderObject renderObject, CSSStyleDeclaration style, int targetId) {
-    oldDecoration = getTransitionDecoration(style);
-    EdgeInsets borderEdge = oldDecoration.getBorderEdgeInsets();
-
-    return renderDecoratedBox = RenderDecorateElementBox(
-      borderEdge: borderEdge,
-      decoration: oldDecoration.toBoxDecoration(),
-      child: renderObject,
-    );
+  void initRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+    renderBoxModel.oldDecoration = getTransitionDecoration(style);
+    renderBoxModel.borderEdge = renderBoxModel.oldDecoration.getBorderEdgeInsets();
+    renderBoxModel.decoration = renderBoxModel.oldDecoration.toBoxDecoration();
   }
 
-  void updateRenderDecoratedBox(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     TransitionDecoration newDecoration = getTransitionDecoration(style);
+    TransitionDecoration oldDecoration = renderBoxModel.oldDecoration;
+
     if (transitionMap != null) {
       CSSTransition backgroundColorTransition = getTransition(transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
@@ -66,6 +59,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
         // background color transition
         addColorProcessListener(
+          renderBoxModel,
           backgroundColorTransition,
           newDecoration.color,
           oldDecoration.color,
@@ -79,6 +73,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         for (int i = 0; i < 4; i++) {
           // add border color transition
           addColorProcessListener(
+            renderBoxModel,
             borderColorTransitionsLTRB[i],
             newDecoration.borderSidesLTRB[i].color,
             oldDecoration.borderSidesLTRB[i].color,
@@ -87,22 +82,22 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
             progressDecoration
           );
 
-          addWidthAndRadiusProcessListener(borderWidthTransitionsLTRB[i], borderRadiusTransitionTLTRBLBR[i], i,
+          addWidthAndRadiusProcessListener(renderBoxModel, borderWidthTransitionsLTRB[i], borderRadiusTransitionTLTRBLBR[i], i,
               newDecoration, oldDecoration, baseDecoration, progressDecoration);
         }
       } else {
-        renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-        _updateBorderInsets(newDecoration.getBorderEdgeInsets());
+        renderBoxModel.decoration = newDecoration.toBoxDecoration();
+        _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
       }
     } else {
-      renderDecoratedBox.decoration = newDecoration.toBoxDecoration();
-      _updateBorderInsets(newDecoration.getBorderEdgeInsets());
+      renderBoxModel.decoration = newDecoration.toBoxDecoration();
+      _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
     }
-    oldDecoration = newDecoration;
+    renderBoxModel.oldDecoration = newDecoration;
   }
 
   // add color relate transition listener
-  void addColorProcessListener(CSSTransition transition, Color newColor, Color oldColor,
+  void addColorProcessListener(RenderBoxModel renderBoxModel, CSSTransition transition, Color newColor, Color oldColor,
       Color processColor, Color baseColor, TransitionDecoration processDecoration) {
     if (transition != null) {
 
@@ -119,13 +114,14 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
           (greenDiff * progress).toInt() + baseColor.green
         );
 
-        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
+        renderBoxModel.decoration = processDecoration.toBoxDecoration();
       });
     }
   }
 
   // add width and radius relate transition listener
   void addWidthAndRadiusProcessListener(
+      RenderBoxModel renderBoxModel,
       CSSTransition widthTransition,
       CSSTransition radiusTransition,
       int index,
@@ -137,8 +133,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       double widthDiff = newDecoration.borderSidesLTRB[index].width - oldDecoration.borderSidesLTRB[index].width;
       widthTransition.addProgressListener((progress) {
         processDecoration.borderSidesLTRB[index] = processDecoration.borderSidesLTRB[index].copyWith(width: widthDiff * progress + baseDecoration.borderSidesLTRB[index].width);
-        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
-        _updateBorderInsets(processDecoration.getBorderEdgeInsets());
+        renderBoxModel.decoration = processDecoration.toBoxDecoration();
+        _updateBorderInsets(renderBoxModel, processDecoration.getBorderEdgeInsets());
       });
     }
 
@@ -147,7 +143,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       radiusTransition.addProgressListener((progress) {
         processDecoration.borderRadiusTLTRBLBR[index] =
             radiusDiff * progress + baseDecoration.borderRadiusTLTRBLBR[index];
-        renderDecoratedBox.decoration = processDecoration.toBoxDecoration();
+        renderBoxModel.decoration = processDecoration.toBoxDecoration();
       });
     }
   }
@@ -163,8 +159,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     return null;
   }
 
-  void _updateBorderInsets(EdgeInsets insets) {
-    renderDecoratedBox.borderEdge = insets;
+  void _updateBorderInsets(RenderBoxModel renderBoxModel, EdgeInsets insets) {
+    renderBoxModel.borderEdge = insets;
   }
 
   /// Shorted border property:
@@ -178,14 +174,13 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   TransitionDecoration getTransitionDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    if (CSSBackground.hasScrollBackgroundImage(style)) {
-      List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
-      for (CSSFunctionalNotation method in methods) {
-        if (method.name == 'url') {
-          decorationImage = CSSBackground.getDecorationImage(style, method);
-        } else {
-          gradient = CSSBackground.getBackgroundGradient(method);
-        }
+    
+    List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == 'url') {
+        decorationImage = CSSBackground.getDecorationImage(style, method);
+      } else {
+        gradient = CSSBackground.getBackgroundGradient(method);
       }
     }
 
