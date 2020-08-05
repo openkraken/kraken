@@ -100,6 +100,19 @@ class CSSStyleDeclaration {
         case MARGIN:
           CSSStyleProperty.removeShorthandMargin(_cssProperties);
           break;
+        case BACKGROUND:
+          CSSStyleProperty.removeShorthandBackground(_cssProperties);
+          break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.removeShorthandBorder(_cssProperties, propertyName);
+          break;
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
           break;
@@ -171,6 +184,9 @@ class CSSStyleDeclaration {
           break;
         case MARGIN:
           CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
+          break;
+        case BACKGROUND:
+          CSSStyleProperty.setShorthandBackground(_cssProperties, normalizedValue);
           break;
         case BORDER:
         case BORDER_TOP:

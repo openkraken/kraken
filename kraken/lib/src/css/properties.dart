@@ -179,3 +179,19 @@ const String STEP_END = 'step-end';
 
 // Shadow
 const String INSET = 'inset';
+
+// Background
+const String REPEAT_X = 'repeat-x';
+const String REPEAT_Y = 'repeat-y';
+const String REPEAT = 'repeat';
+const String NO_REPEAT = 'no-repeat';
+
+const String CONTAIN = 'contain';
+const String COVER = 'cover';
+const String FIT_WIDTH = 'fit-width';
+const String FIT_HEIGTH = 'fit-height';
+const String SCALE_DOWN = 'scale-down';
+const String FILL = 'fill';
+
+const String SCROLL = 'scroll';
+const String LOCAL = 'local';
