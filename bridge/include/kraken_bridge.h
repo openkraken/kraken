@@ -7,9 +7,11 @@
 #define KRAKEN_BRIDGE_EXPORT_H
 
 #include <cstdint>
+#include <thread>
 #define KRAKEN_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 void *getJSContext(int32_t contextId);
+std::__thread_id getUIThreadId();
 
 struct Screen {
   double width;
