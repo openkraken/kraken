@@ -116,9 +116,9 @@ describe('Tags img', () => {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.2);
     img.src = 'assets/300x150-green.png';
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.2);
   });
 
 
@@ -126,6 +126,6 @@ describe('Tags img', () => {
     var img = document.createElement('img');
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
     document.body.appendChild(img);
-    await matchElementImageSnapshot(img);
+    await matchViewportSnapshot(0.2);
   })
 });

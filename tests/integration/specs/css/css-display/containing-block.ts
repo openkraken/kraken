@@ -231,7 +231,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(p);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('007', async () => {
     let p;
@@ -329,7 +329,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('008', async () => {
     let p;
@@ -432,7 +432,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('009', async () => {
     let p;
@@ -945,7 +945,7 @@ describe('containing-block', () => {
     );
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('019', async () => {
     let p;
@@ -1063,7 +1063,7 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('020', async () => {
     let p;

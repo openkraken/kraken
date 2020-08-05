@@ -19,8 +19,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('none-repeat', async () => {
@@ -44,8 +43,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat-x', async () => {
@@ -69,8 +67,7 @@ describe('background-repeat', () => {
     repeat.appendChild(div2);
     append(BODY, repeat);
 
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat-y', async () => {
@@ -93,8 +90,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div3);
     append(BODY, repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat', async () => {
@@ -117,8 +113,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div4);
     append(BODY, repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   xit('round', async () => {
@@ -131,7 +126,7 @@ describe('background-repeat', () => {
       backgroundRepeat: 'round',
     });
     append(BODY, div);
-    await sleep(1);
+    await sleep(0.5);
     await matchElementImageSnapshot(div);
   });
 
@@ -145,7 +140,7 @@ describe('background-repeat', () => {
       backgroundRepeat: 'round',
     });
     append(BODY, div);
-    await sleep(1);
+    await sleep(0.5);
     await matchElementImageSnapshot(div);
   });
 });
