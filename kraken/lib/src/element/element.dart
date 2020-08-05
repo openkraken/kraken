@@ -162,11 +162,9 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
+    // Init overflow
     initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
-
-    // Background image
-    renderObject = initBackground(renderObject, style, targetId);
-
+    
     // BoxModel Border
     renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
@@ -858,13 +856,13 @@ class Element extends Node
         _styleOverflowChangedListener(property, original, present);
         break;
 
-      case 'background':
-      case 'backgroundColor':
-      case 'backgroundAttachment':
-      case 'backgroundImage':
-      case 'backgroundRepeat':
-      case 'backgroundSize':
-      case 'backgroundPosition':
+      case BACKGROUND:
+      case BACKGROUND_COLOR:
+      case BACKGROUND_ATTACHMENT:
+      case BACKGROUND_IMAGE:
+      case BACKGROUND_REPEAT:
+      case BACKGROUND_POSITION:
+      case BACKGROUND_SIZE:
         _styleBackgroundChangedListener(property, original, present);
         break;
 
@@ -1069,7 +1067,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, renderDecoratedBox, targetId);
+    updateBackground(style, property, present, renderDecoratedBox, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }

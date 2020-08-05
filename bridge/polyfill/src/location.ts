@@ -1,4 +1,4 @@
-import { krakenWindow } from './bridge';
+import { krakenInvokeModule, krakenWindow } from './bridge';
 import { URL } from './url';
 
 const krakenLocation = krakenWindow.location;
@@ -11,6 +11,9 @@ export function getUrl() : URL {
 export const location = {
   get href() {
     return getUrl().href;
+  },
+  set href(url: string) {
+    krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [url]]));
   },
   get origin() {
     return getUrl().origin;
@@ -39,7 +42,7 @@ export const location = {
 
   get assign() {
     return (assignURL: string) => {
-      console.warn('Unimpl location.assign');
+      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [assignURL]]));
     };
   },
   get reload() {
@@ -47,7 +50,7 @@ export const location = {
   },
   get replace() {
     return (replaceURL: string) => {
-      console.warn('Unimpl location.replace');
+      krakenInvokeModule(JSON.stringify(['Navigation', 'goTo', [replaceURL]]));
     };
   },
   get toString() {

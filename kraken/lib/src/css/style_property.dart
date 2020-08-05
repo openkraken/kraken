@@ -2,6 +2,7 @@ import 'package:kraken/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
+final RegExp _slashRegExp = RegExp(r'\/(?![^(]*\))');
 const String _comma = ', ';
 const String _0s = '0s';
 
@@ -40,6 +41,27 @@ class CSSStyleProperty {
     if (style.containsKey(MARGIN_TOP)) style.remove(MARGIN_LEFT);
     if (style.containsKey(MARGIN_RIGHT)) style.remove(MARGIN_RIGHT);
     if (style.containsKey(MARGIN_BOTTOM)) style.remove(MARGIN_BOTTOM);
+  }
+
+  static void setShorthandBackground(Map<String, String> style, String shorthandValue) {
+    List<String> values = getBackgroundValues(shorthandValue);
+    if (values != null) {
+      style[BACKGROUND_COLOR] = values[0];
+      style[BACKGROUND_IMAGE] = values[1];
+      style[BACKGROUND_REPEAT] = values[2];
+      style[BACKGROUND_ATTACHMENT] = values[3];
+      style[BACKGROUND_POSITION] = values[4];
+      style[BACKGROUND_SIZE] = values[5];
+    }
+  }
+
+  static void removeShorthandBackground(Map<String, String> style) {
+    if (style.containsKey(BACKGROUND_ATTACHMENT)) style.remove(BACKGROUND_ATTACHMENT);
+    if (style.containsKey(BACKGROUND_COLOR)) style.remove(BACKGROUND_COLOR);
+    if (style.containsKey(BACKGROUND_IMAGE)) style.remove(BACKGROUND_IMAGE);
+    if (style.containsKey(BACKGROUND_POSITION)) style.remove(BACKGROUND_POSITION);
+    if (style.containsKey(BACKGROUND_SIZE)) style.remove(BACKGROUND_SIZE);
+    if (style.containsKey(BACKGROUND_REPEAT)) style.remove(BACKGROUND_REPEAT);
   }
 
   static void setShorthandTransition(Map<String, String> style, String shorthandValue) {
@@ -106,7 +128,7 @@ class CSSStyleProperty {
           borderLeftColor = values[2];
         }
       } else {
-        
+
         List<String> values = CSSStyleProperty.getEdgeValues(shorthandValue);
         if (values == null) return;
         // @TODO validate value
@@ -144,9 +166,49 @@ class CSSStyleProperty {
   }
 
   static void removeShorthandBorder(Map<String, String> style, String property) {
-    if (style.containsKey(BORDER_WIDTH)) style.remove(BORDER_WIDTH);
-    if (style.containsKey(BORDER_STYLE)) style.remove(BORDER_STYLE);
-    if (style.containsKey(BORDER_COLOR)) style.remove(BORDER_COLOR);
+    if (property == BORDER ||
+        property == BORDER_TOP ||
+        property == BORDER_RIGHT ||
+        property == BORDER_BOTTOM ||
+        property == BORDER_LEFT) {
+      if (property == BORDER || property == BORDER_TOP) {
+        if (style.containsKey(BORDER_TOP_COLOR)) style.remove(BORDER_TOP_COLOR);
+        if (style.containsKey(BORDER_TOP_STYLE)) style.remove(BORDER_TOP_STYLE);
+        if (style.containsKey(BORDER_TOP_WIDTH)) style.remove(BORDER_TOP_WIDTH);
+      }
+      if (property == BORDER || property == BORDER_RIGHT) {
+        if (style.containsKey(BORDER_RIGHT_COLOR)) style.remove(BORDER_RIGHT_COLOR);
+        if (style.containsKey(BORDER_RIGHT_STYLE)) style.remove(BORDER_RIGHT_STYLE);
+        if (style.containsKey(BORDER_RIGHT_WIDTH)) style.remove(BORDER_RIGHT_WIDTH);
+      }
+      if (property == BORDER || property == BORDER_BOTTOM) {
+        if (style.containsKey(BORDER_BOTTOM_COLOR)) style.remove(BORDER_BOTTOM_COLOR);
+        if (style.containsKey(BORDER_BOTTOM_STYLE)) style.remove(BORDER_BOTTOM_STYLE);
+        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);
+      }
+      if (property == BORDER || property == BORDER_LEFT) {
+        if (style.containsKey(BORDER_LEFT_COLOR)) style.remove(BORDER_LEFT_COLOR);
+        if (style.containsKey(BORDER_LEFT_STYLE)) style.remove(BORDER_LEFT_STYLE);
+        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);
+      }
+    } else {
+      if (property == BORDER_WIDTH) {
+        if (style.containsKey(BORDER_TOP_WIDTH)) style.remove(BORDER_TOP_WIDTH);
+        if (style.containsKey(BORDER_RIGHT_WIDTH)) style.remove(BORDER_RIGHT_WIDTH);
+        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);
+        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);
+      } else if (property == BORDER_STYLE) {
+        if (style.containsKey(BORDER_TOP_STYLE)) style.remove(BORDER_TOP_STYLE);
+        if (style.containsKey(BORDER_RIGHT_STYLE)) style.remove(BORDER_RIGHT_STYLE);
+        if (style.containsKey(BORDER_BOTTOM_STYLE)) style.remove(BORDER_BOTTOM_STYLE);
+        if (style.containsKey(BORDER_LEFT_STYLE)) style.remove(BORDER_LEFT_STYLE);
+      } else if (property == BORDER_COLOR) {
+        if (style.containsKey(BORDER_TOP_COLOR)) style.remove(BORDER_TOP_COLOR);
+        if (style.containsKey(BORDER_RIGHT_COLOR)) style.remove(BORDER_RIGHT_COLOR);
+        if (style.containsKey(BORDER_BOTTOM_COLOR)) style.remove(BORDER_BOTTOM_COLOR);
+        if (style.containsKey(BORDER_LEFT_COLOR)) style.remove(BORDER_LEFT_COLOR);
+      }
+    }
   }
 
   // all, -moz-specific, sliding; => ['all', '-moz-specific', 'sliding']
@@ -193,6 +255,84 @@ class CSSStyleProperty {
     return values;
   }
 
+  // Current not support multiple background layer:
+  static List<String> getBackgroundValues(String shorthandProperty) {
+    assert(shorthandProperty != null);
+    // Convert 40%/10em -> 40% / 10em
+    shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
+    List values = shorthandProperty.split(_spaceRegExp);
+
+    String color;
+    String image;
+    String repeat;
+    String attachment;
+    String positionX;
+    String positionY;
+    String sizeWidth;
+    String sizeHeight;
+
+    String position;
+    String size;
+    bool isPositionEndAndSizeStart = false;
+
+    for (String value in values) {
+      if (color == null && CSSColor.isColor(value)) {
+        color = value;
+      } else if (image == null && CSSBackground.isValidBackgroundImageValue(value)) {
+        image = value;
+      } else if (repeat == null && CSSBackground.isValidBackgroundRepeatValue(value)) {
+        repeat = value;
+      } else if (attachment == null && CSSBackground.isValidBackgroundAttachmentValue(value)) {
+        attachment = value;
+      } else if (positionX == null && !isPositionEndAndSizeStart && CSSBackground.isValidBackgroundPositionValue(value)) {
+        positionX = value;
+      } else if (positionY == null && !isPositionEndAndSizeStart && CSSBackground.isValidBackgroundPositionValue(value)) {
+        positionY = value;
+      } else if (value == '/') {
+        isPositionEndAndSizeStart = true;
+        continue;
+      } else if (sizeWidth == null && CSSBackground.isValidBackgroundSizeValue(value)) {
+        sizeWidth = value;
+      } else if (sizeHeight == null && CSSBackground.isValidBackgroundSizeValue(value)) {
+        sizeHeight = value;
+      } else {
+        return null;
+      }
+    }
+
+    // Before `/` must have one position value, after `/` must have on size value
+    if (isPositionEndAndSizeStart &&
+        ((positionX == null && positionY == null) || (sizeWidth == null && sizeHeight == null))) {
+       return null;
+    }
+
+    if (positionX != null) {
+      position = positionX;
+    }
+
+    if(positionY != null) {
+      position += (' ' + positionY);
+    }
+
+    if (sizeWidth != null) {
+      size = sizeWidth;
+    }
+
+    if (sizeHeight != null) {
+      size += (' ' + sizeHeight);
+    }
+
+    return [
+      color,
+      image,
+      repeat,
+      attachment,
+      position,
+      size
+    ];
+
+  }
+
   static List<String> getTransitionValues(String shorthandProperty) {
     List transitions = shorthandProperty.split(_commaRegExp);
     List<String> values = List(4);
@@ -226,10 +366,10 @@ class CSSStyleProperty {
 
       values[0] == null ? values[0] = property : values[0] += (_comma + property);
       values[1] == null ? values[1] = duration : values[1] += (_comma + duration);
-      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);  
+      values[2] == null ? values[2] = timingFuction : values[2] += (_comma + timingFuction);
       values[3] == null ? values[3] = delay : values[3] += (_comma + delay);
     }
-    
+
     return values;
   }
 

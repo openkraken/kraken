@@ -44,8 +44,8 @@ describe('Position', () => {
   });
 
   it('should work with flex', async () => {
-    const WIDTH = '100vw';
-    const HEIGHT = '100vh';
+    const WIDTH = '360px';
+    const HEIGHT = '640px';
 
     const container = document.createElement('div');
     setElementStyle(container, {

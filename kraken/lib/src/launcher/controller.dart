@@ -31,8 +31,14 @@ void setTargetPlatformForDesktop() {
 
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController {
+  KrakenController rootController;
+
+  // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
+  // during a kraken view's process of loading, and completing a navigation request.
+  KrakenNavigationDelegate navigationDelegate;
+
   KrakenViewController(double viewportWidth, double viewportHeight,
-      {this.showPerformanceOverlay, this.enableDebug = false, int contextId})
+      {this.showPerformanceOverlay, this.enableDebug = false, int contextId, this.rootController, this.navigationDelegate})
       : _contextId = contextId {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -143,6 +149,27 @@ class KrakenViewController {
     }
   }
 
+  void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+
+    try {
+      KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
+      if (policy == KrakenNavigationActionPolicy.cancel) return;
+
+      switch(action.navigationType) {
+        case KrakenNavigationType.reload:
+          rootController.reloadWithUrl(action.target);
+          break;
+        default:
+        // for linkActivated and other type, we choose to do nothing.
+      }
+    } catch (e, stack) {
+      if (navigationDelegate.errorHandler != null) {
+        navigationDelegate.errorHandler(e, stack);
+      }
+    }
+  }
+
   // detach renderObject from parent but keep everything in active.
   void detachView() {
     _elementManager.detach();
@@ -212,7 +239,7 @@ class KrakenController {
       {bool showPerformanceOverlay = false, enableDebug = false}) {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
-        showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug);
+        showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug, rootController: this, navigationDelegate: KrakenNavigationDelegate());
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId), "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
@@ -233,6 +260,11 @@ class KrakenController {
   // the bundle manager which used to download javascript source and run.
   KrakenBundle _bundle;
 
+  void setNavigationDelegate(KrakenNavigationDelegate delegate) {
+    assert(_view != null);
+    _view.navigationDelegate = delegate;
+  }
+
   // reload current kraken view.
   void reload() async {
     RenderObject root = _view.getRootRenderObject();
@@ -246,7 +278,9 @@ class KrakenController {
     _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
-        contextId: _view.contextId);
+        contextId: _view.contextId,
+        rootController: this,
+        navigationDelegate: _view.navigationDelegate);
     _view.attachView(parent, previousSibling);
     await reloadJSContext(_view.contextId);
     await loadBundle();
@@ -266,8 +300,11 @@ class KrakenController {
   }
 
   String _bundleContent;
+  String get bundleContent => _bundleContent;
   String _bundlePath;
+  String get bundlePath => _bundlePath;
   String _bundleURL;
+  String get bundleURL => _bundleURL;
 
   // preload javascript source and cache it.
   void loadBundle({
