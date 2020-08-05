@@ -103,6 +103,9 @@ class CSSStyleDeclaration {
         case BACKGROUND:
           CSSStyleProperty.removeShorthandBackground(_cssProperties);
           break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.removeShorthandBorderRadius(_cssProperties);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -187,6 +190,9 @@ class CSSStyleDeclaration {
           break;
         case BACKGROUND:
           CSSStyleProperty.setShorthandBackground(_cssProperties, normalizedValue);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.setShorthandBorderRadius(_cssProperties, normalizedValue);
           break;
         case BORDER:
         case BORDER_TOP:
