@@ -54,7 +54,7 @@ describe('Overflow', () => {
 
     document.body.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('scrollTo', async (done) => {

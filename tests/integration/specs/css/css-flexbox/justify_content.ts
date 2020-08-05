@@ -36,7 +36,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with flex-end when flex-direction is row', async () => {
@@ -76,7 +76,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with center when flex-direction is row', async () => {
@@ -116,7 +116,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with space-around when flex-direction is row', async () => {
@@ -156,7 +156,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with space-between when flex-direction is row', async () => {
@@ -196,7 +196,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with flex-start when flex-direction is column', async () => {
@@ -236,7 +236,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with flex-end when flex-direction is column', async () => {
@@ -276,7 +276,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with center when flex-direction is column', async () => {
@@ -316,7 +316,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with space-around when flex-direction is column', async () => {
@@ -356,7 +356,7 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with space-between when flex-direction is column', async () => {
@@ -396,6 +396,6 @@ describe('flexbox justify-content', () => {
     });
     container.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

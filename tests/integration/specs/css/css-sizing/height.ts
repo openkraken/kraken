@@ -22,7 +22,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is inline-block', async () => {
@@ -34,7 +34,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is inline-flex', async () => {
@@ -46,7 +46,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is block', async () => {
@@ -58,7 +58,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('element is flex', async () => {
@@ -70,7 +70,7 @@ describe('Height', () => {
         createText('foobar'),
       ]);
       append(BODY, element);
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 
@@ -113,7 +113,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('when parent is flex with no height and align-items stretch', async () => {
@@ -152,7 +152,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
 
     it('when nested in flex parents with align-items stretch', async () => {
@@ -203,7 +203,7 @@ describe('Height', () => {
       });
       container.appendChild(child3);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 });

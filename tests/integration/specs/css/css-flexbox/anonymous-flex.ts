@@ -38,7 +38,7 @@ describe('anonymous-flex', () => {
 
     spanRemove.remove();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('item-002', async () => {
     let p;
@@ -74,7 +74,7 @@ describe('anonymous-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('item-003', async () => {
     let p;
@@ -112,7 +112,7 @@ describe('anonymous-flex', () => {
 
     document.body.offsetTop;
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('item-004', async () => {
     let p;
@@ -153,7 +153,7 @@ describe('anonymous-flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('item-005', async () => {
     let p;
@@ -204,7 +204,7 @@ describe('anonymous-flex', () => {
     // absSpan.style.position = "absolute";
     // absSpan.style.display = "inline";
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('item-006', async () => {
     let p;
@@ -261,6 +261,6 @@ describe('anonymous-flex', () => {
 
     spanRemove.parentNode.removeChild(spanRemove);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

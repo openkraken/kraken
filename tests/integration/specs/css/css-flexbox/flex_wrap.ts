@@ -46,7 +46,7 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with nowrap', async () => {
@@ -96,7 +96,7 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with wrap-reverse', async () => {
@@ -146,6 +146,6 @@ describe('flexbox flex-wrap', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -53,7 +53,7 @@ describe('flex', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('002', async () => {
     let p;
@@ -134,7 +134,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let p;
@@ -216,7 +216,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('004', async () => {
     let p;
@@ -298,7 +298,7 @@ describe('flex', () => {
     BODY.appendChild(ref1);
     BODY.appendChild(ref2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('direction', async () => {
     let flexItem;
@@ -574,7 +574,7 @@ describe('flex', () => {
     BODY.appendChild(flexContainer_2);
     BODY.appendChild(flexContainer_3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('direction_column', async () => {
     let test01;
@@ -644,7 +644,7 @@ describe('flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('direction_row', async () => {
     let test01;
@@ -714,7 +714,7 @@ describe('flex', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with initial', async () => {
@@ -759,7 +759,7 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with auto', async () => {
@@ -804,7 +804,7 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with none', async () => {
@@ -849,6 +849,6 @@ describe('flex', () => {
     );
 
     document.body.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

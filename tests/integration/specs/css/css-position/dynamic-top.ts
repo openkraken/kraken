@@ -38,7 +38,7 @@ describe('dynamic-top', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('change-002-ref', async () => {
     let p;
@@ -78,7 +78,7 @@ describe('dynamic-top', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('change-004', async () => {
     let p;
@@ -144,7 +144,7 @@ describe('dynamic-top', () => {
       parent.style.top = '2em';
     };
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('change-005', async () => {
     let p;
@@ -218,7 +218,7 @@ describe('dynamic-top', () => {
       parent.style.top = '50px';
     };
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('change-005a', async () => {
     let p;
@@ -292,9 +292,9 @@ describe('dynamic-top', () => {
       parent.style.top = '50px';
     };
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('change-005b', async () => {
     let p;
@@ -363,6 +363,6 @@ describe('dynamic-top', () => {
     BODY.appendChild(grandparent);
     BODY.appendChild(green);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

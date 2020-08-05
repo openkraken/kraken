@@ -71,6 +71,6 @@ describe('toogle-abspos', () => {
     document.body.offsetTop;
     victim.style.position = 'absolute';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

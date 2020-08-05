@@ -15,7 +15,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   it('003', async () => {
     let div;
@@ -32,7 +32,7 @@ describe('border', () => {
     });
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('005', async () => {
     let reference;
@@ -75,7 +75,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   xit('006', async () => {
     let reference;
@@ -118,7 +118,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   it('008', async () => {
     let reference;
@@ -161,7 +161,7 @@ describe('border', () => {
     );
     BODY.appendChild(wrapper);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
   });
   it('010', async () => {
     let p;
@@ -192,6 +192,40 @@ describe('border', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.1);
+  });
+
+  it('border will not appear if border width is 0.0', async () => {
+    let p;
+    let div;
+    p = createElement(
+      'p',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there are no solid border.`
+        ),
+      ]
+    );
+    div = createElement('div', {
+      xmlns: 'http://www.w3.org/1999/xhtml',
+      style: {
+        borderWidth: 0,
+        borderStyle: 'solid',
+        borderColor: '#000',
+        height: '100px',
+        width: '100px',
+        'box-sizing': 'border-box',
+      },
+    });
+    BODY.appendChild(p);
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot(0.1);
   });
 });

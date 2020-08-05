@@ -48,7 +48,7 @@ describe('flexbox flex-grow', () => {
     );
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let test1;
@@ -113,7 +113,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('003', async () => {
     let test1;
@@ -169,7 +169,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('004', async () => {
     let test1;
@@ -224,7 +224,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('005', async () => {
     let container;
@@ -275,7 +275,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let test1;
@@ -335,7 +335,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('007', async () => {
     let test1;
@@ -426,7 +426,7 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     BODY.appendChild(container_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('010', async () => {
     let test;
@@ -492,7 +492,7 @@ describe('flexbox flex-grow', () => {
       ]
     );
     BODY.appendChild(test);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('should work when flex-direction is row', async () => {
     const container1 = document.createElement('div');
@@ -529,7 +529,7 @@ describe('flexbox flex-grow', () => {
     child3.appendChild(document.createTextNode('flex-grow: 1'));
     container1.appendChild(child3);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work when flex-direction is column', async () => {
@@ -567,6 +567,6 @@ describe('flexbox flex-grow', () => {
     child6.appendChild(document.createTextNode('flex-grow: 1'));
     container2.appendChild(child6);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -65,7 +65,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let test;
@@ -132,7 +132,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('004', async () => {
     let test;
@@ -180,7 +180,7 @@ describe('align-self', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('005', async () => {
     let p;
@@ -263,7 +263,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('006', async () => {
     let p;
@@ -352,7 +352,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('007', async () => {
     let test;
@@ -420,7 +420,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('008', async () => {
     let p;
@@ -502,7 +502,7 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('009', async () => {
     let p;
@@ -595,7 +595,7 @@ describe('align-self', () => {
     BODY.appendChild(top);
     BODY.appendChild(bottom);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('010', async () => {
     let p;
@@ -725,7 +725,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('011', async () => {
     let p;
@@ -792,7 +792,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('012', async () => {
     let p;
@@ -859,7 +859,7 @@ describe('align-self', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('013', async () => {
     let test;
@@ -924,6 +924,6 @@ describe('align-self', () => {
     BODY.appendChild(test);
     BODY.appendChild(cover);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

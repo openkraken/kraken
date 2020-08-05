@@ -65,6 +65,6 @@ describe('auto-margins', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

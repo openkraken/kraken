@@ -56,6 +56,6 @@ describe('Position static', () => {
     div2.style.position = 'relative';
     div3.style.position = 'fixed';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

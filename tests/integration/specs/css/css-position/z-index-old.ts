@@ -37,6 +37,6 @@ describe('ZIndex', () => {
 
     container1.appendChild(div2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

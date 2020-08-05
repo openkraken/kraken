@@ -26,8 +26,8 @@ describe('position-006', () => {
     BODY.appendChild(p);
     BODY.appendChild(p_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -14,7 +14,7 @@ describe('conic-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('angle', async () => {
     let gradient;
@@ -30,7 +30,7 @@ describe('conic-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('center-ref', async () => {
     let top;
@@ -69,7 +69,7 @@ describe('conic-gradient', () => {
     );
     BODY.appendChild(box);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('center', async () => {
     let gradient;
@@ -85,6 +85,6 @@ describe('conic-gradient', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

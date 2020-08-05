@@ -265,7 +265,7 @@ class CSSBorder {
   static String RIGHT = 'Right';
   static String TOP = 'Top';
   static String BOTTOM = 'Bottom';
-  
+
   static double getBorderWidth(String input) {
     // https://drafts.csswg.org/css2/#border-width-properties
     // The interpretation of the first three values depends on the user agent.
@@ -302,7 +302,7 @@ class CSSBorder {
   }
 
   static bool isValidBorderStyleValue(String value) {
-    return value == SOLID || value == NONE; 
+    return value == SOLID || value == NONE;
   }
 
   static bool isValidBorderWidthValue(String value) {
@@ -361,7 +361,9 @@ class CSSBorder {
 
   static BorderSide getBorderSide(CSSStyleDeclaration style, String side) {
     BorderStyle borderStyle = getBorderSideStyle(style, side);
-    if (borderStyle == BorderStyle.none) {
+    double width = getBorderSideWidth(style, side);
+    // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
+    if (borderStyle == BorderStyle.none || width == 0.0) {
       return _noneBorderSide;
     } else {
       return BorderSide(

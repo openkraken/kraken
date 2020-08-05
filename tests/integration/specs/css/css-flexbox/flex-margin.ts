@@ -73,6 +73,6 @@ describe('flex-margin', () => {
     BODY.appendChild(redBox);
     BODY.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

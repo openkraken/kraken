@@ -46,7 +46,7 @@ describe('FontWeight', () => {
       append(BODY, p1);
       append(BODY, p2);
 
-      return matchScreenshot();
+      return matchViewportSnapshot();
     });
   });
 });

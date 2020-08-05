@@ -14,7 +14,7 @@ describe('gradient-move', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('stops', async () => {
     let gradient;
@@ -30,6 +30,6 @@ describe('gradient-move', () => {
     });
     BODY.appendChild(gradient);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

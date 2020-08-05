@@ -20,7 +20,7 @@ describe('Box padding', () => {
     container1.appendChild(container2);
     container1.style.padding = '20px';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with background-color', async () => {
@@ -38,6 +38,6 @@ describe('Box padding', () => {
       backgroundColor: 'red',
     });
     append(div, box);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
