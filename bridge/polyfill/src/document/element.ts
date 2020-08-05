@@ -1,5 +1,6 @@
 import { BODY } from './events/event-target';
 import { Node, NodeType } from './node';
+import { document } from './document';
 import {
   createElement,
   setProperty,
@@ -157,14 +158,40 @@ export class Element extends Node {
     name = String(name).toLowerCase();
     value = String(value);
     if (this.attributes[name]) {
+      // this._didModifyAttribute(name, this.attributes[name], value);
       this.attributes[name].value = value;
     } else {
       const attr = {name, value};
       this.attributes[name] = attr;
       this.attributes.push(attr);
     }
-
     setProperty(this.targetId, name, value);
+  }
+
+  private _didModifyAttribute(name:string, oldValue:string, newValue:string) :void {
+    if (name === 'id') {
+      this._checkupdateId(oldValue,newValue);
+    }
+  }
+
+  private _checkupdateId(oldValue:string, newValue:string) :void {
+    if (!this.isConnected) {
+      return;
+    }
+    if (oldValue === newValue) {
+      return;
+    }
+    if (oldValue !== '' && oldValue !== undefined && oldValue !== null) {
+      this._updateId(oldValue, newValue);
+    }
+  }
+  private _updateId(oldValue:string, newValue:string) {
+    if (oldValue !== null && oldValue !== undefined && oldValue !== '') {
+      document.removeElementById(oldValue, this);
+    }
+    if (newValue !== null && newValue !== undefined && newValue !== '') {
+      document.addElementById(newValue, this);
+    }
   }
 
   public getAttribute(name: string) {
@@ -187,6 +214,7 @@ export class Element extends Node {
       if (idx !== -1) {
         this.attributes.splice(idx, 1);
       }
+      this._didModifyAttribute(name, attr, '');
 
       removeProperty(this.targetId, name);
       delete this.attributes[name];
