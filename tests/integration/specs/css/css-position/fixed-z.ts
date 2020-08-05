@@ -18,8 +18,8 @@ describe('fixed-z', () => {
         position: 'relative',
         'z-index': '3',
         overflow: 'hidden',
-        width: '100vw',
-        'min-height': '100vh',
+        width: '360px',
+        'min-height': '640px',
         'font-size': '50px',
       },
       [

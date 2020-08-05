@@ -19,8 +19,6 @@ bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::str
   return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
 }
 
-std::shared_ptr<Value> executeTestCallback{nullptr};
-
 Value executeTest(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   const Value &callback = args[0];
 
@@ -28,7 +26,9 @@ Value executeTest(JSContext &context, const Value &thisVal, const Value *args, s
     throw JSError(context, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
   }
 
-  executeTestCallback = std::make_shared<Value>(Value(context, args[0]));
+  auto bridge = static_cast<JSBridge*>(context.getOwner());
+  auto bridgeTest = static_cast<JSBridgeTest*>(bridge->owner);
+  bridgeTest->executeTestCallback = std::make_shared<Value>(Value(context, args[0]));
 
   return Value::undefined();
 }
@@ -136,6 +136,7 @@ Value environment(JSContext &context, const Value &thisVal, const Value *args, s
 }
 
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
+  bridge->owner = this;
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
@@ -153,7 +154,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     if (!status.isString()) {
       throw JSError(context, "failed to execute 'done': parameter 1 (status) is not a string");
     }
-    executeCallback(status.getString(context).utf8(context).c_str());
+    executeCallback(context.getContextId(), status.getString(context).utf8(context).c_str());
     return Value::undefined();
   };
 

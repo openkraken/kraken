@@ -43,6 +43,8 @@ public:
 
   int32_t contextId;
   foundation::BridgeCallback bridgeCallback;
+  // the owner pointer which take JSBridge as property.
+  void *owner;
   /// evaluate JavaScript source codes in standard mode.
   alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
 

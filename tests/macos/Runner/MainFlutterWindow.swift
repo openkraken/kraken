@@ -11,10 +11,16 @@ class MainFlutterWindow: NSWindow {
     
     RegisterGeneratedPlugins(registry: flutterViewController)
     
-    var kraken = Kraken.init(name: "main")
+    let mainKraken = Kraken.init(name: "main")
+    let secondaryKraken = Kraken.init(name: "secondary")
     
-    kraken.registerMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) in
-      kraken.invokeMethod(call.method, arguments: call.arguments)
+    mainKraken.registerMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) in
+      mainKraken.invokeMethod(call.method, arguments: call.arguments)
+      result("method: " + call.method)
+    })
+    
+    secondaryKraken.registerMethodCallHandler({ (call: FlutterMethodCall, result: FlutterResult) in
+      secondaryKraken.invokeMethod(call.method, arguments: call.arguments)
       result("method: " + call.method)
     })
     

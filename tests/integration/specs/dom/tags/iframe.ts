@@ -5,8 +5,8 @@ describe('IframeElement', () => {
       'src',
       'https://dev.g.alicdn.com/kraken/kraken-demos/todomvc/build/web/index.html'
     );
-    iframe.style.width = '100vw';
-    iframe.style.height = '375rpx';
+    iframe.style.width = '360px';
+    iframe.style.height = '375px';
 
     const div = document.createElement('div');
     div.style.width = div.style.height = '200px';

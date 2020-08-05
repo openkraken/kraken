@@ -3,7 +3,7 @@ describe('background-repeat', () => {
     // repeat
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -12,7 +12,7 @@ describe('background-repeat', () => {
 
     const div1 = document.createElement('div');
     setElementStyle(div1, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url("assets/rax.png")',
@@ -27,7 +27,7 @@ describe('background-repeat', () => {
     // repeat
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -36,7 +36,7 @@ describe('background-repeat', () => {
 
     const div1 = document.createElement('div');
     setElementStyle(div1, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -51,7 +51,7 @@ describe('background-repeat', () => {
   it('repeat-x', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -60,7 +60,7 @@ describe('background-repeat', () => {
 
     const div2 = document.createElement('div');
     setElementStyle(div2, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -76,7 +76,7 @@ describe('background-repeat', () => {
   it('repeat-y', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -85,7 +85,7 @@ describe('background-repeat', () => {
 
     const div3 = document.createElement('div');
     setElementStyle(div3, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -100,7 +100,7 @@ describe('background-repeat', () => {
   it('repeat', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -109,7 +109,7 @@ describe('background-repeat', () => {
 
     const div4 = document.createElement('div');
     setElementStyle(div4, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',

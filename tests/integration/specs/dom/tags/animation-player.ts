@@ -7,8 +7,8 @@ describe('AnimationPlayer', () => {
       animationPlayer.setAttribute('type', 'flare');
       animationPlayer.setAttribute('src', ASSET);
       Object.assign(animationPlayer.style, {
-        width: '100vw',
-        height: '100vh',
+        width: '360px',
+        height: '640px',
         objectFit: 'contain',
       });
 

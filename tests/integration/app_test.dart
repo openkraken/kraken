@@ -15,12 +15,12 @@ void main() async {
   FlutterDriver driver = await FlutterDriver.connect();
 
   List<FileSystemEntity> specs = specsDirectory.listSync(recursive: true);
-  List<Map<String, String>> testPayload = [];
+  List<Map<String, String>> mainTestPayload = [];
   for (FileSystemEntity file in specs) {
     if (file.path.endsWith('js')) {
       String filename = path.basename(file.path);
       String code = File(file.path).readAsStringSync();
-      testPayload.add({
+      mainTestPayload.add({
         'filename': filename,
         'filepath': file.path,
         'code': code,
@@ -28,7 +28,22 @@ void main() async {
     }
   }
 
-  String status = await driver.requestData(jsonEncode(testPayload));
+  var reversedSpecs = specs.reversed;
+  List<Map<String, String>> childTestPayload = [];
+
+  for (FileSystemEntity file in reversedSpecs) {
+    if (file.path.endsWith('js')) {
+      String filename = path.basename(file.path);
+      String code = File(file.path).readAsStringSync();
+      childTestPayload.add({
+        'filename': filename,
+        'filepath': file.path,
+        'code': code,
+      });
+    }
+  }
+
+  String status = await driver.requestData(jsonEncode([mainTestPayload, childTestPayload]));
   await driver.close();
 
   if (status == 'failed') {
