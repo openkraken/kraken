@@ -12,7 +12,7 @@ export enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 }
 
-export let nodesCount = 1;
+let nodesCount = 1;
 
 export class Node extends EventTarget {
   public readonly nodeType: NodeType;

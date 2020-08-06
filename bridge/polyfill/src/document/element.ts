@@ -159,7 +159,7 @@ export class Element extends Node {
     name = String(name).toLowerCase();
     value = String(value);
     if (this.attributes[name]) {
-      // this._didModifyAttribute(name, this.attributes[name], value);
+      this._didModifyAttribute(name, this.attributes[name].value, value);
       this.attributes[name].value = value;
     } else {
       const attr = {name, value};
