@@ -145,12 +145,18 @@ class CSSStyleDeclaration {
         case PADDING_LEFT:
         case PADDING_BOTTOM:
         case PADDING_RIGHT:
+          // Validation length type
+          if (!CSSLength.isLength(normalizedValue)) {
+            return;
+          }
+          break;
         case MARGIN_TOP:
         case MARGIN_LEFT:
         case MARGIN_RIGHT:
         case MARGIN_BOTTOM:
-          // Validation length type
-          if (!CSSLength.isLength(normalizedValue)) {
+          // Validation length type and keyword type
+          if (!CSSLength.isLength(normalizedValue) &&
+            !CSSLength.isKeyword(normalizedValue)) {
             return;
           }
           break;

@@ -1336,8 +1336,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (isHorizontalFlexDirection(flexDirection)) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
             verticalRemainingSpace = crossAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginLeft == 'auto') {
-              if (marginRight == 'auto') {
+            if (totalFlexGrow == 0 && marginLeft == AUTO) {
+              if (marginRight == AUTO) {
                 childMainPosition += (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
                 betweenSpace = (horizontalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
@@ -1345,8 +1345,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginTop == 'auto') {
-              if (marginBottom == 'auto') {
+            if (marginTop == AUTO) {
+              if (marginBottom == AUTO) {
                 childCrossPosition += verticalRemainingSpace / 2;
               } else {
                 childCrossPosition += verticalRemainingSpace
@@ -1356,8 +1356,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           } else {
             horizontalRemainingSpace = crossAxisRemainingSpace;
             verticalRemainingSpace = mainAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginTop == 'auto') {
-              if (marginBottom == 'auto') {
+            if (totalFlexGrow == 0 && marginTop == AUTO) {
+              if (marginBottom == AUTO) {
                 childMainPosition += (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
                 betweenSpace = (verticalRemainingSpace / mainAxisMarginAutoChildren) / 2;
               } else {
@@ -1365,8 +1365,8 @@ class RenderFlexLayout extends RenderLayoutBox {
               }
             }
 
-            if (marginLeft == 'auto') {
-              if (marginRight == 'auto') {
+            if (marginLeft == AUTO) {
+              if (marginRight == AUTO) {
                 childCrossPosition += horizontalRemainingSpace / 2;
               } else {
                 childCrossPosition += horizontalRemainingSpace;
