@@ -101,6 +101,12 @@ class RenderBoxModel extends RenderBox with
     if (padding != null) {
       newBox.padding = padding;
     }
+    if (borderEdge != null) {
+      newBox.borderEdge = borderEdge;
+    }
+    if (decoration != null) {
+      newBox.decoration = decoration;
+    }
 
     return newBox;
   }
