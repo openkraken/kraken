@@ -14,7 +14,7 @@ mixin CSSContentVisibilityMixin on Node {
   bool _hasIntersectionObserver = false;
 
   RenderObject initRenderContentVisibility(RenderObject renderObject, CSSStyleDeclaration style) {
-    String contentVisibility = style['contentVisibility'];
+    String contentVisibility = style[CONTENT_VISIBILITY];
     if (contentVisibility == 'hidden' || contentVisibility == 'auto') {
       // @TODO:  containIntrinsicSize
       renderVisibility = RenderVisibility(hidden: true, maintainSize: false, child: renderObject);

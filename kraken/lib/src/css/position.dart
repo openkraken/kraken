@@ -188,31 +188,6 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   childParentData.offset = Offset(x ?? 0, y ?? 0);
 }
 
-double getFontSize(CSSStyleDeclaration style) {
-  if (style.contains(FONT_SIZE)) {
-    return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
-  } else {
-    return DEFAULT_FONT_SIZE;
-  }
-}
-
-double getLineHeight(CSSStyleDeclaration style) {
-  String lineHeightStr = style[LINE_HEIGHT];
-  double lineHeight;
-  if (lineHeightStr != '') {
-    if (lineHeightStr.endsWith(CSSLength.PX) ||
-      lineHeightStr.endsWith(CSSLength.RPX) ||
-      lineHeightStr.endsWith(CSSLength.VW) ||
-      lineHeightStr.endsWith(CSSLength.VH)
-  ) {
-      lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
-    } else {
-      lineHeight = getFontSize(style) * double.parse(lineHeightStr);
-    }
-  }
-  return lineHeight;
-}
-
 VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
   String verticalAlign = style[VERTICAL_ALIGN];
 

@@ -106,6 +106,12 @@ class CSSStyleDeclaration {
         case BORDER_RADIUS:
           CSSStyleProperty.removeShorthandBorderRadius(_cssProperties);
           break;
+        case OVERFLOW:
+          CSSStyleProperty.removeShorthandOverflow(_cssProperties);
+          break;
+        case FONT:
+          CSSStyleProperty.removeShorthandFont(_cssProperties);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -194,6 +200,12 @@ class CSSStyleDeclaration {
         case BORDER_RADIUS:
           CSSStyleProperty.setShorthandBorderRadius(_cssProperties, normalizedValue);
           break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(_cssProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -222,8 +234,7 @@ class CSSStyleDeclaration {
 
   /// Check a css property is valid.
   bool contains(String property) {
-    String value = getPropertyValue(property);
-    return !CSSStyleDeclaration.isNullOrEmptyValue(value);
+    return _cssProperties.containsKey(property) && _cssProperties[property] != null;
   }
 
   void addStyleChangeListener(StyleChangeListener listener) {

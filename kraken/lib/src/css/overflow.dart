@@ -14,17 +14,9 @@ enum CSSOverflowType {
   scroll,
 }
 
-List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
-  CSSOverflowType overflowX, overflowY;
-  overflowX = overflowY = _getOverflow(style['overflow']);
-
-  if (style.contains('overflowX')) {
-    overflowX = _getOverflow(style['overflowX']);
-  }
-
-  if (style.contains('overflowY')) {
-    overflowY = _getOverflow(style['overflowY']);
-  }
+List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
+  CSSOverflowType overflowX  = _getOverflowType(style[OVERFLOW_X]);
+  CSSOverflowType overflowY  = _getOverflowType(style[OVERFLOW_Y]);
 
   // Apply overflow special rules from w3c.
   if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
@@ -38,7 +30,7 @@ List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
   return [overflowX, overflowY];
 }
 
-CSSOverflowType _getOverflow(String definition) {
+CSSOverflowType _getOverflowType(String definition) {
   switch (definition) {
     case 'hidden':
       return CSSOverflowType.hidden;
@@ -47,9 +39,9 @@ CSSOverflowType _getOverflow(String definition) {
     case 'auto':
       return CSSOverflowType.auto;
     case 'visible':
+    default:
       return CSSOverflowType.visible;
   }
-  return CSSOverflowType.visible;
 }
 
 mixin CSSOverflowMixin {
@@ -61,7 +53,7 @@ mixin CSSOverflowMixin {
   RenderObject initOverflowBox(RenderObject current, CSSStyleDeclaration style,
       void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     assert(style != null);
-    List<CSSOverflowType> overflow = getOverflowFromStyle(style);
+    List<CSSOverflowType> overflow = getOverflowTypes(style);
     // X direction overflow
     renderScrollViewPortX = _getRenderObjectByOverflow(overflow[0], current, AxisDirection.right, scrollListener);
     // Y direction overflow
@@ -73,7 +65,7 @@ mixin CSSOverflowMixin {
   void updateOverFlowBox(
       CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     if (style != null) {
-      List<CSSOverflowType> overflow = getOverflowFromStyle(style);
+      List<CSSOverflowType> overflow = getOverflowTypes(style);
 
       if (renderScrollViewPortY != null) {
         RenderObject parent = renderScrollViewPortY.parent;

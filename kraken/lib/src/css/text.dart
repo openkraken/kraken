@@ -10,10 +10,13 @@ const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
 const double DEFAULT_FONT_WEIGHT = 400.0;
 
+final RegExp _spaceRegExp = RegExp(r'\s+');
+final RegExp _commaRegExp = RegExp(r'\s*,\s*');
+
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin {
-  TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
+  TextSpan createTextSpan(String text, CSSStyleDeclaration style) {
     TextStyle textStyle = style != null ? getTextStyle(style) : null;
     return TextSpan(
       text: text,
@@ -21,12 +24,12 @@ mixin CSSTextMixin {
     );
   }
 
-  TextAlign getTextAlignFromStyle(CSSStyleDeclaration style) {
+  TextAlign getTextAlign(CSSStyleDeclaration style) {
     TextAlign textAlign = TextAlign.left;
     if (style == null) {
       return textAlign;
     }
-    switch (style['textAlign']) {
+    switch (style[TEXT_ALIGN]) {
       case 'center':
         textAlign = TextAlign.center;
         break;
@@ -41,25 +44,6 @@ mixin CSSTextMixin {
     return textAlign;
   }
 
-  /// TextStyle({
-  ///   Color color,
-  ///   TextDecoration decoration,
-  ///   Color decorationColor,
-  ///   TextDecorationStyle decorationStyle,
-  ///   FontWeight fontWeight,
-  ///   FontStyle fontStyle,
-  ///   TextBaseline textBaseline,
-  ///   String fontFamily,
-  ///   double fontSize,
-  ///   double letterSpacing,
-  ///   double wordSpacing,
-  ///   double height,
-  ///   Locale locale,
-  ///   Paint background,
-  ///   Paint foreground,
-  ///   List<Shadow> shadows
-  /// })
-  ///
   /// Creates a new TextStyle object.
   ///   color: The color to use when painting the text. If this is specified, foreground must be null.
   ///   decoration: The decorations to paint near the text (e.g., an underline).
@@ -67,7 +51,6 @@ mixin CSSTextMixin {
   ///   decorationStyle: The style in which to paint the text decorations (e.g., dashed).
   ///   fontWeight: The typeface thickness to use when painting the text (e.g., bold).
   ///   fontStyle: The typeface variant to use when drawing the letters (e.g., italics).
-  ///   fontFamily: The name of the font to use when painting the text (e.g., Roboto).
   ///   fontSize: The size of glyphs (in logical pixels) to use when painting the text.
   ///   letterSpacing: The amount of space (in logical pixels) to add between each letter.
   ///   wordSpacing: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between /// each word).
@@ -81,12 +64,11 @@ mixin CSSTextMixin {
       color: getColor(style),
       decoration: getDecorationLine(style),
       decorationColor: getDecorationColor(style),
-      decorationStyle: getDecorationStyle(style),
+      decorationStyle: getTextDecorationStyle(style),
       fontWeight: getFontWeight(style),
       fontStyle: getFontStyle(style),
       textBaseline: getTextBaseLine(style),
       package: getFontPackage(style),
-      fontFamily: getFontFamily(style),
       fontFamilyFallback: getFontFamilyFallback(style),
       fontSize: getFontSize(style),
       letterSpacing: getLetterSpacing(style),
@@ -106,8 +88,6 @@ mixin CSSTextMixin {
     }
   }
 
-  static RegExp _splitRegExp = RegExp(r' ');
-
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
   TextDecoration getDecorationLine(CSSStyleDeclaration style) {
@@ -115,7 +95,7 @@ mixin CSSTextMixin {
       return _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splittedTextDecoration = textDecoration.split(_splitRegExp);
+      List<String> splittedTextDecoration = textDecoration.split(_spaceRegExp);
       // Compatible with CSS 2.1: text-decoration = text-decoration-line.
       if (splittedTextDecoration.length >= 1) {
         return _getTextDecorationLine(splittedTextDecoration[0]);
@@ -140,7 +120,7 @@ mixin CSSTextMixin {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
+      List<String> splitedDecoration = textDecoration.split(_spaceRegExp);
       if (splitedDecoration.length >= 2) {
         return CSSColor.parseColor(splitedDecoration.last);
       }
@@ -148,20 +128,20 @@ mixin CSSTextMixin {
     return getColor(style); // Default to currentColor (style.color)
   }
 
-  TextDecorationStyle getDecorationStyle(CSSStyleDeclaration style) {
+  TextDecorationStyle getTextDecorationStyle(CSSStyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_STYLE)) {
-      return _getDecorationStyle(style[TEXT_DECORATION_STYLE]);
+      return _getTextDecorationStyle(style[TEXT_DECORATION_STYLE]);
     } else if (style.contains(TEXT_DECORATION)) {
       String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
+      List<String> splitedDecoration = textDecoration.split(_spaceRegExp);
       if (splitedDecoration.length >= 2) {
-        return _getDecorationStyle(splitedDecoration[1]);
+        return _getTextDecorationStyle(splitedDecoration[1]);
       }
     }
-    return _getDecorationStyle();
+    return _getTextDecorationStyle();
   }
 
-  TextDecorationStyle _getDecorationStyle([String value]) {
+  TextDecorationStyle _getTextDecorationStyle([String value]) {
     switch (value) {
       case 'double':
         return TextDecorationStyle.double;
@@ -186,20 +166,13 @@ mixin CSSTextMixin {
           case 'lighter':
             fontWeightValue = 200;
             break;
-          case 'light':
-            fontWeightValue = 300;
-            break;
           case 'normal':
             fontWeightValue = 400;
-            break;
-          case 'medium':
-            fontWeightValue = 500;
             break;
           case 'bold':
             fontWeightValue = 700;
             break;
           case 'bolder':
-          case 'heavy':
             fontWeightValue = 900;
             break;
           default:
@@ -253,13 +226,46 @@ mixin CSSTextMixin {
     return BUILTIN_FONT_PACKAGE;
   }
 
-  static String DEFAULT_FONT_FAMILY = '';
-  String getFontFamily(CSSStyleDeclaration style) {
-    return style.contains(FONT_FAMILY) ? style[FONT_FAMILY] : DEFAULT_FONT_FAMILY;
-  }
-
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
   List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
+    String fontFamily = style[FONT_FAMILY];
+    if (fontFamily.isNotEmpty) {
+      List<String> values = fontFamily.split(_commaRegExp);
+      List<String> resolvedFamily = List();
+
+      for (int i = 0; i < values.length; i++) {
+        String familyName = values[i];
+        // Remove wrapping quotes: "Gill Sans" -> Gill Sans
+        if (familyName[0] == '"' || familyName[0] == '\'') {
+          familyName = familyName.substring(1, familyName.length - 1);
+        }
+
+        switch (familyName) {
+          case 'sans-serif':
+            // Default sans-serif font in iOS (9 and newer)and iPadOS: San Francisco
+            // Default sans-serif font in Android (4.0+): Roboto
+            resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
+            break;
+          case 'serif':
+            // Default serif font in iOS and iPadOS: Times New Roman (as TimesNewRomanPSMT)
+            // Default serif font in Android (4.0+): Noto Serif
+            resolvedFamily.addAll(['Times', 'Times New Roman', 'Noto Serif', 'Songti SC', 'Songti TC', 'Hiragino Mincho ProN', 'AppleMyungjo', 'Apple SD Gothic Neo']);
+            break;
+          case 'monospace':
+            resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
+            break;
+          case 'cursive':
+            resolvedFamily.addAll(['Apple Chancery', 'DancingScript']);
+            break;
+          case 'fantasy':
+            resolvedFamily.addAll(['Papyrus', 'Impact']);
+            break;
+          default:
+            resolvedFamily.add(familyName);
+        }
+      }
+      return resolvedFamily;
+    }
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
@@ -332,5 +338,50 @@ mixin CSSTextMixin {
 
     }
     return textShadows;
+  }
+}
+
+
+class CSSFont {
+  static bool isValidFontStyleValue(String value) {
+    return value ==  'normal' || value == 'italic' || value == 'oblique';
+  }
+
+  static bool isValidFontWeightValue(String value) {
+    double weight = CSSNumber.parseNumber(value);
+    if (weight != null) {
+      return weight >= 1 && weight <= 1000;
+    } else {
+      return value == 'normal' || value == 'bold' || value == 'lighter' || value == 'bolder';
+    }
+  }
+
+  static bool isValidLineHeightValue(String value) {
+    return CSSLength.isLength(value) || value == 'normal' || double.tryParse(value) != null;
+  }
+
+  static double getFontSize(CSSStyleDeclaration style) {
+    if (style.contains(FONT_SIZE)) {
+      return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
+    } else {
+      return DEFAULT_FONT_SIZE;
+    }
+  }
+
+  static double getLineHeight(CSSStyleDeclaration style) {
+    String value = style[LINE_HEIGHT];
+    double lineHeight;
+    if (value.isNotEmpty) {
+      if (CSSLength.isLength(value)) {
+        lineHeight = CSSLength.toDisplayPortValue(value);
+      } else {
+        double multipliedNumber = double.tryParse(value);
+        if (multipliedNumber != null) {
+          lineHeight = getFontSize(style) * multipliedNumber;
+        }
+        
+      }
+    }
+    return lineHeight;
   }
 }

@@ -3,10 +3,63 @@ import 'package:kraken/css.dart';
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
 final RegExp _slashRegExp = RegExp(r'\/(?![^(]*\))');
+final RegExp _replaceCommaRegExp = RegExp(r'\s*,\s*');
 const String _comma = ', ';
 const String _0s = '0s';
 
+// Origin version: https://github.com/jedmao/css-list-helpers/blob/master/src/index.ts
+List<String> _splitBySpace(String value) {
+  List<String> array = List();
+  String current = '';
+  int func = 0;
+  String quote;
+  bool splitMe = false;
+  bool escape = false;
+
+  for (int i = 0; i < value.length; i++) {
+    String char = value[i];
+
+    if (quote != null) {
+      if (escape) {
+        escape = false;
+      } else if (char == '\\') {
+        escape = true;
+      } else if (char == quote) {
+        quote = null;
+      }
+    } else if (char == '"' || char == '\'') {
+      quote = char;
+    } else if (char == '(') {
+      func += 1;
+    } else if (char == ')') {
+      if (func > 0) {
+        func -= 1;
+      }
+    } else if (func == 0) {
+      if (char == ' ') {
+        splitMe = true;
+      }
+    }
+
+    if (splitMe) {
+      if (current != '') {
+        array.add(current.trim());
+      }
+      current = '';
+      splitMe = false;
+    } else {
+      current += char;
+    }
+  }
+
+  if (current != '') {
+    array.add(current.trim());
+  }
+  return array;
+}
+
 class CSSStyleProperty {
+
   static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
     List<String> values = _getEdgeValues(shorthandValue);
     if (values == null) return;
@@ -78,6 +131,39 @@ class CSSStyleProperty {
     if (style.containsKey(BORDER_TOP_RIGHT_RADIUS)) style.remove(BORDER_TOP_RIGHT_RADIUS);
     if (style.containsKey(BORDER_BOTTOM_RIGHT_RADIUS)) style.remove(BORDER_BOTTOM_RIGHT_RADIUS);
     if (style.containsKey(BORDER_BOTTOM_LEFT_RADIUS)) style.remove(BORDER_BOTTOM_LEFT_RADIUS);
+  }
+
+  static void setShorthandOverflow(Map<String, String> style, String shorthandValue) {
+    List<String> values = shorthandValue.split(_spaceRegExp);
+    if (values.length == 1) {
+      style[OVERFLOW_Y] = style[OVERFLOW_X] = values[0];
+    } else if (values.length == 2) {
+      style[OVERFLOW_X] = values[0];
+      style[OVERFLOW_Y] = values[1];
+    }
+  }
+
+  static void removeShorthandOverflow(Map<String, String> style) {
+    if (style.containsKey(OVERFLOW_X)) style.remove(OVERFLOW_X);
+    if (style.containsKey(OVERFLOW_Y)) style.remove(OVERFLOW_Y);
+  }
+
+  static void setShorthandFont(Map<String, String> style, String shorthandValue) {
+    List<String> values = _getFontValues(shorthandValue);
+    if (values == null) return;
+    style[FONT_STYLE] = values[0];
+    style[FONT_WEIGHT] = values[1];
+    style[FONT_SIZE] = values[2];
+    style[LINE_HEIGHT] = values[3];
+    style[FONT_FAMILY] = values[4];
+  }
+
+  static void removeShorthandFont(Map<String, String> style) {
+    if (style.containsKey(FONT_STYLE)) style.remove(FONT_STYLE);
+    if (style.containsKey(FONT_WEIGHT)) style.remove(FONT_WEIGHT);
+    if (style.containsKey(FONT_SIZE)) style.remove(FONT_SIZE);
+    if (style.containsKey(LINE_HEIGHT)) style.remove(LINE_HEIGHT);
+    if (style.containsKey(FONT_FAMILY)) style.remove(FONT_FAMILY);
   }
 
   static void setShorthandTransition(Map<String, String> style, String shorthandValue) {
@@ -380,6 +466,54 @@ class CSSStyleProperty {
       size
     ];
 
+  }
+
+  static List<String> _getFontValues(String shorthandProperty) {
+    assert(shorthandProperty != null);
+    // Convert 40%/10em => 40% / 10em
+    shorthandProperty = shorthandProperty.replaceAll(_slashRegExp, ' / ');
+    // Convert "Goudy Bookletter 1911", sans-serif => "Goudy Bookletter 1911",sans-serif
+    shorthandProperty = shorthandProperty.replaceAll(_replaceCommaRegExp, ',');
+    List values = _splitBySpace(shorthandProperty);
+    
+    String style;
+    String weight;
+    String size;
+    String lineHeight;
+    String family;
+
+    bool isSizeEndAndLineHeightStart = false;
+
+    for (String value in values) {
+      if (style == null && CSSFont.isValidFontStyleValue(value)) {
+        style = value;
+      } else if (weight == null && CSSFont.isValidFontWeightValue(value)) {
+        weight = value;
+      } else if (size == null && CSSLength.isLength(value)) {
+        size = value;
+      } else if (value == '/') {
+        isSizeEndAndLineHeightStart = true;
+        continue;
+      } else if (lineHeight == null && CSSFont.isValidLineHeightValue(value)) {
+        lineHeight = value;
+      } else if (family == null) {
+        family = value;
+      } else {
+        return null;
+      }
+    }
+
+    if (isSizeEndAndLineHeightStart && (size == null || lineHeight == null)) {
+      return null;
+    }
+
+    return [
+      style,
+      weight,
+      size,
+      lineHeight,
+      family
+    ];
   }
 
   static List<String> _getTransitionValues(String shorthandProperty) {

@@ -6,11 +6,22 @@
 // properties
 const String DISPLAY = 'display';
 const String POSITION = 'position';
+const String OPACITY = 'opacity';
 const String Z_INDEX = 'zIndex';
 const String CONTENT_VISIBILITY = 'contentVisibility';
-const String TRANSFORM = 'transform';
-const String OVERFLOW = 'overflow';
 const String BOX_SHADOW = 'boxShadow';
+const String COLOR = 'color';
+
+const String WIDTH = 'width';
+const String HEIGHT = 'height';
+const String MIN_HEIGHT = 'minHeight';
+const String MAX_HEIGHT = 'maxHeight';
+const String MIN_WIDTH = 'minWidth';
+const String MAX_WIDTH = 'maxWidth';
+
+const String OVERFLOW = 'overflow';
+const String OVERFLOW_X = 'overflowX';
+const String OVERFLOW_Y = 'overflowY';
 
 const String PADDING = 'padding';
 const String PADDING_LEFT = 'paddingLeft';
@@ -66,15 +77,32 @@ const String FONT_SIZE = 'fontSize';
 const String LINE_HEIGHT = 'lineHeight';
 const String FONT_FAMILY = 'fontFamily';
 const String VERTICAL_ALIGN = 'verticalAlign';
+const String TEXT_OVERFLOW = 'textOverflow';
+const String TEXT_DECORATION = 'textDecoration';
+const String TEXT_DECORATION_LINE = 'textDecorationLine';
+const String TEXT_DECORATION_COLOR = 'textDecorationColor';
+const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
+const String TEXT_SHADOW = 'textShadow';
+const String LETTER_SPACING = 'letterSpacing';
+const String WORD_SPACING = 'wordSpacing';
+const String WHITE_SPACE = 'whiteSpace';
 
+const String FLEX = 'flex';
+const String FLEX_GROW = 'flexGrow';
+const String FLEX_SHRINK = 'flexShrink';
+const String FLEX_BASIS = 'flexBasis';
 const String FLEX_DIRECTION = 'flexDirection';
 const String FLEX_WRAP = 'flexWrap';
 const String FLEX_FLOW = 'flexFlow';
+
 const String JUSTIFY_CONTENT = 'justifyContent';
 const String TEXT_ALIGN = 'textAlign';
 const String ALIGN_ITEMS = 'alignItems';
 const String ALIGN_SELF = 'alignSelf';
 const String ALIGN_CONTENT = 'alignContent';
+
+const String TRANSFORM = 'transform';
+const String TRANSFORM_ORIGIN = 'transformOrigin';
 
 const String TRANSITION = 'transition';
 const String TRANSITION_PROPERTY = 'transitionProperty';
@@ -92,22 +120,6 @@ const String ANIMATION_DIRECTION = 'animationDirection';
 const String ANIMATION_FILL_MODE = 'animationFillMode';
 const String ANIMATION_PLAY_STATE = 'animationPlayState';
 
-const String COLOR = 'color';
-const String WIDTH = 'width';
-const String HEIGHT = 'height';
-const String MIN_HEIGHT = 'minHeight';
-const String MAX_HEIGHT = 'maxHeight';
-const String MIN_WIDTH = 'minWidth';
-const String MAX_WIDTH = 'maxWidth';
-
-const String TEXT_DECORATION = 'textDecoration';
-const String TEXT_DECORATION_LINE = 'textDecorationLine';
-const String TEXT_DECORATION_COLOR = 'textDecorationColor';
-const String TEXT_DECORATION_STYLE = 'textDecorationStyle';
-const String TEXT_SHADOW = 'textShadow';
-const String LETTER_SPACING = 'letterSpacing';
-const String WORD_SPACING = 'wordSpacing';
-const String WHITE_SPACE = 'whiteSpace';
 
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
@@ -139,7 +151,6 @@ const String INLINE = 'inline';
 const String BLOCK = 'block';
 const String INLINE_BLOCK = 'inline-block';
 const String INLINE_FLEX = 'inline-flex';
-const String FLEX = 'flex';
 
 // Position
 const String RELATIVE = 'relative';

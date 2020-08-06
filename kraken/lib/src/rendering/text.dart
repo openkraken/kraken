@@ -27,8 +27,8 @@ class RenderTextBox extends RenderBox
     _style = style;
 
     _renderParagraph = RenderParagraph(
-      createTextSpanWithStyle(text, style),
-      textAlign: getTextAlignFromStyle(style),
+      createTextSpan(text, style),
+      textAlign: getTextAlign(style),
       textDirection: TextDirection.ltr,
       overflow: _getOverflow(),
     );
@@ -39,8 +39,8 @@ class RenderTextBox extends RenderBox
   BoxSizeType heightSizeType;
 
   void _rebuild() {
-    _renderParagraph.text = createTextSpanWithStyle(text, style);
-    _renderParagraph.textAlign = getTextAlignFromStyle(style);
+    _renderParagraph.text = createTextSpan(text, style);
+    _renderParagraph.textAlign = getTextAlign(style);
     _renderParagraph.overflow = _getOverflow();
     _renderParagraph.markNeedsLayout();
   }
@@ -63,12 +63,7 @@ class RenderTextBox extends RenderBox
   }
 
   bool _isTextOverflowEllipsis() {
-    if (style == null) {
-      return false;
-    }
-    String overflowX = style['overflowX'] != '' ? style['overflowX'] : style['overflow'];
-
-    return overflowX != 'visible' && style['whiteSpace'] == 'nowrap' && style['textOverflow'] == 'ellipsis';
+    return _style != null && style[OVERFLOW_X] != 'visible' && style[WHITE_SPACE] == 'nowrap' && style[TEXT_OVERFLOW] == 'ellipsis';
   }
 
   TextOverflow _getOverflow() {
@@ -93,7 +88,7 @@ class RenderTextBox extends RenderBox
     if (child != null) {
       BoxConstraints additionalConstraints = constraints;
 
-      if (_isTextOverflowEllipsis() || (style['whiteSpace'] != 'nowrap' && elementWidth != null)) {
+      if (_isTextOverflowEllipsis() || (style[WHITE_SPACE] != 'nowrap' && elementWidth != null)) {
         additionalConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: elementWidth,
