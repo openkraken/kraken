@@ -169,7 +169,7 @@ export class Element extends Node {
     setProperty(this.targetId, name, value);
   }
 
-  otifyNodeRemoved(insertionNode: Node) {
+  notifyNodeRemoved(insertionNode: Node) {
     if (insertionNode.isConnected) {
       traverseNode(this, (node:Node) => {
         if (node instanceof Element) {
