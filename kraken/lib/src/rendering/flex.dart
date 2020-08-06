@@ -295,6 +295,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
   }
 
+  double flowAwareBorderStart() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? borderLeft : borderRight;
+    }
+    return _startIsTopLeft(flexDirection) ? borderTop : borderBottom;
+  }
+
+  double flowAwareBorderEnd() {
+    if (isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? borderRight : borderLeft;
+    }
+    return _startIsTopLeft(flexDirection) ? borderBottom : borderTop;
+  }
+  
   double flowAwarePaddingBefore() {
     // NOTE: We did't going to support writing mode.
     return paddingTop;
@@ -1139,20 +1153,22 @@ class RenderFlexLayout extends RenderLayoutBox {
       constraintHeight = math.max(constraintHeight, elementHeight);
     }
 
+    BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
+    
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = contentConstraints
-            .constrain(Size(math.max(constraintWidth, idealMainSize), contentConstraints.constrainHeight(constraintHeight)));
-        actualSize = contentSize.width;
-        crossSize = contentSize.height;
+        size = inflatedContentConstraints 
+            .constrain(Size(math.max(constraintWidth, idealMainSize), inflatedContentConstraints.constrainHeight(constraintHeight)));
+        actualSize = contentSize.width + borderEdge.horizontal;
+        crossSize = contentSize.height + borderEdge.vertical;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = contentConstraints
-            .constrain(Size(math.max(constraintWidth, crossSize), contentConstraints.constrainHeight(constraintHeight)));
-        actualSize = contentSize.height;
-        crossSize = contentSize.width;
+        size = inflatedContentConstraints 
+            .constrain(Size(math.max(constraintWidth, crossSize), inflatedContentConstraints.constrainHeight(constraintHeight)));
+        actualSize = contentSize.height + borderEdge.vertical;
+        crossSize = contentSize.width + borderEdge.horizontal;
         break;
     }
 
@@ -1208,9 +1224,14 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       double mainAxisPadding = flowAwarePaddingStart();
       double crossAxisPadding = flowAwarePaddingEnd();
+
+      double mainAxisBorder = flowAwareBorderStart();
+      double crossAxisBorder = flowAwareBorderEnd();
+      
       // Position elements
       double childMainPosition =
-        flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
+        flipMainAxis ? mainAxisPadding + mainAxisBorder + actualSize - leadingSpace :
+        leadingSpace + mainAxisPadding + mainAxisBorder;
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
@@ -1240,22 +1261,22 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignItems.start:
             case AlignItems.flexEnd:
             case AlignItems.end:
-              childCrossPosition = crossAxisPadding +
+              childCrossPosition = crossAxisPadding + crossAxisBorder +
                   (_startIsTopLeft(flipDirection(flexDirection)) ==
                           (alignItems == AlignItems.flexStart || alignItems == AlignItems.start)
                       ? 0.0
                       : crossSize - _getCrossSize(child));
               break;
             case AlignItems.center:
-              childCrossPosition = crossAxisPadding + (crossSize - _getCrossSize(child)) / 2.0;
+              childCrossPosition = crossAxisPadding + crossAxisBorder + (crossSize - _getCrossSize(child)) / 2.0;
               break;
             case AlignItems.baseline:
               // Distance from top to baseline of child
               double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true) ?? 0;
-              childCrossPosition = crossAxisPadding + lineBoxLeading / 2 + (runBaselineExtent - childAscent);
+              childCrossPosition = crossAxisPadding + crossAxisBorder + lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case AlignItems.stretch:
-              childCrossPosition = crossAxisPadding;
+              childCrossPosition = crossAxisPadding + crossAxisBorder;
               break;
             default:
               break;
@@ -1266,22 +1287,22 @@ class RenderFlexLayout extends RenderLayoutBox {
             case AlignSelf.start:
             case AlignSelf.flexEnd:
             case AlignSelf.end:
-              childCrossPosition = crossAxisPadding +
+              childCrossPosition = crossAxisPadding + crossAxisBorder +
                   (_startIsTopLeft(flipDirection(flexDirection)) ==
                           (alignSelf == AlignSelf.flexStart || alignSelf == AlignSelf.start)
                       ? 0.0
                       : crossSize - _getCrossSize(child));
               break;
             case AlignSelf.center:
-              childCrossPosition = crossAxisPadding + (crossSize - _getCrossSize(child)) / 2.0;
+              childCrossPosition = crossAxisPadding + crossAxisBorder + (crossSize - _getCrossSize(child)) / 2.0;
               break;
             case AlignSelf.baseline:
               // Distance from top to baseline of child
               double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true) ?? 0;
-              childCrossPosition = crossAxisPadding + lineBoxLeading / 2 + (runBaselineExtent - childAscent);
+              childCrossPosition = crossAxisPadding + crossAxisBorder + lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case AlignSelf.stretch:
-              childCrossPosition = crossAxisPadding;
+              childCrossPosition = crossAxisPadding + crossAxisBorder;
               break;
             default:
               break;

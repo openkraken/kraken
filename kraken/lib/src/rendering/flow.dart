@@ -732,15 +732,18 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
+
+    BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
+    
     switch (direction) {
       case Axis.horizontal:
-        size = contentConstraints.constrain(Size(constraintWidth, constraintHeight));
+        size = inflatedContentConstraints.constrain(Size(constraintWidth, constraintHeight));
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = contentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+        size = inflatedContentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;
@@ -873,8 +876,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         }
 
         Offset relativeOffset = _getOffset(
-          childMainPosition + paddingLeft,
-          crossAxisOffset + childLineExtent + paddingTop
+          childMainPosition + paddingLeft + borderLeft,
+          crossAxisOffset + childLineExtent + paddingTop + borderTop
         );
 
         /// Apply position relative offset change.
@@ -1011,7 +1014,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
-    
+
     basePaint(context, offset, (context, offset) {
       List<RenderObject> children = getChildrenAsList();
       children.sort((RenderObject prev, RenderObject next) {
