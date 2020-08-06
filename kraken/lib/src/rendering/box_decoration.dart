@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/foundation.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
 
@@ -43,6 +42,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
   }
   
   BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
-    return constraints.deflate(borderEdge);
+    if (borderEdge != null) {
+      return constraints.deflate(borderEdge);
+    }
+    return constraints;
   }
 }

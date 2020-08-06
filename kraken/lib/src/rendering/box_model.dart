@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
 import 'padding.dart';
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
@@ -276,7 +275,7 @@ class RenderBoxModel extends RenderBox with
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
-    properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+    if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
+    if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }

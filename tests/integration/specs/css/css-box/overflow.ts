@@ -79,7 +79,7 @@ describe('Overflow', () => {
 
     requestAnimationFrame(async () => {
       div1.scroll(20, 20);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     });
     document.body.appendChild(container);
