@@ -720,21 +720,20 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     double containerCrossAxisExtent = 0.0;
 
     // Default to children's width
-    double constraintWidth = mainAxisExtent;
+    double constraintWidth = mainAxisExtent + borderEdge.horizontal;
     // Get max of element's width and children's width if element's width exists
     if (contentWidth != null) {
       constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
-    double constraintHeight = crossAxisExtent;
+    double constraintHeight = crossAxisExtent + borderEdge.vertical;
     // Get max of element's height and children's height if element's height exists
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
     BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
-    
     switch (direction) {
       case Axis.horizontal:
         size = inflatedContentConstraints.constrain(Size(constraintWidth, constraintHeight));

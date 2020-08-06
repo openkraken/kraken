@@ -601,6 +601,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double elementWidth = getElementComputedWidth(targetId, elementManager);
     double elementHeight = getElementComputedHeight(targetId, elementManager);
 
+
     // If no child exists, stop layout.
     if (childCount == 0) {
       Size preferredSize = Size(
@@ -613,6 +614,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     assert(contentConstraints != null);
 
+    BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
+    
     double maxWidth = 0;
     if (elementWidth != null) {
       maxWidth = elementWidth;
@@ -1030,14 +1033,14 @@ class RenderFlexLayout extends RenderLayoutBox {
                       // for empty child width, maybe it's unloaded image, set constraints range.
                       if (child.size.isEmpty) {
                         minCrossAxisSize = 0.0;
-                        maxCrossAxisSize = contentConstraints.maxHeight;
+                        maxCrossAxisSize = inflatedContentConstraints.maxHeight;
                       } else {
                         minCrossAxisSize = maxCrossAxisSize = child.size.height + childMarginHeight;
                       }
                     } else {
                       // expand child's height to contentConstraints.maxHeight;
-                      minCrossAxisSize = contentConstraints.maxHeight;
-                      maxCrossAxisSize = contentConstraints.maxHeight;
+                      minCrossAxisSize = inflatedContentConstraints.maxHeight;
+                      maxCrossAxisSize = inflatedContentConstraints.maxHeight;
                     }
                   } else {
                     // child is't layout, so set minHeight
@@ -1076,14 +1079,14 @@ class RenderFlexLayout extends RenderLayoutBox {
                       // for empty child width, maybe it's unloaded image, set contentConstraints range.
                       if (child.size.isEmpty) {
                         minCrossAxisSize = 0.0;
-                        maxCrossAxisSize = contentConstraints.maxWidth;
+                        maxCrossAxisSize = inflatedContentConstraints.maxWidth;
                       } else {
                         minCrossAxisSize = maxCrossAxisSize = child.size.width;
                       }
                     } else {
                       // expand child's height to contentConstraints.maxWidth;
-                      minCrossAxisSize = contentConstraints.maxWidth;
-                      maxCrossAxisSize = contentConstraints.maxWidth;
+                      minCrossAxisSize = inflatedContentConstraints.maxWidth;
+                      maxCrossAxisSize = inflatedContentConstraints.maxWidth;
                     }
                   } else {
                     // child is't layout, so set minHeight
@@ -1093,7 +1096,7 @@ class RenderFlexLayout extends RenderLayoutBox {
                 } else if (child is! RenderTextBox) {
                   // only stretch ElementBox, not TextBox.
                   minCrossAxisSize = maxCrossSize;
-                  maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
+                  maxCrossAxisSize = math.max(maxCrossSize, inflatedContentConstraints.maxWidth);
                 } else {
                   // for RenderTextBox, there are no cross Axis contentConstraints.
                   minCrossAxisSize = 0.0;
@@ -1111,12 +1114,12 @@ class RenderFlexLayout extends RenderLayoutBox {
               case FlexDirection.row:
               case FlexDirection.rowReverse:
                 innerConstraints = BoxConstraints(
-                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: contentConstraints.maxHeight);
+                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: inflatedContentConstraints.maxHeight);
                 break;
               case FlexDirection.column:
               case FlexDirection.columnReverse:
                 innerConstraints = BoxConstraints(
-                    maxWidth: contentConstraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
+                    maxWidth: inflatedContentConstraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
                 break;
             }
           }
@@ -1140,20 +1143,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     double actualSize;
 
     // Get layout width from children's width by flex axis
-    double constraintWidth = isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
+    double constraintWidth = isHorizontalFlexDirection(_flexDirection) ?
+      idealMainSize + borderEdge.horizontal : crossSize + borderEdge.vertical;
     // Get max of element's width and children's width if element's width exists
     if (elementWidth != null) {
       constraintWidth = math.max(constraintWidth, elementWidth);
     }
 
     // Get layout height from children's height by flex axis
-    double constraintHeight = isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
+    double constraintHeight = isHorizontalFlexDirection(_flexDirection) ?
+      crossSize + borderEdge.vertical : idealMainSize + borderEdge.horizontal;
     // Get max of element's height and children's height if element's height exists
     if (elementHeight != null) {
       constraintHeight = math.max(constraintHeight, elementHeight);
     }
-
-    BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
     
     switch (_flexDirection) {
       case FlexDirection.row:
