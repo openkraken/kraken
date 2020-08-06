@@ -153,7 +153,11 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
 
   // hooks when content box had layout.
   void didLayout() {
-    setUpOverflowScroller(_contentSize);
+    Size scrollableSize = Size(
+      _contentSize.width + paddingLeft + paddingRight,
+      _contentSize.height + paddingTop + paddingBottom
+    );
+    setUpOverflowScroller(scrollableSize);
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
