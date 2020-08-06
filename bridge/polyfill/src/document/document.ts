@@ -7,13 +7,13 @@ import { BODY, WINDOW, eventTargetMap } from './events/event-target';
 import { cookie } from '../cookie';
 import { HTMLAllCollection } from './collection';
 
-interface MapEntry {
+interface MapElement {
   orderList: Array<Element|null>|null,
   element: Element|null,
   count: number
 }
 
-export const elementsByIdMap:Map<string, MapEntry> = new Map();
+export const m_elementsById:Map<string, MapElement> = new Map();
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -29,64 +29,66 @@ export class Document extends Node {
     // document events are triggered and received by body element.
     super(NodeType.DOCUMENT_NODE, BODY);
   }
-  public test() {
-    return elementsByIdMap;
-  }
+
   public getElementById(elementid:string) : null | Element {
     const argLength = arguments.length;
     if (argLength < 1) throw new Error(`Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only ${argLength} present.`);
     if (elementid === '' || elementid === null || elementid === undefined) {
       return null;
     }
-    if (elementsByIdMap.size === 0) {
+    if (m_elementsById.size === 0) {
       return null;
     }
-    const entry = elementsByIdMap.get(elementid);
+    const entry = m_elementsById.get(elementid);
     if (!entry) {
       return null;
     }
-    if (entry.element) {
+    if (entry.element && entry.element !== undefined && entry.element != null) {
       return entry.element;
     }
-    return traverseNode(document, (node: Node) => {
+    let element: Element| null = null;
+    traverseNode(this.body, (node: Node) => {
       if (node instanceof Element && node.getAttribute('id') === elementid) {
-        return node;
+        if (!element) {
+          element = node;
+        }
+        return true;
       }
       return false;
     });
+    return element;
   }
 
   public addElementById(elementid:string, element: Element) :void {
-    const mapEntity = elementsByIdMap.get(elementid);
+    const mapEntity = m_elementsById.get(elementid);
     if (mapEntity) {
       if (mapEntity.count === 1) {
         mapEntity.count += 1;
         mapEntity.orderList = [element, mapEntity.element];
         mapEntity.element = null;
-      }
-      if (mapEntity.count !== 1 && mapEntity.orderList) {
+      } else if (mapEntity.count !== 1 && mapEntity.orderList) {
         mapEntity.count += 1;
         mapEntity.orderList.push(element);
       }
     } else {
-      const newEntity:MapEntry = { count: 0, element, orderList: null };
-      elementsByIdMap.set(elementid, newEntity);
+      const newEntity:MapElement = { count: 1, element, orderList: null };
+      m_elementsById.set(elementid, newEntity);
     }
   }
 
   public removeElementById(elementid:string, element:Element) :void {
-    const mapEntity = elementsByIdMap.get(elementid);
+    const mapEntity = m_elementsById.get(elementid);
     if (mapEntity && mapEntity.count === 1) {
-      elementsByIdMap.delete(elementid);
+      m_elementsById.delete(elementid);
     }
     if (mapEntity && mapEntity.count === 2 && mapEntity.orderList) {
-      mapEntity.count = 1;
+      mapEntity.count -= 1;
       mapEntity.element = mapEntity.orderList[0] === element ?
         mapEntity.orderList[1] : mapEntity.orderList[0];
       mapEntity.orderList = null;
     }
     if (mapEntity && mapEntity.count > 2 && mapEntity.orderList) {
-      mapEntity.count = 1;
+      mapEntity.count -= 1;
       mapEntity.orderList = mapEntity.orderList.filter((value) => { return value !== element; });
     }
   }
@@ -107,19 +109,6 @@ export class Document extends Node {
   createComment(data: string) {
     return new Comment(data);
   }
-
-  // getElementById(id: string): Element|null {
-  //   if (id === '') {
-  //     return null;
-  //   }
-  //   for (let key in eventTargetMap) {
-  //     const element=eventTargetMap[key];
-  //     if( element instanceof Element && element.getAttribute('id')===id){
-  //         return element;
-  //     }
-  //   }
-  //   return null;
-  // }
 
   get all(): HTMLAllCollection {
     const all = new HTMLAllCollection();

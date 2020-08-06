@@ -1,6 +1,7 @@
 import { BODY } from './events/event-target';
-import { Node, NodeType } from './node';
+import { Node, NodeType, traverseNode } from './node';
 import { document } from './document';
+
 import {
   createElement,
   setProperty,
@@ -168,9 +169,35 @@ export class Element extends Node {
     setProperty(this.targetId, name, value);
   }
 
+  public notifyNodeRemoved(insertionNode: Node) {
+    if (insertionNode.isConnected) {
+      traverseNode(this, (node:Node) => {
+        if (node instanceof Element) {
+          node.notifyChildRemoved();
+        }
+      });
+    }
+  }
+  public notifyChildRemoved() {
+    const elementid = this.getAttribute('id');
+    if (elementid !== null && elementid !== undefined && elementid !== '') {
+      this._updateId(elementid, '');
+    }
+  }
+
+  public notifyNodeInsert(insertionNode: Node) :void {
+    if (insertionNode.isConnected) {
+      const elementid = this.getAttribute('id');
+      if (elementid !== null && elementid !== undefined && elementid !== '') {
+        this._updateId('', elementid);
+      }
+    }
+  }
+
+
   private _didModifyAttribute(name:string, oldValue:string, newValue:string) :void {
     if (name === 'id') {
-      this._checkupdateId(oldValue,newValue);
+      this._checkupdateId(oldValue, newValue);
     }
   }
 

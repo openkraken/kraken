@@ -1,8 +1,5 @@
 import { EventTarget, BODY } from './events/event-target';
 import { insertAdjacentNode, removeNode } from './ui-manager';
-// import { document } from './document';
-import { Document } from './document';
-import { Element } from './element';
 
 export type NodeList = Array<Node>;
 
@@ -15,7 +12,7 @@ export enum NodeType {
   DOCUMENT_FRAGMENT_NODE = 11
 }
 
-let nodesCount = 1;
+export let nodesCount = 1;
 
 export class Node extends EventTarget {
   public readonly nodeType: NodeType;
@@ -29,27 +26,6 @@ export class Node extends EventTarget {
   constructor(type: NodeType, id?: number, builtInEvents?: Array<string>) {
     super(id || nodesCount++, builtInEvents || []);
     this.nodeType = type;
-  }
-
-  protected document() :Document| null {
-    if (this instanceof Document) {
-      return this;
-    }
-
-    if (this.isConnected) {
-      let currentNode = this.parentNode;
-      if (!currentNode) {
-        return this instanceof Document ? this : null;
-      }
-      if (!currentNode.parentNode && currentNode instanceof Document) {
-        return currentNode;
-      }
-      while (currentNode.parentNode) {
-        currentNode = currentNode.parentNode;
-      }
-      return currentNode instanceof Document ? currentNode : null;
-    }
-    return null;
   }
 
   public get isConnected() {
@@ -90,7 +66,7 @@ export class Node extends EventTarget {
     if (child.parentNode) {
       const idx = child.parentNode!.childNodes.indexOf(child);
       if (idx !== -1) {
-        // this.RemovedFromNotify(child.parentNode, child);
+        child.notifyNodeRemoved(child.parentNode);
         child.parentNode!.childNodes.splice(idx, 1);
         child.parentNode = null;
       }
@@ -104,11 +80,10 @@ export class Node extends EventTarget {
     }
 
     this._ensureDetached(child);
-
     this.childNodes.push(child);
     child.parentNode = this;
     insertAdjacentNode(this.targetId, 'beforeend', child.targetId);
-    // this.InsertIntoNotify(this, child);
+    traverseNode(child, (node:Node) => { node.notifyNodeInsert(child.parentNode!); });
   }
 
   /**
@@ -138,7 +113,7 @@ export class Node extends EventTarget {
       this.childNodes.splice(idx, 1);
       child.parentNode = null;
       removeNode(child.targetId);
-      // this.RemovedFromNotify(this, child);
+      child.notifyNodeRemoved(this);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
     }
@@ -157,35 +132,13 @@ export class Node extends EventTarget {
         parentChildNodes.splice(nextIndex - 1, 0, newChild);
         newChild.parentNode = parentNode;
         insertAdjacentNode(referenceNode.targetId, 'beforebegin', newChild.targetId);
-        // this.InsertIntoNotify(parentNode, newChild);
+        traverseNode(newChild, (node:Node) => { node.notifyNodeInsert(parentNode); });
       }
     }
   }
-
-  // public RemovedFromNotify(parentNode: Node, removedNode: Node) :void{
-  //   if (parentNode.isConnected && removedNode instanceof Element) {
-  //     const elementid = removedNode.getAttribute('id');
-  //     if (elementid !== '' && elementid !== undefined && elementid !== null) {
-  //       // this.document()?.removeElementById(elementid,)
-  //       const my_document = this.document();
-  //       if (my_document) {
-  //         my_document.removeElementById(elementid, removedNode);
-  //       }
-  //     }
-  //   }
-  // }
-
-  public InsertIntoNotify(parentNode: Node, insertionNode:Node) {
-    if (parentNode.isConnected && insertionNode instanceof Element) {
-      const elementid = insertionNode.getAttribute('id');
-      if (elementid !== '' && elementid !== undefined && elementid !== null) {
-        const my_document = this.document();
-        if (my_document) {
-          my_document.addElementById(elementid, insertionNode);
-        }
-      }
-    }
-  }
+  public notifyNodeRemoved(insertionNode: Node) :void{}
+  public notifyChildRemoved() :void{}
+  public notifyNodeInsert(insertionNode: Node) :void{}
 
   /**
    * The Node.replaceChild() method replaces a child node within the given (parent) node.
@@ -199,25 +152,22 @@ export class Node extends EventTarget {
     if (!oldChild.parentNode) throw new Error(`Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.`);
 
     this._ensureDetached(newChild);
-
     const parentNode = oldChild.parentNode;
     oldChild.parentNode = null;
     const childIndex = parentNode.childNodes.indexOf(oldChild);
-    // this.RemovedFromNotify(parentNode, oldChild);
-    // this.InsertIntoNotify(parentNode, newChild);
+    oldChild.notifyNodeRemoved(this);
     newChild.parentNode = parentNode;
+    traverseNode(newChild, (node:Node) => { node.notifyNodeInsert(newChild); });
     parentNode.childNodes.splice(childIndex, 1, newChild);
-
     insertAdjacentNode(oldChild.targetId, 'afterend', newChild.targetId);
     removeNode(oldChild.targetId);
-
     return oldChild;
   }
 }
 
 export function traverseNode(node: Node, handle: Function) {
   const shouldExit = handle(node);
-  if (shouldExit) return shouldExit;
+  if (shouldExit) return;
 
   if (node.childNodes.length > 0) {
     for (let i = 0, l = node.childNodes.length; i < l; i++) {
