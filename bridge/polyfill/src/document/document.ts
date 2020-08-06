@@ -13,8 +13,7 @@ interface MapElement {
   count: number
 }
 
-export const m_elementsById:Map<string, MapElement> = new Map();
-
+export const m_elementsById = {};
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
   public body: Element = this.bodyElement;
@@ -22,7 +21,6 @@ export class Document extends Node {
   public documentElement: Element = this.bodyElement;
   public nodeName: string = '#document';
   public nodeType = NodeType.DOCUMENT_NODE;
-
 
   constructor() {
     // Use the same targetId with body, only used in event targets,
@@ -36,10 +34,10 @@ export class Document extends Node {
     if (elementid === '' || elementid === null || elementid === undefined) {
       return null;
     }
-    if (m_elementsById.size === 0) {
+    if (Object.keys(m_elementsById).length === 0) {
       return null;
     }
-    const entry = m_elementsById.get(elementid);
+    const entry = m_elementsById[elementid];
     if (!entry) {
       return null;
     }
@@ -60,36 +58,36 @@ export class Document extends Node {
   }
 
   public addElementById(elementid:string, element: Element) :void {
-    const mapEntity = m_elementsById.get(elementid);
+    const mapEntity = m_elementsById[elementid];
     if (mapEntity) {
       if (mapEntity.count === 1) {
         mapEntity.count += 1;
         mapEntity.orderList = [element, mapEntity.element];
         mapEntity.element = null;
-      } else if (mapEntity.count !== 1 && mapEntity.orderList) {
+      } else if (mapEntity.count !== 1) {
         mapEntity.count += 1;
         mapEntity.orderList.push(element);
       }
     } else {
       const newEntity:MapElement = { count: 1, element, orderList: null };
-      m_elementsById.set(elementid, newEntity);
+      m_elementsById[elementid] = newEntity;
     }
   }
 
   public removeElementById(elementid:string, element:Element) :void {
-    const mapEntity = m_elementsById.get(elementid);
+    const mapEntity = m_elementsById[elementid];
     if (mapEntity && mapEntity.count === 1) {
-      m_elementsById.delete(elementid);
+      delete m_elementsById[elementid];
     }
-    if (mapEntity && mapEntity.count === 2 && mapEntity.orderList) {
+    if (mapEntity && mapEntity.count === 2) {
       mapEntity.count -= 1;
       mapEntity.element = mapEntity.orderList[0] === element ?
         mapEntity.orderList[1] : mapEntity.orderList[0];
       mapEntity.orderList = null;
     }
-    if (mapEntity && mapEntity.count > 2 && mapEntity.orderList) {
+    if (mapEntity && mapEntity.count > 2) {
       mapEntity.count -= 1;
-      mapEntity.orderList = mapEntity.orderList.filter((value) => { return value !== element; });
+      mapEntity.orderList = mapEntity.orderList.filter((value: Element) => { return value !== element; });
     }
   }
 

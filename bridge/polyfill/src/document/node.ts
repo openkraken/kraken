@@ -16,9 +16,7 @@ let nodesCount = 1;
 
 export class Node extends EventTarget {
   public readonly nodeType: NodeType;
-
   public readonly childNodes: NodeList = [];
-
   public nodeValue: string | null;
   public textContent: string | null;
   public parentNode: Node | null;
@@ -29,7 +27,7 @@ export class Node extends EventTarget {
   }
 
   public get isConnected() {
-    let _isConnected: boolean = this.targetId === BODY;
+    let _isConnected = this.targetId === BODY;
     let parentNode = this.parentNode;
     while (parentNode) {
       _isConnected = parentNode.targetId === BODY;
@@ -80,6 +78,7 @@ export class Node extends EventTarget {
     }
 
     this._ensureDetached(child);
+
     this.childNodes.push(child);
     child.parentNode = this;
     insertAdjacentNode(this.targetId, 'beforeend', child.targetId);
@@ -136,9 +135,9 @@ export class Node extends EventTarget {
       }
     }
   }
-  public notifyNodeRemoved(insertionNode: Node) :void{}
-  public notifyChildRemoved() :void{}
-  public notifyNodeInsert(insertionNode: Node) :void{}
+  notifyNodeRemoved(insertionNode: Node) :void{}
+  notifyChildRemoved() :void{}
+  notifyNodeInsert(insertionNode: Node) :void{}
 
   /**
    * The Node.replaceChild() method replaces a child node within the given (parent) node.

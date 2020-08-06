@@ -169,7 +169,7 @@ export class Element extends Node {
     setProperty(this.targetId, name, value);
   }
 
-  public notifyNodeRemoved(insertionNode: Node) {
+  otifyNodeRemoved(insertionNode: Node) {
     if (insertionNode.isConnected) {
       traverseNode(this, (node:Node) => {
         if (node instanceof Element) {
@@ -178,14 +178,14 @@ export class Element extends Node {
       });
     }
   }
-  public notifyChildRemoved() {
+  notifyChildRemoved() {
     const elementid = this.getAttribute('id');
     if (elementid !== null && elementid !== undefined && elementid !== '') {
       this._updateId(elementid, '');
     }
   }
 
-  public notifyNodeInsert(insertionNode: Node) :void {
+  notifyNodeInsert(insertionNode: Node) :void {
     if (insertionNode.isConnected) {
       const elementid = this.getAttribute('id');
       if (elementid !== null && elementid !== undefined && elementid !== '') {
@@ -241,7 +241,7 @@ export class Element extends Node {
       if (idx !== -1) {
         this.attributes.splice(idx, 1);
       }
-      this._didModifyAttribute(name, attr, '');
+      this._didModifyAttribute(name, attr.value, '');
 
       removeProperty(this.targetId, name);
       delete this.attributes[name];
