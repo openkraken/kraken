@@ -25,7 +25,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should not align center vertical with margin-top and margin-bottom of block element in flow layout', async () => {
@@ -54,7 +54,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should not work with inline and inline-block element in flow layout', async () => {
@@ -94,7 +94,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with margin-left of block element in flow layout', async () => {
@@ -123,7 +123,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with positioned element in horizontal direction with left, right and width not auto', async () => {
@@ -154,7 +154,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with positioned element in horizontal direction with top, bottom and height not auto', async () => {
@@ -185,7 +185,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with positioned element in both direction in flow layout', async () => {
@@ -217,7 +217,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with positioned element in both direction in flex layout', async () => {
@@ -250,7 +250,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('should work with flex item in row direction', async () => {
@@ -299,7 +299,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
   });
 
@@ -350,7 +350,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
   });
 
@@ -400,7 +400,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
   });
 
@@ -450,7 +450,7 @@ describe('Box margin auto', () => {
       ]
     );
     BODY.appendChild(div);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
   });
 });
