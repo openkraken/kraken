@@ -519,13 +519,15 @@ class CSSStyleProperty {
       } else if (lineHeight == null && CSSFont.isValidLineHeightValue(value)) {
         lineHeight = value;
       } else if (family == null) {
+        // The font-family must be the last value specified.
+        // Like `font: 12px` is invalid property value.
         family = value;
       } else {
         return null;
       }
     }
 
-    if (isSizeEndAndLineHeightStart && (size == null || lineHeight == null)) {
+    if ((isSizeEndAndLineHeightStart && (size == null || lineHeight == null)) || family == null) {
       return null;
     }
 
