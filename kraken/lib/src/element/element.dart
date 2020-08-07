@@ -488,7 +488,7 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
-          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
         }
         if (style.contains(TOP)) {
           positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
@@ -1481,7 +1481,7 @@ void setPositionedChildParentData(
   }
   parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

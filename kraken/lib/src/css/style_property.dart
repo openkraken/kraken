@@ -6,6 +6,8 @@ final RegExp _slashRegExp = RegExp(r'\/(?![^(]*\))');
 final RegExp _replaceCommaRegExp = RegExp(r'\s*,\s*');
 const String _comma = ', ';
 const String _0s = '0s';
+const String _0 = '0';
+const String _1 = '1';
 
 // Origin version: https://github.com/jedmao/css-list-helpers/blob/master/src/index.ts
 List<String> _splitBySpace(String value) {
@@ -169,13 +171,13 @@ class CSSStyleProperty {
   static void setShorthandFlex(Map<String, String> style, String shorthandValue) {
     List<String> values = _getFlexValues(shorthandValue);
     if (values == null) return;
-    style[FLEX_FLOW] = values[0];
+    style[FLEX_GROW] = values[0];
     style[FLEX_SHRINK] = values[1];
     style[FLEX_BASIS] = values[2];
   }
 
   static void removeShorthandFlex(Map<String, String> style) {
-    if (style.containsKey(FLEX_FLOW)) style.remove(FLEX_FLOW);
+    if (style.containsKey(FLEX_GROW)) style.remove(FLEX_GROW);
     if (style.containsKey(FLEX_SHRINK)) style.remove(FLEX_SHRINK);
     if (style.containsKey(FLEX_BASIS)) style.remove(FLEX_BASIS);
   }
@@ -606,25 +608,28 @@ class CSSStyleProperty {
     List<String> values = shorthandProperty.split(_spaceRegExp);
 
     // In flex shorthand case it is interpreted as flex: <number> 1 0; 
-    String grow = '1';
-    String shrink = '1';
-    String basis = '0';
+    String grow;
+    String shrink;
+    String basis;
 
     for (String value in values) {
 
       if (values.length == 1) {
-        if (value == 'initial') {
-          grow = '0';
-          shrink = '1';
-          basis = 'auto';
-        } else if (value == 'auto') {
-          grow = '1';
-          shrink = '1';
-          basis = 'auto';
-        } else if (value == 'none') {
-          grow = '0';
-          shrink = '0';
-          basis = 'auto';
+        if (value == INITIAL) {
+          grow = _0;
+          shrink = _1;
+          basis = AUTO;
+          break;
+        } else if (value == AUTO) {
+          grow = _1;
+          shrink = _1;
+          basis = AUTO;
+          break;
+        } else if (value == NONE) {
+          grow = _0;
+          shrink = _0;
+          basis = AUTO;
+          break;
         }
       }
 
@@ -632,7 +637,7 @@ class CSSStyleProperty {
         grow = value;
       } else if (shrink == null && CSSNumber.isNumber(value)) {
         shrink = value;
-      } else if (basis == null && CSSLength.isLength(value)){
+      } else if (basis == null && ((CSSLength.isLength(value) || value == AUTO))){
         basis = value;
       } else {
         return null;
@@ -640,9 +645,9 @@ class CSSStyleProperty {
     }
 
     return [
-      grow,
-      shrink,
-      basis
+      grow ?? _1,
+      shrink ?? _1,
+      basis ?? _0
     ];
   }
 

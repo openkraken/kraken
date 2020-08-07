@@ -124,10 +124,13 @@ const String ANIMATION_PLAY_STATE = 'animationPlayState';
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
 
-// values
+// Values keywords
+const String INITIAL = 'initial';
 const String NORMAL = 'normal';
+const String NONE = 'none';
 
 // Border
+const String SOLID = 'solid';
 const String THIN = 'thin'; // A thin border.
 const String MEDIUM = 'medium'; // A medium border.
 const String THICK = 'thick'; // A thick border.
@@ -142,9 +145,6 @@ const String XX_LARGE =  'xx-large';
 // Font relative size keyword
 const String SMALLER =  'smaller';
 const String LARGER =  'larger';
-
-const String SOLID = 'solid';
-const String NONE = 'none';
 
 // Display
 const String INLINE = 'inline';

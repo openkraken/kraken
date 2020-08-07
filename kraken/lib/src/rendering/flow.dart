@@ -1061,7 +1061,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
     parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
     parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']);
+    parentData.zIndex = CSSLength.toInt(style['zIndex']) ?? 0;
 
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

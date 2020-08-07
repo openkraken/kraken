@@ -331,15 +331,9 @@ class CSSFlex {
     String basis = style[FLEX_BASIS];
     String alignSelf = style[ALIGN_SELF];
 
-    parentData.flexGrow = CSSStyleDeclaration.isNullOrEmptyValue(grow)
-        ? 0 // Grow default to 0.
-        : CSSLength.toInt(grow);
-    parentData.flexShrink = CSSStyleDeclaration.isNullOrEmptyValue(shrink)
-        ? 1 // Shrink default to 1.
-        : CSSLength.toInt(shrink);
-    parentData.flexBasis = CSSStyleDeclaration.isNullOrEmptyValue(basis)
-        ? AUTO // flexBasis default to auto.
-        : basis;
+    parentData.flexGrow = CSSLength.toInt(grow) ?? 0;
+    parentData.flexShrink = CSSLength.toInt(shrink) ?? 1;
+    parentData.flexBasis = basis.isEmpty ? AUTO : basis;
     parentData.alignSelf = _getAlignSelf(alignSelf);
 
     return parentData;
