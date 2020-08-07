@@ -20,17 +20,17 @@ mixin CSSTransformMixin on Node {
       RenderObject current, CSSStyleDeclaration style, int targetId, ElementManager elementManager) {
     this.targetId = targetId;
 
-    if (style.contains('transform')) {
-      prevMethods = CSSFunction(style['transform']).computedValue;
+    if (style.contains(TRANSFORM)) {
+      prevMethods = CSSFunction(style[TRANSFORM]).computedValue;
       matrix4 = combineTransform(prevMethods) ?? matrix4;
-      CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
+      CSSTransformOrigin transformOrigin = parseOrigin(style[TRANSFORM_ORIGIN]);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
         oldAlignment = transformOrigin.alignment;
       }
     }
 
-    bool shouldRender = style['display'] != 'none';
+    bool shouldRender = style[DISPLAY] != NONE;
     transform = RenderElementBoundary(
       child: current,
       transform: matrix4,

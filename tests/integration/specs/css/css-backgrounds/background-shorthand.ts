@@ -2,7 +2,7 @@ describe('background-shorthand', () => {
   it('background image', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       background: 'left top / contain repeat url(assets/rabbit.png)'
     });
@@ -14,7 +14,7 @@ describe('background-shorthand', () => {
   it('background gradient', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       background: 'center/contain repeat radial-gradient(crimson,skyblue)'
     });
@@ -25,7 +25,7 @@ describe('background-shorthand', () => {
   it('background color', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       background: 'red'
     });
@@ -36,7 +36,7 @@ describe('background-shorthand', () => {
   it('background color rgb', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       background: 'rgb(255, 0, 0)'
     });
@@ -72,6 +72,6 @@ describe('background-shorthand', () => {
     document.body.appendChild(flexbox);
 
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   })
 });

@@ -25,7 +25,7 @@ describe('hypothetical-box', () => {
 
     div.scrollLeft = 1000;
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('scroll-parent', async () => {
     let target;
@@ -60,7 +60,7 @@ describe('hypothetical-box', () => {
     // Now force relayout of the abs pos div.
     target.textContent = 'Modified text';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('scroll-viewport', async () => {
     let div;
@@ -85,7 +85,7 @@ describe('hypothetical-box', () => {
     // Now force relayout of the abs pos div.
     div.textContent = 'Modified text';
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('scroll-viewport-ref', async () => {
     let div;
@@ -100,6 +100,6 @@ describe('hypothetical-box', () => {
 
     window.scrollTo(window.innerWidth * 2, 0);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

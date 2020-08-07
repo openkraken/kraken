@@ -177,7 +177,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextSpan buildTextSpan({ String text = '' }) {
     text ??= properties['value'];
-    return createTextSpanWithStyle(text, style);
+    return createTextSpan(text, style);
   }
 
   get cursorColor => CSSColor.initial;

@@ -100,6 +100,28 @@ class CSSStyleDeclaration {
         case MARGIN:
           CSSStyleProperty.removeShorthandMargin(_cssProperties);
           break;
+        case BACKGROUND:
+          CSSStyleProperty.removeShorthandBackground(_cssProperties);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.removeShorthandBorderRadius(_cssProperties);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.removeShorthandOverflow(_cssProperties);
+          break;
+        case FONT:
+          CSSStyleProperty.removeShorthandFont(_cssProperties);
+          break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.removeShorthandBorder(_cssProperties, propertyName);
+          break;
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
           break;
@@ -178,6 +200,18 @@ class CSSStyleDeclaration {
         case MARGIN:
           CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
           break;
+        case BACKGROUND:
+          CSSStyleProperty.setShorthandBackground(_cssProperties, normalizedValue);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.setShorthandBorderRadius(_cssProperties, normalizedValue);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(_cssProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -206,8 +240,7 @@ class CSSStyleDeclaration {
 
   /// Check a css property is valid.
   bool contains(String property) {
-    String value = getPropertyValue(property);
-    return !CSSStyleDeclaration.isNullOrEmptyValue(value);
+    return _cssProperties.containsKey(property) && _cssProperties[property] != null;
   }
 
   void addStyleChangeListener(StyleChangeListener listener) {

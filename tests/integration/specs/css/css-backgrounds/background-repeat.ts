@@ -3,7 +3,7 @@ describe('background-repeat', () => {
     // repeat
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -12,22 +12,21 @@ describe('background-repeat', () => {
 
     const div1 = document.createElement('div');
     setElementStyle(div1, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url("assets/rax.png")',
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('none-repeat', async () => {
     // repeat
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -36,7 +35,7 @@ describe('background-repeat', () => {
 
     const div1 = document.createElement('div');
     setElementStyle(div1, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -44,14 +43,13 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat-x', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -60,7 +58,7 @@ describe('background-repeat', () => {
 
     const div2 = document.createElement('div');
     setElementStyle(div2, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -69,14 +67,13 @@ describe('background-repeat', () => {
     repeat.appendChild(div2);
     append(BODY, repeat);
 
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat-y', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -85,7 +82,7 @@ describe('background-repeat', () => {
 
     const div3 = document.createElement('div');
     setElementStyle(div3, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -93,14 +90,13 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div3);
     append(BODY, repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   it('repeat', async () => {
     const repeat = document.createElement('div');
     setElementStyle(repeat, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       marginTop: '10px',
       display: 'flex',
@@ -109,7 +105,7 @@ describe('background-repeat', () => {
 
     const div4 = document.createElement('div');
     setElementStyle(div4, {
-      width: '100vw',
+      width: '360px',
       height: '200px',
       backgroundImage:
         'url(assets/rax.png)',
@@ -117,8 +113,7 @@ describe('background-repeat', () => {
     });
     repeat.appendChild(div4);
     append(BODY, repeat);
-    await sleep(1);
-    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot();
+    await expectAsync(repeat.toBlob(1.0)).toMatchImageSnapshot(0.5);
   });
 
   xit('round', async () => {
@@ -131,7 +126,7 @@ describe('background-repeat', () => {
       backgroundRepeat: 'round',
     });
     append(BODY, div);
-    await sleep(1);
+    await sleep(0.5);
     await matchElementImageSnapshot(div);
   });
 
@@ -145,7 +140,7 @@ describe('background-repeat', () => {
       backgroundRepeat: 'round',
     });
     append(BODY, div);
-    await sleep(1);
+    await sleep(0.5);
     await matchElementImageSnapshot(div);
   });
 });

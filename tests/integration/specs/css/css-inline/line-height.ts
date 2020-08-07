@@ -18,73 +18,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
-  });
-
-  it('with unit of rpx', async () => {
-    const div = createElement(
-      'div',
-      {
-        style: {
-          'line-height': '300rpx',
-          'box-sizing': 'border-box',
-          'backgroundColor': 'green',
-          fontSize: '16px',
-          width: '300rpx',
-          height: '300rpx',
-        },
-      },
-      [
-        createText(`line height 300rpx`),
-      ]
-    );
-    BODY.appendChild(div);
-
-    await matchScreenshot();
-  });
-
-  it('with unit of vw', async () => {
-    const div = createElement(
-      'div',
-      {
-        style: {
-          'line-height': '20vw',
-          'box-sizing': 'border-box',
-          'backgroundColor': 'green',
-          fontSize: '16px',
-          width: '200px',
-          height: '20vw',
-        },
-      },
-      [
-        createText(`line height 20vw`),
-      ]
-    );
-    BODY.appendChild(div);
-
-    await matchScreenshot();
-  });
-
-  it('with unit of vh', async () => {
-    const div = createElement(
-      'div',
-      {
-        style: {
-          'line-height': '20vh',
-          'box-sizing': 'border-box',
-          'backgroundColor': 'green',
-          fontSize: '16px',
-          width: '200px',
-          height: '20vh',
-        },
-      },
-      [
-        createText(`line height 20vh`),
-      ]
-    );
-    BODY.appendChild(div);
-
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with unit of number', async () => {
@@ -106,7 +40,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with block element', async () => {
@@ -141,7 +75,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with inline element', async () => {
@@ -176,7 +110,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with flex item', async () => {
@@ -227,7 +161,7 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with multiple lines', async () => {
@@ -276,6 +210,6 @@ describe('line-height', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -7,8 +7,8 @@ describe('AnimationPlayer', () => {
       animationPlayer.setAttribute('type', 'flare');
       animationPlayer.setAttribute('src', ASSET);
       Object.assign(animationPlayer.style, {
-        width: '100vw',
-        height: '100vh',
+        width: '360px',
+        height: '640px',
         objectFit: 'contain',
       });
 
@@ -16,14 +16,14 @@ describe('AnimationPlayer', () => {
 
       // Need to impl onload event.
       await sleep(1);
-      await matchScreenshot();
+      await matchViewportSnapshot();
 
       animationPlayer.play('hands_up');
       // Wait for animation end.
       // Need to impl animation_end event.
       await sleep(1);
 
-      await matchScreenshot();
+      await matchViewportSnapshot();
     });
   });
 });

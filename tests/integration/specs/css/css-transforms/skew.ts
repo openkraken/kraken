@@ -10,6 +10,6 @@ describe('Transform skew', function() {
       })
     );
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

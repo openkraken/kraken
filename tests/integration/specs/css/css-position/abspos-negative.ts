@@ -61,7 +61,7 @@ describe('abspos-negative', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('margin-001', async () => {
     let abspos;
@@ -157,6 +157,6 @@ describe('abspos-negative', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

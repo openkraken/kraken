@@ -21,49 +21,48 @@ import 'platform.dart';
 // 6. Call the C function.
 
 // Init Test Framework
-typedef Native_InitTestFramework = Void Function();
-typedef Dart_InitTestFramework = void Function();
+typedef Native_InitTestFramework = Void Function(Int32 contextId);
+typedef Dart_InitTestFramework = void Function(int contextId);
 
 final Dart_InitTestFramework _initTestFramework =
     nativeDynamicLibrary.lookup<NativeFunction<Native_InitTestFramework>>('initTestFramework').asFunction();
 
-void initTestFramework() {
-  registerDartMethodsToCpp();
-  _initTestFramework();
+void initTestFramework(int contextId) {
+  _initTestFramework(contextId);
 }
 
 // Register evaluteTestScripts
-typedef Native_EvaluateTestScripts = Int8 Function(Pointer<Utf8>, Pointer<Utf8>, Int32);
-typedef Dart_EvaluateTestScripts = int Function(Pointer<Utf8>, Pointer<Utf8>, int);
+typedef Native_EvaluateTestScripts = Int8 Function(Int32 contextId, Pointer<Utf8>, Pointer<Utf8>, Int32);
+typedef Dart_EvaluateTestScripts = int Function(int contextId, Pointer<Utf8>, Pointer<Utf8>, int);
 
 final Dart_EvaluateTestScripts _evaluateTestScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
-void evaluateTestScripts(String code, {String url = 'test://', int line = 0}) {
+void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _code = Utf8.toUtf8(code);
   Pointer<Utf8> _url = Utf8.toUtf8(url);
-  _evaluateTestScripts(_code, _url, line);
+  _evaluateTestScripts(contextId, _code, _url, line);
 }
 
-typedef NativeExecuteCallback = Void Function(Pointer<Utf8> status);
+typedef NativeExecuteCallback = Void Function(Int32 contextId, Pointer<Utf8> status);
 typedef DartExecuteCallback = void Function(int);
-typedef Native_ExecuteTest = Void Function(Pointer<NativeFunction<NativeExecuteCallback>>);
-typedef Dart_ExecuteTest = void Function(Pointer<NativeFunction<NativeExecuteCallback>>);
+typedef Native_ExecuteTest = Void Function(Int32 contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
+typedef Dart_ExecuteTest = void Function(int contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
 
 final Dart_ExecuteTest _executeTest =
     nativeDynamicLibrary.lookup<NativeFunction<Native_ExecuteTest>>('executeTest').asFunction();
 
-Completer<String> completer;
+List<Completer<String>> completerList = List(10);
 
-void _executeTestCallback(Pointer<Utf8> status) {
-  if (completer == null) return;
-  completer.complete(Utf8.fromUtf8(status));
-  completer = null;
+void _executeTestCallback(int contextId, Pointer<Utf8> status) {
+  if (completerList[contextId] == null) return;
+  completerList[contextId].complete(Utf8.fromUtf8(status));
+  completerList[contextId] = null;
 }
 
-Future<String> executeTest() async {
-  completer = Completer();
+Future<String> executeTest(int contextId) async {
+  completerList[contextId] = Completer();
   Pointer<NativeFunction<NativeExecuteCallback>> callback = Pointer.fromFunction(_executeTestCallback);
-  _executeTest(callback);
-  return completer.future;
+  _executeTest(contextId, callback);
+  return completerList[contextId].future;
 }

@@ -423,19 +423,14 @@ AlignSelf _getAlignSelf(String alignSelf, CSSStyleDeclaration style) {
 }
 
 class CSSFlexItem {
-  static const String GROW = 'flexGrow';
-  static const String SHRINK = 'flexShrink';
-  static const String BASIS = 'flexBasis';
-  static const String ALIGN_SELF = 'alignSelf';
-  static const String FLEX = 'flex';
 
   static RenderFlexParentData getParentData(CSSStyleDeclaration style) {
     RenderFlexParentData parentData = RenderFlexParentData();
     String flexShotHand = style[FLEX];
-    String grow = style[GROW] ?? '';
-    String shrink = style[SHRINK] ?? '';
-    String basis = style[BASIS] ?? '';
-    String alignSelf = style[ALIGN_SELF] ?? '';
+    String grow = style[FLEX_GROW];
+    String shrink = style[FLEX_SHRINK];
+    String basis = style[FLEX_BASIS];
+    String alignSelf = style[ALIGN_SELF];
 
     if (flexShotHand != null) {
       _FlexShortHand _flexShortHand = _FlexShortHand(flexShotHand);
@@ -451,7 +446,7 @@ class CSSFlexItem {
         ? 1 // Shrink default to 1.
         : CSSLength.toInt(shrink);
     parentData.flexBasis = CSSStyleDeclaration.isNullOrEmptyValue(basis)
-        ? 'auto' // flexBasis default to auto.
+        ? AUTO // flexBasis default to auto.
         : basis;
     parentData.alignSelf = CSSStyleDeclaration.isNullOrEmptyValue(alignSelf)
         ? AlignSelf.auto // alignSelf default to auto.

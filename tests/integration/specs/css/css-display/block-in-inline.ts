@@ -22,7 +22,7 @@ describe('Display block in inline', () => {
     div2.appendChild(div3);
     div3.appendChild(document.createTextNode('There should be no red.'));
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('style changes 001', async () => {
@@ -49,7 +49,7 @@ describe('Display block in inline', () => {
     div1.addEventListener('click', () => {
       div3.style.display = div3.style.display == 'inline' ? 'block' : 'inline';
     });
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('style changes 002', async () => {
@@ -79,7 +79,7 @@ describe('Display block in inline', () => {
       div2.style.display = div2.style.display == 'inline' ? 'block' : 'inline';
       div3.style.display = div3.style.display == 'inline' ? 'block' : 'inline';
     });
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('relative positioning', async () => {
@@ -115,7 +115,7 @@ describe('Display block in inline', () => {
     });
     div3.appendChild(div4);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   xit('there should be no red', async () => {
@@ -227,7 +227,7 @@ describe('Display block in inline', () => {
     append(wrap, inline);
     append(BODY, control);
     append(BODY, wrap);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('sliver boxs', async () => {

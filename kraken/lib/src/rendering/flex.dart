@@ -736,7 +736,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Distance from top to baseline of child
         double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = getLineHeight(childStyle);
+        double lineHeight = CSSFont.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -1242,7 +1242,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = getLineHeight(style);
+      double lineBoxHeight = CSSFont.getLineHeight(style);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }

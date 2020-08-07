@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'dart:async';
 
 const String IMAGE = 'IMG';
 
@@ -93,7 +94,10 @@ class ImageElement extends Element {
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    dispatchEvent(Event('load'));
+    // img load event should trigger asynchronously to make sure load event had bind.
+    Timer.run(() {
+      dispatchEvent(Event('load'));
+    });
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {

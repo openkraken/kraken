@@ -19,8 +19,8 @@ describe('fixed-z-index', () => {
         position: 'relative',
         zIndex: 3,
         overflow: 'hidden',
-        width: '100vw',
-        height: '100vh',
+        width: '360px',
+        height: '640px',
         fontSize: '50px'
       }, [
         createElementWithStyle('div', {
@@ -31,6 +31,6 @@ describe('fixed-z-index', () => {
       ])
     ]);
     BODY.appendChild(container);
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

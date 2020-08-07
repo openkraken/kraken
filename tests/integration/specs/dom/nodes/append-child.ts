@@ -11,7 +11,7 @@ describe('Append child', () => {
     );
     BODY.appendChild(n1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with orphan textNode', async () => {
@@ -19,7 +19,7 @@ describe('Append child', () => {
     n1 = createText('foobar');
     BODY.appendChild(n1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with element which has parent and connected', async () => {
@@ -47,7 +47,7 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     n1.appendChild(n2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with textNode which has parent and connected', async () => {
@@ -68,7 +68,7 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     n1.appendChild(n2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with element which has parent but not connected', async () => {
@@ -94,7 +94,7 @@ describe('Append child', () => {
     );
     BODY.appendChild(n2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with textNode which has parent but not connected', async () => {
@@ -113,7 +113,7 @@ describe('Append child', () => {
     );
     BODY.appendChild(n2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('with connected and not connected children which has parent', async () => {
@@ -160,6 +160,6 @@ describe('Append child', () => {
     BODY.appendChild(n2);
     BODY.appendChild(n4);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

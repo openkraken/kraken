@@ -11,9 +11,9 @@ mixin CSSOpacityMixin on Node {
   KrakenRenderOpacity renderOpacity;
 
   RenderObject initRenderOpacity(RenderObject renderObject, CSSStyleDeclaration style) {
-    bool existsOpacity = style.contains('opacity');
+    bool existsOpacity = style.contains(OPACITY);
     if (existsOpacity) {
-      double opacity = _convertStringToDouble(style['opacity']);
+      double opacity = _convertStringToDouble(style[OPACITY]);
       renderOpacity = KrakenRenderOpacity(opacity: opacity, child: renderObject);
       return renderOpacity;
     } else {

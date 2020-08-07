@@ -19,7 +19,7 @@ describe('Transition all', () => {
 
       // Wait for animation finished.
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
