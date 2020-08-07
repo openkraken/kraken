@@ -140,7 +140,7 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   xit('height-003', async () => {
     let p;
