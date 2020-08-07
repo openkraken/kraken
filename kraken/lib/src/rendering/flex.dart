@@ -1211,8 +1211,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginTop = childStyle[MARGIN_TOP];
 
-          if ((isHorizontalFlexDirection(flexDirection) && marginLeft == AUTO) ||
-            (isVerticalFlexDirection(flexDirection) && marginTop == AUTO)
+          if ((CSSFlex.isHorizontalFlexDirection(flexDirection) && marginLeft == AUTO) ||
+            (CSSFlex.isVerticalFlexDirection(flexDirection) && marginTop == AUTO)
           ) {
               mainAxisMarginAutoChildren++;
           }
@@ -1325,7 +1325,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           double mainAxisRemainingSpace = remainingSpace;
           double crossAxisRemainingSpace = crossSize - _getCrossSize(child);
 
-          if (isHorizontalFlexDirection(flexDirection)) {
+          if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
             verticalRemainingSpace = crossAxisRemainingSpace;
             if (totalFlexGrow == 0 && marginLeft == AUTO) {
