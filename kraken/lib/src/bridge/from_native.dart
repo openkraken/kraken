@@ -439,7 +439,6 @@ final Dart_RegisterSetInterval _registerSetInterval =
 int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  print('controller: $controller, id: $contextId');
   return controller.module.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {
