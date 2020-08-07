@@ -109,6 +109,11 @@ class CSSLength implements CSSValue<double> {
     return value != null && (value == _0 || _lengthRegExp.hasMatch(value));
   }
 
+  // Css keyword value such as 'auto', 'initial' etc, currently only support 'auto'
+  static bool isKeyword(String value) {
+    return value == 'auto';
+  }
+
   final String _rawInput;
   double _value;
   CSSLength(this._rawInput) {

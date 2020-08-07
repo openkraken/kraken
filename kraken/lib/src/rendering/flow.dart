@@ -829,6 +829,32 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (childParentData.runIndex != i) break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
         final double childCrossAxisExtent = _getCrossAxisExtent(child);
+
+        // Calculate margin auto length according to CSS spec
+        // https://www.w3.org/TR/CSS21/visudet.html#blockwidth
+        // margin-left and margin-right auto takes up available space
+        // between element and its containing block on block-level element
+        // which is not positioned and computed to 0px in other cases
+        if (child is RenderElementBoundary) {
+          String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
+          CSSStyleDeclaration childStyle = child.style;
+          String marginLeft = childStyle[MARGIN_LEFT];
+          String marginRight = childStyle[MARGIN_RIGHT];
+
+          // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
+          // 'border-right-width' + 'margin-right' = width of containing block
+          if (childRealDisplay == BLOCK || childRealDisplay == FLEX) {
+            if (marginLeft == AUTO) {
+              double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
+              if (marginRight == AUTO) {
+                childMainPosition = remainingSpace / 2;
+              } else {
+                childMainPosition = remainingSpace;
+              }
+            }
+          }
+        }
+
         // Always align to the top of run when positioning positioned element placeholder
         // @HACK(kraken): Judge positioned holder to impl top align.
         final double childCrossAxisOffset = isPositionHolder(child)
