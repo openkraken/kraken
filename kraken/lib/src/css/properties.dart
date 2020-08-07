@@ -91,9 +91,9 @@ const String FLEX = 'flex';
 const String FLEX_GROW = 'flexGrow';
 const String FLEX_SHRINK = 'flexShrink';
 const String FLEX_BASIS = 'flexBasis';
+const String FLEX_FLOW = 'flexFlow';
 const String FLEX_DIRECTION = 'flexDirection';
 const String FLEX_WRAP = 'flexWrap';
-const String FLEX_FLOW = 'flexFlow';
 
 const String JUSTIFY_CONTENT = 'justifyContent';
 const String TEXT_ALIGN = 'textAlign';

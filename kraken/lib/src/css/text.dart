@@ -242,22 +242,26 @@ mixin CSSTextMixin {
 
         switch (familyName) {
           case 'sans-serif':
-            // Default sans-serif font in iOS (9 and newer)and iPadOS: San Francisco
+            // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
             // Default sans-serif font in Android (4.0+): Roboto
             resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
             break;
           case 'serif':
-            // Default serif font in iOS and iPadOS: Times New Roman (as TimesNewRomanPSMT)
+            // Default serif font in iOS and iPadOS: Times
             // Default serif font in Android (4.0+): Noto Serif
             resolvedFamily.addAll(['Times', 'Times New Roman', 'Noto Serif', 'Songti SC', 'Songti TC', 'Hiragino Mincho ProN', 'AppleMyungjo', 'Apple SD Gothic Neo']);
             break;
           case 'monospace':
+            // Default monospace font in iOS and iPadOS: Courier
             resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
             break;
           case 'cursive':
-            resolvedFamily.addAll(['Apple Chancery', 'DancingScript']);
+            // Default cursive font in iOS and iPadOS: Snell Roundhand
+            resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
             break;
           case 'fantasy':
+            // Default fantasy font in iOS and iPadOS: 
+            // Default fantasy font in MacOS: Papyrus
             resolvedFamily.addAll(['Papyrus', 'Impact']);
             break;
           default:

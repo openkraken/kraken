@@ -112,6 +112,12 @@ class CSSStyleDeclaration {
         case FONT:
           CSSStyleProperty.removeShorthandFont(_cssProperties);
           break;
+        case FLEX:
+          CSSStyleProperty.removeShorthandFlex(_cssProperties);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.removeShorthandFlexFlow(_cssProperties);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -205,6 +211,12 @@ class CSSStyleDeclaration {
           break;
         case FONT:
           CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
+          break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(_cssProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(_cssProperties, normalizedValue);
           break;
         case BORDER:
         case BORDER_TOP:

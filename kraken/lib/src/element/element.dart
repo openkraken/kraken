@@ -780,7 +780,7 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
@@ -810,17 +810,17 @@ class Element extends Node
         _styleOffsetChangedListener(property, original, present);
         break;
 
+      case FLEX_FLOW:
       case FLEX_DIRECTION:
       case FLEX_WRAP:
-      case JUSTIFY_CONTENT:
       case ALIGN_SELF:
       case ALIGN_CONTENT:
       case ALIGN_ITEMS:
+      case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
       case FLEX:
-      case FLEX_FLOW:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
