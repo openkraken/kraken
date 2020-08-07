@@ -159,64 +159,67 @@ export class Element extends Node {
     name = String(name).toLowerCase();
     value = String(value);
     if (this.attributes[name]) {
-      this._didModifyAttribute(name, this.attributes[name].value, value);
+      const oldValue = this.attributes[name].value;
       this.attributes[name].value = value;
+      this._didModifyAttribute(name, oldValue, value);
     } else {
       const attr = {name, value};
       this.attributes[name] = attr;
       this.attributes.push(attr);
+      this._didModifyAttribute(name, '', value);
     }
     setProperty(this.targetId, name, value);
   }
 
-  notifyNodeRemoved(insertionNode: Node) {
+  notifyNodeRemoved(insertionNode: Node): void {
     if (insertionNode.isConnected) {
-      traverseNode(this, (node:Node) => {
-        if (node instanceof Element) {
-          node.notifyChildRemoved();
-        }
+      traverseNode(this, (node: Node) => {
+        node.notifyChildRemoved();
       });
     }
   }
-  notifyChildRemoved() {
-    const elementid = this.getAttribute('id');
-    if (elementid !== null && elementid !== undefined && elementid !== '') {
+  notifyChildRemoved(): void {
+    if (this.hasAttribute('id')) {
+      const elementid = this.getAttribute('id');
       this._updateId(elementid, '');
     }
   }
 
-  notifyNodeInsert(insertionNode: Node) :void {
+  notifyNodeInsert(insertionNode: Node): void {
     if (insertionNode.isConnected) {
+      traverseNode(this, (node: Node) => {
+        node.notifyChildInsert();
+      });
+    }
+  }
+  notifyChildInsert(): void {
+    if (this.hasAttribute('id')) {
       const elementid = this.getAttribute('id');
-      if (elementid !== null && elementid !== undefined && elementid !== '') {
-        this._updateId('', elementid);
-      }
+      this._updateId('', elementid);
     }
   }
 
-
-  private _didModifyAttribute(name:string, oldValue:string, newValue:string) :void {
+  private _didModifyAttribute(name: string, oldValue: string, newValue: string): void {
     if (name === 'id') {
-      this._checkupdateId(oldValue, newValue);
+      this._beforeUpdateId(oldValue, newValue);
     }
   }
 
-  private _checkupdateId(oldValue:string, newValue:string) :void {
+  private _beforeUpdateId(oldValue: string, newValue: string): void {
     if (!this.isConnected) {
       return;
     }
     if (oldValue === newValue) {
       return;
     }
-    if (oldValue !== '' && oldValue !== undefined && oldValue !== null) {
-      this._updateId(oldValue, newValue);
-    }
+    this._updateId(oldValue, newValue);
+
   }
-  private _updateId(oldValue:string, newValue:string) {
-    if (oldValue !== null && oldValue !== undefined && oldValue !== '') {
+  private _updateId(oldValue: string, newValue: string): void {
+    if (oldValue) {
       document.removeElementById(oldValue, this);
     }
-    if (newValue !== null && newValue !== undefined && newValue !== '') {
+    if (newValue) {
       document.addElementById(newValue, this);
     }
   }
@@ -240,8 +243,8 @@ export class Element extends Node {
       const idx = this.attributes.indexOf(attr);
       if (idx !== -1) {
         this.attributes.splice(idx, 1);
+        this._didModifyAttribute(name, attr.value, '');
       }
-      this._didModifyAttribute(name, attr.value, '');
 
       removeProperty(this.targetId, name);
       delete this.attributes[name];
