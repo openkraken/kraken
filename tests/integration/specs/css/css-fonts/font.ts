@@ -1,6 +1,6 @@
 
 describe('Font', () => {
-  fit('shorthand', () => {
+  it('shorthand', () => {
     const p1 = createElementWithStyle(
       'p',
       {
