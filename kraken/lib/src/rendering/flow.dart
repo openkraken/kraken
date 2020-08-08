@@ -503,7 +503,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   double _getCrossAxisExtent(RenderBox child) {
     CSSStyleDeclaration childStyle = _getChildStyle(child);
-    double lineHeight = CSSFont.getLineHeight(childStyle);
+    double lineHeight = CSSText.getLineHeight(childStyle);
     double margin = 0;
 
     if (child is RenderElementBoundary) {
@@ -679,7 +679,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // Distance from top to baseline of child
         double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSFont.getLineHeight(childStyle);
+        double lineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -814,7 +814,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSFont.getLineHeight(style);
+      double lineBoxHeight = CSSText.getLineHeight(style);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -864,7 +864,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         CSSStyleDeclaration childStyle = _getChildStyle(child);
 
         // Line height of child
-        double childLineHeight = CSSFont.getLineHeight(childStyle);
+        double childLineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {

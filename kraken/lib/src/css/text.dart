@@ -10,7 +10,6 @@ const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
 const double DEFAULT_FONT_WEIGHT = 400.0;
 
-final RegExp _spaceRegExp = RegExp(r'\s+');
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
 // CSS Text: https://drafts.csswg.org/css-text-3/
@@ -61,9 +60,9 @@ mixin CSSTextMixin {
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
   TextStyle getTextStyle(CSSStyleDeclaration style) {
     return TextStyle(
-      color: getColor(style),
-      decoration: getDecorationLine(style),
-      decorationColor: getDecorationColor(style),
+      color: getCurrentColor(style),
+      decoration: getTextDecorationLine(style),
+      decorationColor: getTextDecorationColor(style),
       decorationStyle: getTextDecorationStyle(style),
       fontWeight: getFontWeight(style),
       fontStyle: getFontStyle(style),
@@ -76,11 +75,11 @@ mixin CSSTextMixin {
       locale: getLocale(style),
       background: getBackground(style),
       foreground: getForeground(style),
-      shadows: getShadows(style),
+      shadows: getTextShadow(style),
     );
   }
 
-  Color getColor(CSSStyleDeclaration style) {
+  Color getCurrentColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
       return CSSColor.parseColor(style[COLOR]);
     } else {
@@ -90,59 +89,30 @@ mixin CSSTextMixin {
 
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
-  TextDecoration getDecorationLine(CSSStyleDeclaration style) {
-    if (style.contains(TEXT_DECORATION_LINE)) {
-      return _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splittedTextDecoration = textDecoration.split(_spaceRegExp);
-      // Compatible with CSS 2.1: text-decoration = text-decoration-line.
-      if (splittedTextDecoration.length >= 1) {
-        return _getTextDecorationLine(splittedTextDecoration[0]);
-      }
+  TextDecoration getTextDecorationLine(CSSStyleDeclaration style) {
+    switch(style[TEXT_DECORATION_LINE]) {
+      case 'line-through':
+        return TextDecoration.lineThrough;
+      case 'overline':
+        return TextDecoration.overline;
+      case 'underline':
+        return TextDecoration.underline;
+      case 'none':
+      default:
+        return TextDecoration.none;
     }
-    return _getTextDecorationLine();
   }
 
-  TextDecoration _getTextDecorationLine([String type]) {
-    if (type == 'line-through')
-      return TextDecoration.lineThrough;
-    else if (type == 'overline')
-      return TextDecoration.overline;
-    else if (type == 'underline')
-      return TextDecoration.underline;
-    else
-      return TextDecoration.none;
-  }
-
-  Color getDecorationColor(CSSStyleDeclaration style) {
+  Color getTextDecorationColor(CSSStyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_spaceRegExp);
-      if (splitedDecoration.length >= 2) {
-        return CSSColor.parseColor(splitedDecoration.last);
-      }
+    } else {
+      return getCurrentColor(style); // Default to currentColor (style.color)
     }
-    return getColor(style); // Default to currentColor (style.color)
   }
 
   TextDecorationStyle getTextDecorationStyle(CSSStyleDeclaration style) {
-    if (style.contains(TEXT_DECORATION_STYLE)) {
-      return _getTextDecorationStyle(style[TEXT_DECORATION_STYLE]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_spaceRegExp);
-      if (splitedDecoration.length >= 2) {
-        return _getTextDecorationStyle(splitedDecoration[1]);
-      }
-    }
-    return _getTextDecorationStyle();
-  }
-
-  TextDecorationStyle _getTextDecorationStyle([String value]) {
-    switch (value) {
+    switch (style[TEXT_DECORATION_STYLE]) {
       case 'double':
         return TextDecorationStyle.double;
       case 'dotted':
@@ -318,7 +288,7 @@ mixin CSSTextMixin {
     return null;
   }
 
-  List<Shadow> getShadows(CSSStyleDeclaration style) {
+  List<Shadow> getTextShadow(CSSStyleDeclaration style) {
     List<Shadow> textShadows = [];
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
@@ -346,7 +316,7 @@ mixin CSSTextMixin {
 }
 
 
-class CSSFont {
+class CSSText {
   static bool isValidFontStyleValue(String value) {
     return value ==  'normal' || value == 'italic' || value == 'oblique';
   }
@@ -362,6 +332,14 @@ class CSSFont {
 
   static bool isValidLineHeightValue(String value) {
     return CSSLength.isLength(value) || value == 'normal' || double.tryParse(value) != null;
+  }
+
+  static bool isValidTextTextDecorationLineValue(String value) {
+    return value == 'underline' || value == 'overline' || value == 'line-through' || value  == 'none';
+  }
+
+  static bool isValidTextTextDecorationStyleValue(String value) {
+    return value == 'solid' || value == 'double' || value == 'dotted' || value  == 'dashed' || value == 'wavy';
   }
 
   static double getFontSize(CSSStyleDeclaration style) {
@@ -388,4 +366,5 @@ class CSSFont {
     }
     return lineHeight;
   }
+
 }

@@ -131,6 +131,9 @@ class CSSStyleDeclaration {
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
           break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.removeShorthandTextDecoration(_cssProperties);
+          break;
       }
       _cssProperties.remove(propertyName);
       _invokePropertyChangedListener(propertyName, prevValue, '');
@@ -236,6 +239,9 @@ class CSSStyleDeclaration {
           break;
         case TRANSITION:
           CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(_cssProperties, normalizedValue);
           break;
       }
 

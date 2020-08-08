@@ -110,17 +110,6 @@ const String TRANSITION_DURATION = 'transitionDuration';
 const String TRANSITION_TIMING_FUNCTION = 'transitionTimingFunction';
 const String TRANSITION_DELAY = 'transitionDelay';
 
-const String ANIMATION = 'animation';
-const String ANIMATION_NAME = 'animationName';
-const String ANIMATION_DURATION = 'animationDuration';
-const String ANIMATION_TIMING_FUNCTION = 'animationTimingFunction';
-const String ANIMATION_DELAY = 'animationDelay';
-const String ANIMATION_ITERATION_COUNT = 'animationIterationCount';
-const String ANIMATION_DIRECTION = 'animationDirection';
-const String ANIMATION_FILL_MODE = 'animationFillMode';
-const String ANIMATION_PLAY_STATE = 'animationPlayState';
-
-
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
 

@@ -211,6 +211,21 @@ class CSSStyleProperty {
     if (style.containsKey(TRANSITION_DELAY)) style.remove(TRANSITION_DELAY);
   }
 
+  static void setShorthandTextDecoration(Map<String, String> style, String shorthandValue) {
+    List<String> values = _getTextDecorationValues(shorthandValue);
+    if (values == null) return;
+
+    style[TEXT_DECORATION_LINE] = values[0];
+    style[TEXT_DECORATION_COLOR] = values[1];
+    style[TEXT_DECORATION_STYLE] = values[2];
+  }
+
+  static void removeShorthandTextDecoration(Map<String, String> style) {
+    if (style.containsKey(TEXT_DECORATION_LINE)) style.remove(TEXT_DECORATION_LINE);
+    if (style.containsKey(TEXT_DECORATION_COLOR)) style.remove(TEXT_DECORATION_COLOR);
+    if (style.containsKey(TEXT_DECORATION_STYLE)) style.remove(TEXT_DECORATION_STYLE);
+  }
+
   static void setShorthandBorder(Map<String, String> style, String property, String shorthandValue) {
 
     String borderTopColor;
@@ -509,16 +524,16 @@ class CSSStyleProperty {
     bool isSizeEndAndLineHeightStart = false;
 
     for (String value in values) {
-      if (style == null && CSSFont.isValidFontStyleValue(value)) {
+      if (style == null && CSSText.isValidFontStyleValue(value)) {
         style = value;
-      } else if (weight == null && CSSFont.isValidFontWeightValue(value)) {
+      } else if (weight == null && CSSText.isValidFontWeightValue(value)) {
         weight = value;
       } else if (size == null && CSSLength.isLength(value)) {
         size = value;
       } else if (value == '/') {
         isSizeEndAndLineHeightStart = true;
         continue;
-      } else if (lineHeight == null && CSSFont.isValidLineHeightValue(value)) {
+      } else if (lineHeight == null && CSSText.isValidLineHeightValue(value)) {
         lineHeight = value;
       } else if (family == null) {
         // The font-family must be the last value specified.
@@ -539,6 +554,31 @@ class CSSStyleProperty {
       size,
       lineHeight,
       family
+    ];
+  }
+
+  static List<String> _getTextDecorationValues(String shorthandProperty) {
+    List<String> values = shorthandProperty.split(_spaceRegExp);
+    String line;
+    String color;
+    String style;
+
+    for (String value in values) {
+      if (line == null && CSSText.isValidTextTextDecorationLineValue(value)) {
+        line = value;
+      } else if (color == null && CSSColor.isColor(value)) {
+        color = value;
+      } else if (style == null && CSSText.isValidTextTextDecorationStyleValue(value)) {
+        style = value;
+      } else {
+        return null;
+      }
+    }
+
+    return [
+      line,
+      color,
+      style
     ];
   }
 
