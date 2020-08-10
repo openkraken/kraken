@@ -585,7 +585,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     double contentWidth = getElementComputedWidth(targetId, elementManager);
     double contentHeight = getElementComputedHeight(targetId, elementManager);
-
     // If no child exists, stop layout.
     if (childCount == 0) {
       size = Size(
@@ -640,7 +639,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         child = childParentData.nextSibling;
         continue;
       }
-
       child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
@@ -720,14 +718,14 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     double containerCrossAxisExtent = 0.0;
 
     // Default to children's width
-    double constraintWidth = mainAxisExtent + borderEdge.horizontal;
+    double constraintWidth = mainAxisExtent;
     // Get max of element's width and children's width if element's width exists
     if (contentWidth != null) {
       constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
-    double constraintHeight = crossAxisExtent + borderEdge.vertical;
+    double constraintHeight = crossAxisExtent;
     // Get max of element's height and children's height if element's height exists
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);

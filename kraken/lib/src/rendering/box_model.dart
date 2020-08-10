@@ -117,6 +117,9 @@ class RenderBoxModel extends RenderBox with
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
     }
+    if (borderEdge != null) {
+      boxSize = wrapBorderSize(boxSize);
+    }
 
     super.size = super.constraints.constrain(boxSize);
   }

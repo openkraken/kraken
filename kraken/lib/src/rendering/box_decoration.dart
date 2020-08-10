@@ -79,4 +79,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
     if (borderEdge == null) return 0;
     return borderEdge.right;
   }
+
+  Size wrapBorderSize(Size innerSize) {
+    return Size(borderLeft + innerSize.width + borderRight,
+      borderTop + innerSize.height + borderBottom);
+  }
 }

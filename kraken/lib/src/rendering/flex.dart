@@ -1143,16 +1143,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     double actualSize;
 
     // Get layout width from children's width by flex axis
-    double constraintWidth = isHorizontalFlexDirection(_flexDirection) ?
-      idealMainSize + borderEdge.horizontal : crossSize + borderEdge.vertical;
+    double constraintWidth = isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
     // Get max of element's width and children's width if element's width exists
     if (elementWidth != null) {
       constraintWidth = math.max(constraintWidth, elementWidth);
     }
 
     // Get layout height from children's height by flex axis
-    double constraintHeight = isHorizontalFlexDirection(_flexDirection) ?
-      crossSize + borderEdge.vertical : idealMainSize + borderEdge.horizontal;
+    double constraintHeight = isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
     // Get max of element's height and children's height if element's height exists
     if (elementHeight != null) {
       constraintHeight = math.max(constraintHeight, elementHeight);
