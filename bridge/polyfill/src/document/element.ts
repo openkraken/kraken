@@ -181,7 +181,7 @@ export class Element extends Node {
   notifyChildRemoved(): void {
     if (this.hasAttribute('id')) {
       const elementid = this.getAttribute('id');
-      this._updateId(elementid, '');
+      this._updateId(elementid, null);
     }
   }
 
@@ -195,7 +195,7 @@ export class Element extends Node {
   notifyChildInsert(): void {
     if (this.hasAttribute('id')) {
       const elementid = this.getAttribute('id');
-      this._updateId('', elementid);
+      this._updateId(null, elementid);
     }
   }
 
@@ -215,7 +215,7 @@ export class Element extends Node {
     this._updateId(oldValue, newValue);
 
   }
-  private _updateId(oldValue: string, newValue: string): void {
+  private _updateId(oldValue: string | null, newValue: string | null): void {
     if (oldValue) {
       document.removeElementById(oldValue, this);
     }
