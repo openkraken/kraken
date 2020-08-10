@@ -162,9 +162,8 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset baseOffset =
-        childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root)
-            - parent.localToGlobal(Offset.zero, ancestor: root);
+    Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
+        parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
@@ -207,9 +206,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
     // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
     // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
     if ((left.isNotEmpty && left != AUTO) &&
-      (right.isNotEmpty && right != AUTO) &&
-      (width.isNotEmpty && width != AUTO)
-    ) {
+        (right.isNotEmpty && right != AUTO) &&
+        (width.isNotEmpty && width != AUTO)) {
       if (marginLeft == AUTO) {
         double leftValue = CSSLength.toDisplayPortValue(left);
         double rightValue = CSSLength.toDisplayPortValue(right);
@@ -224,9 +222,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
     }
 
     if ((top.isNotEmpty && top != AUTO) &&
-      (bottom.isNotEmpty && bottom != AUTO) &&
-      (height.isNotEmpty && height != AUTO)
-    ) {
+        (bottom.isNotEmpty && bottom != AUTO) &&
+        (height.isNotEmpty && height != AUTO)) {
       if (marginTop == AUTO) {
         double topValue = CSSLength.toDisplayPortValue(top);
         double bottomValue = CSSLength.toDisplayPortValue(bottom);

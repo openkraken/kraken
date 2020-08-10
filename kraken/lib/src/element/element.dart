@@ -216,11 +216,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -539,24 +539,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
     if (display.endsWith(FLEX)) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == NONE ||
-        display == INLINE ||
-        display == INLINE_BLOCK ||
-        display == BLOCK) {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -1069,7 +1058,8 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(style, property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
+    updateBackground(
+        style, property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }

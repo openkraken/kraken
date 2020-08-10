@@ -90,7 +90,7 @@ mixin CSSTextMixin {
   /// In CSS2.1, text-decoration determin the type of text decoration,
   /// but in CSS3, which is text-decoration-line.
   TextDecoration getTextDecorationLine(CSSStyleDeclaration style) {
-    switch(style[TEXT_DECORATION_LINE]) {
+    switch (style[TEXT_DECORATION_LINE]) {
       case 'line-through':
         return TextDecoration.lineThrough;
       case 'overline':
@@ -219,7 +219,16 @@ mixin CSSTextMixin {
           case 'serif':
             // Default serif font in iOS and iPadOS: Times
             // Default serif font in Android (4.0+): Noto Serif
-            resolvedFamily.addAll(['Times', 'Times New Roman', 'Noto Serif', 'Songti SC', 'Songti TC', 'Hiragino Mincho ProN', 'AppleMyungjo', 'Apple SD Gothic Neo']);
+            resolvedFamily.addAll([
+              'Times',
+              'Times New Roman',
+              'Noto Serif',
+              'Songti SC',
+              'Songti TC',
+              'Hiragino Mincho ProN',
+              'AppleMyungjo',
+              'Apple SD Gothic Neo'
+            ]);
             break;
           case 'monospace':
             // Default monospace font in iOS and iPadOS: Courier
@@ -230,7 +239,7 @@ mixin CSSTextMixin {
             resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
             break;
           case 'fantasy':
-            // Default fantasy font in iOS and iPadOS: 
+            // Default fantasy font in iOS and iPadOS:
             // Default fantasy font in MacOS: Papyrus
             resolvedFamily.addAll(['Papyrus', 'Impact']);
             break;
@@ -309,16 +318,14 @@ mixin CSSTextMixin {
           }
         });
       }
-
     }
     return textShadows;
   }
 }
 
-
 class CSSText {
   static bool isValidFontStyleValue(String value) {
-    return value ==  'normal' || value == 'italic' || value == 'oblique';
+    return value == 'normal' || value == 'italic' || value == 'oblique';
   }
 
   static bool isValidFontWeightValue(String value) {
@@ -335,11 +342,11 @@ class CSSText {
   }
 
   static bool isValidTextTextDecorationLineValue(String value) {
-    return value == 'underline' || value == 'overline' || value == 'line-through' || value  == 'none';
+    return value == 'underline' || value == 'overline' || value == 'line-through' || value == 'none';
   }
 
   static bool isValidTextTextDecorationStyleValue(String value) {
-    return value == 'solid' || value == 'double' || value == 'dotted' || value  == 'dashed' || value == 'wavy';
+    return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
   }
 
   static double getFontSize(CSSStyleDeclaration style) {
@@ -361,10 +368,8 @@ class CSSText {
         if (multipliedNumber != null) {
           lineHeight = getFontSize(style) * multipliedNumber;
         }
-        
       }
     }
     return lineHeight;
   }
-
 }

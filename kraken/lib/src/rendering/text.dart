@@ -63,7 +63,10 @@ class RenderTextBox extends RenderBox
   }
 
   bool _isTextOverflowEllipsis() {
-    return _style != null && style[OVERFLOW_X] != 'visible' && style[WHITE_SPACE] == 'nowrap' && style[TEXT_OVERFLOW] == 'ellipsis';
+    return _style != null &&
+        style[OVERFLOW_X] != 'visible' &&
+        style[WHITE_SPACE] == 'nowrap' &&
+        style[TEXT_OVERFLOW] == 'ellipsis';
   }
 
   TextOverflow _getOverflow() {

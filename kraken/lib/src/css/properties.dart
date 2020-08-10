@@ -127,13 +127,13 @@ const String THICK = 'thick'; // A thick border.
 // Font absolute size keyword: [ xx-small | x-small | small | medium | large | x-large | xx-large ]
 const String XX_SMALL = 'xx-small';
 const String X_SMALL = 'x-small';
-const String SMALL =  'small';
-const String LARGE =  'large';
-const String X_LARGE =  'x-large';
-const String XX_LARGE =  'xx-large';
+const String SMALL = 'small';
+const String LARGE = 'large';
+const String X_LARGE = 'x-large';
+const String XX_LARGE = 'xx-large';
 // Font relative size keyword
-const String SMALLER =  'smaller';
-const String LARGER =  'larger';
+const String SMALLER = 'smaller';
+const String LARGER = 'larger';
 
 // Display
 const String INLINE = 'inline';
@@ -173,7 +173,7 @@ const String LINEAR = 'linear';
 const String EASE = 'ease';
 const String EASE_IN = 'ease-in';
 const String EASE_OUT = 'ease-out';
-const String EASE_IN_OUT= 'ease-in-out';
+const String EASE_IN_OUT = 'ease-in-out';
 const String STEP_START = 'step-start';
 const String STEP_END = 'step-end';
 

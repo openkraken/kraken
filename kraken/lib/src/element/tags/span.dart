@@ -8,9 +8,7 @@ import 'package:kraken/element.dart';
 
 const String SPAN = 'SPAN';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE};
 
 class SpanElement extends Element {
   SpanElement(int targetId, ElementManager elementManager)

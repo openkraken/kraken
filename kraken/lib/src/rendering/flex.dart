@@ -1150,6 +1150,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     child = placeholderChild != null ? placeholderChild : firstChild;
+
     /// Set offset of children
     for (int i = 0; i < runCount; ++i) {
       double actualSizeDelta;
@@ -1203,7 +1204,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Calculate margin auto children in the main axis
       double mainAxisMarginAutoChildren = 0;
       RenderBox runChild = firstChild;
-      while(runChild != null) {
+      while (runChild != null) {
         final RenderFlexParentData childParentData = runChild.parentData;
         if (childParentData.runIndex != i) break;
         if (runChild is RenderElementBoundary) {
@@ -1212,9 +1213,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           String marginTop = childStyle[MARGIN_TOP];
 
           if ((CSSFlex.isHorizontalFlexDirection(flexDirection) && marginLeft == AUTO) ||
-            (CSSFlex.isVerticalFlexDirection(flexDirection) && marginTop == AUTO)
-          ) {
-              mainAxisMarginAutoChildren++;
+              (CSSFlex.isVerticalFlexDirection(flexDirection) && marginTop == AUTO)) {
+            mainAxisMarginAutoChildren++;
           }
         }
         runChild = childParentData.nextSibling;
@@ -1230,7 +1230,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       double crossAxisPadding = flowAwarePaddingEnd();
       // Position elements
       double childMainPosition =
-        flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
+          flipMainAxis ? mainAxisPadding + actualSize - leadingSpace : leadingSpace + mainAxisPadding;
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
@@ -1238,7 +1238,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
-
 
       while (child != null) {
         final RenderFlexParentData childParentData = child.parentData;
@@ -1341,8 +1340,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               if (marginBottom == AUTO) {
                 childCrossPosition += verticalRemainingSpace / 2;
               } else {
-                childCrossPosition += verticalRemainingSpace
-                  - CSSLength.toDisplayPortValue(marginBottom);
+                childCrossPosition += verticalRemainingSpace - CSSLength.toDisplayPortValue(marginBottom);
               }
             }
           } else {
@@ -1417,7 +1415,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
     if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
       result.add(BoxHitTestEntry(this, position));
       return true;
@@ -1576,38 +1574,30 @@ class RenderFlexItem extends RenderBox
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-                "Unfortunately, this object's geometry is not known at this time, "
-                    'probably because it has never been laid out. '
-                    'This means it cannot be accurately hit-tested.'
-            ),
-            ErrorHint(
-                'If you are trying '
-                    'to perform a hit test during the layout phase itself, make sure '
-                    "you only hit test nodes that have completed layout (e.g. the node's "
-                    'children, after their layout() method has been called).'
-            ),
+            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
+                'probably because it has never been laid out. '
+                'This means it cannot be accurately hit-tested.'),
+            ErrorHint('If you are trying '
+                'to perform a hit test during the layout phase itself, make sure '
+                "you only hit test nodes that have completed layout (e.g. the node's "
+                'children, after their layout() method has been called).'),
           ]);
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot hit test a render box with no size.'),
           describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-              'Although this node is not marked as needing layout, '
-                  'its size is not set.'
-          ),
-          ErrorHint(
-              'A RenderBox object must have an '
-                  'explicit size before it can be hit-tested. Make sure '
-                  'that the RenderBox in question sets its size during layout.'
-          ),
+          ErrorDescription('Although this node is not marked as needing layout, '
+              'its size is not set.'),
+          ErrorHint('A RenderBox object must have an '
+              'explicit size before it can be hit-tested. Make sure '
+              'that the RenderBox in question sets its size during layout.'),
         ]);
       }
       return true;

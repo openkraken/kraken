@@ -186,8 +186,7 @@ class CSSStyleDeclaration {
         case MARGIN_RIGHT:
         case MARGIN_BOTTOM:
           // Validation length type and keyword type
-          if (!CSSLength.isLength(normalizedValue) &&
-            !CSSLength.isKeyword(normalizedValue)) {
+          if (!CSSLength.isLength(normalizedValue) && !CSSLength.isKeyword(normalizedValue)) {
             return;
           }
           break;

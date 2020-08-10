@@ -172,7 +172,6 @@ enum AlignSelf {
   baseline
 }
 
-
 mixin CSSFlexboxMixin {
   void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
     if (style != null) {
@@ -306,7 +305,6 @@ AlignSelf _getAlignSelf(String alignSelf) {
   }
 }
 
-
 class CSSFlex {
   static bool isValidFlexWrapValue(String val) {
     return val == 'wrap' || val == 'nowrap' || val == 'wrap-reverse';
@@ -317,8 +315,8 @@ class CSSFlex {
   }
 
   static bool isHorizontalFlexDirection(FlexDirection flexDirection) {
-  return flexDirection == FlexDirection.row || flexDirection == FlexDirection.rowReverse;
-}
+    return flexDirection == FlexDirection.row || flexDirection == FlexDirection.rowReverse;
+  }
 
   static bool isVerticalFlexDirection(FlexDirection flexDirection) {
     return flexDirection == FlexDirection.columnReverse || flexDirection == FlexDirection.column;

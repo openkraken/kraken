@@ -121,31 +121,42 @@ class CSSTransition with CustomTickerProviderStateMixin {
   }
 
   static bool isValidTransitionTimingFunctionValue(String value) {
-    return value == LINEAR || value == EASE || value == EASE_IN || value == EASE_OUT || value == EASE_IN_OUT ||
-      value == STEP_END || value == STEP_START || CSSFunction.isFunction(value);
+    return value == LINEAR ||
+        value == EASE ||
+        value == EASE_IN ||
+        value == EASE_OUT ||
+        value == EASE_IN_OUT ||
+        value == STEP_END ||
+        value == STEP_START ||
+        CSSFunction.isFunction(value);
   }
 
   static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, Element el) {
-
     Map<String, CSSTransition> map = {};
 
-    List<String> transitionProperty = CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY].isEmpty ? ALL : style[TRANSITION_PROPERTY]);
-    List<String> transitionDuration = CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION].isEmpty ? '0s' : style[TRANSITION_DURATION]);
-    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(style[TRANSITION_TIMING_FUNCTION].isEmpty ? EASE : style[TRANSITION_TIMING_FUNCTION]);
-    List<String> transitionDelay = CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY].isEmpty ? '0s' : style[TRANSITION_DELAY]);
+    List<String> transitionProperty =
+        CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY].isEmpty ? ALL : style[TRANSITION_PROPERTY]);
+    List<String> transitionDuration =
+        CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION].isEmpty ? '0s' : style[TRANSITION_DURATION]);
+    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(
+        style[TRANSITION_TIMING_FUNCTION].isEmpty ? EASE : style[TRANSITION_TIMING_FUNCTION]);
+    List<String> transitionDelay =
+        CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY].isEmpty ? '0s' : style[TRANSITION_DELAY]);
 
     for (int i = 0; i < transitionProperty.length; i++) {
       String property = transitionProperty[i];
-      String function = transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
+      String function =
+          transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
       String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
       String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
-  
+
       Curve curve = _parseFunction(function);
       if (curve != null) {
         CSSTransition transition = CSSTransition();
         el?.dispatchTransitionRun();
 
-        AnimationController controller = AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
+        AnimationController controller =
+            AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
         transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
         transition.controller = controller;
         transition.delay = Duration(milliseconds: CSSTime.parseTime(delay));

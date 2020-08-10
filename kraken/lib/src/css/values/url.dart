@@ -42,7 +42,6 @@ class CSSUrl implements CSSValue<ImageProvider> {
       } else {
         _value = getImageProviderFactory(ImageType.network)(url);
       }
-
     } else if (_rawInput.startsWith('file://')) {
       File file = File.fromUri(Uri.parse(_rawInput));
       _value = getImageProviderFactory(ImageType.file)(_rawInput, file);

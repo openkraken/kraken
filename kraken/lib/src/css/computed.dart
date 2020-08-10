@@ -213,12 +213,9 @@ mixin CSSComputedMixin on RenderBox {
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
     bool isFlex = style[DISPLAY].endsWith(FLEX);
-    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) ||
-      style[FLEX_DIRECTION] == ROW;
-    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
-      style[ALIGN_ITEMS] == STRETCH;
-    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
-        style[FLEX_WRAP] != WRAP_REVERSE;
+    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) || style[FLEX_DIRECTION] == ROW;
+    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) || style[ALIGN_ITEMS] == STRETCH;
+    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP && style[FLEX_WRAP] != WRAP_REVERSE;
     bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
 
     if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {

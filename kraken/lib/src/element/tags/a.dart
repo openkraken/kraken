@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
@@ -11,9 +10,7 @@ import 'package:kraken/module.dart';
 
 const String ANCHOR = 'A';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE};
 
 class AnchorElement extends Element {
   String _href;
@@ -45,7 +42,7 @@ class AnchorElement extends Element {
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {
-    switch(scheme) {
+    switch (scheme) {
       case 'http':
       case 'https':
       case 'file':
@@ -62,7 +59,7 @@ class AnchorElement extends Element {
   @override
   void setProperty(String key, value) {
     super.setProperty(key, value);
-    switch(key) {
+    switch (key) {
       case 'href':
         _href = value;
         break;
@@ -77,7 +74,7 @@ class AnchorElement extends Element {
   void removeProperty(String key) {
     super.removeProperty(key);
 
-    switch(key) {
+    switch (key) {
       case 'href':
         _href = null;
         break;
