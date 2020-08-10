@@ -4,6 +4,7 @@
  */
 
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
@@ -60,8 +61,7 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 class RenderLayoutBox extends RenderBoxModel
     with
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-        RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-        CSSComputedMixin {
+        RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
 }
@@ -86,12 +86,227 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
 
   ElementManager elementManager;
 
+  BoxSizeType widthSizeType;
+  BoxSizeType heightSizeType;
+
   RenderBoxModel fromCopy(RenderBoxModel newBox) {
     if (padding != null) {
       newBox.padding = padding;
     }
 
     return newBox;
+  }
+
+  // @FIXME: fake border width, remove this after border had merged into renderObject.
+  double borderLeft = 0.0;
+  double borderTop = 0.0;
+  double borderRight = 0.0;
+  double borderBottom = 0.0;
+
+  double _width;
+  double get width {
+    return _width;
+  }
+  set width(double value) {
+    if (_width == value) return;
+    _width = value;
+    markNeedsLayout();
+  }
+
+  double _height;
+  double get height {
+    return _height;
+  }
+  set height(double value) {
+    if (_height == value) return;
+    _height = value;
+    markNeedsLayout();
+  }
+
+  double _minWidth;
+  double get minWidth {
+    return _minWidth;
+  }
+  set minWidth(double value) {
+    if (_minWidth == value) return;
+    _minWidth = value;
+    markNeedsLayout();
+  }
+
+  double _maxWidth;
+  double get maxWidth {
+    return _maxWidth;
+  }
+  set maxWidth(double value) {
+    if (_maxWidth == value) return;
+    _maxWidth = value;
+    markNeedsLayout();
+  }
+
+  double _minHeight;
+  double get minHeight {
+    return _minHeight;
+  }
+  set minHeight(double value) {
+    if (_minHeight == value) return;
+    _minHeight = value;
+    markNeedsLayout();
+  }
+
+  double _maxHeight;
+  double get maxHeight {
+    return _maxHeight;
+  }
+  set maxHeight(double value) {
+    if (_maxHeight == value) return;
+    _maxHeight = value;
+    markNeedsLayout();
+  }
+
+  double getContentWidth() {
+    double cropWidth = 0;
+    // @FIXME, need to remove elementManager in the future.
+    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
+    CSSStyleDeclaration style = hostElement.style;
+    double width = _width;
+    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+
+    void cropMargin(Element childNode) {
+      cropWidth += childNode.cropMarginWidth;
+    }
+
+    void cropPaddingBorder(Element childNode) {
+      cropWidth += childNode.cropBorderWidth;
+      cropWidth += childNode.cropPaddingWidth;
+    }
+
+    if (minWidth != null && (width == null || width < minWidth)) {
+      width = minWidth;
+    } else if (maxWidth != null && (width == null || width > maxWidth)) {
+      width = maxWidth;
+    }
+
+    switch (display) {
+      case BLOCK:
+      case FLEX:
+        // Get own width if exists else get the width of nearest ancestor width width
+        if (style.contains(WIDTH)) {
+          width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+          cropPaddingBorder(hostElement);
+        } else {
+          while (true) {
+            if (hostElement.parentNode != null) {
+              cropMargin(hostElement);
+              cropPaddingBorder(hostElement);
+              hostElement = hostElement.parentNode;
+            } else {
+              break;
+            }
+            if (hostElement is Element) {
+              CSSStyleDeclaration style = hostElement.style;
+              String display = RenderSizingHelper.getElementRealDisplayValue(hostElement.targetId, elementManager);
+
+              // Set width of element according to parent display
+              if (display != INLINE) {
+                // Skip to find upper parent
+                if (style.contains(WIDTH)) {
+                  // Use style width
+                  width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+                  cropPaddingBorder(hostElement);
+                  break;
+                } else if (display == INLINE_BLOCK || display == INLINE_FLEX) {
+                  // Collapse width to children
+                  width = null;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        break;
+      case INLINE_BLOCK:
+      case INLINE_FLEX:
+        if (style.contains(WIDTH)) {
+          width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+          cropPaddingBorder(hostElement);
+        } else {
+          width = null;
+        }
+        break;
+      case INLINE:
+        width = null;
+        break;
+      default:
+        break;
+    }
+
+    if (width != null) {
+      return math.max(0, width - cropWidth);
+    } else {
+      return null;
+    }
+  }
+
+  double getContentHeight() {
+    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
+    CSSStyleDeclaration style = hostElement.style;
+    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+    double height = _height;
+    double cropHeight = 0;
+
+    void cropMargin(Element childNode) {
+      cropHeight += childNode.cropMarginHeight;
+    }
+
+    void cropPaddingBorder(Element childNode) {
+      cropHeight += childNode.cropBorderHeight;
+      cropHeight += childNode.cropPaddingHeight;
+    }
+
+    if (minHeight != null && (height == null || height < minHeight)) {
+      height = minHeight;
+    } else if (maxHeight != null && (height == null || height > maxHeight)) {
+      height = maxHeight;
+    }
+
+    // inline element has no height
+    if (display == INLINE) {
+      return null;
+    } else if (style.contains(HEIGHT)) {
+      if (hostElement is Element) {
+        height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
+        cropPaddingBorder(hostElement);
+      }
+    } else {
+      while (true) {
+        Element current;
+        if (hostElement.parentNode != null) {
+          cropMargin(hostElement);
+          cropPaddingBorder(hostElement);
+          current = hostElement;
+          hostElement = hostElement.parentNode;
+        } else {
+          break;
+        }
+        if (hostElement is Element) {
+          CSSStyleDeclaration style = hostElement.style;
+          if (RenderSizingHelper.isStretchChildHeight(hostElement, current)) {
+            if (style.contains(HEIGHT)) {
+              height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
+              cropPaddingBorder(hostElement);
+              break;
+            }
+          } else {
+            break;
+          }
+        }
+      }
+    }
+    if (height != null) {
+      return math.max(0, height - cropHeight);
+    } else {
+      return null;
+    }
   }
 
   set size(Size value) {
@@ -133,14 +348,18 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   // call this method before content box layout.
   BoxConstraints beforeLayout() {
     _debugHasBoxLayout = true;
-    _contentConstraints = super.constraints;
-
-    if (padding != null) {
-      _contentConstraints = deflatePaddingConstraints(_contentConstraints);
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
+    if (contentWidth != null || contentHeight != null) {
+      _contentConstraints = BoxConstraints(
+        minWidth: 0.0,
+        maxWidth: contentWidth != null ? contentWidth : double.infinity,
+        minHeight: 0.0,
+        maxHeight: contentHeight != null ? contentHeight : double.infinity
+      );
+    } else {
+      _contentConstraints = super.constraints;
     }
-
-    // layout overflow Box
-    _contentConstraints = deflateOverflowConstraints(_contentConstraints);
 
     return _contentConstraints;
   }
@@ -162,5 +381,18 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintOverflow(context, offset, callback);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('width', width));
+    properties.add(DiagnosticsProperty('height', height));
+    properties.add(DiagnosticsProperty('maxWidth', maxWidth));
+    properties.add(DiagnosticsProperty('minWidth', minWidth));
+    properties.add(DiagnosticsProperty('maxHeight', maxHeight));
+    properties.add(DiagnosticsProperty('minHeight', minHeight));
+    properties.add(DiagnosticsProperty('contentSize', _contentSize));
+    properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints));
   }
 }

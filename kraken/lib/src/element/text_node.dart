@@ -10,7 +10,13 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    renderTextBox = RenderTextBox(targetId: targetId, text: '', style: null, elementManager: elementManager);
+    InlineSpan text = createTextSpanWithStyle(_data, null);
+
+    renderTextBox = RenderTextBox(text,
+      targetId: targetId,
+      style: null,
+      elementManager: elementManager,
+    );
   }
 
   RenderTextBox renderTextBox;
@@ -21,7 +27,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    String whiteSpace = parent?.style['whiteSpace'];
+    WhiteSpace whiteSpace = CSSTextMixin.getWhiteSpace(parent?.style);
 
     /// The following table summarizes the behavior of the various white-space values:
     //
@@ -32,8 +38,11 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // pre-wrap	Preserve	Preserve	Wrap	Hang
     // pre-line	Preserve	Collapse	Wrap	Remove
     // break-spaces	Preserve	Preserve	Wrap	Wrap
-    if (whiteSpace.startsWith('pre') || whiteSpace == 'break-spaces') {
-      return whiteSpace == 'pre-line' ? collapseWhitespace(_data, collapseSpace: true) : _data;
+    if (whiteSpace == WhiteSpace.pre ||
+        whiteSpace == WhiteSpace.preLine ||
+        whiteSpace == WhiteSpace.preWrap ||
+        whiteSpace == WhiteSpace.breakSpaces) {
+      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data, collapseSpace: true) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
       // Append space while prev is element.
@@ -67,6 +76,17 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     }
   }
 
+//  bool _isTextOverflowEllipsis(CSSStyleDeclaration style) {
+//    List<CSSOverflowType> overflows = getOverflowFromStyle(style);
+//    WhiteSpace whiteSpace = getWhiteSpace(style);
+//    CSSOverflowType overflowX = overflows[0];
+//    return overflowX != Overflow.visible && whiteSpace == WhiteSpace.nowrap && style['textOverflow'] == 'ellipsis';
+//  }
+//
+//  TextOverflow getTextOverflow(CSSStyleDeclaration style) {
+//    return _isTextOverflowEllipsis(style) ? TextOverflow.ellipsis : TextOverflow.clip;
+//  }
+
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
     // migrate element's size type to RenderTextBox
     renderTextBox.widthSizeType = width;
@@ -76,8 +96,10 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void _updateTextStyle() {
     // parentNode must be an element.
     Element parentElement = parentNode;
-    renderTextBox.text = data;
     renderTextBox.style = parentElement.style;
+    renderTextBox.text = createTextSpanWithStyle(data, parentElement.style);
+    renderTextBox.whiteSpace = CSSTextMixin.getWhiteSpace(parentElement.style);
+    renderTextBox.overflow = CSSTextMixin.getTextOverflow(parentElement.style);
 
     _setTextSizeType(
         parentElement.renderElementBoundary.widthSizeType, parentElement.renderElementBoundary.heightSizeType);
@@ -91,7 +113,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void attachTo(Element parent, {RenderObject after}) {
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    renderTextBox.text = data;
+    renderTextBox.text = createTextSpanWithStyle(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
     parent.renderLayoutBox.insert(renderTextBox, after: after);

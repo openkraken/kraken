@@ -21,116 +21,109 @@ mixin CSSSizingMixin {
   RenderMargin renderMargin;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
-  CSSSizedConstraints oldConstraints;
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-    if (renderConstrainedBox != null) {
-      CSSTransition allTransition,
-          widthTransition,
-          heightTransition,
-          minWidthTransition,
-          maxWidthTransition,
-          minHeightTransition,
-          maxHeightTransition;
-      if (transitionMap != null) {
-        allTransition = transitionMap['all'];
-        widthTransition = transitionMap['width'];
-        heightTransition = transitionMap['height'];
-        minWidthTransition = transitionMap['min-width'];
-        maxWidthTransition = transitionMap['max-width'];
-        minHeightTransition = transitionMap['min-height'];
-        maxHeightTransition = transitionMap['max-height'];
-      }
+//  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+//    if (renderConstrainedBox != null) {
+//      CSSTransition allTransition,
+//          widthTransition,
+//          heightTransition,
+//          minWidthTransition,
+//          maxWidthTransition,
+//          minHeightTransition,
+//          maxHeightTransition;
+//      if (transitionMap != null) {
+//        allTransition = transitionMap['all'];
+//        widthTransition = transitionMap['width'];
+//        heightTransition = transitionMap['height'];
+//        minWidthTransition = transitionMap['min-width'];
+//        maxWidthTransition = transitionMap['max-width'];
+//        minHeightTransition = transitionMap['min-height'];
+//        maxHeightTransition = transitionMap['max-height'];
+//      }
+//
+//      if (allTransition != null ||
+//          widthTransition != null ||
+//          heightTransition != null ||
+//          minWidthTransition != null ||
+//          maxWidthTransition != null ||
+//          minHeightTransition != null ||
+//          maxHeightTransition != null) {
+//        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
+//        double diffHeight = (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
+//        double diffMinWidth = (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
+//        double diffMaxWidth = (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
+//        double diffMinHeight = (newConstraints.minHeight ?? 0.0) - (oldConstraints.minHeight ?? 0.0);
+//        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) - (oldConstraints.maxHeight ?? 0.0);
+//
+//        CSSSizedConstraints progressConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
+//            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
+//
+//        CSSSizedConstraints baseConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
+//            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
+//
+//        allTransition?.addProgressListener((progress) {
+//          if (widthTransition == null) {
+//            progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
+//          }
+//          if (heightTransition == null) {
+//            progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
+//          }
+//          if (minWidthTransition == null) {
+//            progressConstraints.minWidth = diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
+//          }
+//          if (maxWidthTransition == null) {
+//            progressConstraints.maxWidth = diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+//          }
+//          if (minHeightTransition == null) {
+//            progressConstraints.minHeight = diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
+//          }
+//          if (maxHeightTransition == null) {
+//            progressConstraints.maxHeight = diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
+//          }
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        widthTransition?.addProgressListener((progress) {
+//          progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        heightTransition?.addProgressListener((progress) {
+//          progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        minHeightTransition?.addProgressListener((progress) {
+//          progressConstraints.minHeight = diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        minWidthTransition?.addProgressListener((progress) {
+//          progressConstraints.minWidth = diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        maxHeightTransition?.addProgressListener((progress) {
+//          progressConstraints.maxHeight = diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//        maxWidthTransition?.addProgressListener((progress) {
+//          progressConstraints.maxWidth = diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+//        });
+//      } else {
+//        renderConstrainedBox.additionalConstraints = newConstraints.toBoxConstraints();
+//      }
+//
+//      // Remove inline element dimension
+//      if (style[DISPLAY] == INLINE) {
+//        renderConstrainedBox.additionalConstraints = BoxConstraints();
+//      }
+//
+//      oldConstraints = newConstraints;
+//    }
+//  }
 
-      CSSSizedConstraints newConstraints = getConstraints(style);
-
-      if (allTransition != null ||
-          widthTransition != null ||
-          heightTransition != null ||
-          minWidthTransition != null ||
-          maxWidthTransition != null ||
-          minHeightTransition != null ||
-          maxHeightTransition != null) {
-        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
-        double diffHeight = (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
-        double diffMinWidth = (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
-        double diffMaxWidth = (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
-        double diffMinHeight = (newConstraints.minHeight ?? 0.0) - (oldConstraints.minHeight ?? 0.0);
-        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) - (oldConstraints.maxHeight ?? 0.0);
-
-        CSSSizedConstraints progressConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
-
-        CSSSizedConstraints baseConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
-
-        allTransition?.addProgressListener((progress) {
-          if (widthTransition == null) {
-            progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
-          }
-          if (heightTransition == null) {
-            progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
-          }
-          if (minWidthTransition == null) {
-            progressConstraints.minWidth = diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
-          }
-          if (maxWidthTransition == null) {
-            progressConstraints.maxWidth = diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
-          }
-          if (minHeightTransition == null) {
-            progressConstraints.minHeight = diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
-          }
-          if (maxHeightTransition == null) {
-            progressConstraints.maxHeight = diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
-          }
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        widthTransition?.addProgressListener((progress) {
-          progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        heightTransition?.addProgressListener((progress) {
-          progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        minHeightTransition?.addProgressListener((progress) {
-          progressConstraints.minHeight = diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        minWidthTransition?.addProgressListener((progress) {
-          progressConstraints.minWidth = diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        maxHeightTransition?.addProgressListener((progress) {
-          progressConstraints.maxHeight = diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-        maxWidthTransition?.addProgressListener((progress) {
-          progressConstraints.maxWidth = diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-        });
-      } else {
-        renderConstrainedBox.additionalConstraints = newConstraints.toBoxConstraints();
-      }
-
-      // Remove inline element dimension
-      if (style[DISPLAY] == INLINE) {
-        renderConstrainedBox.additionalConstraints = BoxConstraints();
-      }
-
-      oldConstraints = newConstraints;
-    }
+  void initRenderBoxSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+    updateBoxSize(renderBoxModel, style);
   }
 
-  RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
-    oldConstraints = getConstraints(style);
-    return renderConstrainedBox = KrakenRenderConstrainedBox(
-      additionalConstraints: oldConstraints.toBoxConstraints(),
-      child: renderObject,
-    );
-  }
-
-  static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
+  void updateBoxSize(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
     double width = CSSLength.toDisplayPortValue(style[WIDTH]);
     double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
     double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
@@ -138,44 +131,12 @@ mixin CSSSizingMixin {
     double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
     double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
 
-    CSSEdgeInsets padding = _getPaddingFromStyle(style);
-    EdgeInsets border = CSSBorder.getBorderEdgeInsets(style);
-
-    if (width != null) {
-      if (maxWidth != null && width > maxWidth) {
-        width = maxWidth;
-      } else if (minWidth != null && width < minWidth) {
-        width = minWidth;
-      }
-    }
-
-    if (height != null) {
-      if (minHeight != null && height < minHeight) {
-        height = minHeight;
-      } else if (maxHeight != null && height > maxHeight) {
-        height = maxHeight;
-      }
-    }
-
-    double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
-    if (height == null) {
-      minHeight = internalHeight;
-    } else if (internalHeight > height) {
-      height = internalHeight;
-    }
-
-    if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
-
-    double internalWidth = padding.left + padding.right + border.left + border.right;
-    if (width == null) {
-      minWidth = internalWidth;
-    } else if (internalWidth > width) {
-      width = internalWidth;
-    }
-
-    if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
-
-    return CSSSizedConstraints(width, height, minWidth, maxWidth, minHeight, maxHeight);
+    renderBoxModel.width = width;
+    renderBoxModel.height = height;
+    renderBoxModel.maxWidth = maxWidth;
+    renderBoxModel.minWidth = minWidth;
+    renderBoxModel.maxHeight = maxHeight;
+    renderBoxModel.minHeight = minHeight;
   }
 
   RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
@@ -418,29 +379,4 @@ class CSSEdgeInsets {
   double bottom;
 
   CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
-}
-
-class CSSSizedConstraints {
-  double width;
-  double height;
-  double minWidth;
-  double maxWidth;
-  double minHeight;
-  double maxHeight;
-
-  CSSSizedConstraints(this.width, this.height, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight);
-
-  BoxConstraints toBoxConstraints() {
-    return BoxConstraints(
-      minWidth: minWidth ?? 0.0,
-      minHeight: minHeight ?? 0.0,
-      maxWidth: maxWidth ?? width ?? double.infinity,
-      maxHeight: maxHeight ?? height ?? double.infinity,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'CSSSizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
-  }
 }

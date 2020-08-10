@@ -89,7 +89,6 @@ class Element extends Node
 
   // A point reference to treed renderObject.
   RenderObject renderObject;
-  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
@@ -162,14 +161,14 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
+    // init box sizing
+    initRenderBoxSizing(getRenderBoxModel(), style);
+
     // Init overflow
-    initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
-    
+    initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
+
     // BoxModel Border
     renderObject = initRenderDecoratedBox(renderObject, style, targetId);
-
-    // Constrained box
-    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Opacity
     renderObject = initRenderOpacity(renderObject, style);
@@ -1002,16 +1001,16 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+    updateRenderOverflow(getRenderBoxModel(), style, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(_getRenderBoxModel(), style, transitionMap);
+    updateRenderPadding(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
     // Update constrained box.
-    updateConstraints(style, transitionMap);
+    updateBoxSize(getRenderBoxModel(), style);
 
     setElementSizeType();
 
@@ -1122,7 +1121,7 @@ class Element extends Node
     updateChildNodesStyle();
   }
 
-  RenderBoxModel _getRenderBoxModel() {
+  RenderBoxModel getRenderBoxModel() {
     if (isIntrinsicBox) {
       return renderIntrinsicBox;
     } else {
@@ -1206,9 +1205,9 @@ class Element extends Node
       case 'scrollLeft':
         return getScrollLeft();
       case 'scrollHeight':
-        return getScrollHeight(_getRenderBoxModel());
+        return getScrollHeight(getRenderBoxModel());
       case 'scrollWidth':
-        return getScrollWidth(_getRenderBoxModel());
+        return getScrollWidth(getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
       case 'click':
@@ -1290,7 +1289,7 @@ class Element extends Node
     super.addEventListener(eventName, _eventResponder);
 
     // bind pointer responder.
-    addEventResponder(_getRenderBoxModel());
+    addEventResponder(getRenderBoxModel());
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
@@ -1303,7 +1302,7 @@ class Element extends Node
     super.removeEventListener(eventName, _eventResponder);
 
     // Remove pointer responder.
-    removeEventResponder(_getRenderBoxModel());
+    removeEventResponder(getRenderBoxModel());
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {

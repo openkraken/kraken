@@ -4,6 +4,7 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;
@@ -133,6 +134,53 @@ mixin CSSTextMixin {
       return TextDecoration.underline;
     else
       return TextDecoration.none;
+  }
+
+  static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
+    WhiteSpace whiteSpace = WhiteSpace.normal;
+    if (style == null) {
+      return whiteSpace;
+    }
+
+    switch(style['white-space']) {
+      case 'nowrap':
+        return WhiteSpace.nowrap;
+      case 'pre':
+        return WhiteSpace.pre;
+      case 'pre-wrap':
+        return WhiteSpace.preWrap;
+      case 'pre-line':
+        return WhiteSpace.preLine;
+      case 'break-spaces':
+        return WhiteSpace.breakSpaces;
+      case 'normal':
+      default:
+        return WhiteSpace.normal;
+    }
+  }
+
+  static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
+    List<CSSOverflowType> overflows = getOverflowFromStyle(style);
+    WhiteSpace whiteSpace = getWhiteSpace(style);
+    //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
+    if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
+      return TextOverflow.visible;
+    }
+
+    TextOverflow textOverflow = TextOverflow.clip;
+    if (style == null) {
+      return textOverflow;
+    }
+
+    switch(style['text-overflow']) {
+      case 'ellipsis':
+        return TextOverflow.ellipsis;
+      case 'fade':
+        return TextOverflow.fade;
+      case 'clip':
+      default:
+        return TextOverflow.clip;
+    }
   }
 
   Color getDecorationColor(CSSStyleDeclaration style) {

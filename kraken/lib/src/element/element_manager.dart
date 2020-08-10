@@ -150,13 +150,11 @@ class ElementManager {
 
   void createTextNode(int id, String data) {
     TextNode textNode = TextNode(id, data, this);
-    textNode.elementManager = this;
     setEventTarget(textNode);
   }
 
   void createComment(int id, String data) {
     EventTarget comment = Comment(targetId: id, data: data, elementManager: this);
-    comment.elementManager = this;
     setEventTarget(comment);
   }
 

@@ -584,14 +584,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
-    double elementWidth = getElementComputedWidth(targetId, elementManager);
-    double elementHeight = getElementComputedHeight(targetId, elementManager);
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
 
     // If no child exists, stop layout.
     if (childCount == 0) {
       Size preferredSize = Size(
-        elementWidth ?? 0,
-        elementHeight ?? 0,
+        contentWidth ?? 0,
+        contentHeight ?? 0,
       );
       size = preferredSize;
       return;
@@ -600,13 +600,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     assert(contentConstraints != null);
 
     double maxWidth = 0;
-    if (elementWidth != null) {
-      maxWidth = elementWidth;
+    if (contentWidth != null) {
+      maxWidth = contentWidth;
     }
 
     double maxHeight = 0;
-    if (elementHeight != null) {
-      maxHeight = elementHeight;
+    if (contentHeight != null) {
+      maxHeight = contentHeight;
     }
 
     // maxMainSize still can be updated by content size suggestion and transferred size suggestion
@@ -635,10 +635,10 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Max length of each flex line
     double flexLineLimit = 0.0;
-    if (elementWidth != null) {
-      flexLineLimit = elementWidth;
+    if (contentWidth != null) {
+      flexLineLimit = contentWidth;
     } else {
-      flexLineLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
+      flexLineLimit = RenderSizingHelper.getElementComputedMaxWidth(targetId, elementManager);
     }
 
     double maxSizeAboveBaseline = 0;
@@ -677,7 +677,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           } else if (child is RenderTextBox) {
             maxCrossAxisSize = double.infinity;
           } else {
-            maxCrossAxisSize = elementHeight ?? double.infinity;
+            maxCrossAxisSize = contentHeight ?? double.infinity;
           }
         }
         innerConstraints = BoxConstraints(
@@ -857,8 +857,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else {
       // Stop layout when no non positioned child exists
       Size preferredSize = Size(
-        elementWidth ?? 0,
-        elementHeight ?? 0,
+        contentWidth ?? 0,
+        contentHeight ?? 0,
       );
       size = preferredSize;
       return;
@@ -870,9 +870,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     bool isVerticalDirection = isVerticalFlexDirection(_flexDirection);
     if (isVerticalDirection) {
-      containerCrossAxisExtent = elementWidth ?? 0;
+      containerCrossAxisExtent = contentWidth ?? 0;
     } else {
-      containerCrossAxisExtent = elementHeight ?? 0;
+      containerCrossAxisExtent = contentHeight ?? 0;
     }
 
     final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
@@ -1128,15 +1128,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Get layout width from children's width by flex axis
     double constraintWidth = isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
     // Get max of element's width and children's width if element's width exists
-    if (elementWidth != null) {
-      constraintWidth = math.max(constraintWidth, elementWidth);
+    if (contentWidth != null) {
+      constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Get layout height from children's height by flex axis
     double constraintHeight = isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
     // Get max of element's height and children's height if element's height exists
-    if (elementHeight != null) {
-      constraintHeight = math.max(constraintHeight, elementHeight);
+    if (contentHeight != null) {
+      constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
     switch (_flexDirection) {

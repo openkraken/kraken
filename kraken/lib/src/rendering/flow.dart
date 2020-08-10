@@ -154,16 +154,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   /// The distance by which the child's left edge is inset from the left of the stack.
   double left;
 
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
-
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
-
   /// because the wrap has a minimum size that is not filled), the additional
   /// free space will be allocated according to the [runAlignment].
   ///
@@ -583,8 +573,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double contentWidth = getElementComputedWidth(targetId, elementManager);
-    double contentHeight = getElementComputedHeight(targetId, elementManager);
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -606,7 +596,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = RenderSizingHelper.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -1042,7 +1032,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
