@@ -180,7 +180,7 @@ class RenderBoxModel extends RenderBox with
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintDecoration(context, offset);
-    paintOverflow(context, offset, callback);
+    paintOverflow(context, offset, borderEdge, callback);
   }
 
   @override
