@@ -565,7 +565,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(this, child, size);
+        setPositionedChildOffset(this, child, size, borderEdge);
       }
       child = childParentData.nextSibling;
     }
@@ -1155,21 +1155,21 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (elementHeight != null) {
       constraintHeight = math.max(constraintHeight, elementHeight);
     }
-    
+
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = inflatedContentConstraints 
+        size = inflatedContentConstraints
             .constrain(Size(math.max(constraintWidth, idealMainSize), inflatedContentConstraints.constrainHeight(constraintHeight)));
-        actualSize = contentSize.width + borderEdge.horizontal;
-        crossSize = contentSize.height + borderEdge.vertical;
+        actualSize = contentSize.width;
+        crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = inflatedContentConstraints 
+        size = inflatedContentConstraints
             .constrain(Size(math.max(constraintWidth, crossSize), inflatedContentConstraints.constrainHeight(constraintHeight)));
-        actualSize = contentSize.height + borderEdge.vertical;
-        crossSize = contentSize.width + borderEdge.horizontal;
+        actualSize = contentSize.height;
+        crossSize = contentSize.width;
         break;
     }
 
@@ -1318,7 +1318,10 @@ class RenderFlexLayout extends RenderLayoutBox {
         } else {
           crossOffset = childCrossPosition + crossAxisOffset;
         }
-        Offset relativeOffset = _getOffset(childMainPosition, crossOffset);
+        Offset relativeOffset = _getOffset(
+          childMainPosition,
+          crossOffset
+        );
 
         /// Apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
@@ -1376,8 +1379,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    super.paint(context, offset);
-
     basePaint(context, offset, (context, offset) {
       List<RenderObject> children = getChildrenAsList();
       children.sort((RenderObject prev, RenderObject next) {

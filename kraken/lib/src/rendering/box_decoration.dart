@@ -86,7 +86,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
       borderTop + innerSize.height + borderBottom);
   }
 
-  void paintDecoration(PaintingContext context, Offset offset, BoxPainter _painter, Decoration decoration) {
+  void paintDecoration(PaintingContext context, Offset offset) {
     _painter ??= decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background) {
