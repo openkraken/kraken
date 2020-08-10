@@ -7,10 +7,7 @@ import 'package:kraken/element.dart';
 
 const String STRONG = 'STRONG';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE,
-  FONT_WEIGHT: BOLD
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE, FONT_WEIGHT: BOLD};
 
 class StrongElement extends Element {
   StrongElement(int targetId, ElementManager elementManager)

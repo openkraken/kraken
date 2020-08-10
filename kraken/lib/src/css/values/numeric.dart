@@ -5,6 +5,7 @@
 import 'value.dart';
 
 const String PERCENTAGE = '%';
+final RegExp _numberRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?$');
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#integers
 class CSSInteger implements CSSValue<int> {
@@ -30,36 +31,18 @@ class CSSInteger implements CSSValue<int> {
 }
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
-class CSSNumber implements CSSValue<double> {
-  double _value = 0.0;
-
-  final String _rawInput;
-  CSSNumber(this._rawInput) {
-    parse();
+class CSSNumber {
+  static double parseNumber(String input) {
+    return double.tryParse(input);
   }
 
-  double toDouble() => computedValue;
-
-  int toInt() => _value.toInt();
-
-  @override
-  double get computedValue => _value;
-
-  @override
-  void parse() {
-    _value = double.tryParse(_rawInput);
+  static bool isNumber(String input) {
+    return input != null && _numberRegExp.hasMatch(input);
   }
-
-  @override
-  String get serializedValue => _value.toString();
 }
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
 class CSSPercentage implements CSSValue<double> {
-  static bool isPercentage(String percentageValue) {
-    return percentageValue != null && percentageValue.endsWith(PERCENTAGE);
-  }
-
   final String _rawInput;
   double _value = 0.0;
   double toDouble() => _value;
@@ -80,4 +63,8 @@ class CSSPercentage implements CSSValue<double> {
 
   @override
   String get serializedValue => _value.toString();
+
+  static bool isPercentage(String percentageValue) {
+    return percentageValue != null && percentageValue.endsWith(PERCENTAGE);
+  }
 }

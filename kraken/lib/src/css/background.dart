@@ -16,15 +16,15 @@ import 'package:kraken/css.dart';
 
 /// The [CSSBackgroundMixin] mixin used to handle background shorthand and compute
 /// to single value of background
-/// 
+///
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
 mixin CSSBackgroundMixin {
-
   RenderDecorateElementBox _renderDecorateElementBox;
 
-  void updateBackground(CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
+  void updateBackground(
+      CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
     if (!CSSBackground.hasLocalBackgroundImage(style)) return;
 
     if (style[BACKGROUND_IMAGE].isNotEmpty) {
@@ -47,19 +47,15 @@ mixin CSSBackgroundMixin {
     }
   }
 
-  void _updateRenderGradient(DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
+  void _updateRenderGradient(
+      DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
     if (_renderDecorateElementBox != null) {
-      _renderDecorateElementBox.decoration = BoxDecoration(
-        image: decorationImage,
-        gradient: gradient
-      );
+      _renderDecorateElementBox.decoration = BoxDecoration(image: decorationImage, gradient: gradient);
     } else {
       RenderObject child = parent.child;
       parent.child = null;
-      _renderDecorateElementBox = RenderDecorateElementBox(
-        decoration: BoxDecoration(image: decorationImage, gradient: gradient),
-        child: child
-      );
+      _renderDecorateElementBox =
+          RenderDecorateElementBox(decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
       parent.child = _renderDecorateElementBox;
     }
   }
@@ -73,10 +69,7 @@ class CSSColorStop {
 
 class CSSBackground {
   static bool isValidBackgroundRepeatValue(String value) {
-    return value == REPEAT ||
-      value == NO_REPEAT ||
-      value == REPEAT_X ||
-      value == REPEAT_Y;
+    return value == REPEAT || value == NO_REPEAT || value == REPEAT_X || value == REPEAT_Y;
   }
 
   static bool isValidBackgroundSizeValue(String value) {
@@ -97,21 +90,21 @@ class CSSBackground {
 
   static bool isValidBackgroundImageValue(String value) {
     return value.startsWith('url(') ||
-      value.startsWith('linear-gradient(') ||
-      value.startsWith('repeating-linear-gradient(') ||
-      value.startsWith('radial-gradient(') ||
-      value.startsWith('repeating-radial-gradient(') ||
-      value.startsWith('conic-gradient(');
+        value.startsWith('linear-gradient(') ||
+        value.startsWith('repeating-linear-gradient(') ||
+        value.startsWith('radial-gradient(') ||
+        value.startsWith('repeating-radial-gradient(') ||
+        value.startsWith('conic-gradient(');
   }
 
   static bool isValidBackgroundPositionValue(String value) {
     return value == CSSPosition.CENTER ||
-      value == CSSPosition.LEFT ||
-      value == CSSPosition.RIGHT ||
-      value == CSSPosition.TOP ||
-      value == CSSPosition.BOTTOM ||
-      CSSLength.isLength(value) ||
-      CSSPercentage.isPercentage(value);
+        value == CSSPosition.LEFT ||
+        value == CSSPosition.RIGHT ||
+        value == CSSPosition.TOP ||
+        value == CSSPosition.BOTTOM ||
+        CSSLength.isLength(value) ||
+        CSSPercentage.isPercentage(value);
   }
 
   static Color getBackgroundColor(CSSStyleDeclaration style) {
@@ -180,11 +173,10 @@ class CSSBackground {
     }
 
     backgroundImage = DecorationImage(
-      image: CSSUrl(url).computedValue,
-      repeat: imageRepeat,
-      alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION]),
-      fit: boxFit
-    );
+        image: CSSUrl(url).computedValue,
+        repeat: imageRepeat,
+        alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION]),
+        fit: boxFit);
 
     return backgroundImage;
   }
@@ -354,7 +346,6 @@ class CSSBackground {
 
     return gradient;
   }
-
 
   static void _applyColorAndStops(int start, List<String> args, List<Color> colors, List<double> stops) {
     // colors should more than one, otherwise invalid

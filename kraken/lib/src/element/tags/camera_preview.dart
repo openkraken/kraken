@@ -238,7 +238,7 @@ class CameraPreviewElement extends Element {
   }
 
   void _updateSensorOrientation(value) async {
-    int sensorOrientation = CSSNumber(value.toString()).toInt();
+    int sensorOrientation = int.tryParse(value.toString());
     cameraDescription = cameraDescription.copyWith(sensorOrientation: sensorOrientation);
     await _initCamera();
   }

@@ -4479,7 +4479,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot(0.1);
+    await matchViewportSnapshot(0.2);
   });
   it('color-083', async () => {
     let p;

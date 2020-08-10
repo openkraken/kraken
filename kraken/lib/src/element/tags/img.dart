@@ -11,9 +11,7 @@ import 'dart:async';
 
 const String IMAGE = 'IMG';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
   RegExp regExp = new RegExp(r"^\d+$");
@@ -21,8 +19,6 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
-
-
   ImageProvider image;
   RenderImage imageBox;
   ImageStream imageStream;
@@ -200,7 +196,6 @@ class ImageElement extends Element {
 
     // The default value for object-position is 50% 50%
     return Alignment.center;
-
   }
 
   double _getAlignmentValueFromString(String value) {

@@ -21,7 +21,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    String whiteSpace = parent?.style['whiteSpace'];
+    String whiteSpace = parent?.style[WHITE_SPACE];
 
     /// The following table summarizes the behavior of the various white-space values:
     //

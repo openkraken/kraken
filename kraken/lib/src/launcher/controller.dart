@@ -38,7 +38,11 @@ class KrakenViewController {
   KrakenNavigationDelegate navigationDelegate;
 
   KrakenViewController(double viewportWidth, double viewportHeight,
-      {this.showPerformanceOverlay, this.enableDebug = false, int contextId, this.rootController, this.navigationDelegate})
+      {this.showPerformanceOverlay,
+      this.enableDebug = false,
+      int contextId,
+      this.rootController,
+      this.navigationDelegate})
       : _contextId = contextId {
     if (this.enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
@@ -156,7 +160,7 @@ class KrakenViewController {
       KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
-      switch(action.navigationType) {
+      switch (action.navigationType) {
         case KrakenNavigationType.reload:
           rootController.reloadWithUrl(action.target);
           break;
@@ -239,9 +243,13 @@ class KrakenController {
       {bool showPerformanceOverlay = false, enableDebug = false}) {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
-        showPerformanceOverlay: showPerformanceOverlay, enableDebug: enableDebug, rootController: this, navigationDelegate: KrakenNavigationDelegate());
+        showPerformanceOverlay: showPerformanceOverlay,
+        enableDebug: enableDebug,
+        rootController: this,
+        navigationDelegate: KrakenNavigationDelegate());
     _module = KrakenModuleController();
-    assert(!_controllerMap.containsKey(_view.contextId), "found exist contextId of KrakenController, contextId: ${_view.contextId}");
+    assert(!_controllerMap.containsKey(_view.contextId),
+        "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
     assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
@@ -316,7 +324,8 @@ class KrakenController {
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
     // TODO native public API need to support KrakenViewController
-    String bundleURL = _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
+    String bundleURL =
+        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
     _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
   }
 
