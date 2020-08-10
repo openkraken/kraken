@@ -171,19 +171,10 @@ class Element extends Node
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
-    // Opacity
-    renderObject = initRenderOpacity(renderObject, style);
-
-    // Content Visibility
-    renderObject = initRenderContentVisibility(renderObject, style);
-
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
-
-    // Visibility
-    renderObject = initRenderVisibility(renderObject, style);
 
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
