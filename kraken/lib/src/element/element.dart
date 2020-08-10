@@ -126,9 +126,9 @@ class Element extends Node
 
   // Horizontal border dimension (left + right)
   double get cropBorderWidth {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.borderEdge != null) {
       return renderIntrinsicBox.borderEdge.horizontal;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+    } else if (renderLayoutBox != null && renderLayoutBox.borderEdge != null) {
       return renderLayoutBox.borderEdge.horizontal;
     }
     return 0.0;
@@ -136,9 +136,9 @@ class Element extends Node
 
   // Vertical border dimension (top + bottom)
   double get cropBorderHeight {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
+    if (renderIntrinsicBox != null && renderIntrinsicBox.borderEdge != null) {
       return renderIntrinsicBox.borderEdge.vertical;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
+    } else if (renderLayoutBox != null && renderLayoutBox.borderEdge != null) {
       return renderLayoutBox.borderEdge.vertical;
     }
     return 0.0;
