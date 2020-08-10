@@ -32,7 +32,7 @@ class CSSPosition {
     } else if (split.length == 2) {
       parsed = Alignment(_getValueX(split.first), _getValueY(split.last));
     }
-    return parsed; 
+    return parsed;
   }
 
   static double _gatValuePercentage(String input) {

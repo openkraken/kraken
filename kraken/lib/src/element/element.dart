@@ -182,25 +182,14 @@ class Element extends Node
 
     // Init border and background
     initRenderDecoratedBox(_getRenderBoxModel(), style);
-    // BoxModel Border
-//    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
 
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-
-    // Opacity
-    renderObject = initRenderOpacity(renderObject, style);
-
-    // Content Visibility
-    renderObject = initRenderContentVisibility(renderObject, style);
 
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
-
-    // Visibility
-    renderObject = initRenderVisibility(renderObject, style);
 
     // BoxModel Margin
     renderObject = initRenderMargin(renderObject, style);
@@ -505,7 +494,7 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
-          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
         }
         if (style.contains(TOP)) {
           positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
@@ -556,24 +545,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
     if (display.endsWith(FLEX)) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == NONE ||
-        display == INLINE ||
-        display == INLINE_BLOCK ||
-        display == BLOCK) {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -797,7 +775,7 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
@@ -827,49 +805,47 @@ class Element extends Node
         _styleOffsetChangedListener(property, original, present);
         break;
 
-      case 'flexDirection':
-      case 'flexWrap':
-      case 'justifyContent':
-      case 'alignItems':
-      case 'alignSelf':
-      case 'alignContent':
-      case 'textAlign':
+      case FLEX_FLOW:
+      case FLEX_DIRECTION:
+      case FLEX_WRAP:
+      case ALIGN_SELF:
+      case ALIGN_CONTENT:
+      case ALIGN_ITEMS:
+      case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
-      case 'flexFlow':
-      case 'flexGrow':
-      case 'flexShrink':
-      case 'flexBasis':
-      case 'flex':
-      case 'alignItems':
+      case FLEX:
+      case FLEX_GROW:
+      case FLEX_SHRINK:
+      case FLEX_BASIS:
         _styleFlexItemChangedListener(property, original, present);
         break;
 
-      case 'textAlign':
+      case TEXT_ALIGN:
         _styleTextAlignChangedListener(property, original, present);
         break;
 
-      case 'padding':
-      case 'paddingLeft':
-      case 'paddingTop':
-      case 'paddingRight':
-      case 'paddingBottom':
+      case PADDING:
+      case PADDING_TOP:
+      case PADDING_RIGHT:
+      case PADDING_BOTTOM:
+      case PADDING_LEFT:
         _stylePaddingChangedListener(property, original, present);
         break;
 
-      case 'width':
-      case 'minWidth':
-      case 'maxWidth':
-      case 'height':
-      case 'minHeight':
-      case 'maxHeight':
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
         _styleSizeChangedListener(property, original, present);
         break;
 
-      case 'overflow':
-      case 'overflowX':
-      case 'overflowY':
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
         _styleOverflowChangedListener(property, original, present);
         break;
 
@@ -1404,8 +1380,8 @@ Element findContainingBlock(Element element) {
   Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION] != '';
-    bool hasTransform = _el.style[TRANSFORM] != '';
+    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION].isNotEmpty;
+    bool hasTransform = _el.style[TRANSFORM].isNotEmpty;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
@@ -1420,7 +1396,7 @@ Element findScrollContainer(Element element) {
   Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
-    List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);
+    List<CSSOverflowType> overflow = getOverflowTypes(_el.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
@@ -1437,7 +1413,7 @@ List<Element> findStickyChildren(Element element) {
   List<Element> result = [];
 
   element.children.forEach((Element child) {
-    List<CSSOverflowType> overflow = getOverflowFromStyle(child.style);
+    List<CSSOverflowType> overflow = getOverflowTypes(child.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
@@ -1504,7 +1480,7 @@ void setPositionedChildParentData(
   }
   parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

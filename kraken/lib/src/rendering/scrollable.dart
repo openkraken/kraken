@@ -215,7 +215,7 @@ mixin RenderOverflowMixin on RenderBox {
     _enableScrollY = value;
   }
 
-  Size _contentSize;
+  Size _scrollableSize;
 
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
   ViewportOffset _scrollOffsetX;
@@ -265,16 +265,16 @@ mixin RenderOverflowMixin on RenderBox {
 
   void _setUpScrollX() {
     _scrollOffsetX.applyViewportDimension(size.width);
-    _scrollOffsetX.applyContentDimensions(0.0, _contentSize.width - size.width);
+    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - size.width);
   }
 
   void _setUpScrollY() {
     _scrollOffsetY.applyViewportDimension(size.height);
-    _scrollOffsetY.applyContentDimensions(0.0, _contentSize.height - size.height);
+    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - size.height);
   }
 
-  void setUpOverflowScroller(Size contentSize) {
-    _contentSize = contentSize;
+  void setUpOverflowScroller(Size scrollableSize) {
+    _scrollableSize = scrollableSize;
     if (_clipX && _scrollOffsetX != null) {
       _setUpScrollX();
     }

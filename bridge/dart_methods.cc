@@ -12,6 +12,15 @@ namespace kraken {
 std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
 std::shared_ptr<DartMethodPointer> getDartMethod() {
+  std::__thread_id currentThread = std::this_thread::get_id();
+  // Dart methods can only invoked from Flutter UI threads. Javascript Debugger like Safari Debugger can invoke
+  // Javascript methods from debugger thread and will crash the app.
+  // @TODO: implement task loops for async method call.
+  if (currentThread != getUIThreadId()) {
+    // return empty struct to stop further behavior.
+    return std::make_shared<DartMethodPointer>();
+  }
+
   return methodPointer;
 }
 

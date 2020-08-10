@@ -11,7 +11,7 @@ mixin CSSComputedMixin on RenderBox {
     double cropWidth = 0;
     Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId, elementManager);
+    String display = getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -38,7 +38,7 @@ mixin CSSComputedMixin on RenderBox {
         }
         if (child is Element) {
           CSSStyleDeclaration style = child.style;
-          String display = _getElementRealDisplayValue(child.targetId, elementManager);
+          String display = getElementRealDisplayValue(child.targetId, elementManager);
           if (style.contains(WIDTH) && display != INLINE) {
             width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
             cropPaddingBorder(child);
@@ -60,7 +60,7 @@ mixin CSSComputedMixin on RenderBox {
     double cropWidth = 0;
     Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId, elementManager);
+    String display = getElementRealDisplayValue(targetId, elementManager);
 
     double width = CSSLength.toDisplayPortValue(style[WIDTH]);
     double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
@@ -99,7 +99,7 @@ mixin CSSComputedMixin on RenderBox {
             }
             if (child is Element) {
               CSSStyleDeclaration style = child.style;
-              String display = _getElementRealDisplayValue(child.targetId, elementManager);
+              String display = getElementRealDisplayValue(child.targetId, elementManager);
 
               // Set width of element according to parent display
               if (display != INLINE) {
@@ -146,7 +146,7 @@ mixin CSSComputedMixin on RenderBox {
   double getElementComputedHeight(int targetId, ElementManager elementManager) {
     Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = _getElementRealDisplayValue(targetId, elementManager);
+    String display = getElementRealDisplayValue(targetId, elementManager);
     double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
     double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
     double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
@@ -213,12 +213,9 @@ mixin CSSComputedMixin on RenderBox {
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
     bool isFlex = style[DISPLAY].endsWith(FLEX);
-    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) ||
-      style[FLEX_DIRECTION] == ROW;
-    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
-      style[ALIGN_ITEMS] == STRETCH;
-    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
-        style[FLEX_WRAP] != WRAP_REVERSE;
+    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) || style[FLEX_DIRECTION] == ROW;
+    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) || style[ALIGN_ITEMS] == STRETCH;
+    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP && style[FLEX_WRAP] != WRAP_REVERSE;
     bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
 
     if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
@@ -230,7 +227,7 @@ mixin CSSComputedMixin on RenderBox {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String _getElementRealDisplayValue(int targetId, ElementManager elementManager) {
+  static String getElementRealDisplayValue(int targetId, ElementManager elementManager) {
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
     String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])

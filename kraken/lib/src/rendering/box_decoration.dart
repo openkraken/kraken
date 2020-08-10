@@ -9,7 +9,7 @@ import 'package:kraken/painting.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
 
-  TransitionDecoration oldDecoration;
+  CSSBoxDecoration oldDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
   BoxPainter _painter;
