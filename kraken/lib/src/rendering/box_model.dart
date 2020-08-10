@@ -179,6 +179,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    paintDecoration(context, offset, _painter, decoration);
     paintOverflow(context, offset, callback);
   }
 
@@ -242,43 +243,6 @@ class RenderBoxModel extends RenderBox with
   @override
   bool hitTestSelf(Offset position) {
     return decoration.hitTest(size, position, textDirection: configuration.textDirection);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(size.width != null);
-    assert(size.height != null);
-    _painter ??= decoration.createBoxPainter(markNeedsPaint);
-    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
-    if (position == DecorationPosition.background) {
-      int debugSaveCount;
-      assert(() {
-        debugSaveCount = context.canvas.getSaveCount();
-        return true;
-      }());
-      _painter.paint(context.canvas, offset, filledConfiguration);
-      assert(() {
-        if (debugSaveCount != context.canvas.getSaveCount()) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
-            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
-              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-              'Every call to save() or saveLayer() must be matched by a call to restore().'),
-            DiagnosticsProperty<Decoration>('The decoration was', decoration,
-              style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
-          ]);
-        }
-        return true;
-      }());
-      if (decoration.isComplex) context.setIsComplexHint();
-    }
-    Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
-    super.paint(context, contentOffset);
-    if (position == DecorationPosition.foreground) {
-      _painter.paint(context.canvas, offset, filledConfiguration);
-      if (decoration.isComplex) context.setIsComplexHint();
-    }
   }
 
   @override

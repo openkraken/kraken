@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
 
@@ -83,5 +84,39 @@ mixin RenderBoxDecorationMixin on RenderBox {
   Size wrapBorderSize(Size innerSize) {
     return Size(borderLeft + innerSize.width + borderRight,
       borderTop + innerSize.height + borderBottom);
+  }
+
+  void paintDecoration(PaintingContext context, Offset offset, BoxPainter _painter, Decoration decoration) {
+    _painter ??= decoration.createBoxPainter(markNeedsPaint);
+    final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
+    if (position == DecorationPosition.background) {
+      int debugSaveCount;
+      assert(() {
+        debugSaveCount = context.canvas.getSaveCount();
+        return true;
+      }());
+      _painter.paint(context.canvas, offset, filledConfiguration);
+      assert(() {
+        if (debugSaveCount != context.canvas.getSaveCount()) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
+              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+              'Every call to save() or saveLayer() must be matched by a call to restore().'),
+            DiagnosticsProperty<Decoration>('The decoration was', decoration,
+              style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
+        }
+        return true;
+      }());
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
+    Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    super.paint(context, contentOffset);
+    if (position == DecorationPosition.foreground) {
+      _painter.paint(context.canvas, offset, filledConfiguration);
+      if (decoration.isComplex) context.setIsComplexHint();
+    }
   }
 }
