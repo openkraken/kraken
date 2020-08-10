@@ -91,9 +91,9 @@ const String FLEX = 'flex';
 const String FLEX_GROW = 'flexGrow';
 const String FLEX_SHRINK = 'flexShrink';
 const String FLEX_BASIS = 'flexBasis';
+const String FLEX_FLOW = 'flexFlow';
 const String FLEX_DIRECTION = 'flexDirection';
 const String FLEX_WRAP = 'flexWrap';
-const String FLEX_FLOW = 'flexFlow';
 
 const String JUSTIFY_CONTENT = 'justifyContent';
 const String TEXT_ALIGN = 'textAlign';
@@ -110,24 +110,16 @@ const String TRANSITION_DURATION = 'transitionDuration';
 const String TRANSITION_TIMING_FUNCTION = 'transitionTimingFunction';
 const String TRANSITION_DELAY = 'transitionDelay';
 
-const String ANIMATION = 'animation';
-const String ANIMATION_NAME = 'animationName';
-const String ANIMATION_DURATION = 'animationDuration';
-const String ANIMATION_TIMING_FUNCTION = 'animationTimingFunction';
-const String ANIMATION_DELAY = 'animationDelay';
-const String ANIMATION_ITERATION_COUNT = 'animationIterationCount';
-const String ANIMATION_DIRECTION = 'animationDirection';
-const String ANIMATION_FILL_MODE = 'animationFillMode';
-const String ANIMATION_PLAY_STATE = 'animationPlayState';
-
-
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
 
-// values
+// Values keywords
+const String INITIAL = 'initial';
 const String NORMAL = 'normal';
+const String NONE = 'none';
 
 // Border
+const String SOLID = 'solid';
 const String THIN = 'thin'; // A thin border.
 const String MEDIUM = 'medium'; // A medium border.
 const String THICK = 'thick'; // A thick border.
@@ -135,16 +127,13 @@ const String THICK = 'thick'; // A thick border.
 // Font absolute size keyword: [ xx-small | x-small | small | medium | large | x-large | xx-large ]
 const String XX_SMALL = 'xx-small';
 const String X_SMALL = 'x-small';
-const String SMALL =  'small';
-const String LARGE =  'large';
-const String X_LARGE =  'x-large';
-const String XX_LARGE =  'xx-large';
+const String SMALL = 'small';
+const String LARGE = 'large';
+const String X_LARGE = 'x-large';
+const String XX_LARGE = 'xx-large';
 // Font relative size keyword
-const String SMALLER =  'smaller';
-const String LARGER =  'larger';
-
-const String SOLID = 'solid';
-const String NONE = 'none';
+const String SMALLER = 'smaller';
+const String LARGER = 'larger';
 
 // Display
 const String INLINE = 'inline';
@@ -184,7 +173,7 @@ const String LINEAR = 'linear';
 const String EASE = 'ease';
 const String EASE_IN = 'ease-in';
 const String EASE_OUT = 'ease-out';
-const String EASE_IN_OUT= 'ease-in-out';
+const String EASE_IN_OUT = 'ease-in-out';
 const String STEP_START = 'step-start';
 const String STEP_END = 'step-end';
 

@@ -10,12 +10,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
 class _RunMetrics {
-  _RunMetrics(
-    this.mainAxisExtent,
-    this.crossAxisExtent,
-    this.baselineExtent,
-    this.childCount
-  );
+  _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.baselineExtent, this.childCount);
 
   final double mainAxisExtent;
   final double crossAxisExtent;
@@ -503,7 +498,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   double _getCrossAxisExtent(RenderBox child) {
     CSSStyleDeclaration childStyle = _getChildStyle(child);
-    double lineHeight = CSSFont.getLineHeight(childStyle);
+    double lineHeight = CSSText.getLineHeight(childStyle);
     double margin = 0;
 
     if (child is RenderElementBoundary) {
@@ -513,8 +508,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
     switch (direction) {
       case Axis.horizontal:
-        return lineHeight != null ? math.max(lineHeight + margin, child.size.height) :
-          child.size.height;
+        return lineHeight != null ? math.max(lineHeight + margin, child.size.height) : child.size.height;
       case Axis.vertical:
         return child.size.width;
     }
@@ -679,7 +673,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // Distance from top to baseline of child
         double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
-        double lineHeight = CSSFont.getLineHeight(childStyle);
+        double lineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
@@ -773,6 +767,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     double crossAxisOffset = flipCrossAxis ? containerCrossAxisExtent - runLeadingSpace : runLeadingSpace;
 
     child = firstChild;
+
     /// Set offset of children
     for (int i = 0; i < runCount; ++i) {
       final _RunMetrics metrics = runMetrics[i];
@@ -814,7 +809,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
-      double lineBoxHeight = CSSFont.getLineHeight(style);
+      double lineBoxHeight = CSSText.getLineHeight(style);
       if (lineBoxHeight != null) {
         lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
       }
@@ -864,7 +859,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         CSSStyleDeclaration childStyle = _getChildStyle(child);
 
         // Line height of child
-        double childLineHeight = CSSFont.getLineHeight(childStyle);
+        double childLineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {
@@ -879,7 +874,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
           VerticalAlign verticalAlign = getVerticalAlign(childStyle);
 
-          switch(verticalAlign) {
+          switch (verticalAlign) {
             case VerticalAlign.baseline:
               childLineExtent = lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
@@ -887,20 +882,18 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
               childLineExtent = childLeading / 2;
               break;
             case VerticalAlign.bottom:
-              childLineExtent = (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent)
-                - child.size.height - childLeading / 2;
+              childLineExtent =
+                  (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent) - child.size.height - childLeading / 2;
               break;
             // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
             // currently flutter lack the api to caculate x-height of glyph
 //            case VerticalAlign.middle:
 //              break;
-            }
+          }
         }
 
-        Offset relativeOffset = _getOffset(
-          childMainPosition + paddingLeft,
-          crossAxisOffset + childLineExtent + paddingTop
-        );
+        Offset relativeOffset =
+            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childLineExtent + paddingTop);
 
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
@@ -985,38 +978,30 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-                "Unfortunately, this object's geometry is not known at this time, "
-                    'probably because it has never been laid out. '
-                    'This means it cannot be accurately hit-tested.'
-            ),
-            ErrorHint(
-                'If you are trying '
-                    'to perform a hit test during the layout phase itself, make sure '
-                    "you only hit test nodes that have completed layout (e.g. the node's "
-                    'children, after their layout() method has been called).'
-            ),
+            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
+                'probably because it has never been laid out. '
+                'This means it cannot be accurately hit-tested.'),
+            ErrorHint('If you are trying '
+                'to perform a hit test during the layout phase itself, make sure '
+                "you only hit test nodes that have completed layout (e.g. the node's "
+                'children, after their layout() method has been called).'),
           ]);
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot hit test a render box with no size.'),
           describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-              'Although this node is not marked as needing layout, '
-                  'its size is not set.'
-          ),
-          ErrorHint(
-              'A RenderBox object must have an '
-                  'explicit size before it can be hit-tested. Make sure '
-                  'that the RenderBox in question sets its size during layout.'
-          ),
+          ErrorDescription('Although this node is not marked as needing layout, '
+              'its size is not set.'),
+          ErrorHint('A RenderBox object must have an '
+              'explicit size before it can be hit-tested. Make sure '
+              'that the RenderBox in question sets its size during layout.'),
         ]);
       }
       return true;
@@ -1087,7 +1072,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     }
     parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
     parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']);
+    parentData.zIndex = CSSLength.toInt(style['zIndex']) ?? 0;
 
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

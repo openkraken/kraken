@@ -32,7 +32,6 @@ class CSSInteger implements CSSValue<int> {
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#numbers
 class CSSNumber {
-
   static double parseNumber(String input) {
     return double.tryParse(input);
   }

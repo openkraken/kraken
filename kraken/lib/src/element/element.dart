@@ -216,11 +216,11 @@ class Element extends Node
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject()) -
+              renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -488,7 +488,7 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
-          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
         }
         if (style.contains(TOP)) {
           positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
@@ -539,24 +539,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
     if (display.endsWith(FLEX)) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == NONE ||
-        display == INLINE ||
-        display == INLINE_BLOCK ||
-        display == BLOCK) {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -780,7 +769,7 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
@@ -810,17 +799,17 @@ class Element extends Node
         _styleOffsetChangedListener(property, original, present);
         break;
 
+      case FLEX_FLOW:
       case FLEX_DIRECTION:
       case FLEX_WRAP:
-      case JUSTIFY_CONTENT:
       case ALIGN_SELF:
       case ALIGN_CONTENT:
       case ALIGN_ITEMS:
+      case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
       case FLEX:
-      case FLEX_FLOW:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
@@ -1069,7 +1058,8 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(style, property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
+    updateBackground(
+        style, property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(style, transitionMap);
   }
@@ -1481,7 +1471,7 @@ void setPositionedChildParentData(
   }
   parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

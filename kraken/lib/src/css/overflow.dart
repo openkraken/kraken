@@ -15,8 +15,8 @@ enum CSSOverflowType {
 }
 
 List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
-  CSSOverflowType overflowX  = _getOverflowType(style[OVERFLOW_X]);
-  CSSOverflowType overflowY  = _getOverflowType(style[OVERFLOW_Y]);
+  CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
+  CSSOverflowType overflowY = _getOverflowType(style[OVERFLOW_Y]);
 
   // Apply overflow special rules from w3c.
   if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
@@ -285,7 +285,7 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
     if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
       result.add(BoxHitTestEntry(this, position));
       return true;
@@ -295,7 +295,7 @@ class CSSOverflowDirectionBox extends RenderSizedOverflowBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     return child?.hitTest(result, position: position);
   }
 }

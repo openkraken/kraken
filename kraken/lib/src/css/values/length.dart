@@ -5,7 +5,7 @@
 
 import 'dart:ui';
 
-import 'value.dart';
+import 'package:kraken/css.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -50,9 +50,9 @@ class CSSLength implements CSSValue<double> {
     } else if (value is int) {
       return value;
     } else if (value is String) {
-      return int.tryParse(value) ?? 0;
+      return int.tryParse(value);
     } else {
-      return 0;
+      return null;
     }
   }
 

@@ -112,6 +112,12 @@ class CSSStyleDeclaration {
         case FONT:
           CSSStyleProperty.removeShorthandFont(_cssProperties);
           break;
+        case FLEX:
+          CSSStyleProperty.removeShorthandFlex(_cssProperties);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.removeShorthandFlexFlow(_cssProperties);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -124,6 +130,9 @@ class CSSStyleDeclaration {
           break;
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.removeShorthandTextDecoration(_cssProperties);
           break;
       }
       _cssProperties.remove(propertyName);
@@ -177,8 +186,7 @@ class CSSStyleDeclaration {
         case MARGIN_RIGHT:
         case MARGIN_BOTTOM:
           // Validation length type and keyword type
-          if (!CSSLength.isLength(normalizedValue) &&
-            !CSSLength.isKeyword(normalizedValue)) {
+          if (!CSSLength.isLength(normalizedValue) && !CSSLength.isKeyword(normalizedValue)) {
             return;
           }
           break;
@@ -212,6 +220,12 @@ class CSSStyleDeclaration {
         case FONT:
           CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
           break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(_cssProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(_cssProperties, normalizedValue);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -224,6 +238,9 @@ class CSSStyleDeclaration {
           break;
         case TRANSITION:
           CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(_cssProperties, normalizedValue);
           break;
       }
 
