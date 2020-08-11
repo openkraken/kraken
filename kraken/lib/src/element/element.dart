@@ -138,7 +138,7 @@ class Element extends Node
     }
 
     // init box sizing
-    initRenderBoxSizing(getRenderBoxModel(), style);
+    initRenderBoxSizing(getRenderBoxModel(), style, transitionMap);
 
     // Init overflow
     initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
@@ -963,8 +963,7 @@ class Element extends Node
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    // Update constrained box.
-    updateBoxSize(getRenderBoxModel(), style);
+    updateBoxSize(getRenderBoxModel(), style, transitionMap);
 
     setElementSizeType();
 

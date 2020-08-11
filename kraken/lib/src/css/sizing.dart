@@ -21,114 +21,108 @@ mixin CSSSizingMixin {
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
 
-//  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-//    if (renderConstrainedBox != null) {
-//      CSSTransition allTransition,
-//          widthTransition,
-//          heightTransition,
-//          minWidthTransition,
-//          maxWidthTransition,
-//          minHeightTransition,
-//          maxHeightTransition;
-//      if (transitionMap != null) {
-//        allTransition = transitionMap['all'];
-//        widthTransition = transitionMap['width'];
-//        heightTransition = transitionMap['height'];
-//        minWidthTransition = transitionMap['min-width'];
-//        maxWidthTransition = transitionMap['max-width'];
-//        minHeightTransition = transitionMap['min-height'];
-//        maxHeightTransition = transitionMap['max-height'];
-//      }
-//
-//      if (allTransition != null ||
-//          widthTransition != null ||
-//          heightTransition != null ||
-//          minWidthTransition != null ||
-//          maxWidthTransition != null ||
-//          minHeightTransition != null ||
-//          maxHeightTransition != null) {
-//        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
-//        double diffHeight = (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
-//        double diffMinWidth = (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
-//        double diffMaxWidth = (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
-//        double diffMinHeight = (newConstraints.minHeight ?? 0.0) - (oldConstraints.minHeight ?? 0.0);
-//        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) - (oldConstraints.maxHeight ?? 0.0);
-//
-//        CSSSizedConstraints progressConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-//            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
-//
-//        CSSSizedConstraints baseConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-//            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
-//
-//        allTransition?.addProgressListener((progress) {
-//          if (widthTransition == null) {
-//            progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
-//          }
-//          if (heightTransition == null) {
-//            progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
-//          }
-//          if (minWidthTransition == null) {
-//            progressConstraints.minWidth = diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
-//          }
-//          if (maxWidthTransition == null) {
-//            progressConstraints.maxWidth = diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
-//          }
-//          if (minHeightTransition == null) {
-//            progressConstraints.minHeight = diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
-//          }
-//          if (maxHeightTransition == null) {
-//            progressConstraints.maxHeight = diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
-//          }
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        widthTransition?.addProgressListener((progress) {
-//          progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        heightTransition?.addProgressListener((progress) {
-//          progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        minHeightTransition?.addProgressListener((progress) {
-//          progressConstraints.minHeight = diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        minWidthTransition?.addProgressListener((progress) {
-//          progressConstraints.minWidth = diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        maxHeightTransition?.addProgressListener((progress) {
-//          progressConstraints.maxHeight = diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//        maxWidthTransition?.addProgressListener((progress) {
-//          progressConstraints.maxWidth = diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
-//          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
-//        });
-//      } else {
-//        renderConstrainedBox.additionalConstraints = newConstraints.toBoxConstraints();
-//      }
-//
-//      // Remove inline element dimension
-//      if (style[DISPLAY] == INLINE) {
-//        renderConstrainedBox.additionalConstraints = BoxConstraints();
-//      }
-//
-//      oldConstraints = newConstraints;
-//    }
-//  }
-
-  void initRenderBoxSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    updateBoxSize(renderBoxModel, style);
+  void initRenderBoxSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+    updateBoxSize(renderBoxModel, style, transitionMap);
   }
 
-  void updateBoxSize(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
+  void updateBoxSize(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     double width = CSSLength.toDisplayPortValue(style[WIDTH]);
     double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
     double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
     double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
     double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
     double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
+
+    if (transitionMap != null) {
+      CSSTransition allTransition,
+          widthTransition,
+          heightTransition,
+          minWidthTransition,
+          maxWidthTransition,
+          minHeightTransition,
+          maxHeightTransition;
+
+      allTransition = transitionMap['all'];
+      widthTransition = transitionMap['width'];
+      heightTransition = transitionMap['height'];
+      minWidthTransition = transitionMap['min-width'];
+      maxWidthTransition = transitionMap['max-width'];
+      minHeightTransition = transitionMap['min-height'];
+      maxHeightTransition = transitionMap['max-height'];
+
+      if (allTransition != null ||
+          widthTransition != null ||
+          heightTransition != null ||
+          minWidthTransition != null ||
+          maxWidthTransition != null ||
+          minHeightTransition != null ||
+          maxHeightTransition != null) {
+        double diffWidth = (width ?? 0.0) - (renderBoxModel.width ?? 0.0);
+        double diffHeight = (height ?? 0.0) - (renderBoxModel.height ?? 0.0);
+        double diffMinWidth = (minWidth ?? 0.0) - (renderBoxModel.minWidth ?? 0.0);
+        double diffMaxWidth = (maxWidth ?? 0.0) - (renderBoxModel.maxWidth ?? 0.0);
+        double diffMinHeight = (minHeight ?? 0.0) - (renderBoxModel.minHeight ?? 0.0);
+        double diffMaxHeight = (maxHeight ?? 0.0) - (renderBoxModel.maxHeight ?? 0.0);
+
+        allTransition?.addProgressListener((progress) {
+          double newWidth;
+          double newHeight;
+          double newMinWidth;
+          double newMaxWidth;
+          double newMinHeight;
+          double newMaxHeight;
+
+          if (widthTransition == null) {
+            newWidth = diffWidth * progress + (renderBoxModel.width ?? 0.0);
+          }
+          if (heightTransition == null) {
+            newHeight = diffHeight * progress + (renderBoxModel.height ?? 0.0);
+          }
+          if (minWidthTransition == null) {
+            newMinWidth = diffMinWidth * progress + (renderBoxModel.minWidth ?? 0.0);
+          }
+          if (maxWidthTransition == null) {
+            newMaxWidth = diffMaxWidth * progress + (renderBoxModel.maxWidth ?? double.infinity);
+          }
+          if (minHeightTransition == null) {
+            newMinHeight = diffMinHeight * progress + (renderBoxModel.minHeight ?? 0.0);
+          }
+          if (maxHeightTransition == null) {
+            newMaxHeight = diffMaxHeight * progress + (renderBoxModel.maxHeight ?? double.infinity);
+          }
+          renderBoxModel.width = newWidth;
+          renderBoxModel.height = newHeight;
+          renderBoxModel.minWidth = newMinWidth;
+          renderBoxModel.maxWidth = newMaxWidth;
+          renderBoxModel.minHeight = newMinHeight;
+          renderBoxModel.maxHeight = newMaxHeight;
+        });
+        widthTransition?.addProgressListener((progress) {
+          double newWidth = diffWidth * progress + (renderBoxModel.width ?? 0.0);
+          renderBoxModel.width = newWidth;
+        });
+        heightTransition?.addProgressListener((progress) {
+          double newHeight = diffHeight * progress + (renderBoxModel.height ?? 0.0);
+          renderBoxModel.height = newHeight;
+        });
+        minHeightTransition?.addProgressListener((progress) {
+          double newMinHeight = diffWidth * progress + (renderBoxModel.minHeight ?? 0.0);
+          renderBoxModel.minHeight = newMinHeight;
+        });
+        minWidthTransition?.addProgressListener((progress) {
+          double newMinWidth = diffWidth * progress + (renderBoxModel.minWidth ?? 0.0);
+          renderBoxModel.minWidth = newMinWidth;
+        });
+        maxHeightTransition?.addProgressListener((progress) {
+          double newMaxHeight = diffWidth * progress + (renderBoxModel.maxHeight ?? double.infinity);
+          renderBoxModel.maxHeight = newMaxHeight;
+        });
+        maxWidthTransition?.addProgressListener((progress) {
+          double newMaxWidth = diffWidth * progress + (renderBoxModel.maxWidth ?? double.infinity);
+          renderBoxModel.maxWidth = newMaxWidth;
+        });
+      }
+    }
 
     renderBoxModel.width = width;
     renderBoxModel.height = height;
