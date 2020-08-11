@@ -134,9 +134,13 @@ export class Node extends EventTarget {
       }
     }
   }
+
   notifyNodeRemoved(insertionNode: Node): void {}
-  notifyChildRemoved(): void {} 
+
+  notifyChildRemoved(): void {}
+
   notifyNodeInsert(insertionNode: Node): void {}
+
   notifyChildInsert(): void {}
 
   /**

@@ -1,6 +1,6 @@
 import { BODY } from './events/event-target';
 import { Node, NodeType, traverseNode } from './node';
-import { document } from './document';
+import { addElementById, removeElementById } from './document';
 
 import {
   createElement,
@@ -217,10 +217,10 @@ export class Element extends Node {
   }
   private _updateId(oldValue: string | null, newValue: string | null): void {
     if (oldValue) {
-      document.removeElementById(oldValue, this);
+      removeElementById(oldValue, this);
     }
     if (newValue) {
-      document.addElementById(newValue, this);
+      addElementById(newValue, this);
     }
   }
 
