@@ -8,7 +8,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
-
   CSSBoxDecoration oldDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
@@ -41,7 +40,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
     _decoration = value;
     markNeedsPaint();
   }
-  
+
   BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
     if (borderEdge != null) {
       return constraints.deflate(borderEdge);
