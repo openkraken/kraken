@@ -30,7 +30,7 @@ mixin CSSBackgroundMixin {
     if (style[BACKGROUND_IMAGE].isNotEmpty) {
       DecorationImage decorationImage;
       Gradient gradient;
-      List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
+      List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
       // @FIXME: flutter just support one property
       for (CSSFunctionalNotation method in methods) {
         if (method.name == 'url') {
@@ -173,7 +173,7 @@ class CSSBackground {
     }
 
     backgroundImage = DecorationImage(
-        image: CSSUrl(url).computedValue,
+        image: CSSUrl.parseUrl(url),
         repeat: imageRepeat,
         alignment: CSSPosition.parsePosition(style[BACKGROUND_POSITION]),
         fit: boxFit);
@@ -260,8 +260,7 @@ class CSSBackground {
             linearAngle = null;
             start = 1;
           } else if (CSSAngle.isAngle(arg0)) {
-            CSSAngle angle = CSSAngle(arg0);
-            linearAngle = angle.angleValue;
+            linearAngle = CSSAngle.parseAngle(arg0);
             start = 1;
           }
           _applyColorAndStops(start, method.args, colors, stops);
@@ -286,16 +285,16 @@ class CSSBackground {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
             if (positionAndRadius.length >= 1) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
-                radius = CSSPercentage(positionAndRadius[0]).toDouble() * 0.5;
+                radius = CSSPercentage.parsePercentage(positionAndRadius[0]) * 0.5;
                 start = 1;
               }
               if (positionAndRadius.length > 2 && positionAndRadius[1] == 'at') {
                 start = 1;
                 if (CSSPercentage.isPercentage(positionAndRadius[2])) {
-                  atX = CSSPercentage(positionAndRadius[2]).toDouble();
+                  atX = CSSPercentage.parsePercentage(positionAndRadius[2]);
                 }
                 if (positionAndRadius.length == 4 && CSSPercentage.isPercentage(positionAndRadius[3])) {
-                  atY = CSSPercentage(positionAndRadius[3]).toDouble();
+                  atY = CSSPercentage.parsePercentage(positionAndRadius[3]);
                 }
               }
             }
@@ -320,14 +319,14 @@ class CSSBackground {
             int fromIndex = fromAt.indexOf('from');
             int atIndex = fromAt.indexOf('at');
             if (fromIndex != -1 && fromIndex + 1 < fromAt.length) {
-              from = CSSAngle(fromAt[fromIndex + 1]).angleValue;
+              from = CSSAngle.parseAngle(fromAt[fromIndex + 1]);
             }
             if (atIndex != -1) {
               if (atIndex + 1 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 1])) {
-                atX = CSSPercentage(fromAt[atIndex + 1]).toDouble();
+                atX = CSSPercentage.parsePercentage(fromAt[atIndex + 1]);
               }
               if (atIndex + 2 < fromAt.length && CSSPercentage.isPercentage(fromAt[atIndex + 2])) {
-                atY = CSSPercentage(fromAt[atIndex + 2]).toDouble();
+                atY = CSSPercentage.parsePercentage(fromAt[atIndex + 2]);
               }
             }
             start = 1;
@@ -385,9 +384,9 @@ class CSSBackground {
         try {
           for (int i = 1; i < strings.length; i++) {
             if (CSSPercentage.isPercentage(strings[i])) {
-              stop = CSSPercentage(strings[i]).toDouble();
+              stop = CSSPercentage.parsePercentage(strings[i]);
             } else if (CSSAngle.isAngle(strings[i])) {
-              stop = CSSAngle(strings[i]).angleValue / (math.pi * 2);
+              stop = CSSAngle.parseAngle(strings[i]) / (math.pi * 2);
             }
             colorGradients.add(CSSColorStop(CSSColor.parseColor(strings[0]), stop));
           }

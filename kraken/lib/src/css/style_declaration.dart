@@ -62,27 +62,6 @@ class CSSStyleDeclaration {
     return _cssProperties[propertyName] ?? '';
   }
 
-  CSSValue _getCSSValue(String propertyName) {
-    var stringValue = getPropertyValue(propertyName);
-
-    switch (propertyName) {
-      case WIDTH:
-      case HEIGHT:
-        return CSSLength(stringValue);
-
-      // TODO: Add more css properties.
-    }
-
-    return null;
-  }
-
-  /// Returns a computed value.
-  T getComputedValue<T>(String propertyName) {
-    CSSValue cssValue = getComputedValue(propertyName);
-    T computedValue = cssValue.computedValue;
-    return computedValue;
-  }
-
   /// Returns a property name.
   String item(int index) {
     return _cssProperties.keys.elementAt(index);
@@ -299,11 +278,4 @@ class CSSStyleDeclaration {
 
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
-}
-
-// Returns the computed property value.
-T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {
-  assert(style != null);
-  CSSValue cssValue = style._getCSSValue(propertyName);
-  return cssValue?.computedValue;
 }

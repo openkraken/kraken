@@ -274,7 +274,7 @@ class ImageElement extends Element {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
       _removeStreamListener();
-      image = CSSUrl(src, cache: properties['caching']).computedValue;
+      image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
       // Store listeners for remove listener.
       imageListeners = [

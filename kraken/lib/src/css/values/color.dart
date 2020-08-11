@@ -7,8 +7,6 @@ import 'dart:math';
 import 'dart:ui' show Color;
 import 'package:flutter/painting.dart';
 
-import 'value.dart';
-
 /// Only support Basic color keywords and Extended color keywords,
 /// for CSS system colors is not recommended for use after CSS3
 const Map<String, int> _namedColors = {
@@ -176,7 +174,7 @@ final _colorRgbRegExp =
 /// #123456
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
-class CSSColor implements CSSValue<Color> {
+class CSSColor {
   // Use a preprocessed color to cache.
   // Example:
   //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
@@ -288,42 +286,10 @@ class CSSColor implements CSSValue<Color> {
     return parsed;
   }
 
-  final String rawInput;
   Color value;
-
-  CSSColor(this.rawInput);
 
   static const Color transparent = Color(0x00000000);
   static const Color initial = Color(0xFF000000);
-
-  bool _parsed = false;
-  @override
-  void parse() {
-    if (!_parsed) value = CSSColor.parseColor(rawInput);
-    _parsed = true;
-  }
-
-  @override
-  Color get computedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    return value;
-  }
-
-  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
-  @override
-  String get serializedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    var rgb = '${value.red}, ${value.green}, ${value.blue}';
-    if (value.alpha == 255) {
-      return 'rgb($rgb)';
-    } else {
-      return 'rgba($rgb, ${value.opacity})';
-    }
-  }
 }
 
 /// A color in the CIELAB color space.
