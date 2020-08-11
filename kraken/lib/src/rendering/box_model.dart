@@ -166,20 +166,9 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   double getContentWidth() {
     double cropWidth = 0;
     // @FIXME, need to remove elementManager in the future.
-    Node hostNode = elementManager.getEventTargetByTargetId<Node>(targetId);
-    Element hostElement;
-    CSSStyleDeclaration style;
-    String display;
-    if (hostNode is Element) {
-      style = hostNode.style;
-      display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
-      hostElement = hostNode;
-    } else if (hostNode is TextNode) {
-      style = hostNode.parent.style;
-      display = RenderSizingHelper.getElementRealDisplayValue(hostNode.parent.targetId, elementManager);
-      hostElement = hostNode.parentElement;
-    }
-
+    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
+    CSSStyleDeclaration style = hostElement.style;
+    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
     double width = _width;
 
     void cropMargin(Element childNode) {
@@ -239,7 +228,7 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
       case INLINE_FLEX:
         if (style.contains(WIDTH)) {
           width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-          cropPaddingBorder(hostNode);
+          cropPaddingBorder(hostElement);
         } else {
           width = null;
         }
@@ -259,20 +248,9 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   }
 
   double getContentHeight() {
-    Node hostNode = elementManager.getEventTargetByTargetId<Node>(targetId);
-
-    Element hostElement;
-    CSSStyleDeclaration style;
-    String display;
-    if (hostNode is Element) {
-      hostElement = hostNode;
-      style = hostNode.style;
-      display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
-    } else if (hostNode is TextNode) {
-      hostElement = hostNode.parent;
-      style = hostElement.style;
-      display = RenderSizingHelper.getElementRealDisplayValue(hostElement.targetId, elementManager);
-    }
+    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
+    CSSStyleDeclaration style = hostElement.style;
+    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
 
     double height = _height;
     double cropHeight = 0;

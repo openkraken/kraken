@@ -19,12 +19,12 @@ enum WhiteSpace {
   breakSpaces
 }
 
-class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<RenderBox> {
+class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   RenderTextBox(InlineSpan text, {
-    int targetId,
-    CSSStyleDeclaration style,
-    ElementManager elementManager,
-  }) : assert(text != null), super(targetId: targetId, elementManager: elementManager, style: style) {
+    this.targetId,
+    this.style,
+    this.elementManager,
+  }) : assert(text != null) {
     _renderParagraph = RenderParagraph(
       text,
       textDirection: TextDirection.ltr,
@@ -34,6 +34,12 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
   }
 
   RenderParagraph _renderParagraph;
+  int targetId;
+  CSSStyleDeclaration style;
+  ElementManager elementManager;
+
+  BoxSizeType widthSizeType;
+  BoxSizeType heightSizeType;
 
   set text(InlineSpan value) {
     assert(_renderParagraph != null);
@@ -68,7 +74,6 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
 
   @override
   void performLayout() {
-    beforeLayout();
     if (child != null) {
       BoxConstraints boxConstraints;
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
@@ -89,7 +94,6 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
     } else {
       performResize();
     }
-    didLayout();
   }
 
   @override
@@ -99,10 +103,8 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    basePaint(context, offset, (context, offset) {
-      if (child != null) {
-        context.paintChild(child, offset);
-      }
-    });
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
   }
 }
