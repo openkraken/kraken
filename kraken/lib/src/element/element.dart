@@ -104,45 +104,6 @@ class Element extends Node
   double get cropMarginWidth => renderMargin.margin.horizontal;
   // Vertical margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
-  // Horizontal padding dimension (left + right)
-  double get cropPaddingWidth {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.horizontal;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.horizontal;
-    }
-    return 0.0;
-  }
-
-  // Vertical padding dimension (top + bottom)
-  double get cropPaddingHeight {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.vertical;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.vertical;
-    }
-    return 0.0;
-  }
-
-  // Horizontal border dimension (left + right)
-  double get cropBorderWidth {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.borderEdge != null) {
-      return renderIntrinsicBox.borderEdge.horizontal;
-    } else if (renderLayoutBox != null && renderLayoutBox.borderEdge != null) {
-      return renderLayoutBox.borderEdge.horizontal;
-    }
-    return 0.0;
-  }
-
-  // Vertical border dimension (top + bottom)
-  double get cropBorderHeight {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.borderEdge != null) {
-      return renderIntrinsicBox.borderEdge.vertical;
-    } else if (renderLayoutBox != null && renderLayoutBox.borderEdge != null) {
-      return renderLayoutBox.borderEdge.vertical;
-    }
-    return 0.0;
-  }
 
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
@@ -178,10 +139,10 @@ class Element extends Node
     }
 
     // Init overflow
-    initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+    initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
 
     // Init border and background
-    initRenderDecoratedBox(_getRenderBoxModel(), style);
+    initRenderDecoratedBox(getRenderBoxModel(), style);
 
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
@@ -995,11 +956,11 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+    updateRenderOverflow(getRenderBoxModel(), style, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(_getRenderBoxModel(), style, transitionMap);
+    updateRenderPadding(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
@@ -1060,14 +1021,14 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(_getRenderBoxModel(), style, property, present, renderConstrainedBox, targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, renderConstrainedBox, targetId);
     // decoratedBox may contains background and border
-    updateRenderDecoratedBox(_getRenderBoxModel(), style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
-    updateRenderDecoratedBox(_getRenderBoxModel(), style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
@@ -1115,7 +1076,7 @@ class Element extends Node
     updateChildNodesStyle();
   }
 
-  RenderBoxModel _getRenderBoxModel() {
+  RenderBoxModel getRenderBoxModel() {
     if (isIntrinsicBox) {
       return renderIntrinsicBox;
     } else {
@@ -1187,21 +1148,23 @@ class Element extends Node
         elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
-        // TODO: implement this after border has supported in renderLayoutBox
-        //  return renderLayoutBox.borderLeft();
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderLeft;
         break;
       case 'clientTop':
-        // TODO: implement this after border has supported in renderLayoutBox
-        // return renderLayoutBox.borderTop;
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderTop;
         break;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
         return getScrollLeft();
       case 'scrollHeight':
-        return getScrollHeight(_getRenderBoxModel());
+        return getScrollHeight(getRenderBoxModel());
       case 'scrollWidth':
-        return getScrollWidth(_getRenderBoxModel());
+        return getScrollWidth(getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
       case 'click':
@@ -1283,7 +1246,7 @@ class Element extends Node
     super.addEventListener(eventName, _eventResponder);
 
     // bind pointer responder.
-    addEventResponder(_getRenderBoxModel());
+    addEventResponder(getRenderBoxModel());
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
@@ -1296,7 +1259,7 @@ class Element extends Node
     super.removeEventListener(eventName, _eventResponder);
 
     // Remove pointer responder.
-    removeEventResponder(_getRenderBoxModel());
+    removeEventResponder(getRenderBoxModel());
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {

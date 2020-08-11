@@ -179,10 +179,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
-    
+
     List<CSSFunctionalNotation> methods = CSSFunction(style[BACKGROUND_IMAGE]).computedValue;
     for (CSSFunctionalNotation method in methods) {
-      if (method.name == 'url') {
+      if (method.name == URL) {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
         gradient = CSSBackground.getBackgroundGradient(method);

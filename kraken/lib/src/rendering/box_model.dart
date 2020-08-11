@@ -155,11 +155,15 @@ class RenderBoxModel extends RenderBox with
     _debugHasBoxLayout = true;
     _contentConstraints = super.constraints;
 
+    // Deflate padding size
     if (padding != null) {
       _contentConstraints = deflatePaddingConstraints(_contentConstraints);
     }
 
-    _contentConstraints = deflateBorderConstraints(_contentConstraints);
+    // Deflate border size
+    if (borderEdge != null) {
+      _contentConstraints = deflateBorderConstraints(_contentConstraints);
+    }
 
     // layout overflow Box
     _contentConstraints = deflateOverflowConstraints(_contentConstraints);
@@ -189,15 +193,8 @@ class RenderBoxModel extends RenderBox with
 
   @override
   void detach() {
-    _painter?.dispose();
-    _painter = null;
+    disposePainter();
     super.detach();
-    // Since we're disposing of our painter, we won't receive change
-    // notifications. We mark ourselves as needing paint so that we will
-    // resubscribe to change notifications. If we didn't do this, then, for
-    // example, animated GIFs would stop animating when a DecoratedBox gets
-    // moved around the tree due to GlobalKey reparenting.
-    markNeedsPaint();
   }
 
   @override
@@ -208,36 +205,28 @@ class RenderBoxModel extends RenderBox with
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-              "Unfortunately, this object's geometry is not known at this time, "
-                'probably because it has never been laid out. '
-                'This means it cannot be accurately hit-tested.'
-            ),
-            ErrorHint(
-              'If you are trying '
-                'to perform a hit test during the layout phase itself, make sure '
-                "you only hit test nodes that have completed layout (e.g. the node's "
-                'children, after their layout() method has been called).'
-            ),
+            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
+              'probably because it has never been laid out. '
+              'This means it cannot be accurately hit-tested.'),
+            ErrorHint('If you are trying '
+              'to perform a hit test during the layout phase itself, make sure '
+              "you only hit test nodes that have completed layout (e.g. the node's "
+              'children, after their layout() method has been called).'),
           ]);
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot hit test a render box with no size.'),
           describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-            'Although this node is not marked as needing layout, '
-              'its size is not set.'
-          ),
-          ErrorHint(
-            'A RenderBox object must have an '
-              'explicit size before it can be hit-tested. Make sure '
-              'that the RenderBox in question sets its size during layout.'
-          ),
+          ErrorDescription('Although this node is not marked as needing layout, '
+            'its size is not set.'),
+          ErrorHint('A RenderBox object must have an '
+            'explicit size before it can be hit-tested. Make sure '
+            'that the RenderBox in question sets its size during layout.'),
         ]);
       }
       return true;
     }());
-    if (hitTestChildren(result, position: position)) {
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
       result.add(BoxHitTestEntry(this, position));
       return true;
     }
@@ -246,7 +235,7 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTestSelf(Offset position) {
-    return decoration.hitTest(size, position, textDirection: configuration.textDirection);
+    return size.contains(position);
   }
 
   @override

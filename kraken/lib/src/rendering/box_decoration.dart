@@ -85,6 +85,17 @@ mixin RenderBoxDecorationMixin on RenderBox {
       borderTop + innerSize.height + borderBottom);
   }
 
+  void disposePainter() {
+    _painter?.dispose();
+    _painter = null;
+    // Since we're disposing of our painter, we won't receive change
+    // notifications. We mark ourselves as needing paint so that we will
+    // resubscribe to change notifications. If we didn't do this, then, for
+    // example, animated GIFs would stop animating when a DecoratedBox gets
+    // moved around the tree due to GlobalKey reparenting.
+    markNeedsPaint();
+  }
+
   void paintDecoration(PaintingContext context, Offset offset) {
     _painter ??= decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
