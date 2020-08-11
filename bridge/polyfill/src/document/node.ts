@@ -136,7 +136,6 @@ export class Node extends EventTarget {
   }
 
   protected _notifyNodeRemoved(insertionNode: Node): void {}
-
   protected _notifyNodeInsert(insertionNode: Node): void {}
 
   /**
