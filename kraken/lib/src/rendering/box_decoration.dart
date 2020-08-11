@@ -48,35 +48,23 @@ mixin RenderBoxDecorationMixin on RenderBox {
     return constraints;
   }
 
-  /// Returns new box constraints that are bigger by the given edge dimensions.
-  BoxConstraints inflateConstraints(BoxConstraints constraints, EdgeInsets edges) {
-    final double horizontal = edges.horizontal;
-    final double vertical = edges.vertical;
-    return BoxConstraints(
-      minWidth: constraints.minWidth,
-      maxWidth: constraints.maxWidth + horizontal,
-      minHeight: constraints.minHeight,
-      maxHeight: constraints.maxHeight + vertical,
-    );
-  }
-
   double get borderTop {
-    if (borderEdge == null) return 0;
+    if (borderEdge == null) return 0.0;
     return borderEdge.top;
   }
 
   double get borderBottom {
-    if (borderEdge == null) return 0;
+    if (borderEdge == null) return 0.0;
     return borderEdge.bottom;
   }
 
   double get borderLeft {
-    if (borderEdge == null) return 0;
+    if (borderEdge == null) return 0.0;
     return borderEdge.left;
   }
 
   double get borderRight {
-    if (borderEdge == null) return 0;
+    if (borderEdge == null) return 0.0;
     return borderEdge.right;
   }
 
