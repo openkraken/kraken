@@ -142,7 +142,7 @@ mixin CSSTextMixin {
       return whiteSpace;
     }
 
-    switch(style['white-space']) {
+    switch(style['whiteSpace']) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -172,7 +172,7 @@ mixin CSSTextMixin {
       return textOverflow;
     }
 
-    switch(style['text-overflow']) {
+    switch(style['textOverflow']) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':

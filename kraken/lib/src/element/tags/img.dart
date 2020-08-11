@@ -113,42 +113,42 @@ class ImageElement extends Element {
   }
 
   void _resize() {
-//    double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
-//    double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
-//    double width = 0.0;
-//    double height = 0.0;
-//    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
-//    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
-//    if (!containWidth && !containHeight) {
-//      width = naturalWidth;
-//      height = naturalHeight;
-//    } else {
-//      CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
-//      if (containWidth && containHeight) {
-//        width = sizedConstraints.width ?? _propertyWidth;
-//        height = sizedConstraints.height ?? _propertyHeight;
-//      } else if (containWidth) {
-//        width = sizedConstraints.width ?? _propertyWidth;
-//        if (naturalWidth != 0) {
-//          height = width * naturalHeight / naturalWidth;
-//        }
-//      } else if (containHeight) {
-//        height = sizedConstraints.height ?? _propertyHeight;
-//        if (naturalHeight != 0) {
-//          width = height * naturalWidth / naturalHeight;
-//        }
-//      }
-//    }
+    double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
+    double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
+    double width = 0.0;
+    double height = 0.0;
+    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
+    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
+    if (!containWidth && !containHeight) {
+      width = naturalWidth;
+      height = naturalHeight;
+    } else {
+      RenderBoxModel renderBoxModel = getRenderBoxModel();
+      if (containWidth && containHeight) {
+        width = renderBoxModel.width ?? _propertyWidth;
+        height = renderBoxModel.height ?? _propertyHeight;
+      } else if (containWidth) {
+        width = renderBoxModel.width ?? _propertyWidth;
+        if (naturalWidth != 0) {
+          height = width * naturalHeight / naturalWidth;
+        }
+      } else if (containHeight) {
+        height = renderBoxModel.height ?? _propertyHeight;
+        if (naturalHeight != 0) {
+          width = height * naturalWidth / naturalHeight;
+        }
+      }
+    }
 
-//    if (!height.isFinite) {
-//      height = 0.0;
-//    }
-//    if (!width.isFinite) {
-//      width = 0.0;
-//    }
-//
-//    imageBox?.width = width;
-//    imageBox?.height = height;
+    if (!height.isFinite) {
+      height = 0.0;
+    }
+    if (!width.isFinite) {
+      width = 0.0;
+    }
+
+    imageBox?.width = width;
+    imageBox?.height = height;
   }
 
   void _removeStreamListener() {

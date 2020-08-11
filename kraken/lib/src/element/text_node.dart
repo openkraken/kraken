@@ -76,17 +76,6 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     }
   }
 
-//  bool _isTextOverflowEllipsis(CSSStyleDeclaration style) {
-//    List<CSSOverflowType> overflows = getOverflowFromStyle(style);
-//    WhiteSpace whiteSpace = getWhiteSpace(style);
-//    CSSOverflowType overflowX = overflows[0];
-//    return overflowX != Overflow.visible && whiteSpace == WhiteSpace.nowrap && style['textOverflow'] == 'ellipsis';
-//  }
-//
-//  TextOverflow getTextOverflow(CSSStyleDeclaration style) {
-//    return _isTextOverflowEllipsis(style) ? TextOverflow.ellipsis : TextOverflow.clip;
-//  }
-
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
     // migrate element's size type to RenderTextBox
     renderTextBox.widthSizeType = width;
@@ -98,11 +87,15 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     Element parentElement = parentNode;
     renderTextBox.style = parentElement.style;
     renderTextBox.text = createTextSpanWithStyle(data, parentElement.style);
-    renderTextBox.whiteSpace = CSSTextMixin.getWhiteSpace(parentElement.style);
-    renderTextBox.overflow = CSSTextMixin.getTextOverflow(parentElement.style);
+    _setTextNodeProperties(parentElement.style);
 
     _setTextSizeType(
         parentElement.renderElementBoundary.widthSizeType, parentElement.renderElementBoundary.heightSizeType);
+  }
+
+  void _setTextNodeProperties(CSSStyleDeclaration style) {
+    renderTextBox.whiteSpace = CSSTextMixin.getWhiteSpace(parentElement.style);
+    renderTextBox.overflow = CSSTextMixin.getTextOverflow(parentElement.style);
   }
 
   @override
@@ -116,6 +109,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     renderTextBox.text = createTextSpanWithStyle(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
+    _setTextNodeProperties(parent.style);
     parent.renderLayoutBox.insert(renderTextBox, after: after);
     _setTextSizeType(parent.renderElementBoundary.widthSizeType, parent.renderElementBoundary.heightSizeType);
   }

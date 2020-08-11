@@ -156,7 +156,7 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style);
+      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style, elementManager);
     } else {
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }

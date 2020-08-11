@@ -73,7 +73,7 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
       Element parentElement = hostTextNode.parent;
       final double contentWidth = parentElement.getRenderBoxModel().getContentWidth();
-      if (_renderParagraph.overflow != TextOverflow.visible && contentWidth != null) {
+      if (contentWidth != null) {
         boxConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: contentWidth,
