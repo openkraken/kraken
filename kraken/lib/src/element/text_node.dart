@@ -10,7 +10,7 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    InlineSpan text = createTextSpanWithStyle(_data, null);
+    InlineSpan text = createTextSpan(_data, null);
 
     renderTextBox = RenderTextBox(text,
       targetId: targetId,
@@ -86,7 +86,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // parentNode must be an element.
     Element parentElement = parentNode;
     renderTextBox.style = parentElement.style;
-    renderTextBox.text = createTextSpanWithStyle(data, parentElement.style);
+    renderTextBox.text = createTextSpan(data, parentElement.style);
     _setTextNodeProperties(parentElement.style);
 
     _setTextSizeType(
@@ -106,7 +106,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void attachTo(Element parent, {RenderObject after}) {
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    renderTextBox.text = createTextSpanWithStyle(data, parent.style);
+    renderTextBox.text = createTextSpan(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
     _setTextNodeProperties(parent.style);

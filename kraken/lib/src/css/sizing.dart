@@ -17,7 +17,6 @@ import 'package:kraken/css.dart';
 /// - min-height
 
 mixin CSSSizingMixin {
-  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;

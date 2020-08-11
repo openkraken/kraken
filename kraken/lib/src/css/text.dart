@@ -128,7 +128,7 @@ mixin CSSTextMixin {
   }
 
   static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
-    List<CSSOverflowType> overflows = getOverflowFromStyle(style);
+    List<CSSOverflowType> overflows = getOverflowTypes(style);
     WhiteSpace whiteSpace = getWhiteSpace(style);
     //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
     if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {

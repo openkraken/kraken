@@ -191,8 +191,13 @@ class RenderBoxModel extends RenderBox with
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropWidth += childNode.cropBorderWidth;
-      cropWidth += childNode.cropPaddingWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
     }
 
     if (minWidth != null && (width == null || width < minWidth)) {
@@ -275,8 +280,13 @@ class RenderBoxModel extends RenderBox with
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropHeight += childNode.cropBorderHeight;
-      cropHeight += childNode.cropPaddingHeight;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropHeight += renderBoxModel.borderEdge.vertical;
+      }
+      if (renderBoxModel.padding != null) {
+        cropHeight += renderBoxModel.padding.vertical;
+      }
     }
 
     if (minHeight != null && (height == null || height < minHeight)) {
@@ -477,11 +487,6 @@ class RenderBoxModel extends RenderBox with
     super.debugFillProperties(properties);
     if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
     if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));

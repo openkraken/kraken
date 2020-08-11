@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
 mixin RenderSizingHelper on RenderBox {
   // Get max width of element, use width if exist,
@@ -17,8 +18,13 @@ mixin RenderSizingHelper on RenderBox {
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropWidth += childNode.cropBorderWidth;
-      cropWidth += childNode.cropPaddingWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
     }
 
     // Get width of element if it's not inline
