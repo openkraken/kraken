@@ -121,15 +121,13 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints parentConstraints = parentElement.renderLayoutBox.constraints;
-
+  RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
   final RenderLayoutParentData childParentData = child.parentData;
 
   // Default to no constraints. (0 - infinite)
   BoxConstraints childConstraints = const BoxConstraints();
-
-  Size trySize = parentConstraints.biggest;
-  Size parentSize = trySize.isInfinite ? parentConstraints.smallest : trySize;
+  Size trySize = parentRenderBoxModel.contentConstraints.biggest;
+  Size parentSize = trySize.isInfinite ? parentRenderBoxModel.contentConstraints.smallest : trySize;
 
   BoxSizeType widthType = _getChildWidthSizeType(child);
   BoxSizeType heightType = _getChildHeightSizeType(child);
@@ -173,7 +171,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
     double borderRight = borderEdge != null ? borderEdge.right : 0;
     double borderTop = borderEdge != null ? borderEdge.top : 0;
     double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
-    
+
     double top = childParentData.top != null ? childParentData.top + borderTop : baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
       top = parentSize.height - child.size.height - borderBottom - ((childParentData.bottom) ?? 0);
