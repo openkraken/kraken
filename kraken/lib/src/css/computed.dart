@@ -15,7 +15,10 @@ mixin CSSComputedMixin on RenderBox {
     String display = getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
-      cropWidth += childNode.cropMarginWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {
@@ -74,7 +77,10 @@ mixin CSSComputedMixin on RenderBox {
 
 
     void cropMargin(Element childNode) {
-      cropWidth += childNode.cropMarginWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {
@@ -165,7 +171,10 @@ mixin CSSComputedMixin on RenderBox {
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
-      cropHeight += childNode.cropMarginHeight;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropHeight += renderBoxModel.margin.vertical;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {

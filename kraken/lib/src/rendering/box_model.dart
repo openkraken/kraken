@@ -69,6 +69,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 class RenderBoxModel extends RenderBox with
   RenderPaddingMixin,
+  RenderMarginMixin,
   RenderBoxDecorationMixin,
   RenderOverflowMixin,
   RenderPointerListenerMixin {
@@ -98,6 +99,9 @@ class RenderBoxModel extends RenderBox with
   RenderBoxModel fromCopy(RenderBoxModel newBox) {
     if (padding != null) {
       newBox.padding = padding;
+    }
+    if (margin != null) {
+      newBox.margin = margin;
     }
     if (borderEdge != null) {
       newBox.borderEdge = borderEdge;

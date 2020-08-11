@@ -504,7 +504,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (child is RenderElementBoundary) {
       int childNodeId = child.targetId;
       Element childEl = elementManager.getEventTargetByTargetId<Element>(childNodeId);
-      margin = childEl.cropMarginHeight;
+      RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+      margin = renderBoxModel.margin != null ? renderBoxModel.margin.vertical : 0;
     }
     switch (direction) {
       case Axis.horizontal:
@@ -892,9 +893,18 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           }
         }
 
+        double childMarginLeft = 0;
+        double childMarginTop = 0;
+        if (child is RenderElementBoundary) {
+          Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
+          RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+          childMarginLeft = renderBoxModel.marginLeft;
+          childMarginTop = renderBoxModel.marginTop;
+        }
+
         Offset relativeOffset = _getOffset(
-          childMainPosition + paddingLeft + borderLeft,
-          crossAxisOffset + childLineExtent + paddingTop + borderTop
+          childMainPosition + paddingLeft + borderLeft + childMarginLeft,
+          crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
         );
 
         /// Apply position relative offset change.
