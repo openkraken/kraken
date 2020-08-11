@@ -725,16 +725,15 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
-    BoxConstraints inflatedContentConstraints = inflateConstraints(contentConstraints, borderEdge);
     switch (direction) {
       case Axis.horizontal:
-        size = inflatedContentConstraints.constrain(Size(constraintWidth, constraintHeight));
+        size = contentConstraints.constrain(Size(constraintWidth, constraintHeight));
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = inflatedContentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+        size = contentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;

@@ -78,8 +78,6 @@ class RenderBoxModel extends RenderBox with
     this.elementManager
   }) : super();
 
-  BoxPainter _painter;
-
   bool _debugHasBoxLayout = false;
 
   BoxConstraints _contentConstraints;
