@@ -693,16 +693,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else {
         innerConstraints = BoxConstraints(minHeight: baseConstraints);
       }
-
-      if (clipX || clipY) {
-        innerConstraints = BoxConstraints(
-          minWidth: innerConstraints.minWidth,
-          maxWidth: clipX ? double.infinity : innerConstraints.maxWidth,
-          minHeight: innerConstraints.minHeight,
-          maxHeight: clipY ? double.infinity : innerConstraints.maxHeight
-        );
-      }
-      child.layout(innerConstraints, parentUsesSize: true);
+      child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
 
       double childMainSize = _getMainSize(child);
       double childCrossSize = _getCrossSize(child);
@@ -1121,16 +1112,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             }
           }
 
-          if (clipX || clipY) {
-            innerConstraints = BoxConstraints(
-                minWidth: innerConstraints.minWidth,
-                maxWidth: clipX ? double.infinity : innerConstraints.maxWidth,
-                minHeight: innerConstraints.minHeight,
-                maxHeight: clipY ? double.infinity : innerConstraints.maxHeight
-            );
-          }
-
-          child.layout(innerConstraints, parentUsesSize: true);
+          child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
           crossSize = math.max(crossSize, _getCrossSize(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;

@@ -112,12 +112,6 @@ class RenderBoxModel extends RenderBox with
     return newBox;
   }
 
-  // @FIXME: fake border width, remove this after border had merged into renderObject.
-  double borderLeft = 0.0;
-  double borderTop = 0.0;
-  double borderRight = 0.0;
-  double borderBottom = 0.0;
-
   double _width;
   double get width {
     return _width;
@@ -295,7 +289,7 @@ class RenderBoxModel extends RenderBox with
       height = maxHeight;
     }
 
-    // inline element has no height
+    // Inline element has no height
     if (display == INLINE) {
       return null;
     } else if (style.contains(HEIGHT)) {
@@ -335,12 +329,16 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  set size(Size value) {
-    // set scrollable size from unconstrainted size.
-    maxScrollableX = value.width;
-    maxScrollableY = value.height;
+  set size(Size contentSize) {
+    // Set scrollable size from unconstrained size.
+    maxScrollableX = contentSize.width + paddingLeft + paddingRight;
+    maxScrollableY = contentSize.height + paddingTop + paddingBottom;
 
-    Size boxSize = _contentSize = contentConstraints.constrain(value);;
+    Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
+
+    scrollableViewportWidth = _contentSize.width + paddingLeft + paddingRight;
+    scrollableViewportHeight = _contentSize.height + paddingTop + paddingBottom;
+
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
     }
@@ -348,10 +346,10 @@ class RenderBoxModel extends RenderBox with
       boxSize = wrapBorderSize(boxSize);
     }
 
-    super.size = super.constraints.constrain(boxSize);
+    super.size = constraints.constrain(boxSize);
   }
 
-  // the contentSize of layout box
+  // The contentSize of layout box
   Size _contentSize;
   Size get contentSize {
     if (_contentSize == null) {
@@ -376,8 +374,8 @@ class RenderBoxModel extends RenderBox with
     return height;
   }
 
-  // base layout methods to compute content constraints before content box layout.
-  // call this method before content box layout.
+  // Base layout methods to compute content constraints before content box layout.
+  // Call this method before content box layout.
   BoxConstraints beforeLayout() {
     _debugHasBoxLayout = true;
     final double contentWidth = getContentWidth();
@@ -385,27 +383,13 @@ class RenderBoxModel extends RenderBox with
     if (contentWidth != null || contentHeight != null) {
       _contentConstraints = BoxConstraints(
           minWidth: 0.0,
-          maxWidth: contentWidth != null ? contentWidth : double.infinity,
+          maxWidth: contentWidth != null ? contentWidth : constraints.maxWidth,
           minHeight: 0.0,
-          maxHeight: contentHeight != null ? contentHeight : double.infinity
+          maxHeight: contentHeight != null ? contentHeight : constraints.maxHeight
       );
     } else {
       _contentConstraints = super.constraints;
     }
-
-//    // Deflate padding size
-//    if (padding != null) {
-//      _contentConstraints = deflatePaddingConstraints(_contentConstraints);
-//    }
-//
-//    // Deflate border size
-//    if (borderEdge != null) {
-//      _contentConstraints = deflateBorderConstraints(_contentConstraints);
-//    }
-//
-//    // layout overflow Box
-//    _contentConstraints = deflateOverflowConstraints(_contentConstraints);
-
 
     return _contentConstraints;
   }
@@ -416,23 +400,24 @@ class RenderBoxModel extends RenderBox with
     applyOverflowPaintTransform(child, transform);
   }
 
-  // the max scrollable size of X axis.
+  // The max scrollable size of X axis.
   double maxScrollableX;
-  // the max scrollable size of Y axis.
+  // The max scrollable size of Y axis.
   double maxScrollableY;
+
+  double scrollableViewportWidth;
+  double scrollableViewportHeight;
 
   // hooks when content box had layout.
   void didLayout() {
-    Size scrollableSize = Size(
-        maxScrollableX + paddingLeft + paddingRight,
-        maxScrollableY + paddingTop + paddingBottom
-    );
-    setUpOverflowScroller(scrollableSize);
+    Size scrollableSize = Size(maxScrollableX, maxScrollableY);
+    Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
+    setUpOverflowScroller(scrollableSize, viewportSize);
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintDecoration(context, offset);
-    paintOverflow(context, offset, borderEdge, callback);
+    paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
   }
 
   @override
@@ -487,6 +472,8 @@ class RenderBoxModel extends RenderBox with
     super.debugFillProperties(properties);
     if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
     if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+    properties.add(DiagnosticsProperty('clipX', clipX));
+    properties.add(DiagnosticsProperty('clipY', clipY));
     properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));

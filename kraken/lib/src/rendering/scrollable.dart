@@ -216,6 +216,7 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   Size _scrollableSize;
+  Size _viewportSize;
 
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
   ViewportOffset _scrollOffsetX;
@@ -264,17 +265,18 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void _setUpScrollX() {
-    _scrollOffsetX.applyViewportDimension(size.width);
-    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - size.width);
+    _scrollOffsetX.applyViewportDimension(_viewportSize.width);
+    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - _viewportSize.width);
   }
 
   void _setUpScrollY() {
-    _scrollOffsetY.applyViewportDimension(size.height);
-    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - size.height);
+    _scrollOffsetY.applyViewportDimension(_viewportSize.height);
+    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - _viewportSize.height);
   }
 
-  void setUpOverflowScroller(Size scrollableSize) {
+  void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
     _scrollableSize = scrollableSize;
+    _viewportSize = viewportSize;
     if (_clipX && _scrollOffsetX != null) {
       _setUpScrollX();
     }
@@ -298,18 +300,18 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, Size viewportSize, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
     // Overflow should not cover border
-    Rect clipRect = Offset.zero & Size(
-      size.width - borderEdge.right,
-      size.height - borderEdge.bottom,
+    Rect clipRect = Offset(borderEdge.left, borderEdge.top) & Size(
+      size.width - borderEdge.right - borderEdge.left,
+      size.height - borderEdge.bottom - borderEdge.top,
     );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
-      context.pushClipRect(needsCompositing, offset, clipRect, (PaintingContext context, Offset offset) {
+      context.pushClipRect(true, offset, clipRect, (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       });
     } else {
