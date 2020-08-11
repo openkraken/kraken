@@ -26,10 +26,15 @@ export class Document extends Node {
   public getElementById(elementid: string): null | Element {
     const argLength = arguments.length;
     if (argLength < 1) throw new Error(`Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.`);
-    if (!elementid) {
+    if (elementid === '') {
       return null;
     }
-    const mapEntity = elementMapById[elementid];
+    let id = elementid;
+    // convert undefined/null into 'undefined'/'null' it works according to;
+    if (!id) {
+      id = String(id);
+    }
+    const mapEntity = elementMapById[id];
     if (!mapEntity) {
       return null;
     }
@@ -70,9 +75,9 @@ export class Document extends Node {
       if (mapEntity.orderList.length === 0) {
         delete elementMapById[elementid];
       } else {
-        mapEntity.orderList = mapEntity.orderList.filter( (item: Element) => { return item !== element; })
-        if(mapEntity.orderList.length === 1) {
-          mapEntity.element = mapEntity.orderList[0];
+        mapEntity.orderList = mapEntity.orderList.filter((item: Element) => item !== element);
+        if (mapEntity.orderList.length === 1) {
+          [mapEntity.element] = mapEntity.orderList;
           mapEntity.orderList = [];
         }
       }
