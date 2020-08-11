@@ -7,7 +7,7 @@ import { BODY, WINDOW, eventTargetMap } from './events/event-target';
 import { cookie } from '../cookie';
 import { HTMLAllCollection } from './collection';
 
-export const elementMapById = {};
+const elementMapById = {};
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -30,7 +30,9 @@ export class Document extends Node {
       return null;
     }
     let id = elementid;
-    // convert undefined/null into 'undefined'/'null' it works according to;
+    // Defined by the special condition
+    // When set Element id attribute with string type: 'null', 'undefined',
+    // getElementById can find it by null, undefined.
     if (!id) {
       id = String(id);
     }
@@ -52,36 +54,6 @@ export class Document extends Node {
       return false;
     });
     return element;
-  }
-
-  public addElementById(elementid: string, element: Element): void {
-    const mapEntity = elementMapById[elementid];
-    if (mapEntity) {
-      if (mapEntity.orderList.length > 0) {
-        mapEntity.orderList.push(element);
-      } else {
-        mapEntity.orderList = [element, mapEntity.element];
-        mapEntity.element = null;
-      }
-    } else {
-      const newEntity = { element, orderList: [] };
-      elementMapById[elementid] = newEntity;
-    }
-  }
-
-  public removeElementById(elementid: string, element: Element): void {
-    const mapEntity = elementMapById[elementid];
-    if (mapEntity && mapEntity.orderList) {
-      if (mapEntity.orderList.length === 0) {
-        delete elementMapById[elementid];
-      } else {
-        mapEntity.orderList = mapEntity.orderList.filter((item: Element) => item !== element);
-        if (mapEntity.orderList.length === 1) {
-          [mapEntity.element] = mapEntity.orderList;
-          mapEntity.orderList = [];
-        }
-      }
-    }
   }
 
   createElement(tagName: string) : Element {
@@ -133,4 +105,34 @@ export function getNodeByTargetId(targetId: number) : Node|null|Window {
   }
 
   return null;
+}
+
+export function removeElementById(elementid: string, element: Element): void {
+  const mapEntity = elementMapById[elementid];
+  if (mapEntity && mapEntity.orderList) {
+    if (mapEntity.orderList.length === 0) {
+      delete elementMapById[elementid];
+    } else {
+      mapEntity.orderList = mapEntity.orderList.filter((item: Element) => item !== element);
+      if (mapEntity.orderList.length === 1) {
+        [mapEntity.element] = mapEntity.orderList;
+        mapEntity.orderList = [];
+      }
+    }
+  }
+}
+
+export function addElementById(elementid: string, element: Element): void {
+  const mapEntity = elementMapById[elementid];
+  if (mapEntity) {
+    if (mapEntity.orderList.length > 0) {
+      mapEntity.orderList.push(element);
+    } else {
+      mapEntity.orderList = [element, mapEntity.element];
+      mapEntity.element = null;
+    }
+  } else {
+    const newEntity = { element, orderList: [] };
+    elementMapById[elementid] = newEntity;
+  }
 }
