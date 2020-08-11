@@ -16,11 +16,7 @@ import 'package:kraken/css.dart';
 
 const String INPUT = 'INPUT';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
-  WIDTH: '150px',
-  BORDER: '1px solid #767676'
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK, WIDTH: '150px', BORDER: '1px solid #767676'};
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -102,7 +98,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-
   TextInputConfiguration textInputConfiguration;
 
   InputElement(
@@ -175,9 +170,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-  TextSpan buildTextSpan({ String text = '' }) {
+  TextSpan buildTextSpan({String text = ''}) {
     text ??= properties['value'];
-    return createTextSpanWithStyle(text, style);
+    return createTextSpan(text, style);
   }
 
   get cursorColor => CSSColor.initial;

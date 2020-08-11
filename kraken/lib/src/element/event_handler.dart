@@ -52,7 +52,6 @@ mixin EventHandlerMixin on Node {
 
     // <300ms to trigger click
     if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-
       handleClick(Event('click', EventInit()));
     }
   }

@@ -4,7 +4,6 @@ describe('FontWeight', () => {
     'medium',
     'light',
     'bold',
-    'heavy',
     'lighter',
     'bolder',
     'alibaba',

@@ -298,14 +298,18 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
-
+    // Overflow should not cover border
+    Rect clipRect = Offset.zero & Size(
+      size.width - borderEdge.right,
+      size.height - borderEdge.bottom,
+    );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, (PaintingContext context, Offset offset) {
+      context.pushClipRect(needsCompositing, offset, clipRect, (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       });
     } else {

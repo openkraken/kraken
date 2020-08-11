@@ -148,7 +148,6 @@ mixin CSSSizingMixin {
   }
 
   static CSSEdgeInsets _getMarginFromStyle(CSSStyleDeclaration style) {
-
     double marginLeft;
     double marginTop;
     double marginRight;
@@ -260,7 +259,6 @@ mixin CSSSizingMixin {
   }
 
   static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {
-
     double paddingTop;
     double paddingRight;
     double paddingBottom;
@@ -303,7 +301,8 @@ mixin CSSSizingMixin {
       double paddingTopInterval = newPadding.top - oldPadding.top;
       double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
 
-      CSSEdgeInsets progressPadding = CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
+      CSSEdgeInsets progressPadding =
+          CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
       CSSEdgeInsets basePadding = CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
 
       all?.addProgressListener((progress) {

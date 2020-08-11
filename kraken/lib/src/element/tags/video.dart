@@ -115,7 +115,7 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    renderDecoratedBox.child = null;
+    renderConstrainedBox.child = null;
   }
 
   onCanPlay() async {

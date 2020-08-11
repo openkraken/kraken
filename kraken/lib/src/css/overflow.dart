@@ -14,17 +14,9 @@ enum CSSOverflowType {
   clip
 }
 
-List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
-  CSSOverflowType overflowX, overflowY;
-  overflowX = overflowY = _getOverflow(style['overflow']);
-
-  if (style.contains('overflowX')) {
-    overflowX = _getOverflow(style['overflowX']);
-  }
-
-  if (style.contains('overflowY')) {
-    overflowY = _getOverflow(style['overflowY']);
-  }
+List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
+  CSSOverflowType overflowX = _getOverflowType(style[OVERFLOW_X]);
+  CSSOverflowType overflowY = _getOverflowType(style[OVERFLOW_Y]);
 
   // Apply overflow special rules from w3c.
   if (overflowX == CSSOverflowType.visible && overflowY != CSSOverflowType.visible) {
@@ -38,7 +30,7 @@ List<CSSOverflowType> getOverflowFromStyle(CSSStyleDeclaration style) {
   return [overflowX, overflowY];
 }
 
-CSSOverflowType _getOverflow(String definition) {
+CSSOverflowType _getOverflowType(String definition) {
   switch (definition) {
     case 'hidden':
       return CSSOverflowType.hidden;
@@ -47,9 +39,9 @@ CSSOverflowType _getOverflow(String definition) {
     case 'auto':
       return CSSOverflowType.auto;
     case 'visible':
+    default:
       return CSSOverflowType.visible;
   }
-  return CSSOverflowType.visible;
 }
 
 mixin CSSOverflowMixin {
@@ -65,7 +57,7 @@ mixin CSSOverflowMixin {
       CSSStyleDeclaration style,
       void scrollListener(double scrollTop, AxisDirection axisDirection)) {
     if (style != null) {
-      List<CSSOverflowType> overflow = getOverflowFromStyle(style);
+      List<CSSOverflowType> overflow = getOverflowTypes(style);
       CSSOverflowType overflowX = overflow[0];
       CSSOverflowType overflowY = overflow[1];
 

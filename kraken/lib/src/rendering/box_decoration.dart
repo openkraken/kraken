@@ -1,33 +1,16 @@
-import 'package:flutter/foundation.dart';
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
-import 'package:meta/meta.dart';
 
-/// Paints a [Decoration] either before or after its child paints.
-/// Provide Border and Background render box.
-class RenderDecorateElementBox extends RenderProxyBox {
-  /// Creates a decorated box.
-  ///
-  /// The [decoration], [position], and [configuration] arguments must not be
-  /// null. By default the decoration paints behind the child.
-  ///
-  /// The [ImageConfiguration] will be passed to the decoration (with the size
-  /// filled in) to let it resolve images.
-  RenderDecorateElementBox({
-    @required Decoration decoration,
-    EdgeInsets borderEdge = EdgeInsets.zero,
-    DecorationPosition position = DecorationPosition.background,
-    ImageConfiguration configuration = ImageConfiguration.empty,
-    RenderBox child,
-  })  : assert(decoration != null),
-        assert(position != null),
-        assert(configuration != null),
-        _decoration = decoration,
-        _borderEdge = borderEdge,
-        _position = position,
-        _configuration = configuration,
-        super(child);
-
+mixin RenderBoxDecorationMixin on RenderBox {
+  CSSBoxDecoration oldDecoration;
+  DecorationPosition position = DecorationPosition.background;
+  ImageConfiguration configuration = ImageConfiguration.empty;
   BoxPainter _painter;
 
   /// BorderSize to deflate.
@@ -58,48 +41,41 @@ class RenderDecorateElementBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// Whether to paint the box decoration behind or in front of the child.
-  DecorationPosition get position => _position;
-  DecorationPosition _position;
-  set position(DecorationPosition value) {
-    assert(value != null);
-    if (value == _position) return;
-    _position = value;
-    markNeedsPaint();
-  }
-
-  /// The settings to pass to the decoration when painting, so that it can
-  /// resolve images appropriately. See [ImageProvider.resolve] and
-  /// [BoxPainter.paint].
-  ///
-  /// The [ImageConfiguration.textDirection] field is also used by
-  /// direction-sensitive [Decoration]s for painting and hit-testing.
-  ImageConfiguration get configuration => _configuration;
-  ImageConfiguration _configuration;
-  set configuration(ImageConfiguration value) {
-    assert(value != null);
-    if (value == _configuration) return;
-    _configuration = value;
-    markNeedsPaint();
-  }
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      // Clamp border size for child box.
-      BoxConstraints childConstrains = constraints.deflate(borderEdge);
-      child.layout(childConstrains, parentUsesSize: true);
-      size = borderEdge.inflateSize(child.size);
-    } else {
-      performResize();
+  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
+    if (borderEdge != null) {
+      return constraints.deflate(borderEdge);
     }
+    return constraints;
   }
 
-  @override
-  void detach() {
+  double get borderTop {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.top;
+  }
+
+  double get borderBottom {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.bottom;
+  }
+
+  double get borderLeft {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.left;
+  }
+
+  double get borderRight {
+    if (borderEdge == null) return 0.0;
+    return borderEdge.right;
+  }
+
+  Size wrapBorderSize(Size innerSize) {
+    return Size(borderLeft + innerSize.width + borderRight,
+      borderTop + innerSize.height + borderBottom);
+  }
+
+  void disposePainter() {
     _painter?.dispose();
     _painter = null;
-    super.detach();
     // Since we're disposing of our painter, we won't receive change
     // notifications. We mark ourselves as needing paint so that we will
     // resubscribe to change notifications. If we didn't do this, then, for
@@ -108,60 +84,8 @@ class RenderDecorateElementBox extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
-            describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-                "Unfortunately, this object's geometry is not known at this time, "
-                    'probably because it has never been laid out. '
-                    'This means it cannot be accurately hit-tested.'
-            ),
-            ErrorHint(
-                'If you are trying '
-                    'to perform a hit test during the layout phase itself, make sure '
-                    "you only hit test nodes that have completed layout (e.g. the node's "
-                    'children, after their layout() method has been called).'
-            ),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-              'Although this node is not marked as needing layout, '
-                  'its size is not set.'
-          ),
-          ErrorHint(
-              'A RenderBox object must have an '
-                  'explicit size before it can be hit-tested. Make sure '
-                  'that the RenderBox in question sets its size during layout.'
-          ),
-        ]);
-      }
-      return true;
-    }());
-    if (hitTestChildren(result, position: position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  bool hitTestSelf(Offset position) {
-    return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(size.width != null);
-    assert(size.height != null);
-    _painter ??= _decoration.createBoxPainter(markNeedsPaint);
+  void paintDecoration(PaintingContext context, Offset offset) {
+    _painter ??= decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background) {
       int debugSaveCount;
@@ -173,12 +97,12 @@ class RenderDecorateElementBox extends RenderProxyBox {
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('${_decoration.runtimeType} painter had mismatching save and restore calls.'),
+            ErrorSummary('${decoration.runtimeType} painter had mismatching save and restore calls.'),
             ErrorDescription('Before painting the decoration, the canvas save count was $debugSaveCount. '
-                'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
-                'Every call to save() or saveLayer() must be matched by a call to restore().'),
+              'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
+              'Every call to save() or saveLayer() must be matched by a call to restore().'),
             DiagnosticsProperty<Decoration>('The decoration was', decoration,
-                style: DiagnosticsTreeStyle.errorProperty),
+              style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<BoxPainter>('The painter was', _painter, style: DiagnosticsTreeStyle.errorProperty),
           ]);
         }
@@ -192,12 +116,5 @@ class RenderDecorateElementBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(_decoration.toDiagnosticsNode(name: 'decoration'));
-    properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }

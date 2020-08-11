@@ -106,6 +106,18 @@ class CSSStyleDeclaration {
         case BORDER_RADIUS:
           CSSStyleProperty.removeShorthandBorderRadius(_cssProperties);
           break;
+        case OVERFLOW:
+          CSSStyleProperty.removeShorthandOverflow(_cssProperties);
+          break;
+        case FONT:
+          CSSStyleProperty.removeShorthandFont(_cssProperties);
+          break;
+        case FLEX:
+          CSSStyleProperty.removeShorthandFlex(_cssProperties);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.removeShorthandFlexFlow(_cssProperties);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -118,6 +130,9 @@ class CSSStyleDeclaration {
           break;
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.removeShorthandTextDecoration(_cssProperties);
           break;
       }
       _cssProperties.remove(propertyName);
@@ -161,12 +176,17 @@ class CSSStyleDeclaration {
         case PADDING_LEFT:
         case PADDING_BOTTOM:
         case PADDING_RIGHT:
+          // Validation length type
+          if (!CSSLength.isLength(normalizedValue)) {
+            return;
+          }
+          break;
         case MARGIN_TOP:
         case MARGIN_LEFT:
         case MARGIN_RIGHT:
         case MARGIN_BOTTOM:
-          // Validation length type
-          if (!CSSLength.isLength(normalizedValue)) {
+          // Validation length type and keyword type
+          if (!CSSLength.isLength(normalizedValue) && !CSSLength.isKeyword(normalizedValue)) {
             return;
           }
           break;
@@ -194,6 +214,18 @@ class CSSStyleDeclaration {
         case BORDER_RADIUS:
           CSSStyleProperty.setShorthandBorderRadius(_cssProperties, normalizedValue);
           break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(_cssProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
+          break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(_cssProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(_cssProperties, normalizedValue);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -206,6 +238,9 @@ class CSSStyleDeclaration {
           break;
         case TRANSITION:
           CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(_cssProperties, normalizedValue);
           break;
       }
 
@@ -222,8 +257,7 @@ class CSSStyleDeclaration {
 
   /// Check a css property is valid.
   bool contains(String property) {
-    String value = getPropertyValue(property);
-    return !CSSStyleDeclaration.isNullOrEmptyValue(value);
+    return _cssProperties.containsKey(property) && _cssProperties[property] != null;
   }
 
   void addStyleChangeListener(StyleChangeListener listener) {

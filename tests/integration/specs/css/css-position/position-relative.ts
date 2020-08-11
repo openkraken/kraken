@@ -327,7 +327,7 @@ describe('position-relative', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('004', async () => {
     let p;
