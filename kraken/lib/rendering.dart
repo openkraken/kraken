@@ -23,5 +23,4 @@ export 'src/rendering/visibility.dart';
 export 'src/rendering/pointer.dart';
 export 'src/rendering/padding.dart';
 export 'src/rendering/opacity.dart';
-export 'src/rendering/box.dart';
 export 'src/rendering/sizing_helper.dart';
