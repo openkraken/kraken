@@ -667,7 +667,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       BoxSizeType sizeType = _getChildHeightSizeType(child);
       if (isHorizontalFlexDirection(_flexDirection)) {
         double maxCrossAxisSize;
-        // Caculate max height constaints
+        // Calculate max height constraints
         if (sizeType == BoxSizeType.specified) {
           maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT]);
         } else {
@@ -688,6 +688,14 @@ class RenderFlexLayout extends RenderLayoutBox {
         innerConstraints = BoxConstraints(minHeight: baseConstraints);
       }
 
+      if (clipX || clipY) {
+        innerConstraints = BoxConstraints(
+          minWidth: innerConstraints.minWidth,
+          maxWidth: clipX ? double.infinity : innerConstraints.maxWidth,
+          minHeight: innerConstraints.minHeight,
+          maxHeight: clipY ? double.infinity : innerConstraints.maxHeight
+        );
+      }
       child.layout(innerConstraints, parentUsesSize: true);
 
       double childMainSize = _getMainSize(child);
@@ -704,7 +712,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         'flexShrink': _getFlexShrink(child),
       };
 
-      // Caculate flex line
+      // calculate flex line
       if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
           _effectiveChildCount > 0 &&
           (runMainAxisExtent + childMainSize > flexLineLimit)) {
@@ -1106,6 +1114,16 @@ class RenderFlexLayout extends RenderLayoutBox {
                 break;
             }
           }
+
+          if (clipX || clipY) {
+            innerConstraints = BoxConstraints(
+                minWidth: innerConstraints.minWidth,
+                maxWidth: clipX ? double.infinity : innerConstraints.maxWidth,
+                minHeight: innerConstraints.minHeight,
+                maxHeight: clipY ? double.infinity : innerConstraints.maxHeight
+            );
+          }
+
           child.layout(innerConstraints, parentUsesSize: true);
           crossSize = math.max(crossSize, _getCrossSize(child));
           // Only layout placeholder renderObject child
