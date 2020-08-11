@@ -85,7 +85,7 @@ describe('Overflow', () => {
     document.body.appendChild(container);
   });
 
-  it('overflow with inner padding', async () => {
+  it('overflow with inner padding', async (done) => {
     let div;
     div = createElement(
       'div',
@@ -103,6 +103,39 @@ describe('Overflow', () => {
       ],
     );
     BODY.appendChild(div);
-    await matchViewportSnapshot(0.2);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      div.scroll(0, 20);
+      await matchViewportSnapshot();
+      done();
+    });
+  });
+
+  it('overflow with flex container', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          width: '150px',
+          height: '150px',
+          border: '10px solid #f40',
+          padding: '10px',
+          overflow: 'auto',
+          background: 'conic-gradient(from -90deg, blue 0 25%, black 25% 50%, red 50% 75%, green 75% 100%)',
+        },
+      }, [
+        createText('London. Michaelmas term lately over, and the Lord Chancellor sitting in Lincolns Inn Hall. Implacable November weather. As much mud in the streets as if the waters had but newly retired from the face of the earth, and it would not be wonderful to meet a Megalosaurus, forty feet long or so, waddling like an elephantine lizard up Holborn Hill.')
+      ],
+    );
+    BODY.appendChild(div);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      div.scroll(0, 20);
+      await matchViewportSnapshot();
+    });
   });
 });
