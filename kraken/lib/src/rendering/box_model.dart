@@ -166,10 +166,21 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   double getContentWidth() {
     double cropWidth = 0;
     // @FIXME, need to remove elementManager in the future.
-    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
-    CSSStyleDeclaration style = hostElement.style;
+    Node hostNode = elementManager.getEventTargetByTargetId<Node>(targetId);
+    Element hostElement;
+    CSSStyleDeclaration style;
+    String display;
+    if (hostNode is Element) {
+      style = hostNode.style;
+      display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+      hostElement = hostNode;
+    } else if (hostNode is TextNode) {
+      style = hostNode.parent.style;
+      display = RenderSizingHelper.getElementRealDisplayValue(hostNode.parent.targetId, elementManager);
+      hostElement = hostNode.parentElement;
+    }
+
     double width = _width;
-    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
@@ -228,7 +239,7 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
       case INLINE_FLEX:
         if (style.contains(WIDTH)) {
           width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-          cropPaddingBorder(hostElement);
+          cropPaddingBorder(hostNode);
         } else {
           width = null;
         }
@@ -248,9 +259,21 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   }
 
   double getContentHeight() {
-    Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
-    CSSStyleDeclaration style = hostElement.style;
-    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+    Node hostNode = elementManager.getEventTargetByTargetId<Node>(targetId);
+
+    Element hostElement;
+    CSSStyleDeclaration style;
+    String display;
+    if (hostNode is Element) {
+      hostElement = hostNode;
+      style = hostNode.style;
+      display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+    } else if (hostNode is TextNode) {
+      hostElement = hostNode.parent;
+      style = hostElement.style;
+      display = RenderSizingHelper.getElementRealDisplayValue(hostElement.targetId, elementManager);
+    }
+
     double height = _height;
     double cropHeight = 0;
 
@@ -310,8 +333,11 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   }
 
   set size(Size value) {
-    _contentSize = value;
-    Size boxSize = value;
+    // set scrollable size from unconstrainted size.
+    maxScrollableX = value.width;
+    maxScrollableY = value.height;
+
+    Size boxSize = _contentSize = contentConstraints.constrain(value);;
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
     }
@@ -370,11 +396,16 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     applyOverflowPaintTransform(child, transform);
   }
 
+  // the max scrollable size of X axis.
+  double maxScrollableX;
+  // the max scrollable size of Y axis.
+  double maxScrollableY;
+
   // hooks when content box had layout.
   void didLayout() {
     Size scrollableSize = Size(
-      _contentSize.width + paddingLeft + paddingRight,
-      _contentSize.height + paddingTop + paddingBottom
+        maxScrollableX + paddingLeft + paddingRight,
+        maxScrollableY + paddingTop + paddingBottom
     );
     setUpOverflowScroller(scrollableSize);
   }
@@ -386,6 +417,7 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));
     properties.add(DiagnosticsProperty('maxWidth', maxWidth));

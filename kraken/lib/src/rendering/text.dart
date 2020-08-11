@@ -68,6 +68,7 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
 
   @override
   void performLayout() {
+    beforeLayout();
     if (child != null) {
       BoxConstraints boxConstraints;
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
@@ -88,6 +89,7 @@ class RenderTextBox extends RenderBoxModel with RenderObjectWithChildMixin<Rende
     } else {
       performResize();
     }
+    didLayout();
   }
 
   @override
