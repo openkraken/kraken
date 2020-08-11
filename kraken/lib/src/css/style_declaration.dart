@@ -28,7 +28,7 @@ class CSSStyleDeclaration {
   CSSStyleDeclaration({Map<String, dynamic> style}) {
     if (style != null) {
       style.forEach((property, dynamic value) {
-        if (value != null) setProperty(property, value: value.toString());
+        if (value != null) setProperty(property, value.toString());
       });
     }
   }
@@ -144,7 +144,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, {value = ''}) {
+  void setProperty(String propertyName, value) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -252,7 +252,7 @@ class CSSStyleDeclaration {
   /// Override [] and []= operator to get/set style properties.
   operator [](String property) => getPropertyValue(property);
   operator []=(String property, value) {
-    setProperty(property, value: value);
+    setProperty(property, value);
   }
 
   /// Check a css property is valid.

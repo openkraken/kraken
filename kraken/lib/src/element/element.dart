@@ -1087,22 +1087,18 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void updateChildNodesStyle() {
+  void _updateChildNodesStyle() {
     childNodes.forEach((node) {
       if (node is TextNode) node.updateTextStyle();
     });
   }
 
-  // @TODO(refactor): Need to remove it.
-  void _flushStyle() {
+  void _updateTransitionEvent() {
     if (transitionMap != null) {
       for (CSSTransition transition in transitionMap.values) {
-        initTransitionEvent(transition);
-        transition?.apply();
+        updateTransitionEvent(transition);
       }
     }
-
-    updateChildNodesStyle();
   }
 
   // Universal style property change callback.
@@ -1110,8 +1106,10 @@ class Element extends Node
   void setStyle(String key, value) {
     // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
     // [StyleChangeListener] to be invoked in sync.
-    style[key] = value;
-    _flushStyle();
+    style.setProperty(key, value);
+
+    _updateTransitionEvent();
+    _updateChildNodesStyle();
   }
 
   @mustCallSuper
