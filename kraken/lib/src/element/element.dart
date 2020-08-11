@@ -104,34 +104,10 @@ class Element extends Node
   double get cropMarginWidth => renderMargin.margin.horizontal;
   // Vertical margin dimension (top + bottom)
   double get cropMarginHeight => renderMargin.margin.vertical;
-  // Horizontal padding dimension (left + right)
-  double get cropPaddingWidth {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.horizontal;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.horizontal;
-    }
-    return 0.0;
-  }
-
-  // Vertical padding dimension (top + bottom)
-  double get cropPaddingHeight {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.vertical;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.vertical;
-    }
-    return 0.0;
-  }
 
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
-
-  // Horizontal border dimension (left + right)
-  double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
-  // Vertical border dimension (top + bottom)
-  double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
   Element(
     int targetId,
@@ -141,7 +117,7 @@ class Element extends Node
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
-  })  : assert(targetId != null),
+  }) : assert(targetId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
@@ -163,10 +139,10 @@ class Element extends Node
     }
 
     // Init overflow
-    initRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+    initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
 
-    // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
+    // Init border and background
+    initRenderDecoratedBox(getRenderBoxModel(), style);
 
     // Constrained box
     renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
@@ -208,10 +184,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderDecoratedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -252,7 +228,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderDecoratedBox?.size?.height;
+      double viewPortHeight = renderConstrainedBox?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -288,7 +264,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderDecoratedBox?.size?.width;
+      double viewPortWidth = renderConstrainedBox?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -558,8 +534,8 @@ class Element extends Node
 
     // Add FlexItem wrap for flex child node.
     if (isParentFlexDisplayType && renderLayoutBox != null) {
-      renderDecoratedBox.child = null;
-      renderDecoratedBox.child = RenderFlexItem(child: renderLayoutBox);
+      renderConstrainedBox.child = null;
+      renderConstrainedBox.child = RenderFlexItem(child: renderLayoutBox);
     }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
@@ -926,9 +902,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderDecoratedBox.child = null;
+        renderConstrainedBox.child = null;
         renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        renderDecoratedBox.child = renderLayoutBox;
+        renderConstrainedBox.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -980,11 +956,11 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateRenderOverflow(_getRenderBoxModel(), style, _scrollListener);
+    updateRenderOverflow(getRenderBoxModel(), style, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(_getRenderBoxModel(), style, transitionMap);
+    updateRenderPadding(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
@@ -1022,9 +998,9 @@ class Element extends Node
         })
         ..removeAll();
 
-      renderDecoratedBox.child = null;
+      renderConstrainedBox.child = null;
       renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      renderDecoratedBox.child = renderLayoutBox;
+      renderConstrainedBox.child = renderLayoutBox;
 
       this.children.forEach((Element child) {
         _updateFlexItemStyle(child);
@@ -1045,14 +1021,14 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(style, property, present, renderDecoratedBox, targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, renderConstrainedBox, targetId);
     // decoratedBox may contains background and border
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
@@ -1100,7 +1076,7 @@ class Element extends Node
     updateChildNodesStyle();
   }
 
-  RenderBoxModel _getRenderBoxModel() {
+  RenderBoxModel getRenderBoxModel() {
     if (isIntrinsicBox) {
       return renderIntrinsicBox;
     } else {
@@ -1172,21 +1148,23 @@ class Element extends Node
         elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
-        // TODO: implement this after border has supported in renderLayoutBox
-        //  return renderLayoutBox.borderLeft();
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderLeft;
         break;
       case 'clientTop':
-        // TODO: implement this after border has supported in renderLayoutBox
-        // return renderLayoutBox.borderTop;
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderTop;
         break;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
         return getScrollLeft();
       case 'scrollHeight':
-        return getScrollHeight(_getRenderBoxModel());
+        return getScrollHeight(getRenderBoxModel());
       case 'scrollWidth':
-        return getScrollWidth(_getRenderBoxModel());
+        return getScrollWidth(getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
       case 'click':
@@ -1268,7 +1246,7 @@ class Element extends Node
     super.addEventListener(eventName, _eventResponder);
 
     // bind pointer responder.
-    addEventResponder(_getRenderBoxModel());
+    addEventResponder(getRenderBoxModel());
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
@@ -1281,7 +1259,7 @@ class Element extends Node
     super.removeEventListener(eventName, _eventResponder);
 
     // Remove pointer responder.
-    removeEventResponder(_getRenderBoxModel());
+    removeEventResponder(getRenderBoxModel());
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {

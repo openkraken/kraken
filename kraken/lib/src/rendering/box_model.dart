@@ -6,6 +6,7 @@
 import 'dart:ui';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'padding.dart';
@@ -66,8 +67,16 @@ class RenderLayoutBox extends RenderBoxModel
       : super(targetId: targetId, style: style, elementManager: elementManager);
 }
 
-class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMixin, RenderPointerListenerMixin {
-  RenderBoxModel({this.targetId, this.style, this.elementManager});
+class RenderBoxModel extends RenderBox with
+  RenderPaddingMixin,
+  RenderBoxDecorationMixin,
+  RenderOverflowMixin,
+  RenderPointerListenerMixin {
+  RenderBoxModel({
+    this.targetId,
+    this.style,
+    this.elementManager
+  }) : super();
 
   bool _debugHasBoxLayout = false;
 
@@ -90,6 +99,12 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     if (padding != null) {
       newBox.padding = padding;
     }
+    if (borderEdge != null) {
+      newBox.borderEdge = borderEdge;
+    }
+    if (decoration != null) {
+      newBox.decoration = decoration;
+    }
 
     return newBox;
   }
@@ -99,6 +114,9 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     Size boxSize = value;
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
+    }
+    if (borderEdge != null) {
+      boxSize = wrapBorderSize(boxSize);
     }
 
     super.size = super.constraints.constrain(boxSize);
@@ -135,8 +153,14 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
     _debugHasBoxLayout = true;
     _contentConstraints = super.constraints;
 
+    // Deflate padding size
     if (padding != null) {
       _contentConstraints = deflatePaddingConstraints(_contentConstraints);
+    }
+
+    // Deflate border size
+    if (borderEdge != null) {
+      _contentConstraints = deflateBorderConstraints(_contentConstraints);
     }
 
     // layout overflow Box
@@ -161,6 +185,61 @@ class RenderBoxModel extends RenderBox with RenderPaddingMixin, RenderOverflowMi
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    paintOverflow(context, offset, callback);
+    paintDecoration(context, offset);
+    paintOverflow(context, offset, borderEdge, callback);
+  }
+
+  @override
+  void detach() {
+    disposePainter();
+    super.detach();
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    assert(() {
+      if (!hasSize) {
+        if (debugNeedsLayout) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
+            describeForError('The hitTest() method was called on this RenderBox'),
+            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
+              'probably because it has never been laid out. '
+              'This means it cannot be accurately hit-tested.'),
+            ErrorHint('If you are trying '
+              'to perform a hit test during the layout phase itself, make sure '
+              "you only hit test nodes that have completed layout (e.g. the node's "
+              'children, after their layout() method has been called).'),
+          ]);
+        }
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot hit test a render box with no size.'),
+          describeForError('The hitTest() method was called on this RenderBox'),
+          ErrorDescription('Although this node is not marked as needing layout, '
+            'its size is not set.'),
+          ErrorHint('A RenderBox object must have an '
+            'explicit size before it can be hit-tested. Make sure '
+            'that the RenderBox in question sets its size during layout.'),
+        ]);
+      }
+      return true;
+    }());
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) {
+    return size.contains(position);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
+    if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }

@@ -565,7 +565,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(this, child, size);
+        setPositionedChildOffset(this, child, size, borderEdge);
       }
       child = childParentData.nextSibling;
     }
@@ -579,7 +579,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     double contentWidth = getElementComputedWidth(targetId, elementManager);
     double contentHeight = getElementComputedHeight(targetId, elementManager);
-
     // If no child exists, stop layout.
     if (childCount == 0) {
       size = Size(
@@ -634,7 +633,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         child = childParentData.nextSibling;
         continue;
       }
-
       child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
@@ -726,6 +724,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
+
     switch (direction) {
       case Axis.horizontal:
         size = contentConstraints.constrain(Size(constraintWidth, constraintHeight));
@@ -893,8 +892,10 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           }
         }
 
-        Offset relativeOffset =
-            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childLineExtent + paddingTop);
+        Offset relativeOffset = _getOffset(
+          childMainPosition + paddingLeft + borderLeft,
+          crossAxisOffset + childLineExtent + paddingTop + borderTop
+        );
 
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);

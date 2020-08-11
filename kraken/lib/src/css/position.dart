@@ -121,7 +121,7 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
+  BoxConstraints parentConstraints = parentElement.renderLayoutBox.constraints;
 
   final RenderLayoutParentData childParentData = child.parentData;
 
@@ -154,7 +154,7 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
@@ -165,16 +165,23 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
     Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
         parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
-    // padding box of containing block
+    // padding box of containing block, so it needs to add border insets
+    // when caculating offset
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    double top = childParentData.top != null ? (childParentData.top) : baseOffset.dy;
+
+    double borderLeft = borderEdge != null ? borderEdge.left : 0;
+    double borderRight = borderEdge != null ? borderEdge.right : 0;
+    double borderTop = borderEdge != null ? borderEdge.top : 0;
+    double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
+    
+    double top = childParentData.top != null ? childParentData.top + borderTop : baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = parentSize.height - child.size.height - ((childParentData.bottom) ?? 0);
+      top = parentSize.height - child.size.height - borderBottom - ((childParentData.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? (childParentData.left) : baseOffset.dx;
+    double left = childParentData.left != null ? childParentData.left + borderLeft : baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
-      left = parentSize.width - child.size.width - ((childParentData.right) ?? 0);
+      left = parentSize.width - child.size.width - borderRight - ((childParentData.right) ?? 0);
     }
 
     x = left;

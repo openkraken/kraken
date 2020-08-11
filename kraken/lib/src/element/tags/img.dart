@@ -29,7 +29,12 @@ class ImageElement extends Element {
   double _propertyHeight;
 
   ImageElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
+      : super(
+        targetId,
+        elementManager,
+        defaultStyle: _defaultStyle,
+        isIntrinsicBox: true,
+        tagName: IMAGE) {
     _renderImage();
   }
 

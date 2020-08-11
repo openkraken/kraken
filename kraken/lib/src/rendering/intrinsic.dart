@@ -28,6 +28,10 @@ class RenderIntrinsicBox extends RenderBoxModel
         offset += Offset(paddingLeft, paddingTop);
       }
 
+      if (borderEdge != null) {
+        offset += Offset(borderLeft, borderTop);
+      }
+
       if (child != null) context.paintChild(child, offset);
     });
   }

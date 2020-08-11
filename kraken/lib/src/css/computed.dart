@@ -1,5 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'dart:math' as math;
 
@@ -18,8 +19,13 @@ mixin CSSComputedMixin on RenderBox {
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropWidth += childNode.cropBorderWidth;
-      cropWidth += childNode.cropPaddingWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
     }
 
     // Get width of element if it's not inline
@@ -66,13 +72,19 @@ mixin CSSComputedMixin on RenderBox {
     double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
     double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
 
+
     void cropMargin(Element childNode) {
       cropWidth += childNode.cropMarginWidth;
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropWidth += childNode.cropBorderWidth;
-      cropWidth += childNode.cropPaddingWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
     }
 
     if (minWidth != null && (width == null || width < minWidth)) {
@@ -157,8 +169,13 @@ mixin CSSComputedMixin on RenderBox {
     }
 
     void cropPaddingBorder(Element childNode) {
-      cropHeight += childNode.cropBorderHeight;
-      cropHeight += childNode.cropPaddingHeight;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropHeight += renderBoxModel.borderEdge.vertical;
+      }
+      if (renderBoxModel.padding != null) {
+        cropHeight += renderBoxModel.padding.vertical;
+      }
     }
 
     if (minHeight != null && (height == null || height < minHeight)) {

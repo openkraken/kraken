@@ -21,10 +21,8 @@ import 'package:kraken/css.dart';
 final RegExp _splitRegExp = RegExp(r'\s+');
 
 mixin CSSBackgroundMixin {
-  RenderDecorateElementBox _renderDecorateElementBox;
 
-  void updateBackground(
-      CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
+  void updateBackground(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
     if (!CSSBackground.hasLocalBackgroundImage(style)) return;
 
     if (style[BACKGROUND_IMAGE].isNotEmpty) {
@@ -40,23 +38,19 @@ mixin CSSBackgroundMixin {
         }
 
         if (decorationImage != null || gradient != null) {
-          _updateRenderGradient(decorationImage, gradient, parent, targetId);
+          _updateRenderGradient(renderBoxModel, decorationImage, gradient, parent, targetId);
           return;
         }
       }
     }
   }
 
-  void _updateRenderGradient(
-      DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
-    if (_renderDecorateElementBox != null) {
-      _renderDecorateElementBox.decoration = BoxDecoration(image: decorationImage, gradient: gradient);
-    } else {
-      RenderObject child = parent.child;
-      parent.child = null;
-      _renderDecorateElementBox =
-          RenderDecorateElementBox(decoration: BoxDecoration(image: decorationImage, gradient: gradient), child: child);
-      parent.child = _renderDecorateElementBox;
+  void _updateRenderGradient(RenderBoxModel renderBoxModel, DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
+    if (renderBoxModel != null) {
+      renderBoxModel.decoration = BoxDecoration(
+        image: decorationImage,
+        gradient: gradient
+      );
     }
   }
 }
