@@ -171,28 +171,34 @@ export class Element extends Node {
     setProperty(this.targetId, name, value);
   }
 
-  notifyNodeRemoved(insertionNode: Node): void {
+  protected _notifyNodeRemoved(insertionNode: Node): void {
     if (insertionNode.isConnected) {
       traverseNode(this, (node: Node) => {
-        node.notifyChildRemoved();
+        if (node instanceof Element) {
+          node._notifyChildRemoved();
+        }
       });
     }
   }
-  notifyChildRemoved(): void {
+
+  protected _notifyChildRemoved(): void {
     if (this.hasAttribute('id')) {
       const elementid = this.getAttribute('id');
       this._updateId(elementid, null);
     }
   }
 
-  notifyNodeInsert(insertionNode: Node): void {
+  protected _notifyNodeInsert(insertionNode: Node): void {
     if (insertionNode.isConnected) {
       traverseNode(this, (node: Node) => {
-        node.notifyChildInsert();
+        if( node instanceof Element) {
+          node._notifyChildInsert();
+        }
       });
     }
   }
-  notifyChildInsert(): void {
+
+  protected _notifyChildInsert(): void {
     if (this.hasAttribute('id')) {
       const elementid = this.getAttribute('id');
       this._updateId(null, elementid);
