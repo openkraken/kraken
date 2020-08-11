@@ -194,12 +194,6 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minWidth != null && (width == null || width < minWidth)) {
-      width = minWidth;
-    } else if (maxWidth != null && (width == null || width > maxWidth)) {
-      width = maxWidth;
-    }
-
     switch (display) {
       case BLOCK:
       case FLEX:
@@ -254,6 +248,12 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
+    if (minWidth != null && (width == null || width < minWidth)) {
+      width = minWidth;
+    } else if (maxWidth != null && (width == null || width > maxWidth)) {
+      width = maxWidth;
+    }
+
     if (width != null) {
       return math.max(0, width - cropWidth);
     } else {
@@ -281,12 +281,6 @@ class RenderBoxModel extends RenderBox with
       if (renderBoxModel.padding != null) {
         cropHeight += renderBoxModel.padding.vertical;
       }
-    }
-
-    if (minHeight != null && (height == null || height < minHeight)) {
-      height = minHeight;
-    } else if (maxHeight != null && (height == null || height > maxHeight)) {
-      height = maxHeight;
     }
 
     // Inline element has no height
@@ -322,6 +316,13 @@ class RenderBoxModel extends RenderBox with
         }
       }
     }
+
+    if (minHeight != null && (height == null || height < minHeight)) {
+      height = minHeight;
+    } else if (maxHeight != null && (height == null || height > maxHeight)) {
+      height = maxHeight;
+    }
+
     if (height != null) {
       return math.max(0, height - cropHeight);
     } else {
