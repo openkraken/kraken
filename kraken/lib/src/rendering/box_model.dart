@@ -182,6 +182,16 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  double _intrinsicRatio;
+  double get intrinsicRatio {
+    return _intrinsicRatio;
+  }
+  set intrinsicRatio(double value) {
+    if (_intrinsicRatio == value) return;
+    _intrinsicRatio = value;
+    markNeedsLayout();
+  }
+
   double _minWidth;
   double get minWidth {
     return _minWidth;
@@ -321,6 +331,10 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
+    if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
+      double height = getContentHeight();
+      width = height * intrinsicRatio;
+    }
 
     if (width != null) {
       return math.max(0, width - cropWidth);
@@ -406,6 +420,11 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
+    if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
+      double width = getContentWidth();
+      height = width * intrinsicRatio;
+    }
+
     if (height != null) {
       return math.max(0, height - cropHeight);
     } else {
@@ -462,17 +481,53 @@ class RenderBoxModel extends RenderBox with
   // Call this method before content box layout.
   BoxConstraints beforeLayout() {
     _debugHasBoxLayout = true;
+    BoxConstraints boxConstraints = constraints;
+    // Deflate border constraints.
+    boxConstraints = deflateBorderConstraints(boxConstraints);
+
+    // Deflate overflow constraints.
+    boxConstraints = deflateOverflowConstraints(boxConstraints);
+
+    // Deflate padding constraints.
+    boxConstraints = deflatePaddingConstraints(boxConstraints);
+
     final double contentWidth = getContentWidth();
     final double contentHeight = getContentHeight();
+
     if (contentWidth != null || contentHeight != null) {
+      double minWidth;
+      double maxWidth;
+      double minHeight;
+      double maxHeight;
+
+      if (boxConstraints.hasTightWidth) {
+        minWidth = maxWidth = boxConstraints.maxWidth;
+      } else if (contentWidth != null) {
+        minWidth = 0.0;
+        maxWidth = contentWidth;
+      } else {
+        minWidth = 0.0;
+        maxWidth = constraints.maxWidth;
+      }
+
+      if (boxConstraints.hasTightHeight) {
+        minHeight = maxHeight = boxConstraints.maxHeight;
+      } else if (contentHeight != null) {
+        minHeight = 0.0;
+        maxHeight = contentHeight;
+      } else {
+        minHeight = 0.0;
+        maxHeight = boxConstraints.maxHeight;
+      }
+
       _contentConstraints = BoxConstraints(
-          minWidth: 0.0,
-          maxWidth: contentWidth != null ? contentWidth : constraints.maxWidth,
-          minHeight: 0.0,
-          maxHeight: contentHeight != null ? contentHeight : constraints.maxHeight
+          minWidth: minWidth,
+          maxWidth: maxWidth,
+          minHeight: minHeight,
+          maxHeight: maxHeight
       );
     } else {
-      _contentConstraints = super.constraints;
+      _contentConstraints = boxConstraints;
     }
 
     return _contentConstraints;
@@ -561,6 +616,9 @@ class RenderBoxModel extends RenderBox with
     properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));
+    properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
+    properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
+    properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
     properties.add(DiagnosticsProperty('maxWidth', maxWidth));
     properties.add(DiagnosticsProperty('minWidth', minWidth));
     properties.add(DiagnosticsProperty('maxHeight', maxHeight));

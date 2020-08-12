@@ -58,6 +58,8 @@ mixin RenderPaddingMixin on RenderBox {
   }
 
   BoxConstraints deflatePaddingConstraints(BoxConstraints constraints) {
+    if (_resolvedPadding == null) return constraints;
+
     _resolve();
     return constraints.deflate(_resolvedPadding);
   }

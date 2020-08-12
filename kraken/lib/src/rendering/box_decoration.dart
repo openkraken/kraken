@@ -41,6 +41,13 @@ mixin RenderBoxDecorationMixin on RenderBox {
     markNeedsPaint();
   }
 
+  BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
+    if (borderEdge != null) {
+      return constraints.deflate(borderEdge);
+    }
+    return constraints;
+  }
+
   double get borderTop {
     if (borderEdge == null) return 0.0;
     return borderEdge.top;

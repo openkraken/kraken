@@ -167,8 +167,13 @@ class Element extends Node
     BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
     BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
 
+    // @FIXME: need to remove after renderElementBoundary removed.
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -532,10 +537,10 @@ class Element extends Node
     bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
 
     // Add FlexItem wrap for flex child node.
-    if (isParentFlexDisplayType && renderLayoutBox != null) {
-      renderIntersectionObserver.child = null;
-      renderIntersectionObserver.child = RenderFlexItem(child: renderLayoutBox);
-    }
+//    if (isParentFlexDisplayType) {
+//      renderIntersectionObserver.child = null;
+//      renderIntersectionObserver.child = RenderFlexItem(child: getRenderBoxModel());
+//    }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
@@ -985,26 +990,6 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-//    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-//    if (display.endsWith(FLEX)) {
-//      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
-//      // Collect children of renderLayoutBox and remove their relationship.
-//      List<RenderBox> children = [];
-//      prevRenderLayoutBox
-//        ..visitChildren((child) {
-//          children.add(child);
-//        })
-//        ..removeAll();
-//
-//      renderIntersectionObserver.child = null;
-//      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-//      renderIntersectionObserver.child = renderLayoutBox;
-//
-//      this.children.forEach((Element child) {
-//        _updateFlexItemStyle(child);
-//      });
-//    }
-
     _updateDecorationRenderLayoutBox();
   }
 

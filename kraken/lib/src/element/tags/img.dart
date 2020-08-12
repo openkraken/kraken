@@ -92,6 +92,10 @@ class ImageElement extends Element {
 
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
@@ -151,8 +155,14 @@ class ImageElement extends Element {
     imageBox?.width = width;
     imageBox?.height = height;
     RenderBoxModel renderBoxModel = getRenderBoxModel();
-    renderBoxModel.intrinsicWidth = width;
-    renderBoxModel.intrinsicHeight = height;
+    renderBoxModel.intrinsicWidth = naturalWidth;
+    renderBoxModel.intrinsicHeight = naturalHeight;
+
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderBoxModel.intrinsicRatio = null;
+    } else {
+      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+    }
   }
 
   void _removeStreamListener() {
