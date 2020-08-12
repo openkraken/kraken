@@ -6,10 +6,10 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ffi';
+//import 'dart:ffi';
 import 'dart:async';
 
-import 'package:ffi/ffi.dart';
+//import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 

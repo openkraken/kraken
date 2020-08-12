@@ -1302,11 +1302,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = renderElementBoundary.child;
+    var originalChild = renderIntersectionObserver.child;
     // Make sure child is detached.
-    renderElementBoundary.child = null;
+    renderIntersectionObserver.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderElementBoundary.child = renderRepaintBoundary;
+    renderIntersectionObserver.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
 
@@ -1321,7 +1321,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderElementBoundary.child = originalChild;
+      renderIntersectionObserver.child = originalChild;
 
       completer.complete(captured);
     });
