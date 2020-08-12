@@ -214,8 +214,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
         (right.isNotEmpty && right != AUTO) &&
         (width.isNotEmpty && width != AUTO)) {
       if (marginLeft == AUTO) {
-        double leftValue = CSSLength.toDisplayPortValue(left);
-        double rightValue = CSSLength.toDisplayPortValue(right);
+        double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
+        double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
         double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
 
         if (marginRight == AUTO) {
@@ -230,8 +230,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
         (bottom.isNotEmpty && bottom != AUTO) &&
         (height.isNotEmpty && height != AUTO)) {
       if (marginTop == AUTO) {
-        double topValue = CSSLength.toDisplayPortValue(top);
-        double bottomValue = CSSLength.toDisplayPortValue(bottom);
+        double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
+        double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
         double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
 
         if (marginBottom == AUTO) {
