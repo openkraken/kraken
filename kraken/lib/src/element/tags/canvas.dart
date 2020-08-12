@@ -26,8 +26,8 @@ class CanvasElement extends Element {
           tagName: CANVAS,
         ) {
     painter = CanvasPainter();
-    _width = CSSLength(ELEMENT_DEFAULT_WIDTH).computedValue;
-    _height = CSSLength(ELEMENT_DEFAULT_HEIGHT).computedValue;
+    _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
+    _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
 
     renderCustomPaint = RenderCustomPaint(
       painter: painter,

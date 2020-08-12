@@ -5,76 +5,112 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
+const String _0s = '0s';
+const String _transitionRun = 'transitionrun';
+const String _transitionStart = 'transitionstart';
+const String _transitionEnd = 'transitionend';
+const String _transitionCancel = 'transitioncancel';
+
+/// The types of TransitionEvent
+enum CSSTransitionEvent {
+  /// The transitionrun event occurs when a transition is created
+  run,
+
+  /// The transitionstart event occurs when a transition’s delay phase ends.
+  start,
+
+  /// The transitionend event occurs at the completion of the transition.
+  end,
+
+  /// The transitioncancel event occurs when a transition is canceled.
+  cancel,
+}
 
 mixin CSSTransitionMixin on Node {
   Throttling throttler = Throttling();
   Map<String, CSSTransition> transitionMap;
 
   void updateTransition(CSSStyleDeclaration style) {
-    transitionMap = CSSTransition.parseTransitions(style, this);
-  }
+    Map<String, CSSTransition> map = {};
 
-  void initTransitionEvent(CSSTransition transition) {
-    transition?.setStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
-        // An Event fired when a CSS transition has been cancelled.
-        dispatchTransitionCancel();
-      } else if (status == AnimationStatus.forward) {
-        // An Event fired when a CSS transition is created,
-        // when it is added to a set of running transitions,
-        // though not nessarilty started.
-        dispatchTransitionStart();
-      } else if (status == AnimationStatus.completed) {
-        // An Event fired when a CSS transition has finished playing.
-        dispatchTransitionEnd();
+    List<String> transitionProperty = CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY]) ?? [ALL];
+    List<String> transitionDuration = CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION]) ?? [_0s];
+    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(style[TRANSITION_TIMING_FUNCTION]) ?? [EASE];
+    List<String> transitionDelay = CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY]) ?? [_0s];
+
+    for (int i = 0; i < transitionProperty.length; i++) {
+      String property = transitionProperty[i];
+      String function = transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
+      String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
+      String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
+
+      Curve curve = CSSTransition._parseFunction(function);
+      if (curve != null) {
+        CSSTransition transition = CSSTransition();
+        _dispatchTransitionRun();
+
+        AnimationController controller =
+            AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
+        transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
+        transition.controller = controller;
+        transition.delay = Duration(milliseconds: CSSTime.parseTime(delay));
+        map[property] = transition;
       }
-    });
+    }
+
+    transitionMap = map;
   }
 
-  void dispatchTransitionRun() {
-    dispatchEvent(Event('transitionrun'));
+  void updateTransitionEvent(CSSTransition transition) {
+    transition?._setTransitionListener(_dispatchTransitionEvent);
+    transition?._listen();
   }
 
-  void dispatchTransitionStart() {
-    dispatchEvent(Event('transitionstart'));
+  void _dispatchTransitionEvent(CSSTransitionEvent status) {
+    if (status == CSSTransitionEvent.cancel) {
+      // An Event fired when a CSS transition has been cancelled.
+      dispatchEvent(Event(_transitionCancel));
+    } else if (status == CSSTransitionEvent.start) {
+      // An Event fired when a CSS transition is created,
+      // when it is added to a set of running transitions,
+      // though not nessarilty started.
+      dispatchEvent(Event(_transitionStart));
+    } else if (status == CSSTransitionEvent.end) {
+      // An Event fired when a CSS transition has finished playing.
+      dispatchEvent(Event(_transitionEnd));
+    }
   }
 
-  void dispatchTransitionCancel() {
-    dispatchEvent(Event('transitioncancel'));
-  }
-
-  void dispatchTransitionEnd() {
-    dispatchEvent(Event('transitionend'));
+  void _dispatchTransitionRun() {
+    dispatchEvent(Event(_transitionRun));
   }
 }
 
 typedef CSSTransitionProgressListener = void Function(double progress);
-typedef CSSTransitionStatusListener = void Function(AnimationStatus status);
+typedef CSSTransitionStatusListener = void Function(CSSTransitionEvent status);
 
 class CSSTransition with CustomTickerProviderStateMixin {
   Duration delay = Duration(milliseconds: 0);
   CurvedAnimation curvedAnimation;
   AnimationController controller;
   List<CSSTransitionProgressListener> progressListeners;
-  CSSTransitionStatusListener _statusListener;
+  CSSTransitionStatusListener _transitionListener;
 
-  void setStatusListener(CSSTransitionStatusListener statusListener) {
-    _statusListener = statusListener;
+  void _setTransitionListener(CSSTransitionStatusListener transitionListener) {
+    _transitionListener = transitionListener;
   }
 
-  void apply() {
+  void _listen() {
     if (progressListeners != null && progressListeners.length > 0) {
-      curvedAnimation.addListener(listener);
-      curvedAnimation.addStatusListener(statusListener);
-      Future.delayed(delay, () {
-        controller.reset();
-        controller.forward();
-      });
+      curvedAnimation.addListener(_progressListener);
+      curvedAnimation.addStatusListener(_statusListener);
+      Future.delayed(delay, _forward);
     }
   }
 
-  void setProgressListener(CSSTransitionProgressListener progressListener) {
-    progressListeners = [progressListener];
+  void _forward() {
+    controller.reset();
+    controller.forward();
   }
 
   void addProgressListener(CSSTransitionProgressListener progressListener) {
@@ -86,34 +122,39 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
-  void listener() {
+  void _progressListener() {
     if (progressListeners != null) {
-      if (curvedAnimation.value == 0.0) {
-        statusListener(AnimationStatus.forward);
-      }
       for (CSSTransitionProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
     }
   }
 
-  void statusListener(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      dispose();
-    }
-    if (_statusListener != null) {
-      _statusListener(status);
+  bool _isTransitionStart = false;
+  void _statusListener(AnimationStatus status) {
+    if (status == AnimationStatus.forward) {
+      // Forward status trigger many times
+      if (!_isTransitionStart) {
+        _isTransitionStart = true;
+        _transitionListener(CSSTransitionEvent.start);
+      }
+    } else if (status == AnimationStatus.completed) {
+      _dispose();
+      _transitionListener(CSSTransitionEvent.end);
+    } else if (status == AnimationStatus.dismissed) {
+      _transitionListener(CSSTransitionEvent.cancel);
     }
   }
 
-  void dispose() {
-    curvedAnimation.removeListener(listener);
-    curvedAnimation.removeStatusListener(statusListener);
+  void _dispose() {
+    curvedAnimation.removeListener(_progressListener);
+    curvedAnimation.removeStatusListener(_statusListener);
     controller.reset();
     if (progressListeners != null) {
       progressListeners.clear();
       progressListeners = null;
     }
+    _isTransitionStart = false;
   }
 
   static bool isValidTransitionPropertyValue(String value) {
@@ -129,42 +170,6 @@ class CSSTransition with CustomTickerProviderStateMixin {
         value == STEP_END ||
         value == STEP_START ||
         CSSFunction.isFunction(value);
-  }
-
-  static Map<String, CSSTransition> parseTransitions(CSSStyleDeclaration style, Element el) {
-    Map<String, CSSTransition> map = {};
-
-    List<String> transitionProperty =
-        CSSStyleProperty.getMultipleValues(style[TRANSITION_PROPERTY].isEmpty ? ALL : style[TRANSITION_PROPERTY]);
-    List<String> transitionDuration =
-        CSSStyleProperty.getMultipleValues(style[TRANSITION_DURATION].isEmpty ? '0s' : style[TRANSITION_DURATION]);
-    List<String> transitionTimingFunction = CSSStyleProperty.getMultipleValues(
-        style[TRANSITION_TIMING_FUNCTION].isEmpty ? EASE : style[TRANSITION_TIMING_FUNCTION]);
-    List<String> transitionDelay =
-        CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY].isEmpty ? '0s' : style[TRANSITION_DELAY]);
-
-    for (int i = 0; i < transitionProperty.length; i++) {
-      String property = transitionProperty[i];
-      String function =
-          transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
-      String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
-      String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
-
-      Curve curve = _parseFunction(function);
-      if (curve != null) {
-        CSSTransition transition = CSSTransition();
-        el?.dispatchTransitionRun();
-
-        AnimationController controller =
-            AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
-        transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
-        transition.controller = controller;
-        transition.delay = Duration(milliseconds: CSSTime.parseTime(delay));
-        map[property] = transition;
-      }
-    }
-
-    return map;
   }
 
   static Curve _parseFunction(String function) {
@@ -184,7 +189,7 @@ class CSSTransition with CustomTickerProviderStateMixin {
       case STEP_END:
         return Threshold(1);
     }
-    List<CSSFunctionalNotation> methods = CSSFunction(function).computedValue;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
     if (methods != null && methods.length > 0) {
       CSSFunctionalNotation method = methods.first;
       if (method != null) {
