@@ -28,7 +28,7 @@ class CSSStyleDeclaration {
   CSSStyleDeclaration({Map<String, dynamic> style}) {
     if (style != null) {
       style.forEach((property, dynamic value) {
-        if (value != null) setProperty(property, value: value.toString());
+        if (value != null) setProperty(property, value.toString());
       });
     }
   }
@@ -60,27 +60,6 @@ class CSSStyleDeclaration {
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
     return _cssProperties[propertyName] ?? '';
-  }
-
-  CSSValue _getCSSValue(String propertyName) {
-    var stringValue = getPropertyValue(propertyName);
-
-    switch (propertyName) {
-      case WIDTH:
-      case HEIGHT:
-        return CSSLength(stringValue);
-
-      // TODO: Add more css properties.
-    }
-
-    return null;
-  }
-
-  /// Returns a computed value.
-  T getComputedValue<T>(String propertyName) {
-    CSSValue cssValue = getComputedValue(propertyName);
-    T computedValue = cssValue.computedValue;
-    return computedValue;
   }
 
   /// Returns a property name.
@@ -144,7 +123,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, {value = ''}) {
+  void setProperty(String propertyName, value) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -252,7 +231,7 @@ class CSSStyleDeclaration {
   /// Override [] and []= operator to get/set style properties.
   operator [](String property) => getPropertyValue(property);
   operator []=(String property, value) {
-    setProperty(property, value: value);
+    setProperty(property, value);
   }
 
   /// Check a css property is valid.
@@ -299,11 +278,4 @@ class CSSStyleDeclaration {
 
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
-}
-
-// Returns the computed property value.
-T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {
-  assert(style != null);
-  CSSValue cssValue = style._getCSSValue(propertyName);
-  return cssValue?.computedValue;
 }
