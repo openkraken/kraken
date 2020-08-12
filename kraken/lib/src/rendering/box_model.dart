@@ -98,7 +98,7 @@ class RenderBoxModel extends RenderBox with
   BoxSizeType widthSizeType;
   BoxSizeType heightSizeType;
 
-  RenderBoxModel fromCopy(RenderBoxModel newBox) {
+  RenderBoxModel copyWith(RenderBoxModel newBox) {
     // Copy Sizing
     newBox.width = width;
     newBox.height = height;

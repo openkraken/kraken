@@ -907,7 +907,7 @@ class Element extends Node
           ..removeAll();
 
         renderIntersectionObserver.child = null;
-        renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
+        renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
         renderIntersectionObserver.child = renderLayoutBox;
       }
 
