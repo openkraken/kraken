@@ -160,6 +160,28 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  // Boxes which have intrinsic ratio
+  double _intrinsicWidth;
+  double get intrinsicWidth {
+    return _intrinsicWidth;
+  }
+  set intrinsicWidth(double value) {
+    if (_intrinsicWidth == value) return;
+    _intrinsicWidth = value;
+    markNeedsLayout();
+  }
+
+  // Boxes which have intrinsic ratio
+  double _intrinsicHeight;
+  double get intrinsicHeight {
+    return _intrinsicHeight;
+  }
+  set intrinsicHeight(double value) {
+    if (_intrinsicHeight == value) return;
+    _intrinsicHeight = value;
+    markNeedsLayout();
+  }
+
   double _minWidth;
   double get minWidth {
     return _minWidth;
@@ -275,11 +297,30 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    if (minWidth != null && (width == null || width < minWidth)) {
-      width = minWidth;
-    } else if (maxWidth != null && (width == null || width > maxWidth)) {
-      width = maxWidth;
+    if (maxWidth != null) {
+      if (width == null) {
+        if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
+          width = maxWidth;
+        } else {
+          width = intrinsicWidth;
+        }
+      } else if (width > maxWidth) {
+        width = maxWidth;
+      }
     }
+
+    if (minWidth != null) {
+      if (width == null) {
+        if (intrinsicWidth == null || intrinsicWidth < minWidth) {
+          width = minWidth;
+        } else {
+          width = intrinsicWidth;
+        }
+      } else if (width < minWidth) {
+        width = minWidth;
+      }
+    }
+
 
     if (width != null) {
       return math.max(0, width - cropWidth);
@@ -341,10 +382,28 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minHeight != null && (height == null || height < minHeight)) {
-      height = minHeight;
-    } else if (maxHeight != null && (height == null || height > maxHeight)) {
-      height = maxHeight;
+    if (maxHeight != null) {
+      if (height == null) {
+        if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
+          height = maxHeight;
+        } else {
+          height = intrinsicHeight;
+        }
+      } else if (height > maxHeight) {
+        height = maxHeight;
+      }
+    }
+
+    if (minHeight != null) {
+      if (height == null) {
+        if (intrinsicHeight == null || intrinsicHeight < minHeight) {
+          height = minHeight;
+        } else {
+          height = intrinsicHeight;
+        }
+      } else if (height < minHeight) {
+        height = minHeight;
+      }
     }
 
     if (height != null) {

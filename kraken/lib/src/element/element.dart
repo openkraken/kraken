@@ -985,25 +985,25 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-    if (display.endsWith(FLEX)) {
-      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
-      // Collect children of renderLayoutBox and remove their relationship.
-      List<RenderBox> children = [];
-      prevRenderLayoutBox
-        ..visitChildren((child) {
-          children.add(child);
-        })
-        ..removeAll();
-
-      renderIntersectionObserver.child = null;
-      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      renderIntersectionObserver.child = renderLayoutBox;
-
-      this.children.forEach((Element child) {
-        _updateFlexItemStyle(child);
-      });
-    }
+//    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
+//    if (display.endsWith(FLEX)) {
+//      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
+//      // Collect children of renderLayoutBox and remove their relationship.
+//      List<RenderBox> children = [];
+//      prevRenderLayoutBox
+//        ..visitChildren((child) {
+//          children.add(child);
+//        })
+//        ..removeAll();
+//
+//      renderIntersectionObserver.child = null;
+//      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
+//      renderIntersectionObserver.child = renderLayoutBox;
+//
+//      this.children.forEach((Element child) {
+//        _updateFlexItemStyle(child);
+//      });
+//    }
 
     _updateDecorationRenderLayoutBox();
   }

@@ -150,6 +150,9 @@ class ImageElement extends Element {
 
     imageBox?.width = width;
     imageBox?.height = height;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.intrinsicWidth = width;
+    renderBoxModel.intrinsicHeight = height;
   }
 
   void _removeStreamListener() {
