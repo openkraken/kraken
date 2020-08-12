@@ -644,7 +644,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (contentWidth != null) {
       flexLineLimit = contentWidth;
     } else {
-      flexLineLimit = RenderSizingHelper.getElementComputedMaxWidth(targetId, elementManager);
+      flexLineLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
     }
 
     double maxSizeAboveBaseline = 0;

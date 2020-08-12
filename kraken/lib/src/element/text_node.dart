@@ -27,7 +27,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    WhiteSpace whiteSpace = CSSTextMixin.getWhiteSpace(parent?.style);
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
 
     /// The following table summarizes the behavior of the various white-space values:
     //
@@ -94,8 +94,8 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
-    renderTextBox.whiteSpace = CSSTextMixin.getWhiteSpace(parentElement.style);
-    renderTextBox.overflow = CSSTextMixin.getTextOverflow(parentElement.style);
+    renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
+    renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
   }
 
   @override

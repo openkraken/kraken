@@ -26,7 +26,7 @@ mixin RenderPaddingMixin on RenderBox {
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
-    assert(value != null);
+    if (value == null) return;
     assert(value.isNonNegative);
     if (_padding == value) return;
     _padding = value;

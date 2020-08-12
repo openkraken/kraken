@@ -590,7 +590,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = RenderSizingHelper.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -822,7 +822,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderElementBoundary) {
-          String childRealDisplay = RenderSizingHelper.getElementRealDisplayValue(child.targetId, elementManager);
+          String childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginRight = childStyle[MARGIN_RIGHT];

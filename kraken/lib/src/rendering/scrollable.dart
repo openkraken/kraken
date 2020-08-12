@@ -181,8 +181,6 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 }
 
 mixin RenderOverflowMixin on RenderBox {
-  AxisDirection XAxis;
-  AxisDirection YAxis;
   ScrollListener scrollListener;
 
   bool _clipX = false;
@@ -221,7 +219,7 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset get scrollOffsetX => _scrollOffsetX;
   ViewportOffset _scrollOffsetX;
   set scrollOffsetX(ViewportOffset value) {
-    assert(value != null);
+    if (value == null) return;
     if (value == _scrollOffsetX) return;
     _scrollOffsetX = value;
     _scrollOffsetX.removeListener(_scrollXListener);
@@ -232,7 +230,7 @@ mixin RenderOverflowMixin on RenderBox {
   ViewportOffset get scrollOffsetY => _scrollOffsetY;
   ViewportOffset _scrollOffsetY;
   set scrollOffsetY(ViewportOffset value) {
-    assert(value != null);
+    if (value == null) return;
     if (value == _scrollOffsetY) return;
     _scrollOffsetY = value;
     _scrollOffsetY.removeListener(_scrollYListener);

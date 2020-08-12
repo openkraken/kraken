@@ -99,15 +99,43 @@ class RenderBoxModel extends RenderBox with
   BoxSizeType heightSizeType;
 
   RenderBoxModel fromCopy(RenderBoxModel newBox) {
-    if (padding != null) {
-      newBox.padding = padding;
-    }
-    if (borderEdge != null) {
-      newBox.borderEdge = borderEdge;
-    }
-    if (decoration != null) {
-      newBox.decoration = decoration;
-    }
+    // Copy Sizing
+    newBox.width = width;
+    newBox.height = height;
+    newBox.minWidth = minWidth;
+    newBox.minHeight = minHeight;
+    newBox.maxWidth = maxWidth;
+    newBox.maxHeight = maxHeight;
+
+    // Copy size type
+    newBox.widthSizeType = widthSizeType;
+    newBox.heightSizeType = heightSizeType;
+
+    // Copy padding
+    newBox.padding = padding;
+
+    // Copy Border
+    newBox.borderEdge = borderEdge;
+    newBox.decoration = decoration;
+    newBox.oldDecoration = oldDecoration;
+    newBox.position = position;
+    newBox.configuration = configuration;
+
+    // Copy overflow
+    newBox.scrollListener = scrollListener;
+    newBox.clipX = clipX;
+    newBox.clipY = clipY;
+    newBox.enableScrollX = enableScrollX;
+    newBox.enableScrollY = enableScrollY;
+    newBox.scrollOffsetX = scrollOffsetX;
+    newBox.scrollOffsetY = scrollOffsetY;
+
+    // Copy pointer listener
+    newBox.onPointerDown = onPointerDown;
+    newBox.onPointerCancel = onPointerCancel;
+    newBox.onPointerUp = onPointerUp;
+    newBox.onPointerMove = onPointerMove;
+    newBox.onPointerSignal = onPointerSignal;
 
     return newBox;
   }
@@ -177,7 +205,7 @@ class RenderBoxModel extends RenderBox with
     // @FIXME, need to remove elementManager in the future.
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     double width = _width;
 
     void cropMargin(Element childNode) {
@@ -199,7 +227,6 @@ class RenderBoxModel extends RenderBox with
       case FLEX:
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains(WIDTH)) {
-          width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
           cropPaddingBorder(hostElement);
         } else {
           while (true) {
@@ -212,7 +239,7 @@ class RenderBoxModel extends RenderBox with
             }
             if (hostElement is Element) {
               CSSStyleDeclaration style = hostElement.style;
-              String display = RenderSizingHelper.getElementRealDisplayValue(hostElement.targetId, elementManager);
+              String display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
 
               // Set width of element according to parent display
               if (display != INLINE) {
@@ -264,7 +291,7 @@ class RenderBoxModel extends RenderBox with
   double getContentHeight() {
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = RenderSizingHelper.getElementRealDisplayValue(targetId, elementManager);
+    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     double height = _height;
     double cropHeight = 0;
@@ -287,10 +314,7 @@ class RenderBoxModel extends RenderBox with
     if (display == INLINE) {
       return null;
     } else if (style.contains(HEIGHT)) {
-      if (hostElement is Element) {
-        height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
-        cropPaddingBorder(hostElement);
-      }
+      cropPaddingBorder(hostElement);
     } else {
       while (true) {
         Element current;
@@ -304,7 +328,7 @@ class RenderBoxModel extends RenderBox with
         }
         if (hostElement is Element) {
           CSSStyleDeclaration style = hostElement.style;
-          if (RenderSizingHelper.isStretchChildHeight(hostElement, current)) {
+          if (CSSSizing.isStretchChildHeight(hostElement, current)) {
             if (style.contains(HEIGHT)) {
               height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
               cropPaddingBorder(hostElement);
