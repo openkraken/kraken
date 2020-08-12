@@ -296,7 +296,7 @@ describe('bottom-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   xit('percentage-001', async () => {
     let p;
