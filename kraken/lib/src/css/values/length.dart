@@ -20,7 +20,7 @@ const _0 = '0';
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
-class CSSLength implements CSSValue<double> {
+class CSSLength {
   static const String RPX = 'rpx';
   static const String PX = 'px';
   static const String VW = 'vw';
@@ -114,20 +114,4 @@ class CSSLength implements CSSValue<double> {
     return value == 'auto';
   }
 
-  final String _rawInput;
-  double _value;
-  CSSLength(this._rawInput) {
-    parse();
-  }
-
-  @override
-  double get computedValue => _value;
-
-  @override
-  void parse() {
-    _value = CSSLength.toDisplayPortValue(_rawInput);
-  }
-
-  @override
-  String get serializedValue => _rawInput;
 }
