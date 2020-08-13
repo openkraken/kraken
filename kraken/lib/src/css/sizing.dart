@@ -6,8 +6,17 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/element.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
+
+enum Display {
+  inline,
+  block,
+  inlineBlock,
+  flex,
+  inlineFlex
+}
 
 /// - width
 /// - height
@@ -17,15 +26,23 @@ import 'package:kraken/css.dart';
 /// - min-height
 
 mixin CSSSizingMixin {
-  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderMargin renderMargin;
-  KrakenRenderPadding renderPadding;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
-  CSSSizedConstraints oldConstraints;
 
-  void updateConstraints(CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-    if (renderConstrainedBox != null) {
+  void initRenderBoxSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+    updateBoxSize(renderBoxModel, style, transitionMap);
+  }
+
+  void updateBoxSize(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
+    double width = CSSLength.toDisplayPortValue(style[WIDTH]);
+    double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
+    double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
+    double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
+    double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
+    double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
+
+    if (transitionMap != null) {
       CSSTransition allTransition,
           widthTransition,
           heightTransition,
@@ -33,17 +50,14 @@ mixin CSSSizingMixin {
           maxWidthTransition,
           minHeightTransition,
           maxHeightTransition;
-      if (transitionMap != null) {
-        allTransition = transitionMap['all'];
-        widthTransition = transitionMap['width'];
-        heightTransition = transitionMap['height'];
-        minWidthTransition = transitionMap['min-width'];
-        maxWidthTransition = transitionMap['max-width'];
-        minHeightTransition = transitionMap['min-height'];
-        maxHeightTransition = transitionMap['max-height'];
-      }
 
-      CSSSizedConstraints newConstraints = getConstraints(style);
+      allTransition = transitionMap['all'];
+      widthTransition = transitionMap['width'];
+      heightTransition = transitionMap['height'];
+      minWidthTransition = transitionMap['min-width'];
+      maxWidthTransition = transitionMap['max-width'];
+      minHeightTransition = transitionMap['min-height'];
+      maxHeightTransition = transitionMap['max-height'];
 
       if (allTransition != null ||
           widthTransition != null ||
@@ -52,131 +66,86 @@ mixin CSSSizingMixin {
           maxWidthTransition != null ||
           minHeightTransition != null ||
           maxHeightTransition != null) {
-        double diffWidth = (newConstraints.width ?? 0.0) - (oldConstraints.width ?? 0.0);
-        double diffHeight = (newConstraints.height ?? 0.0) - (oldConstraints.height ?? 0.0);
-        double diffMinWidth = (newConstraints.minWidth ?? 0.0) - (oldConstraints.minWidth ?? 0.0);
-        double diffMaxWidth = (newConstraints.maxWidth ?? 0.0) - (oldConstraints.maxWidth ?? 0.0);
-        double diffMinHeight = (newConstraints.minHeight ?? 0.0) - (oldConstraints.minHeight ?? 0.0);
-        double diffMaxHeight = (newConstraints.maxHeight ?? 0.0) - (oldConstraints.maxHeight ?? 0.0);
+        double oldWidth = renderBoxModel.width ?? 0.0;
+        double oldHeight = renderBoxModel.height ?? 0.0;
+        double oldMinWidth = renderBoxModel.minWidth ?? 0.0;
+        double oldMaxWidth = renderBoxModel.maxWidth ?? 0.0;
+        double oldMinHeight = renderBoxModel.minHeight ?? 0.0;
+        double oldMaxHeight = renderBoxModel.maxHeight ?? 0.0;
 
-        CSSSizedConstraints progressConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
-
-        CSSSizedConstraints baseConstraints = CSSSizedConstraints(oldConstraints.width, oldConstraints.height,
-            oldConstraints.minWidth, oldConstraints.maxWidth, oldConstraints.minHeight, oldConstraints.maxHeight);
+        double diffWidth = (width ?? 0.0) - oldWidth;
+        double diffHeight = (height ?? 0.0) - oldHeight;
+        double diffMinWidth = (minWidth ?? 0.0) - oldMinWidth;
+        double diffMaxWidth = (maxWidth ?? 0.0) - oldMaxWidth;
+        double diffMinHeight = (minHeight ?? 0.0) - oldMinHeight;
+        double diffMaxHeight = (maxHeight ?? 0.0) - oldMaxHeight;
 
         allTransition?.addProgressListener((progress) {
+          double newWidth;
+          double newHeight;
+          double newMinWidth;
+          double newMaxWidth;
+          double newMinHeight;
+          double newMaxHeight;
+
           if (widthTransition == null) {
-            progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
+            newWidth = diffWidth * progress + oldWidth;
           }
           if (heightTransition == null) {
-            progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
+            newHeight = diffHeight * progress + oldHeight;
           }
           if (minWidthTransition == null) {
-            progressConstraints.minWidth = diffMinWidth * progress + (baseConstraints.minWidth ?? 0.0);
+            newMinWidth = diffMinWidth * progress + oldMinWidth;
           }
           if (maxWidthTransition == null) {
-            progressConstraints.maxWidth = diffMaxWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
+            newMaxWidth = diffMaxWidth * progress + oldMaxWidth;
           }
           if (minHeightTransition == null) {
-            progressConstraints.minHeight = diffMinHeight * progress + (baseConstraints.minHeight ?? 0.0);
+            newMinHeight = diffMinHeight * progress + oldMinHeight;
           }
           if (maxHeightTransition == null) {
-            progressConstraints.maxHeight = diffMaxHeight * progress + (baseConstraints.maxHeight ?? double.infinity);
+            newMaxHeight = diffMaxHeight * progress + oldMaxHeight;
           }
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          renderBoxModel.width = newWidth;
+          renderBoxModel.height = newHeight;
+          renderBoxModel.minWidth = newMinWidth;
+          renderBoxModel.maxWidth = newMaxWidth;
+          renderBoxModel.minHeight = newMinHeight;
+          renderBoxModel.maxHeight = newMaxHeight;
         });
         widthTransition?.addProgressListener((progress) {
-          progressConstraints.width = diffWidth * progress + (baseConstraints.width ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newWidth = diffWidth * progress + oldWidth;
+          renderBoxModel.width = newWidth;
         });
         heightTransition?.addProgressListener((progress) {
-          progressConstraints.height = diffHeight * progress + (baseConstraints.height ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newHeight = diffHeight * progress + oldHeight;
+          renderBoxModel.height = newHeight;
         });
         minHeightTransition?.addProgressListener((progress) {
-          progressConstraints.minHeight = diffWidth * progress + (baseConstraints.minHeight ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newMinHeight = diffWidth * progress + oldMinHeight;
+          renderBoxModel.minHeight = newMinHeight;
         });
         minWidthTransition?.addProgressListener((progress) {
-          progressConstraints.minWidth = diffWidth * progress + (baseConstraints.minWidth ?? 0.0);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newMinWidth = diffWidth * progress + oldMinWidth;
+          renderBoxModel.minWidth = newMinWidth;
         });
         maxHeightTransition?.addProgressListener((progress) {
-          progressConstraints.maxHeight = diffWidth * progress + (baseConstraints.maxHeight ?? double.infinity);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newMaxHeight = diffWidth * progress + oldMaxHeight;
+          renderBoxModel.maxHeight = newMaxHeight;
         });
         maxWidthTransition?.addProgressListener((progress) {
-          progressConstraints.maxWidth = diffWidth * progress + (baseConstraints.maxWidth ?? double.infinity);
-          renderConstrainedBox.additionalConstraints = progressConstraints.toBoxConstraints();
+          double newMaxWidth = diffWidth * progress + oldMaxWidth;
+          renderBoxModel.maxWidth = newMaxWidth;
         });
-      } else {
-        renderConstrainedBox.additionalConstraints = newConstraints.toBoxConstraints();
       }
-
-      // Remove inline element dimension
-      if (style[DISPLAY] == INLINE) {
-        renderConstrainedBox.additionalConstraints = BoxConstraints();
-      }
-
-      oldConstraints = newConstraints;
+    } else {
+      renderBoxModel.width = width;
+      renderBoxModel.height = height;
+      renderBoxModel.maxWidth = maxWidth;
+      renderBoxModel.minWidth = minWidth;
+      renderBoxModel.maxHeight = maxHeight;
+      renderBoxModel.minHeight = minHeight;
     }
-  }
-
-  RenderObject initRenderConstrainedBox(RenderObject renderObject, CSSStyleDeclaration style) {
-    oldConstraints = getConstraints(style);
-    return renderConstrainedBox = KrakenRenderConstrainedBox(
-      additionalConstraints: oldConstraints.toBoxConstraints(),
-      child: renderObject,
-    );
-  }
-
-  static CSSSizedConstraints getConstraints(CSSStyleDeclaration style) {
-    double width = CSSLength.toDisplayPortValue(style[WIDTH]);
-    double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
-    double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
-    double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
-    double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
-    double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
-
-    CSSEdgeInsets padding = _getPaddingFromStyle(style);
-    EdgeInsets border = CSSBorder.getBorderEdgeInsets(style);
-
-    if (width != null) {
-      if (maxWidth != null && width > maxWidth) {
-        width = maxWidth;
-      } else if (minWidth != null && width < minWidth) {
-        width = minWidth;
-      }
-    }
-
-    if (height != null) {
-      if (minHeight != null && height < minHeight) {
-        height = minHeight;
-      } else if (maxHeight != null && height > maxHeight) {
-        height = maxHeight;
-      }
-    }
-
-    double internalHeight = padding.top + padding.bottom + border.top + border.bottom;
-    if (height == null) {
-      minHeight = internalHeight;
-    } else if (internalHeight > height) {
-      height = internalHeight;
-    }
-
-    if (maxHeight != null && internalHeight > maxHeight) maxHeight = internalHeight;
-
-    double internalWidth = padding.left + padding.right + border.left + border.right;
-    if (width == null) {
-      minWidth = internalWidth;
-    } else if (internalWidth > width) {
-      width = internalWidth;
-    }
-
-    if (maxWidth != null && internalWidth > maxWidth) maxWidth = internalWidth;
-
-    return CSSSizedConstraints(width, height, minWidth, maxWidth, minHeight, maxHeight);
   }
 
   RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
@@ -296,11 +265,6 @@ mixin CSSSizingMixin {
 
   void _updateMargin(EdgeInsets margin) {
     renderMargin.margin = margin;
-  }
-
-  RenderObject initRenderPadding(RenderObject renderObject, CSSStyleDeclaration style) {
-    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-    return renderPadding = KrakenRenderPadding(padding: edgeInsets, child: renderObject);
   }
 
   static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {
@@ -425,27 +389,133 @@ class CSSEdgeInsets {
   CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
 }
 
-class CSSSizedConstraints {
-  double width;
-  double height;
-  double minWidth;
-  double maxWidth;
-  double minHeight;
-  double maxHeight;
+class CSSSizing {
+  // Get max width of element, use width if exist,
+  // or find the width of the nearest ancestor with width
+  static double getElementComputedMaxWidth(int targetId, ElementManager elementManager) {
+    double width;
+    double cropWidth = 0;
+    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
+    CSSStyleDeclaration style = child.style;
+    String display = getElementRealDisplayValue(targetId, elementManager);
 
-  CSSSizedConstraints(this.width, this.height, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight);
+    void cropMargin(Element childNode) {
+      cropWidth += childNode.cropMarginWidth;
+    }
 
-  BoxConstraints toBoxConstraints() {
-    return BoxConstraints(
-      minWidth: minWidth ?? 0.0,
-      minHeight: minHeight ?? 0.0,
-      maxWidth: maxWidth ?? width ?? double.infinity,
-      maxHeight: maxHeight ?? height ?? double.infinity,
-    );
+    void cropPaddingBorder(Element childNode) {
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.borderEdge != null) {
+        cropWidth += renderBoxModel.borderEdge.horizontal;
+      }
+      if (renderBoxModel.padding != null) {
+        cropWidth += renderBoxModel.padding.horizontal;
+      }
+    }
+
+    // Get width of element if it's not inline
+    if (display != INLINE && style.contains(WIDTH)) {
+      width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+      cropPaddingBorder(child);
+    } else {
+      // Get the nearest width of ancestor with width
+      while (true) {
+        if (child.parentNode != null) {
+          cropMargin(child);
+          cropPaddingBorder(child);
+          child = child.parentNode;
+        } else {
+          break;
+        }
+        if (child is Element) {
+          CSSStyleDeclaration style = child.style;
+          String display = getElementRealDisplayValue(child.targetId, elementManager);
+          if (style.contains(WIDTH) && display != INLINE) {
+            width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
+            cropPaddingBorder(child);
+            break;
+          }
+        }
+      }
+    }
+
+    if (width != null) {
+      return width - cropWidth;
+    } else {
+      return null;
+    }
   }
 
-  @override
-  String toString() {
-    return 'CSSSizedConstraints(width:$width, height: $height, minWidth: $minWidth, maxWidth: $maxWidth, minHeight: $minHeight, maxHeight: $maxHeight)';
+  // Whether current node should stretch children's height
+  static bool isStretchChildHeight(Element current, Element child) {
+    bool isStretch = false;
+    CSSStyleDeclaration style = current.style;
+    CSSStyleDeclaration childStyle = child.style;
+    bool isFlex = style[DISPLAY].endsWith(FLEX);
+    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) ||
+        style[FLEX_DIRECTION] == ROW;
+    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
+        style[ALIGN_ITEMS] == STRETCH;
+    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
+        style[FLEX_WRAP] != WRAP_REVERSE;
+    bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+
+    if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
+      isStretch = true;
+    }
+
+    return isStretch;
+  }
+
+  // Element tree hierarchy can cause element display behavior to change,
+  // for example element which is flex-item can display like inline-block or block
+  static String getElementRealDisplayValue(int targetId, ElementManager elementManager) {
+    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
+    Element parentNode = element.parentNode;
+    String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])
+        ? element.defaultDisplay
+        : element.style[DISPLAY];
+    String position = element.style[POSITION];
+
+    // Display as inline-block when element is positioned
+    if (position == ABSOLUTE || position == FIXED) {
+      display = INLINE_BLOCK;
+    } else if (parentNode != null) {
+      CSSStyleDeclaration style = parentNode.style;
+
+      if (style[DISPLAY].endsWith(FLEX)) {
+        // Display as inline-block if parent node is flex
+        display = INLINE_BLOCK;
+
+        // Display as block if flex vertical layout children and stretch children
+        if (style[FLEX_DIRECTION] == COLUMN &&
+            (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
+          display = BLOCK;
+        }
+      }
+    }
+
+    return display;
+  }
+
+  static Display getDisplay(String displayString) {
+    Display display = Display.inline;
+    if (displayString == null) {
+      return display;
+    }
+
+    switch(displayString) {
+      case 'block':
+        return Display.block;
+      case 'inline-block':
+        return Display.inlineBlock;
+      case 'flex':
+        return Display.flex;
+      case 'inline-flex':
+        return Display.inlineFlex;
+      case 'inline':
+      default:
+        return Display.inline;
+    }
   }
 }

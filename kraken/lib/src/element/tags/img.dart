@@ -29,7 +29,12 @@ class ImageElement extends Element {
   double _propertyHeight;
 
   ImageElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
+      : super(
+        targetId,
+        elementManager,
+        defaultStyle: _defaultStyle,
+        isIntrinsicBox: true,
+        tagName: IMAGE) {
     _renderImage();
   }
 
@@ -87,6 +92,10 @@ class ImageElement extends Element {
 
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
@@ -119,17 +128,17 @@ class ImageElement extends Element {
       width = naturalWidth;
       height = naturalHeight;
     } else {
-      CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
+      RenderBoxModel renderBoxModel = getRenderBoxModel();
       if (containWidth && containHeight) {
-        width = sizedConstraints.width ?? _propertyWidth;
-        height = sizedConstraints.height ?? _propertyHeight;
+        width = renderBoxModel.width ?? _propertyWidth;
+        height = renderBoxModel.height ?? _propertyHeight;
       } else if (containWidth) {
-        width = sizedConstraints.width ?? _propertyWidth;
+        width = renderBoxModel.width ?? _propertyWidth;
         if (naturalWidth != 0) {
           height = width * naturalHeight / naturalWidth;
         }
       } else if (containHeight) {
-        height = sizedConstraints.height ?? _propertyHeight;
+        height = renderBoxModel.height ?? _propertyHeight;
         if (naturalHeight != 0) {
           width = height * naturalWidth / naturalHeight;
         }
@@ -145,6 +154,15 @@ class ImageElement extends Element {
 
     imageBox?.width = width;
     imageBox?.height = height;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.intrinsicWidth = naturalWidth;
+    renderBoxModel.intrinsicHeight = naturalHeight;
+
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderBoxModel.intrinsicRatio = null;
+    } else {
+      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+    }
   }
 
   void _removeStreamListener() {

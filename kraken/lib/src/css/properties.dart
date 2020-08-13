@@ -112,3 +112,5 @@ const String TRANSITION_DELAY = 'transitionDelay';
 
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
+
+const String URL = 'url';

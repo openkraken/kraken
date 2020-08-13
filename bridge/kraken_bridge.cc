@@ -10,6 +10,7 @@
 #include "jsa.h"
 
 #include <atomic>
+#include <thread>
 
 // this is not thread safe
 std::atomic<bool> inited{false};
@@ -17,6 +18,12 @@ std::atomic<int32_t> poolIndex{0};
 int maxPoolSize = 0;
 kraken::JSBridge **contextPool;
 Screen screen;
+
+std::__thread_id uiThreadId;
+
+std::__thread_id getUIThreadId() {
+  return uiThreadId;
+}
 
 void printError(alibaba::jsa::JSContext &bridge, const alibaba::jsa::JSError &error) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
@@ -48,6 +55,7 @@ int32_t searchForAvailablecontextId() {
 } // namespace
 
 void initJSContextPool(int poolSize) {
+  uiThreadId = std::this_thread::get_id();
   if (inited) disposeAllBridge();
   contextPool = new kraken::JSBridge *[poolSize];
   for (int i = 1; i < poolSize; i++) {

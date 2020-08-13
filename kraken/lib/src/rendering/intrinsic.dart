@@ -5,33 +5,36 @@
 
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsicBox extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style) : super(targetId: targetId, style: style);
+  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
+      : super(targetId: targetId, style: style, elementManager: elementManager);
 
   @override
   void performLayout() {
+    beforeLayout();
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
-
-      if (padding != null) {
-        childConstraints = deflatePaddingConstraints(childConstraints);
-      }
-
-      child.layout(childConstraints, parentUsesSize: true);
-      contentSize = child.size;
-      size = computeBoxSize(contentSize);
+      child.layout(contentConstraints, parentUsesSize: true);
+      size = child.size;
     }
+    didLayout();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (padding != null) {
-      offset += Offset(paddingLeft, paddingTop);
-    }
+    basePaint(context, offset, (PaintingContext context, Offset offset) {
+      if (padding != null) {
+        offset += Offset(paddingLeft, paddingTop);
+      }
 
-    if (child != null) context.paintChild(child, offset);
+      if (borderEdge != null) {
+        offset += Offset(borderLeft, borderTop);
+      }
+
+      if (child != null) context.paintChild(child, offset);
+    });
   }
 }

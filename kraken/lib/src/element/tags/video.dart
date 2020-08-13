@@ -115,7 +115,7 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
+    renderIntersectionObserver.child = null;
   }
 
   onCanPlay() async {

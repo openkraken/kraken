@@ -149,16 +149,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   /// The distance by which the child's left edge is inset from the left of the stack.
   double left;
 
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
-
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
-
   /// because the wrap has a minimum size that is not filled), the additional
   /// free space will be allocated according to the [runAlignment].
   ///
@@ -544,6 +534,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   // @override
   void performLayout() {
+    beforeLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
@@ -564,26 +555,27 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
-        setPositionedChildOffset(this, child, size);
+        setPositionedChildOffset(this, child, size, borderEdge);
       }
       child = childParentData.nextSibling;
     }
+
+    didLayout();
   }
 
   void _layoutChildren() {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double contentWidth = getElementComputedWidth(targetId, elementManager);
-    double contentHeight = getElementComputedHeight(targetId, elementManager);
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      contentSize = Size(
+      size = Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      size = computeBoxSize(contentSize);
       return;
     }
 
@@ -598,13 +590,13 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
         break;
       case Axis.vertical:
-        mainAxisLimit = constraints.maxHeight;
+        mainAxisLimit = contentConstraints.maxHeight;
         if (verticalDirection == VerticalDirection.up) flipMainAxis = true;
         if (textDirection == TextDirection.rtl) flipCrossAxis = true;
         break;
@@ -632,7 +624,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         child = childParentData.nextSibling;
         continue;
       }
-
       child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
@@ -724,16 +715,16 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
+
     switch (direction) {
       case Axis.horizontal:
-        contentSize = Size(constraintWidth, constraintHeight);
-        size = computeBoxSize(contentSize);
+        size = Size(constraintWidth, constraintHeight);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+        size = Size(crossAxisExtent, mainAxisExtent);
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;
@@ -831,7 +822,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderElementBoundary) {
-          String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
+          String childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginRight = childStyle[MARGIN_RIGHT];
@@ -892,8 +883,10 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           }
         }
 
-        Offset relativeOffset =
-            _getOffset(childMainPosition + paddingLeft, crossAxisOffset + childLineExtent + paddingTop);
+        Offset relativeOffset = _getOffset(
+          childMainPosition + paddingLeft + borderLeft,
+          crossAxisOffset + childLineExtent + paddingTop + borderTop
+        );
 
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
@@ -1020,37 +1013,38 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    List<RenderObject> children = getChildrenAsList();
-    children.sort((RenderObject prev, RenderObject next) {
-      RenderLayoutParentData prevParentData = prev.parentData;
-      RenderLayoutParentData nextParentData = next.parentData;
-      // Place positioned element after non positioned element
-      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-        return -1;
-      }
-      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-        return 1;
-      }
-      // z-index applies to element when position is not static
-      int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-      int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-      return prevZIndex - nextZIndex;
-    });
+    basePaint(context, offset, (context, offset) {
+      List<RenderObject> children = getChildrenAsList();
+      children.sort((RenderObject prev, RenderObject next) {
+        RenderLayoutParentData prevParentData = prev.parentData;
+        RenderLayoutParentData nextParentData = next.parentData;
+        // Place positioned element after non positioned element
+        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+          return -1;
+        }
+        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+          return 1;
+        }
+        // z-index applies to element when position is not static
+        int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
+        int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
+        return prevZIndex - nextZIndex;
+      });
 
-    for (var child in children) {
-      if (child is! RenderPositionHolder) {
-        final RenderLayoutParentData childParentData = child.parentData;
-        context.paintChild(child, childParentData.offset + offset);
-        child = childParentData.nextSibling;
+      for (var child in children) {
+        if (child is! RenderPositionHolder) {
+          final RenderLayoutParentData childParentData = child.parentData;
+          context.paintChild(child, childParentData.offset + offset);
+          child = childParentData.nextSibling;
+        }
       }
-    }
+    });
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {

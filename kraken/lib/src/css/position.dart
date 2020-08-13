@@ -121,15 +121,13 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
-
+  RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
   final RenderLayoutParentData childParentData = child.parentData;
 
   // Default to no constraints. (0 - infinite)
   BoxConstraints childConstraints = const BoxConstraints();
-
-  Size trySize = parentConstraints.biggest;
-  Size parentSize = trySize.isInfinite ? parentConstraints.smallest : trySize;
+  Size trySize = parentRenderBoxModel.contentConstraints.biggest;
+  Size parentSize = trySize.isInfinite ? parentRenderBoxModel.contentConstraints.smallest : trySize;
 
   BoxSizeType widthType = _getChildWidthSizeType(child);
   BoxSizeType heightType = _getChildHeightSizeType(child);
@@ -154,7 +152,7 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
@@ -165,16 +163,23 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
     Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
         parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
-    // padding box of containing block
+    // padding box of containing block, so it needs to add border insets
+    // when caculating offset
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    double top = childParentData.top != null ? (childParentData.top) : baseOffset.dy;
+
+    double borderLeft = borderEdge != null ? borderEdge.left : 0;
+    double borderRight = borderEdge != null ? borderEdge.right : 0;
+    double borderTop = borderEdge != null ? borderEdge.top : 0;
+    double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
+
+    double top = childParentData.top != null ? childParentData.top + borderTop : baseOffset.dy;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = parentSize.height - child.size.height - ((childParentData.bottom) ?? 0);
+      top = parentSize.height - child.size.height - borderBottom - ((childParentData.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? (childParentData.left) : baseOffset.dx;
+    double left = childParentData.left != null ? childParentData.left + borderLeft : baseOffset.dx;
     if (childParentData.left == null && childParentData.right != null) {
-      left = parentSize.width - child.size.width - ((childParentData.right) ?? 0);
+      left = parentSize.width - child.size.width - borderRight - ((childParentData.right) ?? 0);
     }
 
     x = left;
@@ -209,8 +214,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
         (right.isNotEmpty && right != AUTO) &&
         (width.isNotEmpty && width != AUTO)) {
       if (marginLeft == AUTO) {
-        double leftValue = CSSLength.toDisplayPortValue(left);
-        double rightValue = CSSLength.toDisplayPortValue(right);
+        double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
+        double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
         double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
 
         if (marginRight == AUTO) {
@@ -225,8 +230,8 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
         (bottom.isNotEmpty && bottom != AUTO) &&
         (height.isNotEmpty && height != AUTO)) {
       if (marginTop == AUTO) {
-        double topValue = CSSLength.toDisplayPortValue(top);
-        double bottomValue = CSSLength.toDisplayPortValue(bottom);
+        double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
+        double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
         double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
 
         if (marginBottom == AUTO) {
