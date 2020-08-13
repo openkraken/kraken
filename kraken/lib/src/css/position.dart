@@ -159,6 +159,19 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   // Calc x,y by parentData.
   double x, y;
 
+  double childMarginTop = 0;
+  double childMarginBottom = 0;
+  double childMarginLeft = 0;
+  double childMarginRight = 0;
+  if (child is RenderElementBoundary) {
+    Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
+    RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
+    childMarginTop = childRenderBoxModel.marginTop;
+    childMarginBottom = childRenderBoxModel.marginBottom;
+    childMarginLeft = childRenderBoxModel.marginLeft;
+    childMarginRight = childRenderBoxModel.marginRight;
+  }
+
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
@@ -173,15 +186,19 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
     double borderRight = borderEdge != null ? borderEdge.right : 0;
     double borderTop = borderEdge != null ? borderEdge.top : 0;
     double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
-    
-    double top = childParentData.top != null ? childParentData.top + borderTop : baseOffset.dy;
+
+    double top = childParentData.top != null ?
+      childParentData.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = parentSize.height - child.size.height - borderBottom - ((childParentData.bottom) ?? 0);
+      top = parentSize.height - child.size.height - borderBottom - childMarginBottom -
+        ((childParentData.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? childParentData.left + borderLeft : baseOffset.dx;
+    double left = childParentData.left != null ?
+      childParentData.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
     if (childParentData.left == null && childParentData.right != null) {
-      left = parentSize.width - child.size.width - borderRight - ((childParentData.right) ?? 0);
+      left = parentSize.width - child.size.width - borderRight - childMarginRight -
+        ((childParentData.right) ?? 0);
     }
 
     x = left;
