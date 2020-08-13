@@ -521,7 +521,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     return minConstraints;
   }
 
-  double _getCrossSize(RenderBox child) {
+  double _getCrossAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
@@ -541,7 +541,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     return null;
   }
 
-  double _getMainSize(RenderBox child) {
+  double _getMainAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
@@ -557,6 +557,30 @@ class RenderFlexLayout extends RenderLayoutBox {
       case FlexDirection.column:
       case FlexDirection.columnReverse:
         return child.size.height + marginVertical;
+    }
+    return null;
+  }
+
+  double _getCrossSize(RenderBox child) {
+    switch (_flexDirection) {
+      case FlexDirection.row:
+      case FlexDirection.rowReverse:
+        return child.size.height;
+      case FlexDirection.columnReverse:
+      case FlexDirection.column:
+        return child.size.width;
+    }
+    return null;
+  }
+
+  double _getMainSize(RenderBox child) {
+    switch (_flexDirection) {
+      case FlexDirection.row:
+      case FlexDirection.rowReverse:
+        return child.size.width;
+      case FlexDirection.column:
+      case FlexDirection.columnReverse:
+        return child.size.height;
     }
     return null;
   }
@@ -751,8 +775,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
       child.layout(innerConstraints, parentUsesSize: true);
 
-      double childMainSize = _getMainSize(child);
-      double childCrossSize = _getCrossSize(child);
+      double childMainAxisExtent = _getMainAxisExtent(child);
+      double childCrossAxisExtent = _getCrossAxisExtent(child);
 
       // If container has no main size, get minimum content based size
       // https://www.w3.org/TR/css-flexbox-1/#min-size-auto
@@ -768,7 +792,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       // Caculate flex line
       if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
           _effectiveChildCount > 0 &&
-          (runMainAxisExtent + childMainSize > flexLineLimit)) {
+          (runMainAxisExtent + childMainAxisExtent > flexLineLimit)) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
 
@@ -789,8 +813,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         totalFlexGrow = 0;
         hasFlexShrink = false;
       }
-      runMainAxisExtent += childMainSize;
-      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossSize);
+      runMainAxisExtent += childMainAxisExtent;
+      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
 
       /// Caculate baseline extent of layout box
       AlignSelf alignSelf = childParentData.alignSelf;
@@ -816,10 +840,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           );
           runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
         } else {
-          runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossSize);
+          runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
         }
       } else {
-        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossSize);
+        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
 
       _effectiveChildCount += 1;
@@ -896,7 +920,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         totalFlexGrow += childParentData.flexGrow;
       }
 
-      crossSize = crossAxisExtent != 0.0 ? crossAxisExtent : math.max(crossSize, childMainSize);
+      crossSize = crossAxisExtent != 0.0 ? crossAxisExtent : math.max(crossSize, childMainAxisExtent);
 
       // Only layout placeholder renderObject child
       child = placeholderChild == null ? childParentData.nextSibling : null;
@@ -1174,7 +1198,6 @@ class RenderFlexLayout extends RenderLayoutBox {
                 break;
             }
           }
-
           child.layout(innerConstraints, parentUsesSize: true);
           crossSize = math.max(crossSize, _getCrossSize(child));
           // Only layout placeholder renderObject child
