@@ -16,7 +16,6 @@ mixin RenderPaddingMixin on RenderBox {
 
   void _markNeedResolution() {
     _resolvedPadding = null;
-    _resolvedPadding = null;
     markNeedsLayout();
   }
 
