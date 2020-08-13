@@ -590,9 +590,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
-    double contentWidth = getElementComputedWidth(targetId, elementManager);
-    double contentHeight = getElementComputedHeight(targetId, elementManager);
-
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -645,7 +644,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (contentWidth != null) {
       flexLineLimit = contentWidth;
     } else {
-      flexLineLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
+      flexLineLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
     }
 
     double maxSizeAboveBaseline = 0;
@@ -674,7 +673,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       BoxSizeType sizeType = _getChildHeightSizeType(child);
       if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
         double maxCrossAxisSize;
-        // Caculate max height constaints
+        // Calculate max height constraints
         if (sizeType == BoxSizeType.specified) {
           maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT]);
         } else {
@@ -694,8 +693,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else {
         innerConstraints = BoxConstraints(minHeight: baseConstraints);
       }
-
-      child.layout(innerConstraints, parentUsesSize: true);
+      child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
 
       double childMainSize = _getMainSize(child);
       double childCrossSize = _getCrossSize(child);
@@ -711,7 +709,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         'flexShrink': _getFlexShrink(child),
       };
 
-      // Caculate flex line
+      // calculate flex line
       if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
           _effectiveChildCount > 0 &&
           (runMainAxisExtent + childMainSize > flexLineLimit)) {
@@ -1113,7 +1111,8 @@ class RenderFlexLayout extends RenderLayoutBox {
                 break;
             }
           }
-          child.layout(innerConstraints, parentUsesSize: true);
+
+          child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
           crossSize = math.max(crossSize, _getCrossSize(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;
@@ -1149,15 +1148,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = contentConstraints
-            .constrain(Size(math.max(constraintWidth, idealMainSize), contentConstraints.constrainHeight(constraintHeight)));
+        size = Size(math.max(constraintWidth, idealMainSize), constraintHeight);
         actualSize = contentSize.width;
         crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = contentConstraints
-            .constrain(Size(math.max(constraintWidth, crossSize), contentConstraints.constrainHeight(constraintHeight)));
+        size = Size(math.max(constraintWidth, crossSize), constraintHeight);
         actualSize = contentSize.height;
         crossSize = contentSize.width;
         break;

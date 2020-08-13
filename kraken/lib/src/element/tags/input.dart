@@ -128,8 +128,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
-
-    setBoxConstraints();
   }
 
   @override
@@ -144,30 +142,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     // Rebuilt text span, for style has changed.
     textSpan = buildTextSpan();
     renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
-  }
-
-  void setBoxConstraints() {
-    bool containWidth = style.contains('width');
-    bool containHeight = style.contains('height');
-    BoxConstraints oldConstraints = renderConstrainedBox.additionalConstraints;
-    double minWidth = oldConstraints.minWidth;
-    double maxWidth = oldConstraints.maxWidth;
-    double minHeight = oldConstraints.minHeight;
-    double maxHeight = oldConstraints.maxHeight;
-
-    if (containWidth) {
-      minWidth = maxWidth = CSSLength.toDisplayPortValue(style['width']);
-    }
-    if (containHeight) {
-      minHeight = maxHeight = CSSLength.toDisplayPortValue(style['height']);
-    }
-
-    renderConstrainedBox.additionalConstraints = BoxConstraints(
-      minWidth: minWidth,
-      maxWidth: maxWidth,
-      minHeight: minHeight,
-      maxHeight: maxHeight,
-    );
   }
 
   TextSpan buildTextSpan({String text = ''}) {

@@ -5,11 +5,13 @@
 
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderIntrinsicBox extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style) : super(targetId: targetId, style: style);
+  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
+      : super(targetId: targetId, style: style, elementManager: elementManager);
 
   @override
   void performLayout() {

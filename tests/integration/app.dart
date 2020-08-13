@@ -14,7 +14,7 @@ String err = (AnsiPen()..red())('[TEST FAILED]');
 
 void main() {
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
-  CSSTextMixin.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
+  CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
   // This line enables the extension.
   enableFlutterDriverExtension(handler: (String payload) async {

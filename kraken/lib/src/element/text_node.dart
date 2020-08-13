@@ -10,7 +10,13 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    renderTextBox = RenderTextBox(targetId: targetId, text: '', style: null, elementManager: elementManager);
+    InlineSpan text = createTextSpan(_data, null);
+
+    renderTextBox = RenderTextBox(text,
+      targetId: targetId,
+      style: null,
+      elementManager: elementManager,
+    );
   }
 
   RenderTextBox renderTextBox;
@@ -21,7 +27,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   String get data {
     if (_data == null || _data.isEmpty) return '';
 
-    String whiteSpace = parent?.style[WHITE_SPACE];
+    WhiteSpace whiteSpace = CSSText.getWhiteSpace(parent?.style);
 
     /// The following table summarizes the behavior of the various white-space values:
     //
@@ -32,8 +38,11 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     // pre-wrap	Preserve	Preserve	Wrap	Hang
     // pre-line	Preserve	Collapse	Wrap	Remove
     // break-spaces	Preserve	Preserve	Wrap	Wrap
-    if (whiteSpace.startsWith('pre') || whiteSpace == 'break-spaces') {
-      return whiteSpace == 'pre-line' ? collapseWhitespace(_data, collapseSpace: true) : _data;
+    if (whiteSpace == WhiteSpace.pre ||
+        whiteSpace == WhiteSpace.preLine ||
+        whiteSpace == WhiteSpace.preWrap ||
+        whiteSpace == WhiteSpace.breakSpaces) {
+      return whiteSpace == WhiteSpace.preLine ? collapseWhitespace(_data, collapseSpace: true) : _data;
     } else {
       String collapsedData = collapseWhitespace(_data);
       // Append space while prev is element.
@@ -76,11 +85,17 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void _updateTextStyle() {
     // parentNode must be an element.
     Element parentElement = parentNode;
-    renderTextBox.text = data;
     renderTextBox.style = parentElement.style;
+    renderTextBox.text = createTextSpan(data, parentElement.style);
+    _setTextNodeProperties(parentElement.style);
 
     _setTextSizeType(
         parentElement.renderElementBoundary.widthSizeType, parentElement.renderElementBoundary.heightSizeType);
+  }
+
+  void _setTextNodeProperties(CSSStyleDeclaration style) {
+    renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
+    renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
   }
 
   @override
@@ -91,9 +106,10 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   void attachTo(Element parent, {RenderObject after}) {
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
-    renderTextBox.text = data;
+    renderTextBox.text = createTextSpan(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
+    _setTextNodeProperties(parent.style);
     parent.renderLayoutBox.insert(renderTextBox, after: after);
     _setTextSizeType(parent.renderElementBoundary.widthSizeType, parent.renderElementBoundary.heightSizeType);
   }

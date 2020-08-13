@@ -149,16 +149,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   /// The distance by which the child's left edge is inset from the left of the stack.
   double left;
 
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
-
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
-
   /// because the wrap has a minimum size that is not filled), the additional
   /// free space will be allocated according to the [runAlignment].
   ///
@@ -577,8 +567,9 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    double contentWidth = getElementComputedWidth(targetId, elementManager);
-    double contentHeight = getElementComputedHeight(targetId, elementManager);
+    final double contentWidth = getContentWidth();
+    final double contentHeight = getContentHeight();
+
     // If no child exists, stop layout.
     if (childCount == 0) {
       size = Size(
@@ -599,7 +590,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSComputedMixin.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -727,13 +718,13 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        size = contentConstraints.constrain(Size(constraintWidth, constraintHeight));
+        size = Size(constraintWidth, constraintHeight);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = contentConstraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+        size = Size(crossAxisExtent, mainAxisExtent);
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;
@@ -831,7 +822,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderElementBoundary) {
-          String childRealDisplay = CSSComputedMixin.getElementRealDisplayValue(child.targetId, elementManager);
+          String childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginRight = childStyle[MARGIN_RIGHT];
@@ -1054,7 +1045,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {

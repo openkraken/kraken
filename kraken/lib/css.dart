@@ -5,7 +5,6 @@
 
 export 'src/css/background.dart';
 export 'src/css/box.dart';
-export 'src/css/computed.dart';
 export 'src/css/content_visibility.dart';
 export 'src/css/flexbox.dart';
 export 'src/css/opacity.dart';
