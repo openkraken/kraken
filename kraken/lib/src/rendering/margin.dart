@@ -30,7 +30,7 @@ mixin RenderMarginMixin on RenderBox {
   EdgeInsetsGeometry get margin => _margin;
   EdgeInsetsGeometry _margin;
   set margin(EdgeInsetsGeometry value) {
-    assert(value != null);
+    if (value == null) return;
     assert(value.isNonNegative);
     if (_margin == value) return;
     _margin = value;
