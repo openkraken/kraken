@@ -125,13 +125,8 @@ class RenderElementBoundary extends RenderTransform
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      RenderBoxModel renderBoxModel = element.getRenderBoxModel();
-      double marginWidth = renderBoxModel.margin != null ?
-        renderBoxModel.margin.horizontal : 0;
-      double marginHeight = renderBoxModel.margin != null ?
-        renderBoxModel.margin.vertical : 0;
-      double width = (layoutSize?.width ?? 0.0) - (marginWidth ?? 0.0);
-      double height = (layoutSize?.height ?? 0.0) - (marginHeight ?? 0.0);
+      double width = (layoutSize?.width ?? 0.0);
+      double height = (layoutSize?.height ?? 0.0);
 
       translation = (alignment as Alignment).alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);
