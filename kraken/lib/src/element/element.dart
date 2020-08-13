@@ -1025,12 +1025,12 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderElementBoundary);
+    updateRenderOpacity(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderElementBoundary);
+    updateRenderVisibility(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
