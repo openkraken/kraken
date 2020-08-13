@@ -109,14 +109,14 @@ export function getNodeByTargetId(targetId: number) : Node|null|Window {
 
 export function removeElementById(elementid: string, element: Element): void {
   const mapEntity = elementMapById[elementid];
-  if (mapEntity && mapEntity.orderList) {
-    if (mapEntity.orderList.length === 0) {
+  if (mapEntity && mapEntity.elementList) {
+    if (mapEntity.elementList.length === 0) {
       delete elementMapById[elementid];
     } else {
-      mapEntity.orderList = mapEntity.orderList.filter((item: Element) => item !== element);
-      if (mapEntity.orderList.length === 1) {
-        [mapEntity.element] = mapEntity.orderList;
-        mapEntity.orderList = [];
+      mapEntity.elementList = mapEntity.elementList.filter((item: Element) => item !== element);
+      if (mapEntity.elementList.length === 1) {
+        [mapEntity.element] = mapEntity.elementList;
+        mapEntity.elementList = [];
       }
     }
   }
@@ -125,14 +125,14 @@ export function removeElementById(elementid: string, element: Element): void {
 export function addElementById(elementid: string, element: Element): void {
   const mapEntity = elementMapById[elementid];
   if (mapEntity) {
-    if (mapEntity.orderList.length > 0) {
-      mapEntity.orderList.push(element);
+    if (mapEntity.elementList.length > 0) {
+      mapEntity.elementList.push(element);
     } else {
-      mapEntity.orderList = [element, mapEntity.element];
+      mapEntity.elementList = [element, mapEntity.element];
       mapEntity.element = null;
     }
   } else {
-    const newEntity = { element, orderList: [] };
+    const newEntity = { element, elementList: [] };
     elementMapById[elementid] = newEntity;
   }
 }

@@ -136,7 +136,9 @@ export class Node extends EventTarget {
   }
 
   protected _notifyNodeRemoved(insertionNode: Node): void {}
+
   protected _notifyNodeInsert(insertionNode: Node): void {}
+
 
   /**
    * The Node.replaceChild() method replaces a child node within the given (parent) node.
