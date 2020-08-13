@@ -487,11 +487,19 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   }
 
   double _getMainAxisExtent(RenderBox child) {
+    double marginHorizontal = 0;
+    double marginVertical = 0;
+
+    if (child is RenderElementBoundary) {
+      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
+      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+    }
     switch (direction) {
       case Axis.horizontal:
-        return child.size.width;
+        return child.size.width + marginHorizontal;
       case Axis.vertical:
-        return child.size.height;
+        return child.size.height + marginVertical;
     }
     return 0.0;
   }
@@ -507,18 +515,20 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     CSSStyleDeclaration childStyle = _getChildStyle(child);
     double lineHeight = CSSText.getLineHeight(childStyle);
     double marginVertical = 0;
+    double marginHorizontal = 0;
 
     if (child is RenderElementBoundary) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
     }
     switch (direction) {
       case Axis.horizontal:
         return lineHeight != null ?
-          math.max(lineHeight + marginVertical, child.size.height + marginVertical) :
+          math.max(lineHeight, child.size.height) + marginVertical :
           child.size.height + marginVertical;
       case Axis.vertical:
-        return child.size.width;
+        return child.size.width + marginHorizontal;
     }
     return 0.0;
   }
@@ -686,8 +696,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
           childMarginTop = childRenderBoxModel.marginTop;
           childMarginBottom = childRenderBoxModel.marginBottom;
         }
-        // Distance from top to baseline of child
-//        double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
 
         CSSStyleDeclaration childStyle = _getChildStyle(child);
         double lineHeight = CSSText.getLineHeight(childStyle);
@@ -896,7 +904,6 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         bool isLineHeightValid = _isLineHeightValid(child);
         if (isLineHeightValid) {
           // Distance from top to baseline of child
-//          double childAscent = child.getDistanceToBaseline(TextBaseline.alphabetic);
           double childAscent = _getChildAscent(child);
 
           VerticalAlign verticalAlign = getVerticalAlign(childStyle);
@@ -914,8 +921,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
               break;
             // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
             // currently flutter lack the api to caculate x-height of glyph
-//            case VerticalAlign.middle:
-//              break;
+            //  case VerticalAlign.middle:
+            //  break;
           }
         }
 
