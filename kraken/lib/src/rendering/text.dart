@@ -4,73 +4,65 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
-import 'element_boundary.dart';
+import 'package:kraken/css.dart';
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
-class RenderTextBox extends RenderBox
-    with
-        CSSComputedMixin,
-        CSSTextMixin,
-        CSSSizingMixin,
-        ContainerRenderObjectMixin<RenderBox, TextParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
-  RenderTextBox({
+enum WhiteSpace {
+  normal,
+  nowrap,
+  pre,
+  preWrap,
+  preLine,
+  breakSpaces
+}
+
+class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  RenderTextBox(InlineSpan text, {
     this.targetId,
+    this.style,
     this.elementManager,
-    String text,
-    CSSStyleDeclaration style,
   }) : assert(text != null) {
-    _text = text;
-    _style = style;
-
     _renderParagraph = RenderParagraph(
-      createTextSpan(text, style),
-      textAlign: getTextAlign(style),
+      text,
       textDirection: TextDirection.ltr,
-      overflow: _getOverflow(),
     );
-    add(_renderParagraph);
-  }
 
-  BoxSizeType widthSizeType;
-  BoxSizeType heightSizeType;
-
-  void _rebuild() {
-    _renderParagraph.text = createTextSpan(text, style);
-    _renderParagraph.textAlign = getTextAlign(style);
-    _renderParagraph.overflow = _getOverflow();
-    _renderParagraph.markNeedsLayout();
+    child = _renderParagraph;
   }
 
   RenderParagraph _renderParagraph;
   int targetId;
-  String _text;
+  CSSStyleDeclaration style;
   ElementManager elementManager;
-  String get text => _text;
-  set text(String newText) {
-    _text = newText;
-    _rebuild();
+
+  BoxSizeType widthSizeType;
+  BoxSizeType heightSizeType;
+
+  set text(InlineSpan value) {
+    assert(_renderParagraph != null);
+    _renderParagraph.text = value;
   }
 
-  CSSStyleDeclaration _style;
-  CSSStyleDeclaration get style => _style;
-  set style(CSSStyleDeclaration newStyle) {
-    _style = newStyle;
-    _rebuild();
+  set textAlign(TextAlign value) {
+    assert(_renderParagraph != null);
+    _renderParagraph.textAlign = value;
   }
 
-  bool _isTextOverflowEllipsis() {
-    return _style != null &&
-        style[OVERFLOW_X] != 'visible' &&
-        style[WHITE_SPACE] == 'nowrap' &&
-        style[TEXT_OVERFLOW] == 'ellipsis';
+  set overflow(TextOverflow value) {
+    assert(_renderParagraph != null);
+    _renderParagraph.overflow = value;
   }
 
-  TextOverflow _getOverflow() {
-    return _isTextOverflowEllipsis() ? TextOverflow.ellipsis : TextOverflow.clip;
+  WhiteSpace _whiteSpace;
+  WhiteSpace get whiteSpace {
+    return _whiteSpace;
+  }
+  set whiteSpace(WhiteSpace value) {
+    if (value == whiteSpace) return;
+    _whiteSpace = value;
   }
 
   @override
@@ -82,24 +74,22 @@ class RenderTextBox extends RenderBox
 
   @override
   void performLayout() {
-    RenderBox child = firstChild;
-
-    // @TODO when in flex-grow or flex-shrink width needs to be recalculated
-    Node currentNode = elementManager.getEventTargetByTargetId<Node>(targetId);
-    Element parentNode = currentNode.parentNode;
-    double elementWidth = getElementComputedWidth(parentNode.targetId, elementManager);
     if (child != null) {
-      BoxConstraints additionalConstraints = constraints;
-
-      if (_isTextOverflowEllipsis() || (style[WHITE_SPACE] != 'nowrap' && elementWidth != null)) {
-        additionalConstraints = BoxConstraints(
+      BoxConstraints boxConstraints;
+      Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
+      Element parentElement = hostTextNode.parent;
+      final double contentWidth = parentElement.getRenderBoxModel().getContentWidth();
+      if (contentWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
+        boxConstraints = BoxConstraints(
           minWidth: 0,
-          maxWidth: elementWidth,
+          maxWidth: contentWidth,
           minHeight: 0,
-          maxHeight: double.infinity,
+          maxHeight: double.infinity
         );
+      } else {
+        boxConstraints = constraints;
       }
-      child.layout(additionalConstraints, parentUsesSize: true);
+      child.layout(boxConstraints, parentUsesSize: true);
       size = child.size;
     } else {
       performResize();
@@ -113,14 +103,8 @@ class RenderTextBox extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderBox child = firstChild;
     if (child != null) {
       context.paintChild(child, offset);
     }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
   }
 }

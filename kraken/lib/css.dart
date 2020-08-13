@@ -5,7 +5,6 @@
 
 export 'src/css/background.dart';
 export 'src/css/box.dart';
-export 'src/css/computed.dart';
 export 'src/css/content_visibility.dart';
 export 'src/css/flexbox.dart';
 export 'src/css/opacity.dart';
@@ -27,10 +26,11 @@ export 'src/css/values/angle.dart';
 export 'src/css/values/color.dart';
 export 'src/css/values/function.dart';
 export 'src/css/values/length.dart';
-export 'src/css/values/numeric.dart';
+export 'src/css/values/number.dart';
+export 'src/css/values/integer.dart';
 export 'src/css/values/position.dart';
 export 'src/css/values/time.dart';
 export 'src/css/values/url.dart';
-export 'src/css/values/value.dart';
+export 'src/css/values/percentage.dart';
 export 'src/css/values/textual.dart';
 export 'src/css/values/keywords.dart';

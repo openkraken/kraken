@@ -33,7 +33,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
   Decoration get decoration => _decoration;
   Decoration _decoration;
   set decoration(Decoration value) {
-    assert(value != null);
+    if (value == null) return;
     if (value == _decoration) return;
     _painter?.dispose();
     _painter = null;

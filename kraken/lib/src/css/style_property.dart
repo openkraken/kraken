@@ -356,7 +356,7 @@ class CSSStyleProperty {
 
   // all, -moz-specific, sliding; => ['all', '-moz-specific', 'sliding']
   static List<String> getMultipleValues(String property) {
-    assert(property != null);
+    if (property.isEmpty) return null;
     return property.split(_commaRegExp);
   }
 

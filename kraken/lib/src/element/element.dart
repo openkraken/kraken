@@ -89,7 +89,6 @@ class Element extends Node
 
   // A point reference to treed renderObject.
   RenderObject renderObject;
-  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
@@ -128,19 +127,19 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style);
+      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style, elementManager);
     } else {
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
+
+    // init box sizing
+    initRenderBoxSizing(getRenderBoxModel(), style, transitionMap);
 
     // Init overflow
     initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
 
     // Init border and background
     initRenderDecoratedBox(getRenderBoxModel(), style);
-
-    // Constrained box
-    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
 
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
@@ -160,8 +159,13 @@ class Element extends Node
     BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
     BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
 
+    // @FIXME: need to remove after renderElementBoundary removed.
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -176,10 +180,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderConstrainedBox.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -220,7 +224,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderConstrainedBox?.size?.height;
+      double viewPortHeight = renderIntersectionObserver?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -256,7 +260,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderConstrainedBox?.size?.width;
+      double viewPortWidth = renderIntersectionObserver?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -525,10 +529,10 @@ class Element extends Node
     bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
 
     // Add FlexItem wrap for flex child node.
-    if (isParentFlexDisplayType && renderLayoutBox != null) {
-      renderConstrainedBox.child = null;
-      renderConstrainedBox.child = RenderFlexItem(child: renderLayoutBox);
-    }
+//    if (isParentFlexDisplayType) {
+//      renderIntersectionObserver.child = null;
+//      renderIntersectionObserver.child = RenderFlexItem(child: getRenderBoxModel());
+//    }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
@@ -894,9 +898,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderConstrainedBox.child = null;
-        renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        renderConstrainedBox.child = renderLayoutBox;
+        renderIntersectionObserver.child = null;
+        renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
+        renderIntersectionObserver.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -956,8 +960,7 @@ class Element extends Node
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    // Update constrained box.
-    updateConstraints(style, transitionMap);
+    updateBoxSize(getRenderBoxModel(), style, transitionMap);
 
     setElementSizeType();
 
@@ -979,26 +982,6 @@ class Element extends Node
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-    if (display.endsWith(FLEX)) {
-      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
-      // Collect children of renderLayoutBox and remove their relationship.
-      List<RenderBox> children = [];
-      prevRenderLayoutBox
-        ..visitChildren((child) {
-          children.add(child);
-        })
-        ..removeAll();
-
-      renderConstrainedBox.child = null;
-      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      renderConstrainedBox.child = renderLayoutBox;
-
-      this.children.forEach((Element child) {
-        _updateFlexItemStyle(child);
-      });
-    }
-
     _updateDecorationRenderLayoutBox();
   }
 
@@ -1013,7 +996,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(getRenderBoxModel(), style, property, present, renderConstrainedBox, targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, renderIntersectionObserver, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
@@ -1050,22 +1033,18 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void updateChildNodesStyle() {
+  void _updateChildNodesStyle() {
     childNodes.forEach((node) {
       if (node is TextNode) node.updateTextStyle();
     });
   }
 
-  // @TODO(refactor): Need to remove it.
-  void _flushStyle() {
+  void _updateTransitionEvent() {
     if (transitionMap != null) {
       for (CSSTransition transition in transitionMap.values) {
-        initTransitionEvent(transition);
-        transition?.apply();
+        updateTransitionEvent(transition);
       }
     }
-
-    updateChildNodesStyle();
   }
 
   RenderBoxModel getRenderBoxModel() {
@@ -1081,8 +1060,10 @@ class Element extends Node
   void setStyle(String key, value) {
     // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
     // [StyleChangeListener] to be invoked in sync.
-    style[key] = value;
-    _flushStyle();
+    style.setProperty(key, value);
+
+    _updateTransitionEvent();
+    _updateChildNodesStyle();
   }
 
   @mustCallSuper
@@ -1171,7 +1152,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
 
-    RenderBox sizedBox = renderConstrainedBox.child;
+    RenderBox sizedBox = renderIntersectionObserver.child;
     if (isConnected) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();

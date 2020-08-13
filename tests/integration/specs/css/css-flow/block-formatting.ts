@@ -400,7 +400,7 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.2);
   });
   xit('contexts-009', async () => {
     let p;
