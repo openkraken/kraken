@@ -561,17 +561,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     return null;
   }
 
-//  double _getCrossSize(RenderBox child) {
-//    switch (_flexDirection) {
-//      case FlexDirection.row:
-//      case FlexDirection.rowReverse:
-//        return child.size.height;
-//      case FlexDirection.columnReverse:
-//      case FlexDirection.column:
-//        return child.size.width;
-//    }
-//    return null;
-//  }
+  double _getCrossSize(RenderBox child) {
+    switch (_flexDirection) {
+      case FlexDirection.row:
+      case FlexDirection.rowReverse:
+        return child.size.height;
+      case FlexDirection.columnReverse:
+      case FlexDirection.column:
+        return child.size.width;
+    }
+    return null;
+  }
 
   double _getMainSize(RenderBox child) {
     switch (_flexDirection) {
@@ -671,7 +671,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   void _layoutChildren(RenderPositionHolder placeholderChild) {
     double contentWidth = getElementComputedWidth(targetId, elementManager);
     double contentHeight = getElementComputedHeight(targetId, elementManager);
-
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -785,7 +784,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       childSizeMap[childNodeId] = {
-        'size': _getMainAxisExtent(child),
+        'size': _getMainSize(child),
         'flexShrink': _getFlexShrink(child),
       };
 
@@ -1008,6 +1007,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           mainSizeType == BoxSizeType.automatic ? 0 : (canFlex ? maxMainSize : 0.0) - runMainAxisExtent;
       bool isFlexGrow = freeMainAxisSpace >= 0 && totalFlexGrow > 0;
       bool isFlexShrink = freeMainAxisSpace < 0 && hasFlexShrink;
+
       if (isFlexGrow || isFlexShrink || alignItems == AlignItems.stretch && placeholderChild == null) {
         final double spacePerFlex = canFlex && totalFlexGrow > 0 ? (freeMainAxisSpace / totalFlexGrow) : double.nan;
         while (child != null) {
@@ -1477,7 +1477,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         double crossOffset;
         if (flexWrap == FlexWrap.wrapReverse) {
-          crossOffset = constraintHeight - (childCrossPosition + crossAxisOffset + _getCrossAxisExtent(child));
+          crossOffset = constraintHeight - (childCrossPosition + crossAxisOffset + _getCrossSize(child));
         } else {
           crossOffset = childCrossPosition + crossAxisOffset;
         }
