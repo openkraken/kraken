@@ -1082,15 +1082,6 @@ class RenderFlexLayout extends RenderLayoutBox {
           BoxConstraints innerConstraints;
           // @TODO: minChildExtent.isNegative
           if (alignItems == AlignItems.stretch) {
-//            double childMarginHeight = 0;
-//            if (child is RenderElementBoundary) {
-//              int childNodeId = child.targetId;
-//              Element childEl = elementManager.getEventTargetByTargetId<Element>(childNodeId);
-//              RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
-//              childMarginHeight = renderBoxModel.margin != null ?
-//                renderBoxModel.margin.vertical : 0;
-//            }
-
             switch (_flexDirection) {
               case FlexDirection.row:
               case FlexDirection.rowReverse:
@@ -1111,7 +1102,6 @@ class RenderFlexLayout extends RenderLayoutBox {
                         minCrossAxisSize = 0.0;
                         maxCrossAxisSize = contentConstraints.maxHeight;
                       } else {
-//                        minCrossAxisSize = maxCrossAxisSize = child.size.height + childMarginHeight;
                         minCrossAxisSize = maxCrossAxisSize = child.size.height;
                       }
                     } else {
