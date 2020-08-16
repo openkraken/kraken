@@ -19,16 +19,16 @@ final RegExp _spaceRegExp = RegExp(r'\s+');
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   void initRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    renderBoxModel.oldDecoration = getCSSBoxDecoration(style);
-    renderBoxModel.borderEdge = renderBoxModel.oldDecoration.getBorderEdgeInsets();
-    renderBoxModel.decoration = renderBoxModel.oldDecoration.toBoxDecoration();
+    renderBoxModel.cssBoxDecoration = getCSSBoxDecoration(style);
+    renderBoxModel.borderEdge = renderBoxModel.cssBoxDecoration.getBorderEdgeInsets();
+    renderBoxModel.decoration = renderBoxModel.cssBoxDecoration.toBoxDecoration();
   }
 
   void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
     CSSBoxDecoration newDecoration = getCSSBoxDecoration(style);
-    CSSBoxDecoration oldDecoration = renderBoxModel.oldDecoration;
+    CSSBoxDecoration oldDecoration = renderBoxModel.cssBoxDecoration;
 
-    if (transitionMap != null) {
+    if (transitionMap != null && oldDecoration != null) {
       CSSTransition backgroundColorTransition = getTransition(transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
       List<CSSTransition> borderColorTransitionsLTRB = [
@@ -93,7 +93,7 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       renderBoxModel.decoration = newDecoration.toBoxDecoration();
       _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
     }
-    renderBoxModel.oldDecoration = newDecoration;
+    renderBoxModel.cssBoxDecoration = newDecoration;
   }
 
   // add color relate transition listener

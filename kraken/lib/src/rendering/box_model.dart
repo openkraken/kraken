@@ -117,7 +117,7 @@ class RenderBoxModel extends RenderBox with
     // Copy Border
     newBox.borderEdge = borderEdge;
     newBox.decoration = decoration;
-    newBox.oldDecoration = oldDecoration;
+    newBox.cssBoxDecoration = cssBoxDecoration;
     newBox.position = position;
     newBox.configuration = configuration;
 

@@ -1467,7 +1467,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         return prevZIndex - nextZIndex;
       });
 
-      for (var child in children) {
+      RenderObject child = firstChild;
+      while (child != null) {
         // Don't paint placeholder of positioned element
         if (child is! RenderPositionHolder) {
           final RenderFlexParentData childParentData = child.parentData;
@@ -1495,7 +1496,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {

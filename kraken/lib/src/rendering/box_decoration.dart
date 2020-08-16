@@ -6,9 +6,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
+import 'package:kraken/rendering.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
-  CSSBoxDecoration oldDecoration;
+  CSSBoxDecoration cssBoxDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
   BoxPainter _painter;
@@ -85,6 +86,8 @@ mixin RenderBoxDecorationMixin on RenderBox {
   }
 
   void paintDecoration(PaintingContext context, Offset offset) {
+    if (decoration == null) return;
+
     _painter ??= decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background) {
@@ -110,7 +113,12 @@ mixin RenderBoxDecorationMixin on RenderBox {
       }());
       if (decoration.isComplex) context.setIsComplexHint();
     }
-    Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    Offset contentOffset;
+    if (borderEdge == null) {
+      contentOffset = Offset(0, 0);
+    } else {
+      contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    }
     super.paint(context, contentOffset);
     if (position == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
