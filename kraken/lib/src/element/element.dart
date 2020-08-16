@@ -99,11 +99,6 @@ class Element extends Node
   // used to get original coordinate before move away from document flow
   RenderObject renderPositionedPlaceholder;
 
-  // Horizontal margin dimension (left + right)
-  double get cropMarginWidth => renderMargin.margin.horizontal;
-  // Vertical margin dimension (top + bottom)
-  double get cropMarginHeight => renderMargin.margin.vertical;
-
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
@@ -150,9 +145,6 @@ class Element extends Node
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
-
-    // BoxModel Margin
-    renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
     renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
@@ -747,7 +739,7 @@ class Element extends Node
       parentData.alignSelf = flexParentData.alignSelf;
 
       // Update margin for flex child.
-      element.updateRenderMargin(element.style);
+      element.updateRenderMargin(element.getRenderBoxModel(), element.style);
       element.renderObject.markNeedsLayout();
     }
   }
@@ -986,7 +978,7 @@ class Element extends Node
 
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
-    updateRenderMargin(style, transitionMap);
+    updateRenderMargin(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
@@ -1016,12 +1008,12 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderMargin);
+    updateRenderOpacity(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderMargin);
+    updateRenderVisibility(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
@@ -1114,11 +1106,11 @@ class Element extends Node
       case 'offsetWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderMargin.hasSize ? renderMargin.size.width : 0;
+        return renderElementBoundary.hasSize ? renderElementBoundary.size.width : 0;
       case 'offsetHeight':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderMargin.hasSize ? renderMargin.size.height : 0;
+        return renderElementBoundary.hasSize ? renderElementBoundary.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         // need to flush layout to get correct size
@@ -1291,11 +1283,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = renderMargin.child;
+    var originalChild = renderIntersectionObserver.child;
     // Make sure child is detached.
-    renderMargin.child = null;
+    renderIntersectionObserver.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderMargin.child = renderRepaintBoundary;
+    renderIntersectionObserver.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
 
@@ -1310,7 +1302,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderMargin.child = originalChild;
+      renderIntersectionObserver.child = originalChild;
 
       completer.complete(captured);
     });
