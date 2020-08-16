@@ -1078,29 +1078,39 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      List<RenderObject> children = getChildrenAsList();
-      children.sort((RenderObject prev, RenderObject next) {
-        RenderLayoutParentData prevParentData = prev.parentData;
-        RenderLayoutParentData nextParentData = next.parentData;
-        // Place positioned element after non positioned element
-        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-          return -1;
-        }
-        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-          return 1;
-        }
-        // z-index applies to element when position is not static
-        int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-        int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-        return prevZIndex - nextZIndex;
-      });
+      if (needsSortByZIndex) {
+        List<RenderObject> children = getChildrenAsList();
+        children.sort((RenderObject prev, RenderObject next) {
+          RenderLayoutParentData prevParentData = prev.parentData;
+          RenderLayoutParentData nextParentData = next.parentData;
+          // Place positioned element after non positioned element
+          if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+            return -1;
+          }
+          if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+            return 1;
+          }
+          // z-index applies to element when position is not static
+          int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
+          int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
+          return prevZIndex - nextZIndex;
+        });
 
-      RenderObject child = firstChild;
-      while (child != null) {
-        if (child is! RenderPositionHolder) {
-          final RenderLayoutParentData childParentData = child.parentData;
-          context.paintChild(child, childParentData.offset + offset);
-          child = childParentData.nextSibling;
+        for (int i = 0; i < children.length; i ++) {
+          RenderObject child = children[i];
+          if (child is! RenderPositionHolder) {
+            final RenderLayoutParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+          }
+        }
+      } else {
+        RenderObject child = firstChild;
+        while (child != null) {
+          if (child is! RenderPositionHolder) {
+            final RenderLayoutParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+            child = childParentData.nextSibling;
+          }
         }
       }
     });

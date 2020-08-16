@@ -88,6 +88,8 @@ class RenderBoxModel extends RenderBox with
     return _contentConstraints;
   }
 
+  bool needsSortByZIndex = false;
+
   // id of current element
   int targetId;
 
