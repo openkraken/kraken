@@ -568,7 +568,13 @@ class RenderBoxModel extends RenderBox with
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintDecoration(context, offset);
-    paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+    paintOverflow(
+        context,
+        offset,
+        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+        Size(scrollableViewportWidth, scrollableViewportHeight),
+        callback
+    );
   }
 
   @override

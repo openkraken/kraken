@@ -19,9 +19,13 @@ final RegExp _spaceRegExp = RegExp(r'\s+');
 /// - border
 mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   void initRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    renderBoxModel.cssBoxDecoration = getCSSBoxDecoration(style);
-    renderBoxModel.borderEdge = renderBoxModel.cssBoxDecoration.getBorderEdgeInsets();
-    renderBoxModel.decoration = renderBoxModel.cssBoxDecoration.toBoxDecoration();
+    CSSBoxDecoration cssBoxDecoration = getCSSBoxDecoration(style);
+
+    if (cssBoxDecoration != null) {
+      renderBoxModel.cssBoxDecoration = cssBoxDecoration;
+      renderBoxModel.borderEdge = cssBoxDecoration.getBorderEdgeInsets();
+      renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
+    }
   }
 
   void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
@@ -188,12 +192,17 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       }
     }
 
-    Color bgColor = CSSBackground.getBackgroundColor(style) ?? CSSColor.transparent;
+    Color bgColor = CSSBackground.getBackgroundColor(style);
 
     BorderSide leftSide = CSSBorder.getBorderSide(style, CSSBorder.LEFT);
     BorderSide topSide = CSSBorder.getBorderSide(style, CSSBorder.TOP);
     BorderSide rightSide = CSSBorder.getBorderSide(style, CSSBorder.RIGHT);
     BorderSide bottomSide = CSSBorder.getBorderSide(style, CSSBorder.BOTTOM);
+
+    bool hasBorder = leftSide != null ||
+        topSide != null ||
+        rightSide != null ||
+        bottomSide != null;
 
     // border radius add inorder topLeft topRight bottomLeft bottomRight
     Radius topLeftRadius = CSSBorder.getRadius(style[BORDER_TOP_LEFT_RADIUS]);
@@ -201,14 +210,44 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     Radius bottomRightRadius = CSSBorder.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS]);
     Radius bottomLeftRadius = CSSBorder.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS]);
 
-    return CSSBoxDecoration(bgColor, decorationImage, gradient, [leftSide, topSide, rightSide, bottomSide],
-        [topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius], getBoxShadow(style));
+    bool hasBorderRadius = topLeftRadius != null ||
+        topRightRadius != null ||
+        bottomRightRadius != null ||
+        bottomLeftRadius != null;
+
+    List<BorderSide> borderSides = hasBorder ? [
+      leftSide ?? CSSBorder._noneBorderSide,
+      topSide ?? CSSBorder._noneBorderSide,
+      rightSide ?? CSSBorder._noneBorderSide,
+      bottomSide ?? CSSBorder._noneBorderSide] : null;
+
+    List<Radius> borderRadius = hasBorderRadius ? [
+      topLeftRadius ?? Radius.zero,
+      topRightRadius ?? Radius.zero,
+      bottomRightRadius ?? Radius.zero,
+      bottomLeftRadius ?? Radius.zero
+    ] : null;
+
+    List<BoxShadow> boxShadow = getBoxShadow(style);
+
+    // have no border and background
+    if (bgColor == null &&
+        decorationImage == null &&
+        gradient == null &&
+        borderSides == null &&
+        borderRadius == null &&
+        boxShadow == null) {
+      return null;
+    }
+
+    return CSSBoxDecoration(bgColor ?? CSSColor.transparent, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(style));
   }
 
   /// Tip: inset not supported.
   List<BoxShadow> getBoxShadow(CSSStyleDeclaration style) {
-    List<BoxShadow> boxShadow = [];
+    List<BoxShadow> boxShadow;
     if (style.contains(BOX_SHADOW)) {
+      boxShadow = [];
       var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
       if (shadows != null) {
         shadows.forEach((shadowDefinitions) {
@@ -344,7 +383,7 @@ class CSSBorder {
     double width = getBorderSideWidth(style, side);
     // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
     if (borderStyle == BorderStyle.none || width == 0.0) {
-      return _noneBorderSide;
+      return null;
     } else {
       return BorderSide(
           color: getBorderSideColor(style, side), width: getBorderSideWidth(style, side), style: borderStyle);
@@ -366,7 +405,7 @@ class CSSBorder {
       }
     }
 
-    return Radius.zero;
+    return null;
   }
 }
 
@@ -388,22 +427,26 @@ class CSSBoxDecoration {
         image,
         gradient,
         // side read inorder left top right bottom
-        List.of(borderSides),
+        borderSides != null ? List.of(borderSides) : null,
         // radius read inorder topLeft topRight bottomLeft bottomRight
-        List.of(radius),
-        List.of(boxShadow));
+        radius != null ? List.of(radius) : null,
+        boxShadow != null ? List.of(boxShadow) : null);
   }
 
   BoxDecoration toBoxDecoration() {
     if (gradient != null) {
       color = null;
     }
-    // side read inorder left top right bottom
-    Border border = Border(left: borderSides[0], top: borderSides[1], right: borderSides[2], bottom: borderSides[3]);
+
+    Border border;
+    if (borderSides != null) {
+      // side read inorder left top right bottom
+      border = Border(left: borderSides[0], top: borderSides[1], right: borderSides[2], bottom: borderSides[3]);
+    }
 
     BorderRadius borderRadius;
-    // flutter border limit, when border is not uniform, should set borderRadius
-    if (border.isUniform) {
+    // Flutter border radius only works when border is unitform.
+    if (border != null && border.isUniform && radius != null) {
       // radius read inorder topLeft topRight bottomLeft bottomRight
       borderRadius = BorderRadius.only(
         topLeft: radius[0],
@@ -423,7 +466,16 @@ class CSSBoxDecoration {
   }
 
   EdgeInsets getBorderEdgeInsets() {
+    if (borderSides == null) {
+      return EdgeInsets.zero;
+    }
+
     // side read inorder left top right bottom
     return EdgeInsets.fromLTRB(borderSides[0].width, borderSides[1].width, borderSides[2].width, borderSides[3].width);
+  }
+
+  @override
+  String toString() {
+    return 'CSSBoxDecoration(color: $color, image: $image, borderSides: $borderSides, radius: $radius, boxShadow: $boxShadow, gradient: $gradient)';
   }
 }

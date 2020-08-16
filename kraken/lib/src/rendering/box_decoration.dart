@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/rendering.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
   CSSBoxDecoration cssBoxDecoration;
