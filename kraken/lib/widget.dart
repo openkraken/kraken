@@ -75,5 +75,11 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   }
 
   @override
+  void unmount() {
+    super.unmount();
+    widget._controller.dispose();
+  }
+
+  @override
   KrakenRenderWidget get widget => super.widget as KrakenRenderWidget;
 }
