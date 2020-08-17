@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
