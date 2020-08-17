@@ -1537,26 +1537,28 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      if (needsSortByZIndex) {
-        List<RenderObject> children = getChildrenAsList();
-        children.sort((RenderObject prev, RenderObject next) {
-          RenderFlexParentData prevParentData = prev.parentData;
-          RenderFlexParentData nextParentData = next.parentData;
-          // Place positioned element after non positioned element
-          if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-            return -1;
-          }
-          if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-            return 1;
-          }
-          // z-index applies to flex-item ignoring position property
-          int prevZIndex = prevParentData.zIndex ?? 0;
-          int nextZIndex = nextParentData.zIndex ?? 0;
-          return prevZIndex - nextZIndex;
-        });
-
-        for (int i = 0; i < children.length; i ++) {
-          RenderObject child = children[i];
+      if (needsSortChildren) {
+        if (!isChildrenSorted) {
+          List<RenderObject> children = getChildrenAsList();
+          children.sort((RenderObject prev, RenderObject next) {
+            RenderFlexParentData prevParentData = prev.parentData;
+            RenderFlexParentData nextParentData = next.parentData;
+            // Place positioned element after non positioned element
+            if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+              return -1;
+            }
+            if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+              return 1;
+            }
+            // z-index applies to flex-item ignoring position property
+            int prevZIndex = prevParentData.zIndex ?? 0;
+            int nextZIndex = nextParentData.zIndex ?? 0;
+            return prevZIndex - nextZIndex;
+          });
+          sortedChildren = children;
+        }
+        for (int i = 0; i < sortedChildren.length; i ++) {
+          RenderObject child = sortedChildren[i];
           // Don't paint placeholder of positioned element
           if (child is! RenderPositionHolder) {
             final RenderFlexParentData childParentData = child.parentData;

@@ -452,7 +452,6 @@ class Element extends Node
       } else {
         if (style.contains(Z_INDEX)) {
           int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
-          renderParent.needsSortByZIndex = zIndex > 0;
           positionParentData.zIndex = zIndex;
         }
         if (style.contains(TOP)) {
@@ -541,9 +540,11 @@ class Element extends Node
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         parent._addPositionedChild(this, positionType);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.sticky:
         parent._addStickyChild(this, after);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
@@ -1420,7 +1421,6 @@ void setPositionedChildParentData(
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
 
   int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
-  parentRenderLayoutBox.needsSortByZIndex = zIndex > 0;
   parentData.zIndex = zIndex;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;

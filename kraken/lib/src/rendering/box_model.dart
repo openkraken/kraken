@@ -65,6 +65,63 @@ class RenderLayoutBox extends RenderBoxModel
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
+
+  bool _needsSortChildren = true;
+  bool get needsSortChildren {
+    return _needsSortChildren;
+  }
+  void markNeedsSortChildren() {
+    _needsSortChildren = true;
+  }
+
+  bool _isChildrenSorted = false;
+  bool get isChildrenSorted => _isChildrenSorted;
+
+  List<RenderObject> _sortedChildren;
+  List<RenderObject> get sortedChildren {
+    if (_sortedChildren == null) return [];
+    return _sortedChildren;
+  }
+  set sortedChildren(List<RenderObject> value) {
+    assert(value != null);
+    _isChildrenSorted = true;
+    _sortedChildren = value;
+  }
+
+  @override
+  void insert(RenderBox child, { RenderBox after }) {
+    super.insert(child, after: after);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void add(RenderBox child) {
+    super.add(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void addAll(List<RenderBox> children) {
+    super.addAll(children);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void remove(RenderBox child) {
+    super.remove(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void removeAll() {
+    super.removeAll();
+    _isChildrenSorted = false;
+  }
+
+  void move(RenderBox child, { RenderBox after }) {
+    super.move(child, after: after);
+    _isChildrenSorted = false;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
@@ -87,8 +144,6 @@ class RenderBoxModel extends RenderBox with
     assert(_contentConstraints != null);
     return _contentConstraints;
   }
-
-  bool needsSortByZIndex = false;
 
   // id of current element
   int targetId;
