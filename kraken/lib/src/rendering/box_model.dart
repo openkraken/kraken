@@ -69,6 +69,7 @@ class RenderLayoutBox extends RenderBoxModel
 
 class RenderBoxModel extends RenderBox with
   RenderPaddingMixin,
+  RenderMarginMixin,
   RenderBoxDecorationMixin,
   RenderOverflowMixin,
   RenderPointerListenerMixin {
@@ -113,6 +114,9 @@ class RenderBoxModel extends RenderBox with
 
     // Copy padding
     newBox.padding = padding;
+
+    // Copy margin
+    newBox.margin = margin;
 
     // Copy Border
     newBox.borderEdge = borderEdge;
@@ -241,7 +245,10 @@ class RenderBoxModel extends RenderBox with
     double width = _width;
 
     void cropMargin(Element childNode) {
-      cropWidth += childNode.cropMarginWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {
@@ -352,7 +359,10 @@ class RenderBoxModel extends RenderBox with
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
-      cropHeight += childNode.cropMarginHeight;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropHeight += renderBoxModel.margin.vertical;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {

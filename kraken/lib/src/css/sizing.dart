@@ -26,7 +26,6 @@ enum Display {
 /// - min-height
 
 mixin CSSSizingMixin {
-  RenderMargin renderMargin;
   CSSEdgeInsets oldPadding;
   CSSEdgeInsets oldMargin;
 
@@ -148,14 +147,6 @@ mixin CSSSizingMixin {
     }
   }
 
-  RenderObject initRenderMargin(RenderObject renderObject, CSSStyleDeclaration style) {
-    EdgeInsets edgeInsets = getMarginInsetsFromStyle(style);
-    return renderMargin = RenderMargin(
-      margin: edgeInsets,
-      child: renderObject,
-    );
-  }
-
   static CSSEdgeInsets _getMarginFromStyle(CSSStyleDeclaration style) {
     double marginLeft;
     double marginTop;
@@ -175,8 +166,7 @@ mixin CSSSizingMixin {
     return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
   }
 
-  void updateRenderMargin(CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
-    assert(renderMargin != null);
+  void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
     CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
     if (transitionMap != null) {
       all = transitionMap['all'];
@@ -216,8 +206,10 @@ mixin CSSSizingMixin {
           if (marginRight == null) {
             progressMargin.right = progress * marginRightInterval + baseMargin.right;
           }
-          _updateMargin(EdgeInsets.fromLTRB(
-              progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
+          _updateMargin(
+            renderBoxModel,
+            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
+          );
         }
       });
 
@@ -235,36 +227,44 @@ mixin CSSSizingMixin {
           progressMargin.right = progress * marginRightInterval + baseMargin.right;
         }
         _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
+          renderBoxModel,
+          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
+        );
       });
       marginTop?.addProgressListener((progress) {
         progressMargin.top = progress * marginTopInterval + baseMargin.top;
-        renderMargin.margin =
+        renderBoxModel.margin =
             EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom);
       });
       marginBottom?.addProgressListener((progress) {
         progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
         _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
+          renderBoxModel,
+          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
+        );
       });
       marginLeft?.addProgressListener((progress) {
         progressMargin.left = progress * marginLeftInterval + baseMargin.left;
         _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
+          renderBoxModel,
+          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
+        );
       });
       marginRight?.addProgressListener((progress) {
         progressMargin.right = progress * marginRightInterval + baseMargin.right;
         _updateMargin(
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom));
+          renderBoxModel,
+          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
+        );
       });
       oldMargin = newMargin;
     } else {
-      _updateMargin(getMarginInsetsFromStyle(style));
+      _updateMargin(renderBoxModel, getMarginInsetsFromStyle(style));
     }
   }
 
-  void _updateMargin(EdgeInsets margin) {
-    renderMargin.margin = margin;
+  void _updateMargin(RenderBoxModel renderBoxModel, EdgeInsets margin) {
+    renderBoxModel.margin = margin;
   }
 
   static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {
@@ -400,7 +400,10 @@ class CSSSizing {
     String display = getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
-      cropWidth += childNode.cropMarginWidth;
+      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      if (renderBoxModel.margin != null) {
+        cropWidth += renderBoxModel.margin.horizontal;
+      }
     }
 
     void cropPaddingBorder(Element childNode) {

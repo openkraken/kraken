@@ -6,10 +6,8 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ffi';
 import 'dart:async';
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -110,7 +108,7 @@ class KrakenViewController {
     Completer<Uint8List> completer = Completer();
     try {
       if (!_elementManager.existsTarget(eventTargetId)) {
-        Pointer<Utf8> msg = Utf8.toUtf8('toImage: unknown node id: $eventTargetId');
+        String msg = 'toImage: unknown node id: $eventTargetId';
         completer.completeError(new Exception(msg));
         return completer.future;
       }
@@ -120,17 +118,15 @@ class KrakenViewController {
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
-          Pointer<Utf8> msg =
-              Utf8.toUtf8('toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack');
+          String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
           completer.completeError(new Exception(msg));
         });
       } else {
-        Pointer<Utf8> msg = Utf8.toUtf8('toBlob: node is not an element, id: $eventTargetId');
+        String msg = 'toBlob: node is not an element, id: $eventTargetId';
         completer.completeError(new Exception(msg));
       }
     } catch (e, stack) {
-      Pointer<Utf8> msg = Utf8.toUtf8('toBlob: unexpected error: $e\n$stack');
-      completer.completeError(new Exception(msg));
+      completer.completeError(e, stack);
     }
     return completer.future;
   }
