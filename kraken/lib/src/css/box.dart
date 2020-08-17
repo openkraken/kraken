@@ -32,6 +32,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     CSSBoxDecoration newDecoration = getCSSBoxDecoration(style);
     CSSBoxDecoration oldDecoration = renderBoxModel.cssBoxDecoration;
 
+    if (newDecoration == null) return;
+
     if (transitionMap != null && oldDecoration != null) {
       CSSTransition backgroundColorTransition = getTransition(transitionMap, BACKGROUND_COLOR);
       // border color and width transition add inorder left top right bottom
@@ -446,7 +448,7 @@ class CSSBoxDecoration {
 
     BorderRadius borderRadius;
     // Flutter border radius only works when border is unitform.
-    if (border != null && border.isUniform && radius != null) {
+    if (radius != null && (border == null || border.isUniform)) {
       // radius read inorder topLeft topRight bottomLeft bottomRight
       borderRadius = BorderRadius.only(
         topLeft: radius[0],
