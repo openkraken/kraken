@@ -6,10 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
-const double DEFAULT_FONT_WEIGHT = 400.0;
 
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
@@ -222,48 +220,45 @@ class CSSText {
   static FontWeight getFontWeight(CSSStyleDeclaration style) {
     if (style.contains(FONT_WEIGHT)) {
       var fontWeight = style[FONT_WEIGHT];
-      double fontWeightValue = DEFAULT_FONT_WEIGHT; // Default to 400.
-      if (fontWeight is String) {
-        switch (fontWeight) {
-          case 'lighter':
-            fontWeightValue = 200;
-            break;
-          case 'normal':
-            fontWeightValue = 400;
-            break;
-          case 'bold':
-            fontWeightValue = 700;
-            break;
-          case 'bolder':
-            fontWeightValue = 900;
-            break;
-          default:
-            fontWeightValue = double.tryParse(fontWeight) ?? DEFAULT_FONT_WEIGHT;
-            break;
-        }
-      }
-
-      if (fontWeightValue >= 900) {
-        return FontWeight.w900;
-      } else if (fontWeightValue >= 800) {
-        return FontWeight.w800;
-      } else if (fontWeightValue >= 700) {
-        return FontWeight.w700;
-      } else if (fontWeightValue >= 600) {
-        return FontWeight.w600;
-      } else if (fontWeightValue >= 500) {
-        return FontWeight.w500;
-      } else if (fontWeightValue >= 400) {
-        return FontWeight.w400;
-      } else if (fontWeightValue >= 300) {
-        return FontWeight.w300;
-      } else if (fontWeightValue >= 200) {
-        return FontWeight.w200;
-      } else {
-        return FontWeight.w100;
-      }
+      switch (fontWeight) {
+        case 'lighter':
+          return FontWeight.w200;
+        case 'normal':
+          return FontWeight.w400;
+        case 'bold':
+          return FontWeight.w700;
+        case 'bolder':
+          return FontWeight.w900;
+        default:
+          int fontWeightValue = int.tryParse(fontWeight);
+          // See: https://drafts.csswg.org/css-fonts-4/#font-weight-numeric-values
+          // Only values greater than or equal to 1, and less than or equal to 1000, are valid,
+          // and all other values are invalid.
+          if (fontWeightValue == null || fontWeightValue > 1000 || fontWeightValue <= 0) {
+            return FontWeight.w400;
+          } else if (fontWeightValue >= 900) {
+            return FontWeight.w900;
+          } else if (fontWeightValue >= 800) {
+            return FontWeight.w800;
+          } else if (fontWeightValue >= 700) {
+            return FontWeight.w700;
+          } else if (fontWeightValue >= 600) {
+            return FontWeight.w600;
+          } else if (fontWeightValue >= 500) {
+            return FontWeight.w500;
+          } else if (fontWeightValue >= 400) {
+            return FontWeight.w400;
+          } else if (fontWeightValue >= 300) {
+            return FontWeight.w300;
+          } else if (fontWeightValue >= 200) {
+            return FontWeight.w200;
+          } else {
+            return FontWeight.w100;
+          }
+          break;
+      }      
     }
-    return FontWeight.normal;
+    return FontWeight.w400;
   }
 
   static FontStyle getFontStyle(CSSStyleDeclaration style) {
@@ -344,6 +339,7 @@ class CSSText {
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
+  static double DEFAULT_FONT_SIZE = 16.0;
   static double getFontSize(CSSStyleDeclaration style) {
     if (style.contains(FONT_SIZE)) {
       return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
