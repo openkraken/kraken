@@ -6,7 +6,7 @@ import { ElementRegistry } from './element-registry';
 import { BODY, eventTargetMap, WINDOW } from './events/event-target';
 import { cookie } from '../cookie';
 import { HTMLAllCollection } from './collection';
-import { elementMapById } from './selector/getElementById';
+import { elementMapById } from './getElementById';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
