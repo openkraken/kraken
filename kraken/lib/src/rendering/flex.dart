@@ -1566,12 +1566,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else {
         RenderObject child = firstChild;
         while (child != null) {
+          final RenderFlexParentData childParentData = child.parentData;
           // Don't paint placeholder of positioned element
           if (child is! RenderPositionHolder) {
-            final RenderFlexParentData childParentData = child.parentData;
             context.paintChild(child, childParentData.offset + offset);
-            child = childParentData.nextSibling;
           }
+          child = childParentData.nextSibling;
         }
       }
     });

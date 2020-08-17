@@ -1106,11 +1106,11 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       } else {
         RenderObject child = firstChild;
         while (child != null) {
+          final RenderLayoutParentData childParentData = child.parentData;
           if (child is! RenderPositionHolder) {
-            final RenderLayoutParentData childParentData = child.parentData;
             context.paintChild(child, childParentData.offset + offset);
-            child = childParentData.nextSibling;
           }
+          child = childParentData.nextSibling;
         }
       }
     });
