@@ -3,11 +3,10 @@ import { Element } from './element';
 import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
-import { BODY, WINDOW, eventTargetMap } from './events/event-target';
+import { BODY, eventTargetMap, WINDOW } from './events/event-target';
 import { cookie } from '../cookie';
 import { HTMLAllCollection } from './collection';
-
-const elementMapById = {};
+import { elementMapById } from './selector/getElementById';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -105,34 +104,4 @@ export function getNodeByTargetId(targetId: number) : Node|null|Window {
   }
 
   return null;
-}
-
-export function removeElementById(elementid: string, element: Element): void {
-  const mapEntity = elementMapById[elementid];
-  if (mapEntity && mapEntity.elementList) {
-    if (mapEntity.elementList.length === 0) {
-      delete elementMapById[elementid];
-    } else {
-      mapEntity.elementList = mapEntity.elementList.filter((item: Element) => item !== element);
-      if (mapEntity.elementList.length === 1) {
-        [mapEntity.element] = mapEntity.elementList;
-        mapEntity.elementList = [];
-      }
-    }
-  }
-}
-
-export function addElementById(elementid: string, element: Element): void {
-  const mapEntity = elementMapById[elementid];
-  if (mapEntity) {
-    if (mapEntity.elementList.length > 0) {
-      mapEntity.elementList.push(element);
-    } else {
-      mapEntity.elementList = [element, mapEntity.element];
-      mapEntity.element = null;
-    }
-  } else {
-    const newEntity = { element, elementList: [] };
-    elementMapById[elementid] = newEntity;
-  }
 }
