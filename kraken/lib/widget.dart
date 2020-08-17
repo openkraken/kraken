@@ -10,13 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 
-class KrakenWidget extends StatefulWidget {
-  // a absolute URL address which point to a javascript source file.
-  final String bundleURL;
-  // a local file path which point to a javascript source file.
-  final String bundlePath;
-  // a raw javascript source content which will evaluate after kraken have initialized.
-  final String bundleContent;
+class KrakenWidget extends StatelessWidget {
   // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
   final String name;
 
@@ -28,57 +22,28 @@ class KrakenWidget extends StatefulWidget {
   final KrakenController controller;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, this.bundleURL, this.bundlePath, this.bundleContent})
+      {Key key, String bundleURL, String bundlePath, String bundleContent})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
         controller = KrakenController(name, viewportWidth, viewportHeight,
             showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
-        super(key: key);
-
-  @override
-  _KrakenWidgetState createState() => _KrakenWidgetState(controller);
+        super(key: key) {
+    controller.bundleURL = bundleURL;
+    controller.bundlePath = bundlePath;
+    controller.bundleContent = bundleContent;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<double>('viewportWidth', viewportWidth));
     properties.add(DiagnosticsProperty<double>('viewportHeight', viewportHeight));
-    properties.add(DiagnosticsProperty<String>('bundleURL', bundleURL));
-    properties.add(DiagnosticsProperty<String>('bundlePath', bundlePath));
-    properties.add(DiagnosticsProperty<String>('bundleContent', bundleContent));
   }
-}
-
-class _KrakenWidgetState extends State<KrakenWidget> {
-  final KrakenController _controller;
-  _KrakenWidgetState(this._controller);
 
   @override
   Widget build(BuildContext context) {
-    return KrakenRenderWidget(_controller);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Bootstrap binding.
-    init();
-  }
-
-  Future init() async {
-    await _controller.loadBundle(
-        bundleURLOverride: widget.bundleURL,
-        bundlePathOverride: widget.bundlePath,
-        bundleContentOverride: widget.bundleContent);
-    await _controller.run();
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
+    return KrakenRenderWidget(controller);
   }
 }
 
@@ -101,6 +66,19 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
 
 class _KrakenRenderElement extends SingleChildRenderObjectElement {
   _KrakenRenderElement(KrakenRenderWidget widget) : super(widget);
+
+  @override
+  void mount(Element parent, dynamic newSlot) async {
+    super.mount(parent, newSlot);
+    await widget._controller.loadBundle();
+    await widget._controller.run();
+  }
+
+  @override
+  void unmount() {
+    super.unmount();
+    widget._controller.dispose();
+  }
 
   @override
   KrakenRenderWidget get widget => super.widget as KrakenRenderWidget;
