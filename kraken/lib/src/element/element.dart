@@ -415,7 +415,7 @@ class Element extends Node
 
   void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
-    RenderBox renderParent = renderElementBoundary.parent;
+    RenderObject renderParent = renderElementBoundary.parent;
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
       positionParentData = renderElementBoundary.parentData;
       RenderLayoutParentData progressParentData = positionParentData;
