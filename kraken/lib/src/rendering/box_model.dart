@@ -70,6 +70,8 @@ class RenderLayoutBox extends RenderBoxModel
   bool get needsSortChildren {
     return _needsSortChildren;
   }
+  // Mark this container to sort children by zIndex properties.
+  // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
   void markNeedsSortChildren() {
     _needsSortChildren = true;
   }
@@ -121,6 +123,26 @@ class RenderLayoutBox extends RenderBoxModel
   void move(RenderBox child, { RenderBox after }) {
     super.move(child, after: after);
     _isChildrenSorted = false;
+  }
+
+  void sortChildrenByZIndex() {
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      RenderFlexParentData prevParentData = prev.parentData;
+      RenderFlexParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
+      // z-index applies to flex-item ignoring position property
+      int prevZIndex = prevParentData.zIndex ?? 0;
+      int nextZIndex = nextParentData.zIndex ?? 0;
+      return prevZIndex - nextZIndex;
+    });
+    sortedChildren = children;
   }
 }
 

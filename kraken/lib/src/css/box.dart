@@ -196,10 +196,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
 
     Color bgColor = CSSBackground.getBackgroundColor(style);
 
-    BorderSide leftSide = CSSBorder.getBorderSide(style, CSSBorder.LEFT);
-    BorderSide topSide = CSSBorder.getBorderSide(style, CSSBorder.TOP);
-    BorderSide rightSide = CSSBorder.getBorderSide(style, CSSBorder.RIGHT);
-    BorderSide bottomSide = CSSBorder.getBorderSide(style, CSSBorder.BOTTOM);
+    BorderSide leftSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT);
+    BorderSide topSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP);
+    BorderSide rightSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT);
+    BorderSide bottomSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.BOTTOM);
 
     bool hasBorder = leftSide != null ||
         topSide != null ||
@@ -207,10 +207,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         bottomSide != null;
 
     // border radius add inorder topLeft topRight bottomLeft bottomRight
-    Radius topLeftRadius = CSSBorder.getRadius(style[BORDER_TOP_LEFT_RADIUS]);
-    Radius topRightRadius = CSSBorder.getRadius(style[BORDER_TOP_RIGHT_RADIUS]);
-    Radius bottomRightRadius = CSSBorder.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS]);
-    Radius bottomLeftRadius = CSSBorder.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS]);
+    Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS]);
+    Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS]);
+    Radius bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS]);
+    Radius bottomLeftRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_LEFT_RADIUS]);
 
     bool hasBorderRadius = topLeftRadius != null ||
         topRightRadius != null ||
@@ -218,16 +218,16 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         bottomLeftRadius != null;
 
     List<BorderSide> borderSides = hasBorder ? [
-      leftSide ?? CSSBorder._noneBorderSide,
-      topSide ?? CSSBorder._noneBorderSide,
-      rightSide ?? CSSBorder._noneBorderSide,
-      bottomSide ?? CSSBorder._noneBorderSide] : null;
+      leftSide ?? CSSBorderSide.none,
+      topSide ?? CSSBorderSide.none,
+      rightSide ?? CSSBorderSide.none,
+      bottomSide ?? CSSBorderSide.none] : null;
 
     List<Radius> borderRadius = hasBorderRadius ? [
-      topLeftRadius ?? Radius.zero,
-      topRightRadius ?? Radius.zero,
-      bottomRightRadius ?? Radius.zero,
-      bottomLeftRadius ?? Radius.zero
+      topLeftRadius ?? CSSBorderRadius.none,
+      topRightRadius ?? CSSBorderRadius.none,
+      bottomRightRadius ?? CSSBorderRadius.none,
+      bottomLeftRadius ?? CSSBorderRadius.none
     ] : null;
 
     List<BoxShadow> boxShadow = getBoxShadow(style);
@@ -282,10 +282,9 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 }
 
-class CSSBorder {
+class CSSBorderSide {
   // border default width 3.0
   static double defaultBorderWidth = 3.0;
-  static BorderStyle defaultBorderStyle = BorderStyle.none;
   static Color defaultBorderColor = CSSColor.initial;
   static String LEFT = 'Left';
   static String RIGHT = 'Right';
@@ -314,19 +313,6 @@ class CSSBorder {
     return borderWidth;
   }
 
-  static BorderStyle getBorderStyle(String input) {
-    BorderStyle borderStyle;
-    switch (input) {
-      case SOLID:
-        borderStyle = BorderStyle.solid;
-        break;
-      case NONE:
-        borderStyle = BorderStyle.none;
-        break;
-    }
-    return borderStyle;
-  }
-
   static bool isValidBorderStyleValue(String value) {
     return value == SOLID || value == NONE;
   }
@@ -347,13 +333,7 @@ class CSSBorder {
     return value.isEmpty ? defaultBorderColor : CSSColor.parseColor(value);
   }
 
-  static BorderStyle getBorderSideStyle(CSSStyleDeclaration style, String side) {
-    String property = 'border${side}Style';
-    String value = style[property];
-    return value.isEmpty ? defaultBorderStyle : getBorderStyle(value);
-  }
-
-  static getBorderEdgeInsets(CSSStyleDeclaration style) {
+  static EdgeInsets getBorderEdgeInsets(CSSStyleDeclaration style) {
     double left = 0.0;
     double top = 0.0;
     double bottom = 0.0;
@@ -378,10 +358,10 @@ class CSSBorder {
     return EdgeInsets.fromLTRB(left, top, right, bottom);
   }
 
-  static BorderSide _noneBorderSide = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
+  static BorderSide none = BorderSide(color: defaultBorderColor, width: 0.0, style: BorderStyle.none);
 
   static BorderSide getBorderSide(CSSStyleDeclaration style, String side) {
-    BorderStyle borderStyle = getBorderSideStyle(style, side);
+    BorderStyle borderStyle = CSSBorderStyle.getBorderSideStyle(style, side);
     double width = getBorderSideWidth(style, side);
     // Flutter will print border event if width is 0.0. So we needs to set borderStyle to none to prevent this.
     if (borderStyle == BorderStyle.none || width == 0.0) {
@@ -391,6 +371,10 @@ class CSSBorder {
           color: getBorderSideColor(style, side), width: getBorderSideWidth(style, side), style: borderStyle);
     }
   }
+}
+
+class CSSBorderRadius {
+  static Radius none = Radius.zero;
 
   static Radius getRadius(String radius) {
     if (radius.isNotEmpty) {
@@ -408,6 +392,28 @@ class CSSBorder {
     }
 
     return null;
+  }
+}
+
+class CSSBorderStyle {
+  static BorderStyle defaultBorderStyle = BorderStyle.none;
+  static BorderStyle getBorderSideStyle(CSSStyleDeclaration style, String side) {
+    String property = 'border${side}Style';
+    String value = style[property];
+    return value.isEmpty ? defaultBorderStyle : getBorderStyle(value);
+  }
+
+  static BorderStyle getBorderStyle(String input) {
+    BorderStyle borderStyle;
+    switch (input) {
+      case SOLID:
+        borderStyle = BorderStyle.solid;
+        break;
+      case NONE:
+        borderStyle = BorderStyle.none;
+        break;
+    }
+    return borderStyle;
   }
 }
 

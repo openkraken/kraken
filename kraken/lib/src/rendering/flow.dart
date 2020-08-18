@@ -1080,23 +1080,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     basePaint(context, offset, (context, offset) {
       if (needsSortChildren) {
         if (!isChildrenSorted) {
-          List<RenderObject> children = getChildrenAsList();
-          children.sort((RenderObject prev, RenderObject next) {
-            RenderLayoutParentData prevParentData = prev.parentData;
-            RenderLayoutParentData nextParentData = next.parentData;
-            // Place positioned element after non positioned element
-            if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-              return -1;
-            }
-            if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-              return 1;
-            }
-            // z-index applies to element when position is not static
-            int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-            int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-            return prevZIndex - nextZIndex;
-          });
-          sortedChildren = children;
+          sortChildrenByZIndex();
         }
         for (int i = 0; i < sortedChildren.length; i ++) {
           RenderObject child = sortedChildren[i];
