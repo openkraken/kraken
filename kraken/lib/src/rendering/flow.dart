@@ -1134,9 +1134,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     return parentData;
   }
 
+  /// Convert [RenderFlowLayout] to [RenderFlexLayout]
   RenderFlexLayout toFlexLayout() {
-    List<RenderObject> children = getChildrenAsList();
-    removeAll();
+    List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlexLayout flexLayout = RenderFlexLayout(
       children: children,
       targetId: targetId,
@@ -1146,9 +1146,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     return copyWith(flexLayout);
   }
 
+  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlowLayout]
   RenderSelfRepaintFlowLayout toSelfRepaint() {
-    List<RenderObject> children = getChildrenAsList();
-    removeAll();
+    List<RenderObject> children = getDetachedChildrenAsList();
     RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
       children: children,
       targetId: targetId,
@@ -1156,6 +1156,18 @@ class RenderFlowLayout extends RenderLayoutBox {
       elementManager: elementManager
     );
     return copyWith(selfRepaintFlowLayout);
+  }
+
+  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlexLayout]
+  RenderSelfRepaintFlexLayout toSelfRepaintFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlexLayout);
   }
 }
 
@@ -1171,9 +1183,21 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   @override
   get isRepaintBoundary => true;
 
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
+  RenderSelfRepaintFlexLayout toFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlexLayout);
+  }
+
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
   RenderFlowLayout toParentRepaint() {
-    List<RenderObject> children = getChildrenAsList();
-    removeAll();
+    List<RenderObject> children = getDetachedChildrenAsList();
     RenderFlowLayout renderFlowLayout = RenderFlowLayout(
       children: children,
       targetId: targetId,
@@ -1181,5 +1205,17 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
       elementManager: elementManager
     );
     return copyWith(renderFlowLayout);
+  }
+
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
+  RenderFlexLayout toParentRepaintFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(renderFlexLayout);
   }
 }

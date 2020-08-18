@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
@@ -48,18 +49,23 @@ mixin CSSOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  void initRenderOverflow(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
-    updateRenderOverflow(renderBoxModel, style, scrollListener);
+  void initRenderOverflow(
+      RenderBoxModel renderBoxModel,
+      Element element,
+      void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+    updateRenderOverflow(renderBoxModel, element, scrollListener);
   }
 
   void updateRenderOverflow(
       RenderBoxModel renderBoxModel,
-      CSSStyleDeclaration style,
+      Element element,
       void scrollListener(double scrollTop, AxisDirection axisDirection)) {
+    CSSStyleDeclaration style = element.style;
     if (style != null) {
       List<CSSOverflowType> overflow = getOverflowTypes(style);
       CSSOverflowType overflowX = overflow[0];
       CSSOverflowType overflowY = overflow[1];
+      bool shouldRepaintSelf = false;
 
       switch(overflowX) {
         case CSSOverflowType.hidden:
@@ -77,6 +83,7 @@ mixin CSSOverflowMixin {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+          shouldRepaintSelf = true;
           renderBoxModel.clipX = true;
           renderBoxModel.enableScrollX = true;
           renderBoxModel.scrollOffsetX = _scrollableX.position;
@@ -105,6 +112,7 @@ mixin CSSOverflowMixin {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+          shouldRepaintSelf = true;
           renderBoxModel.clipY = true;
           renderBoxModel.enableScrollY = true;
           renderBoxModel.scrollOffsetY = _scrollableY.position;
@@ -126,6 +134,20 @@ mixin CSSOverflowMixin {
           _scrollableY.handlePointerDown(event);
         }
       };
+
+      if (renderBoxModel is RenderLayoutBox) {
+        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderLayoutBox.parent;
+        RenderLayoutBox newLayoutBox;
+        if (shouldRepaintSelf) {
+          element.renderLayoutBox = newLayoutBox = createRenderLayoutBox(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
+        } else {
+          element.renderLayoutBox = newLayoutBox = createRenderLayoutBox(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
+        }
+        if (layoutBoxParent != null) {
+          layoutBoxParent.child = newLayoutBox;
+        }
+
+      }
     }
   }
 

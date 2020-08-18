@@ -144,6 +144,13 @@ class RenderLayoutBox extends RenderBoxModel
     });
     sortedChildren = children;
   }
+
+  // Get all children as a list and detach them all.
+  List<RenderObject> getDetachedChildrenAsList() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    return children;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
