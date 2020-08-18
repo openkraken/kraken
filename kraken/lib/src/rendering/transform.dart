@@ -18,7 +18,7 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   Alignment get alignment => _alignment;
-  Alignment _alignment;
+  Alignment _alignment = Alignment.center;
   set alignment(Alignment value) {
     if (_alignment == value) return;
     _alignment = value;
@@ -34,22 +34,7 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   Matrix4 getEffectiveTransform() {
-//    // @TODO: need to remove this after RenderObject merge have completed.
-//    Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
-//    // transform origin is apply to border in browser
-//    // so apply the margin child offset
-//    // percent or keyword apply by border size
-//    if (element != null) {
-//      RenderBox renderBox = element.renderIntersectionObserver;
-//      if (renderBox != null) {
-//        BoxParentData boxParentData = renderBox.parentData;
-//        origin += boxParentData.offset;
-//      }
-//    }
-
-//  origin = Offset(0, 0);
-
-  if (origin == null) return _transform;
+    if (origin == null) return _transform;
     final Matrix4 result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin.dx, origin.dy);
@@ -69,7 +54,6 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
-//    print('_transform------------------ $_transform $origin $alignment');
       if (_transform != null) {
         final Matrix4 transform = getEffectiveTransform();
         final Offset childOffset = MatrixUtils.getAsTranslation(transform);
@@ -85,6 +69,8 @@ mixin RenderTransformMixin on RenderBox {
           superPaint(context, offset + childOffset);
           layer = null;
         }
+      } else {
+        superPaint(context, offset);
       }
   }
 
@@ -99,8 +85,7 @@ mixin RenderTransformMixin on RenderBox {
     transform.multiply(getEffectiveTransform());
   }
 
-  // FIXME when super class RenderTransform hitTestChildren change
-  bool hitTestTransformChildren(BoxHitTestResult result, RenderBox child, {Offset position}) {
+  bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox child, Offset position) {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
       final bool isHit = result.addWithPaintTransform(
@@ -114,6 +99,20 @@ mixin RenderTransformMixin on RenderBox {
         return true;
       child = childParentData.previousSibling;
     }
+    return false;
+  }
+
+  bool hitTestIntrinsicChild(BoxHitTestResult result, RenderBox child, Offset position) {
+    final ParentData childParentData = child.parentData as ParentData;
+    final bool isHit = result.addWithPaintTransform(
+      transform: getEffectiveTransform(),
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return child?.hitTest(result, position: position) ?? false;
+      },
+    );
+    if (isHit)
+      return true;
     return false;
   }
 }

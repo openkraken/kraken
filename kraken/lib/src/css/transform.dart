@@ -33,13 +33,9 @@ mixin CSSTransformMixin on Node {
     bool shouldRender = style[DISPLAY] != NONE;
     transform = RenderElementBoundary(
       child: current,
-      transform: matrix4,
       targetId: targetId,
       elementManager: elementManager,
       style: style,
-      origin: oldOffset,
-      alignment: oldAlignment,
-      shouldRender: shouldRender,
     );
     return transform;
   }

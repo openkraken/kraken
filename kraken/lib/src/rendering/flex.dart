@@ -1521,16 +1521,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
-  }
-
-  @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+    if (transform != null) {
+      return hitTestLayoutChildren(result, lastChild, position);
+    }
     return defaultHitTestChildren(result, position: position);
   }
 

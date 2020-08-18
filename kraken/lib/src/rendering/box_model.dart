@@ -159,6 +159,14 @@ class RenderBoxModel extends RenderBox with
     newBox.onPointerMove = onPointerMove;
     newBox.onPointerSignal = onPointerSignal;
 
+    // Copy transform
+    newBox.transform = transform;
+    newBox.origin = origin;
+    newBox.alignment = alignment;
+
+    // Copy shouldRender
+    newBox.shouldRender = shouldRender;
+
     return newBox;
   }
 
@@ -593,9 +601,7 @@ class RenderBoxModel extends RenderBox with
     if (shouldRender == false) {
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, painter);
     } else {
-      print('transform----------------- $transform');
       paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
-//        Offset transformedOffset = offset;
         paintDecoration(context, transformedOffset);
         paintOverflow(context, transformedOffset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
       });

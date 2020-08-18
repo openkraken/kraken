@@ -37,4 +37,12 @@ class RenderIntrinsicBox extends RenderBoxModel
       if (child != null) context.paintChild(child, offset);
     });
   }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+    if (transform != null) {
+      return hitTestIntrinsicChild(result, child, position);
+    }
+    return super.hitTestChildren(result, position: position);
+  }
 }
