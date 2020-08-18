@@ -1537,28 +1537,26 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      List<RenderObject> children = getChildrenAsList();
-      children.sort((RenderObject prev, RenderObject next) {
-        RenderFlexParentData prevParentData = prev.parentData;
-        RenderFlexParentData nextParentData = next.parentData;
-        // Place positioned element after non positioned element
-        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-          return -1;
+      if (needsSortChildren) {
+        if (!isChildrenSorted) {
+          sortChildrenByZIndex();
         }
-        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-          return 1;
+        for (int i = 0; i < sortedChildren.length; i ++) {
+          RenderObject child = sortedChildren[i];
+          // Don't paint placeholder of positioned element
+          if (child is! RenderPositionHolder) {
+            final RenderFlexParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+          }
         }
-        // z-index applies to flex-item ignoring position property
-        int prevZIndex = prevParentData.zIndex ?? 0;
-        int nextZIndex = nextParentData.zIndex ?? 0;
-        return prevZIndex - nextZIndex;
-      });
-
-      for (var child in children) {
-        // Don't paint placeholder of positioned element
-        if (child is! RenderPositionHolder) {
+      } else {
+        RenderObject child = firstChild;
+        while (child != null) {
           final RenderFlexParentData childParentData = child.parentData;
-          context.paintChild(child, childParentData.offset + offset);
+          // Don't paint placeholder of positioned element
+          if (child is! RenderPositionHolder) {
+            context.paintChild(child, childParentData.offset + offset);
+          }
           child = childParentData.nextSibling;
         }
       }
@@ -1582,7 +1580,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
