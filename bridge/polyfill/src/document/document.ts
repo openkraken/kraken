@@ -6,7 +6,7 @@ import { ElementRegistry } from './element-registry';
 import { BODY, eventTargetMap, WINDOW } from './events/event-target';
 import { cookie } from '../cookie';
 import { HTMLAllCollection } from './collection';
-import { elementMapById } from './getElementById';
+import { elementMapById } from './element-id';
 
 export class Document extends Node {
   private bodyElement = new Element('BODY', BODY);
@@ -22,13 +22,13 @@ export class Document extends Node {
     super(NodeType.DOCUMENT_NODE, BODY);
   }
 
-  public getElementById(elementid: string): null | Element {
+  public getElementById(elementId: string): null | Element {
     const argLength = arguments.length;
     if (argLength < 1) throw new Error(`Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.`);
-    if (elementid === '') {
+    if (elementId === '') {
       return null;
     }
-    let id = elementid;
+    let id = elementId;
     // Defined by the special condition
     // When set Element id attribute with string type: 'null', 'undefined',
     // getElementById can find it by null, undefined.
@@ -44,7 +44,7 @@ export class Document extends Node {
     }
     let element: Element | null = null;
     traverseNode(this.body, (node: Node) => {
-      if (node instanceof Element && node.getAttribute('id') === elementid) {
+      if (node instanceof Element && node.getAttribute('id') === elementId) {
         if (!element) {
           element = node;
         }
