@@ -128,8 +128,8 @@ class RenderLayoutBox extends RenderBoxModel
   void sortChildrenByZIndex() {
     List<RenderObject> children = getChildrenAsList();
     children.sort((RenderObject prev, RenderObject next) {
-      RenderFlexParentData prevParentData = prev.parentData;
-      RenderFlexParentData nextParentData = next.parentData;
+      RenderLayoutParentData prevParentData = prev.parentData;
+      RenderLayoutParentData nextParentData = next.parentData;
       // Place positioned element after non positioned element
       if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
         return -1;
