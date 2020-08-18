@@ -115,7 +115,7 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    renderIntersectionObserver.child = null;
+    renderElementBoundary.child = null;
   }
 
   onCanPlay() async {

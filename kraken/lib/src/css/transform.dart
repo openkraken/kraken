@@ -30,7 +30,6 @@ mixin CSSTransformMixin on Node {
       }
     }
 
-    bool shouldRender = style[DISPLAY] != NONE;
     transform = RenderElementBoundary(
       child: current,
       targetId: targetId,

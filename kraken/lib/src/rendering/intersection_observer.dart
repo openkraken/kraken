@@ -47,20 +47,23 @@ Rect _localRectToGlobal(Layer layer, Rect localRect) {
 
 typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
 
-// The [RenderObject] corresponding to the element.
-class RenderIntersectionObserver extends RenderProxyBox {
-  RenderIntersectionObserver({
-    RenderBox child,
-  }) : super(child);
+
+mixin RenderIntersectionObserverMixin on RenderBox {
 
   IntersectionChangeCallback _onIntersectionChange;
+
+  // See [RenderProxyBox.alwaysNeedsCompositing].
+  @override
+  bool get alwaysNeedsCompositing => _onIntersectionChange != null;
+
+  IntersectionObserverLayer _layer;
 
   /**
    * A list of event handlers
    */
   List<IntersectionChangeCallback> _listeners;
 
-  void addListener(IntersectionChangeCallback callback) {
+  void addIntersectionChangeListener(IntersectionChangeCallback callback) {
     // Init things
     if (_listeners == null) {
       _listeners = List();
@@ -69,7 +72,7 @@ class RenderIntersectionObserver extends RenderProxyBox {
     _listeners.add(callback);
   }
 
-  void removeListener(IntersectionChangeCallback callback) {
+  void removeIntersectionChangeListener(IntersectionChangeCallback callback) {
     for (int i = 0; i < _listeners.length; i += 1) {
       if (_listeners[i] == callback) {
         _listeners.removeAt(i);
@@ -88,65 +91,21 @@ class RenderIntersectionObserver extends RenderProxyBox {
     });
   }
 
-  // See [RenderProxyBox.alwaysNeedsCompositing].
-  @override
-  bool get alwaysNeedsCompositing => _onIntersectionChange != null;
-
-  IntersectionObserverLayer _layer;
-
-  /// See [RenderObject.paint].
-  @override
-  void paint(PaintingContext context, Offset offset) {
+  void paintIntersectionObserverLayer(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
     if (_onIntersectionChange == null) {
-      super.paint(context, offset);
+      superPaint(context, offset);
       return;
     }
 
     if (_layer == null) {
       _layer = IntersectionObserverLayer(
-          elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
+        elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
     } else {
       _layer.elementSize = semanticBounds.size;
       _layer.paintOffset = offset;
     }
 
-    context.pushLayer(_layer, super.paint, offset);
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
-            describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
-                'probably because it has never been laid out. '
-                'This means it cannot be accurately hit-tested.'),
-            ErrorHint('If you are trying '
-                'to perform a hit test during the layout phase itself, make sure '
-                "you only hit test nodes that have completed layout (e.g. the node's "
-                'children, after their layout() method has been called).'),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription('Although this node is not marked as needing layout, '
-              'its size is not set.'),
-          ErrorHint('A RenderBox object must have an '
-              'explicit size before it can be hit-tested. Make sure '
-              'that the RenderBox in question sets its size during layout.'),
-        ]);
-      }
-      return true;
-    }());
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
+    context.pushLayer(_layer, superPaint, offset);
   }
 }
 

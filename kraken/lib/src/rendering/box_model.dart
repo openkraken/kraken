@@ -73,6 +73,7 @@ class RenderBoxModel extends RenderBox with
   RenderBoxDecorationMixin,
   RenderTransformMixin,
   RenderOverflowMixin,
+  RenderIntersectionObserverMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
@@ -602,8 +603,10 @@ class RenderBoxModel extends RenderBox with
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, painter);
     } else {
       paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
-        paintDecoration(context, transformedOffset);
-        paintOverflow(context, transformedOffset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+        paintIntersectionObserverLayer(context, transformedOffset, (PaintingContext context, Offset offset) {
+          paintDecoration(context, offset);
+          paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+        });
       });
     }
   }
@@ -654,11 +657,6 @@ class RenderBoxModel extends RenderBox with
   bool hitTestSelf(Offset position) {
     return size.contains(position);
   }
-
-//  @override
-//  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-//    return hitTestTransformChildren(result, position: position);
-//  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

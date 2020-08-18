@@ -3,8 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
-import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
 mixin RenderTransformMixin on RenderBox {
@@ -44,7 +42,7 @@ mixin RenderTransformMixin on RenderBox {
       double width = (size?.width ?? 0.0);
       double height = (size?.height ?? 0.0);
 
-      translation = (alignment as Alignment).alongSize(Size(width, height));
+      translation = alignment.alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);
     }
     result.multiply(_transform);
@@ -74,11 +72,6 @@ mixin RenderTransformMixin on RenderBox {
       }
   }
 
-//  // FIXME when super class RenderTransform paint change
-//  void superPaint(PaintingContext context, Offset offset) {
-//    if (child != null) context.paintChild(child, offset);
-//  }
-
   // FIXME when super class RenderTransform applyPaintTransform change
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
@@ -103,7 +96,6 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   bool hitTestIntrinsicChild(BoxHitTestResult result, RenderBox child, Offset position) {
-    final ParentData childParentData = child.parentData as ParentData;
     final bool isHit = result.addWithPaintTransform(
       transform: getEffectiveTransform(),
       position: position,

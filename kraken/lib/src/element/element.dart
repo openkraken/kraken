@@ -92,7 +92,6 @@ class Element extends Node
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
-  RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
   // Placeholder renderObject of positioned element(absolute/fixed)
@@ -142,9 +141,9 @@ class Element extends Node
     initRenderDecoratedBox(getRenderBoxModel(), style);
 
     // Intersection observer
-    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
+//    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
-    setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
+    setContentVisibilityIntersectionObserver(getRenderBoxModel(), style[CONTENT_VISIBILITY]);
 
     // The layout boundary of element.
     renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
@@ -180,10 +179,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -224,7 +223,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderIntersectionObserver?.size?.height;
+      double viewPortHeight = renderElementBoundary?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -260,7 +259,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderIntersectionObserver?.size?.width;
+      double viewPortWidth = renderElementBoundary?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -527,12 +526,6 @@ class Element extends Node
         CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY];
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
-
-    // Add FlexItem wrap for flex child node.
-//    if (isParentFlexDisplayType) {
-//      renderIntersectionObserver.child = null;
-//      renderIntersectionObserver.child = RenderFlexItem(child: getRenderBoxModel());
-//    }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
@@ -899,9 +892,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderIntersectionObserver.child = null;
+        renderElementBoundary.child = null;
         renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
-        renderIntersectionObserver.child = renderLayoutBox;
+        renderElementBoundary.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -997,7 +990,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(getRenderBoxModel(), style, property, present, renderIntersectionObserver, targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, renderElementBoundary, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
@@ -1009,18 +1002,18 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderIntersectionObserver);
+    updateRenderOpacity(present, parentRenderObject: renderElementBoundary);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderIntersectionObserver);
+    updateRenderVisibility(present, parentRenderObject: renderElementBoundary);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
     // Update content visibility.
     updateRenderContentVisibility(present,
-        parentRenderObject: renderIntersectionObserver, renderIntersectionObserver: renderIntersectionObserver);
+        parentRenderObject: renderElementBoundary, renderBoxModel: getRenderBoxModel());
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
@@ -1153,7 +1146,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
 
-    RenderBox sizedBox = renderIntersectionObserver.child;
+    RenderBox sizedBox = renderElementBoundary.child;
     if (isConnected) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
@@ -1224,7 +1217,8 @@ class Element extends Node
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
-      renderIntersectionObserver.addListener(handleIntersectionChange);
+      RenderBoxModel renderBoxModel = getRenderBoxModel();
+      renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
     }
   }
 
@@ -1237,7 +1231,8 @@ class Element extends Node
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
-      renderIntersectionObserver.removeListener(handleIntersectionChange);
+      RenderBoxModel renderBoxModel = getRenderBoxModel();
+      renderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
     }
   }
 
@@ -1284,11 +1279,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = renderIntersectionObserver.child;
+    var originalChild = renderElementBoundary.child;
     // Make sure child is detached.
-    renderIntersectionObserver.child = null;
+    renderElementBoundary.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderIntersectionObserver.child = renderRepaintBoundary;
+    renderElementBoundary.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
 
@@ -1303,7 +1298,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderIntersectionObserver.child = originalChild;
+      renderElementBoundary.child = originalChild;
 
       completer.complete(captured);
     });

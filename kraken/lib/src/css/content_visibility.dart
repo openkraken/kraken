@@ -14,11 +14,11 @@ mixin CSSContentVisibilityMixin on Node {
   bool _hasIntersectionObserver = false;
 
   void setContentVisibilityIntersectionObserver(
-      RenderIntersectionObserver renderIntersectionObserver, String contentVisibility) {
+    RenderBoxModel renderBoxModel, String contentVisibility) {
     if (contentVisibility == AUTO && !_hasIntersectionObserver) {
-      renderIntersectionObserver.addListener(_handleIntersectionChange);
+      renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
       // Call needs paint make sure intersection observer works immediately
-      renderIntersectionObserver.markNeedsPaint();
+      renderBoxModel.markNeedsPaint();
       _hasIntersectionObserver = true;
     }
   }
@@ -28,11 +28,11 @@ mixin CSSContentVisibilityMixin on Node {
   }
 
   void updateRenderContentVisibility(String contentVisibility,
-      {RenderObjectWithChildMixin parentRenderObject, RenderIntersectionObserver renderIntersectionObserver}) {
+      {RenderObjectWithChildMixin parentRenderObject, RenderBoxModel renderBoxModel}) {
     if (renderVisibility != null) {
       renderVisibility.hidden = (contentVisibility == HIDDEN || contentVisibility == AUTO);
       if (contentVisibility != AUTO && _hasIntersectionObserver) {
-        renderIntersectionObserver.removeListener(_handleIntersectionChange);
+        renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
         _hasIntersectionObserver = false;
       }
     } else if (contentVisibility == HIDDEN || contentVisibility == AUTO) {
@@ -43,6 +43,6 @@ mixin CSSContentVisibilityMixin on Node {
       parentRenderObject.child = renderVisibility;
     }
 
-    setContentVisibilityIntersectionObserver(renderIntersectionObserver, contentVisibility);
+    setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
   }
 }
