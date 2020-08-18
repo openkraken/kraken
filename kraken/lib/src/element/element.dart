@@ -499,16 +499,31 @@ class Element extends Node
     }
   }
 
-  RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
+  RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {RenderLayoutBox prevRenderLayoutBox}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
     if (display.endsWith(FLEX)) {
-      RenderFlexLayout flexLayout =
-          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
+      RenderFlexLayout flexLayout;
+      if (prevRenderLayoutBox != null && prevRenderLayoutBox is RenderFlowLayout) {
+        flexLayout = prevRenderLayoutBox.toFlexLayout();
+      } else if (prevRenderLayoutBox == null) {
+        flexLayout = RenderFlexLayout(style: style, targetId: targetId, elementManager: elementManager);
+      } else {
+        flexLayout = prevRenderLayoutBox;
+      }
+
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
     } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
-      RenderFlowLayoutBox flowLayout =
-          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
+      RenderFlowLayout flowLayout;
+
+      if (prevRenderLayoutBox != null && prevRenderLayoutBox is RenderFlexLayout) {
+        flowLayout = prevRenderLayoutBox.toFlowLayout();
+      } else if (prevRenderLayoutBox == null) {
+        flowLayout = RenderFlowLayout(style: style, targetId: targetId, elementManager: elementManager);
+      } else {
+        flowLayout = prevRenderLayoutBox;
+      }
+
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -527,12 +542,6 @@ class Element extends Node
         CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY];
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
-
-    // Add FlexItem wrap for flex child node.
-//    if (isParentFlexDisplayType) {
-//      renderIntersectionObserver.child = null;
-//      renderIntersectionObserver.child = RenderFlexItem(child: getRenderBoxModel());
-//    }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
@@ -889,26 +898,10 @@ class Element extends Node
       String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
       String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
       if (prevDisplay != currentDisplay) {
-        ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
-        // Collect children of renderLayoutBox and remove their relationship.
-        List<RenderBox> children = [];
-        prevRenderLayoutBox
-          ..visitChildren((child) {
-            children.add(child);
-          })
-          ..removeAll();
-
+        RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
         renderIntersectionObserver.child = null;
-        renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
+        renderLayoutBox = createRenderLayoutBox(style, prevRenderLayoutBox: prevRenderLayoutBox);
         renderIntersectionObserver.child = renderLayoutBox;
-      }
-
-      if (currentDisplay.endsWith(FLEX)) {
-        // update flex layout properties
-        decorateRenderFlex(renderLayoutBox, style);
-      } else {
-        // update flow layout properties
-        decorateRenderFlow(renderLayoutBox, style);
       }
     }
   }
@@ -942,7 +935,7 @@ class Element extends Node
   void _updateDecorationRenderLayoutBox() {
     if (renderLayoutBox is RenderFlexLayout) {
       decorateRenderFlex(renderLayoutBox, style);
-    } else if (renderLayoutBox is RenderFlowLayoutBox) {
+    } else if (renderLayoutBox is RenderFlowLayout) {
       decorateRenderFlow(renderLayoutBox, style);
     }
   }
@@ -1391,7 +1384,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
 void setPositionedChildParentData(
     ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
   var parentData;
-  if (parentRenderLayoutBox is RenderFlowLayoutBox) {
+  if (parentRenderLayoutBox is RenderFlowLayout) {
     parentData = RenderLayoutParentData();
   } else {
     parentData = RenderFlexParentData();

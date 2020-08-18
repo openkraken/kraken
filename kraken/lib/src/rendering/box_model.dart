@@ -124,6 +124,7 @@ class RenderBoxModel extends RenderBox with
     newBox.oldDecoration = oldDecoration;
     newBox.position = position;
     newBox.configuration = configuration;
+    newBox.boxPainter = boxPainter;
 
     // Copy overflow
     newBox.scrollListener = scrollListener;

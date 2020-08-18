@@ -11,7 +11,12 @@ mixin RenderBoxDecorationMixin on RenderBox {
   CSSBoxDecoration oldDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
+
   BoxPainter _painter;
+  BoxPainter get boxPainter => _painter;
+  set boxPainter(BoxPainter painter) {
+    _painter = painter;
+  }
 
   /// BorderSize to deflate.
   EdgeInsets _borderEdge;

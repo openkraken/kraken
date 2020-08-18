@@ -19,8 +19,8 @@ class _RunMetrics {
 }
 
 /// Impl flow layout algorithm.
-class RenderFlowLayoutBox extends RenderLayoutBox {
-  RenderFlowLayoutBox(
+class RenderFlowLayout extends RenderLayoutBox {
+  RenderFlowLayout(
       {List<RenderBox> children,
       MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
       TextDirection textDirection = TextDirection.ltr,
@@ -999,7 +999,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   String _getChildDisplayFromRenderBox(RenderBox child) {
     String display = 'inline'; // Default value.
     int targetId;
-    if (child is RenderFlowLayoutBox) targetId = child.targetId;
+    if (child is RenderFlowLayout) targetId = child.targetId;
     if (child is RenderElementBoundary) targetId = child.targetId;
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
@@ -1135,5 +1135,54 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
     return parentData;
+  }
+
+  RenderFlexLayout toFlexLayout() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(flexLayout);
+  }
+
+  RenderSelfRepaintFlowLayout toSelfRepaint() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlowLayout);
+  }
+}
+
+// Render flex layout with self repaint boundary.
+class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
+  RenderSelfRepaintFlowLayout({
+    List<RenderBox> children,
+    int targetId,
+    ElementManager elementManager,
+    CSSStyleDeclaration style,
+  }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+
+  @override
+  get isRepaintBoundary => true;
+
+  RenderFlowLayout toParentRepaint() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(renderFlowLayout);
   }
 }

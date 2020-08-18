@@ -1610,110 +1610,55 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     return parentData;
   }
+
+  // Change layout type to flow layout
+  RenderFlowLayout toFlowLayout() {
+    List<RenderBox> children = getChildrenAsList();
+    removeAll();
+    RenderFlowLayout flowLayout = RenderFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(flowLayout);
+  }
+
+  // Change repaint strategy from paint from parent to self repaint.
+  RenderSelfRepaintFlexLayout toSelfRepaint() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlexLayout);
+  }
 }
 
-class RenderFlexItem extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, RenderFlexParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, RenderFlexParentData>,
-        DebugOverflowIndicatorMixin {
-  RenderFlexItem({RenderBox child}) {
-    add(child);
-  }
+// Render flex layout with self repaint boundary.
+class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
+  RenderSelfRepaintFlexLayout({
+    List<RenderBox> children,
+    int targetId,
+    ElementManager elementManager,
+    CSSStyleDeclaration style,
+  }) : super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! RenderFlexParentData) {
-      RenderFlexParentData flexParentData = RenderFlexParentData();
-      child.parentData = flexParentData;
-    }
-  }
+  get isRepaintBoundary => true;
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
-  }
-
-  @override
-  void performLayout() {
-    RenderBox child = firstChild;
-    if (child != null) {
-      BoxConstraints innerConstraint = constraints;
-      child.layout(innerConstraint, parentUsesSize: true);
-      size = child.size;
-    } else {
-      size = Size.zero;
-    }
-  }
-
-  @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return computeDistanceToHighestActualBaseline(baseline);
-  }
-
-  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    double result;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData;
-
-      // Positioned element doesn't involve in baseline alignment
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-
-      double candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null)
-          result = math.min(result, candidate);
-        else
-          result = candidate;
-      }
-      child = childParentData.nextSibling;
-    }
-    return result;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
-            describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
-                'probably because it has never been laid out. '
-                'This means it cannot be accurately hit-tested.'),
-            ErrorHint('If you are trying '
-                'to perform a hit test during the layout phase itself, make sure '
-                "you only hit test nodes that have completed layout (e.g. the node's "
-                'children, after their layout() method has been called).'),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription('Although this node is not marked as needing layout, '
-              'its size is not set.'),
-          ErrorHint('A RenderBox object must have an '
-              'explicit size before it can be hit-tested. Make sure '
-              'that the RenderBox in question sets its size during layout.'),
-        ]);
-      }
-      return true;
-    }());
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
+  RenderFlexLayout toParentRepaint() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(flexLayout);
   }
 }
