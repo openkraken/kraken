@@ -1,6 +1,6 @@
 import { BODY } from './events/event-target';
 import { Node, NodeType, traverseNode } from './node';
-import { addElementById, removeElementById } from './getElementById';
+import { addElementById, removeElementById } from './element-id';
 
 import {
   createElement,
