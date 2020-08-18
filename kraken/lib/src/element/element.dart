@@ -499,9 +499,9 @@ class Element extends Node
     }
   }
 
-  RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {RenderLayoutBox prevRenderLayoutBox}) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-    if (display.endsWith(FLEX)) {
+  RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+    CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
+    if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       RenderFlexLayout flexLayout;
       if (prevRenderLayoutBox != null && prevRenderLayoutBox is RenderFlowLayout) {
         flexLayout = prevRenderLayoutBox.toFlexLayout();
@@ -513,7 +513,7 @@ class Element extends Node
 
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
+    } else if (display == CSSDisplay.block || display == CSSDisplay.none || display == CSSDisplay.inline || display == CSSDisplay.inlineBlock) {
       RenderFlowLayout flowLayout;
 
       if (prevRenderLayoutBox != null && prevRenderLayoutBox is RenderFlexLayout) {
@@ -538,10 +538,10 @@ class Element extends Node
   @override
   void attachTo(Element parent, {RenderObject after}) {
     CSSStyleDeclaration parentStyle = parent.style;
-    String parentDisplayValue =
-        CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY];
+    CSSDisplay parentDisplayValue =
+       CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY]);
     // InlineFlex or Flex
-    bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
+    bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
@@ -677,8 +677,8 @@ class Element extends Node
         return;
     }
     Size preferredSize = Size.zero;
-    String childDisplay = child.style[DISPLAY];
-    if ((!childDisplay.isEmpty && childDisplay != INLINE) || (position != CSSPositionType.static)) {
+    CSSDisplay childDisplay = CSSSizing.getDisplay(child.style[DISPLAY]);
+    if (childDisplay != CSSDisplay.inline || (position != CSSPositionType.static)) {
       preferredSize = Size(
         CSSLength.toDisplayPortValue(child.style[WIDTH]) ?? 0,
         CSSLength.toDisplayPortValue(child.style[HEIGHT]) ?? 0,
@@ -979,8 +979,8 @@ class Element extends Node
   }
 
   void _styleFlexItemChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-    if (display.endsWith(FLEX)) {
+    CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
+    if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       children.forEach((Element child) {
         _updateFlexItemStyle(child);
       });

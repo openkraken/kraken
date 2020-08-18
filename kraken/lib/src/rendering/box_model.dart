@@ -242,7 +242,7 @@ class RenderBoxModel extends RenderBox with
     // @FIXME, need to remove elementManager in the future.
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     double width = _width;
 
     void cropMargin(Element childNode) {
@@ -263,8 +263,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     switch (display) {
-      case BLOCK:
-      case FLEX:
+      case CSSDisplay.block:
+      case CSSDisplay.flex:
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains(WIDTH)) {
           cropPaddingBorder(hostElement);
@@ -279,17 +279,17 @@ class RenderBoxModel extends RenderBox with
             }
             if (hostElement is Element) {
               CSSStyleDeclaration style = hostElement.style;
-              String display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
+              CSSDisplay display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
 
               // Set width of element according to parent display
-              if (display != INLINE) {
+              if (display != CSSDisplay.inline) {
                 // Skip to find upper parent
                 if (style.contains(WIDTH)) {
                   // Use style width
                   width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
                   cropPaddingBorder(hostElement);
                   break;
-                } else if (display == INLINE_BLOCK || display == INLINE_FLEX) {
+                } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
                   // Collapse width to children
                   width = null;
                   break;
@@ -299,8 +299,8 @@ class RenderBoxModel extends RenderBox with
           }
         }
         break;
-      case INLINE_BLOCK:
-      case INLINE_FLEX:
+      case CSSDisplay.inlineBlock:
+      case CSSDisplay.inlineFlex:
         if (style.contains(WIDTH)) {
           width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
           cropPaddingBorder(hostElement);
@@ -308,7 +308,7 @@ class RenderBoxModel extends RenderBox with
           width = null;
         }
         break;
-      case INLINE:
+      case CSSDisplay.inline:
         width = null;
         break;
       default:
@@ -354,7 +354,7 @@ class RenderBoxModel extends RenderBox with
   double getContentHeight() {
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     double height = _height;
     double cropHeight = 0;
@@ -377,7 +377,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     // Inline element has no height
-    if (display == INLINE) {
+    if (display == CSSDisplay.inline) {
       return null;
     } else if (style.contains(HEIGHT)) {
       cropPaddingBorder(hostElement);
