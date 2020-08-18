@@ -882,8 +882,9 @@ class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
     bool shouldRender = present != NONE;
-    renderElementBoundary.shouldRender = shouldRender;
+    renderBoxModel.shouldRender = shouldRender;
 
     if (renderLayoutBox != null) {
       String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
@@ -1024,12 +1025,12 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransform(present, transitionMap);
+    updateTransform(getRenderBoxModel(), present, transitionMap);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransformOrigin(present, transitionMap);
+    updateTransformOrigin(getRenderBoxModel(), present, transitionMap);
   }
 
   // Update textNode style when container style changed

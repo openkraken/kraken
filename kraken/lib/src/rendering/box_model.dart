@@ -71,13 +71,18 @@ class RenderBoxModel extends RenderBox with
   RenderPaddingMixin,
   RenderMarginMixin,
   RenderBoxDecorationMixin,
+  RenderTransformMixin,
   RenderOverflowMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
     this.style,
-    this.elementManager
-  }) : super();
+    this.elementManager,
+    bool shouldRender,
+  }) : assert(targetId != null),
+    _shouldRender = shouldRender,
+    super();
+
 
   bool _debugHasBoxLayout = false;
 
@@ -86,6 +91,16 @@ class RenderBoxModel extends RenderBox with
     assert(_debugHasBoxLayout, 'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
     assert(_contentConstraints != null);
     return _contentConstraints;
+  }
+
+  bool _shouldRender = false;
+  bool get shouldRender => _shouldRender;
+  set shouldRender(bool value) {
+    assert(value != null);
+    if (_shouldRender != value) {
+      markNeedsLayout();
+      _shouldRender = value;
+    }
   }
 
   // id of current element
@@ -98,6 +113,9 @@ class RenderBoxModel extends RenderBox with
 
   BoxSizeType widthSizeType;
   BoxSizeType heightSizeType;
+
+  // Positioned holder box ref.
+  RenderPositionHolder positionedHolder;
 
   RenderBoxModel copyWith(RenderBoxModel newBox) {
     // Copy Sizing
@@ -235,6 +253,7 @@ class RenderBoxModel extends RenderBox with
     _maxHeight = value;
     markNeedsLayout();
   }
+
 
   double getContentWidth() {
     double cropWidth = 0;
@@ -562,11 +581,25 @@ class RenderBoxModel extends RenderBox with
     Size scrollableSize = Size(maxScrollableX, maxScrollableY);
     Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
     setUpOverflowScroller(scrollableSize, viewportSize);
+
+    if (positionedHolder != null) {
+      // Make position holder preferred size equal to current element boundary size.
+      positionedHolder.preferredSize = Size.copy(size);
+    }
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    paintDecoration(context, offset);
-    paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+    void painter(PaintingContext context, Offset offset) {}
+    if (shouldRender == false) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, painter);
+    } else {
+      print('transform----------------- $transform');
+      paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
+//        Offset transformedOffset = offset;
+        paintDecoration(context, transformedOffset);
+        paintOverflow(context, transformedOffset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+      });
+    }
   }
 
   @override
@@ -615,6 +648,11 @@ class RenderBoxModel extends RenderBox with
   bool hitTestSelf(Offset position) {
     return size.contains(position);
   }
+
+//  @override
+//  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+//    return hitTestTransformChildren(result, position: position);
+//  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

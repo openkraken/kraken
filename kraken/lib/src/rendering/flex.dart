@@ -1676,10 +1676,10 @@ class RenderFlexItem extends RenderBox
     return result;
   }
 
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
+//  @override
+//  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+//    return defaultHitTestChildren(result, position: position);
+//  }
 
   @override
   bool hitTest(BoxHitTestResult result, {@required Offset position}) {

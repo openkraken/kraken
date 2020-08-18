@@ -552,8 +552,23 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   // @override
   void performLayout() {
+
     beforeLayout();
     RenderBox child = firstChild;
+
+    BoxConstraints additionalConstraints = constraints;
+    if (child != null && shouldRender == false) {
+      additionalConstraints = BoxConstraints(
+        minWidth: 0,
+        maxWidth: 0,
+        minHeight: 0,
+        maxHeight: 0,
+      );
+      child.layout(additionalConstraints, parentUsesSize: true);
+      size = child.size;
+      return;
+    }
+
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element
     while (child != null) {
@@ -1072,7 +1087,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
+//    return defaultHitTestChildren(result, position: position);
   }
 
   @override
