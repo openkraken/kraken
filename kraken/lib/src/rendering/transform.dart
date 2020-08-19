@@ -52,33 +52,33 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
-      if (_transform != null) {
-        final Matrix4 transform = getEffectiveTransform();
-        final Offset childOffset = MatrixUtils.getAsTranslation(transform);
-        if (childOffset == null) {
-          layer = context.pushTransform(
-            needsCompositing,
-            offset,
-            transform,
-            superPaint,
-            oldLayer: layer as TransformLayer,
-          );
-        } else {
-          superPaint(context, offset + childOffset);
-          layer = null;
-        }
+    if (_transform != null) {
+      final Matrix4 transform = getEffectiveTransform();
+      final Offset childOffset = MatrixUtils.getAsTranslation(transform);
+      if (childOffset == null) {
+        layer = context.pushTransform(
+          needsCompositing,
+          offset,
+          transform,
+          superPaint,
+          oldLayer: layer as TransformLayer,
+        );
       } else {
-        superPaint(context, offset);
+        superPaint(context, offset + childOffset);
+        layer = null;
       }
+    } else {
+      superPaint(context, offset);
+    }
   }
 
   // FIXME when super class RenderTransform applyPaintTransform change
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (_transform != null) {
-      transform.multiply(getEffectiveTransform());
-    }
-  }
+//  @override
+//  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+//    if (_transform != null) {
+//      transform.multiply(getEffectiveTransform());
+//    }
+//  }
 
   bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox child, Offset position) {
     while (child != null) {

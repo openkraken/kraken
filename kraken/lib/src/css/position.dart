@@ -105,7 +105,7 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
 BoxSizeType _getChildWidthSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.widthSizeType;
-  } else if (child is RenderLayoutBox) {
+  } else if (child is RenderBoxModel) {
     return child.widthSizeType;
   }
   return null;
@@ -114,7 +114,7 @@ BoxSizeType _getChildWidthSizeType(RenderBox child) {
 BoxSizeType _getChildHeightSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.heightSizeType;
-  } else if (child is RenderLayoutBox) {
+  } else if (child is RenderBoxModel) {
     return child.heightSizeType;
   }
   return null;
@@ -148,7 +148,6 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
     childConstraints =
         childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
-
   child.layout(childConstraints, parentUsesSize: true);
 }
 

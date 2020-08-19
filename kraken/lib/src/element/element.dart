@@ -667,17 +667,17 @@ class Element extends Node
 
     RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
 
-    var childRenderLayoutBox = child.renderLayoutBox;
+    RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
     if (position == CSSPositionType.relative || position == CSSPositionType.absolute) {
-      childRenderLayoutBox.positionedHolder = positionedBoxHolder;
+      childRenderBoxModel.positionedHolder = positionedBoxHolder;
     }
 
     child.parent.addChild(positionedBoxHolder);
 
     setPositionedChildParentData(parentRenderLayoutBox, child, positionedBoxHolder);
-    positionedBoxHolder.realDisplayedBox = childRenderLayoutBox;
+    positionedBoxHolder.realDisplayedBox = childRenderBoxModel;
 
-    parentRenderLayoutBox.add(childRenderLayoutBox);
+    parentRenderLayoutBox.add(childRenderBoxModel);
   }
 
   void _addStickyChild(Element child, RenderObject after) {
