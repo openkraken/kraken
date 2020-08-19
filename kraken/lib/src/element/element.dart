@@ -1264,25 +1264,29 @@ class Element extends Node
     RenderBox previousSibling = parentData.previousSibling;
     ContainerRenderObjectMixin parent = renderBoxModel.parent;
 
-    // Make sure child is detached.
-    parent.remove(renderBoxModel);
-    var renderRepaintBoundary = RenderRepaintBoundary(child: renderBoxModel);
-    parent.insert(renderRepaintBoundary, after: previousSibling);
-    renderRepaintBoundary.markNeedsLayout();
-    renderRepaintBoundary.markNeedsPaint();
+    if (!renderBoxModel.isRepaintBoundary) {
+      parent.remove(renderBoxModel);
+      if (renderBoxModel is RenderLayoutBox) {
+        renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+      } else {
+        renderBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+      }
+      parent.insert(renderBoxModel, after: previousSibling);
+    }
+
+    renderBoxModel.markNeedsLayout();
+    renderBoxModel.markNeedsPaint();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
-      if (renderRepaintBoundary.size == Size.zero) {
+      if (renderBoxModel.size == Size.zero) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image = await renderRepaintBoundary.toImage(pixelRatio: devicePixelRatio);
+        Image image = await renderBoxModel.toImage(pixelRatio: devicePixelRatio);
         ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData.buffer.asUint8List();
       }
-      renderRepaintBoundary.child = null;
-      parent.insert(renderBoxModel, after: previousSibling);
 
       completer.complete(captured);
     });

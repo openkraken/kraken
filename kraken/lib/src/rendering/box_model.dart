@@ -751,6 +751,13 @@ class RenderBoxModel extends RenderBox with
     return size.contains(position);
   }
 
+  Future<Image> toImage({ double pixelRatio = 1.0 }) {
+    assert(!debugNeedsPaint);
+    assert(isRepaintBoundary);
+    final OffsetLayer offsetLayer = layer as OffsetLayer;
+    return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
