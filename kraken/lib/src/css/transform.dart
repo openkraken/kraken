@@ -49,8 +49,7 @@ mixin CSSTransformMixin on Node {
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
-        CSSTransition transition = transitionMap['transform'];
-        CSSTransition all = transitionMap['all'];
+        CSSTransition transition = transitionMap[TRANSFORM] ?? transitionMap[ALL];
         List<CSSFunctionalNotation> baseMethods = prevMethods;
 
         CSSTransitionProgressListener progressListener = (progress) {
@@ -65,8 +64,6 @@ mixin CSSTransformMixin on Node {
 
         if (transition != null) {
           transition.addProgressListener(progressListener);
-        } else if (all != null) {
-          all.addProgressListener(progressListener);
         } else {
           transform.transform = combineTransform(newMethods);
           prevMethods = newMethods;
@@ -93,8 +90,7 @@ mixin CSSTransformMixin on Node {
     // transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       if (transitionMap != null) {
-        CSSTransition all = transitionMap['all'];
-        CSSTransition transitionOrigin = transitionMap['transform-origin'];
+        CSSTransition transition = transitionMap[TRANSFORM_ORIGIN] ?? transitionMap[ALL];
         Offset baseOffset = oldOffset;
         Offset diffOffset = offset - baseOffset;
         CSSTransitionProgressListener originProgressListener = (progress) {
@@ -102,10 +98,8 @@ mixin CSSTransformMixin on Node {
             transform.origin = diffOffset * progress + baseOffset;
           }
         };
-        if (transitionOrigin != null) {
-          transitionOrigin.addProgressListener(originProgressListener);
-        } else if (all != null) {
-          all.addProgressListener(originProgressListener);
+        if (transition != null) {
+          transition.addProgressListener(originProgressListener);
         } else {
           transform.origin = offset;
         }
@@ -117,8 +111,7 @@ mixin CSSTransformMixin on Node {
     // transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
       if (transitionMap != null) {
-        CSSTransition all = transitionMap['all'];
-        CSSTransition transitionOrigin = transitionMap['transform-origin'];
+        CSSTransition transition = transitionMap[TRANSFORM_ORIGIN] ?? transitionMap[ALL];
         Alignment baseAlign = oldAlignment;
         Alignment diffAlign = alignment - baseAlign;
         CSSTransitionProgressListener originProgressListener = (progress) {
@@ -126,10 +119,8 @@ mixin CSSTransformMixin on Node {
             transform.alignment = diffAlign * progress + baseAlign;
           }
         };
-        if (transitionOrigin != null) {
-          transitionOrigin.addProgressListener(originProgressListener);
-        } else if (all != null) {
-          all.addProgressListener(originProgressListener);
+        if (transition != null) {
+          transition.addProgressListener(originProgressListener);
         } else {
           transform.alignment = alignment;
         }

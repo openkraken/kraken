@@ -29,29 +29,28 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     CSSBoxDecoration oldDecoration = renderBoxModel.oldDecoration;
 
     if (transitionMap != null) {
-      CSSTransition backgroundColorTransition = getTransition(transitionMap, BACKGROUND_COLOR);
-      // border color and width transition add inorder left top right bottom
+      CSSTransition backgroundColorTransition = transitionMap[BACKGROUND_COLOR] ?? transitionMap[ALL];
+
       List<CSSTransition> borderColorTransitionsLTRB = [
-        getTransition(transitionMap, 'border-left-color', parentProperty: 'border-color'),
-        getTransition(transitionMap, 'border-top-color', parentProperty: 'border-color'),
-        getTransition(transitionMap, 'border-right-color', parentProperty: 'border-color'),
-        getTransition(transitionMap, 'border-bottom-color', parentProperty: 'border-color')
+        _getTransition(transitionMap, BORDER_LEFT_COLOR, parentProperty: BORDER_COLOR),
+        _getTransition(transitionMap, BORDER_TOP_COLOR, parentProperty: BORDER_COLOR),
+        _getTransition(transitionMap, BORDER_RIGHT_COLOR, parentProperty: BORDER_COLOR),
+        _getTransition(transitionMap, BORDER_BOTTOM_COLOR, parentProperty: BORDER_COLOR)
       ];
       List<CSSTransition> borderWidthTransitionsLTRB = [
-        getTransition(transitionMap, 'border-left-width', parentProperty: 'border-width'),
-        getTransition(transitionMap, 'border-top-width', parentProperty: 'border-width'),
-        getTransition(transitionMap, 'border-right-width', parentProperty: 'border-width'),
-        getTransition(transitionMap, 'border-bottom-width', parentProperty: 'border-width')
+        _getTransition(transitionMap, BORDER_LEFT_WIDTH, parentProperty: BORDER_WIDTH),
+        _getTransition(transitionMap, BORDER_TOP_WIDTH, parentProperty: BORDER_WIDTH),
+        _getTransition(transitionMap, BORDER_RIGHT_WIDTH, parentProperty: BORDER_WIDTH),
+        _getTransition(transitionMap, BORDER_BOTTOM_WIDTH, parentProperty: BORDER_WIDTH)
       ];
 
-      // border radius transition add inorder topLeft topRight bottomLeft
-      // bottomRight
       List<CSSTransition> borderRadiusTransitionTLTRBLBR = [
-        getTransition(transitionMap, 'border-top-left-radius', parentProperty: 'border-radius'),
-        getTransition(transitionMap, 'border-top-right-radius', parentProperty: 'border-radius'),
-        getTransition(transitionMap, 'border-bottom-left-radius', parentProperty: 'border-radius'),
-        getTransition(transitionMap, 'border-bottom-right-radius', parentProperty: 'border-radius')
+        _getTransition(transitionMap, BORDER_TOP_LEFT_RADIUS, parentProperty: BORDER_RADIUS),
+        _getTransition(transitionMap, BORDER_TOP_RIGHT_RADIUS, parentProperty: BORDER_RADIUS),
+        _getTransition(transitionMap, BORDER_BOTTOM_LEFT_RADIUS, parentProperty: BORDER_RADIUS),
+        _getTransition(transitionMap, BORDER_BOTTOM_RIGHT_RADIUS, parentProperty: BORDER_RADIUS)
       ];
+
       if (backgroundColorTransition != null ||
           borderWidthTransitionsLTRB.isNotEmpty ||
           borderColorTransitionsLTRB.isNotEmpty ||
@@ -153,13 +152,13 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     }
   }
 
-  CSSTransition getTransition(Map<String, CSSTransition> transitionMap, String property, {String parentProperty}) {
+  CSSTransition _getTransition(Map<String, CSSTransition> transitionMap, String property, {String parentProperty}) {
     if (transitionMap.containsKey(property)) {
       return transitionMap[property];
-    } else if (parentProperty?.isNotEmpty != null && transitionMap.containsKey(parentProperty)) {
+    } else if (transitionMap.containsKey(parentProperty)) {
       return transitionMap[parentProperty];
-    } else if (transitionMap.containsKey('all')) {
-      return transitionMap['all'];
+    } else if (transitionMap.containsKey(ALL)) {
+      return transitionMap[ALL];
     }
     return null;
   }

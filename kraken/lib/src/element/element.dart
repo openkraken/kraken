@@ -118,8 +118,7 @@ class Element extends Node
     if (events == null) events = [];
 
     defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
-    style = CSSStyleDeclaration(style: defaultStyle);
-
+    style = CSSStyleDeclaration();
     style.addStyleChangeListener(_onStyleChanged);
 
     // Mark element needs to reposition according to position CSS.
@@ -131,12 +130,6 @@ class Element extends Node
     } else {
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
-
-    // init box sizing
-    initRenderBoxSizing(getRenderBoxModel(), style, transitionMap);
-
-    // Init overflow
-    initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
 
     // Init border and background
     initRenderDecoratedBox(getRenderBoxModel(), style);
@@ -150,6 +143,16 @@ class Element extends Node
     renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
 
     setElementSizeType();
+
+    _setDefaultStyle();
+  }
+
+  void _setDefaultStyle() {
+    if (defaultStyle.isNotEmpty) {
+      defaultStyle.forEach((property, dynamic value) {
+        style.setProperty(property, value);
+      });
+    }
   }
 
   void setElementSizeType() {
@@ -405,19 +408,16 @@ class Element extends Node
     }
   }
 
-  void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
+  void _updateOffset({String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
     RenderObject renderParent = renderElementBoundary.parent;
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
       positionParentData = renderElementBoundary.parentData;
       RenderLayoutParentData progressParentData = positionParentData;
 
-      CSSTransition allTransition;
-      if (transitionMap != null) {
-        allTransition = transitionMap['all'];
-      }
+      CSSTransition propertyTransition = transitionMap != null ? (transitionMap[property] ?? transitionMap['all']) : null;
 
-      if (definiteTransition != null || allTransition != null) {
+      if (propertyTransition != null) {
         assert(diff != null);
         assert(original != null);
 
@@ -446,9 +446,7 @@ class Element extends Node
           renderElementBoundary.parentData = progressParentData;
           renderParent.markNeedsLayout();
         };
-
-        definiteTransition?.addProgressListener(progressListener);
-        allTransition?.addProgressListener(progressListener);
+        propertyTransition.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
           positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
@@ -738,8 +736,6 @@ class Element extends Node
       parentData.flexBasis = flexParentData.flexBasis;
       parentData.alignSelf = flexParentData.alignSelf;
 
-      // Update margin for flex child.
-      element.updateRenderMargin(element.getRenderBoxModel(), element.style);
       element.renderObject.markNeedsLayout();
     }
   }
@@ -928,7 +924,6 @@ class Element extends Node
     double _original = CSSLength.toDisplayPortValue(original) ?? 0;
     double current = CSSLength.toDisplayPortValue(present) ?? 0;
     _updateOffset(
-      definiteTransition: transitionMap != null ? transitionMap[property] : null,
       property: property,
       original: _original,
       diff: current - _original,
@@ -956,11 +951,11 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(getRenderBoxModel(), style, transitionMap);
+    updateRenderPadding(getRenderBoxModel(), style, property, present, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    updateBoxSize(getRenderBoxModel(), style, transitionMap);
+    updateRenderSizing(getRenderBoxModel(), style, property, present, transitionMap);
 
     setElementSizeType();
 
@@ -968,7 +963,6 @@ class Element extends Node
       double _original = CSSLength.toDisplayPortValue(original) ?? 0;
       double current = CSSLength.toDisplayPortValue(present) ?? 0;
       _updateOffset(
-        definiteTransition: transitionMap != null ? transitionMap[property] : null,
         property: property,
         original: _original,
         diff: current - _original,
@@ -978,7 +972,7 @@ class Element extends Node
 
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
-    updateRenderMargin(getRenderBoxModel(), style, transitionMap);
+    updateRenderMargin(getRenderBoxModel(), style, property, present, transitionMap);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {

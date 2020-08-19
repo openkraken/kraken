@@ -48,10 +48,6 @@ mixin CSSOverflowMixin {
   KrakenScrollable _scrollableX;
   KrakenScrollable _scrollableY;
 
-  void initRenderOverflow(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, void scrollListener(double scrollTop, AxisDirection axisDirection)) {
-    updateRenderOverflow(renderBoxModel, style, scrollListener);
-  }
-
   void updateRenderOverflow(
       RenderBoxModel renderBoxModel,
       CSSStyleDeclaration style,

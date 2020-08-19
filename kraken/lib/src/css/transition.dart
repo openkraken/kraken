@@ -11,6 +11,25 @@ const String _transitionStart = 'transitionstart';
 const String _transitionEnd = 'transitionend';
 const String _transitionCancel = 'transitioncancel';
 
+String _toCamelCase(String s) {
+  var sb = StringBuffer();
+  var shouldUpperCase = false;
+  s.runes.forEach((int rune) {
+    // '-' char code is 45
+    if (rune == 45) {
+      shouldUpperCase = true;
+    } else {
+      var char = String.fromCharCode(rune);
+      if (shouldUpperCase) {
+        sb.write(char.toUpperCase());
+      } else {
+        sb.write(char);
+      }
+    }
+  });
+  return sb.toString();
+}
+
 /// The types of TransitionEvent
 enum CSSTransitionEvent {
   /// The transitionrun event occurs when a transition is created
@@ -39,7 +58,7 @@ mixin CSSTransitionMixin on Node {
     List<String> transitionDelay = CSSStyleProperty.getMultipleValues(style[TRANSITION_DELAY]) ?? [_0s];
 
     for (int i = 0; i < transitionProperty.length; i++) {
-      String property = transitionProperty[i];
+      String property = _toCamelCase(transitionProperty[i]);
       String function = transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
       String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
       String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
@@ -47,8 +66,6 @@ mixin CSSTransitionMixin on Node {
       Curve curve = CSSTransition._parseFunction(function);
       if (curve != null) {
         CSSTransition transition = CSSTransition();
-        _dispatchTransitionRun();
-
         AnimationController controller =
             AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
         transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
@@ -67,7 +84,9 @@ mixin CSSTransitionMixin on Node {
   }
 
   void _dispatchTransitionEvent(CSSTransitionEvent status) {
-    if (status == CSSTransitionEvent.cancel) {
+    if (status == CSSTransitionEvent.run) {
+      dispatchEvent(Event(_transitionRun));
+    } else if (status == CSSTransitionEvent.cancel) {
       // An Event fired when a CSS transition has been cancelled.
       dispatchEvent(Event(_transitionCancel));
     } else if (status == CSSTransitionEvent.start) {
@@ -79,10 +98,6 @@ mixin CSSTransitionMixin on Node {
       // An Event fired when a CSS transition has finished playing.
       dispatchEvent(Event(_transitionEnd));
     }
-  }
-
-  void _dispatchTransitionRun() {
-    dispatchEvent(Event(_transitionRun));
   }
 }
 
@@ -100,16 +115,19 @@ class CSSTransition with CustomTickerProviderStateMixin {
     _transitionListener = transitionListener;
   }
 
+  bool _listened = false;
   void _listen() {
+    if (_listened) return;
+
     if (progressListeners != null && progressListeners.length > 0) {
+      _listened = true;
+      _transitionListener(CSSTransitionEvent.run);
       curvedAnimation.addListener(_progressListener);
-      curvedAnimation.addStatusListener(_statusListener);
       Future.delayed(delay, _forward);
     }
   }
 
   void _forward() {
-    controller.reset();
     controller.forward();
   }
 
@@ -122,39 +140,50 @@ class CSSTransition with CustomTickerProviderStateMixin {
     }
   }
 
+  bool _isTransitionStart = false;
+  bool _isTransitionCancel = false;
+  bool _isTransitionEnd = false;
+
   void _progressListener() {
     if (progressListeners != null) {
       for (CSSTransitionProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
-    }
-  }
-
-  bool _isTransitionStart = false;
-  void _statusListener(AnimationStatus status) {
-    if (status == AnimationStatus.forward) {
-      // Forward status trigger many times
-      if (!_isTransitionStart) {
-        _isTransitionStart = true;
-        _transitionListener(CSSTransitionEvent.start);
+      // Trigger transtion event 
+      AnimationStatus status = curvedAnimation.status;
+      if (status == AnimationStatus.forward) {
+        // Forward status trigger many times
+        if (!_isTransitionStart) {
+          _isTransitionStart = true;
+          _transitionListener(CSSTransitionEvent.start);
+        }
+      } else if (status == AnimationStatus.completed) {
+        if (!_isTransitionEnd) {
+          _isTransitionEnd = true;
+          _dispose();
+          _transitionListener(CSSTransitionEvent.end);
+        }
+      } else if (status == AnimationStatus.dismissed) {
+        if (!_isTransitionCancel) {
+          _isTransitionCancel = true;
+          _dispose();
+          _transitionListener(CSSTransitionEvent.cancel);
+        } 
       }
-    } else if (status == AnimationStatus.completed) {
-      _dispose();
-      _transitionListener(CSSTransitionEvent.end);
-    } else if (status == AnimationStatus.dismissed) {
-      _transitionListener(CSSTransitionEvent.cancel);
     }
   }
 
   void _dispose() {
     curvedAnimation.removeListener(_progressListener);
-    curvedAnimation.removeStatusListener(_statusListener);
     controller.reset();
     if (progressListeners != null) {
       progressListeners.clear();
       progressListeners = null;
     }
+    _listened = false;
     _isTransitionStart = false;
+    _isTransitionCancel = false;
+    _isTransitionEnd = false;
   }
 
   static bool isValidTransitionPropertyValue(String value) {
