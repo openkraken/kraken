@@ -309,7 +309,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
-      if (child is RenderElementBoundary) {
+      if (child is RenderBoxModel) {
         child.parentData = getPositionParentDataFromStyle(child.style);
       } else {
         child.parentData = RenderLayoutParentData();
@@ -480,7 +480,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
-    if (child is RenderElementBoundary) {
+    if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
@@ -495,7 +495,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   }
 
 
-  RenderBoxModel _getChildRenderBoxModel(RenderElementBoundary child) {
+  RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
     return renderBoxModel;
@@ -507,7 +507,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     double marginVertical = 0;
     double marginHorizontal = 0;
 
-    if (child is RenderElementBoundary) {
+    if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
@@ -663,7 +663,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
       if (isPositionHolder(child)) {
         RenderPositionHolder positionHolder = child;
-        RenderElementBoundary childElementBoundary = positionHolder.realDisplayedBox;
+        RenderBoxModel childElementBoundary = positionHolder.realDisplayedBox;
         if (childElementBoundary != null) {
           RenderLayoutParentData childParentData = childElementBoundary.parentData;
           if (childParentData.position != CSSPositionType.static &&
@@ -697,7 +697,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
       if (verticalAlign == VerticalAlign.baseline && isLineHeightValid) {
         double childMarginTop = 0;
         double childMarginBottom = 0;
-        if (child is RenderElementBoundary) {
+        if (child is RenderBoxModel) {
           RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
           childMarginTop = childRenderBoxModel.marginTop;
           childMarginBottom = childRenderBoxModel.marginBottom;
@@ -869,7 +869,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // margin-left and margin-right auto takes up available space
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
-        if (child is RenderElementBoundary) {
+        if (child is RenderBoxModel) {
           String childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
@@ -934,7 +934,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
         double childMarginLeft = 0;
         double childMarginTop = 0;
-        if (child is RenderElementBoundary) {
+        if (child is RenderBoxModel) {
           Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
           RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
           childMarginLeft = renderBoxModel.marginLeft;
@@ -971,7 +971,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
     double childMarginTop = 0;
     double childMarginBottom = 0;
-    if (child is RenderElementBoundary) {
+    if (child is RenderBoxModel) {
       RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
       childMarginTop = childRenderBoxModel.marginTop;
       childMarginBottom = childRenderBoxModel.marginBottom;
@@ -1002,7 +1002,8 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     int childNodeId;
     if (child is RenderTextBox) {
       childNodeId = targetId;
-    } else if (child is RenderElementBoundary) {
+    } else if (child is RenderBoxModel) {
+      print('child targetId--------------- ${child.targetId}');
       childNodeId = child.targetId;
     } else if (child is RenderPositionHolder) {
       childNodeId = child.realDisplayedBox?.targetId;
@@ -1015,7 +1016,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     String display = 'inline'; // Default value.
     int targetId;
     if (child is RenderFlowLayoutBox) targetId = child.targetId;
-    if (child is RenderElementBoundary) targetId = child.targetId;
+    if (child is RenderBoxModel) targetId = child.targetId;
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
     if (targetId != null) {

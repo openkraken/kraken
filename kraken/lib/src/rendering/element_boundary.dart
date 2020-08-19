@@ -42,8 +42,8 @@ class RenderElementBoundary extends RenderProxyBox {
 
   CSSStyleDeclaration style;
 
-  BoxSizeType widthSizeType;
-  BoxSizeType heightSizeType;
+//  BoxSizeType widthSizeType;
+//  BoxSizeType heightSizeType;
 
   @override
   void setupParentData(RenderBox child) {

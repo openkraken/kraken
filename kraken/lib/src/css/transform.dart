@@ -16,8 +16,8 @@ mixin CSSTransformMixin on Node {
   Alignment oldAlignment = Alignment.center;
   int targetId;
 
-  RenderObject initTransform(
-      RenderObject current, CSSStyleDeclaration style, int targetId, ElementManager elementManager) {
+  void initTransform(
+      CSSStyleDeclaration style, int targetId) {
     this.targetId = targetId;
 
     if (style.contains(TRANSFORM)) {
@@ -29,14 +29,6 @@ mixin CSSTransformMixin on Node {
         oldAlignment = transformOrigin.alignment;
       }
     }
-
-    transform = RenderElementBoundary(
-      child: current,
-      targetId: targetId,
-      elementManager: elementManager,
-      style: style,
-    );
-    return transform;
   }
 
   void updateTransform(RenderBoxModel renderBoxModel, String transformStr, [Map<String, CSSTransition> transitionMap]) {

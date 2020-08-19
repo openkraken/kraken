@@ -92,8 +92,10 @@ class Element extends Node
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
+
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
+
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow
   RenderObject renderPositionedPlaceholder;
@@ -145,8 +147,8 @@ class Element extends Node
 
     setContentVisibilityIntersectionObserver(getRenderBoxModel(), style[CONTENT_VISIBILITY]);
 
-    // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
+    // Init transform
+    initTransform(style, targetId);
 
     setElementSizeType();
   }
@@ -157,10 +159,6 @@ class Element extends Node
 
     BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
     BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
-
-    // @FIXME: need to remove after renderElementBoundary removed.
-    renderElementBoundary.widthSizeType = widthType;
-    renderElementBoundary.heightSizeType = heightType;
 
     RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.widthSizeType = widthType;
@@ -175,14 +173,16 @@ class Element extends Node
   void layoutStickyChild(Element child, double scrollOffset, AxisDirection axisDirection) {
     CSSStyleDeclaration childStyle = child.style;
     bool isFixed = false;
+    RenderBox renderBoxModel = getRenderBoxModel();
+    RenderBox childRenderBoxModel = child.getRenderBoxModel();
 
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
-          child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+          childRenderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
+              - renderBoxModel.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -203,7 +203,7 @@ class Element extends Node
       resolvedPadding = padding.resolve(TextDirection.ltr);
     }
 
-    RenderLayoutParentData boxParentData = child.renderElementBoundary?.parentData;
+    RenderLayoutParentData boxParentData = childRenderBoxModel?.parentData;
 
     if (child.originalOffset == null) {
       child.originalOffset = boxParentData.offset;
@@ -212,8 +212,8 @@ class Element extends Node
     double offsetY = child.originalOffset.dy;
     double offsetX = child.originalOffset.dx;
 
-    double childHeight = child.renderElementBoundary?.size?.height;
-    double childWidth = child.renderElementBoundary?.size?.width;
+    double childHeight = childRenderBoxModel?.size?.height;
+    double childWidth = childRenderBoxModel?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
     RenderBox parentContainer = child.parent.renderLayoutBox;
     double minOffsetY = 0;
@@ -223,7 +223,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderElementBoundary?.size?.height;
+      double viewPortHeight = renderBoxModel?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -259,7 +259,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderElementBoundary?.size?.width;
+      double viewPortWidth = renderBoxModel?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -299,13 +299,13 @@ class Element extends Node
       // Change sticky status to fixed
       child.stickyStatus = StickyPositionType.fixed;
       boxParentData.isOffsetSet = true;
-      child.renderElementBoundary.markNeedsPaint();
+      childRenderBoxModel.markNeedsPaint();
     } else {
       // Change sticky status to relative
       if (child.stickyStatus == StickyPositionType.fixed) {
         child.stickyStatus = StickyPositionType.relative;
         // Reset child offset to its original offset
-        child.renderElementBoundary.markNeedsPaint();
+        childRenderBoxModel.markNeedsPaint();
       }
     }
   }
@@ -319,15 +319,16 @@ class Element extends Node
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
-    if (renderElementBoundary.parentData is RenderLayoutParentData) {
-      (renderElementBoundary.parentData as RenderLayoutParentData).position = currentPosition;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    if (renderBoxModel.parentData is RenderLayoutParentData) {
+      (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
     }
     // Move element according to position when it's already connected
     if (isConnected) {
       if (currentPosition == CSSPositionType.static) {
         // Loop renderObject children to move positioned children to its containing block
         renderLayoutBox.visitChildren((childRenderObject) {
-          if (childRenderObject is RenderElementBoundary) {
+          if (childRenderObject is RenderBoxModel) {
             Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
@@ -340,7 +341,7 @@ class Element extends Node
 
         // Move self from containing block to original position in element tree
         if (prevPosition == CSSPositionType.absolute || prevPosition == CSSPositionType.fixed) {
-          RenderLayoutParentData parentData = renderElementBoundary.parentData;
+          RenderLayoutParentData parentData = renderBoxModel.parentData;
           RenderPositionHolder renderPositionHolder = parentData.renderPositionHolder;
           if (renderPositionHolder != null) {
             RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
@@ -360,10 +361,10 @@ class Element extends Node
 
         // Reset stick element offset to normal flow
         if (prevPosition == CSSPositionType.sticky) {
-          RenderLayoutParentData boxParentData = renderElementBoundary?.parentData;
+          RenderLayoutParentData boxParentData = renderBoxModel?.parentData;
           boxParentData.isOffsetSet = false;
-          renderElementBoundary.markNeedsLayout();
-          renderElementBoundary.markNeedsPaint();
+          renderBoxModel.markNeedsLayout();
+          renderBoxModel.markNeedsPaint();
         }
       } else {
         // Move self to containing block
@@ -406,9 +407,10 @@ class Element extends Node
 
   void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
-    RenderBox renderParent = renderElementBoundary.parent;
-    if (renderElementBoundary.parentData is RenderLayoutParentData) {
-      positionParentData = renderElementBoundary.parentData;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    RenderBox renderParent = renderBoxModel.parent;
+    if (renderBoxModel.parentData is RenderLayoutParentData) {
+      positionParentData = renderBoxModel.parentData;
       RenderLayoutParentData progressParentData = positionParentData;
 
       CSSTransition allTransition;
@@ -442,7 +444,7 @@ class Element extends Node
               progressParentData.height = newValue;
               break;
           }
-          renderElementBoundary.parentData = progressParentData;
+          renderBoxModel.parentData = progressParentData;
           renderParent.markNeedsLayout();
         };
 
@@ -516,7 +518,10 @@ class Element extends Node
   }
 
   @override
-  bool get attached => renderElementBoundary.attached;
+  bool get attached {
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    return renderBoxModel.attached;
+  }
 
   // Attach renderObject of current node to parent
   @override
@@ -538,7 +543,8 @@ class Element extends Node
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        parent.renderLayoutBox.insert(renderElementBoundary, after: after);
+        RenderBoxModel renderBoxModel = getRenderBoxModel();
+        parent.renderLayoutBox.insert(renderBoxModel, after: after);
         break;
     }
 
@@ -549,13 +555,14 @@ class Element extends Node
   // Detach renderObject of current node from parent
   @override
   void detach() {
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
     // Remove placeholder of positioned element
-    RenderLayoutParentData parentData = renderElementBoundary.parentData;
+    RenderLayoutParentData parentData = renderBoxModel.parentData;
     if (parentData.renderPositionHolder != null) {
       ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
       parent.remove(parentData.renderPositionHolder);
     }
-    (renderElementBoundary.parent as ContainerRenderObjectMixin).remove(renderElementBoundary);
+    (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
   }
 
   @override
@@ -671,27 +678,28 @@ class Element extends Node
 
     RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
 
-    var childRenderElementBoundary = child.renderElementBoundary;
+    var childRenderLayoutBox = child.renderLayoutBox;
     if (position == CSSPositionType.relative || position == CSSPositionType.absolute) {
-      childRenderElementBoundary.positionedHolder = positionedBoxHolder;
+      childRenderLayoutBox.positionedHolder = positionedBoxHolder;
     }
 
     child.parent.addChild(positionedBoxHolder);
 
     setPositionedChildParentData(parentRenderLayoutBox, child, positionedBoxHolder);
-    positionedBoxHolder.realDisplayedBox = childRenderElementBoundary;
+    positionedBoxHolder.realDisplayedBox = childRenderLayoutBox;
 
-    parentRenderLayoutBox.add(childRenderElementBoundary);
+    parentRenderLayoutBox.add(childRenderLayoutBox);
   }
 
   void _addStickyChild(Element child, RenderObject after) {
-    renderLayoutBox.insert(child.renderElementBoundary, after: after);
+    RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
+    renderLayoutBox.insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
     Element scrollContainer = findScrollContainer(child);
     // Flush layout first to calculate sticky offset
-    if (!child.renderElementBoundary.hasSize) {
-      child.renderElementBoundary.owner.flushLayout();
+    if (!childRenderBoxModel.hasSize) {
+      childRenderBoxModel.owner.flushLayout();
     }
     // Set sticky child offset manually
     scrollContainer.layoutStickyChild(child, 0, AxisDirection.down);
@@ -892,9 +900,7 @@ class Element extends Node
           })
           ..removeAll();
 
-        renderElementBoundary.child = null;
         renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
-        renderElementBoundary.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -990,7 +996,7 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(getRenderBoxModel(), style, property, present, renderElementBoundary, targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, targetId);
     // decoratedBox may contains background and border
     updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
@@ -1088,6 +1094,7 @@ class Element extends Node
 
   @mustCallSuper
   method(String name, List args) {
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
     switch (name) {
       case 'offsetTop':
         // need to flush layout to get correct size
@@ -1100,11 +1107,11 @@ class Element extends Node
       case 'offsetWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderElementBoundary.hasSize ? renderElementBoundary.size.width : 0;
+        return renderBoxModel.hasSize ? renderBoxModel.size.width : 0;
       case 'offsetHeight':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderElementBoundary.hasSize ? renderElementBoundary.size.height : 0;
+        return renderBoxModel.hasSize ? renderBoxModel.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         // need to flush layout to get correct size
@@ -1145,8 +1152,8 @@ class Element extends Node
 
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
-
-    RenderBox sizedBox = renderElementBoundary.child;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    RenderBox sizedBox = renderBoxModel;
     if (isConnected) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
@@ -1243,9 +1250,10 @@ class Element extends Node
 
   void click() {
     Event clickEvent = Event('click', EventInit());
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
 
     if (isConnected) {
-      final RenderBox box = renderElementBoundary;
+      final RenderBox box = renderBoxModel;
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
       // or child may miss size.
@@ -1261,7 +1269,7 @@ class Element extends Node
         currentElement.handleClick(clickEvent);
         if (currentElement.parent != null) {
           currentElement = currentElement.parent;
-          hitTest = currentElement.renderElementBoundary.hitTest(boxHitTestResult, position: position);
+          hitTest = currentElement.getRenderBoxModel().hitTest(boxHitTestResult, position: position);
         } else {
           hitTest = false;
         }
@@ -1278,12 +1286,15 @@ class Element extends Node
     }
 
     Completer<Uint8List> completer = new Completer();
-    // Only capture
-    var originalChild = renderElementBoundary.child;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    ContainerBoxParentData parentData = renderBoxModel.parentData;
+    RenderBox previousSibling = parentData.previousSibling;
+    ContainerRenderObjectMixin parent = renderBoxModel.parent;
+
     // Make sure child is detached.
-    renderElementBoundary.child = null;
-    var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderElementBoundary.child = renderRepaintBoundary;
+    parent.remove(renderBoxModel);
+    var renderRepaintBoundary = RenderRepaintBoundary(child: renderBoxModel);
+    parent.insert(renderRepaintBoundary, after: previousSibling);
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
 
@@ -1298,7 +1309,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderElementBoundary.child = originalChild;
+      parent.insert(renderBoxModel, after: previousSibling);
 
       completer.complete(captured);
     });
@@ -1416,6 +1427,6 @@ void setPositionedChildParentData(
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
-  RenderElementBoundary childRenderElementBoundary = child.renderElementBoundary;
-  childRenderElementBoundary.parentData = parentData;
+  RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
+  childRenderBoxModel.parentData = parentData;
 }

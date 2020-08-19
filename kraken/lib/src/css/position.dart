@@ -105,7 +105,7 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
 BoxSizeType _getChildWidthSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.widthSizeType;
-  } else if (child is RenderElementBoundary) {
+  } else if (child is RenderLayoutBox) {
     return child.widthSizeType;
   }
   return null;
@@ -114,7 +114,7 @@ BoxSizeType _getChildWidthSizeType(RenderBox child) {
 BoxSizeType _getChildHeightSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.heightSizeType;
-  } else if (child is RenderElementBoundary) {
+  } else if (child is RenderLayoutBox) {
     return child.heightSizeType;
   }
   return null;

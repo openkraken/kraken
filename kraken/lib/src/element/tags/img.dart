@@ -92,9 +92,6 @@ class ImageElement extends Element {
     BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
     BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
 
-    renderElementBoundary.widthSizeType = widthType;
-    renderElementBoundary.heightSizeType = heightType;
-
     RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.widthSizeType = widthType;
     renderBoxModel.heightSizeType = heightType;
