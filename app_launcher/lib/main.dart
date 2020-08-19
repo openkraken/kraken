@@ -10,6 +10,6 @@ void main() {
       debugShowCheckedModeBanner: false,
       home: KrakenWidget(
         'main',
-          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio)
+          window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio, bundleURL: 'http://127.0.0.1:3300/kraken_debug_server.js',)
   ));
 }

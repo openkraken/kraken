@@ -305,10 +305,24 @@ class KrakenController {
 
   String _bundleContent;
   String get bundleContent => _bundleContent;
+  set bundleContent(String value) {
+    if (value == null) return;
+    _bundleContent = value;
+  }
+
   String _bundlePath;
   String get bundlePath => _bundlePath;
+  set bundlePath(String value) {
+    if (value == null) return;
+    _bundlePath = value;
+  }
+
   String _bundleURL;
   String get bundleURL => _bundleURL;
+  set bundleURL(String value) {
+    if (value == null) return;
+    _bundleURL = value;
+  }
 
   // preload javascript source and cache it.
   void loadBundle({

@@ -65,6 +65,92 @@ class RenderLayoutBox extends RenderBoxModel
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
+
+  bool _needsSortChildren = true;
+  bool get needsSortChildren {
+    return _needsSortChildren;
+  }
+  // Mark this container to sort children by zIndex properties.
+  // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
+  void markNeedsSortChildren() {
+    _needsSortChildren = true;
+  }
+
+  bool _isChildrenSorted = false;
+  bool get isChildrenSorted => _isChildrenSorted;
+
+  List<RenderObject> _sortedChildren;
+  List<RenderObject> get sortedChildren {
+    if (_sortedChildren == null) return [];
+    return _sortedChildren;
+  }
+  set sortedChildren(List<RenderObject> value) {
+    assert(value != null);
+    _isChildrenSorted = true;
+    _sortedChildren = value;
+  }
+
+  @override
+  void insert(RenderBox child, { RenderBox after }) {
+    super.insert(child, after: after);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void add(RenderBox child) {
+    super.add(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void addAll(List<RenderBox> children) {
+    super.addAll(children);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void remove(RenderBox child) {
+    super.remove(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void removeAll() {
+    super.removeAll();
+    _isChildrenSorted = false;
+  }
+
+  void move(RenderBox child, { RenderBox after }) {
+    super.move(child, after: after);
+    _isChildrenSorted = false;
+  }
+
+  void sortChildrenByZIndex() {
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      RenderLayoutParentData prevParentData = prev.parentData;
+      RenderLayoutParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
+      // z-index applies to flex-item ignoring position property
+      int prevZIndex = prevParentData.zIndex ?? 0;
+      int nextZIndex = nextParentData.zIndex ?? 0;
+      return prevZIndex - nextZIndex;
+    });
+    sortedChildren = children;
+  }
+
+  // Get all children as a list and detach them all.
+  List<RenderObject> getDetachedChildrenAsList() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    return children;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
@@ -97,7 +183,7 @@ class RenderBoxModel extends RenderBox with
   bool _shouldRender = false;
   bool get shouldRender => _shouldRender;
   set shouldRender(bool value) {
-    assert(value != null);
+    if (value == null) return;
     if (_shouldRender != value) {
       markNeedsLayout();
       _shouldRender = value;
@@ -140,9 +226,10 @@ class RenderBoxModel extends RenderBox with
     // Copy Border
     newBox.borderEdge = borderEdge;
     newBox.decoration = decoration;
-    newBox.oldDecoration = oldDecoration;
+    newBox.cssBoxDecoration = cssBoxDecoration;
     newBox.position = position;
     newBox.configuration = configuration;
+    newBox.boxPainter = boxPainter;
 
     // Copy overflow
     newBox.scrollListener = scrollListener;
@@ -269,7 +356,7 @@ class RenderBoxModel extends RenderBox with
     // @FIXME, need to remove elementManager in the future.
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     double width = _width;
 
     void cropMargin(Element childNode) {
@@ -290,8 +377,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     switch (display) {
-      case BLOCK:
-      case FLEX:
+      case CSSDisplay.block:
+      case CSSDisplay.flex:
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains(WIDTH)) {
           cropPaddingBorder(hostElement);
@@ -306,17 +393,17 @@ class RenderBoxModel extends RenderBox with
             }
             if (hostElement is Element) {
               CSSStyleDeclaration style = hostElement.style;
-              String display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
+              CSSDisplay display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
 
               // Set width of element according to parent display
-              if (display != INLINE) {
+              if (display != CSSDisplay.inline) {
                 // Skip to find upper parent
                 if (style.contains(WIDTH)) {
                   // Use style width
                   width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
                   cropPaddingBorder(hostElement);
                   break;
-                } else if (display == INLINE_BLOCK || display == INLINE_FLEX) {
+                } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
                   // Collapse width to children
                   width = null;
                   break;
@@ -326,8 +413,8 @@ class RenderBoxModel extends RenderBox with
           }
         }
         break;
-      case INLINE_BLOCK:
-      case INLINE_FLEX:
+      case CSSDisplay.inlineBlock:
+      case CSSDisplay.inlineFlex:
         if (style.contains(WIDTH)) {
           width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
           cropPaddingBorder(hostElement);
@@ -335,7 +422,7 @@ class RenderBoxModel extends RenderBox with
           width = null;
         }
         break;
-      case INLINE:
+      case CSSDisplay.inline:
         width = null;
         break;
       default:
@@ -381,7 +468,7 @@ class RenderBoxModel extends RenderBox with
   double getContentHeight() {
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     double height = _height;
     double cropHeight = 0;
@@ -404,7 +491,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     // Inline element has no height
-    if (display == INLINE) {
+    if (display == CSSDisplay.inline) {
       return null;
     } else if (style.contains(HEIGHT)) {
       cropPaddingBorder(hostElement);
@@ -605,7 +692,13 @@ class RenderBoxModel extends RenderBox with
       paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
         paintIntersectionObserverLayer(context, transformedOffset, (PaintingContext context, Offset offset) {
           paintDecoration(context, offset);
-          paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+          paintOverflow(
+              context,
+              offset,
+              EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+              Size(scrollableViewportWidth, scrollableViewportHeight),
+              callback
+          );
         });
       });
     }

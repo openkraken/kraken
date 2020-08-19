@@ -173,7 +173,7 @@ enum AlignSelf {
 }
 
 mixin CSSFlexboxMixin {
-  void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
+  static void decorateRenderFlex(RenderFlexLayout renderFlexLayout, CSSStyleDeclaration style) {
     if (style != null) {
       String justifyContent = style[JUSTIFY_CONTENT];
       String alignItems = style[ALIGN_ITEMS];

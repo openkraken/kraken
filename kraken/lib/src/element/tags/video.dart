@@ -24,6 +24,7 @@ class VideoElement extends Element {
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
+          repaintSelf: true,
           tagName: VIDEO,
         ) {
     renderVideo();
@@ -117,7 +118,7 @@ class VideoElement extends Element {
 
   void _removeVideoBox() {
     RenderBoxModel renderBoxModel = getRenderBoxModel();
-    (renderBoxModel as RenderIntrinsicBox).child = null;
+    (renderBoxModel as RenderIntrinsic).child = null;
   }
 
   onCanPlay() async {

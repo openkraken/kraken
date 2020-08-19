@@ -23,6 +23,7 @@ class CanvasElement extends Element {
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
+          repaintSelf: true,
           tagName: CANVAS,
         ) {
     painter = CanvasPainter();

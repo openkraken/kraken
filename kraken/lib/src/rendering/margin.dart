@@ -17,10 +17,6 @@ mixin RenderMarginMixin on RenderBox {
   void _markNeedResolution() {
     _resolvedMargin = null;
     markNeedsLayout();
-    // force child re-layout
-//    RenderBox childBox = child;
-//    child = null;
-//    child = childBox;
   }
 
   /// The amount to pad the child in each dimension.

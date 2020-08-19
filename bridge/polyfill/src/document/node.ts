@@ -64,6 +64,7 @@ export class Node extends EventTarget {
     if (child.parentNode) {
       const idx = child.parentNode!.childNodes.indexOf(child);
       if (idx !== -1) {
+        child._notifyNodeRemoved(child.parentNode);
         child.parentNode!.childNodes.splice(idx, 1);
         child.parentNode = null;
       }
@@ -77,9 +78,9 @@ export class Node extends EventTarget {
     }
 
     this._ensureDetached(child);
-
     this.childNodes.push(child);
     child.parentNode = this;
+    child._notifyNodeInsert(this);
     insertAdjacentNode(this.targetId, 'beforeend', child.targetId);
   }
 
@@ -109,6 +110,7 @@ export class Node extends EventTarget {
     if (idx !== -1) {
       this.childNodes.splice(idx, 1);
       child.parentNode = null;
+      child._notifyNodeRemoved(this);
       removeNode(child.targetId);
     } else {
       throw new Error(`Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.`);
@@ -125,12 +127,18 @@ export class Node extends EventTarget {
       if (parentNode != null) {
         const parentChildNodes = parentNode.childNodes;
         const nextIndex = parentChildNodes.indexOf(referenceNode);
-        parentChildNodes.splice(nextIndex - 1, 0, newChild);
+        parentChildNodes.splice(nextIndex, 0, newChild);
         newChild.parentNode = parentNode;
+        newChild._notifyNodeInsert(parentNode);
         insertAdjacentNode(referenceNode.targetId, 'beforebegin', newChild.targetId);
       }
     }
   }
+
+  protected _notifyNodeRemoved(insertionNode: Node): void {}
+
+  protected _notifyNodeInsert(insertionNode: Node): void {}
+
 
   /**
    * The Node.replaceChild() method replaces a child node within the given (parent) node.
@@ -144,17 +152,15 @@ export class Node extends EventTarget {
     if (!oldChild.parentNode) throw new Error(`Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.`);
 
     this._ensureDetached(newChild);
-
     const parentNode = oldChild.parentNode;
     oldChild.parentNode = null;
     const childIndex = parentNode.childNodes.indexOf(oldChild);
-
     newChild.parentNode = parentNode;
     parentNode.childNodes.splice(childIndex, 1, newChild);
-
+    oldChild._notifyNodeRemoved(parentNode);
+    newChild._notifyNodeInsert(parentNode);
     insertAdjacentNode(oldChild.targetId, 'afterend', newChild.targetId);
     removeNode(oldChild.targetId);
-
     return oldChild;
   }
 }

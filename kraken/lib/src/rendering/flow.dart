@@ -19,8 +19,8 @@ class _RunMetrics {
 }
 
 /// Impl flow layout algorithm.
-class RenderFlowLayoutBox extends RenderLayoutBox {
-  RenderFlowLayoutBox(
+class RenderFlowLayout extends RenderLayoutBox {
+  RenderFlowLayout(
       {List<RenderBox> children,
       MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
       TextDirection textDirection = TextDirection.ltr,
@@ -870,14 +870,14 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
         // between element and its containing block on block-level element
         // which is not positioned and computed to 0px in other cases
         if (child is RenderBoxModel) {
-          String childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+          CSSDisplay childRealDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
           CSSStyleDeclaration childStyle = child.style;
           String marginLeft = childStyle[MARGIN_LEFT];
           String marginRight = childStyle[MARGIN_RIGHT];
 
           // 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' +
           // 'border-right-width' + 'margin-right' = width of containing block
-          if (childRealDisplay == BLOCK || childRealDisplay == FLEX) {
+          if (childRealDisplay == CSSDisplay.block || childRealDisplay == CSSDisplay.flex) {
             if (marginLeft == AUTO) {
               double remainingSpace = containerMainAxisExtent - childMainAxisExtent;
               if (marginRight == AUTO) {
@@ -1015,7 +1015,7 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   String _getChildDisplayFromRenderBox(RenderBox child) {
     String display = 'inline'; // Default value.
     int targetId;
-    if (child is RenderFlowLayoutBox) targetId = child.targetId;
+    if (child is RenderFlowLayout) targetId = child.targetId;
     if (child is RenderBoxModel) targetId = child.targetId;
     if (child is RenderPositionHolder) targetId = child.realDisplayedBox?.targetId;
 
@@ -1061,27 +1061,24 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      List<RenderObject> children = getChildrenAsList();
-      children.sort((RenderObject prev, RenderObject next) {
-        RenderLayoutParentData prevParentData = prev.parentData;
-        RenderLayoutParentData nextParentData = next.parentData;
-        // Place positioned element after non positioned element
-        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-          return -1;
+      if (needsSortChildren) {
+        if (!isChildrenSorted) {
+          sortChildrenByZIndex();
         }
-        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-          return 1;
+        for (int i = 0; i < sortedChildren.length; i ++) {
+          RenderObject child = sortedChildren[i];
+          if (child is! RenderPositionHolder) {
+            final RenderLayoutParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+          }
         }
-        // z-index applies to element when position is not static
-        int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-        int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-        return prevZIndex - nextZIndex;
-      });
-
-      for (var child in children) {
-        if (child is! RenderPositionHolder) {
+      } else {
+        RenderObject child = firstChild;
+        while (child != null) {
           final RenderLayoutParentData childParentData = child.parentData;
-          context.paintChild(child, childParentData.offset + offset);
+          if (child is! RenderPositionHolder) {
+            context.paintChild(child, childParentData.offset + offset);
+          }
           child = childParentData.nextSibling;
         }
       }
@@ -1118,5 +1115,90 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
     parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
     return parentData;
+  }
+
+  /// Convert [RenderFlowLayout] to [RenderFlexLayout]
+  RenderFlexLayout toFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlexLayout flexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(flexLayout);
+  }
+
+  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlowLayout]
+  RenderSelfRepaintFlowLayout toSelfRepaint() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderSelfRepaintFlowLayout selfRepaintFlowLayout = RenderSelfRepaintFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlowLayout);
+  }
+
+  /// Convert [RenderFlowLayout] to [RenderSelfRepaintFlexLayout]
+  RenderSelfRepaintFlexLayout toSelfRepaintFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlexLayout);
+  }
+}
+
+// Render flex layout with self repaint boundary.
+class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
+  RenderSelfRepaintFlowLayout({
+    List<RenderBox> children,
+    int targetId,
+    ElementManager elementManager,
+    CSSStyleDeclaration style,
+  }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
+
+  @override
+  get isRepaintBoundary => true;
+
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
+  RenderSelfRepaintFlexLayout toFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderSelfRepaintFlexLayout selfRepaintFlexLayout = RenderSelfRepaintFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(selfRepaintFlexLayout);
+  }
+
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
+  RenderFlowLayout toParentRepaint() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(renderFlowLayout);
+  }
+
+  /// Convert [RenderSelfRepaintFlowLayout] to [RenderFlowLayout]
+  RenderFlexLayout toParentRepaintFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
+      children: children,
+      targetId: targetId,
+      style: style,
+      elementManager: elementManager
+    );
+    return copyWith(renderFlexLayout);
   }
 }

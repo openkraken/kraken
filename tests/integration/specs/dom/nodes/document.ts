@@ -32,5 +32,4 @@ describe('Document api', () => {
     expect(document.all).not.toBeUndefined();
     expect(document.all.length).toBeGreaterThan(0);
   });
-
 });

@@ -1,5 +1,7 @@
 import { BODY } from './events/event-target';
-import { Node, NodeType } from './node';
+import { Node, NodeType, traverseNode } from './node';
+import { addElementById, removeElementById } from './getElementById';
+
 import {
   createElement,
   setProperty,
@@ -157,14 +159,75 @@ export class Element extends Node {
     name = String(name).toLowerCase();
     value = String(value);
     if (this.attributes[name]) {
+      const oldValue = this.attributes[name].value;
       this.attributes[name].value = value;
+      this._didModifyAttribute(name, oldValue, value);
     } else {
       const attr = {name, value};
       this.attributes[name] = attr;
       this.attributes.push(attr);
+      this._didModifyAttribute(name, '', value);
     }
-
     setProperty(this.targetId, name, value);
+  }
+
+  protected _notifyNodeRemoved(insertionNode: Node): void {
+    if (insertionNode.isConnected) {
+      traverseNode(this, (node: Node) => {
+        if (node instanceof Element) {
+          node._notifyChildRemoved();
+        }
+      });
+    }
+  }
+
+  protected _notifyChildRemoved(): void {
+    if (this.hasAttribute('id')) {
+      const elementid = this.getAttribute('id');
+      this._updateId(elementid, null);
+    }
+  }
+
+  protected _notifyNodeInsert(insertionNode: Node): void {
+    if (insertionNode.isConnected) {
+      traverseNode(this, (node: Node) => {
+        if( node instanceof Element) {
+          node._notifyChildInsert();
+        }
+      });
+    }
+  }
+
+  protected _notifyChildInsert(): void {
+    if (this.hasAttribute('id')) {
+      const elementid = this.getAttribute('id');
+      this._updateId(null, elementid);
+    }
+  }
+
+  private _didModifyAttribute(name: string, oldValue: string, newValue: string): void {
+    if (name === 'id') {
+      this._beforeUpdateId(oldValue, newValue);
+    }
+  }
+
+  private _beforeUpdateId(oldValue: string, newValue: string): void {
+    if (!this.isConnected) {
+      return;
+    }
+    if (oldValue === newValue) {
+      return;
+    }
+    this._updateId(oldValue, newValue);
+
+  }
+  private _updateId(oldValue: string | null, newValue: string | null): void {
+    if (oldValue) {
+      removeElementById(oldValue, this);
+    }
+    if (newValue) {
+      addElementById(newValue, this);
+    }
   }
 
   public getAttribute(name: string) {
@@ -186,6 +249,7 @@ export class Element extends Node {
       const idx = this.attributes.indexOf(attr);
       if (idx !== -1) {
         this.attributes.splice(idx, 1);
+        this._didModifyAttribute(name, attr.value, '');
       }
 
       removeProperty(this.targetId, name);
