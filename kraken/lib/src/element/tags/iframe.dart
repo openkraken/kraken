@@ -458,7 +458,7 @@ abstract class WebViewElement extends Element {
     this.initialMediaPlaybackPolicy = AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
   })  : assert(javascriptMode != null),
         assert(initialMediaPlaybackPolicy != null),
-        super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+        super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
 
   /// The url that WebView loaded at first time.
   String initialUrl;

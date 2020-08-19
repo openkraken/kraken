@@ -65,6 +65,9 @@ class Element extends Node
   /// changing position property.
   bool needsReposition = false;
 
+  /// Should create repaintBoundary for this element to repaint separately from parent.
+  bool repaintSelf;
+
   bool shouldBlockStretch = true;
 
   // Position of sticky element changes between relative and fixed of scroll container
@@ -91,7 +94,7 @@ class Element extends Node
   RenderObject renderObject;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
-  RenderIntrinsicBox renderIntrinsicBox;
+  RenderIntrinsic renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;
   // The boundary of an Element, can be used to logic distinguish difference element
   RenderElementBoundary renderElementBoundary;
@@ -111,6 +114,7 @@ class Element extends Node
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
+    this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
@@ -127,9 +131,9 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style, elementManager);
+      renderObject = renderIntrinsicBox = createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
-      renderObject = renderLayoutBox = createRenderLayoutBox(this);
+      renderObject = renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
     // init box sizing
@@ -871,7 +875,7 @@ class Element extends Node
       if (prevDisplay != currentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
         renderIntersectionObserver.child = null;
-        renderLayoutBox = createRenderLayoutBox(this, prevRenderLayoutBox: prevRenderLayoutBox);
+        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox);
         renderIntersectionObserver.child = renderLayoutBox;
       }
     }
@@ -1275,14 +1279,19 @@ class Element extends Node
   }
 }
 
-RenderBoxModel createRenderLayoutBox(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
   CSSStyleDeclaration style = element.style;
   CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
     RenderFlexLayout flexLayout;
 
     if (prevRenderLayoutBox == null) {
-      flexLayout = RenderFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      if (repaintSelf) {
+        flexLayout = RenderSelfRepaintFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      } else {
+        flexLayout = RenderFlexLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      }
+
     } else if (prevRenderLayoutBox is RenderFlowLayout) {
       if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
         if (repaintSelf) {
@@ -1329,7 +1338,11 @@ RenderBoxModel createRenderLayoutBox(Element element, {RenderLayoutBox prevRende
     RenderFlowLayout flowLayout;
 
     if (prevRenderLayoutBox == null) {
-      flowLayout = RenderFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      if (repaintSelf) {
+        flowLayout = RenderSelfRepaintFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      } else {
+        flowLayout = RenderFlowLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+      }
     } else if (prevRenderLayoutBox is RenderFlowLayout) {
       if (prevRenderLayoutBox is RenderSelfRepaintFlowLayout) {
         if (repaintSelf) {
@@ -1376,6 +1389,38 @@ RenderBoxModel createRenderLayoutBox(Element element, {RenderLayoutBox prevRende
     throw FlutterError('Not supported display type $display');
   }
 }
+
+RenderIntrinsic createRenderIntrinsic(Element element, {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
+  RenderIntrinsic intrinsic;
+
+  if (prevRenderIntrinsic == null) {
+    if (repaintSelf) {
+      intrinsic = RenderSelfRepaintIntrinsic(element.targetId, element.style, element.elementManager);
+    } else {
+      intrinsic = RenderIntrinsic(element.targetId, element.style, element.elementManager);
+    }
+  } else {
+    if (prevRenderIntrinsic is RenderSelfRepaintIntrinsic) {
+      if (repaintSelf) {
+        // RenderSelfRepaintIntrinsic --> RenderSelfRepaintIntrinsic
+        intrinsic = prevRenderIntrinsic;
+      } else {
+        // RenderSelfRepaintIntrinsic --> RenderIntrinsic
+        intrinsic = prevRenderIntrinsic.toParentRepaint();
+      }
+    } else {
+      if (repaintSelf) {
+        // RenderIntrinsic --> RenderSelfRepaintIntrinsic
+        intrinsic = prevRenderIntrinsic.toSelfRepaint();
+      } else {
+        // RenderIntrinsic --> RenderIntrinsic
+        intrinsic = prevRenderIntrinsic;
+      }
+    }
+  }
+  return intrinsic;
+}
+
 
 Element findContainingBlock(Element element) {
   Element _el = element?.parent;

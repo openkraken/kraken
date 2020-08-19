@@ -137,12 +137,8 @@ mixin CSSOverflowMixin {
 
       if (renderBoxModel is RenderLayoutBox) {
         RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderLayoutBox.parent;
-        RenderLayoutBox newLayoutBox;
-        if (shouldRepaintSelf) {
-          element.renderLayoutBox = newLayoutBox = createRenderLayoutBox(element, repaintSelf: true, prevRenderLayoutBox: renderBoxModel);
-        } else {
-          element.renderLayoutBox = newLayoutBox = createRenderLayoutBox(element, repaintSelf: false, prevRenderLayoutBox: renderBoxModel);
-        }
+        RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
+        element.renderLayoutBox = newLayoutBox;
         if (layoutBoxParent != null) {
           layoutBoxParent.child = newLayoutBox;
         }

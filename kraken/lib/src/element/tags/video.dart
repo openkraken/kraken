@@ -23,6 +23,7 @@ class VideoElement extends Element {
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
+          repaintSelf: true,
           tagName: VIDEO,
         ) {
     renderVideo();

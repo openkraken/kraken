@@ -8,9 +8,9 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderIntrinsicBox extends RenderBoxModel
+class RenderIntrinsic extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsicBox(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
+  RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
   @override
@@ -36,5 +36,29 @@ class RenderIntrinsicBox extends RenderBoxModel
 
       if (child != null) context.paintChild(child, offset);
     });
+  }
+
+  RenderSelfRepaintIntrinsic toSelfRepaint() {
+    RenderObject childRenderObject = child;
+    child = null;
+    RenderSelfRepaintIntrinsic newChild = RenderSelfRepaintIntrinsic(targetId, style, elementManager);
+    newChild.child = childRenderObject;
+    return copyWith(newChild);
+  }
+}
+
+class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
+  RenderSelfRepaintIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager):
+        super(targetId, style, elementManager);
+
+  @override
+  get isRepaintBoundary => true;
+
+  RenderIntrinsic toParentRepaint() {
+    RenderObject childRenderObject = child;
+    child = null;
+    RenderIntrinsic newChild = RenderIntrinsic(targetId, style, elementManager);
+    newChild.child = childRenderObject;
+    return copyWith(newChild);
   }
 }
