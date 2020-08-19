@@ -142,7 +142,7 @@ class Element extends Node
     initRenderDecoratedBox(getRenderBoxModel(), style);
 
     // Intersection observer
-    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
+    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: getRenderBoxModel());
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
 
