@@ -643,6 +643,25 @@ class RenderBoxModel extends RenderBox with
     setUpOverflowScroller(scrollableSize, viewportSize);
   }
 
+  void setMaximumScrollableHeightForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    }
+    if (childParentData.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    }
+  }
+
+  void setMaximumScrollableWidthForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.left != null) {
+      maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
+    }
+
+    if (childParentData.right != null) {
+      maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
+    }
+  }
+
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintDecoration(context, offset);
     paintOverflow(

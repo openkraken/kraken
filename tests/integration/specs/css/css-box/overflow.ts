@@ -138,4 +138,48 @@ describe('Overflow', () => {
       await matchViewportSnapshot();
     });
   });
+
+  it('overflow with absolute positioned elements', async (done) => {
+    let scroller;
+    let container = createElement('div', {
+      style: {
+        display: 'inline-block',
+        position: 'relative',
+        width: '120px',
+        height: '250px',
+      }
+    }, [
+      scroller = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '200px',
+          'overflow-x': 'auto',
+          'overflow-y': 'auto',
+          border: '1px solid #000'
+        }
+      }, [
+        createElement('div', {
+          style: {
+            position: 'absolute',
+            right: '-20px',
+            color: 'red',
+            display: 'inline',
+            bottom: '-550px'
+          }
+        }, [
+          createText('XXX')
+        ])
+      ])
+    ]);
+
+    document.body.appendChild(container);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      scroller.scroll(20, 550);
+      await matchViewportSnapshot(0.2);
+      done();
+    });
+  });
 });
