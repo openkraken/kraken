@@ -161,7 +161,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   double childMarginBottom = 0;
   double childMarginLeft = 0;
   double childMarginRight = 0;
-  if (child is RenderElementBoundary) {
+  if (child is RenderBoxModel) {
     Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
     childMarginTop = childRenderBoxModel.marginTop;
@@ -204,7 +204,6 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   }
 
   Offset offset = setAutoMarginPositionedElementOffset(x, y, child, parentSize);
-
   childParentData.offset = offset;
 }
 
@@ -212,7 +211,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
 Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child, Size parentSize) {
-  if (child is RenderElementBoundary) {
+  if (child is RenderBoxModel) {
     CSSStyleDeclaration childStyle = child.style;
     String marginLeft = childStyle[MARGIN_LEFT];
     String marginRight = childStyle[MARGIN_RIGHT];

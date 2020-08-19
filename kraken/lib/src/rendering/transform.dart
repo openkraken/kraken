@@ -75,7 +75,9 @@ mixin RenderTransformMixin on RenderBox {
   // FIXME when super class RenderTransform applyPaintTransform change
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.multiply(getEffectiveTransform());
+    if (_transform != null) {
+      transform.multiply(getEffectiveTransform());
+    }
   }
 
   bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox child, Offset position) {

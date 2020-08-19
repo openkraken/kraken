@@ -6,7 +6,6 @@ import 'package:kraken/element.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 mixin CSSTransformMixin on Node {
-  RenderElementBoundary transform;
   Matrix4 matrix4 = Matrix4.identity();
   List<CSSFunctionalNotation> prevMethods;
   double prevMethodsProgress = 0;

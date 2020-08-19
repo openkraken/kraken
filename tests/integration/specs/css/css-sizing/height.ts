@@ -1,5 +1,5 @@
 describe('Height', () => {
-  fit('basic example', async () => {
+  it('basic example', async () => {
     const div = document.createElement('div');
     setElementStyle(div, {
       width: '100px',
