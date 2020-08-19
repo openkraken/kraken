@@ -65,6 +65,85 @@ class RenderLayoutBox extends RenderBoxModel
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
+
+  bool _needsSortChildren = true;
+  bool get needsSortChildren {
+    return _needsSortChildren;
+  }
+  // Mark this container to sort children by zIndex properties.
+  // When children have positioned elements, which needs to reorder and paint earlier than flow layout renderObjects.
+  void markNeedsSortChildren() {
+    _needsSortChildren = true;
+  }
+
+  bool _isChildrenSorted = false;
+  bool get isChildrenSorted => _isChildrenSorted;
+
+  List<RenderObject> _sortedChildren;
+  List<RenderObject> get sortedChildren {
+    if (_sortedChildren == null) return [];
+    return _sortedChildren;
+  }
+  set sortedChildren(List<RenderObject> value) {
+    assert(value != null);
+    _isChildrenSorted = true;
+    _sortedChildren = value;
+  }
+
+  @override
+  void insert(RenderBox child, { RenderBox after }) {
+    super.insert(child, after: after);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void add(RenderBox child) {
+    super.add(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void addAll(List<RenderBox> children) {
+    super.addAll(children);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void remove(RenderBox child) {
+    super.remove(child);
+    _isChildrenSorted = false;
+  }
+
+  @override
+  void removeAll() {
+    super.removeAll();
+    _isChildrenSorted = false;
+  }
+
+  void move(RenderBox child, { RenderBox after }) {
+    super.move(child, after: after);
+    _isChildrenSorted = false;
+  }
+
+  void sortChildrenByZIndex() {
+    List<RenderObject> children = getChildrenAsList();
+    children.sort((RenderObject prev, RenderObject next) {
+      RenderLayoutParentData prevParentData = prev.parentData;
+      RenderLayoutParentData nextParentData = next.parentData;
+      // Place positioned element after non positioned element
+      if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
+        return -1;
+      }
+      if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
+        return 1;
+      }
+      // z-index applies to flex-item ignoring position property
+      int prevZIndex = prevParentData.zIndex ?? 0;
+      int nextZIndex = nextParentData.zIndex ?? 0;
+      return prevZIndex - nextZIndex;
+    });
+    sortedChildren = children;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
@@ -121,7 +200,7 @@ class RenderBoxModel extends RenderBox with
     // Copy Border
     newBox.borderEdge = borderEdge;
     newBox.decoration = decoration;
-    newBox.oldDecoration = oldDecoration;
+    newBox.cssBoxDecoration = cssBoxDecoration;
     newBox.position = position;
     newBox.configuration = configuration;
 
@@ -566,7 +645,13 @@ class RenderBoxModel extends RenderBox with
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     paintDecoration(context, offset);
-    paintOverflow(context, offset, borderEdge, Size(scrollableViewportWidth, scrollableViewportHeight), callback);
+    paintOverflow(
+        context,
+        offset,
+        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+        Size(scrollableViewportWidth, scrollableViewportHeight),
+        callback
+    );
   }
 
   @override

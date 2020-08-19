@@ -410,8 +410,8 @@ class Element extends Node
 
   void _updateOffset({String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
-    RenderObject renderParent = renderElementBoundary.parent;
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
+      RenderLayoutBox renderParent = renderElementBoundary.parent;
       positionParentData = renderElementBoundary.parentData;
       RenderLayoutParentData progressParentData = positionParentData;
 
@@ -449,7 +449,8 @@ class Element extends Node
         propertyTransition.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
-          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+          int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+          positionParentData.zIndex = zIndex;
         }
         if (style.contains(TOP)) {
           positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
@@ -537,9 +538,11 @@ class Element extends Node
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         parent._addPositionedChild(this, positionType);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.sticky:
         parent._addStickyChild(this, after);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
@@ -644,7 +647,7 @@ class Element extends Node
 
   void _addPositionedChild(Element child, CSSPositionType position) {
     // RenderPosition parentRenderPosition;
-    ContainerRenderObjectMixin parentRenderLayoutBox;
+    RenderLayoutBox parentRenderLayoutBox;
 
     switch (position) {
       case CSSPositionType.absolute:
@@ -1383,7 +1386,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
 }
 
 void setPositionedChildParentData(
-    ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
+    RenderLayoutBox parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
   var parentData;
   if (parentRenderLayoutBox is RenderFlowLayoutBox) {
     parentData = RenderLayoutParentData();
@@ -1410,7 +1413,9 @@ void setPositionedChildParentData(
   }
   parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+
+  int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+  parentData.zIndex = zIndex;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
