@@ -1256,22 +1256,24 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     RenderBoxModel renderBoxModel = getRenderBoxModel();
-    ContainerBoxParentData parentData = renderBoxModel.parentData;
-    RenderBox previousSibling = parentData.previousSibling;
-    ContainerRenderObjectMixin parent = renderBoxModel.parent;
-
+    RenderObject parent = renderBoxModel.parent;
     if (!renderBoxModel.isRepaintBoundary) {
       if (renderBoxModel is RenderLayoutBox) {
         renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
-        parent.remove(renderBoxModel);
-        parent.insert(renderLayoutBox, after: previousSibling);
         renderBoxModel = renderLayoutBox;
       } else {
         renderIntrinsic = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
-        parent.remove(renderBoxModel);
-        parent.insert(renderIntrinsic, after: previousSibling);
         renderBoxModel = renderIntrinsic;
       }
+    }
+
+    if (parent is RenderObjectWithChildMixin<RenderBox>) {
+      parent.child = getRenderBoxModel();
+    } else if (parent is ContainerRenderObjectMixin) {
+      ContainerBoxParentData parentData = renderBoxModel.parentData;
+      RenderObject previousSibling = parentData.previousSibling;
+      parent.remove(renderBoxModel);
+      parent.insert(getRenderBoxModel(), after: previousSibling);
     }
 
     renderBoxModel.markNeedsLayout();
