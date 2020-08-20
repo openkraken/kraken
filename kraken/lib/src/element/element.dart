@@ -95,8 +95,6 @@ class Element extends Node
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsic renderIntrinsic;
-  // The boundary of an Element, can be used to logic distinguish difference element
-  RenderElementBoundary renderElementBoundary;
 
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow
@@ -344,8 +342,7 @@ class Element extends Node
 
         // Move self from containing block to original position in element tree
         if (prevPosition == CSSPositionType.absolute || prevPosition == CSSPositionType.fixed) {
-          RenderLayoutParentData parentData = renderBoxModel.parentData;
-          RenderPositionHolder renderPositionHolder = parentData.renderPositionHolder;
+          RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
           if (renderPositionHolder != null) {
             RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
             int parentTargetId = parentLayoutBox.targetId;
@@ -545,11 +542,11 @@ class Element extends Node
   @override
   void detach() {
     RenderBoxModel renderBoxModel = getRenderBoxModel();
+    RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
     // Remove placeholder of positioned element
-    RenderLayoutParentData parentData = renderBoxModel.parentData;
-    if (parentData.renderPositionHolder != null) {
-      ContainerRenderObjectMixin parent = parentData.renderPositionHolder.parent;
-      parent.remove(parentData.renderPositionHolder);
+    if (renderPositionHolder != null) {
+      ContainerRenderObjectMixin parent = renderPositionHolder.parent;
+      parent.remove(renderPositionHolder);
     }
     (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
   }
@@ -665,17 +662,13 @@ class Element extends Node
       );
     }
 
-    RenderPositionHolder positionedBoxHolder = RenderPositionHolder(preferredSize: preferredSize);
+    RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
-    if (position == CSSPositionType.relative || position == CSSPositionType.absolute) {
-      childRenderBoxModel.positionedHolder = positionedBoxHolder;
-    }
-
-    child.parent.addChild(positionedBoxHolder);
-
-    setPositionedChildParentData(parentRenderLayoutBox, child, positionedBoxHolder);
-    positionedBoxHolder.realDisplayedBox = childRenderBoxModel;
+    child.parent.addChild(childPositionHolder);
+    childRenderBoxModel.renderPositionHolder = childPositionHolder;
+    setPositionedChildParentData(parentRenderLayoutBox, child);
+    childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
   }
@@ -981,18 +974,21 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderElementBoundary);
+    // @TODO need to merge into box model
+//    updateRenderOpacity(present, parentRenderObject: renderElementBoundary);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderElementBoundary);
+    // @TODO need to merge into box model
+//    updateRenderVisibility(present, parentRenderObject: renderElementBoundary);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
     // Update content visibility.
-    updateRenderContentVisibility(present,
-        parentRenderObject: renderElementBoundary, renderBoxModel: getRenderBoxModel());
+    // @TODO need to merge into box model
+//    updateRenderContentVisibility(present,
+//        parentRenderObject: renderElementBoundary, renderBoxModel: getRenderBoxModel());
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
@@ -1265,13 +1261,17 @@ class Element extends Node
     ContainerRenderObjectMixin parent = renderBoxModel.parent;
 
     if (!renderBoxModel.isRepaintBoundary) {
-      parent.remove(renderBoxModel);
       if (renderBoxModel is RenderLayoutBox) {
-        renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        parent.remove(renderBoxModel);
+        parent.insert(renderLayoutBox, after: previousSibling);
+        renderBoxModel = renderLayoutBox;
       } else {
-        renderBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        renderIntrinsic = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        parent.remove(renderBoxModel);
+        parent.insert(renderIntrinsic, after: previousSibling);
+        renderBoxModel = renderIntrinsic;
       }
-      parent.insert(renderBoxModel, after: previousSibling);
     }
 
     renderBoxModel.markNeedsLayout();
@@ -1516,7 +1516,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
 }
 
 void setPositionedChildParentData(
-    RenderLayoutBox parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
+    RenderLayoutBox parentRenderLayoutBox, Element child) {
   var parentData;
   if (parentRenderLayoutBox is RenderFlowLayout) {
     parentData = RenderLayoutParentData();
@@ -1526,7 +1526,6 @@ void setPositionedChildParentData(
   CSSStyleDeclaration style = child.style;
 
   CSSPositionType positionType = resolvePositionFromStyle(style);
-  parentData.renderPositionHolder = placeholder;
   parentData.position = positionType;
 
   if (style.contains(TOP)) {

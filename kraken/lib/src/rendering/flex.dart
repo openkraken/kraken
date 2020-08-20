@@ -185,11 +185,10 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderFlexParentData) {
-      if (child is RenderBoxModel) {
-        child.parentData = getPositionParentDataFromStyle(child.style);
-      } else {
-        child.parentData = RenderFlexParentData();
-      }
+      child.parentData = RenderFlexParentData();
+    }
+    if (child is RenderBoxModel) {
+      child.parentData = getPositionParentDataFromStyle(child.style, child.parentData);
     }
   }
 
@@ -635,7 +634,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
-      if (childParentData.isPositioned) {
+      if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
       }
       child = childParentData.nextSibling;
@@ -1576,8 +1575,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
   }
 
-  RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-    RenderFlexParentData parentData = RenderFlexParentData();
+  RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderFlexParentData parentData) {
     CSSPositionType positionType = resolvePositionFromStyle(style);
     parentData.position = positionType;
 

@@ -116,6 +116,6 @@ describe('Box border', () => {
     append(container, red);
     append(container, green);
     append(BODY, container);
-    await matchElementImageSnapshot(container);
+    await matchViewportSnapshot();
   });
 });

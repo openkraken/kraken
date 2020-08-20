@@ -40,22 +40,15 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// Row index of child when wrapping
   int runIndex = 0;
 
-  RenderPositionHolder renderPositionHolder;
   int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
-
-  /// Get element original position offset to parent(layoutBox) should be.
-  Offset get stackedChildOriginalRelativeOffset {
-    if (renderPositionHolder == null) return Offset.zero;
-    return (renderPositionHolder.parentData as BoxParentData).offset;
-  }
 
   // Whether offset is already set
   bool isOffsetSet = false;
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; renderPositionHolder=$renderPositionHolder; ${super.toString()}; runIndex: $runIndex;';
+    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; top=$top; left=$left; bottom=$bottom; right=$right; ${super.toString()}; runIndex: $runIndex;';
   }
 }
 
@@ -170,6 +163,7 @@ class RenderBoxModel extends RenderBox with
     _shouldRender = shouldRender,
     super();
 
+  RenderPositionHolder renderPositionHolder;
 
   bool _debugHasBoxLayout = false;
 
@@ -254,6 +248,9 @@ class RenderBoxModel extends RenderBox with
 
     // Copy shouldRender
     newBox.shouldRender = shouldRender;
+
+    // Copy renderPositionHolder
+    newBox.renderPositionHolder = renderPositionHolder;
 
     return newBox;
   }

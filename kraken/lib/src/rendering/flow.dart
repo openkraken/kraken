@@ -309,11 +309,10 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
-      if (child is RenderBoxModel) {
-        child.parentData = getPositionParentDataFromStyle(child.style);
-      } else {
-        child.parentData = RenderLayoutParentData();
-      }
+      child.parentData = RenderLayoutParentData();
+    }
+    if (child is RenderBoxModel) {
+      child.parentData = getPositionParentDataFromStyle(child.style, child.parentData);
     }
   }
 
@@ -587,7 +586,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
 
-      if (childParentData.isPositioned) {
+      if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
       }
       child = childParentData.nextSibling;
@@ -663,9 +662,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (isPositionHolder(child)) {
         RenderPositionHolder positionHolder = child;
-        RenderBoxModel childElementBoundary = positionHolder.realDisplayedBox;
-        if (childElementBoundary != null) {
-          RenderLayoutParentData childParentData = childElementBoundary.parentData;
+        RenderBoxModel childRenderBoxModel = positionHolder.realDisplayedBox;
+        if (childRenderBoxModel != null) {
+          RenderLayoutParentData childParentData = childRenderBoxModel.parentData;
           if (childParentData.position != CSSPositionType.static &&
               childParentData.position != CSSPositionType.relative) childMainAxisExtent = childCrossAxisExtent = 0;
         }
@@ -1090,8 +1089,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
   }
 
-  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-    RenderLayoutParentData parentData = RenderLayoutParentData();
+  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderLayoutParentData parentData) {
     CSSPositionType positionType = resolvePositionFromStyle(style);
     parentData.position = positionType;
 

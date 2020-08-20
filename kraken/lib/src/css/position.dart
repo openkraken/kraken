@@ -151,7 +151,7 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize, EdgeInsets borderEdge) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
@@ -160,19 +160,18 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   double childMarginBottom = 0;
   double childMarginLeft = 0;
   double childMarginRight = 0;
-  if (child is RenderBoxModel) {
+
     Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
     childMarginTop = childRenderBoxModel.marginTop;
     childMarginBottom = childRenderBoxModel.marginBottom;
     childMarginLeft = childRenderBoxModel.marginLeft;
     childMarginRight = childRenderBoxModel.marginRight;
-  }
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
+    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
         parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block, so it needs to add border insets
