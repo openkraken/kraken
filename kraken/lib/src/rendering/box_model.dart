@@ -649,6 +649,7 @@ class RenderBoxModel extends RenderBox with
         context,
         offset,
         EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+        decoration,
         Size(scrollableViewportWidth, scrollableViewportHeight),
         callback
     );
