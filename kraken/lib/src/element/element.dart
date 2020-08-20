@@ -456,7 +456,7 @@ class Element extends Node
               break;
           }
           renderBoxModel.parentData = progressParentData;
-          renderParent.markNeedsLayout();
+          renderBoxModel.markNeedsLayout();
         };
 
         definiteTransition?.addProgressListener(progressListener);
@@ -485,7 +485,7 @@ class Element extends Node
           positionParentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]);
         }
         renderObject.parentData = positionParentData;
-        renderParent.markNeedsLayout();
+        renderBoxModel.markNeedsLayout();
       }
     }
   }
