@@ -55,10 +55,13 @@ mixin CSSDecoratedBoxMixin {
       RenderBoxModel renderBoxModel,
       CSSStyleDeclaration style,
       String property) {
+    
+    BoxDecoration oldBox = renderBoxModel.decoration;
 
     if (property == BACKGROUND || property == BACKGROUND_COLOR) {
       Color bgColor = CSSBackground.getBackgroundColor(style);
-      if (bgColor != null) {
+      // If there has gradient, background color will not work
+      if (bgColor != null && oldBox.gradient == null) {
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(color: bgColor);
       }
       if (property == BACKGROUND_COLOR) return;
@@ -214,7 +217,9 @@ mixin CSSDecoratedBoxMixin {
   ///   borderColor: <color>
   CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style) {
 
+    // Backgroud color
     Color bgColor = CSSBackground.getBackgroundColor(style);
+    // Background image
     DecorationImage decorationImage;
     Gradient gradient;
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
@@ -230,7 +235,6 @@ mixin CSSDecoratedBoxMixin {
     List<BoxShadow> boxShadow = getBoxShadow(style);
     List<BorderSide> borderSides = _getBorderSides(style);
 
-    // have no border and background
     if (bgColor == null &&
         decorationImage == null &&
         gradient == null &&
@@ -240,7 +244,7 @@ mixin CSSDecoratedBoxMixin {
       return null;
     }
 
-    return CSSBoxDecoration(bgColor ?? CSSColor.transparent, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(style));
+    return CSSBoxDecoration(bgColor, decorationImage, gradient, borderSides, borderRadius, getBoxShadow(style));
   }
 
   /// Tip: inset not supported.
