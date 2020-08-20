@@ -1269,25 +1269,28 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     RenderBoxModel renderBoxModel = getRenderBoxModel();
+
     RenderObject parent = renderBoxModel.parent;
     if (!renderBoxModel.isRepaintBoundary) {
+      RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
-        renderBoxModel = renderLayoutBox;
+        renderLayoutBox = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
-        renderIntrinsic = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
-        renderBoxModel = renderIntrinsic;
+        renderIntrinsic = renderReplacedBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
+
+      if (parent is RenderObjectWithChildMixin<RenderBox>) {
+        parent.child = null;
+        parent.child = renderReplacedBoxModel;
+      } else if (parent is ContainerRenderObjectMixin) {
+        ContainerBoxParentData parentData = renderBoxModel.parentData;
+        RenderObject previousSibling = parentData.previousSibling;
+        parent.remove(renderBoxModel);
+        parent.insert(renderReplacedBoxModel, after: previousSibling);
+      }
+      renderBoxModel = renderReplacedBoxModel;
     }
 
-    if (parent is RenderObjectWithChildMixin<RenderBox>) {
-      parent.child = getRenderBoxModel();
-    } else if (parent is ContainerRenderObjectMixin) {
-      ContainerBoxParentData parentData = renderBoxModel.parentData;
-      RenderObject previousSibling = parentData.previousSibling;
-      parent.remove(renderBoxModel);
-      parent.insert(getRenderBoxModel(), after: previousSibling);
-    }
 
     renderBoxModel.markNeedsLayout();
     renderBoxModel.markNeedsPaint();
