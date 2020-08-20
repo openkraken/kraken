@@ -4,7 +4,6 @@
  */
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
-import 'package:kraken/rendering.dart';
 
 mixin RenderOpacityMixin on RenderBox {
   /// The fraction to scale the child's alpha value.
