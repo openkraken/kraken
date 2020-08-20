@@ -22,15 +22,14 @@ void main() {
     Completer<String> completer = Completer();
     List allSpecsPayload = jsonDecode(payload);
 
-    KrakenWidget main = KrakenWidget(
-      'main',
-      360, 640,
-      bundleContent: 'console.log("starting main integration test")',);
+    List<String> runningWidgets = ['main'];
+    List<KrakenWidget> widgets = [];
 
-    KrakenWidget secondary = KrakenWidget(
-      'secondary',
-      360, 640,
-      bundleContent: 'console.log("starting secondary integration test")');
+    for (int i = 0; i < runningWidgets.length; i ++) {
+      String name = runningWidgets[i];
+      KrakenWidget widget = KrakenWidget(name, 360, 640, bundleContent: 'console.log("starting $name integration test")',);
+      widgets.add(widget);
+    }
 
     runApp(MaterialApp(
         title: 'Loading Test',
@@ -40,10 +39,7 @@ void main() {
             title: Text('Kraken Integration Test')
           ),
           body: Wrap(
-            children: <Widget>[
-              main,
-              secondary
-            ],
+            children: widgets,
           )
         )
     ));
@@ -51,37 +47,29 @@ void main() {
     WidgetsBinding.instance
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
-      int mainContextId = main.controller.view.contextId;
-      int childContextId = secondary.controller.view.contextId;
-      initTestFramework(mainContextId);
-      initTestFramework(childContextId);
-      addJSErrorListener(mainContextId, (String err) {
-        print(err);
-      });
-      addJSErrorListener(childContextId, (String err) {
-        print(err);
-      });
 
-      List mainTestPayload = allSpecsPayload[0];
-      List childTestPayload = allSpecsPayload[1];
+      List<Future<String>> testResults = [];
 
-      // Preload load test cases
-      for (Map spec in mainTestPayload) {
-        String filename = spec['filename'];
-        String code = spec['code'];
-        evaluateTestScripts(mainContextId, code, url: filename);
+      for (int i = 0; i < widgets.length; i ++) {
+        int contextId = widgets[i].controller.view.contextId;
+        initTestFramework(contextId);
+        addJSErrorListener(contextId, (String err) {
+          print(err);
+        });
+
+        List testPayload = allSpecsPayload[i];
+
+        // Preload load test cases
+        for (Map spec in testPayload) {
+          String filename = spec['filename'];
+          String code = spec['code'];
+          evaluateTestScripts(contextId, code, url: filename);
+        }
+
+        testResults.add(executeTest(contextId));
       }
 
-      for (Map spec in childTestPayload) {
-        String filename = spec['filename'];
-        String code = spec['code'];
-        evaluateTestScripts(childContextId, code, url: filename);
-      }
-
-      Future<String> mainTestResult = executeTest(mainContextId);
-      Future<String> childTestResult = executeTest(childContextId);
-
-      List<String> results = await Future.wait([mainTestResult, childTestResult]);
+      List<String> results = await Future.wait(testResults);
 
       for (int i = 0; i < results.length; i ++) {
         String status = results[i];
