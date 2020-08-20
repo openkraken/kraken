@@ -82,15 +82,16 @@ mixin CSSDecoratedBoxMixin {
     if (CSSBackground.hasScrollBackgroundImage(style)) {
       renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
     } else if (CSSBackground.hasLocalBackgroundImage(style)) {
-      // @TODO: support local background image
+      // @FIXME: support local background image
+      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage); 
     }
   }
 
   static Map _borderRadiusMapping = {
     BORDER_TOP_LEFT_RADIUS: 0,
     BORDER_TOP_RIGHT_RADIUS: 1,
-    BORDER_BOTTOM_LEFT_RADIUS: 2,
-    BORDER_BOTTOM_RIGHT_RADIUS: 3
+    BORDER_BOTTOM_RIGHT_RADIUS: 2,
+    BORDER_BOTTOM_LEFT_RADIUS: 3
   };
 
   // Add border radius transition listener
@@ -155,18 +156,21 @@ mixin CSSDecoratedBoxMixin {
           right: right,
           bottom: bottom,
         ));
+        return;
       }
     }
 
     // Update all border
     List<BorderSide> borderSides = _getBorderSides(style);
 
-    renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
-      left: borderSides[0],
-      top: borderSides[1],
-      right: borderSides[2],
-      bottom: borderSides[3],
-    ));
+    if (borderSides != null) {
+      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
+        left: borderSides[0],
+        top: borderSides[1],
+        right: borderSides[2],
+        bottom: borderSides[3],
+      ));
+    }
   }
 
   List<BorderSide> _getBorderSides(CSSStyleDeclaration style) {
