@@ -27,10 +27,10 @@ void main() {
       360, 640,
       bundleContent: 'console.log("starting main integration test")',);
 
-    // KrakenWidget secondary = KrakenWidget(
-    //   'secondary',
-    //   360, 640,
-    //   bundleContent: 'console.log("starting secondary integration test")');
+    KrakenWidget secondary = KrakenWidget(
+      'secondary',
+      360, 640,
+      bundleContent: 'console.log("starting secondary integration test")');
 
     runApp(MaterialApp(
         title: 'Loading Test',
@@ -42,7 +42,7 @@ void main() {
           body: Wrap(
             children: <Widget>[
               main,
-              // secondary
+              secondary
             ],
           )
         )
@@ -52,18 +52,18 @@ void main() {
         .addPostFrameCallback((_) async {
       registerDartTestMethodsToCpp();
       int mainContextId = main.controller.view.contextId;
-      // int childContextId = secondary.controller.view.contextId;
+      int childContextId = secondary.controller.view.contextId;
       initTestFramework(mainContextId);
-      // initTestFramework(childContextId);
+      initTestFramework(childContextId);
       addJSErrorListener(mainContextId, (String err) {
         print(err);
       });
-      // addJSErrorListener(childContextId, (String err) {
-      //   print(err);
-      // });
+      addJSErrorListener(childContextId, (String err) {
+        print(err);
+      });
 
       List mainTestPayload = allSpecsPayload[0];
-      // List childTestPayload = allSpecsPayload[1];
+      List childTestPayload = allSpecsPayload[1];
 
       // Preload load test cases
       for (Map spec in mainTestPayload) {
@@ -72,16 +72,16 @@ void main() {
         evaluateTestScripts(mainContextId, code, url: filename);
       }
 
-      // for (Map spec in childTestPayload) {
-      //   String filename = spec['filename'];
-      //   String code = spec['code'];
-      //   evaluateTestScripts(childContextId, code, url: filename);
-      // }
+      for (Map spec in childTestPayload) {
+        String filename = spec['filename'];
+        String code = spec['code'];
+        evaluateTestScripts(childContextId, code, url: filename);
+      }
 
       Future<String> mainTestResult = executeTest(mainContextId);
-      // Future<String> childTestResult = executeTest(childContextId);
+      Future<String> childTestResult = executeTest(childContextId);
 
-      List<String> results = await Future.wait([mainTestResult]);
+      List<String> results = await Future.wait([mainTestResult, childTestResult]);
 
       for (int i = 0; i < results.length; i ++) {
         String status = results[i];
