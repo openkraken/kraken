@@ -39,6 +39,17 @@ enum StickyPositionType {
   fixed,
 }
 
+enum BoxSizeType {
+  // Element which have intrinsic before layout. Such as <img /> and <video />
+  intrinsic,
+
+  // Element which have width or min-width properties defined.
+  specified,
+
+  // Element which neither have intrinsic or predefined size.
+  automatic,
+}
+
 class Element extends Node
     with
         NodeLifeCycle,
