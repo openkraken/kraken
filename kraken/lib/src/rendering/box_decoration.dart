@@ -19,7 +19,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
   set borderEdge(EdgeInsets newValue) {
     _borderEdge = newValue;
     if (_decoration != null && _decoration is BoxDecoration) {
-      Gradient gradient = (_decoration as BoxDecoration).gradient;
+      Gradient gradient = _decoration.gradient;
       if (gradient is BorderGradientMixin) {
         gradient.borderEdge = newValue;
       }
@@ -30,14 +30,26 @@ mixin RenderBoxDecorationMixin on RenderBox {
   /// What decoration to paint.
   ///
   /// Commonly a [BoxDecoration].
-  Decoration get decoration => _decoration;
-  Decoration _decoration;
-  set decoration(Decoration value) {
+  BoxDecoration get decoration => _decoration;
+  BoxDecoration _decoration;
+  set decoration(BoxDecoration value) {
     if (value == null) return;
     if (value == _decoration) return;
     _painter?.dispose();
     _painter = null;
     _decoration = value;
+    
+    // If has border, render padding should subtracting the edge of the border
+    if (value.border != null) {
+      Border border = value.border;
+      borderEdge = EdgeInsets.fromLTRB(
+        border.left.width,
+        border.top.width,
+        border.right.width,
+        border.bottom.width
+      );
+    }
+
     markNeedsPaint();
   }
 

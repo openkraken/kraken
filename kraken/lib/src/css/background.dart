@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
@@ -19,41 +18,6 @@ import 'package:kraken/css.dart';
 ///
 
 final RegExp _splitRegExp = RegExp(r'\s+');
-
-mixin CSSBackgroundMixin {
-
-  void updateBackground(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
-    if (!CSSBackground.hasLocalBackgroundImage(style)) return;
-
-    if (style[BACKGROUND_IMAGE].isNotEmpty) {
-      DecorationImage decorationImage;
-      Gradient gradient;
-      List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
-      // @FIXME: flutter just support one property
-      for (CSSFunctionalNotation method in methods) {
-        if (method.name == 'url') {
-          decorationImage = CSSBackground.getDecorationImage(style, method);
-        } else {
-          gradient = CSSBackground.getBackgroundGradient(method);
-        }
-
-        if (decorationImage != null || gradient != null) {
-          _updateRenderGradient(renderBoxModel, decorationImage, gradient, parent, targetId);
-          return;
-        }
-      }
-    }
-  }
-
-  void _updateRenderGradient(RenderBoxModel renderBoxModel, DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
-    if (renderBoxModel != null) {
-      renderBoxModel.decoration = BoxDecoration(
-        image: decorationImage,
-        gradient: gradient
-      );
-    }
-  }
-}
 
 class CSSColorStop {
   Color color;
@@ -259,7 +223,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebLinearGradient(
+            gradient = CSSLinearGradient(
                 begin: begin,
                 end: end,
                 angle: linearAngle,
@@ -295,7 +259,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebRadialGradient(
+            gradient = CSSRadialGradient(
               center: FractionalOffset(atX, atY),
               radius: radius,
               colors: colors,
@@ -327,7 +291,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebConicGradient(
+            gradient = CSSConicGradient(
                 center: FractionalOffset(atX, atY),
                 colors: colors,
                 stops: stops,

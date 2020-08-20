@@ -17,170 +17,56 @@ final RegExp _spaceRegExp = RegExp(r'\s+');
 
 /// - background
 /// - border
-mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
-  void initRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style) {
-    CSSBoxDecoration cssBoxDecoration = getCSSBoxDecoration(style);
+mixin CSSDecoratedBoxMixin {
+
+  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+    CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
 
     if (cssBoxDecoration != null) {
+      // Update by property
+      if (property.startsWith(BACKGROUND)) {
+        _updateBackground(renderBoxModel, style, property);
+      } else if (property.endsWith('Radius')) {
+        _updateBorderRadius(renderBoxModel, style, property);
+      } else if (property.startsWith(BORDER)) {
+        _updateBorder(renderBoxModel, style, property);
+      } else if (property == BOX_SHADOW) {
+        _updateBoxShadow(renderBoxModel, style, property);
+      }
+    } else {
+      cssBoxDecoration = getCSSBoxDecoration(style);
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
-      renderBoxModel.borderEdge = cssBoxDecoration.getBorderEdgeInsets();
+      if (cssBoxDecoration == null) return;
+
       renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
     }
   }
 
-  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-    CSSBoxDecoration newDecoration = getCSSBoxDecoration(style);
-    CSSBoxDecoration oldDecoration = renderBoxModel.cssBoxDecoration;
+  void _updateBoxShadow(
+    RenderBoxModel renderBoxModel,
+    CSSStyleDeclaration style,
+    String property) {
 
-    if (newDecoration == null) return;
-
-    if (transitionMap != null && oldDecoration != null) {
-      CSSTransition backgroundColorTransition = transitionMap[BACKGROUND_COLOR] ?? transitionMap[ALL];
-
-      List<CSSTransition> borderColorTransitionsLTRB = [
-        _getTransition(transitionMap, BORDER_LEFT_COLOR, parentProperty: BORDER_COLOR),
-        _getTransition(transitionMap, BORDER_TOP_COLOR, parentProperty: BORDER_COLOR),
-        _getTransition(transitionMap, BORDER_RIGHT_COLOR, parentProperty: BORDER_COLOR),
-        _getTransition(transitionMap, BORDER_BOTTOM_COLOR, parentProperty: BORDER_COLOR)
-      ];
-      List<CSSTransition> borderWidthTransitionsLTRB = [
-        _getTransition(transitionMap, BORDER_LEFT_WIDTH, parentProperty: BORDER_WIDTH),
-        _getTransition(transitionMap, BORDER_TOP_WIDTH, parentProperty: BORDER_WIDTH),
-        _getTransition(transitionMap, BORDER_RIGHT_WIDTH, parentProperty: BORDER_WIDTH),
-        _getTransition(transitionMap, BORDER_BOTTOM_WIDTH, parentProperty: BORDER_WIDTH)
-      ];
-
-      List<CSSTransition> borderRadiusTransitionTLTRBLBR = [
-        _getTransition(transitionMap, BORDER_TOP_LEFT_RADIUS, parentProperty: BORDER_RADIUS),
-        _getTransition(transitionMap, BORDER_TOP_RIGHT_RADIUS, parentProperty: BORDER_RADIUS),
-        _getTransition(transitionMap, BORDER_BOTTOM_LEFT_RADIUS, parentProperty: BORDER_RADIUS),
-        _getTransition(transitionMap, BORDER_BOTTOM_RIGHT_RADIUS, parentProperty: BORDER_RADIUS)
-      ];
-
-      if (backgroundColorTransition != null) {
-        CSSBoxDecoration progressDecoration = oldDecoration.clone();
-        CSSBoxDecoration baseDecoration = oldDecoration.clone();
-
-        // background color transition
-        addColorProcessListener(
-            renderBoxModel,
-            backgroundColorTransition,
-            newDecoration.color,
-            oldDecoration.color,
-            progressDecoration.color,
-            baseDecoration.color,
-            progressDecoration);
-
-        // side read inorder left top right bottom
-        // radius read inorder topLeft topRight bottomLeft bottomRight
-        for (int i = 0; i < 4; i++) {
-          // add border color transition
-          addColorProcessListener(
-              renderBoxModel,
-              borderColorTransitionsLTRB[i],
-              newDecoration.borderSides[i].color,
-              oldDecoration.borderSides[i].color,
-              progressDecoration.borderSides[i].color,
-              baseDecoration.borderSides[i].color,
-              progressDecoration);
-
-          addWidthAndRadiusProcessListener(renderBoxModel, borderWidthTransitionsLTRB[i], borderRadiusTransitionTLTRBLBR[i], i,
-              newDecoration, oldDecoration, baseDecoration, progressDecoration);
-        }
-      } else {
-        renderBoxModel.decoration = newDecoration.toBoxDecoration();
-        _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
-      }
-    } else {
-      renderBoxModel.decoration = newDecoration.toBoxDecoration();
-      _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
-    }
-    renderBoxModel.cssBoxDecoration = newDecoration;
+    List<BoxShadow> boxShadow = getBoxShadow(style);
+    renderBoxModel.decoration = renderBoxModel.decoration.copyWith(boxShadow: boxShadow);
   }
 
-  // add color relate transition listener
-  void addColorProcessListener(RenderBoxModel renderBoxModel, CSSTransition transition, Color newColor, Color oldColor, Color processColor,
-      Color baseColor, CSSBoxDecoration processDecoration) {
-    if (transition != null) {
-      int alphaDiff = newColor.alpha - oldColor.alpha;
-      int redDiff = newColor.red - oldColor.red;
-      int greenDiff = newColor.green - oldColor.green;
-      int blueDiff = newColor.blue - oldColor.blue;
-
-      transition.addProgressListener((progress) {
-        processDecoration.color = Color.fromARGB(
-            (alphaDiff * progress).toInt() + baseColor.alpha,
-            (redDiff * progress).toInt() + baseColor.red,
-            (blueDiff * progress).toInt() + baseColor.blue,
-            (greenDiff * progress).toInt() + baseColor.green);
-
-        renderBoxModel.decoration = processDecoration.toBoxDecoration();
-      });
-    }
-  }
-
-  // add width and radius relate transition listener
-  void addWidthAndRadiusProcessListener(
+  void _updateBackground(
       RenderBoxModel renderBoxModel,
-      CSSTransition widthTransition,
-      CSSTransition radiusTransition,
-      int index,
-      CSSBoxDecoration newDecoration,
-      CSSBoxDecoration oldDecoration,
-      CSSBoxDecoration baseDecoration,
-      CSSBoxDecoration processDecoration) {
-    if (widthTransition != null) {
-      double widthDiff = newDecoration.borderSides[index].width - oldDecoration.borderSides[index].width;
+      CSSStyleDeclaration style,
+      String property) {
 
-      widthTransition.addProgressListener((progress) {
-        processDecoration.borderSides[index] = processDecoration.borderSides[index]
-            .copyWith(width: widthDiff * progress + baseDecoration.borderSides[index].width);
-        renderBoxModel.decoration = processDecoration.toBoxDecoration();
-        _updateBorderInsets(renderBoxModel, processDecoration.getBorderEdgeInsets());
-      });
+    if (property == BACKGROUND || property == BACKGROUND_COLOR) {
+      Color bgColor = CSSBackground.getBackgroundColor(style);
+      if (bgColor != null) {
+        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(color: bgColor);
+      }
+      if (property == BACKGROUND_COLOR) return;
     }
 
-    if (radiusTransition != null) {
-      Radius newRadius = newDecoration.radius[index];
-      Radius oldRadius = oldDecoration.radius[index];
-      Radius baseRadius = baseDecoration.radius[index];
-      double radiusDiffX = newRadius.x - oldRadius.x;
-      double radiusDiffY = newRadius.y - oldRadius.y;
-
-      radiusTransition.addProgressListener((progress) {
-        processDecoration.radius[index] =
-            Radius.elliptical(radiusDiffX * progress + baseRadius.x, radiusDiffY * progress + baseRadius.y);
-        renderBoxModel.decoration = processDecoration.toBoxDecoration();
-      });
-    }
-  }
-
-  CSSTransition _getTransition(Map<String, CSSTransition> transitionMap, String property, {String parentProperty}) {
-    if (transitionMap.containsKey(property)) {
-      return transitionMap[property];
-    } else if (transitionMap.containsKey(parentProperty)) {
-      return transitionMap[parentProperty];
-    } else if (transitionMap.containsKey(ALL)) {
-      return transitionMap[ALL];
-    }
-    return null;
-  }
-
-  void _updateBorderInsets(RenderBoxModel renderBoxModel, EdgeInsets insets) {
-    renderBoxModel.borderEdge = insets;
-  }
-
-  /// Shorted border property:
-  ///   border：<line-width> || <line-style> || <color>
-  ///   (<line-width> = <length> | thin | medium | thick), support length now.
-  /// Seperated properties:
-  ///   borderWidth: <line-width>{1,4}
-  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
-  ///     (PS. Only support solid now.)
-  ///   borderColor: <color>
-  CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style) {
     DecorationImage decorationImage;
     Gradient gradient;
+
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
     for (CSSFunctionalNotation method in methods) {
       if (method.name == URL) {
@@ -190,8 +76,97 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       }
     }
 
-    Color bgColor = CSSBackground.getBackgroundColor(style);
+    if (CSSBackground.hasScrollBackgroundImage(style)) {
+      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
+    } else if (CSSBackground.hasLocalBackgroundImage(style)) {
+      // @TODO: support local background image
+    }
+  }
 
+  static Map _borderRadiusMapping = {
+    BORDER_TOP_LEFT_RADIUS: 0,
+    BORDER_TOP_RIGHT_RADIUS: 1,
+    BORDER_BOTTOM_LEFT_RADIUS: 2,
+    BORDER_BOTTOM_RIGHT_RADIUS: 3
+  };
+
+  // Add border radius transition listener
+  void _updateBorderRadius(
+      RenderBoxModel renderBoxModel,
+      CSSStyleDeclaration style,
+      String property) {
+
+      // topLeft topRight bottomRight bottomLeft
+      int index = _borderRadiusMapping[property];
+
+      if (index != null) {
+        Radius newRadius = CSSBorderRadius.getRadius(style[property]);
+        BorderRadius borderRaduis = renderBoxModel.decoration.borderRadius as BorderRadius;
+        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
+          topLeft: index == 0 ? newRadius : borderRaduis.topLeft,
+          topRight: index == 1 ? newRadius : borderRaduis.topRight,
+          bottomRight: index == 2 ? newRadius : borderRaduis.bottomRight,
+          bottomLeft: index == 3 ? newRadius : borderRaduis.bottomLeft,
+        ));
+      } else {
+        List<Radius> borderRadius = _getBorderRadius(style);
+
+        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
+          topLeft: borderRadius[0],
+          topRight: borderRadius[1],
+          bottomRight: borderRadius[2],
+          bottomLeft: borderRadius[3],
+        ));
+      }
+  }
+
+  void _updateBorder(
+      RenderBoxModel renderBoxModel,
+      CSSStyleDeclaration style,
+      String property) {
+
+    Border border = renderBoxModel.decoration.border as Border;
+    if (border != null) {
+      BorderSide left =  border.left;
+      BorderSide top =  border.top;
+      BorderSide right =  border.right;
+      BorderSide bottom =  border.bottom;
+      bool updateAll = false;
+
+      if (property.contains(LEFT)) {
+        left = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT);
+      } else if (property.contains(TOP)) {
+        top = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP);
+      } else if (property.contains(RIGHT)) {
+        right = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT);
+      } else if (property.contains(BOTTOM)) {
+        bottom = CSSBorderSide.getBorderSide(style, CSSBorderSide.BOTTOM);
+      } else {
+        updateAll = true;
+      }
+
+      if (!updateAll) {
+        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
+          left: left,
+          top: top,
+          right: right,
+          bottom: bottom,
+        ));
+      }
+    }
+
+    // Update all border
+    List<BorderSide> borderSides = _getBorderSides(style);
+
+    renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
+      left: borderSides[0],
+      top: borderSides[1],
+      right: borderSides[2],
+      bottom: borderSides[3],
+    ));
+  }
+
+  List<BorderSide> _getBorderSides(CSSStyleDeclaration style) {
     BorderSide leftSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT);
     BorderSide topSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP);
     BorderSide rightSide = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT);
@@ -202,6 +177,14 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         rightSide != null ||
         bottomSide != null;
 
+    return hasBorder ? [
+      leftSide ?? CSSBorderSide.none,
+      topSide ?? CSSBorderSide.none,
+      rightSide ?? CSSBorderSide.none,
+      bottomSide ?? CSSBorderSide.none] : null;
+  }
+
+  List<Radius> _getBorderRadius(CSSStyleDeclaration style) {
     // border radius add inorder topLeft topRight bottomLeft bottomRight
     Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS]);
     Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS]);
@@ -213,20 +196,39 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
         bottomRightRadius != null ||
         bottomLeftRadius != null;
 
-    List<BorderSide> borderSides = hasBorder ? [
-      leftSide ?? CSSBorderSide.none,
-      topSide ?? CSSBorderSide.none,
-      rightSide ?? CSSBorderSide.none,
-      bottomSide ?? CSSBorderSide.none] : null;
-
-    List<Radius> borderRadius = hasBorderRadius ? [
+    return hasBorderRadius ? [
       topLeftRadius ?? CSSBorderRadius.none,
       topRightRadius ?? CSSBorderRadius.none,
       bottomRightRadius ?? CSSBorderRadius.none,
       bottomLeftRadius ?? CSSBorderRadius.none
     ] : null;
+  }
 
+  /// Shorted border property:
+  ///   border：<line-width> || <line-style> || <color>
+  ///   (<line-width> = <length> | thin | medium | thick), support length now.
+  /// Seperated properties:
+  ///   borderWidth: <line-width>{1,4}
+  ///   borderStyle: none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset
+  ///     (PS. Only support solid now.)
+  ///   borderColor: <color>
+  CSSBoxDecoration getCSSBoxDecoration(CSSStyleDeclaration style) {
+
+    Color bgColor = CSSBackground.getBackgroundColor(style);
+    DecorationImage decorationImage;
+    Gradient gradient;
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
+    for (CSSFunctionalNotation method in methods) {
+      if (method.name == URL) {
+        decorationImage = CSSBackground.getDecorationImage(style, method);
+      } else {
+        gradient = CSSBackground.getBackgroundGradient(method);
+      }
+    }
+
+    List<Radius> borderRadius = _getBorderRadius(style);
     List<BoxShadow> boxShadow = getBoxShadow(style);
+    List<BorderSide> borderSides = _getBorderSides(style);
 
     // have no border and background
     if (bgColor == null &&
@@ -325,7 +327,7 @@ class CSSBorderSide {
 
   static Color getBorderSideColor(CSSStyleDeclaration style, String side) {
     String property = 'border${side}Color';
-    String value = style[property];
+    String value = style[property] ?? style[COLOR]; // Use current color first
     return value.isEmpty ? defaultBorderColor : CSSColor.parseColor(value);
   }
 
@@ -417,7 +419,7 @@ class CSSBoxDecoration {
   Color color;
   DecorationImage image;
   Gradient gradient;
-  // radius inorder topLeft topRight bottomLeft bottomRight
+  // radius inorder topLeft topRight bottomRight bottomLeft
   List<Radius> radius;
   // side inorder left top right bottom
   List<BorderSide> borderSides;
@@ -449,9 +451,8 @@ class CSSBoxDecoration {
     }
 
     BorderRadius borderRadius;
-    // Flutter border radius only works when border is unitform.
+    // Flutter border radius only works when border is uniform.
     if (radius != null && (border == null || border.isUniform)) {
-      // radius read inorder topLeft topRight bottomLeft bottomRight
       borderRadius = BorderRadius.only(
         topLeft: radius[0],
         topRight: radius[1],
@@ -467,15 +468,6 @@ class CSSBoxDecoration {
         borderRadius: borderRadius,
         boxShadow: boxShadow,
         gradient: gradient);
-  }
-
-  EdgeInsets getBorderEdgeInsets() {
-    if (borderSides == null) {
-      return EdgeInsets.zero;
-    }
-
-    // side read inorder left top right bottom
-    return EdgeInsets.fromLTRB(borderSides[0].width, borderSides[1].width, borderSides[2].width, borderSides[3].width);
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/animation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/scheduler.dart';
@@ -45,6 +47,20 @@ enum CSSTransitionEvent {
   cancel,
 }
 
+const ShorthandPropertyTransitionSupport = {
+  MARGIN: [MARGIN_BOTTOM, MARGIN_LEFT, MARGIN_RIGHT, MARGIN_TOP],
+  PADDING: [PADDING_BOTTOM, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP],
+  BACKGROUND: [BACKGROUND_COLOR],
+  BORDER_RADIUS: [BORDER_BOTTOM_LEFT_RADIUS, BORDER_BOTTOM_RIGHT_RADIUS, BORDER_TOP_LEFT_RADIUS, BORDER_TOP_RIGHT_RADIUS],
+  BORDER: [
+    BORDER_BOTTOM_COLOR, BORDER_LEFT_COLOR, BORDER_RIGHT_COLOR, BORDER_TOP_COLOR,
+    BORDER_BOTTOM_WIDTH, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH, BORDER_TOP_WIDTH
+  ],
+  BORDER_COLOR: [BORDER_BOTTOM_COLOR, BORDER_LEFT_COLOR, BORDER_RIGHT_COLOR, BORDER_TOP_COLOR],
+  BORDER_WIDTH: [BORDER_BOTTOM_WIDTH, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH, BORDER_TOP_WIDTH],
+  FONT: [FONT_SIZE, FONT_WEIGHT],
+};
+
 mixin CSSTransitionMixin on Node {
   Throttling throttler = Throttling();
   Map<String, CSSTransition> transitionMap;
@@ -65,13 +81,21 @@ mixin CSSTransitionMixin on Node {
 
       Curve curve = CSSTransition._parseFunction(function);
       if (curve != null) {
+        // @TODO: lazy init css transition
         CSSTransition transition = CSSTransition();
         AnimationController controller =
             AnimationController(duration: Duration(milliseconds: CSSTime.parseTime(duration)), vsync: transition);
         transition.curvedAnimation = CurvedAnimation(curve: curve, parent: controller);
         transition.controller = controller;
         transition.delay = Duration(milliseconds: CSSTime.parseTime(delay));
+
         map[property] = transition;
+
+        if (ShorthandPropertyTransitionSupport.containsKey(property)) {
+          ShorthandPropertyTransitionSupport[property].forEach((property) {
+            map[property] = transition;
+          });
+        }
       }
     }
 
@@ -81,6 +105,35 @@ mixin CSSTransitionMixin on Node {
   void updateTransitionEvent(CSSTransition transition) {
     transition?._setTransitionListener(_dispatchTransitionEvent);
     transition?._listen();
+  }
+
+  // Update background color
+  Color getProgressColor(double progress, Color newColor, Color oldColor) {
+    if (newColor.value != oldColor.value) {
+      int alphaDiff = newColor.alpha - oldColor.alpha;
+      int redDiff = newColor.red - oldColor.red;
+      int greenDiff = newColor.green - oldColor.green;
+      int blueDiff = newColor.blue - oldColor.blue;
+
+      return Color.fromARGB(
+        (alphaDiff * progress).toInt() + oldColor.alpha,
+        (redDiff * progress).toInt() + oldColor.red,
+        (blueDiff * progress).toInt() + oldColor.blue,
+        (greenDiff * progress).toInt() + oldColor.green
+      );
+    }
+    return newColor;
+  }
+
+  Radius getProgressRaduis(double progress, Radius newRadius, Radius oldRadius) {
+    double radiusDiffX = newRadius.x - oldRadius.x;
+    double radiusDiffY = newRadius.y - oldRadius.y;
+    return Radius.elliptical(radiusDiffX * progress + oldRadius.x, radiusDiffY * progress + oldRadius.y);
+  }
+
+  double getProgressLength(double progress, double newLength, double oldLength) {
+    double lenghtDiff = newLength - oldLength;
+    return lenghtDiff * progress + oldLength;
   }
 
   void _dispatchTransitionEvent(CSSTransitionEvent status) {
@@ -149,7 +202,7 @@ class CSSTransition with CustomTickerProviderStateMixin {
       for (CSSTransitionProgressListener progressListener in progressListeners) {
         progressListener(curvedAnimation.value);
       }
-      // Trigger transtion event 
+      // Trigger transtion event
       AnimationStatus status = curvedAnimation.status;
       if (status == AnimationStatus.forward) {
         // Forward status trigger many times
@@ -168,7 +221,7 @@ class CSSTransition with CustomTickerProviderStateMixin {
           _isTransitionCancel = true;
           _dispose();
           _transitionListener(CSSTransitionEvent.cancel);
-        } 
+        }
       }
     }
   }

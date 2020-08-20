@@ -44,7 +44,6 @@ class Element extends Node
         NodeLifeCycle,
         EventHandlerMixin,
         CSSTextMixin,
-        CSSBackgroundMixin,
         CSSDecoratedBoxMixin,
         CSSSizingMixin,
         CSSFlexboxMixin,
@@ -53,6 +52,7 @@ class Element extends Node
         CSSOpacityMixin,
         CSSTransformMixin,
         CSSVisibilityMixin,
+        CSSOffsetMixin,
         CSSContentVisibilityMixin,
         CSSTransitionMixin {
   Map<String, dynamic> properties;
@@ -99,6 +99,8 @@ class Element extends Node
   // used to get original coordinate before move away from document flow
   RenderObject renderPositionedPlaceholder;
 
+  static Matrix4 _matrix4 = Matrix4.identity();
+
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
@@ -131,16 +133,22 @@ class Element extends Node
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
-    // Init border and background
-    initRenderDecoratedBox(getRenderBoxModel(), style);
-
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
 
     // The layout boundary of element.
-    renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
+    renderObject = renderElementBoundary = RenderElementBoundary(
+      child: renderObject,
+      transform: _matrix4,
+      targetId: targetId,
+      elementManager: elementManager,
+      style: style,
+      origin: Offset.zero,
+      alignment: Alignment.center,
+      shouldRender: true, // style[DISPLAY] != NONE
+    );;
 
     setElementSizeType();
 
@@ -404,74 +412,6 @@ class Element extends Node
         positionedChildren.add(child);
       } else if (child.children.length != 0) {
         _findPositionedChildren(child, positionedChildren);
-      }
-    }
-  }
-
-  void _updateOffset({String property, double diff, double original}) {
-    RenderLayoutParentData positionParentData;
-    if (renderElementBoundary.parentData is RenderLayoutParentData) {
-      RenderLayoutBox renderParent = renderElementBoundary.parent;
-      positionParentData = renderElementBoundary.parentData;
-      RenderLayoutParentData progressParentData = positionParentData;
-
-      CSSTransition propertyTransition = transitionMap != null ? (transitionMap[property] ?? transitionMap['all']) : null;
-
-      if (propertyTransition != null) {
-        assert(diff != null);
-        assert(original != null);
-
-        CSSTransitionProgressListener progressListener = (percent) {
-          double newValue = original + diff * percent;
-          switch (property) {
-            case TOP:
-              progressParentData.top = newValue;
-              break;
-            case LEFT:
-              progressParentData.left = newValue;
-              break;
-            case RIGHT:
-              progressParentData.right = newValue;
-              break;
-            case BOTTOM:
-              progressParentData.bottom = newValue;
-              break;
-            case WIDTH:
-              progressParentData.width = newValue;
-              break;
-            case HEIGHT:
-              progressParentData.height = newValue;
-              break;
-          }
-          renderElementBoundary.parentData = progressParentData;
-          renderParent.markNeedsLayout();
-        };
-        propertyTransition.addProgressListener(progressListener);
-      } else {
-        if (style.contains(Z_INDEX)) {
-          int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
-          positionParentData.zIndex = zIndex;
-        }
-        if (style.contains(TOP)) {
-          positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
-        }
-        if (style.contains(LEFT)) {
-          positionParentData.left = CSSLength.toDisplayPortValue(style[LEFT]);
-        }
-        if (style.contains(RIGHT)) {
-          positionParentData.right = CSSLength.toDisplayPortValue(style[RIGHT]);
-        }
-        if (style.contains(BOTTOM)) {
-          positionParentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM]);
-        }
-        if (style.contains(WIDTH)) {
-          positionParentData.width = CSSLength.toDisplayPortValue(style[WIDTH]);
-        }
-        if (style.contains(HEIGHT)) {
-          positionParentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]);
-        }
-        renderObject.parentData = positionParentData;
-        renderParent.markNeedsLayout();
       }
     }
   }
@@ -812,7 +752,7 @@ class Element extends Node
       case BACKGROUND_REPEAT:
       case BACKGROUND_POSITION:
       case BACKGROUND_SIZE:
-        _styleBackgroundChangedListener(property, original, present);
+        _styleBoxChangedListener(property, original, present);
         break;
 
       case 'border':
@@ -841,7 +781,7 @@ class Element extends Node
       case 'borderRightColor':
       case 'borderBottomColor':
       case 'boxShadow':
-        _styleDecoratedChangedListener(property, original, present);
+        _styleBoxChangedListener(property, original, present);
         break;
 
       case 'margin':
@@ -924,13 +864,7 @@ class Element extends Node
   }
 
   void _styleOffsetChangedListener(String property, String original, String present) {
-    double _original = CSSLength.toDisplayPortValue(original) ?? 0;
-    double current = CSSLength.toDisplayPortValue(present) ?? 0;
-    _updateOffset(
-      property: property,
-      original: _original,
-      diff: current - _original,
-    );
+    updateRenderOffset(renderElementBoundary, property, present);
   }
 
   void _styleTextAlignChangedListener(String property, String original, String present) {
@@ -954,28 +888,22 @@ class Element extends Node
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    updateRenderPadding(getRenderBoxModel(), style, property, present, transitionMap);
+    updateRenderPadding(getRenderBoxModel(), style, property, present);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    updateRenderSizing(getRenderBoxModel(), style, property, present, transitionMap);
+    updateRenderSizing(getRenderBoxModel(), style, property, present);
 
     setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
-      double _original = CSSLength.toDisplayPortValue(original) ?? 0;
-      double current = CSSLength.toDisplayPortValue(present) ?? 0;
-      _updateOffset(
-        property: property,
-        original: _original,
-        diff: current - _original,
-      );
+      updateRenderOffset(renderElementBoundary, property, present);
     }
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
-    updateRenderMargin(getRenderBoxModel(), style, property, present, transitionMap);
+    updateRenderMargin(getRenderBoxModel(), style, property, present);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
@@ -991,16 +919,8 @@ class Element extends Node
     }
   }
 
-  // background may exist on the decoratedBox or single box, because the attachment
-  void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(getRenderBoxModel(), style, property, present, renderIntersectionObserver, targetId);
-    // decoratedBox may contains background and border
-    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
-  }
-
-  void _styleDecoratedChangedListener(String property, String original, String present) {
-    // Update decorated box.
-    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
+  void _styleBoxChangedListener(String property, String original, String present) {
+    updateRenderDecoratedBox(getRenderBoxModel(), style, property);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
@@ -1021,12 +941,12 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransform(present, transitionMap);
+    updateRenderTransform(renderElementBoundary, present);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
     // Update transform.
-    updateTransformOrigin(present, transitionMap);
+    updateRenderTransformOrigin(renderElementBoundary, present);
   }
 
   // Update textNode style when container style changed
@@ -1108,7 +1028,7 @@ class Element extends Node
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
         return renderElementBoundary.hasSize ? renderElementBoundary.size.height : 0;
-      // TODO support clientWidth clientHeight clientLeft clientTop
+        // @TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
