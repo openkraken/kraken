@@ -546,7 +546,9 @@ class Element extends Node
     // Remove placeholder of positioned element
     if (renderPositionHolder != null) {
       ContainerRenderObjectMixin parent = renderPositionHolder.parent;
-      parent.remove(renderPositionHolder);
+      if (parent != null) {
+        parent.remove(renderPositionHolder);
+      }
     }
     (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
   }
