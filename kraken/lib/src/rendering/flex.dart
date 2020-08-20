@@ -287,6 +287,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
   }
 
+  double flowAwarePaddingBefore() {
+    if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
+  }
+
+  double flowAwarePaddingAfter() {
+    if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+      return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
+    }
+    return _startIsTopLeft(flexDirection) ? paddingRight : paddingLeft;
+  }
+
   double flowAwareBorderStart() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? borderLeft : borderRight;
@@ -332,16 +346,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
     return _startIsTopLeft(flexDirection) ?
       childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
-  }
-
-  double flowAwarePaddingBefore() {
-    // NOTE: We did't going to support writing mode.
-    return paddingTop;
-  }
-
-  double flowAwarePaddingAfter() {
-    // NOTE: We did't going to support writing mode.
-    return paddingBottom;
   }
 
   RenderBoxModel _getChildRenderBoxModel(RenderElementBoundary child) {
@@ -1321,7 +1325,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       double mainAxisPadding = flowAwarePaddingStart();
-      double crossAxisPadding = flowAwarePaddingEnd();
+      double crossAxisPadding = flowAwarePaddingBefore();
 
       double mainAxisBorder = flowAwareBorderStart();
       double crossAxisBorder = flowAwareBorderEnd();

@@ -405,7 +405,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minWidth != null) {
+    if (minWidth != null && minWidth > 0.0) {
       if (width == null) {
         if (intrinsicWidth == null || intrinsicWidth < minWidth) {
           width = minWidth;
@@ -497,7 +497,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minHeight != null) {
+    if (minHeight != null && minHeight > 0.0) {
       if (height == null) {
         if (intrinsicHeight == null || intrinsicHeight < minHeight) {
           height = minHeight;
