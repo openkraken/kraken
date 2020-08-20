@@ -1262,12 +1262,11 @@ class Element extends Node
     }
   }
 
-  Future<Uint8List> toBlob({double devicePixelRatio}) {
+  Future<Uint8List> toBlob({double devicePixelRatio}) async {
     if (devicePixelRatio == null) {
       devicePixelRatio = window.devicePixelRatio;
     }
 
-    Completer<Uint8List> completer = new Completer();
     RenderBoxModel renderBoxModel = getRenderBoxModel();
 
     RenderObject parent = renderBoxModel.parent;
@@ -1291,25 +1290,17 @@ class Element extends Node
       renderBoxModel = renderReplacedBoxModel;
     }
 
+    Uint8List captured;
+    if (renderBoxModel.size == Size.zero) {
+      // Return a blob with zero length.
+      captured = Uint8List(0);
+    } else {
+      Image image = await renderBoxModel.toImage(pixelRatio: devicePixelRatio);
+      ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+      captured = byteData.buffer.asUint8List();
+    }
 
-    renderBoxModel.markNeedsLayout();
-    renderBoxModel.markNeedsPaint();
-
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      Uint8List captured;
-      if (renderBoxModel.size == Size.zero) {
-        // Return a blob with zero length.
-        captured = Uint8List(0);
-      } else {
-        Image image = await renderBoxModel.toImage(pixelRatio: devicePixelRatio);
-        ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
-        captured = byteData.buffer.asUint8List();
-      }
-
-      completer.complete(captured);
-    });
-
-    return completer.future;
+    return captured;
   }
 }
 
