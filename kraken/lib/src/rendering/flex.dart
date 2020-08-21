@@ -333,7 +333,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
   }
 
-  RenderBoxModel _getChildRenderBoxModel(RenderElementBoundary child) {
+  RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
     return renderBoxModel;

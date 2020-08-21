@@ -987,8 +987,7 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    // @TODO need to merge into box model
-//    updateRenderOpacity(present, parentRenderObject: renderElementBoundary);
+    updateRenderOpacity(getRenderBoxModel(), this, present);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {

@@ -162,6 +162,7 @@ class RenderBoxModel extends RenderBox with
   RenderBoxDecorationMixin,
   RenderTransformMixin,
   RenderOverflowMixin,
+  RenderOpacityMixin,
   RenderIntersectionObserverMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
@@ -261,6 +262,8 @@ class RenderBoxModel extends RenderBox with
 
     // Copy renderPositionHolder
     newBox.renderPositionHolder = renderPositionHolder;
+
+    newBox.parentData = parentData;
 
     return newBox;
   }
@@ -717,15 +720,17 @@ class RenderBoxModel extends RenderBox with
     } else {
       paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
         paintIntersectionObserverLayer(context, transformedOffset, (PaintingContext context, Offset offset) {
-          paintDecoration(context, offset);
-          paintOverflow(
-              context,
-              offset,
-              EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-              decoration,
-              Size(scrollableViewportWidth, scrollableViewportHeight),
-              callback
-          );
+          paintOpacity(context, offset, (context, offset) {
+            paintDecoration(context, offset);
+            paintOverflow(
+                context,
+                offset,
+                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+                decoration,
+                Size(scrollableViewportWidth, scrollableViewportHeight),
+                callback
+            );
+          });
         });
       });
     }
