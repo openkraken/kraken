@@ -637,6 +637,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       if (childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
+
+        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
+        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
