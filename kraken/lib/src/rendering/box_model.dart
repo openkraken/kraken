@@ -158,6 +158,7 @@ class RenderBoxModel extends RenderBox with
   RenderMarginMixin,
   RenderBoxDecorationMixin,
   RenderOverflowMixin,
+  RenderOpacityMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
@@ -227,6 +228,8 @@ class RenderBoxModel extends RenderBox with
     newBox.onPointerUp = onPointerUp;
     newBox.onPointerMove = onPointerMove;
     newBox.onPointerSignal = onPointerSignal;
+
+    newBox.parentData = parentData;
 
     return newBox;
   }
@@ -652,14 +655,16 @@ class RenderBoxModel extends RenderBox with
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    paintDecoration(context, offset);
-    paintOverflow(
-        context,
-        offset,
-        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-        Size(scrollableViewportWidth, scrollableViewportHeight),
-        callback
-    );
+    paintOpacity(context, offset, (context, offset) {
+      paintDecoration(context, offset);
+      paintOverflow(
+          context,
+          offset,
+          EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+          Size(scrollableViewportWidth, scrollableViewportHeight),
+          callback
+      );
+    });
   }
 
   @override

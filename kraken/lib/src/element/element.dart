@@ -976,7 +976,7 @@ class Element extends Node
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderIntersectionObserver);
+    updateRenderOpacity(getRenderBoxModel(), this, present);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
