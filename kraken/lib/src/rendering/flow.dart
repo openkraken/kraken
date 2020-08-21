@@ -564,7 +564,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         maxHeight: 0,
       );
       child.layout(additionalConstraints, parentUsesSize: true);
-      size = child.size;
+      size = getBoxSize(child.size);
       return;
     }
 
@@ -604,10 +604,10 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      size = Size(
+      size = getBoxSize(Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
-      );
+      ));
       return;
     }
 
@@ -765,13 +765,15 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     switch (direction) {
       case Axis.horizontal:
-        size = Size(constraintWidth, constraintHeight);
+        Size contentSize = Size(constraintWidth, constraintHeight);
+        size = getBoxSize(contentSize);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
         containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
-        size = Size(crossAxisExtent, mainAxisExtent);
+        Size contentSize = Size(crossAxisExtent, mainAxisExtent);
+        size = getBoxSize(contentSize);
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
         break;

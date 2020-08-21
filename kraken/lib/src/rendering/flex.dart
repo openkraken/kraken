@@ -677,7 +677,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      size = preferredSize;
+      size = getBoxSize(preferredSize);
       return;
     }
 
@@ -949,7 +949,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
-      size = preferredSize;
+      size = getBoxSize(preferredSize);
       return;
     }
 
@@ -1230,13 +1230,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        size = Size(math.max(constraintWidth, idealMainSize), constraintHeight);
+        Size contentSize = Size(math.max(constraintWidth, idealMainSize), constraintHeight);
+        size = getBoxSize(contentSize);
         actualSize = contentSize.width;
         crossSize = contentSize.height;
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        size = Size(math.max(constraintWidth, crossSize), constraintHeight);
+        Size contentSize = Size(math.max(constraintWidth, crossSize), constraintHeight);
+        size = getBoxSize(contentSize);
         actualSize = contentSize.height;
         crossSize = contentSize.width;
         break;

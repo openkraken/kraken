@@ -554,7 +554,7 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  set size(Size contentSize) {
+  Size getBoxSize(Size contentSize) {
     // Set scrollable size from unconstrained size.
     maxScrollableX = contentSize.width + paddingLeft + paddingRight;
     maxScrollableY = contentSize.height + paddingTop + paddingBottom;
@@ -571,7 +571,7 @@ class RenderBoxModel extends RenderBox with
       boxSize = wrapBorderSize(boxSize);
     }
 
-    super.size = constraints.constrain(boxSize);
+    return constraints.constrain(boxSize);
   }
 
   // The contentSize of layout box

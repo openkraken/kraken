@@ -1290,7 +1290,6 @@ class Element extends Node
       renderBoxModel = renderReplacedBoxModel;
     }
 
-
     renderBoxModel.markNeedsLayout();
     renderBoxModel.markNeedsPaint();
 
