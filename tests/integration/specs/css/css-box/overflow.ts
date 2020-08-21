@@ -139,6 +139,25 @@ describe('Overflow', () => {
     });
   });
 
+  it('borderRadius with overflow', async () => {
+    let container = document.createElement('div');
+    let child = document.createElement('div');
+    child.style.width = '100px';
+    child.style.height = '100px';
+    child.style.background = 'red';
+    container.appendChild(child);
+    container.style.borderTopLeftRadius = '15px';
+    container.style.borderTopRightRadius = '35px';
+    container.style.borderBottomLeftRadius = '25px';
+    container.style.borderBottomRightRadius = '50px';
+    container.style.width = '100px';
+    container.style.height = '100px';
+    container.style.overflow = 'hidden';
+    document.body.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
   it('overflow with absolute positioned elements', async (done) => {
     let scroller;
     let container = createElement('div', {
