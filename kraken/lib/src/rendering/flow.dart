@@ -588,6 +588,9 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
+
+        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
+        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }

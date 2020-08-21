@@ -272,28 +272,28 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  double flowAwarePaddingStart() {
+  double flowAwareMainAxisPadding() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
     }
     return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
   }
 
-  double flowAwarePaddingEnd() {
+  double flowAwareCrossAxisPadding() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      return _startIsTopLeft(flexDirection) ? paddingRight : paddingLeft;
+      return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
     }
-    return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
+    return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
   }
 
-  double flowAwareBorderStart() {
+  double flowAwareMainAxisBorder() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? borderLeft : borderRight;
     }
     return _startIsTopLeft(flexDirection) ? borderTop : borderBottom;
   }
 
-  double flowAwareBorderEnd() {
+  double flowAwareCrossAxisBorder() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? borderRight : borderLeft;
     }
@@ -333,17 +333,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
   }
 
-  double flowAwarePaddingBefore() {
-    // NOTE: We did't going to support writing mode.
-    return paddingTop;
-  }
-
-  double flowAwarePaddingAfter() {
-    // NOTE: We did't going to support writing mode.
-    return paddingBottom;
-  }
-
-  RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
+  RenderBoxModel _getChildRenderBoxModel(RenderElementBoundary child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
     return renderBoxModel;
@@ -636,6 +626,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
+
+        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
+        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
@@ -1321,11 +1314,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         betweenSpace = 0;
       }
 
-      double mainAxisPadding = flowAwarePaddingStart();
-      double crossAxisPadding = flowAwarePaddingEnd();
+      double mainAxisPadding = flowAwareMainAxisPadding();
+      double crossAxisPadding = flowAwareCrossAxisPadding();
 
-      double mainAxisBorder = flowAwareBorderStart();
-      double crossAxisBorder = flowAwareBorderEnd();
+      double mainAxisBorder = flowAwareMainAxisBorder();
+      double crossAxisBorder = flowAwareCrossAxisBorder();
 
       double childMainAxisMargin = flowAwareChildMainAxisMargin(child);
       double childCrossAxisMargin = flowAwareChildCrossAxisMargin(child);

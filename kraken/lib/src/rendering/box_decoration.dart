@@ -24,7 +24,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
   set borderEdge(EdgeInsets newValue) {
     _borderEdge = newValue;
     if (_decoration != null && _decoration is BoxDecoration) {
-      Gradient gradient = (_decoration as BoxDecoration).gradient;
+      Gradient gradient = _decoration.gradient;
       if (gradient is BorderGradientMixin) {
         gradient.borderEdge = newValue;
       }
@@ -35,9 +35,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
   /// What decoration to paint.
   ///
   /// Commonly a [BoxDecoration].
-  Decoration get decoration => _decoration;
-  Decoration _decoration;
-  set decoration(Decoration value) {
+  BoxDecoration get decoration => _decoration;
+  BoxDecoration _decoration;
+  set decoration(BoxDecoration value) {
     if (value == null) return;
     if (value == _decoration) return;
     _painter?.dispose();

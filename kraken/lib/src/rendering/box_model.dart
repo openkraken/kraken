@@ -448,7 +448,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minWidth != null) {
+    if (minWidth != null && minWidth > 0.0) {
       if (width == null) {
         if (intrinsicWidth == null || intrinsicWidth < minWidth) {
           width = minWidth;
@@ -540,7 +540,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minHeight != null) {
+    if (minHeight != null && minHeight > 0.0) {
       if (height == null) {
         if (intrinsicHeight == null || intrinsicHeight < minHeight) {
           height = minHeight;
@@ -691,6 +691,25 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
+  void setMaximumScrollableHeightForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    }
+    if (childParentData.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    }
+  }
+
+  void setMaximumScrollableWidthForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.left != null) {
+      maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
+    }
+
+    if (childParentData.right != null) {
+      maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
+    }
+  }
+
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     void painter(PaintingContext context, Offset offset) {}
     if (shouldRender == false) {
@@ -703,6 +722,7 @@ class RenderBoxModel extends RenderBox with
               context,
               offset,
               EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+              decoration,
               Size(scrollableViewportWidth, scrollableViewportHeight),
               callback
           );
