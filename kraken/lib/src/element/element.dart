@@ -886,7 +886,8 @@ class Element extends Node
       String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
       if (prevDisplay != currentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
-        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox);
+        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+        renderLayoutBox.markNeedsLayout();
       }
     }
   }

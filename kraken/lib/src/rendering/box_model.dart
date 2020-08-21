@@ -59,6 +59,16 @@ class RenderLayoutBox extends RenderBoxModel
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+
+    // FlexItem layout must trigger flex container to layout.
+    if (parent != null && parent is RenderFlexLayout) {
+      markParentNeedsLayout();
+    }
+  }
+
   bool _needsSortChildren = true;
   bool get needsSortChildren {
     return _needsSortChildren;
