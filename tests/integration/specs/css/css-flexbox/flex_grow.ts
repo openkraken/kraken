@@ -569,7 +569,7 @@ describe('flexbox flex-grow', () => {
 
     await matchViewportSnapshot();
   });
-  fit('should work with multiple flex container', async () => {
+  it('should work with multiple flex container', async () => {
     let container;
     container = createViewElement(
 

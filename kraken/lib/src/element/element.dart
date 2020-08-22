@@ -101,8 +101,6 @@ class Element extends Node
   // Style declaration from user.
   CSSStyleDeclaration style;
 
-  // A point reference to treed renderObject.
-  RenderObject renderObject;
   RenderDecoratedBox stickyPlaceholder;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsic renderIntrinsic;
@@ -140,9 +138,9 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderObject = renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
+      renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
-      renderObject = renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
     // init box sizing
@@ -157,7 +155,7 @@ class Element extends Node
     // Intersection observer
 //    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
-    setContentVisibilityIntersectionObserver(getRenderBoxModel(), style[CONTENT_VISIBILITY]);
+//    setContentVisibilityIntersectionObserver(getRenderBoxModel(), style[CONTENT_VISIBILITY]);
 
     // Init transform
     initTransform(style, targetId);
@@ -483,7 +481,7 @@ class Element extends Node
         if (style.contains(HEIGHT)) {
           positionParentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]);
         }
-        renderObject.parentData = positionParentData;
+        getRenderBoxModel().parentData = positionParentData;
         renderBoxModel.markNeedsLayout();
       }
     }
@@ -618,7 +616,7 @@ class Element extends Node
             after = childNodes[--referenceIndex];
           } while (after is! Element && referenceIndex > 0);
           if (after is Element) {
-            afterRenderObject = after?.renderObject;
+            afterRenderObject = after?.getRenderBoxModel();
           }
         }
         _append(child, after: afterRenderObject);
@@ -724,7 +722,7 @@ class Element extends Node
   }
 
   void _updateFlexItemStyle(Element element) {
-    ParentData childParentData = element.renderObject.parentData;
+    ParentData childParentData = element.getRenderBoxModel().parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
       RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
@@ -735,7 +733,7 @@ class Element extends Node
 
       // Update margin for flex child.
       element.updateRenderMargin(element.getRenderBoxModel(), element.style);
-      element.renderObject.markNeedsLayout();
+      element.getRenderBoxModel().markNeedsLayout();
     }
   }
 
@@ -1166,8 +1164,9 @@ class Element extends Node
 
   double getOffsetX() {
     double offset = 0;
-    if (renderObject is RenderBox && renderObject.attached) {
-      Offset relative = getOffset(renderObject as RenderBox);
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    if (renderBoxModel.attached) {
+      Offset relative = getOffset(renderBoxModel);
       offset += relative.dx;
     }
     return offset;
@@ -1175,8 +1174,9 @@ class Element extends Node
 
   double getOffsetY() {
     double offset = 0;
-    if (renderObject is RenderBox && renderObject.attached) {
-      Offset relative = getOffset(renderObject as RenderBox);
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    if (renderBoxModel.attached) {
+      Offset relative = getOffset(renderBoxModel);
       offset += relative.dy;
     }
     return offset;
@@ -1190,7 +1190,7 @@ class Element extends Node
     if (element == null) {
       element = elementManager.getRootElement();
     }
-    return renderBox.localToGlobal(Offset.zero, ancestor: element.renderObject);
+    return renderBox.localToGlobal(Offset.zero, ancestor: element.getRenderBoxModel());
   }
 
   @override
