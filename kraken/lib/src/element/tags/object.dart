@@ -21,32 +21,19 @@ _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost
 
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
 class ObjectElement extends Element implements ObjectElementHost {
-  static double defaultWidth = 300.0;
-  static double defaultHeight = 150.0;
 
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
-  RenderConstrainedBox _sizedBox;
 
   ObjectElement(targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
-    initTextureContainerBox();
     initElementClient();
   }
 
   void initObjectClient() {
     _objectElementClientFactory = getObjectElementClientFactory() ?? _DefaultObjectElementClientFactory;
     _objectElementClient = _objectElementClientFactory(this);
-  }
-
-  void initTextureContainerBox(){
-    _sizedBox = RenderConstrainedBox(
-        additionalConstraints: BoxConstraints.loose(Size(
-          CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
-          CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT),
-        )));
-    addChild(_sizedBox);
   }
 
   Future<dynamic> initElementClient() async {
@@ -75,25 +62,12 @@ class ObjectElement extends Element implements ObjectElementHost {
   @override
   void setStyle(String key, value) {
     super.setStyle(key, value);
-    switch (key) {
-      case WIDTH:
-      case HEIGHT:
-        _updateSizedBox();
-        break;
-    }
     _objectElementClient?.setStyle(key, value);
-  }
-
-  void _updateSizedBox() {
-    double w = style.contains(WIDTH) ? CSSLength.toDisplayPortValue(style[WIDTH]) : null;
-    double h = style.contains(HEIGHT) ? CSSLength.toDisplayPortValue(style[HEIGHT]) : null;
-    _sizedBox.additionalConstraints = BoxConstraints.tight(Size(w ?? defaultWidth, h ?? defaultHeight));
   }
 
   @override
   updateChildTextureBox(TextureBox textureBox) {
-    _sizedBox.child = textureBox;
-    _updateSizedBox();
+    addChild(textureBox);
   }
 
   @override
