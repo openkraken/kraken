@@ -60,9 +60,7 @@ describe('css-flexbox', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchViewportSnapshot();
-
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.5);
   });
   it('row-ref', async () => {
     let p;

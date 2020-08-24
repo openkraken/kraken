@@ -574,6 +574,9 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
 
       if (childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
+
+        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
+        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
@@ -1078,27 +1081,24 @@ class RenderFlowLayoutBox extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      List<RenderObject> children = getChildrenAsList();
-      children.sort((RenderObject prev, RenderObject next) {
-        RenderLayoutParentData prevParentData = prev.parentData;
-        RenderLayoutParentData nextParentData = next.parentData;
-        // Place positioned element after non positioned element
-        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-          return -1;
+      if (needsSortChildren) {
+        if (!isChildrenSorted) {
+          sortChildrenByZIndex();
         }
-        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-          return 1;
+        for (int i = 0; i < sortedChildren.length; i ++) {
+          RenderObject child = sortedChildren[i];
+          if (child is! RenderPositionHolder) {
+            final RenderLayoutParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+          }
         }
-        // z-index applies to element when position is not static
-        int prevZIndex = prevParentData.position != CSSPositionType.static ? prevParentData.zIndex : 0;
-        int nextZIndex = nextParentData.position != CSSPositionType.static ? nextParentData.zIndex : 0;
-        return prevZIndex - nextZIndex;
-      });
-
-      for (var child in children) {
-        if (child is! RenderPositionHolder) {
+      } else {
+        RenderObject child = firstChild;
+        while (child != null) {
           final RenderLayoutParentData childParentData = child.parentData;
-          context.paintChild(child, childParentData.offset + offset);
+          if (child is! RenderPositionHolder) {
+            context.paintChild(child, childParentData.offset + offset);
+          }
           child = childParentData.nextSibling;
         }
       }

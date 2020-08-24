@@ -298,7 +298,7 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, Size viewportSize, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, Size viewportSize, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
@@ -309,9 +309,21 @@ mixin RenderOverflowMixin on RenderBox {
       size.height - borderEdge.bottom - borderEdge.top,
     );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
-      context.pushClipRect(true, offset, clipRect, (PaintingContext context, Offset offset) {
+      PaintingContextCallback fn = (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
-      });
+      };
+      if (decoration != null && decoration.borderRadius != null) {
+        BorderRadius radius = decoration.borderRadius;
+        RRect clipRRect = RRect.fromRectAndCorners(clipRect,
+            topLeft: radius.topLeft,
+            topRight: radius.topRight,
+            bottomLeft: radius.bottomLeft,
+            bottomRight: radius.bottomRight
+        );
+        context.pushClipRRect(true, offset, clipRect, clipRRect, fn);
+      } else {
+        context.pushClipRect(true, offset, clipRect, fn);
+      }
     } else {
       callback(context, offset);
     }

@@ -675,9 +675,9 @@ class CSSStyleProperty {
 
     // NOTE: if one of token is wrong like `1pxxx solid red` that all should not work
     for (String value in values) {
-      if (width == null && CSSBorder.isValidBorderWidthValue(value)) {
+      if (width == null && CSSBorderSide.isValidBorderWidthValue(value)) {
         width = value;
-      } else if (style == null && CSSBorder.isValidBorderStyleValue(value)) {
+      } else if (style == null && CSSBorderSide.isValidBorderStyleValue(value)) {
         style = value;
       } else if (color == null && CSSColor.isColor(value)) {
         color = value;

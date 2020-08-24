@@ -273,28 +273,28 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  double flowAwarePaddingStart() {
+  double flowAwareMainAxisPadding() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
     }
     return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
   }
 
-  double flowAwarePaddingEnd() {
+  double flowAwareCrossAxisPadding() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
-      return _startIsTopLeft(flexDirection) ? paddingRight : paddingLeft;
+      return _startIsTopLeft(flexDirection) ? paddingTop : paddingBottom;
     }
-    return _startIsTopLeft(flexDirection) ? paddingBottom : paddingTop;
+    return _startIsTopLeft(flexDirection) ? paddingLeft : paddingRight;
   }
 
-  double flowAwareBorderStart() {
+  double flowAwareMainAxisBorder() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? borderLeft : borderRight;
     }
     return _startIsTopLeft(flexDirection) ? borderTop : borderBottom;
   }
 
-  double flowAwareBorderEnd() {
+  double flowAwareCrossAxisBorder() {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       return _startIsTopLeft(flexDirection) ? borderRight : borderLeft;
     }
@@ -332,16 +332,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
     return _startIsTopLeft(flexDirection) ?
       childRenderBoxModel.marginLeft : childRenderBoxModel.marginRight;
-  }
-
-  double flowAwarePaddingBefore() {
-    // NOTE: We did't going to support writing mode.
-    return paddingTop;
-  }
-
-  double flowAwarePaddingAfter() {
-    // NOTE: We did't going to support writing mode.
-    return paddingBottom;
   }
 
   RenderBoxModel _getChildRenderBoxModel(RenderElementBoundary child) {
@@ -637,6 +627,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       if (childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
+
+        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
+        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
@@ -1320,11 +1313,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         betweenSpace = 0;
       }
 
-      double mainAxisPadding = flowAwarePaddingStart();
-      double crossAxisPadding = flowAwarePaddingEnd();
+      double mainAxisPadding = flowAwareMainAxisPadding();
+      double crossAxisPadding = flowAwareCrossAxisPadding();
 
-      double mainAxisBorder = flowAwareBorderStart();
-      double crossAxisBorder = flowAwareBorderEnd();
+      double mainAxisBorder = flowAwareMainAxisBorder();
+      double crossAxisBorder = flowAwareCrossAxisBorder();
 
       double childMainAxisMargin = flowAwareChildMainAxisMargin(child);
       double childCrossAxisMargin = flowAwareChildCrossAxisMargin(child);
@@ -1537,28 +1530,26 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
-      List<RenderObject> children = getChildrenAsList();
-      children.sort((RenderObject prev, RenderObject next) {
-        RenderFlexParentData prevParentData = prev.parentData;
-        RenderFlexParentData nextParentData = next.parentData;
-        // Place positioned element after non positioned element
-        if (prevParentData.position == CSSPositionType.static && nextParentData.position != CSSPositionType.static) {
-          return -1;
+      if (needsSortChildren) {
+        if (!isChildrenSorted) {
+          sortChildrenByZIndex();
         }
-        if (prevParentData.position != CSSPositionType.static && nextParentData.position == CSSPositionType.static) {
-          return 1;
+        for (int i = 0; i < sortedChildren.length; i ++) {
+          RenderObject child = sortedChildren[i];
+          // Don't paint placeholder of positioned element
+          if (child is! RenderPositionHolder) {
+            final RenderFlexParentData childParentData = child.parentData;
+            context.paintChild(child, childParentData.offset + offset);
+          }
         }
-        // z-index applies to flex-item ignoring position property
-        int prevZIndex = prevParentData.zIndex ?? 0;
-        int nextZIndex = nextParentData.zIndex ?? 0;
-        return prevZIndex - nextZIndex;
-      });
-
-      for (var child in children) {
-        // Don't paint placeholder of positioned element
-        if (child is! RenderPositionHolder) {
+      } else {
+        RenderObject child = firstChild;
+        while (child != null) {
           final RenderFlexParentData childParentData = child.parentData;
-          context.paintChild(child, childParentData.offset + offset);
+          // Don't paint placeholder of positioned element
+          if (child is! RenderPositionHolder) {
+            context.paintChild(child, childParentData.offset + offset);
+          }
           child = childParentData.nextSibling;
         }
       }
@@ -1582,7 +1573,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
-    properties.add(DiagnosticsProperty('padding', padding));
   }
 
   RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {

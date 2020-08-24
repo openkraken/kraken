@@ -8,7 +8,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
 
 mixin RenderBoxDecorationMixin on RenderBox {
-  CSSBoxDecoration oldDecoration;
+  CSSBoxDecoration cssBoxDecoration;
   DecorationPosition position = DecorationPosition.background;
   ImageConfiguration configuration = ImageConfiguration.empty;
   BoxPainter _painter;
@@ -19,7 +19,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
   set borderEdge(EdgeInsets newValue) {
     _borderEdge = newValue;
     if (_decoration != null && _decoration is BoxDecoration) {
-      Gradient gradient = (_decoration as BoxDecoration).gradient;
+      Gradient gradient = _decoration.gradient;
       if (gradient is BorderGradientMixin) {
         gradient.borderEdge = newValue;
       }
@@ -30,9 +30,9 @@ mixin RenderBoxDecorationMixin on RenderBox {
   /// What decoration to paint.
   ///
   /// Commonly a [BoxDecoration].
-  Decoration get decoration => _decoration;
-  Decoration _decoration;
-  set decoration(Decoration value) {
+  BoxDecoration get decoration => _decoration;
+  BoxDecoration _decoration;
+  set decoration(BoxDecoration value) {
     if (value == null) return;
     if (value == _decoration) return;
     _painter?.dispose();
@@ -85,6 +85,8 @@ mixin RenderBoxDecorationMixin on RenderBox {
   }
 
   void paintDecoration(PaintingContext context, Offset offset) {
+    if (decoration == null) return;
+
     _painter ??= decoration.createBoxPainter(markNeedsPaint);
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background) {
@@ -110,7 +112,12 @@ mixin RenderBoxDecorationMixin on RenderBox {
       }());
       if (decoration.isComplex) context.setIsComplexHint();
     }
-    Offset contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    Offset contentOffset;
+    if (borderEdge == null) {
+      contentOffset = Offset(0, 0);
+    } else {
+      contentOffset = offset.translate(borderEdge.left, borderEdge.top);
+    }
     super.paint(context, contentOffset);
     if (position == DecorationPosition.foreground) {
       _painter.paint(context.canvas, offset, filledConfiguration);
