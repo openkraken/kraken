@@ -169,9 +169,7 @@ class RenderBoxModel extends RenderBox with
     this.targetId,
     this.style,
     this.elementManager,
-    bool shouldRender,
   }) : assert(targetId != null),
-    _shouldRender = shouldRender,
     super();
 
   RenderPositionHolder renderPositionHolder;
@@ -185,13 +183,13 @@ class RenderBoxModel extends RenderBox with
     return _contentConstraints;
   }
 
-  bool _shouldRender = false;
-  bool get shouldRender => _shouldRender;
-  set shouldRender(bool value) {
+  CSSDisplay _display;
+  get display => _display;
+  set display(CSSDisplay value) {
     if (value == null) return;
-    if (_shouldRender != value) {
+    if (_display != value) {
       markNeedsLayout();
-      _shouldRender = value;
+      _display = value;
     }
   }
 
@@ -258,7 +256,7 @@ class RenderBoxModel extends RenderBox with
     newBox.alignment = alignment;
 
     // Copy shouldRender
-    newBox.shouldRender = shouldRender;
+    newBox.display = display;
 
     // Copy renderPositionHolder
     newBox.renderPositionHolder = renderPositionHolder;

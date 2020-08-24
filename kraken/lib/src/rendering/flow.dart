@@ -551,22 +551,13 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
+    if (display == CSSDisplay.none) {
+      size = constraints.biggest;
+      return;
+    }
 
     beforeLayout();
     RenderBox child = firstChild;
-
-    BoxConstraints additionalConstraints = constraints;
-    if (child != null && shouldRender == false) {
-      additionalConstraints = BoxConstraints(
-        minWidth: 0,
-        maxWidth: 0,
-        minHeight: 0,
-        maxHeight: 0,
-      );
-      child.layout(additionalConstraints, parentUsesSize: true);
-      size = getBoxSize(child.size);
-      return;
-    }
 
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     // Layout positioned element

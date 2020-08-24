@@ -875,14 +875,14 @@ class Element extends Node
     // Display change may case width/height doesn't works at all.
     _styleSizeChangedListener(property, original, present);
 
+    CSSDisplay originalDisplay = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original);
+    CSSDisplay presentDisplay = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present);
+
     RenderBoxModel renderBoxModel = getRenderBoxModel();
-    bool shouldRender = present != NONE;
-    renderBoxModel.shouldRender = shouldRender;
+    renderBoxModel.display = presentDisplay;
 
     if (renderLayoutBox != null) {
-      String prevDisplay = CSSStyleDeclaration.isNullOrEmptyValue(original) ? defaultDisplay : original;
-      String currentDisplay = CSSStyleDeclaration.isNullOrEmptyValue(present) ? defaultDisplay : present;
-      if (prevDisplay != currentDisplay) {
+      if (originalDisplay != presentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
         renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
         renderLayoutBox.markNeedsLayout();

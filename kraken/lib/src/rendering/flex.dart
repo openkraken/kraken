@@ -601,6 +601,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    if (display == CSSDisplay.none) {
+      size = constraints.biggest;
+      return;
+    }
+
     beforeLayout();
     RenderBox child = firstChild;
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
