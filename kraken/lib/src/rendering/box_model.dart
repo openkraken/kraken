@@ -670,6 +670,7 @@ class RenderBoxModel extends RenderBox with
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     super.applyPaintTransform(child, transform);
     applyOverflowPaintTransform(child, transform);
+    applyEffectiveTransform(child, transform);
   }
 
   // The max scrollable size of X axis.
@@ -712,26 +713,25 @@ class RenderBoxModel extends RenderBox with
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    void painter(PaintingContext context, Offset offset) {}
-    if (shouldRender == false) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, painter);
-    } else {
-      paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
-        paintIntersectionObserverLayer(context, transformedOffset, (PaintingContext context, Offset offset) {
-          paintOpacity(context, offset, (context, offset) {
-            paintDecoration(context, offset);
-            paintOverflow(
-                context,
-                offset,
-                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                decoration,
-                Size(scrollableViewportWidth, scrollableViewportHeight),
-                callback
-            );
-          });
+    if (display != null && display == CSSDisplay.none) return;
+
+    paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
+      paintTransform(context, offset, (PaintingContext context, Offset offset) {
+        paintOpacity(context, offset, (context, offset) {
+          paintDecoration(context, offset);
+          paintOverflow(
+              context,
+              offset,
+              EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+              decoration,
+              Size(scrollableViewportWidth, scrollableViewportHeight),
+              (context, offset) {
+                paintContentVisibility(context, offset, callback);
+              }
+          );
         });
       });
-    }
+    });
   }
 
   @override

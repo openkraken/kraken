@@ -52,6 +52,11 @@ class RenderIntrinsic extends RenderBoxModel
 
   @override
   void performLayout() {
+    if (display == CSSDisplay.none) {
+      size = constraints.biggest;
+      return;
+    }
+
     beforeLayout();
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);

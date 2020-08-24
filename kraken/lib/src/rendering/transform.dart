@@ -51,34 +51,34 @@ mixin RenderTransformMixin on RenderBox {
     return result;
   }
 
+  TransformLayer _transformLayer;
+
   void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
     if (_transform != null) {
       final Matrix4 transform = getEffectiveTransform();
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
-        layer = context.pushTransform(
+        _transformLayer = context.pushTransform(
           needsCompositing,
           offset,
           transform,
           superPaint,
-          oldLayer: layer as TransformLayer,
+          oldLayer: _transformLayer,
         );
       } else {
         superPaint(context, offset + childOffset);
-        layer = null;
+        _transformLayer = null;
       }
     } else {
       superPaint(context, offset);
     }
   }
 
-  // FIXME when super class RenderTransform applyPaintTransform change
-//  @override
-//  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-//    if (_transform != null) {
-//      transform.multiply(getEffectiveTransform());
-//    }
-//  }
+  void applyEffectiveTransform(RenderBox child, Matrix4 transform) {
+    if (_transform != null) {
+      transform.multiply(getEffectiveTransform());
+    }
+  }
 
   bool hitTestLayoutChildren(BoxHitTestResult result, RenderBox child, Offset position) {
     while (child != null) {
