@@ -21,7 +21,7 @@ describe('delete-block-in-inlines', () => {
 
     async function onClick() {
       container.removeChild(nodeToDelete);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -42,7 +42,7 @@ describe('delete-block-in-inlines', () => {
 
     append(BODY, container);
     append(BODY, container2);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     BODY.click();
   });
@@ -69,7 +69,7 @@ describe('delete-block-in-inlines', () => {
 
     async function onClick() {
       container.removeChild(nodeToDelete);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -90,7 +90,7 @@ describe('delete-block-in-inlines', () => {
 
     append(BODY, container);
     append(BODY, container2);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     BODY.click();
   });
@@ -117,7 +117,7 @@ describe('delete-block-in-inlines', () => {
 
     async function onClick() {
       container.removeChild(nodeToDelete);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       BODY.removeEventListener('click', onClick);
       done();
     }
@@ -138,7 +138,7 @@ describe('delete-block-in-inlines', () => {
 
     append(BODY, container);
     append(BODY, container2);
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     BODY.click();
   });

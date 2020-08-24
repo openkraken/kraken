@@ -71,6 +71,27 @@ function createElement(tag: string, props: ElementProps, child?: Node | Array<No
   return el;
 }
 
+function createViewElement(extraStyle, child) {
+  return createElement(
+    'div',
+    {
+      style: {
+        display: 'flex',
+        position: 'relative',
+        flexDirection: 'column',
+        flexShrink: 0,
+        alignContent: 'flex-start',
+        border: '0 solid black',
+        margin: 0,
+        padding: 0,
+        minWidth: 0,
+        ...extraStyle,
+      },
+    },
+    child
+  );
+}
+
 function createText(content: string) {
   return document.createTextNode(content);
 }
@@ -79,8 +100,8 @@ function append(parent: HTMLElement, child: Node) {
   parent.appendChild(child);
 }
 
-async function matchScreenshot() {
-  await sleep(16 / 1000); // Force wait 1 frame for async rendering finished.
+async function matchViewportSnapshot(wait: number = 0.0) {
+  await sleep(wait);
   return await matchElementImageSnapshot(document.body);
 }
 

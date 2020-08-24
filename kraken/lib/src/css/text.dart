@@ -4,16 +4,17 @@
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 
-const double DEFAULT_FONT_SIZE = 14.0;
 const double DEFAULT_LETTER_SPACING = 0.0;
 const double DEFAULT_WORD_SPACING = 0.0;
-const double DEFAULT_FONT_WEIGHT = 400.0;
+
+final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
 // CSS Text: https://drafts.csswg.org/css-text-3/
 // CSS Text Decoration: https://drafts.csswg.org/css-text-decor-3/
 mixin CSSTextMixin {
-  TextSpan createTextSpanWithStyle(String text, CSSStyleDeclaration style) {
+  TextSpan createTextSpan(String text, CSSStyleDeclaration style) {
     TextStyle textStyle = style != null ? getTextStyle(style) : null;
     return TextSpan(
       text: text,
@@ -21,12 +22,91 @@ mixin CSSTextMixin {
     );
   }
 
-  TextAlign getTextAlignFromStyle(CSSStyleDeclaration style) {
+  /// Creates a new TextStyle object.
+  ///   color: The color to use when painting the text. If this is specified, foreground must be null.
+  ///   decoration: The decorations to paint near the text (e.g., an underline).
+  ///   decorationColor: The color in which to paint the text decorations.
+  ///   decorationStyle: The style in which to paint the text decorations (e.g., dashed).
+  ///   fontWeight: The typeface thickness to use when painting the text (e.g., bold).
+  ///   fontStyle: The typeface variant to use when drawing the letters (e.g., italics).
+  ///   fontSize: The size of glyphs (in logical pixels) to use when painting the text.
+  ///   letterSpacing: The amount of space (in logical pixels) to add between each letter.
+  ///   wordSpacing: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between /// each word).
+  ///   textBaseline: The common baseline that should be aligned between this text span and its parent text span, /// or, for the root text spans, with the line box.
+  ///   height: The height of this text span, as a multiple of the font size.
+  ///   locale: The locale used to select region-specific glyphs.
+  ///   background: The paint drawn as a background for the text.
+  ///   foreground: The paint used to draw the text. If this is specified, color must be null.
+  TextStyle getTextStyle(CSSStyleDeclaration style) {
+    return TextStyle(
+      color: CSSText.getCurrentColor(style),
+      decoration: CSSText.getTextDecorationLine(style),
+      decorationColor: CSSText.getTextDecorationColor(style),
+      decorationStyle: CSSText.getTextDecorationStyle(style),
+      fontWeight: CSSText.getFontWeight(style),
+      fontStyle: CSSText.getFontStyle(style),
+      textBaseline: CSSText.getTextBaseLine(style),
+      package: CSSText.getFontPackage(style),
+      fontFamilyFallback: CSSText.getFontFamilyFallback(style),
+      fontSize: CSSText.getFontSize(style),
+      letterSpacing: CSSText.getLetterSpacing(style),
+      wordSpacing: CSSText.getWordSpacing(style),
+      locale: CSSText.getLocale(style),
+      background: CSSText.getBackground(style),
+      foreground: CSSText.getForeground(style),
+      shadows: CSSText.getTextShadow(style),
+    );
+  }
+}
+
+class CSSText {
+  static bool isValidFontStyleValue(String value) {
+    return value == 'normal' || value == 'italic' || value == 'oblique';
+  }
+
+  static bool isValidFontWeightValue(String value) {
+    double weight = CSSNumber.parseNumber(value);
+    if (weight != null) {
+      return weight >= 1 && weight <= 1000;
+    } else {
+      return value == 'normal' || value == 'bold' || value == 'lighter' || value == 'bolder';
+    }
+  }
+
+  static bool isValidLineHeightValue(String value) {
+    return CSSLength.isLength(value) || value == 'normal' || double.tryParse(value) != null;
+  }
+
+  static bool isValidTextTextDecorationLineValue(String value) {
+    return value == 'underline' || value == 'overline' || value == 'line-through' || value == 'none';
+  }
+
+  static bool isValidTextTextDecorationStyleValue(String value) {
+    return value == 'solid' || value == 'double' || value == 'dotted' || value == 'dashed' || value == 'wavy';
+  }
+
+  static double getLineHeight(CSSStyleDeclaration style) {
+    String value = style[LINE_HEIGHT];
+    double lineHeight;
+    if (value.isNotEmpty) {
+      if (CSSLength.isLength(value)) {
+        lineHeight = CSSLength.toDisplayPortValue(value);
+      } else {
+        double multipliedNumber = double.tryParse(value);
+        if (multipliedNumber != null) {
+          lineHeight = getFontSize(style) * multipliedNumber;
+        }
+      }
+    }
+    return lineHeight;
+  }
+
+  static TextAlign getTextAlign(CSSStyleDeclaration style) {
     TextAlign textAlign = TextAlign.left;
     if (style == null) {
       return textAlign;
     }
-    switch (style['textAlign']) {
+    switch (style[TEXT_ALIGN]) {
       case 'center':
         textAlign = TextAlign.center;
         break;
@@ -41,64 +121,71 @@ mixin CSSTextMixin {
     return textAlign;
   }
 
-  /// TextStyle({
-  ///   Color color,
-  ///   TextDecoration decoration,
-  ///   Color decorationColor,
-  ///   TextDecorationStyle decorationStyle,
-  ///   FontWeight fontWeight,
-  ///   FontStyle fontStyle,
-  ///   TextBaseline textBaseline,
-  ///   String fontFamily,
-  ///   double fontSize,
-  ///   double letterSpacing,
-  ///   double wordSpacing,
-  ///   double height,
-  ///   Locale locale,
-  ///   Paint background,
-  ///   Paint foreground,
-  ///   List<Shadow> shadows
-  /// })
-  ///
-  /// Creates a new TextStyle object.
-  ///   color: The color to use when painting the text. If this is specified, foreground must be null.
-  ///   decoration: The decorations to paint near the text (e.g., an underline).
-  ///   decorationColor: The color in which to paint the text decorations.
-  ///   decorationStyle: The style in which to paint the text decorations (e.g., dashed).
-  ///   fontWeight: The typeface thickness to use when painting the text (e.g., bold).
-  ///   fontStyle: The typeface variant to use when drawing the letters (e.g., italics).
-  ///   fontFamily: The name of the font to use when painting the text (e.g., Roboto).
-  ///   fontSize: The size of glyphs (in logical pixels) to use when painting the text.
-  ///   letterSpacing: The amount of space (in logical pixels) to add between each letter.
-  ///   wordSpacing: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between /// each word).
-  ///   textBaseline: The common baseline that should be aligned between this text span and its parent text span, /// or, for the root text spans, with the line box.
-  ///   height: The height of this text span, as a multiple of the font size.
-  ///   locale: The locale used to select region-specific glyphs.
-  ///   background: The paint drawn as a background for the text.
-  ///   foreground: The paint used to draw the text. If this is specified, color must be null.
-  TextStyle getTextStyle(CSSStyleDeclaration style) {
-    return TextStyle(
-      color: getColor(style),
-      decoration: getDecorationLine(style),
-      decorationColor: getDecorationColor(style),
-      decorationStyle: getDecorationStyle(style),
-      fontWeight: getFontWeight(style),
-      fontStyle: getFontStyle(style),
-      textBaseline: getTextBaseLine(style),
-      package: getFontPackage(style),
-      fontFamily: getFontFamily(style),
-      fontFamilyFallback: getFontFamilyFallback(style),
-      fontSize: getFontSize(style),
-      letterSpacing: getLetterSpacing(style),
-      wordSpacing: getWordSpacing(style),
-      locale: getLocale(style),
-      background: getBackground(style),
-      foreground: getForeground(style),
-      shadows: getShadows(style),
-    );
+  /// In CSS2.1, text-decoration determin the type of text decoration,
+  /// but in CSS3, which is text-decoration-line.
+  static TextDecoration getTextDecorationLine(CSSStyleDeclaration style) {
+    switch (style[TEXT_DECORATION_LINE]) {
+      case 'line-through':
+        return TextDecoration.lineThrough;
+      case 'overline':
+        return TextDecoration.overline;
+      case 'underline':
+        return TextDecoration.underline;
+      case 'none':
+      default:
+        return TextDecoration.none;
+    }
   }
 
-  Color getColor(CSSStyleDeclaration style) {
+  static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
+    WhiteSpace whiteSpace = WhiteSpace.normal;
+    if (style == null) {
+      return whiteSpace;
+    }
+
+    switch(style['whiteSpace']) {
+      case 'nowrap':
+        return WhiteSpace.nowrap;
+      case 'pre':
+        return WhiteSpace.pre;
+      case 'pre-wrap':
+        return WhiteSpace.preWrap;
+      case 'pre-line':
+        return WhiteSpace.preLine;
+      case 'break-spaces':
+        return WhiteSpace.breakSpaces;
+      case 'normal':
+      default:
+        return WhiteSpace.normal;
+    }
+  }
+
+  static TextOverflow getTextOverflow(CSSStyleDeclaration style) {
+    List<CSSOverflowType> overflows = getOverflowTypes(style);
+    WhiteSpace whiteSpace = getWhiteSpace(style);
+    //  To make text overflow its container you have to set overflowX hidden and white-space: nowrap.
+    if (overflows[0] != CSSOverflowType.hidden || whiteSpace != WhiteSpace.nowrap) {
+      return TextOverflow.visible;
+    }
+
+    TextOverflow textOverflow = TextOverflow.clip;
+    if (style == null) {
+      return textOverflow;
+    }
+
+    switch(style['textOverflow']) {
+      case 'ellipsis':
+        return TextOverflow.ellipsis;
+      case 'fade':
+        return TextOverflow.fade;
+      case 'clip':
+      default:
+        return TextOverflow.clip;
+    }
+  }
+
+
+  static Color getCurrentColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
       return CSSColor.parseColor(style[COLOR]);
     } else {
@@ -106,63 +193,16 @@ mixin CSSTextMixin {
     }
   }
 
-  static RegExp _splitRegExp = RegExp(r' ');
-
-  /// In CSS2.1, text-decoration determin the type of text decoration,
-  /// but in CSS3, which is text-decoration-line.
-  TextDecoration getDecorationLine(CSSStyleDeclaration style) {
-    if (style.contains(TEXT_DECORATION_LINE)) {
-      return _getTextDecorationLine(style[TEXT_DECORATION_LINE]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splittedTextDecoration = textDecoration.split(_splitRegExp);
-      // Compatible with CSS 2.1: text-decoration = text-decoration-line.
-      if (splittedTextDecoration.length >= 1) {
-        return _getTextDecorationLine(splittedTextDecoration[0]);
-      }
-    }
-    return _getTextDecorationLine();
-  }
-
-  TextDecoration _getTextDecorationLine([String type]) {
-    if (type == 'line-through')
-      return TextDecoration.lineThrough;
-    else if (type == 'overline')
-      return TextDecoration.overline;
-    else if (type == 'underline')
-      return TextDecoration.underline;
-    else
-      return TextDecoration.none;
-  }
-
-  Color getDecorationColor(CSSStyleDeclaration style) {
+  static Color getTextDecorationColor(CSSStyleDeclaration style) {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
-      if (splitedDecoration.length >= 2) {
-        return CSSColor.parseColor(splitedDecoration.last);
-      }
+    } else {
+      return getCurrentColor(style); // Default to currentColor (style.color)
     }
-    return getColor(style); // Default to currentColor (style.color)
   }
 
-  TextDecorationStyle getDecorationStyle(CSSStyleDeclaration style) {
-    if (style.contains(TEXT_DECORATION_STYLE)) {
-      return _getDecorationStyle(style[TEXT_DECORATION_STYLE]);
-    } else if (style.contains(TEXT_DECORATION)) {
-      String textDecoration = style[TEXT_DECORATION];
-      List<String> splitedDecoration = textDecoration.split(_splitRegExp);
-      if (splitedDecoration.length >= 2) {
-        return _getDecorationStyle(splitedDecoration[1]);
-      }
-    }
-    return _getDecorationStyle();
-  }
-
-  TextDecorationStyle _getDecorationStyle([String value]) {
-    switch (value) {
+  static TextDecorationStyle getTextDecorationStyle(CSSStyleDeclaration style) {
+    switch (style[TEXT_DECORATION_STYLE]) {
       case 'double':
         return TextDecorationStyle.double;
       case 'dotted':
@@ -177,61 +217,51 @@ mixin CSSTextMixin {
     }
   }
 
-  FontWeight getFontWeight(CSSStyleDeclaration style) {
+  static FontWeight getFontWeight(CSSStyleDeclaration style) {
     if (style.contains(FONT_WEIGHT)) {
       var fontWeight = style[FONT_WEIGHT];
-      double fontWeightValue = DEFAULT_FONT_WEIGHT; // Default to 400.
-      if (fontWeight is String) {
-        switch (fontWeight) {
-          case 'lighter':
-            fontWeightValue = 200;
-            break;
-          case 'light':
-            fontWeightValue = 300;
-            break;
-          case 'normal':
-            fontWeightValue = 400;
-            break;
-          case 'medium':
-            fontWeightValue = 500;
-            break;
-          case 'bold':
-            fontWeightValue = 700;
-            break;
-          case 'bolder':
-          case 'heavy':
-            fontWeightValue = 900;
-            break;
-          default:
-            fontWeightValue = double.tryParse(fontWeight) ?? DEFAULT_FONT_WEIGHT;
-            break;
-        }
-      }
-
-      if (fontWeightValue >= 900) {
-        return FontWeight.w900;
-      } else if (fontWeightValue >= 800) {
-        return FontWeight.w800;
-      } else if (fontWeightValue >= 700) {
-        return FontWeight.w700;
-      } else if (fontWeightValue >= 600) {
-        return FontWeight.w600;
-      } else if (fontWeightValue >= 500) {
-        return FontWeight.w500;
-      } else if (fontWeightValue >= 400) {
-        return FontWeight.w400;
-      } else if (fontWeightValue >= 300) {
-        return FontWeight.w300;
-      } else if (fontWeightValue >= 200) {
-        return FontWeight.w200;
-      } else {
-        return FontWeight.w100;
-      }
+      switch (fontWeight) {
+        case 'lighter':
+          return FontWeight.w200;
+        case 'normal':
+          return FontWeight.w400;
+        case 'bold':
+          return FontWeight.w700;
+        case 'bolder':
+          return FontWeight.w900;
+        default:
+          int fontWeightValue = int.tryParse(fontWeight);
+          // See: https://drafts.csswg.org/css-fonts-4/#font-weight-numeric-values
+          // Only values greater than or equal to 1, and less than or equal to 1000, are valid,
+          // and all other values are invalid.
+          if (fontWeightValue == null || fontWeightValue > 1000 || fontWeightValue <= 0) {
+            return FontWeight.w400;
+          } else if (fontWeightValue >= 900) {
+            return FontWeight.w900;
+          } else if (fontWeightValue >= 800) {
+            return FontWeight.w800;
+          } else if (fontWeightValue >= 700) {
+            return FontWeight.w700;
+          } else if (fontWeightValue >= 600) {
+            return FontWeight.w600;
+          } else if (fontWeightValue >= 500) {
+            return FontWeight.w500;
+          } else if (fontWeightValue >= 400) {
+            return FontWeight.w400;
+          } else if (fontWeightValue >= 300) {
+            return FontWeight.w300;
+          } else if (fontWeightValue >= 200) {
+            return FontWeight.w200;
+          } else {
+            return FontWeight.w100;
+          }
+          break;
+      }      
     }
-    return FontWeight.normal;
+    return FontWeight.w400;
   }
 
-  FontStyle getFontStyle(CSSStyleDeclaration style) {
+  static FontStyle getFontStyle(CSSStyleDeclaration style) {
     if (style.contains(FONT_STYLE)) {
       switch (style[FONT_STYLE]) {
         case 'oblique':
@@ -244,26 +274,73 @@ mixin CSSTextMixin {
     return FontStyle.normal;
   }
 
-  TextBaseline getTextBaseLine(CSSStyleDeclaration style) {
+  static TextBaseline getTextBaseLine(CSSStyleDeclaration style) {
     return TextBaseline.alphabetic; // @TODO: impl vertical-align
   }
 
   static String BUILTIN_FONT_PACKAGE = null;
-  String getFontPackage(CSSStyleDeclaration style) {
+  static String getFontPackage(CSSStyleDeclaration style) {
     return BUILTIN_FONT_PACKAGE;
   }
 
-  static String DEFAULT_FONT_FAMILY = '';
-  String getFontFamily(CSSStyleDeclaration style) {
-    return style.contains(FONT_FAMILY) ? style[FONT_FAMILY] : DEFAULT_FONT_FAMILY;
-  }
-
   static List<String> DEFAULT_FONT_FAMILY_FALLBACK = null;
-  List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
+  static List<String> getFontFamilyFallback(CSSStyleDeclaration style) {
+    String fontFamily = style[FONT_FAMILY];
+    if (fontFamily.isNotEmpty) {
+      List<String> values = fontFamily.split(_commaRegExp);
+      List<String> resolvedFamily = List();
+
+      for (int i = 0; i < values.length; i++) {
+        String familyName = values[i];
+        // Remove wrapping quotes: "Gill Sans" -> Gill Sans
+        if (familyName[0] == '"' || familyName[0] == '\'') {
+          familyName = familyName.substring(1, familyName.length - 1);
+        }
+
+        switch (familyName) {
+          case 'sans-serif':
+          // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
+          // Default sans-serif font in Android (4.0+): Roboto
+            resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
+            break;
+          case 'serif':
+          // Default serif font in iOS and iPadOS: Times
+          // Default serif font in Android (4.0+): Noto Serif
+            resolvedFamily.addAll([
+              'Times',
+              'Times New Roman',
+              'Noto Serif',
+              'Songti SC',
+              'Songti TC',
+              'Hiragino Mincho ProN',
+              'AppleMyungjo',
+              'Apple SD Gothic Neo'
+            ]);
+            break;
+          case 'monospace':
+          // Default monospace font in iOS and iPadOS: Courier
+            resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
+            break;
+          case 'cursive':
+          // Default cursive font in iOS and iPadOS: Snell Roundhand
+            resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
+            break;
+          case 'fantasy':
+          // Default fantasy font in iOS and iPadOS:
+          // Default fantasy font in MacOS: Papyrus
+            resolvedFamily.addAll(['Papyrus', 'Impact']);
+            break;
+          default:
+            resolvedFamily.add(familyName);
+        }
+      }
+      return resolvedFamily;
+    }
     return DEFAULT_FONT_FAMILY_FALLBACK;
   }
 
-  double getFontSize(CSSStyleDeclaration style) {
+  static double DEFAULT_FONT_SIZE = 16.0;
+  static double getFontSize(CSSStyleDeclaration style) {
     if (style.contains(FONT_SIZE)) {
       return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
     } else {
@@ -271,7 +348,7 @@ mixin CSSTextMixin {
     }
   }
 
-  double getLetterSpacing(CSSStyleDeclaration style) {
+  static double getLetterSpacing(CSSStyleDeclaration style) {
     if (style.contains(LETTER_SPACING)) {
       String _letterSpacing = style[LETTER_SPACING];
       if (_letterSpacing == NORMAL) return DEFAULT_LETTER_SPACING;
@@ -282,7 +359,7 @@ mixin CSSTextMixin {
     }
   }
 
-  double getWordSpacing(CSSStyleDeclaration style) {
+  static double getWordSpacing(CSSStyleDeclaration style) {
     if (style.contains(WORD_SPACING)) {
       String _wordSpacing = style[WORD_SPACING];
       if (_wordSpacing == NORMAL) return DEFAULT_WORD_SPACING;
@@ -293,22 +370,22 @@ mixin CSSTextMixin {
     }
   }
 
-  Locale getLocale(CSSStyleDeclaration style) {
+  static Locale getLocale(CSSStyleDeclaration style) {
     // TODO: impl locale for text decoration.
     return null;
   }
 
-  Paint getBackground(CSSStyleDeclaration style) {
+  static Paint getBackground(CSSStyleDeclaration style) {
     // TODO: Reserved port for customize text decoration background.
     return null;
   }
 
-  Paint getForeground(CSSStyleDeclaration style) {
+  static Paint getForeground(CSSStyleDeclaration style) {
     // TODO: Reserved port for customize text decoration foreground.
     return null;
   }
 
-  List<Shadow> getShadows(CSSStyleDeclaration style) {
+  static List<Shadow> getTextShadow(CSSStyleDeclaration style) {
     List<Shadow> textShadows = [];
     if (style.contains(TEXT_SHADOW)) {
       var shadows = CSSStyleProperty.getShadowValues(style[TEXT_SHADOW]);
@@ -329,7 +406,6 @@ mixin CSSTextMixin {
           }
         });
       }
-
     }
     return textShadows;
   }

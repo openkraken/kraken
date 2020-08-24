@@ -15,12 +15,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -44,12 +44,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translate3d(10px, 10px, 20px)',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -73,12 +73,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translateX(20px)',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -102,12 +102,12 @@ describe('Transition transform', () => {
     container1.appendChild(document.createTextNode('DIV 1'));
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translateY(10px)',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1100);
     });
@@ -140,7 +140,7 @@ describe('Multiple transition transform', () => {
     div.appendChild(container1);
 
     requestAnimationFrame(async () => {
-      await matchScreenshot();
+      await matchViewportSnapshot();
       setElementStyle(container1, {
         transform: 'translate3d(-100px, 0vw, 0vw)',
       });
@@ -148,7 +148,7 @@ describe('Multiple transition transform', () => {
         transform: 'translate3d(-100px, 0px, 0px)',
       });
       setTimeout(async () => {
-        await matchScreenshot();
+        await matchViewportSnapshot();
         done();
       }, 1000);
     });

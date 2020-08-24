@@ -12,7 +12,7 @@ describe('Document api', () => {
     container.appendChild(document.createComment('This is a comment'));
     document.body.appendChild(container);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('documentElement', async () => {
@@ -25,12 +25,11 @@ describe('Document api', () => {
     const text2 = document.createTextNode('documentElement height: ' + documentElementHeight + '\n');
     document.body.appendChild(text2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('document.all', () => {
     expect(document.all).not.toBeUndefined();
     expect(document.all.length).toBeGreaterThan(0);
   });
-
 });

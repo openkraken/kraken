@@ -311,6 +311,14 @@ String invokeModule(
       } else if (method == 'cancelVibrate') {
         Vibration.cancel();
       }
+    } else if (module == 'Navigation') {
+      String method = args[1];
+      List navigationArgs = args[2];
+      if (method == 'goTo') {
+        String url = navigationArgs[0];
+        String sourceUrl = controller.bundleURL;
+        controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+      }
     }
   } catch (e, stack) {
     // Dart side internal error should print it directly.
@@ -431,7 +439,6 @@ final Dart_RegisterSetInterval _registerSetInterval =
 int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
     Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  print('controller: $controller, id: $contextId');
   return controller.module.setInterval(timeout, () {
     DartAsyncCallback func = callback.asFunction();
     try {

@@ -41,6 +41,6 @@ describe('left-ltr', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

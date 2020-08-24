@@ -2,15 +2,15 @@ describe('Tags video', () => {
   it('basic', done => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
-      height: '500rpx',
+      height: '500px',
     });
 
     document.body.appendChild(container1);
 
     const video = document.createElement('video');
     setElementStyle(video, {
-      width: '750rpx',
-      height: '400rpx',
+      width: '750px',
+      height: '400px',
     });
 
     setAttributes(video, {

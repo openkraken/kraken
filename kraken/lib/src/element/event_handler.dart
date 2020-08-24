@@ -4,38 +4,24 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
 
 mixin EventHandlerMixin on Node {
-  KrakenRenderPointerListener renderPointerListener;
   num _touchStartTime = 0;
   num _touchEndTime = 0;
 
   static const int MAX_STEP_MS = 10;
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
-  insertRenderPointerListener(RenderObjectWithChildMixin parentRenderObject) {
-    if (renderPointerListener == null && hasPointerEvent()) {
-      RenderObject child = parentRenderObject.child;
-      // Drop child by set null first.
-      parentRenderObject.child = null;
-      renderPointerListener = KrakenRenderPointerListener(
-        child: child,
-        onPointerDown: handlePointDown,
-        onPointerMove: handlePointMove,
-        onPointerUp: handlePointUp,
-        onPointerCancel: handlePointCancel,
-      );
-      parentRenderObject.child = renderPointerListener;
-    }
+  void addEventResponder(RenderBoxModel renderBoxModel) {
+    renderBoxModel.onPointerDown = handlePointDown;
+    renderBoxModel.onPointerMove = handlePointMove;
+    renderBoxModel.onPointerUp = handlePointUp;
+    renderBoxModel.onPointerCancel = handlePointCancel;
   }
 
-  removeRenderPointerListener() {
-    if (renderPointerListener != null && !hasPointerEvent()) {
-      RenderObjectWithChildMixin parent = renderPointerListener.parent;
-      // Drop child by set null first.
-      parent.child = null;
-      // Replace with renderPointerListener's child
-      parent.child = renderPointerListener.child;
-      renderPointerListener = null;
-    }
+  void removeEventResponder(RenderBoxModel renderBoxModel) {
+    renderBoxModel.onPointerDown = null;
+    renderBoxModel.onPointerMove = null;
+    renderBoxModel.onPointerUp = null;
+    renderBoxModel.onPointerCancel = null;
   }
 
   bool hasPointerEvent() {
@@ -66,7 +52,6 @@ mixin EventHandlerMixin on Node {
 
     // <300ms to trigger click
     if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-
       handleClick(Event('click', EventInit()));
     }
   }

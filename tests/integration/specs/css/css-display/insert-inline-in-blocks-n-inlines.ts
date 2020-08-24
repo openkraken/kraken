@@ -41,11 +41,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('begin-002', async () => {
@@ -92,11 +92,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('begin-003', async () => {
@@ -143,11 +143,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('end-001', async () => {
@@ -194,11 +194,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('end-002', async () => {
@@ -245,11 +245,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')), insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('end-003', async () => {
@@ -295,11 +295,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.appendChild(createElementWithStyle('span', insertedStyle, createText('Inserted new inline')));
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('middle-001', async () => {
@@ -347,11 +347,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(insertBlock, insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('middle-002', async () => {
@@ -399,11 +399,11 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(insertBlock, insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 
   it('middle-003', async () => {
@@ -451,10 +451,10 @@ describe('insert-inline-in-blocks-n-inlines', () => {
     append(BODY, container);
     append(BODY, container2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
 
     container.insertBefore(insertBlock, insertPoint);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

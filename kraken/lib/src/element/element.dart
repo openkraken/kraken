@@ -89,9 +89,7 @@ class Element extends Node
 
   // A point reference to treed renderObject.
   RenderObject renderObject;
-  KrakenRenderConstrainedBox renderConstrainedBox;
   RenderDecoratedBox stickyPlaceholder;
-  KrakenRenderPadding renderPadding;
   RenderLayoutBox renderLayoutBox;
   RenderIntrinsicBox renderIntrinsicBox;
   RenderIntersectionObserver renderIntersectionObserver;
@@ -101,38 +99,9 @@ class Element extends Node
   // used to get original coordinate before move away from document flow
   RenderObject renderPositionedPlaceholder;
 
-  // Horizontal margin dimension (left + right)
-  double get cropMarginWidth => renderMargin.margin.horizontal;
-  // Vertical margin dimension (top + bottom)
-  double get cropMarginHeight => renderMargin.margin.vertical;
-  // Horizontal padding dimension (left + right)
-  double get cropPaddingWidth {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.horizontal;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.horizontal;
-    }
-    return 0.0;
-  }
-
-  // Vertical padding dimension (top + bottom)
-  double get cropPaddingHeight {
-    if (renderIntrinsicBox != null && renderIntrinsicBox.padding != null) {
-      return renderIntrinsicBox.padding.vertical;
-    } else if (renderLayoutBox != null && renderLayoutBox.padding != null) {
-      return renderLayoutBox.padding.vertical;
-    }
-    return 0.0;
-  }
-
   bool get isValidSticky {
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
-
-  // Horizontal border dimension (left + right)
-  double get cropBorderWidth => renderDecoratedBox.borderEdge.horizontal;
-  // Vertical border dimension (top + bottom)
-  double get cropBorderHeight => renderDecoratedBox.borderEdge.vertical;
 
   Element(
     int targetId,
@@ -142,7 +111,7 @@ class Element extends Node
     this.events = const [],
     this.needsReposition = false,
     this.isIntrinsicBox = false,
-  })  : assert(targetId != null),
+  }) : assert(targetId != null),
         assert(tagName != null),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
@@ -158,39 +127,24 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style);
+      renderObject = renderIntrinsicBox = RenderIntrinsicBox(targetId, style, elementManager);
     } else {
       renderObject = renderLayoutBox = createRenderLayoutBox(style);
     }
 
-    // Background image
-    renderObject = initBackground(renderObject, style, targetId);
+    // init box sizing
+    initRenderBoxSizing(getRenderBoxModel(), style, transitionMap);
 
-    // Overflow
-    renderObject = initOverflowBox(renderObject, style, _scrollListener);
+    // Init overflow
+    initRenderOverflow(getRenderBoxModel(), style, _scrollListener);
 
-    // BoxModel Border
-    renderObject = initRenderDecoratedBox(renderObject, style, targetId);
-
-    // Constrained box
-    renderObject = renderConstrainedBox = initRenderConstrainedBox(renderObject, style);
-
-    // Opacity
-    renderObject = initRenderOpacity(renderObject, style);
-
-    // Content Visibility
-    renderObject = initRenderContentVisibility(renderObject, style);
+    // Init border and background
+    initRenderDecoratedBox(getRenderBoxModel(), style);
 
     // Intersection observer
     renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
 
     setContentVisibilityIntersectionObserver(renderIntersectionObserver, style[CONTENT_VISIBILITY]);
-
-    // Visibility
-    renderObject = initRenderVisibility(renderObject, style);
-
-    // BoxModel Margin
-    renderObject = initRenderMargin(renderObject, style);
 
     // The layout boundary of element.
     renderObject = renderElementBoundary = initTransform(renderObject, style, targetId, elementManager);
@@ -205,8 +159,13 @@ class Element extends Node
     BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
     BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
 
+    // @FIXME: need to remove after renderElementBoundary removed.
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -221,10 +180,10 @@ class Element extends Node
     if (child.originalScrollContainerOffset == null) {
       Offset horizontalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortX.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
       Offset verticalScrollContainerOffset =
           child.renderElementBoundary.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject())
-              - renderScrollViewPortY.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
+              - renderIntersectionObserver.localToGlobal(Offset.zero, ancestor: child.elementManager.getRootRenderObject());
 
       double offsetY = verticalScrollContainerOffset.dy;
       double offsetX = horizontalScrollContainerOffset.dx;
@@ -265,7 +224,7 @@ class Element extends Node
 
     if (axisDirection == AxisDirection.down) {
       double offsetTop = child.originalScrollContainerOffset.dy - scrollOffset;
-      double viewPortHeight = renderScrollViewPortY?.size?.height;
+      double viewPortHeight = renderIntersectionObserver?.size?.height;
       double offsetBottom = viewPortHeight - childHeight - offsetTop;
 
       if (childStyle.contains(TOP)) {
@@ -301,7 +260,7 @@ class Element extends Node
       }
     } else if (axisDirection == AxisDirection.right) {
       double offsetLeft = child.originalScrollContainerOffset.dx - scrollOffset;
-      double viewPortWidth = renderScrollViewPortX?.size?.width;
+      double viewPortWidth = renderIntersectionObserver?.size?.width;
       double offsetRight = viewPortWidth - childWidth - offsetLeft;
 
       if (childStyle.contains(LEFT)) {
@@ -448,8 +407,8 @@ class Element extends Node
 
   void _updateOffset({CSSTransition definiteTransition, String property, double diff, double original}) {
     RenderLayoutParentData positionParentData;
-    RenderBox renderParent = renderElementBoundary.parent;
     if (renderElementBoundary.parentData is RenderLayoutParentData) {
+      RenderLayoutBox renderParent = renderElementBoundary.parent;
       positionParentData = renderElementBoundary.parentData;
       RenderLayoutParentData progressParentData = positionParentData;
 
@@ -492,7 +451,8 @@ class Element extends Node
         allTransition?.addProgressListener(progressListener);
       } else {
         if (style.contains(Z_INDEX)) {
-          positionParentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+          int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+          positionParentData.zIndex = zIndex;
         }
         if (style.contains(TOP)) {
           positionParentData.top = CSSLength.toDisplayPortValue(style[TOP]);
@@ -543,24 +503,13 @@ class Element extends Node
   RenderBoxModel createRenderLayoutBox(CSSStyleDeclaration style, {List<RenderBox> children}) {
     String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
     if (display.endsWith(FLEX)) {
-      RenderFlexLayout flexLayout = RenderFlexLayout(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+      RenderFlexLayout flexLayout =
+          RenderFlexLayout(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlex(flexLayout, style);
       return flexLayout;
-    } else if (display == NONE ||
-        display == INLINE ||
-        display == INLINE_BLOCK ||
-        display == BLOCK) {
-      RenderFlowLayoutBox flowLayout = RenderFlowLayoutBox(
-        children: children,
-        style: style,
-        targetId: targetId,
-        elementManager: elementManager
-      );
+    } else if (display == NONE || display == INLINE || display == INLINE_BLOCK || display == BLOCK) {
+      RenderFlowLayoutBox flowLayout =
+          RenderFlowLayoutBox(children: children, style: style, targetId: targetId, elementManager: elementManager);
       decorateRenderFlow(flowLayout, style);
       return flowLayout;
     } else {
@@ -581,19 +530,21 @@ class Element extends Node
     bool isParentFlexDisplayType = parentDisplayValue.endsWith(FLEX);
 
     // Add FlexItem wrap for flex child node.
-    if (isParentFlexDisplayType && renderLayoutBox != null) {
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = RenderFlexItem(child: renderLayoutBox);
-    }
+//    if (isParentFlexDisplayType) {
+//      renderIntersectionObserver.child = null;
+//      renderIntersectionObserver.child = RenderFlexItem(child: getRenderBoxModel());
+//    }
 
     CSSPositionType positionType = resolvePositionFromStyle(style);
     switch (positionType) {
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         parent._addPositionedChild(this, positionType);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.sticky:
         parent._addStickyChild(this, after);
+        parent.renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
@@ -698,7 +649,7 @@ class Element extends Node
 
   void _addPositionedChild(Element child, CSSPositionType position) {
     // RenderPosition parentRenderPosition;
-    ContainerRenderObjectMixin parentRenderLayoutBox;
+    RenderLayoutBox parentRenderLayoutBox;
 
     switch (position) {
       case CSSPositionType.absolute:
@@ -784,14 +735,14 @@ class Element extends Node
     ParentData childParentData = element.renderObject.parentData;
     if (childParentData is RenderFlexParentData) {
       final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = CSSFlexItem.getParentData(element.style);
+      RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
       parentData.flexGrow = flexParentData.flexGrow;
       parentData.flexShrink = flexParentData.flexShrink;
       parentData.flexBasis = flexParentData.flexBasis;
       parentData.alignSelf = flexParentData.alignSelf;
 
       // Update margin for flex child.
-      element.updateRenderMargin(element.style);
+      element.updateRenderMargin(element.getRenderBoxModel(), element.style);
       element.renderObject.markNeedsLayout();
     }
   }
@@ -814,59 +765,57 @@ class Element extends Node
         _styleOffsetChangedListener(property, original, present);
         break;
 
-      case 'flexDirection':
-      case 'flexWrap':
-      case 'justifyContent':
-      case 'alignItems':
-      case 'alignSelf':
-      case 'alignContent':
-      case 'textAlign':
+      case FLEX_FLOW:
+      case FLEX_DIRECTION:
+      case FLEX_WRAP:
+      case ALIGN_SELF:
+      case ALIGN_CONTENT:
+      case ALIGN_ITEMS:
+      case JUSTIFY_CONTENT:
         _styleFlexChangedListener(property, original, present);
         break;
 
-      case 'flexFlow':
-      case 'flexGrow':
-      case 'flexShrink':
-      case 'flexBasis':
-      case 'flex':
-      case 'alignItems':
+      case FLEX:
+      case FLEX_GROW:
+      case FLEX_SHRINK:
+      case FLEX_BASIS:
         _styleFlexItemChangedListener(property, original, present);
         break;
 
-      case 'textAlign':
+      case TEXT_ALIGN:
         _styleTextAlignChangedListener(property, original, present);
         break;
 
-      case 'padding':
-      case 'paddingLeft':
-      case 'paddingTop':
-      case 'paddingRight':
-      case 'paddingBottom':
+      case PADDING:
+      case PADDING_TOP:
+      case PADDING_RIGHT:
+      case PADDING_BOTTOM:
+      case PADDING_LEFT:
         _stylePaddingChangedListener(property, original, present);
         break;
 
-      case 'width':
-      case 'minWidth':
-      case 'maxWidth':
-      case 'height':
-      case 'minHeight':
-      case 'maxHeight':
+      case WIDTH:
+      case MIN_WIDTH:
+      case MAX_WIDTH:
+      case HEIGHT:
+      case MIN_HEIGHT:
+      case MAX_HEIGHT:
         _styleSizeChangedListener(property, original, present);
         break;
 
-      case 'overflow':
-      case 'overflowX':
-      case 'overflowY':
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
         _styleOverflowChangedListener(property, original, present);
         break;
 
-      case 'background':
-      case 'backgroundColor':
-      case 'backgroundAttachment':
-      case 'backgroundImage':
-      case 'backgroundRepeat':
-      case 'backgroundSize':
-      case 'backgroundPosition':
+      case BACKGROUND:
+      case BACKGROUND_COLOR:
+      case BACKGROUND_ATTACHMENT:
+      case BACKGROUND_IMAGE:
+      case BACKGROUND_REPEAT:
+      case BACKGROUND_POSITION:
+      case BACKGROUND_SIZE:
         _styleBackgroundChangedListener(property, original, present);
         break;
 
@@ -952,9 +901,9 @@ class Element extends Node
           })
           ..removeAll();
 
-        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-        renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-        (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
+        renderIntersectionObserver.child = null;
+        renderLayoutBox = renderLayoutBox.copyWith(createRenderLayoutBox(style, children: children));
+        renderIntersectionObserver.child = renderLayoutBox;
       }
 
       if (currentDisplay.endsWith(FLEX)) {
@@ -1006,20 +955,15 @@ class Element extends Node
   }
 
   void _styleOverflowChangedListener(String property, String original, String present) {
-    updateOverFlowBox(style, _scrollListener);
+    updateRenderOverflow(getRenderBoxModel(), style, _scrollListener);
   }
 
   void _stylePaddingChangedListener(String property, String original, String present) {
-    if (renderLayoutBox != null) {
-      updateRenderPadding(renderLayoutBox, style, transitionMap);
-    } else {
-      updateRenderPadding(renderIntrinsicBox, style, transitionMap);
-    }
+    updateRenderPadding(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleSizeChangedListener(String property, String original, String present) {
-    // Update constrained box.
-    updateConstraints(style, transitionMap);
+    updateBoxSize(getRenderBoxModel(), style, transitionMap);
 
     setElementSizeType();
 
@@ -1037,30 +981,10 @@ class Element extends Node
 
   void _styleMarginChangedListener(String property, String original, String present) {
     /// Update margin.
-    updateRenderMargin(style, transitionMap);
+    updateRenderMargin(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleFlexChangedListener(String property, String original, String present) {
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY];
-    if (display.endsWith(FLEX)) {
-      ContainerRenderObjectMixin prevRenderLayoutBox = renderLayoutBox;
-      // Collect children of renderLayoutBox and remove their relationship.
-      List<RenderBox> children = [];
-      prevRenderLayoutBox
-        ..visitChildren((child) {
-          children.add(child);
-        })
-        ..removeAll();
-
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = null;
-      renderLayoutBox = renderLayoutBox.fromCopy(createRenderLayoutBox(style, children: children));
-      (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>).child = renderLayoutBox;
-
-      this.children.forEach((Element child) {
-        _updateFlexItemStyle(child);
-      });
-    }
-
     _updateDecorationRenderLayoutBox();
   }
 
@@ -1075,24 +999,24 @@ class Element extends Node
 
   // background may exist on the decoratedBox or single box, because the attachment
   void _styleBackgroundChangedListener(String property, String original, String present) {
-    updateBackground(property, present, (renderScrollViewPortX as RenderObjectWithChildMixin<RenderBox>), targetId);
+    updateBackground(getRenderBoxModel(), style, property, present, renderIntersectionObserver, targetId);
     // decoratedBox may contains background and border
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleDecoratedChangedListener(String property, String original, String present) {
     // Update decorated box.
-    updateRenderDecoratedBox(style, transitionMap);
+    updateRenderDecoratedBox(getRenderBoxModel(), style, transitionMap);
   }
 
   void _styleOpacityChangedListener(String property, String original, String present) {
     // Update opacity.
-    updateRenderOpacity(present, parentRenderObject: renderMargin);
+    updateRenderOpacity(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
     // Update visibility.
-    updateRenderVisibility(present, parentRenderObject: renderMargin);
+    updateRenderVisibility(present, parentRenderObject: renderIntersectionObserver);
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
@@ -1112,22 +1036,26 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void updateChildNodesStyle() {
+  void _updateChildNodesStyle() {
     childNodes.forEach((node) {
       if (node is TextNode) node.updateTextStyle();
     });
   }
 
-  // @TODO(refactor): Need to remove it.
-  void _flushStyle() {
+  void _updateTransitionEvent() {
     if (transitionMap != null) {
       for (CSSTransition transition in transitionMap.values) {
-        initTransitionEvent(transition);
-        transition?.apply();
+        updateTransitionEvent(transition);
       }
     }
+  }
 
-    updateChildNodesStyle();
+  RenderBoxModel getRenderBoxModel() {
+    if (isIntrinsicBox) {
+      return renderIntrinsicBox;
+    } else {
+      return renderLayoutBox;
+    }
   }
 
   // Universal style property change callback.
@@ -1135,8 +1063,10 @@ class Element extends Node
   void setStyle(String key, value) {
     // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
     // [StyleChangeListener] to be invoked in sync.
-    style[key] = value;
-    _flushStyle();
+    style.setProperty(key, value);
+
+    _updateTransitionEvent();
+    _updateChildNodesStyle();
   }
 
   @mustCallSuper
@@ -1179,11 +1109,11 @@ class Element extends Node
       case 'offsetWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderMargin.hasSize ? renderMargin.size.width : 0;
+        return renderElementBoundary.hasSize ? renderElementBoundary.size.width : 0;
       case 'offsetHeight':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderMargin.hasSize ? renderMargin.size.height : 0;
+        return renderElementBoundary.hasSize ? renderElementBoundary.size.height : 0;
       // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         // need to flush layout to get correct size
@@ -1194,21 +1124,23 @@ class Element extends Node
         elementManager.getRootRenderObject().owner.flushLayout();
         return renderLayoutBox.clientHeight;
       case 'clientLeft':
-        // TODO: implement this after border has supported in renderLayoutBox
-        //  return renderLayoutBox.borderLeft();
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderLeft;
         break;
       case 'clientTop':
-        // TODO: implement this after border has supported in renderLayoutBox
-        // return renderLayoutBox.borderTop;
+        // need to flush layout to get correct size
+        elementManager.getRootRenderObject().owner.flushLayout();
+        return renderLayoutBox.borderTop;
         break;
       case 'scrollTop':
         return getScrollTop();
       case 'scrollLeft':
         return getScrollLeft();
       case 'scrollHeight':
-        return getScrollHeight();
+        return getScrollHeight(getRenderBoxModel());
       case 'scrollWidth':
-        return getScrollWidth();
+        return getScrollWidth(getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
       case 'click':
@@ -1223,7 +1155,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
 
-    RenderBox sizedBox = renderConstrainedBox.child;
+    RenderBox sizedBox = renderIntersectionObserver.child;
     if (isConnected) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
@@ -1289,8 +1221,8 @@ class Element extends Node
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
     super.addEventListener(eventName, _eventResponder);
 
-    // Insert pointer listener render if event needs
-    insertRenderPointerListener(renderConstrainedBox);
+    // bind pointer responder.
+    addEventResponder(getRenderBoxModel());
 
     // Only add listener once for all intersection related event
     if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
@@ -1302,8 +1234,8 @@ class Element extends Node
     if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
     super.removeEventListener(eventName, _eventResponder);
 
-    // Remove pointer listener render if no event needs
-    removeRenderPointerListener();
+    // Remove pointer responder.
+    removeEventResponder(getRenderBoxModel());
 
     // Remove listener when no intersection related event
     if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
@@ -1354,11 +1286,11 @@ class Element extends Node
 
     Completer<Uint8List> completer = new Completer();
     // Only capture
-    var originalChild = renderMargin.child;
+    var originalChild = renderIntersectionObserver.child;
     // Make sure child is detached.
-    renderMargin.child = null;
+    renderIntersectionObserver.child = null;
     var renderRepaintBoundary = RenderRepaintBoundary(child: originalChild);
-    renderMargin.child = renderRepaintBoundary;
+    renderIntersectionObserver.child = renderRepaintBoundary;
     renderRepaintBoundary.markNeedsLayout();
     renderRepaintBoundary.markNeedsPaint();
 
@@ -1373,7 +1305,7 @@ class Element extends Node
         captured = byteData.buffer.asUint8List();
       }
       renderRepaintBoundary.child = null;
-      renderMargin.child = originalChild;
+      renderIntersectionObserver.child = originalChild;
 
       completer.complete(captured);
     });
@@ -1387,8 +1319,8 @@ Element findContainingBlock(Element element) {
   Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
-    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION] != '';
-    bool hasTransform = _el.style[TRANSFORM] != '';
+    bool isElementNonStatic = _el.style[POSITION] != STATIC && _el.style[POSITION].isNotEmpty;
+    bool hasTransform = _el.style[TRANSFORM].isNotEmpty;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
     if (_el == rootEl || isElementNonStatic || hasTransform) {
       break;
@@ -1403,7 +1335,7 @@ Element findScrollContainer(Element element) {
   Element rootEl = element.elementManager.getRootElement();
 
   while (_el != null) {
-    List<CSSOverflowType> overflow = getOverflowFromStyle(_el.style);
+    List<CSSOverflowType> overflow = getOverflowTypes(_el.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
@@ -1420,7 +1352,7 @@ List<Element> findStickyChildren(Element element) {
   List<Element> result = [];
 
   element.children.forEach((Element child) {
-    List<CSSOverflowType> overflow = getOverflowFromStyle(child.style);
+    List<CSSOverflowType> overflow = getOverflowTypes(child.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
 
@@ -1460,7 +1392,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
 }
 
 void setPositionedChildParentData(
-    ContainerRenderObjectMixin parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
+    RenderLayoutBox parentRenderLayoutBox, Element child, RenderPositionHolder placeholder) {
   var parentData;
   if (parentRenderLayoutBox is RenderFlowLayoutBox) {
     parentData = RenderLayoutParentData();
@@ -1487,7 +1419,9 @@ void setPositionedChildParentData(
   }
   parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
   parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-  parentData.zIndex = CSSLength.toInt(style[Z_INDEX]);
+
+  int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
+  parentData.zIndex = zIndex;
 
   parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 

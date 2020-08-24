@@ -8,6 +8,7 @@
 
 #include "kraken_bridge.h"
 #include "kraken_bridge_test.h"
+#include <thread>
 #include <memory>
 
 namespace kraken {

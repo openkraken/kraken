@@ -20,17 +20,17 @@ mixin CSSTransformMixin on Node {
       RenderObject current, CSSStyleDeclaration style, int targetId, ElementManager elementManager) {
     this.targetId = targetId;
 
-    if (style.contains('transform')) {
-      prevMethods = CSSFunction(style['transform']).computedValue;
+    if (style.contains(TRANSFORM)) {
+      prevMethods = CSSFunction.parseFunction(style[TRANSFORM]);
       matrix4 = combineTransform(prevMethods) ?? matrix4;
-      CSSTransformOrigin transformOrigin = parseOrigin(style['transformOrigin']);
+      CSSTransformOrigin transformOrigin = parseOrigin(style[TRANSFORM_ORIGIN]);
       if (transformOrigin != null) {
         oldOffset = transformOrigin.offset;
         oldAlignment = transformOrigin.alignment;
       }
     }
 
-    bool shouldRender = style['display'] != 'none';
+    bool shouldRender = style[DISPLAY] != NONE;
     transform = RenderElementBoundary(
       child: current,
       transform: matrix4,
@@ -45,7 +45,7 @@ mixin CSSTransformMixin on Node {
   }
 
   void updateTransform(String transformStr, [Map<String, CSSTransition> transitionMap]) {
-    List<CSSFunctionalNotation> newMethods = CSSFunction(transformStr).computedValue;
+    List<CSSFunctionalNotation> newMethods = CSSFunction.parseFunction(transformStr);
     // transform transition
     if (newMethods != null) {
       if (transitionMap != null) {
@@ -168,7 +168,7 @@ mixin CSSTransformMixin on Node {
       if (CSSLength.isLength(x)) {
         offsetX = CSSLength.toDisplayPortValue(x) ?? offsetX;
       } else if (CSSPercentage.isPercentage(x)) {
-        alignX = CSSPercentage(x).toDouble() * 2 - 1;
+        alignX = CSSPercentage.parsePercentage(x) * 2 - 1;
       } else if (x == CSSPosition.LEFT) {
         alignX = -1.0;
       } else if (x == CSSPosition.RIGHT) {
@@ -181,7 +181,7 @@ mixin CSSTransformMixin on Node {
       if (CSSLength.isLength(y)) {
         offsetY = CSSLength.toDisplayPortValue(y) ?? offsetY;
       } else if (CSSPercentage.isPercentage(y)) {
-        alignY = CSSPercentage(y).toDouble() * 2 - 1;
+        alignY = CSSPercentage.parsePercentage(y) * 2 - 1;
       } else if (y == CSSPosition.TOP) {
         alignY = -1.0;
       } else if (y == CSSPosition.BOTTOM) {
@@ -339,11 +339,11 @@ mixin CSSTransformMixin on Node {
       case 'rotate':
       case 'rotateZ':
         if (method.args.length == 1) {
-          double angle = CSSAngle(method.args[0].trim()).angleValue;
+          double angle = CSSAngle.parseAngle(method.args[0].trim());
           if (needDiff) {
             double oldAngle = 0.0;
             if (prevMethod != null && prevMethod.args.length == 1) {
-              oldAngle = CSSAngle(prevMethod.args[0].trim()).angleValue;
+              oldAngle = CSSAngle.parseAngle(prevMethod.args[0].trim());
             }
             angle = _getProgressValue(angle, oldAngle, progress);
           }
@@ -355,14 +355,14 @@ mixin CSSTransformMixin on Node {
           double x = double.tryParse(method.args[0].trim()) ?? 0.0;
           double y = double.tryParse(method.args[1].trim()) ?? 0.0;
           double z = double.tryParse(method.args[2].trim()) ?? 0.0;
-          double angle = CSSAngle(method.args[3].trim()).angleValue;
+          double angle = CSSAngle.parseAngle(method.args[3].trim());
           if (needDiff) {
             double oldX = 0.0, oldY = 0.0, oldZ = 0.0, oldAngle = 0.0;
             if (prevMethod != null && prevMethod.args.length == 4) {
               oldX = double.tryParse(prevMethod.args[0].trim()) ?? 0.0;
               oldY = double.tryParse(prevMethod.args[1].trim()) ?? 0.0;
               oldZ = double.tryParse(prevMethod.args[2].trim()) ?? 0.0;
-              oldAngle = CSSAngle(prevMethod.args[3].trim()).angleValue;
+              oldAngle = CSSAngle.parseAngle(prevMethod.args[3].trim());
             }
             x = _getProgressValue(x, oldX, progress);
             y = _getProgressValue(y, oldY, progress);
@@ -375,11 +375,11 @@ mixin CSSTransformMixin on Node {
         break;
       case 'rotateX':
         if (method.args.length == 1) {
-          double x = CSSAngle(method.args[0].trim()).angleValue;
+          double x = CSSAngle.parseAngle(method.args[0].trim());
           if (needDiff) {
             double oldX = 0.0;
             if (prevMethod != null && prevMethod.args.length == 1) {
-              oldX = CSSAngle(prevMethod.args[0].trim()).angleValue;
+              oldX = CSSAngle.parseAngle(prevMethod.args[0].trim());
             }
             x = _getProgressValue(x, oldX, progress);
           }
@@ -388,11 +388,11 @@ mixin CSSTransformMixin on Node {
         break;
       case 'rotateY':
         if (method.args.length == 1) {
-          double y = CSSAngle(method.args[0].trim()).angleValue;
+          double y = CSSAngle.parseAngle(method.args[0].trim());
           if (needDiff) {
             double oldY = 0.0;
             if (prevMethod != null && prevMethod.args.length == 1) {
-              oldY = CSSAngle(prevMethod.args[0].trim()).angleValue;
+              oldY = CSSAngle.parseAngle(prevMethod.args[0].trim());
             }
             y = _getProgressValue(y, oldY, progress);
           }
@@ -469,18 +469,18 @@ mixin CSSTransformMixin on Node {
         break;
       case 'skew':
         if (method.args.length == 1 || method.args.length == 2) {
-          double alpha = CSSAngle(method.args[0].trim()).angleValue;
+          double alpha = CSSAngle.parseAngle(method.args[0].trim());
           double beta = 0.0;
           if (method.args.length == 2) {
-            beta = CSSAngle(method.args[1].trim()).angleValue;
+            beta = CSSAngle.parseAngle(method.args[1].trim());
           }
           if (needDiff) {
             double oldAlpha = 0.0;
             double oldBeta = 0.0;
             if (prevMethod != null && (prevMethod.args.length == 1 || prevMethod.args.length == 2)) {
-              oldAlpha = CSSAngle(prevMethod.args[0].trim()).angleValue;
+              oldAlpha = CSSAngle.parseAngle(prevMethod.args[0].trim());
               if (prevMethod.args.length == 2) {
-                oldBeta = CSSAngle(prevMethod.args[1].trim()).angleValue;
+                oldBeta = CSSAngle.parseAngle(prevMethod.args[1].trim());
               }
             }
             alpha = _getProgressValue(alpha, oldAlpha, progress);
@@ -492,11 +492,11 @@ mixin CSSTransformMixin on Node {
       case 'skewX':
       case 'skewY':
         if (method.args.length == 1) {
-          double angle = CSSAngle(method.args[0].trim()).angleValue;
+          double angle = CSSAngle.parseAngle(method.args[0].trim());
           if (needDiff) {
             double oldAngle = 0.0;
             if (prevMethod != null && prevMethod.args.length == 1) {
-              oldAngle = CSSAngle(prevMethod.args[0].trim()).angleValue;
+              oldAngle = CSSAngle.parseAngle(prevMethod.args[0].trim());
             }
             angle = _getProgressValue(angle, oldAngle, progress);
           }

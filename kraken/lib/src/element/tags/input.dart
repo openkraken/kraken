@@ -16,11 +16,7 @@ import 'package:kraken/css.dart';
 
 const String INPUT = 'INPUT';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK,
-  WIDTH: '150px',
-  BORDER: '1px solid #767676'
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK, WIDTH: '150px', BORDER: '1px solid #767676'};
 
 typedef ValueChanged<T> = void Function(T value);
 // The time it takes for the cursor to fade from fully opaque to fully
@@ -102,7 +98,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     );
   }
 
-
   TextInputConfiguration textInputConfiguration;
 
   InputElement(
@@ -133,8 +128,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
-
-    setBoxConstraints();
   }
 
   @override
@@ -151,33 +144,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
   }
 
-  void setBoxConstraints() {
-    bool containWidth = style.contains('width');
-    bool containHeight = style.contains('height');
-    BoxConstraints oldConstraints = renderConstrainedBox.additionalConstraints;
-    double minWidth = oldConstraints.minWidth;
-    double maxWidth = oldConstraints.maxWidth;
-    double minHeight = oldConstraints.minHeight;
-    double maxHeight = oldConstraints.maxHeight;
-
-    if (containWidth) {
-      minWidth = maxWidth = CSSLength.toDisplayPortValue(style['width']);
-    }
-    if (containHeight) {
-      minHeight = maxHeight = CSSLength.toDisplayPortValue(style['height']);
-    }
-
-    renderConstrainedBox.additionalConstraints = BoxConstraints(
-      minWidth: minWidth,
-      maxWidth: maxWidth,
-      minHeight: minHeight,
-      maxHeight: maxHeight,
-    );
-  }
-
-  TextSpan buildTextSpan({ String text = '' }) {
+  TextSpan buildTextSpan({String text = ''}) {
     text ??= properties['value'];
-    return createTextSpanWithStyle(text, style);
+    return createTextSpan(text, style);
   }
 
   get cursorColor => CSSColor.initial;

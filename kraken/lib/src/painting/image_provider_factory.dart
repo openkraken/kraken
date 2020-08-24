@@ -10,7 +10,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/painting.dart';
 
-
 /// This class allows user to customize Kraken's image loading.
 
 /// A factory function allow user to build an customized ImageProvider class.
@@ -130,7 +129,7 @@ ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider defaultFileProviderFactory(String rawPath, [dynamic param]) {
   ImageProvider _imageProvider = null;
-  if(param is File){
+  if (param is File) {
     _imageProvider = FileImage(param);
   }
   return _imageProvider;

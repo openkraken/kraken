@@ -112,7 +112,7 @@ class RenderElementBoundary extends RenderTransform
     // so apply the margin child offset
     // percent or keyword apply by border size
     if (element != null) {
-      RenderBox renderBox = element.renderMargin?.child;
+      RenderBox renderBox = element.renderIntersectionObserver;
       if (renderBox != null) {
         BoxParentData boxParentData = renderBox.parentData;
         origin += boxParentData.offset;
@@ -125,8 +125,8 @@ class RenderElementBoundary extends RenderTransform
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      double width = (layoutSize?.width ?? 0.0) - (element?.cropMarginWidth ?? 0.0);
-      double height = (layoutSize?.height ?? 0.0) - (element?.cropMarginHeight ?? 0.0);
+      double width = (layoutSize?.width ?? 0.0);
+      double height = (layoutSize?.height ?? 0.0);
 
       translation = (alignment as Alignment).alongSize(Size(width, height));
       result.translate(translation.dx, translation.dy);

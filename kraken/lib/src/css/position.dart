@@ -121,15 +121,13 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  BoxConstraints parentConstraints = parentElement.renderDecoratedBox.constraints;
-
+  RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
   final RenderLayoutParentData childParentData = child.parentData;
 
   // Default to no constraints. (0 - infinite)
   BoxConstraints childConstraints = const BoxConstraints();
-
-  Size trySize = parentConstraints.biggest;
-  Size parentSize = trySize.isInfinite ? parentConstraints.smallest : trySize;
+  Size trySize = parentRenderBoxModel.contentConstraints.biggest;
+  Size parentSize = trySize.isInfinite ? parentRenderBoxModel.contentConstraints.smallest : trySize;
 
   BoxSizeType widthType = _getChildWidthSizeType(child);
   BoxSizeType heightType = _getChildHeightSizeType(child);
@@ -154,63 +152,114 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize) {
-  double width = parentSize.width;
-  double height = parentSize.height;
-
+void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
 
+  double childMarginTop = 0;
+  double childMarginBottom = 0;
+  double childMarginLeft = 0;
+  double childMarginRight = 0;
+  if (child is RenderElementBoundary) {
+    Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
+    RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
+    childMarginTop = childRenderBoxModel.marginTop;
+    childMarginBottom = childRenderBoxModel.marginBottom;
+    childMarginLeft = childRenderBoxModel.marginLeft;
+    childMarginRight = childRenderBoxModel.marginRight;
+  }
+
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset baseOffset =
-        childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root)
-            - parent.localToGlobal(Offset.zero, ancestor: root);
+    Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
+        parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
-    // padding box of containing block
+    // padding box of containing block, so it needs to add border insets
+    // when caculating offset
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    double top = childParentData.top != null ? (childParentData.top) : baseOffset.dy;
+
+    double borderLeft = borderEdge != null ? borderEdge.left : 0;
+    double borderRight = borderEdge != null ? borderEdge.right : 0;
+    double borderTop = borderEdge != null ? borderEdge.top : 0;
+    double borderBottom = borderEdge != null ? borderEdge.bottom : 0;
+
+    double top = childParentData.top != null ?
+      childParentData.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = height - child.size.height - ((childParentData.bottom) ?? 0);
+      top = parentSize.height - child.size.height - borderBottom - childMarginBottom -
+        ((childParentData.bottom) ?? 0);
     }
 
-    double left = childParentData.left != null ? (childParentData.left) : baseOffset.dx;
+    double left = childParentData.left != null ?
+      childParentData.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
     if (childParentData.left == null && childParentData.right != null) {
-      left = width - child.size.width - ((childParentData.right) ?? 0);
+      left = parentSize.width - child.size.width - borderRight - childMarginRight -
+        ((childParentData.right) ?? 0);
     }
 
     x = left;
     y = top;
   }
 
-  childParentData.offset = Offset(x ?? 0, y ?? 0);
+  Offset offset = setAutoMarginPositionedElementOffset(x, y, child, parentSize);
+
+  childParentData.offset = offset;
 }
 
-double getFontSize(CSSStyleDeclaration style) {
-  if (style.contains(FONT_SIZE)) {
-    return CSSLength.toDisplayPortValue(style[FONT_SIZE]) ?? DEFAULT_FONT_SIZE;
-  } else {
-    return DEFAULT_FONT_SIZE;
-  }
-}
+// Margin auto has special rules for positioned element
+// which will override the default position rule
+// https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
+Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child, Size parentSize) {
+  if (child is RenderElementBoundary) {
+    CSSStyleDeclaration childStyle = child.style;
+    String marginLeft = childStyle[MARGIN_LEFT];
+    String marginRight = childStyle[MARGIN_RIGHT];
+    String marginTop = childStyle[MARGIN_TOP];
+    String marginBottom = childStyle[MARGIN_BOTTOM];
+    String width = childStyle[WIDTH];
+    String height = childStyle[HEIGHT];
+    String left = childStyle[LEFT];
+    String right = childStyle[RIGHT];
+    String top = childStyle[TOP];
+    String bottom = childStyle[BOTTOM];
 
-double getLineHeight(CSSStyleDeclaration style) {
-  String lineHeightStr = style[LINE_HEIGHT];
-  double lineHeight;
-  if (lineHeightStr != '') {
-    if (lineHeightStr.endsWith(CSSLength.PX) ||
-      lineHeightStr.endsWith(CSSLength.RPX) ||
-      lineHeightStr.endsWith(CSSLength.VW) ||
-      lineHeightStr.endsWith(CSSLength.VH)
-  ) {
-      lineHeight = CSSLength.toDisplayPortValue(style[LINE_HEIGHT]);
-    } else {
-      lineHeight = getFontSize(style) * double.parse(lineHeightStr);
+    // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
+    // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
+    if ((left.isNotEmpty && left != AUTO) &&
+        (right.isNotEmpty && right != AUTO) &&
+        (width.isNotEmpty && width != AUTO)) {
+      if (marginLeft == AUTO) {
+        double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
+        double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
+        double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
+
+        if (marginRight == AUTO) {
+          x = leftValue + remainingSpace / 2;
+        } else {
+          x = leftValue + remainingSpace;
+        }
+      }
+    }
+
+    if ((top.isNotEmpty && top != AUTO) &&
+        (bottom.isNotEmpty && bottom != AUTO) &&
+        (height.isNotEmpty && height != AUTO)) {
+      if (marginTop == AUTO) {
+        double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
+        double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
+        double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
+
+        if (marginBottom == AUTO) {
+          y = topValue + remainingSpace / 2;
+        } else {
+          y = topValue + remainingSpace;
+        }
+      }
     }
   }
-  return lineHeight;
+  return Offset(x ?? 0, y ?? 0);
 }
 
 VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {

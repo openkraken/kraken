@@ -4,7 +4,6 @@ describe('FontWeight', () => {
     'medium',
     'light',
     'bold',
-    'heavy',
     'lighter',
     'bolder',
     'alibaba',
@@ -46,7 +45,7 @@ describe('FontWeight', () => {
       append(BODY, p1);
       append(BODY, p2);
 
-      return matchScreenshot();
+      return matchViewportSnapshot();
     });
   });
 });

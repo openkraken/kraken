@@ -7,8 +7,6 @@ import 'dart:math';
 import 'dart:ui' show Color;
 import 'package:flutter/painting.dart';
 
-import 'value.dart';
-
 /// Only support Basic color keywords and Extended color keywords,
 /// for CSS system colors is not recommended for use after CSS3
 const Map<String, int> _namedColors = {
@@ -167,16 +165,16 @@ const Map<String, int> _namedColors = {
 // CSS Color: https://drafts.csswg.org/css-color-4/
 // ignore: public_member_api_docs
 final _colorHexRegExp = RegExp(r'^#([a-f0-9]{3,8})$', caseSensitive: false);
-final _colorHslRegExp = RegExp(
-    r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\s*\)$');
-final _colorRgbRegExp = RegExp(
-    r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
+final _colorHslRegExp =
+    RegExp(r'^(hsla?)\(([0-9.-]+)(deg|rad|grad|turn)?[,\s]+([0-9.]+%)[,\s]+([0-9.]+%)([,\s/]+([0-9.]+%?))?\s*\)$');
+final _colorRgbRegExp =
+    RegExp(r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
 
 /// #123
 /// #123456
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
-class CSSColor implements CSSValue<Color> {
+class CSSColor {
   // Use a preprocessed color to cache.
   // Example:
   //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
@@ -223,7 +221,7 @@ class CSSColor implements CSSValue<Color> {
   static Color parseColor(String color) {
     if (color == null) return null;
     color = color.trim().toLowerCase();
-    
+
     if (color == 'transparent') {
       return CSSColor.transparent;
     } else if (_cachedColor.containsKey(color)) {
@@ -263,21 +261,16 @@ class CSSColor implements CSSValue<Color> {
         final double rgbB = _parseColorPart(rgbMatch[4], 0, 255);
         final double rgbO = rgbMatch[6] != null ? _parseColorPart(rgbMatch[6], 0, 1) : 1;
         if (rgbR != null && rgbG != null && rgbB != null && rgbO != null) {
-          parsed = Color.fromRGBO(
-            rgbR.round(),
-            rgbG.round(),
-            rgbB.round(),
-            rgbO
-          );
+          parsed = Color.fromRGBO(rgbR.round(), rgbG.round(), rgbB.round(), rgbO);
         }
       }
-    } else if(color.startsWith('hsl')) {
+    } else if (color.startsWith('hsl')) {
       final hslMatch = _colorHslRegExp.firstMatch(color);
       if (hslMatch != null) {
         final hslH = _parseColorHue(hslMatch[2], hslMatch[3]);
         final hslS = _parseColorPart(hslMatch[4], 0, 1);
         final hslL = _parseColorPart(hslMatch[5], 0, 1);
-        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7], 0 ,1) : 1;
+        final hslA = hslMatch[7] != null ? _parseColorPart(hslMatch[7], 0, 1) : 1;
         if (hslH != null && hslS != null && hslL != null && hslA != null) {
           parsed = HSLColor.fromAHSL(hslA, hslH, hslS, hslL).toColor();
         }
@@ -293,44 +286,11 @@ class CSSColor implements CSSValue<Color> {
     return parsed;
   }
 
-  final String rawInput;
   Color value;
-
-  CSSColor(this.rawInput);
 
   static const Color transparent = Color(0x00000000);
   static const Color initial = Color(0xFF000000);
-
-  bool _parsed = false;
-  @override
-  void parse() {
-    if (!_parsed) value = CSSColor.parseColor(rawInput);
-    _parsed = true;
-  }
-
-  @override
-  Color get computedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    return value;
-  }
-
-  /// https://drafts.csswg.org/css-color-3/#valuea-def-color
-  @override
-  String get serializedValue {
-    // Lazy parse to get performance improved.
-    parse();
-
-    var rgb = '${value.red}, ${value.green}, ${value.blue}';
-    if (value.alpha == 255) {
-      return 'rgb($rgb)';
-    } else {
-      return 'rgba($rgb, ${value.opacity})';
-    }
-  }
 }
-
 
 /// A color in the CIELAB color space.
 ///

@@ -5,7 +5,7 @@
 
 import 'dart:ui';
 
-import 'value.dart';
+import 'package:kraken/css.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -20,7 +20,7 @@ const _0 = '0';
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
-class CSSLength implements CSSValue<double> {
+class CSSLength {
   static const String RPX = 'rpx';
   static const String PX = 'px';
   static const String VW = 'vw';
@@ -50,9 +50,9 @@ class CSSLength implements CSSValue<double> {
     } else if (value is int) {
       return value;
     } else if (value is String) {
-      return int.tryParse(value) ?? 0;
+      return int.tryParse(value);
     } else {
-      return 0;
+      return null;
     }
   }
 
@@ -109,20 +109,9 @@ class CSSLength implements CSSValue<double> {
     return value != null && (value == _0 || _lengthRegExp.hasMatch(value));
   }
 
-  final String _rawInput;
-  double _value;
-  CSSLength(this._rawInput) {
-    parse();
+  // Css keyword value such as 'auto', 'initial' etc, currently only support 'auto'
+  static bool isKeyword(String value) {
+    return value == 'auto';
   }
 
-  @override
-  double get computedValue => _value;
-
-  @override
-  void parse() {
-    _value = CSSLength.toDisplayPortValue(_rawInput);
-  }
-
-  @override
-  String get serializedValue => _rawInput;
 }

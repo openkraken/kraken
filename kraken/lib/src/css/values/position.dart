@@ -1,5 +1,4 @@
 import 'package:flutter/painting.dart';
-import 'package:kraken/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
@@ -8,7 +7,7 @@ final RegExp _splitRegExp = RegExp(r'\s+');
 /// (e.g. background image) inside a positioning area (e.g. background
 /// positioning area). It is interpreted as specified for background-position.
 /// [CSS3-BACKGROUND]
-class CSSPosition implements CSSValue<Alignment> {
+class CSSPosition {
   static const String LEFT = 'left';
   static const String RIGHT = 'right';
   static const String TOP = 'top';
@@ -16,31 +15,24 @@ class CSSPosition implements CSSValue<Alignment> {
   static const String CENTER = 'center';
 
   // [0, 1]
-  Alignment _value = Alignment.topLeft; // default value.
+  static Alignment initial = Alignment.topLeft; // default value.
 
-  final String _rawInput;
-  CSSPosition(this._rawInput);
+  static Alignment parsePosition(String input) {
+    String normalized = input.trim();
+    if (normalized.isEmpty) return initial;
 
-  bool _parsed = false;
-  @override
-  void parse() {
-    if (!_parsed) _parse();
-    _parsed = true;
-  }
-
-  void _parse() {
-    var normalized = _rawInput.trim();
+    Alignment parsed;
     List<String> split = normalized.split(_splitRegExp);
 
     if (split.length == 1) {
       // If one value is set, another value should be center(0).
-      var dx = _getValueX(split.first, initial: 0);
-      var dy = _getValueY(split.first, initial: 0);
-      _value = Alignment(dx, dy);
+      double dx = _getValueX(split.first, initial: 0);
+      double dy = _getValueY(split.first, initial: 0);
+      parsed = Alignment(dx, dy);
     } else if (split.length == 2) {
-      _value = Alignment(_getValueX(split.first), _getValueY(split.last));
+      parsed = Alignment(_getValueX(split.first), _getValueY(split.last));
     }
-    // Silently failed.
+    return parsed;
   }
 
   static double _gatValuePercentage(String input) {
@@ -74,34 +66,5 @@ class CSSPosition implements CSSValue<Alignment> {
         return 0;
     }
     return _gatValuePercentage(input) ?? initial;
-  }
-
-  @override
-  Alignment get computedValue {
-    parse();
-    return _value;
-  }
-
-  @override
-  String get serializedValue {
-    parse();
-    var x = _value.x;
-    var y = _value.y;
-
-    if (x == -1.0 && y == -1.0) return 'top left';
-    if (x == 0.0 && y == -1.0) return 'top center';
-    if (x == 1.0 && y == -1.0) return 'top right';
-    if (x == -1.0 && y == 0.0) return 'center left';
-    if (x == 0.0 && y == 0.0) return 'center';
-    if (x == 1.0 && y == 0.0) return 'center right';
-    if (x == -1.0 && y == 1.0) return 'bottom left';
-    if (x == 0.0 && y == 1.0) return 'bottom center';
-    if (x == 1.0 && y == 1.0) return 'bottom right';
-    return '${x * 100}%, ${y * 100}%';
-  }
-
-  @override
-  String toString() {
-    return 'CSSPosition($serializedValue)';
   }
 }

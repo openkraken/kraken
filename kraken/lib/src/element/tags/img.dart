@@ -7,12 +7,11 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
+import 'dart:async';
 
 const String IMAGE = 'IMG';
 
-const Map<String, dynamic> _defaultStyle = {
-  DISPLAY: INLINE_BLOCK
-};
+const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
   RegExp regExp = new RegExp(r"^\d+$");
@@ -20,8 +19,6 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
-
-
   ImageProvider image;
   RenderImage imageBox;
   ImageStream imageStream;
@@ -32,7 +29,12 @@ class ImageElement extends Element {
   double _propertyHeight;
 
   ImageElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, defaultStyle: _defaultStyle, isIntrinsicBox: true, tagName: IMAGE) {
+      : super(
+        targetId,
+        elementManager,
+        defaultStyle: _defaultStyle,
+        isIntrinsicBox: true,
+        tagName: IMAGE) {
     _renderImage();
   }
 
@@ -90,10 +92,17 @@ class ImageElement extends Element {
 
     renderElementBoundary.widthSizeType = widthType;
     renderElementBoundary.heightSizeType = heightType;
+
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.widthSizeType = widthType;
+    renderBoxModel.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    dispatchEvent(Event('load'));
+    // img load event should trigger asynchronously to make sure load event had bind.
+    Timer.run(() {
+      dispatchEvent(Event('load'));
+    });
   }
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
@@ -119,17 +128,17 @@ class ImageElement extends Element {
       width = naturalWidth;
       height = naturalHeight;
     } else {
-      CSSSizedConstraints sizedConstraints = CSSSizingMixin.getConstraints(style);
+      RenderBoxModel renderBoxModel = getRenderBoxModel();
       if (containWidth && containHeight) {
-        width = sizedConstraints.width ?? _propertyWidth;
-        height = sizedConstraints.height ?? _propertyHeight;
+        width = renderBoxModel.width ?? _propertyWidth;
+        height = renderBoxModel.height ?? _propertyHeight;
       } else if (containWidth) {
-        width = sizedConstraints.width ?? _propertyWidth;
+        width = renderBoxModel.width ?? _propertyWidth;
         if (naturalWidth != 0) {
           height = width * naturalHeight / naturalWidth;
         }
       } else if (containHeight) {
-        height = sizedConstraints.height ?? _propertyHeight;
+        height = renderBoxModel.height ?? _propertyHeight;
         if (naturalHeight != 0) {
           width = height * naturalWidth / naturalHeight;
         }
@@ -145,6 +154,15 @@ class ImageElement extends Element {
 
     imageBox?.width = width;
     imageBox?.height = height;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.intrinsicWidth = naturalWidth;
+    renderBoxModel.intrinsicHeight = naturalHeight;
+
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderBoxModel.intrinsicRatio = null;
+    } else {
+      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+    }
   }
 
   void _removeStreamListener() {
@@ -196,7 +214,6 @@ class ImageElement extends Element {
 
     // The default value for object-position is 50% 50%
     return Alignment.center;
-
   }
 
   double _getAlignmentValueFromString(String value) {
@@ -275,7 +292,7 @@ class ImageElement extends Element {
     String src = properties['src'];
     if (src != null && src.isNotEmpty) {
       _removeStreamListener();
-      image = CSSUrl(src, cache: properties['caching']).computedValue;
+      image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
       // Store listeners for remove listener.
       imageListeners = [

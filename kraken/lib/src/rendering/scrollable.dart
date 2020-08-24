@@ -4,13 +4,11 @@
  */
 
 import 'dart:math' as math;
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
-import 'package:meta/meta.dart';
 import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
@@ -22,7 +20,6 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   ScrollPosition position;
   ScrollPhysics _physics = BouncingScrollPhysics();
   DragStartBehavior dragStartBehavior;
-  RenderBox _renderBox;
   ScrollListener scrollListener;
 
   KrakenScrollable({
@@ -34,30 +31,12 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
 
-  RenderObject getScrollableRenderObject(RenderObject child) {
-    RenderSingleChildViewport renderSingleChildViewport = RenderSingleChildViewport(
-      axisDirection: _axisDirection,
-      offset: position,
-      child: child,
-      scrollListener: scrollListener,
-      shouldClip: true,
-    );
-
-    _renderBox = child;
-    KrakenRenderPointerListener renderPointerListener =
-      KrakenRenderPointerListener(onPointerDown: _handlePointerDown, child: renderSingleChildViewport);
-
-    return renderPointerListener;
-  }
-
-  RenderBox get renderBox => _renderBox;
-
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(_axisDirection);
 
-  void _handlePointerDown(PointerDownEvent event) {
+  void handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
     for (GestureRecognizer recognizer in _recognizers.values) {
       recognizer.addPointer(event);
@@ -201,378 +180,160 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
   TickerProvider get vsync => this;
 }
 
-class RenderSingleChildViewport extends RenderBox
-    with RenderObjectWithChildMixin<RenderBox>
-    implements RenderAbstractViewport {
-  RenderSingleChildViewport(
-      {AxisDirection axisDirection = AxisDirection.down,
-      @required ViewportOffset offset,
-      double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
-      RenderBox child,
-      this.scrollListener,
-      this.shouldClip = false})
-      : assert(axisDirection != null),
-        assert(offset != null),
-        assert(cacheExtent != null),
-        _axisDirection = axisDirection,
-        _offset = offset,
-        _cacheExtent = cacheExtent {
-    this.child = child;
-  }
-
+mixin RenderOverflowMixin on RenderBox {
   ScrollListener scrollListener;
-  bool shouldClip;
-  AxisDirection get axisDirection => _axisDirection;
-  AxisDirection _axisDirection;
-  set axisDirection(AxisDirection value) {
-    assert(value != null);
-    if (value == _axisDirection) return;
-    _axisDirection = value;
+
+  bool _clipX = false;
+  bool get clipX => _clipX;
+  set clipX(bool value) {
+    if (_clipX == value) return;
+    _clipX = value;
     markNeedsLayout();
   }
 
-  Axis get axis => axisDirectionToAxis(axisDirection);
-
-  ViewportOffset get offset => _offset;
-  ViewportOffset _offset;
-  set offset(ViewportOffset value) {
-    assert(value != null);
-    if (value == _offset) return;
-    if (attached) _offset.removeListener(_hasScrolled);
-    _offset = value;
-    if (attached) _offset.addListener(_hasScrolled);
+  bool _clipY = false;
+  bool get clipY => _clipY;
+  set clipY(bool value) {
+    if (_clipY == value) return;
+    _clipY = value;
     markNeedsLayout();
   }
 
-  /// {@macro flutter.rendering.viewport.cacheExtent}
-  double get cacheExtent => _cacheExtent;
-  double _cacheExtent;
-  set cacheExtent(double value) {
-    assert(value != null);
-    if (value == _cacheExtent) return;
-    _cacheExtent = value;
+  bool _enableScrollX = false;
+  bool get enableScrollX => _enableScrollX;
+  set enableScrollX(bool value) {
+    if (_enableScrollX == value) return;
+    _enableScrollX = value;
+  }
+
+  bool _enableScrollY = false;
+  bool get enableScrollY => _enableScrollY;
+  set enableScrollY(bool value) {
+    if (_enableScrollY == value) return;
+    _enableScrollY = value;
+  }
+
+  Size _scrollableSize;
+  Size _viewportSize;
+
+  ViewportOffset get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset _scrollOffsetX;
+  set scrollOffsetX(ViewportOffset value) {
+    if (value == null) return;
+    if (value == _scrollOffsetX) return;
+    _scrollOffsetX = value;
+    _scrollOffsetX.removeListener(_scrollXListener);
+    _scrollOffsetX.addListener(_scrollXListener);
     markNeedsLayout();
   }
 
-  void _hasScrolled() {
-    scrollListener(offset.pixels, axisDirection);
+  ViewportOffset get scrollOffsetY => _scrollOffsetY;
+  ViewportOffset _scrollOffsetY;
+  set scrollOffsetY(ViewportOffset value) {
+    if (value == null) return;
+    if (value == _scrollOffsetY) return;
+    _scrollOffsetY = value;
+    _scrollOffsetY.removeListener(_scrollYListener);
+    _scrollOffsetY.addListener(_scrollYListener);
+    markNeedsLayout();
+  }
+
+  void _scrollXListener() {
+    assert(scrollListener != null);
+    scrollListener(scrollOffsetX.pixels, AxisDirection.right);
     markNeedsPaint();
-    markNeedsSemanticsUpdate();
   }
 
-  @override
-  void setupParentData(RenderObject child) {
-    if (child.parentData is! RenderSingleViewPortParentData) {
-      child.parentData = RenderSingleViewPortParentData();
+  void _scrollYListener() {
+    assert(scrollListener != null);
+    scrollListener(scrollOffsetY.pixels, AxisDirection.down);
+    markNeedsPaint();
+  }
+
+  BoxConstraints deflateOverflowConstraints(BoxConstraints constraints) {
+    BoxConstraints result = constraints;
+    if (_clipX && _clipY) {
+      result = BoxConstraints();
+    } else if (_clipX) {
+      result = BoxConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    } else if (_clipY) {
+      result = BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight);
+    }
+    return result;
+  }
+
+  void _setUpScrollX() {
+    _scrollOffsetX.applyViewportDimension(_viewportSize.width);
+    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - _viewportSize.width);
+  }
+
+  void _setUpScrollY() {
+    _scrollOffsetY.applyViewportDimension(_viewportSize.height);
+    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - _viewportSize.height);
+  }
+
+  void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
+    _scrollableSize = scrollableSize;
+    _viewportSize = viewportSize;
+    if (_clipX && _scrollOffsetX != null) {
+      _setUpScrollX();
+    }
+
+    if (_clipY && _scrollOffsetY != null) {
+      _setUpScrollY();
     }
   }
 
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _offset.addListener(_hasScrolled);
+  double get _paintOffsetX {
+    if (_scrollOffsetX == null) return 0.0;
+    return -_scrollOffsetX.pixels;
+  }
+  double get _paintOffsetY {
+    if (_scrollOffsetY == null) return 0.0;
+    return -_scrollOffsetY.pixels;
   }
 
-  @override
-  void detach() {
-    _offset.removeListener(_hasScrolled);
-    super.detach();
+  bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
+    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
 
-  @override
-  bool get isRepaintBoundary => true;
-
-  double get _viewportExtent {
-    assert(hasSize);
-    switch (axis) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
-    return null;
-  }
-
-  double get _minScrollExtent {
-    assert(hasSize);
-    return 0.0;
-  }
-
-  double get _maxScrollExtent {
-    assert(hasSize);
-    if (child == null) return 0.0;
-    switch (axis) {
-      case Axis.horizontal:
-        return math.max(0.0, child.size.width - size.width);
-      case Axis.vertical:
-        return math.max(0.0, child.size.height - size.height);
-    }
-    return null;
-  }
-
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    switch (axis) {
-      case Axis.horizontal:
-        return constraints.heightConstraints();
-      case Axis.vertical:
-        return constraints.widthConstraints();
-    }
-    return null;
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    if (child != null) return child.getMinIntrinsicWidth(height);
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    if (child != null) return child.getMaxIntrinsicWidth(height);
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    if (child != null) return child.getMinIntrinsicHeight(width);
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    if (child != null) return child.getMaxIntrinsicHeight(width);
-    return 0.0;
-  }
-
-  // We don't override computeDistanceToActualBaseline(), because we
-  // want the default behavior (returning null). Otherwise, as you
-  // scroll, it would shift in its parent if the parent was baseline-aligned,
-  // which makes no sense.
-
-  @override
-  void performLayout() {
-    if (child == null) {
-      size = constraints.smallest;
-    } else {
-      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      size = constraints.constrain(child.size);
-    }
-
-    offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
-  }
-
-  Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
-
-  Offset _paintOffsetForPosition(double position) {
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-        return Offset(0.0, position - child.size.height + size.height);
-      case AxisDirection.down:
-        return Offset(0.0, -position);
-      case AxisDirection.left:
-        return Offset(position - child.size.width + size.width, 0.0);
-      case AxisDirection.right:
-        return Offset(-position, 0.0);
-    }
-    return null;
-  }
-
-  bool _shouldClipAtPaintOffset(Offset paintOffset) {
-    assert(child != null);
-    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      final Offset paintOffset = _paintOffset;
-
-      void paintContents(PaintingContext context, Offset offset) {
-        context.paintChild(child, offset + paintOffset);
-      }
-
-      if (shouldClip && _shouldClipAtPaintOffset(paintOffset)) {
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents);
+  // @TODO implement RenderSilver protocol to achieve high performance scroll list.
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, Size viewportSize, PaintingContextCallback callback) {
+    if (clipX == false && clipY == false) return callback(context, offset);
+    final double paintOffsetX = _paintOffsetX;
+    final double paintOffsetY = _paintOffsetY;
+    final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
+    // Overflow should not cover border
+    Rect clipRect = Offset(borderEdge.left, borderEdge.top) & Size(
+      size.width - borderEdge.right - borderEdge.left,
+      size.height - borderEdge.bottom - borderEdge.top,
+    );
+    if (_shouldClipAtPaintOffset(paintOffset, size)) {
+      PaintingContextCallback fn = (PaintingContext context, Offset offset) {
+        callback(context, offset + paintOffset);
+      };
+      if (decoration != null && decoration.borderRadius != null) {
+        BorderRadius radius = decoration.borderRadius;
+        RRect clipRRect = RRect.fromRectAndCorners(clipRect,
+            topLeft: radius.topLeft,
+            topRight: radius.topRight,
+            bottomLeft: radius.bottomLeft,
+            bottomRight: radius.bottomRight
+        );
+        context.pushClipRRect(true, offset, clipRect, clipRRect, fn);
       } else {
-        paintContents(context, offset);
+        context.pushClipRect(true, offset, clipRect, fn);
       }
+    } else {
+      callback(context, offset);
     }
-  }
-
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset paintOffset = _paintOffset;
-    transform.translate(paintOffset.dx, paintOffset.dy);
-  }
-
-  @override
-  Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffset)) return Offset.zero & size;
-    return null;
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
-            describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription(
-                "Unfortunately, this object's geometry is not known at this time, "
-                    'probably because it has never been laid out. '
-                    'This means it cannot be accurately hit-tested.'
-            ),
-            ErrorHint(
-                'If you are trying '
-                    'to perform a hit test during the layout phase itself, make sure '
-                    "you only hit test nodes that have completed layout (e.g. the node's "
-                    'children, after their layout() method has been called).'
-            ),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription(
-              'Although this node is not marked as needing layout, '
-                  'its size is not set.'
-          ),
-          ErrorHint(
-              'A RenderBox object must have an '
-                  'explicit size before it can be hit-tested. Make sure '
-                  'that the RenderBox in question sets its size during layout.'
-          ),
-        ]);
-      }
-      return true;
-    }());
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    if (child != null) {
-      return result.addWithPaintOffset(
-        offset: _paintOffset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - _paintOffset);
-          return child.hitTest(result, position: transformed);
-        },
-      );
-    }
-    return false;
-  }
-
-  @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
-    rect ??= target.paintBounds;
-    if (target is! RenderBox) return RevealedOffset(offset: offset.pixels, rect: rect);
-
-    final RenderBox targetBox = target;
-    final Matrix4 transform = targetBox.getTransformTo(this);
-    final Rect bounds = MatrixUtils.transformRect(transform, rect);
-    final Size contentSize = child.size;
-
-    double leadingScrollOffset;
-    double targetMainAxisExtent;
-    double mainAxisExtent;
-
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-        mainAxisExtent = size.height;
-        leadingScrollOffset = contentSize.height - bounds.bottom;
-        targetMainAxisExtent = bounds.height;
-        break;
-      case AxisDirection.right:
-        mainAxisExtent = size.width;
-        leadingScrollOffset = bounds.left;
-        targetMainAxisExtent = bounds.width;
-        break;
-      case AxisDirection.down:
-        mainAxisExtent = size.height;
-        leadingScrollOffset = bounds.top;
-        targetMainAxisExtent = bounds.height;
-        break;
-      case AxisDirection.left:
-        mainAxisExtent = size.width;
-        leadingScrollOffset = contentSize.width - bounds.right;
-        targetMainAxisExtent = bounds.width;
-        break;
-    }
-
-    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
-    final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));
-    return RevealedOffset(offset: targetOffset, rect: targetRect);
-  }
-
-  @override
-  void showOnScreen({
-    RenderObject descendant,
-    Rect rect,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
-  }) {
-    if (!offset.allowImplicitScrolling) {
-      return super.showOnScreen(
-        descendant: descendant,
-        rect: rect,
-        duration: duration,
-        curve: curve,
-      );
-    }
-
-    final Rect newRect = RenderViewportBase.showInViewport(
-      descendant: descendant,
-      viewport: this,
-      offset: offset,
-      rect: rect,
-      duration: duration,
-      curve: curve,
-    );
-    super.showOnScreen(
-      rect: newRect,
-      duration: duration,
-      curve: curve,
-    );
-  }
-
-  @override
-  Rect describeSemanticsClip(RenderObject child) {
-    assert(axis != null);
-    switch (axis) {
-      case Axis.vertical:
-        return Rect.fromLTRB(
-          semanticBounds.left,
-          semanticBounds.top - cacheExtent,
-          semanticBounds.right,
-          semanticBounds.bottom + cacheExtent,
-        );
-      case Axis.horizontal:
-        return Rect.fromLTRB(
-          semanticBounds.left - cacheExtent,
-          semanticBounds.top,
-          semanticBounds.right + cacheExtent,
-          semanticBounds.bottom,
-        );
-    }
-    return null;
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
-    final RenderSingleViewPortParentData childParentData = child.parentData;
-    double candidate = child.getDistanceToActualBaseline(baseline);
+    final RenderSingleViewPortParentData childParentData = parentData;
+    double candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;
       if (result != null)
@@ -581,5 +342,17 @@ class RenderSingleChildViewport extends RenderBox
         result = candidate;
     }
     return result;
+  }
+
+  void applyOverflowPaintTransform(RenderBox child, Matrix4 transform) {
+    final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
+    transform.translate(paintOffset.dx, paintOffset.dy);
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) {
+    final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
+    if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
+    return null;
   }
 }

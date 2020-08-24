@@ -36,7 +36,7 @@ describe('image-fit', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot(0.5);
   });
   it('006', async () => {
     let div;
@@ -74,8 +74,6 @@ describe('image-fit', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
-
-    await matchScreenshot();
+    await matchViewportSnapshot(0.5);
   });
 });

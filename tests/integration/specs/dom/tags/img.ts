@@ -91,10 +91,10 @@ describe('Tags img', () => {
     expect(src).toBe('assets/rabbit.png');
     // have to wait for asset load?
     await sleep(0.1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
     img.src = 'assets/solidblue.png';
     await sleep(0.1);
-    await matchScreenshot();
+    await matchViewportSnapshot();
     src = img.src;
     expect(src).toBe('assets/solidblue.png');
   });
@@ -104,7 +104,7 @@ describe('Tags img', () => {
     img.onload = async () => {
       expect(img.width).toBe(70);
       expect(img.height).toBe(72);
-      await matchScreenshot();
+      await matchViewportSnapshot();
       done();
     };
     img.src = 'assets/rabbit.png';
@@ -116,9 +116,9 @@ describe('Tags img', () => {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
-    await matchScreenshot();
+    await matchViewportSnapshot(0.2);
     img.src = 'assets/300x150-green.png';
-    await matchScreenshot();
+    await matchViewportSnapshot(0.2);
   });
 
 
@@ -126,6 +126,6 @@ describe('Tags img', () => {
     var img = document.createElement('img');
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
     document.body.appendChild(img);
-    await matchElementImageSnapshot(img);
+    await matchViewportSnapshot(0.2);
   })
 });

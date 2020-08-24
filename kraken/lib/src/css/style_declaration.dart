@@ -28,7 +28,7 @@ class CSSStyleDeclaration {
   CSSStyleDeclaration({Map<String, dynamic> style}) {
     if (style != null) {
       style.forEach((property, dynamic value) {
-        if (value != null) setProperty(property, value: value.toString());
+        if (value != null) setProperty(property, value.toString());
       });
     }
   }
@@ -62,27 +62,6 @@ class CSSStyleDeclaration {
     return _cssProperties[propertyName] ?? '';
   }
 
-  CSSValue _getCSSValue(String propertyName) {
-    var stringValue = getPropertyValue(propertyName);
-
-    switch (propertyName) {
-      case WIDTH:
-      case HEIGHT:
-        return CSSLength(stringValue);
-
-      // TODO: Add more css properties.
-    }
-
-    return null;
-  }
-
-  /// Returns a computed value.
-  T getComputedValue<T>(String propertyName) {
-    CSSValue cssValue = getComputedValue(propertyName);
-    T computedValue = cssValue.computedValue;
-    return computedValue;
-  }
-
   /// Returns a property name.
   String item(int index) {
     return _cssProperties.keys.elementAt(index);
@@ -100,8 +79,39 @@ class CSSStyleDeclaration {
         case MARGIN:
           CSSStyleProperty.removeShorthandMargin(_cssProperties);
           break;
+        case BACKGROUND:
+          CSSStyleProperty.removeShorthandBackground(_cssProperties);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.removeShorthandBorderRadius(_cssProperties);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.removeShorthandOverflow(_cssProperties);
+          break;
+        case FONT:
+          CSSStyleProperty.removeShorthandFont(_cssProperties);
+          break;
+        case FLEX:
+          CSSStyleProperty.removeShorthandFlex(_cssProperties);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.removeShorthandFlexFlow(_cssProperties);
+          break;
+        case BORDER:
+        case BORDER_TOP:
+        case BORDER_RIGHT:
+        case BORDER_BOTTOM:
+        case BORDER_LEFT:
+        case BORDER_COLOR:
+        case BORDER_STYLE:
+        case BORDER_WIDTH:
+          CSSStyleProperty.removeShorthandBorder(_cssProperties, propertyName);
+          break;
         case TRANSITION:
           CSSStyleProperty.removeShorthandTransition(_cssProperties);
+          break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.removeShorthandTextDecoration(_cssProperties);
           break;
       }
       _cssProperties.remove(propertyName);
@@ -113,7 +123,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, {value = ''}) {
+  void setProperty(String propertyName, value) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -145,12 +155,17 @@ class CSSStyleDeclaration {
         case PADDING_LEFT:
         case PADDING_BOTTOM:
         case PADDING_RIGHT:
+          // Validation length type
+          if (!CSSLength.isLength(normalizedValue)) {
+            return;
+          }
+          break;
         case MARGIN_TOP:
         case MARGIN_LEFT:
         case MARGIN_RIGHT:
         case MARGIN_BOTTOM:
-          // Validation length type
-          if (!CSSLength.isLength(normalizedValue)) {
+          // Validation length type and keyword type
+          if (!CSSLength.isLength(normalizedValue) && !CSSLength.isKeyword(normalizedValue)) {
             return;
           }
           break;
@@ -172,6 +187,24 @@ class CSSStyleDeclaration {
         case MARGIN:
           CSSStyleProperty.setShorthandMargin(_cssProperties, normalizedValue);
           break;
+        case BACKGROUND:
+          CSSStyleProperty.setShorthandBackground(_cssProperties, normalizedValue);
+          break;
+        case BORDER_RADIUS:
+          CSSStyleProperty.setShorthandBorderRadius(_cssProperties, normalizedValue);
+          break;
+        case OVERFLOW:
+          CSSStyleProperty.setShorthandOverflow(_cssProperties, normalizedValue);
+          break;
+        case FONT:
+          CSSStyleProperty.setShorthandFont(_cssProperties, normalizedValue);
+          break;
+        case FLEX:
+          CSSStyleProperty.setShorthandFlex(_cssProperties, normalizedValue);
+          break;
+        case FLEX_FLOW:
+          CSSStyleProperty.setShorthandFlexFlow(_cssProperties, normalizedValue);
+          break;
         case BORDER:
         case BORDER_TOP:
         case BORDER_RIGHT:
@@ -185,6 +218,9 @@ class CSSStyleDeclaration {
         case TRANSITION:
           CSSStyleProperty.setShorthandTransition(_cssProperties, normalizedValue);
           break;
+        case TEXT_DECORATION:
+          CSSStyleProperty.setShorthandTextDecoration(_cssProperties, normalizedValue);
+          break;
       }
 
       _cssProperties[propertyName] = normalizedValue;
@@ -195,13 +231,12 @@ class CSSStyleDeclaration {
   /// Override [] and []= operator to get/set style properties.
   operator [](String property) => getPropertyValue(property);
   operator []=(String property, value) {
-    setProperty(property, value: value);
+    setProperty(property, value);
   }
 
   /// Check a css property is valid.
   bool contains(String property) {
-    String value = getPropertyValue(property);
-    return !CSSStyleDeclaration.isNullOrEmptyValue(value);
+    return _cssProperties.containsKey(property) && _cssProperties[property] != null;
   }
 
   void addStyleChangeListener(StyleChangeListener listener) {
@@ -243,11 +278,4 @@ class CSSStyleDeclaration {
 
   @override
   String toString() => 'CSSStyleDeclaration($cssText)';
-}
-
-// Returns the computed property value.
-T getComputedStyle<T>(CSSStyleDeclaration style, String propertyName) {
-  assert(style != null);
-  CSSValue cssValue = style._getCSSValue(propertyName);
-  return cssValue?.computedValue;
 }
