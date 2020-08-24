@@ -273,11 +273,6 @@ class _BoxDecorationPainter extends BoxPainter {
     final TextDirection textDirection = configuration.textDirection;
 
     Size size = configuration.size;
-    Rect paddingRect = Offset(borderEdge.left, borderEdge.top) & Size(
-      size.width - borderEdge.right - borderEdge.left,
-      size.height - borderEdge.bottom - borderEdge.top,
-    );
-
     double borderTop = 0;
     double borderBottom = 0;
     double borderLeft = 0;
