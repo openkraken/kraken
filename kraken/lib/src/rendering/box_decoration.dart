@@ -7,6 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/painting.dart';
 
+enum BackgroundBoundary {
+  borderBox,
+  paddingBox,
+  contentBox,
+}
+
 mixin RenderBoxDecorationMixin on RenderBox {
   CSSBoxDecoration cssBoxDecoration;
   DecorationPosition position = DecorationPosition.background;
@@ -16,6 +22,26 @@ mixin RenderBoxDecorationMixin on RenderBox {
   BoxPainter get boxPainter => _painter;
   set boxPainter(BoxPainter painter) {
     _painter = painter;
+  }
+
+  /// Background-clip
+  BackgroundBoundary get backgroundClip => _backgroundClip;
+  BackgroundBoundary _backgroundClip;
+  set backgroundClip(BackgroundBoundary value) {
+    if (value == null) return;
+    if (value == _backgroundClip) return;
+    _backgroundClip = value;
+    markNeedsPaint();
+  }
+
+  /// Background-origin
+  BackgroundBoundary get backgroundOrigin => _backgroundOrigin;
+  BackgroundBoundary _backgroundOrigin;
+  set backgroundOrigin(BackgroundBoundary value) {
+    if (value == null) return;
+    if (value == _backgroundOrigin) return;
+    _backgroundOrigin = value;
+    markNeedsPaint();
   }
 
   /// BorderSize to deflate.
@@ -89,10 +115,19 @@ mixin RenderBoxDecorationMixin on RenderBox {
     markNeedsPaint();
   }
 
-  void paintDecoration(PaintingContext context, Offset offset) {
+  void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
     if (decoration == null) return;
 
-    _painter ??= decoration.createBoxPainter(markNeedsPaint);
+//    _painter ??= decoration.createBoxPainter(markNeedsPaint);
+    _painter ??= _BoxDecorationPainter(
+      decoration,
+      borderEdge,
+      backgroundClip,
+      backgroundOrigin,
+      padding,
+      markNeedsPaint
+    );
+
     final ImageConfiguration filledConfiguration = configuration.copyWith(size: size);
     if (position == DecorationPosition.background) {
       int debugSaveCount;
@@ -128,5 +163,192 @@ mixin RenderBoxDecorationMixin on RenderBox {
       _painter.paint(context.canvas, offset, filledConfiguration);
       if (decoration.isComplex) context.setIsComplexHint();
     }
+  }
+}
+
+/// An object that paints a [BoxDecoration] into a canvas.
+class _BoxDecorationPainter extends BoxPainter {
+  _BoxDecorationPainter(
+    this._decoration,
+    this.borderEdge,
+    this.backgroundClip,
+    this.backgroundOrigin,
+    this.padding,
+    VoidCallback onChanged
+  ) : assert(_decoration != null),
+      super(onChanged);
+
+  BackgroundBoundary backgroundClip;
+  BackgroundBoundary backgroundOrigin;
+  EdgeInsets borderEdge;
+  EdgeInsets padding;
+  final BoxDecoration _decoration;
+
+  Paint _cachedBackgroundPaint;
+  Rect _rectForCachedBackgroundPaint;
+  Paint _getBackgroundPaint(Rect rect, TextDirection textDirection) {
+    assert(rect != null);
+    assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
+
+    if (_cachedBackgroundPaint == null ||
+      (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
+      final Paint paint = Paint();
+      if (_decoration.backgroundBlendMode != null)
+        paint.blendMode = _decoration.backgroundBlendMode;
+      if (_decoration.color != null)
+        paint.color = _decoration.color;
+      if (_decoration.gradient != null) {
+        paint.shader = _decoration.gradient.createShader(rect, textDirection: textDirection);
+        _rectForCachedBackgroundPaint = rect;
+      }
+      _cachedBackgroundPaint = paint;
+    }
+
+    return _cachedBackgroundPaint;
+  }
+
+  void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection textDirection) {
+    switch (_decoration.shape) {
+      case BoxShape.circle:
+        assert(_decoration.borderRadius == null);
+        final Offset center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
+        canvas.drawCircle(center, radius, paint);
+        break;
+      case BoxShape.rectangle:
+        if (_decoration.borderRadius == null) {
+          canvas.drawRect(rect, paint);
+        } else {
+          canvas.drawRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect), paint);
+        }
+        break;
+    }
+  }
+
+  void _paintShadows(Canvas canvas, Rect rect, TextDirection textDirection) {
+    if (_decoration.boxShadow == null)
+      return;
+    for (final BoxShadow boxShadow in _decoration.boxShadow) {
+      final Paint paint = boxShadow.toPaint();
+      final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      _paintBox(canvas, bounds, paint, textDirection);
+    }
+  }
+
+  void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection textDirection) {
+    if (_decoration.color != null || _decoration.gradient != null)
+      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
+  }
+
+  DecorationImagePainter _imagePainter;
+  void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
+    if (_decoration.image == null)
+      return;
+    _imagePainter ??= _decoration.image.createPainter(onChanged);
+    Path clipPath;
+    switch (_decoration.shape) {
+      case BoxShape.circle:
+        clipPath = Path()..addOval(rect);
+        break;
+      case BoxShape.rectangle:
+        if (_decoration.borderRadius != null)
+          clipPath = Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
+        break;
+    }
+    _imagePainter.paint(canvas, rect, clipPath, configuration);
+  }
+
+  @override
+  void dispose() {
+    _imagePainter?.dispose();
+    super.dispose();
+  }
+
+  /// Paint the box decoration into the given location on the given canvas
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration != null);
+    assert(configuration.size != null);
+    final Rect rect = offset & configuration.size;
+    final TextDirection textDirection = configuration.textDirection;
+
+    Size size = configuration.size;
+    Rect paddingRect = Offset(borderEdge.left, borderEdge.top) & Size(
+      size.width - borderEdge.right - borderEdge.left,
+      size.height - borderEdge.bottom - borderEdge.top,
+    );
+
+    double borderTop = 0;
+    double borderBottom = 0;
+    double borderLeft = 0;
+    double borderRight = 0;
+    if (borderEdge != null) {
+      borderTop = borderEdge.top;
+      borderBottom = borderEdge.bottom;
+      borderLeft = borderEdge.left;
+      borderRight = borderEdge.right;
+    }
+
+    double paddingTop = 0;
+    double paddingBottom = 0;
+    double paddingLeft = 0;
+    double paddingRight = 0;
+    if (padding != null) {
+      paddingTop = padding.top;
+      paddingBottom = padding.bottom;
+      paddingLeft = padding.left;
+      paddingRight = padding.right;
+    }
+
+    Rect backgroundClipRect;
+    switch(backgroundClip) {
+      case BackgroundBoundary.paddingBox:
+        backgroundClipRect = offset.translate(borderLeft, borderTop) & Size(
+          size.width - borderRight - borderLeft,
+          size.height - borderBottom - borderTop,
+        );
+        break;
+      case BackgroundBoundary.contentBox:
+        backgroundClipRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & Size(
+          size.width - borderRight - borderLeft - paddingRight -  paddingLeft,
+          size.height - borderBottom - borderTop - paddingBottom - paddingTop,
+        );
+        break;
+      default:
+        backgroundClipRect = offset & size;
+        break;
+    }
+
+    // Background origin moves background image from specified origin
+    Rect backgroundOriginRect;
+    switch(backgroundOrigin) {
+      case BackgroundBoundary.borderBox:
+        backgroundOriginRect = offset & size;
+        break;
+      case BackgroundBoundary.contentBox:
+        backgroundOriginRect = offset.translate(borderLeft + paddingLeft, borderTop + paddingTop) & size;
+        break;
+      default:
+        backgroundOriginRect = offset.translate(borderLeft, borderTop) & size;
+        break;
+    }
+    // Rect of background image
+    Rect backgroundImageRect = backgroundClipRect.intersect(backgroundOriginRect);
+
+    _paintShadows(canvas, rect, textDirection);
+    _paintBackgroundColor(canvas, backgroundClipRect, textDirection);
+    _paintBackgroundImage(canvas, backgroundImageRect, configuration);
+    _decoration.border?.paint(
+      canvas,
+      rect,
+      shape: _decoration.shape,
+      borderRadius: _decoration.borderRadius as BorderRadius,
+      textDirection: configuration.textDirection,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'BoxPainter for $_decoration';
   }
 }

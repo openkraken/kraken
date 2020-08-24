@@ -721,7 +721,8 @@ class RenderBoxModel extends RenderBox with
       paintTransform(context, offset, (PaintingContext context, Offset transformedOffset) {
         paintIntersectionObserverLayer(context, transformedOffset, (PaintingContext context, Offset offset) {
           paintOpacity(context, offset, (context, offset) {
-            paintDecoration(context, offset);
+            EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+            paintDecoration(context, offset, resolvedPadding);
             paintOverflow(
                 context,
                 offset,
