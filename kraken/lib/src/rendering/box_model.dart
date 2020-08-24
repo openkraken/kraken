@@ -164,6 +164,7 @@ class RenderBoxModel extends RenderBox with
   RenderOverflowMixin,
   RenderOpacityMixin,
   RenderIntersectionObserverMixin,
+  RenderContentVisibility,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
@@ -171,6 +172,13 @@ class RenderBoxModel extends RenderBox with
     this.elementManager,
   }) : assert(targetId != null),
     super();
+
+  @override
+  bool get alwaysNeedsCompositing => _boxModelAlwaysNeedsCompositing();
+
+  bool _boxModelAlwaysNeedsCompositing() {
+    return intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
+  }
 
   RenderPositionHolder renderPositionHolder;
 
@@ -742,6 +750,10 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    if (!hitContentVisibilityTest(result, position: position)) {
+      return false;
+    }
+
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {

@@ -50,8 +50,22 @@ enum BoxSizeType {
   automatic,
 }
 
+mixin ElementBase {
+  RenderLayoutBox renderLayoutBox;
+  RenderIntrinsic renderIntrinsic;
+
+  RenderBoxModel getRenderBoxModel() {
+    if (renderIntrinsic != null) {
+      return renderIntrinsic;
+    } else {
+      return renderLayoutBox;
+    }
+  }
+}
+
 class Element extends Node
     with
+        ElementBase,
         NodeLifeCycle,
         EventHandlerMixin,
         CSSTextMixin,
@@ -63,14 +77,11 @@ class Element extends Node
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
-        CSSVisibilityMixin,
+//        CSSVisibilityMixin,
         CSSContentVisibilityMixin,
         CSSTransitionMixin {
   Map<String, dynamic> properties;
   List<String> events;
-
-  // Whether element allows children.
-  bool isIntrinsicBox = false;
 
   /// whether element needs reposition when append to tree or
   /// changing position property.
@@ -102,9 +113,6 @@ class Element extends Node
   CSSStyleDeclaration style;
 
   RenderDecoratedBox stickyPlaceholder;
-  RenderLayoutBox renderLayoutBox;
-  RenderIntrinsic renderIntrinsic;
-
   // Placeholder renderObject of positioned element(absolute/fixed)
   // used to get original coordinate before move away from document flow
   RenderObject renderPositionedPlaceholder;
@@ -120,7 +128,8 @@ class Element extends Node
     this.defaultStyle = const {},
     this.events = const [],
     this.needsReposition = false,
-    this.isIntrinsicBox = false,
+    // Whether element allows children.
+    bool isIntrinsicBox = false,
     this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
@@ -996,9 +1005,7 @@ class Element extends Node
 
   void _styleContentVisibilityChangedListener(String property, original, present) {
     // Update content visibility.
-    // @TODO need to merge into box model
-//    updateRenderContentVisibility(present,
-//        parentRenderObject: renderElementBoundary, renderBoxModel: getRenderBoxModel());
+    updateRenderContentVisibility(CSSContentVisibilityMixin.getContentVisibility(present));
   }
 
   void _styleTransformChangedListener(String property, String original, String present) {
@@ -1023,14 +1030,6 @@ class Element extends Node
       for (CSSTransition transition in transitionMap.values) {
         updateTransitionEvent(transition);
       }
-    }
-  }
-
-  RenderBoxModel getRenderBoxModel() {
-    if (isIntrinsicBox) {
-      return renderIntrinsic;
-    } else {
-      return renderLayoutBox;
     }
   }
 

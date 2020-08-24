@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -47,14 +48,13 @@ Rect _localRectToGlobal(Layer layer, Rect localRect) {
 
 typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
 
-
 mixin RenderIntersectionObserverMixin on RenderBox {
 
   IntersectionChangeCallback _onIntersectionChange;
 
-  // See [RenderProxyBox.alwaysNeedsCompositing].
-  @override
-  bool get alwaysNeedsCompositing => _onIntersectionChange != null;
+  bool intersectionAlwaysNeedsCompositing() {
+    return _onIntersectionChange != null;
+  }
 
   IntersectionObserverLayer _layer;
 
@@ -91,7 +91,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     });
   }
 
-  void paintIntersectionObserverLayer(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
     if (_onIntersectionChange == null) {
       superPaint(context, offset);
       return;
