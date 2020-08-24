@@ -26,6 +26,8 @@ abstract class ObjectElementClient {
 
   void setStyle(String key, value);
 
+  void dispose();
+
   void setProperty(String key, value);
 
   dynamic getProperty(String key);

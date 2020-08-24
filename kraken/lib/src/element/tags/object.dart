@@ -29,6 +29,7 @@ class ObjectElement extends Element implements ObjectElementHost {
       : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
+    initDetachCallback(elementManager);
   }
 
   void initObjectClient() {
@@ -42,6 +43,12 @@ class ObjectElement extends Element implements ObjectElementHost {
     } catch (e) {
       print(e);
     }
+  }
+
+  void initDetachCallback(final ElementManager elementManager) {
+    elementManager?.setDetachCallback(() {
+      disposeClient();
+    });
   }
 
   @override
@@ -68,6 +75,17 @@ class ObjectElement extends Element implements ObjectElementHost {
   @override
   updateChildTextureBox(TextureBox textureBox) {
     addChild(textureBox);
+  }
+
+
+  @override
+  void detach() {
+    super.detach();
+    disposeClient();
+  }
+
+  void disposeClient() {
+    _objectElementClient?.dispose();
   }
 
   @override
@@ -127,5 +145,10 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   @override
   void setStyle(String key, value) {
     print('call DefaultObjectElementClient setStyle key[$key] value[$value]');
+  }
+
+  @override
+  void dispose() {
+    print('call DefaultObjectElementClient dispose');
   }
 }
