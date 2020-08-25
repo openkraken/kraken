@@ -8,11 +8,14 @@ import 'package:kraken/css.dart';
 mixin RenderContentVisibility on RenderBox {
   /// Whether the child is hidden from the rest of the tree.
   ///
-  /// If true, the child is laid out as if it was in the tree, but without
+  /// If ContentVisibility.hidden, the child is laid out as if it was in the tree, but without
   /// painting anything, without making the child available for hit testing, and
   /// without taking any room in the parent.
   ///
-  /// If false, the child is included in the tree as normal.
+  /// If ContentVisibility.visible, the child is included in the tree as normal.
+  ///
+  /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
+  /// are no longer intersection with this renderObject.
   ContentVisibility _contentVisibility;
   ContentVisibility get contentVisibility => _contentVisibility;
   set contentVisibility(ContentVisibility value) {
@@ -23,10 +26,7 @@ mixin RenderContentVisibility on RenderBox {
   }
 
   bool contentVisibilityHitTest(BoxHitTestResult result, {Offset position}) {
-    if (_contentVisibility == ContentVisibility.hidden) {
-      return false;
-    }
-    return true;
+    return _contentVisibility != ContentVisibility.hidden;
   }
 
   void paintContentVisibility(PaintingContext context, Offset offset, PaintingContextCallback callback) {
@@ -37,7 +37,6 @@ mixin RenderContentVisibility on RenderBox {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', contentVisibility));
   }
 }

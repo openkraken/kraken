@@ -77,7 +77,7 @@ class Element extends Node
         CSSOverflowMixin,
         CSSOpacityMixin,
         CSSTransformMixin,
-//        CSSVisibilityMixin,
+        CSSVisibilityMixin,
         CSSContentVisibilityMixin,
         CSSTransitionMixin {
   Map<String, dynamic> properties;
@@ -993,9 +993,8 @@ class Element extends Node
   }
 
   void _styleVisibilityChangedListener(String property, String original, String present) {
-    // Update visibility.
-    // @TODO need to merge into box model
-//    updateRenderVisibility(present, parentRenderObject: renderElementBoundary);
+    // Update visibility
+    updateRenderVisibility(CSSVisibilityMixin.getVisibility(present));
   }
 
   void _styleContentVisibilityChangedListener(String property, original, present) {

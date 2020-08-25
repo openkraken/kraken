@@ -165,6 +165,7 @@ class RenderBoxModel extends RenderBox with
   RenderOpacityMixin,
   RenderIntersectionObserverMixin,
   RenderContentVisibility,
+  RenderVisibilityMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
@@ -174,11 +175,7 @@ class RenderBoxModel extends RenderBox with
     super();
 
   @override
-  bool get alwaysNeedsCompositing => _boxModelAlwaysNeedsCompositing();
-
-  bool _boxModelAlwaysNeedsCompositing() {
-    return intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
-  }
+  bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
   RenderPositionHolder renderPositionHolder;
 
@@ -730,20 +727,22 @@ class RenderBoxModel extends RenderBox with
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (display != null && display == CSSDisplay.none) return;
 
-    paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
-      paintTransform(context, offset, (PaintingContext context, Offset offset) {
-        paintOpacity(context, offset, (context, offset) {
-          paintDecoration(context, offset);
-          paintOverflow(
-              context,
-              offset,
-              EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-              decoration,
-              Size(scrollableViewportWidth, scrollableViewportHeight),
-              (context, offset) {
-                paintContentVisibility(context, offset, callback);
-              }
-          );
+    paintVisibility(context, offset, (context, offset) {
+      paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
+        paintTransform(context, offset, (PaintingContext context, Offset offset) {
+          paintOpacity(context, offset, (context, offset) {
+            paintDecoration(context, offset);
+            paintOverflow(
+                context,
+                offset,
+                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+                decoration,
+                Size(scrollableViewportWidth, scrollableViewportHeight),
+                    (context, offset) {
+                  paintContentVisibility(context, offset, callback);
+                }
+            );
+          });
         });
       });
     });
@@ -758,6 +757,9 @@ class RenderBoxModel extends RenderBox with
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
     if (!contentVisibilityHitTest(result, position: position)) {
+      return false;
+    }
+    if (!visibilityHitTest(result, position: position)) {
       return false;
     }
 
@@ -812,6 +814,7 @@ class RenderBoxModel extends RenderBox with
     super.debugFillProperties(properties);
     if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
     if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+    debugVisibilityProperties(properties);
     properties.add(DiagnosticsProperty('clipX', clipX));
     properties.add(DiagnosticsProperty('clipY', clipY));
     properties.add(DiagnosticsProperty('padding', padding));
