@@ -6,6 +6,7 @@
 export 'src/element/binding.dart';
 export 'src/element/element.dart';
 export 'src/element/element_manager.dart';
+export 'src/element/object_element_client.dart';
 export 'src/element/event.dart';
 export 'src/element/event_target.dart';
 export 'src/element/node.dart';
@@ -28,3 +29,4 @@ export 'src/element/tags/span.dart';
 export 'src/element/tags/video.dart';
 export 'src/element/tags/pre.dart';
 export 'src/element/tags/strong.dart';
+export 'src/element/tags/object.dart';

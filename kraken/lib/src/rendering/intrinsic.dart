@@ -61,8 +61,10 @@ class RenderIntrinsic extends RenderBoxModel
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
       size = getBoxSize(child.size);
+      didLayout();
+    } else {
+      super.performResize();
     }
-    didLayout();
   }
 
   @override

@@ -154,6 +154,14 @@ mixin CSSOverflowMixin {
     return 0;
   }
 
+  void setScrollTop(double value) {
+    _scroll(value, null, isScrollBy: false, isDirectionX: false);
+  }
+
+  void setScrollLeft(double value) {
+    _scroll(value, null, isScrollBy: false, isDirectionX: true);
+  }
+
   double getScrollLeft() {
     if (_scrollableX != null) {
       return _scrollableX.position?.pixels ?? 0;
