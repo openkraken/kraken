@@ -1048,9 +1048,13 @@ class Element extends Node
     } else {
       switch(key) {
         case 'scrollTop':
+          // need to flush layout to get correct size
+          elementManager.getRootRenderObject().owner.flushLayout();
           setScrollTop(value.toDouble());
           break;
         case 'scrollLeft':
+          // need to flush layout to get correct size
+          elementManager.getRootRenderObject().owner.flushLayout();
           setScrollLeft(value.toDouble());
           break;
       }
@@ -1060,6 +1064,7 @@ class Element extends Node
 
   @mustCallSuper
   dynamic getProperty(String key) {
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
     switch(key) {
       case 'offsetTop':
         // need to flush layout to get correct size

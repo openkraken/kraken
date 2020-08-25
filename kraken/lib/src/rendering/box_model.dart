@@ -690,8 +690,8 @@ class RenderBoxModel extends RenderBox with
   // The max scrollable size of Y axis.
   double maxScrollableY;
 
-  double scrollableViewportWidth;
-  double scrollableViewportHeight;
+  double scrollableViewportWidth = 0.0;
+  double scrollableViewportHeight = 0.0;
 
   // hooks when content box had layout.
   void didLayout() {
