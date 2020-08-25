@@ -22,7 +22,7 @@ mixin RenderContentVisibility on RenderBox {
     markNeedsPaint();
   }
 
-  bool hitContentVisibilityTest(BoxHitTestResult result, {Offset position}) {
+  bool contentVisibilityHitTest(BoxHitTestResult result, {Offset position}) {
     if (_contentVisibility == ContentVisibility.hidden) {
       return false;
     }

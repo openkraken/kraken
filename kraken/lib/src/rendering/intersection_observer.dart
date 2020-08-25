@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 
 /// Returns a sequence containing the specified [Layer] and all of its
 /// ancestors.  The returned sequence is in [parent, child] order.
@@ -56,7 +55,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     return _onIntersectionChange != null;
   }
 
-  IntersectionObserverLayer _layer;
+  IntersectionObserverLayer _intersectionObserverLayer;
 
   /**
    * A list of event handlers
@@ -97,15 +96,15 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    if (_layer == null) {
-      _layer = IntersectionObserverLayer(
-        elementSize: semanticBounds.size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
+    if (_intersectionObserverLayer == null) {
+      _intersectionObserverLayer = IntersectionObserverLayer(
+        elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange);
     } else {
-      _layer.elementSize = semanticBounds.size;
-      _layer.paintOffset = offset;
+      _intersectionObserverLayer.elementSize = semanticBounds.size;
+      _intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_layer, superPaint, offset);
+    context.pushLayer(_intersectionObserverLayer, superPaint, offset);
   }
 }
 

@@ -46,6 +46,8 @@ mixin CSSContentVisibilityMixin on ElementBase {
     RenderBoxModel renderBoxModel = getRenderBoxModel();
     if (!entry.isIntersecting) {
       renderBoxModel.contentVisibility = ContentVisibility.hidden;
+    } else {
+      renderBoxModel.contentVisibility = ContentVisibility.auto;
     }
   }
 
