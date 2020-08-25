@@ -2,11 +2,11 @@ import { Element } from "./element";
 
 export const elementMapById = {};
 
-export function removeElementById(elementid: string, element: Element): void {
-  const mapEntity = elementMapById[elementid];
+export function removeElementById(elementId: string, element: Element): void {
+  const mapEntity = elementMapById[elementId];
   if (mapEntity && mapEntity.elementList) {
     if (mapEntity.elementList.length === 0) {
-      delete elementMapById[elementid];
+      delete elementMapById[elementId];
     } else {
       mapEntity.elementList = mapEntity.elementList.filter((item: Element) => item !== element);
       if (mapEntity.elementList.length === 1) {
@@ -17,8 +17,8 @@ export function removeElementById(elementid: string, element: Element): void {
   }
 }
 
-export function addElementById(elementid: string, element: Element): void {
-  const mapEntity = elementMapById[elementid];
+export function addElementById(elementId: string, element: Element): void {
+  const mapEntity = elementMapById[elementId];
   if (mapEntity) {
     if (mapEntity.elementList.length > 0) {
       mapEntity.elementList.push(element);
@@ -28,6 +28,6 @@ export function addElementById(elementid: string, element: Element): void {
     }
   } else {
     const newEntity = { element, elementList: [] };
-    elementMapById[elementid] = newEntity;
+    elementMapById[elementId] = newEntity;
   }
 }

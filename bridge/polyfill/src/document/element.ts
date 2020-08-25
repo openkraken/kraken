@@ -1,6 +1,6 @@
 import { BODY } from './events/event-target';
 import { Node, NodeType, traverseNode } from './node';
-import { addElementById, removeElementById } from './getElementById';
+import { addElementById, removeElementById } from './element-id';
 
 import {
   createElement,
@@ -23,10 +23,13 @@ const RECT_PROPERTIES = [
   'clientLeft',
   'clientTop',
 
-  'scrollTop',
-  'scrollLeft',
   'scrollHeight',
   'scrollWidth',
+];
+
+const RECT_MUTABLE_PROPERTIES = [
+  'scrollTop',
+  'scrollLeft',
 ];
 
 interface ICamelize {
@@ -116,8 +119,22 @@ export class Element extends Node {
         configurable: false,
         enumerable: true,
         get() {
-          return Number(method(targetId, prop));
+          return Number(getProperty(targetId, prop));
         },
+      });
+    }
+
+    for (let i = 0; i < RECT_MUTABLE_PROPERTIES.length; i ++) {
+      const prop = RECT_MUTABLE_PROPERTIES[i];
+      Object.defineProperty(this, prop, {
+        configurable: false,
+        enumerable: true,
+        get() {
+          return Number(getProperty(targetId, prop));
+        },
+        set(value) {
+          setProperty(targetId, prop, Number(value));
+        }
       });
     }
 
