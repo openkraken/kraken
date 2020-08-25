@@ -1106,11 +1106,16 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  CSSDisplay childDisplay;
+                  String marginTop;
+                  String marginBottom;
                   if (child is RenderBoxModel) {
-                    childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginTop = childStyle[MARGIN_TOP];
+                    marginBottom = childStyle[MARGIN_BOTTOM];
                   }
-                  if (childDisplay == CSSDisplay.inlineBlock) {
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in vertical direction
+                  if (marginTop == AUTO || marginBottom == AUTO) {
                     minCrossAxisSize = maxCrossAxisSize = child.size.height;
                   } else {
                     // Stretch child height to flex line' height
@@ -1165,11 +1170,16 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  CSSDisplay childDisplay;
+                  String marginLeft;
+                  String marginRight;
                   if (child is RenderBoxModel) {
-                    childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginLeft = childStyle[MARGIN_LEFT];
+                    marginRight = childStyle[MARGIN_RIGHT];
                   }
-                  if (childDisplay == CSSDisplay.inlineBlock) {
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in horizontal direction
+                  if (marginLeft == AUTO || marginRight == AUTO) {
                     minCrossAxisSize = maxCrossAxisSize = child.size.width;
                   } else {
                     minCrossAxisSize = maxCrossSize;
