@@ -161,11 +161,6 @@ class Element extends Node
     // Init border and background
     initRenderDecoratedBox(getRenderBoxModel(), style);
 
-    // Intersection observer
-//    renderObject = renderIntersectionObserver = RenderIntersectionObserver(child: renderObject);
-
-//    setContentVisibilityIntersectionObserver(getRenderBoxModel(), style[CONTENT_VISIBILITY]);
-
     // Init transform
     initTransform(style, targetId);
 

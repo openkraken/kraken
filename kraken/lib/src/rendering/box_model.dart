@@ -263,12 +263,17 @@ class RenderBoxModel extends RenderBox with
     newBox.origin = origin;
     newBox.alignment = alignment;
 
-    // Copy shouldRender
+    // Copy display
     newBox.display = display;
+
+    // Copy ContentVisibility
+    newBox.contentVisibility = contentVisibility;
 
     // Copy renderPositionHolder
     newBox.renderPositionHolder = renderPositionHolder;
+    renderPositionHolder.realDisplayedBox = newBox;
 
+    // Copy parentData
     newBox.parentData = parentData;
 
     return newBox;
