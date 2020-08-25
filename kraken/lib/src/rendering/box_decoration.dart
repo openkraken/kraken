@@ -118,7 +118,6 @@ mixin RenderBoxDecorationMixin on RenderBox {
   void paintDecoration(PaintingContext context, Offset offset, EdgeInsets padding) {
     if (decoration == null) return;
 
-//    _painter ??= decoration.createBoxPainter(markNeedsPaint);
     _painter ??= _BoxDecorationPainter(
       decoration,
       borderEdge,

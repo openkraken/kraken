@@ -286,7 +286,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   BackgroundBoundary getBackgroundClip(CSSStyleDeclaration style) {
-    String value = style[BACKGROUND_CLIP];
+    String value;
+    if (style != null) {
+      value = style[BACKGROUND_CLIP];
+    }
 
     switch (value) {
       case 'border-box':
@@ -301,7 +304,10 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
   }
 
   BackgroundBoundary getBackgroundOrigin(CSSStyleDeclaration style) {
-    String value = style[BACKGROUND_ORIGIN];
+    String value;
+    if (style != null) {
+      value = style[BACKGROUND_ORIGIN];
+    }
 
     switch (value) {
       case 'border-box':
