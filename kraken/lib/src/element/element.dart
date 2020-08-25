@@ -1077,27 +1077,21 @@ class Element extends Node
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
     } else {
+      switch(key) {
+        case 'scrollTop':
+          setScrollTop(value.toDouble());
+          break;
+        case 'scrollLeft':
+          setScrollLeft(value.toDouble());
+          break;
+      }
       properties[key] = value;
     }
   }
 
   @mustCallSuper
   dynamic getProperty(String key) {
-    return properties[key];
-  }
-
-  @mustCallSuper
-  void removeProperty(String key) {
-    properties.remove(key);
-
-    if (key == STYLE) {
-      setProperty(STYLE, null);
-    }
-  }
-
-  @mustCallSuper
-  method(String name, List args) {
-    switch (name) {
+    switch(key) {
       case 'offsetTop':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
@@ -1114,7 +1108,6 @@ class Element extends Node
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
         return renderElementBoundary.hasSize ? renderElementBoundary.size.height : 0;
-      // TODO support clientWidth clientHeight clientLeft clientTop
       case 'clientWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
@@ -1143,6 +1136,23 @@ class Element extends Node
         return getScrollWidth(getRenderBoxModel());
       case 'getBoundingClientRect':
         return getBoundingClientRect();
+      default:
+        return properties[key];
+    }
+  }
+
+  @mustCallSuper
+  void removeProperty(String key) {
+    properties.remove(key);
+
+    if (key == STYLE) {
+      setProperty(STYLE, null);
+    }
+  }
+
+  @mustCallSuper
+  method(String name, List args) {
+    switch (name) {
       case 'click':
         return click();
       case 'scroll':
