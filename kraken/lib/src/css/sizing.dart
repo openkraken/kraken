@@ -457,7 +457,7 @@ class CSSSizing {
     CSSStyleDeclaration childStyle = child.style;
     bool isFlex = style[DISPLAY].endsWith(FLEX);
     bool isHorizontalDirection = !style.contains(FLEX_DIRECTION) ||
-        style[FLEX_DIRECTION] == ROW;
+        style[FLEX_DIRECTION] == ROW || style[FLEX_DIRECTION] == ROW_REVERSE;
     bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
     bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
@@ -468,7 +468,7 @@ class CSSSizing {
     String marginBottom = child.style[MARGIN_BOTTOM];
 
     // Display as block if flex vertical layout children and stretch children
-    if (marginTop != 'auto' && marginBottom != 'auto' &&
+    if (marginTop != AUTO && marginBottom != AUTO &&
       isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
@@ -501,9 +501,9 @@ class CSSSizing {
         String marginLeft = element.style[MARGIN_LEFT];
         String marginRight = element.style[MARGIN_RIGHT];
 
+        bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
         // Display as block if flex vertical layout children and stretch children
-        if (marginLeft != 'auto' && marginRight != 'auto' &&
-          style[FLEX_DIRECTION] == COLUMN &&
+        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
             (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }
