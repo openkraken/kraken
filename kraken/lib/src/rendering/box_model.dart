@@ -271,7 +271,9 @@ class RenderBoxModel extends RenderBox with
 
     // Copy renderPositionHolder
     newBox.renderPositionHolder = renderPositionHolder;
-    renderPositionHolder.realDisplayedBox = newBox;
+    if (renderPositionHolder != null) {
+      renderPositionHolder.realDisplayedBox = newBox;
+    }
 
     // Copy parentData
     newBox.parentData = parentData;

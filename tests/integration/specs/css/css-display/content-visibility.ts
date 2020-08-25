@@ -114,7 +114,7 @@ describe('Content Visibility', () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      contentVisibility: 'auto',
+      contentVisibility: 'hidden',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',
@@ -127,9 +127,11 @@ describe('Content Visibility', () => {
       top: '-1000px',
     });
 
+    let text = document.createTextNode('helloworld');
+    container1.appendChild(text);
+
     // Should be empty blob
-    const blob = await container1.toBlob(1.0);
-    expect(blob.size).toEqual(0);
+    await matchElementImageSnapshot(container1);
   });
 
 });
