@@ -406,16 +406,28 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   int _getFlexGrow(RenderBox child) {
+    // Flex grow has no effect on placeholder of positioned element
+    if (child is RenderPositionHolder) {
+      return 0;
+    }
     final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexGrow ?? 0;
   }
 
   int _getFlexShrink(RenderBox child) {
+    // Flex shrink has no effect on placeholder of positioned element
+    if (child is RenderPositionHolder) {
+      return 0;
+    }
     final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexShrink ?? 1;
   }
 
   String _getFlexBasis(RenderBox child) {
+    // Flex basis has no effect on placeholder of positioned element
+    if (child is RenderPositionHolder) {
+      return AUTO;
+    }
     final RenderFlexParentData childParentData = child.parentData;
     return childParentData.flexBasis ?? AUTO;
   }
