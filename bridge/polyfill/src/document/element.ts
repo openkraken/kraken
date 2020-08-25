@@ -158,7 +158,7 @@ export class Element extends Node {
   }
 
   getBoundingClientRect = () => {
-    const rectInformation = method(this.targetId, 'getBoundingClientRect');
+    const rectInformation = getProperty(this.targetId, 'getBoundingClientRect');
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {
