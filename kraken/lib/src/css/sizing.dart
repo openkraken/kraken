@@ -464,7 +464,12 @@ class CSSSizing {
         style[FLEX_WRAP] != WRAP_REVERSE;
     bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
 
-    if (isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
+    String marginTop = child.style[MARGIN_TOP];
+    String marginBottom = child.style[MARGIN_BOTTOM];
+
+    // Display as block if flex vertical layout children and stretch children
+    if (marginTop != 'auto' && marginBottom != 'auto' &&
+      isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
 
@@ -493,8 +498,12 @@ class CSSSizing {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
 
+        String marginLeft = element.style[MARGIN_LEFT];
+        String marginRight = element.style[MARGIN_RIGHT];
+
         // Display as block if flex vertical layout children and stretch children
-        if (style[FLEX_DIRECTION] == COLUMN &&
+        if (marginLeft != 'auto' && marginRight != 'auto' &&
+          style[FLEX_DIRECTION] == COLUMN &&
             (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }

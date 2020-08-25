@@ -453,4 +453,132 @@ describe('Box margin auto', () => {
     await matchViewportSnapshot();
 
   });
+
+  it('should work with flex item of margin-top auto with no height in row direction', async () => {
+    let container;
+    container = createElement('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          width: '300px',
+          height: '100px',
+          backgroundColor: '#999',
+        },
+      }, [
+        createElement('span', {
+          style: {
+              position: 'relative',
+              alignItems: 'center',
+              marginTop: 'auto',
+              backgroundImage: 'linear-gradient(to right, #FF6647, #FF401A)',
+              borderRadius: '6px',
+              color: '#fff',
+              fontSize: '20px',
+              lineHeight: '34px',
+              padding: '0 10px',
+          }
+        }, [
+            createText('12345')
+        ])
+      ]
+    );
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin-bottom auto with no height in row direction', async () => {
+    let container;
+    container = createElement('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          width: '300px',
+          height: '100px',
+          backgroundColor: '#999',
+        },
+      }, [
+        createElement('span', {
+          style: {
+              position: 'relative',
+              alignItems: 'center',
+              marginBottom: 'auto',
+              backgroundImage: 'linear-gradient(to right, #FF6647, #FF401A)',
+              borderRadius: '6px',
+              color: '#fff',
+              fontSize: '20px',
+              lineHeight: '34px',
+              padding: '0 10px',
+          }
+        }, [
+            createText('12345')
+        ])
+      ]
+    );
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin-top auto with no height in column direction', async () => {
+    let container;
+    container = createElement('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '300px',
+          height: '100px',
+          backgroundColor: '#999',
+        },
+      }, [
+        createElement('span', {
+          style: {
+              position: 'relative',
+              alignItems: 'center',
+              marginTop: 'auto',
+              backgroundImage: 'linear-gradient(to right, #FF6647, #FF401A)',
+              borderRadius: '6px',
+              color: '#fff',
+              fontSize: '20px',
+              lineHeight: '34px',
+              padding: '0 10px',
+          }
+        }, [
+            createText('12345')
+        ])
+      ]
+    );
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin-bottom auto with no height in column direction', async () => {
+    let container;
+    container = createElement('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '300px',
+          height: '100px',
+          backgroundColor: '#999',
+        },
+      }, [
+        createElement('span', {
+          style: {
+              position: 'relative',
+              alignItems: 'center',
+              marginBottom: 'auto',
+              backgroundImage: 'linear-gradient(to right, #FF6647, #FF401A)',
+              borderRadius: '6px',
+              color: '#fff',
+              fontSize: '20px',
+              lineHeight: '34px',
+              padding: '0 10px',
+          }
+        }, [
+            createText('12345')
+        ])
+      ]
+    );
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
 });
