@@ -355,4 +355,11 @@ mixin RenderOverflowMixin on RenderBox {
     if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
     return null;
   }
+
+  void debugOverflowProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
+    properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
+    properties.add(DiagnosticsProperty('clipX', clipX));
+    properties.add(DiagnosticsProperty('clipY', clipY));
+  }
 }
