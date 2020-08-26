@@ -601,7 +601,7 @@ describe('flexbox flex-grow', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with flex item of margin and not width', async () => {
+  it('should work with flex item of margin and not width when flex-direction is row', async () => {
     let containingBlock = createElement('div', {
         style: {
           position: 'relative',
@@ -610,6 +610,40 @@ describe('flexbox flex-grow', () => {
           'background-color': 'red',
           display: 'flex',
           'flex-direction': 'row',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            display: 'flex',
+            'justify-content': 'center',
+            backgroundColor: 'yellow',
+            margin: '10px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            height: '100px',
+            'background-color': 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin and not width when flex-direction is row-reverse', async () => {
+    let containingBlock = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'row-reverse',
         },
       },
       [

@@ -495,7 +495,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else if (child is RenderBoxModel) {
       String flexBasis = _getFlexBasis(child);
 
-      if (_flexDirection == FlexDirection.row) {
+      if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
         String width = child.style[WIDTH];
         if (flexBasis == AUTO) {
           if (width != null) {
