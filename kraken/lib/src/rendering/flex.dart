@@ -1176,8 +1176,13 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // only stretch ElementBox, not TextBox.
-                  minCrossAxisSize = maxCrossSize;
+                  // Should substract margin when layout child
+                  double marginHorizontal = 0;
+                  if (child is RenderBoxModel) {
+                    RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+                    marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
+                  }
+                  minCrossAxisSize = maxCrossSize - marginHorizontal;
                   maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
                 } else {
                   // for RenderTextBox, there are no cross Axis contentConstraints.
@@ -1206,6 +1211,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             }
           }
           child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+
           crossSize = math.max(crossSize, _getCrossAxisExtent(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;
