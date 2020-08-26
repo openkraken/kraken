@@ -1047,8 +1047,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
           if (isFlexGrow && freeMainAxisSpace >= 0) {
             final int flexGrow = _getFlexGrow(child);
-            final double mainSize = _getMainAxisExtent(child);
-            maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow : double.infinity;
+            final double mainSize = _getMainSize(child);
+            maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
+              : double.infinity;
 
             double baseConstraints = _getBaseConstraints(child);
             // get the maximum child size between baseConstraints and maxChildExtent.
@@ -1337,13 +1338,11 @@ class RenderFlexLayout extends RenderLayoutBox {
       double mainAxisBorder = flowAwareMainAxisBorder();
       double crossAxisBorder = flowAwareCrossAxisBorder();
 
-      double childMainAxisMargin = flowAwareChildMainAxisMargin(child);
-      double childCrossAxisMargin = flowAwareChildCrossAxisMargin(child);
-
-      // Position elements
+      // Main axis position of child while layout
       double childMainPosition =
-        flipMainAxis ? mainAxisPadding + mainAxisBorder + childMainAxisMargin + actualSize - leadingSpace :
-        leadingSpace + mainAxisPadding + mainAxisBorder + childMainAxisMargin;
+        flipMainAxis ? mainAxisPadding + mainAxisBorder + actualSize - leadingSpace :
+        leadingSpace + mainAxisPadding + mainAxisBorder;
+
       // Leading between height of line box's content area and line height of line box
       double lineBoxLeading = 0;
       double lineBoxHeight = CSSText.getLineHeight(style);
@@ -1352,6 +1351,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       while (child != null) {
+
         final RenderFlexParentData childParentData = child.parentData;
         // Exclude positioned placeholder renderObject when layout non placeholder object
         // and positioned renderObject
@@ -1360,6 +1360,12 @@ class RenderFlexLayout extends RenderLayoutBox {
           continue;
         }
         if (childParentData.runIndex != i) break;
+
+        double childMainAxisMargin = flowAwareChildMainAxisMargin(child);
+        double childCrossAxisMargin = flowAwareChildCrossAxisMargin(child);
+
+        // Add start margin of main axis when setting offset
+        childMainPosition += childMainAxisMargin;
 
         double childCrossPosition;
 
@@ -1495,10 +1501,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         /// Apply position relative offset change
         applyRelativeOffset(relativeOffset, child, childStyle);
 
+        // Need to substract start margin of main axis when calculating next child's start position
         if (flipMainAxis) {
-          childMainPosition -= betweenSpace;
+          childMainPosition -= betweenSpace + childMainAxisMargin;
         } else {
-          childMainPosition += _getMainAxisExtent(child) + betweenSpace;
+          childMainPosition += _getMainAxisExtent(child) - childMainAxisMargin + betweenSpace;
         }
         // Only layout placeholder renderObject child
         child = placeholderChild == null ? childParentData.nextSibling : null;
