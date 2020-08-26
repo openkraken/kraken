@@ -184,7 +184,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, root) ?? Offset.zero;
+    Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
     Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
         parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root);
     // Positioned element is positioned relative to the edge of
