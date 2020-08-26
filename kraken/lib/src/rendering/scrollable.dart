@@ -294,12 +294,12 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   double get scrollTop {
-    if (_scrollOffsetX == null) return 0.0;
+    if (_scrollOffsetY == null) return 0.0;
     return _scrollOffsetY.pixels;
   }
 
   double get scrollLeft {
-    if (_scrollOffsetY == null) return 0.0;
+    if (_scrollOffsetX == null) return 0.0;
     return _scrollOffsetX.pixels;
   }
 

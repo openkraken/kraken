@@ -151,6 +151,19 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
   child.layout(childConstraints, parentUsesSize: true);
 }
 
+// RenderPositionHolder may be affected by overflow: scroller offset.
+// We need to reset these offset to keep positioned elements render at their original position.
+Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
+  RenderBoxModel parent = holder.parent;
+  while (parent != root) {
+    if (parent.clipX || parent.clipY) {
+      return Offset(parent.scrollLeft, parent.scrollTop);
+    }
+    parent = parent.parent;
+  }
+  return null;
+}
+
 void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
@@ -171,8 +184,9 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
-        parent.localToGlobal(Offset.zero, ancestor: root);
+    Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, root) ?? Offset.zero;
+    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+        parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block, so it needs to add border insets
     // when caculating offset
