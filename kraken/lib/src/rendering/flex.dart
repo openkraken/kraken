@@ -800,7 +800,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         innerConstraints = BoxConstraints(minHeight: baseConstraints);
       }
       child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
-
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -1144,15 +1143,28 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // Stretch child height to flex line' height
-                  double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
-                  // Should substract margin when layout child
-                  double marginVertical = 0;
+                  String marginTop;
+                  String marginBottom;
                   if (child is RenderBoxModel) {
-                    RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-                    marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginTop = childStyle[MARGIN_TOP];
+                    marginBottom = childStyle[MARGIN_BOTTOM];
                   }
-                  minCrossAxisSize = maxCrossAxisSize = flexLineHeight - marginVertical;
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in vertical direction
+                  if (marginTop == AUTO || marginBottom == AUTO) {
+                    minCrossAxisSize = maxCrossAxisSize = child.size.height;
+                  } else {
+                    // Stretch child height to flex line' height
+                    double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+                    // Should substract margin when layout child
+                    double marginVertical = 0;
+                    if (child is RenderBoxModel) {
+                      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+                      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+                    }
+                    minCrossAxisSize = maxCrossAxisSize = flexLineHeight - marginVertical;
+                  }
                 } else {
                   minCrossAxisSize = 0.0;
                   maxCrossAxisSize = double.infinity;
@@ -1195,9 +1207,21 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // only stretch ElementBox, not TextBox.
-                  minCrossAxisSize = maxCrossSize;
-                  maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
+                  String marginLeft;
+                  String marginRight;
+                  if (child is RenderBoxModel) {
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginLeft = childStyle[MARGIN_LEFT];
+                    marginRight = childStyle[MARGIN_RIGHT];
+                  }
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in horizontal direction
+                  if (marginLeft == AUTO || marginRight == AUTO) {
+                    minCrossAxisSize = maxCrossAxisSize = child.size.width;
+                  } else {
+                    minCrossAxisSize = maxCrossSize;
+                    maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
+                  }
                 } else {
                   // for RenderTextBox, there are no cross Axis contentConstraints.
                   minCrossAxisSize = 0.0;
@@ -1474,7 +1498,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               if (marginBottom == AUTO) {
                 childCrossPosition += verticalRemainingSpace / 2;
               } else {
-                childCrossPosition += verticalRemainingSpace - CSSLength.toDisplayPortValue(marginBottom);
+                childCrossPosition += verticalRemainingSpace;
               }
             }
           } else {
