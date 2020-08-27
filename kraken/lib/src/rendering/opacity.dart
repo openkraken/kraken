@@ -3,60 +3,54 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
+import 'dart:ui' as ui;
 
-// Makes its child partially transparent.
-///
-/// This class paints its child into an intermediate buffer and then blends the
-/// child back into the scene partially transparent.
-///
-/// For values of opacity other than 0.0 and 1.0, this class is relatively
-/// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
-/// value 1.0, the child is painted immediately without an intermediate buffer.
-class KrakenRenderOpacity extends RenderOpacity {
-  /// Creates a partially transparent render object.
+mixin RenderOpacityMixin on RenderBox {
+  /// The fraction to scale the child's alpha value.
   ///
-  /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
-  KrakenRenderOpacity({
-    double opacity = 1.0,
-    bool alwaysIncludeSemantics = false,
-    RenderBox child,
-  }) : super(opacity: opacity, alwaysIncludeSemantics: alwaysIncludeSemantics, child: child);
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the child into an intermediate buffer, which is
+  /// expensive.
+  double get opacity => _opacity;
+  double _opacity = 1.0;
+  set opacity(double value) {
+    if (value == null) return;
+    assert(value >= 0.0 && value <= 1.0);
+    if (_opacity == value)
+      return;
+    _opacity = value;
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity);
+    if (_alpha != 0 && _alpha != 255)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
 
-  @override
-  bool hitTest(BoxHitTestResult result, {@required Offset position}) {
-    assert(() {
-      if (!hasSize) {
-        if (debugNeedsLayout) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Cannot hit test a render box that has never been laid out.'),
-            describeForError('The hitTest() method was called on this RenderBox'),
-            ErrorDescription("Unfortunately, this object's geometry is not known at this time, "
-                'probably because it has never been laid out. '
-                'This means it cannot be accurately hit-tested.'),
-            ErrorHint('If you are trying '
-                'to perform a hit test during the layout phase itself, make sure '
-                "you only hit test nodes that have completed layout (e.g. the node's "
-                'children, after their layout() method has been called).'),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot hit test a render box with no size.'),
-          describeForError('The hitTest() method was called on this RenderBox'),
-          ErrorDescription('Although this node is not marked as needing layout, '
-              'its size is not set.'),
-          ErrorHint('A RenderBox object must have an '
-              'explicit size before it can be hit-tested. Make sure '
-              'that the RenderBox in question sets its size during layout.'),
-        ]);
-      }
-      return true;
-    }());
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
+  bool opacityAlwaysNeedsCompositing() => _alpha != 0 && _alpha != 255;
+
+  int _alpha = ui.Color.getAlphaFromOpacity(1.0);
+
+  OpacityLayer _opacityLayer;
+
+  void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    if (_alpha == 0) {
+      // No need to keep the layer. We'll create a new one if necessary.
+      _opacityLayer = null;
+      callback(context, offset);
+      return;
     }
-    return false;
+    if (_alpha == 255) {
+      _opacityLayer = null;
+      // No need to keep the layer. We'll create a new one if necessary.
+      callback(context, offset);
+      return;
+    }
+
+    _opacityLayer = context.pushOpacity(offset, _alpha, callback, oldLayer: _opacityLayer);
   }
 }
+

@@ -33,4 +33,4 @@ describe('CustomEvent', () => {
     expect(customEvent.detail).toEqual('newDetail');
   });
 });
-  
+

@@ -1,31 +1,92 @@
 describe('Content Visibility', () => {
   it('should visible', async () => {
-    var container1 = document.createElement('div');
-
-    setElementStyle(container1, {
-      contentVisibility: 'visible',
-      backgroundColor: 'red',
-      width: '200px',
-      height: '200px',
-    });
-
-    document.body.appendChild(container1);
-
+    let container;
+    container = createViewElement(
+      {
+        width: '200px',
+        height: '500px',
+        flexShrink: 1,
+        border: '2px solid #000',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+          },
+          []
+        ),
+        createViewElement(
+          {
+            flex: 1,
+            width: '200px',
+            contentVisibility: 'visible',
+            background: 'red'
+          },
+          [
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(container);
     await matchViewportSnapshot();
   });
 
   it('should hidden', async () => {
-    var container1 = document.createElement('div');
-
-    setElementStyle(container1, {
-      contentVisibility: 'hidden',
-      backgroundColor: 'red',
-      width: '200px',
-      height: '200px',
-    });
-
-    document.body.appendChild(container1);
-
+    let container;
+    let block;
+    container = createViewElement(
+      {
+        width: '200px',
+        height: '500px',
+        flexShrink: 1,
+        border: '2px solid #000',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+          },
+          []
+        ),
+        createViewElement(
+          {
+            flex: 1,
+            width: '200px',
+            contentVisibility: 'hidden',
+            background: 'red'
+          },
+          [
+            block = createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+            createElement('div', {}, [createText('123456')]),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(container);
     await matchViewportSnapshot();
   });
 
@@ -53,7 +114,7 @@ describe('Content Visibility', () => {
     var container1 = document.createElement('div');
 
     setElementStyle(container1, {
-      contentVisibility: 'auto',
+      contentVisibility: 'hidden',
       backgroundColor: 'red',
       width: '200px',
       height: '200px',
@@ -66,9 +127,11 @@ describe('Content Visibility', () => {
       top: '-1000px',
     });
 
+    let text = document.createTextNode('helloworld');
+    container1.appendChild(text);
+
     // Should be empty blob
-    const blob = await container1.toBlob(1.0);
-    expect(blob.size).toEqual(0);
+    await matchElementImageSnapshot(container1);
   });
 
 });

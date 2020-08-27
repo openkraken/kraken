@@ -16,5 +16,5 @@ Map<String, dynamic> createBodyStyle(double viewportWidth, double viewportHeight
 class BodyElement extends Element {
   BodyElement(double viewportWidth, double viewportHeight,
       {@required int targetId, @required ElementManager elementManager})
-      : super(targetId, elementManager, tagName: BODY, defaultStyle: createBodyStyle(viewportWidth, viewportHeight));
+      : super(targetId, elementManager, repaintSelf: true, tagName: BODY, defaultStyle: createBodyStyle(viewportWidth, viewportHeight));
 }

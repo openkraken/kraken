@@ -46,7 +46,7 @@ class RenderPositionHolder extends RenderPreferredSize {
     RenderBox child = null,
   }) : super(preferredSize: preferredSize, child: child);
 
-  RenderElementBoundary realDisplayedBox;
+  RenderBoxModel realDisplayedBox;
 }
 
 bool isPositionHolder(RenderBox box) {

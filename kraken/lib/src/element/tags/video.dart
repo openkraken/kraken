@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
 const String VIDEO = 'VIDEO';
@@ -23,6 +24,7 @@ class VideoElement extends Element {
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
+          repaintSelf: true,
           tagName: VIDEO,
         ) {
     renderVideo();
@@ -115,7 +117,8 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    renderIntersectionObserver.child = null;
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    (renderBoxModel as RenderIntrinsic).child = null;
   }
 
   onCanPlay() async {
