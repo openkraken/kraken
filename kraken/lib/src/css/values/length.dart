@@ -56,6 +56,10 @@ class CSSLength {
     }
   }
 
+  static double parseLength(String unitedValue) {
+    return toDisplayPortValue(unitedValue);
+  }
+
   static double toDisplayPortValue(String unitedValue) {
     if (unitedValue == null || unitedValue.isEmpty) return null;
 

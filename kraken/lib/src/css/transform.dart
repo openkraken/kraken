@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
@@ -7,21 +8,8 @@ import 'package:kraken/element.dart';
 mixin CSSTransformMixin on Node {
   static Matrix4 _matrix4 = Matrix4.identity();
 
-  void updateRenderTransform(RenderTransform renderElementBoundary, String present) {
-
-    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(present);
-
-    Matrix4 matrix4;
-    for (CSSFunctionalNotation method in methods) {
-      Matrix4 transform = _parseTransform(method);
-      if (transform != null) {
-        if (matrix4 == null) {
-          matrix4 = transform;
-        } else {
-          matrix4.multiply(transform);
-        }
-      }
-    }
+  void updateRenderTransform(RenderTransform renderElementBoundary, String value) {
+    Matrix4 matrix4 = CSSTransform.parseTransform(value);
     renderElementBoundary.transform = matrix4 ?? _matrix4;
   }
 
@@ -99,7 +87,27 @@ mixin CSSTransformMixin on Node {
     return null;
   }
 
-  Matrix4 _parseTransform(CSSFunctionalNotation method) {
+}
+
+class CSSTransform {
+  static Matrix4 parseTransform(String value) {
+    List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
+
+    Matrix4 matrix4;
+    for (CSSFunctionalNotation method in methods) {
+      Matrix4 transform = _parseTransform(method);
+      if (transform != null) {
+        if (matrix4 == null) {
+          matrix4 = transform;
+        } else {
+          matrix4.multiply(transform);
+        }
+      }
+    }
+    return matrix4;
+  }
+
+  static Matrix4 _parseTransform(CSSFunctionalNotation method) {
     Matrix4 matrix4;
     switch (method.name) {
       case 'matrix':

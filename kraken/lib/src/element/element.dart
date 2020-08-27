@@ -18,6 +18,7 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/css/animation.dart';
 import 'package:meta/meta.dart';
 
 import '../css/flow.dart';
@@ -150,7 +151,7 @@ class Element extends Node
       shouldRender: true, // style[DISPLAY] != NONE
     );;
 
-    setElementSizeType();
+    _setElementSizeType();
 
     _setDefaultStyle();
   }
@@ -163,7 +164,7 @@ class Element extends Node
     }
   }
 
-  void setElementSizeType() {
+  void _setElementSizeType() {
     bool widthDefined = style.contains(WIDTH) || style.contains(MIN_WIDTH);
     bool heightDefined = style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
 
@@ -683,7 +684,28 @@ class Element extends Node
     }
   }
 
+  Map<String, bool> _propertyRunningTransition = {};
+
+  bool _hasRunningTransition(String property) {
+    return _propertyRunningTransition[property] != null;
+  }
+
   void _onStyleChanged(String property, String original, String present) {
+
+    if (style.shouldTransition(property, original, present) && !_hasRunningTransition(property)) {
+      EffectTiming options = style.getTransitionEffectTiming(property);
+      
+      Animation animation = animate([
+        Keyframe(property, original, 0, options.easing),
+        Keyframe(property, present, 1, options.easing),
+      ], options);
+      _propertyRunningTransition[property] = true;
+      animation.onfinish = (AnimationPlaybackEvent event) {
+        _propertyRunningTransition[property] = null;
+      };
+      return;
+    }
+
     switch (property) {
       case DISPLAY:
         _styleDisplayChangedListener(property, original, present);
@@ -894,7 +916,7 @@ class Element extends Node
   void _styleSizeChangedListener(String property, String original, String present) {
     updateRenderSizing(getRenderBoxModel(), style, property, present);
 
-    setElementSizeType();
+    _setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
       updateRenderOffset(renderElementBoundary, property, present);
@@ -956,14 +978,6 @@ class Element extends Node
     });
   }
 
-  void _updateTransitionEvent() {
-    if (transitionMap != null) {
-      for (CSSTransition transition in transitionMap.values) {
-        updateTransitionEvent(transition);
-      }
-    }
-  }
-
   RenderBoxModel getRenderBoxModel() {
     if (isIntrinsicBox) {
       return renderIntrinsicBox;
@@ -979,7 +993,6 @@ class Element extends Node
     // [StyleChangeListener] to be invoked in sync.
     style.setProperty(key, value);
 
-    _updateTransitionEvent();
     _updateChildNodesStyle();
   }
 
@@ -1191,6 +1204,13 @@ class Element extends Node
       // If element not in tree, click is fired and only response to itself.
       handleClick(clickEvent);
     }
+  }
+
+  Animation animate(List<Keyframe> keyframes, [EffectTiming options]) {
+    KeyframeEffect effect = KeyframeEffect(this, keyframes, options);
+    Animation animation = new Animation(effect);
+    animation.play();
+    return animation;
   }
 
   Future<Uint8List> toBlob({double devicePixelRatio}) {
