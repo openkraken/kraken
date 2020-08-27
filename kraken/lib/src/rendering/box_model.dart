@@ -630,9 +630,6 @@ class RenderBoxModel extends RenderBox with
     // Deflate border constraints.
     boxConstraints = deflateBorderConstraints(boxConstraints);
 
-    // Deflate overflow constraints.
-    boxConstraints = deflateOverflowConstraints(boxConstraints);
-
     // Deflate padding constraints.
     boxConstraints = deflatePaddingConstraints(boxConstraints);
 
@@ -695,9 +692,11 @@ class RenderBoxModel extends RenderBox with
 
   // hooks when content box had layout.
   void didLayout() {
-    Size scrollableSize = Size(maxScrollableX, maxScrollableY);
-    Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
-    setUpOverflowScroller(scrollableSize, viewportSize);
+    if (clipX || clipY) {
+      Size scrollableSize = Size(maxScrollableX, maxScrollableY);
+      Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
+      setUpOverflowScroller(scrollableSize, viewportSize);
+    }
 
     if (positionedHolder != null) {
       // Make position holder preferred size equal to current element boundary size.
@@ -731,7 +730,8 @@ class RenderBoxModel extends RenderBox with
       paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
         paintTransform(context, offset, (PaintingContext context, Offset offset) {
           paintOpacity(context, offset, (context, offset) {
-            paintDecoration(context, offset);
+            EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+            paintDecoration(context, offset, resolvedPadding);
             paintOverflow(
                 context,
                 offset,
@@ -756,6 +756,10 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    if (clipX || clipY) {
+      position += Offset(scrollLeft, scrollTop);
+    }
+
     if (!contentVisibilityHitTest(result, position: position)) {
       return false;
     }
@@ -815,8 +819,7 @@ class RenderBoxModel extends RenderBox with
     if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
     if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
     debugVisibilityProperties(properties);
-    properties.add(DiagnosticsProperty('clipX', clipX));
-    properties.add(DiagnosticsProperty('clipY', clipY));
+    debugOverflowProperties(properties);
     properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));

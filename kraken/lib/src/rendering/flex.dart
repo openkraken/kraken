@@ -542,6 +542,18 @@ class RenderFlexLayout extends RenderLayoutBox {
     return null;
   }
 
+  bool _isChildMainAxisClip(RenderBoxModel renderBoxModel) {
+    switch(_flexDirection) {
+      case FlexDirection.row:
+      case FlexDirection.rowReverse:
+        return renderBoxModel.clipX;
+      case FlexDirection.column:
+      case FlexDirection.columnReverse:
+        return renderBoxModel.clipY;
+    }
+    return false;
+  }
+
   double _getMainAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
@@ -788,7 +800,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         innerConstraints = BoxConstraints(minHeight: baseConstraints);
       }
       child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
-
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -1069,21 +1080,29 @@ class RenderFlexLayout extends RenderLayoutBox {
               continue;
             }
 
-            double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeMainAxisSpace);
-
+            double computedSize;
             dynamic current = childSizeMap[childNodeId];
-            double computedSize = current['size'] + shrinkValue;
-            // if shrink size is lower than child's min-content, should reset to min-content size
-            // @TODO no proper way to get real min-content of child element.
-            if (CSSFlex.isHorizontalFlexDirection(flexDirection) &&
-                computedSize < child.size.width &&
-                _getChildWidthSizeType(child) == BoxSizeType.automatic) {
-              computedSize = child.size.width;
-            } else if (CSSFlex.isVerticalFlexDirection(flexDirection) &&
-                computedSize < child.size.height &&
-                _getChildHeightSizeType(child) == BoxSizeType.automatic) {
-              computedSize = child.size.height;
+
+            // If child's mainAxis have clips, it will create a new format context in it's children's.
+            // so we do't need to care about child's size.
+            if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
+              computedSize = current['size'] + freeMainAxisSpace;
+            } else {
+              double shrinkValue = _getShrinkConstraints(child, childSizeMap, freeMainAxisSpace);
+              computedSize = current['size'] + shrinkValue;
+              // if shrink size is lower than child's min-content, should reset to min-content size
+              // @TODO no proper way to get real min-content of child element.
+              if (CSSFlex.isHorizontalFlexDirection(flexDirection) &&
+                  computedSize < child.size.width &&
+                  _getChildWidthSizeType(child) == BoxSizeType.automatic) {
+                computedSize = child.size.width;
+              } else if (CSSFlex.isVerticalFlexDirection(flexDirection) &&
+                  computedSize < child.size.height &&
+                  _getChildHeightSizeType(child) == BoxSizeType.automatic) {
+                computedSize = child.size.height;
+              }
             }
+
             maxChildExtent = minChildExtent = computedSize;
           } else {
             maxChildExtent = minChildExtent = _getMainSize(child);
@@ -1125,15 +1144,28 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // Stretch child height to flex line' height
-                  double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
-                  // Should substract margin when layout child
-                  double marginVertical = 0;
+                  String marginTop;
+                  String marginBottom;
                   if (child is RenderBoxModel) {
-                    RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-                    marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginTop = childStyle[MARGIN_TOP];
+                    marginBottom = childStyle[MARGIN_BOTTOM];
                   }
-                  minCrossAxisSize = maxCrossAxisSize = flexLineHeight - marginVertical;
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in vertical direction
+                  if (marginTop == AUTO || marginBottom == AUTO) {
+                    minCrossAxisSize = maxCrossAxisSize = child.size.height;
+                  } else {
+                    // Stretch child height to flex line' height
+                    double flexLineHeight = runCrossAxisExtent + runBetweenSpace;
+                    // Should substract margin when layout child
+                    double marginVertical = 0;
+                    if (child is RenderBoxModel) {
+                      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+                      marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
+                    }
+                    minCrossAxisSize = maxCrossAxisSize = flexLineHeight - marginVertical;
+                  }
                 } else {
                   minCrossAxisSize = 0.0;
                   maxCrossAxisSize = double.infinity;
@@ -1176,14 +1208,27 @@ class RenderFlexLayout extends RenderLayoutBox {
                     maxCrossSize = double.infinity;
                   }
                 } else if (child is! RenderTextBox) {
-                  // Should substract margin when layout child
-                  double marginHorizontal = 0;
+                  String marginLeft;
+                  String marginRight;
                   if (child is RenderBoxModel) {
-                    RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
-                    marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
+                    CSSStyleDeclaration childStyle = child.style;
+                    marginLeft = childStyle[MARGIN_LEFT];
+                    marginRight = childStyle[MARGIN_RIGHT];
                   }
-                  minCrossAxisSize = maxCrossSize - marginHorizontal;
-                  maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
+                  // Margin auto alignment takes priority over align-items stretch,
+                  // it will not stretch child in horizontal direction
+                  if (marginLeft == AUTO || marginRight == AUTO) {
+                    minCrossAxisSize = maxCrossAxisSize = child.size.width;
+                  } else {
+                    // Should substract margin when layout child
+                    double marginHorizontal = 0;
+                    if (child is RenderBoxModel) {
+                      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+                      marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
+                    }
+                    minCrossAxisSize = maxCrossSize - marginHorizontal;
+                    maxCrossAxisSize = math.max(maxCrossSize, contentConstraints.maxWidth);
+                  }
                 } else {
                   // for RenderTextBox, there are no cross Axis contentConstraints.
                   minCrossAxisSize = 0.0;
@@ -1466,7 +1511,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               if (marginBottom == AUTO) {
                 childCrossPosition += verticalRemainingSpace / 2;
               } else {
-                childCrossPosition += verticalRemainingSpace - CSSLength.toDisplayPortValue(marginBottom);
+                childCrossPosition += verticalRemainingSpace;
               }
             }
           } else {

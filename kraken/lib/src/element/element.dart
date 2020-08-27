@@ -810,6 +810,8 @@ class Element extends Node
       case BACKGROUND_REPEAT:
       case BACKGROUND_POSITION:
       case BACKGROUND_SIZE:
+      case BACKGROUND_CLIP:
+      case BACKGROUND_ORIGIN:
         _styleBackgroundChangedListener(property, original, present);
         break;
 

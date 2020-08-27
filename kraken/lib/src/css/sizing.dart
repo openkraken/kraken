@@ -455,16 +455,29 @@ class CSSSizing {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    bool isFlex = style[DISPLAY].endsWith(FLEX);
-    bool isHorizontalDirection = !style.contains(FLEX_DIRECTION) ||
-        style[FLEX_DIRECTION] == ROW;
-    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
+    RenderBoxModel renderBoxModel = current.getRenderBoxModel();
+    bool isFlex = renderBoxModel is RenderFlexLayout;
+    bool isHorizontalDirection = false;
+    bool isAlignItemsStretch = false;
+    bool isFlexNoWrap = false;
+    bool isChildAlignSelfStretch = false;
+    if (isFlex) {
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
+        (renderBoxModel as RenderFlexLayout).flexDirection
+      );
+      isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
-    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
+      isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
         style[FLEX_WRAP] != WRAP_REVERSE;
-    bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+      isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+    }
 
-    if (isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
+    String marginTop = child.style[MARGIN_TOP];
+    String marginBottom = child.style[MARGIN_BOTTOM];
+
+    // Display as block if flex vertical layout children and stretch children
+    if (marginTop != AUTO && marginBottom != AUTO &&
+      isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
 
@@ -493,8 +506,12 @@ class CSSSizing {
         // Display as inline-block if parent node is flex
         display = CSSDisplay.inlineBlock;
 
+        String marginLeft = element.style[MARGIN_LEFT];
+        String marginRight = element.style[MARGIN_RIGHT];
+
+        bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
         // Display as block if flex vertical layout children and stretch children
-        if (style[FLEX_DIRECTION] == COLUMN &&
+        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
             (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }

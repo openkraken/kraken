@@ -293,6 +293,16 @@ mixin RenderOverflowMixin on RenderBox {
     return -_scrollOffsetY.pixels;
   }
 
+  double get scrollTop {
+    if (_scrollOffsetY == null) return 0.0;
+    return _scrollOffsetY.pixels;
+  }
+
+  double get scrollLeft {
+    if (_scrollOffsetX == null) return 0.0;
+    return _scrollOffsetX.pixels;
+  }
+
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }
@@ -354,5 +364,12 @@ mixin RenderOverflowMixin on RenderBox {
     final Offset paintOffset = Offset(_paintOffsetX, _paintOffsetY);
     if (child != null && _shouldClipAtPaintOffset(paintOffset, size)) return Offset.zero & size;
     return null;
+  }
+
+  void debugOverflowProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
+    properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
+    properties.add(DiagnosticsProperty('clipX', clipX));
+    properties.add(DiagnosticsProperty('clipY', clipY));
   }
 }
