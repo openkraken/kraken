@@ -149,12 +149,12 @@ describe('flexbox flex-shrink', () => {
 
     BODY.appendChild(container);
 
+    await matchViewportSnapshot();
+
     requestAnimationFrame(async () => {
       scroller.scrollTop = 400;
       await matchViewportSnapshot();
       done();
     });
-
-    await matchViewportSnapshot();
   });
 });
