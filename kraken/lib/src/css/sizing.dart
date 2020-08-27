@@ -455,14 +455,23 @@ class CSSSizing {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    bool isFlex = style[DISPLAY].endsWith(FLEX);
-    bool isHorizontalDirection = !style.contains(FLEX_DIRECTION) ||
-        style[FLEX_DIRECTION] == ROW || style[FLEX_DIRECTION] == ROW_REVERSE;
-    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
+    RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
+
+    bool isFlex = childRenderBoxModel is RenderFlexLayout;
+    bool isHorizontalDirection = false;
+    bool isAlignItemsStretch = false;
+    bool isFlexNoWrap = false;
+    bool isChildAlignSelfStretch = false;
+    if (isFlex) {
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
+        (childRenderBoxModel as RenderFlexLayout).flexDirection
+      );
+      isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
-    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
+      isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
         style[FLEX_WRAP] != WRAP_REVERSE;
-    bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+      isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+    }
 
     String marginTop = child.style[MARGIN_TOP];
     String marginBottom = child.style[MARGIN_BOTTOM];
