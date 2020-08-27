@@ -115,4 +115,46 @@ describe('flexbox flex-shrink', () => {
     BODY.appendChild(element);
     await matchViewportSnapshot();
   });
+
+  it('scrollable height auto computed by flex container', async (done) => {
+    let container;
+    let list = new Array(100).fill(0);
+    let scroller;
+    container = createViewElement(
+      {
+        width: '200px',
+        height: '500px',
+        flexShrink: 1,
+        border: '2px solid #000',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+          },
+          []
+        ),
+        scroller = createViewElement(
+          {
+            flex: 1,
+            width: '200px',
+            overflow: 'scroll',
+          },
+          list.map((_, index) => {
+            return createElement('div', {}, [createText(`${index}`)]);
+          })
+        ),
+      ]
+    );
+
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      scroller.scrollTop = 400;
+      await matchViewportSnapshot();
+      done();
+    });
+  });
 });
