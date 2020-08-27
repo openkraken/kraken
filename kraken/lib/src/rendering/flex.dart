@@ -1082,6 +1082,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
             double computedSize;
             dynamic current = childSizeMap[childNodeId];
+
+            // If child's mainAxis have clips, it will create a new format context in it's children's.
+            // so we do't need to care about child's size.
             if (child is RenderBoxModel && _isChildMainAxisClip(child)) {
               computedSize = current['size'] + freeMainAxisSpace;
             } else {
