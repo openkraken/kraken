@@ -293,6 +293,16 @@ mixin RenderOverflowMixin on RenderBox {
     return -_scrollOffsetY.pixels;
   }
 
+  double get scrollTop {
+    if (_scrollOffsetY == null) return 0.0;
+    return _scrollOffsetY.pixels;
+  }
+
+  double get scrollLeft {
+    if (_scrollOffsetX == null) return 0.0;
+    return _scrollOffsetX.pixels;
+  }
+
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & childSize).bottomRight);
   }

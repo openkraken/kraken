@@ -755,6 +755,10 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    if (clipX || clipY) {
+      position += Offset(scrollLeft, scrollTop);
+    }
+
     if (!contentVisibilityHitTest(result, position: position)) {
       return false;
     }
