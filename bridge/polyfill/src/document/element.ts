@@ -9,7 +9,8 @@ import {
   setStyle,
   method,
   toBlob,
-  getProperty
+  getProperty,
+  requestUpdateFrame
 } from './ui-manager';
 
 const RECT_PROPERTIES = [
@@ -133,6 +134,7 @@ export class Element extends Node {
           return Number(getProperty(targetId, prop));
         },
         set(value) {
+          requestUpdateFrame();
           setProperty(targetId, prop, Number(value));
         }
       });

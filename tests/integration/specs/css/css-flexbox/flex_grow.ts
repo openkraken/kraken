@@ -569,4 +569,35 @@ describe('flexbox flex-grow', () => {
 
     await matchViewportSnapshot();
   });
+  it('should work with multiple flex container', async () => {
+    let container;
+    container = createViewElement(
+
+      {
+        width: '200px',
+        height: '500px',
+        flexShrink: 1,
+        border: '2px solid #000',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+          },
+          []
+        ),
+        createViewElement(
+          {
+            flex: 1,
+            width: '200px',
+            background: 'red'
+          },
+          []
+        ),
+      ]
+    );
+
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
 });

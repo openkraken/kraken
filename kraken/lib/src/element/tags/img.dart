@@ -43,10 +43,11 @@ class ImageElement extends Element {
   void _renderImage() {
     if (_hasLazyLoading) return;
     String loading = properties['loading'];
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
     // Image dimensions(width/height) should specified for performance when lazyload
     if (loading == 'lazy') {
       _hasLazyLoading = true;
-      renderIntersectionObserver.addListener(_handleIntersectionChange);
+      renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
     } else {
       _constructImageChild();
       _setImage();
@@ -64,7 +65,8 @@ class ImageElement extends Element {
 
   void _resetLazyLoading() {
     _hasLazyLoading = false;
-    renderIntersectionObserver.removeListener(_handleIntersectionChange);
+    RenderBoxModel renderBoxModel = getRenderBoxModel();
+    renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
   void _removeImage() {
@@ -89,9 +91,6 @@ class ImageElement extends Element {
 
     BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
     BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-
-    renderElementBoundary.widthSizeType = widthType;
-    renderElementBoundary.heightSizeType = heightType;
 
     RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.widthSizeType = widthType;

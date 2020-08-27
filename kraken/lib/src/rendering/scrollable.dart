@@ -320,9 +320,9 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        context.pushClipRRect(true, offset, clipRect, clipRRect, fn);
+        context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, fn);
       } else {
-        context.pushClipRect(true, offset, clipRect, fn);
+        context.pushClipRect(needsCompositing, offset, clipRect, fn);
       }
     } else {
       callback(context, offset);

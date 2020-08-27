@@ -105,7 +105,7 @@ Offset getRelativeOffset(CSSStyleDeclaration style) {
 BoxSizeType _getChildWidthSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.widthSizeType;
-  } else if (child is RenderElementBoundary) {
+  } else if (child is RenderBoxModel) {
     return child.widthSizeType;
   }
   return null;
@@ -114,7 +114,7 @@ BoxSizeType _getChildWidthSizeType(RenderBox child) {
 BoxSizeType _getChildHeightSizeType(RenderBox child) {
   if (child is RenderTextBox) {
     return child.heightSizeType;
-  } else if (child is RenderElementBoundary) {
+  } else if (child is RenderBoxModel) {
     return child.heightSizeType;
   }
   return null;
@@ -148,11 +148,10 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
     childConstraints =
         childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
-
   child.layout(childConstraints, parentUsesSize: true);
 }
 
-void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size parentSize, EdgeInsets borderEdge) {
+void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
   final RenderLayoutParentData childParentData = child.parentData;
   // Calc x,y by parentData.
   double x, y;
@@ -161,19 +160,18 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   double childMarginBottom = 0;
   double childMarginLeft = 0;
   double childMarginRight = 0;
-  if (child is RenderElementBoundary) {
+
     Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
     RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
     childMarginTop = childRenderBoxModel.marginTop;
     childMarginBottom = childRenderBoxModel.marginBottom;
     childMarginLeft = childRenderBoxModel.marginLeft;
     childMarginRight = childRenderBoxModel.marginRight;
-  }
 
   // Offset to global coordinate system of base
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
-    Offset baseOffset = childParentData.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
+    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(Offset.zero, ancestor: root) -
         parent.localToGlobal(Offset.zero, ancestor: root);
     // Positioned element is positioned relative to the edge of
     // padding box of containing block, so it needs to add border insets
@@ -204,7 +202,6 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
   }
 
   Offset offset = setAutoMarginPositionedElementOffset(x, y, child, parentSize);
-
   childParentData.offset = offset;
 }
 
@@ -212,7 +209,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBox child, Size paren
 // which will override the default position rule
 // https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
 Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child, Size parentSize) {
-  if (child is RenderElementBoundary) {
+  if (child is RenderBoxModel) {
     CSSStyleDeclaration childStyle = child.style;
     String marginLeft = childStyle[MARGIN_LEFT];
     String marginRight = childStyle[MARGIN_RIGHT];

@@ -6,7 +6,6 @@ import 'package:kraken/element.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 mixin CSSTransformMixin on Node {
-  RenderTransform transform;
   Matrix4 matrix4 = Matrix4.identity();
   List<CSSFunctionalNotation> prevMethods;
   double prevMethodsProgress = 0;
@@ -16,8 +15,8 @@ mixin CSSTransformMixin on Node {
   Alignment oldAlignment = Alignment.center;
   int targetId;
 
-  RenderObject initTransform(
-      RenderObject current, CSSStyleDeclaration style, int targetId, ElementManager elementManager) {
+  void initTransform(
+      CSSStyleDeclaration style, int targetId) {
     this.targetId = targetId;
 
     if (style.contains(TRANSFORM)) {
@@ -29,22 +28,9 @@ mixin CSSTransformMixin on Node {
         oldAlignment = transformOrigin.alignment;
       }
     }
-
-    bool shouldRender = style[DISPLAY] != NONE;
-    transform = RenderElementBoundary(
-      child: current,
-      transform: matrix4,
-      targetId: targetId,
-      elementManager: elementManager,
-      style: style,
-      origin: oldOffset,
-      alignment: oldAlignment,
-      shouldRender: shouldRender,
-    );
-    return transform;
   }
 
-  void updateTransform(String transformStr, [Map<String, CSSTransition> transitionMap]) {
+  void updateTransform(RenderBoxModel renderBoxModel, String transformStr, [Map<String, CSSTransition> transitionMap]) {
     List<CSSFunctionalNotation> newMethods = CSSFunction.parseFunction(transformStr);
     // transform transition
     if (newMethods != null) {
@@ -56,7 +42,7 @@ mixin CSSTransformMixin on Node {
         CSSTransitionProgressListener progressListener = (progress) {
           prevMethodsProgress = progress;
           if (progress > 0.0) {
-            transform.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
+            renderBoxModel.transform = combineTransform(newMethods, prevMethods: baseMethods, progress: progress);
           }
           if (progress >= 1) {
             prevMethods = newMethods;
@@ -68,11 +54,11 @@ mixin CSSTransformMixin on Node {
         } else if (all != null) {
           all.addProgressListener(progressListener);
         } else {
-          transform.transform = combineTransform(newMethods);
+          renderBoxModel.transform = combineTransform(newMethods);
           prevMethods = newMethods;
         }
       } else {
-        transform.transform = combineTransform(newMethods);
+        renderBoxModel.transform = combineTransform(newMethods);
         prevMethodsProgress = 1;
       }
 
@@ -82,7 +68,7 @@ mixin CSSTransformMixin on Node {
     }
   }
 
-  void updateTransformOrigin(String transformOriginStr, [Map<String, CSSTransition> transitionMap]) {
+  void updateTransformOrigin(RenderBoxModel renderBoxModel, String transformOriginStr, [Map<String, CSSTransition> transitionMap]) {
     Offset offset = Offset.zero;
     Alignment alignment = Alignment.center;
     CSSTransformOrigin transformOrigin = parseOrigin(transformOriginStr);
@@ -99,7 +85,7 @@ mixin CSSTransformMixin on Node {
         Offset diffOffset = offset - baseOffset;
         CSSTransitionProgressListener originProgressListener = (progress) {
           if (progress > 0.0) {
-            transform.origin = diffOffset * progress + baseOffset;
+            renderBoxModel.origin = diffOffset * progress + baseOffset;
           }
         };
         if (transitionOrigin != null) {
@@ -107,10 +93,10 @@ mixin CSSTransformMixin on Node {
         } else if (all != null) {
           all.addProgressListener(originProgressListener);
         } else {
-          transform.origin = offset;
+          renderBoxModel.origin = offset;
         }
       } else {
-        transform.origin = offset;
+        renderBoxModel.origin = offset;
       }
       oldOffset = offset;
     }
@@ -123,7 +109,7 @@ mixin CSSTransformMixin on Node {
         Alignment diffAlign = alignment - baseAlign;
         CSSTransitionProgressListener originProgressListener = (progress) {
           if (progress > 0.0) {
-            transform.alignment = diffAlign * progress + baseAlign;
+            renderBoxModel.alignment = diffAlign * progress + baseAlign;
           }
         };
         if (transitionOrigin != null) {
@@ -131,10 +117,10 @@ mixin CSSTransformMixin on Node {
         } else if (all != null) {
           all.addProgressListener(originProgressListener);
         } else {
-          transform.alignment = alignment;
+          renderBoxModel.alignment = alignment;
         }
       } else {
-        transform.alignment = alignment;
+        renderBoxModel.alignment = alignment;
       }
       oldAlignment = alignment;
     }

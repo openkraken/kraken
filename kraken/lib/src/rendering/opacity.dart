@@ -30,20 +30,27 @@ mixin RenderOpacityMixin on RenderBox {
     markNeedsPaint();
   }
 
+  bool opacityAlwaysNeedsCompositing() => _alpha != 0 && _alpha != 255;
+
   int _alpha = ui.Color.getAlphaFromOpacity(1.0);
+
+  OpacityLayer _opacityLayer;
 
   void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_alpha == 0) {
       // No need to keep the layer. We'll create a new one if necessary.
+      _opacityLayer = null;
       callback(context, offset);
       return;
     }
     if (_alpha == 255) {
+      _opacityLayer = null;
       // No need to keep the layer. We'll create a new one if necessary.
       callback(context, offset);
       return;
     }
-    context.pushOpacity(offset, _alpha, callback, oldLayer: layer as OpacityLayer);
+
+    _opacityLayer = context.pushOpacity(offset, _alpha, callback, oldLayer: _opacityLayer);
   }
 }
 
