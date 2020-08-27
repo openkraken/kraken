@@ -455,16 +455,15 @@ class CSSSizing {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
-
-    bool isFlex = childRenderBoxModel is RenderFlexLayout;
+    RenderBoxModel renderBoxModel = current.getRenderBoxModel();
+    bool isFlex = renderBoxModel is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;
     bool isChildAlignSelfStretch = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        (childRenderBoxModel as RenderFlexLayout).flexDirection
+        (renderBoxModel as RenderFlexLayout).flexDirection
       );
       isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
