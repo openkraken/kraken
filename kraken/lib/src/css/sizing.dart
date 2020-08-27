@@ -511,6 +511,8 @@ class CSSSizing {
     }
 
     switch(displayString) {
+      case 'none':
+        return CSSDisplay.none;
       case 'block':
         return CSSDisplay.block;
       case 'inline-block':

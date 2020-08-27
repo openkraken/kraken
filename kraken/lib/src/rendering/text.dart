@@ -4,7 +4,6 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 
@@ -79,7 +78,15 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
       Element parentElement = hostTextNode.parent;
       final double contentWidth = parentElement.getRenderBoxModel().getContentWidth();
-      if (contentWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
+
+      if (parentElement.style[DISPLAY] == NONE) {
+        boxConstraints = BoxConstraints(
+          minWidth: 0,
+          maxWidth: 0,
+          minHeight: 0,
+          maxHeight: 0,
+        );
+      } else if (contentWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
         boxConstraints = BoxConstraints(
           minWidth: 0,
           maxWidth: contentWidth,

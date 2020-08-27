@@ -190,12 +190,12 @@ describe('Display block in inline', () => {
 
     document.body.addEventListener('click', async function listener() {
       toggleBlock.style.display = 'block';
-      await matchElementImageSnapshot(block);
+      await matchViewportSnapshot();
       document.body.removeEventListener('click', listener);
       done();
     });
 
-    await matchElementImageSnapshot(block);
+    await matchViewportSnapshot();
 
     document.body.click();
   });

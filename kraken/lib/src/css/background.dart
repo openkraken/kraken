@@ -22,7 +22,7 @@ final RegExp _splitRegExp = RegExp(r'\s+');
 
 mixin CSSBackgroundMixin {
 
-  void updateBackground(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String value, RenderObjectWithChildMixin parent, int targetId) {
+  void updateBackground(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String value, int targetId) {
     if (!CSSBackground.hasLocalBackgroundImage(style)) return;
 
     if (style[BACKGROUND_IMAGE].isNotEmpty) {
@@ -38,14 +38,14 @@ mixin CSSBackgroundMixin {
         }
 
         if (decorationImage != null || gradient != null) {
-          _updateRenderGradient(renderBoxModel, decorationImage, gradient, parent, targetId);
+          _updateRenderGradient(renderBoxModel, decorationImage, gradient, targetId);
           return;
         }
       }
     }
   }
 
-  void _updateRenderGradient(RenderBoxModel renderBoxModel, DecorationImage decorationImage, Gradient gradient, RenderObjectWithChildMixin parent, int targetId) {
+  void _updateRenderGradient(RenderBoxModel renderBoxModel, DecorationImage decorationImage, Gradient gradient, int targetId) {
     if (renderBoxModel != null) {
       renderBoxModel.decoration = BoxDecoration(
         image: decorationImage,
