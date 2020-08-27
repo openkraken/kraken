@@ -25,6 +25,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       renderBoxModel.cssBoxDecoration = cssBoxDecoration;
       renderBoxModel.borderEdge = cssBoxDecoration.getBorderEdgeInsets();
       renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
+      renderBoxModel.backgroundClip = getBackgroundClip(style);
+      renderBoxModel.backgroundOrigin = getBackgroundOrigin(style);
     }
   }
 
@@ -100,6 +102,8 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
       _updateBorderInsets(renderBoxModel, newDecoration.getBorderEdgeInsets());
     }
     renderBoxModel.cssBoxDecoration = newDecoration;
+    renderBoxModel.backgroundClip = getBackgroundClip(style);
+    renderBoxModel.backgroundOrigin = getBackgroundOrigin(style);
   }
 
   // add color relate transition listener
@@ -279,6 +283,42 @@ mixin CSSDecoratedBoxMixin on CSSBackgroundMixin {
     }
 
     return boxShadow;
+  }
+
+  BackgroundBoundary getBackgroundClip(CSSStyleDeclaration style) {
+    String value;
+    if (style != null) {
+      value = style[BACKGROUND_CLIP];
+    }
+
+    switch (value) {
+      case 'border-box':
+        return BackgroundBoundary.borderBox;
+      case 'padding-box':
+        return BackgroundBoundary.paddingBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      default:
+        return BackgroundBoundary.borderBox;
+    }
+  }
+
+  BackgroundBoundary getBackgroundOrigin(CSSStyleDeclaration style) {
+    String value;
+    if (style != null) {
+      value = style[BACKGROUND_ORIGIN];
+    }
+
+    switch (value) {
+      case 'border-box':
+        return BackgroundBoundary.borderBox;
+      case 'padding-box':
+        return BackgroundBoundary.paddingBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      default:
+        return BackgroundBoundary.paddingBox;
+    }
   }
 }
 
