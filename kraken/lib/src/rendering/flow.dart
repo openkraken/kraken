@@ -746,9 +746,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Default to children's width
     double constraintWidth = mainAxisExtent;
     // Get max of element's width and children's width if element's width exists
-    if (parent is RenderFlexLayout) {
-      constraintWidth = mainAxisExtent;
-    } else if (contentWidth != null) {
+    if (contentWidth != null) {
       constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
