@@ -18,7 +18,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/css/animation.dart';
 import 'package:meta/meta.dart';
 
 import '../css/flow.dart';
