@@ -370,7 +370,6 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
-
   double getContentWidth() {
     double cropWidth = 0;
     // @FIXME, need to remove elementManager in the future.
@@ -687,8 +686,8 @@ class RenderBoxModel extends RenderBox with
   // The max scrollable size of Y axis.
   double maxScrollableY;
 
-  double scrollableViewportWidth = 0.0;
-  double scrollableViewportHeight = 0.0;
+  double scrollableViewportWidth;
+  double scrollableViewportHeight;
 
   // hooks when content box had layout.
   void didLayout() {
@@ -816,21 +815,32 @@ class RenderBoxModel extends RenderBox with
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
-    if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+    properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
+    properties.add(DiagnosticsProperty('style', style, tooltip: style.toString(), missingIfNull: true));
+    properties.add(DiagnosticsProperty('display', display, missingIfNull: true));
+    properties.add(DiagnosticsProperty('contentSize', _contentSize));
+    properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
+    properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));
+    properties.add(DiagnosticsProperty('heightSizeType', heightSizeType, missingIfNull: true));
+
+    if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
+    if (padding != null) properties.add(DiagnosticsProperty('padding', padding));
+    if (width != null) properties.add(DiagnosticsProperty('width', width));
+    if (height != null) properties.add(DiagnosticsProperty('height', height));
+    if (intrinsicWidth != null) properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
+    if (intrinsicHeight != null) properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
+    if (intrinsicRatio != null) properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
+    if (maxWidth != null) properties.add(DiagnosticsProperty('maxWidth', maxWidth));
+    if (minWidth != null) properties.add(DiagnosticsProperty('minWidth', minWidth));
+    if (maxHeight != null) properties.add(DiagnosticsProperty('maxHeight', maxHeight));
+    if (minHeight != null) properties.add(DiagnosticsProperty('minHeight', minHeight));
+
+    debugPaddingProperties(properties);
+    debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);
     debugOverflowProperties(properties);
-    properties.add(DiagnosticsProperty('padding', padding));
-    properties.add(DiagnosticsProperty('width', width));
-    properties.add(DiagnosticsProperty('height', height));
-    properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
-    properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
-    properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
-    properties.add(DiagnosticsProperty('maxWidth', maxWidth));
-    properties.add(DiagnosticsProperty('minWidth', minWidth));
-    properties.add(DiagnosticsProperty('maxHeight', maxHeight));
-    properties.add(DiagnosticsProperty('minHeight', minHeight));
-    properties.add(DiagnosticsProperty('contentSize', _contentSize));
-    properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints));
+    debugMarginProperties(properties);
+    debugTransformProperties(properties);
+    debugOpacityProperties(properties);
   }
 }

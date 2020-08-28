@@ -52,5 +52,9 @@ mixin RenderOpacityMixin on RenderBox {
 
     _opacityLayer = context.pushOpacity(offset, _alpha, callback, oldLayer: _opacityLayer);
   }
+
+  void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {
+    if (_alpha != 0 && _alpha != 255) properties.add(DiagnosticsProperty('alpha', _alpha));;
+  }
 }
 

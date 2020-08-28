@@ -109,4 +109,10 @@ mixin RenderTransformMixin on RenderBox {
       return true;
     return false;
   }
+
+  void debugTransformProperties(DiagnosticPropertiesBuilder properties) {
+    if (origin != null) properties.add(DiagnosticsProperty('transformOrigin', origin));
+    if (alignment != null) properties.add(DiagnosticsProperty('transformAlignment', alignment));
+    if (transform != null) properties.add(DiagnosticsProperty('transform', transform));
+  }
 }

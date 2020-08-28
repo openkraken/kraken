@@ -1082,7 +1082,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderLayoutParentData parentData) {
