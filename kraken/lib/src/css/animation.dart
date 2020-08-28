@@ -98,19 +98,21 @@ class Animation {
   Function oncancel;
   Function onremove;
 
-  Animation(KeyframeEffect effect, [AnimationTimeline timeline]) {
+  // For transitionstart event
+  Function onstart;
 
+  Animation(KeyframeEffect effect, [AnimationTimeline timeline]) {
     if (timeline == null) {
       _timeline = _documentTimeline;
     }
-
     _effect = effect;
+  }
 
-    double activeDuration = effect._calculateActiveDuration();
-    _Phase phase = effect._calculatePhase(activeDuration, _currentTime);
-    double activeTime = effect._calculateActiveTime(activeDuration, _currentTime, phase);
-
-    _inEffect = activeTime != null;
+  void _setInEffect(bool flag) {
+    if (_inEffect == false && flag == true && onstart != null) {
+      onstart();
+    }
+    _inEffect = flag;
   }
 
   double get currentTime {
@@ -136,7 +138,7 @@ class Animation {
     _tickCurrentTime(newTime, true);
   }
 
-  _tickCurrentTime(newTime, [ignoreLimit = false]) {
+  _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
     if (newTime != _currentTime) {
       _currentTime = newTime;
       if (_isFinished && !ignoreLimit)
@@ -297,9 +299,9 @@ class Animation {
     // then it should go out of effect when it reaches the start of its
     // active interval (currentTime == 0).
     if (playbackRate < 0 && currentTime == 0) {
-      _inEffect = _effect._updateCurrentTime(-1);
+      _setInEffect(_effect._updateCurrentTime(-1));
     } else {
-      _inEffect = _effect._updateCurrentTime(currentTime);
+      _setInEffect(_effect._updateCurrentTime(currentTime));
     }
     if (!_inTimeline && (_inEffect || !_finishedFlag)) {
       _inTimeline = true;
@@ -475,12 +477,7 @@ Curve _parseEasing(String function) {
   return null;
 }
 
-enum _Phase {
-  none,
-  before,
-  after,
-  active
-}
+enum _Phase { none, before, active, after }
 
 class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/animation.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/scheduler.dart';
@@ -68,29 +66,6 @@ mixin CSSTransitionMixin on Node {
 
     style.transitions = transitions;
   }
-
-  Radius getProgressRaduis(double progress, Radius newRadius, Radius oldRadius) {
-    double radiusDiffX = newRadius.x - oldRadius.x;
-    double radiusDiffY = newRadius.y - oldRadius.y;
-    return Radius.elliptical(radiusDiffX * progress + oldRadius.x, radiusDiffY * progress + oldRadius.y);
-  }
-
-  void dispatchTransitionEvent(CSSTransitionEvent status) {
-    if (status == CSSTransitionEvent.run) {
-      dispatchEvent(Event(_transitionRun));
-    } else if (status == CSSTransitionEvent.cancel) {
-      // An Event fired when a CSS transition has been cancelled.
-      dispatchEvent(Event(_transitionCancel));
-    } else if (status == CSSTransitionEvent.start) {
-      // An Event fired when a CSS transition is created,
-      // when it is added to a set of running transitions,
-      // though not nessarilty started.
-      dispatchEvent(Event(_transitionStart));
-    } else if (status == CSSTransitionEvent.end) {
-      // An Event fired when a CSS transition has finished playing.
-      dispatchEvent(Event(_transitionEnd));
-    }
-  }
 }
 
 class CSSTransition {
@@ -108,6 +83,23 @@ class CSSTransition {
         value == STEP_END ||
         value == STEP_START ||
         CSSFunction.isFunction(value);
+  }
+
+  static void dispatchTransitionEvent(Element target, CSSTransitionEvent status) {
+    if (status == CSSTransitionEvent.run) {
+      target.dispatchEvent(Event(_transitionRun));
+    } else if (status == CSSTransitionEvent.cancel) {
+      // An Event fired when a CSS transition has been cancelled.
+      target.dispatchEvent(Event(_transitionCancel));
+    } else if (status == CSSTransitionEvent.start) {
+      // An Event fired when a CSS transition is created,
+      // when it is added to a set of running transitions,
+      // though not nessarilty started.
+      target.dispatchEvent(Event(_transitionStart));
+    } else if (status == CSSTransitionEvent.end) {
+      // An Event fired when a CSS transition has finished playing.
+      target.dispatchEvent(Event(_transitionEnd));
+    }
   }
 }
 

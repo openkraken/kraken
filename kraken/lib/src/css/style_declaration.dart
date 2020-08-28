@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:kraken/css.dart';
+import 'package:kraken/element.dart';
 import 'package:kraken/src/css/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -238,14 +239,9 @@ const ShorthandPropertyTransitionSupport = {
 /// 3. Via [Window.getComputedStyle()], which exposes the [CSSStyleDeclaration]
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
-  CSSStyleDeclaration({Map<String, dynamic> style}) {
-    if (style != null) {
-      style.forEach((property, dynamic value) {
-        if (value != null) setProperty(property, value.toString());
-      });
-    }
-  }
-
+  Element target;
+  
+  CSSStyleDeclaration(Element this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   List<StyleChangeListener> _styleChangeListeners = [];
@@ -288,12 +284,39 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition[property] != null;
   }
 
-  Animation animate(List<Keyframe> keyframes, [EffectTiming options]) {
+  void _transition(String propertyName, begin, end){
+    if (_hasRunningTransition(propertyName)) {
+      Animation animation = _propertyRunningTransition[propertyName];
+      animation.cancel();
+      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
+    }
+
+    if (begin == null) {
+      begin = LonghandPropertyInitialValues[propertyName];
+    }
+
+    EffectTiming options = _getTransitionEffectTiming(propertyName);
+    List<Keyframe> keyframes = [
+      Keyframe(propertyName, begin, 0, options.easing),
+      Keyframe(propertyName, end, 1, options.easing),
+    ];
     KeyframeEffect effect = KeyframeEffect(this, keyframes, options);
-    Animation animation = new Animation(effect);
+    Animation animation = Animation(effect);
+    _propertyRunningTransition[propertyName] = animation;
+
+    animation.onstart = () {
+      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.start);
+    };
+
+    animation.onfinish = (AnimationPlaybackEvent event) {
+      _propertyRunningTransition[propertyName] = null;
+      CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
+    };
+
+    CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.run);
     animation.play();
-    return animation;
   }
+
 
   /// Textual representation of the declaration block.
   /// Setting this attribute changes the style.
@@ -399,25 +422,7 @@ class CSSStyleDeclaration {
     if (normalizedValue == prevValue) return;
 
     if (!fromAnimation && _shouldTransition(propertyName)) {
-      if (_hasRunningTransition(propertyName)) {
-        Animation animation = _propertyRunningTransition[propertyName];
-        animation.cancel();
-      }
-
-      if (prevValue == null) {
-        prevValue = LonghandPropertyInitialValues[propertyName];
-      }
-
-      EffectTiming options = _getTransitionEffectTiming(propertyName);
-      Animation animation = animate([
-        Keyframe(propertyName, prevValue, 0, options.easing),
-        Keyframe(propertyName, normalizedValue, 1, options.easing),
-      ], options);
-      _propertyRunningTransition[propertyName] = animation;
-      animation.onfinish = (AnimationPlaybackEvent event) {
-        _propertyRunningTransition[propertyName] = null;
-      };
-      return;
+      return _transition(propertyName, prevValue, normalizedValue);
     }
 
     switch (propertyName) {
@@ -540,16 +545,6 @@ class CSSStyleDeclaration {
 
   double getLengthByPropertyName(properyName) {
     return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
-  }
-
-  CSSStyleDeclaration copyWith(Map<String, String> override) {
-    Map<String, dynamic> mergedProperties = {};
-    var copy = (property, value) {
-      mergedProperties[property] = value;
-    };
-    _properties.forEach(copy);
-    override?.forEach(copy);
-    return CSSStyleDeclaration(style: mergedProperties);
   }
 
   static bool isNullOrEmptyValue(value) {

@@ -138,7 +138,7 @@ class Element extends Node
     if (events == null) events = [];
 
     defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
-    style = CSSStyleDeclaration();
+    style = CSSStyleDeclaration(this);
     style.addStyleChangeListener(_onStyleChanged);
 
     // Mark element needs to reposition according to position CSS.
