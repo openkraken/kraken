@@ -40,22 +40,15 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   /// Row index of child when wrapping
   int runIndex = 0;
 
-  RenderPositionHolder renderPositionHolder;
   int zIndex = 0;
   CSSPositionType position = CSSPositionType.static;
-
-  /// Get element original position offset to parent(layoutBox) should be.
-  Offset get stackedChildOriginalRelativeOffset {
-    if (renderPositionHolder == null) return Offset.zero;
-    return (renderPositionHolder.parentData as BoxParentData).offset;
-  }
 
   // Whether offset is already set
   bool isOffsetSet = false;
 
   @override
   String toString() {
-    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; renderPositionHolder=$renderPositionHolder; ${super.toString()}; runIndex: $runIndex;';
+    return 'zIndex=$zIndex; position=$position; isPositioned=$isPositioned; top=$top; left=$left; bottom=$bottom; right=$right; ${super.toString()}; runIndex: $runIndex;';
   }
 }
 
@@ -65,6 +58,16 @@ class RenderLayoutBox extends RenderBoxModel
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   RenderLayoutBox({int targetId, CSSStyleDeclaration style, ElementManager elementManager})
       : super(targetId: targetId, style: style, elementManager: elementManager);
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+
+    // FlexItem layout must trigger flex container to layout.
+    if (parent != null && parent is RenderFlexLayout) {
+      markParentNeedsLayout();
+    }
+  }
 
   bool _needsSortChildren = true;
   bool get needsSortChildren {
@@ -144,19 +147,37 @@ class RenderLayoutBox extends RenderBoxModel
     });
     sortedChildren = children;
   }
+
+  // Get all children as a list and detach them all.
+  List<RenderObject> getDetachedChildrenAsList() {
+    List<RenderObject> children = getChildrenAsList();
+    removeAll();
+    return children;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
   RenderPaddingMixin,
   RenderMarginMixin,
   RenderBoxDecorationMixin,
+  RenderTransformMixin,
   RenderOverflowMixin,
+  RenderOpacityMixin,
+  RenderIntersectionObserverMixin,
+  RenderContentVisibility,
+  RenderVisibilityMixin,
   RenderPointerListenerMixin {
   RenderBoxModel({
     this.targetId,
     this.style,
-    this.elementManager
-  }) : super();
+    this.elementManager,
+  }) : assert(targetId != null),
+    super();
+
+  @override
+  bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
+
+  RenderPositionHolder renderPositionHolder;
 
   bool _debugHasBoxLayout = false;
 
@@ -165,6 +186,16 @@ class RenderBoxModel extends RenderBox with
     assert(_debugHasBoxLayout, 'can not access contentConstraints, RenderBoxModel has not layout: ${toString()}');
     assert(_contentConstraints != null);
     return _contentConstraints;
+  }
+
+  CSSDisplay _display;
+  get display => _display;
+  set display(CSSDisplay value) {
+    if (value == null) return;
+    if (_display != value) {
+      markNeedsLayout();
+      _display = value;
+    }
   }
 
   // id of current element
@@ -177,6 +208,9 @@ class RenderBoxModel extends RenderBox with
 
   BoxSizeType widthSizeType;
   BoxSizeType heightSizeType;
+
+  // Positioned holder box ref.
+  RenderPositionHolder positionedHolder;
 
   RenderBoxModel copyWith(RenderBoxModel newBox) {
     // Copy Sizing
@@ -203,6 +237,7 @@ class RenderBoxModel extends RenderBox with
     newBox.cssBoxDecoration = cssBoxDecoration;
     newBox.position = position;
     newBox.configuration = configuration;
+    newBox.boxPainter = boxPainter;
 
     // Copy overflow
     newBox.scrollListener = scrollListener;
@@ -219,6 +254,26 @@ class RenderBoxModel extends RenderBox with
     newBox.onPointerUp = onPointerUp;
     newBox.onPointerMove = onPointerMove;
     newBox.onPointerSignal = onPointerSignal;
+
+    // Copy transform
+    newBox.transform = transform;
+    newBox.origin = origin;
+    newBox.alignment = alignment;
+
+    // Copy display
+    newBox.display = display;
+
+    // Copy ContentVisibility
+    newBox.contentVisibility = contentVisibility;
+
+    // Copy renderPositionHolder
+    newBox.renderPositionHolder = renderPositionHolder;
+    if (renderPositionHolder != null) {
+      renderPositionHolder.realDisplayedBox = newBox;
+    }
+
+    // Copy parentData
+    newBox.parentData = parentData;
 
     return newBox;
   }
@@ -315,12 +370,13 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+
   double getContentWidth() {
     double cropWidth = 0;
     // @FIXME, need to remove elementManager in the future.
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     double width = _width;
 
     void cropMargin(Element childNode) {
@@ -341,8 +397,8 @@ class RenderBoxModel extends RenderBox with
     }
 
     switch (display) {
-      case BLOCK:
-      case FLEX:
+      case CSSDisplay.block:
+      case CSSDisplay.flex:
         // Get own width if exists else get the width of nearest ancestor width width
         if (style.contains(WIDTH)) {
           cropPaddingBorder(hostElement);
@@ -357,17 +413,17 @@ class RenderBoxModel extends RenderBox with
             }
             if (hostElement is Element) {
               CSSStyleDeclaration style = hostElement.style;
-              String display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
+              CSSDisplay display = CSSSizing.getElementRealDisplayValue(hostElement.targetId, elementManager);
 
               // Set width of element according to parent display
-              if (display != INLINE) {
+              if (display != CSSDisplay.inline) {
                 // Skip to find upper parent
                 if (style.contains(WIDTH)) {
                   // Use style width
                   width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
                   cropPaddingBorder(hostElement);
                   break;
-                } else if (display == INLINE_BLOCK || display == INLINE_FLEX) {
+                } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
                   // Collapse width to children
                   width = null;
                   break;
@@ -377,8 +433,8 @@ class RenderBoxModel extends RenderBox with
           }
         }
         break;
-      case INLINE_BLOCK:
-      case INLINE_FLEX:
+      case CSSDisplay.inlineBlock:
+      case CSSDisplay.inlineFlex:
         if (style.contains(WIDTH)) {
           width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
           cropPaddingBorder(hostElement);
@@ -386,7 +442,7 @@ class RenderBoxModel extends RenderBox with
           width = null;
         }
         break;
-      case INLINE:
+      case CSSDisplay.inline:
         width = null;
         break;
       default:
@@ -405,7 +461,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minWidth != null) {
+    if (minWidth != null && minWidth > 0.0) {
       if (width == null) {
         if (intrinsicWidth == null || intrinsicWidth < minWidth) {
           width = minWidth;
@@ -432,7 +488,7 @@ class RenderBoxModel extends RenderBox with
   double getContentHeight() {
     Element hostElement = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = hostElement.style;
-    String display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     double height = _height;
     double cropHeight = 0;
@@ -455,7 +511,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     // Inline element has no height
-    if (display == INLINE) {
+    if (display == CSSDisplay.inline) {
       return null;
     } else if (style.contains(HEIGHT)) {
       cropPaddingBorder(hostElement);
@@ -497,7 +553,7 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (minHeight != null) {
+    if (minHeight != null && minHeight > 0.0) {
       if (height == null) {
         if (intrinsicHeight == null || intrinsicHeight < minHeight) {
           height = minHeight;
@@ -521,7 +577,7 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  set size(Size contentSize) {
+  Size getBoxSize(Size contentSize) {
     // Set scrollable size from unconstrained size.
     maxScrollableX = contentSize.width + paddingLeft + paddingRight;
     maxScrollableY = contentSize.height + paddingTop + paddingBottom;
@@ -538,7 +594,7 @@ class RenderBoxModel extends RenderBox with
       boxSize = wrapBorderSize(boxSize);
     }
 
-    super.size = constraints.constrain(boxSize);
+    return constraints.constrain(boxSize);
   }
 
   // The contentSize of layout box
@@ -573,9 +629,6 @@ class RenderBoxModel extends RenderBox with
     BoxConstraints boxConstraints = constraints;
     // Deflate border constraints.
     boxConstraints = deflateBorderConstraints(boxConstraints);
-
-    // Deflate overflow constraints.
-    boxConstraints = deflateOverflowConstraints(boxConstraints);
 
     // Deflate padding constraints.
     boxConstraints = deflatePaddingConstraints(boxConstraints);
@@ -626,6 +679,7 @@ class RenderBoxModel extends RenderBox with
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     super.applyPaintTransform(child, transform);
     applyOverflowPaintTransform(child, transform);
+    applyEffectiveTransform(child, transform);
   }
 
   // The max scrollable size of X axis.
@@ -633,26 +687,65 @@ class RenderBoxModel extends RenderBox with
   // The max scrollable size of Y axis.
   double maxScrollableY;
 
-  double scrollableViewportWidth;
-  double scrollableViewportHeight;
+  double scrollableViewportWidth = 0.0;
+  double scrollableViewportHeight = 0.0;
 
   // hooks when content box had layout.
   void didLayout() {
-    Size scrollableSize = Size(maxScrollableX, maxScrollableY);
-    Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
-    setUpOverflowScroller(scrollableSize, viewportSize);
+    if (clipX || clipY) {
+      Size scrollableSize = Size(maxScrollableX, maxScrollableY);
+      Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
+      setUpOverflowScroller(scrollableSize, viewportSize);
+    }
+
+    if (positionedHolder != null) {
+      // Make position holder preferred size equal to current element boundary size.
+      positionedHolder.preferredSize = Size.copy(size);
+    }
+  }
+
+  void setMaximumScrollableHeightForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    }
+    if (childParentData.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    }
+  }
+
+  void setMaximumScrollableWidthForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    if (childParentData.left != null) {
+      maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
+    }
+
+    if (childParentData.right != null) {
+      maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
+    }
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    paintDecoration(context, offset);
-    paintOverflow(
-        context,
-        offset,
-        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-        decoration,
-        Size(scrollableViewportWidth, scrollableViewportHeight),
-        callback
-    );
+    if (display != null && display == CSSDisplay.none) return;
+
+    paintVisibility(context, offset, (context, offset) {
+      paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
+        paintTransform(context, offset, (PaintingContext context, Offset offset) {
+          paintOpacity(context, offset, (context, offset) {
+            EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+            paintDecoration(context, offset, resolvedPadding);
+            paintOverflow(
+                context,
+                offset,
+                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+                decoration,
+                Size(scrollableViewportWidth, scrollableViewportHeight),
+                    (context, offset) {
+                  paintContentVisibility(context, offset, callback);
+                }
+            );
+          });
+        });
+      });
+    });
   }
 
   @override
@@ -663,6 +756,17 @@ class RenderBoxModel extends RenderBox with
 
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    if (clipX || clipY) {
+      position += Offset(scrollLeft, scrollTop);
+    }
+
+    if (!contentVisibilityHitTest(result, position: position)) {
+      return false;
+    }
+    if (!visibilityHitTest(result, position: position)) {
+      return false;
+    }
+
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
@@ -702,13 +806,20 @@ class RenderBoxModel extends RenderBox with
     return size.contains(position);
   }
 
+  Future<Image> toImage({ double pixelRatio = 1.0 }) {
+    assert(!debugNeedsPaint);
+    assert(isRepaintBoundary);
+    final OffsetLayer offsetLayer = layer as OffsetLayer;
+    return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
     if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
-    properties.add(DiagnosticsProperty('clipX', clipX));
-    properties.add(DiagnosticsProperty('clipY', clipY));
+    debugVisibilityProperties(properties);
+    debugOverflowProperties(properties);
     properties.add(DiagnosticsProperty('padding', padding));
     properties.add(DiagnosticsProperty('width', width));
     properties.add(DiagnosticsProperty('height', height));

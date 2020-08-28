@@ -10,12 +10,13 @@ import 'package:kraken/element.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 
-enum Display {
+enum CSSDisplay {
   inline,
   block,
   inlineBlock,
   flex,
-  inlineFlex
+  inlineFlex,
+  none
 }
 
 /// - width
@@ -165,7 +166,7 @@ class CSSSizing {
     double cropWidth = 0;
     Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
     CSSStyleDeclaration style = child.style;
-    String display = getElementRealDisplayValue(targetId, elementManager);
+    CSSDisplay display = getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
       RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
@@ -185,7 +186,7 @@ class CSSSizing {
     }
 
     // Get width of element if it's not inline
-    if (display != INLINE && style.contains(WIDTH)) {
+    if (display != CSSDisplay.inline && style.contains(WIDTH)) {
       width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
       cropPaddingBorder(child);
     } else {
@@ -200,8 +201,8 @@ class CSSSizing {
         }
         if (child is Element) {
           CSSStyleDeclaration style = child.style;
-          String display = getElementRealDisplayValue(child.targetId, elementManager);
-          if (style.contains(WIDTH) && display != INLINE) {
+          CSSDisplay display = getElementRealDisplayValue(child.targetId, elementManager);
+          if (style.contains(WIDTH) && display != CSSDisplay.inline) {
             width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
             cropPaddingBorder(child);
             break;
@@ -222,16 +223,29 @@ class CSSSizing {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    bool isFlex = style[DISPLAY].endsWith(FLEX);
-    bool isHoriontalDirection = !style.contains(FLEX_DIRECTION) ||
-        style[FLEX_DIRECTION] == ROW;
-    bool isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
+    RenderBoxModel renderBoxModel = current.getRenderBoxModel();
+    bool isFlex = renderBoxModel is RenderFlexLayout;
+    bool isHorizontalDirection = false;
+    bool isAlignItemsStretch = false;
+    bool isFlexNoWrap = false;
+    bool isChildAlignSelfStretch = false;
+    if (isFlex) {
+      isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
+        (renderBoxModel as RenderFlexLayout).flexDirection
+      );
+      isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;
-    bool isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
+      isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
         style[FLEX_WRAP] != WRAP_REVERSE;
-    bool isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+      isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+    }
 
-    if (isFlex && isHoriontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
+    String marginTop = child.style[MARGIN_TOP];
+    String marginBottom = child.style[MARGIN_BOTTOM];
+
+    // Display as block if flex vertical layout children and stretch children
+    if (marginTop != AUTO && marginBottom != AUTO &&
+      isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
       isStretch = true;
     }
 
@@ -240,28 +254,34 @@ class CSSSizing {
 
   // Element tree hierarchy can cause element display behavior to change,
   // for example element which is flex-item can display like inline-block or block
-  static String getElementRealDisplayValue(int targetId, ElementManager elementManager) {
+  static CSSDisplay getElementRealDisplayValue(int targetId, ElementManager elementManager) {
     Element element = elementManager.getEventTargetByTargetId<Element>(targetId);
     Element parentNode = element.parentNode;
-    String display = CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])
-        ? element.defaultDisplay
-        : element.style[DISPLAY];
-    String position = element.style[POSITION];
+    CSSDisplay display = CSSSizing.getDisplay(
+        CSSStyleDeclaration.isNullOrEmptyValue(element.style[DISPLAY])
+            ? element.defaultDisplay
+            : element.style[DISPLAY]
+    );
+    CSSPositionType position = resolvePositionFromStyle(element.style);
 
     // Display as inline-block when element is positioned
-    if (position == ABSOLUTE || position == FIXED) {
-      display = INLINE_BLOCK;
+    if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {
+      display = CSSDisplay.inlineBlock;
     } else if (parentNode != null) {
       CSSStyleDeclaration style = parentNode.style;
 
       if (style[DISPLAY].endsWith(FLEX)) {
         // Display as inline-block if parent node is flex
-        display = INLINE_BLOCK;
+        display = CSSDisplay.inlineBlock;
 
+        String marginLeft = element.style[MARGIN_LEFT];
+        String marginRight = element.style[MARGIN_RIGHT];
+
+        bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
         // Display as block if flex vertical layout children and stretch children
-        if (style[FLEX_DIRECTION] == COLUMN &&
+        if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
             (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
-          display = BLOCK;
+          display = CSSDisplay.block;
         }
       }
     }
@@ -269,24 +289,26 @@ class CSSSizing {
     return display;
   }
 
-  static Display getDisplay(String displayString) {
-    Display display = Display.inline;
+  static CSSDisplay getDisplay(String displayString) {
+    CSSDisplay display = CSSDisplay.inline;
     if (displayString == null) {
       return display;
     }
 
     switch(displayString) {
+      case 'none':
+        return CSSDisplay.none;
       case 'block':
-        return Display.block;
+        return CSSDisplay.block;
       case 'inline-block':
-        return Display.inlineBlock;
+        return CSSDisplay.inlineBlock;
       case 'flex':
-        return Display.flex;
+        return CSSDisplay.flex;
       case 'inline-flex':
-        return Display.inlineFlex;
+        return CSSDisplay.inlineFlex;
       case 'inline':
       default:
-        return Display.inline;
+        return CSSDisplay.inline;
     }
   }
 }

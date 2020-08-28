@@ -851,4 +851,34 @@ describe('flex', () => {
     document.body.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it('flex items with inner padding and no specify width', async () => {
+    let container;
+    container = createViewElement({
+      flexDirection: 'row'
+    }, [
+      createViewElement(
+        {
+          backgroundColor: 'blue',
+          padding: '0 20px',
+          height: '64px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: '32px'
+        },
+        [
+          createElement('span', {
+            style: {
+              color: '#fff',
+              fontSize: '34px'
+            }
+          }, [
+            createText('12345')
+          ])
+        ]
+      )
+    ]);
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+  });
 });

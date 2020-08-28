@@ -19,12 +19,16 @@ final RegExp _spaceRegExp = RegExp(r'\s+');
 /// - border
 mixin CSSDecoratedBoxMixin {
 
-  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+  void updateRenderDecoratedBox(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String original, String present) {
     CSSBoxDecoration cssBoxDecoration = renderBoxModel.cssBoxDecoration;
 
     if (cssBoxDecoration != null) {
       // Update by property
-      if (property.startsWith(BACKGROUND)) {
+      if (property == BACKGROUND_CLIP) {
+        renderBoxModel.backgroundClip = getBackgroundClip(present);
+      } else if (property == BACKGROUND_ORIGIN) {
+        renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
+      } else if (property.startsWith(BACKGROUND)) {
         _updateBackground(renderBoxModel, style, property);
       } else if (property.endsWith('Radius')) {
         _updateBorderRadius(renderBoxModel, style, property);
@@ -39,6 +43,8 @@ mixin CSSDecoratedBoxMixin {
       if (cssBoxDecoration == null) return;
 
       renderBoxModel.decoration = cssBoxDecoration.toBoxDecoration();
+      renderBoxModel.backgroundClip = getBackgroundClip(present);
+      renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
     }
   }
 
@@ -285,6 +291,30 @@ mixin CSSDecoratedBoxMixin {
     }
 
     return boxShadow;
+  }
+
+  BackgroundBoundary getBackgroundClip(String value) {
+    switch (value) {
+      case 'padding-box':
+        return BackgroundBoundary.paddingBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'border-box':
+      default:
+        return BackgroundBoundary.borderBox;
+    }
+  }
+
+  BackgroundBoundary getBackgroundOrigin(String value) {
+    switch (value) {
+      case 'border-box':
+        return BackgroundBoundary.borderBox;
+      case 'content-box':
+        return BackgroundBoundary.contentBox;
+      case 'padding-box':
+      default:
+        return BackgroundBoundary.paddingBox;
+    }
   }
 }
 

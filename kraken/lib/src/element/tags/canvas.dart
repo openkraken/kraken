@@ -23,6 +23,7 @@ class CanvasElement extends Element {
           elementManager,
           defaultStyle: _defaultStyle,
           isIntrinsicBox: true,
+          repaintSelf: true,
           tagName: CANVAS,
         ) {
     painter = CanvasPainter();
@@ -84,7 +85,7 @@ class CanvasElement extends Element {
     }
   }
 
-  void _propertyChangedListener(String key, String original, String present) {
+  void _propertyChangedListener(String key, String original, String present, bool inAnimation) {
     switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.

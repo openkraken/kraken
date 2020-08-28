@@ -9,7 +9,8 @@ import {
   setStyle,
   method,
   toBlob,
-  getProperty
+  getProperty,
+  requestUpdateFrame
 } from './ui-manager';
 
 const RECT_PROPERTIES = [
@@ -23,10 +24,13 @@ const RECT_PROPERTIES = [
   'clientLeft',
   'clientTop',
 
-  'scrollTop',
-  'scrollLeft',
   'scrollHeight',
   'scrollWidth',
+];
+
+const RECT_MUTABLE_PROPERTIES = [
+  'scrollTop',
+  'scrollLeft',
 ];
 
 interface ICamelize {
@@ -116,8 +120,23 @@ export class Element extends Node {
         configurable: false,
         enumerable: true,
         get() {
-          return Number(method(targetId, prop));
+          return Number(getProperty(targetId, prop));
         },
+      });
+    }
+
+    for (let i = 0; i < RECT_MUTABLE_PROPERTIES.length; i ++) {
+      const prop = RECT_MUTABLE_PROPERTIES[i];
+      Object.defineProperty(this, prop, {
+        configurable: false,
+        enumerable: true,
+        get() {
+          return Number(getProperty(targetId, prop));
+        },
+        set(value) {
+          requestUpdateFrame();
+          setProperty(targetId, prop, Number(value));
+        }
       });
     }
 
@@ -141,7 +160,7 @@ export class Element extends Node {
   }
 
   getBoundingClientRect = () => {
-    const rectInformation = method(this.targetId, 'getBoundingClientRect');
+    const rectInformation = getProperty(this.targetId, 'getBoundingClientRect');
     if (typeof rectInformation === 'string') {
       return JSON.parse(rectInformation);
     } else {

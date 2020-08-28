@@ -15,6 +15,7 @@ class BodyElement extends Element {
       : super(
         targetId,
         elementManager,
+        repaintSelf: true,
         tagName: BODY,
         defaultStyle: {
             WIDTH: '${viewportWidth}px',

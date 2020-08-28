@@ -42,6 +42,8 @@ const String BACKGROUND_POSITION = 'backgroundPosition';
 const String BACKGROUND_IMAGE = 'backgroundImage';
 const String BACKGROUND_SIZE = 'backgroundSize';
 const String BACKGROUND_COLOR = 'backgroundColor';
+const String BACKGROUND_ORIGIN = 'backgroundOrigin';
+const String BACKGROUND_CLIP = 'backgroundClip';
 
 const String BORDER = 'border';
 const String BORDER_TOP = 'borderTop';
@@ -112,5 +114,3 @@ const String TRANSITION_DELAY = 'transitionDelay';
 
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
-
-const String URL = 'url';

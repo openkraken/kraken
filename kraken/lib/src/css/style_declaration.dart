@@ -12,7 +12,8 @@ import 'package:vector_math/vector_math_64.dart';
 typedef StyleChangeListener = void Function(
   String property,
   String original,
-  String present
+  String present,
+  bool inAnimation
 );
 
 const String EMPTY_STRING = '';
@@ -53,27 +54,21 @@ Map LonghandPropertyInitialValues = {
   'minHeight': '0px',
   'minWidth': '0px',
   'opacity': '1.0',
-  'outlineColor': 'invert',
-  'outlineOffset': '0px',
-  'outlineWidth': '3px',
   'paddingBottom': '0px',
   'paddingLeft': '0px',
   'paddingRight': '0px',
   'paddingTop': '0px',
   'right': 'auto',
-  'strokeDasharray': 'none',
-  'strokeDashoffset': '0px',
   'textIndent': '0px',
   'textShadow': '0px 0px 0px transparent',
   'top': 'auto',
-  'transform': '',
+  'transform': 'matrix3d(${CSSTransform.initial.storage.join(',')})',
   'verticalAlign': '0px',
   'visibility': 'visible',
   'width': 'auto',
   'wordSpacing': 'normal',
   'zIndex': 'auto'
 };
-
 
 Color _parseColor(String color) {
   return CSSColor.parseColor(color);
@@ -148,15 +143,13 @@ String _stringifyTransform(Matrix4 begin, Matrix4 end, double t) {
   final Vector3 endScale = Vector3.zero();
   begin.decompose(beginTranslation, beginRotation, beginScale);
   end.decompose(endTranslation, endRotation, endScale);
-  final Vector3 lerpTranslation =
-      beginTranslation * (1.0 - t) + endTranslation * t;
+  final Vector3 lerpTranslation = beginTranslation * (1.0 - t) + endTranslation * t;
   // TODO(alangardner): Implement slerp for constant rotation
-  final Quaternion lerpRotation =
-      (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
+  final Quaternion lerpRotation = (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
   final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
   Matrix4 newMatrix4 = Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
   Float64List m4storage = newMatrix4.storage;
-  return 'matrix3d(${m4storage[15]}, ${m4storage[14]}, ${m4storage[12]}, ${m4storage[12]}, ${m4storage[11]}, ${m4storage[10]}, ${m4storage[9]}, ${m4storage[8]}, ${m4storage[7]}, ${m4storage[6]}, ${m4storage[5]}, ${m4storage[4]}, ${m4storage[3]}, ${m4storage[2]}, ${m4storage[1]}, ${m4storage[0]})';
+  return 'matrix3d(${m4storage.join(',')})';
 }
 
 const List<Function> _colorHandler = [_parseColor, _stringifyColor];
@@ -265,17 +258,17 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool shouldTransition(String property, String original, String present) {
-    return original != null && AnimationPropertyHandlers[property] != null &&
+  bool _shouldTransition(String property) {
+    return AnimationPropertyHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
 
-  EffectTiming getTransitionEffectTiming(String property) {
-    
+  EffectTiming _getTransitionEffectTiming(String property) {
+
     List transitionOptions = _transitions[property] ?? _transitions[ALL];
     // [duration, function, delay]
     if (transitionOptions != null) {
-      
+
       return EffectTiming(
         duration: CSSTime.parseTime(transitionOptions[0]).toDouble(),
         easing: transitionOptions[1],
@@ -287,6 +280,19 @@ class CSSStyleDeclaration {
     }
 
     return null;
+  }
+
+  Map<String, Animation> _propertyRunningTransition = {};
+
+  bool _hasRunningTransition(String property) {
+    return _propertyRunningTransition[property] != null;
+  }
+
+  Animation animate(List<Keyframe> keyframes, [EffectTiming options]) {
+    KeyframeEffect effect = KeyframeEffect(this, keyframes, options);
+    Animation animation = new Animation(effect);
+    animation.play();
+    return animation;
   }
 
   /// Textual representation of the declaration block.
@@ -377,7 +383,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value) {
+  void setProperty(String propertyName, value, [bool fromAnimation = false]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
@@ -387,13 +393,32 @@ class CSSStyleDeclaration {
     String normalizedValue = value.toString().trim();
 
     // Illegal value like '   ' after trim is '' shoud do nothing.
-    if (normalizedValue.isEmpty) {
-      return;
-    }
+    if (normalizedValue.isEmpty) return;
 
     String prevValue = _properties[propertyName];
-
     if (normalizedValue == prevValue) return;
+
+    if (!fromAnimation && _shouldTransition(propertyName)) {
+      if (_hasRunningTransition(propertyName)) {
+        Animation animation = _propertyRunningTransition[propertyName];
+        animation.cancel();
+      }
+
+      if (prevValue == null) {
+        prevValue = LonghandPropertyInitialValues[propertyName];
+      }
+
+      EffectTiming options = _getTransitionEffectTiming(propertyName);
+      Animation animation = animate([
+        Keyframe(propertyName, prevValue, 0, options.easing),
+        Keyframe(propertyName, normalizedValue, 1, options.easing),
+      ], options);
+      _propertyRunningTransition[propertyName] = animation;
+      animation.onfinish = (AnimationPlaybackEvent event) {
+        _propertyRunningTransition[propertyName] = null;
+      };
+      return;
+    }
 
     switch (propertyName) {
       case WIDTH:
@@ -480,7 +505,6 @@ class CSSStyleDeclaration {
 
     _properties[propertyName] = normalizedValue;
     _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
-  
   }
 
   /// Override [] and []= operator to get/set style properties.
@@ -510,7 +534,7 @@ class CSSStyleDeclaration {
     assert(property != null);
 
     _styleChangeListeners.forEach((StyleChangeListener listener) {
-      listener(property, original, present);
+      listener(property, original, present, inAnimation);
     });
   }
 

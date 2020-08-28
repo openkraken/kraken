@@ -59,6 +59,9 @@ Element _createElement(
     case AUDIO:
       element = AudioElement(id, elementManager);
       break;
+    case OBJECT:
+      element = ObjectElement(id, elementManager);
+      break;
     default:
       element = DivElement(id, elementManager);
       print('ERROR: unexpected element type "$type"');
@@ -95,7 +98,7 @@ class ElementManager {
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight {
     _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
-    _root = _rootElement.renderObject;
+    _root = _rootElement.getRenderBoxModel();
     setEventTarget(_rootElement);
     setEventTarget(Window(this));
   }

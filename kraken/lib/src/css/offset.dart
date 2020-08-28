@@ -1,15 +1,13 @@
-import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 
 mixin CSSOffsetMixin on Node {
 
-  void updateRenderOffset(RenderObject renderElementBoundary, String property, String present) {
-    
-    if (renderElementBoundary.parentData is RenderLayoutParentData) {
-      RenderLayoutBox renderParent = renderElementBoundary.parent;
-      RenderLayoutParentData positionParentData = renderElementBoundary.parentData;
+  void updateRenderOffset(RenderBoxModel renderBoxModel, String property, String present) {
+
+    if (renderBoxModel.parentData is RenderLayoutParentData) {
+      RenderLayoutParentData positionParentData = renderBoxModel.parentData;
 
       if (property == Z_INDEX) {
         positionParentData.zIndex = int.tryParse(present) ?? 0;
@@ -37,8 +35,8 @@ mixin CSSOffsetMixin on Node {
         }
       }
 
-      renderElementBoundary.parentData = positionParentData;
-      renderParent.markNeedsLayout();
+      renderBoxModel.parentData = positionParentData;
+      renderBoxModel.markNeedsLayout();
     }
   }
 }

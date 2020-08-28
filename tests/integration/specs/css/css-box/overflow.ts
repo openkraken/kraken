@@ -139,6 +139,35 @@ describe('Overflow', () => {
     });
   });
 
+  it('scrollLeft and scrollTop', async (done) => {
+    let container = document.createElement('div');
+    let div1 = document.createElement('div');
+    Object.assign(div1.style, {
+      overflowX: 'scroll',
+      overflowY: 'visible',
+      width: '100px',
+      height: '100px',
+    });
+
+    let inner1 = document.createElement('div');
+    Object.assign(inner1.style, {
+      width: '120px',
+      height: '120px',
+      background: 'conic-gradient(from -90deg, blue 0 25%, black 25% 50%, red 50% 75%, green 75% 100%)',
+    });
+
+    div1.appendChild(inner1);
+    container.appendChild(div1);
+    document.body.appendChild(container);
+
+    requestAnimationFrame(async () => {
+      div1.scrollLeft = 20;
+      div1.scrollTop = 20;
+      await matchViewportSnapshot();
+      done();
+    });
+  });
+
   it('borderRadius with overflow', async () => {
     let container = document.createElement('div');
     let child = document.createElement('div');
@@ -156,5 +185,49 @@ describe('Overflow', () => {
     document.body.appendChild(container);
 
     await matchViewportSnapshot();
+  });
+
+  it('overflow with absolute positioned elements', async (done) => {
+    let scroller;
+    let container = createElement('div', {
+      style: {
+        display: 'inline-block',
+        position: 'relative',
+        width: '120px',
+        height: '250px',
+      }
+    }, [
+      scroller = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '200px',
+          'overflow-x': 'auto',
+          'overflow-y': 'auto',
+          border: '1px solid #000'
+        }
+      }, [
+        createElement('div', {
+          style: {
+            position: 'absolute',
+            right: '-20px',
+            color: 'red',
+            display: 'inline',
+            bottom: '-550px'
+          }
+        }, [
+          createText('XXX')
+        ])
+      ])
+    ]);
+
+    document.body.appendChild(container);
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      scroller.scroll(20, 550);
+      await matchViewportSnapshot(0.2);
+      done();
+    });
   });
 });

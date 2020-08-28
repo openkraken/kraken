@@ -1,35 +1,35 @@
-import 'package:flutter/animation.dart';
+
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 mixin CSSTransformMixin on Node {
-  static Matrix4 _matrix4 = Matrix4.identity();
 
-  void updateRenderTransform(RenderTransform renderElementBoundary, String value) {
+  void updateRenderTransform(RenderBoxModel renderBoxModel, String value) {
     Matrix4 matrix4 = CSSTransform.parseTransform(value);
-    renderElementBoundary.transform = matrix4 ?? _matrix4;
+    renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
   }
 
-  void updateRenderTransformOrigin(RenderTransform renderElementBoundary, String present) {
+  void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
 
     CSSTransformOrigin transformOrigin = _parseTransformOrigin(present);
     if (transformOrigin == null) return;
 
-    Offset oldOffset = renderElementBoundary.origin;
+    Offset oldOffset = renderBoxModel.origin;
     Offset offset = transformOrigin.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
-      renderElementBoundary.origin = offset;
+      renderBoxModel.origin = offset;
     }
 
     Alignment alignment = transformOrigin.alignment;
-    Alignment oldAlignment = renderElementBoundary.alignment;
+    Alignment oldAlignment = renderBoxModel.alignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
-      renderElementBoundary.alignment = alignment;
+      renderBoxModel.alignment = alignment;
     }
   }
 
@@ -90,6 +90,8 @@ mixin CSSTransformMixin on Node {
 }
 
 class CSSTransform {
+  static Matrix4 initial = Matrix4.identity();
+
   static Matrix4 parseTransform(String value) {
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(value);
 

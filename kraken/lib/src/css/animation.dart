@@ -92,7 +92,6 @@ class Animation {
   // This can be null (which is the default) to indicate that there should be no effect applied.
   KeyframeEffect _effect;
   AnimationTimeline _timeline;
-  AnimationPlayState _playState;
   AnimationReplaceState _replaceState;
 
   Function onfinish;
@@ -210,6 +209,10 @@ class Animation {
       // The animation has reached one of its boundaries and the Animation.currentTime property is not updating.
       return AnimationPlayState.finished;
     return AnimationPlayState.running;
+  }
+
+  AnimationReplaceState get replaceState {
+    return _replaceState;
   }
 
   // Indicates whether the animation is currently waiting for an asynchronous operation such as initiating playback or pausing a running animation.
@@ -480,12 +483,12 @@ enum _Phase {
 }
 
 class KeyframeEffect extends AnimationEffect {
-  Element target;
+  CSSStyleDeclaration style;
   List<_Interpolation> _interpolations;
   double _iterationProgress;
   double _playbackRate = 1;
 
-  KeyframeEffect(this.target, List<Keyframe> keyframes, EffectTiming options) {
+  KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options) {
 
     timing = options == null ? EffectTiming() : options;
 
@@ -539,7 +542,7 @@ class KeyframeEffect extends AnimationEffect {
       double scaledLocalTime = localDuration == 0 ? 0 : easingCurve.transform(offsetFraction / localDuration);
       
       String value = interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime);
-      target.setStyle(property, value);
+      style.setProperty(property, value, true);
     }
   }
 
