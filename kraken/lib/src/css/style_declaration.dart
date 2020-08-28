@@ -407,8 +407,8 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
-  void _expandShorthand(String propertyName, normalizedValue) {
-    Map<String, dynamic> longhandProperties = {};
+  void _expandShorthand(String propertyName, String normalizedValue) {
+    Map<String, String> longhandProperties = {};
     switch(propertyName) {
       case PADDING:
         CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
