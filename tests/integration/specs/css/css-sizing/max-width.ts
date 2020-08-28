@@ -103,4 +103,66 @@ describe('max-width', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should work with positioned replaced element', async () => {
+    let flexbox;
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          'background-color': '#999',
+          height: '200px',
+          width: '200px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('img', {
+            src: 'assets/100x100-green.png',
+            style: {
+              position: 'absolute',
+              'background-color': 'green',
+              height: '100px',
+              maxWidth: '100px',
+              'box-sizing': 'border-box',
+            },
+          },
+        )
+      ]
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot(0.1);
+  });
+
+  it('should work with flex-item of replaced element', async () => {
+    let flexbox;
+    flexbox = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          'background-color': '#999',
+          height: '200px',
+          width: '200px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('img', {
+            src: 'assets/100x100-green.png',
+            style: {
+              'background-color': 'green',
+              height: '100px',
+              maxWidth: '100px',
+              'box-sizing': 'border-box',
+            },
+          },
+        )
+      ]
+    );
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot(0.1);
+  });
 });
