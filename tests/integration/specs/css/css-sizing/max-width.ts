@@ -15,7 +15,7 @@ describe('max-width', () => {
         createElement('div',
           {
             style: {
-              display: 'relative',
+              position: 'relative',
               'background-color': 'green',
               height: '100px',
               maxWidth: '100px',
