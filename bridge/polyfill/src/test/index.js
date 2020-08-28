@@ -131,18 +131,22 @@ __kraken_executeTest__((done) => {
   jasmineTracker.onSpecDone = (result) => {
     return new Promise((resolve, reject) => {
       try {
-        clearAllTimer();
-        window.clearAllEventsListeners();
-        window.clearAllNodes();
-        requestAnimationFrame(() => {
-          __kraken_refresh_paint__(function (e) {
-            if (e) {
-              reject(e);
-            } else {
-              resolve();
-            }
+        if (window.notNeedInitEnv) {
+          resolve();
+        } else {
+          clearAllTimer();
+          window.clearAllEventsListeners();
+          window.clearAllNodes();
+          requestAnimationFrame(() => {
+            __kraken_refresh_paint__(function (e) {
+              if (e) {
+                reject(e);
+              } else {
+                resolve();
+              }
+            });
           });
-        });
+        }
       } catch (e) {
         reject(e);
       }

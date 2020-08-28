@@ -2,21 +2,21 @@ import { krakenInvokeModule } from './bridge';
 
 const TRUE = 'true';
 export const asyncStorage = {
-  getItem(key: string) {
+  getItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'getItem', [key]]), resolve);
+      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'getItem', [`${key}`]]), resolve);
     });
   },
-  setItem(key: string, value: string) {
+  setItem(key: number | string, value: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'setItem', [key, value]]), (ret) => {
+      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'setItem', [`${key}`, `${value}`]]), (ret) => {
         ret === TRUE ? resolve() : reject();
       });
     });
   },
-  removeItem(key: string) {
+  removeItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'removeItem', [key]]), (ret) => {
+      krakenInvokeModule(JSON.stringify(['AsyncStorage', 'removeItem', [`${key}`]]), (ret) => {
         ret === TRUE ? resolve() : reject();
       });
     });
