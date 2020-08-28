@@ -147,7 +147,10 @@ class CameraPreviewElement extends Element {
   RenderBox _buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle textStyle = TextStyle(backgroundColor: Color(0xFFFFFFFF));
+    TextStyle textStyle = TextStyle(
+      color: Color(0xFF000000),
+      backgroundColor: Color(0xFFFFFFFF)
+    );
     return RenderFallbackViewBox(
       child: RenderParagraph(
         TextSpan(text: description, style: textStyle),
