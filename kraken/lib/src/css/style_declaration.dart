@@ -31,7 +31,6 @@ Map LonghandPropertyInitialValues = {
   'borderRightColor': 'currentColor',
   'borderRightWidth': '3px',
   // Spec says this should be 0 but in practise it is 2px.
-  'borderSpacing': '2px',
   'borderTopColor': 'currentColor',
   'borderTopLeftRadius': '0px',
   'borderTopRightRadius': '0px',
@@ -60,7 +59,6 @@ Map LonghandPropertyInitialValues = {
   'paddingRight': '0px',
   'paddingTop': '0px',
   'right': 'auto',
-  'textIndent': '0px',
   'textShadow': '0px 0px 0px transparent',
   'top': 'auto',
   'transform': 'matrix3d(${CSSTransform.initial.storage.join(',')})',
@@ -161,67 +159,72 @@ const List<Function> _lineHeightHandler = [_parseLineHeight, _stringifyLineHeigh
 const List<Function> _transformHandler = [_parseTransform, _stringifyTransform];
 
 Map<String, List<Function>> AnimationPropertyHandlers = {
-  'color': _colorHandler,
-  'backgroundColor': _colorHandler,
-  'borderBottomColor': _colorHandler,
-  'borderLeftColor': _colorHandler,
-  'borderRightColor': _colorHandler,
-  'borderTopColor': _colorHandler,
-  'borderColor': _colorHandler,
-  'textDecorationColor': _colorHandler,
-  'opacity': _numberHandler,
-  'zIndex': _numberHandler,
-  'flexGrow': _numberHandler,
-  'flexShrink': _numberHandler,
-  'fontWeight': _fontWeightHandler,
-  'lineHeight': _lineHeightHandler,
-  'transform': _transformHandler,
-  'borderBottomLeftRadius': _lengthHandler,
-  'borderBottomRightRadius': _lengthHandler,
-  'borderTopLeftRadius': _lengthHandler,
-  'borderTopRightRadius': _lengthHandler,
-  'right': _lengthHandler,
-  'top': _lengthHandler,
-  'bottom': _lengthHandler,
-  'left': _lengthHandler,
-  'letterSpacing': _lengthHandler,
-  'marginBottom': _lengthHandler,
-  'marginLeft': _lengthHandler,
-  'marginRight': _lengthHandler,
-  'marginTop': _lengthHandler,
-  'minHeight': _lengthHandler,
-  'minWidth': _lengthHandler,
-  'paddingBottom': _lengthHandler,
-  'paddingLeft': _lengthHandler,
-  'paddingRight': _lengthHandler,
-  'paddingTop': _lengthHandler,
-  'textIndent': _lengthHandler,
+  COLOR: _colorHandler,
+  BACKGROUND_COLOR: _colorHandler,
+  BORDER_BOTTOM_COLOR: _colorHandler,
+  BORDER_LEFT_COLOR: _colorHandler,
+  BORDER_RIGHT_COLOR: _colorHandler,
+  BORDER_TOP_COLOR: _colorHandler,
+  BORDER_COLOR: _colorHandler,
+  TEXT_DECORATION_COLOR: _colorHandler,
+  OPACITY: _numberHandler,
+  Z_INDEX: _numberHandler,
+  FLEX_GROW: _numberHandler,
+  FLEX_SHRINK: _numberHandler,
+  FONT_WEIGHT: _fontWeightHandler,
+  LINE_HEIGHT: _lineHeightHandler,
+  TRANSFORM: _transformHandler,
+  BORDER_BOTTOM_LEFT_RADIUS: _lengthHandler,
+  BORDER_BOTTOM_RIGHT_RADIUS: _lengthHandler,
+  BORDER_TOP_LEFT_RADIUS: _lengthHandler,
+  BORDER_TOP_RIGHT_RADIUS: _lengthHandler,
+  RIGHT: _lengthHandler,
+  TOP: _lengthHandler,
+  BOTTOM: _lengthHandler,
+  LEFT: _lengthHandler,
+  LETTER_SPACING: _lengthHandler,
+  MARGIN_BOTTOM: _lengthHandler,
+  MARGIN_LEFT: _lengthHandler,
+  MARGIN_RIGHT: _lengthHandler,
+  MARGIN_TOP: _lengthHandler,
+  MIN_HEIGHT: _lengthHandler,
+  MIN_WIDTH: _lengthHandler,
+  PADDING_BOTTOM: _lengthHandler,
+  PADDING_LEFT: _lengthHandler,
+  PADDING_RIGHT: _lengthHandler,
+  PADDING_TOP: _lengthHandler,
   // should non negative value
-  'borderBottomWidth': _lengthHandler,
-  'borderLeftWidth': _lengthHandler,
-  'borderRightWidth': _lengthHandler,
-  'borderTopWidth': _lengthHandler,
-  'flexBasis': _lengthHandler,
-  'fontSize': _lengthHandler,
-  'height': _lengthHandler,
-  'width': _lengthHandler,
-  'maxHeight': _lengthHandler,
-  'maxWidth': _lengthHandler,
+  BORDER_BOTTOM_WIDTH: _lengthHandler,
+  BORDER_LEFT_WIDTH: _lengthHandler,
+  BORDER_RIGHT_WIDTH: _lengthHandler,
+  BORDER_TOP_WIDTH: _lengthHandler,
+  FLEX_BASIS: _lengthHandler,
+  FONT_SIZE: _lengthHandler,
+  HEIGHT: _lengthHandler,
+  WIDTH: _lengthHandler,
+  MAX_HEIGHT: _lengthHandler,
+  MAX_WIDTH: _lengthHandler,
 };
 
-
-const ShorthandPropertyTransitionSupport = {
-  MARGIN: [MARGIN_BOTTOM, MARGIN_LEFT, MARGIN_RIGHT, MARGIN_TOP],
-  PADDING: [PADDING_BOTTOM, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP],
-  BACKGROUND: [BACKGROUND_COLOR],
-  BORDER_RADIUS: [BORDER_BOTTOM_LEFT_RADIUS, BORDER_BOTTOM_RIGHT_RADIUS, BORDER_TOP_LEFT_RADIUS, BORDER_TOP_RIGHT_RADIUS],
-  BORDER: [
-    BORDER_BOTTOM_COLOR, BORDER_LEFT_COLOR, BORDER_RIGHT_COLOR, BORDER_TOP_COLOR,
-    BORDER_BOTTOM_WIDTH, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH, BORDER_TOP_WIDTH
-  ],
-  BORDER_COLOR: [BORDER_BOTTOM_COLOR, BORDER_LEFT_COLOR, BORDER_RIGHT_COLOR, BORDER_TOP_COLOR],
-  BORDER_WIDTH: [BORDER_BOTTOM_WIDTH, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH, BORDER_TOP_WIDTH],
-  FONT: [FONT_SIZE, FONT_WEIGHT],
+const Map<String, bool> ShorthandProperty = {
+  MARGIN: true,
+  PADDING: true,
+  BACKGROUND: true,
+  BORDER_RADIUS: true,
+  BORDER: true,
+  BORDER_COLOR: true,
+  BORDER_WIDTH: true,
+  BORDER_STYLE: true,
+  BORDER_LEFT: true,
+  BORDER_RIGHT: true,
+  BORDER_TOP: true,
+  BORDER_BOTTOM: true,
+  FONT: true,
+  FLEX: true,
+  FLEX_FLOW: true,
+  OVERFLOW: true,
+  TRANSITION: true,
+  TEXT_DECORATION: true,
 };
 
 // CSS Object Model: https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
@@ -404,6 +407,56 @@ class CSSStyleDeclaration {
     return prevValue;
   }
 
+  void _expandShorthand(String propertyName, normalizedValue) {
+    Map<String, dynamic> longhandProperties = {};
+    switch(propertyName) {
+      case PADDING:
+        CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
+        break;
+      case MARGIN:
+        CSSStyleProperty.setShorthandMargin(longhandProperties, normalizedValue);
+        break;
+      case BACKGROUND:
+        CSSStyleProperty.setShorthandBackground(longhandProperties, normalizedValue);
+        break;
+      case BORDER_RADIUS:
+        CSSStyleProperty.setShorthandBorderRadius(longhandProperties, normalizedValue);
+        break;
+      case OVERFLOW:
+        CSSStyleProperty.setShorthandOverflow(longhandProperties, normalizedValue);
+        break;
+      case FONT:
+        CSSStyleProperty.setShorthandFont(longhandProperties, normalizedValue);
+        break;
+      case FLEX:
+        CSSStyleProperty.setShorthandFlex(longhandProperties, normalizedValue);
+        break;
+      case FLEX_FLOW:
+        CSSStyleProperty.setShorthandFlexFlow(longhandProperties, normalizedValue);
+        break;
+      case BORDER:
+      case BORDER_TOP:
+      case BORDER_RIGHT:
+      case BORDER_BOTTOM:
+      case BORDER_LEFT:
+      case BORDER_COLOR:
+      case BORDER_STYLE:
+      case BORDER_WIDTH:
+        CSSStyleProperty.setShorthandBorder(longhandProperties, propertyName, normalizedValue);
+        break;
+      case TRANSITION:
+        CSSStyleProperty.setShorthandTransition(longhandProperties, normalizedValue);
+        break;
+      case TEXT_DECORATION:
+        CSSStyleProperty.setShorthandTextDecoration(longhandProperties, normalizedValue);
+        break;
+    }
+
+    if (longhandProperties.isNotEmpty) {
+      longhandProperties.forEach(setProperty);
+    }
+  }
+
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, value, [bool fromAnimation = false]) {
@@ -420,6 +473,10 @@ class CSSStyleDeclaration {
 
     String prevValue = _properties[propertyName];
     if (normalizedValue == prevValue) return;
+
+    if (ShorthandProperty[propertyName] != null) {
+      return _expandShorthand(propertyName, normalizedValue);
+    }
 
     if (!fromAnimation && _shouldTransition(propertyName)) {
       return _transition(propertyName, prevValue, normalizedValue);
@@ -465,46 +522,6 @@ class CSSStyleDeclaration {
         if (!CSSColor.isColor(normalizedValue)) {
           return;
         }
-        break;
-      case PADDING:
-        CSSStyleProperty.setShorthandPadding(_properties, normalizedValue);
-        break;
-      case MARGIN:
-        CSSStyleProperty.setShorthandMargin(_properties, normalizedValue);
-        break;
-      case BACKGROUND:
-        CSSStyleProperty.setShorthandBackground(_properties, normalizedValue);
-        break;
-      case BORDER_RADIUS:
-        CSSStyleProperty.setShorthandBorderRadius(_properties, normalizedValue);
-        break;
-      case OVERFLOW:
-        CSSStyleProperty.setShorthandOverflow(_properties, normalizedValue);
-        break;
-      case FONT:
-        CSSStyleProperty.setShorthandFont(_properties, normalizedValue);
-        break;
-      case FLEX:
-        CSSStyleProperty.setShorthandFlex(_properties, normalizedValue);
-        break;
-      case FLEX_FLOW:
-        CSSStyleProperty.setShorthandFlexFlow(_properties, normalizedValue);
-        break;
-      case BORDER:
-      case BORDER_TOP:
-      case BORDER_RIGHT:
-      case BORDER_BOTTOM:
-      case BORDER_LEFT:
-      case BORDER_COLOR:
-      case BORDER_STYLE:
-      case BORDER_WIDTH:
-        CSSStyleProperty.setShorthandBorder(_properties, propertyName, normalizedValue);
-        break;
-      case TRANSITION:
-        CSSStyleProperty.setShorthandTransition(_properties, normalizedValue);
-        break;
-      case TEXT_DECORATION:
-        CSSStyleProperty.setShorthandTextDecoration(_properties, normalizedValue);
         break;
     }
 
