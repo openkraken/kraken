@@ -376,6 +376,16 @@ class _Interpolation {
   var end;
   Function lerp;
   _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp);
+
+  @override
+  String toString() => '_Interpolation('
+      'startOffset: $startOffset, '
+      'endOffset: $endOffset, '
+      'easing: $easing, '
+      'property: $property, '
+      'begin: $begin, '
+      'end: $end'
+  ')';
 }
 
 List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups) {
@@ -411,9 +421,9 @@ List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpe
         handlers = [_defaultParse, _defaultLerp];
       }
       Function parseProperty = handlers[0];
-      
+
       _Interpolation interpolation = _Interpolation(
-        property, 
+        property,
         startOffset,
         endOffset,
         _parseEasing(keyframes[startIndex].easing),
@@ -486,7 +496,6 @@ class KeyframeEffect extends AnimationEffect {
   double _playbackRate = 1;
 
   KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options) {
-
     timing = options == null ? EffectTiming() : options;
 
     if (keyframes != null) {
@@ -531,13 +540,13 @@ class KeyframeEffect extends AnimationEffect {
     for (int i = 0; i < _interpolations.length; i++) {
       _Interpolation interpolation = _interpolations[i];
       double startOffset = interpolation.startOffset;
-      double endOffet = interpolation.endOffset;
+      double endOffset = interpolation.endOffset;
       Curve easingCurve = interpolation.easing;
       String property = interpolation.property;
       double offsetFraction = _iterationProgress - startOffset;
-      double localDuration = endOffet - startOffset;
+      double localDuration = endOffset - startOffset;
       double scaledLocalTime = localDuration == 0 ? 0 : easingCurve.transform(offsetFraction / localDuration);
-      
+
       String value = interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime);
       style.setProperty(property, value, true);
     }
@@ -663,7 +672,8 @@ class KeyframeEffect extends AnimationEffect {
     double activeTime = _calculateActiveTime(activeDuration, localTime, phase);
 
     if (activeTime == null)
-      return null;
+      // When activeTime is null, the interation was completed.
+      return 1.0;
 
     double overallProgress = _calculateOverallProgress(phase, activeTime);
     double simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime);

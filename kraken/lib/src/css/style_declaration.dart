@@ -243,7 +243,7 @@ const Map<String, bool> ShorthandProperty = {
 ///    object as a read-only interface.
 class CSSStyleDeclaration {
   Element target;
-  
+
   CSSStyleDeclaration(Element this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
