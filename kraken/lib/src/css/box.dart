@@ -145,13 +145,13 @@ mixin CSSDecoratedBoxMixin {
       BorderSide bottom =  border.bottom;
       bool updateAll = false;
 
-      if (property.contains(LEFT)) {
+      if (property.contains(BORDER_LEFT)) {
         left = CSSBorderSide.getBorderSide(style, CSSBorderSide.LEFT);
-      } else if (property.contains(TOP)) {
+      } else if (property.contains(BORDER_TOP)) {
         top = CSSBorderSide.getBorderSide(style, CSSBorderSide.TOP);
-      } else if (property.contains(RIGHT)) {
+      } else if (property.contains(BORDER_RIGHT)) {
         right = CSSBorderSide.getBorderSide(style, CSSBorderSide.RIGHT);
-      } else if (property.contains(BOTTOM)) {
+      } else if (property.contains(BORDER_BOTTOM)) {
         bottom = CSSBorderSide.getBorderSide(style, CSSBorderSide.BOTTOM);
       } else {
         updateAll = true;
@@ -159,10 +159,10 @@ mixin CSSDecoratedBoxMixin {
 
       if (!updateAll) {
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(border: Border(
-          left: left,
-          top: top,
-          right: right,
-          bottom: bottom,
+          left: left ?? BorderSide.none,
+          top: top ?? BorderSide.none,
+          right: right ?? BorderSide.none,
+          bottom: bottom ?? BorderSide.none,
         ));
         return;
       }
@@ -200,7 +200,7 @@ mixin CSSDecoratedBoxMixin {
   }
 
   List<Radius> _getBorderRadius(CSSStyleDeclaration style) {
-    // border radius add inorder topLeft topRight bottomLeft bottomRight
+    // border radius add border topLeft topRight bottomLeft bottomRight
     Radius topLeftRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_LEFT_RADIUS]);
     Radius topRightRadius = CSSBorderRadius.getRadius(style[BORDER_TOP_RIGHT_RADIUS]);
     Radius bottomRightRadius = CSSBorderRadius.getRadius(style[BORDER_BOTTOM_RIGHT_RADIUS]);
