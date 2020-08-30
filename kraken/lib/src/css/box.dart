@@ -61,7 +61,7 @@ mixin CSSDecoratedBoxMixin {
       RenderBoxModel renderBoxModel,
       CSSStyleDeclaration style,
       String property) {
-    
+
     BoxDecoration oldBox = renderBoxModel.decoration;
 
     if (property == BACKGROUND || property == BACKGROUND_COLOR) {
@@ -89,7 +89,7 @@ mixin CSSDecoratedBoxMixin {
       renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
     } else if (CSSBackground.hasLocalBackgroundImage(style)) {
       // @FIXME: support local background image
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage); 
+      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
     }
   }
 
@@ -106,17 +106,19 @@ mixin CSSDecoratedBoxMixin {
       CSSStyleDeclaration style,
       String property) {
 
+      if (renderBoxModel.decoration == null) return;
+
       // topLeft topRight bottomRight bottomLeft
       int index = _borderRadiusMapping[property];
 
       if (index != null) {
         Radius newRadius = CSSBorderRadius.getRadius(style[property]);
-        BorderRadius borderRaduis = renderBoxModel.decoration.borderRadius as BorderRadius;
+        BorderRadius borderRadius = renderBoxModel.decoration.borderRadius as BorderRadius;
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(borderRadius: BorderRadius.only(
-          topLeft: index == 0 ? newRadius : borderRaduis.topLeft,
-          topRight: index == 1 ? newRadius : borderRaduis.topRight,
-          bottomRight: index == 2 ? newRadius : borderRaduis.bottomRight,
-          bottomLeft: index == 3 ? newRadius : borderRaduis.bottomLeft,
+          topLeft: index == 0 ? newRadius : borderRadius?.topLeft,
+          topRight: index == 1 ? newRadius : borderRadius?.topRight,
+          bottomRight: index == 2 ? newRadius : borderRadius?.bottomRight,
+          bottomLeft: index == 3 ? newRadius : borderRadius?.bottomLeft,
         ));
       } else {
         List<Radius> borderRadius = _getBorderRadius(style);
@@ -404,7 +406,7 @@ class CSSBorderSide {
       return null;
     } else {
       return BorderSide(
-          color: getBorderSideColor(style, side), width: getBorderSideWidth(style, side), style: borderStyle);
+          color: getBorderSideColor(style, side), width: width, style: borderStyle);
     }
   }
 }

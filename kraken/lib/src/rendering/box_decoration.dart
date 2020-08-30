@@ -69,7 +69,7 @@ mixin RenderBoxDecorationMixin on RenderBox {
     _painter?.dispose();
     _painter = null;
     _decoration = value;
-    
+
     // If has border, render padding should subtracting the edge of the border
     if (value.border != null) {
       Border border = value.border;
