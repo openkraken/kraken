@@ -478,10 +478,6 @@ class CSSStyleDeclaration {
       return _expandShorthand(propertyName, normalizedValue);
     }
 
-    if (!fromAnimation && _shouldTransition(propertyName)) {
-      return _transition(propertyName, prevValue, normalizedValue);
-    }
-
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
@@ -523,6 +519,15 @@ class CSSStyleDeclaration {
           return;
         }
         break;
+      case TRANSFORM:
+        if (CSSTransform.parseTransform(normalizedValue) == null) {
+          return;
+        }
+        break;
+    }
+
+    if (!fromAnimation && _shouldTransition(propertyName)) {
+      return _transition(propertyName, prevValue, normalizedValue);
     }
 
     _properties[propertyName] = normalizedValue;
