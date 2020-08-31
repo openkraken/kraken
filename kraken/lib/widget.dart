@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:ui';
 import 'package:kraken/kraken.dart';
 
 class KrakenWidget extends StatelessWidget {
@@ -15,29 +16,40 @@ class KrakenWidget extends StatelessWidget {
 
   // the width of krakenWidget
   final double viewportWidth;
+
   // the height of krakenWidget
   final double viewportHeight;
+
   // the kraken controller.
   final KrakenController controller;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
       {Key key,
-        // The remote URL which contains executable JavaScript scripts.
-        // This options have higher priority than bundlePath, bundleContent
-        String bundleURL,
-        // The local filesystem path which contains executable JavaScript scripts.
-        // This options have higher priority than bundleContent
-        String bundlePath,
-        // The executable JavaScripts scripts.
-        String bundleContent,
-        // Callback functions when loading Javascript scripts failed.
-        KrakenLoadErrorFunction loadErrorFn})
+      String bundleURL,
+      String bundlePath,
+      String bundleContent,
+      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version released. (v0.6.0)
+      // Disable viewportWidth check and no assertion error report.
+      bool disableViewportWidthAssertion = false,
+      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version release. (v0.6.0)
+      // Disable viewportHeight check and no assertion error report.
+      bool disableViewportHeightAssertion = false,
+      // Callback functions when loading Javascript scripts failed.
+      KrakenLoadErrorFunction loadErrorFn})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
         controller = KrakenController(name, viewportWidth, viewportHeight,
             showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null, loadErrorFn: loadErrorFn),
         super(key: key) {
+    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
+        'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
+        'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
     controller.bundleURL = bundleURL;
     controller.bundlePath = bundlePath;
     controller.bundleContent = bundleContent;
