@@ -588,15 +588,23 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  Size getBoxSize(Size contentSize) {
-    // Set scrollable size from unconstrained size.
-    maxScrollableX = contentSize.width + paddingLeft + paddingRight;
-    maxScrollableY = contentSize.height + paddingTop + paddingBottom;
+  void setMaxScrollableSize(double width, double height) {
+    assert(width != null);
+    assert(height != null);
 
+    maxScrollableSize = Size(
+      width + paddingLeft + paddingRight,
+      height + paddingTop + paddingBottom
+    );
+  }
+
+  Size getBoxSize(Size contentSize) {
     Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
 
-    scrollableViewportWidth = _contentSize.width + paddingLeft + paddingRight;
-    scrollableViewportHeight = _contentSize.height + paddingTop + paddingBottom;
+    scrollableViewportSize = Size(
+      _contentSize.width + paddingLeft + paddingRight,
+      _contentSize.height + paddingTop + paddingBottom
+    );
 
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
@@ -693,20 +701,25 @@ class RenderBoxModel extends RenderBox with
     applyEffectiveTransform(child, transform);
   }
 
-  // The max scrollable size of X axis.
-  double maxScrollableX;
-  // The max scrollable size of Y axis.
-  double maxScrollableY;
+  // The max scrollable size.
+  Size _maxScrollableSize = Size.zero;
+  Size get maxScrollableSize => _maxScrollableSize;
+  set maxScrollableSize(Size value) {
+    assert(value != null);
+    _maxScrollableSize = value;
+  }
 
-  double scrollableViewportWidth;
-  double scrollableViewportHeight;
+  Size _scrollableViewportSize;
+  Size get scrollableViewportSize => _scrollableViewportSize;
+  set scrollableViewportSize(Size value) {
+    assert(value != null);
+    _scrollableViewportSize = value;
+  }
 
   // hooks when content box had layout.
   void didLayout() {
     if (clipX || clipY) {
-      Size scrollableSize = Size(maxScrollableX, maxScrollableY);
-      Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
-      setUpOverflowScroller(scrollableSize, viewportSize);
+      setUpOverflowScroller(maxScrollableSize, scrollableViewportSize);
     }
 
     if (positionedHolder != null) {
@@ -715,16 +728,9 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  void setMaximumScrollableHeightForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
-    if (childParentData.top != null) {
-      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
-    }
-    if (childParentData.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
-    }
-  }
-
-  void setMaximumScrollableWidthForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+  void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    double maxScrollableX = maxScrollableSize.width;
+    double maxScrollableY = maxScrollableSize.height;
     if (childParentData.left != null) {
       maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
     }
@@ -732,6 +738,15 @@ class RenderBoxModel extends RenderBox with
     if (childParentData.right != null) {
       maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
     }
+
+    if (childParentData.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    }
+    if (childParentData.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    }
+
+    maxScrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
@@ -747,9 +762,7 @@ class RenderBoxModel extends RenderBox with
                 context,
                 offset,
                 EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                decoration,
-                Size(scrollableViewportWidth, scrollableViewportHeight),
-                    (context, offset) {
+                decoration, (context, offset) {
                   paintContentVisibility(context, offset, callback);
                 }
             );
