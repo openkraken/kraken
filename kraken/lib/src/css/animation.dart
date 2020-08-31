@@ -492,7 +492,7 @@ enum _Phase { none, before, active, after }
 class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;
   List<_Interpolation> _interpolations;
-  double _iterationProgress;
+  double _transformedProgress;
 
   // Speed control.
   // The rate of play of an animation can be controlled by setting its playback rate.
@@ -535,12 +535,13 @@ class KeyframeEffect extends AnimationEffect {
 
   bool _updateCurrentTime(double currentTime) {
     double activeDuration = _calculateActiveDuration();
-    _iterationProgress =  _calculateIterationProgress(activeDuration, currentTime);
-    return _iterationProgress != null;
+    _transformedProgress =  _calculateTransformedProgress(activeDuration, currentTime);
+    print(_transformedProgress);
+    return _transformedProgress != null;
   }
 
   void _runIteration(double localTime) {
-    if (_iterationProgress == null) return;
+    if (_transformedProgress == null) return;
 
     for (int i = 0; i < _interpolations.length; i++) {
       _Interpolation interpolation = _interpolations[i];
@@ -548,7 +549,7 @@ class KeyframeEffect extends AnimationEffect {
       double endOffset = interpolation.endOffset;
       Curve easingCurve = interpolation.easing;
       String property = interpolation.property;
-      double offsetFraction = _iterationProgress - startOffset;
+      double offsetFraction = _transformedProgress - startOffset;
       double localDuration = endOffset - startOffset;
       double scaledLocalTime = localDuration == 0 ? 0 : easingCurve.transform(offsetFraction / localDuration);
 
@@ -574,20 +575,45 @@ class KeyframeEffect extends AnimationEffect {
     return timing.duration * timing.iterations;
   }
 
+  // https://github.com/WebKit/webkit/blob/950143da027e80924b4bb86defa8a3f21fd3fb1e/Source/WebCore/animation/WebAnimationUtilities.h#L51
+  static double _timeEpsilon = 0.001;
+
   // https://drafts.csswg.org/web-animations/#animation-effect-phases-and-states
   _Phase _calculatePhase(double activeDuration, double localTime) {
+
+    bool animationIsBackwards = _playbackRate < 0;
+
+    // (This should be the last statement, but it's more efficient to cache the local time and return right away if it's not resolved.)
+    // Furthermore, it is often convenient to refer to the case when an animation effect is in none of the above phases
+    // as being in the idle phase.
     if (localTime == null) {
       return _Phase.none;
     }
 
-    var endTime = timing.delay + activeDuration + timing.endDelay;
-    if (localTime < min<double>(timing.delay, endTime)) {
+    // An animation effect is in the before phase if the animation effect’s local time is not unresolved and
+    // either of the following conditions are met:
+    //     1. the local time is less than the before-active boundary time, or
+    //     2. the animation direction is ‘backwards’ and the local time is equal to the before-active boundary time.
+    double endTime = timing.delay + activeDuration + timing.endDelay;
+    double beforeActiveBoundaryTime = max<double>(min<double>(timing.delay, endTime), 0.0);
+
+    if ((localTime + _timeEpsilon) < beforeActiveBoundaryTime || (animationIsBackwards && (localTime - beforeActiveBoundaryTime).abs() < _timeEpsilon)) {
       return _Phase.before;
     }
-    if (localTime >= min<double>(timing.delay + activeDuration, endTime)) {
+
+    // An animation effect is in the after phase if the animation effect’s local time is not unresolved and
+    // either of the following conditions are met:
+    //     1. the local time is greater than the active-after boundary time, or
+    //     2. the animation direction is ‘forwards’ and the local time is equal to the active-after boundary time.
+    double activeAfterBoundaryTime = max<double>(min<double>(timing.delay + activeDuration, endTime), 0.0);
+
+    if ((localTime - _timeEpsilon) > activeAfterBoundaryTime || (!animationIsBackwards && (localTime - activeAfterBoundaryTime).abs() < _timeEpsilon)) {
       return _Phase.after;
     }
 
+    // An animation effect is in the active phase if the animation effect’s local time is not unresolved and it is not
+    // in either the before phase nor the after phase.
+    // (No need to check, we've already established that local time was resolved).
     return _Phase.active;
   }
 
@@ -597,63 +623,122 @@ class KeyframeEffect extends AnimationEffect {
     FillMode fillMode = timing.fill;
     switch (phase) {
       case _Phase.before:
+        // If the fill mode is backwards or both, return the result of evaluating
+        // max(local time - start delay, 0).
         if (fillMode == FillMode.backwards || fillMode == FillMode.both)
-          return 0.0;
+          return max<double>(localTime - timing.delay, 0.0);
+        // Otherwise, return an unresolved time value.
         return null;
       case _Phase.active:
+        // If the animation effect is in the active phase, return the result of evaluating local time - start delay.
         return localTime - timing.delay;
+      // If the animation effect is in the after phase, the result depends on the first matching
+      // condition from the following,
       case _Phase.after:
+        // If the fill mode is forwards or both, return the result of evaluating
+        // max(min(local time - start delay, active duration), 0).
         if (fillMode == FillMode.forwards || fillMode == FillMode.both)
-          return activeDuration;
+          return max<double>(min<double>(localTime - timing.delay, activeDuration), 0.0);
+        // Otherwise (the local time is unresolved), return an unresolved time value.
         return null;
       case _Phase.none:
         return null;
     }
   }
 
-  // https://drafts.csswg.org/web-animations/#calculating-the-overall-progress
+  // 3.8.3.2. Calculating the overall progress
+  // https://drafts.csswg.org/web-animations-1/#calculating-the-overall-progress
   double _calculateOverallProgress(_Phase phase, double activeTime) {
-    double iterationStart = timing.iterationStart;
-    double overallProgress = iterationStart;
+    // The overall progress describes the number of iterations that have completed (including partial iterations) and is defined as follows:
+
+    // 1. If the active time is unresolved, return unresolved.
+    if (activeTime == null)
+      return null;
+
+    // 2. Calculate an initial value for overall progress based on the first matching condition from below,
+    double overallProgress;
     double iterationDuration = timing.duration;
-    double iterations = timing.iterations;
     if (iterationDuration == 0) {
-      if (phase != _Phase.before) {
-        overallProgress += iterations;
-      }
+      // If the iteration duration is zero, if the animation effect is in the before phase, let overall progress be zero,
+      // otherwise, let it be equal to the iteration count.
+      overallProgress = phase == _Phase.before ? 0 : timing.iterations;
     } else {
-      overallProgress += activeTime / iterationDuration;
+      // Otherwise, let overall progress be the result of calculating active time / iteration duration.
+      overallProgress = activeTime / iterationDuration;
     }
-    return overallProgress;
+
+    // 3. Return the result of calculating overall progress + iteration start.
+    overallProgress += timing.iterationStart;
+    return overallProgress.abs();
   }
 
-  // https://drafts.csswg.org/web-animations/#calculating-the-simple-iteration-progress
-  double _calculateSimpleIterationProgress(double overallProgress, _Phase phase, double activeTime) {
+  // 3.8.3.3. Calculating the simple iteration progress
+  // https://drafts.csswg.org/web-animations-1/#calculating-the-simple-iteration-progress
+  double _calculateSimpleIterationProgress(double overallProgress, _Phase phase, double activeTime, double activeDuration) {
+
+    // The simple iteration progress is a fraction of the progress through the current iteration that
+    // ignores transformations to the time introduced by the playback direction or timing functions
+    // applied to the effect, and is calculated as follows:
+
+    // 1. If the overall progress is unresolved, return unresolved.
+    if (overallProgress == null)
+      return null;
+
     double iterationStart = timing.iterationStart;
     double iterations = timing.iterations;
-    double iterationDuration = timing.duration;
+    // 2. If overall progress is infinity, let the simple iteration progress be iteration start % 1.0,
+    // otherwise, let the simple iteration progress be overall progress % 1.0.
     double simpleIterationProgress = (overallProgress == double.infinity) ? iterationStart % 1 : overallProgress % 1;
-    if (simpleIterationProgress == 0 && phase == _Phase.after && iterations != 0 &&
-        (activeTime != 0 || iterationDuration == 0)) {
+
+    // 3. If all of the following conditions are true,
+    //
+    // the simple iteration progress calculated above is zero, and
+    // the animation effect is in the active phase or the after phase, and
+    // the active time is equal to the active duration, and
+    // the iteration count is not equal to zero.
+    // let the simple iteration progress be 1.0.
+    if (simpleIterationProgress == 0 &&
+        (phase == _Phase.active || phase == _Phase.after) &&
+        iterations != 0 &&
+        (activeTime - activeDuration) < _timeEpsilon) {
       simpleIterationProgress = 1;
     }
     return simpleIterationProgress;
   }
 
-  // https://drafts.csswg.org/web-animations/#calculating-the-current-iteration
-  double _calculateCurrentIteration(_Phase phase, double simpleIterationProgress, double overallProgress) {
+  // 3.8.4. Calculating the current iteration
+  // https://drafts.csswg.org/web-animations-1/#calculating-the-current-iteration
+  double _calculateCurrentIteration(_Phase phase, double activeTime, double simpleIterationProgress, double overallProgress) {
+    // The current iteration can be calculated using the following steps:
+
+    // 1. If the active time is unresolved, return unresolved.
+    if (activeTime == null)
+      return null;
+
     double iterations = timing.iterations;
+    // 2. If the animation effect is in the after phase and the iteration count is infinity, return infinity.
     if (phase == _Phase.after && iterations == double.infinity) {
       return double.infinity;
     }
+    // 3. If the simple iteration progress is 1.0, return floor(overall progress) - 1.
     if (simpleIterationProgress == 1) {
       return overallProgress.floor().toDouble() - 1;
     }
+    // 4. Otherwise, return floor(overall progress).
     return overallProgress.floor().toDouble();
   }
 
-  // https://drafts.csswg.org/web-animations/#calculating-the-directed-progress
+  // 3.9.1. Calculating the directed progress
+  // https://drafts.csswg.org/web-animations-1/#calculating-the-directed-progress
   double _calculateDirectedProgress(double currentIteration, double simpleIterationProgress) {
+    // The directed progress is calculated from the simple iteration progress using the following steps:
+
+
+    // 1. If the simple iteration progress is unresolved, return unresolved.
+    if (simpleIterationProgress == null)
+      return null;
+
+    // 2. Calculate the current direction (we implement this as a separate method).
     PlaybackDirection playbackDirection = timing.direction;
     PlaybackDirection currentDirection = playbackDirection;
     if (playbackDirection != PlaybackDirection.normal && playbackDirection != PlaybackDirection.reverse) {
@@ -666,28 +751,40 @@ class KeyframeEffect extends AnimationEffect {
         currentDirection = PlaybackDirection.reverse;
       }
     }
+
+    // 3. If the current direction is forwards then return the simple iteration progress.
     if (currentDirection == PlaybackDirection.normal) {
       return simpleIterationProgress;
     }
+
+     // Otherwise, return 1.0 - simple iteration progress.
     return 1 - simpleIterationProgress;
   }
 
-  double _calculateIterationProgress(double activeDuration, double localTime) {
+  // 3.10.1. Calculating the transformed progress
+  // https://drafts.csswg.org/web-animations-1/#calculating-the-transformed-progress
+  double _calculateTransformedProgress(double activeDuration, double localTime) {
     _Phase phase = _calculatePhase(activeDuration, localTime);
     double activeTime = _calculateActiveTime(activeDuration, localTime, phase);
 
-    if (activeTime == null)
-      return null;
-
     double overallProgress = _calculateOverallProgress(phase, activeTime);
-    double simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime);
-    double currentIteration = _calculateCurrentIteration(phase, simpleIterationProgress, overallProgress);
+    double simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime, activeDuration);
+    double currentIteration = _calculateCurrentIteration(phase, activeTime, simpleIterationProgress, overallProgress);
     double directedProgress = _calculateDirectedProgress(currentIteration, simpleIterationProgress);
 
-    // https://drafts.csswg.org/web-animations/#calculating-the-transformed-progress
-    // https://drafts.csswg.org/web-animations/#calculating-the-iteration-progress
-    Curve easingCurve = timing._getEasingCurve();
-    return easingCurve.transform(directedProgress);
+    // The transformed progress is calculated from the directed progress using the following steps:
+    //
+    // 1. If the directed progress is unresolved, return unresolved.
+    if (directedProgress == null)
+      return null;
+
+    double iterationDuration = timing.duration;
+    if (iterationDuration != null) {
+      Curve easingCurve = timing._getEasingCurve();
+      return easingCurve.transform(directedProgress);
+    }
+
+    return directedProgress;
   }
 
 }
