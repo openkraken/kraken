@@ -17,7 +17,7 @@ import 'package:kraken/module.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
-typedef KrakenLoadErrorFn = void Function(dynamic error, dynamic stack);
+typedef KrakenLoadErrorFunction = void Function(dynamic error, dynamic stack);
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
@@ -236,13 +236,13 @@ class KrakenController {
   }
 
   // Error handler when load bundle failed.
-  KrakenLoadErrorFn loadErrorFn;
+  KrakenLoadErrorFunction loadErrorFn;
 
   KrakenMethodChannel _methodChannel;
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   KrakenController(String name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false, enableDebug = false, KrakenLoadErrorFn this.loadErrorFn}) {
+      {bool showPerformanceOverlay = false, enableDebug = false, KrakenLoadErrorFunction this.loadErrorFn}) {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay,

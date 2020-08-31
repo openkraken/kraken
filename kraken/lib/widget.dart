@@ -31,7 +31,7 @@ class KrakenWidget extends StatelessWidget {
         // The executable JavaScripts scripts.
         String bundleContent,
         // Callback functions when loading Javascript scripts failed.
-        KrakenLoadErrorFn loadErrorFn})
+        KrakenLoadErrorFunction loadErrorFn})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
