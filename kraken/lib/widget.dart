@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:ui';
 import 'package:kraken/kraken.dart';
 
 class KrakenWidget extends StatelessWidget {
@@ -21,13 +22,23 @@ class KrakenWidget extends StatelessWidget {
   final KrakenController controller;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent})
+      {Key key, String bundleURL, String bundlePath, String bundleContent,
+
+        // Risk use viewportWidth and no assertion error report, and units beside vw uint works fine.
+        bool riskUseViewportWidth = false,
+        // Risk use viewportHeight and no assertion error report, and units beside vh uint works fine.
+        bool riskUseViewportHeight = false
+      })
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
         controller = KrakenController(name, viewportWidth, viewportHeight,
             showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
         super(key: key) {
+    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !riskUseViewportWidth),
+    'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !riskUseViewportHeight),
+      'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
     controller.bundleURL = bundleURL;
     controller.bundlePath = bundlePath;
     controller.bundleContent = bundleContent;
