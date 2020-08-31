@@ -16,29 +16,38 @@ class KrakenWidget extends StatelessWidget {
 
   // the width of krakenWidget
   final double viewportWidth;
+
   // the height of krakenWidget
   final double viewportHeight;
+
   // the kraken controller.
   final KrakenController controller;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent,
-
-        // Risk use viewportWidth and no assertion error report, and units beside vw uint works fine.
-        bool riskUseViewportWidth = false,
-        // Risk use viewportHeight and no assertion error report, and units beside vh uint works fine.
-        bool riskUseViewportHeight = false
-      })
+      {Key key,
+      String bundleURL,
+      String bundlePath,
+      String bundleContent,
+      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version released. (v0.6.0)
+      // Disable viewportWidth check and no assertion error report.
+      bool disableViewportWidthAssertion = false,
+      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version release. (v0.6.0)
+      // Disable viewportHeight check and no assertion error report.
+      bool disableViewportHeightAssertion = false})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
         controller = KrakenController(name, viewportWidth, viewportHeight,
             showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
         super(key: key) {
-    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !riskUseViewportWidth),
-    'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
-    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !riskUseViewportHeight),
-      'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
+    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
+        'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
+        'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
     controller.bundleURL = bundleURL;
     controller.bundlePath = bundlePath;
     controller.bundleContent = bundleContent;
