@@ -16,6 +16,9 @@ import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'bundle.dart';
 
+// Error handler when load bundle failed.
+typedef KrakenLoadErrorFn = void Function(dynamic error, dynamic stack);
+
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
 /// TargetPlatform, override the default platform to one that is.
@@ -232,11 +235,14 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  // Error handler when load bundle failed.
+  KrakenLoadErrorFn loadErrorFn;
+
   KrakenMethodChannel _methodChannel;
   KrakenMethodChannel get methodChannel => _methodChannel;
 
   KrakenController(String name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false, enableDebug = false}) {
+      {bool showPerformanceOverlay = false, enableDebug = false, KrakenLoadErrorFn this.loadErrorFn}) {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay,
@@ -333,10 +339,16 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
-    // TODO native public API need to support KrakenViewController
     String bundleURL =
         _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
-    _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+
+    if (loadErrorFn != null) {
+      try {
+        _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+      } catch(e, stack) { loadErrorFn(e, stack);}
+    } else {
+      _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+    }
   }
 
   // execute preloaded javascript source
@@ -348,8 +360,6 @@ class KrakenController {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
         emitUIEvent(_view.contextId, json);
       });
-    } else {
-      print('ERROR: No bundle found.');
     }
   }
 }

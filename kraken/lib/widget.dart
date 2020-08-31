@@ -21,12 +21,22 @@ class KrakenWidget extends StatelessWidget {
   final KrakenController controller;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent})
+      {Key key,
+        // The remote URL which contains executable JavaScript scripts.
+        // This options have higher priority than bundlePath, bundleContent
+        String bundleURL,
+        // The local filesystem path which contains executable JavaScript scripts.
+        // This options have higher priority than bundleContent
+        String bundlePath,
+        // The executable JavaScripts scripts.
+        String bundleContent,
+        // Callback functions when loading Javascript scripts failed.
+        KrakenLoadErrorFn loadErrorFn})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         name = name,
         controller = KrakenController(name, viewportWidth, viewportHeight,
-            showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
+            showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null, loadErrorFn: loadErrorFn),
         super(key: key) {
     controller.bundleURL = bundleURL;
     controller.bundlePath = bundlePath;
