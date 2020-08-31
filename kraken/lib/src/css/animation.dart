@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:core';
 
 import 'package:flutter/animation.dart';
 import 'package:kraken/css.dart';
@@ -6,7 +7,6 @@ import 'package:kraken/element.dart';
 import 'package:kraken/src/css/values/keywords.dart';
 import 'package:kraken/src/element/event.dart';
 import 'package:flutter/scheduler.dart';
-import 'dart:core';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
 enum AnimationPlayState { idle, running, paused, finished }
@@ -493,6 +493,11 @@ class KeyframeEffect extends AnimationEffect {
   CSSStyleDeclaration style;
   List<_Interpolation> _interpolations;
   double _iterationProgress;
+
+  // Speed control.
+  // The rate of play of an animation can be controlled by setting its playback rate.
+  // For example, setting a playback rate of 2 will cause the animation’s current time to increase at twice the rate of its timeline.
+  // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
   KeyframeEffect(this.style, List<Keyframe> keyframes, EffectTiming options) {
@@ -672,8 +677,7 @@ class KeyframeEffect extends AnimationEffect {
     double activeTime = _calculateActiveTime(activeDuration, localTime, phase);
 
     if (activeTime == null)
-      // When activeTime is null, the interation was completed.
-      return 1.0;
+      return null;
 
     double overallProgress = _calculateOverallProgress(phase, activeTime);
     double simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime);
