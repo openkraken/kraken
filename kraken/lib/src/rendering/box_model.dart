@@ -449,15 +449,27 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    if (maxWidth != null) {
+    // Max width does not work with following conditions on non replaced elements
+    // 1. flex item
+    // 2. position absolute or fixed
+    RenderBoxModel hostRenderBoxModel = hostElement.getRenderBoxModel();
+    bool isIntrisicBox = hostRenderBoxModel is RenderIntrinsic;
+    bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
+    bool isParentFlexLayout = hostRenderBoxModel.parent is RenderFlexLayout;
+    double contentMaxWidth;
+    if (isIntrisicBox || (!isPositioned && !isParentFlexLayout)) {
+      contentMaxWidth = maxWidth;
+    }
+
+    if (contentMaxWidth != null) {
       if (width == null) {
-        if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
-          width = maxWidth;
+        if (intrinsicWidth == null || intrinsicWidth > contentMaxWidth) {
+          width = contentMaxWidth;
         } else {
           width = intrinsicWidth;
         }
-      } else if (width > maxWidth) {
-        width = maxWidth;
+      } else if (width > contentMaxWidth) {
+        width = contentMaxWidth;
       }
     }
 
