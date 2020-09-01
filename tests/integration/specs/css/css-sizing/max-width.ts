@@ -33,6 +33,21 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
+  it("should not work with display inline element", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        height: '1000px',
+        maxWidth: '300px',
+        display: 'inline',
+      }
+    }, [
+      createText('This text should half visible')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
 
   it('should not work with positioned element', async () => {
     let flexbox;
