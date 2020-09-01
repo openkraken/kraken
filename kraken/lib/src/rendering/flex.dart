@@ -1296,12 +1296,16 @@ class RenderFlexLayout extends RenderLayoutBox {
               case FlexDirection.row:
               case FlexDirection.rowReverse:
                 innerConstraints = BoxConstraints(
-                    minWidth: minChildExtent, maxWidth: maxChildExtent, maxHeight: contentConstraints.maxHeight);
+                  minWidth: minChildExtent,
+                  maxWidth: maxChildExtent,
+                );
                 break;
               case FlexDirection.column:
               case FlexDirection.columnReverse:
                 innerConstraints = BoxConstraints(
-                    maxWidth: contentConstraints.maxWidth, minHeight: minChildExtent, maxHeight: maxChildExtent);
+                  minHeight: minChildExtent,
+                  maxHeight: maxChildExtent
+                );
                 break;
             }
           }
