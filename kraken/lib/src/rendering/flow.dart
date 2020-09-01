@@ -462,13 +462,19 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
 
-      double candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
+      double childDistance = child.getDistanceToActualBaseline(baseline);
+      // Use child's height if child has no baseline
+      // Text box always has baseline
+      if (childDistance == null && child is RenderBoxModel) {
+        childDistance = child.height;
+      }
+
+      if (childDistance != null) {
+        childDistance += childParentData.offset.dy;
         if (result != null)
-          result = math.min(result, candidate);
+          result = math.min(result, childDistance);
         else
-          result = candidate;
+          result = childDistance;
       }
       child = childParentData.nextSibling;
     }
