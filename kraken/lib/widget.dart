@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/rendering.dart';
 
 class KrakenWidget extends StatelessWidget {
   // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
@@ -15,23 +16,23 @@ class KrakenWidget extends StatelessWidget {
 
   // the width of krakenWidget
   final double viewportWidth;
+
   // the height of krakenWidget
   final double viewportHeight;
-  // the kraken controller.
-  final KrakenController controller;
+
+  final String bundleURL;
+  final String bundlePath;
+  final String bundleContent;
 
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
       {Key key, String bundleURL, String bundlePath, String bundleContent})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
+        bundleURL = bundleURL,
+        bundlePath = bundlePath,
+        bundleContent = bundleContent,
         name = name,
-        controller = KrakenController(name, viewportWidth, viewportHeight,
-            showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
-        super(key: key) {
-    controller.bundleURL = bundleURL;
-    controller.bundlePath = bundlePath;
-    controller.bundleContent = bundleContent;
-  }
+        super(key: key);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -42,25 +43,38 @@ class KrakenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KrakenRenderWidget(controller);
+    return KrakenRenderWidget(this);
   }
 }
 
 class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const KrakenRenderWidget(KrakenController controller, {Key key})
-      : _controller = controller,
+  const KrakenRenderWidget(KrakenWidget widget, {Key key})
+      : _widget = widget,
         super(key: key);
 
-  final KrakenController _controller;
+  final KrakenWidget _widget;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _controller.view.getRootRenderObject();
+    KrakenController controller = KrakenController(_widget.name, _widget.viewportWidth, _widget.viewportHeight,
+        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+        bundleURL: _widget.bundleURL,
+        bundlePath: _widget.bundlePath,
+        bundleContent: _widget.bundleContent);
+    return controller.view.getRootRenderObject();
   }
 
   @override
-  _KrakenRenderElement createElement() => _KrakenRenderElement(this);
+  void didUnmountRenderObject(covariant RenderObject renderObject) {
+    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    controller.dispose();
+  }
+
+  @override
+  _KrakenRenderElement createElement() {
+    return _KrakenRenderElement(this);
+  }
 }
 
 class _KrakenRenderElement extends SingleChildRenderObjectElement {
@@ -69,14 +83,9 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   @override
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
-    await widget._controller.loadBundle();
-    await widget._controller.run();
-  }
-
-  @override
-  void unmount() {
-    super.unmount();
-    widget._controller.dispose();
+    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    await controller.loadBundle();
+    await controller.run();
   }
 
   @override

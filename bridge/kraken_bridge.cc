@@ -43,7 +43,7 @@ void disposeAllBridge() {
   inited = false;
 }
 
-int32_t searchForAvailablecontextId() {
+int32_t searchForAvailableContextId() {
   for (int i = 0; i < maxPoolSize; i ++) {
     if (contextPool[i] == nullptr) {
       return i;
@@ -78,7 +78,7 @@ void disposeContext(int32_t contextId) {
 int32_t allocateNewContext() {
   poolIndex++;
   if (poolIndex >= maxPoolSize) {
-    return searchForAvailablecontextId();
+    poolIndex = searchForAvailableContextId();
   }
 
   assert(contextPool[poolIndex] == nullptr && (std::string("can not allocate JSBridge at index") +
