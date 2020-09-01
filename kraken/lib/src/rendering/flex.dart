@@ -42,21 +42,6 @@ class RenderFlexParentData extends RenderLayoutParentData {
       '${super.toString()}; flexGrow=$flexGrow; flexShrink=$flexShrink; flexBasis=$flexBasis; alignSelf=$alignSelf';
 }
 
-FlexDirection _flipFlexDirection(FlexDirection direction) {
-  assert(direction != null);
-  switch (direction) {
-    case FlexDirection.row:
-      return FlexDirection.column;
-    case FlexDirection.column:
-      return FlexDirection.row;
-    case FlexDirection.rowReverse:
-      return FlexDirection.columnReverse;
-    case FlexDirection.columnReverse:
-      return FlexDirection.rowReverse;
-  }
-  return null;
-}
-
 bool _startIsTopLeft(FlexDirection direction) {
   assert(direction != null);
 
@@ -1479,6 +1464,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         AlignSelf alignSelf = childParentData.alignSelf;
         double crossStartAddedOffset = crossAxisStartPadding + crossAxisStartBorder + childCrossAxisStartMargin;
+        double contentCrossSize = _getContentCrossSize();
 
         if (alignSelf == AlignSelf.auto) {
           switch (alignItems) {
@@ -1488,11 +1474,11 @@ class RenderFlexLayout extends RenderLayoutBox {
               break;
             case AlignItems.flexEnd:
             case AlignItems.end:
-              childCrossPosition = crossAxisStartPadding + crossAxisStartBorder + contentSize.height -
+              childCrossPosition = crossAxisStartPadding + crossAxisStartBorder + contentCrossSize -
                 _getCrossAxisExtent(child) - childCrossAxisEndMargin;
               break;
             case AlignItems.center:
-              childCrossPosition = crossStartAddedOffset + (crossSize - _getCrossAxisExtent(child)) / 2.0;
+              childCrossPosition = crossStartAddedOffset + (contentCrossSize - _getCrossAxisExtent(child)) / 2.0;
               break;
             case AlignItems.baseline:
               // Distance from top to baseline of child
@@ -1513,11 +1499,11 @@ class RenderFlexLayout extends RenderLayoutBox {
               break;
             case AlignSelf.flexEnd:
             case AlignSelf.end:
-              childCrossPosition = crossAxisStartPadding + crossAxisStartBorder + contentSize.height -
+              childCrossPosition = crossAxisStartPadding + crossAxisStartBorder + contentCrossSize -
                 _getCrossAxisExtent(child) - childCrossAxisEndMargin;
               break;
             case AlignSelf.center:
-              childCrossPosition = crossStartAddedOffset + (crossSize - _getCrossAxisExtent(child)) / 2.0;
+              childCrossPosition = crossStartAddedOffset + (contentCrossSize - _getCrossAxisExtent(child)) / 2.0;
               break;
             case AlignSelf.baseline:
               // Distance from top to baseline of child
@@ -1640,6 +1626,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     } else {
       return Offset(mainAxisOffset, crossAxisOffset);
     }
+  }
+
+  /// Get cross size of  content size
+  double _getContentCrossSize() {
+    if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+      return contentSize.height;
+    }
+    return contentSize.width;
   }
 
   @override
