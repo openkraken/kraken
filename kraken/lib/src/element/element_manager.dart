@@ -116,15 +116,17 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(int targetId) {
-    assert(targetId != null);
-    _eventTargets.remove(targetId);
+  void removeTarget(Node target) {
+    assert(target.targetId != null);
+    removeChildrenTarget(target);
+    _eventTargets.remove(target.targetId);
   }
 
   void removeChildrenTarget(Node target) {
     target?.childNodes?.forEach((element) {
       removeChildrenTarget(element);
-      removeTarget(element.targetId);
+      assert(element.targetId != null);
+      _eventTargets.remove(element.targetId);
     });
   }
 
@@ -178,8 +180,7 @@ class ElementManager {
     // remove node reference to ElementManager
     target.elementManager = null;
 
-    removeChildrenTarget(target);
-    removeTarget(targetId);
+    removeTarget(target);
   }
 
   void setProperty(int targetId, String key, value) {
