@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
+import 'package:kraken/rendering.dart';
 
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
@@ -86,7 +87,7 @@ class ElementManager {
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
-  KrakenViewController controller;
+  KrakenController controller;
 
   final double viewportWidth;
   final double viewportHeight;
@@ -94,11 +95,13 @@ class ElementManager {
   List<VoidCallback> _detachCallbacks = [];
 
   ElementManager(double viewportWidth, double viewportHeight,
-      {KrakenViewController this.controller, this.showPerformanceOverlayOverride})
+      {KrakenController this.controller, this.showPerformanceOverlayOverride})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight {
     _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
-    _root = _rootElement.getRenderBoxModel();
+    RenderBoxModel root = _rootElement.getRenderBoxModel();
+    root.controller = controller;
+    _root = root;
     setEventTarget(_rootElement);
     setEventTarget(Window(this));
   }
@@ -116,9 +119,10 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(int targetId) {
-    assert(targetId != null);
-    _eventTargets.remove(targetId);
+  void removeTarget(Node target) {
+    assert(target.targetId != null);
+    target.childNodes.forEach(removeTarget);
+    _eventTargets.remove(target.targetId);
   }
 
   void setDetachCallback(VoidCallback callback) {
@@ -167,10 +171,11 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
-    target?.parentNode?.removeChild(target);
-    // remove node reference to ElementManager
+    target.parentNode?.removeChild(target);
+    // Remove node reference to ElementManager
     target.elementManager = null;
-    removeTarget(targetId);
+
+    removeTarget(target);
   }
 
   void setProperty(int targetId, String key, value) {
@@ -374,6 +379,7 @@ class ElementManager {
       callback();
     });
     _detachCallbacks.clear();
+    _rootElement = null;
   }
 
   dynamic applyAction(String action, List payload) {

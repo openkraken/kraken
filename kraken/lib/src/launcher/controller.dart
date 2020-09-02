@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 import 'bundle.dart';
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
@@ -51,7 +52,7 @@ class KrakenViewController {
       _contextId = initBridge();
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
+        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
   }
 
   // the manager which controller all renderObjects of Kraken
@@ -59,6 +60,7 @@ class KrakenViewController {
 
   // index value which identify javascript runtime context.
   int _contextId;
+
   int get contextId {
     return _contextId;
   }
@@ -68,6 +70,11 @@ class KrakenViewController {
 
   // print debug message when rendering.
   bool enableDebug;
+
+  // Kraken have already disposed
+  bool _disposed = false;
+
+  bool get disposed => _disposed;
 
   // regenerate generate renderObject created by kraken but not affect jsBridge context.
   // test used only.
@@ -80,11 +87,12 @@ class KrakenViewController {
     }
     detachView();
     _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: this);
+        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
     attachView(parent, previousSibling);
   }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {
+    assert(!_disposed, "Kraken have already disposed");
     evaluateScripts(_contextId, code, source, 0);
   }
 
@@ -95,16 +103,22 @@ class KrakenViewController {
 
   // dispose controller and recycle all resources.
   void dispose() {
+    // break circle reference
+    (_elementManager.getRootRenderObject() as RenderBoxModel).controller = null;
+
     detachView();
     disposeBridge(_contextId);
 
     // break circle reference
-    _elementManager.controller._elementManager = null;
+    _elementManager.getRootElement();
+    _elementManager.controller = null;
     _elementManager = null;
+    _disposed = true;
   }
 
   // export Uint8List bytes from rendered result.
   Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = BODY_ID]) {
+    assert(!_disposed, "Kraken have already disposed");
     Completer<Uint8List> completer = Completer();
     try {
       if (!_elementManager.existsTarget(eventTargetId)) {
@@ -184,6 +198,7 @@ class KrakenViewController {
 class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
   // the websocket instance
   KrakenWebSocket _websocket;
+
   KrakenWebSocket get websocket {
     if (_websocket == null) {
       _websocket = KrakenWebSocket();
@@ -194,6 +209,7 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 
   // the MQTT instance
   MQTT _mqtt;
+
   MQTT get mqtt {
     if (_mqtt == null) {
       _mqtt = MQTT();
@@ -218,6 +234,7 @@ class KrakenModuleController with TimerMixin, ScheduleFrameMixin {
 class KrakenController {
   static Map<int, KrakenController> _controllerMap = Map();
   static Map<String, int> _nameIdMap = Map();
+
   static KrakenController getControllerOfJSContextId(int contextId) {
     if (!_controllerMap.containsKey(contextId)) {
       return null;
@@ -233,10 +250,21 @@ class KrakenController {
   }
 
   KrakenMethodChannel _methodChannel;
+
   KrakenMethodChannel get methodChannel => _methodChannel;
 
+  final String name;
+
   KrakenController(String name, double viewportWidth, double viewportHeight,
-      {bool showPerformanceOverlay = false, enableDebug = false}) {
+      {bool showPerformanceOverlay = false,
+      enableDebug = false,
+      String bundleURL,
+      String bundlePath,
+      String bundleContent})
+      : name = name,
+        _bundleURL = bundleURL,
+        _bundlePath = bundlePath,
+        _bundleContent = bundleContent {
     _methodChannel = KrakenMethodChannel(name, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay,
@@ -252,11 +280,13 @@ class KrakenController {
   }
 
   KrakenViewController _view;
+
   KrakenViewController get view {
     return _view;
   }
 
   KrakenModuleController _module;
+
   KrakenModuleController get module {
     return _module;
   }
@@ -271,6 +301,7 @@ class KrakenController {
 
   // reload current kraken view.
   void reload() async {
+    assert(!_view._disposed, "Kraken have already disposed");
     RenderObject root = _view.getRootRenderObject();
     RenderObject parent = root.parent;
     RenderObject previousSibling;
@@ -292,6 +323,7 @@ class KrakenController {
   }
 
   void reloadWithUrl(String url) async {
+    assert(!_view._disposed, "Kraken have already disposed");
     _bundleURL = url;
     await reload();
   }
@@ -301,24 +333,31 @@ class KrakenController {
     _module.dispose();
     _controllerMap[_view.contextId] = null;
     _controllerMap.remove(_view.contextId);
+    _nameIdMap.remove(name);
   }
 
   String _bundleContent;
+
   String get bundleContent => _bundleContent;
+
   set bundleContent(String value) {
     if (value == null) return;
     _bundleContent = value;
   }
 
   String _bundlePath;
+
   String get bundlePath => _bundlePath;
+
   set bundlePath(String value) {
     if (value == null) return;
     _bundlePath = value;
   }
 
   String _bundleURL;
+
   String get bundleURL => _bundleURL;
+
   set bundleURL(String value) {
     if (value == null) return;
     _bundleURL = value;
@@ -330,6 +369,7 @@ class KrakenController {
     String bundlePathOverride,
     String bundleURLOverride,
   }) async {
+    assert(!_view._disposed, "Kraken have already disposed");
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
@@ -341,6 +381,7 @@ class KrakenController {
 
   // execute preloaded javascript source
   void run() async {
+    assert(!_view._disposed, "Kraken have already disposed");
     if (_bundle != null) {
       await _bundle.run(_view.contextId);
       // trigger window load event

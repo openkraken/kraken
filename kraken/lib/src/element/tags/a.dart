@@ -25,7 +25,7 @@ class AnchorElement extends Element {
     super.handleClick(event);
     if (_href == null) return;
     Uri uri = Uri.parse(_href);
-    KrakenController rootController = elementManager.controller.rootController;
+    KrakenController rootController = elementManager.controller.view.rootController;
     String sourceUrl = rootController.bundleURL;
     String scheme;
     if (!uri.hasScheme) {
@@ -38,7 +38,7 @@ class AnchorElement extends Element {
     } else {
       scheme = uri.scheme;
     }
-    elementManager.controller.handleNavigationAction(sourceUrl, _href, _getNavigationType(scheme));
+    elementManager.controller.view.handleNavigationAction(sourceUrl, _href, _getNavigationType(scheme));
   }
 
   KrakenNavigationType _getNavigationType(String scheme) {
