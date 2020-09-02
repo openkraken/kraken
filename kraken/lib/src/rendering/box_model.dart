@@ -9,6 +9,7 @@ import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'padding.dart';
 
@@ -178,6 +179,9 @@ class RenderBoxModel extends RenderBox with
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
   RenderPositionHolder renderPositionHolder;
+
+  // Kraken controller reference which control all kraken created renderObjects.
+  KrakenController controller;
 
   bool _debugHasBoxLayout = false;
 
