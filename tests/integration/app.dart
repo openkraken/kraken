@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -55,7 +56,7 @@ void main() {
       List<Future<String>> testResults = [];
 
       for (int i = 0; i < widgets.length; i ++) {
-        int contextId = widgets[i].controller.view.contextId;
+        int contextId = KrakenController.getControllerOfName(runningWidgets[i]).view.contextId;
         initTestFramework(contextId);
         addJSErrorListener(contextId, (String err) {
           print(err);
