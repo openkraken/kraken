@@ -1128,7 +1128,7 @@ class Element extends Node
 
   void _eventResponder(Event event) {
     String json = jsonEncode([targetId, event]);
-    emitUIEvent(elementManager.controller.contextId, json);
+    emitUIEvent(elementManager.controller.view.contextId, json);
   }
 
   void click() {

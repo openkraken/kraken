@@ -600,4 +600,138 @@ describe('flexbox flex-grow', () => {
     BODY.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it('should work with flex item of margin and not width when flex-direction is row', async () => {
+    let containingBlock = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'row',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            display: 'flex',
+            'justify-content': 'center',
+            backgroundColor: 'yellow',
+            margin: '10px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            height: '100px',
+            'background-color': 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin and not width when flex-direction is row-reverse', async () => {
+    let containingBlock = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'row-reverse',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            display: 'flex',
+            'justify-content': 'center',
+            backgroundColor: 'yellow',
+            margin: '10px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            height: '100px',
+            'background-color': 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin and not width when flex-direction is column', async () => {
+    let containingBlock = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'column',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            display: 'flex',
+            'justify-content': 'center',
+            backgroundColor: 'yellow',
+            margin: '10px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            'background-color': 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it('should work with flex item of margin and not width when flex-direction is column-reverse', async () => {
+    let containingBlock = createElement('div', {
+        style: {
+          position: 'relative',
+          width: '100px',
+          height: '100px',
+          'background-color': 'red',
+          display: 'flex',
+          'flex-direction': 'column-reverse',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            display: 'flex',
+            'justify-content': 'center',
+            backgroundColor: 'yellow',
+            margin: '10px',
+          },
+        }),
+        createElement('div', {
+          style: {
+            'flex-grow': '1',
+            'background-color': 'blue',
+          }
+        }),
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
 });
