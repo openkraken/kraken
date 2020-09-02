@@ -395,8 +395,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       double childDistance = child.getDistanceToActualBaseline(baseline);
       // Use child's height if child has no baseline
       // Text box always has baseline
-      if (childDistance == null && child is RenderBoxModel) {
-        childDistance = child.height;
+      if (childDistance == null && child is RenderBoxModel && child.contentSize != null) {
+        childDistance = child.contentSize.height;
       }
 
       if (childDistance != null) {
@@ -860,12 +860,18 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (lineHeight != null) {
           childLeading = lineHeight - child.size.height;
         }
+
+        double childMarginTop = 0;
+        if (child is RenderBoxModel) {
+          RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+          childMarginTop = childRenderBoxModel.marginTop;
+        }
         maxSizeAboveBaseline = math.max(
           childAscent + childLeading / 2,
           maxSizeAboveBaseline,
         );
         maxSizeBelowBaseline = math.max(
-          child.size.height - childAscent + childLeading / 2,
+          childMarginTop + child.size.height - childAscent + childLeading / 2,
           maxSizeBelowBaseline,
         );
         runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
@@ -1306,7 +1312,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         crossSize = contentSize.width;
         break;
     }
-
     child = placeholderChild != null ? placeholderChild : firstChild;
 
     /// Set offset of children

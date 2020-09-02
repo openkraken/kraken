@@ -465,8 +465,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       double childDistance = child.getDistanceToActualBaseline(baseline);
       // Use child's height if child has no baseline
       // Text box always has baseline
-      if (childDistance == null && child is RenderBoxModel) {
-        childDistance = child.height;
+      if (childDistance == null && child is RenderBoxModel && child.contentSize != null) {
+        childDistance = child.contentSize.height;
       }
 
       if (childDistance != null) {

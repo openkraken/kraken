@@ -600,10 +600,9 @@ class RenderBoxModel extends RenderBox with
     maxScrollableX = contentSize.width + paddingLeft + paddingRight;
     maxScrollableY = contentSize.height + paddingTop + paddingBottom;
 
-    Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
-
-    scrollableViewportWidth = _contentSize.width + paddingLeft + paddingRight;
-    scrollableViewportHeight = _contentSize.height + paddingTop + paddingBottom;
+    Size boxSize = contentConstraints.constrain(contentSize);
+    scrollableViewportWidth = boxSize.width + paddingLeft + paddingRight;
+    scrollableViewportHeight = boxSize.height + paddingTop + paddingBottom;
 
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
@@ -611,8 +610,8 @@ class RenderBoxModel extends RenderBox with
     if (borderEdge != null) {
       boxSize = wrapBorderSize(boxSize);
     }
-
-    return constraints.constrain(boxSize);
+    _contentSize = constraints.constrain(boxSize);
+    return _contentSize;
   }
 
   // The contentSize of layout box
