@@ -70,6 +70,21 @@ Object.defineProperties(window, {
   },
   __clearListeners__: {
     get() { return windowExtension.__clearListeners__.bind(windowExtension); }
+  },
+  scroll: {
+    get() { return document.body.scroll.bind(document.body); }
+  },
+  scrollBy: {
+    get() { return document.body.scrollBy.bind(document.body); }
+  },
+  scrollTo: {
+    get() { return document.body.scrollTo.bind(document.body); }
+  },
+  scrollX: {
+    get() { return document.body.scrollLeft; }
+  },
+  scrollY: {
+    get() { return document.body.scrollTop; }
   }
 });
 
