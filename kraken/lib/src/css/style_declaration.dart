@@ -250,6 +250,7 @@ class CSSStyleDeclaration {
   List<StyleChangeListener> _styleChangeListeners = [];
 
   Map<String, String> _properties = {};
+  Map<String, String> _animationProperties = {};
 
   Map<String, List> _transitions = {};
 
@@ -287,7 +288,7 @@ class CSSStyleDeclaration {
     return _propertyRunningTransition[property] != null;
   }
 
-  void _transition(String propertyName, begin, end){
+  void _transition(String propertyName, begin, end) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName];
       animation.cancel();
@@ -312,6 +313,7 @@ class CSSStyleDeclaration {
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
+      _setTransitionEndProperty(propertyName, end);
       _propertyRunningTransition[propertyName] = null;
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.end);
     };
@@ -320,6 +322,12 @@ class CSSStyleDeclaration {
     animation.play();
   }
 
+  _setTransitionEndProperty(String propertyName, value) {
+    String prevValue = _properties[propertyName];
+    if (value == prevValue) return;
+    _properties[propertyName] = value;
+    _invokePropertyChangedListener(propertyName, prevValue, value);
+  }
 
   /// Textual representation of the declaration block.
   /// Setting this attribute changes the style.
@@ -337,16 +345,31 @@ class CSSStyleDeclaration {
   /// The number of properties.
   int get length => _properties.length;
 
+  /// Returns a property name.
+  String item(int index) {
+    return _properties.keys.elementAt(index);
+  }
+
   /// Returns the property value given a property name.
   /// value is a String containing the value of the property.
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
+    return _animationProperties[propertyName] ?? _properties[propertyName] ?? EMPTY_STRING;
+  }
+
+  String getStylePropertyValue(String propertyName) {
     return _properties[propertyName] ?? EMPTY_STRING;
   }
 
-  /// Returns a property name.
-  String item(int index) {
-    return _properties.keys.elementAt(index);
+  String removeAimationProperty(String propertyName) {
+    String prevValue = EMPTY_STRING;
+
+    if (_animationProperties.containsKey(propertyName)) {
+       prevValue = _animationProperties[propertyName];
+      _animationProperties.remove(propertyName);
+    }
+
+    return prevValue;
   }
 
   /// Removes a property from the CSS declaration block.
@@ -530,7 +553,12 @@ class CSSStyleDeclaration {
       return _transition(propertyName, prevValue, normalizedValue);
     }
 
-    _properties[propertyName] = normalizedValue;
+    if (fromAnimation) {
+      _animationProperties[propertyName] = normalizedValue;
+    } else {
+      _properties[propertyName] = normalizedValue;
+    }
+    
     _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
   }
 
