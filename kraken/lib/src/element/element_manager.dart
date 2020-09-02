@@ -118,16 +118,8 @@ class ElementManager {
 
   void removeTarget(Node target) {
     assert(target.targetId != null);
-    removeChildrenTarget(target);
+    target.childNodes.forEach(removeTarget);
     _eventTargets.remove(target.targetId);
-  }
-
-  void removeChildrenTarget(Node target) {
-    target?.childNodes?.forEach((element) {
-      removeChildrenTarget(element);
-      assert(element.targetId != null);
-      _eventTargets.remove(element.targetId);
-    });
   }
 
   void setDetachCallback(VoidCallback callback) {
@@ -176,8 +168,8 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
-    target?.parentNode?.removeChild(target);
-    // remove node reference to ElementManager
+    target.parentNode?.removeChild(target);
+    // Remove node reference to ElementManager
     target.elementManager = null;
 
     removeTarget(target);
