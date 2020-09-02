@@ -1,4 +1,4 @@
-import { EventTarget} from './document/events/event-target';
+import { EventTarget } from './document/events/event-target';
 import { krakenWindow } from './bridge';
 import { WINDOW } from './document/events/event-target';
 import { registerGlobalEventHandlers } from './global-event-handlers';
