@@ -121,9 +121,9 @@ class ElementManager {
     _eventTargets.remove(targetId);
   }
 
-  void removeChildrenTag(Node target) {
+  void removeChildrenTarget(Node target) {
     target?.childNodes?.forEach((element) {
-      removeChildrenTag(element);
+      removeChildrenTarget(element);
       removeTarget(element.targetId);
     });
   }
@@ -178,7 +178,7 @@ class ElementManager {
     // remove node reference to ElementManager
     target.elementManager = null;
 
-    removeChildrenTag(target);
+    removeChildrenTarget(target);
     removeTarget(targetId);
   }
 
