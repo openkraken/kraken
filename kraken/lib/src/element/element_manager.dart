@@ -121,6 +121,13 @@ class ElementManager {
     _eventTargets.remove(targetId);
   }
 
+  void removeChildrenTag(Node target) {
+    target?.childNodes?.forEach((element) {
+      removeChildrenTag(element);
+      removeTarget(element.targetId);
+    });
+  }
+
   void setDetachCallback(VoidCallback callback) {
     _detachCallbacks.add(callback);
   }
@@ -170,6 +177,8 @@ class ElementManager {
     target?.parentNode?.removeChild(target);
     // remove node reference to ElementManager
     target.elementManager = null;
+
+    removeChildrenTag(target);
     removeTarget(targetId);
   }
 
