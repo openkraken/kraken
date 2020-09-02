@@ -119,9 +119,10 @@ class ElementManager {
     return _eventTargets.containsKey(id);
   }
 
-  void removeTarget(int targetId) {
-    assert(targetId != null);
-    _eventTargets.remove(targetId);
+  void removeTarget(Node target) {
+    assert(target.targetId != null);
+    target.childNodes.forEach(removeTarget);
+    _eventTargets.remove(target.targetId);
   }
 
   void setDetachCallback(VoidCallback callback) {
@@ -170,10 +171,11 @@ class ElementManager {
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
 
-    target?.parentNode?.removeChild(target);
-    // remove node reference to ElementManager
+    target.parentNode?.removeChild(target);
+    // Remove node reference to ElementManager
     target.elementManager = null;
-    removeTarget(targetId);
+
+    removeTarget(target);
   }
 
   void setProperty(int targetId, String key, value) {
