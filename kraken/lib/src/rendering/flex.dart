@@ -750,8 +750,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
 
-    double maxScrollableWidth = 0.0;
-    double maxScrollableHeight = 0.0;
+    Map<int, double> maxScrollableWidthMap = Map();
+    Map<int, double> maxScrollableHeightMap = Map();
 
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -808,8 +808,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // update max scrollable size
       if (child is RenderBoxModel) {
-        maxScrollableWidth += math.max(child.maxScrollableSize.width, child.size.width);
-        maxScrollableHeight += math.max(child.maxScrollableSize.height, child.size.height);
+        maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, child.size.width);
+        maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, child.size.height);
       }
 
       // If container has no main size, get minimum content based size
@@ -1259,6 +1259,13 @@ class RenderFlexLayout extends RenderLayoutBox {
             }
           }
           child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+
+          // update max scrollable size
+          if (child is RenderBoxModel) {
+            maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, child.size.width);
+            maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, child.size.height);
+          }
+
           crossSize = math.max(crossSize, _getCrossAxisExtent(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;
@@ -1290,6 +1297,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
+
+
+    double maxScrollableWidth = 0.0;
+    double maxScrollableHeight = 0.0;
+
+    maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth += value);
+    maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight += value);
 
     switch (_flexDirection) {
       case FlexDirection.row:
