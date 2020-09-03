@@ -18,7 +18,7 @@ import 'package:kraken/rendering.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
-typedef KrakenLoadErrorFunction = void Function(dynamic error, dynamic stack);
+typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
@@ -253,7 +253,7 @@ class KrakenController {
   }
 
   // Error handler when load bundle failed.
-  KrakenLoadErrorFunction loadErrorFn;
+  LoadErrorHandler loadErrorHandler;
 
   KrakenMethodChannel _methodChannel;
 
@@ -266,8 +266,8 @@ class KrakenController {
       enableDebug = false,
       String bundleURL,
       String bundlePath,
-      String bundleContent, 
-      KrakenLoadErrorFunction this.loadErrorFn})
+      String bundleContent,
+      LoadErrorHandler this.loadErrorHandler})
       : name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -383,10 +383,10 @@ class KrakenController {
     String bundleURL =
         _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
 
-    if (loadErrorFn != null) {
+    if (loadErrorHandler != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorFn(e, stack);}
+      } catch(e, stack) { loadErrorHandler(e, stack);}
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
     }

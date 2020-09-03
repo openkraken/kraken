@@ -25,11 +25,13 @@ class KrakenWidget extends StatelessWidget {
   final String bundlePath;
   final String bundleContent;
 
-  KrakenWidget(String name, double viewportWidth, double viewportHeight,
+  final LoadErrorHandler loadErrorHandler;
+
+  KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
       {Key key,
-      String bundleURL,
-      String bundlePath,
-      String bundleContent,
+      this.bundleURL,
+      this.bundlePath,
+      this.bundleContent,
       // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
       // Maybe got unexpected error when change to other values, use this at your own risk!
       // We will fixed this on next version released. (v0.6.0)
@@ -41,14 +43,8 @@ class KrakenWidget extends StatelessWidget {
       // Disable viewportHeight check and no assertion error report.
       bool disableViewportHeightAssertion = false,
       // Callback functions when loading Javascript scripts failed.
-      KrakenLoadErrorFunction loadErrorFn})
-      : viewportWidth = viewportWidth,
-        viewportHeight = viewportHeight,
-        bundleURL = bundleURL,
-        bundlePath = bundlePath,
-        bundleContent = bundleContent,
-        name = name,
-        super(key: key) {
+      this.loadErrorHandler})
+      : super(key: key) {
     assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -82,6 +78,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         bundleURL: _widget.bundleURL,
         bundlePath: _widget.bundlePath,
+        loadErrorHandler: _widget.loadErrorHandler,
         bundleContent: _widget.bundleContent);
     return controller.view.getRootRenderObject();
   }
