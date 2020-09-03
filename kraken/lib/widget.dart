@@ -24,8 +24,12 @@ class KrakenWidget extends StatelessWidget {
   final String bundlePath;
   final String bundleContent;
 
+  // The animationController of Flutter Route object.
+  // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
+  final AnimationController animationController;
+
   KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent})
+      {Key key, String bundleURL, String bundlePath, String bundleContent, this.animationController})
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         bundleURL = bundleURL,
@@ -85,7 +89,17 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
-    await controller.run();
+    // Execute JavaScript scripts will block the Flutter UI Threads.
+    // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
+    if (controller.bundleURL == null && widget._widget.animationController != null) {
+      widget._widget.animationController.addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          controller.run();
+        }
+      });
+    } else {
+      await controller.run();
+    }
   }
 
   @override
