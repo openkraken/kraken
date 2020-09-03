@@ -445,42 +445,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     return null;
   }
 
-  @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return computeDistanceToHighestActualBaseline(baseline);
-  }
-
-  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    double result;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final RenderLayoutParentData childParentData = child.parentData;
-
-      // Positioned element doesn't involve in baseline alignment
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-
-      double childDistance = child.getDistanceToActualBaseline(baseline);
-      // Use child's height if child has no baseline
-      // Text box always has baseline
-      if (childDistance == null && child is RenderBoxModel && child.contentSize != null) {
-        childDistance = child.contentSize.height;
-      }
-
-      if (childDistance != null) {
-        childDistance += childParentData.offset.dy;
-        if (result != null)
-          result = math.min(result, childDistance);
-        else
-          result = childDistance;
-      }
-      child = childParentData.nextSibling;
-    }
-    return result;
-  }
-
   double _getMainAxisExtent(RenderBox child) {
     double marginHorizontal = 0;
     double marginVertical = 0;
@@ -805,7 +769,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     runBetweenSpace += runSpacing;
     double crossAxisOffset = flipCrossAxis ? containerCrossAxisExtent - runLeadingSpace : runLeadingSpace;
-
     child = firstChild;
 
     /// Set offset of children
@@ -946,7 +909,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMainPosition + paddingLeft + borderLeft + childMarginLeft,
           crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
         );
-
         /// Apply position relative offset change.
         applyRelativeOffset(relativeOffset, child, childStyle);
 

@@ -375,42 +375,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     );
   }
 
-  @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return computeDistanceToHighestActualBaseline(baseline);
-  }
-
-  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    double result;
-    RenderBox child = firstChild;
-    while (child != null) {
-      final RenderFlexParentData childParentData = child.parentData;
-
-      // Positioned element doesn't involve in baseline alignment
-      if (childParentData.isPositioned) {
-        child = childParentData.nextSibling;
-        continue;
-      }
-
-      double childDistance = child.getDistanceToActualBaseline(baseline);
-      // Use child's height if child has no baseline
-      // Text box always has baseline
-      if (childDistance == null && child is RenderBoxModel && child.contentSize != null) {
-        childDistance = child.contentSize.height;
-      }
-
-      if (childDistance != null) {
-        childDistance += childParentData.offset.dy;
-        if (result != null)
-          result = math.min(result, childDistance);
-        else
-          result = childDistance;
-      }
-      child = childParentData.nextSibling;
-    }
-    return result;
-  }
-
   int _getFlexGrow(RenderBox child) {
     // Flex grow has no effect on placeholder of positioned element
     if (child is RenderPositionHolder) {

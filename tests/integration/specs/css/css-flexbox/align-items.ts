@@ -533,4 +533,101 @@ describe('align-items', () => {
     await matchViewportSnapshot();
   });
 
+  it("work with baseline in nested block elements", async () => {
+    let container;
+    container = createElement(
+      'div',
+      {style: {
+        display: 'flex',
+        'box-sizing': 'border-box',
+        height: '100px',
+        width: '500px',
+        alignItems: 'baseline'
+      }},
+      [
+        (createElement('div', {
+          style: {
+            'box-sizing': 'border-box',
+            margin: '20px 0 0',
+            height: '200px',
+            width: '100px',
+            'background-color': 'red',
+            display: 'inline-block',
+          }})),
+        (createElement(
+          'div',
+          {style: {
+            'box-sizing': 'border-box',
+            height: '200px',
+            width: '300px',
+            display: 'inline-block',
+            backgroundColor: '#999'
+          }},
+          [
+            (createElement('div', {
+              style: {
+                'box-sizing': 'border-box',
+                height: '150px',
+                width: '100px',
+                'background-color': 'yellow',
+              }})),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
+
+  it("work with baseline in nested block elements and contain text", async () => {
+    let container;
+    container = createElement(
+      'div',
+      {style: {
+        display: 'flex',
+        'box-sizing': 'border-box',
+        height: '100px',
+        width: '500px',
+        alignItems: 'baseline'
+      }},
+      [
+        (createElement('div', {
+          style: {
+            'box-sizing': 'border-box',
+            margin: '20px 0 0',
+            height: '200px',
+            width: '100px',
+            'background-color': 'red',
+            display: 'inline-block',
+          }})),
+        (createElement(
+          'div',
+          {style: {
+            'box-sizing': 'border-box',
+            height: '200px',
+            width: '300px',
+            display: 'inline-block',
+            backgroundColor: '#999'
+          }},
+          [
+            (createElement('div', {
+              style: {
+                'box-sizing': 'border-box',
+                height: '150px',
+                width: '100px',
+                'background-color': 'yellow',
+              }},
+              [
+                  createText('foo bar')
+              ]
+            )),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+  });
 });
