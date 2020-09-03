@@ -12,7 +12,7 @@ mixin RenderTransformMixin on RenderBox {
   set origin(Offset value) {
     if (_origin == value) return;
     _origin = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Alignment get alignment => _alignment;
@@ -20,7 +20,7 @@ mixin RenderTransformMixin on RenderBox {
   set alignment(Alignment value) {
     if (_alignment == value) return;
     _alignment = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Matrix4 get transform => _transform;
@@ -28,7 +28,7 @@ mixin RenderTransformMixin on RenderBox {
   set transform(Matrix4 value) {
     if (_transform == value) return;
     _transform = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Matrix4 getEffectiveTransform() {
