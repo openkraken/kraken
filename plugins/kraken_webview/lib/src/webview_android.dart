@@ -37,7 +37,7 @@ class AndroidWebView implements WebViewPlatform {
     _id = platformViewsRegistry.getNextPlatformViewId();
     _controller = PlatformViewsService.initAndroidView(
       id: _id,
-      viewType: 'plugins.flutter.io/webview',
+      viewType: 'plugins.kraken/webview',
       // WebView content is not affected by the Android view's layout direction,
       // we explicitly set it here so that the widget doesn't require an ambient
       // directionality.

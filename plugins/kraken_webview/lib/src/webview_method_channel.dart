@@ -14,7 +14,7 @@ class MethodChannelWebViewPlatform implements WebViewPlatformController {
   /// given [id], using the given [WebViewPlatformCallbacksHandler].
   MethodChannelWebViewPlatform(int id, this._platformCallbacksHandler)
       : assert(_platformCallbacksHandler != null),
-        _channel = MethodChannel('plugins.flutter.io/webview_$id') {
+        _channel = MethodChannel('plugins.kraken/webview_$id') {
     _channel.setMethodCallHandler(_onMethodCall);
   }
 
@@ -23,7 +23,7 @@ class MethodChannelWebViewPlatform implements WebViewPlatformController {
   final MethodChannel _channel;
 
   static const MethodChannel _cookieManagerChannel =
-      MethodChannel('plugins.flutter.io/cookie_manager');
+      MethodChannel('plugins.kraken/cookie_manager');
 
   Future<bool> _onMethodCall(MethodCall call) async {
     switch (call.method) {

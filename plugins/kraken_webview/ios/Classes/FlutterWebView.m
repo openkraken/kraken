@@ -74,7 +74,7 @@
   if (self = [super init]) {
     _viewId = viewId;
 
-    NSString* channelName = [NSString stringWithFormat:@"plugins.flutter.io/webview_%lld", viewId];
+    NSString* channelName = [NSString stringWithFormat:@"plugins.kraken/webview_%lld", viewId];
     _channel = [FlutterMethodChannel methodChannelWithName:channelName binaryMessenger:messenger];
     _javaScriptChannelNames = [[NSMutableSet alloc] init];
 
