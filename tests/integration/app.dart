@@ -32,7 +32,7 @@ void main() {
 
     for (int i = 0; i < runningWidgets.length; i ++) {
       String name = runningWidgets[i];
-      KrakenWidget widget = KrakenWidget(name, 360, 640, bundleContent: 'console.log("starting $name integration test")', riskUseViewportWidth:  true, riskUseViewportHeight: true,);
+      KrakenWidget widget = KrakenWidget(name, 360, 640, bundleContent: 'console.log("starting $name integration test")', disableViewportWidthAssertion:  true, disableViewportHeightAssertion: true,);
       widgets.add(widget);
     }
 
