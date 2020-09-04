@@ -150,8 +150,9 @@ class CSSStyleDeclaration {
   void _transition(String propertyName, begin, end) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName];
-      animation.cancel();
+      animation.pause();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
+      begin = _animationProperties[propertyName];
     }
 
     if (begin == null) {
@@ -159,6 +160,7 @@ class CSSStyleDeclaration {
     }
 
     EffectTiming options = _getTransitionEffectTiming(propertyName);
+    
     List<Keyframe> keyframes = [
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
