@@ -69,143 +69,6 @@ Map LonghandPropertyInitialValues = {
   'zIndex': 'auto'
 };
 
-Color _parseColor(String color) {
-  return CSSColor.parseColor(color);
-}
-
-String _stringifyColor(Color oldColor, Color newColor, double progress) {
-  int alphaDiff = newColor.alpha - oldColor.alpha;
-  int redDiff = newColor.red - oldColor.red;
-  int greenDiff = newColor.green - oldColor.green;
-  int blueDiff = newColor.blue - oldColor.blue;
-
-  int alpha = (alphaDiff * progress).toInt() + oldColor.alpha;
-  int red = (redDiff * progress).toInt() + oldColor.red;
-  int blue = (blueDiff * progress).toInt() + oldColor.blue;
-  int green = (greenDiff * progress).toInt() + oldColor.green;
-
-  return 'rgba(${red}, ${green}, ${blue}, ${alpha})';
-}
-
-double _parseLength(String length) {
-  return CSSLength.parseLength(length);
-}
-
-String _stringifyLength(double oldLength, double newLength, double progress) {
-  return _stringifyNumber(oldLength, newLength, progress) + 'px';
-}
-
-FontWeight _parseFontWeight(String fontWeight) {
-  return CSSText.parseFontWeight(fontWeight);
-}
-
-String _stringifyFontWeight(FontWeight oldValue, FontWeight newValue, double progress) {
-  return ((FontWeight.lerp(oldValue, newValue, progress).index + 1) * 100).toString();
-}
-
-double _parseNumber(String number) {
-  return CSSNumber.parseNumber(number);
-}
-
-String _stringifyNumber(double oldValue, double newValue, double progress) {
-  return (oldValue * (1 - progress) + newValue * progress).toString();
-}
-
-String _parseLineHeight(String lineHeight) {
-  return lineHeight;
-}
-
-String _stringifyLineHeight(String oldValue, String newValue, double progress) {
-  if (CSSLength.isLength(oldValue) && CSSLength.isLength(newValue)) {
-    double left = CSSLength.parseLength(oldValue);
-    double right = CSSLength.parseLength(newValue);
-    return _stringifyNumber(left, right, progress).toString() + 'px';
-  } else if (CSSNumber.isNumber(oldValue) && CSSNumber.isNumber(newValue)) {
-    double left = CSSNumber.parseNumber(oldValue);
-    double right = CSSNumber.parseNumber(newValue);
-    return _stringifyNumber(left, right, progress).toString();
-  } else {
-    return newValue;
-  }
-}
-
-Matrix4 _parseTransform(String value) {
-  return CSSTransform.parseTransform(value);
-}
-
-String _stringifyTransform(Matrix4 begin, Matrix4 end, double t) {
-  final Vector3 beginTranslation = Vector3.zero();
-  final Vector3 endTranslation = Vector3.zero();
-  final Quaternion beginRotation = Quaternion.identity();
-  final Quaternion endRotation = Quaternion.identity();
-  final Vector3 beginScale = Vector3.zero();
-  final Vector3 endScale = Vector3.zero();
-  begin.decompose(beginTranslation, beginRotation, beginScale);
-  end.decompose(endTranslation, endRotation, endScale);
-  final Vector3 lerpTranslation = beginTranslation * (1.0 - t) + endTranslation * t;
-  // TODO(alangardner): Implement slerp for constant rotation
-  final Quaternion lerpRotation = (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
-  final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
-  Matrix4 newMatrix4 = Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
-  Float64List m4storage = newMatrix4.storage;
-  return 'matrix3d(${m4storage.join(',')})';
-}
-
-const List<Function> _colorHandler = [_parseColor, _stringifyColor];
-const List<Function> _lengthHandler = [_parseLength, _stringifyLength];
-const List<Function> _fontWeightHandler = [_parseFontWeight, _stringifyFontWeight];
-const List<Function> _numberHandler = [_parseNumber, _stringifyNumber];
-const List<Function> _lineHeightHandler = [_parseLineHeight, _stringifyLineHeight];
-const List<Function> _transformHandler = [_parseTransform, _stringifyTransform];
-
-Map<String, List<Function>> AnimationPropertyHandlers = {
-  COLOR: _colorHandler,
-  BACKGROUND_COLOR: _colorHandler,
-  BORDER_BOTTOM_COLOR: _colorHandler,
-  BORDER_LEFT_COLOR: _colorHandler,
-  BORDER_RIGHT_COLOR: _colorHandler,
-  BORDER_TOP_COLOR: _colorHandler,
-  BORDER_COLOR: _colorHandler,
-  TEXT_DECORATION_COLOR: _colorHandler,
-  OPACITY: _numberHandler,
-  Z_INDEX: _numberHandler,
-  FLEX_GROW: _numberHandler,
-  FLEX_SHRINK: _numberHandler,
-  FONT_WEIGHT: _fontWeightHandler,
-  LINE_HEIGHT: _lineHeightHandler,
-  TRANSFORM: _transformHandler,
-  BORDER_BOTTOM_LEFT_RADIUS: _lengthHandler,
-  BORDER_BOTTOM_RIGHT_RADIUS: _lengthHandler,
-  BORDER_TOP_LEFT_RADIUS: _lengthHandler,
-  BORDER_TOP_RIGHT_RADIUS: _lengthHandler,
-  RIGHT: _lengthHandler,
-  TOP: _lengthHandler,
-  BOTTOM: _lengthHandler,
-  LEFT: _lengthHandler,
-  LETTER_SPACING: _lengthHandler,
-  MARGIN_BOTTOM: _lengthHandler,
-  MARGIN_LEFT: _lengthHandler,
-  MARGIN_RIGHT: _lengthHandler,
-  MARGIN_TOP: _lengthHandler,
-  MIN_HEIGHT: _lengthHandler,
-  MIN_WIDTH: _lengthHandler,
-  PADDING_BOTTOM: _lengthHandler,
-  PADDING_LEFT: _lengthHandler,
-  PADDING_RIGHT: _lengthHandler,
-  PADDING_TOP: _lengthHandler,
-  // should non negative value
-  BORDER_BOTTOM_WIDTH: _lengthHandler,
-  BORDER_LEFT_WIDTH: _lengthHandler,
-  BORDER_RIGHT_WIDTH: _lengthHandler,
-  BORDER_TOP_WIDTH: _lengthHandler,
-  FLEX_BASIS: _lengthHandler,
-  FONT_SIZE: _lengthHandler,
-  HEIGHT: _lengthHandler,
-  WIDTH: _lengthHandler,
-  MAX_HEIGHT: _lengthHandler,
-  MAX_WIDTH: _lengthHandler,
-};
-
 const Map<String, bool> ShorthandProperty = {
   MARGIN: true,
   PADDING: true,
@@ -259,7 +122,7 @@ class CSSStyleDeclaration {
   }
 
   bool _shouldTransition(String property) {
-    return AnimationPropertyHandlers[property] != null &&
+    return CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
 
@@ -558,7 +421,7 @@ class CSSStyleDeclaration {
     } else {
       _properties[propertyName] = normalizedValue;
     }
-    
+
     _invokePropertyChangedListener(propertyName, prevValue, normalizedValue);
   }
 
