@@ -29,7 +29,7 @@ class CupertinoWebView implements WebViewPlatform {
       CreationParams creationParams) async {
     return PlatformViewsService.initUiKitView(
       id: id,
-      viewType: 'plugins.flutter.io/webview',
+      viewType: 'plugins.kraken/webview',
       layoutDirection: TextDirection.rtl,
       creationParams: MethodChannelWebViewPlatform.creationParamsToMap(creationParams),
       creationParamsCodec: const StandardMessageCodec(),

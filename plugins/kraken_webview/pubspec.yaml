@@ -21,9 +21,9 @@ flutter:
   plugin:
     platforms:
       android:
-        package: io.flutter.plugins.webviewflutter
+        package: kraken.plugins.webviewflutter
         pluginClass: WebViewFlutterPlugin
       ios:
-        pluginClass: FLTWebViewFlutterPlugin
+        pluginClass: KKWebViewFlutterPlugin
 #      macos:
-#        pluginClass: FLTWebViewFlutterPlugin
+#        pluginClass: KKWebViewFlutterPlugin
