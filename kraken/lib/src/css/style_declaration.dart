@@ -2,13 +2,9 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'dart:typed_data';
-import 'dart:ui';
-
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/css/animation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 typedef StyleChangeListener = void Function(
   String property,
@@ -156,6 +152,7 @@ class CSSStyleDeclaration {
       Animation animation = _propertyRunningTransition[propertyName];
       animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
+      begin = _animationProperties[propertyName];
     }
 
     if (begin == null) {
@@ -163,9 +160,10 @@ class CSSStyleDeclaration {
     }
 
     EffectTiming options = _getTransitionEffectTiming(propertyName);
+    
     List<Keyframe> keyframes = [
-      Keyframe(propertyName, begin, 0, options.easing),
-      Keyframe(propertyName, end, 1, options.easing),
+      Keyframe(propertyName, begin, 0, LINEAR),
+      Keyframe(propertyName, end, 1, LINEAR),
     ];
     KeyframeEffect effect = KeyframeEffect(this, keyframes, options);
     Animation animation = Animation(effect);

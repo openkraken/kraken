@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:ui';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 
@@ -24,15 +25,36 @@ class KrakenWidget extends StatelessWidget {
   final String bundlePath;
   final String bundleContent;
 
-  KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent})
-      : viewportWidth = viewportWidth,
-        viewportHeight = viewportHeight,
-        bundleURL = bundleURL,
-        bundlePath = bundlePath,
-        bundleContent = bundleContent,
-        name = name,
-        super(key: key);
+  // The animationController of Flutter Route object.
+  // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
+  final AnimationController animationController;
+
+  final LoadErrorHandler loadErrorHandler;
+
+  KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
+      {Key key,
+      this.bundleURL,
+      this.bundlePath,
+      this.bundleContent,
+      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version released. (v0.6.0)
+      // Disable viewportWidth check and no assertion error report.
+      bool disableViewportWidthAssertion = false,
+      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version release. (v0.6.0)
+      // Disable viewportHeight check and no assertion error report.
+      bool disableViewportHeightAssertion = false,
+      // Callback functions when loading Javascript scripts failed.
+      this.loadErrorHandler,
+      this.animationController})
+      : super(key: key) {
+    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
+    'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
+    'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -61,6 +83,7 @@ class KrakenRenderWidget extends SingleChildRenderObjectWidget {
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         bundleURL: _widget.bundleURL,
         bundlePath: _widget.bundlePath,
+        loadErrorHandler: _widget.loadErrorHandler,
         bundleContent: _widget.bundleContent);
     return controller.view.getRootRenderObject();
   }
@@ -85,7 +108,17 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
-    await controller.run();
+    // Execute JavaScript scripts will block the Flutter UI Threads.
+    // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
+    if (controller.bundleURL == null && widget._widget.animationController != null) {
+      widget._widget.animationController.addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          controller.run();
+        }
+      });
+    } else {
+      await controller.run();
+    }
   }
 
   @override

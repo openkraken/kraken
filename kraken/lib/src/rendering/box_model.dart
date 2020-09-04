@@ -374,7 +374,6 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
-
   double getContentWidth() {
     double cropWidth = 0;
     // @FIXME, need to remove elementManager in the future.
@@ -595,15 +594,23 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  Size getBoxSize(Size contentSize) {
-    // Set scrollable size from unconstrained size.
-    maxScrollableX = contentSize.width + paddingLeft + paddingRight;
-    maxScrollableY = contentSize.height + paddingTop + paddingBottom;
+  void setMaxScrollableSize(double width, double height) {
+    assert(width != null);
+    assert(height != null);
 
+    maxScrollableSize = Size(
+      width + paddingLeft + paddingRight,
+      height + paddingTop + paddingBottom
+    );
+  }
+
+  Size getBoxSize(Size contentSize) {
     Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
 
-    scrollableViewportWidth = _contentSize.width + paddingLeft + paddingRight;
-    scrollableViewportHeight = _contentSize.height + paddingTop + paddingBottom;
+    scrollableViewportSize = Size(
+      _contentSize.width + paddingLeft + paddingRight,
+      _contentSize.height + paddingTop + paddingBottom
+    );
 
     if (padding != null) {
       boxSize = wrapPaddingSize(boxSize);
@@ -700,20 +707,25 @@ class RenderBoxModel extends RenderBox with
     applyEffectiveTransform(child, transform);
   }
 
-  // The max scrollable size of X axis.
-  double maxScrollableX;
-  // The max scrollable size of Y axis.
-  double maxScrollableY;
+  // The max scrollable size.
+  Size _maxScrollableSize = Size.zero;
+  Size get maxScrollableSize => _maxScrollableSize;
+  set maxScrollableSize(Size value) {
+    assert(value != null);
+    _maxScrollableSize = value;
+  }
 
-  double scrollableViewportWidth = 0.0;
-  double scrollableViewportHeight = 0.0;
+  Size _scrollableViewportSize;
+  Size get scrollableViewportSize => _scrollableViewportSize;
+  set scrollableViewportSize(Size value) {
+    assert(value != null);
+    _scrollableViewportSize = value;
+  }
 
   // hooks when content box had layout.
   void didLayout() {
     if (clipX || clipY) {
-      Size scrollableSize = Size(maxScrollableX, maxScrollableY);
-      Size viewportSize = Size(scrollableViewportWidth, scrollableViewportHeight);
-      setUpOverflowScroller(scrollableSize, viewportSize);
+      setUpOverflowScroller(maxScrollableSize, scrollableViewportSize);
     }
 
     if (positionedHolder != null) {
@@ -722,16 +734,9 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  void setMaximumScrollableHeightForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
-    if (childParentData.top != null) {
-      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
-    }
-    if (childParentData.bottom != null) {
-      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
-    }
-  }
-
-  void setMaximumScrollableWidthForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+  void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
+    double maxScrollableX = maxScrollableSize.width;
+    double maxScrollableY = maxScrollableSize.height;
     if (childParentData.left != null) {
       maxScrollableX = math.max(maxScrollableX, childParentData.left + childSize.width);
     }
@@ -739,6 +744,15 @@ class RenderBoxModel extends RenderBox with
     if (childParentData.right != null) {
       maxScrollableX = math.max(maxScrollableX, -childParentData.right + _contentSize.width);
     }
+
+    if (childParentData.top != null) {
+      maxScrollableY = math.max(maxScrollableY, childParentData.top + childSize.height);
+    }
+    if (childParentData.bottom != null) {
+      maxScrollableY = math.max(maxScrollableY, -childParentData.bottom + _contentSize.height);
+    }
+
+    maxScrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
@@ -754,9 +768,7 @@ class RenderBoxModel extends RenderBox with
                 context,
                 offset,
                 EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                decoration,
-                Size(scrollableViewportWidth, scrollableViewportHeight),
-                    (context, offset) {
+                decoration, (context, offset) {
                   paintContentVisibility(context, offset, callback);
                 }
             );
@@ -834,21 +846,32 @@ class RenderBoxModel extends RenderBox with
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (decoration != null) properties.add(decoration.toDiagnosticsNode(name: 'decoration'));
-    if (configuration != null) properties.add(DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+    properties.add(DiagnosticsProperty('targetId', targetId, missingIfNull: true));
+    properties.add(DiagnosticsProperty('style', style, tooltip: style.toString(), missingIfNull: true));
+    properties.add(DiagnosticsProperty('display', display, missingIfNull: true));
+    properties.add(DiagnosticsProperty('contentSize', _contentSize));
+    properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
+    properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));
+    properties.add(DiagnosticsProperty('heightSizeType', heightSizeType, missingIfNull: true));
+
+    if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
+    if (padding != null) properties.add(DiagnosticsProperty('padding', padding));
+    if (width != null) properties.add(DiagnosticsProperty('width', width));
+    if (height != null) properties.add(DiagnosticsProperty('height', height));
+    if (intrinsicWidth != null) properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
+    if (intrinsicHeight != null) properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
+    if (intrinsicRatio != null) properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
+    if (maxWidth != null) properties.add(DiagnosticsProperty('maxWidth', maxWidth));
+    if (minWidth != null) properties.add(DiagnosticsProperty('minWidth', minWidth));
+    if (maxHeight != null) properties.add(DiagnosticsProperty('maxHeight', maxHeight));
+    if (minHeight != null) properties.add(DiagnosticsProperty('minHeight', minHeight));
+
+    debugPaddingProperties(properties);
+    debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);
     debugOverflowProperties(properties);
-    properties.add(DiagnosticsProperty('padding', padding));
-    properties.add(DiagnosticsProperty('width', width));
-    properties.add(DiagnosticsProperty('height', height));
-    properties.add(DiagnosticsProperty('intrinsicWidth', intrinsicWidth));
-    properties.add(DiagnosticsProperty('intrinsicHeight', intrinsicHeight));
-    properties.add(DiagnosticsProperty('intrinsicRatio', intrinsicRatio));
-    properties.add(DiagnosticsProperty('maxWidth', maxWidth));
-    properties.add(DiagnosticsProperty('minWidth', minWidth));
-    properties.add(DiagnosticsProperty('maxHeight', maxHeight));
-    properties.add(DiagnosticsProperty('minHeight', minHeight));
-    properties.add(DiagnosticsProperty('contentSize', _contentSize));
-    properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints));
+    debugMarginProperties(properties);
+    debugTransformProperties(properties);
+    debugOpacityProperties(properties);
   }
 }

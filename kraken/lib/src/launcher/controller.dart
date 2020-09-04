@@ -17,6 +17,9 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'bundle.dart';
 
+// Error handler when load bundle failed.
+typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
+
 // See http://github.com/flutter/flutter/wiki/Desktop-shells
 /// If the current platform is a desktop platform that isn't yet supported by
 /// TargetPlatform, override the default platform to one that is.
@@ -249,6 +252,9 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  // Error handler when load bundle failed.
+  LoadErrorHandler loadErrorHandler;
+
   KrakenMethodChannel _methodChannel;
 
   KrakenMethodChannel get methodChannel => _methodChannel;
@@ -260,7 +266,8 @@ class KrakenController {
       enableDebug = false,
       String bundleURL,
       String bundlePath,
-      String bundleContent})
+      String bundleContent,
+      LoadErrorHandler this.loadErrorHandler})
       : name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
@@ -373,10 +380,16 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
-    // TODO native public API need to support KrakenViewController
     String bundleURL =
         _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
-    _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+
+    if (loadErrorHandler != null) {
+      try {
+        _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+      } catch(e, stack) { loadErrorHandler(e, stack);}
+    } else {
+      _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+    }
   }
 
   // execute preloaded javascript source
@@ -389,8 +402,6 @@ class KrakenController {
         String json = jsonEncode([WINDOW_ID, Event('load')]);
         emitUIEvent(_view.contextId, json);
       });
-    } else {
-      print('ERROR: No bundle found.');
     }
   }
 }

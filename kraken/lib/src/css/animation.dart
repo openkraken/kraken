@@ -16,6 +16,57 @@ enum AnimationReplaceState { active, removed, persisted }
 
 enum AnimationEffectPhase { none, before, active, after }
 
+// https://drafts.csswg.org/web-animations/#enumdef-fillmode
+enum FillMode { none, forwards, backwards, both, auto }
+// https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
+enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
+
+Curve _parseEasing(String function) {
+  if (function == null) return null;
+
+  switch (function) {
+    case LINEAR:
+      return Curves.linear;
+    case EASE:
+      return Curves.ease;
+    case EASE_IN:
+      return Curves.easeIn;
+    case EASE_OUT:
+      return Curves.easeOut;
+    case EASE_IN_OUT:
+      return Curves.easeInOut;
+    case STEP_START:
+      return Threshold(0);
+    case STEP_END:
+      return Threshold(1);
+  }
+  List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
+  if (methods != null && methods.length > 0) {
+    CSSFunctionalNotation method = methods.first;
+    if (method != null) {
+      if (method.name == 'steps') {
+        if (method.args.length >= 1) {
+          var step = int.tryParse(method.args[0]);
+          var isStart = false;
+          if (method.args.length == 2) {
+            isStart = method.args[1] == 'start';
+          }
+          return CSSStepCurve(step, isStart);
+        }
+      } else if (method.name == 'cubic-bezier') {
+        if (method.args.length == 4) {
+          var first = double.tryParse(method.args[0]);
+          var sec = double.tryParse(method.args[1]);
+          var third = double.tryParse(method.args[2]);
+          var forth = double.tryParse(method.args[3]);
+          return Cubic(first, sec, third, forth);
+        }
+      }
+    }
+  }
+  return null;
+}
+
 class AnimationTimeline {
   List<Animation> _animations = [];
   double _currentTime;
@@ -141,11 +192,12 @@ class Animation {
   }
 
   _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
+    
     if (newTime != _currentTime) {
       _currentTime = newTime;
-      if (_isFinished && !ignoreLimit)
+      if (_isFinished && !ignoreLimit) {
         _currentTime = _playbackRate > 0 ? _totalDuration : 0;
-
+      }
       _ensureAlive();
       _effect._runIteration(_currentTime);
     }
@@ -371,7 +423,11 @@ class _Interpolation {
   var begin;
   var end;
   Function lerp;
-  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp);
+  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp) {
+    if (easing == null) {
+      easing = Curves.linear;
+    } 
+  }
 
   @override
   String toString() => '_Interpolation('
@@ -382,50 +438,6 @@ class _Interpolation {
       'begin: $begin, '
       'end: $end'
   ')';
-}
-
-Curve _parseEasing(String function) {
-  switch (function) {
-    case LINEAR:
-      return Curves.linear;
-    case EASE:
-      return Curves.ease;
-    case EASE_IN:
-      return Curves.easeIn;
-    case EASE_OUT:
-      return Curves.easeOut;
-    case EASE_IN_OUT:
-      return Curves.easeInOut;
-    case STEP_START:
-      return Threshold(0);
-    case STEP_END:
-      return Threshold(1);
-  }
-  List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(function);
-  if (methods != null && methods.length > 0) {
-    CSSFunctionalNotation method = methods.first;
-    if (method != null) {
-      if (method.name == 'steps') {
-        if (method.args.length >= 1) {
-          var step = int.tryParse(method.args[0]);
-          var isStart = false;
-          if (method.args.length == 2) {
-            isStart = method.args[1] == 'start';
-          }
-          return CSSStepCurve(step, isStart);
-        }
-      } else if (method.name == 'cubic-bezier') {
-        if (method.args.length == 4) {
-          var first = double.tryParse(method.args[0]);
-          var sec = double.tryParse(method.args[1]);
-          var third = double.tryParse(method.args[2]);
-          var forth = double.tryParse(method.args[3]);
-          return Cubic(first, sec, third, forth);
-        }
-      }
-    }
-  }
-  return null;
 }
 
 class KeyframeEffect extends AnimationEffect {
@@ -872,12 +884,6 @@ class AnimationEffect {
     });
   }
 }
-
-
-// https://drafts.csswg.org/web-animations/#enumdef-fillmode
-enum FillMode { none, forwards, backwards, both, auto }
-// https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
-enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
 
 class EffectTiming {
   // The number of milliseconds each iteration of the animation takes to complete.
