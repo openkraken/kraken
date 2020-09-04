@@ -56,4 +56,8 @@ mixin RenderMarginMixin on RenderBox {
     if (_resolvedMargin == null) return 0;
     return _resolvedMargin.left;
   }
+
+  void debugMarginProperties(DiagnosticPropertiesBuilder properties) {
+    if (_margin != null) properties.add(DiagnosticsProperty('margin', _margin));
+  }
 }

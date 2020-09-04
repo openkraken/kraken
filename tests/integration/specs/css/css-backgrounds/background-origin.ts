@@ -21,7 +21,7 @@ describe('Background-origin', () => {
       ]
     );
     append(BODY, div);
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.2);
   });
 
   it('works with border-box', async () => {
