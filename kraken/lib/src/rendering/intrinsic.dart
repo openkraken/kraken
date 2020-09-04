@@ -60,6 +60,7 @@ class RenderIntrinsic extends RenderBoxModel
     beforeLayout();
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
+      setMaxScrollableSize(child.size.width, child.size.height);
       size = getBoxSize(child.size);
       didLayout();
     } else {
