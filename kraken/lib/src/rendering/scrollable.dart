@@ -367,8 +367,8 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void debugOverflowProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
-    properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
+    if (_scrollableSize != null) properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
+    if (_viewportSize != null) properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
     properties.add(DiagnosticsProperty('clipX', clipX));
     properties.add(DiagnosticsProperty('clipY', clipY));
   }

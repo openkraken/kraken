@@ -163,6 +163,16 @@ mixin RenderBoxDecorationMixin on RenderBox {
       if (decoration.isComplex) context.setIsComplexHint();
     }
   }
+
+  void debugBoxDecorationProperties(DiagnosticPropertiesBuilder properties) {
+    if (borderEdge != null) properties.add(DiagnosticsProperty('borderEdge', borderEdge));
+    if (backgroundClip != null) properties.add(DiagnosticsProperty('backgroundClip', backgroundClip));
+    if (backgroundOrigin != null) properties.add(DiagnosticsProperty('backgroundOrigin', backgroundOrigin));
+    if (_decoration != null && _decoration.borderRadius != null) properties.add(DiagnosticsProperty('borderRadius', _decoration.borderRadius));
+    if (_decoration != null && _decoration.image != null) properties.add(DiagnosticsProperty('backgroundImage', _decoration.image));
+    if (_decoration != null && _decoration.boxShadow != null) properties.add(DiagnosticsProperty('boxShadow', _decoration.boxShadow));
+    if (_decoration != null && _decoration.gradient != null) properties.add(DiagnosticsProperty('gradient', _decoration.gradient));
+  }
 }
 
 /// An object that paints a [BoxDecoration] into a canvas.
