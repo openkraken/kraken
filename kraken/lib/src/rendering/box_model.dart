@@ -193,7 +193,9 @@ class RenderLayoutBox extends RenderBoxModel
         isChildInline &&
         child is RenderBoxModel && child.contentSize != null
       ) {
-        childDistance = child.contentSize.height;
+        // Flutter only allow access size of direct children, so cannot use child.size
+        Size childSize = child.getBoxSize(child.contentSize);
+        childDistance = childSize.height;
       }
 
 
@@ -658,11 +660,11 @@ class RenderBoxModel extends RenderBox with
   }
 
   Size getBoxSize(Size contentSize) {
-    Size boxSize = contentConstraints.constrain(contentSize);
+    Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
 
     scrollableViewportSize = Size(
-      boxSize.width + paddingLeft + paddingRight,
-      boxSize.height + paddingTop + paddingBottom
+      _contentSize.width + paddingLeft + paddingRight,
+      _contentSize.height + paddingTop + paddingBottom
     );
 
     if (padding != null) {
@@ -671,8 +673,7 @@ class RenderBoxModel extends RenderBox with
     if (borderEdge != null) {
       boxSize = wrapBorderSize(boxSize);
     }
-    _contentSize = constraints.constrain(boxSize);
-    return _contentSize;
+    return constraints.constrain(boxSize);
   }
 
   // The contentSize of layout box
