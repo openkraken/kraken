@@ -37,6 +37,6 @@ mixin RenderContentVisibility on RenderBox {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', contentVisibility));
+    if (contentVisibility != null) properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', contentVisibility));
   }
 }

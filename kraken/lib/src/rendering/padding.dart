@@ -69,4 +69,8 @@ mixin RenderPaddingMixin on RenderBox {
     return Size(_resolvedPadding.left + innerSize.width + _resolvedPadding.right,
         _resolvedPadding.top + innerSize.height + _resolvedPadding.bottom);
   }
+
+  void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {
+    if (_padding != null) properties.add(DiagnosticsProperty('padding', _padding));
+  }
 }

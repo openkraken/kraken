@@ -550,8 +550,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
 
-        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
-        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
@@ -568,6 +567,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // If no child exists, stop layout.
     if (childCount == 0) {
+      setMaxScrollableSize(contentWidth ?? 0.0, contentHeight ?? 0.0);
       size = getBoxSize(Size(
         contentWidth ?? 0,
         contentHeight ?? 0,
@@ -730,6 +730,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     switch (direction) {
       case Axis.horizontal:
         Size contentSize = Size(constraintWidth, constraintHeight);
+        setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
         // AxisExtent should be size.
         containerMainAxisExtent = contentWidth ?? size.width;
@@ -737,6 +738,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         break;
       case Axis.vertical:
         Size contentSize = Size(crossAxisExtent, mainAxisExtent);
+        setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
         containerMainAxisExtent = contentHeight ?? size.height;
         containerCrossAxisExtent = contentWidth ?? size.width;
@@ -1050,7 +1052,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MainAxisAlignment>('runAlignment', runAlignment));
   }
 
   RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderLayoutParentData parentData) {

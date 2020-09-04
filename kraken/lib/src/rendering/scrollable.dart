@@ -308,7 +308,7 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   // @TODO implement RenderSilver protocol to achieve high performance scroll list.
-  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, Size viewportSize, PaintingContextCallback callback) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, BoxDecoration decoration, PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
@@ -367,8 +367,8 @@ mixin RenderOverflowMixin on RenderBox {
   }
 
   void debugOverflowProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
-    properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
+    if (_scrollableSize != null) properties.add(DiagnosticsProperty('scrollableSize', _scrollableSize));
+    if (_viewportSize != null) properties.add(DiagnosticsProperty('viewportSize', _viewportSize));
     properties.add(DiagnosticsProperty('clipX', clipX));
     properties.add(DiagnosticsProperty('clipY', clipY));
   }

@@ -630,4 +630,313 @@ describe('align-items', () => {
 
     await matchViewportSnapshot();
   });
+
+  it("works with stretch in row flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        margin: '50px',
+        padding: '40px 0',
+        height: '100px',
+        alignItems: 'stretch',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           height: '30px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '100px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with flex-start in row flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        margin: '50px',
+        padding: '40px 0',
+        height: '100px',
+        alignItems: 'flex-start',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           height: '30px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '100px',
+            height: '150px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with center in row flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        margin: '50px',
+        padding: '40px 0',
+        height: '100px',
+        alignItems: 'center',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           height: '30px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '100px',
+            height: '150px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with flex-end in row flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'row',
+        width: '300px',
+        margin: '50px',
+        padding: '40px 0',
+        height: '100px',
+        alignItems: 'flex-end',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           height: '30px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with stretch in column flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'column',
+        width: '300px',
+        margin: '50px',
+        padding: '0 40px',
+        height: '100px',
+        alignItems: 'stretch',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           width: '50px',
+           height: '20px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            height: '30px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with flex-start in column flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'column',
+        width: '300px',
+        margin: '50px',
+        padding: '0 40px',
+        height: '100px',
+        alignItems: 'flex-start',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           width: '50px',
+           height: '20px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '350px',
+            height: '30px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with center in column flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'column',
+        width: '300px',
+        margin: '50px',
+        padding: '0 40px',
+        height: '100px',
+        alignItems: 'center',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           width: '50px',
+           height: '20px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '350px',
+            height: '30px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+    await matchViewportSnapshot();
+  });
+
+  it("works with flex-end in column flex direction when flex-grow is set", async () => {
+    let containingBlock = createViewElement(
+      {
+        position: 'relative',
+        flexDirection: 'column',
+        width: '300px',
+        margin: '50px',
+        padding: '0 40px',
+        height: '100px',
+        alignItems: 'flex-end',
+        backgroundColor: '#999',
+      },
+      [
+        createElement('div', {
+          style: {
+           display: 'flex',
+           flexDirection: 'row',
+           flexGrow: 1,
+           width: '50px',
+           height: '20px',
+           overflow: 'hidden',
+           backgroundColor: 'red',
+          }
+        }),
+        createElement('div', {
+          style: {
+            display: 'flex',
+            position: 'relative',
+            width: '350px',
+            height: '30px',
+            backgroundColor: 'yellow'
+          }
+        })
+      ]
+    );
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
 });
+

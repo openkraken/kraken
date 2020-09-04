@@ -12,7 +12,7 @@ mixin RenderTransformMixin on RenderBox {
   set origin(Offset value) {
     if (_origin == value) return;
     _origin = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Alignment get alignment => _alignment;
@@ -20,7 +20,7 @@ mixin RenderTransformMixin on RenderBox {
   set alignment(Alignment value) {
     if (_alignment == value) return;
     _alignment = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Matrix4 get transform => _transform;
@@ -28,7 +28,7 @@ mixin RenderTransformMixin on RenderBox {
   set transform(Matrix4 value) {
     if (_transform == value) return;
     _transform = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   Matrix4 getEffectiveTransform() {
@@ -108,5 +108,11 @@ mixin RenderTransformMixin on RenderBox {
     if (isHit)
       return true;
     return false;
+  }
+
+  void debugTransformProperties(DiagnosticPropertiesBuilder properties) {
+    if (origin != null) properties.add(DiagnosticsProperty('transformOrigin', origin));
+    if (alignment != null) properties.add(DiagnosticsProperty('transformAlignment', alignment));
+    if (transform != null) properties.add(DiagnosticsProperty('transform', transform));
   }
 }

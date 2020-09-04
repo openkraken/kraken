@@ -230,4 +230,54 @@ describe('Overflow', () => {
       done();
     });
   });
+
+  it('scrollable area computed by max height children', async (done) => {
+    let container;
+
+    let array = new Array(100).fill(0);
+
+    container = createViewElement(
+      {
+        overflow: 'scroll',
+      },
+      [
+        createViewElement(
+          {
+            height: '20px',
+            background: 'green'
+          },
+          []
+        ),
+        createViewElement(
+          {
+            height: '300px',
+            background: 'pink'
+          },
+          [
+            createViewElement(
+              {},
+              array.map((_, index) => {
+                return createElement('div', {}, [createText(`${index}`)]);
+              })
+            ),
+          ]
+        ),
+      ]
+    );
+
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      container.scrollTop = 30;
+      await matchViewportSnapshot();
+      requestAnimationFrame(async () => {
+        container.scrollTop = 10000;
+        await matchViewportSnapshot();
+
+        done();
+      });
+    });
+  });
 });
