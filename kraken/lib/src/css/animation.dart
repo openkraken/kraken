@@ -16,6 +16,11 @@ enum AnimationReplaceState { active, removed, persisted }
 
 enum AnimationEffectPhase { none, before, active, after }
 
+// https://drafts.csswg.org/web-animations/#enumdef-fillmode
+enum FillMode { none, forwards, backwards, both, auto }
+// https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
+enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
+
 class AnimationTimeline {
   List<Animation> _animations = [];
   double _currentTime;
@@ -141,11 +146,12 @@ class Animation {
   }
 
   _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
+    
     if (newTime != _currentTime) {
       _currentTime = newTime;
-      if (_isFinished && !ignoreLimit)
+      if (_isFinished && !ignoreLimit) {
         _currentTime = _playbackRate > 0 ? _totalDuration : 0;
-
+      }
       _ensureAlive();
       _effect._runIteration(_currentTime);
     }
@@ -371,7 +377,11 @@ class _Interpolation {
   var begin;
   var end;
   Function lerp;
-  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp);
+  _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp) {
+    if (easing == null) {
+      easing = Curves.linear;
+    } 
+  }
 
   @override
   String toString() => '_Interpolation('
@@ -385,6 +395,8 @@ class _Interpolation {
 }
 
 Curve _parseEasing(String function) {
+  if (function == null) return null;
+
   switch (function) {
     case LINEAR:
       return Curves.linear;
@@ -872,12 +884,6 @@ class AnimationEffect {
     });
   }
 }
-
-
-// https://drafts.csswg.org/web-animations/#enumdef-fillmode
-enum FillMode { none, forwards, backwards, both, auto }
-// https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
-enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
 
 class EffectTiming {
   // The number of milliseconds each iteration of the animation takes to complete.

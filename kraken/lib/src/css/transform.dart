@@ -191,25 +191,22 @@ List _inverse(m) {
   var a = m[0][0], b = m[0][1], c = m[0][2];
   var d = m[1][0], e = m[1][1], f = m[1][2];
   var g = m[2][0], h = m[2][1], k = m[2][2];
-  var Ainv = [
-    [(e * k - f * h) * iDet, (c * h - b * k) * iDet,
-      (b * f - c * e) * iDet, 0],
-    [(f * g - d * k) * iDet, (a * k - c * g) * iDet,
-      (c * d - a * f) * iDet, 0],
-    [(d * h - e * g) * iDet, (g * b - a * h) * iDet,
-      (a * e - b * d) * iDet, 0]
+  var ainv = [
+    [(e * k - f * h) * iDet, (c * h - b * k) * iDet, (b * f - c * e) * iDet, 0],
+    [(f * g - d * k) * iDet, (a * k - c * g) * iDet, (c * d - a * f) * iDet, 0],
+    [(d * h - e * g) * iDet, (g * b - a * h) * iDet, (a * e - b * d) * iDet, 0]
   ];
   var lastRow = [];
   for (var i = 0; i < 3; i++) {
     var val = 0;
     for (var j = 0; j < 3; j++) {
-      val += m[3][j] * Ainv[j][i];
+      val += m[3][j] * ainv[j][i];
     }
     lastRow.add(val);
   }
   lastRow.add(1);
-  Ainv.add(lastRow);
-  return Ainv;
+  ainv.add(lastRow);
+  return ainv;
 }
 
 List _transposeMatrix4(m) {
