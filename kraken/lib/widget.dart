@@ -25,6 +25,10 @@ class KrakenWidget extends StatelessWidget {
   final String bundlePath;
   final String bundleContent;
 
+  // The animationController of Flutter Route object.
+  // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
+  final AnimationController animationController;
+
   final LoadErrorHandler loadErrorHandler;
 
   KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
@@ -43,7 +47,8 @@ class KrakenWidget extends StatelessWidget {
       // Disable viewportHeight check and no assertion error report.
       bool disableViewportHeightAssertion = false,
       // Callback functions when loading Javascript scripts failed.
-      this.loadErrorHandler})
+      this.loadErrorHandler,
+      this.animationController})
       : super(key: key) {
     assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
@@ -103,7 +108,17 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
-    await controller.run();
+    // Execute JavaScript scripts will block the Flutter UI Threads.
+    // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
+    if (controller.bundleURL == null && widget._widget.animationController != null) {
+      widget._widget.animationController.addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          controller.run();
+        }
+      });
+    } else {
+      await controller.run();
+    }
   }
 
   @override

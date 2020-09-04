@@ -69,7 +69,7 @@ void initJSContextPool(int poolSize) {
 
 void disposeContext(int32_t contextId) {
   assert(contextId < maxPoolSize);
-  assert(contextPool[contextId] != nullptr);
+  if (contextPool[contextId] == nullptr) return;
   auto context = static_cast<kraken::JSBridge *>(contextPool[contextId]);
   delete context;
   contextPool[contextId] = nullptr;
