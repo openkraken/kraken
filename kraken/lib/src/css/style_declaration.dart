@@ -150,7 +150,7 @@ class CSSStyleDeclaration {
   void _transition(String propertyName, begin, end) {
     if (_hasRunningTransition(propertyName)) {
       Animation animation = _propertyRunningTransition[propertyName];
-      animation.pause();
+      animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
       begin = _animationProperties[propertyName];
     }
