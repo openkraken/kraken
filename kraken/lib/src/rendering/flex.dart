@@ -257,6 +257,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end padding in the main axis according to flex direction
   double flowAwareMainAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       if (_startIsTopLeft(flexDirection)) {
@@ -273,6 +274,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end padding in the cross axis according to flex direction
   double flowAwareCrossAxisPadding({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       if (_startIsTopLeft(flexDirection)) {
@@ -289,6 +291,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end border in the main axis according to flex direction
   double flowAwareMainAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       if (_startIsTopLeft(flexDirection)) {
@@ -305,6 +308,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end border in the cross axis according to flex direction
   double flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
       if (_startIsTopLeft(flexDirection)) {
@@ -321,6 +325,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end margin of child in the main axis according to flex direction
   double flowAwareChildMainAxisMargin(RenderBox child, {bool isEnd = false}) {
     RenderBoxModel childRenderBoxModel;
     if (child is RenderBoxModel) {
@@ -345,6 +350,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
+  /// Get start/end margin of child in the cross axis according to flex direction
   double flowAwareChildCrossAxisMargin(RenderBox child, {bool isEnd = false}) {
     RenderBoxModel childRenderBoxModel;
     if (child is RenderBoxModel) {
