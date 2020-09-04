@@ -7,7 +7,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:ui';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/rendering.dart';
 
 class KrakenWidget extends StatelessWidget {
   // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
@@ -15,22 +17,38 @@ class KrakenWidget extends StatelessWidget {
 
   // the width of krakenWidget
   final double viewportWidth;
+
   // the height of krakenWidget
   final double viewportHeight;
-  // the kraken controller.
-  final KrakenController controller;
 
-  KrakenWidget(String name, double viewportWidth, double viewportHeight,
-      {Key key, String bundleURL, String bundlePath, String bundleContent})
-      : viewportWidth = viewportWidth,
-        viewportHeight = viewportHeight,
-        name = name,
-        controller = KrakenController(name, viewportWidth, viewportHeight,
-            showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null),
-        super(key: key) {
-    controller.bundleURL = bundleURL;
-    controller.bundlePath = bundlePath;
-    controller.bundleContent = bundleContent;
+  final String bundleURL;
+  final String bundlePath;
+  final String bundleContent;
+
+  final LoadErrorHandler loadErrorHandler;
+
+  KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
+      {Key key,
+      this.bundleURL,
+      this.bundlePath,
+      this.bundleContent,
+      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version released. (v0.6.0)
+      // Disable viewportWidth check and no assertion error report.
+      bool disableViewportWidthAssertion = false,
+      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version release. (v0.6.0)
+      // Disable viewportHeight check and no assertion error report.
+      bool disableViewportHeightAssertion = false,
+      // Callback functions when loading Javascript scripts failed.
+      this.loadErrorHandler})
+      : super(key: key) {
+    assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
+    'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
+    assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
+    'viewportHeight must temporarily equal to window.physicalSize.height / window.devicePixelRatio, as a result of vh uint in current version is not relative to viewportHeight.');
   }
 
   @override
@@ -42,25 +60,39 @@ class KrakenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KrakenRenderWidget(controller);
+    return KrakenRenderWidget(this);
   }
 }
 
 class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const KrakenRenderWidget(KrakenController controller, {Key key})
-      : _controller = controller,
+  const KrakenRenderWidget(KrakenWidget widget, {Key key})
+      : _widget = widget,
         super(key: key);
 
-  final KrakenController _controller;
+  final KrakenWidget _widget;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _controller.view.getRootRenderObject();
+    KrakenController controller = KrakenController(_widget.name, _widget.viewportWidth, _widget.viewportHeight,
+        showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+        bundleURL: _widget.bundleURL,
+        bundlePath: _widget.bundlePath,
+        loadErrorHandler: _widget.loadErrorHandler,
+        bundleContent: _widget.bundleContent);
+    return controller.view.getRootRenderObject();
   }
 
   @override
-  _KrakenRenderElement createElement() => _KrakenRenderElement(this);
+  void didUnmountRenderObject(covariant RenderObject renderObject) {
+    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    controller.dispose();
+  }
+
+  @override
+  _KrakenRenderElement createElement() {
+    return _KrakenRenderElement(this);
+  }
 }
 
 class _KrakenRenderElement extends SingleChildRenderObjectElement {
@@ -69,14 +101,9 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
   @override
   void mount(Element parent, dynamic newSlot) async {
     super.mount(parent, newSlot);
-    await widget._controller.loadBundle();
-    await widget._controller.run();
-  }
-
-  @override
-  void unmount() {
-    super.unmount();
-    widget._controller.dispose();
+    KrakenController controller = (renderObject as RenderBoxModel).controller;
+    await controller.loadBundle();
+    await controller.run();
   }
 
   @override

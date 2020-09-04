@@ -9,6 +9,7 @@ import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'padding.dart';
 
@@ -178,6 +179,9 @@ class RenderBoxModel extends RenderBox with
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
 
   RenderPositionHolder renderPositionHolder;
+
+  // Kraken controller reference which control all kraken created renderObjects.
+  KrakenController controller;
 
   bool _debugHasBoxLayout = false;
 
@@ -451,12 +455,14 @@ class RenderBoxModel extends RenderBox with
     // Max width does not work with following conditions on non replaced elements
     // 1. flex item
     // 2. position absolute or fixed
+    // 3. display inline
     RenderBoxModel hostRenderBoxModel = hostElement.getRenderBoxModel();
     bool isIntrisicBox = hostRenderBoxModel is RenderIntrinsic;
     bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
     bool isParentFlexLayout = hostRenderBoxModel.parent is RenderFlexLayout;
+    bool isInline = style[DISPLAY] == INLINE;
     double contentMaxWidth;
-    if (isIntrisicBox || (!isPositioned && !isParentFlexLayout)) {
+    if (isIntrisicBox || (!isInline && !isPositioned && !isParentFlexLayout)) {
       contentMaxWidth = maxWidth;
     }
 
