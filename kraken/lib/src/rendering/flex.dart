@@ -656,8 +656,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
 
-        setMaximumScrollableWidthForPositionedChild(childParentData, child.size);
-        setMaximumScrollableHeightForPositionedChild(childParentData, child.size);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child.size);
       }
       child = childParentData.nextSibling;
     }
@@ -699,6 +698,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
+      setMaxScrollableSize(contentWidth ?? 0.0, contentHeight ?? 0.0);
       size = getBoxSize(preferredSize);
       return;
     }
@@ -749,6 +749,9 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
+
+    Map<int, double> maxScrollableWidthMap = Map();
+    Map<int, double> maxScrollableHeightMap = Map();
 
     while (child != null) {
       final RenderFlexParentData childParentData = child.parentData;
@@ -802,6 +805,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
+
+      // update max scrollable size
+      if (child is RenderBoxModel) {
+        maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, child.size.width);
+        maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, child.size.height);
+      }
 
       // If container has no main size, get minimum content based size
       // https://www.w3.org/TR/css-flexbox-1/#min-size-auto
@@ -970,6 +979,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         contentWidth ?? 0,
         contentHeight ?? 0,
       );
+      setMaxScrollableSize(preferredSize.width, preferredSize.height);
       size = getBoxSize(preferredSize);
       return;
     }
@@ -1257,6 +1267,12 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
           child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
 
+          // update max scrollable size
+          if (child is RenderBoxModel) {
+            maxScrollableWidthMap[child.targetId] = math.max(child.maxScrollableSize.width, child.size.width);
+            maxScrollableHeightMap[child.targetId] = math.max(child.maxScrollableSize.height, child.size.height);
+          }
+
           crossSize = math.max(crossSize, _getCrossAxisExtent(child));
           // Only layout placeholder renderObject child
           child = childParentData.nextSibling;
@@ -1289,10 +1305,18 @@ class RenderFlexLayout extends RenderLayoutBox {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
+
+    double maxScrollableWidth = 0.0;
+    double maxScrollableHeight = 0.0;
+
+    maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth += value);
+    maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight += value);
+
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
         Size contentSize = Size(math.max(constraintWidth, idealMainSize), constraintHeight);
+        setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
         size = getBoxSize(contentSize);
         actualSize = contentSize.width;
         crossSize = contentSize.height;
@@ -1300,6 +1324,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       case FlexDirection.column:
       case FlexDirection.columnReverse:
         Size contentSize = Size(math.max(constraintWidth, crossSize), constraintHeight);
+        setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
         size = getBoxSize(contentSize);
         actualSize = contentSize.height;
         crossSize = contentSize.width;
