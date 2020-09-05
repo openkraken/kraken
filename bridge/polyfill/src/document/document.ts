@@ -22,6 +22,18 @@ export class Document extends Node {
     super(NodeType.DOCUMENT_NODE, BODY);
   }
 
+  public getElementsByTagName(tagName: string): Element[] {
+    const argLength = arguments.length;
+    if (argLength < 1) throw new Error(`Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, but only 0 present.`);
+    const elements: Element[] = [];
+    traverseNode(this.body, (node: Node) => {
+      if (node instanceof Element && node.tagName === tagName.toUpperCase()) {
+        elements.push(node);
+      }
+    });
+    return elements;
+  }
+
   public getElementById(elementId: string): null | Element {
     const argLength = arguments.length;
     if (argLength < 1) throw new Error(`Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.`);
@@ -91,7 +103,7 @@ export class Document extends Node {
 
 export const document = new Document();
 
-export function getNodeByTargetId(targetId: number) : Node|null|Window {
+export function getNodeByTargetId(targetId: number): Node | null | Window {
   if (targetId === WINDOW) {
     return window;
   }
