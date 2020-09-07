@@ -29,7 +29,7 @@ enum CSSDisplay {
 mixin CSSSizingMixin {
 
   void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
-    double value = CSSLength.toDisplayPortValue(present) ?? 0;
+    double value = CSSLength.toDisplayPortValue(present);
 
     switch (property) {
       case WIDTH:
@@ -89,7 +89,7 @@ mixin CSSSizingMixin {
           margin = _getMargin(style);
           break;
       }
-  
+
       renderBoxModel.margin = margin;
     } else {
       renderBoxModel.margin = _getMargin(style);
@@ -137,7 +137,7 @@ mixin CSSSizingMixin {
           padding = _getPadding(style);
           break;
       }
-  
+
       renderBoxModel.padding = padding;
     } else {
       renderBoxModel.padding = _getPadding(style);
