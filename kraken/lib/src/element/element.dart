@@ -61,6 +61,14 @@ mixin ElementBase {
       return renderLayoutBox;
     }
   }
+
+  void setRenderBoxModel(RenderBoxModel renderBoxModel) {
+    if (renderBoxModel is RenderIntrinsic) {
+      renderIntrinsic = renderBoxModel;
+    } else {
+      renderLayoutBox = renderBoxModel;
+    }
+  }
 }
 
 class Element extends Node
@@ -909,7 +917,7 @@ class Element extends Node
 
   void _styleTransformChangedListener(String property, String original, String present) {
     // Update transform.
-    updateRenderTransform(getRenderBoxModel(), present);
+    updateRenderTransform(this, getRenderBoxModel(), present);
   }
 
   void _styleTransformOriginChangedListener(String property, String original, String present) {
@@ -1355,6 +1363,15 @@ RenderIntrinsic createRenderIntrinsic(Element element, {RenderIntrinsic prevRend
   return intrinsic;
 }
 
+RenderBoxModel createRenderBoxModel(Element element, {RenderBoxModel prevRenderBoxModel, bool repaintSelf = false}) {
+  RenderBoxModel renderBoxModel = prevRenderBoxModel ?? element.getRenderBoxModel();
+
+  if (renderBoxModel is RenderIntrinsic) {
+    return createRenderIntrinsic(element, prevRenderIntrinsic: prevRenderBoxModel, repaintSelf: repaintSelf);
+  } else {
+    return createRenderLayout(element, prevRenderLayoutBox: prevRenderBoxModel, repaintSelf: repaintSelf);
+  }
+}
 
 Element findContainingBlock(Element element) {
   Element _el = element?.parent;

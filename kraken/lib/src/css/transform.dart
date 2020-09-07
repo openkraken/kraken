@@ -2,7 +2,6 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
@@ -81,7 +80,7 @@ double _lerpDouble(double begin, double to, double t) {
 
 List<double> _lerpFloat64List(List<double> begin, List<double> end, t) {
   List<double> r = [];
-  for (int i = 0; i < begin.length; i++) {    
+  for (int i = 0; i < begin.length; i++) {
     r.add(begin[i] * (1 - t) + end[i] * t);
   }
   return r;
@@ -260,7 +259,7 @@ final double _1deg = 180 / pi;
 final double _1rad = pi / 180;
 
 double _rad2deg(rad) {
-  // angleInDegree = angleInRadians * (180 / Math.PI)  
+  // angleInDegree = angleInRadians * (180 / Math.PI)
   return rad * _1deg;
 }
 
@@ -630,7 +629,7 @@ class CSSTransform {
 
   // https://drafts.csswg.org/css-transforms-1/#decomposing-a-2d-matrix
   static List decompose2DMatrix(Matrix4 matrix4) {
-    
+
     List<double> m4storage = matrix4.storage;
     List<List<double>> matrix = [
       m4storage.sublist(0, 4),
@@ -700,7 +699,7 @@ class CSSTransform {
     angle = _rad2deg(angle);
 
     return [translate, scale, angle, m11, m12, m21, m22];
-  } 
+  }
 
   static Matrix4 initial = Matrix4.identity();
 
@@ -904,8 +903,23 @@ class CSSTransformOrigin {
 
 mixin CSSTransformMixin on Node {
 
-  void updateRenderTransform(RenderBoxModel renderBoxModel, String value) {
+  void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
     Matrix4 matrix4 = CSSTransform.parseTransform(value);
+    // Upgrade this renderObject into repaintSelf mode.
+   if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
+     RenderObject parent = renderBoxModel.parent;
+     RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
+     if (parent is ContainerRenderObjectMixin) {
+       RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+       parent.remove(renderBoxModel);
+       parent.insert(repaintSelfBox, after: previousSibling);
+     } else if (parent is RenderObjectWithChildMixin) {
+       parent.child = repaintSelfBox;
+     }
+     element.setRenderBoxModel(repaintSelfBox);
+     renderBoxModel = repaintSelfBox;
+   }
+
     renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
   }
 
