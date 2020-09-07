@@ -147,10 +147,13 @@ class CameraPreviewElement extends Element {
   RenderBox _buildFallbackView(String description) {
     assert(description != null);
 
-    TextStyle style = getTextStyle(CSSStyleDeclaration()).copyWith(backgroundColor: Color(0xFFFFFFFF));
+    TextStyle textStyle = TextStyle(
+      color: Color(0xFF000000),
+      backgroundColor: Color(0xFFFFFFFF)
+    );
     return RenderFallbackViewBox(
       child: RenderParagraph(
-        TextSpan(text: description, style: style),
+        TextSpan(text: description, style: textStyle),
         textDirection: TextDirection.ltr,
       ),
     );
@@ -205,7 +208,7 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  void _propertyChangedListener(String key, String original, String present) {
+  void _propertyChangedListener(String key, String original, String present, bool inAnimation) {
     switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.

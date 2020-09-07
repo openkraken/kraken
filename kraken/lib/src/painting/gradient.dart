@@ -6,12 +6,12 @@ import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 
 // ignore: must_be_immutable
-class WebLinearGradient extends LinearGradient with BorderGradientMixin {
+class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  WebLinearGradient({
+  CSSLinearGradient({
     Alignment begin = Alignment.centerLeft,
     Alignment end = Alignment.centerRight,
     double angle,
@@ -19,7 +19,7 @@ class WebLinearGradient extends LinearGradient with BorderGradientMixin {
     List<double> stops,
     TileMode tileMode = TileMode.clamp,
     GradientTransform transform,
-  })  : _angle = angle,
+  }) : _angle = angle,
         super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
   final double _angle;
@@ -65,12 +65,12 @@ class WebLinearGradient extends LinearGradient with BorderGradientMixin {
 }
 
 // ignore: must_be_immutable
-class WebRadialGradient extends RadialGradient with BorderGradientMixin {
+class CSSRadialGradient extends RadialGradient with BorderGradientMixin {
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  WebRadialGradient({
+  CSSRadialGradient({
     AlignmentGeometry center = Alignment.center,
     double radius = 1.0,
     @required List<Color> colors,
@@ -121,12 +121,12 @@ class WebRadialGradient extends RadialGradient with BorderGradientMixin {
 }
 
 // ignore: must_be_immutable
-class WebConicGradient extends SweepGradient with BorderGradientMixin {
+class CSSConicGradient extends SweepGradient with BorderGradientMixin {
   /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
-  WebConicGradient(
+  CSSConicGradient(
       {AlignmentGeometry center = Alignment.center,
       @required List<Color> colors,
       List<double> stops,
