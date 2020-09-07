@@ -60,11 +60,14 @@ export class Document extends Node {
     }
     let element: Element | null = null;
     traverseNode(this.body, (node: Node) => {
-      if (node instanceof Element && node.getAttribute('id') === elementId) {
-        if (!element) {
-          element = node;
+      if (node.nodeType === NodeType.ELEMENT_NODE) {
+        const originElement = node as Element;
+        if (originElement.getAttribute('id') === elementId) {
+          if (!element) {
+            element = originElement;
+          }
+          return true;
         }
-        return true;
       }
       return false;
     });
