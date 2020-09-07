@@ -1,4 +1,4 @@
-package io.flutter.plugins.webviewflutter;
+package kraken.plugins.webviewflutter;
 
 import static android.hardware.display.DisplayManager.DisplayListener;
 

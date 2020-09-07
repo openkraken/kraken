@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.plugins.webviewflutter;
+package kraken.plugins.webviewflutter;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -45,7 +45,7 @@ public class WebViewFlutterPlugin implements FlutterPlugin {
     registrar
         .platformViewRegistry()
         .registerViewFactory(
-            "plugins.flutter.io/webview",
+            "plugins.kraken/webview",
             new WebViewFactory(registrar.messenger(), registrar.view()));
     new FlutterCookieManager(registrar.messenger());
   }
@@ -58,7 +58,7 @@ public class WebViewFlutterPlugin implements FlutterPlugin {
         .getPlatformViewsController()
         .getRegistry()
         .registerViewFactory(
-            "plugins.flutter.io/webview", new WebViewFactory(messenger, /*containerView=*/ null));
+            "plugins.kraken/webview", new WebViewFactory(messenger, /*containerView=*/ null));
     flutterCookieManager = new FlutterCookieManager(messenger);
   }
 

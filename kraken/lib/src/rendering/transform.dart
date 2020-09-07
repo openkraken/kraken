@@ -87,7 +87,14 @@ mixin RenderTransformMixin on RenderBox {
         transform: getEffectiveTransform(),
         position: position,
         hitTest: (BoxHitTestResult result, Offset position) {
-          return child?.hitTest(result, position: position) ?? false;
+          return result.addWithPaintOffset(
+            offset: childParentData.offset,
+            position: position,
+            hitTest: (BoxHitTestResult result, Offset transformed) {
+              assert(transformed == position - childParentData.offset);
+              return child.hitTest(result, position: transformed);
+            },
+          );
         },
       );
       if (isHit)

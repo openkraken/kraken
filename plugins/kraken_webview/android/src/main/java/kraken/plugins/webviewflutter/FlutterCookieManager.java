@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.plugins.webviewflutter;
+package kraken.plugins.webviewflutter;
 
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -18,7 +18,7 @@ class FlutterCookieManager implements MethodCallHandler {
   private final MethodChannel methodChannel;
 
   FlutterCookieManager(BinaryMessenger messenger) {
-    methodChannel = new MethodChannel(messenger, "plugins.flutter.io/cookie_manager");
+    methodChannel = new MethodChannel(messenger, "plugins.kraken/cookie_manager");
     methodChannel.setMethodCallHandler(this);
   }
 
