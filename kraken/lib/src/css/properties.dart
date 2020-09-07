@@ -8,6 +8,7 @@ const String DISPLAY = 'display';
 const String POSITION = 'position';
 const String OPACITY = 'opacity';
 const String Z_INDEX = 'zIndex';
+const String VISIBILITY = 'visibility';
 const String CONTENT_VISIBILITY = 'contentVisibility';
 const String BOX_SHADOW = 'boxShadow';
 const String COLOR = 'color';

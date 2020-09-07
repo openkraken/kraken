@@ -78,7 +78,7 @@ mixin CSSDecoratedBoxMixin {
 
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
     for (CSSFunctionalNotation method in methods) {
-      if (method.name == URL) {
+      if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
         gradient = CSSBackground.getBackgroundGradient(method);
@@ -236,7 +236,7 @@ mixin CSSDecoratedBoxMixin {
     Gradient gradient;
     List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
     for (CSSFunctionalNotation method in methods) {
-      if (method.name == URL) {
+      if (method.name == 'url') {
         decorationImage = CSSBackground.getDecorationImage(style, method);
       } else {
         gradient = CSSBackground.getBackgroundGradient(method);

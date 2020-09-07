@@ -738,63 +738,63 @@ class Element extends Node
         _styleBoxChangedListener(property, original, present);
         break;
 
-      case 'border':
-      case 'borderTop':
-      case 'borderLeft':
-      case 'borderRight':
-      case 'borderBottom':
-      case 'borderWidth':
-      case 'borderLeftWidth':
-      case 'borderTopWidth':
-      case 'borderRightWidth':
-      case 'borderBottomWidth':
-      case 'borderRadius':
-      case 'borderTopLeftRadius':
-      case 'borderTopRightRadius':
-      case 'borderBottomLeftRadius':
-      case 'borderBottomRightRadius':
-      case 'borderStyle':
-      case 'borderLeftStyle':
-      case 'borderTopStyle':
-      case 'borderRightStyle':
-      case 'borderBottomStyle':
-      case 'borderColor':
-      case 'borderLeftColor':
-      case 'borderTopColor':
-      case 'borderRightColor':
-      case 'borderBottomColor':
-      case 'boxShadow':
+      case BORDER:
+      case BORDER_BOTTOM:
+      case BORDER_LEFT:
+      case BORDER_TOP:
+      case BORDER_RIGHT:
+      case BORDER_WIDTH:
+      case BORDER_LEFT_WIDTH:
+      case BORDER_TOP_WIDTH:
+      case BORDER_RIGHT_WIDTH:
+      case BORDER_BOTTOM_WIDTH:
+      case BORDER_RADIUS:
+      case BORDER_TOP_LEFT_RADIUS:
+      case BORDER_TOP_RIGHT_RADIUS:
+      case BORDER_BOTTOM_LEFT_RADIUS:
+      case BORDER_BOTTOM_RIGHT_RADIUS:
+      case BORDER_STYLE:
+      case BORDER_LEFT_STYLE:
+      case BORDER_TOP_STYLE:
+      case BORDER_RIGHT_STYLE:
+      case BORDER_BOTTOM_STYLE:
+      case BORDER_COLOR:
+      case BORDER_LEFT_COLOR:
+      case BORDER_TOP_COLOR:
+      case BORDER_RIGHT_COLOR:
+      case BORDER_BOTTOM_COLOR:
+      case BOX_SHADOW:
         _styleBoxChangedListener(property, original, present);
         break;
 
-      case 'margin':
-      case 'marginLeft':
-      case 'marginTop':
-      case 'marginRight':
-      case 'marginBottom':
+      case MARGIN:
+      case MARGIN_LEFT:
+      case MARGIN_TOP:
+      case MARGIN_RIGHT:
+      case MARGIN_BOTTOM:
         _styleMarginChangedListener(property, original, present);
         break;
 
-      case 'opacity':
+      case OPACITY:
         _styleOpacityChangedListener(property, original, present);
         break;
-      case 'visibility':
+      case VISIBILITY:
         _styleVisibilityChangedListener(property, original, present);
         break;
-      case 'contentVisibility':
+      case CONTENT_VISIBILITY:
         _styleContentVisibilityChangedListener(property, original, present);
         break;
-      case 'transform':
+      case TRANSFORM:
         _styleTransformChangedListener(property, original, present);
         break;
-      case 'transformOrigin':
+      case TRANSFORM_ORIGIN:
         _styleTransformOriginChangedListener(property, original, present);
         break;
-      case 'transition':
-      case 'transitionProperty':
-      case 'transitionDuration':
-      case 'transitionTimingFunction':
-      case 'transitionDelay':
+      case TRANSITION:
+      case TRANSITION_DELAY:
+      case TRANSITION_DURATION:
+      case TRANSITION_TIMING_FUNCTION:
+      case TRANSITION_PROPERTY:
         _styleTransitionChangedListener(property, original, present);
         break;
     }
@@ -1427,7 +1427,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains(POSITION)) {
     String position = style[POSITION];
-    return position != '' && position != STATIC;
+    return position != EMPTY && position != STATIC;
   } else {
     return false;
   }

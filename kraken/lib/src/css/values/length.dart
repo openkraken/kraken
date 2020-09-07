@@ -15,8 +15,6 @@ const _1Q = _1cm / 40; // 1Q = 1/40th of 1cm
 const _1pc = _1in / 6; // 1pc = 1/6th of 1in
 const _1pt = _1in / 72; // 1pt = 1/72th of 1in
 
-const _0 = '0';
-
 final _lengthRegExp = RegExp(r'^[+-]?(\d+)?(\.\d+)?px|rpx|vw|vh|in|cm|mm|pc|pt$', caseSensitive: false);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
@@ -68,7 +66,7 @@ class CSSLength {
 
     double displayPortValue;
     // Only '0' is accepted with no unit.
-    if (unitedValue == _0) {
+    if (unitedValue == ZERO) {
       return 0;
     } else if (unitedValue.endsWith(RPX)) {
       double currentValue = double.parse(unitedValue.split(RPX)[0]);
@@ -110,12 +108,12 @@ class CSSLength {
   }
 
   static bool isLength(String value) {
-    return value != null && (value == _0 || _lengthRegExp.hasMatch(value));
+    return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
   }
 
   // Css keyword value such as 'auto', 'initial' etc, currently only support 'auto'
   static bool isKeyword(String value) {
-    return value == 'auto';
+    return value == AUTO;
   }
 
 }
