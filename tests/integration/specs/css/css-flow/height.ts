@@ -302,4 +302,27 @@ describe('height', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('should auto compute height when remove height property', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        style: {
+          background: 'red',
+          height: '50px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`Filler Text`)]
+    );
+    BODY.appendChild(div);
+
+    await matchViewportSnapshot();
+
+    div.style.height = null;
+
+    await matchViewportSnapshot();
+  });
 });
