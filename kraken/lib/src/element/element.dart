@@ -146,9 +146,9 @@ class Element extends Node
 
     // Content children layout, BoxModel content.
     if (isIntrinsicBox) {
-      renderIntrinsic = createRenderIntrinsic(this, repaintSelf: repaintSelf);
+      renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
-      renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      renderLayoutBox = _createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
     _setElementSizeType();
@@ -323,7 +323,7 @@ class Element extends Node
 
   // Calculate sticky status according to scroll offset and scroll direction
   void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
-    List<Element> stickyElements = findStickyChildren(this);
+    List<Element> stickyElements = _findStickyChildren(this);
     stickyElements.forEach((Element el) {
       layoutStickyChild(el, scrollOffset, axisDirection);
     });
@@ -343,7 +343,7 @@ class Element extends Node
             Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
-              Element containgBlockElement = findContainingBlock(child);
+              Element containgBlockElement = _findContainingBlock(child);
               child.detach();
               child.attachTo(containgBlockElement);
             }
@@ -379,7 +379,7 @@ class Element extends Node
       } else {
         // Move self to containing block
         if (currentPosition == CSSPositionType.absolute || currentPosition == CSSPositionType.fixed) {
-          Element containgBlockElement = findContainingBlock(this);
+          Element containgBlockElement = _findContainingBlock(this);
           detach();
           attachTo(containgBlockElement);
         }
@@ -394,7 +394,7 @@ class Element extends Node
 
         // Set stick element offset
         if (currentPosition == CSSPositionType.sticky) {
-          Element scrollContainer = findScrollContainer(this);
+          Element scrollContainer = _findScrollContainer(this);
           // Set sticky child offset manually
           scrollContainer.layoutStickyChild(this, 0, AxisDirection.down);
           scrollContainer.layoutStickyChild(this, 0, AxisDirection.right);
@@ -574,7 +574,7 @@ class Element extends Node
 
     switch (position) {
       case CSSPositionType.absolute:
-        Element containingBlockElement = findContainingBlock(child);
+        Element containingBlockElement = _findContainingBlock(child);
         parentRenderLayoutBox = containingBlockElement.renderLayoutBox;
         break;
 
@@ -584,7 +584,7 @@ class Element extends Node
         break;
 
       case CSSPositionType.sticky:
-        Element containingBlockElement = findContainingBlock(child);
+        Element containingBlockElement = _findContainingBlock(child);
         parentRenderLayoutBox = containingBlockElement.renderLayoutBox;
         break;
 
@@ -605,7 +605,7 @@ class Element extends Node
     RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
     child.parent.addChild(childPositionHolder);
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
-    setPositionedChildParentData(parentRenderLayoutBox, child);
+    _setPositionedChildParentData(parentRenderLayoutBox, child);
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
@@ -616,7 +616,7 @@ class Element extends Node
     renderLayoutBox.insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
-    Element scrollContainer = findScrollContainer(child);
+    Element scrollContainer = _findScrollContainer(child);
     // Flush layout first to calculate sticky offset
     if (!childRenderBoxModel.hasSize) {
       childRenderBoxModel.owner.flushLayout();
@@ -815,7 +815,7 @@ class Element extends Node
     if (renderLayoutBox != null) {
       if (originalDisplay != presentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
-        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+        renderLayoutBox = _createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
         renderLayoutBox.markNeedsLayout();
       }
     }
@@ -1088,7 +1088,7 @@ class Element extends Node
     // need to flush layout to get correct size
     elementManager.getRootRenderObject().owner.flushLayout();
 
-    Element element = findContainingBlock(this);
+    Element element = _findContainingBlock(this);
     if (element == null) {
       element = elementManager.getRootElement();
     }
@@ -1175,9 +1175,9 @@ class Element extends Node
     if (!renderBoxModel.isRepaintBoundary) {
       RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderLayoutBox = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderLayoutBox = renderReplacedBoxModel = _createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
-        renderIntrinsic = renderReplacedBoxModel = createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        renderIntrinsic = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
 
       if (parent is RenderObjectWithChildMixin<RenderBox>) {
@@ -1213,7 +1213,7 @@ class Element extends Node
   }
 }
 
-RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+RenderLayoutBox _createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
   CSSStyleDeclaration style = element.style;
   CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
@@ -1324,7 +1324,7 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
   }
 }
 
-RenderIntrinsic createRenderIntrinsic(Element element, {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
+RenderIntrinsic _createRenderIntrinsic(Element element, {RenderIntrinsic prevRenderIntrinsic, bool repaintSelf = false}) {
   RenderIntrinsic intrinsic;
 
   if (prevRenderIntrinsic == null) {
@@ -1355,8 +1355,7 @@ RenderIntrinsic createRenderIntrinsic(Element element, {RenderIntrinsic prevRend
   return intrinsic;
 }
 
-
-Element findContainingBlock(Element element) {
+Element _findContainingBlock(Element element) {
   Element _el = element?.parent;
   Element rootEl = element.elementManager.getRootElement();
 
@@ -1372,7 +1371,7 @@ Element findContainingBlock(Element element) {
   return _el;
 }
 
-Element findScrollContainer(Element element) {
+Element _findScrollContainer(Element element) {
   Element _el = element?.parent;
   Element rootEl = element.elementManager.getRootElement();
 
@@ -1389,7 +1388,7 @@ Element findScrollContainer(Element element) {
   return _el;
 }
 
-List<Element> findStickyChildren(Element element) {
+List<Element> _findStickyChildren(Element element) {
   assert(element != null);
   List<Element> result = [];
 
@@ -1405,7 +1404,7 @@ List<Element> findStickyChildren(Element element) {
       return;
     }
 
-    List<Element> mergedChildren = findStickyChildren(child);
+    List<Element> mergedChildren = _findStickyChildren(child);
     mergedChildren.forEach((Element child) {
       result.add(child);
     });
@@ -1433,8 +1432,7 @@ bool _isPositioned(CSSStyleDeclaration style) {
   }
 }
 
-void setPositionedChildParentData(
-    RenderLayoutBox parentRenderLayoutBox, Element child) {
+void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Element child) {
   var parentData;
   if (parentRenderLayoutBox is RenderFlowLayout) {
     parentData = RenderLayoutParentData();
