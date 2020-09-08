@@ -163,20 +163,6 @@ class Element extends Node
 
     // Init transform
     initTransform(style, targetId);
-
-    setElementSizeType();
-  }
-
-  void setElementSizeType() {
-    bool widthDefined = style.contains(WIDTH) || style.contains(MIN_WIDTH);
-    bool heightDefined = style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
-
-    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
-    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
-
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
-    renderBoxModel.widthSizeType = widthType;
-    renderBoxModel.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -944,8 +930,6 @@ class Element extends Node
 
   void _styleSizeChangedListener(String property, String original, String present) {
     updateBoxSize(getRenderBoxModel(), style, transitionMap);
-
-    setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
       double _original = CSSLength.toDisplayPortValue(original) ?? 0;

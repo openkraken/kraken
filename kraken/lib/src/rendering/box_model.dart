@@ -265,8 +265,14 @@ class RenderBoxModel extends RenderBox with
 
   ElementManager elementManager;
 
-  BoxSizeType widthSizeType;
-  BoxSizeType heightSizeType;
+  BoxSizeType get widthSizeType {
+    bool widthDefined = width != null || (minWidth != null);
+    return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+  }
+  BoxSizeType get heightSizeType {
+    bool heightDefined = height != null || (minHeight != null);
+    return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+  }
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
@@ -279,10 +285,6 @@ class RenderBoxModel extends RenderBox with
     newBox.minHeight = minHeight;
     newBox.maxWidth = maxWidth;
     newBox.maxHeight = maxHeight;
-
-    // Copy size type
-    newBox.widthSizeType = widthSizeType;
-    newBox.heightSizeType = heightSizeType;
 
     // Copy padding
     newBox.padding = padding;
