@@ -13,6 +13,15 @@ class RenderIntrinsic extends RenderBoxModel
   RenderIntrinsic(int targetId, CSSStyleDeclaration style, ElementManager elementManager)
       : super(targetId: targetId, style: style, elementManager: elementManager);
 
+  BoxSizeType get widthSizeType {
+    bool widthDefined = width != null || (minWidth != null);
+    return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+  }
+  BoxSizeType get heightSizeType {
+    bool heightDefined = height != null || (minHeight != null);
+    return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
