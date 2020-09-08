@@ -148,7 +148,7 @@ class Element extends Node
     if (isIntrinsicBox) {
       renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
-      renderLayoutBox = _createRenderLayout(this, repaintSelf: repaintSelf);
+      renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
     _setElementSizeType();
@@ -815,7 +815,7 @@ class Element extends Node
     if (renderLayoutBox != null) {
       if (originalDisplay != presentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
-        renderLayoutBox = _createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
         renderLayoutBox.markNeedsLayout();
       }
     }
@@ -1175,7 +1175,7 @@ class Element extends Node
     if (!renderBoxModel.isRepaintBoundary) {
       RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderLayoutBox = renderReplacedBoxModel = _createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderLayoutBox = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
         renderIntrinsic = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
@@ -1213,7 +1213,7 @@ class Element extends Node
   }
 }
 
-RenderLayoutBox _createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
+RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderLayoutBox, bool repaintSelf = false}) {
   CSSStyleDeclaration style = element.style;
   CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? element.defaultDisplay : style[DISPLAY]);
   if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
