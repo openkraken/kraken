@@ -15,7 +15,9 @@ typedef StyleChangeListener = void Function(
 
 const String EMPTY_STRING = '';
 
-Map LonghandPropertyInitialValues = {
+// https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
+
+Map CSSInitialValues = {
   BACKGROUND_COLOR: TRANSPARENT,
   BACKGROUND_POSITION: '0% 0%',
   BORDER_BOTTOM_COLOR: CURRENT_COLOR,
@@ -111,13 +113,13 @@ class CSSStyleDeclaration {
 
   Map<String, List> _transitions = {};
 
-  set transitions (Map<String, List> value) {
-    _transitions = value;
-  }
-
   String _getCurrentColor() {
     String currentColor = _properties[COLOR];
     return currentColor ?? BLACK;
+  }
+
+  set transitions (Map<String, List> value) {
+    _transitions = value;
   }
 
   bool _isPropertyTransition(String property) {
@@ -159,7 +161,7 @@ class CSSStyleDeclaration {
     }
 
     if (begin == null) {
-      begin = LonghandPropertyInitialValues[propertyName];
+      begin = CSSInitialValues[propertyName];
 
       if (begin == CURRENT_COLOR) {
         begin = _getCurrentColor();

@@ -492,9 +492,9 @@ class KeyframeEffect extends AnimationEffect {
         String right = keyframes[endIndex].value;
 
         if (left == INITIAL)
-          left = LonghandPropertyInitialValues[property];
+          left = CSSInitialValues[property];
         if (right == INITIAL)
-          right = LonghandPropertyInitialValues[property];
+          right = CSSInitialValues[property];
 
         if (left == right) continue;
 
