@@ -122,9 +122,9 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool _shouldTransition(String property, String propertyValue) {
+  bool _shouldTransition(String property, String prevValue, String nextValue) {
     // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-    if (propertyValue == null && CSSInitialValues[property] == AUTO) {
+    if ((prevValue == null && CSSInitialValues[property] == AUTO) || nextValue == AUTO) {
       return false;
     }
 
@@ -392,7 +392,7 @@ class CSSStyleDeclaration {
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue)) {
+        if (!CSSLength.isLength(normalizedValue) && normalizedValue != AUTO) {
           return;
         }
         break;
@@ -424,7 +424,7 @@ class CSSStyleDeclaration {
         break;
     }
 
-    if (!fromAnimation && _shouldTransition(propertyName, prevValue)) {
+    if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
       return _transition(propertyName, prevValue, normalizedValue);
     }
 
