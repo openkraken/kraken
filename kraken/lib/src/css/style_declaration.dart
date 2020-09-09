@@ -122,7 +122,12 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool _isPropertyTransition(String property) {
+  bool _shouldTransition(String property, String propertyValue) {
+    // When begin propertyValue is AUTO, skip animation and trigger style update directly.
+    if (propertyValue == null && CSSInitialValues[property] == AUTO) {
+      return false;
+    }
+
     return CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
@@ -169,7 +174,7 @@ class CSSStyleDeclaration {
     }
 
     EffectTiming options = _getTransitionEffectTiming(propertyName);
-    
+
     List<Keyframe> keyframes = [
       Keyframe(propertyName, begin, 0, LINEAR),
       Keyframe(propertyName, end, 1, LINEAR),
@@ -419,7 +424,7 @@ class CSSStyleDeclaration {
         break;
     }
 
-    if (!fromAnimation && _isPropertyTransition(propertyName)) {
+    if (!fromAnimation && _shouldTransition(propertyName, prevValue)) {
       return _transition(propertyName, prevValue, normalizedValue);
     }
 

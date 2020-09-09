@@ -82,7 +82,7 @@ double _lerpDouble(double begin, double to, double t) {
 
 List<double> _lerpFloat64List(List<double> begin, List<double> end, t) {
   List<double> r = [];
-  for (int i = 0; i < begin.length; i++) {    
+  for (int i = 0; i < begin.length; i++) {
     r.add(begin[i] * (1 - t) + end[i] * t);
   }
   return r;
@@ -261,7 +261,7 @@ final double _1deg = 180 / pi;
 final double _1rad = pi / 180;
 
 double _rad2deg(rad) {
-  // angleInDegree = angleInRadians * (180 / Math.PI)  
+  // angleInDegree = angleInRadians * (180 / Math.PI)
   return rad * _1deg;
 }
 
@@ -631,7 +631,7 @@ class CSSTransform {
 
   // https://drafts.csswg.org/css-transforms-1/#decomposing-a-2d-matrix
   static List decompose2DMatrix(Matrix4 matrix4) {
-    
+
     List<double> m4storage = matrix4.storage;
     List<List<double>> matrix = [
       m4storage.sublist(0, 4),
@@ -701,7 +701,7 @@ class CSSTransform {
     angle = _rad2deg(angle);
 
     return [translate, scale, angle, m11, m12, m21, m22];
-  } 
+  }
 
   static Matrix4 initial = Matrix4.identity();
 
