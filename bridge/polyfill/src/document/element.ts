@@ -12,6 +12,7 @@ import {
   getProperty,
   requestUpdateFrame
 } from './ui-manager';
+import { TextNode } from "./text";
 
 const RECT_PROPERTIES = [
   'offsetTop',
@@ -312,5 +313,24 @@ export class Element extends Node {
       };
     }
     method(this.targetId, 'scrollBy', [option]);
+  }
+
+  public set textContent(data: string) {
+    while (this.firstChild != null) {
+      this.firstChild.remove();
+    }
+    if (data === null) {
+      data = '';
+    }
+    let textNode = new TextNode(data);
+    this.appendChild(textNode);
+  }
+
+  public get textContent() {
+    let text = '';
+    this.childNodes.forEach(node => {
+      text += node.textContent;
+    });
+    return text;
   }
 }
