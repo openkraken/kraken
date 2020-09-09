@@ -6,13 +6,13 @@ import {
   createElement,
   setProperty,
   removeProperty,
-  setStyle,
   method,
   toBlob,
   getProperty,
   requestUpdateFrame
 } from './ui-manager';
 import { TextNode } from "./text";
+import { StyleDeclaration } from "./style-declaration";
 
 const RECT_PROPERTIES = [
   'offsetTop',
@@ -34,58 +34,8 @@ const RECT_MUTABLE_PROPERTIES = [
   'scrollLeft',
 ];
 
-interface ICamelize {
-  (str: string): string;
-}
-
-/**
- * Create a cached version of a pure function.
- */
-function cached(fn: ICamelize) {
-  const cache = Object.create(null);
-  return function cachedFn(str : string) {
-    const hit = cache[str];
-    return hit || (cache[str] = fn(str));
-  };
-};
-
-/**
- * Camelize a hyphen-delimited string.
- */
-const camelize: ICamelize = (str: string) => {
-  const camelizeRE = /-(\w)/g;
-  return str.replace(camelizeRE, function (_: string, c: string) {
-    return c ? c.toUpperCase() : '';
-  });
-}
-
-// Cached camelize utility
-const cachedCamelize = cached(camelize);
 // support event handlers using 'on' property prefix.
 const elementBuildInEvents = ['click', 'appear', 'disappear', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
-
-class StyleDeclaration {
-  private targetId: number;
-  constructor(targetId: number) {
-    this.targetId = targetId;
-  }
-  setProperty(property: string, value: any) {
-    const camelizedProperty = cachedCamelize(property);
-    this[camelizedProperty] = value;
-    setStyle(this.targetId, camelizedProperty, value);
-  }
-  removeProperty(property: string) {
-    const camelizedProperty = cachedCamelize(property);
-    setStyle(this.targetId, camelizedProperty, '');
-    const originValue = this[camelizedProperty];
-    this[camelizedProperty] = '';
-    return originValue;
-  }
-  getPropertyValue(property: string) {
-    const camelizedProperty = cachedCamelize(property);
-    return this[camelizedProperty];
-  }
-}
 
 export class Element extends Node {
   public readonly tagName: string;
