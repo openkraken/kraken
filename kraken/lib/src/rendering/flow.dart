@@ -616,7 +616,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
