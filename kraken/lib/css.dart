@@ -19,6 +19,7 @@ export 'src/css/text.dart';
 export 'src/css/transform.dart';
 export 'src/css/transition.dart';
 export 'src/css/visibility.dart';
+export 'src/css/offset.dart';
 
 // CSS Values
 // ignore: directives_ordering
