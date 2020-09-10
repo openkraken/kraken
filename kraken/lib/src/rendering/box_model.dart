@@ -444,14 +444,14 @@ class RenderBoxModel extends RenderBox with
     double width = _width;
 
     void cropMargin(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.margin != null) {
         cropWidth += renderBoxModel.margin.horizontal;
       }
     }
 
     void cropPaddingBorder(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
@@ -517,7 +517,7 @@ class RenderBoxModel extends RenderBox with
     // 1. flex item
     // 2. position absolute or fixed
     // 3. display inline
-    RenderBoxModel hostRenderBoxModel = hostElement.getRenderBoxModel();
+    RenderBoxModel hostRenderBoxModel = hostElement.renderBoxModel;
     bool isIntrisicBox = hostRenderBoxModel is RenderIntrinsic;
     bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
     bool isParentFlexLayout = hostRenderBoxModel.parent is RenderFlexLayout;
@@ -572,14 +572,14 @@ class RenderBoxModel extends RenderBox with
     double cropHeight = 0;
 
     void cropMargin(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.margin != null) {
         cropHeight += renderBoxModel.margin.vertical;
       }
     }
 
     void cropPaddingBorder(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.borderEdge != null) {
         cropHeight += renderBoxModel.borderEdge.vertical;
       }

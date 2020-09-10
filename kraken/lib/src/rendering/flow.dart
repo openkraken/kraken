@@ -466,7 +466,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
     return renderBoxModel;
   }
 
@@ -902,7 +902,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
           Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-          RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+          RenderBoxModel renderBoxModel = childEl.renderBoxModel;
           childMarginLeft = renderBoxModel.marginLeft;
           childMarginTop = renderBoxModel.marginTop;
         }

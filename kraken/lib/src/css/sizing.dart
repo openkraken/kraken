@@ -169,14 +169,14 @@ class CSSSizing {
     CSSDisplay display = getElementRealDisplayValue(targetId, elementManager);
 
     void cropMargin(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.margin != null) {
         cropWidth += renderBoxModel.margin.horizontal;
       }
     }
 
     void cropPaddingBorder(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
@@ -223,7 +223,7 @@ class CSSSizing {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    RenderBoxModel renderBoxModel = current.getRenderBoxModel();
+    RenderBoxModel renderBoxModel = current.renderBoxModel;
     bool isFlex = renderBoxModel is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;

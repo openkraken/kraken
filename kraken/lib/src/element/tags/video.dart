@@ -117,7 +117,6 @@ class VideoElement extends Element {
   }
 
   void _removeVideoBox() {
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     (renderBoxModel as RenderIntrinsic).child = null;
   }
 

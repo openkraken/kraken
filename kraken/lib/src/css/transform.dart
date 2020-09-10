@@ -971,7 +971,7 @@ mixin CSSTransformMixin on Node {
       } else if (parent is RenderObjectWithChildMixin) {
         parent.child = repaintSelfBox;
       }
-      element.setRenderBoxModel(repaintSelfBox);
+      element.renderBoxModel = repaintSelfBox;
       renderBoxModel = repaintSelfBox;
     }
 
