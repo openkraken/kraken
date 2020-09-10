@@ -134,25 +134,26 @@ const camelize: ICamelize = (str: string) => {
 const cachedCamelize = cached(camelize);
 
 export class StyleDeclaration {
+  private _internalProperty = {};
   private targetId: number;
   constructor(targetId: number) {
     this.targetId = targetId;
   }
   setProperty(property: string, value: any) {
     const camelizedProperty = cachedCamelize(property);
-    this['_!' + camelizedProperty] = value;
+    this._internalProperty[camelizedProperty] = value;
     setStyle(this.targetId, camelizedProperty, value);
   }
   removeProperty(property: string) {
     const camelizedProperty = cachedCamelize(property);
     setStyle(this.targetId, camelizedProperty, '');
     const originValue = this[camelizedProperty];
-    this[camelizedProperty] = '';
+    this._internalProperty[camelizedProperty] = '';
     return originValue;
   }
   getPropertyValue(property: string) {
     const camelizedProperty = cachedCamelize(property);
-    return this['_!' + camelizedProperty];
+    return this._internalProperty[camelizedProperty];
   }
 }
 
