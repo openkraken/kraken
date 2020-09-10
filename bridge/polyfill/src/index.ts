@@ -1,3 +1,5 @@
+import 'es6-promise/dist/es6-promise.auto';
+
 import { console } from './console';
 import { document } from './document';
 import { PromiseRejectionEvent } from './document/events/promise-rejection-event';

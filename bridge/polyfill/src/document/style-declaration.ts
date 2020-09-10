@@ -11,6 +11,10 @@ const builtInCSSProperties = [
   'color',
   'width',
   'height',
+  'top',
+  'left',
+  'right',
+  'bottom',
   'min-height',
   'max-height',
   'min-width',
@@ -136,7 +140,7 @@ export class StyleDeclaration {
   }
   setProperty(property: string, value: any) {
     const camelizedProperty = cachedCamelize(property);
-    this[camelizedProperty] = value;
+    this['_!' + camelizedProperty] = value;
     setStyle(this.targetId, camelizedProperty, value);
   }
   removeProperty(property: string) {
@@ -148,17 +152,30 @@ export class StyleDeclaration {
   }
   getPropertyValue(property: string) {
     const camelizedProperty = cachedCamelize(property);
-    return this[camelizedProperty];
+    return this['_!' + camelizedProperty];
   }
 }
 
 builtInCSSProperties.forEach(property => {
+  const camelizeProperty = cachedCamelize(property);
+
   Object.defineProperty(StyleDeclaration.prototype, property, {
-    get(): any {
-      return this.getPropertyValue('_' + property);
+    get() {
+      return this.getPropertyValue(property);
     },
     set(value: any) {
-      this.setProperty('_' + property, value);
+      this.setProperty(property, value);
     }
   });
+
+  if (camelizeProperty != property) {
+    Object.defineProperty(StyleDeclaration.prototype, camelizeProperty, {
+      get() {
+        return this.getPropertyValue(camelizeProperty);
+      },
+      set(value) {
+        this.setProperty(camelizeProperty, value);
+      }
+    });
+  }
 });

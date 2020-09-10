@@ -39,6 +39,7 @@ module.exports = [
       typescript(),
       NODE_ENV === 'development' ? null : terser(uglifyOptions),
     ],
+    context: 'window'
   },
   {
     input: 'src/test/index.js',

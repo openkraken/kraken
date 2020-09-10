@@ -47,23 +47,7 @@ export class Element extends Node {
     super(NodeType.ELEMENT_NODE, _targetId, elementBuildInEvents.concat(builtInEvents || []));
     this.tagName = tagName.toUpperCase();
     const targetId = this.targetId;
-    const style = this.style = new StyleDeclaration(targetId);
-    // FIXME: Proxy not support in iOS 9.x
-    // See: https://caniuse.com/#search=proxy
-    this.style = new Proxy(style, {
-      set(target: any, key: string, value: any, receiver: any): boolean {
-        style.setProperty(key, value);
-        return true;
-      },
-      get(target: any, key: string, receiver) {
-        // Proxy to prototype method
-        if (key in target) {
-          return target[key];
-        }
-        return style.getPropertyValue(key);
-      },
-    });
-
+    this.style = new StyleDeclaration(targetId);
     // Define rect properties
     for (let i = 0; i < RECT_PROPERTIES.length; i++) {
       const prop = RECT_PROPERTIES[i];
