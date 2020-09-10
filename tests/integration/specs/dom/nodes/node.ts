@@ -48,4 +48,19 @@ describe('Node API', () => {
 
     expect(el.isConnected).toEqual(false);
   });
+
+  it('set textContent property will clear element childNodes', async () => {
+    let container = createElement('div', {}, [
+      createText('1234'),
+      createElement('div', {}, [ createText('5678')]),
+      createText('90')
+    ]);
+    expect(container.childNodes.length == 3);
+    expect(container.textContent).toBe('1234567890');
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+    container.textContent = '';
+    expect(container.childNodes.length == 1);
+    await matchViewportSnapshot();
+  });
 });

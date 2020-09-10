@@ -151,8 +151,6 @@ class Element extends Node
       renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
     }
 
-    _setElementSizeType();
-
     _setDefaultStyle();
   }
 
@@ -162,18 +160,6 @@ class Element extends Node
         style.setProperty(property, value);
       });
     }
-  }
-
-  void _setElementSizeType() {
-    bool widthDefined = style.contains(WIDTH) || style.contains(MIN_WIDTH);
-    bool heightDefined = style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
-
-    BoxSizeType widthType = widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
-    BoxSizeType heightType = heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
-
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
-    renderBoxModel.widthSizeType = widthType;
-    renderBoxModel.heightSizeType = heightType;
   }
 
   void _scrollListener(double scrollOffset, AxisDirection axisDirection) {
@@ -862,8 +848,6 @@ class Element extends Node
 
   void _styleSizeChangedListener(String property, String original, String present) {
     updateRenderSizing(getRenderBoxModel(), style, property, present);
-
-    _setElementSizeType();
 
     if (property == WIDTH || property == HEIGHT) {
       updateRenderOffset(getRenderBoxModel(), property, present);

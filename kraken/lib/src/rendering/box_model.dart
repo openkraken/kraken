@@ -155,6 +155,61 @@ class RenderLayoutBox extends RenderBoxModel
     removeAll();
     return children;
   }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return computeDistanceToHighestActualBaseline(baseline);
+  }
+
+  /// Baseline rule is as follows:
+  /// 1. Loop children to find baseline, if child is block-level find the nearest non block-level children's height
+  /// as baseline
+  /// 2. If child is text-box, use text's baseline
+  double computeDistanceToHighestActualBaseline(TextBaseline baseline) {
+    double result;
+    RenderBox child = firstChild;
+    while (child != null) {
+      final RenderLayoutParentData childParentData = child.parentData;
+
+      // Whether child is inline-level including text box
+      bool isChildInline = true;
+      if (child is RenderBoxModel) {
+        CSSDisplay childDisplay = CSSSizing.getElementRealDisplayValue(child.targetId, elementManager);
+        if (childDisplay == CSSDisplay.block || childDisplay == CSSDisplay.flex) {
+          isChildInline = false;
+        }
+      }
+
+      // Block level and positioned element doesn't involve in baseline alignment
+      if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      double childDistance = child.getDistanceToActualBaseline(baseline);
+      // Use child's height if child has no baseline and not block-level
+      // Text box always has baseline
+      if (childDistance == null &&
+        isChildInline &&
+        child is RenderBoxModel && child.contentSize != null
+      ) {
+        // Flutter only allow access size of direct children, so cannot use child.size
+        Size childSize = child.getBoxSize(child.contentSize);
+        childDistance = childSize.height;
+      }
+
+
+      if (childDistance != null) {
+        childDistance += childParentData.offset.dy;
+        if (result != null)
+          result = math.min(result, childDistance);
+        else
+          result = childDistance;
+      }
+      child = childParentData.nextSibling;
+    }
+    return result;
+  }
 }
 
 class RenderBoxModel extends RenderBox with
@@ -210,8 +265,14 @@ class RenderBoxModel extends RenderBox with
 
   ElementManager elementManager;
 
-  BoxSizeType widthSizeType;
-  BoxSizeType heightSizeType;
+  BoxSizeType get widthSizeType {
+    bool widthDefined = width != null || (minWidth != null);
+    return widthDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+  }
+  BoxSizeType get heightSizeType {
+    bool heightDefined = height != null || (minHeight != null);
+    return heightDefined ? BoxSizeType.specified : BoxSizeType.automatic;
+  }
 
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
@@ -224,10 +285,6 @@ class RenderBoxModel extends RenderBox with
     newBox.minHeight = minHeight;
     newBox.maxWidth = maxWidth;
     newBox.maxHeight = maxHeight;
-
-    // Copy size type
-    newBox.widthSizeType = widthSizeType;
-    newBox.heightSizeType = heightSizeType;
 
     // Copy padding
     newBox.padding = padding;
@@ -609,7 +666,6 @@ class RenderBoxModel extends RenderBox with
     if (borderEdge != null) {
       boxSize = wrapBorderSize(boxSize);
     }
-
     return constraints.constrain(boxSize);
   }
 

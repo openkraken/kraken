@@ -171,6 +171,13 @@ class CSSStyleDeclaration {
       if (begin == CURRENT_COLOR) {
         begin = _getCurrentColor();
       }
+
+      // When begin propertyValue is AUTO, skip animation and trigger style update directly.
+      if (begin == AUTO) {
+        _properties[propertyName] = end;
+        _invokePropertyChangedListener(propertyName, begin, end);
+        return;
+      }
     }
 
     EffectTiming options = _getTransitionEffectTiming(propertyName);
