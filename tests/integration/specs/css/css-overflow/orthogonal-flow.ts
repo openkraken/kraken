@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('orthogonal-flow', () => {
-  fit('with-inline-end-margin', async () => {
+  it('with-inline-end-margin', async () => {
     let container;
     container = createElement(
       'div',
