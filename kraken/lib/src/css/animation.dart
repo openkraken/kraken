@@ -192,7 +192,7 @@ class Animation {
   }
 
   _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
-    
+
     if (newTime != _currentTime) {
       _currentTime = newTime;
       if (_isFinished && !ignoreLimit) {
@@ -426,7 +426,7 @@ class _Interpolation {
   _Interpolation(this.property, this.startOffset, this.endOffset, this.easing, this.begin, this.end, this.lerp) {
     if (easing == null) {
       easing = Curves.linear;
-    } 
+    }
   }
 
   @override
@@ -492,9 +492,9 @@ class KeyframeEffect extends AnimationEffect {
         String right = keyframes[endIndex].value;
 
         if (left == INITIAL)
-          left = LonghandPropertyInitialValues[property];
+          left = CSSInitialValues[property];
         if (right == INITIAL)
-          right = LonghandPropertyInitialValues[property];
+          right = CSSInitialValues[property];
 
         if (left == right) continue;
 

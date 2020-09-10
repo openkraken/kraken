@@ -9,6 +9,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/element.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
+final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
 Color _parseColor(String color) {
   return CSSColor.parseColor(color);
@@ -894,58 +895,15 @@ class CSSTransform {
   }
 }
 
-class CSSTransformOrigin {
+class CSSOrigin {
   Offset offset;
   Alignment alignment;
 
-  CSSTransformOrigin(this.offset, this.alignment);
-}
+  CSSOrigin(this.offset, this.alignment);
 
-mixin CSSTransformMixin on Node {
-
-  void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
-    Matrix4 matrix4 = CSSTransform.parseTransform(value);
-    // Upgrade this renderObject into repaintSelf mode.
-   if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
-     RenderObject parent = renderBoxModel.parent;
-     RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
-     if (parent is ContainerRenderObjectMixin) {
-       RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
-       parent.remove(renderBoxModel);
-       parent.insert(repaintSelfBox, after: previousSibling);
-     } else if (parent is RenderObjectWithChildMixin) {
-       parent.child = repaintSelfBox;
-     }
-     element.setRenderBoxModel(repaintSelfBox);
-     renderBoxModel = repaintSelfBox;
-   }
-
-    renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
-  }
-
-  void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
-
-    CSSTransformOrigin transformOrigin = _parseTransformOrigin(present);
-    if (transformOrigin == null) return;
-
-    Offset oldOffset = renderBoxModel.origin;
-    Offset offset = transformOrigin.offset;
-    // Transform origin transition by offset
-    if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
-      renderBoxModel.origin = offset;
-    }
-
-    Alignment alignment = transformOrigin.alignment;
-    Alignment oldAlignment = renderBoxModel.alignment;
-    // Transform origin transition by alignment
-    if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
-      renderBoxModel.alignment = alignment;
-    }
-  }
-
-  CSSTransformOrigin _parseTransformOrigin(String origin) {
+  static CSSOrigin parseOrigin(String origin) {
     if (origin != null && origin.isNotEmpty) {
-      List<String> originList = origin.trim().split(' ');
+      List<String> originList = origin.trim().split(_spaceRegExp);
       String x, y;
       if (originList.length == 1) {
         // default center
@@ -992,9 +950,52 @@ mixin CSSTransformMixin on Node {
       } else if (y == CSSPosition.CENTER) {
         alignY = 0.0;
       }
-      return CSSTransformOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
+      return CSSOrigin(Offset(offsetX, offsetY), Alignment(alignX, alignY));
     }
     return null;
+  }
+}
+
+mixin CSSTransformMixin on Node {
+
+  void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
+    Matrix4 matrix4 = CSSTransform.parseTransform(value);
+    // Upgrade this renderObject into repaintSelf mode.
+    if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
+      RenderObject parent = renderBoxModel.parent;
+      RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
+      if (parent is ContainerRenderObjectMixin) {
+        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+        parent.remove(renderBoxModel);
+        parent.insert(repaintSelfBox, after: previousSibling);
+      } else if (parent is RenderObjectWithChildMixin) {
+        parent.child = repaintSelfBox;
+      }
+      element.setRenderBoxModel(repaintSelfBox);
+      renderBoxModel = repaintSelfBox;
+    }
+
+    renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
+  }
+
+  void updateRenderTransformOrigin(RenderBoxModel renderBoxModel, String present) {
+
+    CSSOrigin transformOrigin = CSSOrigin.parseOrigin(present);
+    if (transformOrigin == null) return;
+
+    Offset oldOffset = renderBoxModel.origin;
+    Offset offset = transformOrigin.offset;
+    // Transform origin transition by offset
+    if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
+      renderBoxModel.origin = offset;
+    }
+
+    Alignment alignment = transformOrigin.alignment;
+    Alignment oldAlignment = renderBoxModel.alignment;
+    // Transform origin transition by alignment
+    if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
+      renderBoxModel.alignment = alignment;
+    }
   }
 
 }

@@ -81,20 +81,6 @@ class ImageElement extends Element {
     if (childNodes.isEmpty) {
       addChild(imageBox);
     }
-
-    setElementSizeType();
-  }
-
-  void setElementSizeType() {
-    bool isWidthDefined = _propertyWidth != null || style.contains(WIDTH) || style.contains(MIN_WIDTH);
-    bool isHeightDefined = _propertyHeight != null || style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
-
-    BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-    BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
-    renderBoxModel.widthSizeType = widthType;
-    renderBoxModel.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
