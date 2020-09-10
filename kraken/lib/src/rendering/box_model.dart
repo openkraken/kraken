@@ -431,12 +431,15 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
-  double getContentWidth() {
+  static double getContentWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
-    // @FIXME, need to remove elementManager in the future.
-    RenderBoxModel hostRenderBoxModel = this;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    double width = _width;
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+    double width = renderBoxModel.width;
+    double minWidth = renderBoxModel.minWidth;
+    double maxWidth = renderBoxModel.maxWidth;
+    double intrinsicWidth = renderBoxModel.intrinsicWidth;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    BoxSizeType heightSizeType = renderBoxModel.heightSizeType;
 
     void cropMargin(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.margin != null) {
@@ -457,33 +460,32 @@ class RenderBoxModel extends RenderBox with
       case CSSDisplay.block:
       case CSSDisplay.flex:
         // Get own width if exists else get the width of nearest ancestor width width
-        if (_width != null) {
-          cropPaddingBorder(hostRenderBoxModel);
+        if (renderBoxModel.width != null) {
+          cropPaddingBorder(renderBoxModel);
         } else {
           while (true) {
-            if (hostRenderBoxModel.parent != null && hostRenderBoxModel.parent is RenderBoxModel) {
-              cropMargin(hostRenderBoxModel);
-              cropPaddingBorder(hostRenderBoxModel);
-              hostRenderBoxModel = hostRenderBoxModel.parent;
+            if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+              cropMargin(renderBoxModel);
+              cropPaddingBorder(renderBoxModel);
+              renderBoxModel = renderBoxModel.parent;
             } else {
               break;
             }
-            if (hostRenderBoxModel is RenderBoxModel) {
-              CSSDisplay display = CSSSizing.getElementRealDisplayValue(hostRenderBoxModel.targetId, elementManager);
 
-              // Set width of element according to parent display
-              if (display != CSSDisplay.inline) {
-                // Skip to find upper parent
-                if (hostRenderBoxModel.width != null) {
-                  // Use style width
-                  width = hostRenderBoxModel.width;
-                  cropPaddingBorder(hostRenderBoxModel);
-                  break;
-                } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
-                  // Collapse width to children
-                  width = null;
-                  break;
-                }
+            CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
+
+            // Set width of element according to parent display
+            if (display != CSSDisplay.inline) {
+              // Skip to find upper parent
+              if (renderBoxModel.width != null) {
+                // Use style width
+                width = renderBoxModel.width;
+                cropPaddingBorder(renderBoxModel);
+                break;
+              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
+                // Collapse width to children
+                width = null;
+                break;
               }
             }
           }
@@ -491,9 +493,9 @@ class RenderBoxModel extends RenderBox with
         break;
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
-        if (hostRenderBoxModel.width != null) {
-          width = hostRenderBoxModel.width;
-          cropPaddingBorder(hostRenderBoxModel);
+        if (renderBoxModel.width != null) {
+          width = renderBoxModel.width;
+          cropPaddingBorder(renderBoxModel);
         } else {
           width = null;
         }
@@ -509,9 +511,10 @@ class RenderBoxModel extends RenderBox with
     // 1. flex item
     // 2. position absolute or fixed
     // 3. display inline
-    bool isIntrisicBox = hostRenderBoxModel is RenderIntrinsic;
+    bool isIntrisicBox = renderBoxModel is RenderIntrinsic;
+    CSSStyleDeclaration style = renderBoxModel.style;
     bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
-    bool isParentFlexLayout = hostRenderBoxModel.parent is RenderFlexLayout;
+    bool isParentFlexLayout = renderBoxModel.parent is RenderFlexLayout;
     bool isInline = style[DISPLAY] == INLINE;
     double contentMaxWidth;
     if (isIntrisicBox || (!isInline && !isPositioned && !isParentFlexLayout)) {
@@ -543,7 +546,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
-      double height = getContentHeight();
+      double height = getContentHeight(renderBoxModel);
       width = height * intrinsicRatio;
     }
 
@@ -554,12 +557,17 @@ class RenderBoxModel extends RenderBox with
     }
   }
 
-  double getContentHeight() {
-    RenderBoxModel hostRenderBoxModel = this;
-    CSSDisplay display = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+  static double getContentHeight(RenderBoxModel renderBoxModel) {
+    CSSDisplay display = CSSSizing.getElementRealDisplayValue(renderBoxModel.targetId, renderBoxModel.elementManager);
 
-    double height = _height;
+    double height = renderBoxModel.height;
     double cropHeight = 0;
+
+    double maxHeight = renderBoxModel.maxHeight;
+    double minHeight = renderBoxModel.minHeight;
+    double intrinsicHeight = renderBoxModel.intrinsicHeight;
+    double intrinsicRatio = renderBoxModel.intrinsicRatio;
+    BoxSizeType widthSizeType = renderBoxModel.widthSizeType;
 
     void cropMargin(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.margin != null) {
@@ -579,29 +587,27 @@ class RenderBoxModel extends RenderBox with
     // Inline element has no height
     if (display == CSSDisplay.inline) {
       return null;
-    } else if (_height != null) {
-      cropPaddingBorder(hostRenderBoxModel);
+    } else if (renderBoxModel.height != null) {
+      cropPaddingBorder(renderBoxModel);
     } else {
       while (true) {
         RenderBoxModel current;
-        if (hostRenderBoxModel.parent != null && hostRenderBoxModel.parent is RenderBoxModel) {
-          cropMargin(hostRenderBoxModel);
-          cropPaddingBorder(hostRenderBoxModel);
-          current = hostRenderBoxModel;
-          hostRenderBoxModel = hostRenderBoxModel.parent;
+        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+          cropMargin(renderBoxModel);
+          cropPaddingBorder(renderBoxModel);
+          current = renderBoxModel;
+          renderBoxModel = renderBoxModel.parent;
         } else {
           break;
         }
-        if (hostRenderBoxModel is RenderBoxModel) {
-          if (CSSSizing.isStretchChildHeight(hostRenderBoxModel, current)) {
-            if (hostRenderBoxModel.height != null) {
-              height = hostRenderBoxModel.height;
-              cropPaddingBorder(hostRenderBoxModel);
-              break;
-            }
-          } else {
+        if (CSSSizing.isStretchChildHeight(renderBoxModel, current)) {
+          if (renderBoxModel.height != null) {
+            height = renderBoxModel.height;
+            cropPaddingBorder(renderBoxModel);
             break;
           }
+        } else {
+          break;
         }
       }
     }
@@ -631,7 +637,7 @@ class RenderBoxModel extends RenderBox with
     }
 
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
-      double width = getContentWidth();
+      double width = getContentWidth(renderBoxModel);
       height = width * intrinsicRatio;
     }
 
@@ -705,8 +711,8 @@ class RenderBoxModel extends RenderBox with
     // Deflate padding constraints.
     boxConstraints = deflatePaddingConstraints(boxConstraints);
 
-    final double contentWidth = getContentWidth();
-    final double contentHeight = getContentHeight();
+    final double contentWidth = getContentWidth(this);
+    final double contentHeight = getContentHeight(this);
 
     if (contentWidth != null || contentHeight != null) {
       double minWidth;

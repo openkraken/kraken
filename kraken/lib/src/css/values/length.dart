@@ -54,6 +54,10 @@ class CSSLength {
     }
   }
 
+  static bool isAuto(value) {
+    return value == AUTO;
+  }
+
   static double parseLength(String unitedValue) {
     return toDisplayPortValue(unitedValue);
   }
@@ -109,11 +113,6 @@ class CSSLength {
 
   static bool isLength(String value) {
     return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
-  }
-
-  // Css keyword value such as 'auto', 'initial' etc, currently only support 'auto'
-  static bool isKeyword(String value) {
-    return value == AUTO;
   }
 
 }
