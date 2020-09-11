@@ -21,7 +21,7 @@ describe('vertical-align', () => {
             fontSize: '35px',
             width: '200px',
             height: '50px',
-            vertialAlign: 'baseline',
+            verticalAlign: 'baseline',
             },
         },[
             createText(`ABCD`),

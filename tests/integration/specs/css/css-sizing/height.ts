@@ -205,5 +205,20 @@ describe('Height', () => {
 
       await matchViewportSnapshot();
     });
+
+    it('set element\'s height to auto', async () => {
+      let container = createElement('div', {
+        style: {
+          height: '200px',
+          background: 'red'
+        }
+      }, [createText('1234')]);
+      BODY.appendChild(container);
+
+      await matchViewportSnapshot();
+
+      container.style.height = 'auto';
+      await matchViewportSnapshot();
+    });
   });
 });
