@@ -10,11 +10,11 @@ import 'package:flutter/rendering.dart';
 import 'dart:ui';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
+import 'package:meta/meta.dart';
 
-class KrakenWidget extends StatelessWidget {
-  // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
-  final String name;
+typedef KrakenOnLoadHandler = void Function(KrakenController controller);
 
+class Kraken extends StatelessWidget {
   // the width of krakenWidget
   final double viewportWidth;
 
@@ -31,11 +31,20 @@ class KrakenWidget extends StatelessWidget {
 
   final LoadErrorHandler loadErrorHandler;
 
-  KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
-      {Key key,
+  final KrakenOnLoadHandler onLoadHandler;
+
+  KrakenController get controller {
+    return KrakenController.getControllerOfName(shortHash(this));
+  }
+
+  Kraken({
+      Key key,
+      @required this.viewportWidth,
+      @required this.viewportHeight,
       this.bundleURL,
       this.bundlePath,
       this.bundleContent,
+      this.onLoadHandler,
       // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
       // Maybe got unexpected error when change to other values, use this at your own risk!
       // We will fixed this on next version released. (v0.6.0)
@@ -50,6 +59,7 @@ class KrakenWidget extends StatelessWidget {
       this.loadErrorHandler,
       this.animationController})
       : super(key: key) {
+
     assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -71,15 +81,15 @@ class KrakenWidget extends StatelessWidget {
 
 class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const KrakenRenderWidget(KrakenWidget widget, {Key key})
+  const KrakenRenderWidget(Kraken widget, {Key key})
       : _widget = widget,
         super(key: key);
 
-  final KrakenWidget _widget;
+  final Kraken _widget;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    KrakenController controller = KrakenController(_widget.name, _widget.viewportWidth, _widget.viewportHeight,
+    KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         bundleURL: _widget.bundleURL,
         bundlePath: _widget.bundlePath,
@@ -108,6 +118,11 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
+
+    if (widget._widget.onLoadHandler != null) {
+      widget._widget.onLoadHandler(controller);
+    }
+
     // Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
     if (controller.bundleURL == null && widget._widget.animationController != null) {
