@@ -89,7 +89,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     renderTextBox.text = createTextSpan(data, parentElement.style);
     _setTextNodeProperties(parentElement.style);
 
-    RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
+    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
     _setTextSizeType(
       parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
   }
@@ -112,7 +112,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     renderTextBox.style = parent.style;
     _setTextNodeProperties(parent.style);
     parent.renderLayoutBox.insert(renderTextBox, after: after);
-    RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
+    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
     _setTextSizeType(
       parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
   }
