@@ -1,3 +1,5 @@
+import 'es6-promise/dist/es6-promise.auto';
+
 import { console } from './console';
 import { document } from './document';
 import { PromiseRejectionEvent } from './document/events/promise-rejection-event';
@@ -91,6 +93,7 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 if (process.env.NODE_ENV !== 'production') {
+  // @ts-ignore
   function clearAllEventsListeners() {
     // @ts-ignore
     window.__clearListeners__();
@@ -100,6 +103,7 @@ if (process.env.NODE_ENV !== 'production') {
     });
   }
 
+  // @ts-ignore
   function clearAllNodes() {
     while (document.body.firstChild) {
       document.body.firstChild.remove();
