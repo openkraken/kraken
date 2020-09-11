@@ -668,7 +668,6 @@ class Element extends Node
         _styleOffsetChangedListener(property, original, present);
         break;
 
-      case FLEX_FLOW:
       case FLEX_DIRECTION:
       case FLEX_WRAP:
       case ALIGN_SELF:
@@ -678,7 +677,6 @@ class Element extends Node
         _styleFlexChangedListener(property, original, present);
         break;
 
-      case FLEX:
       case FLEX_GROW:
       case FLEX_SHRINK:
       case FLEX_BASIS:
@@ -689,7 +687,6 @@ class Element extends Node
         _styleTextAlignChangedListener(property, original, present);
         break;
 
-      case PADDING:
       case PADDING_TOP:
       case PADDING_RIGHT:
       case PADDING_BOTTOM:
@@ -706,13 +703,11 @@ class Element extends Node
         _styleSizeChangedListener(property, original, present);
         break;
 
-      case OVERFLOW:
       case OVERFLOW_X:
       case OVERFLOW_Y:
         _styleOverflowChangedListener(property, original, present);
         break;
 
-      case BACKGROUND:
       case BACKGROUND_COLOR:
       case BACKGROUND_ATTACHMENT:
       case BACKGROUND_IMAGE:
@@ -721,30 +716,18 @@ class Element extends Node
       case BACKGROUND_SIZE:
       case BACKGROUND_CLIP:
       case BACKGROUND_ORIGIN:
-        _styleBoxChangedListener(property, original, present);
-        break;
-
-      case BORDER:
-      case BORDER_BOTTOM:
-      case BORDER_LEFT:
-      case BORDER_TOP:
-      case BORDER_RIGHT:
-      case BORDER_WIDTH:
       case BORDER_LEFT_WIDTH:
       case BORDER_TOP_WIDTH:
       case BORDER_RIGHT_WIDTH:
       case BORDER_BOTTOM_WIDTH:
-      case BORDER_RADIUS:
       case BORDER_TOP_LEFT_RADIUS:
       case BORDER_TOP_RIGHT_RADIUS:
       case BORDER_BOTTOM_LEFT_RADIUS:
       case BORDER_BOTTOM_RIGHT_RADIUS:
-      case BORDER_STYLE:
       case BORDER_LEFT_STYLE:
       case BORDER_TOP_STYLE:
       case BORDER_RIGHT_STYLE:
       case BORDER_BOTTOM_STYLE:
-      case BORDER_COLOR:
       case BORDER_LEFT_COLOR:
       case BORDER_TOP_COLOR:
       case BORDER_RIGHT_COLOR:
@@ -753,7 +736,6 @@ class Element extends Node
         _styleBoxChangedListener(property, original, present);
         break;
 
-      case MARGIN:
       case MARGIN_LEFT:
       case MARGIN_TOP:
       case MARGIN_RIGHT:
@@ -776,7 +758,6 @@ class Element extends Node
       case TRANSFORM_ORIGIN:
         _styleTransformOriginChangedListener(property, original, present);
         break;
-      case TRANSITION:
       case TRANSITION_DELAY:
       case TRANSITION_DURATION:
       case TRANSITION_TIMING_FUNCTION:
@@ -785,7 +766,26 @@ class Element extends Node
         break;
     }
 
-    _updateChildNodesStyle();
+    // Text Style
+    switch(property) {
+      case COLOR:
+        _updateTextChildNodesStyle();
+        // Color change should trigger currentColor update
+        _styleBoxChangedListener(property, original, present);
+        break;
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+      case TEXT_SHADOW:
+      case TEXT_DECORATION_LINE:
+      case TEXT_DECORATION_STYLE:
+      case FONT_WEIGHT:
+      case FONT_STYLE:
+      case FONT_SIZE:
+      case LETTER_SPACING:
+      case WORD_SPACING:
+        _updateTextChildNodesStyle();
+        break;
+    }
   }
 
   void _styleDisplayChangedListener(String property, String original, String present) {
@@ -902,7 +902,7 @@ class Element extends Node
   }
 
   // Update textNode style when container style changed
-  void _updateChildNodesStyle() {
+  void _updateTextChildNodesStyle() {
     childNodes.forEach((node) {
       if (node is TextNode) node.updateTextStyle();
     });
@@ -1410,7 +1410,7 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
 bool _isPositioned(CSSStyleDeclaration style) {
   if (style.contains(POSITION)) {
     String position = style[POSITION];
-    return position != EMPTY && position != STATIC;
+    return position != EMPTY_STRING && position != STATIC;
   } else {
     return false;
   }

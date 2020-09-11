@@ -5,6 +5,7 @@
 import 'dart:ui';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
@@ -66,11 +67,11 @@ class CSSBackground {
   }
 
   static Color getBackgroundColor(CSSStyleDeclaration style) {
-    Color backgroundColor;
-    if (style[BACKGROUND_COLOR].isNotEmpty) {
-      backgroundColor = CSSColor.parseColor(style[BACKGROUND_COLOR]);
+    String backgroundColor = style[BACKGROUND_COLOR];
+    if (backgroundColor.isNotEmpty) {
+       return CSSColor.parseColor(backgroundColor);
     }
-    return backgroundColor;
+    return null;
   }
 
   static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {

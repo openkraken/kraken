@@ -36,6 +36,10 @@ mixin CSSDecoratedBoxMixin {
         _updateBorder(renderBoxModel, style, property);
       } else if (property == BOX_SHADOW) {
         _updateBoxShadow(renderBoxModel, style, property);
+      } else if (property == COLOR) {
+        _updateBackground(renderBoxModel, style, property);
+        _updateBorder(renderBoxModel, style, property);
+        _updateBoxShadow(renderBoxModel, style, property);
       }
     } else {
       cssBoxDecoration = getCSSBoxDecoration(style);
@@ -64,13 +68,13 @@ mixin CSSDecoratedBoxMixin {
 
     BoxDecoration oldBox = renderBoxModel.decoration;
 
-    if (property == BACKGROUND || property == BACKGROUND_COLOR) {
+    if (property == BACKGROUND_COLOR || property == COLOR) {
       Color bgColor = CSSBackground.getBackgroundColor(style);
       // If there has gradient, background color will not work
       if (bgColor != null && oldBox.gradient == null) {
         renderBoxModel.decoration = renderBoxModel.decoration.copyWith(color: bgColor);
       }
-      if (property == BACKGROUND_COLOR) return;
+      return;
     }
 
     DecorationImage decorationImage;
@@ -268,7 +272,11 @@ mixin CSSDecoratedBoxMixin {
       if (shadows != null) {
         shadows.forEach((shadowDefinitions) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+          String colorDefinition = shadowDefinitions[0];
+          if (colorDefinition == CURRENT_COLOR || colorDefinition == null) {
+            colorDefinition = style.getCurrentColor();
+          }
+          Color color = CSSColor.parseColor(colorDefinition);
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
           double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;

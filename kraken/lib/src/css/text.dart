@@ -39,7 +39,7 @@ mixin CSSTextMixin {
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
   TextStyle getTextStyle(CSSStyleDeclaration style) {
     return TextStyle(
-      color: CSSText.getCurrentColor(style),
+      color: CSSText.getTextColor(style),
       decoration: CSSText.getTextDecorationLine(style),
       decorationColor: CSSText.getTextDecorationColor(style),
       decorationStyle: CSSText.getTextDecorationStyle(style),
@@ -60,6 +60,7 @@ mixin CSSTextMixin {
 }
 
 class CSSText {
+
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
   }
@@ -138,12 +139,7 @@ class CSSText {
   }
 
   static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
-    WhiteSpace whiteSpace = WhiteSpace.normal;
-    if (style == null) {
-      return whiteSpace;
-    }
-
-    switch(style['whiteSpace']) {
+    switch(style[WHITE_SPACE]) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -185,11 +181,11 @@ class CSSText {
   }
 
 
-  static Color getCurrentColor(CSSStyleDeclaration style) {
+  static Color getTextColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
       return CSSColor.parseColor(style[COLOR]);
     } else {
-      return CSSColor.initial; // Default color to black.
+      return CSSColor.initial;
     }
   }
 
@@ -197,7 +193,7 @@ class CSSText {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
     } else {
-      return getCurrentColor(style); // Default to currentColor (style.color)
+      return getTextColor(style); // Default is currentColor (style.color)
     }
   }
 
@@ -392,7 +388,7 @@ class CSSText {
       if (shadows != null) {
         shadows.forEach((shadowDefinitions) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
           double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;

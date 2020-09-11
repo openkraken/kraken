@@ -57,7 +57,7 @@ describe('Transition transform', () => {
 });
 
 describe('Transition transform', () => {
-  it('translateX', done => {
+  it('translateX',  async () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setElementStyle(container1, {
@@ -77,11 +77,9 @@ describe('Transition transform', () => {
       setElementStyle(container1, {
         transform: 'translateX(20px)',
       });
-      setTimeout(async () => {
-        await matchViewportSnapshot();
-        done();
-      }, 1100);
     });
+
+    await matchViewportSnapshot(1.1);
   });
 });
 

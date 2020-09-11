@@ -90,8 +90,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
-    _setTextSizeType(
-      parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
+    _setTextSizeType(parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
