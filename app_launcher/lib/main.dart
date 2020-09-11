@@ -8,7 +8,7 @@ void main() {
     viewportWidth: window.physicalSize.width / window.devicePixelRatio,
     viewportHeight: window.physicalSize.height / window.devicePixelRatio,
     onLoad: (controller) {
-      controller.methodChannel.methodCallHandler = (String method, dynamic arguments) async {
+      controller.methodChannel.onMethodCall = (String method, dynamic arguments) async {
         return 'methods' + method;
       };
     },

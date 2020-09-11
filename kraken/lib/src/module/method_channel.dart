@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 
-typedef MethodCallHandler = Future<dynamic> Function(String method, dynamic arguments);
+typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 
 enum IntegrationMode {
   dart,
@@ -20,8 +20,8 @@ class KrakenMethodChannel {
 
       if ('reload' == method) {
         await controller.reload();
-      } else if (controller.methodChannel._jsMethodCallHandler != null) {
-        return controller.methodChannel._jsMethodCallHandler(method, call.arguments);
+      } else if (controller.methodChannel._onJSMethodCallCallback != null) {
+        return controller.methodChannel._onJSMethodCallCallback(method, call.arguments);
       }
 
       return Future<dynamic>.value(null);
@@ -31,17 +31,17 @@ class KrakenMethodChannel {
 
   KrakenMethodChannel(this.mode, KrakenController controller);
 
-  MethodCallHandler _methodCallHandler;
-  MethodCallHandler get methodCallHandler => _methodCallHandler;
-  set methodCallHandler(MethodCallHandler value) {
+  MethodCallCallback _methodCalCallback;
+  MethodCallCallback get onMethodCall => _methodCalCallback;
+  set onMethodCall(MethodCallCallback value) {
     assert(value != null);
-    _methodCallHandler = value;
+    _methodCalCallback = value;
   }
 
-  MethodCallHandler _jsMethodCallHandler;
-  set jsMethodCallHandler(MethodCallHandler value) {
+  MethodCallCallback _onJSMethodCallCallback;
+  set onJSMethodCall(MethodCallCallback value) {
     assert(value != null);
-    _jsMethodCallHandler = value;
+    _onJSMethodCallCallback = value;
   }
 
   // Support for method channel
@@ -54,15 +54,15 @@ class KrakenMethodChannel {
   }
 
   Future<dynamic> _invokeDartMethod(String method, List args) async {
-    return _methodCallHandler(method, args);
+    return _methodCalCallback(method, args);
   }
 
   Future<dynamic> invokeMethod(String method, dynamic arguments) async {
-    if (_jsMethodCallHandler == null) {
+    if (_onJSMethodCallCallback == null) {
       return null;
     }
 
-    return _jsMethodCallHandler(method, arguments);
+    return _onJSMethodCallCallback(method, arguments);
   }
 
   Future<dynamic> proxyMethods(String method, List args) {

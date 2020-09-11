@@ -253,7 +253,7 @@ String invokeModule(
           callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
-        controller.methodChannel.jsMethodCallHandler = (String method, dynamic arguments) async {
+        controller.methodChannel.onJSMethodCall = (String method, dynamic arguments) async {
           emitModuleEvent(contextId, jsonEncode(['MethodChannel', method, arguments]));
         };
       }

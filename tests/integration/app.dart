@@ -37,7 +37,7 @@ void main() {
         disableViewportWidthAssertion: true,
         disableViewportHeightAssertion: true,
         onLoad: (KrakenController controller) {
-          controller.methodChannel.methodCallHandler = (String method, dynamic arguments) async {
+          controller.methodChannel.onMethodCall = (String method, dynamic arguments) async {
             controller.methodChannel.invokeMethod(method, arguments);
             return 'method: ' + method;
           };
