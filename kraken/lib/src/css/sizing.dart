@@ -161,22 +161,18 @@ class CSSEdgeInsets {
 class CSSSizing {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementComputedMaxWidth(int targetId, ElementManager elementManager) {
+  static double getElementComputedMaxWidth(RenderBoxModel renderBoxModel, int targetId, ElementManager elementManager) {
     double width;
     double cropWidth = 0;
-    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
-    CSSStyleDeclaration style = child.style;
     CSSDisplay display = getElementRealDisplayValue(targetId, elementManager);
 
-    void cropMargin(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
+    void cropMargin(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.margin != null) {
         cropWidth += renderBoxModel.margin.horizontal;
       }
     }
 
-    void cropPaddingBorder(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.renderBoxModel;
+    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
@@ -186,25 +182,24 @@ class CSSSizing {
     }
 
     // Get width of element if it's not inline
-    if (display != CSSDisplay.inline && style.contains(WIDTH)) {
-      width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-      cropPaddingBorder(child);
+    if (display != CSSDisplay.inline && renderBoxModel.width != null) {
+      width = renderBoxModel.width;
+      cropPaddingBorder(renderBoxModel);
     } else {
       // Get the nearest width of ancestor with width
       while (true) {
-        if (child.parentNode != null) {
-          cropMargin(child);
-          cropPaddingBorder(child);
-          child = child.parentNode;
+        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+          cropMargin(renderBoxModel);
+          cropPaddingBorder(renderBoxModel);
+          renderBoxModel = renderBoxModel.parent;
         } else {
           break;
         }
-        if (child is Element) {
-          CSSStyleDeclaration style = child.style;
-          CSSDisplay display = getElementRealDisplayValue(child.targetId, elementManager);
-          if (style.contains(WIDTH) && display != CSSDisplay.inline) {
-            width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-            cropPaddingBorder(child);
+        if (renderBoxModel is RenderBoxModel) {
+          CSSDisplay display = getElementRealDisplayValue(renderBoxModel.targetId, elementManager);
+          if (renderBoxModel.width != null && display != CSSDisplay.inline) {
+            width = renderBoxModel.width;
+            cropPaddingBorder(renderBoxModel);
             break;
           }
         }
@@ -219,19 +214,18 @@ class CSSSizing {
   }
 
   // Whether current node should stretch children's height
-  static bool isStretchChildHeight(Element current, Element child) {
+  static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    RenderBoxModel renderBoxModel = current.renderBoxModel;
-    bool isFlex = renderBoxModel is RenderFlexLayout;
+    bool isFlex = current is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;
     bool isChildAlignSelfStretch = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        (renderBoxModel as RenderFlexLayout).flexDirection
+        (current as RenderFlexLayout).flexDirection
       );
       isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;

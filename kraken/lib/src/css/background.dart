@@ -239,7 +239,7 @@ class CSSBackground {
           double atY = 0.5;
           double radius = 0.5;
 
-          if (method.args[0].contains(PERCENTAGE)) {
+          if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
             if (positionAndRadius.length >= 1) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
