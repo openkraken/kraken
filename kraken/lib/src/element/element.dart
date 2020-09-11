@@ -349,7 +349,17 @@ class Element extends Node
               layoutChildren.add(child);
             });
             int idx = layoutChildren.indexOf(renderPositionHolder);
-            RenderObject previousSibling = idx > 0 ? layoutChildren[idx - 1] : null;
+            RenderObject previousSibling;
+            if (idx > 0) {
+              /// Placeholder places after its real display box
+              if (layoutChildren[idx - 1] == renderBoxModel) {
+                previousSibling = idx > 1 ? layoutChildren[idx - 2] : null;
+              } else {
+                previousSibling = layoutChildren[idx - 1];
+              }
+            } else {
+              previousSibling = null;
+            }
             detach();
             attachTo(parentElement, after: previousSibling);
           }
@@ -589,12 +599,14 @@ class Element extends Node
     RenderPositionHolder childPositionHolder = RenderPositionHolder(preferredSize: preferredSize);
 
     RenderBoxModel childRenderBoxModel = child.getRenderBoxModel();
-    child.parent.addChild(childPositionHolder);
     childRenderBoxModel.renderPositionHolder = childPositionHolder;
     _setPositionedChildParentData(parentRenderLayoutBox, child);
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
+    /// Placeholder of flexbox needs to inherit size from its real display box, 
+    /// so it needs to layout after real box layout
+    child.parent.addChild(childPositionHolder);
   }
 
   void _addStickyChild(Element child, RenderObject after) {

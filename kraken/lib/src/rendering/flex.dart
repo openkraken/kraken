@@ -785,7 +785,20 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType sizeType = _getChildHeightSizeType(child);
-      if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
+      
+      if (child is RenderPositionHolder) {
+        RenderBoxModel realDisplayedBox = child.realDisplayedBox;
+        // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
+        Size realDisplayedBoxSize = realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
+        double realDisplayedBoxWidth = realDisplayedBoxSize.width;
+        double realDisplayedBoxHeight = realDisplayedBoxSize.height;
+        innerConstraints = BoxConstraints(
+          minWidth: realDisplayedBoxWidth,
+          maxWidth: realDisplayedBoxWidth,
+          minHeight: realDisplayedBoxHeight,
+          maxHeight: realDisplayedBoxHeight,
+        );
+      } else if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
         if (sizeType == BoxSizeType.specified) {
