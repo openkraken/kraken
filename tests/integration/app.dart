@@ -36,7 +36,7 @@ void main() {
         bundleContent: 'console.log("starting integration test")',
         disableViewportWidthAssertion: true,
         disableViewportHeightAssertion: true,
-        onLoadHandler: (KrakenController controller) {
+        onLoad: (KrakenController controller) {
           controller.methodChannel.methodCallHandler = (String method, dynamic arguments) async {
             controller.methodChannel.invokeMethod(method, arguments);
             return 'method: ' + method;

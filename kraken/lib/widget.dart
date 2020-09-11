@@ -12,7 +12,7 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:meta/meta.dart';
 
-typedef KrakenOnLoadHandler = void Function(KrakenController controller);
+typedef KrakenOnLoad = void Function(KrakenController controller);
 
 class Kraken extends StatelessWidget {
   // the width of krakenWidget
@@ -31,7 +31,7 @@ class Kraken extends StatelessWidget {
 
   final LoadErrorHandler loadErrorHandler;
 
-  final KrakenOnLoadHandler onLoadHandler;
+  final KrakenOnLoad onLoad;
 
   KrakenController get controller {
     return KrakenController.getControllerOfName(shortHash(this));
@@ -44,7 +44,7 @@ class Kraken extends StatelessWidget {
       this.bundleURL,
       this.bundlePath,
       this.bundleContent,
-      this.onLoadHandler,
+      this.onLoad,
       // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
       // Maybe got unexpected error when change to other values, use this at your own risk!
       // We will fixed this on next version released. (v0.6.0)
@@ -119,8 +119,8 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
 
-    if (widget._widget.onLoadHandler != null) {
-      widget._widget.onLoadHandler(controller);
+    if (widget._widget.onLoad != null) {
+      widget._widget.onLoad(controller);
     }
 
     // Execute JavaScript scripts will block the Flutter UI Threads.

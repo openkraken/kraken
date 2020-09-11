@@ -7,7 +7,7 @@ void main() {
   Kraken kraken = Kraken(
     viewportWidth: window.physicalSize.width / window.devicePixelRatio,
     viewportHeight: window.physicalSize.height / window.devicePixelRatio,
-    onLoadHandler: (controller) {
+    onLoad: (controller) {
       controller.methodChannel.methodCallHandler = (String method, dynamic arguments) async {
         return 'methods' + method;
       };
