@@ -3,49 +3,79 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 
-typedef MethodCallHandler = Future<dynamic> Function(String methodd, dynamic arguments);
+typedef MethodCallHandler = Future<dynamic> Function(String method, dynamic arguments);
 
-final String NAME_METHOD_SPLIT = '!!';
+enum IntegrationMode {
+  dart,
+  native
+}
 
 class KrakenMethodChannel {
-  static MethodChannel _channel = MethodChannel('kraken')
+  // Flutter method channel used to communicate with public SDK API
+  // Only works when integration wieh public SDK API
+  static MethodChannel _nativeChannel = MethodChannel('kraken')
     ..setMethodCallHandler((call) async {
-      List<String> group = call.method.split(NAME_METHOD_SPLIT);
-      String name = group[0];
-      String method = group[1];
-      KrakenController controller = KrakenController.getControllerOfName(name);
+      String method = call.method;
+      KrakenController controller = KrakenController.getControllerOfJSContextId(0);
 
       if ('reload' == method) {
         await controller.reload();
-      } else if (controller.methodChannel.methodCallHandler != null) {
-        return controller.methodChannel.methodCallHandler(method, call.arguments);
+      } else if (controller.methodChannel._jsMethodCallHandler != null) {
+        return controller.methodChannel._jsMethodCallHandler(method, call.arguments);
       }
+
       return Future<dynamic>.value(null);
     });
 
-  KrakenMethodChannel(this._name, KrakenController controller);
+  final IntegrationMode mode;
 
-  final String _name;
+  KrakenMethodChannel(this.mode, KrakenController controller);
+
   MethodCallHandler _methodCallHandler;
   MethodCallHandler get methodCallHandler => _methodCallHandler;
+  set methodCallHandler(MethodCallHandler value) {
+    assert(value != null);
+    _methodCallHandler = value;
+  }
 
-  void setMethodCallHandler(MethodCallHandler handler) {
-    _methodCallHandler = handler;
+  MethodCallHandler _jsMethodCallHandler;
+  set jsMethodCallHandler(MethodCallHandler value) {
+    assert(value != null);
+    _jsMethodCallHandler = value;
   }
 
   // Support for method channel
-  Future<dynamic> invokeMethod(String method, List args) async {
+  Future<dynamic> _invokeNativeMethod(String method, List args) async {
     Map<String, dynamic> argsWrap = {
       'method': method,
       'args': args,
     };
+    return _nativeChannel.invokeMethod('invokeMethod', argsWrap);
+  }
 
-    return await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}invokeMethod', argsWrap);
+  Future<dynamic> _invokeDartMethod(String method, List args) async {
+    return _methodCallHandler(method, args);
+  }
+
+  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
+    if (_jsMethodCallHandler == null) {
+      return null;
+    }
+
+    return _jsMethodCallHandler(method, arguments);
+  }
+
+  Future<dynamic> proxyMethods(String method, List args) {
+    if (mode == IntegrationMode.dart) {
+      return _invokeDartMethod(method, args);
+    } else {
+      return _invokeNativeMethod(method, args);
+    }
   }
 
   Future<String> getUrl() async {
     // Maybe url of zip bundle or js bundle
-    String url = await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}getUrl');
+    String url = await _nativeChannel.invokeMethod('getUrl');
 
     // @NOTE(zhuoling.lcl): Android plugin protocol cannot return `null` directly, which
     // will case method channel invoke failed with exception, use empty

@@ -272,7 +272,7 @@ class KrakenController {
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
-    _methodChannel = KrakenMethodChannel(name, this);
+    _methodChannel = KrakenMethodChannel(name == null ? IntegrationMode.native : IntegrationMode.dart, this);
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
