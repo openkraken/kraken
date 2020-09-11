@@ -351,10 +351,12 @@ class Element extends Node
             int idx = layoutChildren.indexOf(renderPositionHolder);
             RenderObject previousSibling;
             if (idx > 0) {
-              /// Placeholder places after its real display box
+              /// RenderBoxModel and its placeholder is the same
               if (layoutChildren[idx - 1] == renderBoxModel) {
+                /// Placeholder is placed after its original renderBoxModel
+                /// get idx - 2 as its previous sibling
                 previousSibling = idx > 1 ? layoutChildren[idx - 2] : null;
-              } else {
+              } else { /// RenderBoxModel and its placeholder is different
                 previousSibling = layoutChildren[idx - 1];
               }
             } else {
