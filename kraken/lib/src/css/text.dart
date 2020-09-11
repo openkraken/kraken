@@ -6,9 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-const double DEFAULT_LETTER_SPACING = 0.0;
-const double DEFAULT_WORD_SPACING = 0.0;
-
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
 // CSS Text: https://drafts.csswg.org/css-text-3/
@@ -60,6 +57,9 @@ mixin CSSTextMixin {
 }
 
 class CSSText {
+
+  static const double DEFAULT_LETTER_SPACING = 0.0;
+  static const double DEFAULT_WORD_SPACING = 0.0;
 
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
