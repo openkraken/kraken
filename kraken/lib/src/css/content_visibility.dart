@@ -42,7 +42,6 @@ mixin CSSContentVisibilityMixin on ElementBase {
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     if (!entry.isIntersecting) {
       renderBoxModel.contentVisibility = ContentVisibility.hidden;
     } else {
@@ -51,7 +50,6 @@ mixin CSSContentVisibilityMixin on ElementBase {
   }
 
   void updateRenderContentVisibility(ContentVisibility contentVisibility) {
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.contentVisibility = contentVisibility;
     if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
       renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);

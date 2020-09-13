@@ -61,170 +61,170 @@ List<String> _splitBySpace(String value) {
 }
 
 class CSSStyleProperty {
-  static void setShorthandPadding(Map<String, String> style, String shorthandValue) {
+  static void setShorthandPadding(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getEdgeValues(shorthandValue);
     if (values == null) return;
 
-    style[PADDING_TOP] = values[0];
-    style[PADDING_RIGHT] = values[1];
-    style[PADDING_BOTTOM] = values[2];
-    style[PADDING_LEFT] = values[3];
+    properties[PADDING_TOP] = values[0];
+    properties[PADDING_RIGHT] = values[1];
+    properties[PADDING_BOTTOM] = values[2];
+    properties[PADDING_LEFT] = values[3];
   }
 
-  static void removeShorthandPadding(Map<String, String> style) {
-    if (style.containsKey(PADDING_LEFT)) style.remove(PADDING_LEFT);
-    if (style.containsKey(PADDING_TOP)) style.remove(PADDING_LEFT);
-    if (style.containsKey(PADDING_RIGHT)) style.remove(PADDING_RIGHT);
-    if (style.containsKey(PADDING_BOTTOM)) style.remove(PADDING_BOTTOM);
+  static void removeShorthandPadding(Map<String, String> properties) {
+    if (properties.containsKey(PADDING_LEFT)) properties.remove(PADDING_LEFT);
+    if (properties.containsKey(PADDING_TOP)) properties.remove(PADDING_LEFT);
+    if (properties.containsKey(PADDING_RIGHT)) properties.remove(PADDING_RIGHT);
+    if (properties.containsKey(PADDING_BOTTOM)) properties.remove(PADDING_BOTTOM);
   }
 
-  static void setShorthandMargin(Map<String, String> style, String shorthandValue) {
+  static void setShorthandMargin(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getEdgeValues(shorthandValue, isLength: false);
     if (values == null) return;
 
-    style[MARGIN_TOP] = values[0];
-    style[MARGIN_RIGHT] = values[1];
-    style[MARGIN_BOTTOM] = values[2];
-    style[MARGIN_LEFT] = values[3];
+    properties[MARGIN_TOP] = values[0];
+    properties[MARGIN_RIGHT] = values[1];
+    properties[MARGIN_BOTTOM] = values[2];
+    properties[MARGIN_LEFT] = values[3];
   }
 
-  static void removeShorthandMargin(Map<String, String> style) {
-    if (style.containsKey(MARGIN_LEFT)) style.remove(MARGIN_LEFT);
-    if (style.containsKey(MARGIN_TOP)) style.remove(MARGIN_LEFT);
-    if (style.containsKey(MARGIN_RIGHT)) style.remove(MARGIN_RIGHT);
-    if (style.containsKey(MARGIN_BOTTOM)) style.remove(MARGIN_BOTTOM);
+  static void removeShorthandMargin(Map<String, String> properties) {
+    if (properties.containsKey(MARGIN_LEFT)) properties.remove(MARGIN_LEFT);
+    if (properties.containsKey(MARGIN_TOP)) properties.remove(MARGIN_LEFT);
+    if (properties.containsKey(MARGIN_RIGHT)) properties.remove(MARGIN_RIGHT);
+    if (properties.containsKey(MARGIN_BOTTOM)) properties.remove(MARGIN_BOTTOM);
   }
 
-  static void setShorthandBackground(Map<String, String> style, String shorthandValue) {
+  static void setShorthandBackground(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getBackgroundValues(shorthandValue);
     if (values == null) return;
 
-    style[BACKGROUND_COLOR] = values[0];
-    style[BACKGROUND_IMAGE] = values[1];
-    style[BACKGROUND_REPEAT] = values[2];
-    style[BACKGROUND_ATTACHMENT] = values[3];
-    style[BACKGROUND_POSITION] = values[4];
-    style[BACKGROUND_SIZE] = values[5];
+    properties[BACKGROUND_COLOR] = values[0];
+    properties[BACKGROUND_IMAGE] = values[1];
+    properties[BACKGROUND_REPEAT] = values[2];
+    properties[BACKGROUND_ATTACHMENT] = values[3];
+    properties[BACKGROUND_POSITION] = values[4];
+    properties[BACKGROUND_SIZE] = values[5];
   }
 
-  static void removeShorthandBackground(Map<String, String> style) {
-    if (style.containsKey(BACKGROUND_ATTACHMENT)) style.remove(BACKGROUND_ATTACHMENT);
-    if (style.containsKey(BACKGROUND_COLOR)) style.remove(BACKGROUND_COLOR);
-    if (style.containsKey(BACKGROUND_IMAGE)) style.remove(BACKGROUND_IMAGE);
-    if (style.containsKey(BACKGROUND_POSITION)) style.remove(BACKGROUND_POSITION);
-    if (style.containsKey(BACKGROUND_SIZE)) style.remove(BACKGROUND_SIZE);
-    if (style.containsKey(BACKGROUND_REPEAT)) style.remove(BACKGROUND_REPEAT);
+  static void removeShorthandBackground(Map<String, String> properties) {
+    if (properties.containsKey(BACKGROUND_ATTACHMENT)) properties.remove(BACKGROUND_ATTACHMENT);
+    if (properties.containsKey(BACKGROUND_COLOR)) properties.remove(BACKGROUND_COLOR);
+    if (properties.containsKey(BACKGROUND_IMAGE)) properties.remove(BACKGROUND_IMAGE);
+    if (properties.containsKey(BACKGROUND_POSITION)) properties.remove(BACKGROUND_POSITION);
+    if (properties.containsKey(BACKGROUND_SIZE)) properties.remove(BACKGROUND_SIZE);
+    if (properties.containsKey(BACKGROUND_REPEAT)) properties.remove(BACKGROUND_REPEAT);
   }
 
-  static void setShorthandBorderRadius(Map<String, String> style, String shorthandValue) {
+  static void setShorthandBorderRadius(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getBorderRaidusValues(shorthandValue);
     if (values == null) return;
 
-    style[BORDER_TOP_LEFT_RADIUS] = values[0];
-    style[BORDER_TOP_RIGHT_RADIUS] = values[1];
-    style[BORDER_BOTTOM_RIGHT_RADIUS] = values[2];
-    style[BORDER_BOTTOM_LEFT_RADIUS] = values[3];
+    properties[BORDER_TOP_LEFT_RADIUS] = values[0];
+    properties[BORDER_TOP_RIGHT_RADIUS] = values[1];
+    properties[BORDER_BOTTOM_RIGHT_RADIUS] = values[2];
+    properties[BORDER_BOTTOM_LEFT_RADIUS] = values[3];
   }
 
-  static void removeShorthandBorderRadius(Map<String, String> style) {
-    if (style.containsKey(BORDER_TOP_LEFT_RADIUS)) style.remove(BORDER_TOP_LEFT_RADIUS);
-    if (style.containsKey(BORDER_TOP_RIGHT_RADIUS)) style.remove(BORDER_TOP_RIGHT_RADIUS);
-    if (style.containsKey(BORDER_BOTTOM_RIGHT_RADIUS)) style.remove(BORDER_BOTTOM_RIGHT_RADIUS);
-    if (style.containsKey(BORDER_BOTTOM_LEFT_RADIUS)) style.remove(BORDER_BOTTOM_LEFT_RADIUS);
+  static void removeShorthandBorderRadius(Map<String, String> properties) {
+    if (properties.containsKey(BORDER_TOP_LEFT_RADIUS)) properties.remove(BORDER_TOP_LEFT_RADIUS);
+    if (properties.containsKey(BORDER_TOP_RIGHT_RADIUS)) properties.remove(BORDER_TOP_RIGHT_RADIUS);
+    if (properties.containsKey(BORDER_BOTTOM_RIGHT_RADIUS)) properties.remove(BORDER_BOTTOM_RIGHT_RADIUS);
+    if (properties.containsKey(BORDER_BOTTOM_LEFT_RADIUS)) properties.remove(BORDER_BOTTOM_LEFT_RADIUS);
   }
 
-  static void setShorthandOverflow(Map<String, String> style, String shorthandValue) {
+  static void setShorthandOverflow(Map<String, String> properties, String shorthandValue) {
     List<String> values = shorthandValue.split(_spaceRegExp);
     if (values.length == 1) {
-      style[OVERFLOW_Y] = style[OVERFLOW_X] = values[0];
+      properties[OVERFLOW_Y] = properties[OVERFLOW_X] = values[0];
     } else if (values.length == 2) {
-      style[OVERFLOW_X] = values[0];
-      style[OVERFLOW_Y] = values[1];
+      properties[OVERFLOW_X] = values[0];
+      properties[OVERFLOW_Y] = values[1];
     }
   }
 
-  static void removeShorthandOverflow(Map<String, String> style) {
-    if (style.containsKey(OVERFLOW_X)) style.remove(OVERFLOW_X);
-    if (style.containsKey(OVERFLOW_Y)) style.remove(OVERFLOW_Y);
+  static void removeShorthandOverflow(Map<String, String> properties) {
+    if (properties.containsKey(OVERFLOW_X)) properties.remove(OVERFLOW_X);
+    if (properties.containsKey(OVERFLOW_Y)) properties.remove(OVERFLOW_Y);
   }
 
-  static void setShorthandFont(Map<String, String> style, String shorthandValue) {
+  static void setShorthandFont(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getFontValues(shorthandValue);
     if (values == null) return;
-    style[FONT_STYLE] = values[0];
-    style[FONT_WEIGHT] = values[1];
-    style[FONT_SIZE] = values[2];
-    style[LINE_HEIGHT] = values[3];
-    style[FONT_FAMILY] = values[4];
+    properties[FONT_STYLE] = values[0];
+    properties[FONT_WEIGHT] = values[1];
+    properties[FONT_SIZE] = values[2];
+    properties[LINE_HEIGHT] = values[3];
+    properties[FONT_FAMILY] = values[4];
   }
 
-  static void removeShorthandFont(Map<String, String> style) {
-    if (style.containsKey(FONT_STYLE)) style.remove(FONT_STYLE);
-    if (style.containsKey(FONT_WEIGHT)) style.remove(FONT_WEIGHT);
-    if (style.containsKey(FONT_SIZE)) style.remove(FONT_SIZE);
-    if (style.containsKey(LINE_HEIGHT)) style.remove(LINE_HEIGHT);
-    if (style.containsKey(FONT_FAMILY)) style.remove(FONT_FAMILY);
+  static void removeShorthandFont(Map<String, String> properties) {
+    if (properties.containsKey(FONT_STYLE)) properties.remove(FONT_STYLE);
+    if (properties.containsKey(FONT_WEIGHT)) properties.remove(FONT_WEIGHT);
+    if (properties.containsKey(FONT_SIZE)) properties.remove(FONT_SIZE);
+    if (properties.containsKey(LINE_HEIGHT)) properties.remove(LINE_HEIGHT);
+    if (properties.containsKey(FONT_FAMILY)) properties.remove(FONT_FAMILY);
   }
 
-  static void setShorthandFlex(Map<String, String> style, String shorthandValue) {
+  static void setShorthandFlex(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getFlexValues(shorthandValue);
     if (values == null) return;
-    style[FLEX_GROW] = values[0];
-    style[FLEX_SHRINK] = values[1];
-    style[FLEX_BASIS] = values[2];
+    properties[FLEX_GROW] = values[0];
+    properties[FLEX_SHRINK] = values[1];
+    properties[FLEX_BASIS] = values[2];
   }
 
-  static void removeShorthandFlex(Map<String, String> style) {
-    if (style.containsKey(FLEX_GROW)) style.remove(FLEX_GROW);
-    if (style.containsKey(FLEX_SHRINK)) style.remove(FLEX_SHRINK);
-    if (style.containsKey(FLEX_BASIS)) style.remove(FLEX_BASIS);
+  static void removeShorthandFlex(Map<String, String> properties) {
+    if (properties.containsKey(FLEX_GROW)) properties.remove(FLEX_GROW);
+    if (properties.containsKey(FLEX_SHRINK)) properties.remove(FLEX_SHRINK);
+    if (properties.containsKey(FLEX_BASIS)) properties.remove(FLEX_BASIS);
   }
 
-  static void setShorthandFlexFlow(Map<String, String> style, String shorthandValue) {
+  static void setShorthandFlexFlow(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getFlexFlowValues(shorthandValue);
     if (values == null) return;
-    style[FLEX_DIRECTION] = values[0];
-    style[FLEX_WRAP] = values[1];
+    properties[FLEX_DIRECTION] = values[0];
+    properties[FLEX_WRAP] = values[1];
   }
 
-  static void removeShorthandFlexFlow(Map<String, String> style) {
-    if (style.containsKey(FLEX_DIRECTION)) style.remove(FLEX_DIRECTION);
-    if (style.containsKey(FLEX_WRAP)) style.remove(FLEX_WRAP);
+  static void removeShorthandFlexFlow(Map<String, String> properties) {
+    if (properties.containsKey(FLEX_DIRECTION)) properties.remove(FLEX_DIRECTION);
+    if (properties.containsKey(FLEX_WRAP)) properties.remove(FLEX_WRAP);
   }
 
-  static void setShorthandTransition(Map<String, String> style, String shorthandValue) {
+  static void setShorthandTransition(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getTransitionValues(shorthandValue);
     if (values == null) return;
 
-    style[TRANSITION_PROPERTY] = values[0];
-    style[TRANSITION_DURATION] = values[1];
-    style[TRANSITION_TIMING_FUNCTION] = values[2];
-    style[TRANSITION_DELAY] = values[3];
+    properties[TRANSITION_PROPERTY] = values[0];
+    properties[TRANSITION_DURATION] = values[1];
+    properties[TRANSITION_TIMING_FUNCTION] = values[2];
+    properties[TRANSITION_DELAY] = values[3];
   }
 
-  static void removeShorthandTransition(Map<String, String> style) {
-    if (style.containsKey(TRANSITION_PROPERTY)) style.remove(TRANSITION_PROPERTY);
-    if (style.containsKey(TRANSITION_DURATION)) style.remove(TRANSITION_DURATION);
-    if (style.containsKey(TRANSITION_TIMING_FUNCTION)) style.remove(TRANSITION_TIMING_FUNCTION);
-    if (style.containsKey(TRANSITION_DELAY)) style.remove(TRANSITION_DELAY);
+  static void removeShorthandTransition(Map<String, String> properties) {
+    if (properties.containsKey(TRANSITION_PROPERTY)) properties.remove(TRANSITION_PROPERTY);
+    if (properties.containsKey(TRANSITION_DURATION)) properties.remove(TRANSITION_DURATION);
+    if (properties.containsKey(TRANSITION_TIMING_FUNCTION)) properties.remove(TRANSITION_TIMING_FUNCTION);
+    if (properties.containsKey(TRANSITION_DELAY)) properties.remove(TRANSITION_DELAY);
   }
 
-  static void setShorthandTextDecoration(Map<String, String> style, String shorthandValue) {
+  static void setShorthandTextDecoration(Map<String, String> properties, String shorthandValue) {
     List<String> values = _getTextDecorationValues(shorthandValue);
     if (values == null) return;
 
-    style[TEXT_DECORATION_LINE] = values[0];
-    style[TEXT_DECORATION_COLOR] = values[1];
-    style[TEXT_DECORATION_STYLE] = values[2];
+    properties[TEXT_DECORATION_LINE] = values[0];
+    properties[TEXT_DECORATION_COLOR] = values[1];
+    properties[TEXT_DECORATION_STYLE] = values[2];
   }
 
-  static void removeShorthandTextDecoration(Map<String, String> style) {
-    if (style.containsKey(TEXT_DECORATION_LINE)) style.remove(TEXT_DECORATION_LINE);
-    if (style.containsKey(TEXT_DECORATION_COLOR)) style.remove(TEXT_DECORATION_COLOR);
-    if (style.containsKey(TEXT_DECORATION_STYLE)) style.remove(TEXT_DECORATION_STYLE);
+  static void removeShorthandTextDecoration(Map<String, String> properties) {
+    if (properties.containsKey(TEXT_DECORATION_LINE)) properties.remove(TEXT_DECORATION_LINE);
+    if (properties.containsKey(TEXT_DECORATION_COLOR)) properties.remove(TEXT_DECORATION_COLOR);
+    if (properties.containsKey(TEXT_DECORATION_STYLE)) properties.remove(TEXT_DECORATION_STYLE);
   }
 
-  static void setShorthandBorder(Map<String, String> style, String property, String shorthandValue) {
+  static void setShorthandBorder(Map<String, String> properties, String property, String shorthandValue) {
     String borderTopColor;
     String borderRightColor;
     String borderBottomColor;
@@ -294,62 +294,62 @@ class CSSStyleProperty {
       borderLeftColor = values[3];
     }
 
-    if (borderTopColor != null) style[BORDER_TOP_COLOR] = borderTopColor;
-    if (borderRightColor != null) style[BORDER_RIGHT_COLOR] = borderRightColor;
-    if (borderBottomColor != null) style[BORDER_BOTTOM_COLOR] = borderBottomColor;
-    if (borderLeftColor != null) style[BORDER_LEFT_COLOR] = borderLeftColor;
-    if (borderTopStyle != null) style[BORDER_TOP_STYLE] = borderTopStyle;
-    if (borderRightStyle != null) style[BORDER_RIGHT_STYLE] = borderRightStyle;
-    if (borderBottomStyle != null) style[BORDER_BOTTOM_STYLE] = borderBottomStyle;
-    if (borderLeftStyle != null) style[BORDER_LEFT_STYLE] = borderLeftStyle;
-    if (borderTopWidth != null) style[BORDER_TOP_WIDTH] = borderTopWidth;
-    if (borderRightWidth != null) style[BORDER_RIGHT_WIDTH] = borderRightWidth;
-    if (borderBottomWidth != null) style[BORDER_BOTTOM_WIDTH] = borderBottomWidth;
-    if (borderLeftWidth != null) style[BORDER_LEFT_WIDTH] = borderLeftWidth;
+    if (borderTopColor != null) properties[BORDER_TOP_COLOR] = borderTopColor;
+    if (borderRightColor != null) properties[BORDER_RIGHT_COLOR] = borderRightColor;
+    if (borderBottomColor != null) properties[BORDER_BOTTOM_COLOR] = borderBottomColor;
+    if (borderLeftColor != null) properties[BORDER_LEFT_COLOR] = borderLeftColor;
+    if (borderTopStyle != null) properties[BORDER_TOP_STYLE] = borderTopStyle;
+    if (borderRightStyle != null) properties[BORDER_RIGHT_STYLE] = borderRightStyle;
+    if (borderBottomStyle != null) properties[BORDER_BOTTOM_STYLE] = borderBottomStyle;
+    if (borderLeftStyle != null) properties[BORDER_LEFT_STYLE] = borderLeftStyle;
+    if (borderTopWidth != null) properties[BORDER_TOP_WIDTH] = borderTopWidth;
+    if (borderRightWidth != null) properties[BORDER_RIGHT_WIDTH] = borderRightWidth;
+    if (borderBottomWidth != null) properties[BORDER_BOTTOM_WIDTH] = borderBottomWidth;
+    if (borderLeftWidth != null) properties[BORDER_LEFT_WIDTH] = borderLeftWidth;
   }
 
-  static void removeShorthandBorder(Map<String, String> style, String property) {
+  static void removeShorthandBorder(Map<String, String> properties, String property) {
     if (property == BORDER ||
         property == BORDER_TOP ||
         property == BORDER_RIGHT ||
         property == BORDER_BOTTOM ||
         property == BORDER_LEFT) {
       if (property == BORDER || property == BORDER_TOP) {
-        if (style.containsKey(BORDER_TOP_COLOR)) style.remove(BORDER_TOP_COLOR);
-        if (style.containsKey(BORDER_TOP_STYLE)) style.remove(BORDER_TOP_STYLE);
-        if (style.containsKey(BORDER_TOP_WIDTH)) style.remove(BORDER_TOP_WIDTH);
+        if (properties.containsKey(BORDER_TOP_COLOR)) properties.remove(BORDER_TOP_COLOR);
+        if (properties.containsKey(BORDER_TOP_STYLE)) properties.remove(BORDER_TOP_STYLE);
+        if (properties.containsKey(BORDER_TOP_WIDTH)) properties.remove(BORDER_TOP_WIDTH);
       }
       if (property == BORDER || property == BORDER_RIGHT) {
-        if (style.containsKey(BORDER_RIGHT_COLOR)) style.remove(BORDER_RIGHT_COLOR);
-        if (style.containsKey(BORDER_RIGHT_STYLE)) style.remove(BORDER_RIGHT_STYLE);
-        if (style.containsKey(BORDER_RIGHT_WIDTH)) style.remove(BORDER_RIGHT_WIDTH);
+        if (properties.containsKey(BORDER_RIGHT_COLOR)) properties.remove(BORDER_RIGHT_COLOR);
+        if (properties.containsKey(BORDER_RIGHT_STYLE)) properties.remove(BORDER_RIGHT_STYLE);
+        if (properties.containsKey(BORDER_RIGHT_WIDTH)) properties.remove(BORDER_RIGHT_WIDTH);
       }
       if (property == BORDER || property == BORDER_BOTTOM) {
-        if (style.containsKey(BORDER_BOTTOM_COLOR)) style.remove(BORDER_BOTTOM_COLOR);
-        if (style.containsKey(BORDER_BOTTOM_STYLE)) style.remove(BORDER_BOTTOM_STYLE);
-        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);
+        if (properties.containsKey(BORDER_BOTTOM_COLOR)) properties.remove(BORDER_BOTTOM_COLOR);
+        if (properties.containsKey(BORDER_BOTTOM_STYLE)) properties.remove(BORDER_BOTTOM_STYLE);
+        if (properties.containsKey(BORDER_BOTTOM_WIDTH)) properties.remove(BORDER_BOTTOM_WIDTH);
       }
       if (property == BORDER || property == BORDER_LEFT) {
-        if (style.containsKey(BORDER_LEFT_COLOR)) style.remove(BORDER_LEFT_COLOR);
-        if (style.containsKey(BORDER_LEFT_STYLE)) style.remove(BORDER_LEFT_STYLE);
-        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);
+        if (properties.containsKey(BORDER_LEFT_COLOR)) properties.remove(BORDER_LEFT_COLOR);
+        if (properties.containsKey(BORDER_LEFT_STYLE)) properties.remove(BORDER_LEFT_STYLE);
+        if (properties.containsKey(BORDER_LEFT_WIDTH)) properties.remove(BORDER_LEFT_WIDTH);
       }
     } else {
       if (property == BORDER_WIDTH) {
-        if (style.containsKey(BORDER_TOP_WIDTH)) style.remove(BORDER_TOP_WIDTH);
-        if (style.containsKey(BORDER_RIGHT_WIDTH)) style.remove(BORDER_RIGHT_WIDTH);
-        if (style.containsKey(BORDER_BOTTOM_WIDTH)) style.remove(BORDER_BOTTOM_WIDTH);
-        if (style.containsKey(BORDER_LEFT_WIDTH)) style.remove(BORDER_LEFT_WIDTH);
+        if (properties.containsKey(BORDER_TOP_WIDTH)) properties.remove(BORDER_TOP_WIDTH);
+        if (properties.containsKey(BORDER_RIGHT_WIDTH)) properties.remove(BORDER_RIGHT_WIDTH);
+        if (properties.containsKey(BORDER_BOTTOM_WIDTH)) properties.remove(BORDER_BOTTOM_WIDTH);
+        if (properties.containsKey(BORDER_LEFT_WIDTH)) properties.remove(BORDER_LEFT_WIDTH);
       } else if (property == BORDER_STYLE) {
-        if (style.containsKey(BORDER_TOP_STYLE)) style.remove(BORDER_TOP_STYLE);
-        if (style.containsKey(BORDER_RIGHT_STYLE)) style.remove(BORDER_RIGHT_STYLE);
-        if (style.containsKey(BORDER_BOTTOM_STYLE)) style.remove(BORDER_BOTTOM_STYLE);
-        if (style.containsKey(BORDER_LEFT_STYLE)) style.remove(BORDER_LEFT_STYLE);
+        if (properties.containsKey(BORDER_TOP_STYLE)) properties.remove(BORDER_TOP_STYLE);
+        if (properties.containsKey(BORDER_RIGHT_STYLE)) properties.remove(BORDER_RIGHT_STYLE);
+        if (properties.containsKey(BORDER_BOTTOM_STYLE)) properties.remove(BORDER_BOTTOM_STYLE);
+        if (properties.containsKey(BORDER_LEFT_STYLE)) properties.remove(BORDER_LEFT_STYLE);
       } else if (property == BORDER_COLOR) {
-        if (style.containsKey(BORDER_TOP_COLOR)) style.remove(BORDER_TOP_COLOR);
-        if (style.containsKey(BORDER_RIGHT_COLOR)) style.remove(BORDER_RIGHT_COLOR);
-        if (style.containsKey(BORDER_BOTTOM_COLOR)) style.remove(BORDER_BOTTOM_COLOR);
-        if (style.containsKey(BORDER_LEFT_COLOR)) style.remove(BORDER_LEFT_COLOR);
+        if (properties.containsKey(BORDER_TOP_COLOR)) properties.remove(BORDER_TOP_COLOR);
+        if (properties.containsKey(BORDER_RIGHT_COLOR)) properties.remove(BORDER_RIGHT_COLOR);
+        if (properties.containsKey(BORDER_BOTTOM_COLOR)) properties.remove(BORDER_BOTTOM_COLOR);
+        if (properties.containsKey(BORDER_LEFT_COLOR)) properties.remove(BORDER_LEFT_COLOR);
       }
     }
   }

@@ -167,5 +167,20 @@ describe('Width', function() {
       append(BODY, container);
       await matchViewportSnapshot();
     });
+
+    it('set element\'s width to auto', async () => {
+      let container = createElement('div', {
+        style: {
+          width: '200px',
+          background: 'red'
+        }
+      }, [createText('1234')]);
+      BODY.appendChild(container);
+
+      await matchViewportSnapshot();
+
+      container.style.width = 'auto';
+      await matchViewportSnapshot();
+    });
   });
 });

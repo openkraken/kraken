@@ -86,9 +86,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   String get placeholderText => properties['placeholder'] ?? '';
 
   TextStyle get placeholderTextStyle {
-    return getTextStyle(style.copyWith({
-      'color': 'grey',
-    }));
+    return TextStyle(color: CSSColor.parseColor('grey'));
   }
 
   TextSpan get placeholderTextSpan {

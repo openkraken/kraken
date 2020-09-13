@@ -27,128 +27,33 @@ enum CSSDisplay {
 /// - min-height
 
 mixin CSSSizingMixin {
-  CSSEdgeInsets oldPadding;
-  CSSEdgeInsets oldMargin;
 
-  void initRenderBoxSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-    updateBoxSize(renderBoxModel, style, transitionMap);
-  }
+  void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    double value = CSSLength.toDisplayPortValue(present);
 
-  void updateBoxSize(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, Map<String, CSSTransition> transitionMap) {
-    double width = CSSLength.toDisplayPortValue(style[WIDTH]);
-    double height = CSSLength.toDisplayPortValue(style[HEIGHT]);
-    double minHeight = CSSLength.toDisplayPortValue(style[MIN_HEIGHT]);
-    double maxHeight = CSSLength.toDisplayPortValue(style[MAX_HEIGHT]);
-    double minWidth = CSSLength.toDisplayPortValue(style[MIN_WIDTH]);
-    double maxWidth = CSSLength.toDisplayPortValue(style[MAX_WIDTH]);
-
-    if (transitionMap != null) {
-      CSSTransition allTransition,
-          widthTransition,
-          heightTransition,
-          minWidthTransition,
-          maxWidthTransition,
-          minHeightTransition,
-          maxHeightTransition;
-
-      allTransition = transitionMap['all'];
-      widthTransition = transitionMap['width'];
-      heightTransition = transitionMap['height'];
-      minWidthTransition = transitionMap['min-width'];
-      maxWidthTransition = transitionMap['max-width'];
-      minHeightTransition = transitionMap['min-height'];
-      maxHeightTransition = transitionMap['max-height'];
-
-      if (allTransition != null ||
-          widthTransition != null ||
-          heightTransition != null ||
-          minWidthTransition != null ||
-          maxWidthTransition != null ||
-          minHeightTransition != null ||
-          maxHeightTransition != null) {
-        double oldWidth = renderBoxModel.width ?? 0.0;
-        double oldHeight = renderBoxModel.height ?? 0.0;
-        double oldMinWidth = renderBoxModel.minWidth ?? 0.0;
-        double oldMaxWidth = renderBoxModel.maxWidth ?? 0.0;
-        double oldMinHeight = renderBoxModel.minHeight ?? 0.0;
-        double oldMaxHeight = renderBoxModel.maxHeight ?? 0.0;
-
-        double diffWidth = (width ?? 0.0) - oldWidth;
-        double diffHeight = (height ?? 0.0) - oldHeight;
-        double diffMinWidth = (minWidth ?? 0.0) - oldMinWidth;
-        double diffMaxWidth = (maxWidth ?? 0.0) - oldMaxWidth;
-        double diffMinHeight = (minHeight ?? 0.0) - oldMinHeight;
-        double diffMaxHeight = (maxHeight ?? 0.0) - oldMaxHeight;
-
-        allTransition?.addProgressListener((progress) {
-          double newWidth;
-          double newHeight;
-          double newMinWidth;
-          double newMaxWidth;
-          double newMinHeight;
-          double newMaxHeight;
-
-          if (widthTransition == null) {
-            newWidth = diffWidth * progress + oldWidth;
-          }
-          if (heightTransition == null) {
-            newHeight = diffHeight * progress + oldHeight;
-          }
-          if (minWidthTransition == null) {
-            newMinWidth = diffMinWidth * progress + oldMinWidth;
-          }
-          if (maxWidthTransition == null) {
-            newMaxWidth = diffMaxWidth * progress + oldMaxWidth;
-          }
-          if (minHeightTransition == null) {
-            newMinHeight = diffMinHeight * progress + oldMinHeight;
-          }
-          if (maxHeightTransition == null) {
-            newMaxHeight = diffMaxHeight * progress + oldMaxHeight;
-          }
-          renderBoxModel.width = newWidth;
-          renderBoxModel.height = newHeight;
-          renderBoxModel.minWidth = newMinWidth;
-          renderBoxModel.maxWidth = newMaxWidth;
-          renderBoxModel.minHeight = newMinHeight;
-          renderBoxModel.maxHeight = newMaxHeight;
-        });
-        widthTransition?.addProgressListener((progress) {
-          double newWidth = diffWidth * progress + oldWidth;
-          renderBoxModel.width = newWidth;
-        });
-        heightTransition?.addProgressListener((progress) {
-          double newHeight = diffHeight * progress + oldHeight;
-          renderBoxModel.height = newHeight;
-        });
-        minHeightTransition?.addProgressListener((progress) {
-          double newMinHeight = diffWidth * progress + oldMinHeight;
-          renderBoxModel.minHeight = newMinHeight;
-        });
-        minWidthTransition?.addProgressListener((progress) {
-          double newMinWidth = diffWidth * progress + oldMinWidth;
-          renderBoxModel.minWidth = newMinWidth;
-        });
-        maxHeightTransition?.addProgressListener((progress) {
-          double newMaxHeight = diffWidth * progress + oldMaxHeight;
-          renderBoxModel.maxHeight = newMaxHeight;
-        });
-        maxWidthTransition?.addProgressListener((progress) {
-          double newMaxWidth = diffWidth * progress + oldMaxWidth;
-          renderBoxModel.maxWidth = newMaxWidth;
-        });
-      }
-    } else {
-      renderBoxModel.width = width;
-      renderBoxModel.height = height;
-      renderBoxModel.maxWidth = maxWidth;
-      renderBoxModel.minWidth = minWidth;
-      renderBoxModel.maxHeight = maxHeight;
-      renderBoxModel.minHeight = minHeight;
+    switch (property) {
+      case WIDTH:
+        renderBoxModel.width = value;
+        break;
+      case HEIGHT:
+        renderBoxModel.height = value;
+        break;
+      case MIN_HEIGHT:
+        renderBoxModel.minHeight = value;
+        break;
+      case MAX_HEIGHT:
+        renderBoxModel.maxHeight = value;
+        break;
+      case MIN_WIDTH:
+        renderBoxModel.minWidth = value;
+        break;
+      case MAX_WIDTH:
+        renderBoxModel.maxWidth = value;
+        break;
     }
   }
 
-  static CSSEdgeInsets _getMarginFromStyle(CSSStyleDeclaration style) {
+  static EdgeInsets _getMargin(CSSStyleDeclaration style) {
     double marginLeft;
     double marginTop;
     double marginRight;
@@ -159,116 +64,39 @@ mixin CSSSizingMixin {
     if (style.contains(MARGIN_RIGHT)) marginRight = CSSLength.toDisplayPortValue(style[MARGIN_RIGHT]);
     if (style.contains(MARGIN_BOTTOM)) marginBottom = CSSLength.toDisplayPortValue(style[MARGIN_BOTTOM]);
 
-    return CSSEdgeInsets(marginTop ?? 0.0, marginRight ?? 0.0, marginBottom ?? 0.0, marginLeft ?? 0.0);
+    return EdgeInsets.only(top: marginTop ?? 0.0, right: marginRight ?? 0.0, bottom: marginBottom ?? 0.0, left: marginLeft ?? 0.0);
   }
 
-  EdgeInsets getMarginInsetsFromStyle(CSSStyleDeclaration style) {
-    oldMargin = _getMarginFromStyle(style);
-    return EdgeInsets.fromLTRB(oldMargin.left, oldMargin.top, oldMargin.right, oldMargin.bottom);
-  }
+  void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
 
-  void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, [Map<String, CSSTransition> transitionMap]) {
-    CSSTransition all, margin, marginLeft, marginRight, marginBottom, marginTop;
-    if (transitionMap != null) {
-      all = transitionMap['all'];
-      margin = transitionMap['margin'];
-      marginLeft = transitionMap['margin-left'];
-      marginRight = transitionMap['margin-right'];
-      marginBottom = transitionMap['margin-bottom'];
-      marginTop = transitionMap['margin-top'];
-    }
-    if (all != null ||
-        margin != null ||
-        marginBottom != null ||
-        marginLeft != null ||
-        marginRight != null ||
-        marginTop != null) {
-      CSSEdgeInsets newMargin = _getMarginFromStyle(style);
+    EdgeInsets margin = renderBoxModel.margin;
 
-      double marginLeftInterval = newMargin.left - oldMargin.left;
-      double marginRightInterval = newMargin.right - oldMargin.right;
-      double marginTopInterval = newMargin.top - oldMargin.top;
-      double marginBottomInterval = newMargin.bottom - oldMargin.bottom;
+    if (margin != null) {
+      switch (property) {
+        case MARGIN_LEFT:
+          margin = margin.copyWith(left: CSSLength.toDisplayPortValue(present));
+          break;
+        case MARGIN_TOP:
+          margin = margin.copyWith(top: CSSLength.toDisplayPortValue(present));
+          break;
+        case MARGIN_BOTTOM:
+          margin = margin.copyWith(bottom: CSSLength.toDisplayPortValue(present));
+          break;
+        case MARGIN_RIGHT:
+          margin = margin.copyWith(right: CSSLength.toDisplayPortValue(present));
+          break;
+        case MARGIN:
+          margin = _getMargin(style);
+          break;
+      }
 
-      CSSEdgeInsets progressMargin = CSSEdgeInsets(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
-      CSSEdgeInsets baseMargin = CSSEdgeInsets(oldMargin.top, oldMargin.right, oldMargin.bottom, oldMargin.left);
-
-      all?.addProgressListener((progress) {
-        if (margin == null) {
-          if (marginTop == null) {
-            progressMargin.top = progress * marginTopInterval + baseMargin.top;
-          }
-          if (marginBottom == null) {
-            progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
-          }
-          if (marginLeft == null) {
-            progressMargin.left = progress * marginLeftInterval + baseMargin.left;
-          }
-          if (marginRight == null) {
-            progressMargin.right = progress * marginRightInterval + baseMargin.right;
-          }
-          _updateMargin(
-            renderBoxModel,
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
-          );
-        }
-      });
-
-      margin?.addProgressListener((progress) {
-        if (marginTop == null) {
-          progressMargin.top = progress * marginTopInterval + baseMargin.top;
-        }
-        if (marginBottom == null) {
-          progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
-        }
-        if (marginLeft == null) {
-          progressMargin.left = progress * marginLeftInterval + baseMargin.left;
-        }
-        if (marginRight == null) {
-          progressMargin.right = progress * marginRightInterval + baseMargin.right;
-        }
-        _updateMargin(
-          renderBoxModel,
-          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
-        );
-      });
-      marginTop?.addProgressListener((progress) {
-        progressMargin.top = progress * marginTopInterval + baseMargin.top;
-        renderBoxModel.margin =
-            EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom);
-      });
-      marginBottom?.addProgressListener((progress) {
-        progressMargin.bottom = progress * marginBottomInterval + baseMargin.bottom;
-        _updateMargin(
-          renderBoxModel,
-          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
-        );
-      });
-      marginLeft?.addProgressListener((progress) {
-        progressMargin.left = progress * marginLeftInterval + baseMargin.left;
-        _updateMargin(
-          renderBoxModel,
-          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
-        );
-      });
-      marginRight?.addProgressListener((progress) {
-        progressMargin.right = progress * marginRightInterval + baseMargin.right;
-        _updateMargin(
-          renderBoxModel,
-          EdgeInsets.fromLTRB(progressMargin.left, progressMargin.top, progressMargin.right, progressMargin.bottom)
-        );
-      });
-      oldMargin = newMargin;
+      renderBoxModel.margin = margin;
     } else {
-      _updateMargin(renderBoxModel, getMarginInsetsFromStyle(style));
+      renderBoxModel.margin = _getMargin(style);
     }
   }
 
-  void _updateMargin(RenderBoxModel renderBoxModel, EdgeInsets margin) {
-    renderBoxModel.margin = margin;
-  }
-
-  static CSSEdgeInsets _getPaddingFromStyle(CSSStyleDeclaration style) {
+  static EdgeInsets _getPadding(CSSStyleDeclaration style) {
     double paddingTop;
     double paddingRight;
     double paddingBottom;
@@ -279,105 +107,41 @@ mixin CSSSizingMixin {
     if (style.contains(PADDING_BOTTOM)) paddingBottom = CSSLength.toDisplayPortValue(style[PADDING_BOTTOM]);
     if (style.contains(PADDING_LEFT)) paddingLeft = CSSLength.toDisplayPortValue(style[PADDING_LEFT]);
 
-    return CSSEdgeInsets(paddingTop ?? 0.0, paddingRight ?? 0.0, paddingBottom ?? 0.0, paddingLeft ?? 0.0);
+    return EdgeInsets.only(
+      top: paddingTop ?? 0.0,
+      right: paddingRight ?? 0.0,
+      bottom: paddingBottom ?? 0.0,
+      left: paddingLeft ?? 0.0
+    );
   }
 
-  EdgeInsets getPaddingInsetsFromStyle(CSSStyleDeclaration style) {
-    oldPadding = _getPaddingFromStyle(style);
-    return EdgeInsets.fromLTRB(oldPadding.left, oldPadding.top, oldPadding.right, oldPadding.bottom);
-  }
+  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
 
-  void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style,
-      [Map<String, CSSTransition> transitionMap]) {
-    CSSTransition all, padding, paddingLeft, paddingRight, paddingBottom, paddingTop;
-    if (transitionMap != null) {
-      all = transitionMap['all'];
-      padding = transitionMap['padding'];
-      paddingLeft = transitionMap['padding-left'];
-      paddingRight = transitionMap['padding-right'];
-      paddingBottom = transitionMap['padding-bottom'];
-      paddingTop = transitionMap['padding-top'];
+    EdgeInsets padding = renderBoxModel.padding;
+
+    if (padding != null) {
+      switch (property) {
+        case PADDING_LEFT:
+          padding = padding.copyWith(left: CSSLength.toDisplayPortValue(present));
+          break;
+        case PADDING_TOP:
+          padding = padding.copyWith(top: CSSLength.toDisplayPortValue(present));
+          break;
+        case PADDING_BOTTOM:
+          padding = padding.copyWith(bottom: CSSLength.toDisplayPortValue(present));
+          break;
+        case PADDING_RIGHT:
+          padding = padding.copyWith(right: CSSLength.toDisplayPortValue(present));
+          break;
+        case PADDING:
+          padding = _getPadding(style);
+          break;
+      }
+
+      renderBoxModel.padding = padding;
+    } else {
+      renderBoxModel.padding = _getPadding(style);
     }
-    if (all != null ||
-        padding != null ||
-        paddingBottom != null ||
-        paddingLeft != null ||
-        paddingRight != null ||
-        paddingTop != null) {
-      CSSEdgeInsets newPadding = _getPaddingFromStyle(style);
-
-      double paddingLeftInterval = newPadding.left - oldPadding.left;
-      double paddingRightInterval = newPadding.right - oldPadding.right;
-      double paddingTopInterval = newPadding.top - oldPadding.top;
-      double paddingBottomInterval = newPadding.bottom - oldPadding.bottom;
-
-      CSSEdgeInsets progressPadding =
-          CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
-      CSSEdgeInsets basePadding = CSSEdgeInsets(oldPadding.top, oldPadding.right, oldPadding.bottom, oldPadding.left);
-
-      all?.addProgressListener((progress) {
-        if (padding == null) {
-          if (paddingTop == null) {
-            progressPadding.top = progress * paddingTopInterval + basePadding.top;
-          }
-          if (paddingBottom == null) {
-            progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
-          }
-          if (paddingLeft == null) {
-            progressPadding.left = progress * paddingLeftInterval + basePadding.left;
-          }
-          if (paddingRight == null) {
-            progressPadding.right = progress * paddingRightInterval + basePadding.right;
-          }
-
-          renderBoxModel.padding = EdgeInsets.fromLTRB(
-              progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-        }
-      });
-      padding?.addProgressListener((progress) {
-        if (paddingTop == null) {
-          progressPadding.top = progress * paddingTopInterval + basePadding.top;
-        }
-        if (paddingBottom == null) {
-          progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
-        }
-        if (paddingLeft == null) {
-          progressPadding.left = progress * paddingLeftInterval + basePadding.left;
-        }
-        if (paddingRight == null) {
-          progressPadding.right = progress * paddingRightInterval + basePadding.right;
-        }
-
-        renderBoxModel.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-      });
-      paddingTop?.addProgressListener((progress) {
-        progressPadding.top = progress * paddingTopInterval + basePadding.top;
-        renderBoxModel.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-      });
-      paddingBottom?.addProgressListener((progress) {
-        progressPadding.bottom = progress * paddingBottomInterval + basePadding.bottom;
-        renderBoxModel.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-      });
-      paddingLeft?.addProgressListener((progress) {
-        progressPadding.left = progress * paddingLeftInterval + basePadding.left;
-        renderBoxModel.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-      });
-      paddingRight?.addProgressListener((progress) {
-        progressPadding.right = progress * paddingRightInterval + basePadding.right;
-        renderBoxModel.padding = EdgeInsets.fromLTRB(
-            progressPadding.left, progressPadding.top, progressPadding.right, progressPadding.bottom);
-      });
-      oldPadding = newPadding;
-    }
-
-    EdgeInsets edgeInsets = getPaddingInsetsFromStyle(style);
-
-    // Update renderPadding.
-    renderBoxModel.padding = edgeInsets;
   }
 }
 
@@ -388,27 +152,27 @@ class CSSEdgeInsets {
   double bottom;
 
   CSSEdgeInsets(this.top, this.right, this.bottom, this.left);
+
+  EdgeInsets toEdgeInsets() {
+    return EdgeInsets.fromLTRB(left, top, right, bottom);
+  }
 }
 
 class CSSSizing {
   // Get max width of element, use width if exist,
   // or find the width of the nearest ancestor with width
-  static double getElementComputedMaxWidth(int targetId, ElementManager elementManager) {
+  static double getElementComputedMaxWidth(RenderBoxModel renderBoxModel, int targetId, ElementManager elementManager) {
     double width;
     double cropWidth = 0;
-    Element child = elementManager.getEventTargetByTargetId<Element>(targetId);
-    CSSStyleDeclaration style = child.style;
     CSSDisplay display = getElementRealDisplayValue(targetId, elementManager);
 
-    void cropMargin(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+    void cropMargin(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.margin != null) {
         cropWidth += renderBoxModel.margin.horizontal;
       }
     }
 
-    void cropPaddingBorder(Element childNode) {
-      RenderBoxModel renderBoxModel = childNode.getRenderBoxModel();
+    void cropPaddingBorder(RenderBoxModel renderBoxModel) {
       if (renderBoxModel.borderEdge != null) {
         cropWidth += renderBoxModel.borderEdge.horizontal;
       }
@@ -418,25 +182,24 @@ class CSSSizing {
     }
 
     // Get width of element if it's not inline
-    if (display != CSSDisplay.inline && style.contains(WIDTH)) {
-      width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-      cropPaddingBorder(child);
+    if (display != CSSDisplay.inline && renderBoxModel.width != null) {
+      width = renderBoxModel.width;
+      cropPaddingBorder(renderBoxModel);
     } else {
       // Get the nearest width of ancestor with width
       while (true) {
-        if (child.parentNode != null) {
-          cropMargin(child);
-          cropPaddingBorder(child);
-          child = child.parentNode;
+        if (renderBoxModel.parent != null && renderBoxModel.parent is RenderBoxModel) {
+          cropMargin(renderBoxModel);
+          cropPaddingBorder(renderBoxModel);
+          renderBoxModel = renderBoxModel.parent;
         } else {
           break;
         }
-        if (child is Element) {
-          CSSStyleDeclaration style = child.style;
-          CSSDisplay display = getElementRealDisplayValue(child.targetId, elementManager);
-          if (style.contains(WIDTH) && display != CSSDisplay.inline) {
-            width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-            cropPaddingBorder(child);
+        if (renderBoxModel is RenderBoxModel) {
+          CSSDisplay display = getElementRealDisplayValue(renderBoxModel.targetId, elementManager);
+          if (renderBoxModel.width != null && display != CSSDisplay.inline) {
+            width = renderBoxModel.width;
+            cropPaddingBorder(renderBoxModel);
             break;
           }
         }
@@ -451,19 +214,18 @@ class CSSSizing {
   }
 
   // Whether current node should stretch children's height
-  static bool isStretchChildHeight(Element current, Element child) {
+  static bool isStretchChildHeight(RenderBoxModel current, RenderBoxModel child) {
     bool isStretch = false;
     CSSStyleDeclaration style = current.style;
     CSSStyleDeclaration childStyle = child.style;
-    RenderBoxModel renderBoxModel = current.getRenderBoxModel();
-    bool isFlex = renderBoxModel is RenderFlexLayout;
+    bool isFlex = current is RenderFlexLayout;
     bool isHorizontalDirection = false;
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;
     bool isChildAlignSelfStretch = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
-        (renderBoxModel as RenderFlexLayout).flexDirection
+        (current as RenderFlexLayout).flexDirection
       );
       isAlignItemsStretch = !style.contains(ALIGN_ITEMS) ||
         style[ALIGN_ITEMS] == STRETCH;

@@ -466,7 +466,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
     return renderBoxModel;
   }
 
@@ -562,8 +562,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    final double contentWidth = getContentWidth();
-    final double contentHeight = getContentHeight();
+    final double contentWidth = RenderBoxModel.getContentWidth(this);
+    final double contentHeight = RenderBoxModel.getContentHeight(this);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -586,7 +586,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (contentWidth != null) {
           mainAxisLimit = contentWidth;
         } else {
-          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
+          mainAxisLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
         }
         if (textDirection == TextDirection.rtl) flipMainAxis = true;
         if (verticalDirection == VerticalDirection.up) flipCrossAxis = true;
@@ -902,7 +902,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         if (child is RenderBoxModel) {
           Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-          RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+          RenderBoxModel renderBoxModel = childEl.renderBoxModel;
           childMarginLeft = renderBoxModel.marginLeft;
           childMarginTop = renderBoxModel.marginTop;
         }

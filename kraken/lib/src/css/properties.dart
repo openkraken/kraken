@@ -8,6 +8,7 @@ const String DISPLAY = 'display';
 const String POSITION = 'position';
 const String OPACITY = 'opacity';
 const String Z_INDEX = 'zIndex';
+const String VISIBILITY = 'visibility';
 const String CONTENT_VISIBILITY = 'contentVisibility';
 const String BOX_SHADOW = 'boxShadow';
 const String COLOR = 'color';
@@ -114,5 +115,3 @@ const String TRANSITION_DELAY = 'transitionDelay';
 
 const String OBJECT_FIT = 'objectFit';
 const String OBJECT_POSITION = 'objectPosition';
-
-const String URL = 'url';
