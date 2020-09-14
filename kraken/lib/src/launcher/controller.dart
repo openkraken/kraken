@@ -386,7 +386,7 @@ class KrakenController {
     if (loadErrorHandler != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorHandler(FlutterError(e), stack);}
+      } catch(e, stack) { loadErrorHandler(FlutterError(e.toString()), stack);}
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
     }
