@@ -12,6 +12,29 @@
 #include <atomic>
 #include <thread>
 
+#if defined(_WIN32)
+#define PLATFORM "windows" // Windows
+#elif defined(_WIN64)
+#define PLATFORM "windows" // Windows
+#elif defined(__CYGWIN__) && !defined(_WIN32)
+#define PLATFORM "windows" // Windows (Cygwin POSIX under Microsoft Window)
+#elif defined(__ANDROID__)
+#define PLATFORM "android" // Android (implies Linux, so it must come first)
+#elif defined(__linux__)
+#define PLATFORM "linux"                      // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
+#include <TargetConditionals.h>
+#if TARGET_IPHONE_SIMULATOR == 1
+#define PLATFORM "ios" // Apple iOS Simulator
+#elif TARGET_OS_IPHONE == 1
+#define PLATFORM "ios" // Apple iOS
+#elif TARGET_OS_MAC == 1
+#define PLATFORM "macos" // Apple macOS
+#endif
+#else
+#define PLATFORM "unknown"
+#endif
+
 // this is not thread safe
 std::atomic<bool> inited{false};
 std::atomic<int32_t> poolIndex{0};
@@ -44,7 +67,7 @@ void disposeAllBridge() {
 }
 
 int32_t searchForAvailableContextId() {
-  for (int i = 0; i < maxPoolSize; i ++) {
+  for (int i = 0; i < maxPoolSize; i++) {
     if (contextPool[i] == nullptr) {
       return i;
     }
@@ -82,8 +105,8 @@ int32_t allocateNewContext() {
   }
 
   assert(contextPool[poolIndex] == nullptr && (std::string("can not allocate JSBridge at index") +
-                                             std::to_string(poolIndex) + std::string(": bridge have already exist."))
-                                              .c_str());
+                                               std::to_string(poolIndex) + std::string(": bridge have already exist."))
+                                                .c_str());
 
   auto context = new kraken::JSBridge(poolIndex, printError);
   contextPool[poolIndex] = context;
@@ -99,13 +122,12 @@ bool checkContext(int32_t contextId) {
   return inited && contextId < maxPoolSize && contextPool[contextId] != nullptr;
 }
 
-bool checkContext(int32_t contextId, void* context) {
-  auto bridge = static_cast<kraken::JSBridge*>(getJSContext(contextId));
+bool checkContext(int32_t contextId, void *context) {
+  auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   return bridge->getContext() == context;
 }
 
-void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename,
-                     int startLine) {
+void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine) {
   assert(checkContext(contextId) && "evaluateScripts: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->evaluateScript(std::string(code), std::string(bundleFilename), startLine);
@@ -186,4 +208,37 @@ Screen *createScreen(double width, double height) {
 
 void registerToBlob(ToBlob toBlob) {
   kraken::registerToBlob(toBlob);
+}
+
+static KrakenInfo *krakenInfo{nullptr};
+
+const char *getUserAgent(KrakenInfo *info) {
+  const char *comment = info->comment != nullptr ? info->comment : "";
+  const char *format = "%s/%s (%s; %s/%s)%s";
+  int32_t length = strlen(format) + strlen(info->appName) + strlen(info->product_sub) + strlen(info->product) +
+                   strlen(info->platform) + strlen(comment) + strlen(info->version);
+  char *buf = new char[length];
+  std::string result;
+  std::snprintf(&buf[0], length, format, info->product, info->product_sub, info->platform, info->appName, info->version, comment);
+  return buf;
+}
+
+KrakenInfo *getKrakenInfo() {
+  if (krakenInfo == nullptr) {
+    krakenInfo = new KrakenInfo();
+    krakenInfo->appName = "Kraken";
+    krakenInfo->version = VERSION_APP;
+    krakenInfo->platform = PLATFORM;
+    krakenInfo->product = PRODUCT;
+    krakenInfo->product_sub = PRODUCT_SUB;
+    krakenInfo->getUserAgent = getUserAgent;
+
+    char *userAgentComment = std::getenv("KRAKEN_USERAGENT_COMMENT");
+
+    if (userAgentComment != nullptr) {
+      krakenInfo->comment = userAgentComment;
+    }
+  }
+
+  return krakenInfo;
 }

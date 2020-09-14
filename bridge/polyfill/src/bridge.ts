@@ -27,6 +27,7 @@ export interface PrivateKraken {
   product: string;
   productSub: string;
   comment: string;
+  userAgent: string;
 }
 
 declare const __kraken_window__: KrakenWindow;

@@ -13,6 +13,21 @@
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
+static char* userAgent {nullptr};
+
+struct KrakenInfo;
+
+using GetUserAgent = const char*(*)(KrakenInfo*);
+struct KrakenInfo {
+  const char* appName {nullptr};
+  const char* version {nullptr};
+  const char* platform {nullptr};
+  const char* product {nullptr};
+  const char* product_sub {nullptr};
+  const char* comment {nullptr};
+  GetUserAgent getUserAgent;
+};
+
 struct Screen {
   double width;
   double height;
@@ -45,6 +60,9 @@ KRAKEN_EXPORT
 void disposeContext(int32_t contextId);
 KRAKEN_EXPORT
 int32_t allocateNewContext();
+
+KRAKEN_EXPORT
+KrakenInfo* getKrakenInfo();
 
 bool checkContext(int32_t contextId);
 bool checkContext(int32_t contextId, void* context);

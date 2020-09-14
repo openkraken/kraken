@@ -18,6 +18,75 @@ import 'platform.dart';
 // representation of JSContext
 class JSCallbackContext extends Struct {}
 
+typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
+typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
+
+class NativeKrakenInfo extends Struct {
+  Pointer<Utf8> appName;
+  Pointer<Utf8> version;
+  Pointer<Utf8> platform;
+  Pointer<Utf8> product;
+  Pointer<Utf8> product_sub;
+  Pointer<Utf8> comment;
+  Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
+}
+
+class KrakenInfo {
+  Pointer<NativeKrakenInfo> _nativeKrakenInfo;
+
+  KrakenInfo(Pointer<NativeKrakenInfo> info): _nativeKrakenInfo = info;
+
+  String get appName {
+    if (_nativeKrakenInfo.ref.appName == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.appName);
+  }
+  String get version {
+    if (_nativeKrakenInfo.ref.version == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.version);
+  }
+  String get platform {
+    if (_nativeKrakenInfo.ref.platform == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.platform);
+  }
+  String get product {
+    if (_nativeKrakenInfo.ref.product == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.product);
+  }
+  String get product_sub {
+    if (_nativeKrakenInfo.ref.product_sub == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.product_sub);
+  }
+  String get comment {
+    if (_nativeKrakenInfo.ref.comment == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.comment);
+  }
+
+  String get userAgent {
+    if (_nativeKrakenInfo.ref.getUserAgent == nullptr) return '';
+    Dart_GetUserAgent getUserAgent = _nativeKrakenInfo.ref.getUserAgent.asFunction();
+    return Utf8.fromUtf8(getUserAgent(_nativeKrakenInfo));
+  }
+
+  @override
+  String toString() {
+    return 'appName: $appName version: $version platform: $platform, product: $product productSub: $product_sub';
+  }
+}
+
+typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
+typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
+final Dart_GetKrakenInfo _getKrakenInfo = nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+
+KrakenInfo _cachedInfo;
+
+KrakenInfo getKrakenInfo() {
+  if (_cachedInfo != null) return _cachedInfo;
+  Pointer<NativeKrakenInfo> nativeKrakenInfo = _getKrakenInfo();
+  KrakenInfo info = KrakenInfo(nativeKrakenInfo);
+  _cachedInfo = info;
+  return info;
+}
+
 // Register invokeEventListener
 typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<Utf8>);
 typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<Utf8>);
