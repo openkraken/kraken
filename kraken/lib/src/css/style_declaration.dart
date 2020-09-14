@@ -120,7 +120,12 @@ class CSSStyleDeclaration {
     _transitions = value;
   }
 
-  bool _isPropertyTransition(String property) {
+  bool _shouldTransition(String property, String prevValue, String nextValue) {
+    // When begin propertyValue is AUTO, skip animation and trigger style update directly.
+    if ((prevValue == null && CSSLength.isAuto(CSSInitialValues[property])) || CSSLength.isAuto(prevValue) || CSSLength.isAuto(nextValue)) {
+      return false;
+    }
+
     return CSSTransformHandlers[property] != null &&
       (_transitions.containsKey(property) || _transitions.containsKey(ALL));
   }
@@ -380,6 +385,19 @@ class CSSStyleDeclaration {
     switch (propertyName) {
       case WIDTH:
       case HEIGHT:
+      case TOP:
+      case LEFT:
+      case RIGHT:
+      case BOTTOM:
+      case MARGIN_TOP:
+      case MARGIN_LEFT:
+      case MARGIN_RIGHT:
+      case MARGIN_BOTTOM:
+        // Validation length type
+        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) {
+          return;
+        }
+        break;
       case MIN_WIDTH:
       case MIN_HEIGHT:
       case MAX_WIDTH:
@@ -392,17 +410,7 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        // Validation length type
         if (!CSSLength.isLength(normalizedValue)) {
-          return;
-        }
-        break;
-      case MARGIN_TOP:
-      case MARGIN_LEFT:
-      case MARGIN_RIGHT:
-      case MARGIN_BOTTOM:
-        // Validation length type and keyword type
-        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isKeyword(normalizedValue)) {
           return;
         }
         break;
@@ -425,7 +433,7 @@ class CSSStyleDeclaration {
         break;
     }
 
-    if (!fromAnimation && _isPropertyTransition(propertyName)) {
+    if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
       return _transition(propertyName, prevValue, normalizedValue);
     }
 

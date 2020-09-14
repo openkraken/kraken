@@ -121,7 +121,7 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 }
 
 void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox child) {
-  RenderBoxModel parentRenderBoxModel = parentElement.getRenderBoxModel();
+  RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
   final RenderLayoutParentData childParentData = child.parentData;
 
   // Default to no constraints. (0 - infinite)
@@ -175,7 +175,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
   double childMarginRight = 0;
 
     Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel childRenderBoxModel = childEl.getRenderBoxModel();
+    RenderBoxModel childRenderBoxModel = childEl.renderBoxModel;
     childMarginTop = childRenderBoxModel.marginTop;
     childMarginBottom = childRenderBoxModel.marginBottom;
     childMarginLeft = childRenderBoxModel.marginLeft;

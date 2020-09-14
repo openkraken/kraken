@@ -234,7 +234,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# only works\n\nBRIDGE_DIR=${PROJECT_DIR}/../../bridge\nexport KRAKEN_JS_ENGINE=jsc\n\nif [[ $SDK_NAME == *\"simulator\"* ]]; then\n  export KRAKEN_BRIDGE_ARCH=SIMULATOR64\nelse\n  export KRAKEN_BRIDGE_ARCH=OS64\nfi\n\ncmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DCMAKE_TOOLCHAIN_FILE=$BRIDGE_DIR/cmake/ios.toolchain.cmake -DPLATFORM=$KRAKEN_BRIDGE_ARCH -DENABLE_BITCODE=FALSE -G \"CodeBlocks - Unix Makefiles\" -B $BRIDGE_DIR/cmake-build-ios -S $BRIDGE_DIR\n";
+			shellScript = "# only works\n\nBRIDGE_DIR=${PROJECT_DIR}/../../bridge\nexport KRAKEN_JS_ENGINE=jsc\n\nif [[ $SDK_NAME == *\"simulator\"* ]]; then\n  export KRAKEN_BRIDGE_ARCH=SIMULATOR64\nelse\n  export KRAKEN_BRIDGE_ARCH=OS\nfi\n\ncmake -DCMAKE_BUILD_TYPE=${CONFIGURATION} -DCMAKE_TOOLCHAIN_FILE=$BRIDGE_DIR/cmake/ios.toolchain.cmake -DPLATFORM=$KRAKEN_BRIDGE_ARCH -DENABLE_BITCODE=FALSE -G \"CodeBlocks - Unix Makefiles\" -B $BRIDGE_DIR/cmake-build-ios -S $BRIDGE_DIR\n";
 		};
 		1B7B06A4243EDD6A005F49EE /* Build Kraken Bridge */ = {
 			isa = PBXShellScriptBuildPhase;

@@ -99,7 +99,7 @@ class ElementManager {
       : viewportWidth = viewportWidth,
         viewportHeight = viewportHeight {
     _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
-    RenderBoxModel root = _rootElement.getRenderBoxModel();
+    RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
     _root = root;
     setEventTarget(_rootElement);
