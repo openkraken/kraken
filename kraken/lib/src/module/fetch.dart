@@ -3,10 +3,19 @@
  * Author: Kraken Team.
  */
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:kraken/bridge.dart';
 
 Future<Response> fetch(String url, Map<String, dynamic> map) async {
   Future<Response> future;
+
+  if (map['headers'] != null) {
+    map['headers'][HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
+  } else {
+    map['headers'] = {HttpHeaders.userAgentHeader: getKrakenInfo().userAgent};
+  }
 
   BaseOptions options = BaseOptions(
       headers: map['headers'],

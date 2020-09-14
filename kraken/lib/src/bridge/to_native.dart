@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/element.dart';
+import 'dart:io';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -22,12 +23,14 @@ typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
 
 class NativeKrakenInfo extends Struct {
-  Pointer<Utf8> appName;
-  Pointer<Utf8> version;
-  Pointer<Utf8> platform;
-  Pointer<Utf8> product;
-  Pointer<Utf8> product_sub;
-  Pointer<Utf8> comment;
+  Pointer<Utf8> app_name;
+  Pointer<Utf8> app_version;
+  Pointer<Utf8> app_revision;
+  Pointer<Utf8> system_name;
+  Pointer<Utf8> flutter_version;
+  Pointer<Utf8> flutter_revision;
+  Pointer<Utf8> flutter_engine_revision;
+  Pointer<Utf8> dart_version;
   Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
 }
 
@@ -37,39 +40,42 @@ class KrakenInfo {
   KrakenInfo(Pointer<NativeKrakenInfo> info): _nativeKrakenInfo = info;
 
   String get appName {
-    if (_nativeKrakenInfo.ref.appName == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.appName);
+    if (_nativeKrakenInfo.ref.app_name == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_name);
   }
-  String get version {
-    if (_nativeKrakenInfo.ref.version == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.version);
+  String get appVersion {
+    if (_nativeKrakenInfo.ref.app_version == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_version);
   }
-  String get platform {
-    if (_nativeKrakenInfo.ref.platform == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.platform);
+  String get appRevision {
+    if (_nativeKrakenInfo.ref.app_revision == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_revision);
   }
-  String get product {
-    if (_nativeKrakenInfo.ref.product == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.product);
+  String get systemName {
+    if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
   }
-  String get product_sub {
-    if (_nativeKrakenInfo.ref.product_sub == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.product_sub);
+  String get flutterVersion {
+    if (_nativeKrakenInfo.ref.flutter_version == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_version);
   }
-  String get comment {
-    if (_nativeKrakenInfo.ref.comment == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.comment);
+  String get flutterRevision {
+    if (_nativeKrakenInfo.ref.flutter_revision == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_revision);
+  }
+  String get flutterEngineRevision {
+    if (_nativeKrakenInfo.ref.flutter_engine_revision == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_engine_revision);
+  }
+  String get dartVersion {
+    if (_nativeKrakenInfo.ref.dart_version == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.dart_version);
   }
 
   String get userAgent {
     if (_nativeKrakenInfo.ref.getUserAgent == nullptr) return '';
     Dart_GetUserAgent getUserAgent = _nativeKrakenInfo.ref.getUserAgent.asFunction();
     return Utf8.fromUtf8(getUserAgent(_nativeKrakenInfo));
-  }
-
-  @override
-  String toString() {
-    return 'appName: $appName version: $version platform: $platform, product: $product productSub: $product_sub';
   }
 }
 

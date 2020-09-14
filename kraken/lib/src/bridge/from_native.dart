@@ -117,7 +117,7 @@ String invokeModule(
       }).catchError((e, stack) {
         String errorMessage = e.message;
         String json;
-        if (e.type == DioErrorType.RESPONSE) {
+        if (e is DioError && e.type == DioErrorType.RESPONSE) {
           json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);
         } else {
           json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);

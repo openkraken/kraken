@@ -13,26 +13,26 @@
 #include <thread>
 
 #if defined(_WIN32)
-#define PLATFORM "windows" // Windows
+#define SYSTEM_NAME "windows" // Windows
 #elif defined(_WIN64)
-#define PLATFORM "windows" // Windows
+#define SYSTEM_NAME "windows" // Windows
 #elif defined(__CYGWIN__) && !defined(_WIN32)
-#define PLATFORM "windows" // Windows (Cygwin POSIX under Microsoft Window)
+#define SYSTEM_NAME "windows" // Windows (Cygwin POSIX under Microsoft Window)
 #elif defined(__ANDROID__)
-#define PLATFORM "android" // Android (implies Linux, so it must come first)
+#define SYSTEM_NAME "android" // Android (implies Linux, so it must come first)
 #elif defined(__linux__)
-#define PLATFORM "linux"                      // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
+#define SYSTEM_NAME "linux"                      // Debian, Ubuntu, Gentoo, Fedora, openSUSE, RedHat, Centos and other
 #elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULATOR == 1
-#define PLATFORM "ios" // Apple iOS Simulator
+#define SYSTEM_NAME "ios" // Apple iOS Simulator
 #elif TARGET_OS_IPHONE == 1
-#define PLATFORM "ios" // Apple iOS
+#define SYSTEM_NAME "ios" // Apple iOS
 #elif TARGET_OS_MAC == 1
-#define PLATFORM "macos" // Apple macOS
+#define SYSTEM_NAME "macos" // Apple macOS
 #endif
 #else
-#define PLATFORM "unknown"
+#define SYSTEM_NAME "unknown"
 #endif
 
 // this is not thread safe
@@ -213,31 +213,30 @@ void registerToBlob(ToBlob toBlob) {
 static KrakenInfo *krakenInfo{nullptr};
 
 const char *getUserAgent(KrakenInfo *info) {
-  const char *comment = info->comment != nullptr ? info->comment : "";
-  const char *format = "%s/%s (%s; %s/%s)%s";
-  int32_t length = strlen(format) + strlen(info->appName) + strlen(info->product_sub) + strlen(info->product) +
-                   strlen(info->platform) + strlen(comment) + strlen(info->version);
+  const char *flutterName = "flutter";
+  const char *flutterEngineName = "flutterEngine";
+  const char *dartName = "dart";
+  const char *format = "%s/%s (%s; %s/%s) %s/%s %s/%s %s/%s";
+  int32_t length = strlen(format) + sizeof(*info);
   char *buf = new char[length];
   std::string result;
-  std::snprintf(&buf[0], length, format, info->product, info->product_sub, info->platform, info->appName, info->version, comment);
+  std::snprintf(&buf[0], length, format, info->app_name, info->app_version, info->system_name, info->app_name, info->app_revision,
+                flutterName, info->flutter_version, flutterEngineName, info->flutter_engine_revision, dartName, info->dart_version);
   return buf;
 }
 
 KrakenInfo *getKrakenInfo() {
   if (krakenInfo == nullptr) {
     krakenInfo = new KrakenInfo();
-    krakenInfo->appName = "Kraken";
-    krakenInfo->version = VERSION_APP;
-    krakenInfo->platform = PLATFORM;
-    krakenInfo->product = PRODUCT;
-    krakenInfo->product_sub = PRODUCT_SUB;
+    krakenInfo->app_name = "Kraken";
+    krakenInfo->app_revision = APP_REV;
+    krakenInfo->app_version = APP_VERSION;
+    krakenInfo->system_name = SYSTEM_NAME;
+    krakenInfo->flutter_version = FLUTTER_VER;
+    krakenInfo->flutter_revision = FLUTTER_REV;
+    krakenInfo->flutter_engine_revision = FLUTTER_ENGINE_REV;
+    krakenInfo->dart_version = DART_VER;
     krakenInfo->getUserAgent = getUserAgent;
-
-    char *userAgentComment = std::getenv("KRAKEN_USERAGENT_COMMENT");
-
-    if (userAgentComment != nullptr) {
-      krakenInfo->comment = userAgentComment;
-    }
   }
 
   return krakenInfo;
