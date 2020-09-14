@@ -10,7 +10,45 @@ enum IntegrationMode {
   native
 }
 
+Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
+  return controller.methodChannel._invokeMethodFromJavaScript(method, args);
+}
+
+void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
+  controller.methodChannel._onJSMethodCall = value;
+}
+
 class KrakenMethodChannel {
+  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
+    if (_onJSMethodCallCallback == null) {
+      return null;
+    }
+    return _onJSMethodCallCallback(method, arguments);
+  }
+
+  MethodCallCallback _methodCallCallback;
+  MethodCallCallback get methodCallCallback => _methodCallCallback;
+  set onMethodCall(MethodCallCallback value) {
+    assert(value != null);
+    _methodCallCallback = value;
+  }
+
+  MethodCallCallback _onJSMethodCallCallback;
+  set _onJSMethodCall(MethodCallCallback value) {
+    assert(value != null);
+    _onJSMethodCallCallback = value;
+  }
+
+  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) {
+    if (_methodCallCallback == null) return Future.value(null);
+    return _methodCallCallback(method, arguments);
+  }
+}
+
+class KrakenJavaScriptChannel extends KrakenMethodChannel {
+}
+
+class KrakenNativeChannel extends KrakenMethodChannel {
   // Flutter method channel used to communicate with public SDK API
   // Only works when integration wieh public SDK API
   static MethodChannel _nativeChannel = MethodChannel('kraken')
@@ -27,50 +65,8 @@ class KrakenMethodChannel {
       return Future<dynamic>.value(null);
     });
 
-  final IntegrationMode mode;
-
-  KrakenMethodChannel(this.mode, KrakenController controller);
-
-  MethodCallCallback _methodCalCallback;
-  MethodCallCallback get onMethodCall => _methodCalCallback;
-  set onMethodCall(MethodCallCallback value) {
-    assert(value != null);
-    _methodCalCallback = value;
-  }
-
-  MethodCallCallback _onJSMethodCallCallback;
-  set onJSMethodCall(MethodCallCallback value) {
-    assert(value != null);
-    _onJSMethodCallCallback = value;
-  }
-
-  // Support for method channel
-  Future<dynamic> _invokeNativeMethod(String method, List args) async {
-    Map<String, dynamic> argsWrap = {
-      'method': method,
-      'args': args,
-    };
-    return _nativeChannel.invokeMethod('invokeMethod', argsWrap);
-  }
-
-  Future<dynamic> _invokeDartMethod(String method, List args) async {
-    return _methodCalCallback(method, args);
-  }
-
   Future<dynamic> invokeMethod(String method, dynamic arguments) async {
-    if (_onJSMethodCallCallback == null) {
-      return null;
-    }
-
-    return _onJSMethodCallCallback(method, arguments);
-  }
-
-  Future<dynamic> proxyMethods(String method, List args) {
-    if (mode == IntegrationMode.dart) {
-      return _invokeDartMethod(method, args);
-    } else {
-      return _invokeNativeMethod(method, args);
-    }
+    return await _nativeChannel.invokeMethod(method, arguments);
   }
 
   Future<String> getUrl() async {

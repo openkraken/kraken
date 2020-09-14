@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/src/launcher/controller.dart';
 
 import 'bundle.dart';
@@ -23,7 +24,8 @@ void launch({
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
   KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
-      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null);
+      showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
+      methodChannel: KrakenNativeChannel());
 
   controller.view.attachView(RendererBinding.instance.renderView);
 

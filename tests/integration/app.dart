@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -30,18 +31,19 @@ void main() {
     List<Kraken> widgets = [];
 
     for (int i = 0; i < 2; i ++) {
+      KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+      javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
+        javaScriptChannel.invokeMethod(method, arguments);
+        return 'method: ' + method;
+      };
+
       Kraken widget = Kraken(
         viewportWidth: 360,
         viewportHeight: 640,
         bundleContent: 'console.log("starting integration test")',
         disableViewportWidthAssertion: true,
         disableViewportHeightAssertion: true,
-        onLoad: (KrakenController controller) {
-          controller.methodChannel.onMethodCall = (String method, dynamic arguments) async {
-            controller.methodChannel.invokeMethod(method, arguments);
-            return 'method: ' + method;
-          };
-        },
+        javaScriptChannel: javaScriptChannel
       );
       widgets.add(widget);
     }
