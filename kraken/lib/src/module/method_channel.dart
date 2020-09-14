@@ -3,49 +3,75 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 
-typedef MethodCallHandler = Future<dynamic> Function(String methodd, dynamic arguments);
+typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 
-final String NAME_METHOD_SPLIT = '!!';
+enum IntegrationMode {
+  dart,
+  native
+}
+
+Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
+  return controller.methodChannel._invokeMethodFromJavaScript(method, args);
+}
+
+void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
+  controller.methodChannel._onJSMethodCall = value;
+}
 
 class KrakenMethodChannel {
-  static MethodChannel _channel = MethodChannel('kraken')
+  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
+    if (_onJSMethodCallCallback == null) {
+      return null;
+    }
+    return _onJSMethodCallCallback(method, arguments);
+  }
+
+  MethodCallCallback _methodCallCallback;
+  MethodCallCallback get methodCallCallback => _methodCallCallback;
+  set onMethodCall(MethodCallCallback value) {
+    assert(value != null);
+    _methodCallCallback = value;
+  }
+
+  MethodCallCallback _onJSMethodCallCallback;
+  set _onJSMethodCall(MethodCallCallback value) {
+    assert(value != null);
+    _onJSMethodCallCallback = value;
+  }
+
+  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) {
+    if (_methodCallCallback == null) return Future.value(null);
+    return _methodCallCallback(method, arguments);
+  }
+}
+
+class KrakenJavaScriptChannel extends KrakenMethodChannel {
+}
+
+class KrakenNativeChannel extends KrakenMethodChannel {
+  // Flutter method channel used to communicate with public SDK API
+  // Only works when integration wieh public SDK API
+  static MethodChannel _nativeChannel = MethodChannel('kraken')
     ..setMethodCallHandler((call) async {
-      List<String> group = call.method.split(NAME_METHOD_SPLIT);
-      String name = group[0];
-      String method = group[1];
-      KrakenController controller = KrakenController.getControllerOfName(name);
+      String method = call.method;
+      KrakenController controller = KrakenController.getControllerOfJSContextId(0);
 
       if ('reload' == method) {
         await controller.reload();
-      } else if (controller.methodChannel.methodCallHandler != null) {
-        return controller.methodChannel.methodCallHandler(method, call.arguments);
+      } else if (controller.methodChannel._onJSMethodCallCallback != null) {
+        return controller.methodChannel._onJSMethodCallCallback(method, call.arguments);
       }
+
       return Future<dynamic>.value(null);
     });
 
-  KrakenMethodChannel(this._name, KrakenController controller);
-
-  final String _name;
-  MethodCallHandler _methodCallHandler;
-  MethodCallHandler get methodCallHandler => _methodCallHandler;
-
-  void setMethodCallHandler(MethodCallHandler handler) {
-    _methodCallHandler = handler;
-  }
-
-  // Support for method channel
-  Future<dynamic> invokeMethod(String method, List args) async {
-    Map<String, dynamic> argsWrap = {
-      'method': method,
-      'args': args,
-    };
-
-    return await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}invokeMethod', argsWrap);
+  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
+    return await _nativeChannel.invokeMethod(method, arguments);
   }
 
   Future<String> getUrl() async {
     // Maybe url of zip bundle or js bundle
-    String url = await _channel.invokeMethod('${_name}${NAME_METHOD_SPLIT}getUrl');
+    String url = await _nativeChannel.invokeMethod('getUrl');
 
     // @NOTE(zhuoling.lcl): Android plugin protocol cannot return `null` directly, which
     // will case method channel invoke failed with exception, use empty

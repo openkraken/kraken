@@ -10,32 +10,54 @@ import 'package:flutter/rendering.dart';
 import 'dart:ui';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/module.dart';
+import 'package:meta/meta.dart';
 
-class KrakenWidget extends StatelessWidget {
-  // the name of krakenWidget. a property used to communicate with native using Kraken SDK API.
-  final String name;
+typedef KrakenOnLoad = void Function(KrakenController controller);
 
+class Kraken extends StatelessWidget {
   // the width of krakenWidget
   final double viewportWidth;
 
   // the height of krakenWidget
   final double viewportHeight;
 
+  // The initial URL to load.
   final String bundleURL;
+  // The initial assets path to load.
   final String bundlePath;
+  // The initial raw javascript content to load.
   final String bundleContent;
 
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
   final AnimationController animationController;
 
+  // The methods of the KrakenNavigateDelegation help you implement custom behaviors that are triggered
+  // during a kraken view's process of loading, and completing a navigation request.
+  final KrakenNavigationDelegate navigationDelegate;
+
+  // A method channel for receiving messaged from JavaScript code and sending message to JavaScript.
+  final KrakenJavaScriptChannel javaScriptChannel;
+
   final LoadErrorHandler loadErrorHandler;
 
-  KrakenWidget(this.name, this.viewportWidth, this.viewportHeight,
-      {Key key,
+  final KrakenOnLoad onLoad;
+
+  KrakenController get controller {
+    return KrakenController.getControllerOfName(shortHash(this));
+  }
+
+  Kraken({
+      Key key,
+      @required this.viewportWidth,
+      @required this.viewportHeight,
       this.bundleURL,
       this.bundlePath,
       this.bundleContent,
+      this.onLoad,
+      this.navigationDelegate,
+      this.javaScriptChannel,
       // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
       // Maybe got unexpected error when change to other values, use this at your own risk!
       // We will fixed this on next version released. (v0.6.0)
@@ -50,6 +72,7 @@ class KrakenWidget extends StatelessWidget {
       this.loadErrorHandler,
       this.animationController})
       : super(key: key) {
+
     assert(!(viewportWidth != window.physicalSize.width / window.devicePixelRatio && !disableViewportWidthAssertion),
     'viewportWidth must temporarily equal to window.physicalSize.width / window.devicePixelRatio, as a result of vw uint in current version is not relative to viewportWidth.');
     assert(!(viewportHeight != window.physicalSize.height / window.devicePixelRatio && !disableViewportHeightAssertion),
@@ -71,19 +94,20 @@ class KrakenWidget extends StatelessWidget {
 
 class KrakenRenderWidget extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  const KrakenRenderWidget(KrakenWidget widget, {Key key})
+  const KrakenRenderWidget(Kraken widget, {Key key})
       : _widget = widget,
         super(key: key);
 
-  final KrakenWidget _widget;
+  final Kraken _widget;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    KrakenController controller = KrakenController(_widget.name, _widget.viewportWidth, _widget.viewportHeight,
+    KrakenController controller = KrakenController(shortHash(_widget.hashCode), _widget.viewportWidth, _widget.viewportHeight,
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         bundleURL: _widget.bundleURL,
         bundlePath: _widget.bundlePath,
         loadErrorHandler: _widget.loadErrorHandler,
+        methodChannel: _widget.javaScriptChannel,
         bundleContent: _widget.bundleContent);
     return controller.view.getRootRenderObject();
   }
@@ -108,6 +132,7 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
     super.mount(parent, newSlot);
     KrakenController controller = (renderObject as RenderBoxModel).controller;
     await controller.loadBundle();
+
     // Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
     if (controller.bundleURL == null && widget._widget.animationController != null) {
@@ -118,6 +143,10 @@ class _KrakenRenderElement extends SingleChildRenderObjectElement {
       });
     } else {
       await controller.run();
+    }
+
+    if (widget._widget.onLoad != null) {
+      widget._widget.onLoad(controller);
     }
   }
 

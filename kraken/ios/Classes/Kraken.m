@@ -1,19 +1,28 @@
 #import <Foundation/Foundation.h>
 #import "Kraken.h"
 
-static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
+static NSMutableArray *engineList = nil;
+static NSMutableArray<Kraken*> *instanceList = nil;
 
 @implementation Kraken
 
-+ (Kraken*) instanceByName:(NSString*) name {
-  return instanceMap[name];
++ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
+  for (int i = 0; i < engineList.count; i++) {
+    FlutterEngine *engine = engineList[i];
+    if (engine != nil && engine.viewController != nil && engine.viewController.binaryMessenger != nil) {
+      if (engine.viewController.binaryMessenger == messenger) {
+        return [instanceList objectAtIndex:i];
+      }
+    }
+  }
+  return nil;
 }
 
-- (instancetype _Nonnull)initWithName:(NSString*) name {
-  self.name = name;
-  
+- (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
+  self.flutterEngine = engine;
+
   FlutterMethodChannel *channel = [KrakenSDKPlugin getMethodChannel];
-  
+
   if (channel == nil) {
     NSException* exception = [NSException
                               exceptionWithName:@"InitError"
@@ -22,11 +31,16 @@ static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
     @throw exception;
   }
   self.channel = channel;
-  
-  if (instanceMap == nil) {
-    instanceMap = [[NSMutableDictionary alloc] init];
+
+  if (engineList == nil) {
+    engineList = [[NSMutableArray alloc] initWithCapacity: 0];
   }
-  [instanceMap setValue:self forKey:name];
+  [engineList addObject: engine];
+
+  if (instanceList == nil) {
+    instanceList = [[NSMutableArray alloc] initWithCapacity: 0];
+  }
+  [instanceList addObject: self];
 
   return self;
 }
@@ -39,7 +53,7 @@ static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
 
 - (void) reload {
   if (self.channel != nil) {
-    [self invokeMethod:@"reload" arguments:nil];
+    [self.channel invokeMethod:@"reload" arguments:nil];
   }
 }
 
@@ -55,7 +69,7 @@ static NSMutableDictionary<NSString *, Kraken*> *instanceMap = nil;
 - (void) invokeMethod:(NSString *)method arguments:(nullable id) arguments {
   dispatch_async(dispatch_get_main_queue(), ^{
     if (self.channel != nil) {
-      [self.channel invokeMethod:[NSString stringWithFormat:@"%@%@%@", self.name, NAME_METHOD_SPLIT, method] arguments:arguments];
+      [self.channel invokeMethod:method arguments:arguments];
     }
   });
 }
