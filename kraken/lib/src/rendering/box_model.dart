@@ -300,6 +300,10 @@ class RenderBoxModel extends RenderBox with
     newBox.configuration = configuration;
     newBox.boxPainter = boxPainter;
 
+    // Copy background
+    newBox.backgroundClip = backgroundClip;
+    newBox.backgroundOrigin = backgroundOrigin;
+
     // Copy overflow
     newBox.scrollListener = scrollListener;
     newBox.clipX = clipX;

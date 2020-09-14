@@ -2,7 +2,6 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
@@ -959,8 +958,23 @@ class CSSOrigin {
 
 mixin CSSTransformMixin on Node {
 
-  void updateRenderTransform(RenderBoxModel renderBoxModel, String value) {
+  void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
     Matrix4 matrix4 = CSSTransform.parseTransform(value);
+    // Upgrade this renderObject into repaintSelf mode.
+    if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
+      RenderObject parent = renderBoxModel.parent;
+      RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
+      if (parent is ContainerRenderObjectMixin) {
+        RenderObject previousSibling = (renderBoxModel.parentData as ContainerParentDataMixin).previousSibling;
+        parent.remove(renderBoxModel);
+        parent.insert(repaintSelfBox, after: previousSibling);
+      } else if (parent is RenderObjectWithChildMixin) {
+        parent.child = repaintSelfBox;
+      }
+      element.renderBoxModel = repaintSelfBox;
+      renderBoxModel = repaintSelfBox;
+    }
+
     renderBoxModel.transform = matrix4 ?? CSSTransform.initial;
   }
 

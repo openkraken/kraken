@@ -376,7 +376,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
     return renderBoxModel;
   }
 
