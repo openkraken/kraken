@@ -714,7 +714,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     double containerCrossAxisExtent = 0.0;
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+    bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock;
     
     // Default to children's width
     double constraintWidth = mainAxisExtent;

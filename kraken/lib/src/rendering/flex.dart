@@ -1321,7 +1321,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     double actualSize;
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+    bool isInlineLevel = realDisplay == CSSDisplay.inlineFlex;
 
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
@@ -1363,7 +1363,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
-        Size contentSize = Size(math.max(constraintWidth, idealMainSize), constraintHeight);
+        Size contentSize = Size(constraintWidth, constraintHeight);
         setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
         size = getBoxSize(contentSize);
         actualSize = contentSize.width;
@@ -1371,7 +1371,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         break;
       case FlexDirection.column:
       case FlexDirection.columnReverse:
-        Size contentSize = Size(math.max(constraintWidth, crossSize), constraintHeight);
+        Size contentSize = Size(constraintWidth, constraintHeight);
         setMaxScrollableSize(math.max(contentSize.width, maxScrollableWidth), math.max(contentSize.height, maxScrollableHeight));
         size = getBoxSize(contentSize);
         actualSize = contentSize.height;

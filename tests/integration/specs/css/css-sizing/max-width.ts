@@ -1,125 +1,141 @@
 describe('max-width', () => {
-  it('should work with non positioned element', async () => {
-    let flexbox;
-    flexbox = createElement(
-      'div',
-      {
-        style: {
-          'background-color': '#999',
-          height: '200px',
-          width: '200px',
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createElement('div',
-          {
-            style: {
-              position: 'relative',
-              'background-color': 'green',
-              height: '100px',
-              maxWidth: '100px',
-              'box-sizing': 'border-box',
-            },
-          },
-          [
-            createText('fooooo')
-          ]
-        )
-      ]
-    );
-    BODY.appendChild(flexbox);
-
-    await matchViewportSnapshot();
-  });
-
   it("should not work with display inline element", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        height: '1000px',
         maxWidth: '300px',
         display: 'inline',
       }
     }, [
-      createText('This text should half visible')
+      createText('This text should not be wrapped')
     ]);
     BODY.appendChild(containingBlock);
 
     await matchViewportSnapshot();
   });
 
-  it('should not work with positioned element', async () => {
-    let flexbox;
-    flexbox = createElement(
-      'div',
-      {
-        style: {
-          position: 'relative',
-          'background-color': '#999',
-          height: '200px',
-          width: '200px',
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createElement('div',
-          {
-            style: {
-              position: 'absolute',
-              'background-color': 'green',
-              height: '100px',
-              maxWidth: '100px',
-              'box-sizing': 'border-box',
-            },
-          },
-          [
-            createText('fooooo')
-          ]
-        )
-      ]
-    );
-    BODY.appendChild(flexbox);
+  it("should work with display inline-block when child length is larger than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '200px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
 
     await matchViewportSnapshot();
   });
 
-  it('should not work with flex item', async () => {
-    let flexbox;
-    flexbox = createElement(
-      'div',
-      {
-        style: {
-          display: 'flex',
-          position: 'relative',
-          'background-color': '#999',
-          height: '200px',
-          width: '200px',
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createElement('div',
-          {
-            style: {
-              'background-color': 'green',
-              height: '100px',
-              maxWidth: '100px',
-              'box-sizing': 'border-box',
-            },
-          },
-          [
-            createText('fooooo')
-          ]
-        )
-      ]
-    );
-    BODY.appendChild(flexbox);
+  it("should work with display inline-block when child length is smaller than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '300px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
 
     await matchViewportSnapshot();
   });
 
-  it('should work with positioned replaced element', async () => {
+  it("should work with display inline-flex when child length is larger than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '200px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when child length is smaller than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '300px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display block when child length is larger than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '200px',
+        display: 'block',
+      }
+    }, [
+      createText('This text should be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display block when child length is smaller than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '300px',
+        display: 'block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+
+  it("should work with display flex when child length is larger than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '200px',
+        display: 'flex',
+      }
+    }, [
+      createText('This text should be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display flex when child length is smaller than max-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        maxWidth: '300px',
+        display: 'flex',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it('should work with replaced element', async () => {
     let flexbox;
     flexbox = createElement(
       'div',
@@ -137,7 +153,6 @@ describe('max-width', () => {
             style: {
               position: 'absolute',
               'background-color': 'green',
-              height: '100px',
               maxWidth: '100px',
               'box-sizing': 'border-box',
             },
@@ -150,34 +165,4 @@ describe('max-width', () => {
     await matchViewportSnapshot(0.1);
   });
 
-  it('should work with flex-item of replaced element', async () => {
-    let flexbox;
-    flexbox = createElement(
-      'div',
-      {
-        style: {
-          display: 'flex',
-          'background-color': '#999',
-          height: '200px',
-          width: '200px',
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createElement('img', {
-            src: 'assets/100x100-green.png',
-            style: {
-              'background-color': 'green',
-              height: '100px',
-              maxWidth: '100px',
-              'box-sizing': 'border-box',
-            },
-          },
-        )
-      ]
-    );
-    BODY.appendChild(flexbox);
-
-    await matchViewportSnapshot(0.1);
-  });
 });
