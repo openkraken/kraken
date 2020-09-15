@@ -23,10 +23,6 @@ struct KrakenInfo {
   const char* app_version {nullptr};
   const char* app_revision {nullptr};
   const char* system_name {nullptr};
-  const char* flutter_version {nullptr};
-  const char* flutter_revision {nullptr};
-  const char* flutter_engine_revision {nullptr};
-  const char* dart_version {nullptr};
   GetUserAgent getUserAgent;
 };
 

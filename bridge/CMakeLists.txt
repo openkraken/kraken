@@ -72,22 +72,6 @@ target_include_directories(kraken PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 execute_process(
-  COMMAND node get_version.js
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../scripts
-  OUTPUT_VARIABLE FLUTTER_INFO
-)
-
-list(GET FLUTTER_INFO 0 FLUTTER_VER)
-list(GET FLUTTER_INFO 1 FLUTTER_REV)
-list(GET FLUTTER_INFO 2 FLUTTER_ENGINE_REV)
-list(GET FLUTTER_INFO 3 DART_VER)
-
-add_definitions(-DFLUTTER_VER="${FLUTTER_VER}")
-add_definitions(-DFLUTTER_REV="${FLUTTER_REV}")
-add_definitions(-DFLUTTER_ENGINE_REV="${FLUTTER_ENGINE_REV}")
-add_definitions(-DDART_VER="${DART_VER}")
-
-execute_process(
   COMMAND grep version: ./pubspec.yaml
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
   OUTPUT_VARIABLE APP_VER

@@ -27,10 +27,6 @@ class NativeKrakenInfo extends Struct {
   Pointer<Utf8> app_version;
   Pointer<Utf8> app_revision;
   Pointer<Utf8> system_name;
-  Pointer<Utf8> flutter_version;
-  Pointer<Utf8> flutter_revision;
-  Pointer<Utf8> flutter_engine_revision;
-  Pointer<Utf8> dart_version;
   Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
 }
 
@@ -54,22 +50,6 @@ class KrakenInfo {
   String get systemName {
     if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
-  }
-  String get flutterVersion {
-    if (_nativeKrakenInfo.ref.flutter_version == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_version);
-  }
-  String get flutterRevision {
-    if (_nativeKrakenInfo.ref.flutter_revision == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_revision);
-  }
-  String get flutterEngineRevision {
-    if (_nativeKrakenInfo.ref.flutter_engine_revision == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.flutter_engine_revision);
-  }
-  String get dartVersion {
-    if (_nativeKrakenInfo.ref.dart_version == nullptr) return '';
-    return Utf8.fromUtf8(_nativeKrakenInfo.ref.dart_version);
   }
 
   String get userAgent {
