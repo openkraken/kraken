@@ -524,30 +524,31 @@ class RenderBoxModel extends RenderBox with
     // Max-width doesn't work on inline element
     if (!isInline) {
       double calMinWidth = minWidth != null ? minWidth: null;
-      double calMaxWidth = maxWidth != null && (minWidth == null || maxWidth > minWidth) ?
+      double calMaxWidth = maxWidth != null && (minWidth == null || maxWidth >= minWidth) ?
         maxWidth : null;
 
+      if (calMinWidth != null && calMinWidth > 0) {
+        if (width == null) {
+          // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
+          if (intrinsicWidth != null && intrinsicWidth > calMinWidth) {
+            width = intrinsicWidth;
+          }
+        } else if (width < calMinWidth) {
+          width = calMinWidth;
+        }
+      }
+      
       if (calMaxWidth != null) {
         if (width == null) {
           if (intrinsicWidth == null || intrinsicWidth > calMaxWidth) {
+            // When intrinsicWidth is null, use max-width as max constraints,
+            // real width should be compared with its children width when performLayout
             width = calMaxWidth;
           } else {
             width = intrinsicWidth;
           }
         } else if (width > calMaxWidth) {
           width = calMaxWidth;
-        }
-      }
-
-      if (calMinWidth != null && calMinWidth > 0) {
-        if (width == null) {
-          if (intrinsicWidth == null || intrinsicWidth < calMinWidth) {
-            width = calMinWidth;
-          } else {
-            width = intrinsicWidth;
-          }
-        } else if (width < calMinWidth) {
-          width = calMinWidth;
         }
       }
     }
@@ -625,11 +626,24 @@ class RenderBoxModel extends RenderBox with
     // Max-height doesn't work on inline element
     if (!isInline) {
       double calMinHeight = minHeight != null ? minHeight: null;
-      double calMaxHeight = maxHeight != null && (minHeight == null || maxHeight > minHeight) ?
+      double calMaxHeight = maxHeight != null && (minHeight == null || maxHeight >= minHeight) ?
         maxHeight : null;
 
+      if (calMinHeight != null && calMinHeight > 0) {
+        if (height == null) {
+          // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
+          if (intrinsicHeight != null && intrinsicHeight > calMinHeight) {
+            height = intrinsicHeight;
+          }
+        } else if (height < calMinHeight) {
+          height = calMinHeight;
+        }
+      }
+      
       if (calMaxHeight != null) {
         if (height == null) {
+          // When intrinsicHeight is null, use max-height as max constraints,
+          // real height should be compared with its children height when performLayout
           if (intrinsicHeight == null || intrinsicHeight > calMaxHeight) {
             height = calMaxHeight;
           } else {
@@ -640,17 +654,6 @@ class RenderBoxModel extends RenderBox with
         }
       }
 
-      if (calMinHeight != null && calMinHeight > 0) {
-        if (height == null) {
-          if (intrinsicHeight == null || intrinsicHeight < calMinHeight) {
-            height = calMinHeight;
-          } else {
-            height = intrinsicHeight;
-          }
-        } else if (height < calMinHeight) {
-          height = calMinHeight;
-        }
-      }
     }
 
     if (height != null) {

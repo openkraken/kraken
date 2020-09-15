@@ -1330,9 +1330,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       // ContentWidth equals max-width if only max-width exists
       // Set width not larger then max-width
       bool hasMaxWidth = style[MAX_WIDTH] != '';
+      bool hasMinWidth = style[MIN_WIDTH] != '';
+      double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
       if (isInlineLevel && hasMaxWidth && width == null) {
-        double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
         constraintWidth = childrenWidth > contentWidth ? contentWidth : childrenWidth;
+      } else if (isInlineLevel && hasMinWidth && width == null) {
+        constraintWidth = constraintWidth < contentWidth ? contentWidth : constraintWidth;
       } else {
         constraintWidth = math.max(constraintWidth, contentWidth);
       }
@@ -1345,9 +1348,12 @@ class RenderFlexLayout extends RenderLayoutBox {
       // ContentHeight equals max-height if only max-height exists
       // Set height not larger then max-width
       bool hasMaxHeight = style[MAX_HEIGHT] != '';
+      bool hasMinHeight = style[MIN_HEIGHT] != '';
+      double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
       if (isInlineLevel && hasMaxHeight && height == null) {
-        double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
         constraintHeight = childrenHeight > contentHeight ? contentHeight : childrenHeight;
+      } else if (isInlineLevel && hasMinHeight && height == null) {
+        constraintHeight = constraintHeight < contentHeight ? contentHeight : constraintHeight;
       } else {
         constraintHeight = math.max(constraintHeight, contentHeight);
       }

@@ -718,13 +718,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    // Get max of element's width and children's width if element's width exists
     if (contentWidth != null) {
-      // ContentWidth equals max-width if only max-width exists
-      // Set width not larger then max-width
       bool hasMaxWidth = style[MAX_WIDTH] != '';
+      bool hasMinWidth = style[MIN_WIDTH] != '';
+      // Constrain to min-width or max-width if width not exists
       if (isInlineLevel && hasMaxWidth && width == null) {
         constraintWidth = constraintWidth > contentWidth ? contentWidth : constraintWidth;
+      } else if (isInlineLevel && hasMinWidth && width == null) {
+        constraintWidth = constraintWidth < contentWidth ? contentWidth : constraintWidth;
       } else {
         constraintWidth = math.max(constraintWidth, contentWidth);
       }
@@ -732,13 +733,15 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
-    // Get max of element's height and children's height if element's height exists
     if (contentHeight != null) {
       // ContentHeight equals max-height if only max-height exists
       // Set height not larger then max-width
       bool hasMaxHeight = style[MAX_HEIGHT] != '';
+      bool hasMinHeight = style[MIN_HEIGHT] != '';
       if (isInlineLevel && hasMaxHeight && height == null) {
         constraintHeight = constraintHeight > contentHeight ? contentHeight : constraintHeight;
+      } else if (isInlineLevel && hasMinHeight && height == null) {
+        constraintHeight = constraintHeight < contentHeight ? contentHeight : constraintHeight;
       } else {
         constraintHeight = math.max(constraintHeight, contentHeight);
       }
