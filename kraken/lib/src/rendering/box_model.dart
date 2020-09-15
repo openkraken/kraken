@@ -511,47 +511,45 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    // Max width does not work with following conditions on non replaced elements
-    // 1. flex item
-    // 2. position absolute or fixed
-    // 3. display inline
-    bool isIntrisicBox = renderBoxModel is RenderIntrinsic;
+    if (width == null && intrinsicRatio != null) {
+      if (heightSizeType == BoxSizeType.specified) {
+        double height = getContentHeight(renderBoxModel);
+        width = height / intrinsicRatio;
+      }
+    }
+
     CSSStyleDeclaration style = renderBoxModel.style;
-    bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
-    bool isParentFlexLayout = renderBoxModel.parent is RenderFlexLayout;
     bool isInline = style[DISPLAY] == INLINE;
-    double contentMaxWidth;
-    if (isIntrisicBox || (!isInline && !isPositioned && !isParentFlexLayout)) {
-      contentMaxWidth = maxWidth;
-    }
 
-    if (contentMaxWidth != null) {
-      if (width == null) {
-        if (intrinsicWidth == null || intrinsicWidth > contentMaxWidth) {
-          width = contentMaxWidth;
-        } else {
-          width = intrinsicWidth;
+    // Max-width doesn't work on inline element
+    if (!isInline) {
+      double calMinWidth = minWidth != null ? minWidth: null;
+      double calMaxWidth = maxWidth != null && (minWidth == null || maxWidth > minWidth) ?
+        maxWidth : null;
+
+      if (calMaxWidth != null) {
+        if (width == null) {
+          if (intrinsicWidth == null || intrinsicWidth > calMaxWidth) {
+            width = calMaxWidth;
+          } else {
+            width = intrinsicWidth;
+          }
+        } else if (width > calMaxWidth) {
+          width = calMaxWidth;
         }
-      } else if (width > contentMaxWidth) {
-        width = contentMaxWidth;
       }
-    }
 
-    if (minWidth != null && minWidth > 0.0) {
-      if (width == null) {
-        if (intrinsicWidth == null || intrinsicWidth < minWidth) {
-          width = minWidth;
-        } else {
-          width = intrinsicWidth;
+      if (calMinWidth != null && calMinWidth > 0) {
+        if (width == null) {
+          if (intrinsicWidth == null || intrinsicWidth < calMinWidth) {
+            width = calMinWidth;
+          } else {
+            width = intrinsicWidth;
+          }
+        } else if (width < calMinWidth) {
+          width = calMinWidth;
         }
-      } else if (width < minWidth) {
-        width = minWidth;
       }
-    }
-
-    if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
-      double height = getContentHeight(renderBoxModel);
-      width = height * intrinsicRatio;
     }
 
     if (width != null) {
@@ -616,33 +614,43 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (maxHeight != null) {
-      if (height == null) {
-        if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
-          height = maxHeight;
-        } else {
-          height = intrinsicHeight;
-        }
-      } else if (height > maxHeight) {
-        height = maxHeight;
-      }
-    }
-
-    if (minHeight != null && minHeight > 0.0) {
-      if (height == null) {
-        if (intrinsicHeight == null || intrinsicHeight < minHeight) {
-          height = minHeight;
-        } else {
-          height = intrinsicHeight;
-        }
-      } else if (height < minHeight) {
-        height = minHeight;
-      }
-    }
-
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
       double width = getContentWidth(renderBoxModel);
       height = width * intrinsicRatio;
+    }
+
+    CSSStyleDeclaration style = renderBoxModel.style;
+    bool isInline = style[DISPLAY] == INLINE;
+
+    // Max-height doesn't work on inline element
+    if (!isInline) {
+      double calMinHeight = minHeight != null ? minHeight: null;
+      double calMaxHeight = maxHeight != null && (minHeight == null || maxHeight > minHeight) ?
+        maxHeight : null;
+
+      if (calMaxHeight != null) {
+        if (height == null) {
+          if (intrinsicHeight == null || intrinsicHeight > calMaxHeight) {
+            height = calMaxHeight;
+          } else {
+            height = intrinsicHeight;
+          }
+        } else if (height > calMaxHeight) {
+          height = calMaxHeight;
+        }
+      }
+
+      if (calMinHeight != null && calMinHeight > 0) {
+        if (height == null) {
+          if (intrinsicHeight == null || intrinsicHeight < calMinHeight) {
+            height = calMinHeight;
+          } else {
+            height = intrinsicHeight;
+          }
+        } else if (height < calMinHeight) {
+          height = calMinHeight;
+        }
+      }
     }
 
     if (height != null) {

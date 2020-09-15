@@ -713,18 +713,35 @@ class RenderFlowLayout extends RenderLayoutBox {
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+    
     // Default to children's width
     double constraintWidth = mainAxisExtent;
     // Get max of element's width and children's width if element's width exists
     if (contentWidth != null) {
-      constraintWidth = math.max(constraintWidth, contentWidth);
+      // ContentWidth equals max-width if only max-width exists
+      // Set width not larger then max-width
+      bool hasMaxWidth = style[MAX_WIDTH] != '';
+      if (isInlineLevel && hasMaxWidth && width == null) {
+        constraintWidth = constraintWidth > contentWidth ? contentWidth : constraintWidth;
+      } else {
+        constraintWidth = math.max(constraintWidth, contentWidth);
+      }
     }
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
     // Get max of element's height and children's height if element's height exists
     if (contentHeight != null) {
-      constraintHeight = math.max(constraintHeight, contentHeight);
+      // ContentHeight equals max-height if only max-height exists
+      // Set height not larger then max-width
+      bool hasMaxHeight = style[MAX_HEIGHT] != '';
+      if (isInlineLevel && hasMaxHeight && height == null) {
+        constraintHeight = constraintHeight > contentHeight ? contentHeight : constraintHeight;
+      } else {
+        constraintHeight = math.max(constraintHeight, contentHeight);
+      }
     }
 
     switch (direction) {

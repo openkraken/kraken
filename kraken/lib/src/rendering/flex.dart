@@ -1320,18 +1320,37 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     double actualSize;
 
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+    bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
     // Get max of element's width and children's width if element's width exists
     if (contentWidth != null) {
-      constraintWidth = math.max(constraintWidth, contentWidth);
+      // ContentWidth equals max-width if only max-width exists
+      // Set width not larger then max-width
+      bool hasMaxWidth = style[MAX_WIDTH] != '';
+      if (isInlineLevel && hasMaxWidth && width == null) {
+        double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
+        constraintWidth = childrenWidth > contentWidth ? contentWidth : childrenWidth;
+      } else {
+        constraintWidth = math.max(constraintWidth, contentWidth);
+      }
     }
 
     // Get layout height from children's height by flex axis
     double constraintHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
     // Get max of element's height and children's height if element's height exists
     if (contentHeight != null) {
-      constraintHeight = math.max(constraintHeight, contentHeight);
+      // ContentHeight equals max-height if only max-height exists
+      // Set height not larger then max-width
+      bool hasMaxHeight = style[MAX_HEIGHT] != '';
+      if (isInlineLevel && hasMaxHeight && height == null) {
+        double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
+        constraintHeight = childrenHeight > contentHeight ? contentHeight : childrenHeight;
+      } else {
+        constraintHeight = math.max(constraintHeight, contentHeight);
+      }
     }
 
 
