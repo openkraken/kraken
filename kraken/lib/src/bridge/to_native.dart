@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/element.dart';
+import 'dart:io';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -17,6 +18,60 @@ import 'platform.dart';
 
 // representation of JSContext
 class JSCallbackContext extends Struct {}
+
+typedef Native_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
+typedef Dart_GetUserAgent = Pointer<Utf8> Function(Pointer<NativeKrakenInfo>);
+
+class NativeKrakenInfo extends Struct {
+  Pointer<Utf8> app_name;
+  Pointer<Utf8> app_version;
+  Pointer<Utf8> app_revision;
+  Pointer<Utf8> system_name;
+  Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
+}
+
+class KrakenInfo {
+  Pointer<NativeKrakenInfo> _nativeKrakenInfo;
+
+  KrakenInfo(Pointer<NativeKrakenInfo> info): _nativeKrakenInfo = info;
+
+  String get appName {
+    if (_nativeKrakenInfo.ref.app_name == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_name);
+  }
+  String get appVersion {
+    if (_nativeKrakenInfo.ref.app_version == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_version);
+  }
+  String get appRevision {
+    if (_nativeKrakenInfo.ref.app_revision == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_revision);
+  }
+  String get systemName {
+    if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
+    return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
+  }
+
+  String get userAgent {
+    if (_nativeKrakenInfo.ref.getUserAgent == nullptr) return '';
+    Dart_GetUserAgent getUserAgent = _nativeKrakenInfo.ref.getUserAgent.asFunction();
+    return Utf8.fromUtf8(getUserAgent(_nativeKrakenInfo));
+  }
+}
+
+typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
+typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
+final Dart_GetKrakenInfo _getKrakenInfo = nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+
+KrakenInfo _cachedInfo;
+
+KrakenInfo getKrakenInfo() {
+  if (_cachedInfo != null) return _cachedInfo;
+  Pointer<NativeKrakenInfo> nativeKrakenInfo = _getKrakenInfo();
+  KrakenInfo info = KrakenInfo(nativeKrakenInfo);
+  _cachedInfo = info;
+  return info;
+}
 
 // Register invokeEventListener
 typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, Pointer<Utf8>);
