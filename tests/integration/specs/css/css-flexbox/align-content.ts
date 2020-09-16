@@ -304,7 +304,7 @@ describe('align-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let flexbox;
     p = createElement(
@@ -579,7 +579,7 @@ describe('align-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('wrap-002', async () => {
+  it('wrap-002', async () => {
     let content1Horizontal;
     let content1Horizontal_1;
     let content1Horizontal_2;
