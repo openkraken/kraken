@@ -521,34 +521,30 @@ class RenderBoxModel extends RenderBox with
     CSSStyleDeclaration style = renderBoxModel.style;
     bool isInline = style[DISPLAY] == INLINE;
 
-    // Max-width doesn't work on inline element
+    // min-width and max-width doesn't work on inline element
     if (!isInline) {
-      double calMinWidth = minWidth != null ? minWidth: null;
-      double calMaxWidth = maxWidth != null && (minWidth == null || maxWidth >= minWidth) ?
-        maxWidth : null;
-
-      if (calMinWidth != null && calMinWidth > 0) {
+      if (minWidth != null) {
         if (width == null) {
           // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
-          if (intrinsicWidth != null && intrinsicWidth > calMinWidth) {
+          if (intrinsicWidth != null && intrinsicWidth > minWidth) {
             width = intrinsicWidth;
           }
-        } else if (width < calMinWidth) {
-          width = calMinWidth;
+        } else if (width < minWidth) {
+          width = minWidth;
         }
       }
       
-      if (calMaxWidth != null) {
+      if (maxWidth != null) {
         if (width == null) {
-          if (intrinsicWidth == null || intrinsicWidth > calMaxWidth) {
+          if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
             // When intrinsicWidth is null, use max-width as max constraints,
             // real width should be compared with its children width when performLayout
-            width = calMaxWidth;
+            width = maxWidth;
           } else {
             width = intrinsicWidth;
           }
-        } else if (width > calMaxWidth) {
-          width = calMaxWidth;
+        } else if (width > maxWidth) {
+          width = maxWidth;
         }
       }
     }
@@ -623,34 +619,30 @@ class RenderBoxModel extends RenderBox with
     CSSStyleDeclaration style = renderBoxModel.style;
     bool isInline = style[DISPLAY] == INLINE;
 
-    // Max-height doesn't work on inline element
+    // max-height and min-height doesn't work on inline element
     if (!isInline) {
-      double calMinHeight = minHeight != null ? minHeight: null;
-      double calMaxHeight = maxHeight != null && (minHeight == null || maxHeight >= minHeight) ?
-        maxHeight : null;
-
-      if (calMinHeight != null && calMinHeight > 0) {
+      if (minHeight != null) {
         if (height == null) {
           // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
-          if (intrinsicHeight != null && intrinsicHeight > calMinHeight) {
+          if (intrinsicHeight != null && intrinsicHeight > minHeight) {
             height = intrinsicHeight;
           }
-        } else if (height < calMinHeight) {
-          height = calMinHeight;
+        } else if (height < minHeight) {
+          height = minHeight;
         }
       }
       
-      if (calMaxHeight != null) {
+      if (maxHeight != null) {
         if (height == null) {
           // When intrinsicHeight is null, use max-height as max constraints,
           // real height should be compared with its children height when performLayout
-          if (intrinsicHeight == null || intrinsicHeight > calMaxHeight) {
-            height = calMaxHeight;
+          if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
+            height = maxHeight;
           } else {
             height = intrinsicHeight;
           }
-        } else if (height > calMaxHeight) {
-          height = calMaxHeight;
+        } else if (height > maxHeight) {
+          height = maxHeight;
         }
       }
 

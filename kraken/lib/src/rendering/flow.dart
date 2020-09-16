@@ -715,36 +715,29 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
     bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock;
-    
+
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    if (contentWidth != null) {
-      bool hasMaxWidth = style[MAX_WIDTH] != '';
-      bool hasMinWidth = style[MIN_WIDTH] != '';
-      // Constrain to min-width or max-width if width not exists
-      if (isInlineLevel && hasMaxWidth && width == null) {
-        constraintWidth = constraintWidth > contentWidth ? contentWidth : constraintWidth;
-      } else if (isInlineLevel && hasMinWidth && width == null) {
-        constraintWidth = constraintWidth < contentWidth ? contentWidth : constraintWidth;
-      } else {
-        constraintWidth = math.max(constraintWidth, contentWidth);
-      }
+    
+    // Constrain to min-width or max-width if width not exists
+    if (isInlineLevel && maxWidth != null && width == null) {
+      constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
+    } else if (isInlineLevel && minWidth != null && width == null) {
+      constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
+    } else if (contentWidth != null) {
+      constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
-    if (contentHeight != null) {
-      // ContentHeight equals max-height if only max-height exists
-      // Set height not larger then max-width
-      bool hasMaxHeight = style[MAX_HEIGHT] != '';
-      bool hasMinHeight = style[MIN_HEIGHT] != '';
-      if (isInlineLevel && hasMaxHeight && height == null) {
-        constraintHeight = constraintHeight > contentHeight ? contentHeight : constraintHeight;
-      } else if (isInlineLevel && hasMinHeight && height == null) {
-        constraintHeight = constraintHeight < contentHeight ? contentHeight : constraintHeight;
-      } else {
-        constraintHeight = math.max(constraintHeight, contentHeight);
-      }
+    
+    // Constrain to min-height or max-height if width not exists
+    if (isInlineLevel && maxHeight != null && height == null) {
+      constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
+    } else if (isInlineLevel && minHeight != null && height == null) {
+      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
+    } else if (contentHeight != null) {
+      constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
     switch (direction) {

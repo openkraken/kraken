@@ -1325,40 +1325,29 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
-    // Get max of element's width and children's width if element's width exists
-    if (contentWidth != null) {
-      // ContentWidth equals max-width if only max-width exists
-      // Set width not larger then max-width
-      bool hasMaxWidth = style[MAX_WIDTH] != '';
-      bool hasMinWidth = style[MIN_WIDTH] != '';
-      double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
-      if (isInlineLevel && hasMaxWidth && width == null) {
-        constraintWidth = childrenWidth > contentWidth ? contentWidth : childrenWidth;
-      } else if (isInlineLevel && hasMinWidth && width == null) {
-        constraintWidth = constraintWidth < contentWidth ? contentWidth : constraintWidth;
-      } else {
-        constraintWidth = math.max(constraintWidth, contentWidth);
-      }
+    
+    // Constrain to min-width or max-width if width not exists
+    double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
+    if (isInlineLevel && maxWidth != null && width == null) {
+      constraintWidth = childrenWidth > maxWidth ? maxWidth : childrenWidth;
+    } else if (isInlineLevel && minWidth != null && width == null) {
+      constraintWidth = childrenWidth < minWidth ? minWidth : childrenWidth;
+    } else if (contentWidth != null) {
+      constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Get layout height from children's height by flex axis
     double constraintHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
-    // Get max of element's height and children's height if element's height exists
-    if (contentHeight != null) {
-      // ContentHeight equals max-height if only max-height exists
-      // Set height not larger then max-width
-      bool hasMaxHeight = style[MAX_HEIGHT] != '';
-      bool hasMinHeight = style[MIN_HEIGHT] != '';
-      double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
-      if (isInlineLevel && hasMaxHeight && height == null) {
-        constraintHeight = childrenHeight > contentHeight ? contentHeight : childrenHeight;
-      } else if (isInlineLevel && hasMinHeight && height == null) {
-        constraintHeight = constraintHeight < contentHeight ? contentHeight : constraintHeight;
-      } else {
-        constraintHeight = math.max(constraintHeight, contentHeight);
-      }
+    
+    // Constrain to min-height or max-height if width not exists
+    double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
+    if (isInlineLevel && maxHeight != null && height == null) {
+      constraintHeight = childrenHeight > maxHeight ? maxHeight : childrenHeight;
+    } else if (isInlineLevel && minHeight != null && height == null) {
+      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
+    } else if (contentHeight != null) {
+      constraintHeight = math.max(constraintHeight, contentHeight);
     }
-
 
     double maxScrollableWidth = 0.0;
     double maxScrollableHeight = 0.0;
