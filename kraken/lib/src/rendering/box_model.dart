@@ -533,7 +533,7 @@ class RenderBoxModel extends RenderBox with
           width = minWidth;
         }
       }
-      
+
       if (maxWidth != null) {
         if (width == null) {
           if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
@@ -631,7 +631,7 @@ class RenderBoxModel extends RenderBox with
           height = minHeight;
         }
       }
-      
+
       if (maxHeight != null) {
         if (height == null) {
           // When intrinsicHeight is null, use max-height as max constraints,

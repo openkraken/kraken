@@ -121,10 +121,19 @@ describe('Tags img', () => {
     await matchViewportSnapshot(0.2);
   });
 
-
   it('support base64 data url', async () => {
     var img = document.createElement('img');
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
+    document.body.appendChild(img);
+    await matchViewportSnapshot(0.2);
+  })
+
+  it('minwidth and minheight of image is 0', async (done) => {
+    var img = document.createElement('img');
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    img.style.minWidth = '0';
+    img.style.minHeight = '0';
+    img.style.display = 'inline';
     document.body.appendChild(img);
     await matchViewportSnapshot(0.2);
   })
