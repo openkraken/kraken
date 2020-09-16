@@ -128,7 +128,7 @@ describe('Tags img', () => {
     await matchViewportSnapshot(0.2);
   })
 
-  it('minwidth and minheight of image is 0', async (done) => {
+  it('minwidth and minheight of image is 0', async () => {
     var img = document.createElement('img');
     img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     img.style.minWidth = '0';
