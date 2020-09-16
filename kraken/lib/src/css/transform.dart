@@ -721,9 +721,31 @@ class CSSTransform {
     return matrix4;
   }
 
+  static const String MATRIX = 'matrix';
+  static const String MATRIX_3D = 'matrix3d';
+  static const String TRANSLATE = 'translate';
+  static const String TRANSLATE_3D = 'translate3d';
+  static const String TRANSLATE_X = 'translatex';
+  static const String TRANSLATE_Y = 'translatey';
+  static const String TRANSLATE_Z = 'translatez';
+  static const String ROTATE = 'rotate';
+  static const String ROTATE_3D = 'rotate3d';
+  static const String ROTATE_X = 'rotatex';
+  static const String ROTATE_Y = 'rotatey';
+  static const String ROTATE_Z = 'rotatez';
+  static const String SCALE = 'scale';
+  static const String SCALE_3D = 'scale3d';
+  static const String SCALE_X = 'scalex';
+  static const String SCALE_Y = 'scaley';
+  static const String SCALE_Z = 'scalez';
+  static const String SKEW = 'skew';
+  static const String SKEW_X = 'skewx';
+  static const String SKEW_Y = 'skewy';
+  static const String PERSPECTIVE = 'perspective';
+
   static Matrix4 _parseTransform(CSSFunctionalNotation method) {
     switch (method.name) {
-      case 'matrix':
+      case MATRIX:
         if (method.args.length == 6) {
           List<double> args = List(6);
           for (int i = 0; i < 6; i++) {
@@ -732,7 +754,7 @@ class CSSTransform {
           return Matrix4(args[0], args[1], 0, 0, args[2], args[3], 0, 0, 0, 0, 1, 0, args[4], args[5], 0, 1);
         }
         break;
-      case 'matrix3d':
+      case MATRIX_3D:
         if (method.args.length == 16) {
           List<double> args = List(16);
           for (int i = 0; i < 16; i++) {
@@ -742,7 +764,7 @@ class CSSTransform {
               args[10], args[11], args[12], args[13], args[14], args[15]);
         }
         break;
-      case 'translate':
+      case TRANSLATE:
         if (method.args.length >= 1 && method.args.length <= 2) {
           double y;
           if (method.args.length == 2) {
@@ -754,7 +776,7 @@ class CSSTransform {
           return Matrix4.identity()..translate(x, y);
         }
         break;
-      case 'translate3d':
+      case TRANSLATE_3D:
         //  [1, 0, 0, 0,
         //   0, 1, 0, 0,
         //   0, 0, 1, 0,
@@ -772,32 +794,32 @@ class CSSTransform {
           return Matrix4.identity()..translate(x, y, z);
         }
         break;
-      case 'translateX':
+      case TRANSLATE_X:
         if (method.args.length == 1) {
           double x = CSSLength.toDisplayPortValue(method.args[0].trim());
           return Matrix4.identity()..translate(x);
         }
         break;
-      case 'translateY':
+      case TRANSLATE_Y:
         if (method.args.length == 1) {
           double y = CSSLength.toDisplayPortValue(method.args[0].trim());
           return Matrix4.identity()..translate(0.0, y);
         }
         break;
-      case 'translateZ':
+      case TRANSLATE_Z:
         if (method.args.length == 1) {
           double z = CSSLength.toDisplayPortValue(method.args[0].trim());
           return Matrix4.identity()..translate(0.0, 0.0, z);
         }
         break;
-      case 'rotate':
-      case 'rotateZ':
+      case ROTATE:
+      case ROTATE_Z:
         if (method.args.length == 1) {
           double angle = CSSAngle.parseAngle(method.args[0].trim());
           return Matrix4.rotationZ(angle);
         }
         break;
-      case 'rotate3d':
+      case ROTATE_3D:
         if (method.args.length == 4) {
           double x = double.tryParse(method.args[0].trim()) ?? 0.0;
           double y = double.tryParse(method.args[1].trim()) ?? 0.0;
@@ -807,19 +829,19 @@ class CSSTransform {
           return Matrix4.identity()..rotate(vector3, angle);
         }
         break;
-      case 'rotateX':
+      case ROTATE_X:
         if (method.args.length == 1) {
           double x = CSSAngle.parseAngle(method.args[0].trim());
           return Matrix4.rotationX(x);
         }
         break;
-      case 'rotateY':
+      case ROTATE_Y:
         if (method.args.length == 1) {
           double y = CSSAngle.parseAngle(method.args[0].trim());
           return Matrix4.rotationY(y);
         }
         break;
-      case 'scale':
+      case SCALE:
         if (method.args.length >= 1 && method.args.length <= 2) {
           double x = double.tryParse(method.args[0].trim()) ?? 1.0;
           double y = x;
@@ -829,7 +851,7 @@ class CSSTransform {
           return Matrix4.identity()..scale(x, y, 1);
         }
         break;
-      case 'scale3d':
+      case SCALE_3D:
         // [scaleX, 0, 0, 0,
         //   0, scaleY, 0, 0,
         //   0, 0, scaleY, 0,
@@ -841,15 +863,15 @@ class CSSTransform {
           return Matrix4.identity()..scale(x, y, z);
         }
         break;
-      case 'scaleX':
-      case 'scaleY':
-      case 'scaleZ':
+      case SCALE_X:
+      case SCALE_Y:
+      case SCALE_Z:
         if (method.args.length == 1) {
           double scale = double.tryParse(method.args[0].trim()) ?? 1.0;
           double x = 1.0, y = 1.0, z = 1.0;
-          if (method.name == 'scaleX') {
+          if (method.name == SCALE_X) {
             x = scale;
-          } else if (method.name == 'scaleY') {
+          } else if (method.name == SCALE_Y) {
             y = scale;
           } else {
             z = scale;
@@ -857,7 +879,7 @@ class CSSTransform {
           return Matrix4.identity()..scale(x, y, z);
         }
         break;
-      case 'skew':
+      case SKEW:
         if (method.args.length == 1 || method.args.length == 2) {
           double alpha = CSSAngle.parseAngle(method.args[0].trim());
           double beta = 0.0;
@@ -867,18 +889,18 @@ class CSSTransform {
           return Matrix4.skew(alpha, beta);
         }
         break;
-      case 'skewX':
-      case 'skewY':
+      case SKEW_X:
+      case SKEW_Y:
         if (method.args.length == 1) {
           double angle = CSSAngle.parseAngle(method.args[0].trim());
-          if (method.name == 'skewX') {
+          if (method.name == SKEW_X) {
             return Matrix4.skewX(angle);
           } else {
             return Matrix4.skewY(angle);
           }
         }
         break;
-      case 'perspective':
+      case PERSPECTIVE:
         //  [
         //   1, 0, 0, 0,
         //   0, 1, 0, 0,

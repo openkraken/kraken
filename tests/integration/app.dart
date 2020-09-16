@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/kraken.dart';
+import 'package:kraken/module.dart';
 import 'package:kraken/widget.dart';
 import 'package:kraken/css.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -27,12 +28,23 @@ void main() {
     Completer<String> completer = Completer();
     List allSpecsPayload = jsonDecode(payload);
 
-    List<String> runningWidgets = ['main', 'secondary'];
-    List<KrakenWidget> widgets = [];
+    List<Kraken> widgets = [];
 
-    for (int i = 0; i < runningWidgets.length; i ++) {
-      String name = runningWidgets[i];
-      KrakenWidget widget = KrakenWidget(name, 360, 640, bundleContent: 'console.log("starting $name integration test")', disableViewportWidthAssertion:  true, disableViewportHeightAssertion: true,);
+    for (int i = 0; i < 2; i ++) {
+      KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+      javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
+        javaScriptChannel.invokeMethod(method, arguments);
+        return 'method: ' + method;
+      };
+
+      Kraken widget = Kraken(
+        viewportWidth: 360,
+        viewportHeight: 640,
+        bundleContent: 'console.log("starting integration test")',
+        disableViewportWidthAssertion: true,
+        disableViewportHeightAssertion: true,
+        javaScriptChannel: javaScriptChannel
+      );
       widgets.add(widget);
     }
 
@@ -56,7 +68,7 @@ void main() {
       List<Future<String>> testResults = [];
 
       for (int i = 0; i < widgets.length; i ++) {
-        int contextId = KrakenController.getControllerOfName(runningWidgets[i]).view.contextId;
+        int contextId = i;
         initTestFramework(contextId);
         addJSErrorListener(contextId, (String err) {
           print(err);

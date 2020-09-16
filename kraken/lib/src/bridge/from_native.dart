@@ -239,9 +239,10 @@ String invokeModule(
       }
     } else if (module == 'MethodChannel') {
       String method = args[1];
+      assert(controller.methodChannel != null);
       if (method == 'invokeMethod') {
         List methodArgs = args[2];
-        controller.methodChannel.invokeMethod(methodArgs[0], methodArgs[1]).then((result) {
+        invokeMethodFromJavaScript(controller, methodArgs[0], methodArgs[1]).then((result) {
           String ret;
           if (result is String) {
             ret = result;
@@ -253,7 +254,7 @@ String invokeModule(
           callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
-        controller.methodChannel.setMethodCallHandler((String method, dynamic arguments) async {
+        onJSMethodCall(controller, (String method, dynamic arguments) async {
           emitModuleEvent(contextId, jsonEncode(['MethodChannel', method, arguments]));
         });
       }

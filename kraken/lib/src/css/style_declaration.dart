@@ -13,8 +13,6 @@ typedef StyleChangeListener = void Function(
   bool inAnimation
 );
 
-const String EMPTY_STRING = '';
-
 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/css/CSSProperties.json
 
 Map CSSInitialValues = {
@@ -33,7 +31,7 @@ Map CSSInitialValues = {
   BORDER_LEFT_WIDTH: '3px',
   BORDER_TOP_WIDTH: '3px',
   // Depends on user agent.
-  COLOR: BLACK,
+  COLOR: CSSColor.INITIAL_COLOR,
   FONT_SIZE: '100%',
   FONT_WEIGHT: '400',
   LINE_HEIGHT: '120%',
@@ -65,7 +63,7 @@ Map CSSInitialValues = {
   Z_INDEX: AUTO
 };
 
-const Map<String, bool> ShorthandProperty = {
+const Map<String, bool> CSSShorthandProperty = {
   MARGIN: true,
   PADDING: true,
   BACKGROUND: true,
@@ -113,9 +111,9 @@ class CSSStyleDeclaration {
 
   Map<String, List> _transitions = {};
 
-  String _getCurrentColor() {
+  String getCurrentColor() {
     String currentColor = _properties[COLOR];
-    return currentColor ?? BLACK;
+    return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
   set transitions (Map<String, List> value) {
@@ -169,7 +167,7 @@ class CSSStyleDeclaration {
       begin = CSSInitialValues[propertyName];
 
       if (begin == CURRENT_COLOR) {
-        begin = _getCurrentColor();
+        begin = getCurrentColor();
       }
 
       // When begin propertyValue is AUTO, skip animation and trigger style update directly.
@@ -236,7 +234,8 @@ class CSSStyleDeclaration {
   /// value is a String containing the value of the property.
   /// If not set, returns the empty string.
   String getPropertyValue(String propertyName) {
-    return _animationProperties[propertyName] ?? _properties[propertyName] ?? EMPTY_STRING;
+    String value = _animationProperties[propertyName] ?? _properties[propertyName] ?? EMPTY_STRING;
+    return value == CURRENT_COLOR ? getCurrentColor() : value;
   }
 
   String getStylePropertyValue(String propertyName) {
@@ -371,7 +370,7 @@ class CSSStyleDeclaration {
       return;
     }
 
-    String normalizedValue = value.toString().trim();
+    String normalizedValue = value.toString().trim().toLowerCase();
 
     // Illegal value like '   ' after trim is '' shoud do nothing.
     if (normalizedValue.isEmpty) return;
@@ -379,7 +378,7 @@ class CSSStyleDeclaration {
     String prevValue = _properties[propertyName];
     if (normalizedValue == prevValue) return;
 
-    if (ShorthandProperty[propertyName] != null) {
+    if (CSSShorthandProperty[propertyName] != null) {
       return _expandShorthand(propertyName, normalizedValue);
     }
 

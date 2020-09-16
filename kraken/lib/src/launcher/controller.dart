@@ -267,17 +267,19 @@ class KrakenController {
       String bundleURL,
       String bundlePath,
       String bundleContent,
+      KrakenNavigationDelegate navigationDelegate,
+      KrakenMethodChannel methodChannel,
       LoadErrorHandler this.loadErrorHandler})
       : name = name,
         _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
-    _methodChannel = KrakenMethodChannel(name, this);
+    _methodChannel = methodChannel;
     _view = KrakenViewController(viewportWidth, viewportHeight,
         showPerformanceOverlay: showPerformanceOverlay,
         enableDebug: enableDebug,
         rootController: this,
-        navigationDelegate: KrakenNavigationDelegate());
+        navigationDelegate: navigationDelegate ?? KrakenNavigationDelegate());
     _module = KrakenModuleController();
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
@@ -381,12 +383,16 @@ class KrakenController {
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
     String bundleURL =
-        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv() ?? await methodChannel.getUrl();
+        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+
+    if (bundleURL == null && methodChannel == KrakenNativeChannel) {
+      bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
+    }
 
     if (loadErrorHandler != null) {
       try {
         _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorHandler(FlutterError(e), stack);}
+      } catch(e, stack) { loadErrorHandler(FlutterError(e.toString()), stack);}
     } else {
       _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
     }

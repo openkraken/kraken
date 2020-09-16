@@ -493,4 +493,116 @@ describe('Position absolute', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('with no left and width in flex layout', async () => {
+    const div = createElementWithStyle('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        height: '50px',
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+        top: 0,
+      }, [
+        createText('foo bar')
+      ]),
+    ]);
+
+    append(BODY, div);
+    await matchViewportSnapshot();
+  });
+
+  it('with no top and height in flex layout', async () => {
+    const div = createElementWithStyle('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        width: '100px',
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+        left: 0,
+      }, [
+        createText('foo bar')
+      ]),
+    ]);
+
+    append(BODY, div);
+    await matchViewportSnapshot();
+  });
+
+  it('with no top left width and height in flex layout', async () => {
+    const div = createElementWithStyle('div', {
+      width: '200px',
+      display: 'flex',
+      height: '200px',
+      border: '1px solid #000',
+      position: 'relative',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+    }, [
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'red',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        width: '30px',
+        height: '30px',
+        backgroundColor: 'yellow',
+        border: '2px solid #000',
+      }),
+      createElementWithStyle('div', {
+        backgroundColor: 'green',
+        position: 'absolute',
+        border: '2px solid #000',
+      }, [
+        createText('foo bar')
+      ]),
+    ]);
+
+    append(BODY, div);
+    await matchViewportSnapshot();
+  });
 });
