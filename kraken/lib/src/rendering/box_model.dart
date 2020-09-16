@@ -551,7 +551,9 @@ class RenderBoxModel extends RenderBox with
 
     if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
       double height = getContentHeight(renderBoxModel);
-      width = height * intrinsicRatio;
+      if (height != null) {
+        width = height * intrinsicRatio;
+      }
     }
 
     if (width != null) {
@@ -642,7 +644,10 @@ class RenderBoxModel extends RenderBox with
 
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
       double width = getContentWidth(renderBoxModel);
-      height = width * intrinsicRatio;
+      if (width != null) {
+        height = width * intrinsicRatio;
+      }
+
     }
 
     if (height != null) {
