@@ -1,9 +1,9 @@
-describe('min-width', () => {
+describe('min-height', () => {
   it("should not work with display inline element", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        minWidth: '300px',
+        minHeight: '50px',
         display: 'inline',
       }
     }, [
@@ -14,26 +14,11 @@ describe('min-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-block when child length is larger than min-width", async () => {
+  it("should work with display inline-block when child height is larger than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        minWidth: '200px',
-        display: 'inline-block',
-      }
-    }, [
-      createText('This text should be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it("should work with display inline-block when child length is smaller than min-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        minWidth: '300px',
+        minHeight: '10px',
         display: 'inline-block',
       }
     }, [
@@ -44,12 +29,57 @@ describe('min-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is larger than min-width", async () => {
+  it("should work with display inline-block when child height is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        minWidth: '200px',
+        minHeight: '50px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when child height is larger than min-height", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minHeight: '10px',
         display: 'inline-flex',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when child height is smaller than min-height", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minHeight: '50px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display block when child height is larger than min-height", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minHeight: '10px',
+        display: 'block',
       }
     }, [
       createText('This text should be wrapped')
@@ -59,41 +89,11 @@ describe('min-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is smaller than min-width", async () => {
+  it("should work with display block when child length is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        minWidth: '300px',
-        display: 'inline-flex',
-      }
-    }, [
-      createText('This text should not be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it("should work with display block when child length is larger than min-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        minWidth: '200px',
-        display: 'block',
-      }
-    }, [
-      createText('This text should not be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it("should work with display block when child length is smaller than min-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        minWidth: '300px',
+        minHeight: '50px',
         display: 'block',
       }
     }, [
@@ -105,11 +105,26 @@ describe('min-width', () => {
   });
 
 
-  it("should work with display flex when child length is larger than min-width", async () => {
+  it("should work with display flex when child height is larger than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        minWidth: '200px',
+        minHeight: '10px',
+        display: 'flex',
+      }
+    }, [
+      createText('This text should be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display flex when child height is smaller than min-height", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minHeight: '50px',
         display: 'flex',
       }
     }, [
@@ -120,22 +135,7 @@ describe('min-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display flex when child length is smaller than min-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        minWidth: '300px',
-        display: 'flex',
-      }
-    }, [
-      createText('This text should not be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it('should work with replaced element when element width is smaller than intrinsic width', async () => {
+  it('should work with replaced element when element height is smaller than intrinsic height', async () => {
     let flexbox;
     flexbox = createElement(
       'div',
@@ -152,7 +152,7 @@ describe('min-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              minWidth: '50px',
+              minHeight: '50px',
               'box-sizing': 'border-box',
             },
           },
@@ -164,7 +164,7 @@ describe('min-width', () => {
     await matchViewportSnapshot(0.1);
   });
 
-  it('should work with replaced element when element width is larger than intrinsic width', async () => {
+  it('should work with replaced element when element height is larger than intrinsic height', async () => {
     let flexbox;
     flexbox = createElement(
       'div',
@@ -181,7 +181,7 @@ describe('min-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              minWidth: '200px',
+              minHeight: '200px',
               'box-sizing': 'border-box',
             },
           },
@@ -192,4 +192,5 @@ describe('min-width', () => {
 
     await matchViewportSnapshot(0.1);
   });
+
 });

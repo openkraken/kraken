@@ -777,7 +777,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
-      BoxSizeType sizeType = _getChildHeightSizeType(child);
+      BoxSizeType heightSizeType = _getChildHeightSizeType(child);
 
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
@@ -794,7 +794,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
-        if (sizeType == BoxSizeType.specified) {
+        if (heightSizeType == BoxSizeType.specified && childStyle[HEIGHT] != '') {
           maxCrossAxisSize = CSSLength.toDisplayPortValue(childStyle[HEIGHT]);
         } else {
           // Child in flex line expand automatic when height is not specified
@@ -1314,16 +1314,16 @@ class RenderFlexLayout extends RenderLayoutBox {
     double actualSize;
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-    bool isInlineLevel = realDisplay == CSSDisplay.inlineFlex;
 
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
+    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
 
     // Constrain to min-width or max-width if width not exists
     double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
-    if (isInlineLevel && maxWidth != null && width == null) {
+    if (isInlineBlock && maxWidth != null && width == null) {
       constraintWidth = childrenWidth > maxWidth ? maxWidth : childrenWidth;
-    } else if (isInlineLevel && minWidth != null && width == null) {
+    } else if (isInlineBlock && minWidth != null && width == null) {
       constraintWidth = childrenWidth < minWidth ? minWidth : childrenWidth;
     } else if (contentWidth != null) {
       constraintWidth = math.max(constraintWidth, contentWidth);
@@ -1331,12 +1331,13 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Get layout height from children's height by flex axis
     double constraintHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
+    bool isNotInline = realDisplay != CSSDisplay.inline;
 
     // Constrain to min-height or max-height if width not exists
     double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
-    if (isInlineLevel && maxHeight != null && height == null) {
+    if (isNotInline && maxHeight != null && height == null) {
       constraintHeight = childrenHeight > maxHeight ? maxHeight : childrenHeight;
-    } else if (isInlineLevel && minHeight != null && height == null) {
+    } else if (isNotInline && minHeight != null && height == null) {
       constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
     } else if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);

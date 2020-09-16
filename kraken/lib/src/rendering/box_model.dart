@@ -511,9 +511,9 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    if (width == null && intrinsicRatio != null) {
-      if (heightSizeType == BoxSizeType.specified) {
-        double height = getContentHeight(renderBoxModel);
+    if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
+      double height = getContentHeight(renderBoxModel);
+      if (height != null) {
         width = height / intrinsicRatio;
       }
     }
@@ -613,7 +613,9 @@ class RenderBoxModel extends RenderBox with
 
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
       double width = getContentWidth(renderBoxModel);
-      height = width * intrinsicRatio;
+      if (width != null) {
+        height = width * intrinsicRatio;
+      }
     }
 
     CSSStyleDeclaration style = renderBoxModel.style;
