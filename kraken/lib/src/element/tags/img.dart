@@ -43,7 +43,6 @@ class ImageElement extends Element {
   void _renderImage() {
     if (_hasLazyLoading) return;
     String loading = properties['loading'];
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     // Image dimensions(width/height) should specified for performance when lazyload
     if (loading == 'lazy') {
       _hasLazyLoading = true;
@@ -65,7 +64,6 @@ class ImageElement extends Element {
 
   void _resetLazyLoading() {
     _hasLazyLoading = false;
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -81,20 +79,6 @@ class ImageElement extends Element {
     if (childNodes.isEmpty) {
       addChild(imageBox);
     }
-
-    setElementSizeType();
-  }
-
-  void setElementSizeType() {
-    bool isWidthDefined = _propertyWidth != null || style.contains(WIDTH) || style.contains(MIN_WIDTH);
-    bool isHeightDefined = _propertyHeight != null || style.contains(HEIGHT) || style.contains(MIN_HEIGHT);
-
-    BoxSizeType widthType = isWidthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-    BoxSizeType heightType = isHeightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
-
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
-    renderBoxModel.widthSizeType = widthType;
-    renderBoxModel.heightSizeType = heightType;
   }
 
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
@@ -127,7 +111,6 @@ class ImageElement extends Element {
       width = naturalWidth;
       height = naturalHeight;
     } else {
-      RenderBoxModel renderBoxModel = getRenderBoxModel();
       if (containWidth && containHeight) {
         width = renderBoxModel.width ?? _propertyWidth;
         height = renderBoxModel.height ?? _propertyHeight;
@@ -153,7 +136,6 @@ class ImageElement extends Element {
 
     imageBox?.width = width;
     imageBox?.height = height;
-    RenderBoxModel renderBoxModel = getRenderBoxModel();
     renderBoxModel.intrinsicWidth = naturalWidth;
     renderBoxModel.intrinsicHeight = naturalHeight;
 

@@ -3,7 +3,6 @@ describe('Transition events', () => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     container1.addEventListener('transitionrun', async () => {
-      await sleep(0.1);
       done();
     });
     setElementStyle(container1, {
@@ -16,6 +15,8 @@ describe('Transition events', () => {
       transitionDuration: '1s',
       transitionTimingFunction: 'linear',
     });
+
+    container1.style.transform = 'translate(10px, 10px)';
   });
 
   it('basic transitionstart', (done) => {

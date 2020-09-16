@@ -5,7 +5,9 @@
 
 import 'dart:math';
 import 'dart:ui' show Color;
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/css.dart';
 
 /// Only support Basic color keywords and Extended color keywords,
 /// for CSS system colors is not recommended for use after CSS3
@@ -175,6 +177,12 @@ final _colorRgbRegExp =
 /// rgb(r,g,b)
 /// rgba(r,g,b,a)
 class CSSColor {
+  static const Color transparent = Color(0x00000000);
+  static const Color initial = Color(0xFF000000);
+  static const String INITIAL_COLOR = 'black';
+  static const String RGB = 'rgb';
+  static const String HSL = 'hsl';
+
   // Use a preprocessed color to cache.
   // Example:
   //   Input = '0 2rpx 4rpx 0 rgba(0,0,0,0.1), 0 25rpx 50rpx 0 rgba(0,0,0,0.15)'
@@ -215,14 +223,14 @@ class CSSColor {
   }
 
   static bool isColor(String color) {
-    return parseColor(color) != null;
+    return color == CURRENT_COLOR || parseColor(color) != null;
   }
 
   static Color parseColor(String color) {
     if (color == null) return null;
     color = color.trim().toLowerCase();
 
-    if (color == 'transparent') {
+    if (color == TRANSPARENT) {
       return CSSColor.transparent;
     } else if (_cachedColor.containsKey(color)) {
       return _cachedColor[color];
@@ -253,7 +261,7 @@ class CSSColor {
             break;
         }
       }
-    } else if (color.startsWith('rgb')) {
+    } else if (color.startsWith(RGB)) {
       final rgbMatch = _colorRgbRegExp.firstMatch(color);
       if (rgbMatch != null) {
         final double rgbR = _parseColorPart(rgbMatch[2], 0, 255);
@@ -264,7 +272,7 @@ class CSSColor {
           parsed = Color.fromRGBO(rgbR.round(), rgbG.round(), rgbB.round(), rgbO);
         }
       }
-    } else if (color.startsWith('hsl')) {
+    } else if (color.startsWith(HSL)) {
       final hslMatch = _colorHslRegExp.firstMatch(color);
       if (hslMatch != null) {
         final hslH = _parseColorHue(hslMatch[2], hslMatch[3]);
@@ -287,9 +295,6 @@ class CSSColor {
   }
 
   Color value;
-
-  static const Color transparent = Color(0x00000000);
-  static const Color initial = Color(0xFF000000);
 }
 
 /// A color in the CIELAB color space.

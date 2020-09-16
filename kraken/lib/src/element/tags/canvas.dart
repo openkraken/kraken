@@ -85,7 +85,7 @@ class CanvasElement extends Element {
     }
   }
 
-  void _propertyChangedListener(String key, String original, String present) {
+  void _propertyChangedListener(String key, String original, String present, bool inAnimation) {
     switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.

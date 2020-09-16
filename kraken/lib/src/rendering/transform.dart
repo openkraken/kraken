@@ -31,21 +31,20 @@ mixin RenderTransformMixin on RenderBox {
     markNeedsPaint();
   }
 
+  // Copy from flutter [RenderTransform._effectiveTransform]
   Matrix4 getEffectiveTransform() {
-    if (origin == null) return _transform;
     final Matrix4 result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin.dx, origin.dy);
     }
     Offset translation;
     if (alignment != null && alignment != Alignment.topLeft) {
-      double width = (size?.width ?? 0.0);
-      double height = (size?.height ?? 0.0);
-
-      translation = alignment.alongSize(Size(width, height));
+      translation = alignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
+ 
     result.multiply(_transform);
+
     if (alignment != null && alignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
     if (origin != null) result.translate(-origin.dx, -origin.dy);
     return result;

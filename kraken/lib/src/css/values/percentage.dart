@@ -1,8 +1,7 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#percentages
-
-const String PERCENTAGE = '%';
-
 class CSSPercentage {
+  static String PERCENTAGE = '%';
+
   static double parsePercentage(String value) {
     double parsed;
     if (value.endsWith(PERCENTAGE)) {

@@ -6,9 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-const double DEFAULT_LETTER_SPACING = 0.0;
-const double DEFAULT_WORD_SPACING = 0.0;
-
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
 // CSS Text: https://drafts.csswg.org/css-text-3/
@@ -39,7 +36,7 @@ mixin CSSTextMixin {
   ///   foreground: The paint used to draw the text. If this is specified, color must be null.
   TextStyle getTextStyle(CSSStyleDeclaration style) {
     return TextStyle(
-      color: CSSText.getCurrentColor(style),
+      color: CSSText.getTextColor(style),
       decoration: CSSText.getTextDecorationLine(style),
       decorationColor: CSSText.getTextDecorationColor(style),
       decorationStyle: CSSText.getTextDecorationStyle(style),
@@ -60,6 +57,10 @@ mixin CSSTextMixin {
 }
 
 class CSSText {
+
+  static const double DEFAULT_LETTER_SPACING = 0.0;
+  static const double DEFAULT_WORD_SPACING = 0.0;
+
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
   }
@@ -138,12 +139,7 @@ class CSSText {
   }
 
   static WhiteSpace getWhiteSpace(CSSStyleDeclaration style) {
-    WhiteSpace whiteSpace = WhiteSpace.normal;
-    if (style == null) {
-      return whiteSpace;
-    }
-
-    switch(style['whiteSpace']) {
+    switch(style[WHITE_SPACE]) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -185,11 +181,11 @@ class CSSText {
   }
 
 
-  static Color getCurrentColor(CSSStyleDeclaration style) {
+  static Color getTextColor(CSSStyleDeclaration style) {
     if (style.contains(COLOR)) {
       return CSSColor.parseColor(style[COLOR]);
     } else {
-      return CSSColor.initial; // Default color to black.
+      return CSSColor.initial;
     }
   }
 
@@ -197,7 +193,7 @@ class CSSText {
     if (style.contains(TEXT_DECORATION_COLOR)) {
       return CSSColor.parseColor(style[TEXT_DECORATION_COLOR]);
     } else {
-      return getCurrentColor(style); // Default to currentColor (style.color)
+      return getTextColor(style); // Default is currentColor (style.color)
     }
   }
 
@@ -217,48 +213,48 @@ class CSSText {
     }
   }
 
-  static FontWeight getFontWeight(CSSStyleDeclaration style) {
-    if (style.contains(FONT_WEIGHT)) {
-      var fontWeight = style[FONT_WEIGHT];
-      switch (fontWeight) {
-        case 'lighter':
-          return FontWeight.w200;
-        case 'normal':
+  static FontWeight parseFontWeight(String fontWeight) {
+    switch (fontWeight) {
+      case 'lighter':
+        return FontWeight.w200;
+      case 'normal':
+        return FontWeight.w400;
+      case 'bold':
+        return FontWeight.w700;
+      case 'bolder':
+        return FontWeight.w900;
+      default:
+        int fontWeightValue = int.tryParse(fontWeight);
+        // See: https://drafts.csswg.org/css-fonts-4/#font-weight-numeric-values
+        // Only values greater than or equal to 1, and less than or equal to 1000, are valid,
+        // and all other values are invalid.
+        if (fontWeightValue == null || fontWeightValue > 1000 || fontWeightValue <= 0) {
           return FontWeight.w400;
-        case 'bold':
-          return FontWeight.w700;
-        case 'bolder':
+        } else if (fontWeightValue >= 900) {
           return FontWeight.w900;
-        default:
-          int fontWeightValue = int.tryParse(fontWeight);
-          // See: https://drafts.csswg.org/css-fonts-4/#font-weight-numeric-values
-          // Only values greater than or equal to 1, and less than or equal to 1000, are valid,
-          // and all other values are invalid.
-          if (fontWeightValue == null || fontWeightValue > 1000 || fontWeightValue <= 0) {
-            return FontWeight.w400;
-          } else if (fontWeightValue >= 900) {
-            return FontWeight.w900;
-          } else if (fontWeightValue >= 800) {
-            return FontWeight.w800;
-          } else if (fontWeightValue >= 700) {
-            return FontWeight.w700;
-          } else if (fontWeightValue >= 600) {
-            return FontWeight.w600;
-          } else if (fontWeightValue >= 500) {
-            return FontWeight.w500;
-          } else if (fontWeightValue >= 400) {
-            return FontWeight.w400;
-          } else if (fontWeightValue >= 300) {
-            return FontWeight.w300;
-          } else if (fontWeightValue >= 200) {
-            return FontWeight.w200;
-          } else {
-            return FontWeight.w100;
-          }
-          break;
-      }      
+        } else if (fontWeightValue >= 800) {
+          return FontWeight.w800;
+        } else if (fontWeightValue >= 700) {
+          return FontWeight.w700;
+        } else if (fontWeightValue >= 600) {
+          return FontWeight.w600;
+        } else if (fontWeightValue >= 500) {
+          return FontWeight.w500;
+        } else if (fontWeightValue >= 400) {
+          return FontWeight.w400;
+        } else if (fontWeightValue >= 300) {
+          return FontWeight.w300;
+        } else if (fontWeightValue >= 200) {
+          return FontWeight.w200;
+        } else {
+          return FontWeight.w100;
+        }
+        break;
     }
-    return FontWeight.w400;
+  }
+
+  static FontWeight getFontWeight(CSSStyleDeclaration style) {
+    return parseFontWeight(style[FONT_WEIGHT]);
   }
 
   static FontStyle getFontStyle(CSSStyleDeclaration style) {
@@ -392,7 +388,7 @@ class CSSText {
       if (shadows != null) {
         shadows.forEach((shadowDefinitions) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
-          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style[COLOR]);
+          Color color = CSSColor.parseColor(shadowDefinitions[0] ?? style.getCurrentColor());
           double offsetX = CSSLength.toDisplayPortValue(shadowDefinitions[1]) ?? 0;
           double offsetY = CSSLength.toDisplayPortValue(shadowDefinitions[2]) ?? 0;
           double blurRadius = CSSLength.toDisplayPortValue(shadowDefinitions[3]) ?? 0;

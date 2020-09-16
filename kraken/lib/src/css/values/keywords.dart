@@ -87,3 +87,9 @@ const String FILL = 'fill';
 
 const String SCROLL = 'scroll';
 const String LOCAL = 'local';
+
+const String TRANSPARENT = 'transparent';
+const String CURRENT_COLOR = 'currentcolor';
+
+const String ZERO = '0';
+const String EMPTY_STRING = '';

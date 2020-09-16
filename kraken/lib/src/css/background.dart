@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/painting.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
@@ -19,41 +18,6 @@ import 'package:kraken/css.dart';
 ///
 
 final RegExp _splitRegExp = RegExp(r'\s+');
-
-mixin CSSBackgroundMixin {
-
-  void updateBackground(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String value, int targetId) {
-    if (!CSSBackground.hasLocalBackgroundImage(style)) return;
-
-    if (style[BACKGROUND_IMAGE].isNotEmpty) {
-      DecorationImage decorationImage;
-      Gradient gradient;
-      List<CSSFunctionalNotation> methods = CSSFunction.parseFunction(style[BACKGROUND_IMAGE]);
-      // @FIXME: flutter just support one property
-      for (CSSFunctionalNotation method in methods) {
-        if (method.name == 'url') {
-          decorationImage = CSSBackground.getDecorationImage(style, method);
-        } else {
-          gradient = CSSBackground.getBackgroundGradient(method);
-        }
-
-        if (decorationImage != null || gradient != null) {
-          _updateRenderGradient(renderBoxModel, decorationImage, gradient, targetId);
-          return;
-        }
-      }
-    }
-  }
-
-  void _updateRenderGradient(RenderBoxModel renderBoxModel, DecorationImage decorationImage, Gradient gradient, int targetId) {
-    if (renderBoxModel != null) {
-      renderBoxModel.decoration = BoxDecoration(
-        image: decorationImage,
-        gradient: gradient
-      );
-    }
-  }
-}
 
 class CSSColorStop {
   Color color;
@@ -102,11 +66,11 @@ class CSSBackground {
   }
 
   static Color getBackgroundColor(CSSStyleDeclaration style) {
-    Color backgroundColor;
-    if (style[BACKGROUND_COLOR].isNotEmpty) {
-      backgroundColor = CSSColor.parseColor(style[BACKGROUND_COLOR]);
+    String backgroundColor = style[BACKGROUND_COLOR];
+    if (backgroundColor.isNotEmpty) {
+       return CSSColor.parseColor(backgroundColor);
     }
-    return backgroundColor;
+    return null;
   }
 
   static bool hasLocalBackgroundImage(CSSStyleDeclaration style) {
@@ -259,7 +223,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebLinearGradient(
+            gradient = CSSLinearGradient(
                 begin: begin,
                 end: end,
                 angle: linearAngle,
@@ -275,7 +239,7 @@ class CSSBackground {
           double atY = 0.5;
           double radius = 0.5;
 
-          if (method.args[0].contains(PERCENTAGE)) {
+          if (method.args[0].contains(CSSPercentage.PERCENTAGE)) {
             List<String> positionAndRadius = method.args[0].trim().split(' ');
             if (positionAndRadius.length >= 1) {
               if (CSSPercentage.isPercentage(positionAndRadius[0])) {
@@ -295,7 +259,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebRadialGradient(
+            gradient = CSSRadialGradient(
               center: FractionalOffset(atX, atY),
               radius: radius,
               colors: colors,
@@ -327,7 +291,7 @@ class CSSBackground {
           }
           _applyColorAndStops(start, method.args, colors, stops);
           if (colors.length >= 2) {
-            gradient = WebConicGradient(
+            gradient = CSSConicGradient(
                 center: FractionalOffset(atX, atY),
                 colors: colors,
                 stops: stops,

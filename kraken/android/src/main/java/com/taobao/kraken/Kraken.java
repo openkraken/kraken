@@ -12,39 +12,32 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class Kraken {
-  static String NAME_METHOD_SPLIT = "!!";
 
   private String url;
   private FlutterEngine flutterEngine;
-  // the KrakenWidget's name, use this property to control a KrakenWidget of flutter side.
-  private String name;
 
   private MethodChannel.MethodCallHandler handler;
-  private static Map<String, Kraken> sdkMap = new HashMap<>();
+  private static Map<FlutterEngine, Kraken> sdkMap = new HashMap<>();
 
-  public Kraken(String name, FlutterEngine flutterEngine) {
-    if (flutterEngine == null) {
+  public Kraken(FlutterEngine flutterEngine) {
+    if (flutterEngine != null) {
+      this.flutterEngine = flutterEngine;
+      sdkMap.put(flutterEngine, this);
+    } else {
       throw new IllegalArgumentException("flutter engine must not be null!");
     }
-
-    if (name == null) {
-      throw new IllegalArgumentException("name must not be null!");
-    }
-
-    this.name = name;
-    this.flutterEngine = flutterEngine;
-    sdkMap.put(name, this);
   }
 
-  public static Kraken get(String name) {
-    return sdkMap.get(name);
+  public static Kraken get(FlutterEngine engine) {
+    return sdkMap.get(engine);
   }
 
   public void registerMethodCallHandler(MethodChannel.MethodCallHandler handler) {
     this.handler = handler;
   }
   /**
-   * @param url  a absolute URL address which point to a javascript source file.
+   * page load form
+   * @param url
    */
   public void loadUrl(String url) {
     this.url = url;
@@ -66,9 +59,11 @@ public class Kraken {
       public void run() {
         if (flutterEngine != null) {
           PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-          KrakenSDKPlugin krakenSDKPlugin = (KrakenSDKPlugin) pluginRegistry.get(KrakenSDKPlugin.class);
-          if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
-            krakenSDKPlugin.channel.invokeMethod(name + NAME_METHOD_SPLIT + method, arguments);
+          if (pluginRegistry != null) {
+            KrakenSDKPlugin krakenSDKPlugin = (KrakenSDKPlugin) pluginRegistry.get(KrakenSDKPlugin.class);
+            if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
+              krakenSDKPlugin.channel.invokeMethod(method, arguments);
+            }
           }
         }
       }
@@ -76,6 +71,19 @@ public class Kraken {
   }
 
   public void reload() {
-    invokeMethod("reload", null);
+    if (flutterEngine != null) {
+      PluginRegistry pluginRegistry = flutterEngine.getPlugins();
+      if (pluginRegistry != null) {
+        KrakenSDKPlugin krakenSDKPlugin = (KrakenSDKPlugin) pluginRegistry.get(KrakenSDKPlugin.class);
+        if (krakenSDKPlugin != null) {
+          krakenSDKPlugin.reload();
+        }
+      }
+    }
+  }
+
+  public void destory() {
+    sdkMap.remove(flutterEngine);
+    flutterEngine = null;
   }
 }

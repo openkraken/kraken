@@ -376,7 +376,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   RenderBoxModel _getChildRenderBoxModel(RenderBoxModel child) {
     Element childEl = elementManager.getEventTargetByTargetId<Element>(child.targetId);
-    RenderBoxModel renderBoxModel = childEl.getRenderBoxModel();
+    RenderBoxModel renderBoxModel = childEl.renderBoxModel;
     return renderBoxModel;
   }
 
@@ -700,8 +700,8 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   void _layoutChildren(RenderPositionHolder placeholderChild) {
-    final double contentWidth = getContentWidth();
-    final double contentHeight = getContentHeight();
+    final double contentWidth = RenderBoxModel.getContentWidth(this);
+    final double contentHeight = RenderBoxModel.getContentHeight(this);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
@@ -755,7 +755,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (contentWidth != null) {
       flexLineLimit = contentWidth;
     } else {
-      flexLineLimit = CSSSizing.getElementComputedMaxWidth(targetId, elementManager);
+      flexLineLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
     }
 
     double maxSizeAboveBaseline = 0;
@@ -785,7 +785,20 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType sizeType = _getChildHeightSizeType(child);
-      if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
+      
+      if (child is RenderPositionHolder) {
+        RenderBoxModel realDisplayedBox = child.realDisplayedBox;
+        // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
+        Size realDisplayedBoxSize = realDisplayedBox.getBoxSize(realDisplayedBox.contentSize);
+        double realDisplayedBoxWidth = realDisplayedBoxSize.width;
+        double realDisplayedBoxHeight = realDisplayedBoxSize.height;
+        innerConstraints = BoxConstraints(
+          minWidth: realDisplayedBoxWidth,
+          maxWidth: realDisplayedBoxWidth,
+          minHeight: realDisplayedBoxHeight,
+          maxHeight: realDisplayedBoxHeight,
+        );
+      } else if (CSSFlex.isHorizontalFlexDirection(_flexDirection)) {
         double maxCrossAxisSize;
         // Calculate max height constraints
         if (sizeType == BoxSizeType.specified) {

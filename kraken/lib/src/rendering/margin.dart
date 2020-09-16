@@ -23,9 +23,9 @@ mixin RenderMarginMixin on RenderBox {
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
   /// must not be null.
-  EdgeInsetsGeometry get margin => _margin;
-  EdgeInsetsGeometry _margin;
-  set margin(EdgeInsetsGeometry value) {
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
     if (value == null) return;
     assert(value.isNonNegative);
     if (_margin == value) return;
