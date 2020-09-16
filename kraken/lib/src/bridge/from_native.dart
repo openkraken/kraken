@@ -115,7 +115,7 @@ String invokeModule(
         String json = jsonEncode(['', response.statusCode, response.data]);
         callback(callbackContext, contextId, Utf8.toUtf8(json));
       }).catchError((e, stack) {
-        String errorMessage = e.message;
+        String errorMessage = e.toString();
         String json;
         if (e is DioError && e.type == DioErrorType.RESPONSE) {
           json = jsonEncode([errorMessage, e.response.statusCode, EMPTY_STRING]);

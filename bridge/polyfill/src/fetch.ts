@@ -26,7 +26,7 @@ function consumed(body: Body) {
 }
 
 export class Headers implements Headers {
-  private map = {};
+  public map = {};
 
   constructor(headers?: HeadersInit) {
     if (headers instanceof Headers) {
@@ -262,8 +262,15 @@ export function fetch(input: Request | string, init?: RequestInit) {
   return new Promise((resolve, reject) => {
     let url = typeof input === 'string' ? input : input.url;
     init = init || {method: 'GET'};
+    let headers = init.headers || new Headers();
 
-    krakenInvokeModule(JSON.stringify(['fetch', [url, init]]), function(json) {
+    if (!(headers instanceof Headers)) {
+      headers = new Headers(headers);
+    }
+    krakenInvokeModule(JSON.stringify(['fetch', [url, {
+      ...init,
+      headers: (headers as Headers).map
+    }]]), function(json) {
       var [err, statusCode, body] = JSON.parse(json);
       // network error didn't have statusCode
       if (err && !statusCode) {
