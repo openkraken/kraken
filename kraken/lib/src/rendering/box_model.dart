@@ -511,9 +511,9 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    if (width == null && intrinsicRatio != null) {
-      if (heightSizeType == BoxSizeType.specified) {
-        double height = getContentHeight(renderBoxModel);
+    if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
+      double height = getContentHeight(renderBoxModel);
+      if (height != null) {
         width = height / intrinsicRatio;
       }
     }
@@ -613,7 +613,9 @@ class RenderBoxModel extends RenderBox with
 
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
       double width = getContentWidth(renderBoxModel);
-      height = width * intrinsicRatio;
+      if (width != null) {
+        height = width * intrinsicRatio;
+      }
     }
 
     CSSStyleDeclaration style = renderBoxModel.style;
@@ -745,6 +747,22 @@ class RenderBoxModel extends RenderBox with
       } else {
         minHeight = 0.0;
         maxHeight = boxConstraints.maxHeight;
+      }
+      
+      // max and min size of intrinsc element should respect intrinsc ratio of each other
+      if (intrinsicRatio != null) {
+        if (this.minWidth != null && this.minHeight == null) {
+          minHeight = minWidth * intrinsicRatio;
+        }
+        if (this.maxWidth != null && this.maxHeight == null) {
+          maxHeight = maxWidth * intrinsicRatio;
+        }
+        if (this.minWidth == null && this.minHeight != null) {
+          minWidth = minHeight / intrinsicRatio;
+        }
+        if (this.maxWidth == null && this.maxHeight != null) {
+          maxWidth = maxHeight / intrinsicRatio;
+        }
       }
 
       _contentConstraints = BoxConstraints(

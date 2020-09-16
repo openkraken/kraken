@@ -70,7 +70,49 @@ class RenderIntrinsic extends RenderBoxModel
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
       setMaxScrollableSize(child.size.width, child.size.height);
-      size = getBoxSize(child.size);
+
+      CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+      bool isInlineLevel = realDisplay == CSSDisplay.inlineBlock || realDisplay == CSSDisplay.inlineFlex;
+
+      double constraintWidth = child.size.width;
+      double constraintHeight = child.size.height;
+
+      // Constrain to min-width or max-width if width not exists
+      if (isInlineLevel && maxWidth != null && width == null) {
+        constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
+
+        // max-height should respect intrinsic ratio with max-width
+        if (intrinsicRatio != null && maxHeight == null) {
+          constraintHeight = constraintWidth * intrinsicRatio;
+        }
+      } else if (isInlineLevel && minWidth != null && width == null) {
+        constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
+
+        // max-height should respect intrinsic ratio with max-width
+        if (intrinsicRatio != null && minHeight == null) {
+          constraintHeight = constraintWidth * intrinsicRatio;
+        }
+      }
+
+      // Constrain to min-height or max-height if width not exists
+      if (isInlineLevel && maxHeight != null && height == null) {
+        constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
+
+        // max-width should respect intrinsic ratio with max-height
+        if (intrinsicRatio != null && maxWidth == null) {
+          constraintWidth = constraintHeight / intrinsicRatio;
+        }
+      } else if (isInlineLevel && minHeight != null && height == null) {
+        constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
+
+        // max-width should respect intrinsic ratio with max-height
+        if (intrinsicRatio != null && minWidth == null) {
+          constraintWidth = constraintHeight / intrinsicRatio;
+        }
+      }
+
+      Size contentSize = Size(constraintWidth, constraintHeight);
+      size = getBoxSize(contentSize);
       didLayout();
     } else {
       super.performResize();

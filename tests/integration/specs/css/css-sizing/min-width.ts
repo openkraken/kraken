@@ -1,9 +1,9 @@
-describe('max-width', () => {
+describe('min-width', () => {
   it("should not work with display inline element", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minWidth: '300px',
         display: 'inline',
       }
     }, [
@@ -14,11 +14,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-block when child length is larger than max-width", async () => {
+  it("should work with display inline-block when child length is larger than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minWidth: '200px',
         display: 'inline-block',
       }
     }, [
@@ -29,11 +29,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-block when child length is smaller than max-width", async () => {
+  it("should work with display inline-block when child length is smaller than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minWidth: '300px',
         display: 'inline-block',
       }
     }, [
@@ -44,11 +44,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is larger than max-width", async () => {
+  it("should work with display inline-flex when child length is larger than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minWidth: '200px',
         display: 'inline-flex',
       }
     }, [
@@ -59,12 +59,12 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is smaller than max-width", async () => {
+  it("should work with display inline-flex when child length is smaller than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
-        display: 'inline-block',
+        minWidth: '300px',
+        display: 'inline-flex',
       }
     }, [
       createText('This text should not be wrapped')
@@ -74,26 +74,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display block when child length is larger than max-width", async () => {
+  it("should work with display block when child length is larger than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
-        display: 'block',
-      }
-    }, [
-      createText('This text should be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it("should work with display block when child length is smaller than max-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        maxWidth: '300px',
+        minWidth: '200px',
         display: 'block',
       }
     }, [
@@ -104,27 +89,42 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-
-  it("should work with display flex when child length is larger than max-width", async () => {
+  it("should work with display block when child length is smaller than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minWidth: '300px',
+        display: 'block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+
+  it("should work with display flex when child length is larger than min-width", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minWidth: '200px',
         display: 'flex',
       }
     }, [
-      createText('This text should be wrapped')
+      createText('This text should not be wrapped')
     ]);
     BODY.appendChild(containingBlock);
 
     await matchViewportSnapshot();
   });
 
-  it("should work with display flex when child length is smaller than max-width", async () => {
+  it("should work with display flex when child length is smaller than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minWidth: '300px',
         display: 'flex',
       }
     }, [
@@ -152,7 +152,7 @@ describe('max-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              maxWidth: '50px',
+              minWidth: '50px',
               'box-sizing': 'border-box',
             },
           },
@@ -181,7 +181,7 @@ describe('max-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              maxWidth: '200px',
+              minWidth: '200px',
               'box-sizing': 'border-box',
             },
           },
@@ -192,5 +192,4 @@ describe('max-width', () => {
 
     await matchViewportSnapshot(0.1);
   });
-
 });
