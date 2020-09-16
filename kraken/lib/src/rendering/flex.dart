@@ -716,21 +716,14 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     assert(contentConstraints != null);
 
-    double maxWidth = 0;
-    if (contentWidth != null) {
-      maxWidth = contentWidth;
-    }
-
-    double maxHeight = 0;
-    if (contentHeight != null) {
-      maxHeight = contentHeight;
-    }
+    double widthLimit = contentWidth != null ? contentWidth : 0;
+    double heightLimit = contentHeight != null ? contentHeight : 0;
 
     // maxMainSize still can be updated by content size suggestion and transferred size suggestion
     // https://www.w3.org/TR/css-flexbox-1/#specified-size-suggestion
     // https://www.w3.org/TR/css-flexbox-1/#content-size-suggestion
-    double maxMainSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxWidth : maxHeight;
-    double maxCrossSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxHeight : maxWidth;
+    double maxMainSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? widthLimit : heightLimit;
+    double maxCrossSize = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? heightLimit : widthLimit;
     final bool canFlex = maxMainSize < double.infinity;
     final BoxSizeType mainSizeType = maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
@@ -785,7 +778,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType sizeType = _getChildHeightSizeType(child);
-      
+
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
         // Flutter only allow access size of direct children, so cannot use realDisplayedBox.size
@@ -1325,7 +1318,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
-    
+
     // Constrain to min-width or max-width if width not exists
     double childrenWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? maxAllocatedMainSize : crossSize;
     if (isInlineLevel && maxWidth != null && width == null) {
@@ -1338,7 +1331,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Get layout height from children's height by flex axis
     double constraintHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : idealMainSize;
-    
+
     // Constrain to min-height or max-height if width not exists
     double childrenHeight = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? crossSize : maxAllocatedMainSize;
     if (isInlineLevel && maxHeight != null && height == null) {

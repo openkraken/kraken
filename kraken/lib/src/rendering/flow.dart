@@ -718,7 +718,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    
+
     // Constrain to min-width or max-width if width not exists
     if (isInlineLevel && maxWidth != null && width == null) {
       constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
