@@ -14,6 +14,62 @@ describe('min-width', () => {
     await matchViewportSnapshot();
   });
 
+  it("should work with display inline-block when it has no children and width not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minWidth: '300px',
+        height: '100px',
+        display: 'inline-block',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display block when it has no children and width not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minWidth: '300px',
+        height: '100px',
+        display: 'block',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when it has no children and width not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minWidth: '300px',
+        height: '100px',
+        display: 'inline-flex',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display flex when it has no children and width not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minWidth: '300px',
+        height: '100px',
+        display: 'flex',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
   it("should work with display inline-block when child length is larger than min-width", async () => {
     let containingBlock = createElement('div', {
       style: {

@@ -565,12 +565,39 @@ class RenderFlowLayout extends RenderLayoutBox {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+
     // If no child exists, stop layout.
     if (childCount == 0) {
-      setMaxScrollableSize(contentWidth ?? 0.0, contentHeight ?? 0.0);
+      double constraintWidth = contentWidth ?? 0;
+      double constraintHeight = contentHeight ?? 0;
+
+      bool isInline = realDisplay == CSSDisplay.inline;
+      bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+
+      if (!isInline) {
+        // Base width when width no exists, inline-block has width of 0
+        double baseWidth = isInlineBlock ? 0 : constraintWidth;
+        if (maxWidth != null && width == null) {
+          constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
+        } else if (minWidth != null && width == null) {
+          constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+        }
+
+        // Base height always equals to 0 no matter
+        double baseHeight = 0;
+        if (maxHeight != null && height == null) {
+          constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
+        } else if (minHeight != null && height == null) {
+          constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+        }
+      }
+
+      setMaxScrollableSize(constraintWidth, constraintHeight);
+
       size = getBoxSize(Size(
-        contentWidth ?? 0,
-        contentHeight ?? 0,
+        constraintWidth,
+        constraintHeight,
       ));
       return;
     }
@@ -713,8 +740,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-
     // Default to children's width
     double constraintWidth = mainAxisExtent;
     bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
@@ -741,7 +766,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
-    
+
     switch (direction) {
       case Axis.horizontal:
         Size contentSize = Size(constraintWidth, constraintHeight);

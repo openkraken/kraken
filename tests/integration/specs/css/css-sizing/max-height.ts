@@ -14,6 +14,62 @@ describe('max-height', () => {
     await matchViewportSnapshot();
   });
 
+  it("should work with display inline-block when it has no children and height not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        width: '300px',
+        maxHeight: '100px',
+        display: 'inline-block',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display block when it has no children and height not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        width: '300px',
+        maxHeight: '100px',
+        display: 'block',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when it has no children and height not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        width: '300px',
+        maxHeight: '100px',
+        display: 'inline-flex',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display flex when it has no children and height not exist", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        width: '300px',
+        maxHeight: '100px',
+        display: 'flex',
+      }
+    });
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
   it("should work with display inline-block when child height is larger than max-height", async () => {
     let containingBlock = createElement('div', {
       style: {
