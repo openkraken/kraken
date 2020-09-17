@@ -385,7 +385,7 @@ class KrakenController {
     String bundleURL =
         _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
 
-    if (bundleURL == null && methodChannel == KrakenNativeChannel) {
+    if (bundleURL == null && methodChannel is KrakenNativeChannel) {
       bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
     }
 
