@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/element.dart';
-import 'dart:io';
 
 import 'from_native.dart';
 import 'platform.dart';
