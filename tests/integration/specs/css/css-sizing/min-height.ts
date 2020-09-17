@@ -1,9 +1,9 @@
-describe('max-width', () => {
+describe('min-height', () => {
   it("should not work with display inline element", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minHeight: '50px',
         display: 'inline',
       }
     }, [
@@ -14,12 +14,12 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-block when it has no children and width not exist", async () => {
+  it("should work with display inline-block when it has no children and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
-        height: '100px',
+        width: '300px',
+        minHeight: '100px',
         display: 'inline-block',
       }
     });
@@ -28,12 +28,12 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display block when it has no children and width not exist", async () => {
+  it("should work with display block when it has no children and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
-        height: '100px',
+        width: '300px',
+        minHeight: '100px',
         display: 'block',
       }
     });
@@ -42,12 +42,12 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when it has no children and width not exist", async () => {
+  it("should work with display inline-flex when it has no children and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
-        height: '100px',
+        width: '300px',
+        minHeight: '100px',
         display: 'inline-flex',
       }
     });
@@ -56,12 +56,12 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display flex when it has no children and width not exist", async () => {
+  it("should work with display flex when it has no children and height not exist", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
-        height: '100px',
+        width: '300px',
+        minHeight: '100px',
         display: 'flex',
       }
     });
@@ -70,26 +70,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-block when child length is larger than max-width", async () => {
+  it("should work with display inline-block when child height is larger than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
-        display: 'inline-block',
-      }
-    }, [
-      createText('This text should be wrapped')
-    ]);
-    BODY.appendChild(containingBlock);
-
-    await matchViewportSnapshot();
-  });
-
-  it("should work with display inline-block when child length is smaller than max-width", async () => {
-    let containingBlock = createElement('div', {
-      style: {
-        border: '2px solid #000',
-        maxWidth: '300px',
+        minHeight: '10px',
         display: 'inline-block',
       }
     }, [
@@ -100,26 +85,41 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is larger than max-width", async () => {
+  it("should work with display inline-block when child height is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minHeight: '50px',
+        display: 'inline-block',
+      }
+    }, [
+      createText('This text should not be wrapped')
+    ]);
+    BODY.appendChild(containingBlock);
+
+    await matchViewportSnapshot();
+  });
+
+  it("should work with display inline-flex when child height is larger than min-height", async () => {
+    let containingBlock = createElement('div', {
+      style: {
+        border: '2px solid #000',
+        minHeight: '10px',
         display: 'inline-flex',
       }
     }, [
-      createText('This text should be wrapped')
+      createText('This text should not be wrapped')
     ]);
     BODY.appendChild(containingBlock);
 
     await matchViewportSnapshot();
   });
 
-  it("should work with display inline-flex when child length is smaller than max-width", async () => {
+  it("should work with display inline-flex when child height is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minHeight: '50px',
         display: 'inline-block',
       }
     }, [
@@ -130,11 +130,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display block when child length is larger than max-width", async () => {
+  it("should work with display block when child height is larger than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minHeight: '10px',
         display: 'block',
       }
     }, [
@@ -145,11 +145,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display block when child length is smaller than max-width", async () => {
+  it("should work with display block when child length is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minHeight: '50px',
         display: 'block',
       }
     }, [
@@ -161,11 +161,11 @@ describe('max-width', () => {
   });
 
 
-  it("should work with display flex when child length is larger than max-width", async () => {
+  it("should work with display flex when child height is larger than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '200px',
+        minHeight: '10px',
         display: 'flex',
       }
     }, [
@@ -176,11 +176,11 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it("should work with display flex when child length is smaller than max-width", async () => {
+  it("should work with display flex when child height is smaller than min-height", async () => {
     let containingBlock = createElement('div', {
       style: {
         border: '2px solid #000',
-        maxWidth: '300px',
+        minHeight: '50px',
         display: 'flex',
       }
     }, [
@@ -191,7 +191,7 @@ describe('max-width', () => {
     await matchViewportSnapshot();
   });
 
-  it('should work with replaced element when element width is smaller than intrinsic width', async () => {
+  it('should work with replaced element when element height is smaller than intrinsic height', async () => {
     let flexbox;
     flexbox = createElement(
       'div',
@@ -208,7 +208,7 @@ describe('max-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              maxWidth: '50px',
+              minHeight: '50px',
               'box-sizing': 'border-box',
             },
           },
@@ -220,7 +220,7 @@ describe('max-width', () => {
     await matchViewportSnapshot(0.1);
   });
 
-  it('should work with replaced element when element width is larger than intrinsic width', async () => {
+  it('should work with replaced element when element height is larger than intrinsic height', async () => {
     let flexbox;
     flexbox = createElement(
       'div',
@@ -237,7 +237,7 @@ describe('max-width', () => {
             src: 'assets/100x100-green.png',
             style: {
               'background-color': 'green',
-              maxWidth: '200px',
+              minHeight: '200px',
               'box-sizing': 'border-box',
             },
           },

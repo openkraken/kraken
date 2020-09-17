@@ -511,48 +511,41 @@ class RenderBoxModel extends RenderBox with
         break;
     }
 
-    // Max width does not work with following conditions on non replaced elements
-    // 1. flex item
-    // 2. position absolute or fixed
-    // 3. display inline
-    bool isIntrisicBox = renderBoxModel is RenderIntrinsic;
-    CSSStyleDeclaration style = renderBoxModel.style;
-    bool isPositioned = style[POSITION] == ABSOLUTE || style[POSITION] == FIXED;
-    bool isParentFlexLayout = renderBoxModel.parent is RenderFlexLayout;
-    bool isInline = style[DISPLAY] == INLINE;
-    double contentMaxWidth;
-    if (isIntrisicBox || (!isInline && !isPositioned && !isParentFlexLayout)) {
-      contentMaxWidth = maxWidth;
-    }
-
-    if (contentMaxWidth != null) {
-      if (width == null) {
-        if (intrinsicWidth == null || intrinsicWidth > contentMaxWidth) {
-          width = contentMaxWidth;
-        } else {
-          width = intrinsicWidth;
-        }
-      } else if (width > contentMaxWidth) {
-        width = contentMaxWidth;
-      }
-    }
-
-    if (minWidth != null && minWidth > 0.0) {
-      if (width == null) {
-        if (intrinsicWidth == null || intrinsicWidth < minWidth) {
-          width = minWidth;
-        } else {
-          width = intrinsicWidth;
-        }
-      } else if (width < minWidth) {
-        width = minWidth;
-      }
-    }
-
     if (width == null && intrinsicRatio != null && heightSizeType == BoxSizeType.specified) {
       double height = getContentHeight(renderBoxModel);
       if (height != null) {
-        width = height * intrinsicRatio;
+        width = height / intrinsicRatio;
+      }
+    }
+
+    CSSStyleDeclaration style = renderBoxModel.style;
+    bool isInline = style[DISPLAY] == INLINE;
+
+    // min-width and max-width doesn't work on inline element
+    if (!isInline) {
+      if (minWidth != null) {
+        if (width == null) {
+          // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
+          if (intrinsicWidth != null && intrinsicWidth > minWidth) {
+            width = intrinsicWidth;
+          }
+        } else if (width < minWidth) {
+          width = minWidth;
+        }
+      }
+
+      if (maxWidth != null) {
+        if (width == null) {
+          if (intrinsicWidth == null || intrinsicWidth > maxWidth) {
+            // When intrinsicWidth is null, use max-width as max constraints,
+            // real width should be compared with its children width when performLayout
+            width = maxWidth;
+          } else {
+            width = intrinsicWidth;
+          }
+        } else if (width > maxWidth) {
+          width = maxWidth;
+        }
       }
     }
 
@@ -618,34 +611,41 @@ class RenderBoxModel extends RenderBox with
       }
     }
 
-    if (maxHeight != null) {
-      if (height == null) {
-        if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
-          height = maxHeight;
-        } else {
-          height = intrinsicHeight;
-        }
-      } else if (height > maxHeight) {
-        height = maxHeight;
-      }
-    }
-
-    if (minHeight != null && minHeight > 0.0) {
-      if (height == null) {
-        if (intrinsicHeight == null || intrinsicHeight < minHeight) {
-          height = minHeight;
-        } else {
-          height = intrinsicHeight;
-        }
-      } else if (height < minHeight) {
-        height = minHeight;
-      }
-    }
-
     if (height == null && intrinsicRatio != null && widthSizeType == BoxSizeType.specified) {
       double width = getContentWidth(renderBoxModel);
       if (width != null) {
         height = width * intrinsicRatio;
+      }
+    }
+
+    CSSStyleDeclaration style = renderBoxModel.style;
+    bool isInline = style[DISPLAY] == INLINE;
+
+    // max-height and min-height doesn't work on inline element
+    if (!isInline) {
+      if (minHeight != null) {
+        if (height == null) {
+          // When intrinsicWidth is null and only min-width exists, max constraints should be infinity
+          if (intrinsicHeight != null && intrinsicHeight > minHeight) {
+            height = intrinsicHeight;
+          }
+        } else if (height < minHeight) {
+          height = minHeight;
+        }
+      }
+
+      if (maxHeight != null) {
+        if (height == null) {
+          // When intrinsicHeight is null, use max-height as max constraints,
+          // real height should be compared with its children height when performLayout
+          if (intrinsicHeight == null || intrinsicHeight > maxHeight) {
+            height = maxHeight;
+          } else {
+            height = intrinsicHeight;
+          }
+        } else if (height > maxHeight) {
+          height = maxHeight;
+        }
       }
 
     }
@@ -747,6 +747,22 @@ class RenderBoxModel extends RenderBox with
       } else {
         minHeight = 0.0;
         maxHeight = boxConstraints.maxHeight;
+      }
+      
+      // max and min size of intrinsc element should respect intrinsc ratio of each other
+      if (intrinsicRatio != null) {
+        if (this.minWidth != null && this.minHeight == null) {
+          minHeight = minWidth * intrinsicRatio;
+        }
+        if (this.maxWidth != null && this.maxHeight == null) {
+          maxHeight = maxWidth * intrinsicRatio;
+        }
+        if (this.minWidth == null && this.minHeight != null) {
+          minWidth = minHeight / intrinsicRatio;
+        }
+        if (this.maxWidth == null && this.maxHeight != null) {
+          maxWidth = maxHeight / intrinsicRatio;
+        }
       }
 
       _contentConstraints = BoxConstraints(

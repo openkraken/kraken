@@ -39,20 +39,66 @@ mixin CSSSizingMixin {
         renderBoxModel.height = value;
         break;
       case MIN_HEIGHT:
-        renderBoxModel.minHeight = value;
+        renderBoxModel.minHeight = getMinHeight(value);
+        // max-height should not exceed min-height
+        double maxHeight = renderBoxModel.maxHeight;
+        if (maxHeight != null) {
+          renderBoxModel.maxHeight = getMaxHeight(maxHeight, value);
+        }
         break;
       case MAX_HEIGHT:
-        renderBoxModel.maxHeight = value;
+        renderBoxModel.maxHeight = getMaxHeight(value, renderBoxModel.minHeight);
         break;
       case MIN_WIDTH:
-        renderBoxModel.minWidth = value;
+        renderBoxModel.minWidth = getMinWidth(value);
+        // max-width should not exceed min-midth
+        double maxWidth = renderBoxModel.maxWidth;
+        if (maxWidth != null) {
+          renderBoxModel.maxWidth = getMaxWidth(maxWidth, value);
+        }
         break;
       case MAX_WIDTH:
-        renderBoxModel.maxWidth = value;
+        renderBoxModel.maxWidth = getMaxWidth(value, renderBoxModel.minWidth);
         break;
     }
   }
 
+  double getMinWidth(double minWidth) {
+    if (minWidth < 0)  {
+      return null;
+    }
+    return minWidth;
+  }
+  
+  double getMaxWidth(double maxWidth, double minWidth) {
+    if (maxWidth < 0) {
+      return null; 
+    }
+    // max-width is invalid if max-width is smaller than min-width
+    if (minWidth != null && minWidth > maxWidth) {
+      return null;
+    }
+    return maxWidth;
+  }
+
+  double getMinHeight(double minHeight) {
+    if (minHeight < 0)  {
+      return null;
+    }
+    return minHeight;
+  }
+
+  double getMaxHeight(double maxHeight, double minHeight) {
+    if (maxHeight < 0) {
+      return null;
+    }
+    // max-height is invalid if max-height is smaller than min-height
+    if (minHeight != null && minHeight > maxHeight) {
+      return null;
+    }
+    return maxHeight;
+  }
+  
   static EdgeInsets _getMargin(CSSStyleDeclaration style) {
     double marginLeft;
     double marginTop;

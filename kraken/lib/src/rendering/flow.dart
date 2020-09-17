@@ -565,12 +565,39 @@ class RenderFlowLayout extends RenderLayoutBox {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+
     // If no child exists, stop layout.
     if (childCount == 0) {
-      setMaxScrollableSize(contentWidth ?? 0.0, contentHeight ?? 0.0);
+      double constraintWidth = contentWidth ?? 0;
+      double constraintHeight = contentHeight ?? 0;
+
+      bool isInline = realDisplay == CSSDisplay.inline;
+      bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+
+      if (!isInline) {
+        // Base width when width no exists, inline-block has width of 0
+        double baseWidth = isInlineBlock ? 0 : constraintWidth;
+        if (maxWidth != null && width == null) {
+          constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
+        } else if (minWidth != null && width == null) {
+          constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+        }
+
+        // Base height always equals to 0 no matter
+        double baseHeight = 0;
+        if (maxHeight != null && height == null) {
+          constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
+        } else if (minHeight != null && height == null) {
+          constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+        }
+      }
+
+      setMaxScrollableSize(constraintWidth, constraintHeight);
+
       size = getBoxSize(Size(
-        contentWidth ?? 0,
-        contentHeight ?? 0,
+        constraintWidth,
+        constraintHeight,
       ));
       return;
     }
@@ -715,17 +742,30 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Default to children's width
     double constraintWidth = mainAxisExtent;
-    // Get max of element's width and children's width if element's width exists
-    if (contentWidth != null) {
+    bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
+
+    // Constrain to min-width or max-width if width not exists
+    if (isInlineBlock && maxWidth != null && width == null) {
+      constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
+    } else if (isInlineBlock && minWidth != null && width == null) {
+      constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
+    } else if (contentWidth != null) {
       constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
     double constraintHeight = crossAxisExtent;
-    // Get max of element's height and children's height if element's height exists
-    if (contentHeight != null) {
+    bool isNotInline = realDisplay != CSSDisplay.inline;
+
+    // Constrain to min-height or max-height if width not exists
+    if (isNotInline && maxHeight != null && height == null) {
+      constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
+    } else if (isNotInline && minHeight != null && height == null) {
+      constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
+    } else if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
+
 
     switch (direction) {
       case Axis.horizontal:
