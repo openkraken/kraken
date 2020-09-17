@@ -5,11 +5,6 @@ import 'package:kraken/kraken.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
 
-enum IntegrationMode {
-  dart,
-  native
-}
-
 Future<dynamic> invokeMethodFromJavaScript(KrakenController controller, String method, List args) {
   return controller.methodChannel._invokeMethodFromJavaScript(method, args);
 }
@@ -19,6 +14,16 @@ void onJSMethodCall(KrakenController controller, MethodCallCallback value) {
 }
 
 class KrakenMethodChannel {
+  MethodCallCallback _onJSMethodCallCallback;
+  set _onJSMethodCall(MethodCallCallback value) {
+    assert(value != null);
+    _onJSMethodCallCallback = value;
+  }
+
+  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {}
+}
+
+class KrakenJavaScriptChannel extends KrakenMethodChannel {
   Future<dynamic> invokeMethod(String method, dynamic arguments) async {
     if (_onJSMethodCallCallback == null) {
       return null;
@@ -33,19 +38,10 @@ class KrakenMethodChannel {
     _methodCallCallback = value;
   }
 
-  MethodCallCallback _onJSMethodCallCallback;
-  set _onJSMethodCall(MethodCallCallback value) {
-    assert(value != null);
-    _onJSMethodCallCallback = value;
-  }
-
   Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) {
     if (_methodCallCallback == null) return Future.value(null);
     return _methodCallCallback(method, arguments);
   }
-}
-
-class KrakenJavaScriptChannel extends KrakenMethodChannel {
 }
 
 class KrakenNativeChannel extends KrakenMethodChannel {
@@ -65,8 +61,12 @@ class KrakenNativeChannel extends KrakenMethodChannel {
       return Future<dynamic>.value(null);
     });
 
-  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
-    return await _nativeChannel.invokeMethod(method, arguments);
+  Future<dynamic> _invokeMethodFromJavaScript(String method, List arguments) async {
+    Map<String, dynamic> argsWrap = {
+      'method': method,
+      'args': arguments,
+    };
+    return _nativeChannel.invokeMethod('invokeMethod', argsWrap);
   }
 
   Future<String> getUrl() async {
