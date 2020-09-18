@@ -1062,6 +1062,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
+  Offset getChildScrollOffset(RenderObject child, Offset offset) {
+    final RenderLayoutParentData childParentData = child.parentData;
+    // Fixed elements always paint original offset
+    Offset scrollOffset = childParentData.position == CSSPositionType.fixed ?
+      childParentData.offset : childParentData.offset + offset;
+    return scrollOffset;
+  }
+  
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
@@ -1072,8 +1080,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         for (int i = 0; i < sortedChildren.length; i ++) {
           RenderObject child = sortedChildren[i];
           if (child is! RenderPositionHolder) {
-            final RenderLayoutParentData childParentData = child.parentData;
-            context.paintChild(child, childParentData.offset + offset);
+            context.paintChild(child, getChildScrollOffset(child, offset));
           }
         }
       } else {
@@ -1081,7 +1088,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         while (child != null) {
           final RenderLayoutParentData childParentData = child.parentData;
           if (child is! RenderPositionHolder) {
-            context.paintChild(child, childParentData.offset + offset);
+            context.paintChild(child, getChildScrollOffset(child, offset));
           }
           child = childParentData.nextSibling;
         }
