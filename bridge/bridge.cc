@@ -79,6 +79,10 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     return;
   }
 
+  if (!obj->_callback->isObject()) {
+    return;
+  }
+
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, String::createFromUtf8(_context, std::string(json)));
 }
@@ -182,6 +186,10 @@ void handleTransientCallback(void *callbackContext, int32_t contextId, const cha
   if (obj->_callback == nullptr) {
     JSError error(obj->_context, "Failed to execute '__kraken_request_batch_update__': callback is null.");
     obj->_context.reportError(error);
+    return;
+  }
+
+  if (!obj->_callback->isObject()) {
     return;
   }
 
