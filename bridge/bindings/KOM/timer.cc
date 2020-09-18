@@ -30,6 +30,10 @@ void handlePersistentCallback(void *callbackContext, int32_t contextId, const ch
     return;
   }
 
+  if (!obj->_callback->isObject()) {
+    return;
+  }
+
   if (errmsg != nullptr) {
     JSError error(_context, errmsg);
     obj->_context.reportError(error);
@@ -52,6 +56,10 @@ void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, doubl
     // so we handle it instead of throw
     JSError error(_context, "Failed to trigger callback: requestAnimationFrame callback is null.");
     obj->_context.reportError(error);
+    return;
+  }
+
+  if (!obj->_callback->isObject()) {
     return;
   }
 
