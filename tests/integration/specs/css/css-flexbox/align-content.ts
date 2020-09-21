@@ -2771,7 +2771,7 @@ describe('align-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('wrap-004', async () => {
+  it('wrap-004', async () => {
     let flex;
     flex = createElement(
       'div',
