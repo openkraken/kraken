@@ -78,15 +78,14 @@ execute_process(
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
 string(REPLACE \n "" APP_VER ${APP_VER}) # Remove last \n
-add_definitions(-DVERSION_APP="${APP_VER}") # Read from dartfm version
-add_definitions(-DPRODUCT="kraken")
+add_definitions(-DAPP_VERSION="${APP_VER}") # Read from dartfm version
 execute_process(
   COMMAND /usr/bin/git rev-parse --short HEAD
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_HEAD
 )
 string(REPLACE \n "" GIT_HEAD ${GIT_HEAD}) # Remove last \n
-add_definitions(-DPRODUCT_SUB="${GIT_HEAD}") # Read from git head sha1
+add_definitions(-DAPP_REV="${GIT_HEAD}") # Read from git head sha1
 
 if (${ENABLE_TEST})
   add_compile_definitions(IS_TEST=true)

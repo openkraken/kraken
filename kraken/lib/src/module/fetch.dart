@@ -3,18 +3,31 @@
  * Author: Kraken Team.
  */
 
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:kraken/bridge.dart';
 
 Future<Response> fetch(String url, Map<String, dynamic> map) async {
   Future<Response> future;
+  String method = map['method'] ?? 'GET';
+
+  if (map['headers'] == null) {
+    map['headers'] = {HttpHeaders.userAgentHeader: getKrakenInfo().userAgent};
+  }
+
+  var headers = map['headers'];
+  if (headers[HttpHeaders.userAgentHeader] == null) {
+    headers[HttpHeaders.userAgentHeader] = getKrakenInfo().userAgent;
+  }
 
   BaseOptions options = BaseOptions(
-      headers: map['headers'],
-      method: map['method'],
+      headers: headers,
+      method: method,
       contentType: 'application/json',
       responseType: ResponseType.plain);
 
-  switch (map['method']) {
+  switch (method) {
     case 'GET':
       future = Dio(options).get(url);
       break;

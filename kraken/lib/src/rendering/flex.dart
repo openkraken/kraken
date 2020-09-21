@@ -703,14 +703,40 @@ class RenderFlexLayout extends RenderLayoutBox {
     final double contentWidth = RenderBoxModel.getContentWidth(this);
     final double contentHeight = RenderBoxModel.getContentHeight(this);
 
+    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
+
     // If no child exists, stop layout.
     if (childCount == 0) {
-      Size preferredSize = Size(
-        contentWidth ?? 0,
-        contentHeight ?? 0,
-      );
-      setMaxScrollableSize(contentWidth ?? 0.0, contentHeight ?? 0.0);
-      size = getBoxSize(preferredSize);
+      double constraintWidth = contentWidth ?? 0;
+      double constraintHeight = contentHeight ?? 0;
+
+      bool isInline = realDisplay == CSSDisplay.inline;
+      bool isInlineFlex = realDisplay == CSSDisplay.inlineFlex;
+
+      if (!isInline) {
+        // Base width when width no exists, inline-flex has width of 0
+        double baseWidth = isInlineFlex ? 0 : constraintWidth;
+        if (maxWidth != null && width == null) {
+          constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
+        } else if (minWidth != null && width == null) {
+          constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+        }
+
+        // Base height always equals to 0 no matter
+        double baseHeight = 0;
+        if (maxHeight != null && height == null) {
+          constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
+        } else if (minHeight != null && height == null) {
+          constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
+        }
+      }
+
+      setMaxScrollableSize(constraintWidth, constraintHeight);
+
+      size = getBoxSize(Size(
+        constraintWidth,
+        constraintHeight,
+      ));
       return;
     }
 
@@ -1313,8 +1339,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     double actualSize;
 
-    CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
-
     // Get layout width from children's width by flex axis
     double constraintWidth = CSSFlex.isHorizontalFlexDirection(_flexDirection) ? idealMainSize : crossSize;
     bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
@@ -1687,6 +1711,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     return defaultHitTestChildren(result, position: position);
   }
 
+  Offset getChildScrollOffset(RenderObject child, Offset offset) {
+    final RenderLayoutParentData childParentData = child.parentData;
+    // Fixed elements always paint original offset
+    Offset scrollOffset = childParentData.position == CSSPositionType.fixed ?
+    childParentData.offset : childParentData.offset + offset;
+    return scrollOffset;
+  }
+  
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
@@ -1698,8 +1730,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           RenderObject child = sortedChildren[i];
           // Don't paint placeholder of positioned element
           if (child is! RenderPositionHolder) {
-            final RenderFlexParentData childParentData = child.parentData;
-            context.paintChild(child, childParentData.offset + offset);
+            context.paintChild(child, getChildScrollOffset(child, offset));
           }
         }
       } else {
@@ -1708,7 +1739,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           final RenderFlexParentData childParentData = child.parentData;
           // Don't paint placeholder of positioned element
           if (child is! RenderPositionHolder) {
-            context.paintChild(child, childParentData.offset + offset);
+            context.paintChild(child, getChildScrollOffset(child, offset));
           }
           child = childParentData.nextSibling;
         }

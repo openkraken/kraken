@@ -9,12 +9,7 @@ export const navigator = {
   geolocation,
   // UA is read-only.
   get userAgent() {
-    // Rule: @product/@productSub (@platform; @appName/@appVersion)
-    const product = `${privateKraken.product}/${privateKraken.productSub}`;
-
-    // comment is extra info injected by Shell.
-    const comment = privateKraken.comment;
-    return `${product} (${privateKraken.platform}; ${privateKraken.appName}/${privateKraken.appVersion})${comment ? ' ' + comment : ''}`;
+    return privateKraken.userAgent;
   },
   get hardwareConcurrency() {
     const logicalProcessors = krakenInvokeModule('["DeviceInfo","getHardwareConcurrency"]');

@@ -124,6 +124,7 @@ class NetworkBundle extends KrakenBundle with BundleMixin {
   @override
   Future<void> resolve() async {
     NetworkAssetBundle bundle = NetworkAssetBundle(url);
+    bundle.httpClient.userAgent = getKrakenInfo().userAgent;
     String absoluteURL = url.toString();
     ByteData data = await bundle.load(absoluteURL);
     Uint8List dataList = data.buffer.asUint8List();
@@ -138,6 +139,54 @@ class NetworkBundle extends KrakenBundle with BundleMixin {
 
     isResolved = true;
   }
+}
+
+/// An [AssetBundle] that loads resources over the network.
+///
+/// This asset bundle does not cache any resources, though the underlying
+/// network stack may implement some level of caching itself.
+class NetworkAssetBundle extends AssetBundle {
+  /// Creates an network asset bundle that resolves asset keys as URLs relative
+  /// to the given base URL.
+  NetworkAssetBundle(Uri baseUrl)
+      : _baseUrl = baseUrl,
+        httpClient = HttpClient();
+
+  final Uri _baseUrl;
+  final HttpClient httpClient;
+
+  Uri _urlFromKey(String key) => _baseUrl.resolve(key);
+
+  @override
+  Future<ByteData> load(String key) async {
+    final HttpClientRequest request = await httpClient.getUrl(_urlFromKey(key));
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.ok)
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset: $key'),
+        IntProperty('HTTP status code', response.statusCode),
+      ]);
+    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    return bytes.buffer.asByteData();
+  }
+
+  /// Retrieve a string from the asset bundle, parse it with the given function,
+  /// and return the function's result.
+  ///
+  /// The result is not cached. The parser is run each time the resource is
+  /// fetched.
+  @override
+  Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
+    assert(key != null);
+    assert(parser != null);
+    return parser(await loadString(key));
+  }
+
+  // TODO(ianh): Once the underlying network logic learns about caching, we
+  // should implement evict().
+
+  @override
+  String toString() => '${describeIdentity(this)}($_baseUrl)';
 }
 
 class AssetsBundle extends KrakenBundle with BundleMixin {
