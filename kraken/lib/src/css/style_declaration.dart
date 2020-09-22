@@ -365,12 +365,14 @@ class CSSStyleDeclaration {
     int startIndex = lowerCase.indexOf(startString, start);
     int endIndex;
     if (startIndex > 0) {
-      for (var i = startIndex + 4; i < string.length; i++) {
+      int startStringLength = startString.length;
+      startIndex  = startIndex + startStringLength; 
+      for (var i = startIndex; i < string.length; i++) {
         if (string[i] == endString) endIndex = i;
       }
       if (endIndex != null) {
-        var replacement = string.substring(startIndex + 4, endIndex);
-        lowerCase = lowerCase.replaceRange(startIndex + 4, endIndex, replacement);
+        var replacement = string.substring(startIndex, endIndex);
+        lowerCase = lowerCase.replaceRange(startIndex, endIndex, replacement);
         if (endIndex < string.length) {
           lowerCase = _replacePattern(string, lowerCase, startString, endString, endIndex);
         }
