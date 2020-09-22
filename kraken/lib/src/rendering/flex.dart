@@ -1370,8 +1370,13 @@ class RenderFlexLayout extends RenderLayoutBox {
     double maxScrollableWidth = 0.0;
     double maxScrollableHeight = 0.0;
 
-    maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth += value);
-    maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight += value);
+    if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+      maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth += value);
+      maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight = math.max(value, maxScrollableHeight));
+    } else {
+      maxScrollableWidthMap.forEach((key, value) => maxScrollableWidth = math.max(value, maxScrollableWidth));
+      maxScrollableHeightMap.forEach((key, value) => maxScrollableHeight += value);
+    }
 
     switch (_flexDirection) {
       case FlexDirection.row:
@@ -1718,7 +1723,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }
-  
+
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {
