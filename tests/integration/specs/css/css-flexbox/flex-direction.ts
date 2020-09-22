@@ -444,4 +444,286 @@ describe('flex-direction', () => {
 
     await matchViewportSnapshot();
   });
+  it("column-overlap-001", async () => {
+    let p;
+    let relpos;
+    let flex;
+    let layoutColumn;
+    let layoutRow;
+    let container;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `XXX and YYY should be on separate lines and not overlap, i.e. the height of .flex should not be 0.`
+        ),
+      ]
+    );
+    container = createElement(
+      'div',
+      {
+        class: 'layout-column',
+        id: 'container',
+        style: {
+          display: 'flex',
+          'flex-direction': 'column',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (layoutRow = createElement(
+          'div',
+          {
+            class: 'layout-row',
+            style: {
+              display: 'flex',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            (layoutColumn = createElement(
+              'div',
+              {
+                class: 'layout-column',
+                style: {
+                  display: 'flex',
+                  'flex-direction': 'column',
+                  'box-sizing': 'border-box',
+                },
+              },
+              [
+                (flex = createElement(
+                  'div',
+                  {
+                    class: 'flex',
+                    'data-expected-height': '18',
+                    style: {
+                      flex: '1',
+                      'min-height': '0',
+                      'box-sizing': 'border-box',
+                    },
+                  },
+                  [
+                    createText(`XXX`),
+                    (relpos = createElement('span', {
+                      id: 'relpos',
+                      style: {
+                        position: 'relative',
+                        top: '1px',
+                        'box-sizing': 'border-box',
+                      },
+                    })),
+                  ]
+                )),
+                createElement(
+                  'div',
+                  {
+                    style: {
+                      'box-sizing': 'border-box',
+                    },
+                  },
+                  [createText(`YYY`)]
+                ),
+              ]
+            )),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(container);
+
+    document.body.offsetHeight;
+    document.getElementById('relpos').innerText = ' ';
+    checkLayout('#container');
+
+
+    await matchViewportSnapshot();
+  });
+
+  it("row-001-visual", async () => {
+    let p;
+    let test01;
+    let test02;
+    let test03;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if:`),
+
+        createText(`
+      1. the rectangle 1, 2, 3 show up in a row in a red rectangle and no gap between them.`),
+
+        createText(`
+      2. the rectangle 1, 2, 3 appear in upper left of red rectangle.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          background: '#ff0000',
+          height: '200px',
+          width: '200px',
+          display: 'flex',
+          'flex-direction': 'row',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test01 = createElement(
+          'div',
+          {
+            id: 'test01',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#7FFF00',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        )),
+        (test02 = createElement(
+          'div',
+          {
+            id: 'test02',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#00FFFF',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        )),
+        (test03 = createElement(
+          'div',
+          {
+            id: 'test03',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#4169E1',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  });
+  it("row-reverse-001-visual", async () => {
+    let p;
+    let test01;
+    let test02;
+    let test03;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if:`),
+
+        createText(`
+    1. the rectangle 1, 2, 3 show up in a row in a red rectangle and no gap between them.`),
+
+        createText(`
+    2. the rectangle 1, 2, 3 appear in upper right of red rectangle and from left to right of the row: 3, 2, 1.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          background: '#ff0000',
+          height: '200px',
+          width: '200px',
+          display: 'flex',
+          'flex-direction': 'row-reverse',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (test01 = createElement(
+          'div',
+          {
+            id: 'test01',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#7FFF00',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        )),
+        (test02 = createElement(
+          'div',
+          {
+            id: 'test02',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#00FFFF',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        )),
+        (test03 = createElement(
+          'div',
+          {
+            id: 'test03',
+            style: {
+              width: '50px',
+              height: '50px',
+              'text-align': 'center',
+              'font-size': '20px',
+              background: '#4169E1',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  });
 });

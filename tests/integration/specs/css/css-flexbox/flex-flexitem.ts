@@ -1,5 +1,89 @@
 /*auto generated*/
 describe('flex-flexitem', () => {
+  it("childmargin", async () => {
+    let fixed;
+    let flex;
+    let test;
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          background: 'blue',
+          display: 'flex',
+          height: '300px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (fixed = createElement(
+          'div',
+          {
+            class: 'fixed',
+            style: {
+              height: '300px',
+              flex: '1',
+              background: 'red',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            createElement(
+              'p',
+              {
+                style: {
+                  margin: '200px 0 0 0',
+                  'box-sizing': 'border-box',
+                  width: '100px',
+                  height: '100px',
+                  background: 'orange',
+                },
+              },
+              [
+                createText(`
+            a
+            `),
+              ]
+            ),
+          ]
+        )),
+        (flex = createElement(
+          'div',
+          {
+            class: 'flex',
+            style: {
+              width: '100px',
+              background: 'red',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            createElement(
+              'p',
+              {
+                style: {
+                  margin: '200px 0 0 0',
+                  'box-sizing': 'border-box',
+                  width: '100px',
+                  height: '100px',
+                  background: 'green',
+                },
+              },
+              [
+                createText(`
+            b
+            `),
+              ]
+            ),
+          ]
+        )),
+      ]
+    );
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
   it('childmargin-ref', async () => {
     let fixed;
     let flex;
@@ -159,4 +243,52 @@ describe('flex-flexitem', () => {
 
     await matchViewportSnapshot();
   });
+  it("percentage-prescation", async () => {
+    let test;
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          background: 'red',
+          display: 'flex',
+          height: '300px',
+          width: '101px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'p',
+          {
+            style: {
+              flex: '1',
+              background: 'green',
+              'flex-direction': 'row',
+              margin: '0 0 0 0',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`d`)]
+        ),
+        createElement(
+          'p',
+          {
+            style: {
+              flex: '1',
+              background: 'olive',
+              'flex-direction': 'row',
+              margin: '0 0 0 0',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`d`)]
+        ),
+      ]
+    );
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
 });
