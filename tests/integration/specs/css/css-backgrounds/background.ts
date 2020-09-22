@@ -57,4 +57,13 @@ xdescribe('background-331', () => {
     let cs = window.getComputedStyle(div, null);
     expect(cs.getPropertyValue('background-color')).toBe('rgba(255, 0, 0, 0)');
   });
+
+  it('background url should distinguish word capitalize', async (done) => {
+    let div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '100px';
+    div.style.backgroundImage = 'url(https://gw.alicdn.com/tfs/TB1E5GzToz1gK0jSZLeXXb9kVXa-750-595.png)';
+    document.body.appendChild(div);
+    await matchViewportSnapshot(1);
+  });
 });
