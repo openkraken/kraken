@@ -555,7 +555,7 @@ class KeyframeEffect extends AnimationEffect {
     if (_progress == null) {
       // If fill is backwards that will be null when animation finished
       _propertySpecificKeyframeGroups.forEach((String propertyName, value) {
-        style.removeAimationProperty(propertyName);
+        style.removeAnimationProperty(propertyName);
         String value = style.getStylePropertyValue(propertyName);
         style.setProperty(propertyName, value);
       });

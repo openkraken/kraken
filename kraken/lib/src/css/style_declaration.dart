@@ -242,7 +242,7 @@ class CSSStyleDeclaration {
     return _properties[propertyName] ?? EMPTY_STRING;
   }
 
-  String removeAimationProperty(String propertyName) {
+  String removeAnimationProperty(String propertyName) {
     String prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
