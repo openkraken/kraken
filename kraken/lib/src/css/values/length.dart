@@ -54,7 +54,7 @@ class CSSLength {
     }
   }
 
-  static bool isAuto(value) {
+  static bool isAuto(String value) {
     return value == AUTO;
   }
 
