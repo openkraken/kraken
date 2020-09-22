@@ -930,4 +930,256 @@ describe('align-self', () => {
 
     await matchViewportSnapshot();
   });
+
+  xit("015-ref", async () => {
+    let p;
+    let item1;
+    let item2;
+    let item2_1;
+    let item2_2;
+    let item2_3;
+    let item2_4;
+    let item2_5;
+    let item2_6;
+    let item2_7;
+    let item2_8;
+    let item2_9;
+    let item2_10;
+    let item2_11;
+    let item2_12;
+    let item2_13;
+    let flexbox;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `The test passes if the flex items are properly centered in each column`
+        ),
+      ]
+    );
+    flexbox = createElement(
+      'div',
+      {
+        class: 'flexbox column wrap',
+        style: {
+          border: '1px solid black',
+          width: '400px',
+          height: '200px',
+          display: 'flex',
+          '-webkit-flex-direction': 'column',
+          'flex-direction': 'column',
+          '-webkit-flex-wrap': 'wrap',
+          'flex-wrap': 'wrap',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (item1 = createElement(
+          'div',
+          {
+            class: 'item1 align-self-center',
+            style: {
+              background: 'lightblue',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithMargins`)]
+        )),
+        (item2 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_1 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_2 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_3 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_4 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_5 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_6 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_7 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_8 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_9 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_10 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_11 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_12 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+        (item2_13 = createElement(
+          'div',
+          {
+            class: 'item2 align-self-center',
+            style: {
+              background: 'lime',
+              '-webkit-align-self': 'center',
+              'align-self': 'center',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`centeredWithAlignSelf`)]
+        )),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(flexbox);
+
+
+    await matchViewportSnapshot();
+  })
 });
