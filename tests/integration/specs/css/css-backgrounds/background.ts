@@ -58,7 +58,7 @@ xdescribe('background-331', () => {
     expect(cs.getPropertyValue('background-color')).toBe('rgba(255, 0, 0, 0)');
   });
 
-  fit('background url should distinguish word capitalize', async (done) => {
+  it('background url should distinguish word capitalize', async (done) => {
     let div = document.createElement('div');
     div.style.width = '100px';
     div.style.height = '100px';
