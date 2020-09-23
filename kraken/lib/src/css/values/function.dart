@@ -1,6 +1,9 @@
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
 
 final _functionRegExp = RegExp(r'^[a-zA-Z_]+\(.+\)$', caseSensitive: false);
+final _functionStart = '(';
+final _functionEnd = ')';
+final _functionArgsSplit = ',';
 
 // ignore: public_member_api_docs
 class CSSFunction {
@@ -11,7 +14,7 @@ class CSSFunction {
 
   static List<CSSFunctionalNotation> parseFunction(String value) {
     var start = 0;
-    var left = value.indexOf('(', start);
+    var left = value.indexOf(_functionStart, start);
     List<CSSFunctionalNotation> notations = [];
 
     // function may contain function, should handle this situation
@@ -25,14 +28,14 @@ class CSSFunction {
       bool match = false;
       // find all args in this function
       while (argsBeginIndex < value.length) {
-        if (value[argsBeginIndex] == ',') {
+        if (value[argsBeginIndex] == _functionArgsSplit) {
           if (containLeftCount == 0 && argBeginIndex < argsBeginIndex) {
             argList.add(value.substring(argBeginIndex, argsBeginIndex));
             argBeginIndex = argsBeginIndex + 1;
           }
-        } else if (value[argsBeginIndex] == '(') {
+        } else if (value[argsBeginIndex] == _functionStart) {
           containLeftCount++;
-        } else if (value[argsBeginIndex] == ')') {
+        } else if (value[argsBeginIndex] == _functionEnd) {
           if (containLeftCount > 0) {
             containLeftCount--;
           } else {
@@ -55,7 +58,7 @@ class CSSFunction {
       if (start >= value.length) {
         break;
       }
-      left = value.indexOf('(', start);
+      left = value.indexOf(_functionStart, start);
     }
 
     return notations;

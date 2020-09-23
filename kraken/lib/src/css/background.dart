@@ -47,12 +47,13 @@ class CSSBackground {
   }
 
   static bool isValidBackgroundImageValue(String value) {
-    return value.startsWith('url(') ||
+    return (value.indexOf(')') == value.length - 1) &&
+        (value.startsWith('url(') ||
         value.startsWith('linear-gradient(') ||
         value.startsWith('repeating-linear-gradient(') ||
         value.startsWith('radial-gradient(') ||
         value.startsWith('repeating-radial-gradient(') ||
-        value.startsWith('conic-gradient(');
+        value.startsWith('conic-gradient('));
   }
 
   static bool isValidBackgroundPositionValue(String value) {

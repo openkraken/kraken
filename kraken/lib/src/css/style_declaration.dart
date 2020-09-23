@@ -242,7 +242,7 @@ class CSSStyleDeclaration {
     return _properties[propertyName] ?? EMPTY_STRING;
   }
 
-  String removeAimationProperty(String propertyName) {
+  String removeAnimationProperty(String propertyName) {
     String prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
@@ -361,6 +361,36 @@ class CSSStyleDeclaration {
     }
   }
 
+  String _replacePattern(String string, String lowerCase, String startString, String endString, [int start = 0]) {
+    int startIndex = lowerCase.indexOf(startString, start);
+    if (startIndex >= 0) {
+      int endIndex;
+      int startStringLength = startString.length;
+      startIndex  = startIndex + startStringLength;
+      for (int i = startIndex; i < string.length; i++) {
+        if (string[i] == endString) endIndex = i;
+      }
+      if (endIndex != null) {
+        var replacement = string.substring(startIndex, endIndex);
+        lowerCase = lowerCase.replaceRange(startIndex, endIndex, replacement);
+        if (endIndex < string.length - 1) {
+          lowerCase = _replacePattern(string, lowerCase, startString, endString, endIndex);
+        }
+      }
+    }
+    return lowerCase;
+  }
+
+  String _toLowerCase(String string, [int start = 0]) {
+    // Like url("http://path") declared with quotation marks and
+    // custom property names are case sensitive.
+    String lowerCase = string.toLowerCase();
+    lowerCase = _replacePattern(string, lowerCase, 'url(', ')');
+     // var(--my-color) will be treated as a separate custom property to var(--My-color).
+    lowerCase = _replacePattern(string, lowerCase, 'var(', ')');
+    return lowerCase;
+  }
+
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
   void setProperty(String propertyName, value, [bool fromAnimation = false]) {
@@ -370,7 +400,7 @@ class CSSStyleDeclaration {
       return;
     }
 
-    String normalizedValue = value.toString().trim().toLowerCase();
+    String normalizedValue = _toLowerCase(value.toString().trim());
 
     // Illegal value like '   ' after trim is '' shoud do nothing.
     if (normalizedValue.isEmpty) return;
@@ -394,9 +424,7 @@ class CSSStyleDeclaration {
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
         // Validation length type
-        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) {
-          return;
-        }
+        if (!CSSLength.isLength(normalizedValue) && !CSSLength.isAuto(normalizedValue)) return;
         break;
       case MIN_WIDTH:
       case MIN_HEIGHT:
@@ -410,9 +438,7 @@ class CSSStyleDeclaration {
       case PADDING_LEFT:
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
-        if (!CSSLength.isLength(normalizedValue)) {
-          return;
-        }
+        if (!CSSLength.isLength(normalizedValue)) return;
         break;
       case COLOR:
       case BACKGROUND_COLOR:
@@ -422,9 +448,13 @@ class CSSStyleDeclaration {
       case BORDER_RIGHT_COLOR:
       case TEXT_DECORATION_COLOR:
         // Validation color type
-        if (!CSSColor.isColor(normalizedValue)) {
-          return;
-        }
+        if (!CSSColor.isColor(normalizedValue)) return;
+        break;
+      case BACKGROUND_IMAGE:
+        if (!CSSBackground.isValidBackgroundImageValue(normalizedValue)) return;
+        break;
+      case BACKGROUND_REPEAT:
+        if (!CSSBackground.isValidBackgroundRepeatValue(normalizedValue)) return;
         break;
       case TRANSFORM:
         if (CSSTransform.parseTransform(normalizedValue) == null) {
