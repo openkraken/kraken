@@ -325,7 +325,8 @@ String invokeModule(
         if (targetUri.scheme != sourceUri.scheme ||
             targetUri.host != sourceUri.host ||
             targetUri.port != sourceUri.port ||
-            targetUri.path != sourceUri.path) {
+            targetUri.path != sourceUri.path ||
+            targetUri.query != sourceUri.query) {
           controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
         }
       }
