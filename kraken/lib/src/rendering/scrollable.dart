@@ -264,12 +264,12 @@ mixin RenderOverflowMixin on RenderBox {
 
   void _setUpScrollX() {
     _scrollOffsetX.applyViewportDimension(_viewportSize.width);
-    _scrollOffsetX.applyContentDimensions(0.0, _scrollableSize.width - _viewportSize.width);
+    _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.width - _viewportSize.width));
   }
 
   void _setUpScrollY() {
     _scrollOffsetY.applyViewportDimension(_viewportSize.height);
-    _scrollOffsetY.applyContentDimensions(0.0, _scrollableSize.height - _viewportSize.height);
+    _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize.height - _viewportSize.height));
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {

@@ -280,4 +280,40 @@ describe('Overflow', () => {
       });
     });
   });
+
+  it('flex container\'s maxScrollableSize should care about flex-direction', async (doneFn) => {
+    let container = createViewElement({
+      overflow: 'scroll',
+    }, [
+      createElement('div', {
+        style: {
+          background: 'green',
+          height: '100px'
+        }
+      }, [createText('1234')]),
+      createElement('div', {
+        style: {
+          background: 'blue',
+          height: '200px'
+        }
+      }, [createText('4567')]),
+      createElement('div', {
+        style: {
+          background: 'red',
+          height: '800px'
+        }
+      })
+    ]);
+
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+
+    requestAnimationFrame(async () => {
+      document.body.scrollLeft = 50;
+      document.body.scrollTop = 300;
+      await matchViewportSnapshot();
+      doneFn();
+    });
+  });
 });

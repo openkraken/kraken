@@ -748,7 +748,7 @@ class RenderBoxModel extends RenderBox with
         minHeight = 0.0;
         maxHeight = boxConstraints.maxHeight;
       }
-      
+
       // max and min size of intrinsc element should respect intrinsc ratio of each other
       if (intrinsicRatio != null) {
         if (this.minWidth != null && this.minHeight == null) {
@@ -931,6 +931,7 @@ class RenderBoxModel extends RenderBox with
     properties.add(DiagnosticsProperty('contentConstraints', _contentConstraints, missingIfNull: true));
     properties.add(DiagnosticsProperty('widthSizeType', widthSizeType, missingIfNull: true));
     properties.add(DiagnosticsProperty('heightSizeType', heightSizeType, missingIfNull: true));
+    properties.add(DiagnosticsProperty('maxScrollableSize', maxScrollableSize, missingIfNull: true));
 
     if (renderPositionHolder != null) properties.add(DiagnosticsProperty('renderPositionHolder', renderPositionHolder));
     if (padding != null) properties.add(DiagnosticsProperty('padding', padding));
