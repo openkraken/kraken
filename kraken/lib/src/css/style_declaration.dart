@@ -363,17 +363,17 @@ class CSSStyleDeclaration {
 
   String _replacePattern(String string, String lowerCase, String startString, String endString, [int start = 0]) {
     int startIndex = lowerCase.indexOf(startString, start);
-    int endIndex;
-    if (startIndex > 0) {
+    if (startIndex >= 0) {
+      int endIndex;
       int startStringLength = startString.length;
-      startIndex  = startIndex + startStringLength; 
-      for (var i = startIndex; i < string.length; i++) {
+      startIndex  = startIndex + startStringLength;
+      for (int i = startIndex; i < string.length; i++) {
         if (string[i] == endString) endIndex = i;
       }
       if (endIndex != null) {
         var replacement = string.substring(startIndex, endIndex);
         lowerCase = lowerCase.replaceRange(startIndex, endIndex, replacement);
-        if (endIndex < string.length) {
+        if (endIndex < string.length - 1) {
           lowerCase = _replacePattern(string, lowerCase, startString, endString, endIndex);
         }
       }
