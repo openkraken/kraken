@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('position-absolute', () => {
-  fit('004', async () => {
+  it('004', async () => {
     let item;
     let flex;
     flex = createElement(
