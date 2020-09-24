@@ -69,10 +69,10 @@ mixin CSSSizingMixin {
     }
     return minWidth;
   }
-  
+
   double getMaxWidth(double maxWidth, double minWidth) {
     if (maxWidth < 0) {
-      return null; 
+      return null;
     }
     // max-width is invalid if max-width is smaller than min-width
     if (minWidth != null && minWidth > maxWidth) {
@@ -98,7 +98,7 @@ mixin CSSSizingMixin {
     }
     return maxHeight;
   }
-  
+
   static EdgeInsets _getMargin(CSSStyleDeclaration style) {
     double marginLeft;
     double marginTop;
@@ -279,7 +279,7 @@ class CSSSizing {
       isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
         style[FLEX_WRAP] != WRAP_REVERSE;
       isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
-      isChildStretchSelf = childStyle[ALIGN_SELF] != AUTO ? isChildAlignSelfStretch : isAlignItemsStretch;
+      isChildStretchSelf = childStyle[ALIGN_SELF].isNotEmpty && childStyle[ALIGN_SELF] != AUTO ? isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
     String marginTop = child.style[MARGIN_TOP];
