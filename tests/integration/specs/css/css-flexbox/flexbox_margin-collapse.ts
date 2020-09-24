@@ -36,6 +36,6 @@ describe('flexbox_margin-collapse', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

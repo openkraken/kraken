@@ -52,7 +52,7 @@ describe('justify-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('002', async () => {
     let p;
@@ -104,7 +104,7 @@ describe('justify-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('003', async () => {
     let p;
@@ -156,7 +156,7 @@ describe('justify-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('004', async () => {
     let p;
@@ -210,7 +210,7 @@ describe('justify-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('005', async () => {
     let p;
@@ -264,6 +264,6 @@ describe('justify-content', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

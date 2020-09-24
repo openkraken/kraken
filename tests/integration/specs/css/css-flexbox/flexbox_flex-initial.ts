@@ -148,7 +148,7 @@ describe('flexbox_flex-initial', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('2', async () => {
     let div;
@@ -301,7 +301,7 @@ describe('flexbox_flex-initial', () => {
     BODY.appendChild(div);
     BODY.appendChild(flex);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('ref', async () => {
     let div;
@@ -451,6 +451,6 @@ describe('flexbox_flex-initial', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

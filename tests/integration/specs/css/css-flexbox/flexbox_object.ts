@@ -39,6 +39,6 @@ describe('flexbox_object', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

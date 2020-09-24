@@ -68,7 +68,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('center', async () => {
     let div;
@@ -137,7 +137,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexend-ref', async () => {
     let div;
@@ -207,7 +207,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexend', async () => {
     let div;
@@ -276,7 +276,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexstart-ref', async () => {
     let div;
@@ -346,7 +346,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('flexstart', async () => {
     let div;
@@ -415,7 +415,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('spacearound-ref', async () => {
     let div;
@@ -485,7 +485,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('spacearound', async () => {
     let div;
@@ -554,7 +554,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('spacebetween-ref', async () => {
     let div;
@@ -624,7 +624,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('spacebetween', async () => {
     let div;
@@ -693,7 +693,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('stretch-2-ref', async () => {
     let div;
@@ -763,7 +763,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('stretch-2', async () => {
     let div;
@@ -829,7 +829,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('stretch-ref', async () => {
     let div;
@@ -899,7 +899,7 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('stretch', async () => {
     let div;
@@ -968,6 +968,6 @@ describe('flexbox_align-content', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

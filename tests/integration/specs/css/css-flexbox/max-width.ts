@@ -151,6 +151,6 @@ describe('max-width', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(columns_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

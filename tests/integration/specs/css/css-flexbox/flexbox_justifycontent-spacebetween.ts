@@ -68,7 +68,7 @@ describe('flexbox_justifycontent-spacebetween', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('negative', async () => {
     let div;
@@ -133,7 +133,7 @@ describe('flexbox_justifycontent-spacebetween', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('only-ref', async () => {
     let div;
@@ -172,7 +172,7 @@ describe('flexbox_justifycontent-spacebetween', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('only', async () => {
     let div;
@@ -210,7 +210,7 @@ describe('flexbox_justifycontent-spacebetween', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('ref', async () => {
     let div;
@@ -283,6 +283,6 @@ describe('flexbox_justifycontent-spacebetween', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

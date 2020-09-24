@@ -54,7 +54,7 @@ describe('flexbox_margin-auto', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('overflow', async () => {
     let div;
@@ -105,7 +105,7 @@ describe('flexbox_margin-auto', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('ref', async () => {
     let div;
@@ -161,6 +161,6 @@ describe('flexbox_margin-auto', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

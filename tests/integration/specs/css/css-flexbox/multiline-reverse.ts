@@ -257,6 +257,6 @@ describe('multiline-reverse', () => {
     BODY.appendChild(flexbox_1);
     BODY.appendChild(flexbox_2);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

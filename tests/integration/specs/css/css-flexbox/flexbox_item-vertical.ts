@@ -78,6 +78,6 @@ describe('flexbox_item-vertical', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

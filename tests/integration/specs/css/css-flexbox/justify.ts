@@ -90,6 +90,6 @@ describe('justify', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -72,7 +72,7 @@ describe('flexbox_wrap', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('reverse', async () => {
     let div;
@@ -146,7 +146,7 @@ describe('flexbox_wrap', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('001', async () => {
     let div;
@@ -220,6 +220,6 @@ describe('flexbox_wrap', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

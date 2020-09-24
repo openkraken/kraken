@@ -71,7 +71,7 @@ describe('flexbox_justifycontent-flex', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('end', async () => {
     let div;
@@ -139,7 +139,7 @@ describe('flexbox_justifycontent-flex', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('start-ref', async () => {
     let div;
@@ -212,7 +212,7 @@ describe('flexbox_justifycontent-flex', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('start', async () => {
     let div;
@@ -280,6 +280,6 @@ describe('flexbox_justifycontent-flex', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -76,7 +76,7 @@ describe('flexbox_flex-basis', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('shrink-ref', async () => {
     let div;
@@ -153,7 +153,7 @@ describe('flexbox_flex-basis', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('shrink', async () => {
     let div;
@@ -231,6 +231,6 @@ describe('flexbox_flex-basis', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

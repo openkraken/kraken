@@ -94,6 +94,6 @@ describe('flexbox_width-wrapping', () => {
       checkLayout('.flexbox');
     }
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

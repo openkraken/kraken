@@ -91,7 +91,7 @@ describe('flexbox_stf', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('fixpos', async () => {
     let test;
@@ -184,6 +184,6 @@ describe('flexbox_stf', () => {
     );
     BODY.appendChild(test);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

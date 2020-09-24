@@ -101,6 +101,6 @@ describe('flexbox_order-box', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

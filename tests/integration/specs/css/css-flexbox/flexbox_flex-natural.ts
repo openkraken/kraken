@@ -74,7 +74,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('mixed-basis-auto', async () => {
     let div;
@@ -143,7 +143,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('mixed-basis-ref', async () => {
     let div;
@@ -214,7 +214,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('mixed-basis', async () => {
     let div;
@@ -282,7 +282,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('ref', async () => {
     let div;
@@ -432,7 +432,7 @@ describe('flexbox_flex-natural', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   it('variable-auto-basis', async () => {
     let div;
@@ -504,7 +504,7 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('variable-zero-basis', async () => {
     let div;
@@ -576,6 +576,6 @@ describe('flexbox_flex-natural', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

@@ -100,6 +100,6 @@ describe('inline', () => {
     BODY.appendChild(p);
     BODY.appendChild(testcase);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });

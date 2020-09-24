@@ -66,7 +66,7 @@ describe('flexbox_justifycontent', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('spacearound', async () => {
     let div;
@@ -134,7 +134,7 @@ describe('flexbox_justifycontent', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
   xit('spacebetween', async () => {
     let div;
@@ -202,6 +202,6 @@ describe('flexbox_justifycontent', () => {
     );
     BODY.appendChild(div);
 
-    await matchScreenshot();
+    await matchViewportSnapshot();
   });
 });
