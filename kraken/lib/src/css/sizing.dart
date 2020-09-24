@@ -269,6 +269,7 @@ class CSSSizing {
     bool isAlignItemsStretch = false;
     bool isFlexNoWrap = false;
     bool isChildAlignSelfStretch = false;
+    bool isChildStretchSelf = false;
     if (isFlex) {
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(
         (current as RenderFlexLayout).flexDirection
@@ -278,6 +279,7 @@ class CSSSizing {
       isFlexNoWrap = style[FLEX_WRAP] != WRAP &&
         style[FLEX_WRAP] != WRAP_REVERSE;
       isChildAlignSelfStretch = childStyle[ALIGN_SELF] == STRETCH;
+      isChildStretchSelf = childStyle[ALIGN_SELF] != AUTO ? isChildAlignSelfStretch : isAlignItemsStretch;
     }
 
     String marginTop = child.style[MARGIN_TOP];
@@ -285,7 +287,7 @@ class CSSSizing {
 
     // Display as block if flex vertical layout children and stretch children
     if (marginTop != AUTO && marginBottom != AUTO &&
-      isFlex && isHorizontalDirection && isFlexNoWrap && (isAlignItemsStretch || isChildAlignSelfStretch)) {
+      isFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }
 

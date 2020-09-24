@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('relayout-align', () => {
-  xit('items', async (done) => {
+  it('items', async (done) => {
     let log;
     let alignSelfAuto;
     let alignSelfAuto_1;
