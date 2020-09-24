@@ -1,5 +1,5 @@
 /*auto generated*/
-describe('position-absolute', () => {
+describe('flexbox-position-absolute', () => {
   it('004', async () => {
     let item;
     let flex;

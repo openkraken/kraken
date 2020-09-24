@@ -1329,7 +1329,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/300x150-green.png',
+          'assets/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             height: '50px',
@@ -1342,7 +1342,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   })
   it("width-flex-items-012", async () => {
     let p;
@@ -1377,7 +1377,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/300x150-green.png',
+          'assets/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             height: '2000px',
@@ -1391,7 +1391,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await matchViewportSnapshot();
+    await matchViewportSnapshot(0.1);
   })
   xit("width-flex-items-013", async () => {
     let p;
