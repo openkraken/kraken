@@ -12,6 +12,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
 import 'package:vibration/vibration.dart';
+import 'package:kraken/element.dart';
 import 'platform.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
@@ -623,6 +624,25 @@ void _toBlob(Pointer<JSCallbackContext> callbackContext, int contextId,
 void registerToBlob() {
   Pointer<NativeFunction<Native_ToBlob>> pointer = Pointer.fromFunction(_toBlob);
   _registerToBlob(pointer);
+}
+
+void _test(int num) {
+  print('receive test: $num');
+}
+
+Pointer<NativeElement> _createElement(int num) {
+  Pointer<NativeElement> nativeElement = allocate<NativeElement>();
+  nativeElement.ref.test = Pointer.fromFunction(_test);
+  return nativeElement;
+}
+
+typedef Native_CreateElement = Void Function(Int32 num);
+
+class NativeElement extends Struct {
+  Pointer<NativeFunction<Native_CreateElement>> test;
+}
+
+void registerCreateElement() {
 }
 
 void registerDartMethodsToCpp() {

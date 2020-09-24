@@ -608,7 +608,7 @@ class Element extends Node
     childPositionHolder.realDisplayedBox = childRenderBoxModel;
 
     parentRenderLayoutBox.add(childRenderBoxModel);
-    /// Placeholder of flexbox needs to inherit size from its real display box, 
+    /// Placeholder of flexbox needs to inherit size from its real display box,
     /// so it needs to layout after real box layout
     child.parent.addChild(childPositionHolder);
   }

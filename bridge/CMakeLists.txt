@@ -53,7 +53,7 @@ list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
   )
 
-add_library(bridge STATIC ${BRIDGE_SOURCE})
+add_library(bridge STATIC ${BRIDGE_SOURCE}  bindings/DOM/document.cpp bindings/DOM/document.h bindings/DOM/element.cpp bindings/DOM/element.h)
 add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h)
 
 if (${IS_ANDROID})

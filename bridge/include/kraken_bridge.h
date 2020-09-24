@@ -25,6 +25,8 @@ struct KrakenInfo {
   const char* system_name {nullptr};
   GetUserAgent getUserAgent;
 };
+struct DartElement {
+};
 
 struct Screen {
   double width;
@@ -51,6 +53,7 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
+typedef DartElement* (*CreateElement)(const unsigned short* tagName, int32_t typeLength);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -102,5 +105,7 @@ KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
+KRAKEN_EXPORT
+void registerCreateElement(CreateElement createElement);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

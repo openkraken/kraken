@@ -11,6 +11,7 @@
 #include "bindings/KOM/timer.h"
 #include "bindings/KOM/toBlob.h"
 #include "bindings/KOM/window.h"
+#include "bindings/DOM/document.h"
 #include "foundation/bridge_callback.h"
 #include "polyfill.h"
 
@@ -244,11 +245,11 @@ JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &ha
   auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
     handler(context, error);
     // trigger window.onerror handler.
-    const alibaba::jsa::Value &errorObject = error.value();
-    context.global()
-      .getPropertyAsObject(context, "__global_onerror_handler__")
-      .getFunction(context)
-      .call(context, Value(context, errorObject));
+//    const alibaba::jsa::Value &errorObject = error.value();
+//    context.global()
+//      .getPropertyAsObject(context, "__global_onerror_handler__")
+//      .getFunction(context)
+//      .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
   context = alibaba::jsc::createJSContext(contextId, errorHandler, this);
@@ -263,6 +264,7 @@ JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &ha
   kraken::binding::bindTimer(context);
   kraken::binding::bindBlob(context);
   kraken::binding::bindToBlob(context);
+  kraken::binding::bindDocument(context);
 
   window_ = std::make_shared<kraken::binding::JSWindow>();
   window_->bind(context);

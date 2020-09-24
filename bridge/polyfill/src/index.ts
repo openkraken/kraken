@@ -1,7 +1,7 @@
 import 'es6-promise/dist/es6-promise.auto';
 
 import { console } from './console';
-import { document } from './document';
+// import { document } from './document';
 import { PromiseRejectionEvent } from './document/events/promise-rejection-event';
 import { ErrorEvent } from './document/events/error-event';
 import { CustomEvent } from './document/events/custom-event';
@@ -27,7 +27,7 @@ Object.assign(window, windowExtension);
 
 defineGlobalProperty('console', console);
 defineGlobalProperty('requestAnimationFrame', requestAnimationFrame);
-defineGlobalProperty('document', document);
+// defineGlobalProperty('document', document);
 defineGlobalProperty('WebSocket', WebSocket);
 defineGlobalProperty('Request', Request);
 defineGlobalProperty('Response', Response);

@@ -96,4 +96,8 @@ void registerEnvironment(Environment environment) {
   methodPointer->environment = environment;
 }
 
+void registerCreateElement(CreateElement createElement) {
+  methodPointer->createElement = createElement;
+}
+
 } // namespace kraken

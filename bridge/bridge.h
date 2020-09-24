@@ -8,6 +8,7 @@
 
 #include "bindings/KOM/screen.h"
 #include "bindings/KOM/window.h"
+#include "bindings/DOM/document.h"
 #include "foundation/thread_safe_array.h"
 #include "foundation/bridge_callback.h"
 
@@ -27,6 +28,7 @@ private:
   std::unique_ptr<alibaba::jsa::JSContext> context;
   std::shared_ptr<kraken::binding::JSScreen> screen_;
   std::shared_ptr<kraken::binding::JSWindow> window_;
+  std::shared_ptr<kraken::binding::JSDocument> document_;
   alibaba::jsa::JSExceptionHandler handler_;
 
 public:

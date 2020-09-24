@@ -14,7 +14,13 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
-Element _createElement(
+class NativeElement {
+  Element _element;
+  Element get element => _element;
+  NativeElement(Element element): _element = element;
+}
+
+NativeElement _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
@@ -77,7 +83,7 @@ Element _createElement(
     element.addEvent(eventName);
   });
 
-  return element;
+  return NativeElement(element);
 }
 
 const int BODY_ID = -1;
@@ -140,7 +146,7 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  void createElement(int id, String type, Map<String, dynamic> props, List events) {
+  NativeElement createElement(int id, String type, Map<String, dynamic> props, List events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -151,8 +157,9 @@ class ElementManager {
       }
     }
 
-    EventTarget target = _createElement(id, type, props, eventList, this);
-    setEventTarget(target);
+    NativeElement nativeElement = _createElement(id, type, props, eventList, this);
+    setEventTarget(nativeElement.element);
+    return nativeElement;
   }
 
   void createTextNode(int id, String data) {
