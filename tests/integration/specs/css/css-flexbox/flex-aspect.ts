@@ -324,7 +324,7 @@ describe('flex-aspect', () => {
     await sleep(0.1);
     await matchViewportSnapshot();
   });
-  xit('ratio-img-row-003', async () => {
+  it('ratio-img-row-003', async () => {
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
     let constrainedFlex;

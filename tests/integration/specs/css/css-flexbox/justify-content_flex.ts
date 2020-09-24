@@ -1,20 +1,41 @@
 /*auto generated*/
-describe('align-content_space', () => {
-  it('around', async () => {
+describe('justify-content_flex', () => {
+  it('end', async () => {
+    let p;
     let test01;
     let test02;
     let test03;
     let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if:`),
+
+        createText(`
+    1. the rectangle 1, 2, 3 show up in a row in a red rectangle and no gap between them.`),
+
+        createText(`
+    2. the rectangle 1, 2, 3 appear in right of red rectangle.`),
+
+        createText(`
+    3.     3. the height of the 1, 2, 3 is the same as the height of the red rectangle.`),
+      ]
+    );
     test = createElement(
       'div',
       {
+        id: 'test',
         style: {
-          'background-color': '#ff0000',
+          background: '#ff0000',
           height: '200px',
-          width: '80px',
+          width: '200px',
           display: 'flex',
-          'flex-wrap': 'wrap',
-          'align-content': 'space-around',
+          'justify-content': 'flex-end',
           'box-sizing': 'border-box',
         },
       },
@@ -22,12 +43,12 @@ describe('align-content_space', () => {
         (test01 = createElement(
           'div',
           {
+            id: 'test01',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#7FFF00',
+              width: '30px',
+              background: '#7FFF00',
               'box-sizing': 'border-box',
             },
           },
@@ -36,12 +57,12 @@ describe('align-content_space', () => {
         (test02 = createElement(
           'div',
           {
+            id: 'test02',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#00FFFF',
+              width: '30px',
+              background: '#00FFFF',
               'box-sizing': 'border-box',
             },
           },
@@ -50,12 +71,12 @@ describe('align-content_space', () => {
         (test03 = createElement(
           'div',
           {
+            id: 'test03',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#4169E1',
+              width: '30px',
+              background: '#4169E1',
               'box-sizing': 'border-box',
             },
           },
@@ -63,25 +84,47 @@ describe('align-content_space', () => {
         )),
       ]
     );
+    BODY.appendChild(p);
     BODY.appendChild(test);
 
     await matchViewportSnapshot();
   });
-  it('between', async () => {
+  it('start', async () => {
+    let p;
     let test01;
     let test02;
     let test03;
     let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if:`),
+
+        createText(`
+    1. the rectangle 1, 2, 3 show up in a row in a red rectangle and no gap between them.`),
+
+        createText(`
+    2. the rectangle 1, 2, 3 appear in left of red rectangle.`),
+
+        createText(`
+    3. the height of the 1, 2, 3 is the same as the height of the red rectangle.`),
+      ]
+    );
     test = createElement(
       'div',
       {
+        id: 'test',
         style: {
-          'background-color': '#ff0000',
+          background: '#ff0000',
           height: '200px',
-          width: '80px',
+          width: '200px',
           display: 'flex',
-          'flex-wrap': 'wrap',
-          'align-content': 'space-between',
+          'justify-content': 'flex-start',
           'box-sizing': 'border-box',
         },
       },
@@ -89,12 +132,12 @@ describe('align-content_space', () => {
         (test01 = createElement(
           'div',
           {
+            id: 'test01',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#7FFF00',
+              width: '30px',
+              background: '#7FFF00',
               'box-sizing': 'border-box',
             },
           },
@@ -103,12 +146,12 @@ describe('align-content_space', () => {
         (test02 = createElement(
           'div',
           {
+            id: 'test02',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#00FFFF',
+              width: '30px',
+              background: '#00FFFF',
               'box-sizing': 'border-box',
             },
           },
@@ -117,12 +160,12 @@ describe('align-content_space', () => {
         (test03 = createElement(
           'div',
           {
+            id: 'test03',
             style: {
-              width: '50px',
-              height: '50px',
               'text-align': 'center',
               'font-size': '20px',
-              'background-color': '#4169E1',
+              width: '30px',
+              background: '#4169E1',
               'box-sizing': 'border-box',
             },
           },
@@ -130,6 +173,7 @@ describe('align-content_space', () => {
         )),
       ]
     );
+    BODY.appendChild(p);
     BODY.appendChild(test);
 
     await matchViewportSnapshot();

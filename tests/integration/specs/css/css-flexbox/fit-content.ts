@@ -53,7 +53,7 @@ describe('fit-content', () => {
 
     await matchViewportSnapshot();
   });
-  xit('item-002', async () => {
+  it('item-002', async () => {
     let p;
     let fitContentItem;
     let heightSettingItem;
@@ -97,36 +97,6 @@ describe('fit-content', () => {
     );
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
-
-    await matchViewportSnapshot();
-  });
-  xit('item-003', async () => {
-    let p;
-    p = createElement(
-      'p',
-      {
-        style: {
-          'box-sizing': 'border-box',
-        },
-      },
-      [createText(`Test passes if there is a filled green square.`)]
-    );
-    BODY.appendChild(p);
-
-    await matchViewportSnapshot();
-  });
-  xit('item-004', async () => {
-    let p;
-    p = createElement(
-      'p',
-      {
-        style: {
-          'box-sizing': 'border-box',
-        },
-      },
-      [createText(`Test passes if there is a filled green square.`)]
-    );
-    BODY.appendChild(p);
 
     await matchViewportSnapshot();
   });
