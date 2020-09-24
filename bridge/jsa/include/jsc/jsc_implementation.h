@@ -51,7 +51,8 @@ public:
   JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
   ~JSCContext();
 
-  jsa::Value evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) override;
+  jsa::Value evaluateJavaScript(const unsigned short* code, size_t codeLength, const char* sourceURL, int startLine) override;
+  jsa::Value evaluateJavaScript(const char* code, const char* sourceURL, int startLine) override;
   void setUnhandledPromiseRejectionHandler(jsa::Object &handler) override;
 
   jsa::Object global() override;
@@ -165,12 +166,15 @@ protected:
   jsa::PropNameID createPropNameIDFromUtf8(const uint8_t *utf8, size_t length) override;
   jsa::PropNameID createPropNameIDFromString(const jsa::String &str) override;
   std::string utf8(const jsa::PropNameID &) override;
+  const JSChar* getUnicodePtr(const jsa::String &) override;
+  size_t unicodeSize(const jsa::String &) override;
   bool compare(const jsa::PropNameID &, const jsa::PropNameID &) override;
 
   std::string symbolToString(const jsa::Symbol &) override;
 
   jsa::String createStringFromAscii(const char *str, size_t length) override;
   jsa::String createStringFromUtf8(const uint8_t *utf8, size_t length) override;
+  jsa::String createStringFromUtf16(const JSChar *utf16, size_t length) override;
   std::string utf8(const jsa::String &) override;
 
   jsa::Object createObject() override;

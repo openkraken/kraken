@@ -14,6 +14,48 @@ import 'package:kraken/module.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';
 
+// An native struct can be directly convert to javaScript String without any conversion cost.
+class NativeString extends Struct {
+  Pointer<Uint16> string;
+
+  @Uint32()
+  int length;
+}
+
+String _uint16ToString(Pointer<Uint16> pointer, int length) {
+  return String.fromCharCodes(Uint16List.view(pointer.asTypedList(length).buffer, 0, length));
+}
+
+Pointer<Uint16> _stringToUint16(String string) {
+  final units = string.codeUnits;
+  final Pointer<Uint16> result = allocate<Uint16>(count: units.length + 1);
+  final Uint16List nativeString = result.asTypedList(units.length + 1);
+  nativeString.setAll(0, units);
+  nativeString[units.length] = 0;
+  return result;
+}
+
+// Dart unicode string length and \0 terminate.
+int _getNativeStringLength(String string) {
+  return string.codeUnits.length + 1;
+}
+
+Pointer<NativeString> stringToNativeString(String string) {
+  Pointer<NativeString> nativeString = allocate<NativeString>();
+  nativeString.ref.string = _stringToUint16(string);
+  nativeString.ref.length = _getNativeStringLength(string);
+  return nativeString;
+}
+
+String nativeStringToString(Pointer<NativeString> pointer) {
+  return _uint16ToString(pointer.ref.string, pointer.ref.length);
+}
+
+void freeNativeString(Pointer<NativeString> pointer) {
+  free(pointer.ref.string);
+  free(pointer);
+}
+
 // Steps for using dart:ffi to call a Dart function from C:
 // 1. Import dart:ffi.
 // 2. Create a typedef with the FFI type signature of the Dart function.
@@ -24,7 +66,7 @@ import 'platform.dart';
 // 6. Call from C.
 
 // Register InvokeUIManager
-typedef Native_InvokeUIManager = Pointer<Utf8> Function(Int32 contextId, Pointer<Utf8>);
+typedef Native_InvokeUIManager = Pointer<NativeString> Function(Int32 contextId, Pointer<NativeString>);
 typedef Native_RegisterInvokeUIManager = Void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 typedef Dart_RegisterInvokeUIManager = void Function(Pointer<NativeFunction<Native_InvokeUIManager>>);
 
@@ -61,12 +103,13 @@ String invokeUIManager(int contextId, String json) {
   }
 }
 
-Pointer<Utf8> _invokeUIManager(int contextId, Pointer<Utf8> json) {
+Pointer<NativeString> _invokeUIManager(int contextId, Pointer<NativeString> json) {
   try {
-    String result = invokeUIManager(contextId, Utf8.fromUtf8(json));
-    return Utf8.toUtf8(result);
+    String result = invokeUIManager(contextId, nativeStringToString(json));
+    return stringToNativeString(result);
   } catch (e, stack) {
-    return Utf8.toUtf8('Error: $e\n$stack');
+    String errmsg = 'Error: $e\n$stack';
+    return stringToNativeString(errmsg);
   }
 }
 
@@ -81,8 +124,8 @@ typedef NativeAsyncModuleCallback = Void Function(
 typedef DartAsyncModuleCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json);
 
-typedef Native_InvokeModule = Pointer<Utf8> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
-    Pointer<Utf8>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
+    Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
@@ -339,10 +382,10 @@ String invokeModule(
   return result;
 }
 
-Pointer<Utf8> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json,
+Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json,
     Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
-  String result = invokeModule(callbackContext, contextId, Utf8.fromUtf8(json), callback.asFunction());
-  return Utf8.toUtf8(result);
+  String result = invokeModule(callbackContext, contextId, nativeStringToString(json), callback.asFunction());
+  return stringToNativeString(result);
 }
 
 void registerInvokeModule() {
@@ -374,12 +417,12 @@ void registerReloadApp() {
 }
 
 typedef NativeAsyncCallback = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> timeout);
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> errmsg);
 typedef DartAsyncCallback = void Function(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> timeout);
+    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> errmsg);
 typedef NativeRAFAsyncCallback = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Double data, Pointer<Utf8>);
-typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8>);
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Double data, Pointer<Utf8> errmsg);
+typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(
@@ -433,6 +476,7 @@ int _setTimeout(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_TIMEOUT_ERROR = -1;
+
 void registerSetTimeout() {
   Pointer<NativeFunction<Native_SetTimeout>> pointer = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
   _registerSetTimeout(pointer);
@@ -461,6 +505,7 @@ int _setInterval(Pointer<JSCallbackContext> callbackContext, int contextId,
 }
 
 const int SET_INTERVAL_ERROR = -1;
+
 void registerSetInterval() {
   Pointer<NativeFunction<Native_SetInterval>> pointer = Pointer.fromFunction(_setInterval, SET_INTERVAL_ERROR);
   _registerSetInterval(pointer);
@@ -553,7 +598,7 @@ void registerDevicePixelRatio() {
 }
 
 // Register platformBrightness
-typedef Native_PlatformBrightness = Pointer<Utf8> Function();
+typedef Native_PlatformBrightness = Pointer<NativeString> Function();
 typedef Native_RegisterPlatformBrightness = Void Function(Pointer<NativeFunction<Native_PlatformBrightness>>);
 typedef Dart_RegisterPlatformBrightness = void Function(Pointer<NativeFunction<Native_PlatformBrightness>>);
 
@@ -561,10 +606,10 @@ final Dart_RegisterPlatformBrightness _registerPlatformBrightness = nativeDynami
     .lookup<NativeFunction<Native_RegisterPlatformBrightness>>('registerPlatformBrightness')
     .asFunction();
 
-final Pointer<Utf8> _dark = Utf8.toUtf8('dark');
-final Pointer<Utf8> _light = Utf8.toUtf8('light');
+final Pointer<NativeString> _dark = stringToNativeString('dark');
+final Pointer<NativeString> _light = stringToNativeString('light');
 
-Pointer<Utf8> _platformBrightness() {
+Pointer<NativeString> _platformBrightness() {
   return window.platformBrightness == Brightness.dark ? _dark : _light;
 }
 

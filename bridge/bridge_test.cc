@@ -13,10 +13,10 @@ namespace kraken {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-bool JSBridgeTest::evaluateTestScripts(const std::string &script, const std::string &url, int startLine) {
+bool JSBridgeTest::evaluateTestScripts(const unsigned short* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid()) return false;
-  binding::updateLocation(url);
-  return !context->evaluateJavaScript(script.c_str(), url.c_str(), startLine).isNull();
+  binding::updateLocation(sourceURL);
+  return !context->evaluateJavaScript(code, codeLength, sourceURL, startLine).isNull();
 }
 
 Value executeTest(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -101,7 +101,14 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
 
   std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
 
-  std::string &&name = screenShotName.getString(context).utf8(context);
+  String name = screenShotName.getString(context);
+  const unsigned short* unicodePtr = name.getUnicodePtr(context);
+  size_t unicodeLength = name.unicodeLength(context);
+
+  NativeString nativeString;
+  nativeString.string = unicodePtr;
+  nativeString.length = unicodeLength;
+
   std::shared_ptr<Value> callbackValue = std::make_shared<Value>(Value(context, callback));
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
 
@@ -115,9 +122,9 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   auto bridge = static_cast<JSBridge*>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext),
-    [&jsBlob, &name, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
+    [&jsBlob, &nativeString, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->matchImageSnapshot(callbackContext, contextId, jsBlob->bytes(), jsBlob->size(),
-                                          name.c_str(), fn);
+                                          &nativeString, fn);
     });
 
   return Value::undefined();
@@ -154,7 +161,11 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
     if (!status.isString()) {
       throw JSError(context, "failed to execute 'done': parameter 1 (status) is not a string");
     }
-    executeCallback(context.getContextId(), status.getString(context).utf8(context).c_str());
+    String statusString = status.getString(context);
+    NativeString nativeString;
+    nativeString.string = statusString.getUnicodePtr(context);
+    nativeString.length = statusString.unicodeLength(context);
+    executeCallback(context.getContextId(), &nativeString);
     return Value::undefined();
   };
 

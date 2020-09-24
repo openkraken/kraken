@@ -20,9 +20,9 @@ void initTestFramework(int32_t contextId) {
   bridgeTestPool[contextId] = bridgeTest;
 }
 
-int8_t evaluateTestScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine) {
+int8_t evaluateTestScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {
   auto bridgeTest = bridgeTestPool[contextId];
-  return bridgeTest->evaluateTestScripts(std::string(code), std::string(bundleFilename), startLine);
+  return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
 }
 
 void registerJSError(OnJSError jsError) {
