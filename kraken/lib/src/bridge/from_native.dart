@@ -318,7 +318,17 @@ String invokeModule(
       if (method == 'goTo') {
         String url = navigationArgs[0];
         String sourceUrl = controller.bundleURL;
-        controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+
+        Uri targetUri = Uri.parse(url);
+        Uri sourceUri = Uri.parse(sourceUrl);
+
+        if (targetUri.scheme != sourceUri.scheme ||
+            targetUri.host != sourceUri.host ||
+            targetUri.port != sourceUri.port ||
+            targetUri.path != sourceUri.path ||
+            targetUri.query != sourceUri.query) {
+          controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.reload);
+        }
       }
     }
   } catch (e, stack) {

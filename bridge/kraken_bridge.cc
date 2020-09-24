@@ -137,9 +137,9 @@ void reloadJsContext(int32_t contextId) {
   assert(checkContext(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getJSContext(contextId);
   auto context = static_cast<kraken::JSBridge *>(bridgePtr);
+  auto newContext = new kraken::JSBridge(contextId, printError);
   delete context;
-  context = new kraken::JSBridge(contextId, printError);
-  contextPool[contextId] = context;
+  contextPool[contextId] = newContext;
 }
 
 void invokeEventListener(int32_t contextId, int32_t type, const char *data) {
