@@ -87,13 +87,6 @@ describe('flexbox_width-wrapping', () => {
     BODY.appendChild(p);
     BODY.appendChild(test);
 
-    function change() {
-      var flex = document.getElementById('test');
-      flex.offsetWidth;
-      flex.style.height = '60px';
-      checkLayout('.flexbox');
-    }
-
     await matchViewportSnapshot();
   });
 });

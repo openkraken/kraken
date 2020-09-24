@@ -538,11 +538,6 @@ describe('flex-direction', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    document.body.offsetHeight;
-    document.getElementById('relpos').innerText = ' ';
-    checkLayout('#container');
-
-
     await matchViewportSnapshot();
   });
 

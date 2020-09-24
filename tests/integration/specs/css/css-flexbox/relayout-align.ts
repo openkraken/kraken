@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('relayout-align', () => {
-  xit('items', async () => {
+  xit('items', async (done) => {
     let log;
     let alignSelfAuto;
     let alignSelfAuto_1;
@@ -32,7 +32,6 @@ describe('relayout-align', () => {
           height: '100px',
           position: 'relative',
           'box-sizing': 'border-box',
-          'align-items': 'flex-end',
         },
       },
       [
@@ -127,7 +126,6 @@ describe('relayout-align', () => {
         style: {
           display: 'flex',
           '-webkit-align-items': 'flex-start',
-          'align-items': 'stretch',
           height: '100px',
           position: 'relative',
           'box-sizing': 'border-box',
@@ -221,10 +219,12 @@ describe('relayout-align', () => {
     BODY.appendChild(fromStretch);
     BODY.appendChild(toStretch);
 
-    document.body.offsetLeft;
-    document.getElementById('from-stretch').style.alignItems = 'flex-end';
-    document.getElementById('to-stretch').style.alignItems = 'stretch';
-    checkLayout('.flexbox');
+    requestAnimationFrame(async () => {
+      fromStretch.style.alignItems = 'flex-end';
+      toStretch.style.alignItems = 'stretch';
+      await matchViewportSnapshot();
+      done();
+    });
 
     await matchViewportSnapshot();
   });

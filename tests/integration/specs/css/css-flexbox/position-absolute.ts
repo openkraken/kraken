@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('position-absolute', () => {
-  it('004', async (done) => {
+  fit('004', async () => {
     let item;
     let flex;
     flex = createElement(
@@ -21,6 +21,7 @@ describe('position-absolute', () => {
           id: 'item',
           'data-expected-width': '500',
           style: {
+            position: 'absolute',
             background: 'green',
             left: '0',
             right: '0',
@@ -32,12 +33,6 @@ describe('position-absolute', () => {
       ]
     );
     BODY.appendChild(flex);
-
-    requestAnimationFrame(async () => {
-      item.style.position = 'absolute';
-      await matchViewportSnapshot();
-      done();
-    });
 
     await matchViewportSnapshot();
   });
@@ -193,8 +188,6 @@ describe('position-absolute', () => {
       ]
     );
     BODY.appendChild(div);
-
-    checkLayout('#abspos');
 
     await matchViewportSnapshot();
   });
