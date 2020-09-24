@@ -105,7 +105,6 @@ async function matchViewportSnapshot(wait: number = 0.0) {
   return await matchElementImageSnapshot(document.body);
 }
 
-
 async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();
 }
