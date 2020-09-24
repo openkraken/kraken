@@ -49,7 +49,7 @@ describe('gradients-with', () => {
 
     await matchViewportSnapshot();
   });
-  it('transparent-ref', async () => {
+  xit('transparent-ref', async () => {
     let p;
     let gradient1;
     p = createElement(

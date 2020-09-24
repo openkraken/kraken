@@ -190,6 +190,6 @@ describe('Baseline-rules flexbox', () => {
 //     append(wrapper, left);
 //     append(wrapper, box);
 //     append(BODY, wrapper);
-//     await matchScreenshot();
+//     await matchViewportSnapshot();
 //   });
 // });

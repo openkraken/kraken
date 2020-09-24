@@ -144,7 +144,7 @@ describe('align-items', () => {
 
     await matchViewportSnapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let div1;
     let div2;
     let div3;
@@ -282,7 +282,7 @@ describe('align-items', () => {
 
     await matchViewportSnapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let p;
     let flexbox;
     p = createElement(

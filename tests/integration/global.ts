@@ -5,7 +5,7 @@
  * - setElementProps: Apply attrs object to a specfic DOM.
  * - sleep: wait for several seconds.
  * - create: create element.
- * - matchScreenshot: match snapshot of body's image.
+ * - matchViewportSnapshot: match snapshot of body's image.
  */
 
 let BODY = document.body;
@@ -104,7 +104,6 @@ async function matchViewportSnapshot(wait: number = 0.0) {
   await sleep(wait);
   return await matchElementImageSnapshot(document.body);
 }
-
 
 async function matchElementImageSnapshot(element: HTMLElement) {
   return await expectAsync(element.toBlob(1.0)).toMatchImageSnapshot();

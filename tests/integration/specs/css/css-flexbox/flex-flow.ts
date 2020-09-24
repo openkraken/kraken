@@ -194,4 +194,1173 @@ describe('flexbox flex-flow', () => {
     document.body.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it("001", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green rectangle whose width is greater than height
+  and the number within rectangle is '1 2 3 4' from left to right.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row nowrap',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("002", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row wrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("003", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row wrap-reverse',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("004", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green rectangle whose width is greater than height
+  and the number within rectangle is '1 2 3 4' from left to right.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row-reverse nowrap',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("005", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row-reverse wrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("006", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'row-reverse wrap-reverse',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("007-ref", async () => {
+    let p;
+    let div;
+    let div_1;
+    let div_2;
+    let div_3;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is a filled green square and no red, the number within square is '1 2 3 4' from top to bottom.`
+        ),
+      ]
+    );
+    div = createElement(
+      'div',
+      {
+        style: {
+          'background-color': 'green',
+          height: '25px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`1`)]
+    );
+    div_1 = createElement(
+      'div',
+      {
+        style: {
+          'background-color': 'green',
+          height: '25px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`2`)]
+    );
+    div_2 = createElement(
+      'div',
+      {
+        style: {
+          'background-color': 'green',
+          height: '25px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`3`)]
+    );
+    div_3 = createElement(
+      'div',
+      {
+        style: {
+          'background-color': 'green',
+          height: '25px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`4`)]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(div);
+    BODY.appendChild(div_1);
+    BODY.appendChild(div_2);
+    BODY.appendChild(div_3);
+
+
+    await matchViewportSnapshot();
+  })
+  it("007", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is a filled green square and no red, the number within square is '1 2 3 4' from top to bottom.`
+        ),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column nowrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("008", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column wrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("009", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column wrap-reverse',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("010", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(
+          `Test passes if there is a filled green square and no red, the number within square is '1 2 3 4' from top to bottom.`
+        ),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column-reverse nowrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("011", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column-reverse wrap',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
+  it("012", async () => {
+    let p;
+    let test;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`, the number within square is '1 2 3 4'
+  from left to right, top to bottom.`),
+      ]
+    );
+    test = createElement(
+      'div',
+      {
+        id: 'test',
+        style: {
+          'background-color': 'red',
+          display: 'flex',
+          'flex-flow': 'column-reverse wrap-reverse',
+          height: '100px',
+          width: '100px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`4`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`2`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`3`)]
+        ),
+        createElement(
+          'div',
+          {
+            style: {
+              'background-color': 'green',
+              height: '50px',
+              width: '50px',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`1`)]
+        ),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(test);
+
+
+    await matchViewportSnapshot();
+  })
 });
