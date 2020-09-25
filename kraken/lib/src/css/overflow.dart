@@ -33,13 +33,13 @@ List<CSSOverflowType> getOverflowTypes(CSSStyleDeclaration style) {
 
 CSSOverflowType _getOverflowType(String definition) {
   switch (definition) {
-    case 'hidden':
+    case HIDDEN:
       return CSSOverflowType.hidden;
-    case 'scroll':
+    case SCROLL:
       return CSSOverflowType.scroll;
-    case 'auto':
+    case AUTO:
       return CSSOverflowType.auto;
-    case 'visible':
+    case VISIBLE:
     default:
       return CSSOverflowType.visible;
   }
