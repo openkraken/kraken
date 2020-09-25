@@ -67,7 +67,7 @@ describe('align', () => {
 
     await matchViewportSnapshot();
   });
-  xit('content_stretch', async () => {
+  it('content_stretch', async () => {
     let test01;
     let test02;
     let test03;

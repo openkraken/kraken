@@ -881,4 +881,105 @@ describe('flex', () => {
     BODY.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it("column flex child with overflow scroll", async () => {
+    let log;
+    let box;
+    let box_1;
+    let box2;
+    let flexbox;
+    let flexbox_1;
+    let box4;
+    log = createElement('div', {
+      id: 'log',
+      style: {
+        'box-sizing': 'border-box',
+      },
+    });
+    flexbox = createElement(
+      'div',
+      {
+        class: 'flexbox column',
+        style: {
+          display: 'flex',
+          '-webkit-flex-direction': 'column',
+          'flex-direction': 'column',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (box = createElement('div', {
+          class: 'box',
+          'data-expected-width': '100',
+          'data-expected-height': '75',
+          style: {
+            'box-sizing': 'border-box',
+            width: '100px',
+            height: '75px',
+            padding: '5px',
+            border: '2px solid red',
+          },
+        })),
+        (box2 = createElement('div', {
+          class: 'box scroll',
+          id: 'box2',
+          'data-expected-width': '100',
+          'data-expected-height': '75',
+          style: {
+            'box-sizing': 'border-box',
+            overflow: 'scroll',
+            width: '100px',
+            height: '75px',
+            padding: '5px',
+            border: '2px solid red',
+          },
+        })),
+      ]
+    );
+    flexbox_1 = createElement(
+      'div',
+      {
+        class: 'flexbox column-reverse',
+        style: {
+          display: 'flex',
+          '-webkit-flex-direction': 'column-reverse',
+          'flex-direction': 'column-reverse',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (box_1 = createElement('div', {
+          class: 'box',
+          'data-expected-width': '100',
+          'data-expected-height': '75',
+          style: {
+            'box-sizing': 'border-box',
+            width: '100px',
+            height: '75px',
+            padding: '5px',
+            border: '2px solid red',
+          },
+        })),
+        (box4 = createElement('div', {
+          class: 'box scroll',
+          id: 'box4',
+          'data-expected-width': '100',
+          'data-expected-height': '75',
+          style: {
+            'box-sizing': 'border-box',
+            overflow: 'scroll',
+            width: '100px',
+            height: '75px',
+            padding: '5px',
+            border: '2px solid red',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(log);
+    BODY.appendChild(flexbox);
+    BODY.appendChild(flexbox_1);
+
+    await matchViewportSnapshot();
+  });
 });
