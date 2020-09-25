@@ -160,7 +160,10 @@ class CSSStyleDeclaration {
       Animation animation = _propertyRunningTransition[propertyName];
       animation.cancel();
       CSSTransition.dispatchTransitionEvent(target, CSSTransitionEvent.cancel);
-      begin = _animationProperties[propertyName];
+      // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
+      if (_animationProperties.containsKey(propertyName)) {
+        begin = _animationProperties[propertyName];
+      }
     }
 
     if (begin == null) {
