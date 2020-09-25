@@ -42,7 +42,7 @@ mixin RenderTransformMixin on RenderBox {
       translation = alignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
- 
+
     result.multiply(_transform);
 
     if (alignment != null && alignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
@@ -74,6 +74,7 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   void applyEffectiveTransform(RenderBox child, Matrix4 transform) {
+    if (!hasSize) return;
     if (_transform != null) {
       transform.multiply(getEffectiveTransform());
     }
