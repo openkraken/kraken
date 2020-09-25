@@ -537,11 +537,21 @@ class RenderFlexLayout extends RenderLayoutBox {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
+
+    RenderBoxModel childRenderBoxModel;
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+      childRenderBoxModel = _getChildRenderBoxModel(child);
+    } else if (child is RenderPositionHolder) {
+      // Position placeholder of flex item need to layout as its original renderBox
+      // so it needs to add margin to its extent
+      childRenderBoxModel = child.realDisplayedBox;
+    }
+
+    if (childRenderBoxModel != null) {
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
     }
+
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
@@ -569,11 +579,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     double marginHorizontal = 0;
     double marginVertical = 0;
 
+    RenderBoxModel childRenderBoxModel;
     if (child is RenderBoxModel) {
-      RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
+      childRenderBoxModel = _getChildRenderBoxModel(child);
+    } else if (child is RenderPositionHolder) {
+      // Position placeholder of flex item need to layout as its original renderBox
+      // so it needs to add margin to its extent
+      childRenderBoxModel = child.realDisplayedBox;
+    }
+
+    if (childRenderBoxModel != null) {
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
     }
+
     switch (_flexDirection) {
       case FlexDirection.row:
       case FlexDirection.rowReverse:
