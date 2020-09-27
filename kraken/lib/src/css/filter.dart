@@ -101,6 +101,7 @@ mixin CSSFilterEffectsMixin {
         double amount = double.tryParse(f.args.first) ?? 1;
         switch (f.name.toLowerCase()) {
           case GRAYSCALE:
+            // Formula from: https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent
             matrix5 = multiplyMatrix5(matrix5, <double>[
               (0.2126 + 0.7874 * (1 - amount)), (0.7152 - 0.7152  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
               (0.2126 - 0.2126 * (1 - amount)), (0.7152 + 0.2848  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
@@ -110,6 +111,7 @@ mixin CSSFilterEffectsMixin {
             ]);
             break;
           case SEPIA:
+            // Formula from: https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent
             matrix5 = multiplyMatrix5(matrix5, <double>[
               (0.393 + 0.607 * (1 - amount)), (0.769 - 0.769 * (1 - amount)), (0.189 - 0.189 * (1 - amount)), 0, 0,
               (0.349 - 0.349 * (1 - amount)), (0.686 + 0.314 * (1 - amount)), (0.168 - 0.168 * (1 - amount)), 0, 0,
