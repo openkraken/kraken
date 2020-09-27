@@ -156,7 +156,7 @@ describe('flexbox-position-absolute', () => {
 
     await matchViewportSnapshot();
   });
-  xit('015', async () => {
+  it('015', async () => {
     let abspos;
     let div;
     div = createElement(

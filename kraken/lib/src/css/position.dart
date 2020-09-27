@@ -148,7 +148,8 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
     childConstraints =
         childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
-  child.layout(childConstraints, parentUsesSize: true);
+  // Should create relayoutBoundary for positioned child.
+  child.layout(childConstraints, parentUsesSize: false);
 }
 
 // RenderPositionHolder may be affected by overflow: scroller offset.
@@ -204,14 +205,14 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
     double top = childParentData.top != null ?
       childParentData.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = parentSize.height - child.size.height - borderBottom - childMarginBottom -
+      top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
         ((childParentData.bottom) ?? 0);
     }
 
     double left = childParentData.left != null ?
       childParentData.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
     if (childParentData.left == null && childParentData.right != null) {
-      left = parentSize.width - child.size.width - borderRight - childMarginRight -
+      left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
         ((childParentData.right) ?? 0);
     }
 
@@ -248,7 +249,7 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
       if (marginLeft == AUTO) {
         double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
         double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
-        double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
+        double remainingSpace = parentSize.width - child.boxSize.width - leftValue - rightValue;
 
         if (marginRight == AUTO) {
           x = leftValue + remainingSpace / 2;
@@ -264,7 +265,7 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
       if (marginTop == AUTO) {
         double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
         double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
-        double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
+        double remainingSpace = parentSize.height - child.boxSize.height - topValue - bottomValue;
 
         if (marginBottom == AUTO) {
           y = topValue + remainingSpace / 2;

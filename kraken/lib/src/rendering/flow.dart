@@ -550,7 +550,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child.size);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
       child = childParentData.nextSibling;
     }
@@ -1069,7 +1069,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }
-  
+
   @override
   void paint(PaintingContext context, Offset offset) {
     basePaint(context, offset, (context, offset) {

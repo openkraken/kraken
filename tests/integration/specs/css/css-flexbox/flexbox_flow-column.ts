@@ -79,7 +79,7 @@ describe('flexbox_flow-column', () => {
 
     await matchViewportSnapshot();
   });
-  xit('reverse-wrap', async () => {
+  it('reverse-wrap', async () => {
     let div;
     div = createElement(
       'div',

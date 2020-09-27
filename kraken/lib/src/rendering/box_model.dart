@@ -669,6 +669,18 @@ class RenderBoxModel extends RenderBox with
     );
   }
 
+  // Box size equals to RenderBox.size to avoid flutter complain when read size property.
+  Size _boxSize;
+  Size get boxSize {
+    assert(_boxSize != null, 'box does not have laid out.');
+    return _boxSize;
+  }
+
+  set size(Size value) {
+    _boxSize = value;
+    super.size = value;
+  }
+
   Size getBoxSize(Size contentSize) {
     Size boxSize = _contentSize = contentConstraints.constrain(contentSize);
 
@@ -811,6 +823,15 @@ class RenderBoxModel extends RenderBox with
     if (positionedHolder != null) {
       // Make position holder preferred size equal to current element boundary size.
       positionedHolder.preferredSize = Size.copy(size);
+    }
+
+    // Positioned renderBoxModel will not trigger parent to relayout. Needs to update it's offset for itself.
+    if (parentData is RenderLayoutParentData) {
+      RenderLayoutParentData selfParentData = parentData;
+      RenderBoxModel parentBox = parent;
+      if (selfParentData.isPositioned && parentBox.hasSize) {
+        setPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
+      }
     }
   }
 
