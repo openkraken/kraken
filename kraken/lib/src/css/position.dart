@@ -181,17 +181,21 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
     childMarginLeft = childRenderBoxModel.marginLeft;
     childMarginRight = childRenderBoxModel.marginRight;
 
-  // Offset to global coordinate system of base
+  // Offset to global coordinate system of base.
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
     Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
-    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
-        parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root);
+
+    // If [renderPositionHolder] is not laid out, then base offset must be [Offset.zero].
+    Offset baseOffset = _isLaidOut(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
+        (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+          parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root))
+      : Offset.zero;
+
     // Positioned element is positioned relative to the edge of
     // padding box of containing block, so it needs to add border insets
     // when caculating offset
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-
     double borderLeft = borderEdge != null ? borderEdge.left : 0;
     double borderRight = borderEdge != null ? borderEdge.right : 0;
     double borderTop = borderEdge != null ? borderEdge.top : 0;
@@ -283,4 +287,18 @@ VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
       return VerticalAlign.bottom;
   }
   return VerticalAlign.baseline;
+}
+
+/// Check whether renderBox's parents is laied out.
+bool _isLaidOut(RenderBox renderer, { RenderObject ancestor }) {
+  while (renderer != ancestor) {
+    if (!renderer.hasSize) {
+      return false;
+    }
+
+    if (renderer.parent is RenderBox) {
+      renderer = renderer.parent;
+    }
+  }
+  return true;
 }
