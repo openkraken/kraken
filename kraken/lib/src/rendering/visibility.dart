@@ -15,10 +15,9 @@ mixin RenderVisibilityMixin on RenderBox {
     return _visibility != Visibility.hidden;
   }
 
-  void paintVisibility(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  void paintVisibility(PaintingContext context, Offset offset) {
     if (_visibility == Visibility.hidden) {
       return;
     }
-    callback(context, offset);
   }
 }

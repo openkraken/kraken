@@ -223,7 +223,8 @@ class RenderBoxModel extends RenderBox with
     RenderContentVisibility,
     RenderVisibilityMixin,
     RenderPointerListenerMixin,
-    RenderColorFilter {
+    RenderColorFilter,
+    RenderImageFilter{
   RenderBoxModel({
     this.targetId,
     this.style,
@@ -837,8 +838,9 @@ class RenderBoxModel extends RenderBox with
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (display != null && display == CSSDisplay.none) return;
 
-    paintVisibility(context, offset, (PaintingContext context, Offset offset) {
-      paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
+    paintVisibility(context, offset);
+    paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
+      paintImageFilter(context, offset, (PaintingContext context, Offsetoffset) {
         paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
           paintTransform(context, offset, (PaintingContext context, Offset offset) {
             paintOpacity(context, offset, (PaintingContext context, Offset offset) {
@@ -849,14 +851,13 @@ class RenderBoxModel extends RenderBox with
                   offset,
                   EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
                   decoration, (PaintingContext context, Offset offset) {
+
                 paintContentVisibility(context, offset, callback);
-              }
-              );
+              });
             });
           });
         });
       });
-
     });
   }
 

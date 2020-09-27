@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'dart:ui' show ImageFilter;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -10,8 +12,10 @@ import 'package:kraken/rendering.dart';
 
 const String GRAYSCALE = 'grayscale';
 const String SEPIA = 'sepia';
+const String BLUR = 'blur';
 
-List<double> multiplyMatrix5(List<double> a, List<double> b) {
+// Calc 5x5 matrix multiplcation.
+List<double> _multiplyMatrix5(List<double> a, List<double> b) {
   if (a == null || b == null) {
     return a ?? b;
   }
@@ -91,18 +95,19 @@ mixin CSSFilterEffectsMixin {
 
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
-  static ColorFilter _parseColorFilters(String input) {
-    List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(input);
+  static ColorFilter _parseColorFilters(List<CSSFunctionalNotation> functions) {
     List<double> matrix5 = null;
     if (functions != null && functions.length > 0) {
-      List<ColorFilter> colorFilters = List<ColorFilter>();
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         double amount = double.tryParse(f.args.first) ?? 1;
+        // amount should be range [0, 1]
+        amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
+
         switch (f.name.toLowerCase()) {
           case GRAYSCALE:
             // Formula from: https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent
-            matrix5 = multiplyMatrix5(matrix5, <double>[
+            matrix5 = _multiplyMatrix5(matrix5, <double>[
               (0.2126 + 0.7874 * (1 - amount)), (0.7152 - 0.7152  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
               (0.2126 - 0.2126 * (1 - amount)), (0.7152 + 0.2848  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
               (0.2126 - 0.2126 * (1 - amount)), (0.7152 - 0.7152  * (1 - amount)), (0.0722 + 0.9278 * (1 - amount)), 0, 0,
@@ -112,7 +117,7 @@ mixin CSSFilterEffectsMixin {
             break;
           case SEPIA:
             // Formula from: https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent
-            matrix5 = multiplyMatrix5(matrix5, <double>[
+            matrix5 = _multiplyMatrix5(matrix5, <double>[
               (0.393 + 0.607 * (1 - amount)), (0.769 - 0.769 * (1 - amount)), (0.189 - 0.189 * (1 - amount)), 0, 0,
               (0.349 - 0.349 * (1 - amount)), (0.686 + 0.314 * (1 - amount)), (0.168 - 0.168 * (1 - amount)), 0, 0,
               (0.272 - 0.272 * (1 - amount)), (0.534 - 0.534 * (1 - amount)), (0.131 + 0.869 * (1 - amount)), 0, 0,
@@ -129,16 +134,38 @@ mixin CSSFilterEffectsMixin {
     return matrix5 != null ? ColorFilter.matrix(matrix5.sublist(0, 20)) : null;
   }
 
+  // Get the image filter.
+  static ImageFilter _parseImageFilters(List<CSSFunctionalNotation> functions) {
+    if (functions != null && functions.length > 0) {
+      for (int i = 0; i < functions.length; i ++) {
+        CSSFunctionalNotation f = functions[i];
+        switch (f.name.toLowerCase()) {
+          case BLUR:
+            double amount = CSSLength.parseLength(f.args.first);
+            return ImageFilter.blur(sigmaX: amount, sigmaY: amount);
+        }
+      }
+    }
+    return null;
+  }
+
   void updateFilterEffects(RenderBoxModel renderBoxModel, String filter) {
     assert(renderBoxModel != null);
-
-    ColorFilter colorFilter = _parseColorFilters(filter);
+    List<CSSFunctionalNotation> functions = CSSFunction.parseFunction(filter);
+    ColorFilter colorFilter = _parseColorFilters(functions);
     if (colorFilter != null) {
       renderBoxModel.colorFilter = colorFilter;
-    } else {
-      if (!kReleaseMode) {
+    }
+
+    ImageFilter imageFilter = _parseImageFilters(functions);
+    if (imageFilter != null) {
+      renderBoxModel.imageFilter = imageFilter;
+    }
+
+    if (!kReleaseMode) {
+      if (colorFilter == null && imageFilter == null) {
         print('[WARNING] Parse CSS Filter failed or not supported: "$filter"');
-        String supportedFilters = '$GRAYSCALE $SEPIA';
+        String supportedFilters = '$GRAYSCALE $SEPIA $BLUR';
         print('Kraken only support following filters: $supportedFilters');
       }
     }

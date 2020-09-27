@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:kraken/css.dart';
 
 mixin RenderColorFilter on RenderBox {
   ColorFilter _colorFilter;
@@ -17,6 +18,29 @@ mixin RenderColorFilter on RenderBox {
   void paintColorFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_colorFilter != null) {
       context.pushColorFilter(offset, _colorFilter, callback);
+    } else {
+      callback(context, offset);
+    }
+  }
+}
+
+mixin RenderImageFilter on RenderBox {
+  ImageFilter _imageFilter;
+  get imageFilter => _imageFilter;
+  set imageFilter(ImageFilter value) {
+    if (_imageFilter != value) {
+      _imageFilter = value;
+      markNeedsPaint();
+    }
+  }
+
+  ImageFilterLayer _imageFilterLayer;
+
+  void paintImageFilter(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    if (_imageFilter != null) {
+      _imageFilterLayer ??= ImageFilterLayer();
+      _imageFilterLayer.imageFilter = imageFilter;
+      context.pushLayer(_imageFilterLayer, callback, offset);
     } else {
       callback(context, offset);
     }
