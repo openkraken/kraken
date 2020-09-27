@@ -678,7 +678,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Layout non positioned element and its placeholder
     _layoutChildren(null);
 
-    // Set offset of positioned elemen
+    // Set offset of positioned element
     child = firstChild;
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
@@ -686,7 +686,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && childParentData.isPositioned) {
         setPositionedChildOffset(this, child, size, borderEdge);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child.size);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
       child = childParentData.nextSibling;
     }
