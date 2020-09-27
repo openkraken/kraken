@@ -885,10 +885,14 @@ class RenderFlexLayout extends RenderLayoutBox {
         'flexShrink': _getFlexShrink(child),
       };
 
+      bool isAxisHorizontalDirection = CSSFlex.isHorizontalFlexDirection(flexDirection);
+      double lineLimit = isAxisHorizontalDirection ? flexLineLimit : heightLimit;
+      bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > lineLimit;
+
       // calculate flex line
       if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
-          _effectiveChildCount > 0 &&
-          (runMainAxisExtent + childMainAxisExtent > flexLineLimit)) {
+          _effectiveChildCount > 0 && isExceedFlexLineLimit) {
+
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
 
