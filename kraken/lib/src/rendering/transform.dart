@@ -74,7 +74,7 @@ mixin RenderTransformMixin on RenderBox {
   }
 
   void applyEffectiveTransform(RenderBox child, Matrix4 transform) {
-    if (hasSize && _transform != null) {
+    if (_transform != null) {
       transform.multiply(getEffectiveTransform());
     }
   }
