@@ -289,7 +289,7 @@ VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
   return VerticalAlign.baseline;
 }
 
-/// Check whether renderBox's parents is laied out.
+/// Check whether render object parent is layout.
 bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
   while (renderer != null && renderer != ancestor) {
     if (renderer is RenderBox) {
