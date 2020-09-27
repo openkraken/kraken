@@ -883,12 +883,20 @@ class RenderBoxModel extends RenderBox with
     super.detach();
   }
 
+  Offset getTotalScrollOffset() {
+    double top = scrollTop;
+    double left = scrollLeft;
+    AbstractNode parentNode = parent;
+    while ((parentNode is RenderBoxModel)) {
+      top += (parentNode as RenderBoxModel).scrollTop;
+      left += (parentNode as RenderBoxModel).scrollLeft;
+      parentNode = parentNode.parent;
+    }
+    return Offset(left, top);
+  }
+
   @override
   bool hitTest(BoxHitTestResult result, { @required Offset position }) {
-    if (clipX || clipY) {
-      position += Offset(scrollLeft, scrollTop);
-    }
-
     if (!contentVisibilityHitTest(result, position: position)) {
       return false;
     }
@@ -923,11 +931,23 @@ class RenderBoxModel extends RenderBox with
       }
       return true;
     }());
-    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
+    bool isHit = result.addWithPaintOffset(
+        offset: Offset(-scrollLeft, -scrollTop),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          CSSPositionType positionType = resolveCSSPosition(style[POSITION]);
+          if (positionType == CSSPositionType.fixed) {
+            position -= getTotalScrollOffset();
+          }
+
+          if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+            result.add(BoxHitTestEntry(this, position));
+            return true;
+          }
+          return false;
+        });
+
+    return isHit;
   }
 
   @override
