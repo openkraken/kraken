@@ -190,8 +190,8 @@ class RenderLayoutBox extends RenderBoxModel
       // Use child's height if child has no baseline and not block-level
       // Text box always has baseline
       if (childDistance == null &&
-        isChildInline &&
-        child is RenderBoxModel && child.contentSize != null
+          isChildInline &&
+          child is RenderBoxModel && child.contentSize != null
       ) {
         // Flutter only allow access size of direct children, so cannot use child.size
         Size childSize = child.getBoxSize(child.contentSize);
@@ -213,22 +213,23 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 class RenderBoxModel extends RenderBox with
-  RenderPaddingMixin,
-  RenderMarginMixin,
-  RenderBoxDecorationMixin,
-  RenderTransformMixin,
-  RenderOverflowMixin,
-  RenderOpacityMixin,
-  RenderIntersectionObserverMixin,
-  RenderContentVisibility,
-  RenderVisibilityMixin,
-  RenderPointerListenerMixin {
+    RenderPaddingMixin,
+    RenderMarginMixin,
+    RenderBoxDecorationMixin,
+    RenderTransformMixin,
+    RenderOverflowMixin,
+    RenderOpacityMixin,
+    RenderIntersectionObserverMixin,
+    RenderContentVisibility,
+    RenderVisibilityMixin,
+    RenderPointerListenerMixin,
+    RenderColorFilter {
   RenderBoxModel({
     this.targetId,
     this.style,
     this.elementManager,
   }) : assert(targetId != null),
-    super();
+        super();
 
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
@@ -836,23 +837,26 @@ class RenderBoxModel extends RenderBox with
   void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (display != null && display == CSSDisplay.none) return;
 
-    paintVisibility(context, offset, (context, offset) {
-      paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
-        paintTransform(context, offset, (PaintingContext context, Offset offset) {
-          paintOpacity(context, offset, (context, offset) {
-            EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
-            paintDecoration(context, offset, resolvedPadding);
-            paintOverflow(
-                context,
-                offset,
-                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                decoration, (context, offset) {
-                  paintContentVisibility(context, offset, callback);
-                }
-            );
+    paintVisibility(context, offset, (PaintingContext context, Offset offset) {
+      paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
+        paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
+          paintTransform(context, offset, (PaintingContext context, Offset offset) {
+            paintOpacity(context, offset, (PaintingContext context, Offset offset) {
+              EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+              paintDecoration(context, offset, resolvedPadding);
+              paintOverflow(
+                  context,
+                  offset,
+                  EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
+                  decoration, (PaintingContext context, Offset offset) {
+                paintContentVisibility(context, offset, callback);
+              }
+              );
+            });
           });
         });
       });
+
     });
   }
 
