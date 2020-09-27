@@ -187,7 +187,7 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
     Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
 
     // If [renderPositionHolder] is not laid out, then base offset must be [Offset.zero].
-    Offset baseOffset = _isLaidOut(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
+    Offset baseOffset = _isLayout(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
         (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
           parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root))
       : Offset.zero;
@@ -290,15 +290,23 @@ VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
 }
 
 /// Check whether renderBox's parents is laied out.
-bool _isLaidOut(RenderBox renderer, { RenderObject ancestor }) {
-  while (renderer != ancestor) {
-    if (!renderer.hasSize) {
-      return false;
+bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
+  while (renderer != null && renderer != ancestor) {
+    if (renderer is RenderBox) {
+      // Whether this render box has undergone layout and has a [size].
+      if (!renderer.hasSize) {
+        return false;
+      }
+    } else if (renderer is RenderSliver) {
+      // The geometry of a sliver should be set only during the sliver's
+      // [performLayout] or [performResize] functions.
+      if (renderer.geometry == null) {
+        return false;
+      }
     }
 
-    if (renderer.parent is RenderBox) {
-      renderer = renderer.parent;
-    }
+    renderer = renderer.parent;
   }
+
   return true;
 }
