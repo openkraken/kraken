@@ -193,8 +193,8 @@ class RenderLayoutBox extends RenderBoxModel
       // Use child's height if child has no baseline and not block-level
       // Text box always has baseline
       if (childDistance == null &&
-        isChildInline &&
-        child is RenderBoxModel && child.contentSize != null
+          isChildInline &&
+          child is RenderBoxModel && child.contentSize != null
       ) {
         // Flutter only allow access size of direct children, so cannot use child.size
         Size childSize = child.getBoxSize(child.contentSize);
@@ -216,22 +216,24 @@ class RenderLayoutBox extends RenderBoxModel
 }
 
 class RenderBoxModel extends RenderBox with
-  RenderPaddingMixin,
-  RenderMarginMixin,
-  RenderBoxDecorationMixin,
-  RenderTransformMixin,
-  RenderOverflowMixin,
-  RenderOpacityMixin,
-  RenderIntersectionObserverMixin,
-  RenderContentVisibility,
-  RenderVisibilityMixin,
-  RenderPointerListenerMixin {
+    RenderPaddingMixin,
+    RenderMarginMixin,
+    RenderBoxDecorationMixin,
+    RenderTransformMixin,
+    RenderOverflowMixin,
+    RenderOpacityMixin,
+    RenderIntersectionObserverMixin,
+    RenderContentVisibility,
+    RenderVisibilityMixin,
+    RenderPointerListenerMixin,
+    RenderColorFilter,
+    RenderImageFilter{
   RenderBoxModel({
     this.targetId,
     this.style,
     this.elementManager,
   }) : assert(targetId != null),
-    super();
+        super();
 
   @override
   bool get alwaysNeedsCompositing => intersectionAlwaysNeedsCompositing() || opacityAlwaysNeedsCompositing();
@@ -857,27 +859,57 @@ class RenderBoxModel extends RenderBox with
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
-  void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    if (display != null && display == CSSDisplay.none) return;
+  bool get isCSSDisplayNone {
+    return display != null && display == CSSDisplay.none;
+  }
 
-    paintVisibility(context, offset, (context, offset) {
-      paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
-        paintTransform(context, offset, (PaintingContext context, Offset offset) {
-          paintOpacity(context, offset, (context, offset) {
-            EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
-            paintDecoration(context, offset, resolvedPadding);
-            paintOverflow(
-                context,
-                offset,
-                EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                decoration, (context, offset) {
-                  paintContentVisibility(context, offset, callback);
-                }
-            );
-          });
-        });
-      });
-    });
+  /// [RenderLayoutBox] real paint things after basiclly paint box model.
+  /// Override which to paint layout or intrinsic things.
+  /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
+  void performPaint(PaintingContext context, Offset offset) {
+    throw new FlutterError('Please impl performPaint of $runtimeType.');
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+
+    paintBoxModel(context, offset);
+  }
+
+  void paintBoxModel(PaintingContext context, Offset offset) {
+    paintColorFilter(context, offset, _chainPaintImageFilter);
+  }
+
+  void _chainPaintImageFilter(PaintingContext context, Offset offset) {
+    paintImageFilter(context, offset, _chainPaintIntersectionObserver);
+  }
+
+  void _chainPaintIntersectionObserver(PaintingContext context, Offset offset) {
+    paintIntersectionObserver(context, offset, _chainPaintTransform);
+  }
+
+  void _chainPaintTransform(PaintingContext context, Offset offset) {
+    paintTransform(context, offset, _chainPaintOpacity);
+  }
+
+  void _chainPaintOpacity(PaintingContext context, Offset offset) {
+    paintOpacity(context, offset, _chainPaintDecoration);
+  }
+
+  void _chainPaintDecoration(PaintingContext context, Offset offset) {
+    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    paintDecoration(context, offset, resolvedPadding);
+    _chainPaintOverflow(context, offset);
+  }
+
+  void _chainPaintOverflow(PaintingContext context, Offset offset) {
+    EdgeInsets borderEdge = EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft);
+    paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
+  }
+
+  void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
+    paintContentVisibility(context, offset, performPaint);
   }
 
   @override

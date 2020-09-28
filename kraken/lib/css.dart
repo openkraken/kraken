@@ -7,6 +7,7 @@ export 'src/css/background.dart';
 export 'src/css/box.dart';
 export 'src/css/content_visibility.dart';
 export 'src/css/flexbox.dart';
+export 'src/css/filter.dart';
 export 'src/css/opacity.dart';
 export 'src/css/overflow.dart';
 export 'src/css/position.dart';

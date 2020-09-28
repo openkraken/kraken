@@ -90,9 +90,9 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     });
   }
 
-  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_onIntersectionChange == null) {
-      superPaint(context, offset);
+      callback(context, offset);
       return;
     }
 
@@ -104,7 +104,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       _intersectionObserverLayer.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer, superPaint, offset);
+    context.pushLayer(_intersectionObserverLayer, callback, offset);
   }
 }
 
