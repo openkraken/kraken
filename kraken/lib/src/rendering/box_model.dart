@@ -859,10 +859,13 @@ class RenderBoxModel extends RenderBox with
     maxScrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
-  void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
-    if (display != null && display == CSSDisplay.none) return;
+  bool get isCSSDisplayNone {
+    return display != null && display == CSSDisplay.none;
+  }
 
-    paintVisibility(context, offset);
+  void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+
     paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
       paintImageFilter(context, offset, (PaintingContext context, Offset offset) {
         paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
