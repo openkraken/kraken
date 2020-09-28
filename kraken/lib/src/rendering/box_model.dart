@@ -863,29 +863,49 @@ class RenderBoxModel extends RenderBox with
     return display != null && display == CSSDisplay.none;
   }
 
-  void basePaint(PaintingContext context, Offset offset, PaintingContextCallback callback) {
+  /// [RenderLayoutBox] real paint things after basiclly paint box model.
+  /// Override which to paint layout or intrinsic things.
+  /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
+  void performPaint(PaintingContext context, Offset offset) {
+    throw new FlutterError('Please impl performPaint of $runtimeType.');
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    paintColorFilter(context, offset, _chainPaintImageFilter);
+  }
 
-    paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
-      paintImageFilter(context, offset, (PaintingContext context, Offset offset) {
-        paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
-          paintTransform(context, offset, (PaintingContext context, Offset offset) {
-            paintOpacity(context, offset, (PaintingContext context, Offset offset) {
-              EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
-              paintDecoration(context, offset, resolvedPadding);
-              paintOverflow(
-                  context,
-                  offset,
-                  EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft),
-                  decoration, (PaintingContext context, Offset offset) {
+  void _chainPaintImageFilter(PaintingContext context, Offset offset) {
+    paintImageFilter(context, offset, _chainPaintIntersectionObserver);
+  }
 
-                paintContentVisibility(context, offset, callback);
-              });
-            });
-          });
-        });
-      });
-    });
+  void _chainPaintIntersectionObserver(PaintingContext context, Offset offset) {
+    paintIntersectionObserver(context, offset, _chainPaintTransform);
+  }
+
+  void _chainPaintTransform(PaintingContext context, Offset offset) {
+    paintTransform(context, offset, _chainPaintOpacity);
+  }
+
+  void _chainPaintOpacity(PaintingContext context, Offset offset) {
+    paintOpacity(context, offset, _chainPaintDecoration);
+  }
+
+  void _chainPaintDecoration(PaintingContext context, Offset offset) {
+    EdgeInsets resolvedPadding = padding != null ? padding.resolve(TextDirection.ltr) : null;
+    paintDecoration(context, offset, resolvedPadding);
+    _chainPaintOverflow(context, offset);
+  }
+
+  void _chainPaintOverflow(PaintingContext context, Offset offset) {
+    paintOverflow(context, offset,
+        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft), decoration,
+        _chainPaintContentVisibility);
+  }
+
+  void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
+    paintContentVisibility(context, offset, performPaint);
   }
 
   @override

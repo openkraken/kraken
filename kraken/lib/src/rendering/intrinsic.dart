@@ -120,18 +120,18 @@ class RenderIntrinsic extends RenderBoxModel
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    basePaint(context, offset, (PaintingContext context, Offset offset) {
-      if (padding != null) {
-        offset += Offset(paddingLeft, paddingTop);
-      }
+  void performPaint(PaintingContext context, Offset offset) {
+    if (padding != null) {
+      offset += Offset(paddingLeft, paddingTop);
+    }
 
-      if (borderEdge != null) {
-        offset += Offset(borderLeft, borderTop);
-      }
+    if (borderEdge != null) {
+      offset += Offset(borderLeft, borderTop);
+    }
 
-      if (child != null) context.paintChild(child, offset);
-    });
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
   }
 
   RenderSelfRepaintIntrinsic toSelfRepaint() {

@@ -100,8 +100,10 @@ mixin CSSFilterEffectsMixin {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];
         double amount = double.tryParse(f.args.first) ?? 1;
-        // amount should be range [0, 1]
-        amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
+        double oneMinusAmount = 1 - amount;
+
+        // oneMinusAmount should be range [0, 1]
+        oneMinusAmount = oneMinusAmount > 1 ? 1 : (oneMinusAmount < 0 ? 0 : oneMinusAmount);
 
         switch (f.name.toLowerCase()) {
           case GRAYSCALE:
