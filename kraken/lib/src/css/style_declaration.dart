@@ -261,28 +261,28 @@ class CSSStyleDeclaration {
 
     switch (propertyName) {
       case PADDING:
-        CSSStyleProperty.removeShorthandPadding(_properties);
+        CSSStyleProperty.removeShorthandPadding(this);
         break;
       case MARGIN:
-        CSSStyleProperty.removeShorthandMargin(_properties);
+        CSSStyleProperty.removeShorthandMargin(this);
         break;
       case BACKGROUND:
-        CSSStyleProperty.removeShorthandBackground(_properties);
+        CSSStyleProperty.removeShorthandBackground(this);
         break;
       case BORDER_RADIUS:
-        CSSStyleProperty.removeShorthandBorderRadius(_properties);
+        CSSStyleProperty.removeShorthandBorderRadius(this);
         break;
       case OVERFLOW:
-        CSSStyleProperty.removeShorthandOverflow(_properties);
+        CSSStyleProperty.removeShorthandOverflow(this);
         break;
       case FONT:
-        CSSStyleProperty.removeShorthandFont(_properties);
+        CSSStyleProperty.removeShorthandFont(this);
         break;
       case FLEX:
-        CSSStyleProperty.removeShorthandFlex(_properties);
+        CSSStyleProperty.removeShorthandFlex(this);
         break;
       case FLEX_FLOW:
-        CSSStyleProperty.removeShorthandFlexFlow(_properties);
+        CSSStyleProperty.removeShorthandFlexFlow(this);
         break;
       case BORDER:
       case BORDER_TOP:
@@ -292,13 +292,13 @@ class CSSStyleDeclaration {
       case BORDER_COLOR:
       case BORDER_STYLE:
       case BORDER_WIDTH:
-        CSSStyleProperty.removeShorthandBorder(_properties, propertyName);
+        CSSStyleProperty.removeShorthandBorder(this, propertyName);
         break;
       case TRANSITION:
-        CSSStyleProperty.removeShorthandTransition(_properties);
+        CSSStyleProperty.removeShorthandTransition(this);
         break;
       case TEXT_DECORATION:
-        CSSStyleProperty.removeShorthandTextDecoration(_properties);
+        CSSStyleProperty.removeShorthandTextDecoration(this);
         break;
     }
 

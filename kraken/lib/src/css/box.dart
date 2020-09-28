@@ -69,10 +69,12 @@ mixin CSSDecoratedBoxMixin {
     BoxDecoration oldBox = renderBoxModel.decoration;
 
     if (property == BACKGROUND_COLOR || property == COLOR) {
-      Color bgColor = CSSBackground.getBackgroundColor(style);
+      // If change bg color from some color to null, which must be explicitly transparent.
+      Color bgColor = CSSBackground.getBackgroundColor(style) ?? CSSColor.transparent;
       // If there has gradient, background color will not work
-      if (bgColor != null && oldBox.gradient == null) {
-        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(color: bgColor);
+      if (oldBox.gradient == null) {
+        BoxDecoration updateDecoration = renderBoxModel.decoration.copyWith(color: bgColor);
+        renderBoxModel.decoration = updateDecoration;
       }
       return;
     }
