@@ -1071,29 +1071,27 @@ class RenderFlowLayout extends RenderLayoutBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    basePaint(context, offset, (context, offset) {
-      if (needsSortChildren) {
-        if (!isChildrenSorted) {
-          sortChildrenByZIndex();
-        }
-        for (int i = 0; i < sortedChildren.length; i ++) {
-          RenderObject child = sortedChildren[i];
-          if (child is! RenderPositionHolder) {
-            context.paintChild(child, getChildScrollOffset(child, offset));
-          }
-        }
-      } else {
-        RenderObject child = firstChild;
-        while (child != null) {
-          final RenderLayoutParentData childParentData = child.parentData;
-          if (child is! RenderPositionHolder) {
-            context.paintChild(child, getChildScrollOffset(child, offset));
-          }
-          child = childParentData.nextSibling;
+  void performPaint(PaintingContext context, Offset offset) {
+    if (needsSortChildren) {
+      if (!isChildrenSorted) {
+        sortChildrenByZIndex();
+      }
+      for (int i = 0; i < sortedChildren.length; i ++) {
+        RenderObject child = sortedChildren[i];
+        if (child is! RenderPositionHolder) {
+          context.paintChild(child, getChildScrollOffset(child, offset));
         }
       }
-    });
+    } else {
+      RenderObject child = firstChild;
+      while (child != null) {
+        final RenderLayoutParentData childParentData = child.parentData;
+        if (child is! RenderPositionHolder) {
+          context.paintChild(child, getChildScrollOffset(child, offset));
+        }
+        child = childParentData.nextSibling;
+      }
+    }
   }
 
   @override

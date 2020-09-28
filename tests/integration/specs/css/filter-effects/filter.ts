@@ -1,4 +1,4 @@
-fdescribe('CSS Filter Effects', () => {
+describe('CSS Filter Effects', () => {
   it('grayscale', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
