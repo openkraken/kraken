@@ -1,4 +1,4 @@
-describe('CSS Filter Effects', () => {
+fdescribe('CSS Filter Effects', () => {
   it('grayscale', async () => {
     let div = document.createElement('div');
     setElementStyle(div, {
@@ -7,9 +7,9 @@ describe('CSS Filter Effects', () => {
       background: 'left top / contain repeat url(assets/rabbit.png)'
     });
     document.body.appendChild(div);
-    document.body.style.filter = 'grayscale(1)';
+    div.style.filter = 'grayscale(1)';
     await sleep(0.5);
-    await matchElementImageSnapshot(div);
+    await matchViewportSnapshot();
   });
 
   it('blur', async () => {
