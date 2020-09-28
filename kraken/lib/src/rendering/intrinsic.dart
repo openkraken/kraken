@@ -119,6 +119,14 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
+  /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
+  /// override it to layout box model paint.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+    paintBoxModel(context, offset);
+  }
+
   @override
   void performPaint(PaintingContext context, Offset offset) {
     if (padding != null) {

@@ -873,6 +873,11 @@ class RenderBoxModel extends RenderBox with
   @override
   void paint(PaintingContext context, Offset offset) {
     if (isCSSDisplayNone || isCSSVisibilityHidden) return;
+
+    paintBoxModel(context, offset);
+  }
+
+  void paintBoxModel(PaintingContext context, Offset offset) {
     paintColorFilter(context, offset, _chainPaintImageFilter);
   }
 
@@ -899,9 +904,8 @@ class RenderBoxModel extends RenderBox with
   }
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
-    paintOverflow(context, offset,
-        EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft), decoration,
-        _chainPaintContentVisibility);
+    EdgeInsets borderEdge = EdgeInsets.fromLTRB(borderLeft, borderTop, borderRight, borderLeft);
+    paintOverflow(context, offset, borderEdge, decoration, _chainPaintContentVisibility);
   }
 
   void _chainPaintContentVisibility(PaintingContext context, Offset offset) {
