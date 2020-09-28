@@ -304,7 +304,7 @@ class CSSSizing {
             ? element.defaultDisplay
             : element.style[DISPLAY]
     );
-    CSSPositionType position = resolvePositionFromStyle(element.style);
+    CSSPositionType position = CSSPositionedLayout.parsePositionType(element.style[POSITION]);
 
     // Display as inline-block when element is positioned
     if (position == CSSPositionType.absolute || position == CSSPositionType.fixed) {

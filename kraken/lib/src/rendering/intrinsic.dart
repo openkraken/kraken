@@ -26,37 +26,12 @@ class RenderIntrinsic extends RenderBoxModel
   void setupParentData(RenderBox child) {
     if (child.parentData is! RenderLayoutParentData) {
       if (child is RenderBoxModel) {
-        child.parentData = getPositionParentDataFromStyle(child.style);
+        RenderLayoutParentData parentData = RenderLayoutParentData();
+        child.parentData = CSSPositionedLayout.getPositionParentData(child.style, parentData);;
       } else {
         child.parentData = RenderLayoutParentData();
       }
     }
-  }
-
-  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style) {
-    RenderLayoutParentData parentData = RenderLayoutParentData();
-    CSSPositionType positionType = resolvePositionFromStyle(style);
-    parentData.position = positionType;
-
-    if (style.contains('top')) {
-      parentData.top = CSSLength.toDisplayPortValue(style['top']);
-    }
-    if (style.contains('left')) {
-      parentData.left = CSSLength.toDisplayPortValue(style['left']);
-    }
-    if (style.contains('bottom')) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
-    }
-    if (style.contains('right')) {
-      parentData.right = CSSLength.toDisplayPortValue(style['right']);
-    }
-    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']) ?? 0;
-
-    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
-    return parentData;
   }
 
   @override

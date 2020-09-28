@@ -173,7 +173,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       child.parentData = RenderFlexParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = getPositionParentDataFromStyle(child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child.style, child.parentData);
     }
   }
 
@@ -668,7 +668,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderFlexParentData childParentData = child.parentData;
       // Layout placeholder of positioned element(absolute/fixed) in new layer
       if (childParentData.isPositioned) {
-        layoutPositionedChild(element, this, child);
+        CSSPositionedLayout.layoutPositionedChild(element, this, child);
       } else if (child is RenderPositionHolder && isPlaceholderPositioned(child)) {
         _layoutChildren(child);
       }
@@ -684,7 +684,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        setPositionedChildOffset(this, child, size, borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, borderEdge);
 
         setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
@@ -710,7 +710,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   bool isPlaceholderPositioned(RenderObject child) {
     if (child is RenderPositionHolder) {
       RenderBoxModel realDisplayedBox = child.realDisplayedBox;
-      CSSPositionType positionType = resolvePositionFromStyle(realDisplayedBox.style);
+      CSSPositionType positionType = CSSPositionedLayout.parsePositionType(realDisplayedBox.style[POSITION]);
       if (positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed) {
         return true;
       }
@@ -1672,7 +1672,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
 
         /// Apply position relative offset change
-        applyRelativeOffset(relativeOffset, child, childStyle);
+        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
 
         // Need to substract start margin of main axis when calculating next child's start position
         if (flipMainAxis) {
@@ -1801,31 +1801,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<JustifyContent>('justifyContent', justifyContent));
     properties.add(DiagnosticsProperty<AlignItems>('alignItems', alignItems));
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
-  }
-
-  RenderFlexParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderFlexParentData parentData) {
-    CSSPositionType positionType = resolvePositionFromStyle(style);
-    parentData.position = positionType;
-
-    if (style.contains('top')) {
-      parentData.top = CSSLength.toDisplayPortValue(style['top']);
-    }
-    if (style.contains('left')) {
-      parentData.left = CSSLength.toDisplayPortValue(style['left']);
-    }
-    if (style.contains('bottom')) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
-    }
-    if (style.contains('right')) {
-      parentData.right = CSSLength.toDisplayPortValue(style['right']);
-    }
-    parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']);
-
-    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
-    return parentData;
   }
 
   /// Convert [RenderFlexLayout] to [RenderFlowLayout]
