@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:ui' show ImageFilter;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -81,11 +80,11 @@ List<double> _multiplyMatrix5(List<double> a, List<double> b) {
   var b44 = b[24];
 
   return [
-    a00*b00 + a00*b01 + a00*b02 + a00*b03 + a00*b04, a01*b00 + a01*b01 + a01*b02 + a01*b03 + a01*b04, a02*b00 + a02*b01 + a02*b02 + a02*b03 + a02*b04, a03*b00 + a03*b01 + a03*b02 + a03*b03 + a03*b04, a04*b00 + a04*b01 + a04*b02 + a04*b03 + a04*b04,
-    a10*b00 + a10*b01 + a10*b02 + a10*b03 + a10*b04, a11*b00 + a11*b01 + a11*b02 + a11*b03 + a11*b04, a12*b00 + a12*b01 + a12*b02 + a12*b03 + a12*b04, a13*b00 + a13*b01 + a13*b02 + a13*b03 + a13*b04, a14*b00 + a14*b01 + a14*b02 + a14*b03 + a14*b04,
-    a20*b00 + a20*b01 + a20*b02 + a20*b03 + a20*b04, a21*b00 + a21*b01 + a21*b02 + a21*b03 + a21*b04, a22*b00 + a22*b01 + a22*b02 + a22*b03 + a22*b04, a23*b00 + a23*b01 + a23*b02 + a23*b03 + a23*b04, a24*b00 + a24*b01 + a24*b02 + a24*b03 + a24*b04,
-    a30*b00 + a30*b01 + a30*b02 + a30*b03 + a30*b04, a31*b00 + a31*b01 + a31*b02 + a31*b03 + a31*b04, a32*b00 + a32*b01 + a32*b02 + a32*b03 + a32*b04, a33*b00 + a33*b01 + a33*b02 + a33*b03 + a33*b04, a34*b00 + a34*b01 + a34*b02 + a34*b03 + a34*b04,
-    a40*b00 + a40*b01 + a40*b02 + a40*b03 + a40*b04, a41*b00 + a41*b01 + a41*b02 + a41*b03 + a41*b04, a42*b00 + a42*b01 + a42*b02 + a42*b03 + a42*b04, a43*b00 + a43*b01 + a43*b02 + a43*b03 + a43*b04, a44*b00 + a44*b01 + a44*b02 + a44*b03 + a44*b04,
+    a00*b00+a01*b10+a02*b20+a03*b30+a04*b40, a00*b01+a01*b11+a02*b21+a03*b31+a04*b41, a00*b02+a01*b12+a02*b22+a03*b32+a04*b42, a00*b03+a01*b13+a02*b23+a03*b33+a04*b43, a00*b04+a01*b14+a02*b24+a03*b34+a04*b44,
+    a10*b00+a11*b10+a12*b20+a13*b30+a14*b40, a10*b01+a11*b11+a12*b21+a13*b31+a14*b41, a10*b02+a11*b12+a12*b22+a13*b32+a14*b42, a10*b03+a11*b13+a12*b23+a13*b33+a14*b43, a10*b04+a11*b14+a12*b24+a13*b34+a14*b44,
+    a20*b00+a21*b10+a22*b20+a23*b30+a24*b40, a20*b01+a21*b11+a22*b21+a23*b31+a24*b41, a20*b02+a21*b12+a22*b22+a23*b32+a24*b42, a20*b03+a21*b13+a22*b23+a23*b33+a24*b43, a20*b04+a21*b14+a22*b24+a23*b34+a24*b44,
+    a30*b00+a31*b10+a32*b20+a33*b30+a34*b40, a30*b01+a31*b11+a32*b21+a33*b31+a34*b41, a30*b02+a31*b12+a32*b22+a33*b32+a34*b42, a30*b03+a31*b13+a32*b23+a33*b33+a34*b43, a30*b04+a31*b14+a32*b24+a33*b34+a34*b44,
+    a40*b00+a41*b10+a42*b20+a43*b30+a44*b40, a40*b01+a41*b11+a42*b21+a43*b31+a44*b41, a40*b02+a41*b12+a42*b22+a43*b32+a44*b42, a40*b03+a41*b13+a42*b23+a43*b33+a44*b43, a40*b04+a41*b14+a42*b24+a43*b34+a44*b44,
   ];
 }
 
