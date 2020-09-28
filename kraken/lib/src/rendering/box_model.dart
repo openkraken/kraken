@@ -890,11 +890,10 @@ class RenderBoxModel extends RenderBox with
     double top = scrollTop;
     double left = scrollLeft;
     AbstractNode parentNode = parent;
-    while (parentNode != null) {
-      if (parentNode is RenderBoxModel) {
-        top += parentNode.scrollTop;
-        left += parentNode.scrollLeft;
-      }
+    while (parentNode is RenderBoxModel) {
+      top += (parentNode as RenderBoxModel).scrollTop;
+      left += (parentNode as RenderBoxModel).scrollLeft;
+
       parentNode = parentNode.parent;
     }
     return Offset(left, top);
