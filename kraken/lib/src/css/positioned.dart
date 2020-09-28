@@ -126,6 +126,28 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child
   return Offset(x ?? 0, y ?? 0);
 }
 
+/// Check whether render object parent is layout.
+bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
+  while (renderer != null && renderer != ancestor) {
+    if (renderer is RenderBox) {
+      // Whether this render box has undergone layout and has a [size].
+      if (!renderer.hasSize) {
+        return false;
+      }
+    } else if (renderer is RenderSliver) {
+      // The geometry of a sliver should be set only during the sliver's
+      // [performLayout] or [performResize] functions.
+      if (renderer.geometry == null) {
+        return false;
+      }
+    }
+
+    renderer = renderer.parent;
+  }
+
+  return true;
+}
+
 class CSSPositionedLayout {
   static CSSPositionType parsePositionType(String input) {
     switch (input) {
@@ -225,7 +247,6 @@ class CSSPositionedLayout {
     child.layout(childConstraints, parentUsesSize: false);
   }
 
-
   static void applyPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size parentSize, EdgeInsets borderEdge) {
     final RenderLayoutParentData childParentData = child.parentData;
     // Calc x,y by parentData.
@@ -236,23 +257,23 @@ class CSSPositionedLayout {
     double childMarginLeft = 0;
     double childMarginRight = 0;
 
-      Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
-      RenderBoxModel childRenderBoxModel = childEl.renderBoxModel;
-      childMarginTop = childRenderBoxModel.marginTop;
-      childMarginBottom = childRenderBoxModel.marginBottom;
-      childMarginLeft = childRenderBoxModel.marginLeft;
-      childMarginRight = childRenderBoxModel.marginRight;
+    Element childEl = parent.elementManager.getEventTargetByTargetId<Element>(child.targetId);
+    RenderBoxModel childRenderBoxModel = childEl.renderBoxModel;
+    childMarginTop = childRenderBoxModel.marginTop;
+    childMarginBottom = childRenderBoxModel.marginBottom;
+    childMarginLeft = childRenderBoxModel.marginLeft;
+    childMarginRight = childRenderBoxModel.marginRight;
 
-    // Offset to global coordinate system of base
+    // Offset to global coordinate system of base.
     if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
       RenderObject root = parent.elementManager.getRootRenderObject();
       Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
-      Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
-          parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root);
-      // Positioned element is positioned relative to the edge of
-      // padding box of containing block, so it needs to add border insets
-      // when caculating offset
-      // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
+
+      // If [renderPositionHolder] is not laid out, then base offset must be [Offset.zero].
+      Offset baseOffset = _isLayout(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
+          (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+            parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root))
+        : Offset.zero;
 
       double borderLeft = borderEdge != null ? borderEdge.left : 0;
       double borderRight = borderEdge != null ? borderEdge.right : 0;
