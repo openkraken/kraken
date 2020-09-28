@@ -109,9 +109,9 @@ mixin CSSFilterEffectsMixin {
           case GRAYSCALE:
             // Formula from: https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent
             matrix5 = _multiplyMatrix5(matrix5, <double>[
-              (0.2126 + 0.7874 * (1 - amount)), (0.7152 - 0.7152  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
-              (0.2126 - 0.2126 * (1 - amount)), (0.7152 + 0.2848  * (1 - amount)), (0.0722 - 0.0722 * (1 - amount)), 0, 0,
-              (0.2126 - 0.2126 * (1 - amount)), (0.7152 - 0.7152  * (1 - amount)), (0.0722 + 0.9278 * (1 - amount)), 0, 0,
+              (0.2126 + 0.7874 * oneMinusAmount), (0.7152 - 0.7152  * oneMinusAmount), (0.0722 - 0.0722 * oneMinusAmount), 0, 0,
+              (0.2126 - 0.2126 * oneMinusAmount), (0.7152 + 0.2848  * oneMinusAmount), (0.0722 - 0.0722 * oneMinusAmount), 0, 0,
+              (0.2126 - 0.2126 * oneMinusAmount), (0.7152 - 0.7152  * oneMinusAmount), (0.0722 + 0.9278 * oneMinusAmount), 0, 0,
               0, 0, 0, 1, 0,
               0, 0, 0, 0, 1
             ]);
@@ -119,9 +119,9 @@ mixin CSSFilterEffectsMixin {
           case SEPIA:
             // Formula from: https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent
             matrix5 = _multiplyMatrix5(matrix5, <double>[
-              (0.393 + 0.607 * (1 - amount)), (0.769 - 0.769 * (1 - amount)), (0.189 - 0.189 * (1 - amount)), 0, 0,
-              (0.349 - 0.349 * (1 - amount)), (0.686 + 0.314 * (1 - amount)), (0.168 - 0.168 * (1 - amount)), 0, 0,
-              (0.272 - 0.272 * (1 - amount)), (0.534 - 0.534 * (1 - amount)), (0.131 + 0.869 * (1 - amount)), 0, 0,
+              (0.393 + 0.607 * oneMinusAmount), (0.769 - 0.769 * oneMinusAmount), (0.189 - 0.189 * oneMinusAmount), 0, 0,
+              (0.349 - 0.349 * oneMinusAmount), (0.686 + 0.314 * oneMinusAmount), (0.168 - 0.168 * oneMinusAmount), 0, 0,
+              (0.272 - 0.272 * oneMinusAmount), (0.534 - 0.534 * oneMinusAmount), (0.131 + 0.869 * oneMinusAmount), 0, 0,
               0, 0, 0, 1, 0,
               0, 0, 0, 0, 1
             ]);
