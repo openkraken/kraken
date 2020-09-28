@@ -12,6 +12,24 @@ describe('Background linear-gradient', () => {
     await matchElementImageSnapshot(div1);
   });
 
+  it('linear-gradient and remove', async (done) => {
+    var div1 = document.createElement('div');
+    Object.assign(div1.style, {
+      width: '200px',
+      height: '100px',
+      backgroundImage:
+        'linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)',
+    });
+
+    append(BODY, div1);
+    await matchElementImageSnapshot(div1);
+    requestAnimationFrame(async () => {
+      div1.style.backgroundImage = '';
+      await expectAsync(div1.toBlob(1.0)).toMatchImageSnapshot();
+      done();
+    });
+  });
+
   it('conic-gradient', async () => {
     var div2 = document.createElement('div');
     Object.assign(div2.style, {

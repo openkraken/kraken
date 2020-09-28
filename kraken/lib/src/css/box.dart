@@ -28,8 +28,12 @@ mixin CSSDecoratedBoxMixin {
         renderBoxModel.backgroundClip = getBackgroundClip(present);
       } else if (property == BACKGROUND_ORIGIN) {
         renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
+      } if (property == BACKGROUND_COLOR) {
+        _updateBackgroundColor(renderBoxModel, style, property);
       } else if (property.startsWith(BACKGROUND)) {
-        _updateBackground(renderBoxModel, style, property);
+        // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
+        //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
+        _updateBackgroundImage(renderBoxModel, style, property);
       } else if (property.endsWith('Radius')) {
         _updateBorderRadius(renderBoxModel, style, property);
       } else if (property.startsWith(BORDER)) {
@@ -37,7 +41,7 @@ mixin CSSDecoratedBoxMixin {
       } else if (property == BOX_SHADOW) {
         _updateBoxShadow(renderBoxModel, style, property);
       } else if (property == COLOR) {
-        _updateBackground(renderBoxModel, style, property);
+        _updateBackgroundColor(renderBoxModel, style, property);
         _updateBorder(renderBoxModel, style, property);
         _updateBoxShadow(renderBoxModel, style, property);
       }
@@ -61,23 +65,35 @@ mixin CSSDecoratedBoxMixin {
     renderBoxModel.decoration = renderBoxModel.decoration.copyWith(boxShadow: boxShadow);
   }
 
-  void _updateBackground(
-      RenderBoxModel renderBoxModel,
-      CSSStyleDeclaration style,
-      String property) {
-
-    BoxDecoration oldBox = renderBoxModel.decoration;
-
+  void _updateBackgroundColor(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
     if (property == BACKGROUND_COLOR || property == COLOR) {
       // If change bg color from some color to null, which must be explicitly transparent.
-      Color bgColor = CSSBackground.getBackgroundColor(style) ?? CSSColor.transparent;
-      // If there has gradient, background color will not work
-      if (oldBox.gradient == null) {
-        BoxDecoration updateDecoration = renderBoxModel.decoration.copyWith(color: bgColor);
-        renderBoxModel.decoration = updateDecoration;
+      Color bgColor = CSSBackground.getBackgroundColor(style);
+
+      if (bgColor != null) {
+        // If there has gradient, background color will not work
+        if (prevBoxDecoration.gradient == null) {
+          renderBoxModel.decoration = prevBoxDecoration.copyWith(color: bgColor);
+        }
+      } else {
+        // Remove background color.
+        //   [BoxDecoration.copyWith] can not remove some value, so instantite a new [BoxDecoration].
+        renderBoxModel.decoration = BoxDecoration(
+          image: prevBoxDecoration.image,
+          border: prevBoxDecoration.border,
+          borderRadius: prevBoxDecoration.borderRadius,
+          boxShadow: prevBoxDecoration.boxShadow,
+          gradient: prevBoxDecoration.gradient,
+          backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+          shape: prevBoxDecoration.shape,
+        );
       }
-      return;
     }
+  }
+
+  void _updateBackgroundImage(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
 
     DecorationImage decorationImage;
     Gradient gradient;
@@ -91,11 +107,25 @@ mixin CSSDecoratedBoxMixin {
       }
     }
 
+    BoxDecoration updateBoxDecoration = BoxDecoration(
+      image: decorationImage,
+      gradient: gradient,
+      color: prevBoxDecoration.color,
+      border: prevBoxDecoration.border,
+      borderRadius: prevBoxDecoration.borderRadius,
+      boxShadow: prevBoxDecoration.boxShadow,
+      backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+      shape: prevBoxDecoration.shape,
+    );
+
     if (CSSBackground.hasScrollBackgroundImage(style)) {
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
+      renderBoxModel.decoration = updateBoxDecoration;
     } else if (CSSBackground.hasLocalBackgroundImage(style)) {
       // @FIXME: support local background image
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
+      renderBoxModel.decoration = updateBoxDecoration;
+    } else if (prevBoxDecoration != null) {
+      // Used for removing background properties.
+      renderBoxModel.decoration = updateBoxDecoration;
     }
   }
 
