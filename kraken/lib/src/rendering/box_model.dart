@@ -861,7 +861,7 @@ class RenderBoxModel extends RenderBox with
 
     paintVisibility(context, offset);
     paintColorFilter(context, offset, (PaintingContext context, Offset offset) {
-      paintImageFilter(context, offset, (PaintingContext context, Offsetoffset) {
+      paintImageFilter(context, offset, (PaintingContext context, Offset offset) {
         paintIntersectionObserver(context, offset, (PaintingContext context, Offset offset) {
           paintTransform(context, offset, (PaintingContext context, Offset offset) {
             paintOpacity(context, offset, (PaintingContext context, Offset offset) {
