@@ -73,7 +73,7 @@ class CSSStyleProperty {
 
   static void removeShorthandPadding(CSSStyleDeclaration style) {
     if (style.contains(PADDING_LEFT)) style.removeProperty(PADDING_LEFT);
-    if (style.contains(PADDING_TOP)) style.removeProperty(PADDING_LEFT);
+    if (style.contains(PADDING_TOP)) style.removeProperty(PADDING_TOP);
     if (style.contains(PADDING_RIGHT)) style.removeProperty(PADDING_RIGHT);
     if (style.contains(PADDING_BOTTOM)) style.removeProperty(PADDING_BOTTOM);
   }

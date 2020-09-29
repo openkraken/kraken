@@ -146,7 +146,7 @@ mixin CSSSizingMixin {
         top: top,
         right: right,
         bottom: bottom,
-      );;
+      );
     } else {
       renderBoxModel.margin = _getMargin(style);
     }
