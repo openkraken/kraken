@@ -64,4 +64,20 @@ describe('Box margin', () => {
     document.body.appendChild(div);
     await matchViewportSnapshot();
   });
+
+  it('should can be removed', async () => {
+    const container1 = document.createElement('div');
+    setElementStyle(container1, {
+      width: '100px',
+      height: '100px',
+      backgroundColor: 'red',
+      margin: '50px',
+    });
+
+    document.body.appendChild(container1);
+    await matchViewportSnapshot();
+
+    container1.style.margin = '';
+    await matchViewportSnapshot();
+  });
 });
