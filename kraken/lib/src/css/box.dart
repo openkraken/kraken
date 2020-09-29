@@ -65,8 +65,8 @@ mixin CSSDecoratedBoxMixin {
 
     if (prevBoxDecoration != null) {
       renderBoxModel.decoration = BoxDecoration(
+          // Only modify boxShadow.
           boxShadow: getBoxShadow(style),
-
           color: prevBoxDecoration.color,
           image: prevBoxDecoration.image,
           border: prevBoxDecoration.border,
