@@ -65,7 +65,7 @@ describe('Box margin', () => {
     await matchViewportSnapshot();
   });
 
-  fit('should can be removed', async () => {
+  it('should can be removed', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
       width: '100px',

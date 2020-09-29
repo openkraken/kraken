@@ -42,7 +42,7 @@ describe('Box padding', () => {
   });
 
 
-  fit('should can be removed', async () => {
+  it('should can be removed', async () => {
     const container1 = document.createElement('div');
     setElementStyle(container1, {
       display: 'inline-block',

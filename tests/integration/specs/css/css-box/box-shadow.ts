@@ -19,7 +19,7 @@ describe('BoxShadow', () => {
     await matchElementImageSnapshot(reference);
   });
 
-  fit('remove box-shadow', async () => {
+  it('remove box-shadow', async () => {
     const div = createElementWithStyle('div', {
       width: '50px',
       height: '50px',
