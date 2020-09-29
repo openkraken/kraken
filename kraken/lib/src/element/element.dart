@@ -879,7 +879,6 @@ class Element extends Node
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-    /// Update margin.
     updateRenderMargin(renderBoxModel, style, property, present);
   }
 

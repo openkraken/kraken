@@ -90,7 +90,7 @@ class CSSStyleProperty {
 
   static void removeShorthandMargin(CSSStyleDeclaration style) {
     if (style.contains(MARGIN_LEFT)) style.removeProperty(MARGIN_LEFT);
-    if (style.contains(MARGIN_TOP)) style.removeProperty(MARGIN_LEFT);
+    if (style.contains(MARGIN_TOP)) style.removeProperty(MARGIN_TOP);
     if (style.contains(MARGIN_RIGHT)) style.removeProperty(MARGIN_RIGHT);
     if (style.contains(MARGIN_BOTTOM)) style.removeProperty(MARGIN_BOTTOM);
   }

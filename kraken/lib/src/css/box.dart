@@ -61,8 +61,23 @@ mixin CSSDecoratedBoxMixin {
     CSSStyleDeclaration style,
     String property) {
 
-    List<BoxShadow> boxShadow = getBoxShadow(style);
-    renderBoxModel.decoration = renderBoxModel.decoration.copyWith(boxShadow: boxShadow);
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
+
+    if (prevBoxDecoration != null) {
+      renderBoxModel.decoration = BoxDecoration(
+          boxShadow: getBoxShadow(style),
+
+          color: prevBoxDecoration.color,
+          image: prevBoxDecoration.image,
+          border: prevBoxDecoration.border,
+          borderRadius: prevBoxDecoration.borderRadius,
+          gradient: prevBoxDecoration.gradient,
+          backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+          shape: prevBoxDecoration.shape
+      );
+    } else {
+      renderBoxModel.decoration = BoxDecoration(boxShadow: getBoxShadow(style));
+    }
   }
 
   void _updateBackgroundColor(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {

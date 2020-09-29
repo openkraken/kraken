@@ -114,29 +114,39 @@ mixin CSSSizingMixin {
   }
 
   void updateRenderMargin(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    EdgeInsets prevMargin = renderBoxModel.margin;
 
-    EdgeInsets margin = renderBoxModel.margin;
+    if (prevMargin != null) {
 
-    if (margin != null) {
+      double left = prevMargin.left;
+      double top = prevMargin.top;
+      double right = prevMargin.right;
+      double bottom = prevMargin.bottom;
+
+      double presentValue = CSSLength.toDisplayPortValue(present) ?? 0;
+
+      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
         case MARGIN_LEFT:
-          margin = margin.copyWith(left: CSSLength.toDisplayPortValue(present));
+          left = presentValue;
           break;
         case MARGIN_TOP:
-          margin = margin.copyWith(top: CSSLength.toDisplayPortValue(present));
+          top = presentValue;
           break;
         case MARGIN_BOTTOM:
-          margin = margin.copyWith(bottom: CSSLength.toDisplayPortValue(present));
+          bottom = presentValue;
           break;
         case MARGIN_RIGHT:
-          margin = margin.copyWith(right: CSSLength.toDisplayPortValue(present));
-          break;
-        case MARGIN:
-          margin = _getMargin(style);
+          right = presentValue;
           break;
       }
 
-      renderBoxModel.margin = margin;
+      renderBoxModel.margin = EdgeInsets.only(
+        left: left,
+        top: top,
+        right: right,
+        bottom: bottom,
+      );;
     } else {
       renderBoxModel.margin = _getMargin(style);
     }
@@ -162,29 +172,33 @@ mixin CSSSizingMixin {
   }
 
   void updateRenderPadding(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    EdgeInsets prevPadding = renderBoxModel.padding;
 
-    EdgeInsets padding = renderBoxModel.padding;
+    if (prevPadding != null) {
+      double left = prevPadding.left;
+      double top = prevPadding.top;
+      double right = prevPadding.right;
+      double bottom = prevPadding.bottom;
 
-    if (padding != null) {
+      double presentValue = CSSLength.toDisplayPortValue(present) ?? 0;
+
+      // Can not use [EdgeInsets.copyWith], for zero cannot be replaced to value.
       switch (property) {
         case PADDING_LEFT:
-          padding = padding.copyWith(left: CSSLength.toDisplayPortValue(present));
+          left = presentValue;
           break;
         case PADDING_TOP:
-          padding = padding.copyWith(top: CSSLength.toDisplayPortValue(present));
+          top = presentValue;
           break;
         case PADDING_BOTTOM:
-          padding = padding.copyWith(bottom: CSSLength.toDisplayPortValue(present));
+          bottom = presentValue;
           break;
         case PADDING_RIGHT:
-          padding = padding.copyWith(right: CSSLength.toDisplayPortValue(present));
-          break;
-        case PADDING:
-          padding = _getPadding(style);
+          right = presentValue;
           break;
       }
 
-      renderBoxModel.padding = padding;
+      renderBoxModel.padding = EdgeInsets.only(left: left, right: right, bottom: bottom, top: top);
     } else {
       renderBoxModel.padding = _getPadding(style);
     }
