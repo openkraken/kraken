@@ -40,4 +40,20 @@ describe('Box padding', () => {
     append(div, box);
     await matchViewportSnapshot();
   });
+
+
+  fit('should can be removed', async () => {
+    const container1 = document.createElement('div');
+    setElementStyle(container1, {
+      display: 'inline-block',
+      backgroundColor: 'red',
+      padding: '50px',
+    });
+
+    document.body.appendChild(container1);
+    await matchViewportSnapshot();
+
+    container1.style.padding = '';
+    await matchViewportSnapshot();
+  });
 });
