@@ -149,6 +149,7 @@ class Cubic {
 
 const ease = new Cubic(0.25, 0.1, 0.25, 1.0);
 
+// Simulate an mouse click action
 async function simulateClick(x: number, y: number) {
   await simulatePointer([
     [x, y, PointerChange.down],
@@ -156,6 +157,7 @@ async function simulateClick(x: number, y: number) {
   ]);
 }
 
+// Simulate an mouse swipe action.
 async function simulateSwipe(startX: number, startY: number, endX: number, endY: number, duration: number) {
   let params: [number, number, number][] = [[startX, startY, PointerChange.down]];
   let pointerMoveDelay = 0.001;

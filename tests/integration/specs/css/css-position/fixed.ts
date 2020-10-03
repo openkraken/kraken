@@ -67,15 +67,14 @@ describe('Position fixed', () => {
     await matchViewportSnapshot();
   });
 
-  fit('hitTest with position fixed elements', async () => {
+  it('hitTest with position fixed elements', async () => {
     let box;
+    let clickCount = 0;
     let container = createViewElement({
-      style: {
-        width: '200px',
-        height: '200px',
-        border: '1px solid #000',
-        overflow: 'scroll'
-      }
+      width: '200px',
+      height: '200px',
+      border: '1px solid #000',
+      overflow: 'scroll'
     }, [
       box = createElement('div', {
         style: {
@@ -104,8 +103,14 @@ describe('Position fixed', () => {
 
     BODY.appendChild(container);
 
-    box.onclick = () => console.log('clicked');
+    box.onclick = () => clickCount++;
 
     await simulateClick(10, 10);
+
+    container.scrollTop = 20;
+
+    await simulateClick(10, 10);
+
+    expect(clickCount).toBe(2);
   });
 });
