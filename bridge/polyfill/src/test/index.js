@@ -127,6 +127,35 @@ env.addReporter(consoleReporter);
 env.addReporter(jasmineTracker);
 Object.assign(global, jasmineInterface);
 
+function PointerChange() {}
+PointerChange.cancel = 0;
+PointerChange.add = 1;
+PointerChange.remove = 2;
+PointerChange.hover = 3;
+PointerChange.down = 4;
+PointerChange.move = 5;
+PointerChange.up = 6;
+global.PointerChange = PointerChange;
+
+global.simulatePointer = function simulatePointer(list) {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      if (!Array.isArray(list)) throw new Error('list should be an array');
+
+      list.forEach((value, i) => {
+        if (!Array.isArray(value)) throw new Error(`list[${i}] should be an array`);
+        if (typeof value[0] != 'number') throw new Error(`list[${i}][0] should be an number`);
+        if (typeof value[1] != 'number') throw new Error(`list[${i}][1] should be an number`);
+        if (typeof value[2] != 'number') throw new Error(`list[${i}][2] should be an number`);
+      });
+
+      __kraken_simulate_pointer__(list);
+
+      resolve();
+    });
+  });
+}
+
 __kraken_executeTest__((done) => {
   jasmineTracker.onSpecDone = (result) => {
     return new Promise((resolve, reject) => {

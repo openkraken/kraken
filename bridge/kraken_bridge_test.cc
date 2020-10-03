@@ -45,3 +45,7 @@ void registerMatchImageSnapshot(MatchImageSnapshot matchImageSnapshot) {
 void registerEnvironment(Environment environment) {
   kraken::registerEnvironment(environment);
 }
+
+void registerSimulatePointer(SimulatePointer simulatePointer) {
+  kraken::registerSimulatePointer(simulatePointer);
+}

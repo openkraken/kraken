@@ -15,6 +15,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
+import 'dart:ui';
 
 import 'platform.dart';
 import 'match_snapshots.dart';
@@ -120,9 +121,62 @@ void registerEnvironment() {
   _registerEnvironment(pointer);
 }
 
+typedef Native_SimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length);
+
+typedef Native_RegisterSimulatePointer = Void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+typedef Dart_RegisterSimulatePointer = void Function(Pointer<NativeFunction<Native_SimulatePointer>> function);
+
+final Dart_RegisterSimulatePointer _registerSimulatePointer =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterSimulatePointer>>('registerSimulatePointer').asFunction();
+
+PointerChange _getPointerChange(double change) {
+  return PointerChange.values[change.toInt()];
+}
+
+class MousePointer extends Struct {
+  @Int32()
+  int contextId;
+
+  @Double()
+  double x;
+
+  @Double()
+  double y;
+
+  @Double()
+  double change;
+}
+
+
+void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int length) {
+  List<PointerData> data = [];
+
+  for (int i = 0; i < length; i ++) {
+    int contextId = mousePointerList[i].ref.contextId;
+    double x = mousePointerList[i].ref.x;
+    double y = mousePointerList[i].ref.y;
+
+    double change = mousePointerList[i].ref.change;
+    data.add(PointerData(
+      physicalX: (360 * contextId + x) * window.devicePixelRatio,
+      physicalY: (56.0 + y) * window.devicePixelRatio,
+      kind: PointerDeviceKind.mouse,
+      change: _getPointerChange(change)
+    ));
+  }
+  PointerDataPacket dataPacket = PointerDataPacket(data: data);
+  window.onPointerDataPacket(dataPacket);
+}
+
+void registerSimulatePointer() {
+  Pointer<NativeFunction<Native_SimulatePointer>> pointer = Pointer.fromFunction(_simulatePointer);
+  _registerSimulatePointer(pointer);
+}
+
 void registerDartTestMethodsToCpp() {
   registerJSError();
   registerRefreshPaint();
   registerMatchImageSnapshot();
   registerEnvironment();
+  registerSimulatePointer();
 }
