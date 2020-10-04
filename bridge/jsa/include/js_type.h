@@ -165,7 +165,7 @@ public:
     return context.createStringFromUtf8(reinterpret_cast<const uint8_t *>(utf8.data()), utf8.length());
   }
 
-  static String createFromUtf16(JSContext &context, const unsigned short* utf16, size_t length) {
+  static String createFromUtf16(JSContext &context, const uint16_t* utf16, size_t length) {
     return context.createStringFromUtf16(utf16, length);
   }
 
@@ -179,7 +179,7 @@ public:
     return context.utf8(*this);
   }
 
-  const unsigned short* getUnicodePtr(JSContext &context) const {
+  const uint16_t* getUnicodePtr(JSContext &context) const {
     return context.getUnicodePtr(*this);
   }
 

@@ -51,7 +51,7 @@ public:
   JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
   ~JSCContext();
 
-  jsa::Value evaluateJavaScript(const unsigned short* code, size_t codeLength, const char* sourceURL, int startLine) override;
+  jsa::Value evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) override;
   jsa::Value evaluateJavaScript(const char* code, const char* sourceURL, int startLine) override;
   void setUnhandledPromiseRejectionHandler(jsa::Object &handler) override;
 

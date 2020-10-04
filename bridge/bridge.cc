@@ -42,7 +42,7 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
   auto &&message = args[0];
   String &&messageStr = message.getString(context);
 
-  const unsigned short*unicodeString = messageStr.getUnicodePtr(context);
+  const uint16_t*unicodeString = messageStr.getUnicodePtr(context);
   size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
@@ -89,7 +89,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   const Value &message = args[0];
   String &&messageStr = message.getString(context);
-  const unsigned short* unicodeStrPtr = messageStr.getUnicodePtr(context);
+  const uint16_t* unicodeStrPtr = messageStr.getUnicodePtr(context);
   size_t unicodeLength = messageStr.unicodeLength(context);
 
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {

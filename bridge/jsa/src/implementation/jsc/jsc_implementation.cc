@@ -120,7 +120,7 @@ JSCContext::~JSCContext() {
 #endif
 }
 
-jsa::Value JSCContext::evaluateJavaScript(const unsigned short *code, size_t length, const char *sourceURL,
+jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, const char *sourceURL,
                                           int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, length);
   JSStringRef sourceURLRef = nullptr;

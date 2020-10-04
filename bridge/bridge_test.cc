@@ -13,7 +13,7 @@ namespace kraken {
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
 
-bool JSBridgeTest::evaluateTestScripts(const unsigned short* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid()) return false;
   binding::updateLocation(sourceURL);
   return !context->evaluateJavaScript(code, codeLength, sourceURL, startLine).isNull();
@@ -102,7 +102,7 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
 
   String name = screenShotName.getString(context);
-  const unsigned short* unicodePtr = name.getUnicodePtr(context);
+  const uint16_t* unicodePtr = name.getUnicodePtr(context);
   size_t unicodeLength = name.unicodeLength(context);
 
   NativeString nativeString;

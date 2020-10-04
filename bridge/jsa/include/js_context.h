@@ -130,7 +130,7 @@ public:
   /// through the JSA API. For example, it will be much slower to use this to
   /// call a global function than using the JSA APIs to read the function
   /// property from the global object and then calling it explicitly.
-  virtual Value evaluateJavaScript(const unsigned short *code, size_t codeLength, const char* sourceURL, int startLine) = 0;
+  virtual Value evaluateJavaScript(const uint16_t *code, size_t codeLength, const char* sourceURL, int startLine) = 0;
   virtual Value evaluateJavaScript(const char* code, const char* sourceURL, int startLine) = 0;
 
   /// Sets the unhandled promise rejection callback for a context.
@@ -226,9 +226,9 @@ protected:
 
   virtual String createStringFromAscii(const char *str, size_t length) = 0;
   virtual String createStringFromUtf8(const uint8_t *utf8, size_t length) = 0;
-  virtual String createStringFromUtf16(const unsigned short*utf16, size_t length) = 0;
+  virtual String createStringFromUtf16(const uint16_t*utf16, size_t length) = 0;
   virtual std::string utf8(const String &) = 0;
-  virtual const unsigned short* getUnicodePtr(const String &) = 0;
+  virtual const uint16_t* getUnicodePtr(const String &) = 0;
   virtual size_t unicodeSize(const String &) = 0;
 
   virtual Object createObject() = 0;
