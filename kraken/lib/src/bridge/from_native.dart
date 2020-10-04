@@ -114,9 +114,9 @@ void registerInvokeUIManager() {
 
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
-    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<Utf8> json);
+    Pointer<JSCallbackContext> callbackContext, Int32 contextId, Pointer<NativeString> json);
 typedef DartAsyncModuleCallback = void Function(
-    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> json);
+    Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json);
 
 typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
     Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
@@ -137,7 +137,7 @@ String invokeModule(
       String method = args[1];
       if (method == 'getConnectivity') {
         Connection.getConnectivity((String json) {
-          callback(callbackContext, contextId, Utf8.toUtf8(json));
+          callback(callbackContext, contextId, stringToNativeString(json));
         });
       } else if (method == 'onConnectivityChanged') {
         Connection.onConnectivityChanged((String json) {
@@ -150,7 +150,7 @@ String invokeModule(
       Map<String, dynamic> options = fetchArgs[1];
       fetch(url, options).then((Response response) {
         String json = jsonEncode(['', response.statusCode, response.data]);
-        callback(callbackContext, contextId, Utf8.toUtf8(json));
+        callback(callbackContext, contextId, stringToNativeString(json));
       }).catchError((e, stack) {
         String errorMessage = e.toString();
         String json;
@@ -159,13 +159,13 @@ String invokeModule(
         } else {
           json = jsonEncode(['$errorMessage\n$stack', null, EMPTY_STRING]);
         }
-        callback(callbackContext, contextId, Utf8.toUtf8(json));
+        callback(callbackContext, contextId, stringToNativeString(json));
       });
     } else if (module == 'DeviceInfo') {
       String method = args[1];
       if (method == 'getDeviceInfo') {
         DeviceInfo.getDeviceInfo().then((String json) {
-          callback(callbackContext, contextId, Utf8.toUtf8(json));
+          callback(callbackContext, contextId, stringToNativeString(json));
         });
       } else if (method == 'getHardwareConcurrency') {
         result = DeviceInfo.getHardwareConcurrency().toString();
@@ -177,40 +177,40 @@ String invokeModule(
         String key = methodArgs[0];
         // @TODO: catch error case
         AsyncStorage.getItem(key).then((String value) {
-          callback(callbackContext, contextId, Utf8.toUtf8(value ?? EMPTY_STRING));
+          callback(callbackContext, contextId, stringToNativeString(value ?? EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'setItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         String value = methodArgs[1];
         AsyncStorage.setItem(key, value).then((bool isSuccess) {
-          callback(callbackContext, contextId, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, contextId, stringToNativeString(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'removeItem') {
         List methodArgs = args[2];
         String key = methodArgs[0];
         AsyncStorage.removeItem(key).then((bool isSuccess) {
-          callback(callbackContext, contextId, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, contextId, stringToNativeString(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'getAllKeys') {
         // @TODO: catch error case
         AsyncStorage.getAllKeys().then((Set<String> set) {
           List<String> list = List.from(set);
-          callback(callbackContext, contextId, Utf8.toUtf8(jsonEncode(list)));
+          callback(callbackContext, contextId, stringToNativeString(jsonEncode(list)));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'clear') {
         AsyncStorage.clear().then((bool isSuccess) {
-          callback(callbackContext, contextId, Utf8.toUtf8(isSuccess.toString()));
+          callback(callbackContext, contextId, stringToNativeString(isSuccess.toString()));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       }
     } else if (module == 'MQTT') {
@@ -251,7 +251,7 @@ String invokeModule(
           options = positionArgs[0];
         }
         Geolocation.getCurrentPosition(options, (json) {
-          callback(callbackContext, contextId, Utf8.toUtf8(json));
+          callback(callbackContext, contextId, stringToNativeString(json));
         });
       } else if (method == 'watchPosition') {
         List positionArgs = args[2];
@@ -286,9 +286,9 @@ String invokeModule(
           } else {
             ret = jsonEncode(result);
           }
-          callback(callbackContext, contextId, Utf8.toUtf8(ret));
+          callback(callbackContext, contextId, stringToNativeString(ret));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'setMethodCallHandler') {
         onJSMethodCall(controller, (String method, dynamic arguments) async {
@@ -299,16 +299,16 @@ String invokeModule(
       String method = args[1];
       if (method == 'readText') {
         KrakenClipboard.readText().then((String value) {
-          callback(callbackContext, contextId, Utf8.toUtf8(value ?? ''));
+          callback(callbackContext, contextId, stringToNativeString(value ?? ''));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       } else if (method == 'writeText') {
         List methodArgs = args[2];
         KrakenClipboard.writeText(methodArgs[0]).then((_) {
-          callback(callbackContext, contextId, Utf8.toUtf8(EMPTY_STRING));
+          callback(callbackContext, contextId, stringToNativeString(EMPTY_STRING));
         }).catchError((e, stack) {
-          callback(callbackContext, contextId, Utf8.toUtf8('Error: $e\n$stack'));
+          callback(callbackContext, contextId, stringToNativeString('Error: $e\n$stack'));
         });
       }
     } else if (module == 'WebSocket') {
