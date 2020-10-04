@@ -28,22 +28,16 @@ String _uint16ToString(Pointer<Uint16> pointer, int length) {
 
 Pointer<Uint16> _stringToUint16(String string) {
   final units = string.codeUnits;
-  final Pointer<Uint16> result = allocate<Uint16>(count: units.length + 1);
-  final Uint16List nativeString = result.asTypedList(units.length + 1);
+  final Pointer<Uint16> result = allocate<Uint16>(count: units.length);
+  final Uint16List nativeString = result.asTypedList(units.length);
   nativeString.setAll(0, units);
-  nativeString[units.length] = 0;
   return result;
-}
-
-// Dart unicode string length and \0 terminate.
-int _getNativeStringLength(String string) {
-  return string.codeUnits.length + 1;
 }
 
 Pointer<NativeString> stringToNativeString(String string) {
   Pointer<NativeString> nativeString = allocate<NativeString>();
   nativeString.ref.string = _stringToUint16(string);
-  nativeString.ref.length = _getNativeStringLength(string);
+  nativeString.ref.length = string.length;
   return nativeString;
 }
 

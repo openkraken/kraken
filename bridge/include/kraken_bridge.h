@@ -13,10 +13,10 @@
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
-typedef struct {
-  const unsigned short *string;
-  size_t length;
-} NativeString;
+struct NativeString {
+  const uint16_t *string;
+  int32_t length;
+};
 
 struct KrakenInfo;
 
@@ -70,7 +70,7 @@ KrakenInfo *getKrakenInfo();
 bool checkContext(int32_t contextId);
 bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT
-void evaluateScripts(int32_t contextId, const NativeString *code, const char *bundleFilename, int startLine);
+void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);
