@@ -165,8 +165,8 @@ public:
     return context.createStringFromUtf8(reinterpret_cast<const uint8_t *>(utf8.data()), utf8.length());
   }
 
-  static String createFromUtf16(JSContext &context, const uint16_t* utf16, size_t length) {
-    return context.createStringFromUtf16(utf16, length);
+  static String createFromUInt16(JSContext &context, const uint16_t* data, size_t length) {
+    return context.createStringFromUInt16(data, length);
   }
 
   /// \return whether a and b contain the same characters.

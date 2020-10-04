@@ -20,12 +20,12 @@ struct NativeString {
 
 struct KrakenInfo;
 
-using GetUserAgent = const char*(*)(KrakenInfo*);
+using GetUserAgent = const char *(*)(KrakenInfo *);
 struct KrakenInfo {
-  const char* app_name {nullptr};
-  const char* app_version {nullptr};
-  const char* app_revision {nullptr};
-  const char* system_name {nullptr};
+  const char *app_name{nullptr};
+  const char *app_version{nullptr};
+  const char *app_revision{nullptr};
+  const char *system_name{nullptr};
   GetUserAgent getUserAgent;
 };
 
@@ -39,9 +39,9 @@ using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, doub
 using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
 using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                                    int32_t length);
-typedef const NativeString *(*InvokeUIManager)(int32_t contextId, const NativeString *json);
-typedef const NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, const NativeString *,
-                                          AsyncModuleCallback callback);
+typedef NativeString *(*InvokeUIManager)(int32_t contextId, NativeString *json);
+typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
+                                      AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
 typedef void (*ReloadApp)(int32_t contextId);
 typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
@@ -51,7 +51,7 @@ typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef Screen *(*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
-typedef const NativeString *(*PlatformBrightness)(int32_t contextId);
+typedef NativeString *(*PlatformBrightness)(int32_t contextId);
 typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
@@ -75,7 +75,7 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT
-void invokeEventListener(int32_t contextId, int32_t type, const NativeString *json);
+void invokeEventListener(int32_t contextId, int32_t type, NativeString *json);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 

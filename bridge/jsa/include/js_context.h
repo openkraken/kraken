@@ -226,7 +226,7 @@ protected:
 
   virtual String createStringFromAscii(const char *str, size_t length) = 0;
   virtual String createStringFromUtf8(const uint8_t *utf8, size_t length) = 0;
-  virtual String createStringFromUtf16(const uint16_t*utf16, size_t length) = 0;
+  virtual String createStringFromUInt16(const uint16_t*utf16, size_t length) = 0;
   virtual std::string utf8(const String &) = 0;
   virtual const uint16_t* getUnicodePtr(const String &) = 0;
   virtual size_t unicodeSize(const String &) = 0;

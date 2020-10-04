@@ -398,7 +398,7 @@ jsa::String JSCContext::createStringFromUtf8(const uint8_t *str, size_t length) 
   return createString(stringRef);
 }
 
-jsa::String JSCContext::createStringFromUtf16(const JSChar *utf16, size_t length) {
+jsa::String JSCContext::createStringFromUInt16(const JSChar *utf16, size_t length) {
   JSStringRef stringRef = JSStringCreateWithCharacters(utf16, length);
   return createString(stringRef);
 }

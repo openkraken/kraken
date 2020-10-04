@@ -54,12 +54,12 @@ Value krakenUIManager(JSContext &context, const Value &thisVal, const Value *arg
                   "Failed to execute '__kraken_ui_manager__': dart method (invokeUIManager) is not registered.");
   }
 
-  NativeString nativeString;
+  NativeString nativeString {};
   nativeString.string = unicodeString;
   nativeString.length = unicodeLength;
 
   const NativeString *result = getDartMethod()->invokeUIManager(context.getContextId(), &nativeString);
-  String retValue = String::createFromUtf16(context, result->string, result->length);
+  String retValue = String::createFromUInt16(context, result->string, result->length);
 
   return Value(context, retValue);
 }
@@ -83,7 +83,7 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
   }
 
   Object callback = obj->_callback->getObject(_context);
-  callback.asFunction(_context).call(_context, String::createFromUtf16(_context, json->string, json->length));
+  callback.asFunction(_context).call(_context, String::createFromUInt16(_context, json->string, json->length));
 }
 
 Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -119,7 +119,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
 
-  NativeString nativeString;
+  NativeString nativeString {};
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
@@ -134,7 +134,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   if (result == nullptr) {
     return Value::null();
   }
-  return Value(context, String::createFromUtf16(context, result->string, result->length));
+  return Value(context, String::createFromUInt16(context, result->string, result->length));
 }
 
 /**
@@ -321,7 +321,7 @@ void JSBridge::handleUIListener(const NativeString *args) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': callback is not a function.");
     }
 
-    const String str = String::createFromUtf16(*context, args->string, args->length);
+    const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }
@@ -336,7 +336,7 @@ void JSBridge::handleModuleListener(const NativeString *args) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': callback is not a function.");
     }
 
-    const String str = String::createFromUtf16(*context, args->string, args->length);
+    const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
 }

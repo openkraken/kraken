@@ -174,7 +174,7 @@ protected:
 
   jsa::String createStringFromAscii(const char *str, size_t length) override;
   jsa::String createStringFromUtf8(const uint8_t *utf8, size_t length) override;
-  jsa::String createStringFromUtf16(const JSChar *utf16, size_t length) override;
+  jsa::String createStringFromUInt16(const JSChar *utf16, size_t length) override;
   std::string utf8(const jsa::String &) override;
 
   jsa::Object createObject() override;
