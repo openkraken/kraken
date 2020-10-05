@@ -75,7 +75,7 @@ void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFi
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT
-void invokeEventListener(int32_t contextId, int32_t type, NativeString *json);
+void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 

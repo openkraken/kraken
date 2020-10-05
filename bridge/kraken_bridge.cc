@@ -142,7 +142,7 @@ void reloadJsContext(int32_t contextId) {
   contextPool[contextId] = newContext;
 }
 
-void invokeEventListener(int32_t contextId, int32_t type, const NativeString *data) {
+void invokeEventListener(int32_t contextId, int32_t type, NativeString *data) {
   assert(checkContext(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::JSBridge *>(getJSContext(contextId));
   context->invokeEventListener(type, data);
