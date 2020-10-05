@@ -6,6 +6,7 @@
 export 'src/rendering/box_decoration.dart';
 export 'src/rendering/canvas.dart';
 export 'src/rendering/fallback_view.dart';
+export 'src/rendering/filter.dart';
 export 'src/rendering/flare.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';

@@ -142,4 +142,66 @@ describe('css-flexbox', () => {
 
     await matchViewportSnapshot();
   });
+
+  it('img-expand-evenly-ref', async () => {
+    let p;
+    let flexbox;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [createText(`3 rectangular images fill out border.`)]
+    );
+    flexbox = createElement(
+      'div',
+      {
+        class: 'flexbox',
+        style: {
+          height: '50px',
+          width: '300px',
+          border: '2px dotted black',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement('img', {
+          src: 'assets/solidblue.png',
+          style: {
+            width: '98px',
+            height: '48px',
+            background: 'purple',
+            border: '1px solid white',
+            'box-sizing': 'border-box',
+          },
+        }),
+        createElement('img', {
+          src: 'assets/solidblue.png',
+          style: {
+            width: '98px',
+            height: '48px',
+            background: 'purple',
+            border: '1px solid white',
+            'box-sizing': 'border-box',
+          },
+        }),
+        createElement('img', {
+          src: 'assets/solidblue.png',
+          style: {
+            width: '98px',
+            height: '48px',
+            background: 'purple',
+            border: '1px solid white',
+            'box-sizing': 'border-box',
+          },
+        }),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
 });

@@ -71,4 +71,6 @@ class CSSFunctionalNotation {
   final List<String> args;
 
   CSSFunctionalNotation(this.name, this.args);
+
+  String toString() => 'CSSFunctionalNotation($name: $args)';
 }
