@@ -21,7 +21,7 @@ class BodyElement extends Element {
             WIDTH: '${viewportWidth}px',
             HEIGHT: '${viewportHeight}px',
             OVERFLOW: AUTO,
-            BACKGROUND_COLOR: 'white'
+            BACKGROUND_COLOR: 'white',
           }
         );
 }

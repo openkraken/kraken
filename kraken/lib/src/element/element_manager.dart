@@ -326,7 +326,7 @@ class ElementManager {
 
   bool showPerformanceOverlay = false;
 
-  RenderBox buildRenderBox({bool showPerformanceOverlay}) {
+  RenderBox buildRenderBox({ bool showPerformanceOverlay  }) {
     if (showPerformanceOverlay != null) {
       this.showPerformanceOverlay = showPerformanceOverlay;
     }
@@ -357,6 +357,7 @@ class ElementManager {
         textDirection: TextDirection.ltr,
       );
     }
+
     return result;
   }
 

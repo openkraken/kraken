@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex-margin', () => {
-  xit('no-collapse', async () => {
+  it('no-collapse', async () => {
     let p;
     let redBox;
     let box1;

@@ -86,7 +86,8 @@ class Element extends Node
         CSSVisibilityMixin,
         CSSOffsetMixin,
         CSSContentVisibilityMixin,
-        CSSTransitionMixin {
+        CSSTransitionMixin,
+        CSSFilterEffectsMixin {
   Map<String, dynamic> properties;
   List<String> events;
 
@@ -780,6 +781,10 @@ class Element extends Node
       case TRANSITION_PROPERTY:
         _styleTransitionChangedListener(property, original, present);
         break;
+
+      case FILTER:
+        _styleFilterChangedListener(property, original, present);
+        break;
     }
 
     // Text Style
@@ -847,6 +852,10 @@ class Element extends Node
     } else if (renderLayoutBox is RenderFlowLayout) {
       CSSFlowMixin.decorateRenderFlow(renderLayoutBox, style);
     }
+  }
+
+  void _styleFilterChangedListener(String property, String original, String present) {
+    updateFilterEffects(renderBoxModel, present);
   }
 
   void _styleTransitionChangedListener(String property, String original, String present) {

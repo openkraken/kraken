@@ -148,7 +148,8 @@ void layoutPositionedChild(Element parentElement, RenderBox parent, RenderBox ch
     childConstraints =
         childConstraints.tighten(height: parentSize.height - childParentData.top - childParentData.bottom);
   }
-  child.layout(childConstraints, parentUsesSize: true);
+  // Should create relayoutBoundary for positioned child.
+  child.layout(childConstraints, parentUsesSize: false);
 }
 
 // RenderPositionHolder may be affected by overflow: scroller offset.
@@ -181,17 +182,21 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
     childMarginLeft = childRenderBoxModel.marginLeft;
     childMarginRight = childRenderBoxModel.marginRight;
 
-  // Offset to global coordinate system of base
+  // Offset to global coordinate system of base.
   if (childParentData.position == CSSPositionType.absolute || childParentData.position == CSSPositionType.fixed) {
     RenderObject root = parent.elementManager.getRootRenderObject();
     Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(childRenderBoxModel.renderPositionHolder, parent) ?? Offset.zero;
-    Offset baseOffset = childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
-        parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root);
+
+    // If [renderPositionHolder] is not laid out, then base offset must be [Offset.zero].
+    Offset baseOffset = _isLayout(childRenderBoxModel.renderPositionHolder, ancestor: root) ?
+        (childRenderBoxModel.renderPositionHolder.localToGlobal(positionHolderScrollOffset, ancestor: root) -
+          parent.localToGlobal(Offset(parent.scrollLeft, parent.scrollTop), ancestor: root))
+      : Offset.zero;
+
     // Positioned element is positioned relative to the edge of
     // padding box of containing block, so it needs to add border insets
     // when caculating offset
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-
     double borderLeft = borderEdge != null ? borderEdge.left : 0;
     double borderRight = borderEdge != null ? borderEdge.right : 0;
     double borderTop = borderEdge != null ? borderEdge.top : 0;
@@ -200,14 +205,14 @@ void setPositionedChildOffset(RenderBoxModel parent, RenderBoxModel child, Size 
     double top = childParentData.top != null ?
       childParentData.top + borderTop + childMarginTop : baseOffset.dy + childMarginTop;
     if (childParentData.top == null && childParentData.bottom != null) {
-      top = parentSize.height - child.size.height - borderBottom - childMarginBottom -
+      top = parentSize.height - child.boxSize.height - borderBottom - childMarginBottom -
         ((childParentData.bottom) ?? 0);
     }
 
     double left = childParentData.left != null ?
       childParentData.left + borderLeft + childMarginLeft : baseOffset.dx + childMarginLeft;
     if (childParentData.left == null && childParentData.right != null) {
-      left = parentSize.width - child.size.width - borderRight - childMarginRight -
+      left = parentSize.width - child.boxSize.width - borderRight - childMarginRight -
         ((childParentData.right) ?? 0);
     }
 
@@ -244,7 +249,7 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
       if (marginLeft == AUTO) {
         double leftValue = CSSLength.toDisplayPortValue(left) ?? 0.0;
         double rightValue = CSSLength.toDisplayPortValue(right) ?? 0.0;
-        double remainingSpace = parentSize.width - child.size.width - leftValue - rightValue;
+        double remainingSpace = parentSize.width - child.boxSize.width - leftValue - rightValue;
 
         if (marginRight == AUTO) {
           x = leftValue + remainingSpace / 2;
@@ -260,7 +265,7 @@ Offset setAutoMarginPositionedElementOffset(double x, double y, RenderBox child,
       if (marginTop == AUTO) {
         double topValue = CSSLength.toDisplayPortValue(top) ?? 0.0;
         double bottomValue = CSSLength.toDisplayPortValue(bottom) ?? 0.0;
-        double remainingSpace = parentSize.height - child.size.height - topValue - bottomValue;
+        double remainingSpace = parentSize.height - child.boxSize.height - topValue - bottomValue;
 
         if (marginBottom == AUTO) {
           y = topValue + remainingSpace / 2;
@@ -283,4 +288,26 @@ VerticalAlign getVerticalAlign(CSSStyleDeclaration style) {
       return VerticalAlign.bottom;
   }
   return VerticalAlign.baseline;
+}
+
+/// Check whether render object parent is layout.
+bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
+  while (renderer != null && renderer != ancestor) {
+    if (renderer is RenderBox) {
+      // Whether this render box has undergone layout and has a [size].
+      if (!renderer.hasSize) {
+        return false;
+      }
+    } else if (renderer is RenderSliver) {
+      // The geometry of a sliver should be set only during the sliver's
+      // [performLayout] or [performResize] functions.
+      if (renderer.geometry == null) {
+        return false;
+      }
+    }
+
+    renderer = renderer.parent;
+  }
+
+  return true;
 }
