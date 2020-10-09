@@ -21,7 +21,7 @@ class JSElementStyle : public HostObject {
 class JSElement : public HostObject {
 public:
   JSElement() = delete;
-  explicit JSElement(JSContext &context, const unsigned short* tagName, size_t tagNameLength);
+  explicit JSElement(JSContext &context, NativeString *tagName);
   ~JSElement() override {
     // TODO: call dart method to recycle dart side element.
     // dartMethod.removeElement();

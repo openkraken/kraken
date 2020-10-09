@@ -8,11 +8,11 @@
 namespace kraken {
 namespace binding {
 
-JSElement::JSElement(JSContext &context, const unsigned short *tagName, size_t tagNameLength) {
+JSElement::JSElement(JSContext &context, NativeString *tagName) {
   if (getDartMethod()->createElement == nullptr) {
     throw JSError(context, "Failed to createElement: dart method (createElement) is not registered.");
   }
-  _dartElement = getDartMethod()->createElement(tagName, tagNameLength);
+  _dartElement = getDartMethod()->createElement(tagName);
 }
 
 Value JSElement::get(JSContext &, const PropNameID &name) {

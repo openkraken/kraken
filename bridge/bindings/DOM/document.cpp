@@ -20,10 +20,12 @@ Value createElement(JSContext &context, const Value &thisVal, const Value *args,
   }
 
   String &&tagNameString = tagName.getString(context);
+  NativeString nativeString {};
+  nativeString.string = tagNameString.getUnicodePtr(context);
+  nativeString.length = tagNameString.unicodeLength(context);
 
   auto element =
-    Object::createFromHostObject(context, std::make_shared<JSElement>(context, tagNameString.getUnicodePtr(context),
-                                                                      tagNameString.unicodeLength(context)));
+    Object::createFromHostObject(context, std::make_shared<JSElement>(context, &nativeString));
   return Value(context, element);
 }
 

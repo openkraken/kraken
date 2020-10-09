@@ -682,6 +682,7 @@ class NativeElement extends Struct {
 }
 
 void registerCreateElement() {
+
 }
 
 void registerDartMethodsToCpp() {
@@ -698,4 +699,5 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
+  registerCreateElement();
 }
