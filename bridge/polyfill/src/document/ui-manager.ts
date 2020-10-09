@@ -26,12 +26,17 @@ function handleUIResponse(response: string) {
 export function requestUpdateFrame() {
   updateRequested = false;
   if (updateMessageQueue.length > 0) {
-    // Make sure message queue is cleared, no matter that dart throws error or not.
-    let message = JSON.stringify(['batchUpdate', updateMessageQueue]);
-    // Clear updateMessageQueue before send BatchUpdate into Flutter to prevent duplicate messages.
-    updateMessageQueue.length = 0;
-    let response = krakenUIManager(message);
-    handleUIResponse(response);
+    try {
+      // Make sure message queue is cleared, no matter that dart throws error or not.
+      let message = JSON.stringify(['batchUpdate', updateMessageQueue]);
+      // Clear updateMessageQueue before send BatchUpdate into Flutter to prevent duplicate messages.
+      updateMessageQueue.length = 0;
+      let response = krakenUIManager(message);
+      handleUIResponse(response);
+    } catch (err) {
+      // TODO: needs to remove this log when element bindings works had complete.
+      console.error(err);
+    }
   }
 }
 
