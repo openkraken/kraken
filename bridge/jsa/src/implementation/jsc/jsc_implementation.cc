@@ -120,11 +120,32 @@ JSCContext::~JSCContext() {
 #endif
 }
 
-jsa::Value JSCContext::evaluateJavaScript(const char *code, const std::string &sourceURL, int startLine) {
+jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, const char *sourceURL,
+                                          int startLine) {
+  JSStringRef sourceRef = JSStringCreateWithCharacters(code, length);
+  JSStringRef sourceURLRef = nullptr;
+  if (sourceURL != nullptr) {
+    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
+  }
+
+  JSValueRef exc = nullptr; // exception
+  JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
+
+  JSStringRelease(sourceRef);
+  if (sourceURLRef) {
+    JSStringRelease(sourceURLRef);
+  }
+
+  if (hasException(res, exc)) return jsa::Value::null();
+  return createValue(res);
+}
+
+jsa::Value JSCContext::evaluateJavaScript(const char *code, const char *sourceURL,
+                                          int startLine) {
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
-  if (!sourceURL.empty()) {
-    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL.c_str());
+  if (sourceURL != nullptr) {
+    sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
   }
 
   JSValueRef exc = nullptr; // exception
@@ -349,6 +370,14 @@ std::string JSCContext::utf8(const jsa::PropNameID &sym) {
   return JSStringToSTLString(stringRef(sym));
 }
 
+const JSChar *JSCContext::getUnicodePtr(const jsa::String &str) {
+  return JSStringGetCharactersPtr(stringRef(str));
+}
+
+size_t JSCContext::unicodeSize(const jsa::String &str) {
+  return JSStringGetLength(stringRef(str));
+}
+
 bool JSCContext::compare(const jsa::PropNameID &a, const jsa::PropNameID &b) {
   return JSStringIsEqual(stringRef(a), stringRef(b));
 }
@@ -366,6 +395,11 @@ jsa::String JSCContext::createStringFromAscii(const char *str, size_t length) {
 jsa::String JSCContext::createStringFromUtf8(const uint8_t *str, size_t length) {
   std::string tmp(reinterpret_cast<const char *>(str), length);
   JSStringRef stringRef = JSStringCreateWithUTF8CString(tmp.c_str());
+  return createString(stringRef);
+}
+
+jsa::String JSCContext::createStringFromUInt16(const JSChar *utf16, size_t length) {
+  JSStringRef stringRef = JSStringCreateWithCharacters(utf16, length);
   return createString(stringRef);
 }
 

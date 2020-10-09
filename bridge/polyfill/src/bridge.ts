@@ -41,7 +41,7 @@ export const krakenToBlob = __kraken_to_blob__;
 export const krakenRequestAnimationFrame = __kraken_request_animation_frame__;
 export const privateKraken = __kraken__;
 
-declare const __kraken_ui_manager__: (message: string) => void|string;
+declare const __kraken_ui_manager__: (message: string) => string;
 export const krakenUIManager = __kraken_ui_manager__;
 
 declare const __kraken_ui_listener__: (fn: (message: string) => void) => void;

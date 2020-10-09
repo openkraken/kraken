@@ -13,16 +13,19 @@
 void *getJSContext(int32_t contextId);
 std::__thread_id getUIThreadId();
 
-static char* userAgent {nullptr};
+struct NativeString {
+  const uint16_t *string;
+  int32_t length;
+};
 
 struct KrakenInfo;
 
-using GetUserAgent = const char*(*)(KrakenInfo*);
+using GetUserAgent = const char *(*)(KrakenInfo *);
 struct KrakenInfo {
-  const char* app_name {nullptr};
-  const char* app_version {nullptr};
-  const char* app_revision {nullptr};
-  const char* system_name {nullptr};
+  const char *app_name{nullptr};
+  const char *app_version{nullptr};
+  const char *app_revision{nullptr};
+  const char *system_name{nullptr};
   GetUserAgent getUserAgent;
 };
 struct DartElement {
@@ -32,13 +35,15 @@ struct Screen {
   double width;
   double height;
 };
+
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
 using AsyncRAFCallback = void (*)(void *callbackContext, int32_t contextId, double result, const char *errmsg);
-using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, char *json);
+using AsyncModuleCallback = void (*)(void *callbackContext, int32_t contextId, NativeString *json);
 using AsyncBlobCallback = void (*)(void *callbackContext, int32_t contextId, const char *error, uint8_t *bytes,
                                    int32_t length);
-typedef const char *(*InvokeUIManager)(int32_t contextId, const char *json);
-typedef const char *(*InvokeModule)(void *callbackContext, int32_t contextId, const char *, AsyncModuleCallback callback);
+typedef NativeString *(*InvokeUIManager)(int32_t contextId, NativeString *json);
+typedef NativeString *(*InvokeModule)(void *callbackContext, int32_t contextId, NativeString *,
+                                      AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(void *callbackContext, int32_t contextId, AsyncCallback callback);
 typedef void (*ReloadApp)(int32_t contextId);
 typedef int32_t (*SetTimeout)(void *callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
@@ -48,7 +53,7 @@ typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef Screen *(*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
-typedef const char *(*PlatformBrightness)(int32_t contextId);
+typedef NativeString *(*PlatformBrightness)(int32_t contextId);
 typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
@@ -63,17 +68,17 @@ KRAKEN_EXPORT
 int32_t allocateNewContext();
 
 KRAKEN_EXPORT
-KrakenInfo* getKrakenInfo();
+KrakenInfo *getKrakenInfo();
 
 bool checkContext(int32_t contextId);
-bool checkContext(int32_t contextId, void* context);
+bool checkContext(int32_t contextId, void *context);
 KRAKEN_EXPORT
-void evaluateScripts(int32_t contextId, const char *code, const char *bundleFilename, int startLine);
+void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT
-void invokeEventListener(int32_t contextId, int32_t type, const char *json);
+void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);
 KRAKEN_EXPORT
 Screen *createScreen(double width, double height);
 

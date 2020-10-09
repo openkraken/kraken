@@ -11,6 +11,7 @@
 #include "bindings/DOM/document.h"
 #include "foundation/thread_safe_array.h"
 #include "foundation/bridge_callback.h"
+#include "include/kraken_bridge.h"
 
 #include "bindings/kraken.h"
 #include <atomic>
@@ -48,15 +49,15 @@ public:
   // the owner pointer which take JSBridge as property.
   void *owner;
   /// evaluate JavaScript source codes in standard mode.
-  alibaba::jsa::Value evaluateScript(const std::string &script, const std::string &url, int startLine);
+  alibaba::jsa::Value evaluateScript(const NativeString * script, const char* url, int startLine);
 
   alibaba::jsa::JSContext *getContext() const {
     return context.get();
   }
 
-  void invokeEventListener(int32_t type, const char *args);
-  void handleUIListener(const char *args);
-  void handleModuleListener(const char *args);
+  void invokeEventListener(int32_t type, const NativeString *args);
+  void handleUIListener(const NativeString *args);
+  void handleModuleListener(const NativeString *args);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER
