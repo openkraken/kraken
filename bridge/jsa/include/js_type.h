@@ -165,6 +165,10 @@ public:
     return context.createStringFromUtf8(reinterpret_cast<const uint8_t *>(utf8.data()), utf8.length());
   }
 
+  static String createFromUInt16(JSContext &context, const uint16_t* data, size_t length) {
+    return context.createStringFromUInt16(data, length);
+  }
+
   /// \return whether a and b contain the same characters.
   static bool strictEquals(JSContext &context, const String &a, const String &b) {
     return context.strictEquals(a, b);
@@ -173,6 +177,14 @@ public:
   /// Copies the data in a JS string as utf8 into a C++ string.
   std::string utf8(JSContext &context) const {
     return context.utf8(*this);
+  }
+
+  const uint16_t* getUnicodePtr(JSContext &context) const {
+    return context.getUnicodePtr(*this);
+  }
+
+  size_t unicodeLength(JSContext &context) const {
+    return context.unicodeSize(*this);
   }
 
   friend class JSContext;

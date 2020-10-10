@@ -17,7 +17,7 @@ public:
   explicit JSBridgeTest(JSBridge *bridge);
 
   /// evaluete JavaScript source code with build-in test frameworks, use in test only.
-  bool evaluateTestScripts(const std::string &script, const std::string &url, int startLine);
+  bool evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
   void invokeExecuteTest(ExecuteCallback executeCallback);
 
   std::shared_ptr<Value> executeTestCallback{nullptr};

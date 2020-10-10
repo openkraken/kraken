@@ -333,7 +333,7 @@ class Element extends Node
         renderLayoutBox.visitChildren((childRenderObject) {
           if (childRenderObject is RenderBoxModel) {
             Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
-            CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
+            CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = _findContainingBlock(child);
               child.detach();
@@ -410,7 +410,7 @@ class Element extends Node
   void _findPositionedChildren(Element parent, List<Element> positionedChildren) {
     for (int i = 0; i < parent.children.length; i++) {
       Element child = parent.children[i];
-      CSSPositionType childPositionType = resolvePositionFromStyle(child.style);
+      CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
       if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
         positionedChildren.add(child);
       } else if (child.children.length != 0) {
@@ -455,7 +455,7 @@ class Element extends Node
     // InlineFlex or Flex
     bool isParentFlexDisplayType = parentDisplayValue == CSSDisplay.flex || parentDisplayValue == CSSDisplay.inlineFlex;
 
-    CSSPositionType positionType = resolvePositionFromStyle(style);
+    CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
     switch (positionType) {
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
@@ -829,8 +829,8 @@ class Element extends Node
 
   void _stylePositionChangedListener(String property, String original, String present) {
     /// Update position.
-    CSSPositionType prevPosition = resolveCSSPosition(original);
-    CSSPositionType currentPosition = resolveCSSPosition(present);
+    CSSPositionType prevPosition = CSSPositionedLayout.parsePositionType(original);
+    CSSPositionType currentPosition = CSSPositionedLayout.parsePositionType(present);
 
     // Position changed.
     if (prevPosition != currentPosition) {
@@ -879,7 +879,6 @@ class Element extends Node
   }
 
   void _styleMarginChangedListener(String property, String original, String present) {
-    /// Update margin.
     updateRenderMargin(renderBoxModel, style, property, present);
   }
 
@@ -1452,29 +1451,6 @@ void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Elemen
   }
   CSSStyleDeclaration style = child.style;
 
-  CSSPositionType positionType = resolvePositionFromStyle(style);
-  parentData.position = positionType;
-
-  if (style.contains(TOP)) {
-    parentData.top = CSSLength.toDisplayPortValue(style[TOP]);
-  }
-  if (style.contains(LEFT)) {
-    parentData.left = CSSLength.toDisplayPortValue(style[LEFT]);
-  }
-  if (style.contains(BOTTOM)) {
-    parentData.bottom = CSSLength.toDisplayPortValue(style[BOTTOM]);
-  }
-  if (style.contains(RIGHT)) {
-    parentData.right = CSSLength.toDisplayPortValue(style[RIGHT]);
-  }
-  parentData.width = CSSLength.toDisplayPortValue(style[WIDTH]) ?? 0.0;
-  parentData.height = CSSLength.toDisplayPortValue(style[HEIGHT]) ?? 0.0;
-
-  int zIndex = CSSLength.toInt(style[Z_INDEX]) ?? 0;
-  parentData.zIndex = zIndex;
-
-  parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
   RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-  childRenderBoxModel.parentData = parentData;
+  childRenderBoxModel.parentData = CSSPositionedLayout.getPositionParentData(style, parentData);
 }
