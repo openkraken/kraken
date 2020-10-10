@@ -33,15 +33,9 @@ Function getLocalName = (String name) {
     case IFRAME:
     case AUDIO:
     case OBJECT:
-      {
-        return name.toLowerCase();
-      }
-      break;
-
+      return name.toLowerCase();
     default:
-      {
-        return css.EMPTY_STRING;
-      }
+      return css.EMPTY_STRING;
   }
 };
 
@@ -115,69 +109,59 @@ class DevWebsocket {
     String result;
     switch (data['method']) {
       case 'DOM.getDocument':
-        {
-          if (rootNode != null)
-            result = json.encode({
-              'id': data['id'],
-              'result': {'root': getDocument()}
-            });
-          else {
-            result = json.encode({'node': data['id'], 'result': {}});
-          }
-          ws.add(result);
+        if (rootNode != null)
+          result = json.encode({
+            'id': data['id'],
+            'result': {'root': getDocument()}
+          });
+        else {
+          result = json.encode({'node': data['id'], 'result': {}});
         }
+        ws.add(result);
         break;
       case 'DOM.requestChildNodes':
-        {
-          var nodeId = data['params']['nodeId'];
-          var children = [];
-          nodeIdMap[nodeId].childNodes.forEach((node) {
-            nodeIdMap[count] = node;
-            children.add(nodeToMap(node, count++));
-          });
-          result = json.encode({
-            'method': 'DOM.setChildNodes',
-            'params': {
-              'parentId': nodeId,
-              'nodes': children,
-            },
-          });
-          String response = json.encode({'id': data['id'], 'result': {}});
-          ws.add(result);
-          ws.add(response);
-        }
+        var nodeId = data['params']['nodeId'];
+        var children = [];
+        nodeIdMap[nodeId].childNodes.forEach((node) {
+          nodeIdMap[count] = node;
+          children.add(nodeToMap(node, count++));
+        });
+        result = json.encode({
+          'method': 'DOM.setChildNodes',
+          'params': {
+            'parentId': nodeId,
+            'nodes': children,
+          },
+        });
+        String response = json.encode({'id': data['id'], 'result': {}});
+        ws.add(result);
+        ws.add(response);
         break;
       case 'CSS.getMatchedStylesForNode':
-        {
-          int nodeId = data['params']['nodeId'];
-          String res = json.encode({
-            'id': data['id'],
-            'result': {
-              'inlineStyle': getInlineStyle(nodeId),
-              'inherited': [],
-              'pseudoElements': [],
-              'cssKeyframesRules': [],
-              'matchedCSSRules': []
-            },
-          });
-          ws.add(res);
-        }
+        int nodeId = data['params']['nodeId'];
+        String res = json.encode({
+          'id': data['id'],
+          'result': {
+            'inlineStyle': getInlineStyle(nodeId),
+            'inherited': [],
+            'pseudoElements': [],
+            'cssKeyframesRules': [],
+            'matchedCSSRules': []
+          },
+        });
+        ws.add(res);
         break;
       case 'CSS.getComputedStyleForNode':
-        {
-          int nodeId = data['params']['nodeId'];
-          String res = json.encode({
-            'id': data['id'],
-            'result': {'computedStyle': getComputedStyle(nodeId)}
-          });
-          ws.add(res);
-        }
+        int nodeId = data['params']['nodeId'];
+        String res = json.encode({
+          'id': data['id'],
+          'result': {'computedStyle': getComputedStyle(nodeId)}
+        });
+        ws.add(res);
         break;
       default:
-        {
-          result = json.encode({'id': data['id'], 'result': {}});
-          ws.add(result);
-        }
+        result = json.encode({'id': data['id'], 'result': {}});
+        ws.add(result);
         break;
     }
   }
@@ -295,9 +279,6 @@ class DevWebsocket {
     Map computedStyle = new Map.from(initComputedStyle);
     List styleList = [];
 
-    print('nodeType is Element: ${node is Element}');
-    print('nodeType is What: ${node.nodeType}');
-
     if (node is Element) {
       css.CSSStyleDeclaration style = node.style;
       computedStyle['display'] = node.defaultDisplay;
@@ -328,8 +309,8 @@ class DevWebsocket {
         computedStyle[kebabizeProperty] = propertyValue;
       }
 
-      Map Rect = json.decode(node.getBoundingClientRect());
-      Rect.forEach((key, value) {
+      Map rect = json.decode(node.getBoundingClientRect());
+      rect.forEach((key, value) {
         computedStyle[key] = standardizeNumber(value);
       });
     }
