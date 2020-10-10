@@ -24,8 +24,10 @@ Value JSWindow::get(JSContext &context, const PropNameID &name) {
     if (getDartMethod()->platformBrightness == nullptr) {
       throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
+    const NativeString * code = getDartMethod()->platformBrightness(context.getContextId());
+    String &&result = String::createFromUInt16(context, code->string, code->length);
 
-    return Value(context, String::createFromUtf8(context, getDartMethod()->platformBrightness(context.getContextId())));
+    return Value(context, result);
   } else if (_name == "location") {
     return Value(context, Object::createFromHostObject(context, location_->shared_from_this()));
   }
