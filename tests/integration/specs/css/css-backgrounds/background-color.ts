@@ -56,4 +56,21 @@ describe('Background-color', () => {
     await sleep(1);
     await matchViewportSnapshot();
   });
+
+  it('red and remove', async (done) => {
+    const div = document.createElement('div');
+    setElementStyle(div, {
+      width: '200px',
+      height: '200px',
+      backgroundColor: 'red',
+    });
+    document.body.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      div.style.backgroundColor = '';
+      await expectAsync(div.toBlob(1.0)).toMatchImageSnapshot();
+      done();
+    });
+  });
+
 });

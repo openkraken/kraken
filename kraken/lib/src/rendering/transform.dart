@@ -42,7 +42,7 @@ mixin RenderTransformMixin on RenderBox {
       translation = alignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
- 
+
     result.multiply(_transform);
 
     if (alignment != null && alignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
@@ -52,7 +52,7 @@ mixin RenderTransformMixin on RenderBox {
 
   TransformLayer _transformLayer;
 
-  void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback superPaint) {
+  void paintTransform(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (_transform != null) {
       final Matrix4 transform = getEffectiveTransform();
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
@@ -61,15 +61,15 @@ mixin RenderTransformMixin on RenderBox {
           needsCompositing,
           offset,
           transform,
-          superPaint,
+          callback,
           oldLayer: _transformLayer,
         );
       } else {
-        superPaint(context, offset + childOffset);
+        callback(context, offset + childOffset);
         _transformLayer = null;
       }
     } else {
-      superPaint(context, offset);
+      callback(context, offset);
     }
   }
 

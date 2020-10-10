@@ -103,6 +103,7 @@ const builtInCSSProperties = [
   'transition-delay',
   'object-fit',
   'object-position',
+  'filter'
 ];
 
 interface ICamelize {

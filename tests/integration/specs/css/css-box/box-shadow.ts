@@ -18,4 +18,21 @@ describe('BoxShadow', () => {
     append(BODY, reference);
     await matchElementImageSnapshot(reference);
   });
+
+  it('remove box-shadow', async () => {
+    const div = createElementWithStyle('div', {
+      width: '50px',
+      height: '50px',
+      border: '1px solid black',
+      backgroundColor: 'white',
+      margin: '10px',
+      boxShadow: '0 0 8px black',
+    });
+    append(BODY, div);
+    await matchViewportSnapshot();
+
+    div.style.boxShadow = null;
+    // BoxShadow has been removed.
+    await matchViewportSnapshot();
+  });
 });

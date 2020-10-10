@@ -28,8 +28,12 @@ mixin CSSDecoratedBoxMixin {
         renderBoxModel.backgroundClip = getBackgroundClip(present);
       } else if (property == BACKGROUND_ORIGIN) {
         renderBoxModel.backgroundOrigin = getBackgroundOrigin(present);
+      } if (property == BACKGROUND_COLOR) {
+        _updateBackgroundColor(renderBoxModel, style, property);
       } else if (property.startsWith(BACKGROUND)) {
-        _updateBackground(renderBoxModel, style, property);
+        // Including BACKGROUND_REPEAT, BACKGROUND_POSITION, BACKGROUND_IMAGE,
+        //   BACKGROUND_SIZE, BACKGROUND_ORIGIN, BACKGROUND_CLIP.
+        _updateBackgroundImage(renderBoxModel, style, property);
       } else if (property.endsWith('Radius')) {
         _updateBorderRadius(renderBoxModel, style, property);
       } else if (property.startsWith(BORDER)) {
@@ -37,7 +41,7 @@ mixin CSSDecoratedBoxMixin {
       } else if (property == BOX_SHADOW) {
         _updateBoxShadow(renderBoxModel, style, property);
       } else if (property == COLOR) {
-        _updateBackground(renderBoxModel, style, property);
+        _updateBackgroundColor(renderBoxModel, style, property);
         _updateBorder(renderBoxModel, style, property);
         _updateBoxShadow(renderBoxModel, style, property);
       }
@@ -57,25 +61,54 @@ mixin CSSDecoratedBoxMixin {
     CSSStyleDeclaration style,
     String property) {
 
-    List<BoxShadow> boxShadow = getBoxShadow(style);
-    renderBoxModel.decoration = renderBoxModel.decoration.copyWith(boxShadow: boxShadow);
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
+
+    if (prevBoxDecoration != null) {
+      renderBoxModel.decoration = BoxDecoration(
+          // Only modify boxShadow.
+          boxShadow: getBoxShadow(style),
+          color: prevBoxDecoration.color,
+          image: prevBoxDecoration.image,
+          border: prevBoxDecoration.border,
+          borderRadius: prevBoxDecoration.borderRadius,
+          gradient: prevBoxDecoration.gradient,
+          backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+          shape: prevBoxDecoration.shape
+      );
+    } else {
+      renderBoxModel.decoration = BoxDecoration(boxShadow: getBoxShadow(style));
+    }
   }
 
-  void _updateBackground(
-      RenderBoxModel renderBoxModel,
-      CSSStyleDeclaration style,
-      String property) {
-
-    BoxDecoration oldBox = renderBoxModel.decoration;
-
+  void _updateBackgroundColor(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
     if (property == BACKGROUND_COLOR || property == COLOR) {
+      // If change bg color from some color to null, which must be explicitly transparent.
       Color bgColor = CSSBackground.getBackgroundColor(style);
-      // If there has gradient, background color will not work
-      if (bgColor != null && oldBox.gradient == null) {
-        renderBoxModel.decoration = renderBoxModel.decoration.copyWith(color: bgColor);
+
+      if (bgColor != null) {
+        // If there has gradient, background color will not work
+        if (prevBoxDecoration.gradient == null) {
+          renderBoxModel.decoration = prevBoxDecoration.copyWith(color: bgColor);
+        }
+      } else {
+        // Remove background color.
+        //   [BoxDecoration.copyWith] can not remove some value, so instantite a new [BoxDecoration].
+        renderBoxModel.decoration = BoxDecoration(
+          image: prevBoxDecoration.image,
+          border: prevBoxDecoration.border,
+          borderRadius: prevBoxDecoration.borderRadius,
+          boxShadow: prevBoxDecoration.boxShadow,
+          gradient: prevBoxDecoration.gradient,
+          backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+          shape: prevBoxDecoration.shape,
+        );
       }
-      return;
     }
+  }
+
+  void _updateBackgroundImage(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property) {
+    BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
 
     DecorationImage decorationImage;
     Gradient gradient;
@@ -89,11 +122,25 @@ mixin CSSDecoratedBoxMixin {
       }
     }
 
+    BoxDecoration updateBoxDecoration = BoxDecoration(
+      image: decorationImage,
+      gradient: gradient,
+      color: prevBoxDecoration.color,
+      border: prevBoxDecoration.border,
+      borderRadius: prevBoxDecoration.borderRadius,
+      boxShadow: prevBoxDecoration.boxShadow,
+      backgroundBlendMode: prevBoxDecoration.backgroundBlendMode,
+      shape: prevBoxDecoration.shape,
+    );
+
     if (CSSBackground.hasScrollBackgroundImage(style)) {
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
+      renderBoxModel.decoration = updateBoxDecoration;
     } else if (CSSBackground.hasLocalBackgroundImage(style)) {
       // @FIXME: support local background image
-      renderBoxModel.decoration = renderBoxModel.decoration.copyWith(gradient: gradient, image: decorationImage);
+      renderBoxModel.decoration = updateBoxDecoration;
+    } else if (prevBoxDecoration != null) {
+      // Used for removing background properties.
+      renderBoxModel.decoration = updateBoxDecoration;
     }
   }
 

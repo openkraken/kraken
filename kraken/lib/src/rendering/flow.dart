@@ -312,7 +312,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       child.parentData = RenderLayoutParentData();
     }
     if (child is RenderBoxModel) {
-      child.parentData = getPositionParentDataFromStyle(child.style, child.parentData);
+      child.parentData = CSSPositionedLayout.getPositionParentData(child.style, child.parentData);
     }
   }
 
@@ -534,7 +534,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     while (child != null) {
       final RenderLayoutParentData childParentData = child.parentData;
       if (childParentData.isPositioned) {
-        layoutPositionedChild(element, this, child);
+        CSSPositionedLayout.layoutPositionedChild(element, this, child);
       }
       child = childParentData.nextSibling;
     }
@@ -548,9 +548,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (child is RenderBoxModel && childParentData.isPositioned) {
-        setPositionedChildOffset(this, child, size, borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(this, child, size, borderEdge);
 
-        setMaximumScrollableSizeForPositionedChild(childParentData, child.size);
+        setMaximumScrollableSizeForPositionedChild(childParentData, child.boxSize);
       }
       child = childParentData.nextSibling;
     }
@@ -680,7 +680,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       /// Caculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
-      VerticalAlign verticalAlign = getVerticalAlign(childStyle);
+      VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
       bool isLineHeightValid = _isLineHeightValid(child);
 
       // Vertical align is only valid for inline box
@@ -918,7 +918,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Distance from top to baseline of child
           double childAscent = _getChildAscent(child);
 
-          VerticalAlign verticalAlign = getVerticalAlign(childStyle);
+          VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
 
           switch (verticalAlign) {
             case VerticalAlign.baseline:
@@ -952,7 +952,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           crossAxisOffset + childLineExtent + paddingTop + borderTop + childMarginTop
         );
         /// Apply position relative offset change.
-        applyRelativeOffset(relativeOffset, child, childStyle);
+        CSSPositionedLayout.applyRelativeOffset(relativeOffset, child, childStyle);
 
         if (flipMainAxis)
           childMainPosition -= childBetweenSpace;
@@ -1069,61 +1069,34 @@ class RenderFlowLayout extends RenderLayoutBox {
       childParentData.offset : childParentData.offset + offset;
     return scrollOffset;
   }
-  
+
   @override
-  void paint(PaintingContext context, Offset offset) {
-    basePaint(context, offset, (context, offset) {
-      if (needsSortChildren) {
-        if (!isChildrenSorted) {
-          sortChildrenByZIndex();
-        }
-        for (int i = 0; i < sortedChildren.length; i ++) {
-          RenderObject child = sortedChildren[i];
-          if (child is! RenderPositionHolder) {
-            context.paintChild(child, getChildScrollOffset(child, offset));
-          }
-        }
-      } else {
-        RenderObject child = firstChild;
-        while (child != null) {
-          final RenderLayoutParentData childParentData = child.parentData;
-          if (child is! RenderPositionHolder) {
-            context.paintChild(child, getChildScrollOffset(child, offset));
-          }
-          child = childParentData.nextSibling;
+  void performPaint(PaintingContext context, Offset offset) {
+    if (needsSortChildren) {
+      if (!isChildrenSorted) {
+        sortChildrenByZIndex();
+      }
+      for (int i = 0; i < sortedChildren.length; i ++) {
+        RenderObject child = sortedChildren[i];
+        if (child is! RenderPositionHolder) {
+          context.paintChild(child, getChildScrollOffset(child, offset));
         }
       }
-    });
+    } else {
+      RenderObject child = firstChild;
+      while (child != null) {
+        final RenderLayoutParentData childParentData = child.parentData;
+        if (child is! RenderPositionHolder) {
+          context.paintChild(child, getChildScrollOffset(child, offset));
+        }
+        child = childParentData.nextSibling;
+      }
+    }
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-  }
-
-  RenderLayoutParentData getPositionParentDataFromStyle(CSSStyleDeclaration style, RenderLayoutParentData parentData) {
-    CSSPositionType positionType = resolvePositionFromStyle(style);
-    parentData.position = positionType;
-
-    if (style.contains('top')) {
-      parentData.top = CSSLength.toDisplayPortValue(style['top']);
-    }
-    if (style.contains('left')) {
-      parentData.left = CSSLength.toDisplayPortValue(style['left']);
-    }
-    if (style.contains('bottom')) {
-      parentData.bottom = CSSLength.toDisplayPortValue(style['bottom']);
-    }
-    if (style.contains('right')) {
-      parentData.right = CSSLength.toDisplayPortValue(style['right']);
-    }
-    parentData.width = CSSLength.toDisplayPortValue(style['width']) ?? 0;
-    parentData.height = CSSLength.toDisplayPortValue(style['height']) ?? 0;
-    parentData.zIndex = CSSLength.toInt(style['zIndex']) ?? 0;
-
-    parentData.isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
-
-    return parentData;
   }
 
   /// Convert [RenderFlowLayout] to [RenderFlexLayout]
