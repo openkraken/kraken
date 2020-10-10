@@ -249,10 +249,6 @@ class DevWebsocket {
     Node node = nodeIdMap[nodeId];
     Map inlineStyle = new Map.from(initInlineStyle);
 
-    // if (node is TextNode) {
-    //   node = node.parent;
-    // }
-
     if (node is Element && node.style.length > 0) {
       css.CSSStyleDeclaration style = node.style;
       List cssProperties = [];
@@ -301,10 +297,6 @@ class DevWebsocket {
 
     print('nodeType is Element: ${node is Element}');
     print('nodeType is What: ${node.nodeType}');
-
-    // if (node is TextNode) {
-    //   node = node.parent;
-    // }
 
     if (node is Element) {
       css.CSSStyleDeclaration style = node.style;
