@@ -2,6 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/css/animation.dart';
@@ -396,7 +397,15 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool fromAnimation = false]) {
+  void setProperty(String propertyName, value, [bool fromAnimation = false, bool fromScheduledTransition = false]) {
+    // For transition property, schdule to next frame.
+    if (propertyName == TRANSITION && !fromScheduledTransition) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        setProperty(propertyName, value, false, true);
+      });
+      return;
+    }
+
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
