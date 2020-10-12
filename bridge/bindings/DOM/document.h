@@ -13,8 +13,9 @@ using namespace alibaba::jsa;
 
 class JSDocument : public HostObject, public std::enable_shared_from_this<JSDocument> {
   Value get(JSContext &, const PropNameID &name) override;
-
   void set(JSContext &, const PropNameID &name, const Value &value) override;
+
+  static Value createElement(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 };

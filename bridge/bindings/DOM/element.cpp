@@ -29,6 +29,7 @@ std::vector<PropNameID> JSElement::getPropertyNames(JSContext &context) {
 Value JSElementStyle::get(JSContext &, const PropNameID &name) {
   // TODO: call dart method to get element property property;
   //  return HostObject::get(<unnamed>, name);
+  return Value::undefined();
 }
 
 void JSElementStyle::set(JSContext &, const PropNameID &name, const Value &value) {

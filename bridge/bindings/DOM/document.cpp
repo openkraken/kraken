@@ -9,7 +9,7 @@
 namespace kraken {
 namespace binding {
 
-Value createElement(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+Value JSDocument::createElement(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count != 1) {
     throw JSError(context, "Failed to createElement: only accept 1 parameter.");
   }
@@ -25,7 +25,7 @@ Value createElement(JSContext &context, const Value &thisVal, const Value *args,
   nativeString.length = tagNameString.unicodeLength(context);
 
   auto element =
-    Object::createFromHostObject(context, std::make_shared<JSElement>(context, &nativeString));
+      Object::createFromHostObject(context, std::make_shared<JSElement>(context, &nativeString));
   return Value(context, element);
 }
 

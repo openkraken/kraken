@@ -665,24 +665,24 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-void _test(int num) {
-  print('receive test: $num');
-}
-
-Pointer<NativeElement> _createElement(int num) {
+Pointer<NativeElement> _createElement(Pointer<NativeString> tagName) {
   Pointer<NativeElement> nativeElement = allocate<NativeElement>();
-  nativeElement.ref.test = Pointer.fromFunction(_test);
+  print(nativeStringToString(tagName));
   return nativeElement;
 }
 
-typedef Native_CreateElement = Void Function(Int32 num);
+class NativeElement extends Struct {}
 
-class NativeElement extends Struct {
-  Pointer<NativeFunction<Native_CreateElement>> test;
-}
+typedef Native_CreateElement = Pointer<NativeElement> Function(Pointer<NativeString> tagName);
+typedef Dart_CreateElement = Pointer<NativeElement> Function(Pointer<NativeString> tagName);
+typedef Native_RegisterCreateElement = Void Function(Pointer<NativeFunction<Native_CreateElement>>);
+typedef Dart_RegisterCreateElement = void Function(Pointer<NativeFunction<Native_CreateElement>>);
+final Dart_RegisterCreateElement _registerCreateElement =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateElement>>('registerCreateElement').asFunction();
 
 void registerCreateElement() {
-
+  Pointer<NativeFunction<Native_CreateElement>> pointer = Pointer.fromFunction(_createElement);
+  _registerCreateElement(pointer);
 }
 
 void registerDartMethodsToCpp() {

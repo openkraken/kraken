@@ -34,7 +34,7 @@ public:
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
-  DartElement* _dartElement;
+  NativeElement * _dartElement;
 };
 
 } // namespace binding
