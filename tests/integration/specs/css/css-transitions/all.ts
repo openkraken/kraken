@@ -137,4 +137,36 @@ describe('Transition all', () => {
       done();
     });
   });
+
+  it('dynamic update transition values', async (doneFn) => {
+    let container = createElement('div', {
+      style: {
+        width: '50px',
+        height: '50px',
+        transition: 'width 2s ease 1s',
+        background: 'red'
+      }
+    }, [
+      createText('1234')
+    ]);
+    BODY.appendChild(container);
+
+    await matchViewportSnapshot();
+    requestAnimationFrame(() => {
+      container.style.width = '200px';
+
+      setTimeout(() => {
+        container.style.transition = 'height 0.5s ease 0.5s';
+        requestAnimationFrame(async () => {
+          await matchViewportSnapshot();
+          container.style.height = '200px';
+
+          setTimeout(async () => {
+            await matchViewportSnapshot();
+            doneFn();
+          }, 1200);
+        });
+      }, 100);
+    });
+  });
 });

@@ -833,7 +833,7 @@ class RenderBoxModel extends RenderBox with
       RenderLayoutParentData selfParentData = parentData;
       RenderBoxModel parentBox = parent;
       if (selfParentData.isPositioned && parentBox.hasSize) {
-        setPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
+        CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
       }
     }
   }
@@ -972,7 +972,7 @@ class RenderBoxModel extends RenderBox with
       offset: Offset(-scrollLeft, -scrollTop),
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
-        CSSPositionType positionType = resolveCSSPosition(style[POSITION]);
+        CSSPositionType positionType = CSSPositionedLayout.parsePositionType(style[POSITION]);
         if (positionType == CSSPositionType.fixed) {
           position -= getTotalScrollOffset();
         }
