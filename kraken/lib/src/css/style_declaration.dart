@@ -174,7 +174,7 @@ class CSSStyleDeclaration {
       }
 
       // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-      if (begin == AUTO) {
+      if (begin == AUTO || begin == TRANSPARENT) {
         _properties[propertyName] = end;
         _invokePropertyChangedListener(propertyName, begin, end);
         return;
@@ -464,6 +464,16 @@ class CSSStyleDeclaration {
           return;
         }
         break;
+    }
+
+    // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
+    // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
+    // Therefore we should cancel all running transition to get thing works.
+    if (propertyName == TRANSITION_PROPERTY && _propertyRunningTransition.length > 0) {
+      for (String property in _propertyRunningTransition.keys) {
+        _propertyRunningTransition[property].finish();
+      }
+      _propertyRunningTransition.clear();
     }
 
     if (!fromAnimation && _shouldTransition(propertyName, prevValue, normalizedValue)) {
