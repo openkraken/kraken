@@ -307,12 +307,12 @@ AlignSelf _getAlignSelf(String alignSelf) {
 
 double _getFlexGrow(String grow) {
   double flexGrow = CSSLength.toDouble(grow);
-  return flexGrow != null && flexGrow > 0 ? flexGrow : 0.0;
+  return flexGrow != null && flexGrow >= 0 ? flexGrow : 0.0;
 }
 
 double _getFlexShrink(String shrink) {
   double flexShrink = CSSLength.toDouble(shrink);
-  return flexShrink != null && flexShrink > 0 ? flexShrink : 1.0;
+  return flexShrink != null && flexShrink >= 0 ? flexShrink : 1.0;
 }
 
 String _getFlexBasis(String basis) {
@@ -352,7 +352,7 @@ class CSSFlex {
     String alignSelf = style[ALIGN_SELF];
 
     parentData.flexGrow = _getFlexGrow(grow);
-    parentData.flexShrink = _getFlexGrow(shrink);
+    parentData.flexShrink = _getFlexShrink(shrink);
     parentData.flexBasis = _getFlexBasis(basis);
     parentData.alignSelf = _getAlignSelf(alignSelf);
 
