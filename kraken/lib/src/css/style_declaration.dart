@@ -174,7 +174,7 @@ class CSSStyleDeclaration {
       }
 
       // When begin propertyValue is AUTO, skip animation and trigger style update directly.
-      if (begin == AUTO || begin == TRANSPARENT) {
+      if (begin == AUTO) {
         _properties[propertyName] = end;
         _invokePropertyChangedListener(propertyName, begin, end);
         return;
@@ -466,6 +466,7 @@ class CSSStyleDeclaration {
         break;
     }
 
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/animation/AnimationTimeline.cpp#L257
     // Any animation found in previousAnimations but not found in newAnimations is not longer current and should be canceled.
     // @HACK: There are no way to get animationList from styles(Webkit will create an new Style object when style changes, but Kraken not).
     // Therefore we should cancel all running transition to get thing works.

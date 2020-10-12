@@ -138,22 +138,6 @@ describe('Transition all', () => {
     });
   });
 
-  it('transition should not animation when initialize', async () => {
-    let container = createElement('div', {
-      style: {
-        width: '50px',
-        height: '50px',
-        transition: 'all 2s ease',
-        background: 'red'
-      }
-    }, [
-      createText('1234')
-    ]);
-
-    BODY.appendChild(container);
-    await matchViewportSnapshot();
-  });
-
   it('dynamic update transition values', async (doneFn) => {
     let container = createElement('div', {
       style: {
