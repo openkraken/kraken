@@ -397,15 +397,7 @@ class CSSStyleDeclaration {
 
   /// Modifies an existing CSS property or creates a new CSS property in
   /// the declaration block.
-  void setProperty(String propertyName, value, [bool fromAnimation = false, bool fromScheduledTransition = false]) {
-    // For transition property, schdule to next frame.
-    if (propertyName == TRANSITION && !fromScheduledTransition) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        setProperty(propertyName, value, false, true);
-      });
-      return;
-    }
-
+  void setProperty(String propertyName, value, [bool fromAnimation = false]) {
     // Null or empty value means should be removed.
     if (isNullOrEmptyValue(value)) {
       removeProperty(propertyName);
