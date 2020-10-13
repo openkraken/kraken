@@ -667,7 +667,6 @@ class Element extends Node
   }
 
   void _onStyleChanged(String property, String original, String present, bool inAnimation) {
-
     switch (property) {
       case DISPLAY:
         _styleDisplayChangedListener(property, original, present);
@@ -1264,6 +1263,9 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
           return flexLayout;
         }
       }
+    } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      flexLayout = prevRenderLayoutBox.toFlexLayout();
+      return flexLayout;
     }
 
     CSSFlexboxMixin.decorateRenderFlex(flexLayout, style);
@@ -1319,6 +1321,18 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
 
     CSSFlowMixin.decorateRenderFlow(flowLayout, style);
     return flowLayout;
+  } else if (display == CSSDisplay.sliver) {
+    RenderRecyclerLayout renderRecyclerLayout;
+
+    if (prevRenderLayoutBox == null) {
+      renderRecyclerLayout = RenderRecyclerLayout(style: style, targetId: element.targetId, elementManager: element.elementManager);
+    } else if (prevRenderLayoutBox is RenderFlowLayout) {
+      renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
+    } else if (prevRenderLayoutBox is RenderFlexLayout) {
+
+    }
+
+    return renderRecyclerLayout;
   } else {
     throw FlutterError('Not supported display type $display');
   }

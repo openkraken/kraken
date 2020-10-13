@@ -1099,6 +1099,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     super.debugFillProperties(properties);
   }
 
+  /// Convert [RenderFlowLayout] to [RenderRecyclerLayout]
+  RenderRecyclerLayout toRenderRecyclerLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderRecyclerLayout layout = RenderRecyclerLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    layout.addAll(children);
+    return copyWith(layout);
+  }
+
   /// Convert [RenderFlowLayout] to [RenderFlexLayout]
   RenderFlexLayout toFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();

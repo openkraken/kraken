@@ -282,7 +282,7 @@ class RenderBoxModel extends RenderBox with
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
-  RenderBoxModel copyWith(RenderBoxModel newBox) {
+  T copyWith<T extends RenderBoxModel>(T newBox) {
     // Copy Sizing
     newBox.width = width;
     newBox.height = height;
@@ -468,6 +468,7 @@ class RenderBoxModel extends RenderBox with
     switch (display) {
       case CSSDisplay.block:
       case CSSDisplay.flex:
+      case CSSDisplay.sliver:
         // Get own width if exists else get the width of nearest ancestor width width
         if (renderBoxModel.width != null) {
           cropPaddingBorder(renderBoxModel);
@@ -491,7 +492,7 @@ class RenderBoxModel extends RenderBox with
                 width = renderBoxModel.width;
                 cropPaddingBorder(renderBoxModel);
                 break;
-              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex) {
+              } else if (display == CSSDisplay.inlineBlock || display == CSSDisplay.inlineFlex || display == CSSDisplay.sliver) {
                 // Collapse width to children
                 width = null;
                 break;
