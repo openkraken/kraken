@@ -6,21 +6,18 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
-import 'package:kraken/launcher.dart';
+import 'dart:ffi';
 
+import 'package:ffi/ffi.dart';
+import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/bridge.dart';
 
-class NativeElement {
-  Element _element;
-  Element get element => _element;
-  NativeElement(Element element): _element = element;
-}
-
-NativeElement _createElement(
+Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
   switch (type) {
@@ -83,13 +80,21 @@ NativeElement _createElement(
     element.addEvent(eventName);
   });
 
-  return NativeElement(element);
+  return element;
 }
 
 const int BODY_ID = -1;
 const int WINDOW_ID = -2;
 
 class ElementManager {
+  // Call from JS Bridge before JS side eventTarget object been Garbage collected.
+  static void disposeEventTarget(int contextId, Pointer<NativeEventTarget> nativeEventTarget) {
+    print('dispose eventTarget: $nativeEventTarget');
+    KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+    controller.view.removeEventTargetById(nativeEventTarget.address);
+    free(nativeEventTarget);
+  }
+
   Element _rootElement;
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
   bool showPerformanceOverlayOverride;
@@ -127,7 +132,6 @@ class ElementManager {
 
   void removeTarget(Node target) {
     assert(target.targetId != null);
-    target.childNodes.forEach(removeTarget);
     _eventTargets.remove(target.targetId);
   }
 
@@ -146,7 +150,7 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  NativeElement createElement(int id, String type, Map<String, dynamic> props, List events) {
+  Element createElement(int id, String type, Map<String, dynamic> props, List events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
     List<String> eventList;
@@ -157,9 +161,9 @@ class ElementManager {
       }
     }
 
-    NativeElement nativeElement = _createElement(id, type, props, eventList, this);
-    setEventTarget(nativeElement.element);
-    return nativeElement;
+    Element element = _createElement(id, type, props, eventList, this);
+    setEventTarget(element);
+    return element;
   }
 
   void createTextNode(int id, String data) {

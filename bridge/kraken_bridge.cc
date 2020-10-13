@@ -204,6 +204,11 @@ void registerCreateElement(CreateElement createElement) {
   kraken::registerCreateElement(createElement);
 }
 
+void registerCreateEventTarget(CreateEventTarget createEventTarget) {
+  kraken::registerCreateEventTarget(createEventTarget);
+}
+
+
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;

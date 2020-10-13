@@ -34,6 +34,7 @@ struct DartMethodPointer {
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   CreateElement createElement{nullptr};
+  CreateEventTarget createEventTarget{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -50,6 +51,7 @@ void registerDevicePixelRatio(DevicePixelRatio devicePixelRatio);
 void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerCreateElement(CreateElement createElement);
+void registerCreateEventTarget(CreateEventTarget createEventTarget);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
 

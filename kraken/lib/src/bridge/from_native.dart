@@ -11,8 +11,9 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
-import 'package:vibration/vibration.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/css.dart';
+import 'package:vibration/vibration.dart';
 import 'platform.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
@@ -69,7 +70,6 @@ final Dart_RegisterInvokeUIManager _registerInvokeUIManager =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterInvokeUIManager>>('registerInvokeUIManager').asFunction();
 
 const String BATCH_UPDATE = 'batchUpdate';
-const String EMPTY_STRING = '';
 
 String handleAction(int contextId, List directive) {
   String action = directive[0];
@@ -665,20 +665,43 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-Pointer<NativeElement> _createElement(Pointer<NativeString> tagName) {
-  Pointer<NativeElement> nativeElement = allocate<NativeElement>();
-  print(nativeStringToString(tagName));
-  return nativeElement;
-}
+typedef NativeDisposeEventTarget = Void Function(Int32 contextId, Pointer<NativeEventTarget> pointer);
 
+class NativeEventTarget extends Struct {
+  Pointer<NativeFunction<NativeDisposeEventTarget>> dispose;
+}
+class NativeNode extends Struct {}
 class NativeElement extends Struct {}
 
-typedef Native_CreateElement = Pointer<NativeElement> Function(Pointer<NativeString> tagName);
-typedef Dart_CreateElement = Pointer<NativeElement> Function(Pointer<NativeString> tagName);
+typedef Native_CreateEventTarget = Pointer<NativeEventTarget> Function(Int32 contextId);
+typedef Native_RegisterCreateEventTarget = Void Function(Pointer<NativeFunction<Native_CreateEventTarget>>);
+typedef Dart_RegisterCreateEventTarget = void Function(Pointer<NativeFunction<Native_CreateEventTarget>>);
+final Dart_RegisterCreateEventTarget _registerEventTarget = nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateEventTarget>>('registerCreateEventTarget').asFunction();
+
+Pointer<NativeEventTarget> _createEventTarget(int contextId) {
+  Pointer<NativeEventTarget> eventTarget = allocate<NativeEventTarget>();
+  print('set up dispose callback');
+  eventTarget.ref.dispose = Pointer.fromFunction(ElementManager.disposeEventTarget);
+  print('dispose callback: ${eventTarget.ref.dispose}');
+  return eventTarget;
+}
+
+void registerCreateEventTarget() {
+  Pointer<NativeFunction<Native_CreateEventTarget>> pointer = Pointer.fromFunction(_createEventTarget);
+  _registerEventTarget(pointer);
+}
+
+typedef Native_CreateElement = Void Function(Int32 contextId, Pointer<NativeEventTarget> eventTarget, Pointer<NativeString> tagName);
 typedef Native_RegisterCreateElement = Void Function(Pointer<NativeFunction<Native_CreateElement>>);
 typedef Dart_RegisterCreateElement = void Function(Pointer<NativeFunction<Native_CreateElement>>);
 final Dart_RegisterCreateElement _registerCreateElement =
     nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateElement>>('registerCreateElement').asFunction();
+
+void _createElement(int contextId, Pointer<NativeEventTarget> eventTarget, Pointer<NativeString> tagName) {
+  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
+  // print('createElement, address: $eventTarget tagName: $tagName');
+  controller.view.createElement(eventTarget.address, nativeStringToString(tagName));
+}
 
 void registerCreateElement() {
   Pointer<NativeFunction<Native_CreateElement>> pointer = Pointer.fromFunction(_createElement);
@@ -699,5 +722,6 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
+  registerCreateEventTarget();
   registerCreateElement();
 }

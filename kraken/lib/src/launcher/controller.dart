@@ -148,6 +148,18 @@ class KrakenViewController {
     return completer.future;
   }
 
+  Element createElement(int id, String tagName) {
+    return _elementManager.createElement(id, tagName.toUpperCase(), null, null);
+  }
+
+  EventTarget getEventTargetById(int id) {
+    return _elementManager.getEventTargetByTargetId<EventTarget>(id);
+  }
+
+  void removeEventTargetById(int id) {
+    _elementManager.removeTarget(getEventTargetById(id));
+  }
+
   String applyViewAction(String action, List payload) {
     var result = _elementManager.applyAction(action, payload);
 

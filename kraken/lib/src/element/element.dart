@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -17,6 +18,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
@@ -129,6 +131,9 @@ class Element extends Node
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
 
+  // The pointer address of element object in JS
+  Pointer<NativeElement> _jsElement;
+
   Element(
     int targetId,
     ElementManager elementManager, {
@@ -141,6 +146,7 @@ class Element extends Node
     this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
+        _jsElement = Pointer.fromAddress(targetId),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];

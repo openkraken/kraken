@@ -22,6 +22,14 @@ list(APPEND BRIDGE_SOURCE
     bindings/KOM/blob.h
     bindings/KOM/toBlob.cc
     bindings/KOM/toBlob.h
+    bindings/DOM/document.cc
+    bindings/DOM/document.h
+    bindings/DOM/element.cc
+    bindings/DOM/element.h
+    bindings/DOM/node.cc
+    bindings/DOM/node.h
+    bindings/DOM/eventTarget.cc
+    bindings/DOM/eventTarget.h
     foundation/logging.cc
     foundation/logging.h
     foundation/colors.h
@@ -53,7 +61,7 @@ list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
   )
 
-add_library(bridge STATIC ${BRIDGE_SOURCE}  bindings/DOM/document.cpp bindings/DOM/document.h bindings/DOM/element.cpp bindings/DOM/element.h)
+add_library(bridge STATIC ${BRIDGE_SOURCE})
 add_library(kraken SHARED kraken_bridge.cc ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h)
 
 if (${IS_ANDROID})

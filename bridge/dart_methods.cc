@@ -100,4 +100,8 @@ void registerCreateElement(CreateElement createElement) {
   methodPointer->createElement = createElement;
 }
 
+void registerCreateEventTarget(CreateEventTarget createEventTarget) {
+  methodPointer->createEventTarget = createEventTarget;
+}
+
 } // namespace kraken

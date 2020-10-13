@@ -29,8 +29,17 @@ struct KrakenInfo {
   GetUserAgent getUserAgent;
 };
 
-struct NativeElement {
+struct NativeEventTarget;
 
+using NativeEventTargetDispose = void(*)(int32_t contextId, NativeEventTarget *eventTarget);
+
+struct NativeEventTarget {
+  NativeEventTargetDispose dispose;
+};
+
+struct NativeNode : NativeEventTarget {};
+
+struct NativeElement : NativeNode {
 };
 
 struct Screen {
@@ -60,7 +69,8 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef NativeElement * (*CreateElement)(NativeString* tagName);
+typedef void (*CreateElement)(int32_t contextId, NativeEventTarget* eventTarget, NativeString* tagName);
+typedef NativeEventTarget* (*CreateEventTarget)(int32_t contextId);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -114,5 +124,7 @@ KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT
 void registerCreateElement(CreateElement createElement);
+KRAKEN_EXPORT
+void registerCreateEventTarget(CreateEventTarget createEventTarget);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H
