@@ -15,6 +15,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
+import 'package:kraken/src/bridge/from_native.dart';
 
 import 'platform.dart';
 import 'match_snapshots.dart';
@@ -82,7 +83,7 @@ typedef Native_MatchImageSnapshotCallback = Void Function(Pointer<JSCallbackCont
 typedef Dart_MatchImageSnapshotCallback = void Function(Pointer<JSCallbackContext> callbackContext, int contextId, int);
 typedef Native_MatchImageSnapshot = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId,
-    Pointer<Uint8>, Int32, Pointer<Utf8>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
+    Pointer<Uint8>, Int32, Pointer<NativeString>, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>>);
 typedef Native_RegisterMatchImageSnapshot = Void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
 typedef Dart_RegisterMatchImageSnapshot = void Function(Pointer<NativeFunction<Native_MatchImageSnapshot>>);
 
@@ -90,9 +91,9 @@ final Dart_RegisterMatchImageSnapshot _registerMatchImageSnapshot = nativeDynami
     .lookup<NativeFunction<Native_RegisterMatchImageSnapshot>>('registerMatchImageSnapshot')
     .asFunction();
 
-void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Uint8> bytes, int size, Pointer<Utf8> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
+void _matchImageSnapshot(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Uint8> bytes, int size, Pointer<NativeString> snapshotNamePtr, Pointer<NativeFunction<Native_MatchImageSnapshotCallback>> pointer) {
   Dart_MatchImageSnapshotCallback callback = pointer.asFunction();
-  matchImageSnapshot(bytes.asTypedList(size), Utf8.fromUtf8(snapshotNamePtr)).then((value) {
+  matchImageSnapshot(bytes.asTypedList(size), nativeStringToString(snapshotNamePtr)).then((value) {
     callback(callbackContext, contextId, value ? 1 : 0);
   });
 }

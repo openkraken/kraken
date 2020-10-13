@@ -12,19 +12,29 @@ function appendMessage(message: any[]) {
 }
 
 function sendMessage(message: any[]) {
-  return krakenUIManager(JSON.stringify(message));
+  let response = krakenUIManager(JSON.stringify(message));
+  handleUIResponse(response);
+  return response;
+}
+
+function handleUIResponse(response: string) {
+  if (response.indexOf('Error:') >= 0) {
+    throw new Error(response);
+  }
 }
 
 export function requestUpdateFrame() {
   updateRequested = false;
   if (updateMessageQueue.length > 0) {
-    // Make sure message queue is cleared, no matter that dart throws error or not.
     try {
+      // Make sure message queue is cleared, no matter that dart throws error or not.
       let message = JSON.stringify(['batchUpdate', updateMessageQueue]);
       // Clear updateMessageQueue before send BatchUpdate into Flutter to prevent duplicate messages.
       updateMessageQueue.length = 0;
-      krakenUIManager(message);
-    } catch(err) {
+      let response = krakenUIManager(message);
+      handleUIResponse(response);
+    } catch (err) {
+      // TODO: needs to remove this log when element bindings works had complete.
       console.error(err);
     }
   }
