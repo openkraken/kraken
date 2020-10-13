@@ -554,11 +554,71 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
   }
 
-  double _getBaseConstraints(RenderObject child) {
+  BoxConstraints _getBaseConstraints(RenderObject child) {
+    double minWidth = 0;
+    double maxWidth = double.infinity;
+    double minHeight = 0;
+    double maxHeight = double.infinity;
+
+    if (child is RenderBoxModel) {
+
+      String flexBasis = _getFlexBasis(child);
+      double baseSize;
+      // @FIXME when flex-basis is smaller than content width, it will not take effects
+      if (flexBasis != AUTO) {
+        baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+      }
+      if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+        minWidth = child.minWidth != null ? child.minWidth : 0;
+        maxWidth = child.maxWidth != null ? child.maxWidth : double.infinity;
+
+        if (flexBasis == AUTO) {
+          baseSize = child.width;
+        }
+        if (baseSize != null) {
+          if (child.minWidth != null && baseSize < child.minWidth) {
+            baseSize = child.minWidth;
+          } else if (child.maxWidth != null && baseSize > child.maxWidth) {
+            baseSize = child.maxWidth;
+          }
+          minWidth = maxWidth = baseSize;
+        }
+      } else {
+        minHeight = child.minHeight != null ? child.minHeight : 0;
+        maxHeight = child.maxHeight != null ? child.maxHeight : double.infinity;
+
+        if (flexBasis == AUTO) {
+          baseSize = child.height;
+        }
+        if (baseSize != null) {
+          if (child.minHeight != null && baseSize < child.minHeight) {
+            baseSize = child.minHeight;
+          } else if (child.maxHeight != null && baseSize > child.maxHeight) {
+            baseSize = child.maxHeight;
+          }
+          minHeight = maxHeight = baseSize;
+        }
+      }
+    }
+
+    if (CSSFlex.isHorizontalFlexDirection(flexDirection)) {
+      return BoxConstraints(
+        minWidth: minWidth,
+        maxWidth: maxWidth,
+      );
+    } else {
+      return BoxConstraints(
+        minHeight: minHeight,
+        maxHeight: maxHeight,
+      );
+    }
+  }
+
+  double _getBaseSize(RenderObject child) {
     // set default value
-    double minConstraints = 0;
+    double baseSize = null;
     if (child is RenderTextBox) {
-      return minConstraints;
+      return baseSize;
     } else if (child is RenderBoxModel) {
       String flexBasis = _getFlexBasis(child);
 
@@ -566,27 +626,23 @@ class RenderFlexLayout extends RenderLayoutBox {
         String width = child.style[WIDTH];
         if (flexBasis == AUTO) {
           if (width != null) {
-            minConstraints = CSSLength.toDisplayPortValue(width) ?? 0;
-          } else {
-            minConstraints = 0;
+            baseSize = CSSLength.toDisplayPortValue(width) ?? 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+          baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       } else {
         String height = child.style[HEIGHT];
         if (flexBasis == AUTO) {
-          if (height != null) {
-            minConstraints = CSSLength.toDisplayPortValue(height) ?? 0;
-          } else {
-            minConstraints = 0;
+          if (height != '') {
+            baseSize = CSSLength.toDisplayPortValue(height) ?? 0;
           }
         } else {
-          minConstraints = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
+          baseSize = CSSLength.toDisplayPortValue(flexBasis) ?? 0;
         }
       }
     }
-    return minConstraints;
+    return baseSize;
   }
 
   double _getMainSize(RenderBox child) {
@@ -831,6 +887,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     );
   }
 
+  /// 1. Layout children in flow order to calculate flex lines according to its constaints and flex-wrap property
   void _layoutByFlexLine(
     List<_RunMetrics> runMetrics,
     RenderPositionHolder placeholderChild,
@@ -874,7 +931,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         continue;
       }
 
-      double baseConstraints = _getBaseConstraints(child);
+      double baseSize = _getBaseSize(child);
       BoxConstraints innerConstraints;
 
       int childNodeId;
@@ -886,6 +943,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       BoxSizeType heightSizeType = _getChildHeightSizeType(child);
+      BoxConstraints baseConstraints = _getBaseConstraints(child);
 
       if (child is RenderPositionHolder) {
         RenderBoxModel realDisplayedBox = child.realDisplayedBox;
@@ -920,12 +978,16 @@ class RenderFlexLayout extends RenderLayoutBox {
             maxCrossAxisSize = contentHeight != null ? contentHeight - marginVertical : double.infinity;
           }
         }
+
         innerConstraints = BoxConstraints(
-          minWidth: baseConstraints,
+          minWidth: baseConstraints.minWidth,
+          maxWidth: baseConstraints.maxWidth,
           maxHeight: maxCrossAxisSize,
         );
       } else {
-        innerConstraints = BoxConstraints(minHeight: baseConstraints);
+        innerConstraints = BoxConstraints(
+          minHeight: baseSize != null ? baseSize : 0
+        );
       }
       child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
@@ -1017,9 +1079,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (flexShrink > 0) {
         totalFlexShrink += flexShrink;
       }
-
-//      containerSizeMap['cross']= crossAxisExtent != 0.0 ? crossAxisExtent : math.max(containerSizeMap['cross'], childMainAxisExtent);
-
       // Only layout placeholder renderObject child
       child = placeholderChild == null ? childParentData.nextSibling : null;
     }
@@ -1124,9 +1183,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           maxChildExtent = canFlex ? mainSize + spacePerFlex * flexGrow
             : double.infinity;
 
-          double baseConstraints = _getBaseConstraints(child);
-          // get the maximum child size between baseConstraints and maxChildExtent.
-          maxChildExtent = math.max(baseConstraints, maxChildExtent);
+          double baseSize = _getBaseSize(child) ?? 0;
+          // get the maximum child size between base size and maxChildExtent.
+          maxChildExtent = math.max(baseSize, maxChildExtent);
           minChildExtent = maxChildExtent;
         } else if (isFlexShrink) {
           int childNodeId;
