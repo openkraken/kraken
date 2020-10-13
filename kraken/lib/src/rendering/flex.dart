@@ -1128,7 +1128,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Main axis size of flex container
     containerSizeMap['main'] = mainSizeType != BoxSizeType.automatic ? maxMainSize : maxAllocatedMainSize;
 
-
     for (int i = 0; i < runMetrics.length; ++i) {
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
