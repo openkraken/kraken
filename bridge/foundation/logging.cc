@@ -41,8 +41,11 @@ const char *StripPath(const char *path) {
 
 } // namespace
 
-LogMessage::LogMessage(LogSeverity severity, const char *file, int line)
-  : severity_(severity), file_(file), line_(line) {}
+LogMessage::LogMessage(LogSeverity severity, const char *file, int line, const char* condition)
+  : severity_(severity), file_(file), line_(line) {
+  if (condition)
+    stream_ << "Check failed: " << condition << ". ";
+}
 
 LogMessage::~LogMessage() {
 #if defined(IS_ANDROID)
