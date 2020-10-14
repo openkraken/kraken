@@ -2,6 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/src/css/animation.dart';
