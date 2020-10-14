@@ -282,70 +282,70 @@ class RenderBoxModel extends RenderBox with
   // Positioned holder box ref.
   RenderPositionHolder positionedHolder;
 
-  T copyWith<T extends RenderBoxModel>(T newBox) {
-    // Copy Sizing
-    newBox.width = width;
-    newBox.height = height;
-    newBox.minWidth = minWidth;
-    newBox.minHeight = minHeight;
-    newBox.maxWidth = maxWidth;
-    newBox.maxHeight = maxHeight;
-
-    // Copy padding
-    newBox.padding = padding;
-
-    // Copy margin
-    newBox.margin = margin;
-
-    // Copy Border
-    newBox.borderEdge = borderEdge;
-    newBox.decoration = decoration;
-    newBox.cssBoxDecoration = cssBoxDecoration;
-    newBox.position = position;
-    newBox.configuration = configuration;
-    newBox.boxPainter = boxPainter;
-
-    // Copy background
-    newBox.backgroundClip = backgroundClip;
-    newBox.backgroundOrigin = backgroundOrigin;
-
-    // Copy overflow
-    newBox.scrollListener = scrollListener;
-    newBox.clipX = clipX;
-    newBox.clipY = clipY;
-    newBox.enableScrollX = enableScrollX;
-    newBox.enableScrollY = enableScrollY;
-    newBox.scrollOffsetX = scrollOffsetX;
-    newBox.scrollOffsetY = scrollOffsetY;
-
-    // Copy pointer listener
-    newBox.onPointerDown = onPointerDown;
-    newBox.onPointerCancel = onPointerCancel;
-    newBox.onPointerUp = onPointerUp;
-    newBox.onPointerMove = onPointerMove;
-    newBox.onPointerSignal = onPointerSignal;
-
-    // Copy transform
-    newBox.transform = transform;
-    newBox.origin = origin;
-    newBox.alignment = alignment;
-
-    // Copy display
-    newBox.display = display;
-
-    // Copy ContentVisibility
-    newBox.contentVisibility = contentVisibility;
-
-    // Copy renderPositionHolder
-    newBox.renderPositionHolder = renderPositionHolder;
+  T copyWith<T extends RenderBoxModel>(T copiedRenderBoxModel) {
     if (renderPositionHolder != null) {
-      renderPositionHolder.realDisplayedBox = newBox;
+      renderPositionHolder.realDisplayedBox = copiedRenderBoxModel;
     }
 
-    // Copy parentData
-    newBox.parentData = parentData;
+    return copiedRenderBoxModel
 
-    return newBox;
+      // Copy Sizing
+      ..width = width
+      ..height = height
+      ..minWidth = minWidth
+      ..minHeight = minHeight
+      ..maxWidth = maxWidth
+      ..maxHeight = maxHeight
+
+      // Copy padding
+      ..padding = padding
+
+      // Copy margin
+      ..margin = margin
+
+      // Copy Border
+      ..borderEdge = borderEdge
+      ..decoration = decoration
+      ..cssBoxDecoration = cssBoxDecoration
+      ..position = position
+      ..configuration = configuration
+      ..boxPainter = boxPainter
+
+      // Copy background
+      ..backgroundClip = backgroundClip
+      ..backgroundOrigin = backgroundOrigin
+
+      // Copy overflow
+      ..scrollListener = scrollListener
+      ..clipX = clipX
+      ..clipY = clipY
+      ..enableScrollX = enableScrollX
+      ..enableScrollY = enableScrollY
+      ..scrollOffsetX = scrollOffsetX
+      ..scrollOffsetY = scrollOffsetY
+
+      // Copy pointer listener
+      ..onPointerDown = onPointerDown
+      ..onPointerCancel = onPointerCancel
+      ..onPointerUp = onPointerUp
+      ..onPointerMove = onPointerMove
+      ..onPointerSignal = onPointerSignal
+
+      // Copy transform
+      ..transform = transform
+      ..origin = origin
+      ..alignment = alignment
+
+      // Copy display
+      ..display = display
+
+      // Copy ContentVisibility
+      ..contentVisibility = contentVisibility
+
+      // Copy renderPositionHolder
+      ..renderPositionHolder = renderPositionHolder
+      // Copy parentData
+      ..parentData = parentData;
   }
 
   double _width;
@@ -999,6 +999,14 @@ class RenderBoxModel extends RenderBox with
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    if (pointerListener != null) {
+      pointerListener(event);
+    }
   }
 
   @override

@@ -1,5 +1,7 @@
-
-import 'dart:math' as math;
+/*
+ * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
@@ -18,10 +20,13 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     CSSStyleDeclaration style,
   }) : super(targetId: targetId, style: style, elementManager: elementManager) {
 
+    _element = elementManager.getEventTargetByTargetId<Element>(targetId);
+
     _buildRenderViewport();
     super.insert(_renderViewport);
   }
 
+  Element _element;
   RenderViewport _renderViewport;
   RenderSliverList _renderSliverList;
 
@@ -83,14 +88,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @protected
   RenderViewport _buildRenderViewport() {
-    PointerDownEventListener originalPointerDown = onPointerDown;
-    print('originalPointerDown $originalPointerDown');
-    onPointerDown = (PointerDownEvent event) {
-      if (originalPointerDown != null) {
-        originalPointerDown(event);
+    pointerListener = (PointerEvent event) {
+      if (event is PointerDownEvent) {
+        _scrollableY.handlePointerDown(event);
       }
-
-      _scrollableY.handlePointerDown(event);
     };
 
     return _renderViewport = RenderViewport(
@@ -176,13 +177,40 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   // RenderSliverBoxChildManager protocol.
 
+  /// Useful to determine whether newly added children could
+  /// affect the visible contents of this class.
   bool _didUnderflow = false;
 
-  @override
-  int get childCount => _children.length;
+  /// Determine is doing layout if [_layoutLock] equals true.
+  bool _layoutLock = false;
 
-  List<RenderBox> _presentChildren = List<RenderBox>();
+  /// Child count should rely on element's childNodes, the real
+  /// child renderObject count is not exactly.
+  @override
+  int get childCount => _element.childNodes.length;
+
   int _currentIndex;
+
+  RenderBox _createRenderBox(int index) {
+    if (_element.childNodes.length <= index) {
+      return null;
+    }
+
+    Node node = _element.childNodes[index];
+
+    if (node != null) {
+      node.initializeRenderObject();
+    }
+
+    if (node is Element) {
+      return node.renderBoxModel;
+    } else if (node is TextNode) {
+      return node.renderTextBox;
+    } else {
+      return null;
+    }
+  }
+
   @override
   void createChild(int index, { RenderBox after }) {
     if (index >= childCount) return;
@@ -190,20 +218,27 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     if (index < 0) return;
     if (childCount <= index) return;
 
-    RenderBox child = _children[index];
+    RenderBox child = _createRenderBox(index);
     if (child != null) {
       child.parentData = SliverMultiBoxAdaptorParentData();
       _renderSliverList.insert(child, after: after);
-
-      _presentChildren.insert(index, child);
     }
   }
 
   @override
-  bool debugAssertChildListLocked() {
-    // print('debugAssertChildListLocked');
-    // TODO: implement debugAssertChildListLocked
-    return true;
+  void removeChild(RenderBox child) {
+    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    if (parentData != null) {
+      int index = parentData.index;
+      if (index != null && _element.childNodes.length > index) {
+        Node node = _element.childNodes[index];
+        if (node != null) {
+          node.dispose();
+        }
+      }
+    }
+
+    _renderSliverList.remove(child);
   }
 
   @override
@@ -214,15 +249,21 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }
 
   @override
+  void setDidUnderflow(bool value) {
+    _didUnderflow = value;
+  }
+
+  @override
+  bool debugAssertChildListLocked() => true;
+
+  @override
   void didFinishLayout() {
-    // print('didFinishLayout');
-    // throw FlutterError('didFinishLayout');
+    _layoutLock = false;
   }
 
   @override
   void didStartLayout() {
-    // print('didStartLayout');
-    assert(debugAssertChildListLocked());
+    _layoutLock = true;
   }
 
   @override
@@ -233,43 +274,29 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     double trailingScrollOffset,
   }) {
     return _extrapolateMaxScrollOffset(
-        firstIndex,
-        lastIndex,
-        leadingScrollOffset,
-        trailingScrollOffset,
-        childCount
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+      childCount
     );
   }
 
   static double _extrapolateMaxScrollOffset(
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      int childCount,
-      ) {
-    if (lastIndex == childCount - 1)
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+    int childCount,
+  ) {
+    if (lastIndex == childCount - 1) {
       return trailingScrollOffset;
+    }
+
     final int reifiedCount = lastIndex - firstIndex + 1;
     final double averageExtent = (trailingScrollOffset - leadingScrollOffset) / reifiedCount;
     final int remainingCount = childCount - lastIndex - 1;
     return trailingScrollOffset + averageExtent * remainingCount;
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    int index = parentData.index;
-
-    if (_children.contains(child)) {
-      _renderSliverList.remove(child);
-      _presentChildren[index] = null;
-    }
-  }
-
-  @override
-  void setDidUnderflow(bool value) {
-    _didUnderflow = value;
   }
 
   RenderFlexLayout toFlexLayout() {

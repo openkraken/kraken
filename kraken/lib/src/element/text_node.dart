@@ -10,16 +10,11 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    InlineSpan text = createTextSpan(_data, null);
-
-    renderTextBox = RenderTextBox(text,
-      targetId: targetId,
-      style: null,
-      elementManager: elementManager,
-    );
+    initializeRenderObject();
   }
 
   RenderTextBox renderTextBox;
+  bool _initialized = false;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
@@ -120,6 +115,33 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   @override
   void detach() {
     parent.renderLayoutBox.remove(renderTextBox);
+
+    dispose();
+  }
+
+  @override
+  void initializeRenderObject() {
+    if (_initialized) {
+      return;
+    }
+
+    _initialized = true;
+    InlineSpan text = createTextSpan(_data, null);
+
+    renderTextBox = RenderTextBox(text,
+      targetId: targetId,
+      style: null,
+      elementManager: elementManager,
+    );
+  }
+
+  @override
+  void dispose() {
+    assert(renderTextBox != null);
+    assert(renderTextBox.parent == null);
+
+    renderTextBox = null;
+    _initialized = false;
   }
 }
 

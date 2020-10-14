@@ -27,7 +27,7 @@ import 'bounding_client_rect.dart';
 const String STYLE = 'style';
 
 /// Defined by W3C Standard,
-/// Most elements's default width is 300 in pixel,
+/// Most element's default width is 300 in pixel,
 /// height is 150 in pixel.
 const String ELEMENT_DEFAULT_WIDTH = '300px';
 const String ELEMENT_DEFAULT_HEIGHT = '150px';

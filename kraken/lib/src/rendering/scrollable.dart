@@ -12,6 +12,7 @@ import 'package:kraken/rendering.dart';
 import 'ticker_provider.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
+typedef PointListener = void Function(PointerEvent event);
 
 class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -182,6 +183,7 @@ class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollCont
 
 mixin RenderOverflowMixin on RenderBox {
   ScrollListener scrollListener;
+  PointListener pointerListener;
 
   bool _clipX = false;
   bool get clipX => _clipX;

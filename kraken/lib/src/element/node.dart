@@ -110,6 +110,12 @@ abstract class Node extends EventTarget {
   /// Detach renderObject from parent.
   void detach() {}
 
+  /// Cycle to initialize render object.
+  void initializeRenderObject() {}
+
+  /// Dispose renderObject, but not do anything.
+  void dispose() {}
+
   void _ensureDetached() {
     if (parent != null) {
       parent.removeChild(this);
