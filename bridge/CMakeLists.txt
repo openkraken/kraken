@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12)
 project(KrakenBridge)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -33,6 +33,13 @@ list(APPEND BRIDGE_SOURCE
     foundation/logging.cc
     foundation/logging.h
     foundation/colors.h
+    foundation/ref_counted_internal.h
+    foundation/ref_counter.h
+    foundation/ref_ptr.h
+    foundation/ref_ptr_internal.h
+    foundation/ui_task_queue.h
+    foundation/ui_task_queue.cpp
+    foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc
     dart_methods.h
