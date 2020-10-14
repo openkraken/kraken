@@ -40,4 +40,16 @@ using Environment = const char *(*)();
 KRAKEN_EXPORT
 void registerEnvironment(Environment environment);
 
+struct MousePointer {
+  int32_t contextId;
+  double x;
+  double y;
+  double change;
+};
+
+using SimulatePointer = void (*)(MousePointer**, int32_t length);
+
+KRAKEN_EXPORT
+void registerSimulatePointer(SimulatePointer simulatePointer);
+
 #endif
