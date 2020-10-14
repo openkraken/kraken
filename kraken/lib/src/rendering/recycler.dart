@@ -30,26 +30,34 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   RenderViewport _renderViewport;
   RenderSliverList _renderSliverList;
 
-  List<RenderBox> _children = List<RenderBox>();
+  // Children targetId list.
+  List<int> _children = List<int>();
 
   @override
   void add(RenderBox child) {
-    assert(_renderSliverList != null);
-    _children.add(child);
+    if (child is RenderBoxModel) {
+      _children.add(child.targetId);
+    }
   }
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
-    assert(_renderSliverList != null);
+    // Append to last.
     if (after == _renderViewport) {
       return add(child);
     }
 
-    if (after == null) {
-      // insert at the start
-      _children.insert(0, child);
-    } else {
-      _children.insert(_children.indexOf(after), child);
+    if (child is RenderBoxModel) {
+      int index;
+      if (after == null) {
+        index = 0;
+      } else if (after is RenderBoxModel) {
+        index = _children.indexOf(after.targetId);
+      }
+
+      if (index != null) {
+        _children.insert(index, child.targetId);
+      }
     }
   }
 
@@ -61,13 +69,17 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void remove(RenderBox child) {
+    if (child is RenderBoxModel) {
+      _children.remove(child.targetId);
+    }
+
     assert(_renderSliverList != null);
-    _children.remove(child);
+    _renderSliverList.remove(child);
   }
 
   @override
   void removeAll() {
-    assert(_renderSliverList != null);
+    _renderSliverList.removeAll();
     _children.clear();
   }
 
@@ -181,22 +193,20 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   /// affect the visible contents of this class.
   bool _didUnderflow = false;
 
-  /// Determine is doing layout if [_layoutLock] equals true.
-  bool _layoutLock = false;
-
   /// Child count should rely on element's childNodes, the real
   /// child renderObject count is not exactly.
   @override
-  int get childCount => _element.childNodes.length;
+  int get childCount => _children.length;
 
   int _currentIndex;
 
   RenderBox _createRenderBox(int index) {
-    if (_element.childNodes.length <= index) {
+    if (childCount <= index) {
       return null;
     }
 
-    Node node = _element.childNodes[index];
+    int targetId = _children[index];
+    Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
 
     if (node != null) {
       node.initializeRenderObject();
@@ -213,6 +223,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
   @override
   void createChild(int index, { RenderBox after }) {
+    if (_didUnderflow) return;
     if (index >= childCount) return;
     _currentIndex = index;
     if (index < 0) return;
@@ -256,15 +267,12 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   @override
   bool debugAssertChildListLocked() => true;
 
-  @override
-  void didFinishLayout() {
-    _layoutLock = false;
-  }
+  /// Called at the beginning of layout to indicate that layout is about to
+  /// occur.
+  void didStartLayout() { }
 
-  @override
-  void didStartLayout() {
-    _layoutLock = true;
-  }
+  /// Called at the end of layout to indicate that layout is now complete.
+  void didFinishLayout() { }
 
   @override
   double estimateMaxScrollOffset(SliverConstraints constraints, {
@@ -299,7 +307,35 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     return trailingScrollOffset + averageExtent * remainingCount;
   }
 
-  RenderFlexLayout toFlexLayout() {
+  @override
+  List<RenderBox> getChildrenAsList() {
+    assert(_element != null);
+    final List<RenderBox> result = <RenderBox>[];
+    for (int index = 0; index < childCount; index++) {
+      result.add(_createRenderBox(index));
+    }
+    return result;
+  }
 
+  RenderFlexLayout toFlexLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlexLayout renderFlexLayout = RenderFlexLayout(
+        children: children,
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    return copyWith(renderFlexLayout);
+  }
+
+  RenderFlowLayout toFlowLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderFlowLayout renderFlowLayout = RenderFlowLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    renderFlowLayout.addAll(children);
+    return copyWith(renderFlowLayout);
   }
 }

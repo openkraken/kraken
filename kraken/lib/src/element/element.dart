@@ -820,8 +820,17 @@ class Element extends Node
     if (renderLayoutBox != null) {
       if (originalDisplay != presentDisplay) {
         RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
+        bool shouldReattach = parent != null;
         renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
-        renderLayoutBox.markNeedsLayout();
+
+        if (shouldReattach && prevRenderLayoutBox != renderLayoutBox) {
+          RenderLayoutBox parentRenderObject = parent.renderBoxModel;
+          RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
+          parentRenderObject.remove(prevRenderLayoutBox);
+          parentRenderObject.insert(renderLayoutBox, after: previous);
+        } else {
+          renderLayoutBox.markNeedsLayout();
+        }
       }
     }
   }
@@ -1265,7 +1274,6 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
       }
     } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
       flexLayout = prevRenderLayoutBox.toFlexLayout();
-      return flexLayout;
     }
 
     CSSFlexboxMixin.decorateRenderFlex(flexLayout, style);
@@ -1317,6 +1325,9 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
           flowLayout = prevRenderLayoutBox.toFlowLayout();
         }
       }
+    } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      // RenderRecyclerLayout --> RenderFlowLayout
+      flowLayout = prevRenderLayoutBox.toFlowLayout();
     }
 
     CSSFlowMixin.decorateRenderFlow(flowLayout, style);
@@ -1329,7 +1340,7 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
     } else if (prevRenderLayoutBox is RenderFlowLayout) {
       renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
     } else if (prevRenderLayoutBox is RenderFlexLayout) {
-
+      renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
     }
 
     return renderRecyclerLayout;
