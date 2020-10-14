@@ -176,3 +176,12 @@ void reloadJSContext(int contextId) async {
   });
   return completer.future;
 }
+
+typedef Native_FrameCallback = Void Function();
+typedef Dart_FrameCallback = void Function();
+
+final Dart_FrameCallback _frameCallback = nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
+
+void bridgeFrameCallback() {
+  _frameCallback();
+}

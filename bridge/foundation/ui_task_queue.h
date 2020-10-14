@@ -14,8 +14,7 @@
 
 namespace foundation {
 
-using Task = fml::closure;
-using TaskQueue = std::deque<Task>;
+using Task = void(*)(void*);
 
 class UITaskMessageQueue;
 
@@ -32,12 +31,18 @@ public:
     return instance_;
   };
 
-  void registerTask(const fml::closure& task);
+  void registerTask(const Task& task, void* data);
   void flushTaskFromUIThread();
 
 private:
+  struct TaskData {
+    TaskData(const Task &task, void *data): task(task), data(data) {};
+    Task task;
+    void *data;
+  };
+
   mutable std::mutex queue_mutex_;
-  TaskQueue queue;
+  std::deque<TaskData*> queue;
 
   FML_FRIEND_MAKE_REF_COUNTED(UITaskMessageQueue);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(UITaskMessageQueue);

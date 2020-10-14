@@ -9,12 +9,20 @@
 #include "jsa.h"
 #include "include/kraken_bridge.h"
 #include "foundation/logging.h"
+#include "foundation/ui_task_queue.h"
 #include <condition_variable>
 #include <mutex>
+#include <iostream>
 
 namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
+
+struct DisposeCallbackData {
+  DisposeCallbackData(NativeEventTarget *target, int32_t id): nativeEventTarget(target), contextId(id) {};
+  NativeEventTarget *nativeEventTarget;
+  int32_t contextId;
+};
 
 class JSEventTarget : public HostObject {
 public:
@@ -22,11 +30,14 @@ public:
   explicit JSEventTarget(JSContext &context);
   ~JSEventTarget() override {
     // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-    if (context.isValid() && std::this_thread::get_id() == getUIThreadId()) {
-      KRAKEN_LOG(VERBOSE) << "thread: " << std::this_thread::get_id() << "uiThread: " << getUIThreadId() <<  std::endl;
-      std::mutex mutex;
-      std::unique_lock<std::mutex> lock(mutex);
-      nativeEventTarget->dispose(context.getContextId(), nativeEventTarget);
+    if (context.isValid() && nativeEventTarget != nullptr) {
+      auto data = new DisposeCallbackData(nativeEventTarget, context.getContextId());
+      foundation::Task disposeTask = [](void *data) {
+        auto disposeCallbackData = static_cast<DisposeCallbackData*>(data);
+        disposeCallbackData->nativeEventTarget->dispose(disposeCallbackData->contextId, disposeCallbackData->nativeEventTarget);
+        delete disposeCallbackData;
+      };
+      foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
     }
   }
 
@@ -39,8 +50,9 @@ public:
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
-  NativeEventTarget * nativeEventTarget;
+  NativeEventTarget *nativeEventTarget {nullptr};
   JSContext &context;
+  int32_t contextId;
 };
 
 }

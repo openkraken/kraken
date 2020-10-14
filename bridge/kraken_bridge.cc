@@ -7,6 +7,7 @@
 #include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
+#include "foundation/ui_task_queue.h"
 #include "jsa.h"
 
 #include <atomic>
@@ -241,4 +242,8 @@ KrakenInfo *getKrakenInfo() {
   }
 
   return krakenInfo;
+}
+
+void uiFrameCallback() {
+  foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
 }

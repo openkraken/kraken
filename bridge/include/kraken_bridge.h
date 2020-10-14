@@ -88,6 +88,9 @@ KRAKEN_EXPORT
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine);
 
 KRAKEN_EXPORT
+void uiFrameCallback();
+
+KRAKEN_EXPORT
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT
 void invokeEventListener(int32_t contextId, int32_t type, NativeString *code);

@@ -89,9 +89,9 @@ const int WINDOW_ID = -2;
 class ElementManager {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, Pointer<NativeEventTarget> nativeEventTarget) {
-    print('dispose eventTarget: $nativeEventTarget');
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     controller.view.removeEventTargetById(nativeEventTarget.address);
+    // recycle bridge's nativeEventTarget pointer.
     free(nativeEventTarget);
   }
 

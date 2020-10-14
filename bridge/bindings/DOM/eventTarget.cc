@@ -13,6 +13,7 @@ using namespace alibaba::jsa;
 
 JSEventTarget::JSEventTarget(JSContext &context): context(context) {
   nativeEventTarget = getDartMethod()->createEventTarget(context.getContextId());
+  contextId = context.getContextId();
 }
 
 Value JSEventTarget::get(JSContext &, const PropNameID &name) {

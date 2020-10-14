@@ -678,11 +678,11 @@ typedef Native_RegisterCreateEventTarget = Void Function(Pointer<NativeFunction<
 typedef Dart_RegisterCreateEventTarget = void Function(Pointer<NativeFunction<Native_CreateEventTarget>>);
 final Dart_RegisterCreateEventTarget _registerEventTarget = nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateEventTarget>>('registerCreateEventTarget').asFunction();
 
+final Pointer<NativeFunction<NativeDisposeEventTarget>> disposeEventTarget = Pointer.fromFunction(ElementManager.disposeEventTarget);
+
 Pointer<NativeEventTarget> _createEventTarget(int contextId) {
   Pointer<NativeEventTarget> eventTarget = allocate<NativeEventTarget>();
-  print('set up dispose callback');
-  eventTarget.ref.dispose = Pointer.fromFunction(ElementManager.disposeEventTarget);
-  print('dispose callback: ${eventTarget.ref.dispose}');
+  eventTarget.ref.dispose = disposeEventTarget;
   return eventTarget;
 }
 
@@ -699,7 +699,6 @@ final Dart_RegisterCreateElement _registerCreateElement =
 
 void _createElement(int contextId, Pointer<NativeEventTarget> eventTarget, Pointer<NativeString> tagName) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  // print('createElement, address: $eventTarget tagName: $tagName');
   controller.view.createElement(eventTarget.address, nativeStringToString(tagName));
 }
 

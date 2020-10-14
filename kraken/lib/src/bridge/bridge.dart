@@ -4,6 +4,7 @@
  */
 import 'from_native.dart';
 import 'to_native.dart';
+import 'package:flutter/scheduler.dart';
 
 /// the Kraken JS Bridge Size
 int kKrakenJSBridgePoolSize = 8;
@@ -14,6 +15,11 @@ bool _firstView = true;
 int initBridge() {
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
+
+  // Port flutter's frame callback into bridge.
+  SchedulerBinding.instance.addPersistentFrameCallback((_) {
+    bridgeFrameCallback();
+  });
 
   if (_firstView) {
     initJSContextPool(kKrakenJSBridgePoolSize);
