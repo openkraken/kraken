@@ -94,11 +94,15 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  bool get attached => renderTextBox.attached;
+  bool get attached => _initialized && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
+    if (!_initialized) {
+      initializeRenderObject();
+    }
+    
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
     renderTextBox.text = createTextSpan(data, parent.style);
@@ -124,15 +128,13 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     if (_initialized) {
       return;
     }
-
-    _initialized = true;
     InlineSpan text = createTextSpan(_data, null);
-
     renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
       elementManager: elementManager,
     );
+    _initialized = true;
   }
 
   @override
