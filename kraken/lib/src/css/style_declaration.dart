@@ -116,7 +116,7 @@ class CSSStyleDeclaration {
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
-  set transitions (Map<String, List> value) {
+  set transitions(Map<String, List> value) {
     _transitions = value;
   }
 
@@ -521,8 +521,14 @@ class CSSStyleDeclaration {
     });
   }
 
-  double getLengthByPropertyName(properyName) {
-    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
+  void applyTargetProperties() {
+    _properties.forEach((key, value) {
+      _invokePropertyChangedListener(key, null, value);
+    });
+  }
+
+  double getLengthByPropertyName(propertyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName));
   }
 
   static bool isNullOrEmptyValue(value) {

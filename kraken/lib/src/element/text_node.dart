@@ -94,7 +94,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  bool get attached => _initialized && renderTextBox.attached;
+  bool get attached => renderTextBox != null && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
@@ -102,23 +102,24 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     if (!_initialized) {
       initializeRenderObject();
     }
-    
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
     renderTextBox.text = createTextSpan(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
     _setTextNodeProperties(parent.style);
-    parent.renderLayoutBox.insert(renderTextBox, after: after);
-    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
-    _setTextSizeType(
-      parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
+
+    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
+    parentRenderLayoutBox.insert(renderTextBox, after: after);
+
+    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
   }
 
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    parent.renderLayoutBox.remove(renderTextBox);
+    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
+    parentRenderLayoutBox.remove(renderTextBox);
 
     dispose();
   }

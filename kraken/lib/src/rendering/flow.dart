@@ -519,7 +519,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
-  // @override
+  @override
   void performLayout() {
     if (display == CSSDisplay.none) {
       size = constraints.smallest;

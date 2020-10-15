@@ -122,9 +122,9 @@ mixin CSSOverflowMixin {
       renderBoxModel.pointerListener = _pointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
-        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderLayoutBox.parent;
+        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderBoxModel.parent;
         RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-        element.renderLayoutBox = newLayoutBox;
+        element.renderBoxModel = newLayoutBox;
         if (layoutBoxParent != null) {
           layoutBoxParent.child = newLayoutBox;
         }

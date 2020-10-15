@@ -33,6 +33,7 @@ enum CSSDisplay {
 mixin CSSSizingMixin {
 
   void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
     double value = CSSLength.toDisplayPortValue(present);
 
     switch (property) {

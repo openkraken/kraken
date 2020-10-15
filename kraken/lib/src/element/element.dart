@@ -50,22 +50,22 @@ enum BoxSizeType {
   automatic,
 }
 
-mixin ElementBase {
-  RenderLayoutBox renderLayoutBox;
-  RenderIntrinsic renderIntrinsic;
+mixin ElementBase on Node {
+  RenderLayoutBox _renderLayoutBox;
+  RenderIntrinsic _renderIntrinsic;
 
-  RenderBoxModel get renderBoxModel {
-    if (renderIntrinsic != null) {
-      return renderIntrinsic;
-    } else {
-      return renderLayoutBox;
-    }
-  }
+  RenderBoxModel get renderBoxModel => _renderLayoutBox ?? _renderIntrinsic ?? null;
   set renderBoxModel(RenderBoxModel value) {
-    if (value is RenderIntrinsic) {
-      renderIntrinsic = value;
+    if (value == null) {
+      _renderIntrinsic = null;
+      _renderLayoutBox = null;
+    } else if (value is RenderIntrinsic) {
+      _renderIntrinsic = value;
+    } else if (value is RenderLayoutBox) {
+      _renderLayoutBox = value;
     } else {
-      renderLayoutBox = value;
+      if (!kReleaseMode)
+        throw FlutterError('Unknown RenderBoxModel value.');
     }
   }
 }
@@ -145,6 +145,7 @@ class Element extends Node
     if (properties == null) properties = {};
     if (events == null) events = [];
 
+    _isIntrinsicBox = isIntrinsicBox;
     defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
     style = CSSStyleDeclaration(this);
     style.addStyleChangeListener(_onStyleChanged);
@@ -152,18 +153,33 @@ class Element extends Node
     // Mark element needs to reposition according to position CSS.
     if (_isPositioned(style)) needsReposition = true;
 
-    // Content children layout, BoxModel content.
-    if (isIntrinsicBox) {
-      renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
-    } else {
-      renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
-    }
+    initializeRenderObject();
 
     _setDefaultStyle();
   }
 
+  bool _isIntrinsicBox = false;
+  bool _initialized = false;
+
+  @override
+  void initializeRenderObject() {
+    if (_initialized) {
+      return;
+    }
+    // Content children layout, BoxModel content.
+    if (_isIntrinsicBox) {
+      _renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
+    } else {
+      _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
+      childNodes.forEach((Node child) {
+        child.attachTo(this);
+      });
+    }
+    _initialized = true;
+  }
+
   void _setDefaultStyle() {
-    if (defaultStyle.isNotEmpty) {
+    if (defaultStyle != null && defaultStyle.isNotEmpty) {
       defaultStyle.forEach((property, dynamic value) {
         style.setProperty(property, value);
       });
@@ -201,7 +217,7 @@ class Element extends Node
     }
 
     // Sticky offset to scroll container must include padding
-    EdgeInsetsGeometry padding = renderLayoutBox.padding;
+    EdgeInsetsGeometry padding = _renderLayoutBox.padding;
     EdgeInsets resolvedPadding = EdgeInsets.all(0);
     if (padding != null) {
       resolvedPadding = padding.resolve(TextDirection.ltr);
@@ -219,7 +235,7 @@ class Element extends Node
     double childHeight = childRenderBoxModel?.size?.height;
     double childWidth = childRenderBoxModel?.size?.width;
     // Sticky element cannot exceed the boundary of its parent element container
-    RenderBox parentContainer = child.parent.renderLayoutBox;
+    RenderBox parentContainer = child.parent._renderLayoutBox;
     double minOffsetY = 0;
     double maxOffsetY = parentContainer.size.height - childHeight;
     double minOffsetX = 0;
@@ -330,7 +346,7 @@ class Element extends Node
     if (isConnected) {
       if (currentPosition == CSSPositionType.static) {
         // Loop renderObject children to move positioned children to its containing block
-        renderLayoutBox.visitChildren((childRenderObject) {
+        _renderLayoutBox.visitChildren((childRenderObject) {
           if (childRenderObject is RenderBoxModel) {
             Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
@@ -434,21 +450,32 @@ class Element extends Node
   }
 
   void addChild(RenderObject child) {
-    if (renderLayoutBox != null) {
-      renderLayoutBox.add(child);
+    if (_renderLayoutBox != null) {
+      _renderLayoutBox.add(child);
     } else {
-      renderIntrinsic.child = child;
+      _renderIntrinsic.child = child;
     }
   }
 
   @override
-  bool get attached {
-    return renderBoxModel.attached;
+  void dispose() {
+    assert(renderBoxModel != null);
+    assert(renderBoxModel.parent == null);
+
+    renderBoxModel = null;
+    _initialized = false;
   }
+
+  @override
+  bool get attached => renderBoxModel != null && renderBoxModel.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
+    if (!_initialized) {
+      initializeRenderObject();
+    }
+
     CSSStyleDeclaration parentStyle = parent.style;
     CSSDisplay parentDisplayValue =
        CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(parentStyle[DISPLAY]) ? parent.defaultDisplay : parentStyle[DISPLAY]);
@@ -460,15 +487,15 @@ class Element extends Node
       case CSSPositionType.absolute:
       case CSSPositionType.fixed:
         parent._addPositionedChild(this, positionType);
-        parent.renderLayoutBox.markNeedsSortChildren();
+        parent._renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.sticky:
         parent._addStickyChild(this, after);
-        parent.renderLayoutBox.markNeedsSortChildren();
+        parent._renderLayoutBox.markNeedsSortChildren();
         break;
       case CSSPositionType.relative:
       case CSSPositionType.static:
-        parent.renderLayoutBox.insert(renderBoxModel, after: after);
+        parent._renderLayoutBox.insert(renderBoxModel, after: after);
         break;
     }
 
@@ -488,6 +515,11 @@ class Element extends Node
       }
     }
     (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
+
+    childNodes.forEach((child) {
+      child.detach();
+    });
+    dispose();
   }
 
   @override
@@ -498,7 +530,7 @@ class Element extends Node
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
-        _append(child, after: renderLayoutBox.lastChild);
+        _append(child, after: _renderLayoutBox.lastChild);
         child.fireAfterConnected();
       }
     };
@@ -576,17 +608,17 @@ class Element extends Node
     switch (position) {
       case CSSPositionType.absolute:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement.renderLayoutBox;
+        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         break;
 
       case CSSPositionType.fixed:
         final Element rootEl = elementManager.getRootElement();
-        parentRenderLayoutBox = rootEl.renderLayoutBox;
+        parentRenderLayoutBox = rootEl._renderLayoutBox;
         break;
 
       case CSSPositionType.sticky:
         Element containingBlockElement = _findContainingBlock(child);
-        parentRenderLayoutBox = containingBlockElement.renderLayoutBox;
+        parentRenderLayoutBox = containingBlockElement._renderLayoutBox;
         break;
 
       default:
@@ -616,7 +648,9 @@ class Element extends Node
 
   void _addStickyChild(Element child, RenderObject after) {
     RenderBoxModel childRenderBoxModel = child.renderBoxModel;
-    renderLayoutBox.insert(childRenderBoxModel, after: after);
+    // Only layout box can have sticky child.
+    assert(childRenderBoxModel is RenderLayoutBox);
+    (renderBoxModel as RenderLayoutBox).insert(childRenderBoxModel, after: after);
 
     // Set sticky element offset
     Element scrollContainer = _findScrollContainer(child);
@@ -667,6 +701,10 @@ class Element extends Node
   }
 
   void _onStyleChanged(String property, String original, String present, bool inAnimation) {
+    if (renderBoxModel == null) {
+      return;
+    }
+
     switch (property) {
       case DISPLAY:
         _styleDisplayChangedListener(property, original, present);
@@ -817,19 +855,19 @@ class Element extends Node
 
     renderBoxModel.display = presentDisplay;
 
-    if (renderLayoutBox != null) {
+    if (renderBoxModel != null) {
       if (originalDisplay != presentDisplay) {
-        RenderLayoutBox prevRenderLayoutBox = renderLayoutBox;
+        RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
         bool shouldReattach = parent != null;
-        renderLayoutBox = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+        renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
 
-        if (shouldReattach && prevRenderLayoutBox != renderLayoutBox) {
+        if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
           RenderLayoutBox parentRenderObject = parent.renderBoxModel;
           RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
           parentRenderObject.remove(prevRenderLayoutBox);
-          parentRenderObject.insert(renderLayoutBox, after: previous);
+          parentRenderObject.insert(renderBoxModel, after: previous);
         } else {
-          renderLayoutBox.markNeedsLayout();
+          renderBoxModel.markNeedsLayout();
         }
       }
     }
@@ -855,10 +893,10 @@ class Element extends Node
   }
 
   void _updateDecorationRenderLayoutBox() {
-    if (renderLayoutBox is RenderFlexLayout) {
-      CSSFlexboxMixin.decorateRenderFlex(renderLayoutBox, style);
-    } else if (renderLayoutBox is RenderFlowLayout) {
-      CSSFlowMixin.decorateRenderFlow(renderLayoutBox, style);
+    if (renderBoxModel is RenderFlexLayout) {
+      CSSFlexboxMixin.decorateRenderFlex(renderBoxModel, style);
+    } else if (renderBoxModel is RenderFlowLayout) {
+      CSSFlowMixin.decorateRenderFlow(renderBoxModel, style);
     }
   }
 
@@ -994,20 +1032,20 @@ class Element extends Node
       case 'clientWidth':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.clientWidth;
+        return renderBoxModel.clientWidth;
       case 'clientHeight':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.clientHeight;
+        return renderBoxModel.clientHeight;
       case 'clientLeft':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.borderLeft;
+        return renderBoxModel.borderLeft;
         break;
       case 'clientTop':
         // need to flush layout to get correct size
         elementManager.getRootRenderObject().owner.flushLayout();
-        return renderLayoutBox.borderTop;
+        return renderBoxModel.borderTop;
         break;
       case 'scrollTop':
         return getScrollTop();
@@ -1183,9 +1221,9 @@ class Element extends Node
     if (!renderBoxModel.isRepaintBoundary) {
       RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderLayoutBox = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderBoxModel = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
-        renderIntrinsic = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        renderBoxModel = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
 
       if (parent is RenderObjectWithChildMixin<RenderBox>) {

@@ -3,6 +3,7 @@
  * Author: Kraken Team.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
 
@@ -15,15 +16,34 @@ class RenderRecyclerParentData extends RenderLayoutParentData {}
 class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChildManager {
 
   RenderRecyclerLayout({
+    Axis axis = Axis.vertical,
     int targetId,
     ElementManager elementManager,
     CSSStyleDeclaration style,
-  }) : super(targetId: targetId, style: style, elementManager: elementManager) {
+  }) : assert(axis != null),
+        super(targetId: targetId, style: style, elementManager: elementManager) {
 
+    _axis = axis;
     _element = elementManager.getEventTargetByTargetId<Element>(targetId);
 
     _buildRenderViewport();
     super.insert(_renderViewport);
+  }
+
+  Axis _axis;
+  Axis get axis => _axis;
+  set axis(Axis value) {
+    if (_axis != value) {
+      _axis = value;
+
+      AxisDirection axisDirection = _getAxisDirection();
+      _scrollable = KrakenScrollable(axisDirection: axisDirection);
+      _renderViewport.axisDirection = axisDirection;
+      _renderViewport.crossAxisDirection = _getCrossAxisDirection();
+      _renderViewport.offset = _scrollable.position;
+
+      markNeedsLayout();
+    }
   }
 
   Element _element;
@@ -96,21 +116,48 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
   }
 
-  final KrakenScrollable _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down);
+  KrakenScrollable _scrollable;
 
   @protected
   RenderViewport _buildRenderViewport() {
-    pointerListener = (PointerEvent event) {
-      if (event is PointerDownEvent) {
-        _scrollableY.handlePointerDown(event);
-      }
-    };
+    pointerListener = _pointerListener;
+
+    AxisDirection axisDirection = _getAxisDirection();
+    _scrollable = KrakenScrollable(axisDirection: axisDirection);
 
     return _renderViewport = RenderViewport(
-      offset: _scrollableY.position,
-      crossAxisDirection: AxisDirection.right,
+      offset: _scrollable.position,
+      axisDirection: axisDirection,
+      crossAxisDirection: _getCrossAxisDirection(),
       children: [_buildRenderSliverList()],
+      cacheExtent: kReleaseMode ? null : 0.0,
     );
+  }
+
+  void _pointerListener(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      _scrollable?.handlePointerDown(event);
+    }
+  }
+
+  AxisDirection _getAxisDirection() {
+    switch (_axis) {
+      case Axis.horizontal:
+        return AxisDirection.right;
+      case Axis.vertical:
+      default:
+        return AxisDirection.down;
+    }
+  }
+
+  AxisDirection _getCrossAxisDirection() {
+    switch (_axis) {
+      case Axis.horizontal:
+        return AxisDirection.down;
+      case Axis.vertical:
+      default:
+        return AxisDirection.right;
+    }
   }
 
   @protected
@@ -207,6 +254,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
+    print('_create $index, childCount: $childCount');
 
     if (node != null) {
       node.initializeRenderObject();
@@ -221,35 +269,53 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     }
   }
 
+  void _attachTo(Node child) {
+    if (!child.attached) {
+      child.attachTo(child.parent);
+      child.childNodes.forEach(_attachTo);
+    }
+  }
+
   @override
   void createChild(int index, { RenderBox after }) {
     if (_didUnderflow) return;
     if (index >= childCount) return;
     _currentIndex = index;
+
     if (index < 0) return;
     if (childCount <= index) return;
 
-    RenderBox child = _createRenderBox(index);
-    if (child != null) {
-      child.parentData = SliverMultiBoxAdaptorParentData();
-      _renderSliverList.insert(child, after: after);
+    RenderBox child;
+    int targetId = _children[index];
+    Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
+    assert(node != null);
+    node.initializeRenderObject();
+
+    if (node is Element) {
+      child = node.renderBoxModel;
+      node.style.applyTargetProperties();
+    } else if (node is TextNode) {
+      child = node.renderTextBox;
+    } else {
+      if (!kReleaseMode)
+        throw FlutterError('Unsupported type ${node.runtimeType} $node');
     }
+
+    assert(child != null, 'Child should not be null');
+    child.parentData = SliverMultiBoxAdaptorParentData();
+    _renderSliverList.insert(child, after: after);
   }
 
   @override
   void removeChild(RenderBox child) {
-    final parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    if (parentData != null) {
-      int index = parentData.index;
-      if (index != null && _element.childNodes.length > index) {
-        Node node = _element.childNodes[index];
-        if (node != null) {
-          node.dispose();
-        }
+    if (child is RenderBoxModel) {
+      Node node = elementManager.getEventTargetByTargetId(child.targetId);
+      if (node != null) {
+        node.detach();
       }
+    } else {
+      child.detach();
     }
-
-    _renderSliverList.remove(child);
   }
 
   @override
