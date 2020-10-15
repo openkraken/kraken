@@ -52,7 +52,6 @@ public:
 private:
   NativeEventTarget *nativeEventTarget {nullptr};
   JSContext &context;
-  int32_t contextId;
 };
 
 }
