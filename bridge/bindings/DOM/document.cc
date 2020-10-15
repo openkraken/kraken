@@ -9,6 +9,9 @@
 namespace kraken {
 namespace binding {
 
+// An persistent createElement function pointer which will recycle JSDocument had been disposed.
+static Value *createElementPtr {nullptr};
+
 Value JSDocument::createElement(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count != 1) {
     throw JSError(context, "Failed to createElement: only accept 1 parameter.");
@@ -32,8 +35,11 @@ Value JSDocument::createElement(JSContext &context, const Value &thisVal, const 
 Value JSDocument::get(JSContext &context, const PropNameID &name) {
   std::string property = name.utf8(context);
   if (property == "createElement") {
-    return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "createElement"), 2,
-                                                           createElement));
+    if (createElementPtr == nullptr) {
+      createElementPtr = new Value(context, HOST_FUNCTION_TO_VALUE(context, "creatElement", 0, createElement));
+    }
+
+    return Value(context, *createElementPtr);
   }
 
   return Value::undefined();
@@ -48,6 +54,10 @@ std::vector<PropNameID> JSDocument::getPropertyNames(JSContext &context) {
   // the blob constructor method
   propertyNames.emplace_back(PropNameID::forUtf8(context, "createElement"));
   return propertyNames;
+}
+
+JSDocument::~JSDocument() {
+  delete createElementPtr;
 }
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
