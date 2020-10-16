@@ -7,17 +7,17 @@ import 'dart:io';
 import 'dart:convert' show jsonEncode, jsonDecode;
 
 import 'package:kraken/element.dart';
-import 'package:kraken/css.dart' as css;
-import 'package:kraken/src/debug/css_parse.dart';
+import 'package:kraken/css.dart' hide PRE;
+import 'package:kraken/src/inspect/css_parse.dart';
 
 String ZERO_PX = '0px';
 
-String kebabize (String str) {
+String kebabize(String str) {
   RegExp kababRE = RegExp(r'[A-Z]');
   return str.replaceAllMapped(kababRE, (match) => '-${match[0].toLowerCase()}');
 }
 
-String camelize (String str) {
+String camelize(String str) {
   RegExp kababRE = RegExp(r'-(\w)');
   return str.replaceAllMapped(kababRE, (match) {
     String subStr = match[0].substring(1);
@@ -25,11 +25,11 @@ String camelize (String str) {
   });
 }
 
-String standardizeNumber (double number) {
+String standardizeNumber(double number) {
   return "${(number * 100000).round() / 100000}px";
 }
 
-String getLocalName (String name) {
+String getLocalName(String name) {
   switch (name) {
     case DIV:
     case SPAN:
@@ -49,27 +49,29 @@ String getLocalName (String name) {
     case OBJECT:
       return name.toLowerCase();
     default:
-      return css.EMPTY_STRING;
+      return EMPTY_STRING;
   }
 }
 
-Map initComputedStyle = {
-  'width': '300px',
-  'height': '150px',
-  'border-left-width': ZERO_PX,
-  'border-right-width': ZERO_PX,
-  'border-top-width': ZERO_PX,
-  'border-bottom-width': ZERO_PX,
-  'margin-left': ZERO_PX,
-  'margin-right': ZERO_PX,
-  'margin-top': ZERO_PX,
-  'margin-bottom': ZERO_PX,
-  'padding-left': ZERO_PX,
-  'padding-right': ZERO_PX,
-  'padding-top': ZERO_PX,
-  'padding-bottom': ZERO_PX,
-  'position': 'static'
-};
+// Map initComputedStyle = {
+//   'width': '300px',
+//   'height': '150px',
+//   'border-left-width': ZERO_PX,
+//   'border-right-width': ZERO_PX,
+//   'border-top-width': ZERO_PX,
+//   'border-bottom-width': ZERO_PX,
+//   'margin-left': ZERO_PX,
+//   'margin-right': ZERO_PX,
+//   'margin-top': ZERO_PX,
+//   'margin-bottom': ZERO_PX,
+//   'padding-left': ZERO_PX,
+//   'padding-right': ZERO_PX,
+//   'padding-top': ZERO_PX,
+//   'padding-bottom': ZERO_PX,
+//   'position': 'static'
+// };
+
+Map preComputedStyle = CSSInitialValues;
 
 Map initDocument = {
   'backendNodeId': -2,
@@ -95,6 +97,7 @@ class DevWebsocket {
   Node rootNode;
   double viewportWidth;
   double viewportHeight;
+  Map initComputedStyle = {};
 
   DevWebsocket(this.viewportWidth, this.viewportHeight, rootElement) {
     setRoot(rootElement);
@@ -102,6 +105,10 @@ class DevWebsocket {
   }
 
   void init() {
+    preComputedStyle.forEach((key, value) {
+      initComputedStyle[kebabize(key)] = value;
+    });
+
     // create websocket server
     HttpServer.bind(InternetAddress.anyIPv4, 8082).then((HttpServer server) {
       print('DevTool WebSocket listening at -- ws://localhost:8082');
@@ -113,7 +120,7 @@ class DevWebsocket {
             "Browser": "Kraken0.5.0",
             "Protocol-Version": "1.3",
             "User-Agent":
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36",
+                "Mozilla/5.  (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36",
             "V8-Version": "8.6.395.10",
             "WebKit-Version":
                 "537.36 (@c69c33933bfc72a159aceb4aeca939eb0087416c)",
@@ -224,8 +231,8 @@ class DevWebsocket {
         Map edits = data['params']['edits'][0];
         int styleSheetId = edits['styleSheetId'];
         String cssText = edits['text'];
-        CssParse cssParse = CssParse(cssText);
-        List PropertiesList = cssParse.getCssProperties();
+        CSSParser cssParse = CSSParser(cssText);
+        List<Map<String, dynamic>> PropertiesList = cssParse.declarations();
         var node = nodeIdMap[styleSheetId];
         List cssProperties = [];
         PropertiesList.forEach((element) {
@@ -254,9 +261,7 @@ class DevWebsocket {
         ws.add(jsonEncode({
           'id': data['id'],
           'result': {
-            'styles': [
-              getInlineStyle(styleSheetId)
-            ]
+            'styles': [getInlineStyle(styleSheetId)]
           }
         }));
 
@@ -357,7 +362,7 @@ class DevWebsocket {
     Map inlineStyle = new Map.from(initInlineStyle);
 
     if (node is Element && node.style.length > 0) {
-      css.CSSStyleDeclaration style = node.style;
+      CSSStyleDeclaration style = node.style;
       List cssProperties = [];
       String cssText = '';
 
@@ -403,7 +408,7 @@ class DevWebsocket {
     List styleList = [];
 
     if (node is Element) {
-      css.CSSStyleDeclaration style = node.style;
+      CSSStyleDeclaration style = node.style;
       computedStyle['display'] = node.defaultDisplay;
 
       for (int i = 0; i < style.length; i++) {

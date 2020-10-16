@@ -14,19 +14,19 @@ final RegExp _semicolonRegExp = RegExp(r'^[;\s]*');
 final RegExp _commentStartRegExp = RegExp(r'^\/\*\s');
 final RegExp _commentEndRegExp = RegExp(r'^\*\/');
 
-class CSSParse {
+class CSSParser {
   int line = 0;
   int column = 0;
   String cssText = '';
   Map<String, dynamic> declaration = {};
 
-  CSSParse(this.cssText);
+  CSSParser(this.cssText);
 
   List<Map<String, dynamic>> declarations() {
-    List decs = [];
+    List<Map<String, dynamic>> decs = [];
     match(_spaceRegExp);
 
-    if(hasCommentDeclaration()) {
+    if (hasCommentDeclaration()) {
       decs.add(declaration);
       match(_spaceRegExp);
     }
@@ -34,7 +34,7 @@ class CSSParse {
     while (hasDeclaration()) {
       decs.add(declaration);
       match(_spaceRegExp);
-      if(hasCommentDeclaration()) {
+      if (hasCommentDeclaration()) {
         decs.add(declaration);
         match(_spaceRegExp);
       }
@@ -43,14 +43,11 @@ class CSSParse {
     return decs;
   }
 
-  List getCssProperties() {
-    return declarations();
-  }
-
   bool hasCommentDeclaration() {
     var startOffset = {'startLine': line, 'startColumn': column};
 
-    if (cssText.length < 2 || (cssText[0] != '/' && cssText[1] != '*')) return false;
+    if (cssText.length < 2 || (cssText[0] != '/' && cssText[1] != '*'))
+      return false;
 
     match(_commentStartRegExp);
 
@@ -58,7 +55,11 @@ class CSSParse {
 
     match(_commentEndRegExp);
 
-    declaration['range'] = {...startOffset, 'endLine': line, 'endColumn': column};
+    declaration['range'] = {
+      ...startOffset,
+      'endLine': line,
+      'endColumn': column
+    };
     declaration['disabled'] = true;
 
     return true;

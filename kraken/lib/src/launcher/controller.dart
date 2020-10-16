@@ -15,7 +15,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/debug.dart';
+import 'package:kraken/inspect.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -57,7 +57,7 @@ class KrakenViewController {
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    new DevWebsocket(
+    DevWebsocket(
         viewportWidth, viewportHeight, _elementManager.getRootElement());
   }
 

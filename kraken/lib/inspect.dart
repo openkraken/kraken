@@ -3,4 +3,4 @@
  * Author: Kraken Team.
  */
 
-export 'src/debug/dev_debug.dart';
+export 'src/inspect/dev_debug.dart';
