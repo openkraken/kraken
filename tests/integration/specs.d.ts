@@ -42,6 +42,19 @@ interface DeviceInfo {
   platformName: string;
 }
 
+declare enum PointerChange {
+  cancel,
+  add,
+  remove,
+  hover,
+  down,
+  move,
+  up
+}
+
+type SimulatePointer = (list: [number, number, number][]) => void;
+declare const simulatePointer: SimulatePointer;
+
 interface Navigator {
   connection: {
     getConnectivity(): Connection;

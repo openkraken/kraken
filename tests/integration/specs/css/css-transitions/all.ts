@@ -169,4 +169,28 @@ describe('Transition all', () => {
       }, 100);
     });
   });
+
+  it('transition should not animation when initialize', async (doneFn) => {
+    let container = createElement(
+      'div',
+      {
+        style: {
+          width: '50px',
+          height: '50px',
+          transition: 'all 2s ease',
+          background: 'red',
+        },
+      },
+      [createText('1234')]
+    );
+
+    BODY.appendChild(container);
+    await matchViewportSnapshot();
+
+    // background color will not change anymore.
+    setTimeout(async () => {
+      await matchViewportSnapshot();
+      doneFn();
+    }, 100);
+  });
 });

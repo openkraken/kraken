@@ -47,9 +47,9 @@ namespace jsc {
 namespace {
 std::string JSStringToSTLString(JSStringRef str) {
   size_t maxBytes = JSStringGetMaximumUTF8CStringSize(str);
-  std::vector<char> buffer(maxBytes);
-  JSStringGetUTF8CString(str, buffer.data(), maxBytes);
-  return std::string(buffer.data());
+  char buffer[maxBytes];
+  JSStringGetUTF8CString(str, buffer, maxBytes);
+  return std::string(buffer);
 }
 
 JSStringRef getLengthString() {
@@ -120,8 +120,7 @@ JSCContext::~JSCContext() {
 #endif
 }
 
-jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, const char *sourceURL,
-                                          int startLine) {
+jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, length);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -140,8 +139,7 @@ jsa::Value JSCContext::evaluateJavaScript(const uint16_t *code, size_t length, c
   return createValue(res);
 }
 
-jsa::Value JSCContext::evaluateJavaScript(const char *code, const char *sourceURL,
-                                          int startLine) {
+jsa::Value JSCContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -1166,27 +1164,32 @@ jsa::Object JSCContext::createObject(JSObjectRef obj) const {
 }
 
 jsa::Value JSCContext::createValue(JSValueRef value) const {
-  if (JSValueIsNumber(ctx_, value)) {
-    return jsa::Value(JSValueToNumber(ctx_, value, nullptr));
-  } else if (JSValueIsBoolean(ctx_, value)) {
-    return jsa::Value(JSValueToBoolean(ctx_, value));
-  } else if (JSValueIsNull(ctx_, value)) {
-    return jsa::Value(nullptr);
-  } else if (JSValueIsUndefined(ctx_, value)) {
-    return jsa::Value();
-  } else if (JSValueIsString(ctx_, value)) {
-    JSStringRef str = JSValueToStringCopy(ctx_, value, nullptr);
-    auto result = jsa::Value(createString(str));
-    JSStringRelease(str);
-    return result;
-  } else if (JSValueIsObject(ctx_, value)) {
-    JSObjectRef objRef = JSValueToObject(ctx_, value, nullptr);
-    return jsa::Value(createObject(objRef));
-  } else if (smellsLikeES6Symbol(ctx_, value)) {
-    return jsa::Value(createSymbol(value));
-  } else {
-    // WHAT ARE YOU
-    abort();
+  JSType type = JSValueGetType(ctx_, value);
+  switch (type) {
+    case kJSTypeUndefined:
+      return jsa::Value();
+    case kJSTypeBoolean:
+      return jsa::Value(JSValueToBoolean(ctx_, value));
+    case kJSTypeNull:
+      return jsa::Value(nullptr);
+    case kJSTypeNumber:
+      return jsa::Value(JSValueToNumber(ctx_, value, nullptr));
+    case kJSTypeString: {
+      JSStringRef str = JSValueToStringCopy(ctx_, value, nullptr);
+      auto result = jsa::Value(createString(str));
+      JSStringRelease(str);
+      return result;
+    }
+    case kJSTypeObject: {
+      JSObjectRef objRef = JSValueToObject(ctx_, value, nullptr);
+      return jsa::Value(createObject(objRef));
+    }
+#if __APPLE__ && __OSX_AVAILABLE_STARTING(101504, 130400)
+    // TODO: support symbol value in JSA.
+    case kJSTypeSymbol:
+#endif
+    default:
+      abort();
   }
 }
 
