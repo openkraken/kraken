@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 #include "eventTarget.h"
 #include "dart_methods.h"
 
@@ -11,8 +10,22 @@ namespace kraken {
 namespace binding {
 using namespace alibaba::jsa;
 
-JSEventTarget::JSEventTarget(JSContext &context): context(context) {
-  nativeEventTarget = getDartMethod()->createEventTarget(context.getContextId());
+static std::atomic<int64_t> globalEventTargetId{0};
+
+JSEventTarget::JSEventTarget(JSContext &context) : context(context) {
+  eventTargetId = globalEventTargetId++;
+}
+
+JSEventTarget::~JSEventTarget() {
+  // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
+  auto data = new DisposeCallbackData(context.getContextId(), getEventTargetId());
+  foundation::Task disposeTask = [](void *data) {
+    auto disposeCallbackData = static_cast<DisposeCallbackData *>(data);
+    getDartMethod()->disposeEventTarget(disposeCallbackData->contextId, disposeCallbackData->id);
+    printf("dispose eventTarget: %lld \n", disposeCallbackData->id);
+    delete disposeCallbackData;
+  };
+  foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
 }
 
 Value JSEventTarget::get(JSContext &, const PropNameID &name) {
@@ -26,5 +39,9 @@ std::vector<PropNameID> JSEventTarget::getPropertyNames(JSContext &context) {
   return propertyNames;
 }
 
+int64_t JSEventTarget::getEventTargetId() {
+  return eventTargetId;
 }
-}
+
+} // namespace binding
+} // namespace kraken

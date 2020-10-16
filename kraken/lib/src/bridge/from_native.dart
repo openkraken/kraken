@@ -119,8 +119,8 @@ typedef NativeAsyncModuleCallback = Void Function(
 typedef DartAsyncModuleCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json);
 
-typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext, Int32 contextId,
-    Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+typedef Native_InvokeModule = Pointer<NativeString> Function(Pointer<JSCallbackContext> callbackContext,
+    Int32 contextId, Pointer<NativeString>, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 typedef Native_RegisterInvokeModule = Void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 typedef Dart_RegisterInvokeModule = void Function(Pointer<NativeFunction<Native_InvokeModule>>);
 
@@ -377,8 +377,8 @@ String invokeModule(
   return result;
 }
 
-Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<NativeString> json,
-    Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+Pointer<NativeString> _invokeModule(Pointer<JSCallbackContext> callbackContext, int contextId,
+    Pointer<NativeString> json, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
   String result = invokeModule(callbackContext, contextId, nativeStringToString(json), callback.asFunction());
   return stringToNativeString(result);
 }
@@ -417,7 +417,8 @@ typedef DartAsyncCallback = void Function(
     Pointer<JSCallbackContext> callbackContext, int contextId, Pointer<Utf8> errmsg);
 typedef NativeRAFAsyncCallback = Void Function(
     Pointer<JSCallbackContext> callbackContext, Int32 contextId, Double data, Pointer<Utf8> errmsg);
-typedef DartRAFAsyncCallback = void Function(Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
+typedef DartRAFAsyncCallback = void Function(
+    Pointer<JSCallbackContext>, int contextId, double data, Pointer<Utf8> errmsg);
 
 // Register requestBatchUpdate
 typedef Native_RequestBatchUpdate = Void Function(
@@ -665,46 +666,26 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-typedef NativeDisposeEventTarget = Void Function(Int32 contextId, Pointer<NativeEventTarget> pointer);
+typedef NativeDisposeEventTarget = Void Function(Int32 contextId, Int64 id);
+typedef DartDisposeEventTarget = void Function(int contextId, int id);
 
-class NativeEventTarget extends Struct {
-  Pointer<NativeFunction<NativeDisposeEventTarget>> dispose;
-}
-class NativeNode extends Struct {}
-class NativeElement extends Struct {}
+typedef Native_RegisterDisposeEventTarget = Void Function(Pointer<NativeFunction<NativeDisposeEventTarget>>);
+typedef Dart_RegisterDisposeEventTarget = void Function(Pointer<NativeFunction<NativeDisposeEventTarget>>);
 
-typedef Native_CreateEventTarget = Pointer<NativeEventTarget> Function(Int32 contextId);
-typedef Native_RegisterCreateEventTarget = Void Function(Pointer<NativeFunction<Native_CreateEventTarget>>);
-typedef Dart_RegisterCreateEventTarget = void Function(Pointer<NativeFunction<Native_CreateEventTarget>>);
-final Dart_RegisterCreateEventTarget _registerEventTarget = nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateEventTarget>>('registerCreateEventTarget').asFunction();
+final Dart_RegisterDisposeEventTarget _registerDisposeEventTarget = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterDisposeEventTarget>>('registerDisposeEventTarget')
+    .asFunction();
 
-final Pointer<NativeFunction<NativeDisposeEventTarget>> disposeEventTarget = Pointer.fromFunction(ElementManager.disposeEventTarget);
-
-Pointer<NativeEventTarget> _createEventTarget(int contextId) {
-  Pointer<NativeEventTarget> eventTarget = allocate<NativeEventTarget>();
-  eventTarget.ref.dispose = disposeEventTarget;
-  return eventTarget;
-}
-
-void registerCreateEventTarget() {
-  Pointer<NativeFunction<Native_CreateEventTarget>> pointer = Pointer.fromFunction(_createEventTarget);
-  _registerEventTarget(pointer);
-}
-
-typedef Native_CreateElement = Void Function(Int32 contextId, Pointer<NativeEventTarget> eventTarget, Pointer<NativeString> tagName);
-typedef Native_RegisterCreateElement = Void Function(Pointer<NativeFunction<Native_CreateElement>>);
-typedef Dart_RegisterCreateElement = void Function(Pointer<NativeFunction<Native_CreateElement>>);
-final Dart_RegisterCreateElement _registerCreateElement =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_RegisterCreateElement>>('registerCreateElement').asFunction();
-
-void _createElement(int contextId, Pointer<NativeEventTarget> eventTarget, Pointer<NativeString> tagName) {
+void _disposeEventTarget(int contextId, int id) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-  controller.view.createElement(eventTarget.address, nativeStringToString(tagName));
+
+  print('dispose eventTarget: $id');
+  controller.view.removeEventTargetById(id);
 }
 
-void registerCreateElement() {
-  Pointer<NativeFunction<Native_CreateElement>> pointer = Pointer.fromFunction(_createElement);
-  _registerCreateElement(pointer);
+void registerDisposeEventTarget() {
+  Pointer<NativeFunction<NativeDisposeEventTarget>> pointer = Pointer.fromFunction(_disposeEventTarget);
+  _registerDisposeEventTarget(pointer);
 }
 
 void registerDartMethodsToCpp() {
@@ -721,6 +702,5 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
-  registerCreateEventTarget();
-  registerCreateElement();
+  registerDisposeEventTarget();
 }

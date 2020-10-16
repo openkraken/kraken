@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/element.dart';
+import 'package:kraken/kraken.dart';
 
 import 'from_native.dart';
 import 'platform.dart';
@@ -32,20 +33,23 @@ class NativeKrakenInfo extends Struct {
 class KrakenInfo {
   Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
-  KrakenInfo(Pointer<NativeKrakenInfo> info): _nativeKrakenInfo = info;
+  KrakenInfo(Pointer<NativeKrakenInfo> info) : _nativeKrakenInfo = info;
 
   String get appName {
     if (_nativeKrakenInfo.ref.app_name == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_name);
   }
+
   String get appVersion {
     if (_nativeKrakenInfo.ref.app_version == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_version);
   }
+
   String get appRevision {
     if (_nativeKrakenInfo.ref.app_revision == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.app_revision);
   }
+
   String get systemName {
     if (_nativeKrakenInfo.ref.system_name == nullptr) return '';
     return Utf8.fromUtf8(_nativeKrakenInfo.ref.system_name);
@@ -60,7 +64,9 @@ class KrakenInfo {
 
 typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
-final Dart_GetKrakenInfo _getKrakenInfo = nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+
+final Dart_GetKrakenInfo _getKrakenInfo =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
 
 KrakenInfo _cachedInfo;
 
@@ -113,8 +119,10 @@ Pointer<ScreenSize> createScreen(double width, double height) {
 }
 
 // Register evaluateScripts
-typedef Native_EvaluateScripts = Void Function(Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
-typedef Dart_EvaluateScripts = void Function(int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
+typedef Native_EvaluateScripts = Void Function(
+    Int32 contextId, Pointer<NativeString> code, Pointer<Utf8> url, Int32 startLine);
+typedef Dart_EvaluateScripts = void Function(
+    int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
     nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
@@ -180,8 +188,74 @@ void reloadJSContext(int contextId) async {
 typedef Native_FrameCallback = Void Function();
 typedef Dart_FrameCallback = void Function();
 
-final Dart_FrameCallback _frameCallback = nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
+final Dart_FrameCallback _frameCallback =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
 
 void bridgeFrameCallback() {
   _frameCallback();
+}
+
+enum UICommandType { createElement }
+
+class UICommandItem extends Struct {
+  @Int8()
+  int type;
+
+  Pointer<Pointer<NativeString>> args;
+
+  @Int64()
+  int ownerAddress;
+
+  @Int32()
+  int length;
+}
+
+typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int32 contextId);
+typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
+
+final Dart_GetUICommandItems _getUICommandItems =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
+
+typedef Native_GetUICommandItemSize = Int32 Function(Int32 contextId);
+typedef Dart_GetUICommandItemSize = int Function(int contextId);
+
+final Dart_GetUICommandItemSize _getUICommandItemSize =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
+
+typedef Native_ClearUICommandItems = Void Function(Int32 contextId);
+typedef Dart_ClearUICommandItems = void Function(int contextId);
+
+final Dart_ClearUICommandItems _clearUICommandItems =
+    nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
+
+void _freeUICommand(Pointer<UICommandItem> nativeCommand) {
+  for (int i = 0; i < nativeCommand.ref.length; i ++) {
+    freeNativeString(nativeCommand.ref.args[i]);
+  }
+  free(nativeCommand.ref.args);
+  free(nativeCommand);
+}
+
+void flushUICommand() {
+  Map<int, KrakenController> controllerMap = KrakenController.getControllerMap();
+  for (KrakenController controller in controllerMap.values) {
+    Pointer<Pointer<UICommandItem>> nativeCommandItems = _getUICommandItems(controller.view.contextId);
+    int itemSize = _getUICommandItemSize(controller.view.contextId);
+    for (int i = 0; i < itemSize; i++) {
+      Pointer<UICommandItem> nativeCommand = nativeCommandItems[i];
+      if (nativeCommand == nullptr) continue;
+
+      UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
+      int ownerAddress = nativeCommand.ref.ownerAddress;
+      switch (commandType) {
+        case UICommandType.createElement:
+           controller.view.createElement(ownerAddress, nativeStringToString(nativeCommand.ref.args[0]));
+          break;
+        default:
+          return;
+      }
+      _clearUICommandItems(controller.view.contextId);
+       _freeUICommand(nativeCommand);
+    }
+  }
 }

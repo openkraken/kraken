@@ -8,6 +8,7 @@
 #include "dart_methods.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
+#include "foundation/ui_command_queue.h"
 #include "jsa.h"
 
 #include <atomic>
@@ -201,14 +202,9 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
 }
 
-void registerCreateElement(CreateElement createElement) {
-  kraken::registerCreateElement(createElement);
+void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget) {
+  kraken::registerDisposeEventTarget(disposeEventTarget);
 }
-
-void registerCreateEventTarget(CreateEventTarget createEventTarget) {
-  kraken::registerCreateEventTarget(createEventTarget);
-}
-
 
 Screen *createScreen(double width, double height) {
   screen.width = width;
@@ -246,4 +242,16 @@ KrakenInfo *getKrakenInfo() {
 
 void uiFrameCallback() {
   foundation::UITaskMessageQueue::instance()->flushTaskFromUIThread();
+}
+
+UICommandItem **getUICommandItems(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->data();
+}
+
+size_t getUICommandItemSize(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->size();
+}
+
+void clearUICommandItems(int32_t contextId) {
+  return foundation::UICommandTaskMessageQueue::instance(contextId)->clear();
 }

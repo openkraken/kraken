@@ -131,9 +131,6 @@ class Element extends Node
     return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
   }
 
-  // The pointer address of element object in JS
-  Pointer<NativeElement> _jsElement;
-
   Element(
     int targetId,
     ElementManager elementManager, {
@@ -146,7 +143,6 @@ class Element extends Node
     this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
-        _jsElement = Pointer.fromAddress(targetId),
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
     if (properties == null) properties = {};
     if (events == null) events = [];

@@ -39,6 +39,8 @@ list(APPEND BRIDGE_SOURCE
     foundation/ref_ptr_internal.h
     foundation/ui_task_queue.h
     foundation/ui_task_queue.cpp
+    foundation/ui_command_queue.h
+    foundation/ui_command_queue.cpp
     foundation/closure.h
     foundation/bridge_callback.h
     dart_methods.cc

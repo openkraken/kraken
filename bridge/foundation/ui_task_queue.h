@@ -18,13 +18,13 @@ using Task = void(*)(void*);
 
 class UITaskMessageQueue;
 
-static std::mutex creation_mutex_;
+static std::mutex ui_task_creation_mutex_;
 static fml::RefPtr<UITaskMessageQueue> instance_;
 
 class UITaskMessageQueue : public fml::RefCountedThreadSafe<UITaskMessageQueue> {
 public:
   static fml::RefPtr<UITaskMessageQueue> instance() {
-    std::lock_guard<std::mutex> guard(creation_mutex_);
+    std::lock_guard<std::mutex> guard(ui_task_creation_mutex_);
     if (!instance_) {
       instance_ = fml::MakeRefCounted<UITaskMessageQueue>();
     }

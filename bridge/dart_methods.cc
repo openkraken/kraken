@@ -96,12 +96,8 @@ void registerEnvironment(Environment environment) {
   methodPointer->environment = environment;
 }
 
-void registerCreateElement(CreateElement createElement) {
-  methodPointer->createElement = createElement;
-}
-
-void registerCreateEventTarget(CreateEventTarget createEventTarget) {
-  methodPointer->createEventTarget = createEventTarget;
+void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget) {
+  methodPointer->disposeEventTarget = disposeEventTarget;
 }
 
 } // namespace kraken

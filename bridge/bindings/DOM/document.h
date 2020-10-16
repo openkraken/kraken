@@ -12,6 +12,7 @@ namespace binding {
 using namespace alibaba::jsa;
 
 class JSDocument : public HostObject, public std::enable_shared_from_this<JSDocument> {
+public:
   ~JSDocument() override;
   Value get(JSContext &, const PropNameID &name) override;
   void set(JSContext &, const PropNameID &name, const Value &value) override;

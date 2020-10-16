@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/foundation.dart';
+
 import 'from_native.dart';
 import 'to_native.dart';
 import 'package:flutter/scheduler.dart';
@@ -19,6 +21,7 @@ int initBridge() {
   // Port flutter's frame callback into bridge.
   SchedulerBinding.instance.addPersistentFrameCallback((_) {
     bridgeFrameCallback();
+    flushUICommand();
   });
 
   if (_firstView) {

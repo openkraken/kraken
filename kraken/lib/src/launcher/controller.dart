@@ -259,6 +259,10 @@ class KrakenController {
     return _controllerMap[contextId];
   }
 
+  static Map<int, KrakenController> getControllerMap() {
+    return _controllerMap;
+  }
+
   static KrakenController getControllerOfName(String name) {
     if (!_nameIdMap.containsKey(name)) return null;
     int contextId = _nameIdMap[name];

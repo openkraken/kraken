@@ -16,6 +16,19 @@ std::__thread_id getUIThreadId();
 struct NativeString {
   const uint16_t *string;
   int32_t length;
+
+  NativeString* clone() {
+    NativeString *newNativeString = new NativeString();
+    uint16_t *newString = new uint16_t[length];
+
+    for (size_t i = 0; i < length; i ++) {
+      newString[i] = string[i];
+    }
+
+    newNativeString->string = newString;
+    newNativeString->length = length;
+    return newNativeString;
+  }
 };
 
 struct KrakenInfo;
@@ -31,7 +44,7 @@ struct KrakenInfo {
 
 struct NativeEventTarget;
 
-using NativeEventTargetDispose = void(*)(int32_t contextId, NativeEventTarget *eventTarget);
+using NativeEventTargetDispose = void (*)(int32_t contextId, NativeEventTarget *eventTarget);
 
 struct NativeEventTarget {
   NativeEventTargetDispose dispose;
@@ -39,12 +52,22 @@ struct NativeEventTarget {
 
 struct NativeNode : NativeEventTarget {};
 
-struct NativeElement : NativeNode {
-};
+struct NativeElement : NativeNode {};
 
 struct Screen {
   double width;
   double height;
+};
+
+#define KARKEN_CREATE_ELEMENT 0
+
+struct UICommandItem {
+  UICommandItem(int64_t ownerAddress, int8_t type, NativeString **args, size_t length)
+    : type(type), args(args), ownerAddress(ownerAddress), length(length) {};
+  int8_t type;
+  NativeString **args;
+  int64_t ownerAddress;
+  int32_t length;
 };
 
 using AsyncCallback = void (*)(void *callbackContext, int32_t contextId, const char *errmsg);
@@ -69,8 +92,7 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef void (*CreateElement)(int32_t contextId, NativeEventTarget* eventTarget, NativeString* tagName);
-typedef NativeEventTarget* (*CreateEventTarget)(int32_t contextId);
+typedef void (*DisposeEventTarget)(int32_t context, int64_t ownerAddress);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -81,6 +103,13 @@ int32_t allocateNewContext();
 
 KRAKEN_EXPORT
 KrakenInfo *getKrakenInfo();
+
+KRAKEN_EXPORT
+UICommandItem **getUICommandItems(int32_t contextId);
+KRAKEN_EXPORT
+size_t getUICommandItemSize(int32_t contextId);
+KRAKEN_EXPORT
+void clearUICommandItems(int32_t contextId);
 
 bool checkContext(int32_t contextId);
 bool checkContext(int32_t contextId, void *context);
@@ -126,8 +155,6 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
 KRAKEN_EXPORT
-void registerCreateElement(CreateElement createElement);
-KRAKEN_EXPORT
-void registerCreateEventTarget(CreateEventTarget createEventTarget);
+void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

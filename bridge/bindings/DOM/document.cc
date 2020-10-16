@@ -28,7 +28,7 @@ Value JSDocument::createElement(JSContext &context, const Value &thisVal, const 
   nativeString.length = tagNameString.unicodeLength(context);
 
   auto element =
-      Object::createFromHostObject(context, std::make_shared<JSElement>(context, &nativeString));
+      Object::createFromHostObject(context, std::make_shared<JSElement>(context, nativeString.clone()));
   return Value(context, element);
 }
 
@@ -58,6 +58,7 @@ std::vector<PropNameID> JSDocument::getPropertyNames(JSContext &context) {
 
 JSDocument::~JSDocument() {
   delete createElementPtr;
+  createElementPtr = nullptr;
 }
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
