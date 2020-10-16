@@ -12,7 +12,7 @@ namespace foundation {
 void UITaskMessageQueue::registerTask(const Task &task, void* data) {
   std::lock_guard<std::mutex> guard(queue_mutex_);
   auto taskData = new TaskData(task, data);
-  queue.push_back(taskData);
+  queue.emplace_back(taskData);
 }
 
 void UITaskMessageQueue::flushTaskFromUIThread() {
@@ -23,6 +23,7 @@ void UITaskMessageQueue::flushTaskFromUIThread() {
   while (begin != end) {
     taskData = *begin;
     taskData->task(taskData->data);
+    delete taskData;
     ++begin;
   }
   queue.clear();

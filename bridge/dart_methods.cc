@@ -96,8 +96,4 @@ void registerEnvironment(Environment environment) {
   methodPointer->environment = environment;
 }
 
-void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget) {
-  methodPointer->disposeEventTarget = disposeEventTarget;
-}
-
 } // namespace kraken

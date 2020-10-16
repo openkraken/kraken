@@ -202,10 +202,6 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
 }
 
-void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget) {
-  kraken::registerDisposeEventTarget(disposeEventTarget);
-}
-
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;

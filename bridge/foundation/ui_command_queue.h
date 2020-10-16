@@ -25,7 +25,7 @@ public:
     if (!instanceList_[contextId]) {
       instanceList_[contextId] = new UICommandTaskMessageQueue();
       // preallocate 100 commandItem space.
-      instanceList_[contextId]->queue.reserve(100);
+      instanceList_[contextId]->queue.reserve(1000);
     }
     return instanceList_[contextId];
   };

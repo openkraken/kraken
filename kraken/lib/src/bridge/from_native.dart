@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 
@@ -666,28 +667,6 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
-typedef NativeDisposeEventTarget = Void Function(Int32 contextId, Int64 id);
-typedef DartDisposeEventTarget = void Function(int contextId, int id);
-
-typedef Native_RegisterDisposeEventTarget = Void Function(Pointer<NativeFunction<NativeDisposeEventTarget>>);
-typedef Dart_RegisterDisposeEventTarget = void Function(Pointer<NativeFunction<NativeDisposeEventTarget>>);
-
-final Dart_RegisterDisposeEventTarget _registerDisposeEventTarget = nativeDynamicLibrary
-    .lookup<NativeFunction<Native_RegisterDisposeEventTarget>>('registerDisposeEventTarget')
-    .asFunction();
-
-void _disposeEventTarget(int contextId, int id) {
-  KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
-
-  print('dispose eventTarget: $id');
-  controller.view.removeEventTargetById(id);
-}
-
-void registerDisposeEventTarget() {
-  Pointer<NativeFunction<NativeDisposeEventTarget>> pointer = Pointer.fromFunction(_disposeEventTarget);
-  _registerDisposeEventTarget(pointer);
-}
-
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -702,5 +681,4 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
-  registerDisposeEventTarget();
 }

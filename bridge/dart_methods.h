@@ -33,7 +33,6 @@ struct DartMethodPointer {
   RefreshPaint refreshPaint{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
-  DisposeEventTarget disposeEventTarget{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -51,7 +50,6 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
-void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget);
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);

@@ -66,7 +66,7 @@ typedef Native_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 typedef Dart_GetKrakenInfo = Pointer<NativeKrakenInfo> Function();
 
 final Dart_GetKrakenInfo _getKrakenInfo =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_GetKrakenInfo>>('getKrakenInfo').asFunction();
 
 KrakenInfo _cachedInfo;
 
@@ -83,7 +83,7 @@ typedef Native_InvokeEventListener = Void Function(Int32 contextId, Int32 type, 
 typedef Dart_InvokeEventListener = void Function(int contextId, int type, Pointer<NativeString>);
 
 final Dart_InvokeEventListener _invokeEventListener =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int contextId, int type, String data) {
   Pointer<NativeString> nativeString = stringToNativeString(data);
@@ -112,7 +112,7 @@ typedef Native_CreateScreen = Pointer<ScreenSize> Function(Double, Double);
 typedef Dart_CreateScreen = Pointer<ScreenSize> Function(double, double);
 
 final Dart_CreateScreen _createScreen =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_CreateScreen>>('createScreen').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_CreateScreen>>('createScreen').asFunction();
 
 Pointer<ScreenSize> createScreen(double width, double height) {
   return _createScreen(width, height);
@@ -125,7 +125,7 @@ typedef Dart_EvaluateScripts = void Function(
     int contextId, Pointer<NativeString> code, Pointer<Utf8> url, int startLine);
 
 final Dart_EvaluateScripts _evaluateScripts =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_EvaluateScripts>>('evaluateScripts').asFunction();
 
 void evaluateScripts(int contextId, String code, String url, int line) {
   Pointer<NativeString> nativeString = stringToNativeString(code);
@@ -143,7 +143,7 @@ typedef Native_InitJSContextPool = Void Function(Int32 poolSize);
 typedef Dart_InitJSContextPool = void Function(int poolSize);
 
 final Dart_InitJSContextPool _initJSContextPool =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_InitJSContextPool>>('initJSContextPool').asFunction();
 
 void initJSContextPool(int poolSize) {
   _initJSContextPool(poolSize);
@@ -153,7 +153,7 @@ typedef Native_DisposeContext = Void Function(Int32 contextId);
 typedef Dart_DisposeContext = void Function(int contextId);
 
 final Dart_DisposeContext _disposeContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_DisposeContext>>('disposeContext').asFunction();
 
 void disposeBridge(int contextId) {
   _disposeContext(contextId);
@@ -163,7 +163,7 @@ typedef Native_AllocateNewContext = Int32 Function();
 typedef Dart_AllocateNewContext = int Function();
 
 final Dart_AllocateNewContext _allocateNewContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_AllocateNewContext>>('allocateNewContext').asFunction();
 
 int allocateNewContext() {
   return _allocateNewContext();
@@ -174,7 +174,7 @@ typedef Native_ReloadJSContext = Void Function(Int32 contextId);
 typedef Dart_ReloadJSContext = void Function(int contextId);
 
 final Dart_ReloadJSContext _reloadJSContext =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_ReloadJSContext>>('reloadJsContext').asFunction();
 
 void reloadJSContext(int contextId) async {
   Completer completer = Completer<void>();
@@ -189,13 +189,13 @@ typedef Native_FrameCallback = Void Function();
 typedef Dart_FrameCallback = void Function();
 
 final Dart_FrameCallback _frameCallback =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_FrameCallback>>('uiFrameCallback').asFunction();
 
 void bridgeFrameCallback() {
   _frameCallback();
 }
 
-enum UICommandType { createElement }
+enum UICommandType { createElement, disposeEventTarget }
 
 class UICommandItem extends Struct {
   @Int8()
@@ -204,7 +204,7 @@ class UICommandItem extends Struct {
   Pointer<Pointer<NativeString>> args;
 
   @Int64()
-  int ownerAddress;
+  int id;
 
   @Int32()
   int length;
@@ -214,19 +214,19 @@ typedef Native_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(Int3
 typedef Dart_GetUICommandItems = Pointer<Pointer<UICommandItem>> Function(int contextId);
 
 final Dart_GetUICommandItems _getUICommandItems =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItems>>('getUICommandItems').asFunction();
 
 typedef Native_GetUICommandItemSize = Int32 Function(Int32 contextId);
 typedef Dart_GetUICommandItemSize = int Function(int contextId);
 
 final Dart_GetUICommandItemSize _getUICommandItemSize =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_GetUICommandItemSize>>('getUICommandItemSize').asFunction();
 
 typedef Native_ClearUICommandItems = Void Function(Int32 contextId);
 typedef Dart_ClearUICommandItems = void Function(int contextId);
 
 final Dart_ClearUICommandItems _clearUICommandItems =
-    nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
+nativeDynamicLibrary.lookup<NativeFunction<Native_ClearUICommandItems>>('clearUICommandItems').asFunction();
 
 void _freeUICommand(Pointer<UICommandItem> nativeCommand) {
   for (int i = 0; i < nativeCommand.ref.length; i ++) {
@@ -246,16 +246,19 @@ void flushUICommand() {
       if (nativeCommand == nullptr) continue;
 
       UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
-      int ownerAddress = nativeCommand.ref.ownerAddress;
+      int id = nativeCommand.ref.id;
       switch (commandType) {
         case UICommandType.createElement:
-           controller.view.createElement(ownerAddress, nativeStringToString(nativeCommand.ref.args[0]));
+          controller.view.createElement(id, nativeStringToString(nativeCommand.ref.args[0]));
+          break;
+        case UICommandType.disposeEventTarget:
+          ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
         default:
           return;
       }
       _clearUICommandItems(controller.view.contextId);
-       _freeUICommand(nativeCommand);
+      _freeUICommand(nativeCommand);
     }
   }
 }

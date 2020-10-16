@@ -20,9 +20,9 @@ JSEventTarget::~JSEventTarget() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   auto data = new DisposeCallbackData(context.getContextId(), getEventTargetId());
   foundation::Task disposeTask = [](void *data) {
-    auto disposeCallbackData = static_cast<DisposeCallbackData *>(data);
-    getDartMethod()->disposeEventTarget(disposeCallbackData->contextId, disposeCallbackData->id);
-    printf("dispose eventTarget: %lld \n", disposeCallbackData->id);
+    auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
+    foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
+      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
     delete disposeCallbackData;
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);

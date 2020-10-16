@@ -59,14 +59,17 @@ struct Screen {
   double height;
 };
 
-#define KARKEN_CREATE_ELEMENT 0
+enum UICommandType {
+  createElement = 0,
+  disposeEventTarget = 1
+};
 
 struct UICommandItem {
-  UICommandItem(int64_t ownerAddress, int8_t type, NativeString **args, size_t length)
-    : type(type), args(args), ownerAddress(ownerAddress), length(length) {};
+  UICommandItem(int64_t id, int8_t type, NativeString **args, size_t length)
+    : type(type), args(args), id(id), length(length) {};
   int8_t type;
   NativeString **args;
-  int64_t ownerAddress;
+  int64_t id;
   int32_t length;
 };
 
@@ -92,7 +95,6 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
-typedef void (*DisposeEventTarget)(int32_t context, int64_t ownerAddress);
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -154,7 +156,5 @@ KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
-KRAKEN_EXPORT
-void registerDisposeEventTarget(DisposeEventTarget disposeEventTarget);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

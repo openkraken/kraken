@@ -10,6 +10,7 @@
 #include "include/kraken_bridge.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
+#include "foundation/ui_command_queue.h"
 #include "dart_methods.h"
 #include <condition_variable>
 #include <atomic>

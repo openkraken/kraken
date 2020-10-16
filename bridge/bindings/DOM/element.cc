@@ -18,7 +18,7 @@ JSElement::JSElement(JSContext &context, NativeString *tagName) : JSNode(context
   NativeString **args = new NativeString* [argsLength];
   args[0] = tagName;
   UICommandTaskMessageQueue::instance(context.getContextId())
-    ->registerCommand(getEventTargetId(), KARKEN_CREATE_ELEMENT, args, argsLength);
+    ->registerCommand(getEventTargetId(), UICommandType::createElement, args, argsLength);
 }
 
 Value JSElement::get(JSContext &context, const PropNameID &name) {
