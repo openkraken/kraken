@@ -989,7 +989,14 @@ class RenderFlexLayout extends RenderLayoutBox {
           minHeight: baseSize != null ? baseSize : 0
         );
       }
-      child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+
+      BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
+      // No need to recalculate constraints if already exists
+      if (child.constraints != null) {
+        childConstraints = child.constraints;
+      }
+      child.layout(childConstraints, parentUsesSize: true);
+
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -1148,8 +1155,16 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderFlexParentData childParentData = child.parentData;
 
         AlignSelf alignSelf = childParentData.alignSelf;
+
+        // If size exists in align-items direction, stretch not works
+        bool isStretchSelfValid = false;
+        if (child is RenderBoxModel) {
+          isStretchSelfValid = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
+            child.height == null : child.width == null;
+        }
+
         // Whether child should be stretched
-        bool isStretchSelf = placeholderChild == null &&
+        bool isStretchSelf = placeholderChild == null && isStretchSelfValid &&
           (alignSelf != AlignSelf.auto ? alignSelf == AlignSelf.stretch : alignItems == AlignItems.stretch);
 
         // Whether child is positioned placeholder or positioned renderObject
@@ -1366,6 +1381,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               break;
           }
         }
+
         child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
 
         // update max scrollable size

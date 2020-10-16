@@ -983,7 +983,7 @@ mixin CSSTransformMixin on Node {
   void updateRenderTransform(Element element, RenderBoxModel renderBoxModel, String value) {
     Matrix4 matrix4 = CSSTransform.parseTransform(value);
     // Upgrade this renderObject into repaintSelf mode.
-    if (renderBoxModel.transform == null && matrix4 != CSSTransform.initial && !renderBoxModel.isRepaintBoundary) {
+    if (renderBoxModel.transform == null &&  !renderBoxModel.isRepaintBoundary) {
       RenderObject parent = renderBoxModel.parent;
       RenderBoxModel repaintSelfBox = createRenderBoxModel(element, prevRenderBoxModel: renderBoxModel, repaintSelf: true);
       if (parent is ContainerRenderObjectMixin) {
