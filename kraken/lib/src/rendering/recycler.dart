@@ -3,8 +3,9 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/foundation.dart';
+import 'dart:ui';
 import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:kraken/css.dart';
@@ -14,6 +15,18 @@ import 'package:kraken/element.dart';
 class RenderRecyclerParentData extends RenderLayoutParentData {}
 
 class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChildManager {
+  static Axis resolveAxis(CSSStyleDeclaration style) {
+    String sliverDirection = style[SLIVER_DIRECTION];
+    switch (sliverDirection) {
+      case ROW:
+        return Axis.horizontal;
+        break;
+
+      case COLUMN:
+      default:
+        return Axis.vertical;
+    }
+  }
 
   RenderRecyclerLayout({
     Axis axis = Axis.vertical,
@@ -23,8 +36,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
   }) : assert(axis != null),
         super(targetId: targetId, style: style, elementManager: elementManager) {
 
-    _axis = axis;
     _element = elementManager.getEventTargetByTargetId<Element>(targetId);
+    _axis = resolveAxis(_element.style);
 
     _buildRenderViewport();
     super.insert(_renderViewport);
@@ -165,6 +178,8 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     return _renderSliverList = RenderSliverList(childManager: this);
   }
 
+  Size get _screenSize => window.physicalSize / window.devicePixelRatio;
+
   @override
   void performLayout() {
     if (display == CSSDisplay.none) {
@@ -176,35 +191,26 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     // If width is given, use exact width; or expand to parent extent width.
     // If height is given, use exact height; or use 0.
+    // Only layout [_renderViewport] as only-child.
     RenderBox child = _renderViewport;
+    BoxConstraints childConstraints;
 
-    final double contentWidth = RenderBoxModel.getContentWidth(this);
-    final double contentHeight = RenderBoxModel.getContentHeight(this);
-
-    double constraintWidth = contentWidth ?? 0;
-    double constraintHeight = contentHeight ?? 0;
-    double baseWidth = constraintWidth;
-
-    if (maxWidth != null && width == null) {
-      constraintWidth = baseWidth > maxWidth ? maxWidth : baseWidth;
-    } else if (minWidth != null && width == null) {
-      constraintWidth = baseWidth < minWidth ? minWidth : baseWidth;
+    switch (_axis) {
+      case Axis.horizontal:
+        childConstraints = BoxConstraints(
+          maxWidth: width ?? 0.0,
+          maxHeight: height ?? _screenSize.height,
+        );
+        break;
+      case Axis.vertical:
+        childConstraints = BoxConstraints(
+          maxWidth: width ?? _screenSize.width,
+          maxHeight: height ?? 0.0,
+        );
+        break;
     }
 
-    // Base height always equals to 0.
-    double baseHeight = 0;
-    if (maxHeight != null && height == null) {
-      constraintHeight = baseHeight > maxHeight ? maxHeight : baseHeight;
-    } else if (minHeight != null && height == null) {
-      constraintHeight = baseHeight < minHeight ? minHeight : baseHeight;
-    }
-
-    Size constraintSize = Size(constraintWidth, constraintHeight,);
-    setMaxScrollableSize(constraintWidth, constraintHeight);
-
-    BoxConstraints childConstraints = BoxConstraints.loose(constraintSize);
     child.layout(childConstraints, parentUsesSize: true);
-
     size = getBoxSize(child.size);
 
     didLayout();
@@ -266,13 +272,6 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
       return node.renderTextBox;
     } else {
       return null;
-    }
-  }
-
-  void _attachTo(Node child) {
-    if (!child.attached) {
-      child.attachTo(child.parent);
-      child.childNodes.forEach(_attachTo);
     }
   }
 

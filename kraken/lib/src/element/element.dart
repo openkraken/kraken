@@ -701,10 +701,6 @@ class Element extends Node
   }
 
   void _onStyleChanged(String property, String original, String present, bool inAnimation) {
-    if (renderBoxModel == null) {
-      return;
-    }
-
     switch (property) {
       case DISPLAY:
         _styleDisplayChangedListener(property, original, present);
@@ -735,6 +731,10 @@ class Element extends Node
       case FLEX_SHRINK:
       case FLEX_BASIS:
         _styleFlexItemChangedListener(property, original, present);
+        break;
+
+      case SLIVER_DIRECTION:
+        _styleSliverDirectionChangedListener(property, original, present);
         break;
 
       case TEXT_ALIGN:
@@ -938,6 +938,15 @@ class Element extends Node
       children.forEach((Element child) {
         _updateFlexItemStyle(child);
       });
+    }
+  }
+
+  void _styleSliverDirectionChangedListener(String property, String original, String present) {
+    CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
+    if (display == CSSDisplay.sliver) {
+      assert(renderBoxModel is RenderRecyclerLayout);
+      RenderRecyclerLayout renderRecyclerLayout = renderBoxModel;
+      renderRecyclerLayout.axis = RenderRecyclerLayout.resolveAxis(style);
     }
   }
 
