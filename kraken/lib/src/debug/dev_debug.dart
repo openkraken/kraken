@@ -12,24 +12,24 @@ import 'package:kraken/src/debug/css_parse.dart';
 
 String ZERO_PX = '0px';
 
-Function kebabize = (String str) {
+String kebabize (String str) {
   RegExp kababRE = RegExp(r'[A-Z]');
   return str.replaceAllMapped(kababRE, (match) => '-${match[0].toLowerCase()}');
-};
+}
 
-Function camelize = (String str) {
+String camelize (String str) {
   RegExp kababRE = RegExp(r'-(\w)');
   return str.replaceAllMapped(kababRE, (match) {
     String subStr = match[0].substring(1);
     return subStr.isNotEmpty ? subStr.toUpperCase() : '';
   });
-};
+}
 
-Function standardizeNumber = (double number) {
+String standardizeNumber (double number) {
   return "${(number * 100000).round() / 100000}px";
-};
+}
 
-Function getLocalName = (String name) {
+String getLocalName (String name) {
   switch (name) {
     case DIV:
     case SPAN:
@@ -51,7 +51,7 @@ Function getLocalName = (String name) {
     default:
       return css.EMPTY_STRING;
   }
-};
+}
 
 Map initComputedStyle = {
   'width': '300px',
@@ -220,7 +220,6 @@ class DevWebsocket {
         });
         ws.add(res);
         break;
-
       case 'CSS.setStyleTexts':
         Map edits = data['params']['edits'][0];
         int styleSheetId = edits['styleSheetId'];
