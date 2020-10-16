@@ -4,8 +4,8 @@
 
 // Provides a base class for reference-counted classes.
 
-#ifndef KRAKEN_FML_MEMORY_REF_COUNTED_H_
-#define KRAKEN_FML_MEMORY_REF_COUNTED_H_
+#ifndef FLUTTER_FML_MEMORY_REF_COUNTED_H_
+#define FLUTTER_FML_MEMORY_REF_COUNTED_H_
 
 #include "ref_counted_internal.h"
 #include "ref_ptr.h"
@@ -129,4 +129,4 @@ private:
 
 } // namespace fml
 
-#endif // KRAKEN_FML_MEMORY_REF_COUNTED_H_
+#endif // FLUTTER_FML_MEMORY_REF_COUNTED_H_
