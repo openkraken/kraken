@@ -667,6 +667,25 @@ void registerToBlob() {
   _registerToBlob(pointer);
 }
 
+typedef Native_RequestUpdateFrame = Void Function();
+typedef Dart_RequestUpdateFrame = void Function();
+
+typedef Native_RegisterRequestUpdateFrame = Void Function(Pointer<NativeFunction<Native_RequestUpdateFrame>>);
+typedef Dart_RegisterRequestUpdateFrame = void Function(Pointer<NativeFunction<Native_RequestUpdateFrame>>);
+
+final Dart_RegisterRequestUpdateFrame _registerRequestUpdateFrame = nativeDynamicLibrary
+    .lookup<NativeFunction<Native_RegisterRequestUpdateFrame>>('registerRequestUpdateFrame')
+    .asFunction();
+
+void _requestUpdateFrame() {
+  flushUICommand();
+}
+
+void registerRequestUpdateFrame() {
+  Pointer<NativeFunction<Native_RequestUpdateFrame>> pointer = Pointer.fromFunction(_requestUpdateFrame);
+  _registerRequestUpdateFrame(pointer);
+}
+
 void registerDartMethodsToCpp() {
   registerInvokeUIManager();
   registerInvokeModule();
@@ -681,4 +700,5 @@ void registerDartMethodsToCpp() {
   registerDevicePixelRatio();
   registerPlatformBrightness();
   registerToBlob();
+  registerRequestUpdateFrame();
 }

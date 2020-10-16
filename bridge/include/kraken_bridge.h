@@ -95,6 +95,7 @@ typedef void (*OnPlatformBrightnessChanged)(int32_t contextId);
 typedef void (*ToBlob)(void *callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char *);
+typedef void (*RequestUpdateFrame)();
 
 KRAKEN_EXPORT
 void initJSContextPool(int poolSize);
@@ -156,5 +157,7 @@ KRAKEN_EXPORT
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 KRAKEN_EXPORT
 void registerToBlob(ToBlob toBlob);
+KRAKEN_EXPORT
+void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
 
 #endif // KRAKEN_BRIDGE_EXPORT_H

@@ -34,6 +34,7 @@ struct DartMethodPointer {
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};
+  RequestUpdateFrame requestUpdateFrame{nullptr};
 };
 
 void registerInvokeUIManager(InvokeUIManager callback);
@@ -51,6 +52,7 @@ void registerPlatformBrightness(PlatformBrightness platformBrightness);
 void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformBrightnessChanged);
 void registerToBlob(ToBlob toBlob);
 void registerJSError(OnJSError onJsError);
+void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame);
 
 // test only methods
 void registerRefreshPaint(RefreshPaint refreshPaint);

@@ -100,4 +100,8 @@ void registerSimulatePointer(SimulatePointer simulatePointer) {
   methodPointer->simulatePointer = simulatePointer;
 }
 
+void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
+  methodPointer->requestUpdateFrame = requestUpdateFrame;
+}
+
 } // namespace kraken

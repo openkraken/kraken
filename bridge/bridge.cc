@@ -243,6 +243,15 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   return Value::undefined();
 }
 
+Value requestUpdateFrame(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (getDartMethod()->requestUpdateFrame == nullptr) {
+    throw JSError(context, "Failed to execute '__kraken_request_update_frame__': dart method (requestUpdateFrame) is not registered.");
+  }
+
+  getDartMethod()->requestUpdateFrame();
+  return Value();
+}
+
 } // namespace
 
 /**
@@ -252,11 +261,11 @@ JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &ha
   auto errorHandler = [handler](alibaba::jsa::JSContext &context, const alibaba::jsa::JSError &error) {
     handler(context, error);
     // trigger window.onerror handler.
-//    const alibaba::jsa::Value &errorObject = error.value();
-//    context.global()
-//      .getPropertyAsObject(context, "__global_onerror_handler__")
-//      .getFunction(context)
-//      .call(context, Value(context, errorObject));
+    const alibaba::jsa::Value &errorObject = error.value();
+    context.global()
+      .getPropertyAsObject(context, "__global_onerror_handler__")
+      .getFunction(context)
+      .call(context, Value(context, errorObject));
   };
 #ifdef KRAKEN_JSC_ENGINE
   context = alibaba::jsc::createJSContext(contextId, errorHandler, this);
@@ -283,6 +292,7 @@ JSBridge::JSBridge(int32_t contextId, const alibaba::jsa::JSExceptionHandler &ha
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_module_listener__", 0, krakenModuleListener);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_invoke_module__", 0, invokeModule);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_request_batch_update__", 0, requestBatchUpdate);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_request_update_frame__", 0, requestUpdateFrame);
 
   initKrakenPolyFill(context.get());
 

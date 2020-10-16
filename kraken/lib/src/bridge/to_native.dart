@@ -249,10 +249,10 @@ void flushUICommand() {
       int id = nativeCommand.ref.id;
       switch (commandType) {
         case UICommandType.createElement:
-          controller.view.createElement(id, nativeStringToString(nativeCommand.ref.args[0]));
+//          controller.view.createElement(id, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.disposeEventTarget:
-          ElementManager.disposeEventTarget(controller.view.contextId, id);
+//          ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
         default:
           return;

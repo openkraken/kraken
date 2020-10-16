@@ -202,6 +202,10 @@ void registerOnPlatformBrightnessChanged(OnPlatformBrightnessChanged onPlatformB
   kraken::registerOnPlatformBrightnessChanged(onPlatformBrightnessChanged);
 }
 
+void registerRequestUpdateFrame(RequestUpdateFrame requestUpdateFrame) {
+  kraken::registerRequestUpdateFrame(requestUpdateFrame);
+}
+
 Screen *createScreen(double width, double height) {
   screen.width = width;
   screen.height = height;
