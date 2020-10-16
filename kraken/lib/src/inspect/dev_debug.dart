@@ -12,6 +12,8 @@ import 'package:kraken/src/inspect/css_parse.dart';
 
 String ZERO_PX = '0px';
 
+String KRAKEN_VERSION = 'Kraken';
+
 String kebabize(String str) {
   RegExp kababRE = RegExp(r'[A-Z]');
   return str.replaceAllMapped(kababRE, (match) => '-${match[0].toLowerCase()}');
@@ -91,7 +93,7 @@ Map initInlineStyle = {
   'range': {'endColumn': 0, 'endLine': 0, 'startColumn': 0, 'startLine': 0}
 };
 
-class DevWebsocket {
+class debugInspector {
   int count = 0;
   Map<int, Node> nodeIdMap = {};
   Node rootNode;
@@ -99,7 +101,7 @@ class DevWebsocket {
   double viewportHeight;
   Map initComputedStyle = {};
 
-  DevWebsocket(this.viewportWidth, this.viewportHeight, rootElement) {
+  debugInspector(this.viewportWidth, this.viewportHeight, rootElement) {
     setRoot(rootElement);
     init();
   }
@@ -117,7 +119,7 @@ class DevWebsocket {
       server.listen((HttpRequest request) {
         if (request.uri.path == '/json/version') {
           var data = {
-            "Browser": "Kraken0.5.0",
+            "Browser": KRAKEN_VERSION,
             "Protocol-Version": "1.3",
             "User-Agent":
                 "Mozilla/5.  (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36",

@@ -57,8 +57,8 @@ class KrakenViewController {
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
         showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    DevWebsocket(
-        viewportWidth, viewportHeight, _elementManager.getRootElement());
+    debugInspector(viewportWidth, viewportHeight, _elementManager.getRootElement());
+    
   }
 
   // the manager which controller all renderObjects of Kraken
