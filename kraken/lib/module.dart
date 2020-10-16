@@ -16,4 +16,3 @@ export 'src/module/schedule_frame.dart';
 export 'src/module/timer.dart';
 export 'src/module/websocket.dart';
 export 'src/module/navigation.dart';
-export 'src/module/dev_debug.dart';

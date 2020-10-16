@@ -15,6 +15,7 @@ import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/debug.dart';
 import 'bundle.dart';
 
 // Error handler when load bundle failed.
@@ -55,8 +56,10 @@ class KrakenViewController {
       _contextId = initBridge();
     }
     _elementManager = ElementManager(viewportWidth, viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    new DevWebsocket(viewportWidth, viewportHeight, _elementManager.getRootElement());
+        showPerformanceOverlayOverride: showPerformanceOverlay,
+        controller: rootController);
+    new DevWebsocket(
+        viewportWidth, viewportHeight, _elementManager.getRootElement());
   }
 
   // the manager which controller all renderObjects of Kraken
@@ -87,11 +90,14 @@ class KrakenViewController {
     RenderObject parent = root.parent;
     RenderObject previousSibling;
     if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
+      previousSibling =
+          (root.parentData as ContainerParentDataMixin).previousSibling;
     }
     detachView();
-    _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
+    _elementManager = ElementManager(
+        _elementManager.viewportWidth, _elementManager.viewportHeight,
+        showPerformanceOverlayOverride: showPerformanceOverlay,
+        controller: rootController);
     attachView(parent, previousSibling);
   }
 
@@ -102,7 +108,8 @@ class KrakenViewController {
 
   // attach kraken's renderObject to an renderObject.
   void attachView(RenderObject parent, [RenderObject previousSibling]) {
-    _elementManager.attach(parent, previousSibling, showPerformanceOverlay: showPerformanceOverlay ?? false);
+    _elementManager.attach(parent, previousSibling,
+        showPerformanceOverlay: showPerformanceOverlay ?? false);
   }
 
   // dispose controller and recycle all resources.
@@ -121,7 +128,8 @@ class KrakenViewController {
   }
 
   // export Uint8List bytes from rendered result.
-  Future<Uint8List> toImage(double devicePixelRatio, [int eventTargetId = BODY_ID]) {
+  Future<Uint8List> toImage(double devicePixelRatio,
+      [int eventTargetId = BODY_ID]) {
     assert(!_disposed, "Kraken have already disposed");
     Completer<Uint8List> completer = Completer();
     try {
@@ -131,12 +139,14 @@ class KrakenViewController {
         return completer.future;
       }
 
-      var node = _elementManager.getEventTargetByTargetId<EventTarget>(eventTargetId);
+      var node =
+          _elementManager.getEventTargetByTargetId<EventTarget>(eventTargetId);
       if (node is Element) {
         node.toBlob(devicePixelRatio: devicePixelRatio).then((Uint8List bytes) {
           completer.complete(bytes);
         }).catchError((e, stack) {
-          String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
+          String msg =
+              'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
           completer.completeError(new Exception(msg));
         });
       } else {
@@ -167,11 +177,14 @@ class KrakenViewController {
     }
   }
 
-  void handleNavigationAction(String sourceUrl, String targetUrl, KrakenNavigationType navigationType) async {
-    KrakenNavigationAction action = KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
+  void handleNavigationAction(String sourceUrl, String targetUrl,
+      KrakenNavigationType navigationType) async {
+    KrakenNavigationAction action =
+        KrakenNavigationAction(sourceUrl, targetUrl, navigationType);
 
     try {
-      KrakenNavigationActionPolicy policy = await navigationDelegate.dispatchDecisionHandler(action);
+      KrakenNavigationActionPolicy policy =
+          await navigationDelegate.dispatchDecisionHandler(action);
       if (policy == KrakenNavigationActionPolicy.cancel) return;
 
       switch (action.navigationType) {
@@ -285,7 +298,8 @@ class KrakenController {
     assert(!_controllerMap.containsKey(_view.contextId),
         "found exist contextId of KrakenController, contextId: ${_view.contextId}");
     _controllerMap[_view.contextId] = this;
-    assert(!_nameIdMap.containsKey(name), 'found exist name of KrakenController, name: $name');
+    assert(!_nameIdMap.containsKey(name),
+        'found exist name of KrakenController, name: $name');
     _nameIdMap[name] = _view.contextId;
   }
 
@@ -316,11 +330,13 @@ class KrakenController {
     RenderObject parent = root.parent;
     RenderObject previousSibling;
     if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
+      previousSibling =
+          (root.parentData as ContainerParentDataMixin).previousSibling;
     }
     _module.dispose();
     _view.detachView();
-    _view = KrakenViewController(view._elementManager.viewportWidth, view._elementManager.viewportHeight,
+    _view = KrakenViewController(
+        view._elementManager.viewportWidth, view._elementManager.viewportHeight,
         showPerformanceOverlay: _view.showPerformanceOverlay,
         enableDebug: _view.enableDebug,
         contextId: _view.contextId,
@@ -383,8 +399,10 @@ class KrakenController {
     _bundleContent = _bundleContent ?? bundleContentOverride;
     _bundlePath = _bundlePath ?? bundlePathOverride;
     _bundleURL = _bundleURL ?? bundleURLOverride;
-    String bundleURL =
-        _bundleURL ?? _bundlePath ?? getBundleURLFromEnv() ?? getBundlePathFromEnv();
+    String bundleURL = _bundleURL ??
+        _bundlePath ??
+        getBundleURLFromEnv() ??
+        getBundlePathFromEnv();
 
     if (bundleURL == null && methodChannel is KrakenNativeChannel) {
       bundleURL = await (methodChannel as KrakenNativeChannel).getUrl();
@@ -392,10 +410,14 @@ class KrakenController {
 
     if (loadErrorHandler != null) {
       try {
-        _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
-      } catch(e, stack) { loadErrorHandler(FlutterError(e.toString()), stack);}
+        _bundle = await KrakenBundle.getBundle(bundleURL,
+            contentOverride: _bundleContent);
+      } catch (e, stack) {
+        loadErrorHandler(FlutterError(e.toString()), stack);
+      }
     } else {
-      _bundle = await KrakenBundle.getBundle(bundleURL, contentOverride: _bundleContent);
+      _bundle = await KrakenBundle.getBundle(bundleURL,
+          contentOverride: _bundleContent);
     }
   }
 

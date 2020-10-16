@@ -40,8 +40,16 @@ class CssParse {
     return decs;
   }
 
+  List getCssProperties() {
+    return declarations();
+  }
+
   Map getStartOffset() {
     return {'startLine': line, 'startColumn': column};
+  }
+
+  Map getEndOffset() {
+    return {'endLine': line, 'endColumn': column};
   }
 
   dynamic commentDeclaration() {

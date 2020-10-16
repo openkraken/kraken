@@ -4,16 +4,25 @@
  */
 
 import 'dart:io';
-import 'dart:convert' show json, jsonEncode, jsonDecode;
+import 'dart:convert' show jsonEncode, jsonDecode;
 
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart' as css;
+import 'package:kraken/src/debug/css_parse.dart';
 
 String ZERO_PX = '0px';
 
 Function kebabize = (String str) {
   RegExp kababRE = RegExp(r'[A-Z]');
   return str.replaceAllMapped(kababRE, (match) => '-${match[0].toLowerCase()}');
+};
+
+Function camelize = (String str) {
+  RegExp kababRE = RegExp(r'-(\w)');
+  return str.replaceAllMapped(kababRE, (match) {
+    String subStr = match[0].substring(1);
+    return subStr.isNotEmpty ? subStr.toUpperCase() : '';
+  });
 };
 
 Function standardizeNumber = (double number) {
@@ -211,6 +220,69 @@ class DevWebsocket {
         });
         ws.add(res);
         break;
+
+      case 'CSS.setStyleTexts':
+        Map edits = data['params']['edits'][0];
+        int styleSheetId = edits['styleSheetId'];
+        String cssText = edits['text'];
+        CssParse cssParse = CssParse(cssText);
+        List PropertiesList = cssParse.getCssProperties();
+        var node = nodeIdMap[styleSheetId];
+        List cssProperties = [];
+        PropertiesList.forEach((element) {
+          if (element is Map) {
+            String key = element['property'];
+            String camelKey = camelize(key);
+            String value = element['value'];
+            bool disable = element['disabled'] ?? false;
+
+            if (node is Element) {
+              if (disable) {
+                node.setStyle(camelKey, '');
+              } else {
+                node.setStyle(camelKey, value);
+              }
+            }
+            cssProperties.add({
+              'name': key,
+              'value': value,
+              'disabled': disable,
+              'range': element['range'],
+            });
+          }
+        });
+
+        ws.add(jsonEncode({
+          'id': data['id'],
+          'result': {
+            'styles': [
+              getInlineStyle(styleSheetId)
+            ]
+          }
+        }));
+
+        ws.add(jsonEncode({
+          'method': 'CSS.styleSheetChanged',
+          'params': {'styleSheetId': styleSheetId}
+        }));
+
+        ws.add(jsonEncode({
+          'method': 'DOM.inlineStyleInvalidated	',
+          'params': {
+            'nodeId': [styleSheetId]
+          }
+        }));
+
+        break;
+
+      case 'CSS.getInlineStylesForNode':
+        var nodeId = data['params']['nodeId'];
+        ws.add(jsonEncode({
+          'id': data['id'],
+          'result': {'inlineStyle': getInlineStyle(nodeId)}
+        }));
+        break;
+
       default:
         result = jsonEncode({'id': data['id'], 'result': {}});
         ws.add(result);
