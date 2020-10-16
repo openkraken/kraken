@@ -246,7 +246,7 @@ describe('border', () => {
     expect(clickCount).toBe(1);
   });
 
-  fit('marginSide should not handle hitTest', async () => {
+  it('marginSide should not handle hitTest', async () => {
     let clickCount = 0;
     let container = createElement('div', {
       style: {
