@@ -14,8 +14,8 @@ using namespace alibaba;
 using namespace jsc;
 
 namespace {
-void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-  std::cerr << error.what() << std::endl;
+void normalPrint(int32_t contextId, const char* errmsg) {
+  std::cerr << errmsg << std::endl;
   FAIL();
 }
 }
@@ -31,8 +31,8 @@ TEST(multiple_context, initJSEngine) {
 }
 
 TEST(multiple_context, evaluateString) {
-  auto errorPrint = [](alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\nReferenceError: Can't find variable: A\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\nReferenceError: Can't find variable: A\n"
                                "    at global code");
   };
 

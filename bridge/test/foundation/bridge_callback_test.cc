@@ -20,8 +20,8 @@ using namespace kraken::foundation;
 using namespace alibaba;
 using namespace jsc;
 
-void normalPrint(jsa::JSContext &context, const jsa::JSError &error) {
-  std::cerr << error.what() << std::endl;
+void normalPrint(int32_t contextId, const char* errmsg) {
+  std::cerr << errmsg << std::endl;
   FAIL();
 }
 

@@ -10,33 +10,34 @@ Usage: node js_to_c.js -s /path/to/source.js -o /path/to/dist.cc -n polyfill\n`)
 }
 
 const getPolyFillHeader = (outputName) => `/*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
 
-#include "jsa.h"
+#include "bridge.h"
 
-void initKraken${outputName}(alibaba::jsa::JSContext *context);
+void initKraken${outputName}(kraken::JSBridge *bridge);
 
 #endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
 
 const getPolyFillSource = (source, outputName) => `/*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Copyright (C) 2020 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
 
 #include "${outputName.toLowerCase()}.h"
+#include "bridge.h"
 
 static std::string jsCode = std::string(R"(${source})");
 
-void initKraken${outputName}(alibaba::jsa::JSContext *context) {
+void initKraken${outputName}(kraken::JSBridge *bridge) {
   try {
-    context->evaluateJavaScript(jsCode.c_str(), "internal://", 0);
+    bridge->evaluateScript(jsCode.c_str(), "internal://", 0);
   } catch (alibaba::jsa::JSError &error) {
-    context->reportError(error);
+    bridge->reportError(error.what());
   }
 }
 `;

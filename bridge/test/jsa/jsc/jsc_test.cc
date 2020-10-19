@@ -7,7 +7,7 @@
 
 #include "jsa.h"
 #include "jsc/jsc_implementation.h"
-#include "bindings/KOM/blob.h"
+#include "bindings/jsa/KOM/blob.h"
 #include "gtest/gtest.h"
 #include <memory>
 
@@ -16,8 +16,8 @@ using namespace jsc;
 
 namespace {
 
-void normalPrint(alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-  std::cerr << error.what() << std::endl;
+void normalPrint(int32_t contextId, const char* errmsg) {
+  std::cerr << errmsg << std::endl;
   FAIL();
 }
 
@@ -331,8 +331,8 @@ function fibonacci(num) {
 }
 
 TEST(JSCContext, callFunctionWithException) {
-  auto errorPrint = [](alibaba::jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "Error: 1234\n"
                                "    at throwAnError");
   };
@@ -430,8 +430,8 @@ TEST(JSCContext, hostFunctionWithThis) {
 }
 
 TEST(JSCContext, hostFunctionThrowError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "Error: ops !!\n"
                                "    at global code");
   };
@@ -749,8 +749,8 @@ TEST(JSCContext, getHostObject) {
 }
 
 TEST(JSCContext, codeSyntaxError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\nSyntaxError: Unexpected end of script\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\nSyntaxError: Unexpected end of script\n"
                                "no stack");
   };
   auto context = std::make_unique<JSCContext>(0, errorPrint, nullptr);
@@ -759,8 +759,8 @@ TEST(JSCContext, codeSyntaxError) {
 }
 
 TEST(JSCContext, undefinedError) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "TypeError: null is not an object (evaluating 'obj.abc')\n"
                                "    at f (internal://:1:21)\n"
                                "    at global code (internal://:1:31)");
@@ -771,8 +771,8 @@ TEST(JSCContext, undefinedError) {
 }
 
 TEST(JSCContext, test) {
-  auto errorPrint = [](jsa::JSContext &context, const jsa::JSError &error) {
-    EXPECT_STREQ(error.what(), "\n"
+  auto errorPrint = [](int32_t contextId, const char* errmsg) {
+    EXPECT_STREQ(errmsg, "\n"
                                "ReferenceError: Can't find variable: setTimeout\n"
                                "    at global code (internal://:1:11)");
   };

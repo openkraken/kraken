@@ -4,7 +4,7 @@
  */
 
 #include "bridge_test.h"
-#include "bindings/KOM/blob.h"
+#include "bindings/jsa/KOM/blob.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "testframework.h"
@@ -180,7 +180,7 @@ JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_environment__", 0, environment);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_simulate_pointer__", 0, simulatePointer);
 
-  initKrakenTestFramework(bridge->getContext());
+  initKrakenTestFramework(bridge);
 }
 
 void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {

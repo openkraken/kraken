@@ -4,6 +4,7 @@ const rimraf = require('rimraf');
 const path = require('path');
 const { readFileSync, writeFileSync, mkdirSync } = require('fs');
 const { spawnSync, execSync, fork } = require('child_process');
+const { program } = require('commander');
 const { join, resolve } = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -31,6 +32,12 @@ const paths = {
   tests: resolveKraken('tests'),
   sdk: resolveKraken('sdk')
 };
+
+program
+  .description('Kraken Cli Build Scripts')
+  .option('--enable-jsa', 'Enable JSA (JavaScript Abstraction)', true)
+  .option('--js-engine <engine>', 'The JavaScript Engine used by Kraken.', 'jsc')
+  .parse(process.argv);
 
 function resolveKraken(submodule) {
   return resolve(KRAKEN_ROOT, submodule);
@@ -143,9 +150,17 @@ for (let jsEngine of SUPPORTED_JS_ENGINES) {
       }
     }
 
-    const makeFileArgs = [
+    let cmakeArgs = [
       '-DCMAKE_BUILD_TYPE=' + buildMode,
-      '-DENABLE_TEST=true',
+      '-DENABLE_TEST=true'
+    ];
+
+    if (program.enableJsa) {
+      cmakeArgs.push('-DKRAKEN_ENABLE_JSA=YES');
+    }
+
+    const makeFileArgs = [
+      ...cmakeArgs,
       '-G',
       'CodeBlocks - Unix Makefiles',
       '-B',
