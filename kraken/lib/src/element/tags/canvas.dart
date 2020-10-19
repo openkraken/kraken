@@ -107,36 +107,36 @@ class CanvasElement extends Element {
     String method = args[0];
     switch (method) {
       case 'fillRect':
-        double x = CSSLength.toDouble(args[1]);
-        double y = CSSLength.toDouble(args[2]);
-        double w = CSSLength.toDouble(args[3]);
-        double h = CSSLength.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]) ?? 0.0;
+        double y = CSSLength.toDouble(args[2]) ?? 0.0;
+        double w = CSSLength.toDouble(args[3]) ?? 0.0;
+        double h = CSSLength.toDouble(args[4]) ?? 0.0;
         painter.context.fillRect(x, y, w, h);
         break;
 
       case 'clearRect':
-        double x = CSSLength.toDouble(args[1]);
-        double y = CSSLength.toDouble(args[2]);
-        double w = CSSLength.toDouble(args[3]);
-        double h = CSSLength.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]) ?? 0.0;
+        double y = CSSLength.toDouble(args[2]) ?? 0.0;
+        double w = CSSLength.toDouble(args[3]) ?? 0.0;
+        double h = CSSLength.toDouble(args[4]) ?? 0.0;
         painter.context.clearRect(x, y, w, h);
         break;
 
       case 'strokeRect':
-        double x = CSSLength.toDouble(args[1]);
-        double y = CSSLength.toDouble(args[2]);
-        double w = CSSLength.toDouble(args[3]);
-        double h = CSSLength.toDouble(args[4]);
+        double x = CSSLength.toDouble(args[1]) ?? 0.0;
+        double y = CSSLength.toDouble(args[2]) ?? 0.0;
+        double w = CSSLength.toDouble(args[3]) ?? 0.0;
+        double h = CSSLength.toDouble(args[4]) ?? 0.0;
         painter.context.strokeRect(x, y, w, h);
         break;
 
       case 'fillText':
         String text = args[1];
-        double x = CSSLength.toDouble(args[2]);
-        double y = CSSLength.toDouble(args[3]);
+        double x = CSSLength.toDouble(args[2]) ?? 0.0;
+        double y = CSSLength.toDouble(args[3]) ?? 0.0;
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]);
+          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
           painter.context.fillText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.fillText(text, x, y);
@@ -145,11 +145,11 @@ class CanvasElement extends Element {
 
       case 'strokeText':
         String text = args[1];
-        double x = CSSLength.toDouble(args[2]);
-        double y = CSSLength.toDouble(args[3]);
+        double x = CSSLength.toDouble(args[2]) ?? 0.0;
+        double y = CSSLength.toDouble(args[3]) ?? 0.0;
         if (args.length == 5) {
           // optional maxWidth
-          double maxWidth = CSSLength.toDouble(args[4]);
+          double maxWidth = CSSLength.toDouble(args[4]) ?? 0.0;
           painter.context.strokeText(text, x, y, maxWidth: maxWidth);
         } else {
           painter.context.strokeText(text, x, y);

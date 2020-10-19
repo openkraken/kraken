@@ -371,7 +371,7 @@ describe('flex-grow', () => {
 
     await matchViewportSnapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let test1;
     let container;
