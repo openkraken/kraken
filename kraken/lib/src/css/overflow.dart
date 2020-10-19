@@ -119,23 +119,26 @@ mixin CSSOverflowMixin {
       }
 
       renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.onPointerDown = (PointerDownEvent event) {
-        if (_scrollableX != null) {
-          _scrollableX.handlePointerDown(event);
-        }
-        if (_scrollableY != null) {
-          _scrollableY.handlePointerDown(event);
-        }
-      };
+      renderBoxModel.pointerListener = _pointerListener;
 
       if (renderBoxModel is RenderLayoutBox) {
-        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderLayoutBox.parent;
+        RenderObjectWithChildMixin<RenderBox> layoutBoxParent = element.renderBoxModel.parent;
         RenderLayoutBox newLayoutBox = createRenderLayout(element, repaintSelf: shouldRepaintSelf, prevRenderLayoutBox: renderBoxModel);
-        element.renderLayoutBox = newLayoutBox;
+        element.renderBoxModel = newLayoutBox;
         if (layoutBoxParent != null) {
           layoutBoxParent.child = newLayoutBox;
         }
+      }
+    }
+  }
 
+  void _pointerListener (PointerEvent event) {
+    if (event is PointerDownEvent) {
+      if (_scrollableX != null) {
+        _scrollableX.handlePointerDown(event);
+      }
+      if (_scrollableY != null) {
+        _scrollableY.handlePointerDown(event);
       }
     }
   }

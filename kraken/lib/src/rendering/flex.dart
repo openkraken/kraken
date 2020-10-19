@@ -1847,6 +1847,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     properties.add(DiagnosticsProperty<FlexWrap>('flexWrap', flexWrap));
   }
 
+  RenderRecyclerLayout toRenderRecyclerLayout() {
+    List<RenderBox> children = getDetachedChildrenAsList();
+    RenderRecyclerLayout renderRecyclerLayout = RenderRecyclerLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    renderRecyclerLayout.addAll(children);
+    return copyWith(renderRecyclerLayout);
+  }
+
   /// Convert [RenderFlexLayout] to [RenderFlowLayout]
   RenderFlowLayout toFlowLayout() {
     List<RenderBox> children = getDetachedChildrenAsList();

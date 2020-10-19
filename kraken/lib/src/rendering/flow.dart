@@ -519,7 +519,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
-  // @override
+  @override
   void performLayout() {
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -1097,6 +1097,18 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+  }
+
+  /// Convert [RenderFlowLayout] to [RenderRecyclerLayout]
+  RenderRecyclerLayout toRenderRecyclerLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderRecyclerLayout layout = RenderRecyclerLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    layout.addAll(children);
+    return copyWith(layout);
   }
 
   /// Convert [RenderFlowLayout] to [RenderFlexLayout]
