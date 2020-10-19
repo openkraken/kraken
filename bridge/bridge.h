@@ -24,6 +24,9 @@
 #include "bindings/jsa/KOM/toBlob.h"
 #include "bindings/jsa/KOM/window.h"
 #include "bindings/jsa/kraken.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bindings/jsc/js_context.h"
+
 #endif
 
 #include <atomic>
@@ -64,8 +67,8 @@ public:
   // the owner pointer which take JSBridge as property.
   void *owner;
   /// evaluate JavaScript source codes in standard mode.
-  KRAKEN_JS_VALUE evaluateScript(const NativeString *script, const char *url, int startLine);
-  KRAKEN_JS_VALUE evaluateScript(const char *script, const char *url, int startLine);
+  void evaluateScript(const NativeString *script, const char *url, int startLine);
+  void evaluateScript(const char *script, const char *url, int startLine);
 
   KRAKEN_JS_CONTEXT *getContext() const {
     return context.get();

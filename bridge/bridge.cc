@@ -131,16 +131,16 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   }
 }
 
-KRAKEN_JS_VALUE JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
-  if (!context->isValid()) return Value::undefined();
-  binding::jsa::updateLocation(url);
-  return context->evaluateJavaScript(script->string, script->length, url, startLine);
+void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
+  if (!context->isValid()) return;
+//  binding::jsa::updateLocation(url);
+  context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
-KRAKEN_JS_VALUE JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
-  if (!context->isValid()) return Value::undefined();
-  binding::jsa::updateLocation(url);
-  return context->evaluateJavaScript(script, url, startLine);
+void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
+  if (!context->isValid()) return;
+//  binding::jsa::updateLocation(url);
+  context->evaluateJavaScript(script, url, startLine);
 }
 
 JSBridge::~JSBridge() {

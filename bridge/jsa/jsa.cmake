@@ -6,10 +6,10 @@ set(JSA_INCLUDE_DIRS)
 add_definitions(-fPIC)
 list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_compile_options(-DKRAKEN_ENABLE_JSA=1)
 ### JSC implementations
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
-  add_compile_options(-DKRAKEN_ENABLE_JSA=1)
   list(APPEND JSA_IMPLEMENTATION ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/jsc/jsc_implementation.cc)
   list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include/jsc)
 
@@ -21,18 +21,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all"
     add_library(JavaScriptCore SHARED IMPORTED)
     set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
             "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/lib/android/${ANDROID_ABI}/libjsc.so"
-            )
-    # 链接jsc
-    list(APPEND JSA_LINK_LIBS
-            JavaScriptCore
-            )
-  elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    list(APPEND JSA_INCLUDE_DIRS
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/include
-            )
-    add_library(JavaScriptCore SHARED IMPORTED include/v8/v8_implementation.h)
-    set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
-            /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so
             )
     # 链接jsc
     list(APPEND JSA_LINK_LIBS
@@ -90,7 +78,6 @@ add_library(jsa_abstraction STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/abstraction/js_type.cc
         )
 target_include_directories(jsa_abstraction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
-
 
 add_library(jsa_implementation ${JSA_IMPLEMENTATION})
 target_link_libraries(jsa_implementation PRIVATE ${JSA_LINK_LIBS})

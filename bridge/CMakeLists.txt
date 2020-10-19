@@ -54,10 +54,40 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/DOM/eventTarget.cc
     bindings/jsa/DOM/eventTarget.h
   )
-else()
-  add_compile_options(-DKRAKEN_ENABLE_JSA=0)
-  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
 
+  list(APPEND BRIDGE_LINK_LIBS
+          jsa_abstraction
+          jsa_implementation
+          -pthread
+          )
+  list(APPEND BRIDGE_INCLUDE  ${JSA_INCLUDE_DIRS})
+else()
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+    add_compile_options(-DKRAKEN_JSC_ENGINE=1)
+
+    if (${IS_ANDROID})
+      list(APPEND BRIDGE_INCLUDE
+              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/include
+              )
+      # jsc预编译库
+      add_library(JavaScriptCore SHARED IMPORTED)
+      set_target_properties(JavaScriptCore PROPERTIES IMPORTED_LOCATION
+              "${CMAKE_CURRENT_SOURCE_DIR}/third_party/JavaScriptCore-604.1.13/lib/android/${ANDROID_ABI}/libjsc.so"
+              )
+      # 链接jsc
+      list(APPEND BRIDGE_LINK_LIBS
+              JavaScriptCore
+              )
+    else ()
+      list(APPEND BRIDGE_LINK_LIBS "-framework JavaScriptCore")
+    endif ()
+
+    list(APPEND BRIDGE_SOURCE
+      bindings/jsc/js_context.h
+      bindings/jsc/js_context.cc
+      bindings/jsc/DOM/document.h
+      bindings/jsc/DOM/document.cc
+    )
   endif()
 endif()
 
@@ -68,14 +98,8 @@ list(APPEND BRIDGE_INCLUDE
     ./include
     ./polyfill/dist
     ${ADDITIONAL_INCLUDE_DIRS}
-    ${JSA_INCLUDE_DIRS}
 )
 
-list(APPEND BRIDGE_LINK_LIBS
-        jsa_abstraction
-        jsa_implementation
-        -pthread
-)
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
