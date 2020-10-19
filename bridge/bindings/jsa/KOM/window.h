@@ -11,12 +11,13 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 class JSWindow : public HostObject, public std::enable_shared_from_this<JSWindow> {
 public:
   JSWindow() {
-    location_ = std::make_shared<kraken::binding::JSLocation>();
+    location_ = std::make_shared<kraken::binding::jsa::JSLocation>();
   };
 
   ~JSWindow() {
@@ -34,8 +35,9 @@ private:
   std::shared_ptr<JSWindow> sharedSelf() {
     return shared_from_this();
   }
-  std::shared_ptr<kraken::binding::JSLocation> location_;
+  std::shared_ptr<kraken::binding::jsa::JSLocation> location_;
 };
+} // namespace jsa
 } // namespace binding
 } // namespace kraken
 

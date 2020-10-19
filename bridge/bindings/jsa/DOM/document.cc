@@ -1,6 +1,7 @@
-//
-// Created by andycall on 2020/9/23.
-//
+/*
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "document.h"
 #include "element.h"
@@ -8,9 +9,10 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 // An persistent createElement function pointer which will recycle JSDocument had been disposed.
-static Value *createElementPtr {nullptr};
+static Value *createElementPtr{nullptr};
 
 Value JSDocument::createElement(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   if (count != 1) {
@@ -23,12 +25,11 @@ Value JSDocument::createElement(JSContext &context, const Value &thisVal, const 
   }
 
   String &&tagNameString = tagName.getString(context);
-  NativeString nativeString {};
+  NativeString nativeString{};
   nativeString.string = tagNameString.getUnicodePtr(context);
   nativeString.length = tagNameString.unicodeLength(context);
 
-  auto element =
-      Object::createFromHostObject(context, std::make_shared<JSElement>(context, nativeString.clone()));
+  auto element = Object::createFromHostObject(context, std::make_shared<JSElement>(context, nativeString.clone()));
   return Value(context, element);
 }
 
@@ -64,6 +65,8 @@ JSDocument::~JSDocument() {
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = Object::createFromHostObject(*context, std::make_shared<JSDocument>());
   context->global().setProperty(*context, "document", document);
+}
+
 }
 } // namespace binding
 } // namespace kraken

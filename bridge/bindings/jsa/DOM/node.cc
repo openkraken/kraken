@@ -8,11 +8,11 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
-JSNode::JSNode(JSContext &context, NodeType nodeType): JSEventTarget(context), nodeType(nodeType) {
+JSNode::JSNode(JSContext &context, NodeType nodeType) : JSEventTarget(context), nodeType(nodeType) {}
+
 }
-
-
 }
 }

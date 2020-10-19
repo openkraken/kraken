@@ -6,16 +6,16 @@
 #include "element.h"
 #include "dart_methods.h"
 #include "foundation/ui_command_queue.h"
-#include <iostream>
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 using namespace foundation;
 
 JSElement::JSElement(JSContext &context, NativeString *tagName) : JSNode(context, NodeType::ELEMENT_NODE) {
   const int32_t argsLength = 1;
-  NativeString **args = new NativeString* [argsLength];
+  NativeString **args = new NativeString *[argsLength];
   args[0] = tagName;
   UICommandTaskMessageQueue::instance(context.getContextId())
     ->registerCommand(getEventTargetId(), UICommandType::createElement, args, argsLength);
@@ -32,5 +32,6 @@ std::vector<PropNameID> JSElement::getPropertyNames(JSContext &context) {
   return propertyNames;
 }
 
+}
 } // namespace binding
 } // namespace kraken

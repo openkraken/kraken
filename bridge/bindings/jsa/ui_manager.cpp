@@ -11,7 +11,8 @@
 #include "ui_manager.h"
 
 namespace kraken {
-namespace {
+namespace binding {
+namespace jsa {
 
 using namespace alibaba::jsa;
 using namespace foundation;
@@ -171,7 +172,7 @@ Value krakenModuleListener(JSContext &context, const Value &thisVal, const Value
   return Value::undefined();
 }
 
-void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+void handleBatchUpdate(void *callbackContext, int32_t contextId, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
 
@@ -225,7 +226,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   auto bridge = static_cast<JSBridge *>(context.getOwner());
   bridge->bridgeCallback.registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleTransientCallback);
+      getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleBatchUpdate);
     });
 
   return Value::undefined();
@@ -242,9 +243,7 @@ Value requestUpdateFrame(JSContext &context, const Value &thisVal, const Value *
   return Value();
 }
 
-} // namespace
-
-void bindUIManager(alibaba::jsa::JSContext &context) {
+void bindUIManager(KRAKEN_JS_CONTEXT &context) {
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_ui_manager__", 0, krakenUIManager);
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_ui_listener__", 0, krakenUIListener);
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_module_listener__", 0, krakenModuleListener);
@@ -253,4 +252,6 @@ void bindUIManager(alibaba::jsa::JSContext &context) {
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_request_update_frame__", 0, requestUpdateFrame);
 }
 
+} // namespace jsa
+} // namespace binding
 } // namespace kraken

@@ -9,6 +9,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 std::string href = "";
@@ -58,5 +59,6 @@ std::vector<PropNameID> JSLocation::getPropertyNames(JSContext &context) {
   return names;
 }
 
+}
 } // namespace binding
 } // namespace kraken

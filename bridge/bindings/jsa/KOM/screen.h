@@ -11,6 +11,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 using namespace alibaba::jsa;
 
@@ -29,6 +30,7 @@ private:
   }
 };
 
+}
 } // namespace binding
 } // namespace kraken
 

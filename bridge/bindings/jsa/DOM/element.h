@@ -13,6 +13,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 class JSElement : public JSNode {
@@ -25,9 +26,11 @@ public:
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 
   std::vector<PropNameID> getPropertyNames(JSContext &context) override;
+
 private:
 };
 
+}
 } // namespace binding
 } // namespace kraken
 #endif // KRAKENBRIDGE_ELEMENT_H

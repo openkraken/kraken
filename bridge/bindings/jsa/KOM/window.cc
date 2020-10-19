@@ -8,7 +8,7 @@
 
 namespace kraken {
 namespace binding {
-
+namespace jsa {
 using namespace alibaba::jsa;
 
 Value JSWindow::get(JSContext &context, const PropNameID &name) {
@@ -24,7 +24,7 @@ Value JSWindow::get(JSContext &context, const PropNameID &name) {
     if (getDartMethod()->platformBrightness == nullptr) {
       throw JSError(context, "Failed to read colorScheme: dart method (platformBrightness) not register.");
     }
-    const NativeString * code = getDartMethod()->platformBrightness(context.getContextId());
+    const NativeString *code = getDartMethod()->platformBrightness(context.getContextId());
     String &&result = String::createFromUInt16(context, code->string, code->length);
 
     return Value(context, result);
@@ -60,5 +60,6 @@ std::vector<PropNameID> JSWindow::getPropertyNames(JSContext &context) {
   return names;
 }
 
+}
 } // namespace binding
 } // namespace kraken

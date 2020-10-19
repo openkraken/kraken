@@ -9,6 +9,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 class JSDocument : public HostObject, public std::enable_shared_from_this<JSDocument> {
@@ -24,6 +25,7 @@ public:
 
 void bindDocument(std::unique_ptr<JSContext> &context);
 
+}
 } // namespace binding
 } // namespace kraken
 

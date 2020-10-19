@@ -12,6 +12,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 using namespace kraken::foundation;
 
@@ -68,5 +69,6 @@ void bindToBlob(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_to_blob__", 0, toBlob);
 }
 
+}
 } // namespace binding
 } // namespace kraken

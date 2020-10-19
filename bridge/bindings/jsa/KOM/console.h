@@ -12,10 +12,12 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 void bindConsole(std::unique_ptr<JSContext> &context);
 
+}
 } // namespace binding
 } // namespace kraken
 

@@ -42,9 +42,9 @@ private:
   JSExceptionHandler handler_;
 
 #ifdef KRAKEN_ENABLE_JSA
-  std::shared_ptr<kraken::binding::JSScreen> screen_;
-  std::shared_ptr<kraken::binding::JSWindow> window_;
-  std::shared_ptr<kraken::binding::JSDocument> document_;
+  std::shared_ptr<kraken::binding::jsa::JSScreen> screen_;
+  std::shared_ptr<kraken::binding::jsa::JSWindow> window_;
+  std::shared_ptr<kraken::binding::jsa::JSDocument> document_;
 #endif
 
 public:

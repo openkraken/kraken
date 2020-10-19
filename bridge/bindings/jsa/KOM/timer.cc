@@ -11,6 +11,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 using namespace alibaba::jsa;
 using namespace kraken::foundation;
@@ -255,5 +256,6 @@ void bindTimer(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "cancelAnimationFrame", 0, cancelAnimationFrame);
 }
 
+}
 } // namespace binding
 } // namespace kraken

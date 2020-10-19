@@ -11,6 +11,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 using namespace alibaba::jsa;
 
@@ -55,7 +56,7 @@ public:
   void set(JSContext &, const PropNameID &name, const Value &value) override;
 
   /// get an pointer of bytes data from JSBlob
-  uint8_t* bytes();
+  uint8_t *bytes();
 
   /// get bytes data's length
   int32_t size();
@@ -82,6 +83,7 @@ private:
   std::vector<uint8_t> _data;
 };
 
+}
 } // namespace binding
 } // namespace kraken
 

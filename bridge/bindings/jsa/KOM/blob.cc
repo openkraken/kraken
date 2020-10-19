@@ -8,6 +8,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 
 void BlobBuilder::append(JSContext &context, ArrayBuffer &&arrayBuffer) {
   auto data = arrayBuffer.data<uint8_t>(context);
@@ -86,7 +87,8 @@ Value JSBlob::get(JSContext &context, const PropNameID &name) {
   } else if (_name == "text") {
     return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "text"), 0, text));
   } else if (_name == "arrayBuffer") {
-    return Value(context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "arrayBuffer"), 0, arrayBuffer));
+    return Value(
+      context, Function::createFromHostFunction(context, PropNameID::forAscii(context, "arrayBuffer"), 0, arrayBuffer));
   }
 
   return Value::undefined();
@@ -179,9 +181,10 @@ Value JSBlob::text(JSContext &context, const Value &thisVal, const Value *args, 
 
 Value JSBlob::arrayBuffer(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
   std::shared_ptr<JSBlob> blob = thisVal.getObject(context).getHostObject<JSBlob>(context);
-  return Value(context, ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
-    // there is no need to collect blob's memory
-  }));
+  return Value(context,
+               ArrayBuffer::createWithUnit8(context, blob->_data.data(), blob->_data.size(), [](uint8_t *bytes) {
+                 // there is no need to collect blob's memory
+               }));
 }
 
 uint8_t *JSBlob::bytes() {
@@ -198,5 +201,6 @@ void bindBlob(std::unique_ptr<JSContext> &context) {
                                                     JSBlob::constructor));
 }
 
+}
 } // namespace binding
 } // namespace kraken

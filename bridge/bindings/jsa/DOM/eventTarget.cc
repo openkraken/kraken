@@ -8,6 +8,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 static std::atomic<int64_t> globalEventTargetId{0};
@@ -43,5 +44,6 @@ int64_t JSEventTarget::getEventTargetId() {
   return eventTargetId;
 }
 
+}
 } // namespace binding
 } // namespace kraken

@@ -17,10 +17,11 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 struct DisposeCallbackData {
-  DisposeCallbackData(int32_t contextId, int64_t id): contextId(contextId), id(id) {};
+  DisposeCallbackData(int32_t contextId, int64_t id) : contextId(contextId), id(id){};
   int64_t id;
   int32_t contextId;
 };
@@ -31,7 +32,9 @@ public:
   explicit JSEventTarget(JSContext &context);
   ~JSEventTarget() override;
 
-  NativeEventTarget* getEventTarget() { return nativeEventTarget; }
+  NativeEventTarget *getEventTarget() {
+    return nativeEventTarget;
+  }
 
   Value get(JSContext &, const PropNameID &name) override;
 
@@ -42,11 +45,12 @@ public:
   int64_t getEventTargetId();
 
 private:
-  NativeEventTarget *nativeEventTarget {nullptr};
+  NativeEventTarget *nativeEventTarget{nullptr};
   JSContext &context;
   int64_t eventTargetId;
 };
 
+}
 }
 }
 

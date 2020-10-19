@@ -9,6 +9,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 void JSScreen::bind(std::unique_ptr<JSContext> &context) {
@@ -51,5 +52,6 @@ std::vector<PropNameID> JSScreen::getPropertyNames(JSContext &context) {
   return names;
 }
 
+}
 } // namespace binding
 } // namespace kraken

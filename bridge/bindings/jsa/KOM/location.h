@@ -10,6 +10,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 using namespace alibaba::jsa;
 
 void updateLocation(std::string url);
@@ -35,6 +36,7 @@ private:
   Value reload(JSContext &context, const Value &thisVal, const Value *args, size_t count);
 };
 
+}
 } // namespace binding
 } // namespace kraken
 

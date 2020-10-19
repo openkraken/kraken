@@ -14,6 +14,7 @@
 
 namespace kraken {
 namespace binding {
+namespace jsa {
 namespace {
 using namespace alibaba::jsa;
 
@@ -94,5 +95,6 @@ void bindConsole(std::unique_ptr<JSContext> &context) {
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_print__", 0, print);
 }
 
+}
 } // namespace binding
 } // namespace kraken

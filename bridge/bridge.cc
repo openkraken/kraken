@@ -30,20 +30,20 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
 #endif
   };
 
-  context = KRAKEN_CREATE_JS_ENGINE(contextId, errorHandler, owner);
+  context = KRAKEN_CREATE_JS_ENGINE(contextId, errorHandler, this);
 
 #ifdef KRAKEN_ENABLE_JSA
-  bindUIManager(*context);
-  // Inject JSC global objects
-  kraken::binding::bindKraken(context);
-  kraken::binding::bindConsole(context);
-  kraken::binding::bindTimer(context);
-  kraken::binding::bindBlob(context);
-  kraken::binding::bindToBlob(context);
-  kraken::binding::bindDocument(context);
-  window_ = std::make_shared<kraken::binding::JSWindow>();
+    // Inject JSC global objects
+  kraken::binding::jsa::bindUIManager(*context);
+  kraken::binding::jsa::bindKraken(context);
+  kraken::binding::jsa::bindConsole(context);
+  kraken::binding::jsa::bindTimer(context);
+  kraken::binding::jsa::bindBlob(context);
+  kraken::binding::jsa::bindToBlob(context);
+  kraken::binding::jsa::bindDocument(context);
+  window_ = std::make_shared<kraken::binding::jsa::JSWindow>();
   window_->bind(context);
-  screen_ = std::make_shared<kraken::binding::JSScreen>();
+  screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
 #endif
 
@@ -133,13 +133,13 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
 
 KRAKEN_JS_VALUE JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!context->isValid()) return Value::undefined();
-  binding::updateLocation(url);
+  binding::jsa::updateLocation(url);
   return context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
 KRAKEN_JS_VALUE JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
   if (!context->isValid()) return Value::undefined();
-  binding::updateLocation(url);
+  binding::jsa::updateLocation(url);
   return context->evaluateJavaScript(script, url, startLine);
 }
 
