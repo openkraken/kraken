@@ -142,12 +142,44 @@ Value environment(JSContext &context, const Value &thisVal, const Value *args, s
     .call(context, {Value(context, String::createFromAscii(context, env))});
 }
 
+Value simulatePointer(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
+  if (getDartMethod()->simulatePointer == nullptr) {
+    throw JSError(context, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
+  }
+
+  const Value &firstArgs = args[0];
+  if (!firstArgs.isObject()) {
+    throw JSError(context, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
+  }
+
+  Array &&inputArray = firstArgs.getObject(context).getArray(context);
+  auto **mousePointerList = new MousePointer* [inputArray.length(context)];
+
+  for (int i = 0; i < inputArray.length(context); i ++) {
+    auto mouse = new MousePointer();
+    Array &&params = inputArray.getValueAtIndex(context, i).getObject(context).getArray(context);
+    mouse->contextId = context.getContextId();
+    mouse->x = params.getValueAtIndex(context, 0).getNumber();
+    mouse->y = params.getValueAtIndex(context, 1).getNumber();
+    mouse->change = params.getValueAtIndex(context, 2).getNumber();
+    mousePointerList[i] = mouse;
+  }
+
+  getDartMethod()->simulatePointer(mousePointerList, inputArray.length(context));
+
+  delete[] mousePointerList;
+
+  return Value::undefined();
+}
+
 JSBridgeTest::JSBridgeTest(JSBridge *bridge) : bridge_(bridge), context(bridge->getContext()) {
   bridge->owner = this;
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_executeTest__", 0, executeTest);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_refresh_paint__", 0, refreshPaint);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_match_image_snapshot__", 0, matchImageSnapshot);
   JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_environment__", 0, environment);
+  JSA_BINDING_FUNCTION(*context, context->global(), "__kraken_simulate_pointer__", 0, simulatePointer);
+
   initKrakenTestFramework(bridge->getContext());
 }
 

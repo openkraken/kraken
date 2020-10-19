@@ -96,4 +96,8 @@ void registerEnvironment(Environment environment) {
   methodPointer->environment = environment;
 }
 
+void registerSimulatePointer(SimulatePointer simulatePointer) {
+  methodPointer->simulatePointer = simulatePointer;
+}
+
 } // namespace kraken
