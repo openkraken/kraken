@@ -20,7 +20,6 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
 
   // Other properties are injected by dart.
   JSA_SET_PROPERTY(*context, kraken, "userAgent", std::string(krakenInfo->getUserAgent(krakenInfo)));
-
   JSA_SET_PROPERTY(*context, context->global(), "__kraken__", kraken);
 }
 

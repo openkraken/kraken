@@ -7,29 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} CMAKE_SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
-include(./jsa/jsa.cmake)
-
 list(APPEND BRIDGE_SOURCE
-    bindings/KOM/console.cc
-    bindings/KOM/screen.cc
-    bindings/KOM/timer.cc
-    bindings/KOM/window.cc
-    bindings/KOM/window.h
-    bindings/KOM/location.cc
-    bindings/KOM/location.h
-    bindings/kraken.cc
-    bindings/KOM/blob.cc
-    bindings/KOM/blob.h
-    bindings/KOM/toBlob.cc
-    bindings/KOM/toBlob.h
-    bindings/DOM/document.cc
-    bindings/DOM/document.h
-    bindings/DOM/element.cc
-    bindings/DOM/element.h
-    bindings/DOM/node.cc
-    bindings/DOM/node.h
-    bindings/DOM/eventTarget.cc
-    bindings/DOM/eventTarget.h
     foundation/logging.cc
     foundation/logging.h
     foundation/colors.h
@@ -49,6 +27,39 @@ list(APPEND BRIDGE_SOURCE
     bridge.h
     polyfill/dist/polyfill.cc
 )
+
+if (${KRAKEN_ENABLE_JSA})
+  include(./jsa/jsa.cmake)
+  list(APPEND BRIDGE_SOURCE
+    bindings/jsa/KOM/console.cc
+    bindings/jsa/KOM/screen.cc
+    bindings/jsa/KOM/timer.cc
+    bindings/jsa/KOM/window.cc
+    bindings/jsa/KOM/window.h
+    bindings/jsa/KOM/location.cc
+    bindings/jsa/KOM/location.h
+    bindings/jsa/kraken.cc
+    bindings/jsa/ui_manager.cpp
+    bindings/jsa/ui_manager.h
+    bindings/jsa/KOM/blob.cc
+    bindings/jsa/KOM/blob.h
+    bindings/jsa/KOM/toBlob.cc
+    bindings/jsa/KOM/toBlob.h
+    bindings/jsa/DOM/document.cc
+    bindings/jsa/DOM/document.h
+    bindings/jsa/DOM/element.cc
+    bindings/jsa/DOM/element.h
+    bindings/jsa/DOM/node.cc
+    bindings/jsa/DOM/node.h
+    bindings/jsa/DOM/eventTarget.cc
+    bindings/jsa/DOM/eventTarget.h
+  )
+else()
+  add_compile_options(-DKRAKEN_ENABLE_JSA=0)
+  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
+
+  endif()
+endif()
 
 list(APPEND BRIDGE_INCLUDE
     ./jsa/include

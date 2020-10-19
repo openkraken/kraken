@@ -7,9 +7,8 @@
 #include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "foundation/ui_task_queue.h"
 #include "foundation/ui_command_queue.h"
-#include "jsa.h"
+#include "foundation/ui_task_queue.h"
 
 #include <atomic>
 #include <thread>
@@ -50,11 +49,11 @@ std::__thread_id getUIThreadId() {
   return uiThreadId;
 }
 
-void printError(alibaba::jsa::JSContext &bridge, const alibaba::jsa::JSError &error) {
+void printError(int32_t contextId, const char* errmsg) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(bridge.getContextId(), error.what());
+    kraken::getDartMethod()->onJsError(contextId, errmsg);
   } else {
-    KRAKEN_LOG(ERROR) << error.what() << std::endl;
+    KRAKEN_LOG(ERROR) << errmsg << std::endl;
   }
 }
 

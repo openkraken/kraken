@@ -4,11 +4,12 @@ cmake_minimum_required(VERSION 3.2.0)
 set(CMAKE_CXX_STANDARD 14)
 set(JSA_INCLUDE_DIRS)
 add_definitions(-fPIC)
-list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include)
+list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 ### JSC implementations
 if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc" OR $ENV{KRAKEN_JS_ENGINE} MATCHES "all")
   add_compile_options(-DKRAKEN_JSC_ENGINE=1)
+  add_compile_options(-DKRAKEN_ENABLE_JSA=1)
   list(APPEND JSA_IMPLEMENTATION ${CMAKE_CURRENT_SOURCE_DIR}/jsa/src/implementation/jsc/jsc_implementation.cc)
   list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include/jsc)
 

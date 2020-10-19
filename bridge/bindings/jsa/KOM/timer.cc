@@ -4,9 +4,9 @@
  */
 
 #include "timer.h"
+#include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
-#include "bridge.h"
 #include "jsa.h"
 
 namespace kraken {

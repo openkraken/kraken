@@ -29,6 +29,8 @@
 #define ENABLE_UNHANDLED_PROMISE_REJECTION 1
 #endif
 
+#include "foundation/js_engine_adaptor.h"
+
 #ifdef ENABLE_UNHANDLED_PROMISE_REJECTION
 #include "JSContextRefPrivate.h"
 #endif
@@ -48,7 +50,7 @@ class JSCContext : public jsa::JSContext {
 public:
   // Creates new context in new context group
   JSCContext() = delete;
-  JSCContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
+  JSCContext(int32_t contextId, JSExceptionHandler handler, void *owner);
   ~JSCContext();
 
   jsa::Value evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) override;
@@ -256,7 +258,7 @@ private:
   int32_t _contextId;
   std::atomic<bool> _freeze {false};
   void *_owner {nullptr};
-  jsa::JSExceptionHandler _handler;
+  JSExceptionHandler _handler;
 #ifndef NDEBUG
   mutable std::atomic<intptr_t> objectCounter_;
   mutable std::atomic<intptr_t> symbolCounter_;
@@ -264,7 +266,7 @@ private:
 #endif
 }; // JSCContext
 
-std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, jsa::JSExceptionHandler handler, void *owner);
+std::unique_ptr<jsa::JSContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void *owner);
 
 } // namespace jsc
 } // namespace alibaba
