@@ -6,6 +6,7 @@
 #include "js_context.h"
 #include <memory>
 
+
 namespace kraken::binding::jsc {
 
 JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner)
@@ -21,6 +22,7 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
+  releaseGlobalString();
   JSGlobalContextRelease(ctx_);
 }
 
@@ -39,7 +41,7 @@ void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
     JSStringRelease(sourceURLRef);
   }
 
-  hasException(res, exc);
+  handleException(res, exc);
 }
 
 void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
@@ -57,7 +59,7 @@ void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int 
     JSStringRelease(sourceURLRef);
   }
 
-  hasException(res, exc);
+  handleException(res, exc);
 }
 
 bool JSContext::isValid() {
@@ -72,7 +74,7 @@ void *JSContext::getOwner() {
   return owner;
 }
 
-bool JSContext::hasException(JSValueRef exc) {
+bool JSContext::handleException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
     // TODO JSC ErrorHandler;
     assert(false);
@@ -83,7 +85,7 @@ bool JSContext::hasException(JSValueRef exc) {
   return false;
 }
 
-bool JSContext::hasException(JSValueRef res, JSValueRef exc) {
+bool JSContext::handleException(JSValueRef res, JSValueRef exc) {
   if (JSC_UNLIKELY(!res)) {
     assert(false);
     //    jsa::JSError error = jsa::JSError(*this, createValue(exc));
@@ -93,8 +95,39 @@ bool JSContext::hasException(JSValueRef res, JSValueRef exc) {
   return false;
 }
 
+JSObjectRef JSContext::global() {
+  return JSContextGetGlobalObject(ctx_);
+}
+
+JSGlobalContextRef JSContext::context() {
+  return ctx_;
+}
+
+void JSContext::releaseGlobalString() {
+  auto head = std::begin(globalStrings);
+  auto tail = std::end(globalStrings);
+
+  while (head != tail) {
+    JSStringRef str = *head;
+    // Release all global string reference.
+    JSStringRelease(str);
+    ++head;
+  }
+
+  globalStrings.clear();
+}
+
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
+}
+
+std::string JSStringToStdString(JSStringRef jsString) {
+  size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(jsString);
+  char *utf8Buffer = new char[maxBufferSize];
+  size_t bytesWritten = JSStringGetUTF8CString(jsString, utf8Buffer, maxBufferSize);
+  std::string utf_string = std::string(utf8Buffer, bytesWritten - 1);
+  delete[] utf8Buffer;
+  return utf_string;
 }
 
 } // namespace kraken::binding::jsc

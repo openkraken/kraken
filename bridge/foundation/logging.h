@@ -47,6 +47,8 @@ private:
   FML_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
+void printLog(std::stringstream &stream, std::string level);
+
 } // namespace foundation
 
 #define KRAKEN_LOG_STREAM(severity) ::foundation::LogMessage(::foundation::LOG_##severity, __FILE__, __LINE__, nullptr).stream()

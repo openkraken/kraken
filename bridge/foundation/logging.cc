@@ -82,4 +82,52 @@ LogMessage::~LogMessage() {
 #endif
 }
 
+void printLog(std::stringstream &stream, std::string level) {
+#ifdef ENABLE_DEBUGGER
+    JSC::MessageLevel _log_level = JSC::MessageLevel::Log;
+#endif
+    switch (level[0]) {
+      case 'l':
+        KRAKEN_LOG(VERBOSE) << stream.str();
+#ifdef ENABLE_DEBUGGER
+        _log_level = JSC::MessageLevel::Log;
+#endif
+        break;
+      case 'i':
+        KRAKEN_LOG(INFO) << stream.str();
+#ifdef ENABLE_DEBUGGER
+        _log_level = JSC::MessageLevel::Info;
+#endif
+        break;
+      case 'd':
+        KRAKEN_LOG(DEBUG_) << stream.str();
+#ifdef ENABLE_DEBUGGER
+        _log_level = JSC::MessageLevel::Debug;
+#endif
+        break;
+      case 'w':
+        KRAKEN_LOG(WARN) << stream.str();
+#ifdef ENABLE_DEBUGGER
+        _log_level = JSC::MessageLevel::Warning;
+#endif
+        break;
+      case 'e':
+        KRAKEN_LOG(ERROR) << stream.str();
+#ifdef ENABLE_DEBUGGER
+        _log_level = JSC::MessageLevel::Error;
+#endif
+        break;
+      default:
+        KRAKEN_LOG(VERBOSE) << stream.str();
+    }
+
+#ifdef ENABLE_DEBUGGER
+    auto client = reinterpret_cast<JSC::JSGlobalObject *>(context.globalImpl())->consoleClient();
+  if (client && client != ((void *)0x1)) {
+    auto client_impl = reinterpret_cast<kraken::Debugger::JSCConsoleClientImpl *>(client);
+    client_impl->sendMessageToConsole(_log_level, stream.str());
+  }
+#endif
+  }
+
 } // namespace foundation

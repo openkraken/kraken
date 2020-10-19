@@ -8,6 +8,8 @@
 
 #include "foundation/js_engine_adaptor.h"
 #include <JavaScriptCore/JavaScript.h>
+#include <deque>
+#include <string>
 
 #ifndef __has_builtin
 #define __has_builtin(x) 0
@@ -26,7 +28,7 @@ namespace kraken::binding::jsc {
 class JSContext {
 public:
   JSContext() = delete;
-  JSContext(int32_t contextId, const JSExceptionHandler& handler, void *owner);
+  JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
   void evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
@@ -34,20 +36,32 @@ public:
 
   bool isValid();
 
+  JSObjectRef global();
+  JSGlobalContextRef context();
+
   int32_t getContextId();
 
   void *getOwner();
 
+  bool handleException(JSValueRef exc);
+  bool handleException(JSValueRef res, JSValueRef exc);
+
+  void emplaceGlobalString(JSStringRef string) {
+    globalStrings.emplace_back(string);
+  }
+
 private:
-  bool hasException(JSValueRef exc);
-  bool hasException(JSValueRef res, JSValueRef exc);
+  void releaseGlobalString();
 
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
   std::atomic<bool> ctxInvalid_;
   JSGlobalContextRef ctx_;
+  std::deque<JSStringRef> globalStrings;
 };
+
+std::string JSStringToStdString(JSStringRef jsString);
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 

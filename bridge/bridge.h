@@ -26,7 +26,7 @@
 #include "bindings/jsa/kraken.h"
 #elif KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context.h"
-
+#include "bindings/jsc/KOM/console.h"
 #endif
 
 #include <atomic>
@@ -37,7 +37,9 @@
 
 namespace kraken {
 
+#ifdef KRAKEN_ENABLE_JSA
 using namespace alibaba::jsa;
+#endif
 
 class JSBridge final {
 private:

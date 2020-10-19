@@ -60,7 +60,10 @@ if (${KRAKEN_ENABLE_JSA})
           jsa_implementation
           -pthread
           )
-  list(APPEND BRIDGE_INCLUDE  ${JSA_INCLUDE_DIRS})
+  list(APPEND BRIDGE_INCLUDE
+          ${JSA_INCLUDE_DIRS}
+          ./jsa/include
+          )
 else()
   if ($ENV{KRAKEN_JS_ENGINE} MATCHES "jsc")
     add_compile_options(-DKRAKEN_JSC_ENGINE=1)
@@ -87,12 +90,13 @@ else()
       bindings/jsc/js_context.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
+      bindings/jsc/KOM/console.h
+      bindings/jsc/KOM/console.cc
     )
   endif()
 endif()
 
 list(APPEND BRIDGE_INCLUDE
-    ./jsa/include
     ./foundation
     ./
     ./include

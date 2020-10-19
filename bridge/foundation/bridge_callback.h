@@ -6,16 +6,23 @@
 #ifndef KRAKENBRIDGE_BRIDGE_CALLBACK_H
 #define KRAKENBRIDGE_BRIDGE_CALLBACK_H
 
+#ifdef KRAKEN_ENABLE_JSA
 #include "jsa.h"
-#include <vector>
+#elif KRAKEN_JSC_ENGINE
+#include "bindings/jsc/js_context.h"
+#endif
+
+#include "js_engine_adaptor.h"
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
-namespace kraken {
-namespace foundation {
+namespace kraken::foundation {
 
+#ifdef KRAKEN_ENABLE_JSA
 using namespace alibaba::jsa;
+#endif
 
 /// An global standalone BridgeCallback register and collector used to register an callback which will call back from
 /// outside of bridge.
@@ -29,18 +36,31 @@ public:
   }
 
   struct Context {
-    Context(JSContext &context, std::shared_ptr<Value> callback) : _context(context), _callback(std::move(callback)){};
-    JSContext &_context;
-    std::shared_ptr<Value> _callback;
+    Context(KRAKEN_JS_CONTEXT &context, std::shared_ptr<KRAKEN_JS_VALUE> callback)
+      : _context(context), _callback(std::move(callback)) {
+#ifndef KRAKEN_ENABLE_JSA
+#ifdef KRAKEN_JSC_ENGINE
+      JSValueProtect(_context.context(), *_callback);
+#endif
+#endif
+    };
+    ~Context() {
+#ifndef KRAKEN_ENABLE_JSA
+#ifdef KRAKEN_JSC_ENGINE
+      JSValueUnprotect(_context.context(), *_callback);
+#endif
+#endif
+    }
+    KRAKEN_JS_CONTEXT &_context;
+    std::shared_ptr<KRAKEN_JS_VALUE> _callback;
   };
 
   // An wrapper to register an callback outside of bridge and wait for callback to bridge.
   template <typename T>
-  T registerCallback(std::unique_ptr<Context> &&context,
-                     std::function<T(BridgeCallback::Context *, int32_t)> fn) {
+  T registerCallback(std::unique_ptr<Context> &&context, std::function<T(BridgeCallback::Context *, int32_t)> fn) {
     Context *p = context.get();
     assert(p != nullptr && "Callback context can not be nullptr");
-    JSContext &jsContext = context->_context;
+    KRAKEN_JS_CONTEXT &jsContext = context->_context;
     int32_t contextId = context->_context.getContextId();
     contextList.emplace_back(std::move(context));
     callbackCount.fetch_add(1);
@@ -52,7 +72,6 @@ private:
   std::atomic<int> callbackCount{0};
 };
 
-} // namespace foundation
-} // namespace kraken
+} // namespace kraken::foundation
 
 #endif // KRAKENBRIDGE_BRIDGE_CALLBACK_H

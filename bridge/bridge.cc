@@ -8,7 +8,6 @@
 #include "polyfill.h"
 
 #include "dart_methods.h"
-#include "jsa.h"
 #include <atomic>
 #include <cstdlib>
 #include <memory>
