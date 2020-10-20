@@ -39,16 +39,12 @@ public:
     Context(KRAKEN_JS_CONTEXT &context, std::shared_ptr<KRAKEN_JS_VALUE> callback)
       : _context(context), _callback(std::move(callback)) {
 #ifndef KRAKEN_ENABLE_JSA
-#ifdef KRAKEN_JSC_ENGINE
       JSValueProtect(_context.context(), *_callback);
-#endif
 #endif
     };
     ~Context() {
 #ifndef KRAKEN_ENABLE_JSA
-#ifdef KRAKEN_JSC_ENGINE
       JSValueUnprotect(_context.context(), *_callback);
-#endif
 #endif
     }
     KRAKEN_JS_CONTEXT &_context;

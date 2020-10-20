@@ -34,11 +34,7 @@ const getPolyFillSource = (source, outputName) => `/*
 static std::string jsCode = std::string(R"(${source})");
 
 void initKraken${outputName}(kraken::JSBridge *bridge) {
-  try {
-    bridge->evaluateScript(jsCode.c_str(), "internal://", 0);
-  } catch (alibaba::jsa::JSError &error) {
-    bridge->reportError(error.what());
-  }
+  bridge->evaluateScript(jsCode.c_str(), "internal://", 0);
 }
 `;
 

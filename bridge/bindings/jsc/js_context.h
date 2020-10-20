@@ -43,8 +43,7 @@ public:
 
   void *getOwner();
 
-  bool handleException(JSValueRef exc);
-  bool handleException(JSValueRef res, JSValueRef exc);
+  void handleException(JSValueRef exc);
 
   void emplaceGlobalString(JSStringRef string) {
     globalStrings.emplace_back(string);
@@ -56,7 +55,7 @@ private:
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
-  std::atomic<bool> ctxInvalid_;
+  std::atomic<bool> ctxInvalid_ {false};
   JSGlobalContextRef ctx_;
   std::deque<JSStringRef> globalStrings;
 };

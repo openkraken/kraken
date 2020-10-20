@@ -4,8 +4,8 @@
  */
 
 #include "js_context.h"
+#include "bindings/jsc/macros.h"
 #include <memory>
-
 
 namespace kraken::binding::jsc {
 
@@ -34,14 +34,14 @@ void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
   }
 
   JSValueRef exc = nullptr; // exception
-  JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
+  JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
 
   JSStringRelease(sourceRef);
   if (sourceURLRef) {
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(res, exc);
+  handleException(exc);
 }
 
 void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
@@ -52,18 +52,18 @@ void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int 
   }
 
   JSValueRef exc = nullptr; // exception
-  JSValueRef res = JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
+  JSEvaluateScript(ctx_, sourceRef, nullptr /*null means global*/, sourceURLRef, startLine, &exc);
 
   JSStringRelease(sourceRef);
   if (sourceURLRef) {
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(res, exc);
+  handleException(exc);
 }
 
 bool JSContext::isValid() {
-  return ctxInvalid_;
+  return !ctxInvalid_;
 }
 
 int32_t JSContext::getContextId() {
@@ -74,25 +74,11 @@ void *JSContext::getOwner() {
   return owner;
 }
 
-bool JSContext::handleException(JSValueRef exc) {
+void JSContext::handleException(JSValueRef exc) {
   if (JSC_UNLIKELY(exc)) {
-    // TODO JSC ErrorHandler;
-    assert(false);
-    //    JSObjectRef errorObject = JSValueToObject(ctx_, exc, nullptr);
-    //    _handler(this->getContextId(), error.what());
-    return true;
+    HANDLE_JSC_EXCEPTION(ctx_, exc, _handler);
+    return;
   }
-  return false;
-}
-
-bool JSContext::handleException(JSValueRef res, JSValueRef exc) {
-  if (JSC_UNLIKELY(!res)) {
-    assert(false);
-    //    jsa::JSError error = jsa::JSError(*this, createValue(exc));
-    //    _handler(this->getContextId(), error.what());
-    return true;
-  }
-  return false;
 }
 
 JSObjectRef JSContext::global() {

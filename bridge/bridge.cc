@@ -119,14 +119,10 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeEventListener VERBOSE]: message " << args;
   }
-  try {
-    if (UI_EVENT == type) {
-      this->handleUIListener(args);
-    } else if (MODULE_EVENT == type) {
-      this->handleModuleListener(args);
-    }
-  } catch (JSError &error) {
-    handler_(context->getContextId(), error.what());
+  if (UI_EVENT == type) {
+    this->handleUIListener(args);
+  } else if (MODULE_EVENT == type) {
+    this->handleModuleListener(args);
   }
 }
 
