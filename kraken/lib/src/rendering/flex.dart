@@ -991,10 +991,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
 
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
-      // No need to recalculate constraints if already exists
-      if (child.constraints != null) {
-        childConstraints = child.constraints;
-      }
       child.layout(childConstraints, parentUsesSize: true);
 
       double childMainAxisExtent = _getMainAxisExtent(child);
