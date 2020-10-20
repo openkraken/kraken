@@ -116,4 +116,52 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return utf_string;
 }
 
+HostObject::HostObject(std::unique_ptr<JSContext> &context,
+                       std::map<std::string, JSObjectCallAsFunctionCallback> &properties)
+  : context(context), properties(std::move(properties)) {}
+
+JSValueRef HostObject::getProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                   JSValueRef *exception) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  auto &context = hostObject->context;
+  hostObject->get(context, propertyName, exception);
+  context->handleException(*exception);
+}
+
+bool HostObject::setProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
+                             JSValueRef *exception) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  auto &context = hostObject->context;
+  hostObject->set(context, propertyName, value, exception);
+  context->handleException(*exception);
+}
+
+bool HostObject::hasProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  std::string name = JSStringToStdString(propertyName);
+  return hostObject->properties.contains(name);
+}
+
+void HostObject::finalize(JSObjectRef obj) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
+  delete hostObject;
+}
+
+void HostObject::getPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef accumulator) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  for (auto &properties : hostObject->properties) {
+    JSStringRef key = JSStringCreateWithUTF8CString(properties.first.c_str());
+    JSPropertyNameAccumulatorAddName(accumulator, key);
+    JSStringRelease(key);
+  }
+}
+
+HostObject::~HostObject() {}
+
+JSValueRef HostObject::get(std::unique_ptr<JSContext> &context, JSStringRef name, JSValueRef *exception) {
+  return nullptr;
+}
+
+void HostObject::set(std::unique_ptr<JSContext> &context, JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+
 } // namespace kraken::binding::jsc

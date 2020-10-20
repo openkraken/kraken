@@ -27,6 +27,7 @@
 #elif KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/KOM/console.h"
+#include "bindings/jsc/DOM/document.h"
 #endif
 
 #include <atomic>

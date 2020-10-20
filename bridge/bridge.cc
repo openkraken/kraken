@@ -44,6 +44,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
+#elif KRAKEN_JSC_ENGINE
+  kraken::binding::jsc::bindConsole(context);
+  kraken::binding::jsc::bindDocument(context);
 #endif
 
   initKrakenPolyFill(this);
