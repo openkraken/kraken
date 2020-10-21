@@ -8,11 +8,12 @@
   JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);          \
   context->handleException(exc);
 
-#define JSC_BINDING_OBJECT(context, nameStr, obj, privateData)                                                         \
-  JSObjectRef document = JSObjectMake(context->context(), documentClass, privateData);                                 \
+#define JSC_BINDING_OBJECT(context, nameStr, hostObject)                                                               \
+  JSClassRef objectClass = hostObject->object;                                                                         \
+  JSObjectRef object = JSObjectMake(context->context(), objectClass, hostObject);                                      \
   JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                           \
   context->emplaceGlobalString(name);                                                                                  \
-  JSObjectSetProperty(context->context(), context->global(), name, document, kJSPropertyAttributeReadOnly, nullptr);
+  JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);
 
 #define HANDLE_JSC_EXCEPTION(ctx_, exc, handler)                                                                       \
   JSObjectRef error = JSValueToObject(ctx_, exc, nullptr);                                                             \
@@ -29,3 +30,18 @@
   JSStringRelease(stackKey);                                                                                           \
   JSStringRelease(messageStr);                                                                                         \
   JSStringRelease(stackStr);
+
+#define JSC_CREATE_CLASS_DEFINITION(definition, name, classObject)                                                     \
+  definition.version = 0;                                                                                              \
+  definition.className = name;                                                                                         \
+  definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                       \
+  definition.finalize = classObject::finalize;                                                                         \
+  definition.getProperty = classObject::proxyGetProperty;                                                              \
+  definition.setProperty = classObject::proxySetProperty;                                                              \
+  definition.getPropertyNames = classObject::proxyGetPropertyNames;
+
+#define JSC_THROW_ERROR(ctx, msg, exception)                                                                           \
+  JSStringRef errmsg = JSStringCreateWithUTF8CString(msg);                                                             \
+  const JSValueRef args[] = {JSValueMakeString(ctx, errmsg), nullptr};                                                 \
+  *exception = JSObjectMakeError(ctx, 1, args, nullptr);                                                               \
+  JSStringRelease(errmsg);\

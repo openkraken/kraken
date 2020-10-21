@@ -7,21 +7,20 @@
 #define KRAKENBRIDGE_DOCUMENT_H
 
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/macros.h"
 
 namespace kraken::binding::jsc {
 
 class JSDocument : public HostObject {
 public:
-  JSDocument(std::unique_ptr<JSContext> &context, std::map<std::string, JSObjectCallAsFunctionCallback> &properties)
-    : HostObject(context, properties) {}
+  JSDocument(std::unique_ptr<JSContext> &context);
 
-  JSValueRef get(std::unique_ptr<JSContext> &context, JSStringRef name, JSValueRef *exception) override {
-    return nullptr;
-  }
+  static JSValueRef createElement(JSContextRef ctx, JSObjectRef function,
+                                  JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
 
-  void set(std::unique_ptr<JSContext> &context, JSStringRef name, JSValueRef value, JSValueRef *exception) override {
-
-  }
+  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
 };
 
 void bindDocument(std::unique_ptr<JSContext> &context);

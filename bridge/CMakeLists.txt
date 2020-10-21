@@ -90,6 +90,12 @@ else()
       bindings/jsc/js_context.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
+      bindings/jsc/DOM/element.cc
+      bindings/jsc/DOM/element.h
+      bindings/jsc/DOM/eventTarget.cc
+      bindings/jsc/DOM/eventTarget.h
+      bindings/jsc/DOM/node.cc
+      bindings/jsc/DOM/node.h
       bindings/jsc/KOM/console.h
       bindings/jsc/KOM/console.cc
     )
