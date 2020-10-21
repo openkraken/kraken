@@ -20,13 +20,6 @@ class JSBlob;
 
 class BlobBuilder {
 public:
-  //  void append(JSContext &context, Value &);
-  //
-  //  void append(JSContext &context, ArrayBuffer &&);
-  //
-  //  void append(JSContext &context, ArrayBufferView &&);
-  //
-  //  void append(JSContext &context, JSBlob &&);
   void append(JSContext &context, const JSValueRef value, JSValueRef *exception);
   void append(JSContext &context, JSBlob *blob);
   void append(JSContext &context, JSStringRef text);
@@ -44,18 +37,18 @@ public:
   static JSValueRef constructor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                 const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                           const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+  static JSValueRef text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                          const JSValueRef arguments[], JSValueRef *exception);
-
+  static JSValueRef arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                const JSValueRef arguments[], JSValueRef *exception);
 
   JSBlob() = delete;
-  JSBlob(JSContext *context): _size(0), HostObject(context, JSBlobName) {};
+  JSBlob(JSContext *context) : _size(0), HostObject(context, JSBlobName){};
   JSBlob(JSContext *context, std::vector<uint8_t> &&data)
-    : _size(data.size()), _data(std::move(data)), HostObject(context, JSBlobName) {};
-  JSBlob(JSContext *context, std::vector<uint8_t> &&data, std::string mime): mimeType(std::move(mime)), _size(data.size()), HostObject(context, JSBlobName) {};
+    : _size(data.size()), _data(std::move(data)), HostObject(context, JSBlobName){};
+  JSBlob(JSContext *context, std::vector<uint8_t> &&data, std::string mime)
+    : mimeType(std::move(mime)), _size(data.size()), HostObject(context, JSBlobName){};
 
   /// get an pointer of bytes data from JSBlob
   uint8_t *bytes();
@@ -64,10 +57,6 @@ public:
   int32_t size();
 
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-
-  //  static Value arrayBuffer(JSContext &context, const Value &thisVal, const Value *args, size_t count);
-
-  //  std::vector<PropNameID> getPropertyNames(JSContext &context) override;
 
 private:
   friend BlobBuilder;
