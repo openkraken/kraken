@@ -46,6 +46,8 @@ public:
 
   bool handleException(JSValueRef exc);
 
+  void reportError(const char* errmsg);
+
   void emplaceGlobalString(JSStringRef string) {
     globalStrings.emplace_back(string);
   }

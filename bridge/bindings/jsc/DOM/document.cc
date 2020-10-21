@@ -12,7 +12,7 @@ namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context);
-  JSC_BINDING_OBJECT(context, "document", document);
+  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -27,6 +27,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
     JSC_THROW_ERROR(ctx, "Failed to createElement: tagName should be a string.", exception);
     return nullptr;
   }
+
   JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, tagNameValue, exception);
 
   NativeString nativeString{};
@@ -35,6 +36,9 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   auto document = static_cast<JSDocument*>(JSObjectGetPrivate(thisObject));
   auto element = new JSElement(document->context, nativeString.clone());
+
+  JSStringRelease(tagNameStrRef);
+
   return JSObjectMake(element->context->context(), element->object, element);
 }
 

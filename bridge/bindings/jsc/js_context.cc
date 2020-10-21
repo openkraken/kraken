@@ -19,6 +19,11 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
   JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
+
+  JSObjectSetPrivate(global, this);
+
+  JSStringRelease(windowName);
+  JSStringRelease(globalThis);
 }
 
 JSContext::~JSContext() {
@@ -105,6 +110,10 @@ void JSContext::releaseGlobalString() {
   globalStrings.clear();
 }
 
+void JSContext::reportError(const char *errmsg) {
+  _handler(contextId, errmsg);
+}
+
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner) {
   return std::make_unique<JSContext>(contextId, handler, owner);
 }
@@ -115,6 +124,7 @@ std::string JSStringToStdString(JSStringRef jsString) {
   size_t bytesWritten = JSStringGetUTF8CString(jsString, utf8Buffer, maxBufferSize);
   std::string utf_string = std::string(utf8Buffer, bytesWritten - 1);
   delete[] utf8Buffer;
+  JSStringRelease(jsString);
   return utf_string;
 }
 

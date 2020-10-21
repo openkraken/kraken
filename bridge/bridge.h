@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <vector>
+#include <deque>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
@@ -43,8 +44,13 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-  std::vector<std::shared_ptr<KRAKEN_JS_VALUE>> krakenUIListenerList;
-  std::vector<std::shared_ptr<KRAKEN_JS_VALUE>> krakenModuleListenerList;
+#ifdef KRAKEN_ENABLE_JSC
+  std::vector<std::shared_ptr<Value>> krakenUIListenerList;
+  std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
+#elif KRAKEN_JSC_ENGINE
+  std::deque<JSObjectRef> krakenUIListenerList;
+  std::deque<JSObjectRef> krakenModuleListenerList;
+#endif
 
   int32_t contextId;
   foundation::BridgeCallback bridgeCallback;
