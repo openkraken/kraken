@@ -26,8 +26,8 @@ struct DisposeCallbackData {
 class JSEventTarget : public HostObject {
 public:
   JSEventTarget() = delete;
-  explicit JSEventTarget(std::unique_ptr<JSContext> &context, const char* name);
-  explicit JSEventTarget(std::unique_ptr<JSContext> &context);
+  explicit JSEventTarget(JSContext *context, const char* name);
+  explicit JSEventTarget(JSContext *context);
   ~JSEventTarget() override;
 
   NativeEventTarget *getEventTarget() {

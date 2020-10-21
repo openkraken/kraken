@@ -10,10 +10,10 @@ namespace kraken::binding::jsc {
 
 static std::atomic<int64_t> globalEventTargetId{0};
 
-JSEventTarget::JSEventTarget(std::unique_ptr<JSContext> &context, const char *name) : HostObject(context, name) {
+JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostObject(context, name) {
   eventTargetId = globalEventTargetId++;
 }
-JSEventTarget::JSEventTarget(std::unique_ptr<JSContext> &context) : HostObject(context, "EventTarget") {
+JSEventTarget::JSEventTarget(JSContext *context) : HostObject(context, "EventTarget") {
   eventTargetId = globalEventTargetId++;
 }
 

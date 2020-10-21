@@ -10,8 +10,7 @@
 namespace kraken::binding::jsc {
 using namespace foundation;
 
-JSElement::JSElement(std::unique_ptr<JSContext> &context, NativeString *tagName)
-  : JSNode(context, "Element", NodeType::ELEMENT_NODE) {
+JSElement::JSElement(JSContext *context, NativeString *tagName) : JSNode(context, "Element", NodeType::ELEMENT_NODE) {
   const int32_t argsLength = 1;
   NativeString **args = new NativeString *[argsLength];
   args[0] = tagName;
@@ -19,4 +18,4 @@ JSElement::JSElement(std::unique_ptr<JSContext> &context, NativeString *tagName)
     ->registerCommand(getEventTargetId(), UICommandType::createElement, args, argsLength);
 }
 
-} // namespace kraken
+} // namespace kraken::binding::jsc

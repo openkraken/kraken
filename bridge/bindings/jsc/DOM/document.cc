@@ -11,7 +11,7 @@
 namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
-  auto document = new JSDocument(context);
+  auto document = new JSDocument(context.get());
   JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
 }
 
@@ -34,7 +34,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   nativeString.string = JSStringGetCharactersPtr(tagNameStrRef);
   nativeString.length = JSStringGetLength(tagNameStrRef);
 
-  auto document = static_cast<JSDocument*>(JSObjectGetPrivate(thisObject));
+  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(thisObject));
   auto element = new JSElement(document->context, nativeString.clone());
 
   JSStringRelease(tagNameStrRef);
@@ -42,7 +42,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   return JSObjectMake(element->context->context(), element->object, element);
 }
 
-JSDocument::JSDocument(std::unique_ptr<JSContext> &context) : HostObject(context, "Document") {}
+JSDocument::JSDocument(JSContext *context) : HostObject(context, "Document") {}
 
 JSValueRef JSDocument::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);

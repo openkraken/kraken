@@ -128,7 +128,7 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return utf_string;
 }
 
-HostObject::HostObject(std::unique_ptr<JSContext> &context, const char *name) : context(context) {
+HostObject::HostObject(JSContext *context, const char *name) : context(context), name(name) {
   JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name, HostObject);
   object = JSClassCreate(&hostObjectDefinition);
@@ -157,6 +157,23 @@ void HostObject::finalize(JSObjectRef obj) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
   JSClassRelease(hostObject->object);
   delete hostObject;
+}
+
+bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef *exception) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(constructor));
+
+  if (!JSValueIsObject(ctx, possibleInstance)) {
+    return false;
+  }
+
+  JSObjectRef instanceObject = JSValueToObject(ctx, possibleInstance, exception);
+  auto instanceHostObject = static_cast<HostObject *>(JSObjectGetPrivate(instanceObject));
+
+  if (instanceHostObject == nullptr) {
+    return false;
+  }
+
+  return instanceHostObject->name == hostObject->name;
 }
 
 void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef accumulator) {

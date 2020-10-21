@@ -75,11 +75,13 @@ public:
                                JSValueRef *exception);
   static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
   static void finalize(JSObjectRef obj);
+  static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception);
 
   HostObject() = delete;
-  HostObject(std::unique_ptr<JSContext> &context, const char *name);
+  HostObject(JSContext *context, const char *name);
+  const char* name;
 
-  std::unique_ptr<JSContext> &context;
+  JSContext *context;
   JSClassRef object;
   // The C++ object's dtor will be called when the GC finalizes this
   // object.  (This may be as late as when the JSContext is shut down.)

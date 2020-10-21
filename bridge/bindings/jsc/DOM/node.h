@@ -3,12 +3,11 @@
  * Author: Kraken Team.
  */
 
-
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
-#include "include/kraken_bridge.h"
 #include "eventTarget.h"
+#include "include/kraken_bridge.h"
 
 namespace kraken::binding::jsc {
 
@@ -24,13 +23,13 @@ enum NodeType {
 class JSNode : public JSEventTarget {
 public:
   JSNode() = delete;
-  explicit JSNode(std::unique_ptr<JSContext> &context, NodeType nodeType);
-  explicit JSNode(std::unique_ptr<JSContext> &context, const char *name, NodeType type);
+  explicit JSNode(JSContext *context, NodeType nodeType);
+  explicit JSNode(JSContext *context, const char *name, NodeType type);
 
 private:
   NodeType nodeType;
 };
 
-}
+} // namespace kraken::binding::jsc
 
 #endif // KRAKENBRIDGE_NODE_H

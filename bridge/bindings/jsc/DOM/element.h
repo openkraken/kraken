@@ -14,7 +14,7 @@ namespace kraken::binding::jsc {
 class JSElement : public JSNode {
 public:
   JSElement() = delete;
-  explicit JSElement(std::unique_ptr<JSContext> &context, NativeString *tagName);
+  explicit JSElement(JSContext *context, NativeString *tagName);
 
 private:
 };

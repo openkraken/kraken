@@ -63,6 +63,7 @@
     definition.getProperty = classObject::proxyGetProperty;                                                            \
     definition.setProperty = classObject::proxySetProperty;                                                            \
     definition.getPropertyNames = classObject::proxyGetPropertyNames;                                                  \
+    definition.hasInstance = classObject::hasInstance;                                                                 \
   }
 
 #define JSC_THROW_ERROR(ctx, msg, exception)                                                                           \
