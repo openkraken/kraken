@@ -88,6 +88,8 @@ else()
     list(APPEND BRIDGE_SOURCE
       bindings/jsc/js_context.h
       bindings/jsc/js_context.cc
+      bindings/jsc/ui_manager.h
+      bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
       bindings/jsc/DOM/document.cc
       bindings/jsc/DOM/element.cc

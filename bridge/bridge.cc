@@ -12,6 +12,26 @@
 #include <cstdlib>
 #include <memory>
 
+#ifdef KRAKEN_ENABLE_JSA
+#include "bindings/jsa/ui_manager.h"
+#include "bindings/jsa/DOM/document.h"
+#include "bindings/jsa/DOM/element.h"
+#include "bindings/jsa/DOM/eventTarget.h"
+#include "bindings/jsa/KOM/blob.h"
+#include "bindings/jsa/KOM/console.h"
+#include "bindings/jsa/KOM/location.h"
+#include "bindings/jsa/KOM/screen.h"
+#include "bindings/jsa/KOM/timer.h"
+#include "bindings/jsa/KOM/toBlob.h"
+#include "bindings/jsa/KOM/window.h"
+#include "bindings/jsa/kraken.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bindings/jsc/js_context.h"
+#include "bindings/jsc/ui_manager.h"
+#include "bindings/jsc/KOM/console.h"
+#include "bindings/jsc/DOM/document.h"
+#endif
+
 namespace kraken {
 /**
  * JSRuntime
@@ -45,8 +65,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
 #elif KRAKEN_JSC_ENGINE
-  kraken::binding::jsc::bindConsole(context);
-  kraken::binding::jsc::bindDocument(context);
+    kraken::binding::jsc::bindUIManager(context);
+    kraken::binding::jsc::bindConsole(context);
+    kraken::binding::jsc::bindDocument(context);
 #endif
 
   initKrakenPolyFill(this);

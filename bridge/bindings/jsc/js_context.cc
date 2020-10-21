@@ -30,7 +30,7 @@ JSContext::~JSContext() {
 void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
   JSStringRef sourceURLRef = nullptr;
-  if (sourceURL != nullptr) {7
+  if (sourceURL != nullptr) {
     sourceURLRef = JSStringCreateWithUTF8CString(sourceURL);
   }
 
@@ -145,6 +145,7 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
 
 void HostObject::finalize(JSObjectRef obj) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
+  JSClassRelease(hostObject->object);
   delete hostObject;
 }
 
