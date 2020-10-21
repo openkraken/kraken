@@ -120,10 +120,9 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 
 std::string JSStringToStdString(JSStringRef jsString) {
   size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(jsString);
-  char *utf8Buffer = new char[maxBufferSize];
+  char utf8Buffer[maxBufferSize];
   size_t bytesWritten = JSStringGetUTF8CString(jsString, utf8Buffer, maxBufferSize);
   std::string utf_string = std::string(utf8Buffer, bytesWritten - 1);
-  delete[] utf8Buffer;
   JSStringRelease(jsString);
   return utf_string;
 }

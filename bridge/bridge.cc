@@ -28,8 +28,10 @@
 #elif KRAKEN_JSC_ENGINE
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/ui_manager.h"
-#include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/DOM/document.h"
+#include "bindings/jsc/KOM/console.h"
+#include "bindings/jsc/KOM/window.h"
+#include "bindings/jsc/KOM/location.h"
 #endif
 
 namespace kraken {
@@ -68,6 +70,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     kraken::binding::jsc::bindUIManager(context);
     kraken::binding::jsc::bindConsole(context);
     kraken::binding::jsc::bindDocument(context);
+    kraken::binding::jsc::bindWindow(context);
 #endif
 
   initKrakenPolyFill(this);
@@ -152,13 +155,21 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!context->isValid()) return;
-//  binding::jsa::updateLocation(url);
+#ifdef KRAKEN_ENABLE_JSA
+  binding::jsa::updateLocation(url);
+#elif KRAKEN_JSC_ENGINE
+  binding::jsc::updateLocation(url);
+#endif
   context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
 void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
   if (!context->isValid()) return;
-//  binding::jsa::updateLocation(url);
+#ifdef KRAKEN_ENABLE_JSA
+  binding::jsa::updateLocation(url);
+#elif KRAKEN_JSC_ENGINE
+  binding::jsc::updateLocation(url);
+#endif
   context->evaluateJavaScript(script, url, startLine);
 }
 

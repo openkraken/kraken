@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#define JSBlobName "Blob"
+
 namespace kraken::binding::jsc {
 
 void bindBlob(std::unique_ptr<JSContext> &context);
@@ -35,8 +37,6 @@ private:
   friend JSBlob;
   std::vector<uint8_t> _data;
 };
-
-#define JSBlobName "Blob"
 
 class JSBlob : public HostObject {
 public:

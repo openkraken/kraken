@@ -92,6 +92,10 @@ else()
       bindings/jsc/kraken.cc
       bindings/jsc/KOM/blob.cc
       bindings/jsc/KOM/blob.h
+      bindings/jsc/KOM/location.cc
+      bindings/jsc/KOM/location.h
+      bindings/jsc/KOM/window.cc
+      bindings/jsc/KOM/window.h
       bindings/jsc/ui_manager.h
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
