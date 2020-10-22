@@ -181,6 +181,16 @@ void JSBridge::evaluateScript(const char *script, const char *url, int startLine
 
 JSBridge::~JSBridge() {
   if (!context->isValid()) return;
+
+#if KRAKEN_JSC_ENGINE
+  for (auto &callback : krakenUIListenerList) {
+    JSValueUnprotect(context->context(), callback);
+  }
+  for (auto &callback : krakenModuleListenerList) {
+    JSValueUnprotect(context->context(), callback);
+  }
+#endif
+
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
 }

@@ -32,7 +32,7 @@ JSContext::~JSContext() {
   JSGlobalContextRelease(ctx_);
 }
 
-void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
+bool JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithCharacters(code, codeLength);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -47,10 +47,10 @@ void JSContext::evaluateJavaScript(const uint16_t *code, size_t codeLength, cons
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(exc);
+  return handleException(exc);
 }
 
-void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
+bool JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int startLine) {
   JSStringRef sourceRef = JSStringCreateWithUTF8CString(code);
   JSStringRef sourceURLRef = nullptr;
   if (sourceURL != nullptr) {
@@ -65,7 +65,7 @@ void JSContext::evaluateJavaScript(const char *code, const char *sourceURL, int 
     JSStringRelease(sourceURLRef);
   }
 
-  handleException(exc);
+  return handleException(exc);
 }
 
 bool JSContext::isValid() {

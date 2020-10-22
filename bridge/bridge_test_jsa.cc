@@ -3,7 +3,9 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_test.h"
+#ifdef KRAKEN_ENABLE_JSA
+
+#include "bridge_test_jsa.h"
 #include "bindings/jsa/KOM/blob.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
@@ -209,3 +211,5 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
 }
 
 } // namespace kraken
+
+#endif

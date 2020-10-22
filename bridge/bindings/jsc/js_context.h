@@ -32,8 +32,8 @@ public:
   JSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
   ~JSContext();
 
-  void evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
-  void evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const uint16_t *code, size_t codeLength, const char *sourceURL, int startLine);
+  bool evaluateJavaScript(const char *code, const char *sourceURL, int startLine);
 
   bool isValid();
 
