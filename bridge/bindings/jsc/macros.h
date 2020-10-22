@@ -2,9 +2,14 @@
 
 #define JSC_GLOBAL_BINDING_FUNCTION(context, nameStr, func)                                                            \
   {                                                                                                                    \
+    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;                                                    \
+    functionDefinition.className = nameStr;                                                                            \
+    functionDefinition.callAsFunction = func;                                                                          \
+    functionDefinition.version = 0;                                                                                    \
+    JSClassRef functionClass = JSClassCreate(&functionDefinition);                                                     \
+    JSObjectRef function = JSObjectMake(context->context(), functionClass, context.get());                             \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     context->emplaceGlobalString(name);                                                                                \
-    JSObjectRef function = JSObjectMakeFunctionWithCallback(context->context(), name, func);                           \
     JSValueRef exc = nullptr;                                                                                          \
     JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);        \
     context->handleException(exc);                                                                                     \

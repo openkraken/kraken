@@ -60,8 +60,8 @@ public:
   void evaluateScript(const NativeString *script, const char *url, int startLine);
   void evaluateScript(const char *script, const char *url, int startLine);
 
-  KRAKEN_JS_CONTEXT *getContext() const {
-    return context.get();
+  const std::unique_ptr<KRAKEN_JS_CONTEXT> &getContext() const {
+    return context;
   }
 
   void invokeEventListener(int32_t type, const NativeString *args);

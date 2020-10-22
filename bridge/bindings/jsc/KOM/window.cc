@@ -38,6 +38,6 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
 
 void bindWindow(std::unique_ptr<JSContext> &context) {
   auto window = new JSWindow(context.get());
-  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "window", window);
+  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "__kraken_window__", window);
 }
 } // namespace kraken::binding::jsc

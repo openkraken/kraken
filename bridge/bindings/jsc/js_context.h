@@ -63,10 +63,6 @@ private:
   std::deque<JSStringRef> globalStrings;
 };
 
-typedef JSValueRef (*KrakenJSObjectCallAsFunctionCallback)(std::unique_ptr<JSContext> context, JSObjectRef function,
-                                                           JSObjectRef thisObject, size_t argumentCount,
-                                                           const JSValueRef arguments[], JSValueRef *exception);
-
 class HostObject {
 public:
   static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,

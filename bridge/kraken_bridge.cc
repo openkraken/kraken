@@ -125,7 +125,7 @@ bool checkContext(int32_t contextId) {
 
 bool checkContext(int32_t contextId, void *context) {
   auto bridge = static_cast<kraken::JSBridge *>(getJSContext(contextId));
-  return bridge->getContext() == context;
+  return bridge->getContext().get() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString *code, const char *bundleFilename, int startLine) {

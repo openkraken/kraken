@@ -92,7 +92,7 @@ int32_t JSBlob::size() {
 JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
   BlobBuilder builder;
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   if (argumentCount == 0) {
     auto blob = new JSBlob(context);
     return JSObjectMake(ctx, blob->object, blob);
@@ -135,7 +135,7 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
   const JSValueRef endValueRef = arguments[1];
   const JSValueRef contentTypeValueRef = arguments[2];
 
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(thisObject));
+  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
   size_t start = 0;
   size_t end = blob->_data.size();
   std::string mimeType = blob->mimeType;
@@ -169,7 +169,7 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
 JSValueRef JSBlob::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                         const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(thisObject));
+  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
   std::string newString(reinterpret_cast<const char *>(blob->_data.data()), blob->_data.size());
   JSStringRef newStringRef = JSStringCreateWithUTF8CString(newString.c_str());
   return JSValueMakeString(ctx, newStringRef);
@@ -177,7 +177,7 @@ JSValueRef JSBlob::text(JSContextRef ctx, JSObjectRef function, JSObjectRef this
 
 JSValueRef JSBlob::arrayBuffer(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                const JSValueRef *arguments, JSValueRef *exception) {
-  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(thisObject));
+  auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(function));
   auto buffer = JSObjectMakeArrayBufferWithBytesNoCopy(
     ctx, blob->bytes(), blob->size(), [](void *bytes, void *deallocatorContext) {}, nullptr, exception);
   return buffer;
@@ -187,17 +187,23 @@ JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "slice") {
-    return JSObjectMakeFunctionWithCallback(context->context(), nameRef, slice);
+    JSObjectRef sliceFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, slice);
+    JSObjectSetPrivate(sliceFunction, this);
+    return sliceFunction;
   } else if (name == "text") {
-    return JSObjectMakeFunctionWithCallback(context->context(), nameRef, text);
+    JSObjectRef textFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, text);
+    JSObjectSetPrivate(textFunction, this);
+    return textFunction;
   } else if (name == "arrayBuffer") {
-    return JSObjectMakeFunctionWithCallback(context->context(), nameRef, arrayBuffer);
+    JSObjectRef arrayBufferFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, arrayBuffer);
+    JSObjectSetPrivate(arrayBufferFunction, this);
+    return arrayBufferFunction;
   }
 
   return nullptr;
 }
 
-void bindBlob(JSContext *context) {
+void bindBlob(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_blob__", JSBlob::constructor);
 }
 

@@ -25,7 +25,7 @@ JSValueRef executeTest(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
                        const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef &callback = arguments[0];
 
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, callback)) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.", exception);
     return nullptr;
@@ -49,7 +49,7 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
                         const JSValueRef *arguments, JSValueRef *exception) {
   const JSValueRef &callback = arguments[0];
 
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, callback)) {
     JSC_THROW_ERROR(ctx, "Failed to execute '_kraken_refresh_paint__': parameter 1 (callback) is not an function.",
                     exception);
@@ -102,7 +102,7 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   const JSValueRef screenShotValueRef = arguments[1];
   const JSValueRef callbackValueRef = arguments[2];
 
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
   if (!JSValueIsObject(ctx, blobValueRef)) {
     JSC_THROW_ERROR(ctx, "Failed to execute '__kraken_match_screenshot__': parameter 1 (blob) must be an Blob object.",
                     exception);
@@ -198,7 +198,7 @@ JSValueRef simulatePointer(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     return nullptr;
   }
 
-  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef &firstArgsValueRef = arguments[0];
   if (!JSValueIsObject(ctx, firstArgsValueRef)) {
@@ -263,7 +263,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
 
   auto done = [](JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                  const JSValueRef arguments[], JSValueRef *exception) -> JSValueRef {
-    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(thisObject));
+    auto context = static_cast<binding::jsc::JSContext *>(JSObjectGetPrivate(function));
     const JSValueRef &statusValueRef = arguments[0];
     auto callbackContext = static_cast<ExecuteCallbackContext*>(JSObjectGetPrivate(function));
 
@@ -285,6 +285,7 @@ void JSBridgeTest::invokeExecuteTest(ExecuteCallback executeCallback) {
 
   JSObjectRef callback =
     JSObjectMakeFunctionWithCallback(context->context(), JSStringCreateWithUTF8CString("done"), done);
+  JSObjectSetPrivate(callback, context.get());
   const JSValueRef arguments[] = {callback};
 
   JSObjectCallAsFunction(context->context(), executeTestCallbackObject, context->global(), 1, arguments, nullptr);

@@ -35,6 +35,8 @@
 #include "bindings/jsc/KOM/screen.h"
 #include "bindings/jsc/KOM/timer.h"
 #include "bindings/jsc/KOM/toBlob.h"
+#include "bindings/jsc/KOM/blob.h"
+#include "bindings/jsc/kraken.h"
 #endif
 
 namespace kraken {
@@ -70,6 +72,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
 #elif KRAKEN_JSC_ENGINE
+    kraken::binding::jsc::bindKraken(context);
     kraken::binding::jsc::bindUIManager(context);
     kraken::binding::jsc::bindConsole(context);
     kraken::binding::jsc::bindDocument(context);
@@ -77,6 +80,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     kraken::binding::jsc::bindScreen(context);
     kraken::binding::jsc::bindTimer(context);
     kraken::binding::jsc::bindToBlob(context);
+    kraken::binding::jsc::bindBlob(context);
 #endif
 
   initKrakenPolyFill(this);

@@ -82,7 +82,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -139,7 +139,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef &callbackValueRef = arguments[0];
   const JSValueRef &timeoutValueRef = arguments[1];
@@ -196,7 +196,7 @@ JSValueRef clearTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef this
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef timerIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, timerIdValueRef)) {
@@ -223,7 +223,7 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   const JSValueRef requestIdValueRef = arguments[0];
   if (!JSValueIsNumber(ctx, requestIdValueRef)) {
@@ -253,7 +253,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
     return nullptr;
   }
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(thisObject));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   const JSValueRef &callbackValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {

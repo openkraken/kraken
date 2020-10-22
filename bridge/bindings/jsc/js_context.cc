@@ -20,8 +20,6 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
   JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
 
-  JSObjectSetPrivate(global, this);
-
   JSStringRelease(windowName);
   JSStringRelease(globalThis);
 }

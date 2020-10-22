@@ -32,7 +32,7 @@ private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
   /// the pointer of JSContext, overship belongs to JSContext
-  binding::jsc::JSContext *context;
+  const std::unique_ptr<binding::jsc::JSContext> &context;
 };
 
 } // namespace kraken

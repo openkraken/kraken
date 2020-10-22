@@ -18,14 +18,14 @@ void updateLocation(std::string url = "") {
 
 JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                   const JSValueRef arguments[], JSValueRef *exception) {
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto jsLocation = static_cast<JSLocation *>(JSObjectGetPrivate(function));
 
   if (getDartMethod()->reloadApp == nullptr) {
     JSC_THROW_ERROR(ctx, "Failed to execute 'reload': dart method (reloadApp) is not registered.", exception);
     return nullptr;
   }
 
-  getDartMethod()->reloadApp(context->getContextId());
+  getDartMethod()->reloadApp(jsLocation->context->getContextId());
 
   return nullptr;
 };
@@ -33,7 +33,9 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
 JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "reload") {
-    return JSObjectMakeFunctionWithCallback(context->context(), nameRef, reload);
+    JSObjectRef reloadFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, reload);
+    JSObjectSetPrivate(reloadFunction, this);
+    return reloadFunction;
   } else if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);

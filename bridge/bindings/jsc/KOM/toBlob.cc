@@ -21,7 +21,7 @@ JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
   const JSValueRef &devicePixelRatioValueRef = arguments[1];
   const JSValueRef &callbackValueRef = arguments[2];
 
-  auto context = static_cast<JSContext *>(JSObjectGetPrivate(JSContextGetGlobalObject(ctx)));
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
 
   if (!JSValueIsNumber(ctx, idValueRef)) {
     JSC_THROW_ERROR(ctx, "Failed to export blob: missing element's id.", exception);
