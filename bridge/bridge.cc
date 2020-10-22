@@ -32,6 +32,9 @@
 #include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/KOM/window.h"
 #include "bindings/jsc/KOM/location.h"
+#include "bindings/jsc/KOM/screen.h"
+#include "bindings/jsc/KOM/timer.h"
+#include "bindings/jsc/KOM/toBlob.h"
 #endif
 
 namespace kraken {
@@ -71,6 +74,9 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     kraken::binding::jsc::bindConsole(context);
     kraken::binding::jsc::bindDocument(context);
     kraken::binding::jsc::bindWindow(context);
+    kraken::binding::jsc::bindScreen(context);
+    kraken::binding::jsc::bindTimer(context);
+    kraken::binding::jsc::bindToBlob(context);
 #endif
 
   initKrakenPolyFill(this);

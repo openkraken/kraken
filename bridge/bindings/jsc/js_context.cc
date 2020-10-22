@@ -158,7 +158,8 @@ void HostObject::finalize(JSObjectRef obj) {
   delete hostObject;
 }
 
-bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef *exception) {
+bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
+                             JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(constructor));
 
   if (!JSValueIsObject(ctx, possibleInstance)) {
@@ -188,8 +189,6 @@ JSValueRef HostObject::getProperty(JSStringRef name, JSValueRef *exception) {
 
 void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
 
-void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-
-}
+void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 
 } // namespace kraken::binding::jsc

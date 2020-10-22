@@ -96,6 +96,12 @@ else()
       bindings/jsc/KOM/location.h
       bindings/jsc/KOM/window.cc
       bindings/jsc/KOM/window.h
+      bindings/jsc/KOM/screen.cc
+      bindings/jsc/KOM/screen.h
+      bindings/jsc/KOM/timer.cc
+      bindings/jsc/KOM/timer.h
+      bindings/jsc/KOM/toBlob.cc
+      bindings/jsc/KOM/toBlob.h
       bindings/jsc/ui_manager.h
       bindings/jsc/ui_manager.cc
       bindings/jsc/DOM/document.h
