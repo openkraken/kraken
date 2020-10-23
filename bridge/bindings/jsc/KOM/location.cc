@@ -33,9 +33,13 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
 JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "reload") {
-    JSObjectRef reloadFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, reload);
-    JSObjectSetPrivate(reloadFunction, this);
-    return reloadFunction;
+    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
+    functionDefinition.className = "reload";
+    functionDefinition.callAsFunction = reload;
+    functionDefinition.version = 0;
+    JSClassRef functionClass = JSClassCreate(&functionDefinition);
+    JSObjectRef function = JSObjectMake(context->context(), functionClass, this);
+    return function;
   } else if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);

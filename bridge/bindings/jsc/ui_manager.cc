@@ -5,7 +5,7 @@
 
 #include "ui_manager.h"
 #include "bindings/jsc/macros.h"
-#include "bridge.h"
+#include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "foundation/logging.h"
@@ -116,8 +116,11 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
 
   if (!_context.isValid()) return;
 
+  JSValueRef exception = nullptr;
+
   if (obj->_callback == nullptr) {
-    _context.reportError("Failed to execute '__kraken_invoke_module__': callback is null.");
+    JSC_THROW_ERROR(_context.context(), "Failed to execute '__kraken_invoke_module__': callback is null.", &exception);
+    _context.handleException(exception);
     return;
   }
 

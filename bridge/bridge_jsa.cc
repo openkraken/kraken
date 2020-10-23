@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "bridge.h"
+#include "bridge_jsc.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
 
@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <memory>
 
-#ifdef KRAKEN_ENABLE_JSA
 #include "bindings/jsa/ui_manager.h"
 #include "bindings/jsa/DOM/document.h"
 #include "bindings/jsa/DOM/element.h"
@@ -25,19 +24,6 @@
 #include "bindings/jsa/KOM/toBlob.h"
 #include "bindings/jsa/KOM/window.h"
 #include "bindings/jsa/kraken.h"
-#elif KRAKEN_JSC_ENGINE
-#include "bindings/jsc/js_context.h"
-#include "bindings/jsc/ui_manager.h"
-#include "bindings/jsc/DOM/document.h"
-#include "bindings/jsc/KOM/console.h"
-#include "bindings/jsc/KOM/window.h"
-#include "bindings/jsc/KOM/location.h"
-#include "bindings/jsc/KOM/screen.h"
-#include "bindings/jsc/KOM/timer.h"
-#include "bindings/jsc/KOM/toBlob.h"
-#include "bindings/jsc/KOM/blob.h"
-#include "bindings/jsc/kraken.h"
-#endif
 
 namespace kraken {
 /**
@@ -47,18 +33,15 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
-#ifdef KRAKEN_ENABLE_JSA
     const JSError &error = JSError(*context, errmsg);
     context->global()
-      .getPropertyAsObject(*context, "__global_onerror_handler__")
-      .getFunction(*context)
-      .call(*context, Value(*context, error.value()));
-#endif
+        .getPropertyAsObject(*context, "__global_onerror_handler__")
+        .getFunction(*context)
+        .call(*context, Value(*context, error.value()));
   };
 
   context = KRAKEN_CREATE_JS_ENGINE(contextId, errorHandler, this);
 
-#ifdef KRAKEN_ENABLE_JSA
     // Inject JSC global objects
   kraken::binding::jsa::bindUIManager(*context);
   kraken::binding::jsa::bindKraken(context);
@@ -71,23 +54,10 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
   screen_->bind(context);
-#elif KRAKEN_JSC_ENGINE
-    kraken::binding::jsc::bindKraken(context);
-    kraken::binding::jsc::bindUIManager(context);
-    kraken::binding::jsc::bindConsole(context);
-    kraken::binding::jsc::bindDocument(context);
-    kraken::binding::jsc::bindWindow(context);
-    kraken::binding::jsc::bindScreen(context);
-    kraken::binding::jsc::bindTimer(context);
-    kraken::binding::jsc::bindToBlob(context);
-    kraken::binding::jsc::bindBlob(context);
-#endif
 
   initKrakenPolyFill(this);
-#ifdef KRAKEN_ENABLE_JSA
   Object promiseHandler = context->global().getPropertyAsObject(*context, "__global_unhandled_promise_handler__");
   context->setUnhandledPromiseRejectionHandler(promiseHandler);
-#endif
 }
 
 #ifdef ENABLE_DEBUGGER
@@ -114,7 +84,6 @@ void JSBridge::detachDevtools() {
 #endif // ENABLE_DEBUGGER
 
 void JSBridge::handleUIListener(const NativeString *args) {
-#ifdef KRAKEN_ENABLE_JSA
   for (const auto &callback : krakenUIListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_ui_listener__': can not get listener callback.");
@@ -127,11 +96,9 @@ void JSBridge::handleUIListener(const NativeString *args) {
     const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
-#endif
 }
 
 void JSBridge::handleModuleListener(const NativeString *args) {
-#ifdef KRAKEN_ENABLE_JSA
   for (const auto &callback : krakenModuleListenerList) {
     if (callback == nullptr) {
       throw JSError(*context, "Failed to execute '__kraken_module_listener__': can not get callback.");
@@ -144,7 +111,6 @@ void JSBridge::handleModuleListener(const NativeString *args) {
     const String str = String::createFromUInt16(*context, args->string, args->length);
     callback->getObject(*context).asFunction(*context).callWithThis(*context, context->global(), str, 1);
   }
-#endif
 }
 
 const int UI_EVENT = 0;
@@ -156,45 +122,31 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
   if (std::getenv("ENABLE_KRAKEN_JS_LOG") != nullptr && strcmp(std::getenv("ENABLE_KRAKEN_JS_LOG"), "true") == 0) {
     KRAKEN_LOG(VERBOSE) << "[invokeEventListener VERBOSE]: message " << args;
   }
-  if (UI_EVENT == type) {
-    this->handleUIListener(args);
-  } else if (MODULE_EVENT == type) {
-    this->handleModuleListener(args);
+  try {
+    if (UI_EVENT == type) {
+      this->handleUIListener(args);
+    } else if (MODULE_EVENT == type) {
+      this->handleModuleListener(args);
+    }
+  } catch (JSError &error) {
+    handler_(*context, error);
   }
 }
 
 void JSBridge::evaluateScript(const NativeString *script, const char *url, int startLine) {
   if (!context->isValid()) return;
-#ifdef KRAKEN_ENABLE_JSA
   binding::jsa::updateLocation(url);
-#elif KRAKEN_JSC_ENGINE
-  binding::jsc::updateLocation(url);
-#endif
   context->evaluateJavaScript(script->string, script->length, url, startLine);
 }
 
 void JSBridge::evaluateScript(const char *script, const char *url, int startLine) {
   if (!context->isValid()) return;
-#ifdef KRAKEN_ENABLE_JSA
   binding::jsa::updateLocation(url);
-#elif KRAKEN_JSC_ENGINE
-  binding::jsc::updateLocation(url);
-#endif
   context->evaluateJavaScript(script, url, startLine);
 }
 
 JSBridge::~JSBridge() {
   if (!context->isValid()) return;
-
-#if KRAKEN_JSC_ENGINE
-  for (auto &callback : krakenUIListenerList) {
-    JSValueUnprotect(context->context(), callback);
-  }
-  for (auto &callback : krakenModuleListenerList) {
-    JSValueUnprotect(context->context(), callback);
-  }
-#endif
-
   krakenUIListenerList.clear();
   krakenModuleListenerList.clear();
 }

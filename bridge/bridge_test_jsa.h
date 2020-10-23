@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BRIDGE_TEST_JSA_H
 #define KRAKENBRIDGE_BRIDGE_TEST_JSA_H
 
-#include "bridge.h"
+#include "bridge_jsc.h"
 #include "kraken_bridge_test.h"
 
 #ifdef KRAKEN_ENABLE_JSA

@@ -5,7 +5,7 @@
 
 #include "timer.h"
 #include "bindings/jsc/macros.h"
-#include "bridge.h"
+#include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 
@@ -13,58 +13,58 @@ namespace kraken::binding::jsc {
 
 using namespace kraken::foundation;
 
-void handlePersistentCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
-  JSContext &_context = obj->_context;
+void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) {
+  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
+  JSContext &_context = callbackContext->_context;
   if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
-  if (obj->_callback == nullptr) {
+  if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    _context.reportError("Failed to trigger callback: timer callback is null.");
+    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.", callbackContext->exception);
     return;
   }
 
-  if (!JSValueIsObject(_context.context(), obj->_callback)) {
+  if (!JSValueIsObject(_context.context(), callbackContext->_callback)) {
     return;
   }
 
   if (errmsg != nullptr) {
-    obj->_context.reportError(errmsg);
+    JSC_THROW_ERROR(_context.context(), errmsg, callbackContext->exception);
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), obj->_callback, nullptr);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, nullptr);
+  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, callbackContext->exception);
 }
 
-void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
-  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
-  JSContext &_context = obj->_context;
+void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
+  auto *callbackContext = static_cast<BridgeCallback::Context *>(ptr);
+  JSContext &_context = callbackContext->_context;
   if (!checkContext(contextId, &_context)) return;
 
   if (!_context.isValid()) return;
 
-  if (obj->_callback == nullptr) {
+  if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    _context.reportError("Failed to trigger callback: requestAnimationFrame callback is null.");
+    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.", callbackContext->exception);
     return;
   }
 
-  if (!JSValueIsObject(_context.context(), obj->_callback)) {
+  if (!JSValueIsObject(_context.context(), callbackContext->_callback)) {
     return;
   }
 
   if (errmsg != nullptr) {
-    obj->_context.reportError(errmsg);
+    JSC_THROW_ERROR(_context.context(), errmsg, callbackContext->exception);
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), obj->_callback, nullptr);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, nullptr);
+  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,  callbackContext->exception);
 }
 
 void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {

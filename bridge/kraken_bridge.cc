@@ -4,11 +4,16 @@
  */
 
 #include "kraken_bridge.h"
-#include "bridge.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
 #include "foundation/ui_task_queue.h"
+
+#ifdef KRAKEN_ENABLE_JSA
+#include "bridge_jsa.h"
+#elif KRAKEN_JSC_ENGINE
+#include "bridge_jsc.h"
+#endif
 
 #include <atomic>
 #include <thread>

@@ -23,8 +23,6 @@ list(APPEND BRIDGE_SOURCE
     foundation/bridge_callback.h
     dart_methods.cc
     dart_methods.h
-    bridge.cc
-    bridge.h
     polyfill/dist/polyfill.cc
 )
 
@@ -53,6 +51,8 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/DOM/node.h
     bindings/jsa/DOM/eventTarget.cc
     bindings/jsa/DOM/eventTarget.h
+    bridge_jsa.cc
+    bridge_jsa.h
   )
 
   list(APPEND BRIDGE_LINK_LIBS
@@ -114,6 +114,8 @@ else()
       bindings/jsc/DOM/node.h
       bindings/jsc/KOM/console.h
       bindings/jsc/KOM/console.cc
+      bridge_jsc.cc
+      bridge_jsc.h
     )
   endif()
 endif()

@@ -26,14 +26,8 @@ using namespace alibaba::jsa;
 
 class JSBridge final {
 private:
-  std::unique_ptr<KRAKEN_JS_CONTEXT> context;
+  std::unique_ptr<binding::jsc::JSContext> context;
   JSExceptionHandler handler_;
-
-#ifdef KRAKEN_ENABLE_JSA
-  std::shared_ptr<kraken::binding::jsa::JSScreen> screen_;
-  std::shared_ptr<kraken::binding::jsa::JSWindow> window_;
-  std::shared_ptr<kraken::binding::jsa::JSDocument> document_;
-#endif
 
 public:
   JSBridge() = delete;
@@ -44,13 +38,8 @@ public:
   void detachDevtools();
 #endif // ENABLE_DEBUGGER
 
-#ifdef KRAKEN_ENABLE_JSC
-  std::vector<std::shared_ptr<Value>> krakenUIListenerList;
-  std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
-#elif KRAKEN_JSC_ENGINE
   std::deque<JSObjectRef> krakenUIListenerList;
   std::deque<JSObjectRef> krakenModuleListenerList;
-#endif
 
   int32_t contextId;
   foundation::BridgeCallback bridgeCallback;
@@ -65,8 +54,8 @@ public:
   }
 
   void invokeEventListener(int32_t type, const NativeString *args);
-  void handleUIListener(const NativeString *args);
-  void handleModuleListener(const NativeString *args);
+  void handleUIListener(const NativeString *args, JSValueRef *exception);
+  void handleModuleListener(const NativeString *args, JSValueRef *exception);
   void reportError(const char* errmsg);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;

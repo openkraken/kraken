@@ -73,8 +73,8 @@
 
 #define JSC_THROW_ERROR(ctx, msg, exception)                                                                           \
   {                                                                                                                    \
-    JSStringRef errmsg = JSStringCreateWithUTF8CString(msg);                                                           \
-    const JSValueRef args[] = {JSValueMakeString(ctx, errmsg), nullptr};                                               \
+    JSStringRef _errmsg = JSStringCreateWithUTF8CString(msg);                                                           \
+    const JSValueRef args[] = {JSValueMakeString(ctx, _errmsg), nullptr};                                               \
     *exception = JSObjectMakeError(ctx, 1, args, nullptr);                                                             \
-    JSStringRelease(errmsg);                                                                                           \
+    JSStringRelease(_errmsg);                                                                                           \
   }

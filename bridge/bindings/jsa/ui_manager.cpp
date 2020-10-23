@@ -3,12 +3,12 @@
  * Author: Kraken Team.
  */
 
-#include "bridge.h"
+#include "ui_manager.h"
+#include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "foundation/logging.h"
 #include "jsa.h"
-#include "ui_manager.h"
 
 namespace kraken {
 namespace binding {

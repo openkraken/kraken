@@ -5,7 +5,7 @@
 
 #include "toBlob.h"
 #include "blob.h"
-#include "bridge.h"
+#include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include <vector>
