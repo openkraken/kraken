@@ -23,7 +23,8 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
     return JSValueMakeNumber(context->context(), devicePixelRatio);
   } else if (name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
-      JSC_THROW_ERROR(context->context(), "Failed to read colorScheme: dart method (platformBrightness) not register.", exception);
+      JSC_THROW_ERROR(context->context(), "Failed to read colorScheme: dart method (platformBrightness) not register.",
+                      exception);
       return nullptr;
     }
     const NativeString *code = getDartMethod()->platformBrightness(context->getContextId());
@@ -34,6 +35,18 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   }
 
   return nullptr;
+}
+
+void JSWindow::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+}
+
+JSWindow::~JSWindow() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
 }
 
 void bindWindow(std::unique_ptr<JSContext> &context) {

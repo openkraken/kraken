@@ -4,9 +4,9 @@
  */
 
 #include "location.h"
+#include "bindings/jsc/macros.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
-#include "bindings/jsc/macros.h"
 
 namespace kraken::binding::jsc {
 
@@ -33,19 +33,25 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
 JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "reload") {
-    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
-    functionDefinition.className = "reload";
-    functionDefinition.callAsFunction = reload;
-    functionDefinition.version = 0;
-    JSClassRef functionClass = JSClassCreate(&functionDefinition);
-    JSObjectRef function = JSObjectMake(context->context(), functionClass, this);
-    return function;
+    return JSLocation::propertyBindingFunction(context, this, "reload", reload);
   } else if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);
   }
 
   return nullptr;
+}
+
+void JSLocation::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+}
+
+JSLocation::~JSLocation() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
 }
 
 } // namespace kraken::binding::jsc

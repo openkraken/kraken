@@ -7,6 +7,7 @@
 #define KRAKEN_SCREEN_H
 
 #include "bindings/jsc/js_context.h"
+#include <array>
 
 namespace kraken::binding::jsc {
 
@@ -16,9 +17,19 @@ class JSScreen : public HostObject {
 public:
   explicit JSScreen(JSContext *context) : HostObject(context, JSScreenName) {}
 
+  ~JSScreen() override;
+
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
 private:
+  std::array<JSStringRef, 4> propertyNames {
+    JSStringCreateWithUTF8CString("width"),
+    JSStringCreateWithUTF8CString("height"),
+    JSStringCreateWithUTF8CString("availWidth"),
+    JSStringCreateWithUTF8CString("availHeight"),
+  };
 };
 
 void bindScreen(std::unique_ptr<JSContext> &context);

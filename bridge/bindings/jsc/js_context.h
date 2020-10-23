@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_JS_CONTEXT_H
 #define KRAKENBRIDGE_JS_CONTEXT_H
 
+#include "bindings/jsc/macros.h"
 #include "foundation/js_engine_adaptor.h"
 #include <JavaScriptCore/JavaScript.h>
 #include <deque>
@@ -46,7 +47,7 @@ public:
 
   bool handleException(JSValueRef exc);
 
-  void reportError(const char* errmsg);
+  void reportError(const char *errmsg);
 
   void emplaceGlobalString(JSStringRef string) {
     globalStrings.emplace_back(string);
@@ -71,11 +72,22 @@ public:
                                JSValueRef *exception);
   static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
   static void finalize(JSObjectRef obj);
-  static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception);
+  static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
+                          JSValueRef *exception);
+
+  static JSObjectRef propertyBindingFunction(JSContext* context, HostObject *selfObject,
+                                             const char *name, JSObjectCallAsFunctionCallback callback) {
+    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
+    functionDefinition.className = name;
+    functionDefinition.callAsFunction = callback;
+    functionDefinition.version = 0;
+    JSClassRef functionClass = JSClassCreate(&functionDefinition);
+    return JSObjectMake(context->context(), functionClass, selfObject);
+  }
 
   HostObject() = delete;
   HostObject(JSContext *context, const char *name);
-  const char* name;
+  const char *name;
 
   JSContext *context;
   JSClassRef object;

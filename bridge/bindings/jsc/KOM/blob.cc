@@ -187,20 +187,26 @@ JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "slice") {
-    JSObjectRef sliceFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, slice);
-    JSObjectSetPrivate(sliceFunction, this);
-    return sliceFunction;
+    return JSBlob::propertyBindingFunction(context, this, "slice", slice);
   } else if (name == "text") {
-    JSObjectRef textFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, text);
-    JSObjectSetPrivate(textFunction, this);
-    return textFunction;
+    return JSBlob::propertyBindingFunction(context, this, "text", text);
   } else if (name == "arrayBuffer") {
-    JSObjectRef arrayBufferFunction = JSObjectMakeFunctionWithCallback(context->context(), nameRef, arrayBuffer);
-    JSObjectSetPrivate(arrayBufferFunction, this);
-    return arrayBufferFunction;
+    return JSBlob::propertyBindingFunction(context, this, "arrayBuffer", arrayBuffer);
   }
 
   return nullptr;
+}
+
+void JSBlob::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+}
+
+JSBlob::~JSBlob() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
 }
 
 void bindBlob(std::unique_ptr<JSContext> &context) {

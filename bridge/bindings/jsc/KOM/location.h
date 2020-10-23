@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_LOCATION_H
 
 #include "bindings/jsc/js_context.h"
+#include <array>
 
 namespace kraken::binding::jsc {
 
@@ -18,13 +19,18 @@ class JSWindow;
 
 class JSLocation : public HostObject {
 public:
-  JSLocation(JSContext *context): HostObject(context, JSLocationName) {}
+  JSLocation(JSContext *context) : HostObject(context, JSLocationName) {}
 
+  ~JSLocation() override;
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 
-private:
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
-//  Value reload(JSContext &context, const Value &thisVal, const Value *args, size_t count);
+private:
+  std::array<JSStringRef, 2> propertyNames {
+    JSStringCreateWithUTF8CString("reload"),
+    JSStringCreateWithUTF8CString("href")
+  };
 };
 
 } // namespace kraken::binding::jsc

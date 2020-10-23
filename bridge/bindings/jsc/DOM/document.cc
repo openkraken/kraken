@@ -34,7 +34,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
   nativeString.string = JSStringGetCharactersPtr(tagNameStrRef);
   nativeString.length = JSStringGetLength(tagNameStrRef);
 
-  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(thisObject));
+  auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
   auto element = new JSElement(document->context, nativeString.clone());
 
   JSStringRelease(tagNameStrRef);
@@ -47,7 +47,7 @@ JSDocument::JSDocument(JSContext *context) : HostObject(context, "Document") {}
 JSValueRef JSDocument::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "createElement") {
-    return JSObjectMakeFunctionWithCallback(context->context(), nameRef, createElement);
+    return JSDocument::propertyBindingFunction(context, this, "createElement", createElement);
   }
 
   return nullptr;

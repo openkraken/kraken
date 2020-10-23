@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <array>
 
 #define JSBlobName "Blob"
 
@@ -50,6 +51,8 @@ public:
   JSBlob(JSContext *context, std::vector<uint8_t> &&data, std::string mime)
     : mimeType(std::move(mime)), _size(data.size()), HostObject(context, JSBlobName){};
 
+  ~JSBlob() override;
+
   /// get an pointer of bytes data from JSBlob
   uint8_t *bytes();
 
@@ -58,11 +61,18 @@ public:
 
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 
+  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+
 private:
   friend BlobBuilder;
   size_t _size;
   std::string mimeType;
   std::vector<uint8_t> _data;
+  std::array<JSStringRef, 3> propertyNames {
+    JSStringCreateWithUTF8CString("slice"),
+    JSStringCreateWithUTF8CString("text"),
+    JSStringCreateWithUTF8CString("arrayBuffer"),
+  };
 };
 
 } // namespace kraken::binding::jsc

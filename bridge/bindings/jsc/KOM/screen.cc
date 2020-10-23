@@ -28,6 +28,18 @@ JSValueRef JSScreen::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
+void JSScreen::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
+}
+
+JSScreen::~JSScreen() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+}
+
 void bindScreen(std::unique_ptr<JSContext> &context) {
   auto screen = new JSScreen(context.get());
   JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
