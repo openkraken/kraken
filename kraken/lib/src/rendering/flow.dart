@@ -521,6 +521,19 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
+//    bool isParentFlexLayout = parent is RenderFlexLayout;
+//    bool hasFlexGrow = parentData is RenderFlexParentData &&
+//      (parentData as RenderFlexParentData).flexGrow != 0;
+
+    if (hasSize && targetId != -1) {
+      double logicalWidth = RenderBoxModel.getLogicalWidth(this);
+      double logicalHeight = RenderBoxModel.getLogicalHeight(this);
+      if (size.width == logicalWidth && size.height == logicalHeight) {
+        return;
+      }
+    }
+
+//    print('flow layout=============== $targetId ${style['backgroundColor']}');
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -562,15 +575,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    final double contentWidth = RenderBoxModel.getContentWidth(this);
-    final double contentHeight = RenderBoxModel.getContentHeight(this);
+    final double logicalWidth = RenderBoxModel.getLogicalWidth(this);
+    final double logicalHeight = RenderBoxModel.getLogicalHeight(this);
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      double constraintWidth = contentWidth ?? 0;
-      double constraintHeight = contentHeight ?? 0;
+      double constraintWidth = logicalWidth ?? 0;
+      double constraintHeight = logicalHeight ?? 0;
 
       bool isInline = realDisplay == CSSDisplay.inline;
       bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
@@ -610,8 +623,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     bool flipCrossAxis = false;
     switch (direction) {
       case Axis.horizontal:
-        if (contentWidth != null) {
-          mainAxisLimit = contentWidth;
+        if (logicalWidth != null) {
+          mainAxisLimit = logicalWidth;
         } else {
           mainAxisLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
         }
@@ -647,6 +660,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         child = childParentData.nextSibling;
         continue;
       }
+
       child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
@@ -749,8 +763,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
     } else if (isInlineBlock && minWidth != null && width == null) {
       constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-    } else if (contentWidth != null) {
-      constraintWidth = math.max(constraintWidth, contentWidth);
+    } else if (logicalWidth != null) {
+      constraintWidth = math.max(constraintWidth, logicalWidth);
     }
 
     // Default to children's height
@@ -762,8 +776,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
     } else if (isNotInline && minHeight != null && height == null) {
       constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    } else if (contentHeight != null) {
-      constraintHeight = math.max(constraintHeight, contentHeight);
+    } else if (logicalHeight != null) {
+      constraintHeight = math.max(constraintHeight, logicalHeight);
     }
 
 
@@ -773,15 +787,15 @@ class RenderFlowLayout extends RenderLayoutBox {
         setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
         // AxisExtent should be size.
-        containerMainAxisExtent = contentWidth ?? size.width;
-        containerCrossAxisExtent = contentHeight ?? size.height;
+        containerMainAxisExtent = logicalWidth ?? size.width;
+        containerCrossAxisExtent = logicalHeight ?? size.height;
         break;
       case Axis.vertical:
         Size contentSize = Size(crossAxisExtent, mainAxisExtent);
         setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
-        containerMainAxisExtent = contentHeight ?? size.height;
-        containerCrossAxisExtent = contentWidth ?? size.width;
+        containerMainAxisExtent = logicalHeight ?? size.height;
+        containerCrossAxisExtent = logicalWidth ?? size.width;
         break;
     }
     final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
