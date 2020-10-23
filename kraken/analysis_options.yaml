@@ -1,1 +1,46 @@
-include: ../analysis_options.yaml
+linter:
+  rules:
+    # STYLE
+    - camel_case_types
+    - camel_case_extensions
+    - library_names
+    - file_names
+    - library_prefixes
+
+    # DOCUMENTATION
+    - package_api_docs # prefer
+    #- comment_references # Unused because https://github.com/dart-lang/sdk/issues/36974
+
+    # USAGE
+    - implementation_imports
+    - avoid_relative_lib_imports # prefer
+    - prefer_adjacent_string_concatenation
+    - avoid_function_literals_in_foreach_calls # avoid
+    - prefer_iterable_whereType
+    - prefer_function_declarations_over_variables
+    - unnecessary_lambdas
+    - prefer_equal_for_default_values
+    - avoid_init_to_null
+    #- unnecessary_getters # prefer # Disabled pending fix: https://github.com/dart-lang/linter/issues/23
+    #- prefer_expression_function_bodies # consider
+    - unnecessary_this
+    - prefer_initializing_formals
+    - type_init_formals
+    - empty_constructor_bodies
+    - unnecessary_new
+    - unnecessary_const
+    - avoid_catching_errors
+    - use_rethrow_when_possible
+
+    # DESIGN
+    - use_to_and_as_if_applicable # prefer
+    #- avoid_returning_null # avoid
+    - avoid_returning_this # avoid
+    #- type_annotate_public_apis # prefer
+    #- prefer_typing_uninitialized_variables # consider
+    - avoid_return_types_on_setters # avoid
+    - avoid_private_typedef_functions # prefer
+    #- use_function_type_syntax_for_parameters # consider
+    - hash_and_equals
+    - avoid_equals_and_hash_code_on_mutable_classes # avoid
+    - avoid_null_checks_in_equality_operators

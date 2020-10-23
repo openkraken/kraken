@@ -101,7 +101,7 @@ const Map<String, bool> CSSShorthandProperty = {
 class CSSStyleDeclaration {
   Element target;
 
-  CSSStyleDeclaration(Element this.target);
+  CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   List<StyleChangeListener> _styleChangeListeners = [];
@@ -516,9 +516,9 @@ class CSSStyleDeclaration {
   void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
     assert(property != null);
 
-    _styleChangeListeners.forEach((StyleChangeListener listener) {
+    for (StyleChangeListener listener in _styleChangeListeners) {
       listener(property, original, present, inAnimation);
-    });
+    }
   }
 
   double getLengthByPropertyName(properyName) {

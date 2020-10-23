@@ -1,5 +1,0 @@
-# This is root analysis options for kraken.
-analyzer:
-  exclude:
-    - build/**
-    - plugins/**

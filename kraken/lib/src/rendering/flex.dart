@@ -57,8 +57,6 @@ bool _startIsTopLeft(FlexDirection direction) {
   return null;
 }
 
-typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
-
 /// ## Layout algorithm
 ///
 /// _This section describes how the framework causes [RenderFlexLayout] to position
@@ -180,7 +178,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getIntrinsicSize({
     FlexDirection sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize, // a method to find the size in the sizing direction
+    double Function(RenderBox child, double extent) childSize, // a method to find the size in the sizing direction
   }) {
     if (_flexDirection == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -616,7 +614,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double _getBaseSize(RenderObject child) {
     // set default value
-    double baseSize = null;
+    double baseSize;
     if (child is RenderTextBox) {
       return baseSize;
     } else if (child is RenderBoxModel) {
@@ -1894,7 +1892,7 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   }) : super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   /// Convert [RenderSelfRepaintFlexLayout] to [RenderFlowLayout]
   RenderSelfRepaintFlowLayout toFlowLayout() {

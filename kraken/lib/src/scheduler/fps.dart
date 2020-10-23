@@ -37,9 +37,9 @@ class Fps {
       ElementsBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
         if (_fpsCallbacks.isNotEmpty) {
           List<FpsInfo> fps = timings.map<FpsInfo>((timing) => FpsInfo(timing)).toList();
-          _fpsCallbacks.forEach((callback) {
+          for (var callback in _fpsCallbacks) {
             callback(fps);
-          });
+          }
         }
       });
     }
@@ -77,10 +77,10 @@ class FpsInfo {
 class RenderFpsOverlay extends RenderBox {
   RenderFpsOverlay() : super() {
     Fps.instance.addFpsCallback((List<FpsInfo> fps) {
-      fps.forEach((FpsInfo fpsInfo) {
+      for (FpsInfo fpsInfo in fps) {
         _fpsInfo = fpsInfo;
         markNeedsPaint();
-      });
+      }
     });
     Fps.instance.start();
   }

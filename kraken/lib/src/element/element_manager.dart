@@ -73,9 +73,11 @@ Element _createElement(
   });
 
   // Add element event listener
-  events?.forEach((String eventName) {
-    element.addEvent(eventName);
-  });
+  if (events != null) {
+    for (String eventName in events) {
+      element.addEvent(eventName);
+    }
+  }
 
   return element;
 }
@@ -92,12 +94,10 @@ class ElementManager {
   final double viewportWidth;
   final double viewportHeight;
 
-  List<VoidCallback> _detachCallbacks = [];
+  final List<VoidCallback> _detachCallbacks = [];
 
-  ElementManager(double viewportWidth, double viewportHeight,
-      {KrakenController this.controller, this.showPerformanceOverlayOverride})
-      : viewportWidth = viewportWidth,
-        viewportHeight = viewportHeight {
+  ElementManager(this.viewportWidth, this.viewportHeight,
+      {this.controller, this.showPerformanceOverlayOverride}) {
     _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
     RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
@@ -178,7 +178,7 @@ class ElementManager {
     removeTarget(target);
   }
 
-  void setProperty(int targetId, String key, value) {
+  void setProperty(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'targetId: $targetId key: $key value: $value');
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
@@ -217,7 +217,7 @@ class ElementManager {
     }
   }
 
-  void setStyle(int targetId, String key, value) {
+  void setStyle(int targetId, String key, dynamic value) {
     assert(existsTarget(targetId), 'id: $targetId key: $key value: $value');
     Node target = getEventTargetByTargetId<Node>(targetId);
     assert(target != null);
@@ -376,15 +376,15 @@ class ElementManager {
     }
 
     clearTargets();
-    _detachCallbacks.forEach((callback) {
-      callback();
-    });
+    for (var callback in _detachCallbacks) {
+       callback();
+    }
     _detachCallbacks.clear();
     _rootElement = null;
   }
 
   dynamic applyAction(String action, List payload) {
-    var returnValue;
+    dynamic returnValue;
 
     switch (action) {
       case 'createElement':
