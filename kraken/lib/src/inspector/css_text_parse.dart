@@ -5,22 +5,20 @@
 
 final RegExp _spaceRegExp = RegExp(r'^[\s\u21b5]*');
 final RegExp _newlineRegExp = RegExp(r'[\n\u21b5]');
-final RegExp _propertyNameRegExp =
-    RegExp(r'^(\*?[-#\/\*\\\w]+(\[[0-9a-z_-]+\])?)\s*');
+final RegExp _propertyNameRegExp = RegExp(r'^(\*?[-#\/\*\\\w]+(\[[0-9a-z_-]+\])?)\s*');
 final RegExp _colonRegExp = RegExp(r'^:\s*');
-final RegExp _propertyValueRegExp =
-    RegExp(r'''^((?:'(?:\\'|.)*?'|"(?:\\"|.)*?"|\([^\)]*?\)|[^};])+)''');
+final RegExp _propertyValueRegExp = RegExp(r'''^((?:'(?:\\'|.)*?'|"(?:\\"|.)*?"|\([^\)]*?\)|[^};])+)''');
 final RegExp _semicolonRegExp = RegExp(r'^[;\s]*');
 final RegExp _commentStartRegExp = RegExp(r'^\/\*\s');
 final RegExp _commentEndRegExp = RegExp(r'^\*\/');
 
-class CSSParser {
+class CSSTextParser {
   int line = 0;
   int column = 0;
   String cssText = '';
   Map<String, dynamic> declaration = {};
 
-  CSSParser(this.cssText);
+  CSSTextParser(this.cssText);
 
   List<Map<String, dynamic>> declarations() {
     List<Map<String, dynamic>> decs = [];

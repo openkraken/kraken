@@ -1,0 +1,10 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+export 'src/inspector/inspector.dart';
+export 'src/inspector/inspector_websocket_handle.dart';
+export 'src/inspector/inspector_http_handler.dart';
+export 'src/inspector/inspector_css_agent.dart';
+export 'src/inspector/inspector_dom_agent.dart';
