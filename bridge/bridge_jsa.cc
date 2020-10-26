@@ -49,7 +49,7 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsa::bindTimer(context);
   kraken::binding::jsa::bindBlob(context);
   kraken::binding::jsa::bindToBlob(context);
-  kraken::binding::jsa::bindDocument(context);
+//  kraken::binding::jsa::bindDocument(context);
   window_ = std::make_shared<kraken::binding::jsa::JSWindow>();
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();

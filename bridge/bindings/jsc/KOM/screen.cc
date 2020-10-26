@@ -42,10 +42,7 @@ JSScreen::~JSScreen() {
 
 void bindScreen(std::unique_ptr<JSContext> &context) {
   auto screen = new JSScreen(context.get());
-  //  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
-  JSObjectRef object = screen->object;
-  JSStringRef name = JSStringCreateWithUTF8CString("screen");
-  JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);
+  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
 }
 
 } // namespace kraken::binding::jsc

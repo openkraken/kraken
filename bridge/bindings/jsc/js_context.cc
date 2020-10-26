@@ -8,7 +8,6 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include <iostream>
 
 namespace kraken::binding::jsc {
 
@@ -17,19 +16,18 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
 
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
 
-  std::cout << "create js Context: " << ctx_ << std::endl;
-
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef windowName = JSStringCreateWithUTF8CString("window");
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
   JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
+
+  JSStringRelease(windowName);
+  JSStringRelease(globalThis);
 }
 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
-  std::cout << "release js context: " << ctx_ << std::endl;
-//  releaseGlobalString();
   JSGlobalContextRelease(ctx_);
 }
 
@@ -100,20 +98,6 @@ JSGlobalContextRef JSContext::context() {
   return ctx_;
 }
 
-void JSContext::releaseGlobalString() {
-  auto head = std::begin(globalStrings);
-  auto tail = std::end(globalStrings);
-
-  while (head != tail) {
-    JSStringRef str = *head;
-    // Release all global string reference.
-    JSStringRelease(str);
-    ++head;
-  }
-
-  globalStrings.clear();
-}
-
 void JSContext::reportError(const char *errmsg) {
   _handler(contextId, errmsg);
 }
@@ -129,25 +113,11 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
-std::once_flag hostObjectClassOnceFlag;
-JSClassRef hostObjectClass {};
-
 HostObject::HostObject(JSContext *context, std::string name) : context(context), name(name), ctx(context->context()) {
-//  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
-//  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
-//  object = JSClassCreate(&hostObjectDefinition);
-  std::call_once(hostObjectClassOnceFlag, []() {
-    JSClassDefinition hostObjectClassDef = kJSClassDefinitionEmpty;
-    hostObjectClassDef.version = 0;
-    hostObjectClassDef.attributes = kJSClassAttributeNoAutomaticPrototype;
-    hostObjectClassDef.finalize = HostObject::finalize;
-    hostObjectClassDef.getProperty = HostObject::proxyGetProperty;
-    hostObjectClassDef.setProperty = HostObject::proxySetProperty;
-    hostObjectClassDef.getPropertyNames = HostObject::proxyGetPropertyNames;
-    hostObjectClass = JSClassCreate(&hostObjectClassDef);
-  });
-  object = JSObjectMake(context->context(), hostObjectClass, this);
-  JSValueProtect(context->context(), object);
+  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
+  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
+  jsClass = JSClassCreate(&hostObjectDefinition);
+  jsObject = JSObjectMake(context->context(), jsClass, this);
 }
 
 JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
@@ -175,10 +145,9 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
 
 void HostObject::finalize(JSObjectRef obj) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
-  JSValueUnprotect(hostObject->ctx, obj);
   JSObjectSetPrivate(obj, nullptr);
-//  JSClassRelease(hostObject->object);
-//  delete hostObject;
+  JSClassRelease(hostObject->jsClass);
+  delete hostObject;
 }
 
 bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,

@@ -15,28 +15,23 @@
 
 namespace kraken::binding::jsc {
 
-class JSWindow : public HostObject, std::enable_shared_from_this<JSWindow> {
+class JSWindow : public HostObject {
 public:
-  JSWindow(JSContext *context)
-    : HostObject(context, JSWindowName){
-        //    location_ = new JSLocation(context);
-        //    location_ = JSObjectMake(context->context(), location->object, location);
-      };
+  JSWindow(JSContext *context) : HostObject(context, JSWindowName) {
+    location_ = new JSLocation(context);
+  };
   ~JSWindow();
 
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
   //  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
-  std::shared_ptr<JSWindow> sharedSelf() {
-    return shared_from_this();
-  }
-  //  JSLocation *location_;
-  //  std::array<JSStringRef, 3> propertyNames {
-  //    JSStringCreateWithUTF8CString("devicePixelRatio"),
-  //    JSStringCreateWithUTF8CString("colorScheme"),
-  //    JSStringCreateWithUTF8CString("location"),
-  //  };
+  JSLocation *location_;
+    std::array<JSStringRef, 3> propertyNames {
+      JSStringCreateWithUTF8CString("devicePixelRatio"),
+      JSStringCreateWithUTF8CString("colorScheme"),
+      JSStringCreateWithUTF8CString("location"),
+    };
 };
 
 void bindWindow(std::unique_ptr<JSContext> &context);

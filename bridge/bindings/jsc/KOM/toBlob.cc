@@ -79,8 +79,8 @@ JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
                                                             callbackContext->_callback, callbackContext->exception);
             auto blob = new JSBlob(&callbackContext->_context, std::move(vec));
             const JSValueRef arguments[] = {
-//              JSValueMakeNull(callbackContext->_context.context()),
-//              JSObjectMake(ctx, blob->object, blob)
+              JSValueMakeNull(callbackContext->_context.context()),
+              blob->jsObject
             };
 
             JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, callbackContext->exception);

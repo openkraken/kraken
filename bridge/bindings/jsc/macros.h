@@ -11,15 +11,16 @@
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSValueRef exc = nullptr;                                                                                          \
     JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);        \
+    JSStringRelease(name);                                                                                             \
     context->handleException(exc);                                                                                     \
   }
 
 #define JSC_GLOBAL_BINDING_HOST_OBJECT(context, nameStr, hostObject)                                                   \
   {                                                                                                                    \
-    JSClassRef objectClass = hostObject->object;                                                                       \
-    JSObjectRef object = JSObjectMake(context->context(), objectClass, hostObject);                                    \
+    JSObjectRef object = hostObject->jsObject;                                                                         \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
     JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);   \
+    JSStringRelease(name);                                                                                             \
   }
 
 #define JSC_SET_STRING_PROPERTY(context, object, name, value)                                                          \
@@ -28,6 +29,7 @@
     JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value);                                                 \
     JSValueRef valueRef = JSValueMakeString(context->context(), valueStringRef);                                       \
     JSObjectSetProperty(context->context(), object, keyRef, valueRef, kJSPropertyAttributeNone, nullptr);              \
+    JSStringRelease(keyRef);                                                                                           \
   }
 
 #define JSC_GLOBAL_SET_PROPERTY(context, key, value)                                                                   \
@@ -35,6 +37,7 @@
     JSStringRef keyString = JSStringCreateWithUTF8CString(key);                                                        \
     JSObjectSetProperty(context->context(), context->global(), keyString, value, kJSPropertyAttributeReadOnly,         \
                         nullptr);                                                                                      \
+    JSStringRelease(keyString);                                                                                        \
   }
 
 #define HANDLE_JSC_EXCEPTION(ctx_, exc, handler)                                                                       \

@@ -32,12 +32,7 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
     JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
     return JSValueMakeString(context->context(), resultRef);
   } else if (name == "location") {
-//    auto location = new JSLocation(context);
-//    return JSObjectMake(context->context(), location->object, location);
-//    return JSObjectMake(context->context(), location_->object, location_);
-  } else if (name == "reload") {
-    getDartMethod()->reloadApp(context->getContextId());
-    return JSValueMakeNumber(context->context(), 0);
+    return location_->jsObject;
   }
 
   return nullptr;
@@ -50,18 +45,13 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
 //}
 
 JSWindow::~JSWindow() {
-  KRAKEN_LOG(VERBOSE) << "dispose JSWindow";
-//  for (auto &propertyName : propertyNames) {
-//    JSStringRelease(propertyName);
-//  }
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
 }
 
 void bindWindow(std::unique_ptr<JSContext> &context) {
-//  auto window = new JSWindow(context.get());
-  //  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
-//  JSObjectRef object = window->object;
-//  JSStringRef name = JSStringCreateWithUTF8CString("__kraken_window__");
-//  JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);
-//  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "__kraken_window__", window);
+  auto window = new JSWindow(context.get());
+  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "__kraken_window__", window);
 }
 } // namespace kraken::binding::jsc

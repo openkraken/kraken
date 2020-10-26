@@ -20,44 +20,41 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   auto errorHandler = [handler, this](int32_t contextId, const char *errmsg) {
     handler(contextId, errmsg);
     // trigger window.onerror handler.
-    //    JSStringRef errmsgStringRef = JSStringCreateWithUTF8CString(errmsg);
-    //    const JSValueRef errorArguments[] = {JSValueMakeString(context->context(), errmsgStringRef)};
-    //    JSValueRef exception = nullptr;
-    //    JSObjectRef errorObject = JSObjectMakeError(context->context(), 1, errorArguments, &exception);
-    //
-    //    JSStringRef errorHandlerKeyRef = JSStringCreateWithUTF8CString("__global_onerror_handler__");
-    //    JSValueRef errorHandlerValueRef =
-    //      JSObjectGetProperty(context->context(), context->global(), errorHandlerKeyRef, &exception);
-    //
-    //    if (!JSValueIsObject(context->context(), errorHandlerValueRef)) {
-    //      context->reportError("Failed to trigger global onerror: __global_onerror_handler__ is not registered.");
-    //      return;
-    //    }
-    //
-    //    JSObjectRef errorHandlerFunction = JSValueToObject(context->context(), errorHandlerValueRef, &exception);
-    //    const JSValueRef errorHandlerArguments[] = {errorObject};
-    //    JSObjectCallAsFunction(context->context(), errorHandlerFunction, context->global(), 1, errorHandlerArguments,
-    //                           &exception);
-    //
-    //    context->handleException(exception);
+    JSStringRef errmsgStringRef = JSStringCreateWithUTF8CString(errmsg);
+    const JSValueRef errorArguments[] = {JSValueMakeString(context->context(), errmsgStringRef)};
+    JSValueRef exception = nullptr;
+    JSObjectRef errorObject = JSObjectMakeError(context->context(), 1, errorArguments, &exception);
+
+    JSStringRef errorHandlerKeyRef = JSStringCreateWithUTF8CString("__global_onerror_handler__");
+    JSValueRef errorHandlerValueRef =
+      JSObjectGetProperty(context->context(), context->global(), errorHandlerKeyRef, &exception);
+
+    if (!JSValueIsObject(context->context(), errorHandlerValueRef)) {
+      context->reportError("Failed to trigger global onerror: __global_onerror_handler__ is not registered.");
+      return;
+    }
+
+    JSObjectRef errorHandlerFunction = JSValueToObject(context->context(), errorHandlerValueRef, &exception);
+    const JSValueRef errorHandlerArguments[] = {errorObject};
+    JSObjectCallAsFunction(context->context(), errorHandlerFunction, context->global(), 1, errorHandlerArguments,
+                           &exception);
+
+    context->handleException(exception);
   };
 
   bridgeCallback = new foundation::BridgeCallback();
 
   context = binding::jsc::createJSContext(contextId, errorHandler, this);
 
-  //  kraken::binding::jsc::bindKraken(context);
-  //  kraken::binding::jsc::bindUIManager(context);
+  kraken::binding::jsc::bindKraken(context);
+  kraken::binding::jsc::bindUIManager(context);
   kraken::binding::jsc::bindConsole(context);
-  //    kraken::binding::jsc::bindDocument(context);
-  _window = std::make_shared<binding::jsc::JSWindow>(context.get());
-  JSObjectSetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("__kraken_window__"),
-                      _window->object, kJSPropertyAttributeNone, nullptr);
-  //  kraken::binding::jsc::bindWindow(context);
-  //  kraken::binding::jsc::bindScreen(context);
+  kraken::binding::jsc::bindDocument(context);
+  kraken::binding::jsc::bindWindow(context);
+  kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindTimer(context);
-  //  kraken::binding::jsc::bindToBlob(context);
-  //  kraken::binding::jsc::bindBlob(context);
+  kraken::binding::jsc::bindToBlob(context);
+  kraken::binding::jsc::bindBlob(context);
 
   initKrakenPolyFill(this);
 #ifdef KRAKEN_ENABLE_JSA
@@ -137,7 +134,6 @@ void JSBridge::evaluateScript(const char *script, const char *url, int startLine
 }
 
 JSBridge::~JSBridge() {
-  KRAKEN_LOG(VERBOSE) << "dispose jsbridge";
   if (!context->isValid()) return;
 
   for (auto &callback : krakenUIListenerList) {

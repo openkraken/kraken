@@ -49,8 +49,6 @@ public:
   std::deque<JSObjectRef> krakenUIListenerList;
   std::deque<JSObjectRef> krakenModuleListenerList;
 
-  std::shared_ptr<binding::jsc::JSWindow> _window;
-
   int32_t contextId;
   foundation::BridgeCallback *bridgeCallback;
   // the owner pointer which take JSBridge as property.

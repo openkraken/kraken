@@ -49,19 +49,12 @@ public:
 
   void reportError(const char *errmsg);
 
-  void emplaceGlobalString(JSStringRef string) {
-//    globalStrings.emplace_back(string);
-  }
-
 private:
-  void releaseGlobalString();
-
   int32_t contextId;
   JSExceptionHandler _handler;
   void *owner;
   std::atomic<bool> ctxInvalid_{false};
   JSGlobalContextRef ctx_;
-  std::deque<JSStringRef> globalStrings;
 };
 
 class HostObject {
@@ -90,7 +83,7 @@ public:
   std::string name;
 
   JSContext *context;
-  JSObjectRef object;
+  JSObjectRef jsObject;
   JSContextRef ctx;
   // The C++ object's dtor will be called when the GC finalizes this
   // object.  (This may be as late as when the JSContext is shut down.)
@@ -116,6 +109,9 @@ public:
   virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
 
   virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
+
+private:
+  JSClassRef jsClass;
 };
 
 std::string JSStringToStdString(JSStringRef jsString);
