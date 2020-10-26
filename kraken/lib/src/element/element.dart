@@ -344,8 +344,11 @@ class Element extends Node
             CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
               Element containgBlockElement = _findContainingBlock(child);
+              // @refactor(zl): style should rely on style_declaration.
+              ContentVisibility prevChildContentVisibility = child.renderBoxModel.contentVisibility;
               child.detach();
               child.attachTo(containgBlockElement);
+              child.renderBoxModel.contentVisibility = prevChildContentVisibility;
             }
           }
         });
@@ -376,8 +379,11 @@ class Element extends Node
             } else {
               previousSibling = null;
             }
+            // @refactor(zl): style should rely on style_declaration.
+            ContentVisibility prevContentVisibility = renderBoxModel.contentVisibility;
             detach();
             attachTo(parentElement, after: previousSibling);
+            renderBoxModel.contentVisibility = prevContentVisibility;
           }
         }
 
@@ -392,16 +398,22 @@ class Element extends Node
         // Move self to containing block
         if (currentPosition == CSSPositionType.absolute || currentPosition == CSSPositionType.fixed) {
           Element containgBlockElement = _findContainingBlock(this);
+          // @refactor(zl): style should rely on style_declaration.
+          ContentVisibility prevContentVisibility = renderBoxModel.contentVisibility;
           detach();
           attachTo(containgBlockElement);
+          renderBoxModel.contentVisibility = prevContentVisibility;
         }
 
         // Loop children tree to find and append positioned children whose containing block is self
         List<Element> positionedChildren = [];
         _findPositionedChildren(this, positionedChildren);
         positionedChildren.forEach((child) {
+          // @refactor(zl): style should rely on style_declaration.
+          ContentVisibility prevChildContentVisibility = child.renderBoxModel.contentVisibility;
           child.detach();
           child.attachTo(this);
+          child.renderBoxModel.contentVisibility = prevChildContentVisibility;
         });
 
         // Set stick element offset
