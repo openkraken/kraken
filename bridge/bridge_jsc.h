@@ -6,6 +6,8 @@
 #ifndef KRAKEN_JS_BRIDGE_H_
 #define KRAKEN_JS_BRIDGE_H_
 
+#ifndef  KRAKEN_ENABLE_JSA
+
 #include "foundation/bridge_callback.h"
 #include "foundation/js_engine_adaptor.h"
 #include "foundation/thread_safe_array.h"
@@ -74,4 +76,5 @@ private:
 };
 } // namespace kraken
 
+#endif
 #endif // KRAKEN_JS_BRIDGE_H_

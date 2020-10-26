@@ -6,9 +6,7 @@
 #include "eventTarget.h"
 #include "dart_methods.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 static std::atomic<int64_t> globalEventTargetId{0};
@@ -44,6 +42,4 @@ int64_t JSEventTarget::getEventTargetId() {
   return eventTargetId;
 }
 
-}
-} // namespace binding
-} // namespace kraken
+} // namespace kraken::binding::jsa

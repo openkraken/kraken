@@ -3,17 +3,14 @@
  * Author: Kraken Team.
  */
 
-
 #ifndef KRAKENBRIDGE_NODE_H
 #define KRAKENBRIDGE_NODE_H
 
-#include "jsa.h"
-#include "include/kraken_bridge.h"
 #include "eventTarget.h"
+#include "include/kraken_bridge.h"
+#include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 enum NodeType {
@@ -34,8 +31,6 @@ private:
   NodeType nodeType;
 };
 
-}
-}
-}
+} // namespace kraken::binding::jsa
 
 #endif // KRAKENBRIDGE_NODE_H

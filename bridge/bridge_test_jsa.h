@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BRIDGE_TEST_JSA_H
 #define KRAKENBRIDGE_BRIDGE_TEST_JSA_H
 
-#include "bridge_jsc.h"
+#include "bridge_jsa.h"
 #include "kraken_bridge_test.h"
 
 #ifdef KRAKEN_ENABLE_JSA
@@ -28,7 +28,7 @@ private:
   /// the pointer of bridge, ownership belongs to JSBridge
   JSBridge *bridge_;
   /// the pointer of JSContext, overship belongs to JSContext
-  alibaba::jsa::JSContext *context;
+  const std::unique_ptr<KRAKEN_JS_CONTEXT> &context;
 };
 
 } // namespace kraken

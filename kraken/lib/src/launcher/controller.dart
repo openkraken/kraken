@@ -10,7 +10,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/element.dart';

@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#ifdef KRAKEN_JSC_ENGINE
+#ifdef KRAKEN_ENABLE_JSA
 
 #include "jsa.h"
 #include "jsc/jsc_implementation.h"
@@ -723,7 +723,7 @@ TEST(JSCContext, HostObjectAsArgs) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-    jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
+    jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::jsa::JSBlob>(vector)))
   });
 }
 
@@ -736,7 +736,7 @@ TEST(JSCContext, getHostObject) {
          size_t count) -> jsa::Value {
         auto &&object = args[0].getObject(context);
         EXPECT_EQ(object.isHostObject(context), true);
-        std::shared_ptr<kraken::binding::JSBlob> blob = object.getHostObject<kraken::binding::JSBlob>(context);
+        std::shared_ptr<kraken::binding::jsa::JSBlob> blob = object.getHostObject<kraken::binding::jsa::JSBlob>(context);
         jsa::Value size = blob->get(context, jsa::PropNameID::forAscii(context, "size"));
         EXPECT_EQ(size.getNumber(), 5);
 
@@ -744,7 +744,7 @@ TEST(JSCContext, getHostObject) {
       };
   jsa::Function func = jsa::Function::createFromHostFunction(*context, jsa::PropNameID::forAscii(*context, "func"), 1, getBlob);
   func.call(*context, {
-      jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::JSBlob>(vector)))
+      jsa::Value(*context, jsa::Object::createFromHostObject(*context, std::make_shared<kraken::binding::jsa::JSBlob>(vector)))
   });
 }
 

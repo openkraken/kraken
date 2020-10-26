@@ -17,7 +17,7 @@ using namespace kraken::foundation;
 
 bool JSBridgeTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!context->isValid()) return false;
-  binding::updateLocation(sourceURL);
+  binding::jsa::updateLocation(sourceURL);
   return !context->evaluateJavaScript(code, codeLength, sourceURL, startLine).isNull();
 }
 
@@ -101,7 +101,7 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
       "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
   }
 
-  std::shared_ptr<binding::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::JSBlob>(context);
+  std::shared_ptr<binding::jsa::JSBlob> jsBlob = blob.getObject(context).getHostObject<binding::jsa::JSBlob>(context);
 
   String name = screenShotName.getString(context);
   const uint16_t* unicodePtr = name.getUnicodePtr(context);

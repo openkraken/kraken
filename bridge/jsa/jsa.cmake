@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.2.0)
 
 # set C++ language version
-set(CMAKE_CXX_STANDARD 14)
 set(JSA_INCLUDE_DIRS)
 add_definitions(-fPIC)
 list(APPEND JSA_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/jsa/include ${CMAKE_CURRENT_SOURCE_DIR})

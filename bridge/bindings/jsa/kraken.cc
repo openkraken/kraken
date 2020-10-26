@@ -8,9 +8,7 @@
 #include "kraken_bridge.h"
 #include <cassert>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace alibaba::jsa;
 
@@ -24,6 +22,4 @@ void bindKraken(std::unique_ptr<JSContext> &context) {
   JSA_SET_PROPERTY(*context, context->global(), "__kraken__", kraken);
 }
 
-} // namespace jsa
-} // namespace binding
 } // namespace kraken

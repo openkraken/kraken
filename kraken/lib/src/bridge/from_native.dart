@@ -5,14 +5,12 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:ffi/ffi.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
 
 import 'package:kraken/launcher.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
 import 'package:vibration/vibration.dart';
 import 'platform.dart';

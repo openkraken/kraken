@@ -8,7 +8,7 @@
 
 #include "JavaScriptCore/JavaScript.h"
 #include "macros.h"
-#include "jsa.h"
+#include "jsa/include/jsa.h"
 #include <atomic>
 #include <cstdlib>
 #include <memory>

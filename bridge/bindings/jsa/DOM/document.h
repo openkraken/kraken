@@ -7,9 +7,7 @@
 #define KRAKENBRIDGE_DOCUMENT_H
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 class JSDocument : public HostObject, public std::enable_shared_from_this<JSDocument> {
@@ -25,8 +23,6 @@ public:
 
 void bindDocument(std::unique_ptr<JSContext> &context);
 
-}
-} // namespace binding
-} // namespace kraken
+} // namespace kraken::binding::jsa
 
 #endif // KRAKENBRIDGE_DOCUMENT_H

@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 
-#include "bridge_jsc.h"
+#include "bridge_jsa.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
 
@@ -11,19 +11,6 @@
 #include <atomic>
 #include <cstdlib>
 #include <memory>
-
-#include "bindings/jsa/ui_manager.h"
-#include "bindings/jsa/DOM/document.h"
-#include "bindings/jsa/DOM/element.h"
-#include "bindings/jsa/DOM/eventTarget.h"
-#include "bindings/jsa/KOM/blob.h"
-#include "bindings/jsa/KOM/console.h"
-#include "bindings/jsa/KOM/location.h"
-#include "bindings/jsa/KOM/screen.h"
-#include "bindings/jsa/KOM/timer.h"
-#include "bindings/jsa/KOM/toBlob.h"
-#include "bindings/jsa/KOM/window.h"
-#include "bindings/jsa/kraken.h"
 
 namespace kraken {
 /**
@@ -35,21 +22,22 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
     // trigger window.onerror handler.
     const JSError &error = JSError(*context, errmsg);
     context->global()
-        .getPropertyAsObject(*context, "__global_onerror_handler__")
-        .getFunction(*context)
-        .call(*context, Value(*context, error.value()));
+      .getPropertyAsObject(*context, "__global_onerror_handler__")
+      .getFunction(*context)
+      .call(*context, Value(*context, error.value()));
   };
 
+  bridgeCallback = std::make_unique<foundation::BridgeCallback>();
   context = KRAKEN_CREATE_JS_ENGINE(contextId, errorHandler, this);
 
-    // Inject JSC global objects
+  // Inject JSC global objects
   kraken::binding::jsa::bindUIManager(*context);
   kraken::binding::jsa::bindKraken(context);
   kraken::binding::jsa::bindConsole(context);
   kraken::binding::jsa::bindTimer(context);
   kraken::binding::jsa::bindBlob(context);
   kraken::binding::jsa::bindToBlob(context);
-//  kraken::binding::jsa::bindDocument(context);
+  //  kraken::binding::jsa::bindDocument(context);
   window_ = std::make_shared<kraken::binding::jsa::JSWindow>();
   window_->bind(context);
   screen_ = std::make_shared<kraken::binding::jsa::JSScreen>();
@@ -129,7 +117,7 @@ void JSBridge::invokeEventListener(int32_t type, const NativeString *args) {
       this->handleModuleListener(args);
     }
   } catch (JSError &error) {
-    handler_(*context, error);
+    handler_(context->getContextId(), error.what());
   }
 }
 

@@ -6,18 +6,16 @@
 #ifndef KRAKENBRIDGE_EVENTTARGET_H
 #define KRAKENBRIDGE_EVENTTARGET_H
 
-#include "jsa.h"
-#include "include/kraken_bridge.h"
-#include "foundation/logging.h"
-#include "foundation/ui_task_queue.h"
-#include "foundation/ui_command_queue.h"
 #include "dart_methods.h"
-#include <condition_variable>
+#include "foundation/logging.h"
+#include "foundation/ui_command_queue.h"
+#include "foundation/ui_task_queue.h"
+#include "include/kraken_bridge.h"
+#include "jsa.h"
 #include <atomic>
+#include <condition_variable>
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 struct DisposeCallbackData {
@@ -50,8 +48,6 @@ private:
   int64_t eventTargetId;
 };
 
-}
-}
-}
+} // namespace kraken::binding::jsa
 
 #endif // KRAKENBRIDGE_EVENTTARGET_H

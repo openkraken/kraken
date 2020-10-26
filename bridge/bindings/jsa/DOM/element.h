@@ -3,17 +3,14 @@
  * Author: Kraken Team.
  */
 
-
 #ifndef KRAKENBRIDGE_ELEMENT_H
 #define KRAKENBRIDGE_ELEMENT_H
 
+#include "include/kraken_bridge.h"
 #include "jsa.h"
 #include "node.h"
-#include "include/kraken_bridge.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 class JSElement : public JSNode {
@@ -30,7 +27,5 @@ public:
 private:
 };
 
-}
-} // namespace binding
-} // namespace kraken
+} // namespace kraken::binding::jsa
 #endif // KRAKENBRIDGE_ELEMENT_H

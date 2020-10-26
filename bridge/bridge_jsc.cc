@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+#ifndef KRAKEN_ENABLE_JSA
+
 #include "bridge_jsc.h"
 #include "foundation/logging.h"
 #include "polyfill.h"
@@ -154,3 +156,5 @@ void JSBridge::reportError(const char *errmsg) {
 }
 
 } // namespace kraken
+
+#endif

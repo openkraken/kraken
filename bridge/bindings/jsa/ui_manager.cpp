@@ -4,15 +4,13 @@
  */
 
 #include "ui_manager.h"
-#include "bridge_jsc.h"
+#include "bridge_jsa.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
 #include "foundation/logging.h"
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 
 using namespace alibaba::jsa;
 using namespace foundation;
@@ -252,6 +250,4 @@ void bindUIManager(KRAKEN_JS_CONTEXT &context) {
   JSA_BINDING_FUNCTION(context, context.global(), "__kraken_request_update_frame__", 0, requestUpdateFrame);
 }
 
-} // namespace jsa
-} // namespace binding
 } // namespace kraken

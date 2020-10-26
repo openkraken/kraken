@@ -7,9 +7,7 @@
 #include "dart_methods.h"
 #include "jsa.h"
 
-namespace kraken {
-namespace binding {
-namespace jsa {
+namespace kraken::binding::jsa {
 using namespace alibaba::jsa;
 
 void JSScreen::bind(std::unique_ptr<JSContext> &context) {
@@ -52,6 +50,4 @@ std::vector<PropNameID> JSScreen::getPropertyNames(JSContext &context) {
   return names;
 }
 
-}
-} // namespace binding
 } // namespace kraken

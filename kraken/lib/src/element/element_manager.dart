@@ -6,16 +6,13 @@
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui';
-import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
 import 'package:kraken/launcher.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/bridge.dart';
 
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {

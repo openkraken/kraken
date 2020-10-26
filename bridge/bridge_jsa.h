@@ -9,16 +9,29 @@
 #ifdef KRAKEN_ENABLE_JSA
 
 #include "foundation/bridge_callback.h"
-#include "foundation/thread_safe_array.h"
 #include "foundation/js_engine_adaptor.h"
+#include "foundation/thread_safe_array.h"
 #include "include/kraken_bridge.h"
 
 #include <atomic>
-#include <vector>
 #include <deque>
+#include <vector>
 #ifdef ENABLE_DEBUGGER
 #include <devtools/frontdoor.h>
 #endif // ENABLE_DEBUGGER
+
+#include "bindings/jsa/DOM/document.h"
+#include "bindings/jsa/DOM/element.h"
+#include "bindings/jsa/DOM/eventTarget.h"
+#include "bindings/jsa/KOM/blob.h"
+#include "bindings/jsa/KOM/console.h"
+#include "bindings/jsa/KOM/location.h"
+#include "bindings/jsa/KOM/screen.h"
+#include "bindings/jsa/KOM/timer.h"
+#include "bindings/jsa/KOM/toBlob.h"
+#include "bindings/jsa/KOM/window.h"
+#include "bindings/jsa/kraken.h"
+#include "bindings/jsa/ui_manager.h"
 
 namespace kraken {
 
@@ -46,7 +59,7 @@ public:
   std::vector<std::shared_ptr<Value>> krakenModuleListenerList;
 
   int32_t contextId;
-  foundation::BridgeCallback bridgeCallback;
+  std::unique_ptr<foundation::BridgeCallback> bridgeCallback;
   // the owner pointer which take JSBridge as property.
   void *owner;
   /// evaluate JavaScript source codes in standard mode.
@@ -60,7 +73,7 @@ public:
   void invokeEventListener(int32_t type, const NativeString *args);
   void handleUIListener(const NativeString *args);
   void handleModuleListener(const NativeString *args);
-  void reportError(const char* errmsg);
+  void reportError(const char *errmsg);
   //#ifdef ENABLE_DEBUGGER
   //  std::unique_ptr<kraken::Debugger::FrontDoor> devtools_front_door_;
   //#endif // ENABLE_DEBUGGER
