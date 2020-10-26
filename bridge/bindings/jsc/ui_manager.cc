@@ -129,10 +129,11 @@ void handleInvokeModuleTransientCallback(void *callbackContext, int32_t contextI
     return;
   }
 
-  JSObjectRef callback = JSValueToObject(ctx, obj->_callback, obj->exception);
+  JSObjectRef callback = JSValueToObject(ctx, obj->_callback, &exception);
   JSStringRef argumentsString = JSStringCreateWithCharacters(json->string, json->length);
   const JSValueRef arguments[] = {JSValueMakeString(ctx, argumentsString)};
-  JSObjectCallAsFunction(ctx, callback, obj->_context.global(), 1, arguments, obj->exception);
+  JSObjectCallAsFunction(ctx, callback, obj->_context.global(), 1, arguments, &exception);
+  _context.handleException(exception);
 }
 
 JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -210,8 +211,11 @@ void handleBatchUpdate(void *ptr, int32_t contextId, const char *errmsg) {
 
   if (!_context.isValid()) return;
 
+  JSValueRef exception = nullptr;
+
   if (callbackContext->_callback == nullptr) {
-    _context.reportError("Failed to execute '__kraken_request_batch_update__': callback is null.");
+    JSC_THROW_ERROR(_context.context(), "Failed to execute '__kraken_request_batch_update__': callback is null.", &exception);
+    _context.handleException(exception);
     return;
   }
 
@@ -220,12 +224,14 @@ void handleBatchUpdate(void *ptr, int32_t contextId, const char *errmsg) {
   }
 
   if (errmsg != nullptr) {
-    _context.reportError(errmsg);
+    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
+    _context.handleException(exception);
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, callbackContext->exception);
-  JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 0, nullptr, callbackContext->exception);
+  JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
+  JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 0, nullptr, &exception);
+  _context.handleException(exception);
 }
 
 JSValueRef requestBatchUpdate(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,

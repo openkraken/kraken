@@ -71,19 +71,22 @@ JSValueRef refreshPaint(JSContextRef ctx, JSObjectRef function, JSObjectRef this
     binding::jsc::JSContext &_context = callbackContext->_context;
     JSContextRef ctx = _context.context();
 
+    JSValueRef exception = nullptr;
+
     if (errmsg != nullptr) {
       JSStringRef errorStringRef = JSStringCreateWithUTF8CString(errmsg);
       const JSValueRef errorArgs[] = {JSValueMakeString(ctx, errorStringRef)};
-      JSObjectRef errorObject = JSObjectMakeError(ctx, 1, errorArgs, callbackContext->exception);
+      JSObjectRef errorObject = JSObjectMakeError(ctx, 1, errorArgs, &exception);
       const JSValueRef arguments[] = {errorObject};
-      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, callbackContext->exception);
-      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments,
-                             callbackContext->exception);
+      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
+      JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, &exception);
     } else {
-      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, callbackContext->exception);
+      JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
       JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 0, nullptr,
-                             callbackContext->exception);
+                             &exception);
     }
+
+    _context.handleException(exception);
     delete callbackContext;
   };
 
@@ -158,13 +161,15 @@ JSValueRef matchImageSnapshot(JSContextRef ctx, JSObjectRef function, JSObjectRe
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
   auto fn = [](void *ptr, int32_t contextId, int8_t result) {
+    JSValueRef exception = nullptr;
     auto callbackContext = static_cast<BridgeCallback::Context *>(ptr);
     binding::jsc::JSContext &_context = callbackContext->_context;
     JSContextRef ctx = _context.context();
-    JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, callbackContext->exception);
+    JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackContext->_callback, &exception);
     const JSValueRef arguments[] = {JSValueMakeBoolean(ctx, result)};
-    JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 1, arguments, callbackContext->exception);
+    JSObjectCallAsFunction(ctx, callbackObjectRef, _context.global(), 1, arguments, &exception);
     delete callbackContext;
+    _context.handleException(exception);
   };
 
   auto bridge = static_cast<JSBridge *>(context->getOwner());

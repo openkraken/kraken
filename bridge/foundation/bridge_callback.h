@@ -45,14 +45,13 @@ public:
 #elif KRAKEN_JSC_ENGINE
   struct Context {
     Context(kraken::binding::jsc::JSContext &context, JSValueRef callback, JSValueRef *exception)
-      : _context(context), _callback(callback), exception(exception) {
+      : _context(context), _callback(callback) {
       JSValueProtect(context.context(), callback);
     };
     ~Context() {
       JSValueUnprotect(_context.context(), _callback);
     }
     kraken::binding::jsc::JSContext &_context;
-    JSValueRef *exception;
     JSValueRef _callback;
   };
 #endif

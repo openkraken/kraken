@@ -49,7 +49,7 @@ public:
   JSBlob(JSContext *context, std::vector<uint8_t> &&data)
     : _size(data.size()), _data(std::move(data)), HostObject(context, JSBlobName){};
   JSBlob(JSContext *context, std::vector<uint8_t> &&data, std::string mime)
-    : mimeType(std::move(mime)), _size(data.size()), HostObject(context, JSBlobName){};
+    : mimeType(std::move(mime)), _size(data.size()), _data(std::move(data)), HostObject(context, JSBlobName){};
 
   ~JSBlob() override;
 

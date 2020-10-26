@@ -21,11 +21,12 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
 
   if (!_context.isValid()) return;
 
+  JSValueRef exception = nullptr;
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.",
-                    callbackContext->exception);
+    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.", &exception);
+    _context.handleException(exception);
     return;
   }
 
@@ -34,14 +35,14 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
   }
 
   if (errmsg != nullptr) {
-    JSC_THROW_ERROR(_context.context(), errmsg, callbackContext->exception);
+    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
+    _context.handleException(exception);
     return;
   }
 
-  JSObjectRef callbackObjectRef =
-    JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,
-                         callbackContext->exception);
+  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, &exception);
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, &exception);
+  _context.handleException(exception);
 }
 
 void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
@@ -51,11 +52,14 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
 
   if (!_context.isValid()) return;
 
+  JSValueRef exception = nullptr;
+
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
     JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.",
-                    callbackContext->exception);
+                    &exception);
+    _context.handleException(exception);
     return;
   }
 
@@ -64,14 +68,16 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
   }
 
   if (errmsg != nullptr) {
-    JSC_THROW_ERROR(_context.context(), errmsg, callbackContext->exception);
+    JSC_THROW_ERROR(_context.context(), errmsg, &exception);
+    _context.handleException(exception);
     return;
   }
 
   JSObjectRef callbackObjectRef =
-    JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
+    JSValueToObject(_context.context(), callbackContext->_callback, &exception);
   JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,
-                         callbackContext->exception);
+                         &exception);
+  _context.handleException(exception);
 }
 
 void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
@@ -307,7 +313,7 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
 }
 
 JSValueRef reloadApp(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                  const JSValueRef *arguments, JSValueRef *exception) {
+                     const JSValueRef *arguments, JSValueRef *exception) {
   auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   getDartMethod()->reloadApp(context->getContextId());
   return nullptr;
@@ -318,7 +324,7 @@ void bindTimer(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "setInterval", setInterval);
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_animation_frame__", requestAnimationFrame);
   JSC_GLOBAL_BINDING_FUNCTION(context, "clearTimeout", clearTimeout);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "clearInternal", clearTimeout);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "clearInterval", clearTimeout);
   JSC_GLOBAL_BINDING_FUNCTION(context, "reload", reloadApp);
   JSC_GLOBAL_BINDING_FUNCTION(context, "cancelAnimationFrame", cancelAnimationFrame);
 }

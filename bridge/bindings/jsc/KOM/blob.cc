@@ -10,13 +10,10 @@
 namespace kraken::binding::jsc {
 
 void BlobBuilder::append(JSContext &context, JSStringRef text) {
-  size_t length = JSStringGetMaximumUTF8CStringSize(text);
-  char buffer[length];
-  JSStringGetUTF8CString(text, buffer, length);
-
-  for (size_t i = 0; i < length; i++) {
-    _data.emplace_back(buffer[i]);
-  }
+  std::string str = JSStringToStdString(text);
+  std::vector<uint8_t> strArr(str.begin(), str.end());
+  _data.reserve(_data.size() + strArr.size());
+  _data.insert(_data.end(), strArr.begin(), strArr.end());
 }
 
 void BlobBuilder::append(JSContext &context, JSBlob *blob) {
@@ -29,6 +26,17 @@ void BlobBuilder::append(JSContext &context, const JSValueRef value, JSValueRef 
   if (JSValueIsString(context.context(), value)) {
     append(context, JSValueToStringCopy(context.context(), value, exception));
   } else if (JSValueIsArray(context.context(), value)) {
+    JSObjectRef array = JSValueToObject(context.context(), value, exception);
+    JSValueRef lengthValue =
+      JSObjectGetProperty(context.context(), array, JSStringCreateWithUTF8CString("length"), exception);
+    size_t length = JSValueToNumber(context.context(), lengthValue, exception);
+
+    for (size_t i = 0; i < length; i++) {
+      JSValueRef v = JSObjectGetPropertyAtIndex(context.context(), array, i, exception);
+      append(context, v, exception);
+    }
+
+  } else if (JSValueIsObject(context.context(), value)) {
     JSTypedArrayType typedArrayType = JSValueGetTypedArrayType(context.context(), value, exception);
     if (typedArrayType == JSTypedArrayType::kJSTypedArrayTypeInt8Array ||
         typedArrayType == JSTypedArrayType::kJSTypedArrayTypeInt16Array ||
@@ -53,26 +61,16 @@ void BlobBuilder::append(JSContext &context, const JSValueRef value, JSValueRef 
         _data.emplace_back(ptr[i]);
       }
     } else {
-      JSObjectRef array = JSValueToObject(context.context(), value, exception);
-      JSValueRef lengthValue =
-        JSObjectGetProperty(context.context(), array, JSStringCreateWithUTF8CString("length"), exception);
-      size_t length = JSValueToNumber(context.context(), lengthValue, exception);
-
-      for (size_t i = 0; i < length; i++) {
-        JSValueRef v = JSObjectGetPropertyAtIndex(context.context(), array, i, exception);
-        append(context, v, exception);
+      auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(JSValueToObject(context.context(), value, exception)));
+      if (blob == nullptr) {
+        return;
       }
-    }
-  } else if (JSValueIsObject(context.context(), value)) {
-    auto blob = static_cast<JSBlob *>(JSObjectGetPrivate(JSValueToObject(context.context(), value, exception)));
-    if (blob == nullptr) {
-      return;
-    }
 
-    if (std::string(blob->name) == JSBlobName) {
-      std::vector<uint8_t> blobData = blob->_data;
-      _data.reserve(_data.size() + blobData.size());
-      _data.insert(_data.end(), blobData.begin(), blobData.end());
+      if (std::string(blob->name) == JSBlobName) {
+        std::vector<uint8_t> blobData = blob->_data;
+        _data.reserve(_data.size() + blobData.size());
+        _data.insert(_data.end(), blobData.begin(), blobData.end());
+      }
     }
   }
 }
@@ -192,6 +190,11 @@ JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
     return JSBlob::propertyBindingFunction(context, this, "text", text);
   } else if (name == "arrayBuffer") {
     return JSBlob::propertyBindingFunction(context, this, "arrayBuffer", arrayBuffer);
+  } else if (name == "size") {
+    return JSValueMakeNumber(context->context(), _data.size());
+  } else if (name == "type") {
+    JSStringRef string = JSStringCreateWithUTF8CString(mimeType.c_str());
+    return JSValueMakeString(context->context(), string);
   }
 
   return nullptr;

@@ -70,20 +70,20 @@ JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
             JSStringRef errorStringRef = JSStringCreateWithUTF8CString(error);
             const JSValueRef arguments[] = {JSValueMakeString(ctx, errorStringRef)};
             JSObjectRef callbackObjectRef = JSValueToObject(ctx,
-                                                            callbackContext->_callback, callbackContext->exception);
+                                                            callbackContext->_callback, nullptr);
             JSObjectCallAsFunction(ctx, callbackObjectRef,
-                                   callbackContext->_context.global(), 1, arguments, callbackContext->exception);
+                                   callbackContext->_context.global(), 1, arguments, nullptr);
           } else {
             std::vector<uint8_t> vec(bytes, bytes + length);
             JSObjectRef callbackObjectRef = JSValueToObject(callbackContext->_context.context(),
-                                                            callbackContext->_callback, callbackContext->exception);
+                                                            callbackContext->_callback, nullptr);
             auto blob = new JSBlob(&callbackContext->_context, std::move(vec));
             const JSValueRef arguments[] = {
               JSValueMakeNull(callbackContext->_context.context()),
               blob->jsObject
             };
 
-            JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, callbackContext->exception);
+            JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 2, arguments, nullptr);
           }
         },
         id, devicePixelRatio);
