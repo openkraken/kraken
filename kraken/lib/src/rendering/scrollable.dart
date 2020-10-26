@@ -344,7 +344,7 @@ mixin RenderOverflowMixin on RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
-    final RenderSingleViewPortParentData childParentData = parentData;
+    final BoxParentData childParentData = parentData;
     double candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;
