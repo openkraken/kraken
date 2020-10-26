@@ -92,8 +92,6 @@ class ObjectElement extends Element implements ObjectElementHost {
    super.method(name, args);
    _objectElementClient?.method(name, args);
   }
-
-
 }
 
 class _DefaultObjectElementClient implements ObjectElementClient {

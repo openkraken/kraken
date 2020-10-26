@@ -444,7 +444,7 @@ class Element extends Node
   void addChild(RenderObject child) {
     if (_renderLayoutBox != null) {
       _renderLayoutBox.add(child);
-    } else {
+    } else if (_renderIntrinsic != null) {
       _renderIntrinsic.child = child;
     }
   }
