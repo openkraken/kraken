@@ -989,9 +989,20 @@ class Element extends Node
   // Universal style property change callback.
   @mustCallSuper
   void setStyle(String key, value) {
-    // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
-    // [StyleChangeListener] to be invoked in sync.
-    style.setProperty(key, value);
+    // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
+    // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
+    // This it not a good solution between webkit's implementation which write all new style property into an RenderStyle object
+    // then trigger the animation phase.
+    if (key == TRANSITION) {
+      SchedulerBinding.instance.addPostFrameCallback((timestamp) {
+        style.setProperty(key, value);
+      });
+      return;
+    } else {
+      // @NOTE: See [CSSStyleDeclaration.setProperty], value change will trigger
+      // [StyleChangeListener] to be invoked in sync.
+      style.setProperty(key, value);
+    }
   }
 
   @mustCallSuper

@@ -66,4 +66,51 @@ describe('Position fixed', () => {
     BODY.appendChild(container);
     await matchViewportSnapshot();
   });
+
+  it('hitTest with position fixed elements', async () => {
+    let box;
+    let clickCount = 0;
+    let container = createViewElement({
+      width: '200px',
+      height: '200px',
+      border: '1px solid #000',
+      overflow: 'scroll'
+    }, [
+      box = createElement('div', {
+        style: {
+          width: '50px',
+          height: '50px',
+          position: 'fixed',
+          background: 'red',
+          top: 0
+        }
+      }),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+      createElement('div', {}, [createText('1234')]),
+    ]);
+
+    BODY.appendChild(container);
+
+    box.onclick = () => clickCount++;
+
+    await simulateClick(10, 10);
+
+    container.scrollTop = 20;
+
+    await simulateClick(10, 10);
+
+    expect(clickCount).toBe(2);
+  });
 });

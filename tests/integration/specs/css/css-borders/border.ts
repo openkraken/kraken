@@ -228,4 +228,40 @@ describe('border', () => {
 
     await matchViewportSnapshot(0.1);
   });
+
+  it('borderSide should handle hitTest', async () => {
+    let clickCount = 0;
+    let container = createElement('div', {
+      style: {
+        width: '20px',
+        height: '20px',
+        border: '5px solid #000'
+      }
+    }, [
+    ]);
+
+    BODY.appendChild(container);
+    container.onclick = () => clickCount++;
+    await simulateClick(1.0, 1.0);
+    expect(clickCount).toBe(1);
+  });
+
+  it('marginSide should not handle hitTest', async () => {
+    let clickCount = 0;
+    let container = createElement('div', {
+      style: {
+        width: '20px',
+        height: '20px',
+        margin: '10px',
+        border: '2px solid #000'
+      }
+    });
+
+    BODY.appendChild(container);
+    container.onclick = () => clickCount++;
+
+    await simulateClick(1.0, 1.0);
+    await simulateClick(11.0, 11.0);
+    expect(clickCount).toBe(1);
+  });
 });

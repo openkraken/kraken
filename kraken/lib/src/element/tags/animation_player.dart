@@ -58,10 +58,10 @@ class AnimationPlayerElement extends Element {
       assert(args[1] is Map);
       Map options = args[1];
       if (options.containsKey('mix')) {
-        mix = CSSLength.toDouble(options['mix']);
+        mix = CSSLength.toDouble(options['mix']) ?? 0.0;
       }
       if (options.containsKey('mixSeconds')) {
-        mix = CSSLength.toDouble(options['mixSeconds']);
+        mix = CSSLength.toDouble(options['mixSeconds']) ?? 0.0;
       }
     }
     _animationController?.play(name, mix: mix, mixSeconds: mixSeconds);

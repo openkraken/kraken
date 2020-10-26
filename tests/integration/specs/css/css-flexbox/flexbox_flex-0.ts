@@ -73,7 +73,7 @@ describe('flexbox_flex-0', () => {
 
     await matchViewportSnapshot();
   });
-  it('0-0-unitless', async () => {
+  xit('0-0-unitless', async () => {
     let div;
     div = createElement(
       'div',
@@ -618,7 +618,7 @@ describe('flexbox_flex-0', () => {
 
     await matchViewportSnapshot();
   });
-  it('0-N', async () => {
+  xit('0-N', async () => {
     let div;
     div = createElement(
       'div',
