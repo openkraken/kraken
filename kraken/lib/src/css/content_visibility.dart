@@ -50,11 +50,13 @@ mixin CSSContentVisibilityMixin on ElementBase {
   }
 
   void updateRenderContentVisibility(ContentVisibility contentVisibility) {
-    renderBoxModel.contentVisibility = contentVisibility;
-    if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
-      renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
-      _hasIntersectionObserver = false;
+    if (renderBoxModel != null) {
+      renderBoxModel.contentVisibility = contentVisibility;
+      if (contentVisibility != ContentVisibility.auto && _hasIntersectionObserver) {
+        renderBoxModel.removeIntersectionChangeListener(_handleIntersectionChange);
+        _hasIntersectionObserver = false;
+      }
+      setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
     }
-    setContentVisibilityIntersectionObserver(renderBoxModel, contentVisibility);
   }
 }
