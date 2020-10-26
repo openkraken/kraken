@@ -7,6 +7,8 @@
 #include "bindings/jsc/macros.h"
 #include <memory>
 #include <mutex>
+#include <vector>
+#include <iostream>
 
 namespace kraken::binding::jsc {
 
@@ -14,19 +16,20 @@ JSContext::JSContext(int32_t contextId, const JSExceptionHandler &handler, void 
   : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false) {
 
   ctx_ = JSGlobalContextCreateInGroup(nullptr, nullptr);
+
+  std::cout << "create js Context: " << ctx_ << std::endl;
+
   JSObjectRef global = JSContextGetGlobalObject(ctx_);
   JSStringRef windowName = JSStringCreateWithUTF8CString("window");
   JSStringRef globalThis = JSStringCreateWithUTF8CString("globalThis");
   JSObjectSetProperty(ctx_, global, windowName, global, kJSPropertyAttributeNone, nullptr);
   JSObjectSetProperty(ctx_, global, globalThis, global, kJSPropertyAttributeNone, nullptr);
-
-  JSStringRelease(windowName);
-  JSStringRelease(globalThis);
 }
 
 JSContext::~JSContext() {
   ctxInvalid_ = true;
-  releaseGlobalString();
+  std::cout << "release js context: " << ctx_ << std::endl;
+//  releaseGlobalString();
   JSGlobalContextRelease(ctx_);
 }
 
@@ -71,10 +74,12 @@ bool JSContext::isValid() {
 }
 
 int32_t JSContext::getContextId() {
+  assert(!ctxInvalid_ && "context has been released");
   return contextId;
 }
 
 void *JSContext::getOwner() {
+  assert(!ctxInvalid_ && "context has been released");
   return owner;
 }
 
@@ -91,6 +96,7 @@ JSObjectRef JSContext::global() {
 }
 
 JSGlobalContextRef JSContext::context() {
+  assert(!ctxInvalid_ && "context has been released");
   return ctx_;
 }
 
@@ -118,24 +124,39 @@ std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionH
 
 std::string JSStringToStdString(JSStringRef jsString) {
   size_t maxBufferSize = JSStringGetMaximumUTF8CStringSize(jsString);
-  char utf8Buffer[maxBufferSize];
-  size_t bytesWritten = JSStringGetUTF8CString(jsString, utf8Buffer, maxBufferSize);
-  std::string utf_string = std::string(utf8Buffer, bytesWritten - 1);
-  JSStringRelease(jsString);
-  return utf_string;
+  std::vector<char> buffer(maxBufferSize);
+  JSStringGetUTF8CString(jsString, buffer.data(), maxBufferSize);
+  return std::string(buffer.data());
 }
 
-HostObject::HostObject(JSContext *context, const char *name) : context(context), name(name) {
-  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name, HostObject);
-  object = JSClassCreate(&hostObjectDefinition);
+std::once_flag hostObjectClassOnceFlag;
+JSClassRef hostObjectClass {};
+
+HostObject::HostObject(JSContext *context, std::string name) : context(context), name(name), ctx(context->context()) {
+//  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
+//  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
+//  object = JSClassCreate(&hostObjectDefinition);
+  std::call_once(hostObjectClassOnceFlag, []() {
+    JSClassDefinition hostObjectClassDef = kJSClassDefinitionEmpty;
+    hostObjectClassDef.version = 0;
+    hostObjectClassDef.attributes = kJSClassAttributeNoAutomaticPrototype;
+    hostObjectClassDef.finalize = HostObject::finalize;
+    hostObjectClassDef.getProperty = HostObject::proxyGetProperty;
+    hostObjectClassDef.setProperty = HostObject::proxySetProperty;
+    hostObjectClassDef.getPropertyNames = HostObject::proxyGetPropertyNames;
+    hostObjectClass = JSClassCreate(&hostObjectClassDef);
+  });
+  object = JSObjectMake(context->context(), hostObjectClass, this);
+  JSValueProtect(context->context(), object);
 }
 
 JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                         JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
+  JSStringRetain(propertyName);
   JSValueRef ret = hostObject->getProperty(propertyName, exception);
+  JSStringRelease(propertyName);
   if (!context->handleException(*exception)) {
     return nullptr;
   }
@@ -146,14 +167,18 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
                                   JSValueRef *exception) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
   auto &context = hostObject->context;
+  JSStringRetain(propertyName);
   hostObject->setProperty(propertyName, value, exception);
+  JSStringRelease(propertyName);
   return context->handleException(*exception);
 }
 
 void HostObject::finalize(JSObjectRef obj) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
-  JSClassRelease(hostObject->object);
-  delete hostObject;
+  JSValueUnprotect(hostObject->ctx, obj);
+  JSObjectSetPrivate(obj, nullptr);
+//  JSClassRelease(hostObject->object);
+//  delete hostObject;
 }
 
 bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,

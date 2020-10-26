@@ -95,7 +95,7 @@ JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectR
   auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
   if (argumentCount == 0) {
     auto blob = new JSBlob(context);
-    return JSObjectMake(ctx, blob->object, blob);
+//    return JSObjectMake(ctx, blob->object, blob);
   }
 
   const JSValueRef &arrayValue = arguments[0];
@@ -109,7 +109,7 @@ JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectR
   if (JSValueIsUndefined(ctx, optionValue)) {
     builder.append(*context, arrayValue, exception);
     auto blob = new JSBlob(context, builder.finalize());
-    return JSObjectMake(ctx, blob->object, blob);
+//    return JSObjectMake(ctx, blob->object, blob);
   }
 
   if (!JSValueIsObject(ctx, optionValue)) {
@@ -126,7 +126,7 @@ JSValueRef JSBlob::constructor(JSContextRef ctx, JSObjectRef function, JSObjectR
   JSStringRef mineTypeStringRef = JSValueToStringCopy(ctx, mimeTypeValueRef, exception);
   builder.append(*context, arrayValue, exception);
   auto blob = new JSBlob(context, builder.finalize(), JSStringToStdString(mineTypeStringRef));
-  return JSObjectMake(ctx, blob->object, blob);
+//  return JSObjectMake(ctx, blob->object, blob);
 }
 
 JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
@@ -156,7 +156,7 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
   if (start == 0 && end == blob->_data.size()) {
     auto newBlob = new JSBlob(blob->context, std::move(blob->_data), mimeType);
-    return JSObjectMake(ctx, newBlob->object, newBlob);
+//    return JSObjectMake(ctx, newBlob->object, newBlob);
   }
 
   std::vector<uint8_t> newData;
@@ -164,7 +164,7 @@ JSValueRef JSBlob::slice(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
   newData.insert(newData.begin(), blob->_data.begin() + start, blob->_data.end() - (blob->_data.size() - end));
 
   auto newBlob = new JSBlob(blob->context, std::move(newData), mimeType);
-  return JSObjectMake(ctx, newBlob->object, newBlob);
+//  return JSObjectMake(ctx, newBlob->object, newBlob);
 }
 
 JSValueRef JSBlob::text(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,

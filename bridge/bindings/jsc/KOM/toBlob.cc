@@ -55,7 +55,7 @@ JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext),
     [id, devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->toBlob(
@@ -79,8 +79,8 @@ JSValueRef toBlob(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
                                                             callbackContext->_callback, callbackContext->exception);
             auto blob = new JSBlob(&callbackContext->_context, std::move(vec));
             const JSValueRef arguments[] = {
-              JSValueMakeNull(callbackContext->_context.context()),
-              JSObjectMake(ctx, blob->object, blob)
+//              JSValueMakeNull(callbackContext->_context.context()),
+//              JSObjectMake(ctx, blob->object, blob)
             };
 
             JSObjectCallAsFunction(ctx, callbackObjectRef, callbackContext->_context.global(), 1, arguments, callbackContext->exception);

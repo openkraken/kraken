@@ -41,7 +41,7 @@ Value toBlob(JSContext &context, const Value &thisVal, const Value *args, size_t
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, func);
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext), [&id, &devicePixelRatio](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->toBlob(
         callbackContext, contextId,

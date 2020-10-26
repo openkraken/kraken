@@ -47,7 +47,7 @@ TEST(BridgeCallback, worksWithNoFunctionLeaks) {
     std::shared_ptr<Value> callbackValue = std::make_shared<Value>(jsa::Value(*context, hostFunction));
     auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackValue);
     auto bridge = static_cast<kraken::JSBridge*>(context->getOwner());
-    bridge->bridgeCallback.registerCallback<void>(std::move(callbackContext),
+    bridge->bridgeCallback->registerCallback<void>(std::move(callbackContext),
                                                        [&postToChildThread](void *data, int32_t contextId) { postToChildThread(data); });
   };
 

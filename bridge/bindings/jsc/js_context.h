@@ -50,7 +50,7 @@ public:
   void reportError(const char *errmsg);
 
   void emplaceGlobalString(JSStringRef string) {
-    globalStrings.emplace_back(string);
+//    globalStrings.emplace_back(string);
   }
 
 private:
@@ -86,11 +86,12 @@ public:
   }
 
   HostObject() = delete;
-  HostObject(JSContext *context, const char *name);
-  const char *name;
+  HostObject(JSContext *context, std::string name);
+  std::string name;
 
   JSContext *context;
-  JSClassRef object;
+  JSObjectRef object;
+  JSContextRef ctx;
   // The C++ object's dtor will be called when the GC finalizes this
   // object.  (This may be as late as when the JSContext is shut down.)
   // You have no control over which thread it is called on.  This will

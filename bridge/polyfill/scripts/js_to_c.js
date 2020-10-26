@@ -16,7 +16,7 @@ const getPolyFillHeader = (outputName) => `/*
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
 
-#include "bridge.h"
+#include "bridge_${jsEngine}.h"
 
 void initKraken${outputName}(kraken::JSBridge *bridge);
 
@@ -29,7 +29,7 @@ const getPolyFillSource = (source, outputName) => `/*
  */
 
 #include "${outputName.toLowerCase()}.h"
-#include "bridge.h"
+#include "bridge_${jsEngine}.h"
 
 static std::string jsCode = std::string(R"(${source})");
 
@@ -45,6 +45,7 @@ function convertJSToCpp(code, outputName) {
 
 let source = argv.s;
 let output = argv.o;
+let jsEngine = argv.jsEngine || 'jsc';
 let outputName = argv.n || 'PolyFill';
 
 if (!source || !output) {

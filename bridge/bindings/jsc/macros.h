@@ -9,7 +9,6 @@
     JSClassRef functionClass = JSClassCreate(&functionDefinition);                                                     \
     JSObjectRef function = JSObjectMake(context->context(), functionClass, context.get());                             \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
-    context->emplaceGlobalString(name);                                                                                \
     JSValueRef exc = nullptr;                                                                                          \
     JSObjectSetProperty(context->context(), context->global(), name, function, kJSPropertyAttributeNone, &exc);        \
     context->handleException(exc);                                                                                     \
@@ -20,7 +19,6 @@
     JSClassRef objectClass = hostObject->object;                                                                       \
     JSObjectRef object = JSObjectMake(context->context(), objectClass, hostObject);                                    \
     JSStringRef name = JSStringCreateWithUTF8CString(nameStr);                                                         \
-    context->emplaceGlobalString(name);                                                                                \
     JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);   \
   }
 
@@ -30,13 +28,11 @@
     JSStringRef valueStringRef = JSStringCreateWithUTF8CString(value);                                                 \
     JSValueRef valueRef = JSValueMakeString(context->context(), valueStringRef);                                       \
     JSObjectSetProperty(context->context(), object, keyRef, valueRef, kJSPropertyAttributeNone, nullptr);              \
-    JSStringRelease(keyRef);                                                                                           \
   }
 
 #define JSC_GLOBAL_SET_PROPERTY(context, key, value)                                                                   \
   {                                                                                                                    \
     JSStringRef keyString = JSStringCreateWithUTF8CString(key);                                                        \
-    context->emplaceGlobalString(keyString);                                                                           \
     JSObjectSetProperty(context->context(), context->global(), keyString, value, kJSPropertyAttributeReadOnly,         \
                         nullptr);                                                                                      \
   }

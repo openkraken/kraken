@@ -111,7 +111,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
     });
@@ -158,7 +158,7 @@ Value setInterval(JSContext &context, const Value &thisVal, const Value *args, s
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(context, callbackValue);
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&delay](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, delay);
     });
@@ -233,7 +233,7 @@ Value requestAnimationFrame(JSContext &context, const Value &thisVal, const Valu
   }
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  int32_t requestId = bridge->bridgeCallback.registerCallback<int32_t>(
+  int32_t requestId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->requestAnimationFrame(callbackContext, contextId, handleRAFTransientCallback);
     });

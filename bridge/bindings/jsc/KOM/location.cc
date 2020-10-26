@@ -42,11 +42,11 @@ JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
-void JSLocation::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  for (auto &propertyName : propertyNames) {
-    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-  }
-}
+//void JSLocation::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+//  for (auto &propertyName : propertyNames) {
+//    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+//  }
+//}
 
 JSLocation::~JSLocation() {
   for (auto &propertyName : propertyNames) {

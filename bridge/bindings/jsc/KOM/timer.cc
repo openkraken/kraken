@@ -8,6 +8,7 @@
 #include "bridge_jsc.h"
 #include "dart_methods.h"
 #include "foundation/bridge_callback.h"
+#include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
 
@@ -23,7 +24,8 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.", callbackContext->exception);
+    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: timer callback is null.",
+                    callbackContext->exception);
     return;
   }
 
@@ -36,8 +38,10 @@ void handlePersistentCallback(void *ptr, int32_t contextId, const char *errmsg) 
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr, callbackContext->exception);
+  JSObjectRef callbackObjectRef =
+    JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,
+                         callbackContext->exception);
 }
 
 void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, const char *errmsg) {
@@ -50,7 +54,8 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
   if (callbackContext->_callback == nullptr) {
     // throw JSError inside of dart function callback will directly cause crash
     // so we handle it instead of throw
-    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.", callbackContext->exception);
+    JSC_THROW_ERROR(_context.context(), "Failed to trigger callback: requestAnimationFrame callback is null.",
+                    callbackContext->exception);
     return;
   }
 
@@ -63,8 +68,10 @@ void handleRAFPersistentCallback(void *ptr, int32_t contextId, double result, co
     return;
   }
 
-  JSObjectRef callbackObjectRef = JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
-  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,  callbackContext->exception);
+  JSObjectRef callbackObjectRef =
+    JSValueToObject(_context.context(), callbackContext->_callback, callbackContext->exception);
+  JSObjectCallAsFunction(_context.context(), callbackObjectRef, _context.global(), 0, nullptr,
+                         callbackContext->exception);
 }
 
 void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
@@ -101,7 +108,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
 
   int32_t timeout;
 
-  if (JSValueIsUndefined(ctx, timeoutValueRef) || argumentCount < 2) {
+  if (argumentCount < 2 || JSValueIsUndefined(ctx, timeoutValueRef)) {
     timeout = 0;
   } else if (JSValueIsNumber(ctx, timeoutValueRef)) {
     timeout = JSValueToNumber(ctx, timeoutValueRef, exception);
@@ -118,7 +125,7 @@ JSValueRef setTimeout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisOb
 
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
     });
@@ -158,7 +165,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
 
   int32_t timeout;
 
-  if (JSValueIsUndefined(ctx, timeoutValueRef) || argumentCount < 2) {
+  if (argumentCount < 2 || JSValueIsUndefined(ctx, timeoutValueRef)) {
     timeout = 0;
   } else if (JSValueIsNumber(ctx, timeoutValueRef)) {
     timeout = JSValueToNumber(ctx, timeoutValueRef, exception);
@@ -176,7 +183,7 @@ JSValueRef setInterval(JSContextRef ctx, JSObjectRef function, JSObjectRef thisO
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
+  auto timerId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->setInterval(callbackContext, contextId, handlePersistentCallback, timeout);
     });
@@ -249,7 +256,8 @@ JSValueRef cancelAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObject
 JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                  const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount <= 0) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.",
+                    exception);
     return nullptr;
   }
 
@@ -257,14 +265,16 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   const JSValueRef &callbackValueRef = arguments[0];
 
   if (!JSValueIsObject(ctx, callbackValueRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
+                    exception);
     return nullptr;
   }
 
   JSObjectRef callbackObjectRef = JSValueToObject(ctx, callbackValueRef, exception);
 
   if (!JSObjectIsFunction(ctx, callbackObjectRef)) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.", exception);
+    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.",
+                    exception);
     return nullptr;
   }
 
@@ -272,24 +282,35 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.", exception);
+    JSC_THROW_ERROR(ctx,
+                    "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.",
+                    exception);
     return nullptr;
   }
 
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  int32_t requestId = bridge->bridgeCallback.registerCallback<int32_t>(
+  int32_t requestId = bridge->bridgeCallback->registerCallback<int32_t>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       return getDartMethod()->requestAnimationFrame(callbackContext, contextId, handleRAFTransientCallback);
     });
 
   // `-1` represents some error occurred.
   if (requestId == -1) {
-    JSC_THROW_ERROR(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
-                         "with unexpected error.", exception);
+    JSC_THROW_ERROR(ctx,
+                    "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
+                    "with unexpected error.",
+                    exception);
     return nullptr;
   }
 
   return JSValueMakeNumber(ctx, requestId);
+}
+
+JSValueRef reloadApp(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                  const JSValueRef *arguments, JSValueRef *exception) {
+  auto context = static_cast<JSContext *>(JSObjectGetPrivate(function));
+  getDartMethod()->reloadApp(context->getContextId());
+  return nullptr;
 }
 
 void bindTimer(std::unique_ptr<JSContext> &context) {
@@ -298,6 +319,7 @@ void bindTimer(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_animation_frame__", requestAnimationFrame);
   JSC_GLOBAL_BINDING_FUNCTION(context, "clearTimeout", clearTimeout);
   JSC_GLOBAL_BINDING_FUNCTION(context, "clearInternal", clearTimeout);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "reload", reloadApp);
   JSC_GLOBAL_BINDING_FUNCTION(context, "cancelAnimationFrame", cancelAnimationFrame);
 }
 

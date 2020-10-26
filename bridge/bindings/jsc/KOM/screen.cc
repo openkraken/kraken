@@ -4,8 +4,8 @@
  */
 
 #include "screen.h"
-#include "dart_methods.h"
 #include "bindings/jsc/macros.h"
+#include "dart_methods.h"
 
 namespace kraken::binding::jsc {
 
@@ -42,7 +42,10 @@ JSScreen::~JSScreen() {
 
 void bindScreen(std::unique_ptr<JSContext> &context) {
   auto screen = new JSScreen(context.get());
-  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
+  //  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "screen", screen);
+  JSObjectRef object = screen->object;
+  JSStringRef name = JSStringCreateWithUTF8CString("screen");
+  JSObjectSetProperty(context->context(), context->global(), name, object, kJSPropertyAttributeReadOnly, nullptr);
 }
 
 } // namespace kraken::binding::jsc

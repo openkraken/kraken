@@ -73,7 +73,7 @@ JSValueRef krakenUIListener(JSContextRef ctx, JSObjectRef function, JSObjectRef 
 
   // Needs to protect this function been garbage collected by GC.
   JSValueProtect(ctx, callbackObject);
-  bridge->krakenUIListenerList.emplace_back(callbackObject);
+  bridge->krakenUIListenerList.push_back(callbackObject);
   return nullptr;
 }
 
@@ -103,7 +103,7 @@ JSValueRef krakenModuleListener(JSContextRef ctx, JSObjectRef function, JSObject
   auto bridge = static_cast<JSBridge *>(context->getOwner());
 
   JSValueProtect(ctx, callbackObject);
-  bridge->krakenModuleListenerList.emplace_back(callbackObject);
+  bridge->krakenModuleListenerList.push_back(callbackObject);
 
   return nullptr;
 }
@@ -174,7 +174,7 @@ JSValueRef krakenInvokeModule(JSContextRef ctx, JSObjectRef function, JSObjectRe
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
-  const auto *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
+  const auto *result = bridge->bridgeCallback->registerCallback<const NativeString *>(
     std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
       const NativeString *response =
         getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
@@ -266,7 +266,7 @@ JSValueRef requestBatchUpdate(JSContextRef ctx, JSObjectRef function, JSObjectRe
   }
 
   auto bridge = static_cast<JSBridge *>(context->getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleBatchUpdate);
     });

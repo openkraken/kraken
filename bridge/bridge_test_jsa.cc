@@ -66,7 +66,7 @@ Value refreshPaint(JSContext &context, const Value &thisVal, const Value *args, 
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext),
     [&fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->refreshPaint(callbackContext, contextId, fn);
@@ -122,7 +122,7 @@ Value matchImageSnapshot(JSContext &context, const Value &thisVal, const Value *
   };
 
   auto bridge = static_cast<JSBridge*>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext),
     [&jsBlob, &nativeString, &fn](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->matchImageSnapshot(callbackContext, contextId, jsBlob->bytes(), jsBlob->size(),

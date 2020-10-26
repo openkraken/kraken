@@ -12,7 +12,7 @@ namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context.get());
-  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
+//  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -39,7 +39,7 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
   JSStringRelease(tagNameStrRef);
 
-  return JSObjectMake(element->context->context(), element->object, element);
+//  return JSObjectMake(element->context->context(), element->object, element);
 }
 
 JSDocument::JSDocument(JSContext *context) : HostObject(context, "Document") {}

@@ -114,7 +114,7 @@ Value invokeModule(JSContext &context, const Value &thisVal, const Value *args, 
   nativeString.string = unicodeStrPtr;
   nativeString.length = unicodeLength;
 
-  const auto *result = bridge->bridgeCallback.registerCallback<const NativeString *>(
+  const auto *result = bridge->bridgeCallback->registerCallback<const NativeString *>(
     std::move(callbackContext), [&nativeString](BridgeCallback::Context *bridgeContext, int32_t contextId) {
       const NativeString *response =
         getDartMethod()->invokeModule(bridgeContext, contextId, &nativeString, handleInvokeModuleTransientCallback);
@@ -224,7 +224,7 @@ Value requestBatchUpdate(JSContext &context, const Value &thisVal, const Value *
   }
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  bridge->bridgeCallback.registerCallback<void>(
+  bridge->bridgeCallback->registerCallback<void>(
     std::move(callbackContext), [](BridgeCallback::Context *callbackContext, int32_t contextId) {
       getDartMethod()->requestBatchUpdate(callbackContext, contextId, handleBatchUpdate);
     });
