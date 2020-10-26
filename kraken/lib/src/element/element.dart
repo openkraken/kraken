@@ -91,10 +91,6 @@ class Element extends Node
   Map<String, dynamic> properties;
   List<String> events;
 
-  /// whether element needs reposition when append to tree or
-  /// changing position property.
-  bool needsReposition = false;
-
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
@@ -135,7 +131,6 @@ class Element extends Node
     this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
-    this.needsReposition = false,
     // Whether element allows children.
     bool isIntrinsicBox = false,
     this.repaintSelf = false
@@ -145,15 +140,12 @@ class Element extends Node
     if (properties == null) properties = {};
     if (events == null) events = [];
 
-    _isIntrinsicBox = isIntrinsicBox;
     defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
+    _isIntrinsicBox = isIntrinsicBox;
+
     style = CSSStyleDeclaration(this);
-    style.addStyleChangeListener(_onStyleChanged);
-
-    // Mark element needs to reposition according to position CSS.
-    if (_isPositioned(style)) needsReposition = true;
-
     initializeRenderObject();
+    style.addStyleChangeListener(_onStyleChanged);
 
     _setDefaultStyle();
   }
@@ -855,20 +847,18 @@ class Element extends Node
 
     renderBoxModel.display = presentDisplay;
 
-    if (renderBoxModel != null) {
-      if (originalDisplay != presentDisplay) {
-        RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
-        bool shouldReattach = parent != null;
-        renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+    if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
+      bool shouldReattach = parent != null;
+      renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
 
-        if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
-          RenderLayoutBox parentRenderObject = parent.renderBoxModel;
-          RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
-          parentRenderObject.remove(prevRenderLayoutBox);
-          parentRenderObject.insert(renderBoxModel, after: previous);
-        } else {
-          renderBoxModel.markNeedsLayout();
-        }
+      if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
+        RenderLayoutBox parentRenderObject = parent.renderBoxModel;
+        RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
+        parentRenderObject.remove(prevRenderLayoutBox);
+        parentRenderObject.insert(renderBoxModel, after: previous);
+      } else {
+        renderBoxModel.markNeedsLayout();
       }
     }
   }
@@ -1234,16 +1224,15 @@ class Element extends Node
       devicePixelRatio = window.devicePixelRatio;
     }
 
-    Completer<Uint8List> completer = new Completer();
-    RenderBoxModel renderBoxModel = this.renderBoxModel;
+    Completer<Uint8List> completer = Completer();
 
     RenderObject parent = renderBoxModel.parent;
     if (!renderBoxModel.isRepaintBoundary) {
       RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderBoxModel = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
-        renderBoxModel = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
 
       if (parent is RenderObjectWithChildMixin<RenderBox>) {
@@ -1514,15 +1503,6 @@ bool _hasIntersectionObserverEvent(eventHandlers) {
   return eventHandlers.containsKey('appear') ||
       eventHandlers.containsKey('disappear') ||
       eventHandlers.containsKey('intersectionchange');
-}
-
-bool _isPositioned(CSSStyleDeclaration style) {
-  if (style.contains(POSITION)) {
-    String position = style[POSITION];
-    return position != EMPTY_STRING && position != STATIC;
-  } else {
-    return false;
-  }
 }
 
 void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Element child) {

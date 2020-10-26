@@ -14,8 +14,6 @@ import 'ticker_provider.dart';
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 typedef PointListener = void Function(PointerEvent event);
 
-class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
-
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
   ScrollPosition position;

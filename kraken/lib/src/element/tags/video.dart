@@ -34,6 +34,12 @@ class VideoElement extends Element {
     });
   }
 
+  @override
+  void detach() async {
+    super.detach();
+    await controller?.dispose();
+  }
+
   void renderVideo() {
     _textureBox = TextureBox(textureId: 0);
     if (childNodes.isEmpty) {

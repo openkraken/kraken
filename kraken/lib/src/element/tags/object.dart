@@ -77,7 +77,6 @@ class ObjectElement extends Element implements ObjectElementHost {
     addChild(textureBox);
   }
 
-
   @override
   void detach() {
     super.detach();
