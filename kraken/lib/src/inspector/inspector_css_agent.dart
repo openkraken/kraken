@@ -17,7 +17,7 @@ class InspectorCssAgent {
 
   InspectorCssAgent(this._domAgent);
 
-  ResponseState onRequest(Map<String, Object> params, String method, ResponseData responseData) {
+  ResponseState onRequest(Map<String, dynamic> params, String method, JsonData jsonData) {
     return ResponseState.Success;
   }
 

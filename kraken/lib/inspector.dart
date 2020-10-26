@@ -4,7 +4,7 @@
  */
 
 export 'src/inspector/inspector.dart';
-export 'src/inspector/inspector_websocket_handle.dart';
+export 'src/inspector/inspector_websocket_handler.dart';
 export 'src/inspector/inspector_http_handler.dart';
 export 'src/inspector/inspector_css_agent.dart';
 export 'src/inspector/inspector_dom_agent.dart';
