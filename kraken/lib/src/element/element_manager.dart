@@ -174,8 +174,6 @@ class ElementManager {
     target.parentNode?.removeChild(target);
     // Remove node reference to ElementManager
     target.elementManager = null;
-
-    removeTarget(target);
   }
 
   void setProperty(int targetId, String key, dynamic value) {

@@ -10,16 +10,11 @@ import 'package:kraken/css.dart';
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    InlineSpan text = createTextSpan(_data, null);
-
-    renderTextBox = RenderTextBox(text,
-      targetId: targetId,
-      style: null,
-      elementManager: elementManager,
-    );
+    initializeRenderObject();
   }
 
   RenderTextBox renderTextBox;
+  bool _initialized = false;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
@@ -99,27 +94,57 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  bool get attached => renderTextBox.attached;
+  bool get attached => renderTextBox != null && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
+    if (!_initialized) {
+      initializeRenderObject();
+    }
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
     renderTextBox.text = createTextSpan(data, parent.style);
     // TextNode's style is inherited from parent style
     renderTextBox.style = parent.style;
     _setTextNodeProperties(parent.style);
-    parent.renderLayoutBox.insert(renderTextBox, after: after);
-    RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
-    _setTextSizeType(
-      parentRenderBoxModel.widthSizeType, parentRenderBoxModel.heightSizeType);
+
+    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
+    parentRenderLayoutBox.insert(renderTextBox, after: after);
+
+    _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
   }
 
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    parent.renderLayoutBox.remove(renderTextBox);
+    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
+    parentRenderLayoutBox.remove(renderTextBox);
+
+    dispose();
+  }
+
+  @override
+  void initializeRenderObject() {
+    if (_initialized) {
+      return;
+    }
+    InlineSpan text = createTextSpan(_data, null);
+    renderTextBox = RenderTextBox(text,
+      targetId: targetId,
+      style: null,
+      elementManager: elementManager,
+    );
+    _initialized = true;
+  }
+
+  @override
+  void dispose() {
+    assert(renderTextBox != null);
+    assert(renderTextBox.parent == null);
+
+    renderTextBox = null;
+    _initialized = false;
   }
 }
 

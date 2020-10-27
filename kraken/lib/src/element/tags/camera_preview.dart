@@ -181,7 +181,7 @@ class CameraPreviewElement extends Element {
     // If the controller is updated then update the UI.
     controller.addListener(() {
       if (isConnected) {
-        renderLayoutBox.markNeedsPaint();
+        renderBoxModel.markNeedsPaint();
       }
       if (controller.value.hasError) {
         print('Camera error ${controller.value.errorDescription}');

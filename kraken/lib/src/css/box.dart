@@ -62,7 +62,6 @@ mixin CSSDecoratedBoxMixin {
     String property) {
 
     BoxDecoration prevBoxDecoration = renderBoxModel.decoration;
-
     if (prevBoxDecoration != null) {
       renderBoxModel.decoration = BoxDecoration(
           // Only modify boxShadow.

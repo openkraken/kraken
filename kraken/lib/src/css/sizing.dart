@@ -14,8 +14,12 @@ enum CSSDisplay {
   inline,
   block,
   inlineBlock,
+
   flex,
   inlineFlex,
+
+  sliver, // @TODO temp name.
+
   none
 }
 
@@ -29,6 +33,7 @@ enum CSSDisplay {
 mixin CSSSizingMixin {
 
   void updateRenderSizing(RenderBoxModel renderBoxModel, CSSStyleDeclaration style, String property, String present) {
+    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
     double value = CSSLength.toDisplayPortValue(present);
 
     switch (property) {
@@ -346,14 +351,11 @@ class CSSSizing {
   }
 
   static CSSDisplay getDisplay(String displayString) {
-    CSSDisplay display = CSSDisplay.inline;
-    if (displayString == null) {
-      return display;
-    }
-
-    switch(displayString) {
+    switch (displayString) {
       case 'none':
         return CSSDisplay.none;
+      case 'sliver':
+        return CSSDisplay.sliver;
       case 'block':
         return CSSDisplay.block;
       case 'inline-block':

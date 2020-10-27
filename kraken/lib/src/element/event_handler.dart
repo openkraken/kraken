@@ -1,7 +1,13 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/scheduler.dart';
+
 
 mixin EventHandlerMixin on Node {
   num _touchStartTime = 0;
