@@ -31,7 +31,7 @@ describe('display sliver', () => {
     await matchViewportSnapshot();
   });
 
-  it('scroll works', async (done) => {
+  it('scroll works', async () => {
     const container = createSliverBasicCase();
 
     await simulateSwipe(1, 60, 1, 0, 0.1);
