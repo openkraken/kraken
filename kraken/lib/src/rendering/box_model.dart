@@ -2,9 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-
-import 'dart:ui';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
@@ -253,7 +252,7 @@ class RenderBoxModel extends RenderBox with
   }
 
   CSSDisplay _display;
-  get display => _display;
+  CSSDisplay get display => _display;
   set display(CSSDisplay value) {
     if (value == null) return;
     if (_display != value) {
@@ -867,7 +866,7 @@ class RenderBoxModel extends RenderBox with
   /// Override which to paint layout or intrinsic things.
   /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
   void performPaint(PaintingContext context, Offset offset) {
-    throw new FlutterError('Please impl performPaint of $runtimeType.');
+    throw FlutterError('Please impl performPaint of $runtimeType.');
   }
 
   @override

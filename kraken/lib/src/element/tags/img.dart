@@ -14,7 +14,7 @@ const String IMAGE = 'IMG';
 const Map<String, dynamic> _defaultStyle = {DISPLAY: INLINE_BLOCK};
 
 bool _isNumber(String str) {
-  RegExp regExp = new RegExp(r"^\d+$");
+  RegExp regExp = RegExp(r"^\d+$");
   return regExp.hasMatch(str);
 }
 
@@ -147,9 +147,11 @@ class ImageElement extends Element {
   }
 
   void _removeStreamListener() {
-    imageListeners?.forEach((ImageStreamListener imageListener) {
-      imageStream?.removeListener(imageListener);
-    });
+    if (imageListeners != null) {
+      for (ImageStreamListener imageListener in imageListeners) {
+        imageStream?.removeListener(imageListener);
+      }
+    }
     imageStream = null;
     imageListeners = null;
   }
@@ -244,7 +246,7 @@ class ImageElement extends Element {
   }
 
   @override
-  void setProperty(String key, value) {
+  void setProperty(String key, dynamic value) {
     super.setProperty(key, value);
 
     if (key == 'src') {
@@ -275,30 +277,31 @@ class ImageElement extends Element {
       _removeStreamListener();
       image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
+      
+      ImageStreamListener imageListener = ImageStreamListener(_initImageInfo);
+      imageStream.addListener(imageListener);
+
       // Store listeners for remove listener.
       imageListeners = [
-        ImageStreamListener(_initImageInfo),
+        imageListener,
       ];
-      imageListeners.forEach((ImageStreamListener imageListener) {
-        imageStream.addListener(imageListener);
-      });
     }
   }
 
   @override
-  getProperty(String key) {
+  dynamic getProperty(String key) {
     switch (key) {
       case WIDTH:
-        return this._imageInfo != null ? this._imageInfo.image.width : 0;
+        return _imageInfo != null ? _imageInfo.image.width : 0;
       case HEIGHT:
-        return this._imageInfo != null ? this._imageInfo.image.height : 0;
+        return _imageInfo != null ? _imageInfo.image.height : 0;
     }
 
     return super.getProperty(key);
   }
 
   @override
-  void setStyle(String key, value) {
+  void setStyle(String key, dynamic value) {
     super.setStyle(key, value);
     if (key == WIDTH || key == HEIGHT) {
       _resize();

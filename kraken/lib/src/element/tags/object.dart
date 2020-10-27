@@ -25,7 +25,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   ObjectElementClientFactory _objectElementClientFactory;
   ObjectElementClient _objectElementClient;
 
-  ObjectElement(targetId, ElementManager elementManager)
+  ObjectElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: OBJECT, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
     initObjectClient();
     initElementClient();
@@ -46,9 +46,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   void initDetachCallback(final ElementManager elementManager) {
-    elementManager?.setDetachCallback(() {
-      disposeClient();
-    });
+    elementManager?.setDetachCallback(disposeClient);
   }
 
   @override
@@ -73,10 +71,9 @@ class ObjectElement extends Element implements ObjectElementHost {
   }
 
   @override
-  updateChildTextureBox(TextureBox textureBox) {
+  void updateChildTextureBox(TextureBox textureBox) {
     addChild(textureBox);
   }
-
 
   @override
   void detach() {

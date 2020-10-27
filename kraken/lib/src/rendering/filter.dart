@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 
 mixin RenderColorFilter on RenderBox {
   ColorFilter _colorFilter;
-  get colorFilter => _colorFilter;
+  ColorFilter get colorFilter => _colorFilter;
   set colorFilter(ColorFilter value) {
     if (_colorFilter != value) {
       _colorFilter = value;
@@ -22,7 +22,7 @@ mixin RenderColorFilter on RenderBox {
 
 mixin RenderImageFilter on RenderBox {
   ImageFilter _imageFilter;
-  get imageFilter => _imageFilter;
+  ImageFilter get imageFilter => _imageFilter;
   set imageFilter(ImageFilter value) {
     if (_imageFilter != value) {
       _imageFilter = value;

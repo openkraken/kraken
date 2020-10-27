@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:math' show max;
 import 'dart:ui' as ui;
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -85,9 +85,9 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   }
 
   void _dispatchChange(IntersectionObserverEntry info) {
-    _listeners.forEach((IntersectionChangeCallback callback) {
+    for (IntersectionChangeCallback callback in _listeners) {
       callback(info);
-    });
+    }
   }
 
   void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
@@ -168,7 +168,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   }
 
   bool _isScheduled = false;
-  _scheduleIntersectionObservationUpdate() {
+  void _scheduleIntersectionObservationUpdate() {
     if (!_isScheduled) {
       _isScheduled = true;
       scheduleMicrotask(() {

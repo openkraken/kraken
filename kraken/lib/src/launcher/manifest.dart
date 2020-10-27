@@ -38,34 +38,34 @@ class AppManifest with KrakenManifest {
     backgroundColor = json['background_color'];
     description = json['description'];
     if (json['icons'] != null) {
-      icons = new List<Icons>();
-      json['icons'].forEach((v) {
-        icons.add(new Icons.fromJson(v));
+      icons = List<Icons>();
+      json['icons'].forEach((Map<String, dynamic> v) {
+        icons.add(Icons.fromJson(v));
       });
     }
     if (json['related_applications'] != null) {
-      relatedApplications = new List<RelatedApplications>();
-      json['related_applications'].forEach((v) {
-        relatedApplications.add(new RelatedApplications.fromJson(v));
+      relatedApplications = List<RelatedApplications>();
+      json['related_applications'].forEach((Map<String, dynamic> v) {
+        relatedApplications.add(RelatedApplications.fromJson(v));
       });
     }
     _parseKrakenManifestFromJson(json);
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['short_name'] = this.shortName;
-    data['version'] = this.version;
-    data['start_url'] = this.startUrl;
-    data['display'] = this.display;
-    data['background_color'] = this.backgroundColor;
-    data['description'] = this.description;
-    if (this.icons != null) {
-      data['icons'] = this.icons.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['name'] = name;
+    data['short_name'] = shortName;
+    data['version'] = version;
+    data['start_url'] = startUrl;
+    data['display'] = display;
+    data['background_color'] = backgroundColor;
+    data['description'] = description;
+    if (icons != null) {
+      data['icons'] = icons.map((v) => v.toJson()).toList();
     }
-    if (this.relatedApplications != null) {
-      data['related_applications'] = this.relatedApplications.map((v) => v.toJson()).toList();
+    if (relatedApplications != null) {
+      data['related_applications'] = relatedApplications.map((v) => v.toJson()).toList();
     }
 
     _appendKrakenJson(data);
@@ -121,10 +121,10 @@ class Icons {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['src'] = this.src;
-    data['sizes'] = this.sizes;
-    data['type'] = this.type;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['src'] = src;
+    data['sizes'] = sizes;
+    data['type'] = type;
     return data;
   }
 }
@@ -141,9 +141,9 @@ class RelatedApplications {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['platform'] = this.platform;
-    data['url'] = this.url;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['platform'] = platform;
+    data['url'] = url;
     return data;
   }
 }

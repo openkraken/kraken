@@ -132,7 +132,7 @@ ImageProvider defaultNetworkProviderFactory(String url, [dynamic param]) {
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider defaultFileProviderFactory(String rawPath, [dynamic param]) {
-  ImageProvider _imageProvider = null;
+  ImageProvider _imageProvider;
   if (param is File) {
     _imageProvider = FileImage(param);
   }
@@ -141,7 +141,7 @@ ImageProvider defaultFileProviderFactory(String rawPath, [dynamic param]) {
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
 ImageProvider defaultDataUrlProviderFactory(String uriDataPath, [dynamic param]) {
-  ImageProvider _imageProvider = null;
+  ImageProvider _imageProvider;
   if (param is Uint8List) {
     _imageProvider = MemoryImage(param);
   }

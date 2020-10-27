@@ -294,7 +294,7 @@ describe('flex-basis', () => {
 
     await matchViewportSnapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let p;
     let test;
     let container;
