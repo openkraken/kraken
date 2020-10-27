@@ -102,7 +102,7 @@ abstract class Node extends EventTarget {
   }
 
   // Is child renderObject attached.
-  bool get attached => false;
+  bool get isRenderObjectAttached => false;
 
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderObject after}) {}

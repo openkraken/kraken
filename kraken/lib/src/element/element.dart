@@ -338,7 +338,7 @@ class Element extends Node
       (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
     }
     // Move element according to position when it's already attached to render tree.
-    if (attached) {
+    if (isRenderObjectAttached) {
       if (currentPosition == CSSPositionType.static) {
         // Loop renderObject children to move positioned children to its containing block
         _renderLayoutBox.visitChildren((childRenderObject) {
@@ -346,9 +346,9 @@ class Element extends Node
             Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
             CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
             if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
-              Element containgBlockElement = _findContainingBlock(child);
+              Element containingBlockElement = _findContainingBlock(child);
               child.detach();
-              child.attachTo(containgBlockElement);
+              child.attachTo(containingBlockElement);
             }
           }
         });
@@ -394,9 +394,9 @@ class Element extends Node
       } else {
         // Move self to containing block
         if (currentPosition == CSSPositionType.absolute || currentPosition == CSSPositionType.fixed) {
-          Element containgBlockElement = _findContainingBlock(this);
+          Element containingBlockElement = _findContainingBlock(this);
           detach();
-          attachTo(containgBlockElement);
+          attachTo(containingBlockElement);
         }
 
         // Loop children tree to find and append positioned children whose containing block is self
@@ -461,7 +461,7 @@ class Element extends Node
   }
 
   @override
-  bool get attached => renderBoxModel != null && renderBoxModel.attached;
+  bool get isRenderObjectAttached => renderBoxModel != null && renderBoxModel.attached;
 
   // Attach renderObject of current node to parent
   @override
@@ -549,7 +549,7 @@ class Element extends Node
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
-    if (child is NodeLifeCycle && child.attached) {
+    if (child is NodeLifeCycle && child.isRenderObjectAttached) {
       child.detach();
     }
 
@@ -683,7 +683,7 @@ class Element extends Node
     }
 
     // Only append childNode when it is not attached.
-    if (!child.attached) child.attachTo(this, after: after);
+    if (!child.isRenderObjectAttached) child.attachTo(this, after: after);
   }
 
   void _updateFlexItemStyle(Element element) {
@@ -989,7 +989,7 @@ class Element extends Node
   void setStyle(String key, dynamic value) {
     // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
-    // This it not a good solution between webkit's implementation which write all new style property into an RenderStyle object
+    // This it not a good solution between webkit implementation which write all new style property into an RenderStyle object
     // then trigger the animation phase.
     if (key == TRANSITION) {
       SchedulerBinding.instance.addPostFrameCallback((timestamp) {
@@ -1104,7 +1104,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
     RenderBox sizedBox = renderBoxModel;
-    if (attached) {
+    if (isRenderObjectAttached) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
 
@@ -1199,7 +1199,7 @@ class Element extends Node
   void click() {
     Event clickEvent = Event('click', EventInit());
 
-    if (attached) {
+    if (isRenderObjectAttached) {
       final RenderBox box = renderBoxModel;
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,

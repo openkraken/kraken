@@ -94,7 +94,7 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  bool get attached => renderTextBox != null && renderTextBox.attached;
+  bool get isRenderObjectAttached => renderTextBox != null && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
