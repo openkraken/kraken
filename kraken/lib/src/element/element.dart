@@ -1101,7 +1101,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
     RenderBox sizedBox = renderBoxModel;
-    if (isConnected) {
+    if (attached) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
 
@@ -1196,7 +1196,7 @@ class Element extends Node
   void click() {
     Event clickEvent = Event('click', EventInit());
 
-    if (isConnected) {
+    if (attached) {
       final RenderBox box = renderBoxModel;
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
