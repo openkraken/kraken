@@ -287,6 +287,15 @@ JSValueRef requestAnimationFrame(JSContextRef ctx, JSObjectRef function, JSObjec
   // the context pointer which will be pass by pointer address to dart code.
   auto callbackContext = std::make_unique<BridgeCallback::Context>(*context, callbackObjectRef, exception);
 
+  if (getDartMethod()->requestUpdateFrame == nullptr) {
+    JSC_THROW_ERROR(
+        ctx, "Failed to execute '__kraken_request_update_frame__': dart method (requestUpdateFrame) is not registered.",
+        exception);
+    return nullptr;
+  }
+  // Flush all pending ui messages.
+  getDartMethod()->requestUpdateFrame();
+
   if (getDartMethod()->requestAnimationFrame == nullptr) {
     JSC_THROW_ERROR(ctx,
                     "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.",
@@ -322,7 +331,7 @@ JSValueRef reloadApp(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObj
 void bindTimer(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_FUNCTION(context, "setTimeout", setTimeout);
   JSC_GLOBAL_BINDING_FUNCTION(context, "setInterval", setInterval);
-  JSC_GLOBAL_BINDING_FUNCTION(context, "__kraken_request_animation_frame__", requestAnimationFrame);
+  JSC_GLOBAL_BINDING_FUNCTION(context, "requestAnimationFrame", requestAnimationFrame);
   JSC_GLOBAL_BINDING_FUNCTION(context, "clearTimeout", clearTimeout);
   JSC_GLOBAL_BINDING_FUNCTION(context, "clearInterval", clearTimeout);
   JSC_GLOBAL_BINDING_FUNCTION(context, "reload", reloadApp);

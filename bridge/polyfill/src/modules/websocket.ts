@@ -1,6 +1,5 @@
-import { Event } from './document/events/event';
-import { EventTarget } from './document/events/event-target';
-import { krakenInvokeModule } from './bridge';
+import { Event } from '../dom/events/event';
+import { krakenInvokeModule } from '../bridge';
 
 function validateUrl(url: string) {
   let protocol = url.substring(0, url.indexOf(':'));
@@ -75,6 +74,7 @@ export class WebSocket extends EventTarget {
   public binaryType: BinaryType = BinaryType.blob;
 
   constructor(url: string, protocol: string | string[]) {
+    // @ts-ignore
     super(undefined, ['open', 'close', 'message', 'error']);
     // verify url schema
     validateUrl(url);

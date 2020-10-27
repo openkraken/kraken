@@ -4,7 +4,7 @@ import { Comment } from './comment';
 import { TextNode } from './text';
 import { ElementRegistry } from './element-registry';
 import { BODY, eventTargetMap, WINDOW } from './events/event-target';
-import { cookie } from '../cookie';
+import { cookie } from '../kom/cookie';
 import { HTMLAllCollection } from './collection';
 import { elementMapById } from './element-id';
 

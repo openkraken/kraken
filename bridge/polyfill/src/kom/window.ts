@@ -1,6 +1,5 @@
-import { EventTarget } from './document/events/event-target';
-import { krakenWindow } from './bridge';
-import { WINDOW } from './document/events/event-target';
+import { krakenWindow } from '../bridge';
+import { WINDOW } from '../dom/events/event-target';
 import { registerGlobalEventHandlers } from './global-event-handlers';
 import { history } from './history';
 
@@ -11,6 +10,7 @@ const windowJsOnlyEvents = ['unhandledrejection', 'error'];
 // This is an extension which add more methods to global window object.
 class WindowExtension extends EventTarget {
   constructor() {
+    // @ts-ignore
     super(WINDOW, windowBuiltInEvents, windowJsOnlyEvents);
   }
 
@@ -27,7 +27,9 @@ class WindowExtension extends EventTarget {
   }
 }
 
-export const windowExtension = new WindowExtension();
+const windowExtension = new WindowExtension();
+Object.assign(window, windowExtension);
+
 let propertyEvents = {};
 windowBuiltInEvents.forEach(event => {
   let eventName = 'on' + event.toLowerCase();
@@ -69,6 +71,7 @@ Object.defineProperties(window, {
     }
   },
   __clearListeners__: {
+    // @ts-ignore
     get() { return windowExtension.__clearListeners__.bind(windowExtension); }
   },
   scroll: {

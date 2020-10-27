@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './bridge';
+import { krakenInvokeModule } from '../bridge';
 
 // https://www.w3.org/TR/hr-time-2/#the-performance-interface
 // @NOTE: Not extends EventTarget due to over design.

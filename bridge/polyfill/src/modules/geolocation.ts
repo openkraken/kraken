@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './bridge';
+import { krakenInvokeModule } from '../bridge';
 
 const positionWatcherMap = new Map<string, any>();
 

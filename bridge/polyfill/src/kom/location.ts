@@ -1,4 +1,4 @@
-import { krakenInvokeModule, krakenWindow } from './bridge';
+import { krakenInvokeModule, krakenWindow } from '../bridge';
 import { URL } from './url';
 
 const krakenLocation = krakenWindow.location;

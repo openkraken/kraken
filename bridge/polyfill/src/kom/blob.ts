@@ -1,4 +1,4 @@
-import {KrakenBlob, krakenBlob} from './bridge';
+import {KrakenBlob, krakenBlob} from '../bridge';
 
 export class Blob {
   public size: number;

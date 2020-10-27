@@ -1,4 +1,4 @@
-import { krakenRequestAnimationFrame } from '../bridge';
+import { krakenRequestAnimationFrame } from './bridge';
 import { requestUpdateFrame } from './ui-manager';
 
 // Clear all pending frames to keep execution order.

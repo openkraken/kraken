@@ -1,7 +1,7 @@
-import { krakenInvokeModule, privateKraken } from './bridge';
-import geolocation from './geolocation';
-import connection from './connection';
-import { vibrate } from './vibration';
+import { krakenInvokeModule, privateKraken } from '../bridge';
+import geolocation from '../modules/geolocation';
+import connection from '../modules/connection';
+import { vibrate } from '../modules/vibration';
 
 export const navigator = {
   vibrate,

@@ -1,6 +1,4 @@
-import { EventTarget } from './document/events/event-target';
-import { Event } from './document/events/event';
-import { krakenInvokeModule } from './bridge';
+import { krakenInvokeModule } from '../bridge';
 
 enum ReadyState {
   CONNECTING = 0,
@@ -36,6 +34,7 @@ export class MQTT extends EventTarget {
   url: string;
 
   constructor(url: string, clientId: string = '') {
+    // @ts-ignore
     super(undefined, ['open', 'message', 'close', 'error', 'publish', 'subscribe', 'unsubscribe', 'subscribeerror']);
     this.url = url;
     this.id = krakenInvokeModule(JSON.stringify(['MQTT', 'init', [url, clientId]]));

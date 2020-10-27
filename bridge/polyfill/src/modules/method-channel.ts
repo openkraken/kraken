@@ -1,4 +1,4 @@
-import {krakenInvokeModule} from "./bridge";
+import {krakenInvokeModule} from "../bridge";
 
 type MethodCallHandler = (method: string, args: any[]) => void;
 

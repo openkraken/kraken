@@ -1,9 +1,7 @@
 // Forked from https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 
-import { URL } from './url';
-import { Event } from './document/events/event';
-import { EventTarget } from './document/events/event-target';
-import { navigator } from './navigator';
+import { URL } from '../kom/url';
+import { navigator } from '../kom/navigator';
 
 // XHR buildin events
 const buildInEvents = [
@@ -94,6 +92,7 @@ export class XMLHttpRequest extends EventTarget {
   private errorFlag = false;
 
   constructor() {
+    // @ts-ignore
     super(undefined, buildInEvents);
   }
 
@@ -282,6 +281,7 @@ export class XMLHttpRequest extends EventTarget {
       this.sendFlag = true;
 
       // As per spec, this is called here for historical reasons.
+      // @ts-ignore
       this.dispatchEvent(new Event("readystatechange"));
 
       // Handler for the response
@@ -343,6 +343,7 @@ export class XMLHttpRequest extends EventTarget {
         errorHandler(error);
       });
 
+      // @ts-ignore
       this.dispatchEvent(new Event("loadstart"));
     } else { // @TODO support synchronous
     }
@@ -367,6 +368,7 @@ export class XMLHttpRequest extends EventTarget {
       this.setState(this.DONE);
     }
     this.readyState = this.UNSENT;
+    // @ts-ignore
     this.dispatchEvent(new Event("abort"));
   };
 
@@ -413,6 +415,7 @@ export class XMLHttpRequest extends EventTarget {
     this.responseText = error.stack;
     this.errorFlag = true;
     this.setState(this.DONE);
+    // @ts-ignore
     this.dispatchEvent(new Event("error"));
   };
 
@@ -426,12 +429,15 @@ export class XMLHttpRequest extends EventTarget {
       this.readyState = state;
 
       if (this.settings.async || this.readyState < this.OPENED || this.readyState === this.DONE) {
+        // @ts-ignore
         this.dispatchEvent(new Event("readystatechange"));
       }
 
       if (this.readyState === this.DONE && !this.errorFlag) {
+        // @ts-ignore
         this.dispatchEvent(new Event("load"));
         // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
+        // @ts-ignore
         this.dispatchEvent(new Event("loadend"));
       }
     }

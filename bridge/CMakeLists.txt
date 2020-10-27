@@ -51,6 +51,7 @@ if (${KRAKEN_ENABLE_JSA})
     bindings/jsa/DOM/node.h
     bindings/jsa/DOM/eventTarget.cc
     bindings/jsa/DOM/eventTarget.h
+    polyfill/dist/dom.cc
     bridge_jsa.cc
     bridge_jsa.h
   )

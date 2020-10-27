@@ -1,4 +1,4 @@
-import { krakenInvokeModule } from './bridge';
+import { krakenInvokeModule } from '../bridge';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
