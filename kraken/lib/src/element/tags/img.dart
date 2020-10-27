@@ -43,7 +43,7 @@ class ImageElement extends Element {
   void _renderImage() {
     if (_hasLazyLoading) return;
     String loading = properties['loading'];
-    // Image dimensions(width/height) should specified for performance when lazyload
+    // Image dimensions(width/height) should specified for performance when lazy-load.
     if (loading == 'lazy') {
       _hasLazyLoading = true;
       renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
@@ -96,53 +96,55 @@ class ImageElement extends Element {
     _resize();
 
     // Image size may affect parent layout,
-    // make parent relayout after image inited
+    // make parent relayout after image init.
     imageBox.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
-    double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
-    double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
-    double width = 0.0;
-    double height = 0.0;
-    bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
-    bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
-    if (!containWidth && !containHeight) {
-      width = naturalWidth;
-      height = naturalHeight;
-    } else {
-      if (containWidth && containHeight) {
-        width = renderBoxModel.width ?? _propertyWidth;
-        height = renderBoxModel.height ?? _propertyHeight;
-      } else if (containWidth) {
-        width = renderBoxModel.width ?? _propertyWidth;
-        if (naturalWidth != 0) {
-          height = width * naturalHeight / naturalWidth;
-        }
-      } else if (containHeight) {
-        height = renderBoxModel.height ?? _propertyHeight;
-        if (naturalHeight != 0) {
-          width = height * naturalWidth / naturalHeight;
+    if (isRenderObjectAttached) {
+      double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
+      double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
+      double width = 0.0;
+      double height = 0.0;
+      bool containWidth = style.contains(WIDTH) || _propertyWidth != null;
+      bool containHeight = style.contains(HEIGHT) || _propertyHeight != null;
+      if (!containWidth && !containHeight) {
+        width = naturalWidth;
+        height = naturalHeight;
+      } else {
+        if (containWidth && containHeight) {
+          width = renderBoxModel.width ?? _propertyWidth;
+          height = renderBoxModel.height ?? _propertyHeight;
+        } else if (containWidth) {
+          width = renderBoxModel.width ?? _propertyWidth;
+          if (naturalWidth != 0) {
+            height = width * naturalHeight / naturalWidth;
+          }
+        } else if (containHeight) {
+          height = renderBoxModel.height ?? _propertyHeight;
+          if (naturalHeight != 0) {
+            width = height * naturalWidth / naturalHeight;
+          }
         }
       }
-    }
 
-    if (!height.isFinite) {
-      height = 0.0;
-    }
-    if (!width.isFinite) {
-      width = 0.0;
-    }
+      if (!height.isFinite) {
+        height = 0.0;
+      }
+      if (!width.isFinite) {
+        width = 0.0;
+      }
 
-    imageBox?.width = width;
-    imageBox?.height = height;
-    renderBoxModel.intrinsicWidth = naturalWidth;
-    renderBoxModel.intrinsicHeight = naturalHeight;
+      imageBox?.width = width;
+      imageBox?.height = height;
+      renderBoxModel.intrinsicWidth = naturalWidth;
+      renderBoxModel.intrinsicHeight = naturalHeight;
 
-    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderBoxModel.intrinsicRatio = null;
-    } else {
-      renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+        renderBoxModel.intrinsicRatio = null;
+      } else {
+        renderBoxModel.intrinsicRatio = naturalHeight / naturalWidth;
+      }
     }
   }
 
@@ -252,7 +254,7 @@ class ImageElement extends Element {
     if (key == 'src') {
       _setImage();
     } else if (key == 'loading' && _hasLazyLoading) {
-      // Should reset lazy when value change
+      // Should reset lazy when value change.
       _resetLazyLoading();
     } else if (key == 'width') {
       if (value is String && _isNumber(value)) {
@@ -277,7 +279,7 @@ class ImageElement extends Element {
       _removeStreamListener();
       image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
-      
+
       ImageStreamListener imageListener = ImageStreamListener(_initImageInfo);
       imageStream.addListener(imageListener);
 
