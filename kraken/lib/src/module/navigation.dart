@@ -40,12 +40,7 @@ Future<KrakenNavigationActionPolicy> defaultDecisionHandler(KrakenNavigationActi
 
 class KrakenNavigationDelegate {
   // Called when an error occurs during navigation.
-  KrakenNavigationErrorHandler _errorHandler;
-
-  KrakenNavigationErrorHandler get errorHandler => _errorHandler;
-  set errorHandler(KrakenNavigationErrorHandler errorHandler) {
-    _errorHandler = errorHandler;
-  }
+  KrakenNavigationErrorHandler errorHandler;
 
   KrakenNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
   void setDecisionHandler(KrakenNavigationDecisionHandler handler) {

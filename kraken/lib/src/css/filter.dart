@@ -20,11 +20,11 @@ List<double> _multiplyMatrix5(List<double> a, List<double> b) {
   }
 
   if (a.length != b.length) {
-    throw new FlutterError('Matrix length should be same.');
+    throw FlutterError('Matrix length should be same.');
   }
 
   if (a.length != 25) {
-    throw new FlutterError('Matrix5 size is not correct.');
+    throw FlutterError('Matrix5 size is not correct.');
   }
 
   var a00 = a[0];
@@ -95,7 +95,7 @@ mixin CSSFilterEffectsMixin {
   // Get the color filter.
   // eg: 'grayscale(1) grayscale(0.5)' -> matrix5(grayscale(1)) · matrix5(grayscale(0.5))
   static ColorFilter _parseColorFilters(List<CSSFunctionalNotation> functions) {
-    List<double> matrix5 = null;
+    List<double> matrix5;
     if (functions != null && functions.length > 0) {
       for (int i = 0; i < functions.length; i ++) {
         CSSFunctionalNotation f = functions[i];

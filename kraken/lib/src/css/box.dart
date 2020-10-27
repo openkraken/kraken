@@ -316,7 +316,7 @@ mixin CSSDecoratedBoxMixin {
       boxShadow = [];
       var shadows = CSSStyleProperty.getShadowValues(style[BOX_SHADOW]);
       if (shadows != null) {
-        shadows.forEach((shadowDefinitions) {
+        for (var shadowDefinitions in shadows) {
           // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
           String colorDefinition = shadowDefinitions[0];
           if (colorDefinition == CURRENT_COLOR || colorDefinition == null) {
@@ -336,7 +336,7 @@ mixin CSSDecoratedBoxMixin {
               color: color,
             ));
           }
-        });
+        }
       }
 
       // Tips only debug.

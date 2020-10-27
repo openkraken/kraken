@@ -46,7 +46,7 @@ class KrakenViewController {
       this.rootController,
       this.navigationDelegate})
       : _contextId = contextId {
-    if (this.enableDebug) {
+    if (enableDebug) {
       debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
       debugPaintSizeEnabled = true;
     }
@@ -126,7 +126,7 @@ class KrakenViewController {
     try {
       if (!_elementManager.existsTarget(eventTargetId)) {
         String msg = 'toImage: unknown node id: $eventTargetId';
-        completer.completeError(new Exception(msg));
+        completer.completeError(Exception(msg));
         return completer.future;
       }
 
@@ -136,11 +136,11 @@ class KrakenViewController {
           completer.complete(bytes);
         }).catchError((e, stack) {
           String msg = 'toBlob: failed to export image data from element id: $eventTargetId. error: $e}.\n$stack';
-          completer.completeError(new Exception(msg));
+          completer.completeError(Exception(msg));
         });
       } else {
         String msg = 'toBlob: node is not an element, id: $eventTargetId';
-        completer.completeError(new Exception(msg));
+        completer.completeError(Exception(msg));
       }
     } catch (e, stack) {
       completer.completeError(e, stack);
@@ -261,7 +261,7 @@ class KrakenController {
 
   final String name;
 
-  KrakenController(String name, double viewportWidth, double viewportHeight,
+  KrakenController(this.name, double viewportWidth, double viewportHeight,
       {bool showPerformanceOverlay = false,
       enableDebug = false,
       String bundleURL,
@@ -269,9 +269,8 @@ class KrakenController {
       String bundleContent,
       KrakenNavigationDelegate navigationDelegate,
       KrakenMethodChannel methodChannel,
-      LoadErrorHandler this.loadErrorHandler})
-      : name = name,
-        _bundleURL = bundleURL,
+      this.loadErrorHandler})
+      : _bundleURL = bundleURL,
         _bundlePath = bundlePath,
         _bundleContent = bundleContent {
     _methodChannel = methodChannel;

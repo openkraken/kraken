@@ -12,6 +12,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class PreElement extends Element {
-  PreElement(targetId, ElementManager elementManager)
+  PreElement(int targetId, ElementManager elementManager)
       : super(targetId, elementManager, tagName: PRE, defaultStyle: _defaultStyle);
 }

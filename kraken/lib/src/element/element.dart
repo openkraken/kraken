@@ -328,9 +328,9 @@ class Element extends Node
   // Calculate sticky status according to scroll offset and scroll direction
   void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
     List<Element> stickyElements = _findStickyChildren(this);
-    stickyElements.forEach((Element el) {
+    for (Element el in stickyElements) {
       layoutStickyChild(el, scrollOffset, axisDirection);
-    });
+    }
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
@@ -402,11 +402,10 @@ class Element extends Node
         // Loop children tree to find and append positioned children whose containing block is self
         List<Element> positionedChildren = [];
         _findPositionedChildren(this, positionedChildren);
-        positionedChildren.forEach((child) {
+        for (var child in positionedChildren) {
           child.detach();
           child.attachTo(this);
-        });
-
+        }
         // Set stick element offset
         if (currentPosition == CSSPositionType.sticky) {
           Element scrollContainer = _findScrollContainer(this);
@@ -431,7 +430,7 @@ class Element extends Node
   }
 
   Element getElementById(Element parentElement, int targetId) {
-    Element result = null;
+    Element result;
     List childNodes = parentElement.childNodes;
 
     for (int i = 0; i < childNodes.length; i++) {
@@ -524,6 +523,7 @@ class Element extends Node
   Node appendChild(Node child) {
     super.appendChild(child);
 
+    // ignore: prefer_function_declarations_over_variables
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
@@ -563,6 +563,7 @@ class Element extends Node
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
+    // ignore: prefer_function_declarations_over_variables
     VoidCallback doInsertBefore = () {
       if (referenceIndex != -1) {
         Node after;
@@ -930,9 +931,9 @@ class Element extends Node
   void _styleFlexItemChangedListener(String property, String original, String present) {
     CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-      children.forEach((Element child) {
+      for (Element child in children) {
         _updateFlexItemStyle(child);
-      });
+      }
     }
   }
 
@@ -959,7 +960,7 @@ class Element extends Node
     updateRenderVisibility(CSSVisibilityMixin.getVisibility(present));
   }
 
-  void _styleContentVisibilityChangedListener(String property, original, present) {
+  void _styleContentVisibilityChangedListener(String property, String original, String present) {
     // Update content visibility.
     updateRenderContentVisibility(CSSContentVisibilityMixin.getContentVisibility(present));
   }
@@ -976,14 +977,14 @@ class Element extends Node
 
   // Update textNode style when container style changed
   void _updateTextChildNodesStyle() {
-    childNodes.forEach((node) {
+    for (var node in childNodes) {
       if (node is TextNode) node.updateTextStyle();
-    });
+    }
   }
 
   // Universal style property change callback.
   @mustCallSuper
-  void setStyle(String key, value) {
+  void setStyle(String key, dynamic value) {
     // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
     // This it not a good solution between webkit's implementation which write all new style property into an RenderStyle object
@@ -1001,7 +1002,7 @@ class Element extends Node
   }
 
   @mustCallSuper
-  void setProperty(String key, value) {
+  void setProperty(String key, dynamic value) {
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1087,7 +1088,7 @@ class Element extends Node
   }
 
   @mustCallSuper
-  method(String name, List args) {
+  dynamic method(String name, List args) {
     switch (name) {
       case 'click':
         return click();
@@ -1253,7 +1254,6 @@ class Element extends Node
     }
 
     renderBoxModel.markNeedsLayout();
-    renderBoxModel.markNeedsPaint();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
@@ -1479,7 +1479,7 @@ List<Element> _findStickyChildren(Element element) {
   assert(element != null);
   List<Element> result = [];
 
-  element.children.forEach((Element child) {
+  for (Element child in element.children) {
     List<CSSOverflowType> overflow = getOverflowTypes(child.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
@@ -1488,14 +1488,14 @@ List<Element> _findStickyChildren(Element element) {
 
     // No need to loop scrollable container children
     if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-      return;
+      break;
     }
 
     List<Element> mergedChildren = _findStickyChildren(child);
-    mergedChildren.forEach((Element child) {
+    for (Element child in mergedChildren) {
       result.add(child);
-    });
-  });
+    }
+  }
 
   return result;
 }
@@ -1504,7 +1504,7 @@ bool _isIntersectionObserverEvent(String eventName) {
   return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
 }
 
-bool _hasIntersectionObserverEvent(eventHandlers) {
+bool _hasIntersectionObserverEvent(Map eventHandlers) {
   return eventHandlers.containsKey('appear') ||
       eventHandlers.containsKey('disappear') ||
       eventHandlers.containsKey('intersectionchange');

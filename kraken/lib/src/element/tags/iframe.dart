@@ -511,9 +511,9 @@ abstract class WebViewElement extends Element {
       creationParams: _creationParamsFromElement(this),
       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
       onWebViewPlatformCreated: _onWebViewPlatformCreated,
-      gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
+      gestureRecognizers: gestureRecognizers ?? _emptyRecognizersSet,
       // On focus only works in android now.
-      onFocus: this.onFocus,
+      onFocus: onFocus,
     );
     sizedBox = RenderWebViewBoundaryBox(onDetach,
         additionalConstraints: BoxConstraints.tight(Size(width, height)), child: platformRenderBox);

@@ -22,7 +22,7 @@ int initBridge() {
   } else {
     int contextId = allocateNewContext();
     if (contextId == -1) {
-      throw new Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
+      throw Exception('can\' allocate new kraken js Bridge: bridge count had reach the maximum size.');
     }
     return contextId;
   }

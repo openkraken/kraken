@@ -635,7 +635,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     double runCrossAxisExtent = 0.0;
     int _effectiveChildCount = 0;
 
-    RenderBox preChild = null;
+    RenderBox preChild;
 
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
@@ -1158,7 +1158,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
   RenderSelfRepaintFlexLayout toFlexLayout() {
