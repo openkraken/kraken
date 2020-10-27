@@ -67,6 +67,7 @@ class MQTT {
     client.connect(username, password);
   }
 
+  // ignore: non_constant_identifier_names
   void subscribe(String id, String topic, int QoS) {
     MqttClient client = _clientMap[id];
     client.subscribe(topic, MqttQos.values[QoS]);
@@ -77,6 +78,7 @@ class MQTT {
     client.unsubscribe(topic);
   }
 
+  // ignore: non_constant_identifier_names
   int publish(String id, String topic, String message, int QoS, bool retain) {
     MqttClient client = _clientMap[id];
 

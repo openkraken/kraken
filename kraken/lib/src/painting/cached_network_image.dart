@@ -61,7 +61,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
     return bytes;
   }
 
-  storeFile(Uri tempFile, Uint8List bytes) async {
+  void storeFile(Uri tempFile, Uint8List bytes) async {
     try {
       File file = await File(tempFile.path).create(recursive: true);
       file.writeAsBytes(bytes);

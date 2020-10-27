@@ -327,7 +327,7 @@ class LabColor {
   /// [l] must be `>= 0` and `<= 100`.
   ///
   /// [a] and [b] must both be `>= -128` and `<= 127`.
-  const LabColor(num this.l, num this.a, num this.b);
+  const LabColor(this.l, this.a, this.b);
 
   num _toXyz(num value, num referenceWhiteValue) {
     num cube = pow(value, 3);
@@ -376,7 +376,7 @@ class RgbColor {
    * 255 (inclusive).  Values above this range will be assumed to be a value
    * of 255, and values below this range will be assumed to be a value of 0.
    */
-  const RgbColor(num this.r, num this.g, num this.b);
+  const RgbColor(this.r, this.g, this.b);
 
   num _toLab(num value, num referenceWhiteValue) {
     value /= referenceWhiteValue;

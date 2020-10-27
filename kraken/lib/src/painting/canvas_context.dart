@@ -191,6 +191,7 @@ abstract class CanvasText {
   TextMetrics measureText(String text);
 }
 
+// ignore: one_member_abstracts
 abstract class CanvasDrawImage {
   // drawing images
   void drawImage(
@@ -260,11 +261,13 @@ abstract class CanvasPath {
       {bool anticlockwise = false});
 }
 
+// ignore: one_member_abstracts
 abstract class CanvasGradient {
   // opaque object
   void addColorStop(double offset, String color);
 }
 
+// ignore: one_member_abstracts
 abstract class CanvasPattern {
   // opaque object
   void setTransform(String transform);
