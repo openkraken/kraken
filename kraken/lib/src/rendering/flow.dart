@@ -521,19 +521,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
-//    bool isParentFlexLayout = parent is RenderFlexLayout;
-//    bool hasFlexGrow = parentData is RenderFlexParentData &&
-//      (parentData as RenderFlexParentData).flexGrow != 0;
+//    print('layout flow =============== $targetId ${style['backgroundColor']}');
 
-    if (hasSize && targetId != -1) {
-      double logicalWidth = RenderBoxModel.getLogicalWidth(this);
-      double logicalHeight = RenderBoxModel.getLogicalHeight(this);
-      if (size.width == logicalWidth && size.height == logicalHeight) {
-        return;
-      }
-    }
-
-//    print('flow layout=============== $targetId ${style['backgroundColor']}');
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -657,6 +646,23 @@ class RenderFlowLayout extends RenderLayoutBox {
       final RenderLayoutParentData childParentData = child.parentData;
 
       if (childParentData.isPositioned) {
+        child = childParentData.nextSibling;
+        continue;
+      }
+
+      // No need to layout child if size is the same as logical size calculated by style
+      bool isChildNeedsLayout = true;
+      if (child is RenderBoxModel && child.hasSize) {
+        double childLogicalWidth = RenderBoxModel.getLogicalWidth(child);
+        double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
+        Size childOldSize = child.size;
+        if (childOldSize.width == childLogicalWidth &&
+          childOldSize.height == childLogicalHeight) {
+          isChildNeedsLayout = false;
+        }
+      }
+
+      if (!isChildNeedsLayout) {
         child = childParentData.nextSibling;
         continue;
       }
@@ -798,6 +804,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         containerCrossAxisExtent = logicalWidth ?? size.width;
         break;
     }
+
     final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
     double runLeadingSpace = 0.0;
     double runBetweenSpace = 0.0;
