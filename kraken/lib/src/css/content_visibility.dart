@@ -42,11 +42,10 @@ mixin CSSContentVisibilityMixin on ElementBase {
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
-    if (renderBoxModel != null) {
-      renderBoxModel.contentVisibility = entry.isIntersecting
-          ? ContentVisibility.auto
-          : ContentVisibility.hidden;
-    }
+    assert(renderBoxModel != null);
+    renderBoxModel.contentVisibility = entry.isIntersecting
+        ? ContentVisibility.auto
+        : ContentVisibility.hidden;
   }
 
   void updateRenderContentVisibility(ContentVisibility contentVisibility) {

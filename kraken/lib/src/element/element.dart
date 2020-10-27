@@ -152,10 +152,6 @@ class Element extends Node
   bool _isIntrinsicBox = false;
   bool _initialized = false;
 
-  void _attachChildToThis(Node child) {
-    child.attachTo(this);
-  }
-
   @override
   void initializeRenderObject() {
     if (_initialized) {
@@ -166,8 +162,9 @@ class Element extends Node
       _renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
-      // Avoid forEach with function literal.
-      childNodes.forEach(_attachChildToThis);
+      for (Node child in childNodes) {
+        child.attachTo(this);
+      }
     }
 
     style.addStyleChangeListener(_onStyleChanged);
@@ -500,10 +497,6 @@ class Element extends Node
     if (isParentFlexDisplayType) parent.children.forEach(_updateFlexItemStyle);
   }
 
-  void _detachChild(Node child) {
-    child.detach();
-  }
-
   // Detach renderObject of current node from parent
   @override
   void detach() {
@@ -516,9 +509,12 @@ class Element extends Node
       }
     }
     (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
+    // Remove all intersection change listeners.
+    renderBoxModel.clearIntersectionChangeListeners();
 
-    // Avoid forEach with function literal.
-    childNodes.forEach(_detachChild);
+    for (Node child in childNodes) {
+      child.detach();
+    }
 
     style.removeStyleChangeListener(_onStyleChanged);
     dispose();

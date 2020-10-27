@@ -71,6 +71,12 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     _listeners.add(callback);
   }
 
+  void clearIntersectionChangeListeners() {
+    _listeners?.clear();
+    _listeners = null;
+    _onIntersectionChange = null;
+  }
+
   void removeIntersectionChangeListener(IntersectionChangeCallback callback) {
     for (int i = 0; i < _listeners.length; i += 1) {
       if (_listeners[i] == callback) {
