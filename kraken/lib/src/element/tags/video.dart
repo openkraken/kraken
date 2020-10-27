@@ -20,24 +20,24 @@ const Map<String, dynamic> _defaultStyle = {
 class VideoElement extends Element {
   VideoElement(int targetId, ElementManager elementManager)
       : super(
-          targetId,
-          elementManager,
-          defaultStyle: _defaultStyle,
-          isIntrinsicBox: true,
-          repaintSelf: true,
-          tagName: VIDEO,
-        ) {
+    targetId,
+    elementManager,
+    defaultStyle: _defaultStyle,
+    isIntrinsicBox: true,
+    repaintSelf: true,
+    tagName: VIDEO,
+  ) {
     renderVideo();
-    elementManager.setDetachCallback(() {
-      if (controller == null) return;
-      controller.dispose();
-    });
   }
 
   @override
   void detach() async {
     super.detach();
-    await controller?.dispose();
+
+    if (controller != null) {
+      await controller.dispose();
+      controller = null;
+    }
   }
 
   void renderVideo() {
