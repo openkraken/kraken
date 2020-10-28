@@ -655,19 +655,24 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childLogicalWidth = RenderBoxModel.getLogicalWidth(child);
         double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
-        Size childOldSize = child.size;
-        if (childOldSize.width == childLogicalWidth &&
-          childOldSize.height == childLogicalHeight) {
-          isChildNeedsLayout = false;
+        if (child.needsLayout) {
+          isChildNeedsLayout = true;
+        } else {
+          Size childOldSize = child.size;
+          if (childLogicalWidth != null && childLogicalHeight != null &&
+            (childOldSize.width != childLogicalWidth ||
+              childOldSize.height != childLogicalHeight)) {
+            isChildNeedsLayout = true;
+          } else {
+            isChildNeedsLayout = false;
+          }
         }
       }
 
-      if (!isChildNeedsLayout) {
-        child = childParentData.nextSibling;
-        continue;
+      if (isChildNeedsLayout) {
+        child.layout(childConstraints, parentUsesSize: true);
       }
 
-      child.layout(childConstraints, parentUsesSize: true);
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 

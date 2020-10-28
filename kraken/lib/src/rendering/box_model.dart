@@ -440,6 +440,34 @@ class RenderBoxModel extends RenderBox with
     markNeedsLayout();
   }
 
+  bool needsLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    needsLayout = true;
+  }
+
+  @override
+  void dropChild(RenderBox child) {
+    super.dropChild(child);
+    // Loop to mark all the children to needsLayout as flutter did
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
+  void cleanRelayoutBoundary() {
+    needsLayout = true;
+    visitChildren(_cleanChildRelayoutBoundary);
+  }
+
+  static void _cleanChildRelayoutBoundary(RenderObject child) {
+    if (child is RenderBoxModel) {
+      child.cleanRelayoutBoundary();
+    }
+  }
+
   /// Width of render box model calcaluted from style
   static double getLogicalWidth(RenderBoxModel renderBoxModel) {
     double cropWidth = 0;
@@ -838,6 +866,8 @@ class RenderBoxModel extends RenderBox with
         CSSPositionedLayout.applyPositionedChildOffset(parentBox, this, parentBox.boxSize, parentBox.borderEdge);
       }
     }
+
+    needsLayout = false;
   }
 
   void setMaximumScrollableSizeForPositionedChild(RenderLayoutParentData childParentData, Size childSize) {
