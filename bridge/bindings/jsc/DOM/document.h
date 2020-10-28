@@ -22,7 +22,20 @@ public:
   void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
 };
 
+class DemoClass : public HostClass {
+public:
+  DemoClass() = delete;
+  explicit DemoClass(JSContext *context) : HostClass(context, "Demo"){};
+  void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
+                   const JSValueRef *arguments, JSValueRef *exception) override;
+  void instanceFinalized(JSObjectRef object) override;
+  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception) override;
+  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  void instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+};
+
 void bindDocument(std::unique_ptr<JSContext> &context);
+void bindDemo(std::unique_ptr<JSContext> &context);
 
 } // namespace kraken::binding::jsc
 

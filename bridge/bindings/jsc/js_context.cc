@@ -113,9 +113,10 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
-HostObject::HostObject(JSContext *context, std::string name) : context(context), name(name), ctx(context->context()) {
+HostObject::HostObject(JSContext *context, std::string name)
+  : context(context), name(std::move(name)), ctx(context->context()) {
   JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_CLASS_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
+  JSC_CREATE_HOST_OBJECT_DEFINITION(hostObjectDefinition, name.c_str(), nullptr, HostObject);
   jsClass = JSClassCreate(&hostObjectDefinition);
   jsObject = JSObjectMake(context->context(), jsClass, this);
 }
@@ -143,29 +144,11 @@ bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSString
   return context->handleException(*exception);
 }
 
-void HostObject::finalize(JSObjectRef obj) {
+void HostObject::proxyFinalize(JSObjectRef obj) {
   auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
   JSObjectSetPrivate(obj, nullptr);
   JSClassRelease(hostObject->jsClass);
   delete hostObject;
-}
-
-bool HostObject::hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
-                             JSValueRef *exception) {
-  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(constructor));
-
-  if (!JSValueIsObject(ctx, possibleInstance)) {
-    return false;
-  }
-
-  JSObjectRef instanceObject = JSValueToObject(ctx, possibleInstance, exception);
-  auto instanceHostObject = static_cast<HostObject *>(JSObjectGetPrivate(instanceObject));
-
-  if (instanceHostObject == nullptr) {
-    return false;
-  }
-
-  return instanceHostObject->name == hostObject->name;
 }
 
 void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef accumulator) {
@@ -183,4 +166,104 @@ void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exc
 
 void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 
+HostClass::HostClass(JSContext *context, std::string name)
+  : context(context), _name(std::move(name)), ctx(context->context()) {
+  JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
+  JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), nullptr, nullptr, nullptr, HostClass);
+  jsClass = JSClassCreate(&hostClassDefinition);
+  classObject = JSObjectMake(ctx, jsClass, this);
+  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), jsClass, HostClass);
+  instanceClass = JSClassCreate(&hostInstanceDefinition);
+}
+
+HostClass::HostClass(JSContext *context, HostClass *parentClass, std::string name,
+                     const JSStaticFunction *staticFunction, const JSStaticValue *staticValue)
+  : context(context), _name(std::move(name)), ctx(context->context()) {
+  JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
+  JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), parentClass->jsClass, staticFunction, staticValue,
+                                   HostClass);
+  jsClass = JSClassCreate(&hostClassDefinition);
+  classObject = JSObjectMake(ctx, jsClass, this);
+  JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), jsClass, HostClass);
+  instanceClass = JSClassCreate(&hostInstanceDefinition);
+}
+
+void HostClass::proxyInitialize(JSContextRef ctx, JSObjectRef object) {}
+
+void HostClass::proxyFinalize(JSObjectRef object) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+  JSObjectSetPrivate(object, nullptr);
+  JSClassRelease(hostClass->jsClass);
+  JSClassRelease(hostClass->instanceClass);
+  delete hostClass;
+}
+
+bool HostClass::proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
+                                 JSValueRef *exception) {
+  if (!JSValueIsObject(ctx, possibleInstance)) {
+    return false;
+  }
+
+  JSObjectRef instanceObject = JSValueToObject(ctx, possibleInstance, exception);
+  auto constructorHostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
+  auto instanceHostClass = static_cast<HostClass *>(JSObjectGetPrivate(instanceObject));
+
+  if (constructorHostClass == nullptr || instanceHostClass == nullptr) return false;
+  return constructorHostClass == instanceHostClass;
+}
+
+JSValueRef HostClass::proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(function));
+  JSC_THROW_ERROR(ctx, ("Constructor " + hostClass->_name + " required 'new'").c_str(), exception);
+  return nullptr;
+}
+
+JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                              const JSValueRef *arguments, JSValueRef *exception) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
+  JSObjectRef newInstance = JSObjectMake(ctx, hostClass->instanceClass, hostClass);
+  hostClass->constructor(ctx, constructor, newInstance, argumentCount, arguments, exception);
+  return newInstance;
+}
+
+JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                               JSValueRef *exception) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+  JSStringRetain(propertyName);
+  JSValueRef result = hostClass->instanceGetProperty(propertyName, exception);
+  JSStringRelease(propertyName);
+  return result;
+}
+
+bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                         JSValueRef value, JSValueRef *exception) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+  JSStringRetain(propertyName);
+  hostClass->instanceSetProperty(propertyName, value, exception);
+  JSStringRelease(propertyName);
+  return hostClass->context->handleException(*exception);
+}
+
+void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
+                                              JSPropertyNameAccumulatorRef accumulator) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+  hostClass->instanceGetPropertyNames(accumulator);
+}
+
+void HostClass::proxyInstanceFinalize(JSObjectRef object) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+  hostClass->instanceFinalized(object);
+}
+
+void HostClass::constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
+                            const JSValueRef *arguments, JSValueRef *exception) {}
+void HostClass::instanceFinalized(JSObjectRef object) {}
+JSValueRef HostClass::instanceGetProperty(JSStringRef name, JSValueRef *exception) {
+  return nullptr;
+}
+void HostClass::instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+void HostClass::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
 } // namespace kraken::binding::jsc

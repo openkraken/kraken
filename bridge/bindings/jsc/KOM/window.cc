@@ -38,7 +38,7 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
-//void JSWindow::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+//void JSWindow::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 //  for (auto &propertyName : propertyNames) {
 //    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
 //  }

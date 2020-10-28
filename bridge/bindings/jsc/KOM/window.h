@@ -23,7 +23,7 @@ public:
   ~JSWindow();
 
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-  //  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  //  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
   JSLocation *location_;

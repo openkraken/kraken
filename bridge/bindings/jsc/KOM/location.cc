@@ -42,7 +42,7 @@ JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
-//void JSLocation::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+//void JSLocation::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
 //  for (auto &propertyName : propertyNames) {
 //    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
 //  }

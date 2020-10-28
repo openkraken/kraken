@@ -15,6 +15,11 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
   JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
 }
 
+void bindDemo(std::unique_ptr<JSContext> &context) {
+  auto demo = new DemoClass(context.get());
+  JSObjectSetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Demo"), demo->classObject, kJSPropertyAttributeReadOnly, nullptr);
+}
+
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
                                      size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 1) {
@@ -54,4 +59,20 @@ JSValueRef JSDocument::getProperty(JSStringRef nameRef, JSValueRef *exception) {
 
 void JSDocument::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
 
+void DemoClass::constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
+                            const JSValueRef *arguments, JSValueRef *exception) {
+
+}
+void DemoClass::instanceFinalized(JSObjectRef object) {
+  HostClass::instanceFinalized(object);
+}
+JSValueRef DemoClass::instanceGetProperty(JSStringRef name, JSValueRef *exception) {
+  return HostClass::instanceGetProperty(name, exception);
+}
+void DemoClass::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  HostClass::instanceGetPropertyNames(accumulator);
+}
+void DemoClass::instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {
+  HostClass::instanceSetProperty(name, value, exception);
+}
 } // namespace kraken::binding::jsc

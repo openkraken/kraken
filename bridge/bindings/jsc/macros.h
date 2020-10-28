@@ -58,16 +58,39 @@
     JSStringRelease(stackStr);                                                                                         \
   }
 
-#define JSC_CREATE_CLASS_DEFINITION(definition, name, classObject)                                                     \
+#define JSC_CREATE_HOST_OBJECT_DEFINITION(definition, name, parent, classObject)                                       \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
-    definition.finalize = classObject::finalize;                                                                       \
+    definition.finalize = classObject::proxyFinalize;                                                                  \
     definition.getProperty = classObject::proxyGetProperty;                                                            \
     definition.setProperty = classObject::proxySetProperty;                                                            \
     definition.getPropertyNames = classObject::proxyGetPropertyNames;                                                  \
-    definition.hasInstance = classObject::hasInstance;                                                                 \
+  }
+
+#define JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(definition, name, parent, classObject)                               \
+  {                                                                                                                    \
+    definition.version = 0;                                                                                            \
+    definition.className = name;                                                                                       \
+    definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
+    definition.finalize = classObject::proxyInstanceFinalize;                                                                  \
+    definition.getProperty = classObject::proxyInstanceGetProperty;                                                            \
+    definition.setProperty = classObject::proxyInstanceSetProperty;                                                            \
+    definition.getPropertyNames = classObject::proxyInstanceGetPropertyNames;                                                  \
+  }
+
+#define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, parent, staticFunction, staticValue, HostClass)             \
+  {                                                                                                                    \
+    definition.version = 0;                                                                                            \
+    definition.className = name;                                                                                       \
+    definition.parentClass = parent;                                                                                   \
+    definition.staticFunctions = staticFunction;                                                                       \
+    definition.staticValues = staticValue;                                                                             \
+    definition.initialize = HostClass::proxyInitialize;                                                                \
+    definition.finalize = HostClass::proxyFinalize;                                                                    \
+    definition.hasInstance = HostClass::proxyHasInstance;                                                              \
+    definition.callAsConstructor = HostClass::proxyCallAsConstructor;                                                  \
   }
 
 #define JSC_THROW_ERROR(ctx, msg, exception)                                                                           \

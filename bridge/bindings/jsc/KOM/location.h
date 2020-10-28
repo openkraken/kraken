@@ -24,7 +24,7 @@ public:
   ~JSLocation() override;
   JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 
-//  void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+//  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
 
 private:
   std::array<JSStringRef, 2> propertyNames {

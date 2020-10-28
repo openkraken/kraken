@@ -64,12 +64,10 @@ public:
   static bool proxySetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
                                JSValueRef *exception);
   static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
-  static void finalize(JSObjectRef obj);
-  static bool hasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
-                          JSValueRef *exception);
+  static void proxyFinalize(JSObjectRef obj);
 
-  static JSObjectRef propertyBindingFunction(JSContext* context, HostObject *selfObject,
-                                             const char *name, JSObjectCallAsFunctionCallback callback) {
+  static JSObjectRef propertyBindingFunction(JSContext *context, HostObject *selfObject, const char *name,
+                                             JSObjectCallAsFunctionCallback callback) {
     JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
     functionDefinition.className = name;
     functionDefinition.callAsFunction = callback;
@@ -109,6 +107,47 @@ public:
   virtual void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
 
   virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
+
+private:
+  JSClassRef jsClass;
+};
+
+class HostClass {
+public:
+  static void proxyInitialize(JSContextRef ctx, JSObjectRef object);
+  static void proxyFinalize(JSObjectRef object);
+  static bool proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
+                               JSValueRef *exception);
+  static JSValueRef proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSObjectRef proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                            const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                             JSValueRef *exception);
+  static bool proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
+                                       JSValueRef *exception);
+  static void proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
+                                            JSPropertyNameAccumulatorRef propertyNames);
+  static void proxyInstanceFinalize(JSObjectRef obj);
+
+  HostClass() = delete;
+  HostClass(JSContext *context, std::string name);
+  HostClass(JSContext *context, HostClass *parentClass, std::string name, const JSStaticFunction *staticFunction,
+            const JSStaticValue *staticValue);
+
+  virtual void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
+                           const JSValueRef *arguments, JSValueRef *exception);
+
+  virtual void instanceFinalized(JSObjectRef object);
+  virtual JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception);
+  virtual void instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
+  virtual void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator);
+
+  std::string _name;
+  JSContext *context;
+  JSContextRef ctx;
+  JSObjectRef classObject;
+  JSClassRef instanceClass;
 
 private:
   JSClassRef jsClass;
