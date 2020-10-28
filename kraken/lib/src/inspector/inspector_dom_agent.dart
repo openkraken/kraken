@@ -42,14 +42,14 @@ class InspectorDomAgent {
   }
 
   ResponseState onRequest(
-      Map<String, dynamic> params, String method, JsonData jsonData) {
+      Map<String, dynamic> params, String method, InspectorData protocolData) {
     switch (method) {
       case DOM_GET_DOCUMENT:
-        return getDocument(jsonData);
+        return getDocument(protocolData);
         break;
       case DOM_REQUEST_CHILD_NODES:
         int nodeId = params['nodeId'];
-        return requestChildNodes(jsonData, nodeId);
+        return requestChildNodes(protocolData, nodeId);
         break;
       default:
         break;
@@ -57,7 +57,7 @@ class InspectorDomAgent {
     return ResponseState.Success;
   }
 
-  ResponseState requestChildNodes(JsonData jsonData, int nodeId) {
+  ResponseState requestChildNodes(InspectorData jsonData, int nodeId) {
     if (nodeId == null) return ResponseState.Error;
 
     InspectorDomNode domNode = idToDomNodeMap[nodeId];
@@ -87,7 +87,7 @@ class InspectorDomAgent {
     return ResponseState.Success;
   }
 
-  ResponseState getDocument(JsonData jsonData) {
+  ResponseState getDocument(InspectorData jsonData) {
     Node root = _elementManager.getRootElement();
     if (root == null) return ResponseState.Error;
 

@@ -3,6 +3,8 @@
  * Author: Kraken Team.
  */
 
+import 'package:kraken/inspector.dart';
+
 final RegExp _spaceRegExp = RegExp(r'^[\s\u21b5]*');
 final RegExp _newlineRegExp = RegExp(r'[\n\u21b5]');
 final RegExp _propertyNameRegExp = RegExp(r'^(\*?[-#\/\*\\\w]+(\[[0-9a-z_-]+\])?)\s*');
@@ -20,72 +22,88 @@ class CSSTextParser {
 
   CSSTextParser(this.cssText);
 
-  List<Map<String, dynamic>> declarations() {
-    List<Map<String, dynamic>> decs = [];
+  List<CSSProperty> declarations() {
+    List<CSSProperty> decs = [];
     match(_spaceRegExp);
 
-    if (hasCommentDeclaration()) {
-      decs.add(declaration);
+    CSSProperty commentDeclaration = getCommentDeclaration();
+
+    if (commentDeclaration != null) {
+      decs.add(commentDeclaration);
       match(_spaceRegExp);
     }
 
-    while (hasDeclaration()) {
-      decs.add(declaration);
+    CSSProperty cssProperty = getDeclaration();
+
+    while (cssProperty != null) {
+      decs.add(cssProperty);
       match(_spaceRegExp);
-      if (hasCommentDeclaration()) {
-        decs.add(declaration);
+
+      commentDeclaration = getCommentDeclaration();
+      if (commentDeclaration != null) {
+        decs.add(commentDeclaration);
         match(_spaceRegExp);
       }
+
+      cssProperty = getDeclaration();
     }
 
     return decs;
   }
 
-  bool hasCommentDeclaration() {
-    var startOffset = {'startLine': line, 'startColumn': column};
+  CSSProperty getCommentDeclaration() {
+    SourceRange range = SourceRange()
+      ..setStartLine(line)
+      ..setStartColumn(column);
 
     if (cssText.length < 2 || (cssText[0] != '/' && cssText[1] != '*'))
-      return false;
+      return null;
 
     match(_commentStartRegExp);
 
-    hasDeclaration();
+    CSSProperty cssProperty = getDeclaration();
 
     match(_commentEndRegExp);
 
-    declaration['range'] = {
-      ...startOffset,
-      'endLine': line,
-      'endColumn': column
-    };
-    declaration['disabled'] = true;
+    range.setEndLine(line);
+    range.setEndColumn(column);
 
-    return true;
+    cssProperty
+      ..setRange(range)
+      ..setDisabled(true)
+      ..setText('/* ${cssProperty.getName()}: ${cssProperty.getValue()}; */');
+
+    return cssProperty;
   }
 
-  bool hasDeclaration() {
-    var startOffset = {'startLine': line, 'startColumn': column};
+  CSSProperty getDeclaration() {
+    SourceRange range = SourceRange();
+    range.setStartLine(line);
+    range.setStartColumn(column);
+
     var prop = match(_propertyNameRegExp);
     prop = trim(prop);
 
     var colon = match(_colonRegExp);
 
-    if (colon.isEmpty) return false;
+    if (colon.isEmpty) return null;
 
     var value = match(_propertyValueRegExp);
     value = trim(value);
 
     match(_semicolonRegExp);
 
-    declaration = {
-      'type': 'declaration',
-      'property': prop,
-      'value': value,
-      'range': {...startOffset, 'endLine': line, 'endColumn': column},
-      'disabled': false,
-    };
+    range.setEndLine(line);
+    range.setEndColumn(column);
 
-    return true;
+    CSSProperty cssProperty = CSSProperty()
+      ..setRange(range)
+      ..setName(prop)
+      ..setValue(value)
+      ..setDisabled(false)
+      ..setText('$prop: $value;');
+
+    return cssProperty;
   }
 
   void updatePosition(String str) {

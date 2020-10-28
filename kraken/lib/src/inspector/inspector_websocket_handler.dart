@@ -20,16 +20,12 @@ class InspectorWebSocketAgent {
     cssAgent = InspectorCssAgent(domAgent);
   }
 
-  ResponseState onRequest(JsonData protocolData, String message) {
+  ResponseState onRequest(InspectorData protocolData, String message) {
     Map<String, dynamic> data = jsonDecode(message ?? '');
 
-    if (!(data['id'] is int && data['method'] is String)) {
-      return ResponseState.Error;
-    }
-
-    if (!(data['params'] == null || data['params'] is Map<String, dynamic>)) {
-      return ResponseState.Error;
-    }
+    assert(data['id'] is int);
+    assert(data['method'] is String);
+    assert(data['params'] is Map<String, dynamic> || data['params'] == null);
 
     int connectId = data['id'];
     String method = data['method'];

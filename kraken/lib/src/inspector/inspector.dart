@@ -33,7 +33,7 @@ class DebugInspector {
           WebSocket ws = await WebSocketTransformer.upgrade(request);
 
           ws.listen((message) {
-            JsonData protocolData = new JsonData();
+            InspectorData protocolData = new InspectorData();
             ResponseState response =
                 websocketAgent.onRequest(protocolData, message);
             if (response == ResponseState.Success ||
@@ -59,7 +59,10 @@ class DebugInspector {
   }
 }
 
-class JsonData {
+/// Inspector object record data, which used to response valid websocket message.
+/// 
+/// Inspector data including one response data sequence, request data sequence List (optional).
+class InspectorData {
   ResponseData res = new ResponseData();
   List<RequestData> reqList = [];
 
