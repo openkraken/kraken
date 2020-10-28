@@ -663,7 +663,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-//    print('layout flex =============== $targetId ${style['backgroundColor']}');
+    print('layout flex =============== $targetId ${style['backgroundColor']}');
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -999,7 +999,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childLogicalWidth = RenderBoxModel.getLogicalWidth(child);
         double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
-        if (child.needsLayout) {
+        // Always layout child when parent is not laid out yet or child is marked as needsLayout
+        if (!hasSize || child.needsLayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = child.size;
@@ -1201,7 +1202,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (childParentData.runIndex != i) break;
 
-
         // Whether child should be layout depending on size whether changed
         bool isChildNeedsLayout = true;
         if (child is RenderBoxModel && child.hasSize) {
@@ -1209,7 +1209,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
           RenderFlexParentData childParentData = child.parentData;
 
-          if (child.needsLayout) {
+          // Always layout child when parent is not laid out yet or child is marked as needsLayout
+          if (!hasSize || child.needsLayout) {
             isChildNeedsLayout = true;
           } else {
             if ((isFlexGrow && childParentData.flexGrow > 0) ||
@@ -1404,10 +1405,9 @@ class RenderFlexLayout extends RenderLayoutBox {
                     RenderBoxModel childRenderBoxModel = _getChildRenderBoxModel(child);
                     marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
                   }
-                  minCrossAxisSize = contentConstraints.maxWidth - marginHorizontal;
+                  minCrossAxisSize = (contentConstraints.maxWidth != double.infinity ?
+                    contentConstraints.maxWidth : runCrossAxisExtent) - marginHorizontal;
                   maxCrossAxisSize = double.infinity;
-//                  minCrossAxisSize = runCrossAxisExtent - marginHorizontal;
-//                  maxCrossAxisSize = math.max(runCrossAxisExtent, contentConstraints.maxWidth);
                 }
               } else {
                 // for RenderTextBox, there are no cross Axis contentConstraints.

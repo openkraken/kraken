@@ -521,7 +521,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
-//    print('layout flow =============== $targetId ${style['backgroundColor']}');
+    print('layout flow =============== $targetId ${style['backgroundColor']}');
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -655,7 +655,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (child is RenderBoxModel && child.hasSize) {
         double childLogicalWidth = RenderBoxModel.getLogicalWidth(child);
         double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
-        if (child.needsLayout) {
+        // Always layout child when parent is not laid out yet or child is marked as needsLayout
+        if (!hasSize || child.needsLayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = child.size;
