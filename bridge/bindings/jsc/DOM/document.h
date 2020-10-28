@@ -22,10 +22,20 @@ public:
   void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
 };
 
+class ParentClass : public HostClass {
+public:
+  ParentClass() = delete;
+  explicit ParentClass(JSContext *context): HostClass(context, "Parent") {}
+
+  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception) override;
+};
+
 class DemoClass : public HostClass {
 public:
   DemoClass() = delete;
   explicit DemoClass(JSContext *context) : HostClass(context, "Demo"){};
+  explicit DemoClass(JSContext *context, HostClass *prototype)
+    : HostClass(context, prototype, "Demo", nullptr, nullptr) {}
   void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
                    const JSValueRef *arguments, JSValueRef *exception) override;
   void instanceFinalized(JSObjectRef object) override;

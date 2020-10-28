@@ -16,7 +16,8 @@ void bindDocument(std::unique_ptr<JSContext> &context) {
 }
 
 void bindDemo(std::unique_ptr<JSContext> &context) {
-  auto demo = new DemoClass(context.get());
+  auto parent = new ParentClass(context.get());
+  auto demo = new DemoClass(context.get(), parent);
   JSObjectSetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Demo"), demo->classObject, kJSPropertyAttributeReadOnly, nullptr);
 }
 
@@ -74,5 +75,13 @@ void DemoClass::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulato
 }
 void DemoClass::instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {
   HostClass::instanceSetProperty(name, value, exception);
+}
+
+JSValueRef ParentClass::instanceGetProperty(JSStringRef nameRef, JSValueRef *exception) {
+  std::string name = JSStringToStdString(nameRef);
+  if (name == "helloworld") {
+    return JSValueMakeNumber(ctx, 100);
+  }
+  return nullptr;
 }
 } // namespace kraken::binding::jsc

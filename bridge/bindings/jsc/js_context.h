@@ -118,8 +118,6 @@ public:
   static void proxyFinalize(JSObjectRef object);
   static bool proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
                                JSValueRef *exception);
-  static JSValueRef proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
   static JSObjectRef proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef arguments[], JSValueRef *exception);
   static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
@@ -132,7 +130,7 @@ public:
 
   HostClass() = delete;
   HostClass(JSContext *context, std::string name);
-  HostClass(JSContext *context, HostClass *parentClass, std::string name, const JSStaticFunction *staticFunction,
+  HostClass(JSContext *context, HostClass *prototype, std::string name, const JSStaticFunction *staticFunction,
             const JSStaticValue *staticValue);
 
   virtual void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
@@ -151,6 +149,7 @@ public:
 
 private:
   JSClassRef jsClass;
+  HostClass* _prototype;
 };
 
 std::string JSStringToStdString(JSStringRef jsString);

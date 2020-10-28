@@ -170,22 +170,23 @@ HostClass::HostClass(JSContext *context, std::string name)
   : context(context), _name(std::move(name)), ctx(context->context()) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
   JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), nullptr, nullptr, nullptr, HostClass);
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), nullptr, nullptr, HostClass);
   jsClass = JSClassCreate(&hostClassDefinition);
   classObject = JSObjectMake(ctx, jsClass, this);
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), jsClass, HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
 }
 
-HostClass::HostClass(JSContext *context, HostClass *parentClass, std::string name,
+HostClass::HostClass(JSContext *context, HostClass *prototype, std::string name,
                      const JSStaticFunction *staticFunction, const JSStaticValue *staticValue)
-  : context(context), _name(std::move(name)), ctx(context->context()) {
+  : context(context), _name(std::move(name)), ctx(context->context()), _prototype(prototype) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
-  JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), parentClass->jsClass, staticFunction, staticValue,
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), staticFunction, staticValue,
                                    HostClass);
+  hostClassDefinition.attributes = kJSClassAttributeNone;
   jsClass = JSClassCreate(&hostClassDefinition);
   classObject = JSObjectMake(ctx, jsClass, this);
+  JSClassDefinition hostInstanceDefinition = kJSClassDefinitionEmpty;
   JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(hostInstanceDefinition, _name.c_str(), jsClass, HostClass);
   instanceClass = JSClassCreate(&hostInstanceDefinition);
 }
@@ -214,13 +215,6 @@ bool HostClass::proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSVa
   return constructorHostClass == instanceHostClass;
 }
 
-JSValueRef HostClass::proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
-  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(function));
-  JSC_THROW_ERROR(ctx, ("Constructor " + hostClass->_name + " required 'new'").c_str(), exception);
-  return nullptr;
-}
-
 JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
@@ -234,7 +228,13 @@ JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef obj
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
   JSStringRetain(propertyName);
   JSValueRef result = hostClass->instanceGetProperty(propertyName, exception);
+
+  if (result == nullptr && hostClass->_prototype != nullptr) {
+    result = hostClass->_prototype->instanceGetProperty(propertyName, exception);
+  }
+
   JSStringRelease(propertyName);
+
   return result;
 }
 
