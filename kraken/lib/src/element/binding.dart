@@ -285,6 +285,7 @@ mixin ElementsBinding
     return;
   }
 
+  // ignore: prefer_final_fields
   bool _needToReportFirstFrame = true;
   int _deferFirstFrameReportCount = 0;
 

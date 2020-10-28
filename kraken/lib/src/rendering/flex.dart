@@ -57,8 +57,6 @@ bool _startIsTopLeft(FlexDirection direction) {
   return null;
 }
 
-typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
-
 /// ## Layout algorithm
 ///
 /// _This section describes how the framework causes [RenderFlexLayout] to position
@@ -180,7 +178,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getIntrinsicSize({
     FlexDirection sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize, // a method to find the size in the sizing direction
+    double Function(RenderBox child, double extent) childSize, // a method to find the size in the sizing direction
   }) {
     if (_flexDirection == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -616,7 +614,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double _getBaseSize(RenderObject child) {
     // set default value
-    double baseSize = null;
+    double baseSize;
     if (child is RenderTextBox) {
       return baseSize;
     } else if (child is RenderBoxModel) {
@@ -989,7 +987,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           minHeight: baseSize != null ? baseSize : 0
         );
       }
-      child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
+
+      BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
+      child.layout(childConstraints, parentUsesSize: true);
+
       double childMainAxisExtent = _getMainAxisExtent(child);
       double childCrossAxisExtent = _getCrossAxisExtent(child);
 
@@ -1148,8 +1149,16 @@ class RenderFlexLayout extends RenderLayoutBox {
         final RenderFlexParentData childParentData = child.parentData;
 
         AlignSelf alignSelf = childParentData.alignSelf;
+
+        // If size exists in align-items direction, stretch not works
+        bool isStretchSelfValid = false;
+        if (child is RenderBoxModel) {
+          isStretchSelfValid = CSSFlex.isHorizontalFlexDirection(flexDirection) ?
+            child.height == null : child.width == null;
+        }
+
         // Whether child should be stretched
-        bool isStretchSelf = placeholderChild == null &&
+        bool isStretchSelf = placeholderChild == null && isStretchSelfValid &&
           (alignSelf != AlignSelf.auto ? alignSelf == AlignSelf.stretch : alignItems == AlignItems.stretch);
 
         // Whether child is positioned placeholder or positioned renderObject
@@ -1366,6 +1375,7 @@ class RenderFlexLayout extends RenderLayoutBox {
               break;
           }
         }
+
         child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: true);
 
         // update max scrollable size
@@ -1905,7 +1915,7 @@ class RenderSelfRepaintFlexLayout extends RenderFlexLayout {
   }) : super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   /// Convert [RenderSelfRepaintFlexLayout] to [RenderFlowLayout]
   RenderSelfRepaintFlowLayout toFlowLayout() {

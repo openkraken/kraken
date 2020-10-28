@@ -41,20 +41,20 @@ mixin EventHandlerMixin on Node {
   void handlePointDown(PointerDownEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchstart', pointEvent);
     _touchStartTime = event.timeStamp;
-    this.dispatchEvent(event);
+    dispatchEvent(event);
   }
 
   void handlePointMove(PointerMoveEvent pointEvent) {
     _throttler.throttle(() {
       TouchEvent event = _getTouchEvent('touchmove', pointEvent);
-      this.dispatchEvent(event);
+      dispatchEvent(event);
     });
   }
 
   void handlePointUp(PointerUpEvent pointEvent) {
     TouchEvent event = _getTouchEvent('touchend', pointEvent);
     _touchEndTime = event.timeStamp;
-    this.dispatchEvent(event);
+    dispatchEvent(event);
 
     // <300ms to trigger click
     if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
@@ -65,7 +65,7 @@ mixin EventHandlerMixin on Node {
   void handlePointCancel(PointerCancelEvent pointEvent) {
     Event event = Event('touchcancel', EventInit());
     event.detail = {};
-    this.dispatchEvent(event);
+    dispatchEvent(event);
   }
 
   TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
@@ -95,15 +95,15 @@ mixin EventHandlerMixin on Node {
   }
 
   void handleClick(Event event) {
-    this.dispatchEvent(event);
+    dispatchEvent(event);
   }
 
   void handleAppear() {
-    this.dispatchEvent(AppearEvent());
+    dispatchEvent(AppearEvent());
   }
 
   void handleDisappear() {
-    this.dispatchEvent(DisappearEvent());
+    dispatchEvent(DisappearEvent());
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {
@@ -112,7 +112,7 @@ mixin EventHandlerMixin on Node {
     if (boundingClientRect.left == boundingClientRect.right || boundingClientRect.top == boundingClientRect.bottom)
       return;
 
-    this.dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
+    dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
     if (entry.intersectionRatio > 0) {
       handleAppear();
     } else {

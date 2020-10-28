@@ -29,9 +29,9 @@ mixin NodeLifeCycle on Node {
   List<VoidCallback> _beforeDisconnected = [];
 
   void fireAfterConnected() {
-    _afterConnected.forEach((VoidCallback fn) {
-      fn();
-    });
+    for (VoidCallback callback in _afterConnected) {
+      callback();
+    }
     _afterConnected = [];
   }
 
@@ -40,9 +40,9 @@ mixin NodeLifeCycle on Node {
   }
 
   void fireBeforeDisconnected() {
-    _beforeDisconnected.forEach((VoidCallback fn) {
-      fn();
-    });
+    for (VoidCallback callback in _beforeDisconnected) {
+      callback();
+    }
     _beforeDisconnected = [];
   }
 
@@ -57,12 +57,12 @@ abstract class Node extends EventTarget {
   NodeType nodeType;
   String nodeName;
 
-  Element get parent => this.parentNode;
+  Element get parent => parentNode;
   Element get parentElement => parent;
 
   List<Element> get children {
     List<Element> _children = [];
-    for (var child in this.childNodes) {
+    for (var child in childNodes) {
       if (child is Element) _children.add(child);
     }
     return _children;
@@ -80,7 +80,7 @@ abstract class Node extends EventTarget {
     while (parent.parentNode != null) {
       parent = parent.parentNode;
     }
-    return parent == this.elementManager.getRootElement();
+    return parent == elementManager.getRootElement();
   }
 
   Node get firstChild => childNodes?.first;
@@ -126,7 +126,7 @@ abstract class Node extends EventTarget {
   Node appendChild(Node child) {
     child._ensureDetached();
     child.parentNode = this;
-    this.childNodes.add(child);
+    childNodes.add(child);
 
     return child;
   }

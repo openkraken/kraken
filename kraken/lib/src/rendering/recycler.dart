@@ -43,6 +43,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     super.insert(_renderViewport);
   }
 
+  @override
+  bool get isRepaintBoundary => true;
+
   Axis _axis;
   Axis get axis => _axis;
   set axis(Axis value) {

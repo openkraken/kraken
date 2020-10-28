@@ -14,8 +14,6 @@ import 'ticker_provider.dart';
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);
 typedef PointListener = void Function(PointerEvent event);
 
-class RenderSingleViewPortParentData extends ContainerBoxParentData<RenderBox> {}
-
 class KrakenScrollable with CustomTickerProviderStateMixin implements ScrollContext {
   AxisDirection _axisDirection;
   ScrollPosition position;
@@ -321,7 +319,8 @@ mixin RenderOverflowMixin on RenderBox {
       size.height - borderEdge.bottom - borderEdge.top,
     );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
-      PaintingContextCallback fn = (PaintingContext context, Offset offset) {
+      // ignore: prefer_function_declarations_over_variables
+      PaintingContextCallback painter = (PaintingContext context, Offset offset) {
         callback(context, offset + paintOffset);
       };
       if (decoration != null && decoration.borderRadius != null) {
@@ -332,9 +331,9 @@ mixin RenderOverflowMixin on RenderBox {
             bottomLeft: radius.bottomLeft,
             bottomRight: radius.bottomRight
         );
-        context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, fn);
+        context.pushClipRRect(needsCompositing, offset, clipRect, clipRRect, painter);
       } else {
-        context.pushClipRect(needsCompositing, offset, clipRect, fn);
+        context.pushClipRect(needsCompositing, offset, clipRect, painter);
       }
     } else {
       callback(context, offset);
@@ -344,7 +343,7 @@ mixin RenderOverflowMixin on RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
-    final RenderSingleViewPortParentData childParentData = parentData;
+    final BoxParentData childParentData = parentData;
     double candidate = getDistanceToActualBaseline(baseline);
     if (candidate != null) {
       candidate += childParentData.offset.dy;

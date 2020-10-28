@@ -139,7 +139,7 @@ class RenderSelfRepaintIntrinsic extends RenderIntrinsic {
         super(targetId, style, elementManager);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   RenderIntrinsic toParentRepaint() {
     RenderObject childRenderObject = child;

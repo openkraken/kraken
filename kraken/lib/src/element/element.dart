@@ -91,10 +91,6 @@ class Element extends Node
   Map<String, dynamic> properties;
   List<String> events;
 
-  /// whether element needs reposition when append to tree or
-  /// changing position property.
-  bool needsReposition = false;
-
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
 
@@ -135,7 +131,6 @@ class Element extends Node
     this.tagName,
     this.defaultStyle = const {},
     this.events = const [],
-    this.needsReposition = false,
     // Whether element allows children.
     bool isIntrinsicBox = false,
     this.repaintSelf = false
@@ -145,14 +140,10 @@ class Element extends Node
     if (properties == null) properties = {};
     if (events == null) events = [];
 
-    _isIntrinsicBox = isIntrinsicBox;
     defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
+    _isIntrinsicBox = isIntrinsicBox;
+
     style = CSSStyleDeclaration(this);
-    style.addStyleChangeListener(_onStyleChanged);
-
-    // Mark element needs to reposition according to position CSS.
-    if (_isPositioned(style)) needsReposition = true;
-
     initializeRenderObject();
 
     _setDefaultStyle();
@@ -171,10 +162,14 @@ class Element extends Node
       _renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
-      childNodes.forEach((Node child) {
+      for (Node child in childNodes) {
         child.attachTo(this);
-      });
+      }
     }
+
+    style.addStyleChangeListener(_onStyleChanged);
+    style.applyTargetProperties();
+
     _initialized = true;
   }
 
@@ -333,17 +328,17 @@ class Element extends Node
   // Calculate sticky status according to scroll offset and scroll direction
   void layoutStickyChildren(double scrollOffset, AxisDirection axisDirection) {
     List<Element> stickyElements = _findStickyChildren(this);
-    stickyElements.forEach((Element el) {
+    for (Element el in stickyElements) {
       layoutStickyChild(el, scrollOffset, axisDirection);
-    });
+    }
   }
 
   void _updatePosition(CSSPositionType prevPosition, CSSPositionType currentPosition) {
     if (renderBoxModel.parentData is RenderLayoutParentData) {
       (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
     }
-    // Move element according to position when it's already connected
-    if (isConnected) {
+    // Move element according to position when it's already attached to render tree.
+    if (attached) {
       if (currentPosition == CSSPositionType.static) {
         // Loop renderObject children to move positioned children to its containing block
         _renderLayoutBox.visitChildren((childRenderObject) {
@@ -407,11 +402,10 @@ class Element extends Node
         // Loop children tree to find and append positioned children whose containing block is self
         List<Element> positionedChildren = [];
         _findPositionedChildren(this, positionedChildren);
-        positionedChildren.forEach((child) {
+        for (var child in positionedChildren) {
           child.detach();
           child.attachTo(this);
-        });
-
+        }
         // Set stick element offset
         if (currentPosition == CSSPositionType.sticky) {
           Element scrollContainer = _findScrollContainer(this);
@@ -436,7 +430,7 @@ class Element extends Node
   }
 
   Element getElementById(Element parentElement, int targetId) {
-    Element result = null;
+    Element result;
     List childNodes = parentElement.childNodes;
 
     for (int i = 0; i < childNodes.length; i++) {
@@ -452,7 +446,7 @@ class Element extends Node
   void addChild(RenderObject child) {
     if (_renderLayoutBox != null) {
       _renderLayoutBox.add(child);
-    } else {
+    } else if (_renderIntrinsic != null) {
       _renderIntrinsic.child = child;
     }
   }
@@ -515,10 +509,14 @@ class Element extends Node
       }
     }
     (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
+    // Remove all intersection change listeners.
+    renderBoxModel.clearIntersectionChangeListeners();
 
-    childNodes.forEach((child) {
+    for (Node child in childNodes) {
       child.detach();
-    });
+    }
+
+    style.removeStyleChangeListener(_onStyleChanged);
     dispose();
   }
 
@@ -527,6 +525,7 @@ class Element extends Node
   Node appendChild(Node child) {
     super.appendChild(child);
 
+    // ignore: prefer_function_declarations_over_variables
     VoidCallback doAppendChild = () {
       // Only append node types which is visible in RenderObject tree
       if (child is NodeLifeCycle) {
@@ -566,6 +565,7 @@ class Element extends Node
     // Node.insertBefore will change element tree structure,
     // so get the referenceIndex before calling it.
     Node node = super.insertBefore(child, referenceNode);
+    // ignore: prefer_function_declarations_over_variables
     VoidCallback doInsertBefore = () {
       if (referenceIndex != -1) {
         Node after;
@@ -855,20 +855,18 @@ class Element extends Node
 
     renderBoxModel.display = presentDisplay;
 
-    if (renderBoxModel != null) {
-      if (originalDisplay != presentDisplay) {
-        RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
-        bool shouldReattach = parent != null;
-        renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
+    if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
+      RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
+      bool shouldReattach = parent != null;
+      renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
 
-        if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
-          RenderLayoutBox parentRenderObject = parent.renderBoxModel;
-          RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
-          parentRenderObject.remove(prevRenderLayoutBox);
-          parentRenderObject.insert(renderBoxModel, after: previous);
-        } else {
-          renderBoxModel.markNeedsLayout();
-        }
+      if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
+        RenderLayoutBox parentRenderObject = parent.renderBoxModel;
+        RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
+        parentRenderObject.remove(prevRenderLayoutBox);
+        parentRenderObject.insert(renderBoxModel, after: previous);
+      } else {
+        renderBoxModel.markNeedsLayout();
       }
     }
   }
@@ -935,9 +933,9 @@ class Element extends Node
   void _styleFlexItemChangedListener(String property, String original, String present) {
     CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-      children.forEach((Element child) {
+      for (Element child in children) {
         _updateFlexItemStyle(child);
-      });
+      }
     }
   }
 
@@ -964,7 +962,7 @@ class Element extends Node
     updateRenderVisibility(CSSVisibilityMixin.getVisibility(present));
   }
 
-  void _styleContentVisibilityChangedListener(String property, original, present) {
+  void _styleContentVisibilityChangedListener(String property, String original, String present) {
     // Update content visibility.
     updateRenderContentVisibility(CSSContentVisibilityMixin.getContentVisibility(present));
   }
@@ -981,14 +979,14 @@ class Element extends Node
 
   // Update textNode style when container style changed
   void _updateTextChildNodesStyle() {
-    childNodes.forEach((node) {
+    for (var node in childNodes) {
       if (node is TextNode) node.updateTextStyle();
-    });
+    }
   }
 
   // Universal style property change callback.
   @mustCallSuper
-  void setStyle(String key, value) {
+  void setStyle(String key, dynamic value) {
     // @HACK: delay transition property at next frame to make sure transition trigger after all style had been set.
     // https://github.com/WebKit/webkit/blob/master/Source/WebCore/style/StyleTreeResolver.cpp#L220
     // This it not a good solution between webkit's implementation which write all new style property into an RenderStyle object
@@ -1006,7 +1004,7 @@ class Element extends Node
   }
 
   @mustCallSuper
-  void setProperty(String key, value) {
+  void setProperty(String key, dynamic value) {
     // Each key change will emit to `setStyle`
     if (key == STYLE) {
       assert(value is Map<String, dynamic>);
@@ -1092,7 +1090,7 @@ class Element extends Node
   }
 
   @mustCallSuper
-  method(String name, List args) {
+  dynamic method(String name, List args) {
     switch (name) {
       case 'click':
         return click();
@@ -1106,7 +1104,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
     RenderBox sizedBox = renderBoxModel;
-    if (isConnected) {
+    if (attached) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
 
@@ -1201,7 +1199,7 @@ class Element extends Node
   void click() {
     Event clickEvent = Event('click', EventInit());
 
-    if (isConnected) {
+    if (attached) {
       final RenderBox box = renderBoxModel;
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,
@@ -1234,16 +1232,15 @@ class Element extends Node
       devicePixelRatio = window.devicePixelRatio;
     }
 
-    Completer<Uint8List> completer = new Completer();
-    RenderBoxModel renderBoxModel = this.renderBoxModel;
+    Completer<Uint8List> completer = Completer();
 
     RenderObject parent = renderBoxModel.parent;
     if (!renderBoxModel.isRepaintBoundary) {
       RenderBoxModel renderReplacedBoxModel;
       if (renderBoxModel is RenderLayoutBox) {
-        renderBoxModel = renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
+        renderReplacedBoxModel = createRenderLayout(this, prevRenderLayoutBox: renderBoxModel, repaintSelf: true);
       } else {
-        renderBoxModel = renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
+        renderReplacedBoxModel = _createRenderIntrinsic(this, prevRenderIntrinsic: renderBoxModel, repaintSelf: true);
       }
 
       if (parent is RenderObjectWithChildMixin<RenderBox>) {
@@ -1259,7 +1256,6 @@ class Element extends Node
     }
 
     renderBoxModel.markNeedsLayout();
-    renderBoxModel.markNeedsPaint();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
@@ -1485,7 +1481,7 @@ List<Element> _findStickyChildren(Element element) {
   assert(element != null);
   List<Element> result = [];
 
-  element.children.forEach((Element child) {
+  for (Element child in element.children) {
     List<CSSOverflowType> overflow = getOverflowTypes(child.style);
     CSSOverflowType overflowX = overflow[0];
     CSSOverflowType overflowY = overflow[1];
@@ -1494,14 +1490,14 @@ List<Element> _findStickyChildren(Element element) {
 
     // No need to loop scrollable container children
     if (overflowX != CSSOverflowType.visible || overflowY != CSSOverflowType.visible) {
-      return;
+      break;
     }
 
     List<Element> mergedChildren = _findStickyChildren(child);
-    mergedChildren.forEach((Element child) {
+    for (Element child in mergedChildren) {
       result.add(child);
-    });
-  });
+    }
+  }
 
   return result;
 }
@@ -1510,19 +1506,10 @@ bool _isIntersectionObserverEvent(String eventName) {
   return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
 }
 
-bool _hasIntersectionObserverEvent(eventHandlers) {
+bool _hasIntersectionObserverEvent(Map eventHandlers) {
   return eventHandlers.containsKey('appear') ||
       eventHandlers.containsKey('disappear') ||
       eventHandlers.containsKey('intersectionchange');
-}
-
-bool _isPositioned(CSSStyleDeclaration style) {
-  if (style.contains(POSITION)) {
-    String position = style[POSITION];
-    return position != EMPTY_STRING && position != STATIC;
-  } else {
-    return false;
-  }
 }
 
 void _setPositionedChildParentData(RenderLayoutBox parentRenderLayoutBox, Element child) {

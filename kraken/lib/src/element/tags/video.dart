@@ -20,18 +20,24 @@ const Map<String, dynamic> _defaultStyle = {
 class VideoElement extends Element {
   VideoElement(int targetId, ElementManager elementManager)
       : super(
-          targetId,
-          elementManager,
-          defaultStyle: _defaultStyle,
-          isIntrinsicBox: true,
-          repaintSelf: true,
-          tagName: VIDEO,
-        ) {
+    targetId,
+    elementManager,
+    defaultStyle: _defaultStyle,
+    isIntrinsicBox: true,
+    repaintSelf: true,
+    tagName: VIDEO,
+  ) {
     renderVideo();
-    elementManager.setDetachCallback(() {
-      if (controller == null) return;
-      controller.dispose();
-    });
+  }
+
+  @override
+  void detach() async {
+    super.detach();
+
+    if (controller != null) {
+      await controller.dispose();
+      controller = null;
+    }
   }
 
   void renderVideo() {
@@ -63,7 +69,7 @@ class VideoElement extends Element {
   }
 
   Future<int> createVideoPlayer(String src) {
-    Completer<int> completer = new Completer();
+    Completer<int> completer = Completer();
 
     if (src.startsWith('//') || src.startsWith('http://') || src.startsWith('https://')) {
       controller = VideoPlayerController.network(src.startsWith('//') ? 'https:' + src : src);
@@ -111,9 +117,7 @@ class VideoElement extends Element {
   }
 
   void _createVideoBox() {
-    createVideoPlayer(_src).then((textureId) {
-      addVideoBox(textureId);
-    });
+    createVideoPlayer(_src).then(addVideoBox);
   }
 
   void _removeVideoBox() {
