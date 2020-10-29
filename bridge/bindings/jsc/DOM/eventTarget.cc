@@ -10,20 +10,20 @@ namespace kraken::binding::jsc {
 
 static std::atomic<int64_t> globalEventTargetId{0};
 
-JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostObject(context, name) {
+JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {
   eventTargetId = globalEventTargetId++;
 }
-JSEventTarget::JSEventTarget(JSContext *context) : HostObject(context, "EventTarget") {
+JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {
   eventTargetId = globalEventTargetId++;
 }
 
-JSEventTarget::~JSEventTarget() {
+void JSEventTarget::instanceFinalized(JSObjectRef object) {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
   auto data = new DisposeCallbackData(context->getContextId(), getEventTargetId());
   foundation::Task disposeTask = [](void *data) {
     auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
     foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
+        ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
     delete disposeCallbackData;
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);

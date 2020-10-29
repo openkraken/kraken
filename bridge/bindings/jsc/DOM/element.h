@@ -11,12 +11,17 @@
 
 namespace kraken::binding::jsc {
 
+void bindElement(std::unique_ptr<JSContext> &context);
+
 class JSElement : public JSNode {
 public:
-  JSElement() = delete;
-  explicit JSElement(JSContext *context, NativeString *tagName);
+  static JSElement *instance(JSContext *context);
 
-private:
+  JSElement() = delete;
+  explicit JSElement(JSContext *context);
+
+  void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
+                   const JSValueRef *arguments, JSValueRef *exception) override;
 };
 
 } // namespace kraken::binding::jsc

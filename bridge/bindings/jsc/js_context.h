@@ -57,6 +57,9 @@ private:
   JSGlobalContextRef ctx_;
 };
 
+JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+                                    JSObjectCallAsFunctionCallback callback);
+
 class HostObject {
 public:
   static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
@@ -65,16 +68,6 @@ public:
                                JSValueRef *exception);
   static void proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef propertyNames);
   static void proxyFinalize(JSObjectRef obj);
-
-  static JSObjectRef propertyBindingFunction(JSContext *context, HostObject *selfObject, const char *name,
-                                             JSObjectCallAsFunctionCallback callback) {
-    JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
-    functionDefinition.className = name;
-    functionDefinition.callAsFunction = callback;
-    functionDefinition.version = 0;
-    JSClassRef functionClass = JSClassCreate(&functionDefinition);
-    return JSObjectMake(context->context(), functionClass, selfObject);
-  }
 
   HostObject() = delete;
   HostObject(JSContext *context, std::string name);
@@ -149,7 +142,7 @@ public:
 
 private:
   JSClassRef jsClass;
-  HostClass* _prototype;
+  HostClass *_prototype {nullptr};
 };
 
 std::string JSStringToStdString(JSStringRef jsString);

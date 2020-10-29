@@ -113,6 +113,16 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
+JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
+                                    JSObjectCallAsFunctionCallback callback) {
+  JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;
+  functionDefinition.className = name;
+  functionDefinition.callAsFunction = callback;
+  functionDefinition.version = 0;
+  JSClassRef functionClass = JSClassCreate(&functionDefinition);
+  return JSObjectMake(context->context(), functionClass, data);
+}
+
 HostObject::HostObject(JSContext *context, std::string name)
   : context(context), name(std::move(name)), ctx(context->context()) {
   JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
@@ -177,12 +187,11 @@ HostClass::HostClass(JSContext *context, std::string name)
   instanceClass = JSClassCreate(&hostInstanceDefinition);
 }
 
-HostClass::HostClass(JSContext *context, HostClass *prototype, std::string name,
-                     const JSStaticFunction *staticFunction, const JSStaticValue *staticValue)
+HostClass::HostClass(JSContext *context, HostClass *prototype, std::string name, const JSStaticFunction *staticFunction,
+                     const JSStaticValue *staticValue)
   : context(context), _name(std::move(name)), ctx(context->context()), _prototype(prototype) {
   JSClassDefinition hostClassDefinition = kJSClassDefinitionEmpty;
-  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), staticFunction, staticValue,
-                                   HostClass);
+  JSC_CREATE_HOST_CLASS_DEFINITION(hostClassDefinition, _name.c_str(), staticFunction, staticValue, HostClass);
   hostClassDefinition.attributes = kJSClassAttributeNone;
   jsClass = JSClassCreate(&hostClassDefinition);
   classObject = JSObjectMake(ctx, jsClass, this);
@@ -191,7 +200,16 @@ HostClass::HostClass(JSContext *context, HostClass *prototype, std::string name,
   instanceClass = JSClassCreate(&hostInstanceDefinition);
 }
 
-void HostClass::proxyInitialize(JSContextRef ctx, JSObjectRef object) {}
+void HostClass::proxyInitialize(JSContextRef ctx, JSObjectRef object) {
+  JSObjectRef global = JSContextGetGlobalObject(ctx);
+  JSStringRef functionString = JSStringCreateWithUTF8CString("Function");
+  JSValueRef value = JSObjectGetProperty(ctx, global, functionString, nullptr);
+  JSObjectRef funcCtor = JSValueToObject(ctx, value, nullptr);
+  JSStringRef prototypeKey = JSStringCreateWithUTF8CString("prototype");
+  JSValueRef prototype = JSObjectGetPrototype(ctx, funcCtor);
+  JSObjectSetProperty(ctx, object, prototypeKey, prototype, kJSPropertyAttributeNone, nullptr);
+  JSStringRelease(functionString);
+}
 
 void HostClass::proxyFinalize(JSObjectRef object) {
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));

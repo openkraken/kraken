@@ -1,4 +1,3 @@
-import { Event } from '../dom/events/event';
 import { krakenInvokeModule } from '../bridge';
 
 function validateUrl(url: string) {
@@ -23,7 +22,7 @@ enum BinaryType {
 
 const wsClientMap = {};
 
-export function dispatchWebSocketEvent(clientId: string, event: Event) {
+export function dispatchWebSocketEvent(clientId: string, event: ErrorEvent) {
   let client = wsClientMap[clientId];
   if (client) {
     let readyState = client.readyState;

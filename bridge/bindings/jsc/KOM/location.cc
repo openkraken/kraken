@@ -33,7 +33,7 @@ JSValueRef reload(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject
 JSValueRef JSLocation::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "reload") {
-    return JSLocation::propertyBindingFunction(context, this, "reload", reload);
+    return propertyBindingFunction(context, this, "reload", reload);
   } else if (name == "href") {
     JSStringRef hrefRef = JSStringCreateWithUTF8CString(href.c_str());
     return JSValueMakeString(context->context(), hrefRef);

@@ -185,11 +185,11 @@ JSValueRef JSBlob::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "slice") {
-    return JSBlob::propertyBindingFunction(context, this, "slice", slice);
+    return propertyBindingFunction(context, this, "slice", slice);
   } else if (name == "text") {
-    return JSBlob::propertyBindingFunction(context, this, "text", text);
+    return propertyBindingFunction(context, this, "text", text);
   } else if (name == "arrayBuffer") {
-    return JSBlob::propertyBindingFunction(context, this, "arrayBuffer", arrayBuffer);
+    return propertyBindingFunction(context, this, "arrayBuffer", arrayBuffer);
   } else if (name == "size") {
     return JSValueMakeNumber(context->context(), _data.size());
   } else if (name == "type") {

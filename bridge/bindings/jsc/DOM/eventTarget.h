@@ -23,12 +23,13 @@ struct DisposeCallbackData {
   int32_t contextId;
 };
 
-class JSEventTarget : public HostObject {
+class JSEventTarget : public HostClass {
 public:
   JSEventTarget() = delete;
   explicit JSEventTarget(JSContext *context, const char* name);
   explicit JSEventTarget(JSContext *context);
-  ~JSEventTarget() override;
+
+  void instanceFinalized(JSObjectRef object) override;
 
   NativeEventTarget *getEventTarget() {
     return nativeEventTarget;

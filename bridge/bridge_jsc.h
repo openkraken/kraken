@@ -21,6 +21,7 @@
 #endif // ENABLE_DEBUGGER
 
 #include "bindings/jsc/DOM/document.h"
+#include "bindings/jsc/DOM/element.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/KOM/location.h"
@@ -33,10 +34,6 @@
 #include "bindings/jsc/ui_manager.h"
 
 namespace kraken {
-
-#ifdef KRAKEN_ENABLE_JSA
-using namespace alibaba::jsa;
-#endif
 
 class JSBridge final {
 public:

@@ -52,12 +52,12 @@ JSBridge::JSBridge(int32_t contextId, const JSExceptionHandler &handler) : conte
   kraken::binding::jsc::bindUIManager(context);
   kraken::binding::jsc::bindConsole(context);
   kraken::binding::jsc::bindDocument(context);
+  kraken::binding::jsc::bindElement(context);
   kraken::binding::jsc::bindWindow(context);
   kraken::binding::jsc::bindScreen(context);
   kraken::binding::jsc::bindTimer(context);
   kraken::binding::jsc::bindToBlob(context);
   kraken::binding::jsc::bindBlob(context);
-  kraken::binding::jsc::bindDemo(context);
 
   initKrakenPolyFill(this);
 #ifdef KRAKEN_ENABLE_JSA

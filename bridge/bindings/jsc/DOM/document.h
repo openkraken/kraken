@@ -8,44 +8,20 @@
 
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
+#include "node.h"
 
 namespace kraken::binding::jsc {
 
-class JSDocument : public HostObject {
+class JSDocument :  public JSNode {
 public:
   JSDocument(JSContext *context);
-
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-  void setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
-};
-
-class ParentClass : public HostClass {
-public:
-  ParentClass() = delete;
-  explicit ParentClass(JSContext *context): HostClass(context, "Parent") {}
-
-  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception) override;
-};
-
-class DemoClass : public HostClass {
-public:
-  DemoClass() = delete;
-  explicit DemoClass(JSContext *context) : HostClass(context, "Demo"){};
-  explicit DemoClass(JSContext *context, HostClass *prototype)
-    : HostClass(context, prototype, "Demo", nullptr, nullptr) {}
-  void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
-                   const JSValueRef *arguments, JSValueRef *exception) override;
-  void instanceFinalized(JSObjectRef object) override;
-  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception) override;
-  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
-  void instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) override;
+  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception);
 };
 
 void bindDocument(std::unique_ptr<JSContext> &context);
-void bindDemo(std::unique_ptr<JSContext> &context);
 
 } // namespace kraken::binding::jsc
 

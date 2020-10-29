@@ -81,10 +81,11 @@
     definition.parentClass = parent;                                                                                   \
   }
 
-#define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, staticFunction, staticValue, HostClass)             \
+#define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, staticFunction, staticValue, HostClass)                     \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
+    definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
     definition.staticFunctions = staticFunction;                                                                       \
     definition.staticValues = staticValue;                                                                             \
     definition.initialize = HostClass::proxyInitialize;                                                                \

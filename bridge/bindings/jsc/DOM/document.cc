@@ -12,13 +12,9 @@ namespace kraken::binding::jsc {
 
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context.get());
-  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "document", document);
-}
-
-void bindDemo(std::unique_ptr<JSContext> &context) {
-  auto parent = new ParentClass(context.get());
-  auto demo = new DemoClass(context.get(), parent);
-  JSObjectSetProperty(context->context(), context->global(), JSStringCreateWithUTF8CString("Demo"), demo->classObject, kJSPropertyAttributeReadOnly, nullptr);
+  JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
+  auto documentObjectRef = JSObjectMake(context->context(), document->instanceClass, document);
+  JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -34,54 +30,21 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
     return nullptr;
   }
 
-  JSStringRef tagNameStrRef = JSValueToStringCopy(ctx, tagNameValue, exception);
-
-  NativeString nativeString{};
-  nativeString.string = JSStringGetCharactersPtr(tagNameStrRef);
-  nativeString.length = JSStringGetLength(tagNameStrRef);
-
   auto document = static_cast<JSDocument *>(JSObjectGetPrivate(function));
-  auto element = new JSElement(document->context, nativeString.clone());
-
-  JSStringRelease(tagNameStrRef);
-  return element->jsObject;
+  auto element = JSElement::instance(document->context);
+  auto elementInstance = JSObjectCallAsConstructor(ctx, element->classObject, 1, arguments, exception);
+  return elementInstance;
 }
 
-JSDocument::JSDocument(JSContext *context) : HostObject(context, "Document") {}
+JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document", NodeType::DOCUMENT_NODE) {}
 
-JSValueRef JSDocument::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+JSValueRef JSDocument::instanceGetProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "createElement") {
-    return JSDocument::propertyBindingFunction(context, this, "createElement", createElement);
+    return propertyBindingFunction(context, this, "createElement", createElement);
   }
 
   return nullptr;
 }
 
-void JSDocument::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
-
-void DemoClass::constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
-                            const JSValueRef *arguments, JSValueRef *exception) {
-
-}
-void DemoClass::instanceFinalized(JSObjectRef object) {
-  HostClass::instanceFinalized(object);
-}
-JSValueRef DemoClass::instanceGetProperty(JSStringRef name, JSValueRef *exception) {
-  return HostClass::instanceGetProperty(name, exception);
-}
-void DemoClass::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-  HostClass::instanceGetPropertyNames(accumulator);
-}
-void DemoClass::instanceSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {
-  HostClass::instanceSetProperty(name, value, exception);
-}
-
-JSValueRef ParentClass::instanceGetProperty(JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
-  if (name == "helloworld") {
-    return JSValueMakeNumber(ctx, 100);
-  }
-  return nullptr;
-}
 } // namespace kraken::binding::jsc
