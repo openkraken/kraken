@@ -663,7 +663,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
-    print('layout flex =============== $targetId ${style['backgroundColor']}');
+//    print('layout flex =============== $targetId ${style['backgroundColor']}');
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -1252,7 +1252,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           double baseSize = _getBaseSize(child) ?? 0;
           // get the maximum child size between base size and maxChildExtent.
           minChildExtent = math.max(baseSize, maxChildExtent);
-          maxChildExtent = double.infinity;
+          maxChildExtent = minChildExtent;
         } else if (isFlexShrink) {
           int childNodeId;
           if (child is RenderTextBox) {

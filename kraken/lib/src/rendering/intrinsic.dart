@@ -41,6 +41,7 @@ class RenderIntrinsic extends RenderBoxModel
       return;
     }
 
+//    print('layout intrinsic =============== $targetId ${style['backgroundColor']}');
     beforeLayout();
     if (child != null) {
       child.layout(contentConstraints, parentUsesSize: true);
