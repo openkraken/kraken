@@ -114,18 +114,25 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
-    textSpan = buildTextSpan();
-    renderEditable = createRenderObject();
-
-    addChild(renderEditable);
 
     // Make element listen to click event to trigger focus.
     addEvent('click');
 
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
-
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    renderEditable = createRenderObject();
+
+    addChild(renderEditable);
+  }
+
+  @override
+  void didDetachRenderer() {
+    renderEditable = null;
   }
 
   @override
@@ -139,7 +146,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void updateTextSpan() {
     // Rebuilt text span, for style has changed.
     textSpan = buildTextSpan();
-    renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+
+    if (renderEditable != null) {
+      renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+    }
   }
 
   TextSpan buildTextSpan({String text = ''}) {

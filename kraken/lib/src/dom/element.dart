@@ -84,7 +84,7 @@ class Element extends Node
         CSSContentVisibilityMixin,
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
-  Map<String, dynamic> properties;
+  Map<String, dynamic> properties = Map<String, dynamic>();
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
@@ -123,7 +123,6 @@ class Element extends Node
     ElementManager elementManager, {
     this.tagName,
     this.defaultStyle = const <String, dynamic>{},
-    this.properties = const <String, dynamic>{},
     // Whether element allows children.
     bool isIntrinsicBox = false,
     this.repaintSelf = false
@@ -1181,15 +1180,17 @@ class Element extends Node
     super.addEvent(eventName);
 
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
+
+    // Only add listener once for all intersection related event
+    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
+    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
+
     addEventListener(eventName, _eventResponder);
 
     if (renderBoxModel != null) {
       // Bind pointer responder.
       addEventResponder(renderBoxModel);
 
-      // Only add listener once for all intersection related event
-      bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
-      bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
       if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
         renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
       }
