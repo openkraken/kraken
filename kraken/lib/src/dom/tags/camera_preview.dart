@@ -49,7 +49,6 @@ class CameraPreviewElement extends Element {
 
   @override
   void willAttachRenderer() {
-    style.addStyleChangeListener(_propertyChangedListener);
     super.willAttachRenderer();
 
     sizedBox = RenderConstrainedBox(
@@ -60,6 +59,7 @@ class CameraPreviewElement extends Element {
     );
 
     addChild(sizedBox);
+    style.addStyleChangeListener(_propertyChangedListener);
   }
 
   @override

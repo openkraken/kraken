@@ -39,8 +39,8 @@ class ImageElement extends Element {
   bool _hasLazyLoading = false;
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
+  void willAttachRenderer() {
+    super.willAttachRenderer();
     style.addStyleChangeListener(_stylePropertyChanged);
     _renderImage();
   }

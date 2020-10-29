@@ -157,10 +157,8 @@ class Element extends Node
 
   @override
   void willAttachRenderer() {
-    createRenderer();
-
     style.addStyleChangeListener(_onStyleChanged);
-    style.applyTargetProperties();
+    createRenderer();
   }
 
   @override
@@ -422,7 +420,7 @@ class Element extends Node
         // Loop children tree to find and append positioned children whose containing block is self
         List<Element> positionedChildren = [];
         _findPositionedChildren(this, positionedChildren);
-        for (var child in positionedChildren) {
+        for (Element child in positionedChildren) {
           child.detach();
           child.attachTo(this);
         }
@@ -486,6 +484,7 @@ class Element extends Node
   @override
   void attachTo(Element parent, {RenderObject after}) {
     willAttachRenderer();
+    style.applyTargetProperties();
 
     CSSStyleDeclaration parentStyle = parent.style;
     CSSDisplay parentDisplayValue =

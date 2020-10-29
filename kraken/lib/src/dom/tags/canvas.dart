@@ -29,8 +29,6 @@ class CanvasElement extends Element {
 
   @override
   void willAttachRenderer() {
-    style.addStyleChangeListener(_propertyChangedListener);
-
     super.willAttachRenderer();
     renderCustomPaint = RenderCustomPaint(
       painter: painter,
@@ -39,7 +37,9 @@ class CanvasElement extends Element {
     );
 
     addChild(renderCustomPaint);
+    style.addStyleChangeListener(_propertyChangedListener);
   }
+
 
   @override
   void didDetachRenderer() {

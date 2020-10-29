@@ -27,6 +27,7 @@ class BodyElement extends Element {
 
   void attachBody() {
     willAttachRenderer();
+    style.applyTargetProperties();
     didAttachRenderer();
   }
 }

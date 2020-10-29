@@ -20,10 +20,10 @@ class AudioElement extends Element {
 
   @override
   void willAttachRenderer() {
-    style.addStyleChangeListener(_stylePropertyChanged);
     super.willAttachRenderer();
     initAudioPlayer();
     initSizedBox();
+    style.addStyleChangeListener(_stylePropertyChanged);
   }
 
   @override
