@@ -454,11 +454,14 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
     }
+
+    Size childSize = _getChildSize(child);
+
     switch (direction) {
       case Axis.horizontal:
-        return child.size.width + marginHorizontal;
+        return childSize.width + marginHorizontal;
       case Axis.vertical:
-        return child.size.height + marginVertical;
+        return childSize.height + marginVertical;
     }
     return 0.0;
   }
@@ -481,13 +484,14 @@ class RenderFlowLayout extends RenderLayoutBox {
       marginHorizontal = childRenderBoxModel.marginLeft + childRenderBoxModel.marginRight;
       marginVertical = childRenderBoxModel.marginTop + childRenderBoxModel.marginBottom;
     }
+    Size childSize = _getChildSize(child);
     switch (direction) {
       case Axis.horizontal:
         return lineHeight != null ?
-          math.max(lineHeight, child.size.height) + marginVertical :
-          child.size.height + marginVertical;
+          math.max(lineHeight, childSize.height) + marginVertical :
+          childSize.height + marginVertical;
       case Axis.vertical:
-        return child.size.width + marginHorizontal;
+        return childSize.width + marginHorizontal;
     }
     return 0.0;
   }
@@ -521,7 +525,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
-//    print('layout flow =============== $targetId ${style['backgroundColor']}');
+    print('layout flow =============== $targetId ${style['backgroundColor']}');
 
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -659,7 +663,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (!hasSize || child.needsLayout) {
           isChildNeedsLayout = true;
         } else {
-          Size childOldSize = child.size;
+          Size childOldSize = _getChildSize(child);
           if (childLogicalWidth != null && childLogicalHeight != null &&
             (childOldSize.width != childLogicalWidth ||
               childOldSize.height != childLogicalHeight)) {
@@ -671,7 +675,9 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       if (isChildNeedsLayout) {
-        child.layout(childConstraints, parentUsesSize: true);
+        // If width and height can be calculated from style, then its repaintBoundary equals self
+        bool parentUsesSize = logicalWidth == null || logicalHeight == null;
+        child.layout(childConstraints, parentUsesSize: parentUsesSize);
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);
@@ -719,18 +725,19 @@ class RenderFlowLayout extends RenderLayoutBox {
           childMarginBottom = childRenderBoxModel.marginBottom;
         }
 
+        Size childSize = _getChildSize(child);
         CSSStyleDeclaration childStyle = _getChildStyle(child);
         double lineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (lineHeight != null) {
-          childLeading = lineHeight - child.size.height;
+          childLeading = lineHeight - childSize.height;
         }
 
         // When baseline of children not found, use boundary of margin bottom as baseline
         double childAscent = _getChildAscent(child);
         double extentAboveBaseline = childAscent + childLeading / 2;
-        double extentBelowBaseline = childMarginTop + child.size.height + childMarginBottom
+        double extentBelowBaseline = childMarginTop + childSize.height + childMarginBottom
          - childAscent + childLeading / 2;
 
         maxSizeAboveBaseline = math.max(
@@ -930,12 +937,13 @@ class RenderFlowLayout extends RenderLayoutBox {
         if (flipMainAxis) childMainPosition -= childMainAxisExtent;
         CSSStyleDeclaration childStyle = _getChildStyle(child);
 
+        Size childSize = _getChildSize(child);
         // Line height of child
         double childLineHeight = CSSText.getLineHeight(childStyle);
         // Leading space between content box and virtual box of child
         double childLeading = 0;
         if (childLineHeight != null) {
-          childLeading = childLineHeight - child.size.height;
+          childLeading = childLineHeight - childSize.height;
         }
         // Child line extent caculated according to vertical align
         double childLineExtent = childCrossAxisOffset;
@@ -956,7 +964,7 @@ class RenderFlowLayout extends RenderLayoutBox {
               break;
             case VerticalAlign.bottom:
               childLineExtent =
-                  (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent) - child.size.height - childLeading / 2;
+                  (lineBoxHeight != null ? lineBoxHeight : runCrossAxisExtent) - childSize.height - childLeading / 2;
               break;
             // @TODO Vertical align middle needs to caculate the baseline of the parent box plus half the x-height of the parent from W3C spec,
             // currently flutter lack the api to caculate x-height of glyph
@@ -1009,12 +1017,25 @@ class RenderFlowLayout extends RenderLayoutBox {
       childMarginBottom = childRenderBoxModel.marginBottom;
     }
 
+    Size childSize = _getChildSize(child);
     // When baseline of children not found, use boundary of margin bottom as baseline
     double extentAboveBaseline = childAscent != null ?
       childMarginTop + childAscent :
-      childMarginTop + child.size.height + childMarginBottom;
+      childMarginTop + childSize.height + childMarginBottom;
 
     return extentAboveBaseline;
+  }
+
+  /// Get child size through boxSize to avoid flutter error when parentUsesSize is set to false
+  Size _getChildSize(RenderBox child) {
+    if (child is RenderBoxModel) {
+      return child.boxSize;
+    } else if (child is RenderPositionHolder) {
+      return child.boxSize;
+    } else if (child is RenderTextBox) {
+      return child.boxSize;
+    }
+    return null;
   }
 
   bool _isLineHeightValid(RenderBox child) {
