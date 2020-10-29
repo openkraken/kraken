@@ -4,7 +4,7 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'dart:async';
@@ -101,7 +101,7 @@ class ImageElement extends Element {
   }
 
   void _resize() {
-    if (isRenderObjectAttached) {
+    if (isRendererAttached) {
       double naturalWidth = (_imageInfo?.image?.width ?? 0.0) + 0.0;
       double naturalHeight = (_imageInfo?.image?.height ?? 0.0) + 0.0;
       double width = 0.0;

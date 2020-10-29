@@ -4,7 +4,7 @@
  */
 import 'dart:convert';
 
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {

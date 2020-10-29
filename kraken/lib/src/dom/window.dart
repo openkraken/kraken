@@ -6,7 +6,7 @@
 import 'dart:ui';
 import 'dart:convert';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 const String WINDOW = 'WINDOW';
 

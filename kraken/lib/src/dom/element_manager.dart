@@ -9,7 +9,7 @@ import 'dart:ui';
 import 'package:kraken/launcher.dart';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
@@ -98,7 +98,8 @@ class ElementManager {
 
   ElementManager(this.viewportWidth, this.viewportHeight,
       {this.controller, this.showPerformanceOverlayOverride}) {
-    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this);
+    _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this)
+      ..createRenderer();
     RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
     _root = root;

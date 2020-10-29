@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 class RenderRecyclerParentData extends RenderLayoutParentData {}
 
@@ -266,7 +266,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     print('_create $index, childCount: $childCount');
 
     if (node != null) {
-      node.initializeRenderObject();
+      node.createRenderer();
     }
 
     if (node is Element) {
@@ -291,7 +291,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
     assert(node != null);
-    node.initializeRenderObject();
+    node.createRenderer();
 
     if (node is Element) {
       child = node.renderBoxModel;

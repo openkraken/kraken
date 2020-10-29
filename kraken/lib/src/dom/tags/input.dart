@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 const String INPUT = 'INPUT';
@@ -120,7 +120,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     addChild(renderEditable);
 
     // Make element listen to click event to trigger focus.
-    addEvent("click");
+    addEvent('click');
 
     textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
 
@@ -171,6 +171,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
         selection: renderObject.text == placeholderTextSpan ? blurSelection : selection, composing: TextRange.empty);
     updateEditingValue(value);
   }
+
 
   RenderEditable createRenderObject() {
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;

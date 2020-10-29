@@ -3,18 +3,17 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
       : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    initializeRenderObject();
+    createRenderer();
   }
 
   RenderTextBox renderTextBox;
-  bool _initialized = false;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
@@ -63,6 +62,9 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     updateTextStyle();
   }
 
+  @override
+  RenderObject get renderer => renderTextBox;
+
   void updateTextStyle() {
     if (isConnected) {
       _updateTextStyle();
@@ -94,14 +96,13 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  bool get isRenderObjectAttached => renderTextBox != null && renderTextBox.attached;
+  bool get isRendererAttached => renderTextBox != null && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    if (!_initialized) {
-      initializeRenderObject();
-    }
+    createRenderer();
+
     // Text node whitespace collapse relate to siblings,
     // so text should update when appending
     renderTextBox.text = createTextSpan(data, parent.style);
@@ -125,17 +126,18 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  void initializeRenderObject() {
-    if (_initialized) {
-      return;
+  RenderObject createRenderer() {
+    if (renderer != null) {
+      return renderer;
     }
+
     InlineSpan text = createTextSpan(_data, null);
     renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
       elementManager: elementManager,
     );
-    _initialized = true;
+    return renderTextBox;
   }
 
   @override
@@ -144,7 +146,6 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     assert(renderTextBox.parent == null);
 
     renderTextBox = null;
-    _initialized = false;
   }
 }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/animation.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/css.dart';
 

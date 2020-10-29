@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/src/css/animation.dart';
 
 typedef StyleChangeListener = void Function(

@@ -8,7 +8,7 @@ import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';

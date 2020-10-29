@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_webview/kraken_webview.dart';

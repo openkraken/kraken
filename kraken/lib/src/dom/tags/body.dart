@@ -4,7 +4,7 @@
  */
 
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:meta/meta.dart';
 
 const String BODY = 'BODY';

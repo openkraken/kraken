@@ -14,7 +14,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/bridge.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
@@ -107,56 +107,51 @@ class Element extends Node
 
   final Map<String, dynamic> defaultStyle;
 
-  /// The default display type of
-  String defaultDisplay;
+  /// The default display type.
+  final String defaultDisplay;
 
-  // After `this` created, useful to set default properties, override this for individual element.
-  void afterConstruct() {}
+  /// Is element an intrinsic box.
+  final bool _isIntrinsicBox;
 
-  // Style declaration from user.
+  /// Style declaration from user input.
   CSSStyleDeclaration style;
 
-  RenderDecoratedBox stickyPlaceholder;
   // Placeholder renderObject of positioned element(absolute/fixed)
-  // used to get original coordinate before move away from document flow
+  // used to get original coordinate before move away from document flow.
+  RenderDecoratedBox stickyPlaceholder;
   RenderObject renderPositionedPlaceholder;
 
-  bool get isValidSticky {
-    return style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
-  }
+  bool get isValidSticky => style[POSITION] == STICKY && (style.contains(TOP) || style.contains(BOTTOM));
 
   Element(
     int targetId,
     ElementManager elementManager, {
     this.tagName,
-    this.defaultStyle = const {},
+    this.defaultStyle = const <String, dynamic>{},
+    this.properties = const <String, dynamic>{},
     this.events = const [],
     // Whether element allows children.
     bool isIntrinsicBox = false,
     this.repaintSelf = false
   }) : assert(targetId != null),
         assert(tagName != null),
+        _isIntrinsicBox = isIntrinsicBox,
+        defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK,
         super(NodeType.ELEMENT_NODE, targetId, elementManager, tagName) {
-    if (properties == null) properties = {};
-    if (events == null) events = [];
-
-    defaultDisplay = defaultStyle.containsKey(DISPLAY) ? defaultStyle[DISPLAY] : BLOCK;
-    _isIntrinsicBox = isIntrinsicBox;
 
     style = CSSStyleDeclaration(this);
-    initializeRenderObject();
-
     _setDefaultStyle();
   }
 
-  bool _isIntrinsicBox = false;
-  bool _initialized = false;
+  @override
+  RenderObject get renderer => renderBoxModel;
 
   @override
-  void initializeRenderObject() {
-    if (_initialized) {
-      return;
+  RenderObject createRenderer() {
+    if (renderer != null) {
+      return renderer;
     }
+
     // Content children layout, BoxModel content.
     if (_isIntrinsicBox) {
       _renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
@@ -170,7 +165,7 @@ class Element extends Node
     style.addStyleChangeListener(_onStyleChanged);
     style.applyTargetProperties();
 
-    _initialized = true;
+    return renderer;
   }
 
   void _setDefaultStyle() {
@@ -338,7 +333,7 @@ class Element extends Node
       (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
     }
     // Move element according to position when it's already attached to render tree.
-    if (isRenderObjectAttached) {
+    if (isRendererAttached) {
       if (currentPosition == CSSPositionType.static) {
         // Loop renderObject children to move positioned children to its containing block
         _renderLayoutBox.visitChildren((childRenderObject) {
@@ -457,18 +452,15 @@ class Element extends Node
     assert(renderBoxModel.parent == null);
 
     renderBoxModel = null;
-    _initialized = false;
   }
 
   @override
-  bool get isRenderObjectAttached => renderBoxModel != null && renderBoxModel.attached;
+  bool get isRendererAttached => renderBoxModel != null && renderBoxModel.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    if (!_initialized) {
-      initializeRenderObject();
-    }
+    createRenderer();
 
     CSSStyleDeclaration parentStyle = parent.style;
     CSSDisplay parentDisplayValue =
@@ -549,7 +541,7 @@ class Element extends Node
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
-    if (child is NodeLifeCycle && child.isRenderObjectAttached) {
+    if (child is NodeLifeCycle && child.isRendererAttached) {
       child.detach();
     }
 
@@ -683,7 +675,7 @@ class Element extends Node
     }
 
     // Only append childNode when it is not attached.
-    if (!child.isRenderObjectAttached) child.attachTo(this, after: after);
+    if (!child.isRendererAttached) child.attachTo(this, after: after);
   }
 
   void _updateFlexItemStyle(Element element) {
@@ -1104,7 +1096,7 @@ class Element extends Node
   String getBoundingClientRect() {
     BoundingClientRect boundingClientRect;
     RenderBox sizedBox = renderBoxModel;
-    if (isRenderObjectAttached) {
+    if (isRendererAttached) {
       // need to flush layout to get correct size
       elementManager.getRootRenderObject().owner.flushLayout();
 
@@ -1199,7 +1191,7 @@ class Element extends Node
   void click() {
     Event clickEvent = Event('click', EventInit());
 
-    if (isRenderObjectAttached) {
+    if (isRendererAttached) {
       final RenderBox box = renderBoxModel;
       // HitTest will test rootView's every child (including
       // child's child), so must flush rootView every times,

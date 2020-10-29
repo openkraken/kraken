@@ -7,7 +7,7 @@ import 'package:kraken/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 class _RunMetrics {
   _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.baselineExtent, this.childCount);
