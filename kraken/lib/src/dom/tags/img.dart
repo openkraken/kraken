@@ -34,11 +34,15 @@ class ImageElement extends Element {
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
-        tagName: IMAGE) {
-    _renderImage();
-  }
+        tagName: IMAGE);
 
   bool _hasLazyLoading = false;
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    _renderImage();
+  }
 
   void _renderImage() {
     if (_hasLazyLoading) return;
