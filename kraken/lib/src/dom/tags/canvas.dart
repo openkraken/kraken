@@ -118,7 +118,6 @@ class CanvasElement extends Element {
 
   void _applyContext2DMethod(List args) {
     // [String method, [...args]]
-    _assertPainterExists();
     if (args == null) return;
     if (args.length < 1) return;
     String method = args[0];
@@ -174,12 +173,13 @@ class CanvasElement extends Element {
         break;
     }
 
-    renderCustomPaint.markNeedsPaint();
+    if (renderCustomPaint != null) {
+      renderCustomPaint.markNeedsPaint();
+    }
   }
 
   void _updateContext2DProperty(List args) {
     // [String method, [...args]]
-    _assertPainterExists();
     if (args == null) return;
     if (args.length < 1) return;
     String property = args[0];
@@ -193,12 +193,6 @@ class CanvasElement extends Element {
       case 'font':
         painter.context.font = args[1];
         break;
-    }
-  }
-
-  void _assertPainterExists() {
-    if (painter == null) {
-      throw FlutterError('Canvas painter not exists, get canvas context first.');
     }
   }
 
