@@ -94,14 +94,17 @@ class ImageElement extends Element {
 
   void _initImageInfo(ImageInfo imageInfo, bool synchronousCall) {
     _imageInfo = imageInfo;
-    imageBox.image = _imageInfo?.image;
+    if (imageBox != null) {
+      imageBox.image = _imageInfo?.image;
+
+      // Image size may affect parent layout,
+      // make parent relayout after image init.
+      imageBox.markNeedsLayoutForSizedByParentChange();
+    }
+
     _handleEventAfterImageLoaded(imageInfo, synchronousCall);
     _removeStreamListener();
     _resize();
-
-    // Image size may affect parent layout,
-    // make parent relayout after image init.
-    imageBox.markNeedsLayoutForSizedByParentChange();
   }
 
   void _resize() {
