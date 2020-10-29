@@ -25,11 +25,11 @@ class CanvasElement extends Element {
           isIntrinsicBox: true,
           repaintSelf: true,
           tagName: CANVAS,
-        ) {
-    painter = CanvasPainter();
-    _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
-    _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+        );
 
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
     renderCustomPaint = RenderCustomPaint(
       painter: painter,
       foregroundPainter: null, // Ignore foreground painter
@@ -40,8 +40,13 @@ class CanvasElement extends Element {
     addChild(renderCustomPaint);
   }
 
+  @override
+  void didDetachRenderer() {
+    renderCustomPaint = null;
+  }
+
   /// The painter that paints before the children.
-  CanvasPainter painter;
+  final CanvasPainter painter = CanvasPainter();
 
   /// The size that this [CustomPaint] should aim for, given the layout
   /// constraints, if there is no child.
@@ -66,7 +71,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute width
-  double _width = 0;
+  double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
   double get width => _width;
   set width(double newValue) {
     if (newValue != null) {
@@ -76,7 +81,7 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute height
-  double _height = 0;
+  double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
   double get height => _height;
   set height(double newValue) {
     if (newValue != null) {

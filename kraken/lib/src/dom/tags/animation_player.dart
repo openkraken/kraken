@@ -30,23 +30,34 @@ class AnimationPlayerElement extends Element {
 
   String get objectFit => style[OBJECT_FIT];
 
-  String get type {
-    if (properties.containsKey('type')) return properties['type'];
-    // Default type to flare
-    return ANIMATION_TYPE_FLARE;
+  // Default type to flare
+  String get type => properties['type'] ?? ANIMATION_TYPE_FLARE;
+
+  String get src => properties['src'];
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+
+    _animationRenderObject = _createFlareRenderObject();
+    if (_animationRenderObject != null) {
+      addChild(_animationRenderObject);
+    }
   }
 
-  String get src {
-    if (properties.containsKey('src')) return properties['src'];
-    return null;
+  @override
+  void didDetachRenderer() {
+    _animationRenderObject = null;
   }
 
   void _updateRenderObject() {
-    if (src == null) return;
-    bool shouldAddChild = _animationRenderObject == null;
+    if (isConnected && isRendererAttached) {
+      ContainerBoxParentData parentData = renderer.parentData;
+      RenderObject after = parentData.previousSibling;
 
-    _animationRenderObject = _createFlareRenderObject(properties);
-    if (shouldAddChild) addChild(_animationRenderObject);
+      detach();
+      attachTo(parent, after: after);
+    }
   }
 
   void _play(List args) {
@@ -123,8 +134,10 @@ class AnimationPlayerElement extends Element {
     }
   }
 
-  FlareRenderObject _createFlareRenderObject(Map<String, dynamic> properties) {
-    assert(properties.containsKey('src'));
+  FlareRenderObject _createFlareRenderObject() {
+    if (src == null) {
+      return null;
+    }
 
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();

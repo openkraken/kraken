@@ -16,7 +16,11 @@ class AudioElement extends Element {
   static double defaultHeight = 150.0;
 
   AudioElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, isIntrinsicBox: true, tagName: AUDIO) {
+      : super(targetId, elementManager, isIntrinsicBox: true, tagName: AUDIO);
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
     initAudioPlayer();
     initSizedBox();
   }

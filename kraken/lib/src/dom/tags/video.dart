@@ -26,13 +26,17 @@ class VideoElement extends Element {
     isIntrinsicBox: true,
     repaintSelf: true,
     tagName: VIDEO,
-  ) {
+  );
+
+  @override
+  void willAttachRenderer() {
     renderVideo();
   }
 
   @override
-  void detach() async {
-    super.detach();
+  void didDetachRenderer() async {
+    super.didDetachRenderer();
+    _textureBox = null;
 
     if (controller != null) {
       await controller.dispose();

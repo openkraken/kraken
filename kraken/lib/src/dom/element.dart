@@ -1280,7 +1280,7 @@ class Element extends Node
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
-      if (renderBoxModel.size == Size.zero) {
+      if (renderBoxModel.hasSize && renderBoxModel.size == Size.zero) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
