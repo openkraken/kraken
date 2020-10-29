@@ -68,8 +68,7 @@ bool HostClass::proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSVa
 JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                               const JSValueRef *arguments, JSValueRef *exception) {
   auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(constructor));
-  auto hostClassInstance = new HostClass::Instance(hostClass, argumentCount, arguments, exception);
-  return hostClassInstance->object;
+  return hostClass->constructInstance(ctx, constructor, argumentCount, arguments, exception);
 }
 
 void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
@@ -117,15 +116,17 @@ void HostClass::proxyInstanceFinalize(JSObjectRef object) {
   delete hostClassInstance;
 }
 
+JSObjectRef HostClass::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                         const JSValueRef *arguments, JSValueRef *exception) {
+  return JSObjectMake(ctx, nullptr, nullptr);
+}
 HostClass::~HostClass() {}
 JSValueRef HostClass::prototypeGetProperty(JSStringRef name, JSValueRef *exception) {
   return nullptr;
 }
 void HostClass::prototypeSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
 
-HostClass::Instance::Instance(HostClass *hostClass, size_t argumentsCount, const JSValueRef *arguments,
-                              JSValueRef *exception)
-  : hostClass(hostClass) {
+HostClass::Instance::Instance(HostClass *hostClass) : hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 void HostClass::Instance::initialized() {}

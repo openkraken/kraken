@@ -34,6 +34,9 @@ public:
   // Triggered when this HostClass had been finalized by GC.
   virtual ~HostClass();
 
+  virtual JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                        const JSValueRef *arguments, JSValueRef *exception);
+
   // Triggered when search property on prototype object.
   virtual JSValueRef prototypeGetProperty(JSStringRef name, JSValueRef *exception);
   // Triggered when set property on prototype object.
@@ -43,7 +46,7 @@ public:
   class Instance {
   public:
     Instance() = delete;
-    explicit Instance(HostClass *hostClass, size_t argumentsCount, const JSValueRef *arguments, JSValueRef *exception);
+    explicit Instance(HostClass *hostClass);
     virtual ~Instance();
     virtual void initialized();
     virtual JSValueRef getProperty(JSStringRef name, JSValueRef *exception);

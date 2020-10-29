@@ -13,15 +13,13 @@ static std::atomic<int64_t> globalEventTargetId{0};
 JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}
 JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
 
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, size_t argumentsCount,
-                                                        const JSValueRef *arguments, JSValueRef *exception)
-  : Instance(eventTarget, argumentsCount, arguments, exception) {
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget)
+  : Instance(eventTarget) {
   eventTargetId = globalEventTargetId++;
 }
 
 JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  KRAKEN_LOG(VERBOSE) << "instance finalized targetId: " << eventTargetId;
   auto data = new DisposeCallbackData(hostClass->context->getContextId(), eventTargetId);
   foundation::Task disposeTask = [](void *data) {
     auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);

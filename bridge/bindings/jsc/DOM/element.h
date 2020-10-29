@@ -20,10 +20,13 @@ public:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
 
+  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) override;
+
   class ElementInstance : public EventTargetInstance {
   public:
     ElementInstance() = delete;
-    explicit ElementInstance(JSElement *element, size_t argumentsCount, const JSValueRef *arguments, JSValueRef *exception);
+    explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, JSValueRef *exception);
     void initialized() override;
   };
 };

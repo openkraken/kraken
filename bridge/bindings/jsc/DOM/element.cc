@@ -6,7 +6,6 @@
 #include "element.h"
 #include "dart_methods.h"
 #include "eventTarget.h"
-#include "foundation/logging.h"
 #include "foundation/ui_command_queue.h"
 
 namespace kraken::binding::jsc {
@@ -31,10 +30,15 @@ JSElement *JSElement::instance(JSContext *context) {
   return _instance;
 }
 
-JSElement::ElementInstance::ElementInstance(JSElement *element, size_t argumentsCount, const JSValueRef *arguments,
-                                            JSValueRef *exception)
-  : EventTargetInstance(element, argumentsCount, arguments, exception) {
-  const JSValueRef tagNameValue = arguments[0];
+JSObjectRef JSElement::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                         const JSValueRef *arguments, JSValueRef *exception) {
+  JSValueRef tagNameValue = arguments[0];
+  auto instance = new ElementInstance(this, tagNameValue, exception);
+  return instance->object;
+}
+
+JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, JSValueRef *exception)
+  : EventTargetInstance(element) {
   JSStringRef tagNameStrRef = JSValueToStringCopy(element->ctx, tagNameValue, exception);
   NativeString tagName{};
   tagName.string = JSStringGetCharactersPtr(tagNameStrRef);
@@ -44,10 +48,9 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, size_t arguments
   auto **args = new NativeString *[argsLength];
   args[0] = tagName.clone();
 
-  KRAKEN_LOG(VERBOSE) << "register ui command " << eventTargetId << " createElement";
-
   UICommandTaskMessageQueue::instance(element->context->getContextId())
       ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength);
+
 }
 
 void JSElement::ElementInstance::initialized() {

@@ -33,8 +33,7 @@ public:
   class EventTargetInstance : public Instance {
   public:
     EventTargetInstance() = delete;
-    explicit EventTargetInstance(JSEventTarget *eventTarget, size_t argumentsCount, const JSValueRef *arguments,
-                                 JSValueRef *exception);
+    explicit EventTargetInstance(JSEventTarget *eventTarget);
     ~EventTargetInstance() override;
     int64_t eventTargetId;
   };
