@@ -20,8 +20,12 @@ public:
   JSElement() = delete;
   explicit JSElement(JSContext *context);
 
-  void constructor(JSContextRef ctx, JSObjectRef constructor, JSObjectRef newInstance, size_t argumentCount,
-                   const JSValueRef *arguments, JSValueRef *exception) override;
+  class ElementInstance : public EventTargetInstance {
+  public:
+    ElementInstance() = delete;
+    explicit ElementInstance(JSElement *element, size_t argumentsCount, const JSValueRef *arguments, JSValueRef *exception);
+    void initialized() override;
+  };
 };
 
 } // namespace kraken::binding::jsc

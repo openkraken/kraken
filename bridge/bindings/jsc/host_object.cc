@@ -1,0 +1,63 @@
+/*
+ * Copyright (C) 2020 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+#include "host_object.h"
+
+namespace kraken::binding::jsc {
+
+HostObject::HostObject(JSContext *context, std::string name)
+  : context(context), name(std::move(name)), ctx(context->context()) {
+  JSClassDefinition hostObjectDefinition = kJSClassDefinitionEmpty;
+  JSC_CREATE_HOST_OBJECT_DEFINITION(hostObjectDefinition, name.c_str(), HostObject);
+  jsClass = JSClassCreate(&hostObjectDefinition);
+  jsObject = JSObjectMake(context->context(), jsClass, this);
+}
+
+JSValueRef HostObject::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                        JSValueRef *exception) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  auto &context = hostObject->context;
+  JSStringRetain(propertyName);
+  JSValueRef ret = hostObject->getProperty(propertyName, exception);
+  JSStringRelease(propertyName);
+  if (!context->handleException(*exception)) {
+    return nullptr;
+  }
+  return ret;
+}
+
+bool HostObject::proxySetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName, JSValueRef value,
+                                  JSValueRef *exception) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  auto &context = hostObject->context;
+  JSStringRetain(propertyName);
+  hostObject->setProperty(propertyName, value, exception);
+  JSStringRelease(propertyName);
+  return context->handleException(*exception);
+}
+
+void HostObject::proxyFinalize(JSObjectRef obj) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(obj));
+  JSObjectSetPrivate(obj, nullptr);
+  JSClassRelease(hostObject->jsClass);
+  delete hostObject;
+}
+
+void HostObject::proxyGetPropertyNames(JSContextRef ctx, JSObjectRef object, JSPropertyNameAccumulatorRef accumulator) {
+  auto hostObject = static_cast<HostObject *>(JSObjectGetPrivate(object));
+  hostObject->getPropertyNames(accumulator);
+}
+
+HostObject::~HostObject() {}
+
+JSValueRef HostObject::getProperty(JSStringRef name, JSValueRef *exception) {
+  return nullptr;
+}
+
+void HostObject::setProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
+
+void HostObject::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {}
+
+} // namespace kraken::binding::jsc

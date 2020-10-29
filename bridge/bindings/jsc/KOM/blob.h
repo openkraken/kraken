@@ -6,6 +6,7 @@
 #define KRAKENBRIDGE_BLOB_H
 
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/host_object.h"
 #include <memory>
 #include <utility>
 #include <vector>

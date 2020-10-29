@@ -89,6 +89,10 @@ else()
     list(APPEND BRIDGE_SOURCE
       bindings/jsc/js_context.h
       bindings/jsc/js_context.cc
+      bindings/jsc/host_object.cc
+      bindings/jsc/host_object.h
+      bindings/jsc/host_class.cc
+      bindings/jsc/host_class.h
       bindings/jsc/kraken.h
       bindings/jsc/kraken.cc
       bindings/jsc/KOM/blob.cc

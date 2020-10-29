@@ -10,27 +10,26 @@ namespace kraken::binding::jsc {
 
 static std::atomic<int64_t> globalEventTargetId{0};
 
-JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {
-  eventTargetId = globalEventTargetId++;
-}
-JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {
+JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}
+JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
+
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, size_t argumentsCount,
+                                                        const JSValueRef *arguments, JSValueRef *exception)
+  : Instance(eventTarget, argumentsCount, arguments, exception) {
   eventTargetId = globalEventTargetId++;
 }
 
-void JSEventTarget::instanceFinalized(JSObjectRef object) {
+JSEventTarget::EventTargetInstance::~EventTargetInstance() {
   // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  auto data = new DisposeCallbackData(context->getContextId(), getEventTargetId());
+  KRAKEN_LOG(VERBOSE) << "instance finalized targetId: " << eventTargetId;
+  auto data = new DisposeCallbackData(hostClass->context->getContextId(), eventTargetId);
   foundation::Task disposeTask = [](void *data) {
     auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
     foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-        ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
+      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
     delete disposeCallbackData;
   };
   foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
-}
-
-int64_t JSEventTarget::getEventTargetId() {
-  return eventTargetId;
 }
 
 } // namespace kraken::binding::jsc

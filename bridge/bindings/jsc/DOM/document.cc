@@ -13,8 +13,8 @@ namespace kraken::binding::jsc {
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
-  auto documentObjectRef = JSObjectMake(context->context(), document->instanceClass, document);
-  JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
+//  auto documentObjectRef = JSObjectMake(context->context(), document->instanceClass, document);
+//  JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,

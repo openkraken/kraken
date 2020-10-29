@@ -42,18 +42,6 @@ struct KrakenInfo {
   GetUserAgent getUserAgent;
 };
 
-struct NativeEventTarget;
-
-using NativeEventTargetDispose = void (*)(int32_t contextId, NativeEventTarget *eventTarget);
-
-struct NativeEventTarget {
-  NativeEventTargetDispose dispose;
-};
-
-struct NativeNode : NativeEventTarget {};
-
-struct NativeElement : NativeNode {};
-
 struct Screen {
   double width;
   double height;

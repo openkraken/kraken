@@ -58,7 +58,7 @@
     JSStringRelease(stackStr);                                                                                         \
   }
 
-#define JSC_CREATE_HOST_OBJECT_DEFINITION(definition, name, parent, classObject)                                       \
+#define JSC_CREATE_HOST_OBJECT_DEFINITION(definition, name, classObject)                                       \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
@@ -69,17 +69,17 @@
     definition.getPropertyNames = classObject::proxyGetPropertyNames;                                                  \
   }
 
-#define JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(definition, name, parent, classObject)                               \
+#define JSC_CREATE_HOST_CLASS_INSTANCE_DEFINITION(definition, name, classObject)                                       \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
     definition.attributes = kJSClassAttributeNoAutomaticPrototype;                                                     \
+    definition.initialize = classObject::proxyInstanceInitialize;                                                      \
     definition.finalize = classObject::proxyInstanceFinalize;                                                          \
     definition.getProperty = classObject::proxyInstanceGetProperty;                                                    \
     definition.setProperty = classObject::proxyInstanceSetProperty;                                                    \
     definition.getPropertyNames = classObject::proxyInstanceGetPropertyNames;                                          \
-    definition.parentClass = parent;                                                                                   \
-  }
+}
 
 #define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, staticFunction, staticValue, HostClass)                     \
   {                                                                                                                    \

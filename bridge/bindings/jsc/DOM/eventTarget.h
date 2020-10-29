@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_EVENTTARGET_H
 #define KRAKENBRIDGE_EVENTTARGET_H
 
+#include "bindings/jsc/host_class.h"
 #include "bindings/jsc/js_context.h"
 #include "dart_methods.h"
 #include "foundation/logging.h"
@@ -26,20 +27,17 @@ struct DisposeCallbackData {
 class JSEventTarget : public HostClass {
 public:
   JSEventTarget() = delete;
-  explicit JSEventTarget(JSContext *context, const char* name);
+  explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 
-  void instanceFinalized(JSObjectRef object) override;
-
-  NativeEventTarget *getEventTarget() {
-    return nativeEventTarget;
-  }
-
-  int64_t getEventTargetId();
-
-private:
-  NativeEventTarget *nativeEventTarget{nullptr};
-  int64_t eventTargetId;
+  class EventTargetInstance : public Instance {
+  public:
+    EventTargetInstance() = delete;
+    explicit EventTargetInstance(JSEventTarget *eventTarget, size_t argumentsCount, const JSValueRef *arguments,
+                                 JSValueRef *exception);
+    ~EventTargetInstance() override;
+    int64_t eventTargetId;
+  };
 };
 
 } // namespace kraken::binding::jsc
