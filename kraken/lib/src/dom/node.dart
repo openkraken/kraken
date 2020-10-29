@@ -235,4 +235,14 @@ abstract class Node extends EventTarget implements RenderObjectNode {
       parent.removeChild(this);
     }
   }
+
+  /// Ensure child and child's child render object is attached.
+  void ensureChildAttached() {
+    for (Node child in childNodes) {
+      if (!child.isRendererAttached) {
+        child.ensureChildAttached();
+        child.attachTo(this, after: lastChild?.renderer);
+      }
+    }
+  }
 }

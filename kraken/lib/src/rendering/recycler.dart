@@ -263,7 +263,6 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
-    print('_create $index, childCount: $childCount');
 
     if (node != null) {
       node.createRenderer();
@@ -291,13 +290,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
     assert(node != null);
-    node.createRenderer();
+    node.willAttachRenderer();
 
-    if (node is Element) {
-      child = node.renderBoxModel;
-      node.style.applyTargetProperties();
-    } else if (node is TextNode) {
-      child = node.renderTextBox;
+    if (node is Node) {
+      child = node.renderer;
     } else {
       if (!kReleaseMode)
         throw FlutterError('Unsupported type ${node.runtimeType} $node');
@@ -306,6 +302,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     assert(child != null, 'Child should not be null');
     child.parentData = SliverMultiBoxAdaptorParentData();
     _renderSliverList.insert(child, after: after);
+
+    node.didAttachRenderer();
+    node.ensureChildAttached();
   }
 
   @override

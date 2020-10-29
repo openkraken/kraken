@@ -873,12 +873,13 @@ class Element extends Node
 
     if (originalDisplay != presentDisplay && renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox prevRenderLayoutBox = renderBoxModel;
-      bool shouldReattach = parent != null;
       renderBoxModel = createRenderLayout(this, prevRenderLayoutBox: prevRenderLayoutBox, repaintSelf: repaintSelf);
 
-      if (shouldReattach && prevRenderLayoutBox != renderBoxModel) {
+      bool shouldReattach = isRendererAttached && parent != null && prevRenderLayoutBox != renderBoxModel;
+      if (shouldReattach) {
         RenderLayoutBox parentRenderObject = parent.renderBoxModel;
-        RenderBoxModel previous = previousSibling is Element ? (previousSibling as Element).renderBoxModel : null;
+        RenderObject previous = previousSibling.renderer;
+
         parentRenderObject.remove(prevRenderLayoutBox);
         parentRenderObject.insert(renderBoxModel, after: previous);
       } else {
@@ -1419,6 +1420,8 @@ RenderLayoutBox createRenderLayout(Element element, {RenderLayoutBox prevRenderL
       renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
     } else if (prevRenderLayoutBox is RenderFlexLayout) {
       renderRecyclerLayout = prevRenderLayoutBox.toRenderRecyclerLayout();
+    } else if (prevRenderLayoutBox is RenderRecyclerLayout) {
+      renderRecyclerLayout = prevRenderLayoutBox;
     }
 
     return renderRecyclerLayout;
