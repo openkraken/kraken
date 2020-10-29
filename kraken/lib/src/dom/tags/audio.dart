@@ -20,9 +20,16 @@ class AudioElement extends Element {
 
   @override
   void willAttachRenderer() {
+    style.addStyleChangeListener(_stylePropertyChanged);
     super.willAttachRenderer();
     initAudioPlayer();
     initSizedBox();
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_stylePropertyChanged);
   }
 
   void initAudioPlayer() {
@@ -42,10 +49,8 @@ class AudioElement extends Element {
     addChild(_sizedBox);
   }
 
-  @override
-  void setStyle(String key, dynamic value) {
-    super.setStyle(key, value);
-    switch (key) {
+  void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
+    switch (property) {
       case WIDTH:
       case HEIGHT:
         _updateSizedBox();

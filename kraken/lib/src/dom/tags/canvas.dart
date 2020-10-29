@@ -43,6 +43,8 @@ class CanvasElement extends Element {
 
   @override
   void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_propertyChangedListener);
     renderCustomPaint = null;
   }
 

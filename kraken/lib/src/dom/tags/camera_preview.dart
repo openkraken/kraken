@@ -45,7 +45,13 @@ Future<CameraDescription> detectCamera(String lens) async {
 
 class CameraPreviewElement extends Element {
   CameraPreviewElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+      : super(targetId, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+
+  @override
+  void willAttachRenderer() {
+    style.addStyleChangeListener(_propertyChangedListener);
+    super.willAttachRenderer();
+
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
         CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
@@ -53,8 +59,13 @@ class CameraPreviewElement extends Element {
       )),
     );
 
-    style.addStyleChangeListener(_propertyChangedListener);
     addChild(sizedBox);
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_propertyChangedListener);
   }
 
   bool enableAudio = false;

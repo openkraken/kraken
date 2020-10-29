@@ -41,7 +41,14 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
+    style.addStyleChangeListener(_stylePropertyChanged);
     _renderImage();
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_stylePropertyChanged);
   }
 
   void _renderImage() {
@@ -309,15 +316,13 @@ class ImageElement extends Element {
     return super.getProperty(key);
   }
 
-  @override
-  void setStyle(String key, dynamic value) {
-    super.setStyle(key, value);
-    if (key == WIDTH || key == HEIGHT) {
+  void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
+    if (property == WIDTH || property == HEIGHT) {
       _resize();
-    } else if (key == OBJECT_FIT) {
-      imageBox.fit = _getBoxFit(value);
-    } else if (key == OBJECT_POSITION) {
-      imageBox.alignment = _getAlignment(value);
+    } else if (property == OBJECT_FIT) {
+      imageBox.fit = _getBoxFit(present);
+    } else if (property == OBJECT_POSITION) {
+      imageBox.alignment = _getAlignment(present);
     }
   }
 }
