@@ -20,10 +20,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:meta/meta.dart';
 
-import '../css/flow.dart';
-import 'event_handler.dart';
-import 'bounding_client_rect.dart';
-
 const String STYLE = 'style';
 
 /// Defined by W3C Standard,
@@ -89,7 +85,6 @@ class Element extends Node
         CSSTransitionMixin,
         CSSFilterEffectsMixin {
   Map<String, dynamic> properties;
-  List<String> events;
 
   /// Should create repaintBoundary for this element to repaint separately from parent.
   bool repaintSelf;
@@ -129,7 +124,6 @@ class Element extends Node
     this.tagName,
     this.defaultStyle = const <String, dynamic>{},
     this.properties = const <String, dynamic>{},
-    this.events = const [],
     // Whether element allows children.
     bool isIntrinsicBox = false,
     this.repaintSelf = false
@@ -162,10 +156,45 @@ class Element extends Node
       }
     }
 
+    return renderer;
+  }
+
+  @override
+  void willAttachRenderer() {
+    createRenderer();
+
     style.addStyleChangeListener(_onStyleChanged);
     style.applyTargetProperties();
+  }
 
-    return renderer;
+  @override
+  void didAttachRenderer() {
+    // Bind pointer responder.
+    addEventResponder(renderBoxModel);
+
+    if (_hasIntersectionObserverEvent(eventHandlers)) {
+      renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+    }
+  }
+
+  @override
+  void willDetachRenderer() {
+    // Remove all intersection change listeners.
+    renderBoxModel.clearIntersectionChangeListeners();
+
+    // Remove placeholder of positioned element.
+    RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
+    if (renderPositionHolder != null) {
+      ContainerRenderObjectMixin parent = renderPositionHolder.parent;
+      if (parent != null) {
+        parent.remove(renderPositionHolder);
+      }
+    }
+  }
+
+  @override
+  void didDetachRenderer() {
+    style.removeStyleChangeListener(_onStyleChanged);
   }
 
   void _setDefaultStyle() {
@@ -455,12 +484,12 @@ class Element extends Node
   }
 
   @override
-  bool get isRendererAttached => renderBoxModel != null && renderBoxModel.attached;
+  bool get isRendererAttached => renderer != null && renderer.attached;
 
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
-    createRenderer();
+    willAttachRenderer();
 
     CSSStyleDeclaration parentStyle = parent.style;
     CSSDisplay parentDisplayValue =
@@ -487,28 +516,21 @@ class Element extends Node
 
     /// Update flex siblings.
     if (isParentFlexDisplayType) parent.children.forEach(_updateFlexItemStyle);
+
+    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
-    // Remove placeholder of positioned element
-    if (renderPositionHolder != null) {
-      ContainerRenderObjectMixin parent = renderPositionHolder.parent;
-      if (parent != null) {
-        parent.remove(renderPositionHolder);
-      }
-    }
-    (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
-    // Remove all intersection change listeners.
-    renderBoxModel.clearIntersectionChangeListeners();
+    willDetachRenderer();
 
+    (renderBoxModel.parent as ContainerRenderObjectMixin).remove(renderBoxModel);
     for (Node child in childNodes) {
       child.detach();
     }
 
-    style.removeStyleChangeListener(_onStyleChanged);
+    didDetachRenderer();
     dispose();
   }
 
@@ -1003,7 +1025,7 @@ class Element extends Node
       // @TODO: Consider `{ color: red }` to `{}`, need to remove invisible keys.
       (value as Map<String, dynamic>).forEach(setStyle);
     } else {
-      switch(key) {
+      switch (key) {
         case 'scrollTop':
           // need to flush layout to get correct size
           elementManager.getRootRenderObject().owner.flushLayout();
@@ -1156,30 +1178,36 @@ class Element extends Node
 
   @override
   void addEvent(String eventName) {
+    super.addEvent(eventName);
+
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
-    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
-    bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
-    super.addEventListener(eventName, _eventResponder);
+    addEventListener(eventName, _eventResponder);
 
-    // bind pointer responder.
-    addEventResponder(renderBoxModel);
+    if (renderBoxModel != null) {
+      // Bind pointer responder.
+      addEventResponder(renderBoxModel);
 
-    // Only add listener once for all intersection related event
-    if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
-      renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+      // Only add listener once for all intersection related event
+      bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
+      bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
+      if (isIntersectionObserverEvent && !hasIntersectionObserverEvent) {
+        renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
+      }
     }
   }
 
   void removeEvent(String eventName) {
     if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
-    super.removeEventListener(eventName, _eventResponder);
+    removeEventListener(eventName, _eventResponder);
 
-    // Remove pointer responder.
-    removeEventResponder(renderBoxModel);
+    if (renderBoxModel != null) {
+      // Remove pointer responder.
+      removeEventResponder(renderBoxModel);
 
-    // Remove listener when no intersection related event
-    if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
-      renderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
+      // Remove listener when no intersection related event
+      if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
+        renderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
+      }
     }
   }
 

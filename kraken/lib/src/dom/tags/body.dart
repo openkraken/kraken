@@ -24,4 +24,9 @@ class BodyElement extends Element {
             BACKGROUND_COLOR: 'white',
           }
         );
+
+  void attachBody() {
+    willAttachRenderer();
+    didAttachRenderer();
+  }
 }

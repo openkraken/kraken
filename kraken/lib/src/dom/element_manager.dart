@@ -14,6 +14,8 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
+const String UNKNOWN = 'UNKNOWN';
+
 Element _createElement(
     int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
   Element element;
@@ -64,16 +66,19 @@ Element _createElement(
       element = ObjectElement(id, elementManager);
       break;
     default:
-      element = DivElement(id, elementManager);
+      element = Element(id, elementManager, tagName: UNKNOWN);
       print('ERROR: unexpected element type "$type"');
   }
 
-  props?.forEach((String key, value) {
-    element.setProperty(key, value);
-  });
+  // Add element properties.
+  if (props != null && props.length > 0) {
+    props.forEach((String key, value) {
+      element.setProperty(key, value);
+    });
+  }
 
   // Add element event listener
-  if (events != null) {
+  if (events != null && events.length > 0) {
     for (String eventName in events) {
       element.addEvent(eventName);
     }
@@ -99,7 +104,8 @@ class ElementManager {
   ElementManager(this.viewportWidth, this.viewportHeight,
       {this.controller, this.showPerformanceOverlayOverride}) {
     _rootElement = BodyElement(viewportWidth, viewportHeight, targetId: BODY_ID, elementManager: this)
-      ..createRenderer();
+      ..attachBody();
+
     RenderBoxModel root = _rootElement.renderBoxModel;
     root.controller = controller;
     _root = root;

@@ -172,7 +172,6 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     updateEditingValue(value);
   }
 
-
   RenderEditable createRenderObject() {
     TextSpan text = textSpan.toPlainText().length > 0 ? textSpan : placeholderTextSpan;
 

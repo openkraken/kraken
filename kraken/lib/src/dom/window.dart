@@ -36,9 +36,9 @@ class Window extends EventTarget {
 
     switch (eventName) {
       case 'colorschemechange':
-        return super.addEventListener(eventName, _handleColorSchemeChange);
+        return addEventListener(eventName, _handleColorSchemeChange);
       case 'load':
-        return super.addEventListener(eventName, _handleLoad);
+        return addEventListener(eventName, _handleLoad);
     }
   }
 }
