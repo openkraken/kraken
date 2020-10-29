@@ -157,8 +157,8 @@ class Element extends Node
 
   @override
   void willAttachRenderer() {
-    style.addStyleChangeListener(_onStyleChanged);
     createRenderer();
+    style.addStyleChangeListener(_onStyleChanged);
   }
 
   @override

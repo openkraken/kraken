@@ -462,6 +462,24 @@ abstract class WebViewElement extends Element {
         assert(initialMediaPlaybackPolicy != null),
         super(targetId, elementManager, tagName: tagName, defaultStyle: _defaultStyle, isIntrinsicBox: true, repaintSelf: true);
 
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    style.addStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    _setupRenderer();
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didAttachRenderer();
+    style.removeStyleChangeListener(_stylePropertyChanged);
+  }
+
   /// The url that WebView loaded at first time.
   String initialUrl;
 
@@ -483,23 +501,28 @@ abstract class WebViewElement extends Element {
     if (key == SRC) {
       String url = value;
       initialUrl = url;
-      assert(renderBoxModel is RenderIntrinsic);
-      (renderBoxModel as RenderIntrinsic).child = null;
 
-      _buildPlatformRenderBox();
-      addChild(sizedBox);
+      if (renderer != null) {
+        _setupRenderer();
+      }
     } else if (key == WIDTH || key == HEIGHT) {
       setStyle(key, value);
     }
   }
 
-  @override
-  void setStyle(String key, value) {
-    super.setStyle(key, value);
-    if (key == WIDTH) {
-      width = CSSLength.toDisplayPortValue(value) ?? width;
-    } else if (key == HEIGHT) {
-      height = CSSLength.toDisplayPortValue(value) ?? height;
+  void _setupRenderer() {
+    assert(renderBoxModel is RenderIntrinsic);
+    (renderBoxModel as RenderIntrinsic).child = null;
+
+    _buildPlatformRenderBox();
+    addChild(sizedBox);
+  }
+
+  void _stylePropertyChanged(String property, String prev, String present, bool isAnimation) {
+    if (property == WIDTH) {
+      width = CSSLength.toDisplayPortValue(present);
+    } else if (property == HEIGHT) {
+      height = CSSLength.toDisplayPortValue(present);
     }
   }
 
@@ -527,23 +550,37 @@ abstract class WebViewElement extends Element {
     });
   }
 
+  Size get size => Size(width, height);
+
   /// Element attribute width
   double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
   double get width => _width;
-  set width(double newValue) {
-    if (newValue != null) {
-      _width = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+  set width(double value) {
+    if (value == null) {
+      return;
+    }
+    if (value != _width) {
+      _width = value;
+
+      if (sizedBox != null) {
+        sizedBox.additionalConstraints = BoxConstraints.tight(size);
+      }
     }
   }
 
   /// Element attribute height
   double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
   double get height => _height;
-  set height(double newValue) {
-    if (newValue != null) {
-      _height = newValue;
-      sizedBox.additionalConstraints = BoxConstraints.tight(Size(width, height));
+  set height(double value) {
+    if (value == null) {
+      return;
+    }
+    if (value != _height) {
+      _height = value;
+
+      if (sizedBox != null) {
+        sizedBox.additionalConstraints = BoxConstraints.tight(size);
+      }
     }
   }
 

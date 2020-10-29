@@ -244,14 +244,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (textChanged) {
       _updateRemoteEditingValueIfNeeded();
       textSpan = buildTextSpan(text: value.text);
-      if (value.text.length == 0) {
-        renderEditable.text = placeholderTextSpan;
-      } else {
-        renderEditable.text = textSpan;
+      if (renderEditable != null) {
+        if (value.text.length == 0) {
+          renderEditable.text = placeholderTextSpan;
+        } else {
+          renderEditable.text = textSpan;
+        }
       }
     }
 
-    renderEditable.selection = value.selection;
+    if (renderEditable != null) {
+      renderEditable.selection = value.selection;
+    }
   }
 
   @override

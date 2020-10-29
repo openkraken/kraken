@@ -30,17 +30,19 @@ class VideoElement extends Element {
 
   @override
   void willAttachRenderer() {
+    super.willAttachRenderer();
     renderVideo();
   }
 
   @override
-  void didDetachRenderer() async {
+  void didDetachRenderer() {
     super.didDetachRenderer();
     _textureBox = null;
 
     if (controller != null) {
-      await controller.dispose();
-      controller = null;
+      controller.dispose().then((_) {
+        controller = null;
+      });
     }
   }
 
