@@ -150,9 +150,6 @@ class Element extends Node
       _renderIntrinsic = _createRenderIntrinsic(this, repaintSelf: repaintSelf);
     } else {
       _renderLayoutBox = createRenderLayout(this, repaintSelf: repaintSelf);
-      for (Node child in childNodes) {
-        child.attachTo(this);
-      }
     }
 
     return renderer;
@@ -514,7 +511,11 @@ class Element extends Node
     }
 
     /// Update flex siblings.
-    if (isParentFlexDisplayType) parent.children.forEach(_updateFlexItemStyle);
+    if (isParentFlexDisplayType) {
+      for (Element child in parent.children) {
+        child._updateFlexItemStyle();
+      }
+    }
 
     didAttachRenderer();
   }
@@ -699,17 +700,19 @@ class Element extends Node
     if (!child.isRendererAttached) child.attachTo(this, after: after);
   }
 
-  void _updateFlexItemStyle(Element element) {
-    ParentData childParentData = element.renderBoxModel.parentData;
-    if (childParentData is RenderFlexParentData) {
-      final RenderFlexParentData parentData = childParentData;
-      RenderFlexParentData flexParentData = CSSFlex.getParentData(element.style);
-      parentData.flexGrow = flexParentData.flexGrow;
-      parentData.flexShrink = flexParentData.flexShrink;
-      parentData.flexBasis = flexParentData.flexBasis;
-      parentData.alignSelf = flexParentData.alignSelf;
+  void _updateFlexItemStyle() {
+    if (renderBoxModel != null) {
+      ParentData childParentData = renderBoxModel.parentData;
+      if (childParentData is RenderFlexParentData) {
+        final RenderFlexParentData parentData = childParentData;
+        RenderFlexParentData flexParentData = CSSFlex.getParentData(style);
+        parentData.flexGrow = flexParentData.flexGrow;
+        parentData.flexShrink = flexParentData.flexShrink;
+        parentData.flexBasis = flexParentData.flexBasis;
+        parentData.alignSelf = flexParentData.alignSelf;
 
-      element.renderBoxModel.markNeedsLayout();
+        renderBoxModel.markNeedsLayout();
+      }
     }
   }
 
@@ -947,7 +950,7 @@ class Element extends Node
     CSSDisplay display = CSSSizing.getDisplay(CSSStyleDeclaration.isNullOrEmptyValue(style[DISPLAY]) ? defaultDisplay : style[DISPLAY]);
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
       for (Element child in children) {
-        _updateFlexItemStyle(child);
+        child._updateFlexItemStyle();
       }
     }
   }
