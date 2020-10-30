@@ -82,16 +82,16 @@ class KrakenViewController {
   // regenerate generate renderObject created by kraken but not affect jsBridge context.
   // test used only.
   testRefreshPaint() {
-    RenderObject root = _elementManager.getRootRenderObject();
-    RenderObject parent = root.parent;
-    RenderObject previousSibling;
-    if (parent is ContainerRenderObjectMixin) {
-      previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
-    }
-    detachView();
-    _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
-        showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
-    attachView(parent, previousSibling);
+    // RenderObject root = _elementManager.getRootRenderObject();
+    // RenderObject parent = root.parent;
+    // RenderObject previousSibling;
+    // if (parent is ContainerRenderObjectMixin) {
+    //   previousSibling = (root.parentData as ContainerParentDataMixin).previousSibling;
+    // }
+    // detachView();
+    // _elementManager = ElementManager(_elementManager.viewportWidth, _elementManager.viewportHeight,
+    //     showPerformanceOverlayOverride: showPerformanceOverlay, controller: rootController);
+    // attachView(parent, previousSibling);
   }
 
   void evaluateJavaScripts(String code, [String source = 'kraken://']) {

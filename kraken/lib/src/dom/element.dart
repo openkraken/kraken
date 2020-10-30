@@ -1182,7 +1182,7 @@ class Element extends Node
     }
   }
 
-  Future<Uint8List> toBlob({double devicePixelRatio}) {
+  Future<Uint8List> toBlob({ double devicePixelRatio }) {
     if (devicePixelRatio == null) {
       devicePixelRatio = window.devicePixelRatio;
     }
