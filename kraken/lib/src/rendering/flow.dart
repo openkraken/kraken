@@ -735,8 +735,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    // assert(_effectiveChildCount > 0);
-
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
@@ -765,7 +763,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     } else if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
-
 
     switch (direction) {
       case Axis.horizontal:

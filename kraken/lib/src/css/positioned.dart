@@ -128,6 +128,10 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child
 
 /// Check whether render object parent is layout.
 bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
+  if (renderer == null || !renderer.attached) {
+    return false;
+  }
+
   while (renderer != null && renderer != ancestor) {
     if (renderer is RenderBox) {
       // Whether this render box has undergone layout and has a [size].
