@@ -1210,6 +1210,8 @@ class Element extends Node
       renderBoxModel = renderReplacedBoxModel;
     }
 
+    renderBoxModel.owner.flushLayout();
+
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       if (renderBoxModel.hasSize && renderBoxModel.size == Size.zero) {

@@ -19,13 +19,15 @@ bool _isNumber(String str) {
 }
 
 class ImageElement extends Element {
+  String _source;
   ImageProvider _image;
   RenderImage _imageBox;
   ImageStream _imageStream;
-  List<ImageStreamListener> _imageListeners;
   ImageInfo _imageInfo;
   double _propertyWidth;
   double _propertyHeight;
+  ImageStreamListener _imageStreamListener;
+
   bool _hasLazyLoading = false;
 
   ImageElement(int targetId, ElementManager elementManager)
@@ -34,14 +36,21 @@ class ImageElement extends Element {
         elementManager,
         defaultStyle: _defaultStyle,
         isIntrinsicBox: true,
-        tagName: IMAGE);
-
+        tagName: IMAGE) {
+    _imageStreamListener = ImageStreamListener(_initImageInfo);
+  }
 
   @override
   void willAttachRenderer() {
     super.willAttachRenderer();
     style.addStyleChangeListener(_stylePropertyChanged);
     _renderImage();
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    _resize();
   }
 
   @override
@@ -59,14 +68,12 @@ class ImageElement extends Element {
       renderBoxModel.addIntersectionChangeListener(_handleIntersectionChange);
     } else {
       _constructImageChild();
-      _setImage();
     }
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
     if (entry.isIntersecting) {
-      _setImage();
       // Once appear remove the listener
       _resetLazyLoading();
     }
@@ -162,13 +169,8 @@ class ImageElement extends Element {
   }
 
   void _removeStreamListener() {
-    if (_imageListeners != null) {
-      for (ImageStreamListener imageListener in _imageListeners) {
-        _imageStream?.removeListener(imageListener);
-      }
-    }
+    _imageStream?.removeListener(_imageStreamListener);
     _imageStream = null;
-    _imageListeners = null;
   }
 
   BoxFit _getBoxFit(String fit) {
@@ -265,7 +267,7 @@ class ImageElement extends Element {
     super.setProperty(key, value);
 
     if (key == 'src') {
-      _setImage();
+      _setImage(value);
     } else if (key == 'loading' && _hasLazyLoading) {
       // Should reset lazy when value change.
       _resetLazyLoading();
@@ -286,20 +288,16 @@ class ImageElement extends Element {
     }
   }
 
-  void _setImage() {
-    String src = properties['src'];
-    if (src != null && src.isNotEmpty) {
-      _removeStreamListener();
-      _image = CSSUrl.parseUrl(src, cache: properties['caching']);
-      _imageStream = _image.resolve(ImageConfiguration.empty);
+  void _setImage(String source) {
+    if (_source == null || _source != source) {
+      _source = source;
+      if (source != null && source.isNotEmpty) {
+        _removeStreamListener();
+        _image = CSSUrl.parseUrl(source, cache: properties['caching']);
+        _imageStream = _image.resolve(ImageConfiguration.empty);
 
-      ImageStreamListener imageListener = ImageStreamListener(_initImageInfo);
-      _imageStream.addListener(imageListener);
-
-      // Store listeners for remove listener.
-      _imageListeners = [
-        imageListener,
-      ];
+        _imageStream.addListener(_imageStreamListener);
+      }
     }
   }
 
