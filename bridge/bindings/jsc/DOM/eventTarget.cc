@@ -66,8 +66,7 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   // frequently.
   if (!eventTargetInstance->_eventHandlers.contains(eventName) ||
       eventTargetInstance->eventTargetId == BODY_TARGET_ID) {
-    std::deque<JSObjectRef> handlers;
-    eventTargetInstance->_eventHandlers[eventName] = std::move(handlers);
+    eventTargetInstance->_eventHandlers[eventName] = std::deque<JSObjectRef>();
     int32_t contextId = eventTargetInstance->_hostClass->context->getContextId();
 
     NativeString eventNameArgs{};
@@ -123,15 +122,13 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   }
 
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventName];
-  auto begin = std::begin(handlers);
-  auto end = std::end(handlers);
 
-  while (begin != end) {
-    if (*begin == callbackObjectRef) {
-      handlers.erase(begin);
+  for (auto it = handlers.begin(); it != handlers.end(); ) {
+    if (*it == callbackObjectRef) {
       JSValueUnprotect(ctx, callbackObjectRef);
+      it = handlers.erase(it);
     } else {
-      begin++;
+      ++it;
     }
   }
 
