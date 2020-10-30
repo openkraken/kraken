@@ -525,8 +525,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // @override
   void performLayout() {
-    print('layout flow =============== $targetId ${style['backgroundColor']}');
-
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
       return;
@@ -568,15 +566,15 @@ class RenderFlowLayout extends RenderLayoutBox {
     assert(_debugHasNecessaryDirections);
     RenderBox child = firstChild;
 
-    final double logicalWidth = RenderBoxModel.getLogicalWidth(this);
-    final double logicalHeight = RenderBoxModel.getLogicalHeight(this);
+    final double contentWidth = RenderBoxModel.getContentWidth(this);
+    final double contentHeight = RenderBoxModel.getContentHeight(this);
 
     CSSDisplay realDisplay = CSSSizing.getElementRealDisplayValue(targetId, elementManager);
 
     // If no child exists, stop layout.
     if (childCount == 0) {
-      double constraintWidth = logicalWidth ?? 0;
-      double constraintHeight = logicalHeight ?? 0;
+      double constraintWidth = contentWidth ?? 0;
+      double constraintHeight = contentHeight ?? 0;
 
       bool isInline = realDisplay == CSSDisplay.inline;
       bool isInlineBlock = realDisplay == CSSDisplay.inlineBlock;
@@ -616,8 +614,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     bool flipCrossAxis = false;
     switch (direction) {
       case Axis.horizontal:
-        if (logicalWidth != null) {
-          mainAxisLimit = logicalWidth;
+        if (contentWidth != null) {
+          mainAxisLimit = contentWidth;
         } else {
           mainAxisLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
         }
@@ -657,16 +655,16 @@ class RenderFlowLayout extends RenderLayoutBox {
       // No need to layout child if size is the same as logical size calculated by style
       bool isChildNeedsLayout = true;
       if (child is RenderBoxModel && child.hasSize) {
-        double childLogicalWidth = RenderBoxModel.getLogicalWidth(child);
-        double childLogicalHeight = RenderBoxModel.getLogicalHeight(child);
+        double childContentWidth = RenderBoxModel.getContentWidth(child);
+        double childContentHeight = RenderBoxModel.getContentHeight(child);
         // Always layout child when parent is not laid out yet or child is marked as needsLayout
         if (!hasSize || child.needsLayout) {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          if (childLogicalWidth != null && childLogicalHeight != null &&
-            (childOldSize.width != childLogicalWidth ||
-              childOldSize.height != childLogicalHeight)) {
+          if (childContentWidth != null && childContentHeight != null &&
+            (childOldSize.width != childContentWidth ||
+              childOldSize.height != childContentHeight)) {
             isChildNeedsLayout = true;
           } else {
             isChildNeedsLayout = false;
@@ -676,7 +674,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       if (isChildNeedsLayout) {
         // If width and height can be calculated from style, then its repaintBoundary equals self
-        bool parentUsesSize = logicalWidth == null || logicalHeight == null;
+        bool parentUsesSize = contentWidth == null || contentHeight == null;
         child.layout(childConstraints, parentUsesSize: parentUsesSize);
       }
 
@@ -782,8 +780,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintWidth = constraintWidth > maxWidth ? maxWidth : constraintWidth;
     } else if (isInlineBlock && minWidth != null && width == null) {
       constraintWidth = constraintWidth < minWidth ? minWidth : constraintWidth;
-    } else if (logicalWidth != null) {
-      constraintWidth = math.max(constraintWidth, logicalWidth);
+    } else if (contentWidth != null) {
+      constraintWidth = math.max(constraintWidth, contentWidth);
     }
 
     // Default to children's height
@@ -795,8 +793,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       constraintHeight = constraintHeight > maxHeight ? maxHeight : constraintHeight;
     } else if (isNotInline && minHeight != null && height == null) {
       constraintHeight = constraintHeight < minHeight ? minHeight : constraintHeight;
-    } else if (logicalHeight != null) {
-      constraintHeight = math.max(constraintHeight, logicalHeight);
+    } else if (contentHeight != null) {
+      constraintHeight = math.max(constraintHeight, contentHeight);
     }
 
 
@@ -806,15 +804,15 @@ class RenderFlowLayout extends RenderLayoutBox {
         setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
         // AxisExtent should be size.
-        containerMainAxisExtent = logicalWidth ?? size.width;
-        containerCrossAxisExtent = logicalHeight ?? size.height;
+        containerMainAxisExtent = contentWidth ?? size.width;
+        containerCrossAxisExtent = contentHeight ?? size.height;
         break;
       case Axis.vertical:
         Size contentSize = Size(crossAxisExtent, mainAxisExtent);
         setMaxScrollableSize(contentSize.width, contentSize.height);
         size = getBoxSize(contentSize);
-        containerMainAxisExtent = logicalHeight ?? size.height;
-        containerCrossAxisExtent = logicalWidth ?? size.width;
+        containerMainAxisExtent = contentHeight ?? size.height;
+        containerCrossAxisExtent = contentWidth ?? size.width;
         break;
     }
 

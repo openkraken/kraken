@@ -90,7 +90,7 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
       BoxConstraints boxConstraints;
       Node hostTextNode = elementManager.getEventTargetByTargetId<EventTarget>(targetId);
       Element parentElement = hostTextNode.parent;
-      final double logicalWidth = RenderBoxModel.getLogicalWidth(parentElement.renderBoxModel);
+      final double contentWidth = RenderBoxModel.getContentWidth(parentElement.renderBoxModel);
 
       if (parentElement.style[DISPLAY] == NONE) {
         boxConstraints = BoxConstraints(
@@ -99,10 +99,10 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
           minHeight: 0,
           maxHeight: 0,
         );
-      } else if (logicalWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
+      } else if (contentWidth != null && (whiteSpace != WhiteSpace.nowrap || _renderParagraph.overflow == TextOverflow.ellipsis)) {
         boxConstraints = BoxConstraints(
           minWidth: 0,
-          maxWidth: logicalWidth,
+          maxWidth: contentWidth,
           minHeight: 0,
           maxHeight: double.infinity
         );
