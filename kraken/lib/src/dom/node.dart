@@ -124,7 +124,7 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   }
 
   // Is child renderObject attached.
-  bool get isRendererAttached => false;
+  bool get isRendererAttached => renderer != null && renderer.attached;
 
   void fireAfterConnected() {
     for (VoidCallback callback in _afterConnected) {
@@ -237,12 +237,5 @@ abstract class Node extends EventTarget implements RenderObjectNode {
   }
 
   /// Ensure child and child's child render object is attached.
-  void ensureChildAttached() {
-    for (Node child in childNodes) {
-      if (!child.isRendererAttached) {
-        child.ensureChildAttached();
-        child.attachTo(this, after: lastChild?.renderer);
-      }
-    }
-  }
+  void ensureChildAttached() {}
 }

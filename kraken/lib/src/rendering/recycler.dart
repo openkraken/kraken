@@ -268,13 +268,7 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
       node.createRenderer();
     }
 
-    if (node is Element) {
-      return node.renderBoxModel;
-    } else if (node is TextNode) {
-      return node.renderTextBox;
-    } else {
-      return null;
-    }
+    return node.renderer;
   }
 
   @override

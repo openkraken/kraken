@@ -63,7 +63,7 @@ BoxSizeType _getChildHeightSizeType(RenderBox child) {
 // We need to reset these offset to keep positioned elements render at their original position.
 Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
   RenderBoxModel parent = holder.parent;
-  while (parent != root) {
+  while (parent != null && parent != root) {
     if (parent.clipX || parent.clipY) {
       return Offset(parent.scrollLeft, parent.scrollTop);
     }

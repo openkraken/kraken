@@ -137,7 +137,7 @@ class Element extends Node
   }
 
   @override
-  RenderObject get renderer => renderBoxModel;
+  RenderObject get renderer => renderBoxModel?.renderPositionHolder ?? renderBoxModel;
 
   @override
   RenderObject createRenderer() {
@@ -355,95 +355,12 @@ class Element extends Node
     if (renderBoxModel.parentData is RenderLayoutParentData) {
       (renderBoxModel.parentData as RenderLayoutParentData).position = currentPosition;
     }
+
     // Move element according to position when it's already attached to render tree.
     if (isRendererAttached) {
-      if (currentPosition == CSSPositionType.static) {
-        // Loop renderObject children to move positioned children to its containing block
-        _renderLayoutBox.visitChildren((childRenderObject) {
-          if (childRenderObject is RenderBoxModel) {
-            Element child = elementManager.getEventTargetByTargetId<Element>(childRenderObject.targetId);
-            CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
-            if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
-              Element containingBlockElement = _findContainingBlock(child);
-              child.detach();
-              child.attachTo(containingBlockElement);
-            }
-          }
-        });
-
-        // Move self from containing block to original position in element tree
-        if (prevPosition == CSSPositionType.absolute || prevPosition == CSSPositionType.fixed) {
-          RenderPositionHolder renderPositionHolder = renderBoxModel.renderPositionHolder;
-          if (renderPositionHolder != null) {
-            RenderLayoutBox parentLayoutBox = renderPositionHolder.parent;
-            int parentTargetId = parentLayoutBox.targetId;
-            Element parentElement = elementManager.getEventTargetByTargetId<Element>(parentTargetId);
-
-            List<RenderObject> layoutChildren = [];
-            parentLayoutBox.visitChildren((child) {
-              layoutChildren.add(child);
-            });
-            int idx = layoutChildren.indexOf(renderPositionHolder);
-            RenderObject previousSibling;
-            if (idx > 0) {
-              /// RenderBoxModel and its placeholder is the same
-              if (layoutChildren[idx - 1] == renderBoxModel) {
-                /// Placeholder is placed after its original renderBoxModel
-                /// get idx - 2 as its previous sibling
-                previousSibling = idx > 1 ? layoutChildren[idx - 2] : null;
-              } else { /// RenderBoxModel and its placeholder is different
-                previousSibling = layoutChildren[idx - 1];
-              }
-            } else {
-              previousSibling = null;
-            }
-            detach();
-            attachTo(parentElement, after: previousSibling);
-          }
-        }
-
-        // Reset stick element offset to normal flow
-        if (prevPosition == CSSPositionType.sticky) {
-          RenderLayoutParentData boxParentData = renderBoxModel?.parentData;
-          boxParentData.isOffsetSet = false;
-          renderBoxModel.markNeedsLayout();
-          renderBoxModel.markNeedsPaint();
-        }
-      } else {
-        // Move self to containing block
-        if (currentPosition == CSSPositionType.absolute || currentPosition == CSSPositionType.fixed) {
-          Element containingBlockElement = _findContainingBlock(this);
-          detach();
-          attachTo(containingBlockElement);
-        }
-
-        // Loop children tree to find and append positioned children whose containing block is self
-        List<Element> positionedChildren = [];
-        _findPositionedChildren(this, positionedChildren);
-        for (Element child in positionedChildren) {
-          child.detach();
-          child.attachTo(this);
-        }
-        // Set stick element offset
-        if (currentPosition == CSSPositionType.sticky) {
-          Element scrollContainer = _findScrollContainer(this);
-          // Set sticky child offset manually
-          scrollContainer.layoutStickyChild(this, 0, AxisDirection.down);
-          scrollContainer.layoutStickyChild(this, 0, AxisDirection.right);
-        }
-      }
-    }
-  }
-
-  void _findPositionedChildren(Element parent, List<Element> positionedChildren) {
-    for (int i = 0; i < parent.children.length; i++) {
-      Element child = parent.children[i];
-      CSSPositionType childPositionType = CSSPositionedLayout.parsePositionType(child.style[POSITION]);
-      if (childPositionType == CSSPositionType.absolute || childPositionType == CSSPositionType.fixed) {
-        positionedChildren.add(child);
-      } else if (child.children.length != 0) {
-        _findPositionedChildren(child, positionedChildren);
-      }
+      RenderObject prev = previousSibling?.renderer;
+      detach();
+      attachTo(parent, after: prev);
     }
   }
 
@@ -477,9 +394,6 @@ class Element extends Node
     renderBoxModel = null;
   }
 
-  @override
-  bool get isRendererAttached => renderer != null && renderer.attached;
-
   // Attach renderObject of current node to parent
   @override
   void attachTo(Element parent, {RenderObject after}) {
@@ -509,6 +423,8 @@ class Element extends Node
         break;
     }
 
+    ensureChildAttached();
+
     /// Update flex siblings.
     if (isParentFlexDisplayType) {
       for (Element child in parent.children) {
@@ -531,6 +447,20 @@ class Element extends Node
 
     didDetachRenderer();
     dispose();
+  }
+
+  @override
+  void ensureChildAttached() {
+    if (isRendererAttached) {
+      for (Node child in childNodes) {
+        if (_renderLayoutBox != null && !child.isRendererAttached) {
+          RenderObject after = _renderLayoutBox.lastChild;;
+          child.attachTo(this, after: after);
+
+          child.ensureChildAttached();
+        }
+      }
+    }
   }
 
   @override
@@ -615,7 +545,6 @@ class Element extends Node
   }
 
   void _addPositionedChild(Element child, CSSPositionType position) {
-    // RenderPosition parentRenderPosition;
     RenderLayoutBox parentRenderLayoutBox;
 
     switch (position) {
@@ -995,8 +924,10 @@ class Element extends Node
 
   // Update textNode style when container style changed
   void _updateTextChildNodesStyle() {
-    for (var node in childNodes) {
-      if (node is TextNode) node.updateTextStyle();
+    for (Node node in childNodes) {
+      if (node is TextNode) {
+        node.updateTextStyle();
+      }
     }
   }
 

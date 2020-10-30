@@ -52,11 +52,10 @@ class AnimationPlayerElement extends Element {
 
   void _updateRenderObject() {
     if (isConnected && isRendererAttached) {
-      ContainerBoxParentData parentData = renderer.parentData;
-      RenderObject after = parentData.previousSibling;
+      RenderObject prev = previousSibling?.renderer;
 
       detach();
-      attachTo(parent, after: after);
+      attachTo(parent, after: prev);
     }
   }
 

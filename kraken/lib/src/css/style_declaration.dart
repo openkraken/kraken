@@ -516,7 +516,8 @@ class CSSStyleDeclaration {
   void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
     assert(property != null);
 
-    for (StyleChangeListener listener in _styleChangeListeners) {
+    for (int i = 0; i < _styleChangeListeners.length; i++) {
+      StyleChangeListener listener = _styleChangeListeners[i];
       listener(property, original, present, inAnimation);
     }
   }

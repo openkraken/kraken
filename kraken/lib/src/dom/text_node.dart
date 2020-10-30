@@ -9,11 +9,9 @@ import 'package:kraken/css.dart';
 
 class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   TextNode(int targetId, this._data, ElementManager elementManager)
-      : super(NodeType.TEXT_NODE, targetId, elementManager, '#text') {
-    createRenderer();
-  }
+      : super(NodeType.TEXT_NODE, targetId, elementManager, '#text');
 
-  RenderTextBox renderTextBox;
+  RenderTextBox _renderTextBox;
 
   static const String NORMAL_SPACE = '\u0020';
   // The text string.
@@ -63,27 +61,25 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   @override
-  RenderObject get renderer => renderTextBox;
+  RenderObject get renderer => _renderTextBox;
 
   void updateTextStyle() {
-    if (isConnected) {
+    if (isRendererAttached) {
       _updateTextStyle();
-    } else {
-      queueAfterConnected(_updateTextStyle);
     }
   }
 
   void _setTextSizeType(BoxSizeType width, BoxSizeType height) {
     // migrate element's size type to RenderTextBox
-    renderTextBox.widthSizeType = width;
-    renderTextBox.heightSizeType = height;
+    _renderTextBox.widthSizeType = width;
+    _renderTextBox.heightSizeType = height;
   }
 
   void _updateTextStyle() {
     // parentNode must be an element.
-    Element parentElement = parentNode;
-    renderTextBox.style = parentElement.style;
-    renderTextBox.text = createTextSpan(data, parentElement.style);
+    Element parentElement = parent;
+    _renderTextBox.style = parentElement.style;
+    _renderTextBox.text = createTextSpan(data, parentElement.style);
     _setTextNodeProperties(parentElement.style);
 
     RenderBoxModel parentRenderBoxModel = parentElement.renderBoxModel;
@@ -91,38 +87,44 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
   }
 
   void _setTextNodeProperties(CSSStyleDeclaration style) {
-    renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
-    renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
+    _renderTextBox.whiteSpace = CSSText.getWhiteSpace(parentElement.style);
+    _renderTextBox.overflow = CSSText.getTextOverflow(parentElement.style);
   }
-
-  @override
-  bool get isRendererAttached => renderTextBox != null && renderTextBox.attached;
 
   // Attach renderObject of current node to parent
   @override
-  void attachTo(Element parent, {RenderObject after}) {
-    createRenderer();
-
-    // Text node whitespace collapse relate to siblings,
-    // so text should update when appending
-    renderTextBox.text = createTextSpan(data, parent.style);
-    // TextNode's style is inherited from parent style
-    renderTextBox.style = parent.style;
-    _setTextNodeProperties(parent.style);
+  void attachTo(Element parent, { RenderObject after }) {
+    willAttachRenderer();
 
     RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
-    parentRenderLayoutBox.insert(renderTextBox, after: after);
-
+    parentRenderLayoutBox.insert(_renderTextBox, after: after);
     _setTextSizeType(parentRenderLayoutBox.widthSizeType, parentRenderLayoutBox.heightSizeType);
+
+    didAttachRenderer();
   }
 
   // Detach renderObject of current node from parent
   @override
   void detach() {
-    RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel;
-    parentRenderLayoutBox.remove(renderTextBox);
+    willDetachRenderer();
 
+    ContainerRenderObjectMixin parent = _renderTextBox.parent;
+    parent.remove(_renderTextBox);
+
+    didDetachRenderer();
     dispose();
+  }
+
+  @override
+  void willAttachRenderer() {
+    createRenderer();
+    // Text node whitespace collapse relate to siblings,
+    // so text should update when appending
+    _renderTextBox.text = createTextSpan(data, parent.style);
+    // TextNode's style is inherited from parent style
+    _renderTextBox.style = parent.style;
+
+    _setTextNodeProperties(parent.style);
   }
 
   @override
@@ -132,20 +134,20 @@ class TextNode extends Node with NodeLifeCycle, CSSTextMixin {
     }
 
     InlineSpan text = createTextSpan(_data, null);
-    renderTextBox = RenderTextBox(text,
+    _renderTextBox = RenderTextBox(text,
       targetId: targetId,
       style: null,
       elementManager: elementManager,
     );
-    return renderTextBox;
+    return _renderTextBox;
   }
 
   @override
   void dispose() {
-    assert(renderTextBox != null);
-    assert(renderTextBox.parent == null);
+    assert(_renderTextBox != null);
+    assert(_renderTextBox.parent == null);
 
-    renderTextBox = null;
+    _renderTextBox = null;
   }
 }
 

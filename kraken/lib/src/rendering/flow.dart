@@ -678,7 +678,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       runMainAxisExtent += childMainAxisExtent;
       if (_effectiveChildCount > 0) runMainAxisExtent += spacing;
 
-      /// Caculate baseline extent of layout box
+      /// Calculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
       bool isLineHeightValid = _isLineHeightValid(child);
@@ -735,7 +735,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    assert(_effectiveChildCount > 0);
+    // assert(_effectiveChildCount > 0);
 
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
