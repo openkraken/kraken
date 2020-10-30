@@ -523,7 +523,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     return 0.0;
   }
 
-  // @override
+  @override
   void performLayout() {
     if (display == CSSDisplay.none) {
       size = constraints.smallest;
@@ -639,7 +639,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     double runCrossAxisExtent = 0.0;
     int _effectiveChildCount = 0;
 
-    RenderBox preChild = null;
+    RenderBox preChild;
 
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
@@ -1145,6 +1145,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     super.debugFillProperties(properties);
   }
 
+  /// Convert [RenderFlowLayout] to [RenderRecyclerLayout]
+  RenderRecyclerLayout toRenderRecyclerLayout() {
+    List<RenderObject> children = getDetachedChildrenAsList();
+    RenderRecyclerLayout layout = RenderRecyclerLayout(
+        targetId: targetId,
+        style: style,
+        elementManager: elementManager
+    );
+    layout.addAll(children);
+    return copyWith(layout);
+  }
+
   /// Convert [RenderFlowLayout] to [RenderFlexLayout]
   RenderFlexLayout toFlexLayout() {
     List<RenderObject> children = getDetachedChildrenAsList();
@@ -1192,7 +1204,7 @@ class RenderSelfRepaintFlowLayout extends RenderFlowLayout {
   }): super(children: children, targetId: targetId, elementManager: elementManager, style: style);
 
   @override
-  get isRepaintBoundary => true;
+  bool get isRepaintBoundary => true;
 
   /// Convert [RenderSelfRepaintFlowLayout] to [RenderSelfRepaintFlexLayout]
   RenderSelfRepaintFlexLayout toFlexLayout() {

@@ -101,7 +101,7 @@ const Map<String, bool> CSSShorthandProperty = {
 class CSSStyleDeclaration {
   Element target;
 
-  CSSStyleDeclaration(Element this.target);
+  CSSStyleDeclaration(this.target);
   /// When some property changed, corresponding [StyleChangeListener] will be
   /// invoked in synchronous.
   List<StyleChangeListener> _styleChangeListeners = [];
@@ -116,7 +116,7 @@ class CSSStyleDeclaration {
     return currentColor ?? CSSColor.INITIAL_COLOR;
   }
 
-  set transitions (Map<String, List> value) {
+  set transitions(Map<String, List> value) {
     _transitions = value;
   }
 
@@ -516,13 +516,19 @@ class CSSStyleDeclaration {
   void _invokePropertyChangedListener(String property, String original, String present, [bool inAnimation]) {
     assert(property != null);
 
-    _styleChangeListeners.forEach((StyleChangeListener listener) {
+    for (StyleChangeListener listener in _styleChangeListeners) {
       listener(property, original, present, inAnimation);
+    }
+  }
+
+  void applyTargetProperties() {
+    _properties.forEach((key, value) {
+      _invokePropertyChangedListener(key, null, value);
     });
   }
 
-  double getLengthByPropertyName(properyName) {
-    return CSSLength.toDisplayPortValue(getPropertyValue(properyName));
+  double getLengthByPropertyName(propertyName) {
+    return CSSLength.toDisplayPortValue(getPropertyValue(propertyName));
   }
 
   static bool isNullOrEmptyValue(value) {

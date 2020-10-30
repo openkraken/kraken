@@ -15,7 +15,7 @@ class Window extends EventTarget {
     window.onPlatformBrightnessChanged = () {
       Event event = Event('colorschemechange');
       event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
-      this.dispatchEvent(event);
+      dispatchEvent(event);
     };
   }
 
@@ -32,13 +32,13 @@ class Window extends EventTarget {
   @override
   void addEvent(String eventName) {
     super.addEvent(eventName);
-    if (this.eventHandlers.containsKey(eventName)) return; // Only listen once.
+    if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
       case 'colorschemechange':
-        return super.addEventListener(eventName, this._handleColorSchemeChange);
+        return super.addEventListener(eventName, _handleColorSchemeChange);
       case 'load':
-        return super.addEventListener(eventName, this._handleLoad);
+        return super.addEventListener(eventName, _handleLoad);
     }
   }
 }

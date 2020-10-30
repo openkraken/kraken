@@ -100,14 +100,14 @@ class AnimationTimeline {
 
   List<Animation> _getActiveAnimations() {
     List<Animation> activeAnimations = [];
-    _animations.forEach((Animation animation) {
+    for (Animation animation in _animations) {
       AnimationPlayState playState = animation.playState;
       if (playState != AnimationPlayState.finished && playState != AnimationPlayState.idle) {
         activeAnimations.add(animation);
       } else {
         animation._tick(_currentTime);
       }
-    });
+    }
     return activeAnimations;
   }
 
@@ -303,7 +303,7 @@ class Animation {
     _effect._calculateTiming(null);
 
     if (oncancel != null) {
-      var event = new AnimationPlaybackEvent('cancel');
+      var event = AnimationPlaybackEvent('cancel');
       event.timelineTime = _timeline.currentTime;
       oncancel(event);
     }
@@ -388,7 +388,7 @@ class Animation {
   void _fireEvents(double timelineTime) {
     if (_isFinished) {
       if (!_finishedFlag) {
-        AnimationPlaybackEvent event = new AnimationPlaybackEvent('finish');
+        AnimationPlaybackEvent event = AnimationPlaybackEvent('finish');
         event.currentTime = currentTime;
         event.timelineTime = timelineTime;
         if (onfinish != null) onfinish(event);
@@ -846,7 +846,7 @@ class AnimationEffect {
   EffectTiming timing;
 
   Map getComputedTiming() {
-    throw new UnsupportedError('Not supported');
+    throw UnsupportedError('Not supported');
   }
 
   EffectTiming getTiming() {

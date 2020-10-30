@@ -181,7 +181,7 @@ class CameraPreviewElement extends Element {
     // If the controller is updated then update the UI.
     controller.addListener(() {
       if (isConnected) {
-        renderLayoutBox.markNeedsPaint();
+        renderBoxModel.markNeedsPaint();
       }
       if (controller.value.hasError) {
         print('Camera error ${controller.value.errorDescription}');
@@ -196,7 +196,7 @@ class CameraPreviewElement extends Element {
   }
 
   @override
-  void setProperty(String key, value) async {
+  void setProperty(String key, dynamic value) async {
     super.setProperty(key, value);
 
     if (isFallback || controller != null) {
@@ -222,7 +222,7 @@ class CameraPreviewElement extends Element {
     }
   }
 
-  void _setProperty(String key, value) {
+  void _setProperty(String key, dynamic value) {
     if (key == 'resolution-preset') {
       resolutionPreset = getResolutionPreset(value);
     } else if (key == 'width') {

@@ -12,6 +12,7 @@ import 'package:kraken/element.dart';
 import 'package:kraken/rendering.dart';
 
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
+const String ANIMATION_TYPE_FLARE = 'flare';
 
 final Map<String, dynamic> _defaultStyle = {
   WIDTH: ELEMENT_DEFAULT_WIDTH,
@@ -20,7 +21,6 @@ final Map<String, dynamic> _defaultStyle = {
 
 // Ref: https://github.com/LottieFiles/lottie-player
 class AnimationPlayerElement extends Element {
-  static final String ANIMATION_TYPE_FLARE = 'flare';
 
   RenderObject _animationRenderObject;
   FlareControls _animationController;

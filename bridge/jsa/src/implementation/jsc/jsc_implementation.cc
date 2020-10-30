@@ -162,8 +162,10 @@ void JSCContext::setUnhandledPromiseRejectionHandler(jsa::Object &handler) {
 #if ENABLE_UNHANDLED_PROMISE_REJECTION
   JSValueRef exception = nullptr;
 // dynamic check current os is higher than macOS 10.15 and iOS 13.4
-#if __APPLE__ && __OSX_AVAILABLE_STARTING(101504, 130400)
+#if defined(__APPLE__)
+#if __OSX_AVAILABLE_STARTING(101504, 130400)
   JSGlobalContextSetUnhandledRejectionCallback(ctx_, objectRef(handler), &exception);
+#endif
 #endif
   hasException(exception);
 #endif
@@ -1184,9 +1186,11 @@ jsa::Value JSCContext::createValue(JSValueRef value) const {
       JSObjectRef objRef = JSValueToObject(ctx_, value, nullptr);
       return jsa::Value(createObject(objRef));
     }
-#if __APPLE__ && __OSX_AVAILABLE_STARTING(101504, 130400)
+#if defined(__APPLE__)
+#if __OSX_AVAILABLE_STARTING(101504, 130400)
     // TODO: support symbol value in JSA.
     case kJSTypeSymbol:
+#endif
 #endif
     default:
       abort();

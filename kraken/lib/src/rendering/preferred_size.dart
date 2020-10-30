@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 class RenderPreferredSize extends RenderProxyBox {
   RenderPreferredSize({
     @required Size preferredSize,
-    RenderBox child = null,
+    RenderBox child,
   })  : assert(preferredSize != null),
         _preferredSize = preferredSize,
         super(child);
@@ -43,7 +43,7 @@ class RenderPreferredSize extends RenderProxyBox {
 class RenderPositionHolder extends RenderPreferredSize {
   RenderPositionHolder({
     @required Size preferredSize,
-    RenderBox child = null,
+    RenderBox child,
   }) : super(preferredSize: preferredSize, child: child);
 
   RenderBoxModel realDisplayedBox;

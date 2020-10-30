@@ -70,7 +70,7 @@ class EventInit {
 
   static final Map<String, EventInit> _cache = <String, EventInit>{};
 
-  factory EventInit({bubbles = false, cancelable = false}) {
+  factory EventInit({bool bubbles = false, bool cancelable = false}) {
     String key = bubbles.toString() + cancelable.toString();
     return _cache.putIfAbsent(key, () => EventInit._internal(bubbles: bubbles, cancelable: cancelable));
   }

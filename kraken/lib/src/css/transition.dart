@@ -13,7 +13,7 @@ const String _transitionCancel = 'transitioncancel';
 String _toCamelCase(String s) {
   var sb = StringBuffer();
   var shouldUpperCase = false;
-  s.runes.forEach((int rune) {
+  for (int rune in s.runes) {
     // '-' char code is 45
     if (rune == 45) {
       shouldUpperCase = true;
@@ -26,7 +26,8 @@ String _toCamelCase(String s) {
         sb.write(char);
       }
     }
-  });
+  }
+
   return sb.toString();
 }
 

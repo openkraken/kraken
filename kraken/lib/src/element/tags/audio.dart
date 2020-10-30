@@ -39,7 +39,7 @@ class AudioElement extends Element {
   }
 
   @override
-  void setStyle(String key, value) {
+  void setStyle(String key, dynamic value) {
     super.setStyle(key, value);
     switch (key) {
       case WIDTH:
@@ -56,7 +56,7 @@ class AudioElement extends Element {
   }
 
   @override
-  method(String name, List args) {
+  void method(String name, List args) {
     switch (name) {
       case 'play':
         audioPlayer?.play(audioSrc);

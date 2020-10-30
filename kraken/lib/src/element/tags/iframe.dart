@@ -9,7 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/element.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken_webview/kraken_webview.dart';
+
 
 const String IFRAME = 'IFRAME';
 
@@ -481,7 +483,9 @@ abstract class WebViewElement extends Element {
     if (key == SRC) {
       String url = value;
       initialUrl = url;
-      renderIntrinsic.child = null;
+      assert(renderBoxModel is RenderIntrinsic);
+      (renderBoxModel as RenderIntrinsic).child = null;
+
       _buildPlatformRenderBox();
       addChild(sizedBox);
     } else if (key == WIDTH || key == HEIGHT) {
@@ -507,9 +511,9 @@ abstract class WebViewElement extends Element {
       creationParams: _creationParamsFromElement(this),
       webViewPlatformCallbacksHandler: _platformCallbacksHandler,
       onWebViewPlatformCreated: _onWebViewPlatformCreated,
-      gestureRecognizers: this.gestureRecognizers ?? _emptyRecognizersSet,
+      gestureRecognizers: gestureRecognizers ?? _emptyRecognizersSet,
       // On focus only works in android now.
-      onFocus: this.onFocus,
+      onFocus: onFocus,
     );
     sizedBox = RenderWebViewBoundaryBox(onDetach,
         additionalConstraints: BoxConstraints.tight(Size(width, height)), child: platformRenderBox);

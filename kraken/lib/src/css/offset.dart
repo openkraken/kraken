@@ -5,6 +5,7 @@ import 'package:kraken/element.dart';
 mixin CSSOffsetMixin on Node {
 
   void updateRenderOffset(RenderBoxModel renderBoxModel, String property, String present) {
+    assert(renderBoxModel != null, 'RenderBoxModel should not be null');
 
     if (renderBoxModel.parentData is RenderLayoutParentData) {
       RenderLayoutParentData positionParentData = renderBoxModel.parentData;
