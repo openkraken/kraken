@@ -5,7 +5,6 @@
 
 #include "document.h"
 #include "element.h"
-#include "include/kraken_bridge.h"
 #include <mutex>
 
 namespace kraken::binding::jsc {
@@ -13,8 +12,8 @@ namespace kraken::binding::jsc {
 void bindDocument(std::unique_ptr<JSContext> &context) {
   auto document = new JSDocument(context.get());
   JSC_GLOBAL_SET_PROPERTY(context, "Document", document->classObject);
-//  auto documentObjectRef = JSObjectMake(context->context(), document->instanceClass, document);
-//  JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
+  auto documentObjectRef = document->constructInstance(context->context(), document->classObject, 0, nullptr, nullptr);
+  JSC_GLOBAL_SET_PROPERTY(context, "document", documentObjectRef);
 }
 
 JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
@@ -38,10 +37,18 @@ JSValueRef JSDocument::createElement(JSContextRef ctx, JSObjectRef function, JSO
 
 JSDocument::JSDocument(JSContext *context) : JSNode(context, "Document", NodeType::DOCUMENT_NODE) {}
 
-JSValueRef JSDocument::instanceGetProperty(JSStringRef nameRef, JSValueRef *exception) {
+JSObjectRef JSDocument::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                          const JSValueRef *arguments, JSValueRef *exception) {
+  auto instance = new DocumentInstance(this);
+  return instance->object;
+}
+
+JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : EventTargetInstance(document) {}
+
+JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "createElement") {
-    return propertyBindingFunction(context, this, "createElement", createElement);
+    return propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
   }
 
   return nullptr;

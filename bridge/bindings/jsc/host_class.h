@@ -54,7 +54,7 @@ public:
     virtual void getPropertyNames(JSPropertyNameAccumulatorRef accumulator);
 
     JSObjectRef object{nullptr};
-    HostClass *hostClass{nullptr};
+    HostClass *_hostClass{nullptr};
   };
 
   std::string _name;

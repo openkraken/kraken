@@ -18,7 +18,15 @@ public:
   static JSValueRef createElement(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
                                   const JSValueRef arguments[], JSValueRef *exception);
 
-  JSValueRef instanceGetProperty(JSStringRef name, JSValueRef *exception);
+  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) override;
+
+  class DocumentInstance : public EventTargetInstance {
+  public:
+    DocumentInstance() = delete;
+    explicit DocumentInstance(JSDocument *document);
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  };
 };
 
 void bindDocument(std::unique_ptr<JSContext> &context);

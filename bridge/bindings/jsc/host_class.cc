@@ -78,18 +78,18 @@ void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
 
 JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                                JSValueRef *exception) {
-  auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
+  auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   JSStringRetain(propertyName);
   JSValueRef result = hostClassInstance->getProperty(propertyName, exception);
 
   // If current instance did't have the target property, search for prototype.
   if (result == nullptr) {
-    result = hostClassInstance->hostClass->prototypeGetProperty(propertyName, exception);
+    result = hostClassInstance->_hostClass->prototypeGetProperty(propertyName, exception);
   }
 
   // If current instance's prototype did't have the target property, try to search in the parent HostClass.
-  if (result == nullptr && hostClassInstance->hostClass->_parentHostClass != nullptr) {
-    result = hostClassInstance->hostClass->_parentHostClass->prototypeGetProperty(propertyName, exception);
+  if (result == nullptr && hostClassInstance->_hostClass->_parentHostClass != nullptr) {
+    result = hostClassInstance->_hostClass->_parentHostClass->prototypeGetProperty(propertyName, exception);
   }
 
   JSStringRelease(propertyName);
@@ -102,7 +102,7 @@ bool HostClass::proxyInstanceSetProperty(JSContextRef ctx, JSObjectRef object, J
   JSStringRetain(propertyName);
   hostClassInstance->setProperty(propertyName, value, exception);
   JSStringRelease(propertyName);
-  return hostClassInstance->hostClass->context->handleException(*exception);
+  return hostClassInstance->_hostClass->context->handleException(*exception);
 }
 
 void HostClass::proxyInstanceGetPropertyNames(JSContextRef ctx, JSObjectRef object,
@@ -126,7 +126,7 @@ JSValueRef HostClass::prototypeGetProperty(JSStringRef name, JSValueRef *excepti
 }
 void HostClass::prototypeSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
 
-HostClass::Instance::Instance(HostClass *hostClass) : hostClass(hostClass) {
+HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);
 }
 void HostClass::Instance::initialized() {}
