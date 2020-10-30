@@ -61,6 +61,7 @@ JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *
                                     JSObjectCallAsFunctionCallback callback);
 
 std::string JSStringToStdString(JSStringRef jsString);
+std::string JSValueToStdString(JSContextRef ctx, JSValueRef jsValue, JSValueRef *exception);
 
 std::unique_ptr<JSContext> createJSContext(int32_t contextId, const JSExceptionHandler &handler, void *owner);
 

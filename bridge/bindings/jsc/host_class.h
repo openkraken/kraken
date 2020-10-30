@@ -37,11 +37,6 @@ public:
   virtual JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                         const JSValueRef *arguments, JSValueRef *exception);
 
-  // Triggered when search property on prototype object.
-  virtual JSValueRef prototypeGetProperty(JSStringRef name, JSValueRef *exception);
-  // Triggered when set property on prototype object.
-  virtual void prototypeSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception);
-
   // The instance class represent every javascript instance objects created by new expression.
   class Instance {
   public:
@@ -56,6 +51,9 @@ public:
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
   };
+
+  // Triggered when search property on prototype object.
+  virtual JSValueRef prototypeGetProperty(Instance *instance, JSStringRef name, JSValueRef *exception);
 
   std::string _name;
   JSContext *context{nullptr};

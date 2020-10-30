@@ -33,11 +33,20 @@ JSElement *JSElement::instance(JSContext *context) {
 JSObjectRef JSElement::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                          const JSValueRef *arguments, JSValueRef *exception) {
   JSValueRef tagNameValue = arguments[0];
-  auto instance = new ElementInstance(this, tagNameValue, exception);
+  double targetId;
+
+  if (argumentCount == 2) {
+    targetId = JSValueToNumber(ctx, arguments[1], exception);
+  } else {
+    targetId = NAN;
+  }
+
+  auto instance = new ElementInstance(this, tagNameValue, targetId, exception);
   return instance->object;
 }
 
-JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, JSValueRef *exception)
+JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId,
+                                            JSValueRef *exception)
   : EventTargetInstance(element) {
   JSStringRef tagNameStrRef = JSValueToStringCopy(element->ctx, tagNameValue, exception);
   NativeString tagName{};
@@ -48,9 +57,18 @@ JSElement::ElementInstance::ElementInstance(JSElement *element, JSValueRef tagNa
   auto **args = new NativeString *[argsLength];
   args[0] = tagName.clone();
 
-  UICommandTaskMessageQueue::instance(element->context->getContextId())
-      ->registerCommand(eventTargetId, UICommandType::createElement, args, argsLength);
+  // If target did't set up by constructor parameter, use default eventTargetId.
+  if (isnan(targetId)) {
+    targetId = eventTargetId;
+  }
 
+  // No needs to send create element for BODY element.
+  if (targetId == BODY_TARGET_ID) {
+    return;
+  }
+
+  UICommandTaskMessageQueue::instance(element->context->getContextId())
+    ->registerCommand(targetId, UICommandType::createElement, args, argsLength);
 }
 
 void JSElement::ElementInstance::initialized() {

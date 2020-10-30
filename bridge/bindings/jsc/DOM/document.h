@@ -9,6 +9,7 @@
 #include "bindings/jsc/js_context.h"
 #include "bindings/jsc/macros.h"
 #include "node.h"
+#include "element.h"
 
 namespace kraken::binding::jsc {
 
@@ -25,7 +26,11 @@ public:
   public:
     DocumentInstance() = delete;
     explicit DocumentInstance(JSDocument *document);
+    ~DocumentInstance();
     JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+
+  private:
+    JSObjectRef body;
   };
 };
 

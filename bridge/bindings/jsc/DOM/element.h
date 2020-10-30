@@ -9,6 +9,8 @@
 #include "include/kraken_bridge.h"
 #include "node.h"
 
+#define BODY_TARGET_ID -1
+
 namespace kraken::binding::jsc {
 
 void bindElement(std::unique_ptr<JSContext> &context);
@@ -26,7 +28,7 @@ public:
   class ElementInstance : public EventTargetInstance {
   public:
     ElementInstance() = delete;
-    explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, JSValueRef *exception);
+    explicit ElementInstance(JSElement *element, JSValueRef tagNameValue, double targetId, JSValueRef *exception);
     void initialized() override;
   };
 };

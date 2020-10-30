@@ -113,6 +113,11 @@ std::string JSStringToStdString(JSStringRef jsString) {
   return std::string(buffer.data());
 }
 
+std::string JSValueToStdString(JSContextRef ctx, JSValueRef jsValue, JSValueRef *exception) {
+  JSStringRef stringRef = JSValueToStringCopy(ctx, jsValue, exception);
+  return std::move(JSStringToStdString(stringRef));
+}
+
 JSObjectRef propertyBindingFunction(JSContext *context, void *data, const char *name,
                                     JSObjectCallAsFunctionCallback callback) {
   JSClassDefinition functionDefinition = kJSClassDefinitionEmpty;

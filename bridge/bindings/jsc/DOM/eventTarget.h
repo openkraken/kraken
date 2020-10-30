@@ -30,13 +30,23 @@ public:
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 
+  static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                  const JSValueRef arguments[], JSValueRef *exception);
+
   class EventTargetInstance : public Instance {
   public:
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
     ~EventTargetInstance() override;
     int64_t eventTargetId;
+    std::map<std::string, std::deque<JSObjectRef>> _eventHandlers;
   };
+
+  JSValueRef prototypeGetProperty(Instance *instance, JSStringRef name, JSValueRef *exception) override;
 };
 
 } // namespace kraken::binding::jsc

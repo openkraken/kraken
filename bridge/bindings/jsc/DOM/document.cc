@@ -43,15 +43,30 @@ JSObjectRef JSDocument::constructInstance(JSContextRef ctx, JSObjectRef construc
   return instance->object;
 }
 
-JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : EventTargetInstance(document) {}
+JSDocument::DocumentInstance::DocumentInstance(JSDocument *document) : EventTargetInstance(document) {
+  auto elementConstructor = JSElement::instance(document->context);
+  JSStringRef bodyTagName = JSStringCreateWithUTF8CString("BODY");
+  const JSValueRef arguments[] = {
+    JSValueMakeString(document->ctx, bodyTagName),
+    JSValueMakeNumber(document->ctx, BODY_TARGET_ID)
+  };
+  body = JSObjectCallAsConstructor(document->ctx, elementConstructor->classObject, 2, arguments, nullptr);
+  JSValueProtect(document->ctx, body);
+}
 
 JSValueRef JSDocument::DocumentInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   std::string name = JSStringToStdString(nameRef);
   if (name == "createElement") {
     return propertyBindingFunction(_hostClass->context, this, "createElement", createElement);
+  } else if (name == "body") {
+    return body;
   }
 
   return nullptr;
+}
+
+JSDocument::DocumentInstance::~DocumentInstance() {
+  JSValueUnprotect(_hostClass->ctx, body);
 }
 
 } // namespace kraken::binding::jsc

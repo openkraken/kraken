@@ -4,6 +4,7 @@
  */
 
 #include "host_class.h"
+#include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
 
@@ -84,12 +85,12 @@ JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef obj
 
   // If current instance did't have the target property, search for prototype.
   if (result == nullptr) {
-    result = hostClassInstance->_hostClass->prototypeGetProperty(propertyName, exception);
+    result = hostClassInstance->_hostClass->prototypeGetProperty(hostClassInstance, propertyName, exception);
   }
 
   // If current instance's prototype did't have the target property, try to search in the parent HostClass.
   if (result == nullptr && hostClassInstance->_hostClass->_parentHostClass != nullptr) {
-    result = hostClassInstance->_hostClass->_parentHostClass->prototypeGetProperty(propertyName, exception);
+    result = hostClassInstance->_hostClass->_parentHostClass->prototypeGetProperty(hostClassInstance, propertyName, exception);
   }
 
   JSStringRelease(propertyName);
@@ -121,10 +122,9 @@ JSObjectRef HostClass::constructInstance(JSContextRef ctx, JSObjectRef construct
   return JSObjectMake(ctx, nullptr, nullptr);
 }
 HostClass::~HostClass() {}
-JSValueRef HostClass::prototypeGetProperty(JSStringRef name, JSValueRef *exception) {
+JSValueRef HostClass::prototypeGetProperty(Instance* instance, JSStringRef name, JSValueRef *exception) {
   return nullptr;
 }
-void HostClass::prototypeSetProperty(JSStringRef name, JSValueRef value, JSValueRef *exception) {}
 
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);

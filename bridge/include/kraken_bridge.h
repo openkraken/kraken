@@ -50,6 +50,7 @@ struct Screen {
 enum UICommandType {
   createElement = 0,
   disposeEventTarget = 1,
+  addEvent = 2,
 };
 
 struct UICommandItem {
