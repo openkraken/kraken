@@ -1210,8 +1210,6 @@ class Element extends Node
       renderBoxModel = renderReplacedBoxModel;
     }
 
-    renderBoxModel.markNeedsLayout();
-
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       if (renderBoxModel.hasSize && renderBoxModel.size == Size.zero) {
@@ -1225,6 +1223,7 @@ class Element extends Node
 
       completer.complete(captured);
     });
+    SchedulerBinding.instance.scheduleFrame();
 
     return completer.future;
   }
