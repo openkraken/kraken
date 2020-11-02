@@ -6,7 +6,6 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/src/painting/display_item.dart';
 import 'canvas_context.dart';
 
 final RegExp _splitRegExp = RegExp(' ');
