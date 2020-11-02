@@ -392,15 +392,19 @@ jsa::String JSCContext::createStringFromAscii(const char *str, size_t length) {
   return this->createStringFromUtf8(reinterpret_cast<const uint8_t *>(str), length);
 }
 
-jsa::String JSCContext::createStringFromUtf8(const uint8_t *str, size_t length) {
-  std::string tmp(reinterpret_cast<const char *>(str), length);
+jsa::String JSCContext::createStringFromUtf8(const uint8_t *bytes, size_t length) {
+  std::string tmp(reinterpret_cast<const char *>(bytes), length);
   JSStringRef stringRef = JSStringCreateWithUTF8CString(tmp.c_str());
-  return createString(stringRef);
+  jsa::String str = createString(stringRef);
+  JSStringRelease(stringRef);
+  return str;
 }
 
 jsa::String JSCContext::createStringFromUInt16(const JSChar *utf16, size_t length) {
   JSStringRef stringRef = JSStringCreateWithCharacters(utf16, length);
-  return createString(stringRef);
+  jsa::String str = createString(stringRef);
+  JSStringRelease(stringRef);
+  return str;
 }
 
 std::string JSCContext::utf8(const jsa::String &str) {
