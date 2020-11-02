@@ -9,29 +9,34 @@ import 'package:kraken/painting.dart' show CanvasRenderingContext2D;
 class CanvasPainter extends CustomPainter {
   CanvasRenderingContext2D context;
 
-  PictureRecorder _customRecorder;
-  Picture _customPicture;
-  Canvas _customCanvas;
+  PictureRecorder _pictureRecorder;
+  Picture _picture;
+  Canvas _canvas;
 
-  void _startRecording() {
-    _customRecorder = PictureRecorder();
-    _customCanvas = Canvas(_customRecorder);
-  }
+  bool get _shouldPaintContextActions => context != null && context.actionCount > 0;
+  bool get _shouldPaintCustomPicture => _picture != null && _picture.approximateBytesUsed > 0;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
-      if (_customPicture != null) {
-        canvas.drawPicture(_customPicture);
+      if (_shouldPaintContextActions) {
+        _pictureRecorder = PictureRecorder();
+        _canvas = Canvas(_pictureRecorder);
       }
-      _startRecording();
-      context.performAction(_customCanvas, size);
 
-      /// After calling this function, both the picture recorder
-      /// and the canvas objects are invalid and cannot be used further.
-      _customPicture = _customRecorder.endRecording();
-      context.clearActionRecords();
-      canvas.drawPicture(_customPicture);
+      if (_shouldPaintCustomPicture) {
+        canvas.drawPicture(_picture);
+      }
+
+      if (_shouldPaintContextActions) {
+        context.performAction(_canvas, size);
+
+        /// After calling this function, both the picture recorder
+        /// and the canvas objects are invalid and cannot be used further.
+        _picture = _pictureRecorder.endRecording();
+        context.clearActionRecords();
+        canvas.drawPicture(_picture);
+      }
     }
   }
 
