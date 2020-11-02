@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 class RenderRecyclerParentData extends RenderLayoutParentData {}
 
@@ -263,19 +263,12 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
 
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
-    print('_create $index, childCount: $childCount');
 
     if (node != null) {
-      node.initializeRenderObject();
+      node.createRenderer();
     }
 
-    if (node is Element) {
-      return node.renderBoxModel;
-    } else if (node is TextNode) {
-      return node.renderTextBox;
-    } else {
-      return null;
-    }
+    return node.renderer;
   }
 
   @override
@@ -291,13 +284,10 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     int targetId = _children[index];
     Node node = elementManager.getEventTargetByTargetId<Node>(targetId);
     assert(node != null);
-    node.initializeRenderObject();
+    node.willAttachRenderer();
 
-    if (node is Element) {
-      child = node.renderBoxModel;
-      node.style.applyTargetProperties();
-    } else if (node is TextNode) {
-      child = node.renderTextBox;
+    if (node is Node) {
+      child = node.renderer;
     } else {
       if (!kReleaseMode)
         throw FlutterError('Unsupported type ${node.runtimeType} $node');
@@ -306,6 +296,9 @@ class RenderRecyclerLayout extends RenderLayoutBox implements RenderSliverBoxChi
     assert(child != null, 'Child should not be null');
     child.parentData = SliverMultiBoxAdaptorParentData();
     _renderSliverList.insert(child, after: after);
+
+    node.didAttachRenderer();
+    node.ensureChildAttached();
   }
 
   @override

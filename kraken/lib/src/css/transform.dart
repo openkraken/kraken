@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
