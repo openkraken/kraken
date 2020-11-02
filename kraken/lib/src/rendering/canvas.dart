@@ -13,26 +13,30 @@ class CanvasPainter extends CustomPainter {
   Picture _customPicture;
   Canvas _customCanvas;
 
-  void _startRecording() {
-    _customRecorder = PictureRecorder();
-    _customCanvas = Canvas(_customRecorder);
-  }
+  bool get _shouldPaintContextActions => context != null && context.actionCount > 0;
+  bool get _shouldPaintCustomPicture => _customPicture != null && _customPicture.approximateBytesUsed > 0;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
-      _startRecording();
-      
-      if (_customPicture != null) {
+      if (_shouldPaintContextActions) {
+        _customRecorder = PictureRecorder();
+        _customCanvas = Canvas(_customRecorder);
+      }
+
+      if (_shouldPaintCustomPicture) {
         canvas.drawPicture(_customPicture);
       }
-      context.performAction(_customCanvas, size);
 
-      /// After calling this function, both the picture recorder
-      /// and the canvas objects are invalid and cannot be used further.
-      _customPicture = _customRecorder.endRecording();
-      context.clearActionRecords();
-      canvas.drawPicture(_customPicture);
+      if (_shouldPaintContextActions) {
+        context.performAction(_customCanvas, size);
+
+        /// After calling this function, both the picture recorder
+        /// and the canvas objects are invalid and cannot be used further.
+        _customPicture = _customRecorder.endRecording();
+        context.clearActionRecords();
+        canvas.drawPicture(_customPicture);
+      }
     }
   }
 

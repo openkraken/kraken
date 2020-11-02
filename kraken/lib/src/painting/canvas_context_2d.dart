@@ -6,6 +6,7 @@ import 'dart:core';
 import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:kraken/css.dart';
+import 'package:kraken/src/painting/display_item.dart';
 import 'canvas_context.dart';
 
 final RegExp _splitRegExp = RegExp(' ');
@@ -40,6 +41,8 @@ class CanvasRenderingContext2D extends _CanvasRenderingContext2D
 }
 
 class _CanvasRenderingContext2D extends CanvasRenderingContext {
+  int get actionCount => _actions.length;
+
   List<CanvasAction> _actions = [];
   List<CanvasAction> takeActionRecords() => _actions;
 

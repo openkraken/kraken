@@ -16,6 +16,17 @@ const Map<String, dynamic> _defaultStyle = {
   HEIGHT: ELEMENT_DEFAULT_HEIGHT,
 };
 
+class RenderCanvasPaint extends RenderCustomPaint {
+  @override
+  bool get isRepaintBoundary => true;
+
+  RenderCanvasPaint({ CustomPainter painter, Size preferredSize}) : super(
+    painter: painter,
+    foregroundPainter: null, // Ignore foreground painter
+    preferredSize: preferredSize,
+  );
+}
+
 class CanvasElement extends Element {
   CanvasElement(int targetId, ElementManager elementManager)
       : super(
@@ -186,9 +197,8 @@ class CanvasElement extends Element {
   }
 
   RenderCustomPaint getRenderObject() {
-    return RenderCustomPaint(
+    return RenderCanvasPaint(
       painter: painter,
-      foregroundPainter: null, // Ignore foreground painter
       preferredSize: size,
     );
   }
