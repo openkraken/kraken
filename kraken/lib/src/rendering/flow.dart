@@ -7,7 +7,7 @@ import 'package:kraken/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 class _RunMetrics {
   _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.baselineExtent, this.childCount);
@@ -678,7 +678,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       runMainAxisExtent += childMainAxisExtent;
       if (_effectiveChildCount > 0) runMainAxisExtent += spacing;
 
-      /// Caculate baseline extent of layout box
+      /// Calculate baseline extent of layout box
       CSSStyleDeclaration childStyle = _getChildStyle(child);
       VerticalAlign verticalAlign = CSSInlineLayout.parseVerticalAlign(childStyle[VERTICAL_ALIGN]);
       bool isLineHeightValid = _isLineHeightValid(child);
@@ -735,8 +735,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     final int runCount = runMetrics.length;
 
-    assert(_effectiveChildCount > 0);
-
     double containerMainAxisExtent = 0.0;
     double containerCrossAxisExtent = 0.0;
 
@@ -765,7 +763,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     } else if (contentHeight != null) {
       constraintHeight = math.max(constraintHeight, contentHeight);
     }
-
 
     switch (direction) {
       case Axis.horizontal:

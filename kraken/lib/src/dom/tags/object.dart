@@ -5,8 +5,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
-import 'package:kraken/src/element/object_element_client.dart';
+import 'package:kraken/dom.dart';
 
 const String OBJECT = 'OBJECT';
 

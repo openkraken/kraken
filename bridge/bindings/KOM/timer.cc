@@ -44,7 +44,7 @@ void handlePersistentCallback(void *callbackContext, int32_t contextId, const ch
   callback.asFunction(_context).call(_context, Value::undefined(), 0);
 }
 
-void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
+void handleRAFTemporaryCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
   auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
   JSContext &_context = obj->_context;
   if (!checkContext(contextId, &_context)) return;
@@ -71,14 +71,44 @@ void handleRAFPersistentCallback(void *callbackContext, int32_t contextId, doubl
 
   Object callback = obj->_callback->getObject(_context);
   callback.asFunction(_context).call(_context, Value(result), 0);
+  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  bridge->bridgeCallback.freeBridgeCallbackContext(obj);
 }
 
-void handleTransientCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
-  handlePersistentCallback(callbackContext, contextId, errmsg);
+void handleTemporaryCallback(void *callbackContext, int32_t contextId, const char *errmsg) {
+  auto *obj = static_cast<BridgeCallback::Context *>(callbackContext);
+  JSContext &_context = obj->_context;
+  if (!checkContext(contextId, &_context)) return;
+
+  if (!_context.isValid()) return;
+
+  if (obj->_callback == nullptr) {
+    // throw JSError inside of dart function callback will directly cause crash
+    // so we handle it instead of throw
+    JSError error(_context, "Failed to trigger callback: timer callback is null.");
+    obj->_context.reportError(error);
+    return;
+  }
+
+  if (!obj->_callback->isObject()) {
+    return;
+  }
+
+  if (errmsg != nullptr) {
+    JSError error(_context, errmsg);
+    obj->_context.reportError(error);
+    return;
+  }
+
+  Object callback = obj->_callback->getObject(_context);
+  callback.asFunction(_context).call(_context, Value::undefined(), 0);
+
+  auto bridge = static_cast<JSBridge *>(obj->_context.getOwner());
+  bridge->bridgeCallback.freeBridgeCallbackContext(obj);
 }
 
 void handleRAFTransientCallback(void *callbackContext, int32_t contextId, double result, const char *errmsg) {
-  handleRAFPersistentCallback(callbackContext, contextId, result, errmsg);
+  handleRAFTemporaryCallback(callbackContext, contextId, result, errmsg);
 }
 
 Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, size_t count) {
@@ -112,7 +142,7 @@ Value setTimeout(JSContext &context, const Value &thisVal, const Value *args, si
   auto bridge = static_cast<JSBridge *>(context.getOwner());
   auto timerId = bridge->bridgeCallback.registerCallback<int32_t>(
     std::move(callbackContext), [&timeout](BridgeCallback::Context *callbackContext, int32_t contextId) {
-      return getDartMethod()->setTimeout(callbackContext, contextId, handleTransientCallback, timeout);
+      return getDartMethod()->setTimeout(callbackContext, contextId, handleTemporaryCallback, timeout);
     });
 
   // `-1` represents ffi error occurred.

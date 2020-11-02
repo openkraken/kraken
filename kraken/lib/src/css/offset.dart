@@ -1,6 +1,6 @@
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 mixin CSSOffsetMixin on Node {
 
