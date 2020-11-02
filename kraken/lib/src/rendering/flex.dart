@@ -1013,8 +1013,19 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
       }
       if (isChildNeedsLayout) {
-        // If width and height can be calculated from style, then its repaintBoundary equals self
-        bool parentUsesSize = contentWidth == null || contentHeight == null;
+        bool parentUsesSize = true;
+        if (child is RenderBoxModel) {
+          final double childContentWidth = RenderBoxModel.getContentWidth(child);
+          final double childContentHeight = RenderBoxModel.getContentHeight(child);
+          // If width and height of both layout and its child are defined,
+          // then child's repaintBoundary equals itself, when child is marked as needsLayout,
+          // layout will not marked as needsLayout
+          if (contentWidth != null && contentHeight != null &&
+            childContentWidth != null && childContentHeight != null
+          ) {
+            parentUsesSize = false;
+          }
+        }
         child.layout(childConstraints, parentUsesSize: parentUsesSize);
       }
 
@@ -1470,8 +1481,19 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
         }
 
-        // If width and height can be calculated from style, then its repaintBoundary equals self
-        bool parentUsesSize = contentWidth == null || contentHeight == null;
+        bool parentUsesSize = true;
+        if (child is RenderBoxModel) {
+          final double childContentWidth = RenderBoxModel.getContentWidth(child);
+          final double childContentHeight = RenderBoxModel.getContentHeight(child);
+          // If width and height of both layout and its child are defined,
+          // then child's repaintBoundary equals itself, when child is marked as needsLayout,
+          // layout will not marked as needsLayout
+          if (contentWidth != null && contentHeight != null &&
+            childContentWidth != null && childContentHeight != null
+          ) {
+            parentUsesSize = false;
+          }
+        }
         child.layout(deflateOverflowConstraints(innerConstraints), parentUsesSize: parentUsesSize);
 
         // update max scrollable size
