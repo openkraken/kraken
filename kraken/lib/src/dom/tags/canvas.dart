@@ -3,7 +3,7 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/css.dart';
@@ -20,7 +20,7 @@ class RenderCanvasPaint extends RenderCustomPaint {
   @override
   bool get isRepaintBoundary => true;
 
-  RenderCanvasPaint({ CustomPainter painter, Size preferredSize}) : super(
+  RenderCanvasPaint({ CustomPainter painter, Size preferredSize }) : super(
     painter: painter,
     foregroundPainter: null, // Ignore foreground painter
     preferredSize: preferredSize,
@@ -36,30 +36,37 @@ class CanvasElement extends Element {
           isIntrinsicBox: true,
           repaintSelf: true,
           tagName: CANVAS,
-        ) {
-    painter = CanvasPainter();
-    _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
-    _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
+        );
 
-    renderCustomPaint = RenderCustomPaint(
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    renderCustomPaint = RenderCanvasPaint(
       painter: painter,
-      foregroundPainter: null, // Ignore foreground painter
-      preferredSize: Size(_width, _height), // Default size
+      preferredSize: size,
     );
 
-    style.addStyleChangeListener(_propertyChangedListener);
     addChild(renderCustomPaint);
+    style.addStyleChangeListener(_propertyChangedListener);
+  }
+
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_propertyChangedListener);
+    renderCustomPaint = null;
   }
 
   /// The painter that paints before the children.
-  CanvasPainter painter;
+  final CanvasPainter painter = CanvasPainter();
 
   /// The size that this [CustomPaint] should aim for, given the layout
   /// constraints, if there is no child.
   ///
   /// If there's a child, this is ignored, and the size of the child is used
   /// instead.
-  Size size;
+  Size get size => Size(width, height);
 
   RenderCustomPaint renderCustomPaint;
 
@@ -77,22 +84,34 @@ class CanvasElement extends Element {
   }
 
   /// Element attribute width
-  double _width = 0;
+  double _width = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH);
   double get width => _width;
-  set width(double newValue) {
-    if (newValue != null) {
-      _width = newValue;
-      renderCustomPaint.preferredSize = Size(_width, _height);
+  set width(double value) {
+    if (value == null) {
+      return;
+    }
+
+    if (value != _width) {
+      _width = value;
+      if (renderCustomPaint != null) {
+        renderCustomPaint.preferredSize = size;
+      }
     }
   }
 
   /// Element attribute height
-  double _height = 0;
+  double _height = CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_HEIGHT);
   double get height => _height;
-  set height(double newValue) {
-    if (newValue != null) {
-      _height = newValue;
-      renderCustomPaint.preferredSize = Size(_width, _height);
+  set height(double value) {
+    if (value == null) {
+      return;
+    }
+
+    if (value != _height) {
+      _height = value;
+      if (renderCustomPaint != null) {
+        renderCustomPaint.preferredSize = size;
+      }
     }
   }
 
@@ -100,19 +119,17 @@ class CanvasElement extends Element {
     switch (key) {
       case 'width':
         // Trigger width setter to invoke rerender.
-        width = CSSLength.toDisplayPortValue(present) ?? width;
+        width = CSSLength.toDisplayPortValue(present);
         break;
       case 'height':
         // Trigger height setter to invoke rerender.
-        height = CSSLength.toDisplayPortValue(present) ?? height;
+        height = CSSLength.toDisplayPortValue(present);
         break;
-      default:
     }
   }
 
   void _applyContext2DMethod(List args) {
     // [String method, [...args]]
-    _assertPainterExists();
     if (args == null) return;
     if (args.length < 1) return;
     String method = args[0];
@@ -168,12 +185,13 @@ class CanvasElement extends Element {
         break;
     }
 
-    renderCustomPaint.markNeedsPaint();
+    if (renderCustomPaint != null) {
+      renderCustomPaint.markNeedsPaint();
+    }
   }
 
   void _updateContext2DProperty(List args) {
     // [String method, [...args]]
-    _assertPainterExists();
     if (args == null) return;
     if (args.length < 1) return;
     String property = args[0];
@@ -188,19 +206,6 @@ class CanvasElement extends Element {
         painter.context.font = args[1];
         break;
     }
-  }
-
-  void _assertPainterExists() {
-    if (painter == null) {
-      throw FlutterError('Canvas painter not exists, get canvas context first.');
-    }
-  }
-
-  RenderCustomPaint getRenderObject() {
-    return RenderCanvasPaint(
-      painter: painter,
-      preferredSize: size,
-    );
   }
 
   @override

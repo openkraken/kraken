@@ -8,7 +8,7 @@ import 'package:flare_flutter/flare_controls.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
 const String ANIMATION_PLAYER = 'ANIMATION-PLAYER';
@@ -30,23 +30,33 @@ class AnimationPlayerElement extends Element {
 
   String get objectFit => style[OBJECT_FIT];
 
-  String get type {
-    if (properties.containsKey('type')) return properties['type'];
-    // Default type to flare
-    return ANIMATION_TYPE_FLARE;
+  // Default type to flare
+  String get type => properties['type'] ?? ANIMATION_TYPE_FLARE;
+
+  String get src => properties['src'];
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+
+    _animationRenderObject = _createFlareRenderObject();
+    if (_animationRenderObject != null) {
+      addChild(_animationRenderObject);
+    }
   }
 
-  String get src {
-    if (properties.containsKey('src')) return properties['src'];
-    return null;
+  @override
+  void didDetachRenderer() {
+    _animationRenderObject = null;
   }
 
   void _updateRenderObject() {
-    if (src == null) return;
-    bool shouldAddChild = _animationRenderObject == null;
+    if (isConnected && isRendererAttached) {
+      RenderObject prev = previousSibling?.renderer;
 
-    _animationRenderObject = _createFlareRenderObject(properties);
-    if (shouldAddChild) addChild(_animationRenderObject);
+      detach();
+      attachTo(parent, after: prev);
+    }
   }
 
   void _play(List args) {
@@ -123,8 +133,10 @@ class AnimationPlayerElement extends Element {
     }
   }
 
-  FlareRenderObject _createFlareRenderObject(Map<String, dynamic> properties) {
-    assert(properties.containsKey('src'));
+  FlareRenderObject _createFlareRenderObject() {
+    if (src == null) {
+      return null;
+    }
 
     BoxFit boxFit = _getObjectFit();
     _animationController = FlareControls();

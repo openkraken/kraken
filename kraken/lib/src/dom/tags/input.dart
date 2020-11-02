@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 const String INPUT = 'INPUT';
@@ -114,18 +114,25 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
-    textSpan = buildTextSpan();
-    renderEditable = createRenderObject();
-
-    addChild(renderEditable);
 
     // Make element listen to click event to trigger focus.
-    addEvent("click");
-
-    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+    addEvent('click');
 
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
+  }
+
+  @override
+  void didAttachRenderer() {
+    super.didAttachRenderer();
+    renderEditable = createRenderObject();
+
+    addChild(renderEditable);
+  }
+
+  @override
+  void didDetachRenderer() {
+    renderEditable = null;
   }
 
   @override
@@ -139,7 +146,11 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void updateTextSpan() {
     // Rebuilt text span, for style has changed.
     textSpan = buildTextSpan();
-    renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+    textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
+
+    if (renderEditable != null) {
+      renderEditable.text = textSpan.text.length == 0 ? placeholderTextSpan : textSpan;
+    }
   }
 
   TextSpan buildTextSpan({String text = ''}) {
@@ -233,14 +244,18 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     if (textChanged) {
       _updateRemoteEditingValueIfNeeded();
       textSpan = buildTextSpan(text: value.text);
-      if (value.text.length == 0) {
-        renderEditable.text = placeholderTextSpan;
-      } else {
-        renderEditable.text = textSpan;
+      if (renderEditable != null) {
+        if (value.text.length == 0) {
+          renderEditable.text = placeholderTextSpan;
+        } else {
+          renderEditable.text = textSpan;
+        }
       }
     }
 
-    renderEditable.selection = value.selection;
+    if (renderEditable != null) {
+      renderEditable.selection = value.selection;
+    }
   }
 
   @override

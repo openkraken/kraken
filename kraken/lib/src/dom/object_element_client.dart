@@ -1,5 +1,5 @@
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 typedef ObjectElementClientFactory = ObjectElementClient Function(ObjectElementHost objectElementHost);
 

@@ -2,7 +2,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
