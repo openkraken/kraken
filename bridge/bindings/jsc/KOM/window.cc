@@ -6,31 +6,43 @@
 #include "window.h"
 #include "bindings/jsc/macros.h"
 #include "dart_methods.h"
-#include "foundation/logging.h"
 
 namespace kraken::binding::jsc {
 
-JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+JSWindow::WindowInstance::WindowInstance(JSWindow *window): EventTargetInstance(window, WINDOW_TARGET_ID) {
+  location_ = new JSLocation(_hostClass->context);
+}
+
+JSWindow::WindowInstance::~WindowInstance() {
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+}
+
+JSValueRef JSWindow::WindowInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+  JSValueRef result = EventTargetInstance::getProperty(nameRef, exception);
+  if (result != nullptr) return result;
+
   std::string name = JSStringToStdString(nameRef);
 
   if (name == "devicePixelRatio") {
     if (getDartMethod()->devicePixelRatio == nullptr) {
-      JSC_THROW_ERROR(context->context(),
+      JSC_THROW_ERROR(_hostClass->context->context(),
                       "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.", exception);
       return nullptr;
     }
 
-    double devicePixelRatio = getDartMethod()->devicePixelRatio(context->getContextId());
-    return JSValueMakeNumber(context->context(), devicePixelRatio);
+    double devicePixelRatio = getDartMethod()->devicePixelRatio(_hostClass->context->getContextId());
+    return JSValueMakeNumber(_hostClass->context->context(), devicePixelRatio);
   } else if (name == "colorScheme") {
     if (getDartMethod()->platformBrightness == nullptr) {
-      JSC_THROW_ERROR(context->context(), "Failed to read colorScheme: dart method (platformBrightness) not register.",
+      JSC_THROW_ERROR(_hostClass->context->context(), "Failed to read colorScheme: dart method (platformBrightness) not register.",
                       exception);
       return nullptr;
     }
-    const NativeString *code = getDartMethod()->platformBrightness(context->getContextId());
+    const NativeString *code = getDartMethod()->platformBrightness(_hostClass->context->getContextId());
     JSStringRef resultRef = JSStringCreateWithCharacters(code->string, code->length);
-    return JSValueMakeString(context->context(), resultRef);
+    return JSValueMakeString(_hostClass->context->context(), resultRef);
   } else if (name == "location") {
     return location_->jsObject;
   }
@@ -38,20 +50,20 @@ JSValueRef JSWindow::getProperty(JSStringRef nameRef, JSValueRef *exception) {
   return nullptr;
 }
 
-//void JSWindow::instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
-//  for (auto &propertyName : propertyNames) {
-//    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
-//  }
-//}
-
 JSWindow::~JSWindow() {
-  for (auto &propertyName : propertyNames) {
-    JSStringRelease(propertyName);
-  }
+}
+
+JSObjectRef JSWindow::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                        const JSValueRef *arguments, JSValueRef *exception) {
+  auto window = new WindowInstance(this);
+  return window->object;
 }
 
 void bindWindow(std::unique_ptr<JSContext> &context) {
   auto window = new JSWindow(context.get());
-  JSC_GLOBAL_BINDING_HOST_OBJECT(context, "__kraken_window__", window);
+  JSC_GLOBAL_SET_PROPERTY(context, "Window", window->classObject);
+  auto windowInstance = window->constructInstance(window->ctx, window->classObject, 0, nullptr, nullptr);
+  JSC_GLOBAL_SET_PROPERTY(context, "window", windowInstance);
 }
+
 } // namespace kraken::binding::jsc

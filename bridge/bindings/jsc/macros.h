@@ -58,7 +58,7 @@
     JSStringRelease(stackStr);                                                                                         \
   }
 
-#define JSC_CREATE_HOST_OBJECT_DEFINITION(definition, name, classObject)                                       \
+#define JSC_CREATE_HOST_OBJECT_DEFINITION(definition, name, classObject)                                               \
   {                                                                                                                    \
     definition.version = 0;                                                                                            \
     definition.className = name;                                                                                       \
@@ -79,7 +79,7 @@
     definition.getProperty = classObject::proxyInstanceGetProperty;                                                    \
     definition.setProperty = classObject::proxyInstanceSetProperty;                                                    \
     definition.getPropertyNames = classObject::proxyInstanceGetPropertyNames;                                          \
-}
+  }
 
 #define JSC_CREATE_HOST_CLASS_DEFINITION(definition, name, staticFunction, staticValue, HostClass)                     \
   {                                                                                                                    \
@@ -92,6 +92,8 @@
     definition.finalize = HostClass::proxyFinalize;                                                                    \
     definition.hasInstance = HostClass::proxyHasInstance;                                                              \
     definition.callAsConstructor = HostClass::proxyCallAsConstructor;                                                  \
+    definition.callAsFunction = HostClass::proxyCallAsFunction;                                                        \
+    definition.getProperty = HostClass::proxyGetProperty;                                                              \
   }
 
 #define JSC_THROW_ERROR(ctx, msg, exception)                                                                           \

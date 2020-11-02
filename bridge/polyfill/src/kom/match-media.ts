@@ -103,14 +103,17 @@ export function matchMedia(mediaQuery: string): MediaQueryList {
       _addListener = (listener: any) => {
         // FIXME: change listener will override by other media query, it's bug
         if (typeof listener == 'function') {
+          // @ts-ignore
           krakenWindow.onColorSchemeChange = () => {
             listener(matchMedia(mediaQuery));
           };
         }
       }
       _removeListener = () => {
+        // @ts-ignore
         krakenWindow.onColorSchemeChange = null;
       };
+      // @ts-ignore
       expMatches = expValue === '' || krakenWindow.colorScheme === expValue;
       break;
     default:

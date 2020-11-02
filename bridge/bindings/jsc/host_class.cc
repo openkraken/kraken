@@ -72,6 +72,45 @@ JSObjectRef HostClass::proxyCallAsConstructor(JSContextRef ctx, JSObjectRef cons
   return hostClass->constructInstance(ctx, constructor, argumentCount, arguments, exception);
 }
 
+JSValueRef HostClass::proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  return JSValueMakeUndefined(ctx);
+}
+
+namespace {
+
+JSValueRef constructorCall(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(function));
+
+  const JSValueRef instanceThisObject = arguments[0];
+  JSValueRef *instanceArguments = new JSValueRef[argumentCount - 1];
+
+  for (int i = 1; i < argumentCount; i ++) {
+    instanceArguments[0] = arguments[i];
+  }
+
+  JSObjectRef instanceReturn = hostClass->constructInstance(ctx, thisObject, argumentCount - 1, instanceArguments, exception);
+  delete[] instanceArguments;
+
+  return instanceReturn;
+}
+
+}
+
+JSValueRef HostClass::proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                       JSValueRef *exception) {
+  auto name = JSStringToStdString(propertyName);
+  auto hostClass = static_cast<HostClass *>(JSObjectGetPrivate(object));
+
+  if (name == "call") {
+    return propertyBindingFunction(hostClass->context, hostClass, "call", constructorCall);
+  }
+
+  KRAKEN_LOG(VERBOSE) << "Constructor get property " << name;
+  return nullptr;
+}
+
 void HostClass::proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object) {
   auto hostClassInstance = static_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   hostClassInstance->initialized();
@@ -82,16 +121,6 @@ JSValueRef HostClass::proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef obj
   auto hostClassInstance = reinterpret_cast<HostClass::Instance *>(JSObjectGetPrivate(object));
   JSStringRetain(propertyName);
   JSValueRef result = hostClassInstance->getProperty(propertyName, exception);
-
-  // If current instance did't have the target property, search for prototype.
-  if (result == nullptr) {
-    result = hostClassInstance->_hostClass->prototypeGetProperty(hostClassInstance, propertyName, exception);
-  }
-
-  // If current instance's prototype did't have the target property, try to search in the parent HostClass.
-  if (result == nullptr && hostClassInstance->_hostClass->_parentHostClass != nullptr) {
-    result = hostClassInstance->_hostClass->_parentHostClass->prototypeGetProperty(hostClassInstance, propertyName, exception);
-  }
 
   JSStringRelease(propertyName);
   return result;
@@ -122,9 +151,6 @@ JSObjectRef HostClass::constructInstance(JSContextRef ctx, JSObjectRef construct
   return JSObjectMake(ctx, nullptr, nullptr);
 }
 HostClass::~HostClass() {}
-JSValueRef HostClass::prototypeGetProperty(Instance* instance, JSStringRef name, JSValueRef *exception) {
-  return nullptr;
-}
 
 HostClass::Instance::Instance(HostClass *hostClass) : _hostClass(hostClass) {
   object = JSObjectMake(hostClass->ctx, hostClass->instanceClass, this);

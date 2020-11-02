@@ -14,9 +14,12 @@
 #include "foundation/ui_task_queue.h"
 #include "include/kraken_bridge.h"
 #include <atomic>
+#include <array>
 #include <condition_variable>
 
 namespace kraken::binding::jsc {
+
+void bindEventTarget(std::unique_ptr<JSContext> &context);
 
 struct DisposeCallbackData {
   DisposeCallbackData(int32_t contextId, int64_t id) : contextId(contextId), id(id){};
@@ -26,27 +29,39 @@ struct DisposeCallbackData {
 
 class JSEventTarget : public HostClass {
 public:
+  static JSEventTarget *instance(JSContext *context);
+
   JSEventTarget() = delete;
   explicit JSEventTarget(JSContext *context, const char *name);
   explicit JSEventTarget(JSContext *context);
 
-  static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                     size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
-  static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
-                                  const JSValueRef arguments[], JSValueRef *exception);
+  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) override;
 
   class EventTargetInstance : public Instance {
   public:
+    static JSValueRef addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                       size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                          size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
+    static JSValueRef dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount,
+                                    const JSValueRef arguments[], JSValueRef *exception);
     EventTargetInstance() = delete;
     explicit EventTargetInstance(JSEventTarget *eventTarget);
+    explicit EventTargetInstance(JSEventTarget *eventTarget, int64_t targetId);
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+    void getPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
     ~EventTargetInstance() override;
     int64_t eventTargetId;
     std::map<std::string, std::deque<JSObjectRef>> _eventHandlers;
-  };
 
-  JSValueRef prototypeGetProperty(Instance *instance, JSStringRef name, JSValueRef *exception) override;
+  private:
+    std::array<JSStringRef, 3> propertyNames {
+        JSStringCreateWithUTF8CString("addEventListener"),
+        JSStringCreateWithUTF8CString("removeEventListener"),
+        JSStringCreateWithUTF8CString("dispatchEvent"),
+    };
+  };
 };
 
 } // namespace kraken::binding::jsc

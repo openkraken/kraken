@@ -22,6 +22,7 @@
 
 #include "bindings/jsc/DOM/document.h"
 #include "bindings/jsc/DOM/element.h"
+#include "bindings/jsc/DOM/eventTarget.h"
 #include "bindings/jsc/KOM/blob.h"
 #include "bindings/jsc/KOM/console.h"
 #include "bindings/jsc/KOM/location.h"

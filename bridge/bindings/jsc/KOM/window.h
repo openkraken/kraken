@@ -6,32 +6,41 @@
 #define KRAKEN_JS_BINDINGS_WINDOW_H_
 
 #include "bindings/jsc/js_context.h"
+#include "bindings/jsc/DOM/eventTarget.h"
 #include "location.h"
 
 #include <array>
 #include <memory>
 
 #define JSWindowName "Window"
+#define WINDOW_TARGET_ID -2
 
 namespace kraken::binding::jsc {
 
-class JSWindow : public HostObject {
+class JSWindow : public JSEventTarget {
 public:
-  JSWindow(JSContext *context) : HostObject(context, JSWindowName) {
-    location_ = new JSLocation(context);
-  };
+  JSWindow(JSContext *context) : JSEventTarget(context, JSWindowName) {};
   ~JSWindow();
 
-  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
-  //  void instanceGetPropertyNames(JSPropertyNameAccumulatorRef accumulator) override;
+  JSObjectRef constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                const JSValueRef *arguments, JSValueRef *exception) override;
 
-private:
-  JSLocation *location_;
+  class WindowInstance : public EventTargetInstance {
+  public:
+    WindowInstance() = delete;
+    explicit WindowInstance(JSWindow *window);
+    ~WindowInstance();
+    JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
+  private:
     std::array<JSStringRef, 3> propertyNames {
-      JSStringCreateWithUTF8CString("devicePixelRatio"),
-      JSStringCreateWithUTF8CString("colorScheme"),
-      JSStringCreateWithUTF8CString("location"),
+        JSStringCreateWithUTF8CString("devicePixelRatio"),
+        JSStringCreateWithUTF8CString("colorScheme"),
+        JSStringCreateWithUTF8CString("location"),
     };
+    JSLocation *location_;
+  };
+
+//  JSValueRef getProperty(JSStringRef name, JSValueRef *exception) override;
 };
 
 void bindWindow(std::unique_ptr<JSContext> &context);

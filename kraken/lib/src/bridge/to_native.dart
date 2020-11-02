@@ -195,7 +195,7 @@ void bridgeFrameCallback() {
   _frameCallback();
 }
 
-enum UICommandType { createElement, disposeEventTarget}
+enum UICommandType { createElement, disposeEventTarget, addEvent }
 
 class UICommandItem extends Struct {
   @Int8()
@@ -247,12 +247,16 @@ void flushUICommand() {
 
       UICommandType commandType = UICommandType.values[nativeCommand.ref.type];
       int id = nativeCommand.ref.id;
+      print(commandType);
       switch (commandType) {
         case UICommandType.createElement:
           controller.view.createElement(id, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         case UICommandType.disposeEventTarget:
           ElementManager.disposeEventTarget(controller.view.contextId, id);
+          break;
+        case UICommandType.addEvent:
+          controller.view.addEvent(id, nativeStringToString(nativeCommand.ref.args[0]));
           break;
         default:
           return;

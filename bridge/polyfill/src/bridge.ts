@@ -33,7 +33,7 @@ export interface PrivateKraken {
 declare const __kraken_window__: KrakenWindow;
 declare const __kraken_blob__: (blobParts?: KrakenBlob[], options?: BlobPropertyBag) => KrakenBlob;
 declare const __kraken__: PrivateKraken;
-export const krakenWindow = __kraken_window__;
+export const krakenWindow = process.env.ENABLE_JSA ? __kraken_window__ : window;
 export const krakenBlob = __kraken_blob__;
 export const privateKraken = __kraken__;
 

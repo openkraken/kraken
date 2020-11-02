@@ -12,25 +12,58 @@ namespace kraken::binding::jsc {
 
 static std::atomic<int64_t> globalEventTargetId{-2};
 
+namespace {
+JSEventTarget *_instance{nullptr};
+}
+
+void bindEventTarget(std::unique_ptr<JSContext> &context) {
+  auto eventTarget = JSEventTarget::instance(context.get());
+  JSValueProtect(context->context(), eventTarget->classObject);
+  JSC_GLOBAL_SET_PROPERTY(context, "EventTarget", eventTarget->classObject);
+}
+
+JSEventTarget *JSEventTarget::instance(JSContext *context) {
+  if (_instance == nullptr) {
+    _instance = new JSEventTarget(context);
+  }
+  return _instance;
+}
+
 JSEventTarget::JSEventTarget(JSContext *context, const char *name) : HostClass(context, name) {}
 JSEventTarget::JSEventTarget(JSContext *context) : HostClass(context, "EventTarget") {}
 
-JSValueRef JSEventTarget::prototypeGetProperty(Instance *instance, JSStringRef nameRef, JSValueRef *exception) {
-  std::string name = JSStringToStdString(nameRef);
-
-  if (name == "addEventListener") {
-    return propertyBindingFunction(context, instance, "addEventListener", addEventListener);
-  } else if (name == "removeEventListener") {
-    return propertyBindingFunction(context, instance, "removeEventListener", removeEventListener);
-  } else if (name == "dispatchEvent") {
-    return propertyBindingFunction(context, instance, "dispatchEvent", dispatchEvent);
-  }
-
-  return nullptr;
+JSObjectRef JSEventTarget::constructInstance(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
+                                             const JSValueRef *arguments, JSValueRef *exception) {
+  return HostClass::constructInstance(ctx, constructor, argumentCount, arguments, exception);
 }
 
-JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                           size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) {
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
+  eventTargetId = globalEventTargetId;
+  globalEventTargetId++;
+}
+
+JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget, int64_t id)
+  : Instance(eventTarget), eventTargetId(id) {}
+
+JSEventTarget::EventTargetInstance::~EventTargetInstance() {
+  // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
+  auto data = new DisposeCallbackData(_hostClass->context->getContextId(), eventTargetId);
+  foundation::Task disposeTask = [](void *data) {
+    auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
+    foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
+      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
+    delete disposeCallbackData;
+  };
+  foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
+
+  for (auto &propertyName : propertyNames) {
+    JSStringRelease(propertyName);
+  }
+}
+
+JSValueRef JSEventTarget::EventTargetInstance::addEventListener(JSContextRef ctx, JSObjectRef function,
+                                                                JSObjectRef thisObject, size_t argumentCount,
+                                                                const JSValueRef arguments[], JSValueRef *exception) {
   if (argumentCount != 2) {
     JSC_THROW_ERROR(ctx, "Failed to addEventListener: eventName and function parameter are required.", exception);
     return nullptr;
@@ -73,7 +106,8 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
     eventNameArgs.string = JSStringGetCharactersPtr(eventNameStringRef);
     eventNameArgs.length = JSStringGetLength(eventNameStringRef);
 
-    NativeString *args[1] = {eventNameArgs.clone()};
+    NativeString **args = new NativeString *[1];
+    args[0] = eventNameArgs.clone();
     foundation::UICommandTaskMessageQueue::instance(contextId)->registerCommand(eventTargetInstance->eventTargetId,
                                                                                 UICommandType::addEvent, args, 1);
   }
@@ -85,9 +119,9 @@ JSValueRef JSEventTarget::addEventListener(JSContextRef ctx, JSObjectRef functio
   return nullptr;
 }
 
-JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                              size_t argumentCount, const JSValueRef *arguments,
-                                              JSValueRef *exception) {
+JSValueRef JSEventTarget::EventTargetInstance::removeEventListener(JSContextRef ctx, JSObjectRef function,
+                                                                   JSObjectRef thisObject, size_t argumentCount,
+                                                                   const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 2) {
     JSC_THROW_ERROR(ctx, "Failed to removeEventListener: eventName and function parameter are required.", exception);
     return nullptr;
@@ -123,7 +157,7 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
 
   std::deque<JSObjectRef> &handlers = eventTargetInstance->_eventHandlers[eventName];
 
-  for (auto it = handlers.begin(); it != handlers.end(); ) {
+  for (auto it = handlers.begin(); it != handlers.end();) {
     if (*it == callbackObjectRef) {
       JSValueUnprotect(ctx, callbackObjectRef);
       it = handlers.erase(it);
@@ -135,8 +169,9 @@ JSValueRef JSEventTarget::removeEventListener(JSContextRef ctx, JSObjectRef func
   return nullptr;
 }
 
-JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
-                                        size_t argumentCount, const JSValueRef *arguments, JSValueRef *exception) {
+JSValueRef JSEventTarget::EventTargetInstance::dispatchEvent(JSContextRef ctx, JSObjectRef function,
+                                                             JSObjectRef thisObject, size_t argumentCount,
+                                                             const JSValueRef *arguments, JSValueRef *exception) {
   if (argumentCount != 1) {
     JSC_THROW_ERROR(ctx, "Failed to dispatchEvent: first arguments should be an event object", exception);
     return nullptr;
@@ -146,21 +181,24 @@ JSValueRef JSEventTarget::dispatchEvent(JSContextRef ctx, JSObjectRef function, 
   return nullptr;
 }
 
-JSEventTarget::EventTargetInstance::EventTargetInstance(JSEventTarget *eventTarget) : Instance(eventTarget) {
-  eventTargetId = globalEventTargetId;
-  globalEventTargetId++;
+JSValueRef JSEventTarget::EventTargetInstance::getProperty(JSStringRef nameRef, JSValueRef *exception) {
+  std::string name = JSStringToStdString(nameRef);
+
+  if (name == "addEventListener") {
+    return propertyBindingFunction(_hostClass->context, this, "addEventListener", addEventListener);
+  } else if (name == "removeEventListener") {
+    return propertyBindingFunction(_hostClass->context, this, "removeEventListener", removeEventListener);
+  } else if (name == "dispatchEvent") {
+    return propertyBindingFunction(_hostClass->context, this, "dispatchEvent", dispatchEvent);
+  }
+
+  return nullptr;
 }
 
-JSEventTarget::EventTargetInstance::~EventTargetInstance() {
-  // Recycle eventTarget object could be triggered by hosting JSContext been released or reference count set to 0.
-  auto data = new DisposeCallbackData(_hostClass->context->getContextId(), eventTargetId);
-  foundation::Task disposeTask = [](void *data) {
-    auto disposeCallbackData = reinterpret_cast<DisposeCallbackData *>(data);
-    foundation::UICommandTaskMessageQueue::instance(disposeCallbackData->contextId)
-      ->registerCommand(disposeCallbackData->id, UICommandType::disposeEventTarget, nullptr, 0);
-    delete disposeCallbackData;
-  };
-  foundation::UITaskMessageQueue::instance()->registerTask(disposeTask, data);
+void JSEventTarget::EventTargetInstance::getPropertyNames(JSPropertyNameAccumulatorRef accumulator) {
+  for (auto &propertyName : propertyNames) {
+    JSPropertyNameAccumulatorAddName(accumulator, propertyName);
+  }
 }
 
 } // namespace kraken::binding::jsc

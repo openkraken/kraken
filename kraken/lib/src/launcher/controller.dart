@@ -149,7 +149,13 @@ class KrakenViewController {
   }
 
   Element createElement(int id, String tagName) {
+    print('create element id: $id, tagName: $tagName');
     return _elementManager.createElement(id, tagName.toUpperCase(), null, null);
+  }
+
+  void addEvent(int targetId, String eventName) {
+    print('add event id: $targetId, eventName: $eventName');
+    _elementManager.addEvent(targetId, eventName);
   }
 
   EventTarget getEventTargetById(int id) {

@@ -16,8 +16,12 @@ public:
   static void proxyFinalize(JSObjectRef object);
   static bool proxyHasInstance(JSContextRef ctx, JSObjectRef constructor, JSValueRef possibleInstance,
                                JSValueRef *exception);
+  static JSValueRef proxyCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+                                        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception);
   static JSObjectRef proxyCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount,
                                             const JSValueRef arguments[], JSValueRef *exception);
+  static JSValueRef proxyGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
+                                     JSValueRef *exception);
   static void proxyInstanceInitialize(JSContextRef ctx, JSObjectRef object);
   static JSValueRef proxyInstanceGetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName,
                                              JSValueRef *exception);
@@ -51,9 +55,6 @@ public:
     JSObjectRef object{nullptr};
     HostClass *_hostClass{nullptr};
   };
-
-  // Triggered when search property on prototype object.
-  virtual JSValueRef prototypeGetProperty(Instance *instance, JSStringRef name, JSValueRef *exception);
 
   std::string _name;
   JSContext *context{nullptr};
