@@ -21,10 +21,11 @@ class CanvasPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (context != null) {
+      _startRecording();
+      
       if (_customPicture != null) {
         canvas.drawPicture(_customPicture);
       }
-      _startRecording();
       context.performAction(_customCanvas, size);
 
       /// After calling this function, both the picture recorder
