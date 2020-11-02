@@ -673,20 +673,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
 
       if (isChildNeedsLayout) {
-        bool parentUsesSize = true;
-        if (child is RenderBoxModel) {
-          final double childContentWidth = RenderBoxModel.getContentWidth(child);
-          final double childContentHeight = RenderBoxModel.getContentHeight(child);
-          // If width and height of both layout and its child are defined,
-          // then child's repaintBoundary equals itself, when child is marked as needsLayout,
-          // layout will not marked as needsLayout
-          if (contentWidth != null && contentHeight != null &&
-            childContentWidth != null && childContentHeight != null
-          ) {
-            parentUsesSize = false;
-          }
-        }
-        child.layout(childConstraints, parentUsesSize: parentUsesSize);
+        child.layout(childConstraints, parentUsesSize: true);
       }
 
       double childMainAxisExtent = _getMainAxisExtent(child);
