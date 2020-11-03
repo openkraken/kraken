@@ -119,17 +119,17 @@ class VideoElement extends Element {
   }
 
   onCanPlay() async {
-    Event event = Event('canplay', EventInit());
+    Event event = Event(EventType.cancel, EventInit());
     dispatchEvent(event);
   }
 
   onCanPlayThrough() async {
-    Event event = Event('canplaythrough', EventInit());
+    Event event = Event(EventType.canplaythrough, EventInit());
     dispatchEvent(event);
   }
 
   onEnded() async {
-    Event event = Event('ended', EventInit());
+    Event event = Event(EventType.ended, EventInit());
     dispatchEvent(event);
   }
 
@@ -139,27 +139,27 @@ class VideoElement extends Element {
   }
 
   onPause() async {
-    Event event = Event('pause', EventInit());
+    Event event = Event(EventType.pause, EventInit());
     dispatchEvent(event);
   }
 
   onPlay() async {
-    Event event = Event('play', EventInit());
+    Event event = Event(EventType.play, EventInit());
     dispatchEvent(event);
   }
 
   onSeeked() async {
-    Event event = Event('seeked', EventInit());
+    Event event = Event(EventType.seeked, EventInit());
     dispatchEvent(event);
   }
 
   onSeeking() async {
-    Event event = Event('seeking', EventInit());
+    Event event = Event(EventType.seeking, EventInit());
     dispatchEvent(event);
   }
 
   onVolumeChange() async {
-    Event event = Event('volumechange', EventInit());
+    Event event = Event(EventType.volumechange, EventInit());
     dispatchEvent(event);
   }
 

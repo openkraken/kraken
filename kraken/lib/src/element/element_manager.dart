@@ -15,7 +15,7 @@ import 'package:kraken/scheduler.dart';
 import 'package:kraken/rendering.dart';
 
 Element _createElement(
-    int id, String type, Map<String, dynamic> props, List<String> events, ElementManager elementManager) {
+    int id, String type, Map<String, dynamic> props, List<EventType> events, ElementManager elementManager) {
   Element element;
   switch (type) {
     case DIV:
@@ -74,7 +74,7 @@ Element _createElement(
 
   // Add element event listener
   if (events != null) {
-    for (String eventName in events) {
+    for (EventType eventName in events) {
       element.addEvent(eventName);
     }
   }
@@ -88,6 +88,7 @@ const int WINDOW_ID = -2;
 class ElementManager {
   // Call from JS Bridge before JS side eventTarget object been Garbage collected.
   static void disposeEventTarget(int contextId, int id) {
+    print('dispose event target: $id');
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId);
     controller.view.removeEventTargetById(id);
   }
@@ -145,10 +146,10 @@ class ElementManager {
     _eventTargets = <int, EventTarget>{};
   }
 
-  Element createElement(int id, String type, Map<String, dynamic> props, List events) {
+  Element createElement(int id, String type, Map<String, dynamic> props, List<EventType> events) {
     assert(!existsTarget(id), 'ERROR: Can not create element with same id "$id"');
 
-    List<String> eventList;
+    List<EventType> eventList;
     if (events != null) {
       eventList = [];
       for (var eventName in events) {
@@ -272,22 +273,24 @@ class ElementManager {
     }
   }
 
-  void addEvent(int targetId, String eventName) {
-    assert(existsTarget(targetId), 'targetId: $targetId event: $eventName');
+  void addEvent(int targetId, int eventTypeIndex) {
+    EventType eventType = EventType.values[eventTypeIndex];
+    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
+    assert(eventType != EventType.none, 'unknown event types');
 
     EventTarget target = getEventTargetByTargetId<EventTarget>(targetId);
     assert(target != null);
 
-    target.addEvent(eventName);
+    target.addEvent(eventType);
   }
 
-  void removeEvent(int targetId, String eventName) {
-    assert(existsTarget(targetId), 'targetId: $targetId event: $eventName');
+  void removeEvent(int targetId, EventType eventType) {
+    assert(existsTarget(targetId), 'targetId: $targetId event: $eventType');
 
     Element target = getEventTargetByTargetId<Element>(targetId);
     assert(target != null);
 
-    target.removeEvent(eventName);
+    target.removeEvent(eventType);
   }
 
   method(int targetId, String method, args) {
@@ -426,6 +429,7 @@ class ElementManager {
         removeProperty(payload[0], payload[1]);
         break;
       case 'addEvent':
+        print(payload);
         addEvent(payload[0], payload[1]);
         break;
       case 'removeEvent':

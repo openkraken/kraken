@@ -30,6 +30,31 @@ class NativeKrakenInfo extends Struct {
   Pointer<NativeFunction<Native_GetUserAgent>> getUserAgent;
 }
 
+class NativeEvent extends Struct {
+  @Int8()
+  int type;
+
+  @Int8()
+  int bubbles;
+
+  @Int8()
+  int cancelable;
+
+  @Int64()
+  int timeStamp;
+
+  @Int8()
+  int defaultPrevented;
+
+  @Int64()
+  int targetId;
+
+  @Int64()
+  int currentTarget;
+
+  Pointer<Utf8> detail;
+}
+
 class KrakenInfo {
   Pointer<NativeKrakenInfo> _nativeKrakenInfo;
 
@@ -86,6 +111,7 @@ final Dart_InvokeEventListener _invokeEventListener =
 nativeDynamicLibrary.lookup<NativeFunction<Native_InvokeEventListener>>('invokeEventListener').asFunction();
 
 void invokeEventListener(int contextId, int type, String data) {
+  print('type: $type, data: $data');
   Pointer<NativeString> nativeString = stringToNativeString(data);
   _invokeEventListener(contextId, type, nativeString);
   freeNativeString(nativeString);
@@ -103,7 +129,7 @@ void emitModuleEvent(int contextId, String data) {
 }
 
 void invokeOnPlatformBrightnessChangedCallback(int contextId) {
-  String json = jsonEncode([WINDOW_ID, Event('colorschemechange')]);
+  String json = jsonEncode([WINDOW_ID, Event(EventType.colorschemechange)]);
   emitUIEvent(contextId, json);
 }
 
@@ -256,7 +282,8 @@ void flushUICommand() {
           ElementManager.disposeEventTarget(controller.view.contextId, id);
           break;
         case UICommandType.addEvent:
-          controller.view.addEvent(id, nativeStringToString(nativeCommand.ref.args[0]));
+          String eventType = nativeStringToString(nativeCommand.ref.args[0]);
+          controller.view.addEvent(id, int.parse(eventType));
           break;
         default:
           return;

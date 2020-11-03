@@ -1,7 +1,51 @@
 import { EventTarget } from './event-target';
 
+export enum EventType {
+  none,
+  input,
+  appear,
+  disappear,
+  error,
+  message,
+  close,
+  open,
+  intersectionchange,
+  touchstart,
+  touchend,
+  touchmove,
+  touchcancel,
+  click,
+  colorschemechange,
+  load,
+  finish,
+  cancel,
+  transitionrun,
+  transitionstart,
+  transitionend,
+  transitioncancel,
+  focus,
+  unload,
+  change,
+  canplay,
+  canplaythrough,
+  ended,
+  play,
+  pause,
+  seeked,
+  seeking,
+  volumechange
+}
+
+export function getEventTypeOfName(eventName: string): EventType {
+  return EventType[eventName];
+}
+
+export function getEventTypeOfIndex(index: number): EventType {
+  return EventType[EventType[index]];
+}
+
 export class Event {
-  type: string;
+  type: EventType;
   cancelable: boolean;
   bubbles: boolean;
   currentTarget: EventTarget | null;
@@ -10,7 +54,7 @@ export class Event {
   [key: string]: any;
 
   constructor(type: string, eventInit?: EventInit) {
-    this.type = type;
+    this.type = getEventTypeOfName(type);
     this.bubbles = false;
     this.cancelable = false;
 
@@ -72,7 +116,7 @@ export class Event {
   }
 
   _initialize(type: string, bubbles: boolean = false, cancelable: boolean = false) {
-    this.type = type;
+    this.type = getEventTypeOfName(type);
     this._initializedFlag = true;
 
     this._stopPropagationFlag = false;

@@ -146,7 +146,7 @@ Value krakenUIListener(JSContext &context, const Value &thisVal, const Value *ar
   Object &&func = val->getObject(context);
 
   auto bridge = static_cast<JSBridge *>(context.getOwner());
-  //  bridge->krakenUIListenerList.emplace_back(val);
+  bridge->krakenUIListenerList.emplace_back(val);
 
   return Value::undefined();
 }

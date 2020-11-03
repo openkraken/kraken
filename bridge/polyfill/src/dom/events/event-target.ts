@@ -1,6 +1,6 @@
 import { addEvent } from '../ui-manager';
 import { Node } from '../node';
-import { Event } from './event';
+import { Event, EventType, getEventTypeOfName } from './event';
 
 export const BODY = -1;
 // Window is not inherit node but EventTarget, so we assume window is a node.
@@ -14,7 +14,7 @@ export class EventTarget {
   public targetId: number;
   // built-in events which no need to notify dart side.
   private _jsOnlyEvents: Array<string>;
-  _eventHandlers: Map<string, Array<EventHandler>> = new Map();
+  _eventHandlers: Map<EventType, Array<EventHandler>> = new Map();
   _propertyEventHandler: Map<string, EventHandler> = new Map();
 
   constructor(targetId?: number, builtInEvents: Array<string> = [], jsOnlyEvents: Array<string> = []) {
@@ -54,26 +54,28 @@ export class EventTarget {
     if (typeof handler !== 'function') {
       return;
     }
-    if (!this._eventHandlers.has(eventName) || this.targetId === BODY) {
-      this._eventHandlers.set(eventName, []);
+    let eventType = getEventTypeOfName(eventName);
+    if (!this._eventHandlers.has(eventType) || this.targetId === BODY) {
+      this._eventHandlers.set(eventType, []);
 
       // this is an bargain optimize for addEventListener which send `addEvent` message to kraken Dart side only once and no one can stop element to
       // trigger event from dart side. this can led to significant performance improvement when using Front-End frameworks such as Rax, or cause some
       /// overhead performance issue when some event trigger more frequently.
       if (this.targetId && !this._jsOnlyEvents.includes(eventName)) {
-        addEvent(this.targetId, eventName);
+        addEvent(this.targetId, eventType);
       }
     }
-    this._eventHandlers.get(eventName)!.push(handler);
+    this._eventHandlers.get(eventType)!.push(handler);
   }
 
   // Do not really emit remove event, due to performance consideration.
   public removeEventListener(eventName: string, handler: EventHandler) {
-    if (typeof handler !== 'function' || !this._eventHandlers.has(eventName)) {
+    let eventType = getEventTypeOfName(eventName);
+    if (typeof handler !== 'function' || !this._eventHandlers.has(eventType)) {
       return;
     }
-    let newHandler = this._eventHandlers.get(eventName)!.filter(fn => fn != handler);
-    this._eventHandlers.set(eventName, newHandler);
+    let newHandler = this._eventHandlers.get(eventType)!.filter(fn => fn != handler);
+    this._eventHandlers.set(eventType, newHandler);
   }
 
   public dispatchEvent(event: Event) {

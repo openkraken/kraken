@@ -767,21 +767,21 @@ class IFrameElement extends WebViewElement {
 
   @override
   void onFocus() {
-    dispatchEvent(Event('focus'));
+    dispatchEvent(Event(EventType.focus));
   }
 
   bool _isFirstLoaded;
   @override
   void onPageStarted(String url) {
     if (_isFirstLoaded) {
-      dispatchEvent(Event('unload'));
+      dispatchEvent(Event(EventType.unload));
     }
   }
 
   @override
   void onPageFinished(String url) {
     _isFirstLoaded = true;
-    dispatchEvent(Event('load'));
+    dispatchEvent(Event(EventType.load));
   }
 
   @override

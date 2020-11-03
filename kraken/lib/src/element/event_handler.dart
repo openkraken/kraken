@@ -33,36 +33,36 @@ mixin EventHandlerMixin on Node {
   }
 
   void handlePointDown(PointerDownEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchstart', pointEvent);
+    TouchEvent event = _getTouchEvent(EventType.touchstart, pointEvent);
     _touchStartTime = event.timeStamp;
     dispatchEvent(event);
   }
 
   void handlePointMove(PointerMoveEvent pointEvent) {
     _throttler.throttle(() {
-      TouchEvent event = _getTouchEvent('touchmove', pointEvent);
+      TouchEvent event = _getTouchEvent(EventType.touchmove, pointEvent);
       dispatchEvent(event);
     });
   }
 
   void handlePointUp(PointerUpEvent pointEvent) {
-    TouchEvent event = _getTouchEvent('touchend', pointEvent);
+    TouchEvent event = _getTouchEvent(EventType.touchend, pointEvent);
     _touchEndTime = event.timeStamp;
     dispatchEvent(event);
 
     // <300ms to trigger click
     if (_touchStartTime > 0 && _touchEndTime > 0 && _touchEndTime - _touchStartTime < 300) {
-      handleClick(Event('click', EventInit()));
+      handleClick(Event(EventType.click, EventInit()));
     }
   }
 
   void handlePointCancel(PointerCancelEvent pointEvent) {
-    Event event = Event('touchcancel', EventInit());
+    Event event = Event(EventType.touchcancel, EventInit());
     event.detail = {};
     dispatchEvent(event);
   }
 
-  TouchEvent _getTouchEvent(String type, PointerEvent pointEvent) {
+  TouchEvent _getTouchEvent(EventType type, PointerEvent pointEvent) {
     TouchEvent event = TouchEvent(type);
     // Use original event, prevent to be relative coordinate
     if (pointEvent.original != null) pointEvent = pointEvent.original;

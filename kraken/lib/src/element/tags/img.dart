@@ -84,7 +84,7 @@ class ImageElement extends Element {
   void _handleEventAfterImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
     // img load event should trigger asynchronously to make sure load event had bind.
     Timer.run(() {
-      dispatchEvent(Event('load'));
+      dispatchEvent(Event(EventType.load));
     });
   }
 
@@ -277,7 +277,7 @@ class ImageElement extends Element {
       _removeStreamListener();
       image = CSSUrl.parseUrl(src, cache: properties['caching']);
       imageStream = image.resolve(ImageConfiguration.empty);
-      
+
       ImageStreamListener imageListener = ImageStreamListener(_initImageInfo);
       imageStream.addListener(imageListener);
 

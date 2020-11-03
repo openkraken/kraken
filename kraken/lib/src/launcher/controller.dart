@@ -153,9 +153,9 @@ class KrakenViewController {
     return _elementManager.createElement(id, tagName.toUpperCase(), null, null);
   }
 
-  void addEvent(int targetId, String eventName) {
-    print('add event id: $targetId, eventName: $eventName');
-    _elementManager.addEvent(targetId, eventName);
+  void addEvent(int targetId, int eventTypeIndex) {
+    print('add event id: $targetId, eventName: ${EventType.values[eventTypeIndex]}');
+    _elementManager.addEvent(targetId, eventTypeIndex);
   }
 
   EventTarget getEventTargetById(int id) {
@@ -426,7 +426,7 @@ class KrakenController {
       await _bundle.run(_view.contextId);
       // trigger window load event
       module.requestAnimationFrame((_) {
-        String json = jsonEncode([WINDOW_ID, Event('load')]);
+        String json = jsonEncode([WINDOW_ID, Event(EventType.load)]);
         emitUIEvent(_view.contextId, json);
       });
     }

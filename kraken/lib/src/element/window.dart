@@ -13,7 +13,7 @@ const String WINDOW = 'WINDOW';
 class Window extends EventTarget {
   Window(ElementManager elementManager) : super(WINDOW_ID, elementManager) {
     window.onPlatformBrightnessChanged = () {
-      Event event = Event('colorschemechange');
+      Event event = Event(EventType.colorschemechange);
       event.detail = (window.platformBrightness == Brightness.light) ? 'light' : 'dart';
       dispatchEvent(event);
     };
@@ -30,15 +30,16 @@ class Window extends EventTarget {
   }
 
   @override
-  void addEvent(String eventName) {
+  void addEvent(EventType eventName) {
     super.addEvent(eventName);
     if (eventHandlers.containsKey(eventName)) return; // Only listen once.
 
     switch (eventName) {
-      case 'colorschemechange':
-        return super.addEventListener(eventName, _handleColorSchemeChange);
-      case 'load':
-        return super.addEventListener(eventName, _handleLoad);
+      case EventType.colorschemechange:
+        return super.addEventListener(EventType.colorschemechange, _handleColorSchemeChange);
+      case EventType.load:
+        return super.addEventListener(EventType.load, _handleLoad);
+      default:
     }
   }
 }

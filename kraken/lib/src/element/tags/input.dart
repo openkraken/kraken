@@ -120,7 +120,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     addChild(renderEditable);
 
     // Make element listen to click event to trigger focus.
-    addEvent("click");
+    addEvent(EventType.click);
 
     textSelectionDelegate.textEditingValue = TextEditingValue(text: textSpan.text);
 
@@ -267,7 +267,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void _triggerChangeEvent() {
     String currentText = textSelectionDelegate.textEditingValue?.text;
     if (_lastChangedTextString != currentText) {
-      Event changeEvent = Event('change');
+      Event changeEvent = Event(EventType.change);
       dispatchEvent(changeEvent);
       _lastChangedTextString = currentText;
     }

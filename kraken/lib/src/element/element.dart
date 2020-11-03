@@ -1111,11 +1111,11 @@ class Element extends Node
   }
 
   @override
-  void addEvent(String eventName) {
-    if (eventHandlers.containsKey(eventName)) return; // Only listen once.
-    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventName);
+  void addEvent(EventType eventType) {
+    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
+    bool isIntersectionObserverEvent = _isIntersectionObserverEvent(eventType);
     bool hasIntersectionObserverEvent = isIntersectionObserverEvent && _hasIntersectionObserverEvent(eventHandlers);
-    super.addEventListener(eventName, _eventResponder);
+    super.addEventListener(eventType, _eventResponder);
 
     // bind pointer responder.
     addEventResponder(renderBoxModel);
@@ -1126,15 +1126,15 @@ class Element extends Node
     }
   }
 
-  void removeEvent(String eventName) {
-    if (!eventHandlers.containsKey(eventName)) return; // Only listen once.
-    super.removeEventListener(eventName, _eventResponder);
+  void removeEvent(EventType eventType) {
+    if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
+    super.removeEventListener(eventType, _eventResponder);
 
     // Remove pointer responder.
     removeEventResponder(renderBoxModel);
 
     // Remove listener when no intersection related event
-    if (_isIntersectionObserverEvent(eventName) && !_hasIntersectionObserverEvent(eventHandlers)) {
+    if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(eventHandlers)) {
       renderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
     }
   }
@@ -1145,7 +1145,7 @@ class Element extends Node
   }
 
   void click() {
-    Event clickEvent = Event('click', EventInit());
+    Event clickEvent = Event(EventType.click, EventInit());
 
     if (isConnected) {
       final RenderBox box = renderBoxModel;
@@ -1435,8 +1435,8 @@ List<Element> _findStickyChildren(Element element) {
   return result;
 }
 
-bool _isIntersectionObserverEvent(String eventName) {
-  return eventName == 'appear' || eventName == 'disappear' || eventName == 'intersectionchange';
+bool _isIntersectionObserverEvent(EventType eventType) {
+  return eventType == EventType.appear || eventType == EventType.disappear || eventType == EventType.intersectionchange;
 }
 
 bool _hasIntersectionObserverEvent(Map eventHandlers) {

@@ -303,7 +303,7 @@ class Animation {
     _effect._calculateTiming(null);
 
     if (oncancel != null) {
-      var event = AnimationPlaybackEvent('cancel');
+      var event = AnimationPlaybackEvent(EventType.cancel);
       event.timelineTime = _timeline.currentTime;
       oncancel(event);
     }
@@ -388,7 +388,7 @@ class Animation {
   void _fireEvents(double timelineTime) {
     if (_isFinished) {
       if (!_finishedFlag) {
-        AnimationPlaybackEvent event = AnimationPlaybackEvent('finish');
+        AnimationPlaybackEvent event = AnimationPlaybackEvent(EventType.finish);
         event.currentTime = currentTime;
         event.timelineTime = timelineTime;
         if (onfinish != null) onfinish(event);
@@ -401,7 +401,7 @@ class Animation {
 }
 
 class AnimationPlaybackEvent extends Event {
-  AnimationPlaybackEvent(String type) : super(type);
+  AnimationPlaybackEvent(EventType type) : super(type);
 
   num currentTime;
   num timelineTime;
