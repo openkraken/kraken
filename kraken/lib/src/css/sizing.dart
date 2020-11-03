@@ -341,7 +341,8 @@ class CSSSizing {
         bool isVerticalDirection = style[FLEX_DIRECTION] == COLUMN || style[FLEX_DIRECTION] == COLUMN_REVERSE;
         // Display as block if flex vertical layout children and stretch children
         if (marginLeft != AUTO && marginRight != AUTO && isVerticalDirection &&
-            (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
+          (!style.contains(FLEX_WRAP) || (style.contains(FLEX_WRAP) && style[FLEX_WRAP]!= WRAP)) &&
+          (!style.contains(ALIGN_ITEMS) || (style.contains(ALIGN_ITEMS) && style[ALIGN_ITEMS] == STRETCH))) {
           display = CSSDisplay.block;
         }
       }
