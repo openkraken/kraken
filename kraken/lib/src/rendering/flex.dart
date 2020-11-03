@@ -912,13 +912,17 @@ class RenderFlexLayout extends RenderLayoutBox {
     double maxSizeAboveBaseline = 0;
     double maxSizeBelowBaseline = 0;
 
-    double heightLimit = contentHeight != null ? contentHeight : 0;
     // Max length of each flex line
     double flexLineLimit = 0.0;
-    if (contentWidth != null) {
-      flexLineLimit = contentWidth;
+
+    bool isAxisHorizontalDirection = CSSFlex.isHorizontalFlexDirection(flexDirection);
+    if (isAxisHorizontalDirection) {
+      double maxContentWidth = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
+      flexLineLimit = contentWidth != null ? contentWidth : maxContentWidth;
     } else {
-      flexLineLimit = CSSSizing.getElementComputedMaxWidth(this, targetId, elementManager);
+      // Children in vertical direction should not wrap if height no exists
+      double maxContentHeight = double.infinity;
+      flexLineLimit = contentHeight != null ? contentHeight : maxContentHeight;
     }
 
     RenderBox child = placeholderChild ?? firstChild;
@@ -1027,9 +1031,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         'size': _getMainSize(child),
         'flexShrink': _getFlexShrink(child),
       };
-      bool isAxisHorizontalDirection = CSSFlex.isHorizontalFlexDirection(flexDirection);
-      double lineLimit = isAxisHorizontalDirection ? flexLineLimit : heightLimit;
-      bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > lineLimit;
+      bool isExceedFlexLineLimit = runMainAxisExtent + childMainAxisExtent > flexLineLimit;
 
       // calculate flex line
       if ((flexWrap == FlexWrap.wrap || flexWrap == FlexWrap.wrapReverse) &&
