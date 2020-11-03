@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:convert';
 import 'package:ffi/ffi.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 import 'from_native.dart';
 import 'platform.dart';

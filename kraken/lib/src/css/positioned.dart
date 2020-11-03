@@ -1,5 +1,5 @@
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 
@@ -75,7 +75,7 @@ Size _getChildSize(RenderBox child) {
 // We need to reset these offset to keep positioned elements render at their original position.
 Offset _getRenderPositionHolderScrollOffset(RenderPositionHolder holder, RenderObject root) {
   RenderBoxModel parent = holder.parent;
-  while (parent != root) {
+  while (parent != null && parent != root) {
     if (parent.clipX || parent.clipY) {
       return Offset(parent.scrollLeft, parent.scrollTop);
     }
@@ -140,6 +140,10 @@ Offset _getAutoMarginPositionedElementOffset(double x, double y, RenderBox child
 
 /// Check whether render object parent is layout.
 bool _isLayout(RenderObject renderer, { RenderObject ancestor }) {
+  if (renderer == null || !renderer.attached) {
+    return false;
+  }
+
   while (renderer != null && renderer != ancestor) {
     if (renderer is RenderBox) {
       // Whether this render box has undergone layout and has a [size].

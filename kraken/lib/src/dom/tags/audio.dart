@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_audioplayers/kraken_audioplayers.dart';
 
@@ -16,9 +16,20 @@ class AudioElement extends Element {
   static double defaultHeight = 150.0;
 
   AudioElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, isIntrinsicBox: true, tagName: AUDIO) {
+      : super(targetId, elementManager, isIntrinsicBox: true, tagName: AUDIO);
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
     initAudioPlayer();
     initSizedBox();
+    style.addStyleChangeListener(_stylePropertyChanged);
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_stylePropertyChanged);
   }
 
   void initAudioPlayer() {
@@ -38,10 +49,8 @@ class AudioElement extends Element {
     addChild(_sizedBox);
   }
 
-  @override
-  void setStyle(String key, dynamic value) {
-    super.setStyle(key, value);
-    switch (key) {
+  void _stylePropertyChanged(String property, String original, String present, bool inAnimation) {
+    switch (property) {
       case WIDTH:
       case HEIGHT:
         _updateSizedBox();

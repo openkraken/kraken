@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'package:kraken/css.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken_video_player/kraken_video_player.dart';
 
@@ -26,17 +26,23 @@ class VideoElement extends Element {
     isIntrinsicBox: true,
     repaintSelf: true,
     tagName: VIDEO,
-  ) {
+  );
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
     renderVideo();
   }
 
   @override
-  void detach() async {
-    super.detach();
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    _textureBox = null;
 
     if (controller != null) {
-      await controller.dispose();
-      controller = null;
+      controller.dispose().then((_) {
+        controller = null;
+      });
     }
   }
 

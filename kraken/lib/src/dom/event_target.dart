@@ -4,7 +4,7 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 
 typedef EventHandler = void Function(Event event);
 

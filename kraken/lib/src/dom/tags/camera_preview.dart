@@ -5,7 +5,7 @@
 
 import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/element.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken_camera/camera.dart';
@@ -45,7 +45,12 @@ Future<CameraDescription> detectCamera(String lens) async {
 
 class CameraPreviewElement extends Element {
   CameraPreviewElement(int targetId, ElementManager elementManager)
-      : super(targetId, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+      : super(targetId, elementManager, tagName: CAMERA_PREVIEW, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+
     sizedBox = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.loose(Size(
         CSSLength.toDisplayPortValue(ELEMENT_DEFAULT_WIDTH),
@@ -53,8 +58,14 @@ class CameraPreviewElement extends Element {
       )),
     );
 
-    style.addStyleChangeListener(_propertyChangedListener);
     addChild(sizedBox);
+    style.addStyleChangeListener(_propertyChangedListener);
+  }
+
+  @override
+  void didDetachRenderer() {
+    super.didDetachRenderer();
+    style.removeStyleChangeListener(_propertyChangedListener);
   }
 
   bool enableAudio = false;
