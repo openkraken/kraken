@@ -56,6 +56,18 @@ class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>
     _renderParagraph.overflow = value;
   }
 
+  // Box size equals to RenderBox.size to avoid flutter complain when read size property.
+  Size _boxSize;
+  Size get boxSize {
+    assert(_boxSize != null, 'box does not have laid out.');
+    return _boxSize;
+  }
+
+  set size(Size value) {
+    _boxSize = value;
+    super.size = value;
+  }
+
   WhiteSpace _whiteSpace;
   WhiteSpace get whiteSpace {
     return _whiteSpace;
