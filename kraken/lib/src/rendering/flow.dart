@@ -652,7 +652,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         continue;
       }
 
-      // No need to layout child if size is the same as logical size calculated by style
+      // Whether child need to layout
       bool isChildNeedsLayout = true;
       if (child is RenderBoxModel && child.hasSize) {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
@@ -662,13 +662,10 @@ class RenderFlowLayout extends RenderLayoutBox {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          if (childContentWidth != null && childContentHeight != null &&
+          // Need to layout child when width and height of child are both specified and differ from its previous size
+          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
             (childOldSize.width != childContentWidth ||
-              childOldSize.height != childContentHeight)) {
-            isChildNeedsLayout = true;
-          } else {
-            isChildNeedsLayout = false;
-          }
+              childOldSize.height != childContentHeight);
         }
       }
 

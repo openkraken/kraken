@@ -997,7 +997,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       BoxConstraints childConstraints = deflateOverflowConstraints(innerConstraints);
 
-      // No need to layout child if size is the same as content size calculated by style
+      // Whether child need to layout
       bool isChildNeedsLayout = true;
       if (child is RenderBoxModel && child.hasSize) {
         double childContentWidth = RenderBoxModel.getContentWidth(child);
@@ -1007,13 +1007,10 @@ class RenderFlexLayout extends RenderLayoutBox {
           isChildNeedsLayout = true;
         } else {
           Size childOldSize = _getChildSize(child);
-          if (childContentWidth != null && childContentHeight != null &&
+          // Need to layout child when width and height of child are both specified and differ from its previous size
+          isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
             (childOldSize.width != childContentWidth ||
-            childOldSize.height != childContentHeight)) {
-            isChildNeedsLayout = true;
-          } else {
-            isChildNeedsLayout = false;
-          }
+              childOldSize.height != childContentHeight);
         }
       }
       if (isChildNeedsLayout) {
@@ -1230,7 +1227,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (childParentData.runIndex != i) break;
 
-        // Whether child should be layout depending on size whether changed
+        // Whether child need to layout
         bool isChildNeedsLayout = true;
         if (child is RenderBoxModel && child.hasSize) {
           double childContentWidth = RenderBoxModel.getContentWidth(child);
@@ -1241,18 +1238,16 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (!hasSize || child.needsLayout) {
             isChildNeedsLayout = true;
           } else {
+            // Need to relayout child when flex factor exists
             if ((isFlexGrow && childParentData.flexGrow > 0) ||
               (isFlexShrink) && childParentData.flexShrink > 0) {
               isChildNeedsLayout = true;
             } else if (isStretchSelf) {
               Size childOldSize = _getChildSize(child);
-              if (childContentWidth != null && childContentHeight != null &&
+              // Need to layout child when width and height of child are both specified and differ from its previous size
+              isChildNeedsLayout = childContentWidth != null && childContentHeight != null &&
                 (childOldSize.width != childContentWidth ||
-                  childOldSize.height != childContentHeight)) {
-                isChildNeedsLayout = true;
-              } else {
-                isChildNeedsLayout = false;
-              }
+                  childOldSize.height != childContentHeight);
             }
           }
         }
